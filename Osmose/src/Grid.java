@@ -9,7 +9,7 @@
  * <p>Society : IRD, France </p>
  *
  * @author Yunne Shin, Morgane Travers
- * @version 2.0 
+ * @version 2.1 
  ******************************************************************************** 
  */
 
@@ -23,14 +23,16 @@ class Grid
 	float latMax, latMin, longMax, longMin;
 	float dLat, dLong;
 
-	public Grid(Osmose osmose,int nbl, int nbc)
+	public Grid(Osmose osmose,int nbl, int nbc, float upleftLat, float lowrightLat, float upleftLong, float lowrightLong)
 	{
 		this.osmose=osmose;
-		nbLines=nbl;
-		nbColumns=nbc;
+		this.nbLines=nbl;
+		this.nbColumns=nbc;
 
-		latMax = -28.2f; latMin = -37.5f;
-		longMax = 24.4f; longMin = 16f;
+		this.latMax = upleftLat;
+		this.latMin = lowrightLat;
+		this.longMax = lowrightLong;
+		this.longMin = upleftLong;
 
 		dLat = (latMax-latMin)/(float)nbLines;
 		dLong = (longMax-longMin)/(float)nbColumns;
@@ -49,8 +51,21 @@ class Grid
 		}
 
 		identifyNeighbors(nbLines);
+		identifySpatialGroups();
 	}
 
+	public void identifySpatialGroups()
+	{
+		for (int i=0;i<nbLines;i++)
+			for(int j=0;j<nbColumns;j++)
+			{
+				if (matrix[i][j].coordLat>=(matrix[i][j].coordLong-52.5))
+					matrix[i][j].spatialGroup = 0;	// upwelling
+				else
+					matrix[i][j].spatialGroup = 1;	// banc des aiguilles
+			}
+	}
+	
 	public void identifyNeighbors(int nbl)
 	{
 		//adjacent cells are sorted in random order for non bias when species.iniRepartitionAleat

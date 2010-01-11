@@ -8,7 +8,7 @@
  * <p>Society : IRD, France </p>
  *
  * @author Yunne Shin, Morgane Travers
- * @version 2.0 
+ * @version 2.1 
  ******************************************************************************* 
  */
 
@@ -31,7 +31,7 @@ public class Coupling
 {
 	Simulation simulation;
 	Grid grid;
-	int nbPlankton,nbForcingDt;
+	int nbPlankton, nbForcingDt;
 
 	// Tables of plankton information
 	String[][] planktonFileListTxt;		// List of the file names of plankton matrix provided as input
@@ -43,6 +43,7 @@ public class Coupling
 	float[] prodBiomFactors;		// list of prod/biom ratios of plankton groups
 
 	Plankton[]  planktonList;     // list of plankton groups (here 4)
+	int nbDimensionsGrid;
 	int planktonDimX;      // dimension of LTL model, here ROMS Plume (144 * 65 * 20)
 	int planktonDimY;
 	int planktonDimZ;	// vertical dimension (20)
@@ -54,6 +55,7 @@ public class Coupling
 	float[][][][] saveMortality;     // mortality field to apply to plankton groups
 	FileOutputStream planktonTime;    // for saving
 
+	String[] plktonNetcdfNames;
 	ArrayDouble phyto1, phyto2, zoo1, zoo2;    // for reading NetCDF files
 
 	String planktonFilesPath;
@@ -118,13 +120,13 @@ public class Coupling
 		}
 	}
 
-	public void iniCouplingReading()         // ******** read LTL basic file with name of plankton, sizes, format of files...
+	public void iniCouplingReading(String planktonStructureFileName)         // ******** read LTL basic file with name of plankton, sizes, format of files...
 	{
 		FileInputStream LTLFile;
 		try
-		{LTLFile=new FileInputStream(new File(planktonFilesPath,simulation.osmose.planktonFileNameTab[simulation.numSerie]));}
+		{LTLFile=new FileInputStream(new File(planktonFilesPath,planktonStructureFileName));}
 		catch (FileNotFoundException ex)
-		{System.out.println("LTL file "+simulation.osmose.planktonFileNameTab[simulation.numSerie]+" doesn't exist");return;}
+		{System.out.println("LTL file "+planktonStructureFileName+" doesn't exist");return;}
 
 		Reader r= new BufferedReader(new InputStreamReader(LTLFile));
 		StreamTokenizer st = new StreamTokenizer(r);
@@ -136,13 +138,15 @@ public class Coupling
 		{
 			st.nextToken();
 			nbPlankton = (new Integer(st.sval)).intValue();
-			simulation.osmose.nbPlanktonGroupsTab[simulation.numSerie] = nbPlankton;
+			if(!(nbPlankton==simulation.osmose.nbPlanktonGroupsTab[simulation.numSerie]))
+				System.out.println("The number of plankton group in plankton structure file does not match the one from config file");
 			st.nextToken();
 			nbForcingDt = (new Integer(st.sval)).intValue();
-
+			if(!(nbForcingDt==simulation.nbDt))
+				System.out.println("In the current version, the time step of plankton biomass should match the time step of osmose config");
+			
 			// initializing tables
 			planktonNames = new String[nbPlankton];
-			simulation.osmose.planktonNamesTab[simulation.numSerie] = new String[nbPlankton];
 			trophicLevel = new float[nbPlankton];
 			minSize = new float[nbPlankton];
 			maxSize = new float[nbPlankton];
@@ -168,117 +172,93 @@ public class Coupling
 			}
 
 			st.nextToken();
-			configFileName = st.sval;
+			nbDimensionsGrid = new Integer(st.sval).intValue();
+			if((nbDimensionsGrid>3)||(nbDimensionsGrid<2))
+				System.out.println("The dimension "+nbDimensionsGrid+" cannot be consider - should be 2 or 3");
+			st.nextToken();
+			planktonDimX = new Integer(st.sval).intValue();
+			st.nextToken();
+			planktonDimY = new Integer(st.sval).intValue();
+			if(nbDimensionsGrid==3)
+			{
+				st.nextToken();
+				planktonDimZ = new Integer(st.sval).intValue();
+				st.nextToken();
+				integrationDepth = new Float(st.sval).floatValue();
+			}
+		}
+		catch(IOException ex)
+		{System.out.println("Reading error of LTL structure file");return;}
+	}
+	
+	public void readInputPlanktonFiles(String planktonFileName)
+	{
+		FileInputStream LTLFile;
+		try
+		{LTLFile=new FileInputStream(new File(planktonFilesPath,planktonFileName));}
+		catch (FileNotFoundException ex)
+		{System.out.println("LTL file "+planktonFileName+" doesn't exist");return;}
+
+		Reader r= new BufferedReader(new InputStreamReader(LTLFile));
+		StreamTokenizer st = new StreamTokenizer(r);
+		st.slashSlashComments(true);
+		st.slashStarComments(true);
+		st.quoteChar(';');
+
+		try
+		{
+			st.nextToken();
+			if(!(((new Integer(st.sval)).intValue())==nbPlankton))
+				System.out.println("Error concerning the number of plankton group in plankton file");
+			
+			st.nextToken();
+			nameLatFile = st.sval;
+			st.nextToken();
+			nameLongFile = st.sval;
+
 			st.nextToken();
 			filesFormat = st.sval;
+			
+			if(filesFormat.equalsIgnoreCase("text"))	/* ******* CASE OF BIOMASSE FILE IN TXT FORMAT ******* */
+			{
+				planktonFileListTxt = new String[nbPlankton][];
+				for (int i=0; i<nbPlankton; i++)
+					planktonFileListTxt[i] = new String[nbForcingDt];
+				for (int i=0; i<nbPlankton; i++){
+					for (int step=0;step<nbForcingDt;step++){
+						st.nextToken();
+						planktonFileListTxt[i][step] = st.sval;
+					}
+				}
+			}
+			else if(filesFormat.equalsIgnoreCase("netcdf"))/* ******* CASE OF BIOMASSE FILE IN Netcdf FORMAT ******* */
+			{
+				
+				plktonNetcdfNames = new String[nbPlankton];
+				for (int i=0; i<nbPlankton; i++){
+					st.nextToken();
+					plktonNetcdfNames[i] = st.sval;
+				}
+				
+				planktonFileListNetcdf = new String[nbForcingDt];
+				for (int step=0;step<nbForcingDt;step++){
+					st.nextToken();
+					planktonFileListNetcdf[step] = st.sval;
+				}
+				nameDepthFile = new String[planktonDimZ];
+				for (int i=0; i<planktonDimZ; i++){
+					st.nextToken();
+					nameDepthFile[i] = st.sval;
+				}		
+			}
+			else
+				System.out.println("The file format for plankton files is not supported yet");
 		}
 		catch(IOException ex)
 		{System.out.println("Reading error of LTL file");return;}
+		
 	}
-
-	public void configPlanktonTxt(String fileName)         // ******** read LTL CONFIGURATION file with size of LTL grid, file name of depth data...
-	{
-		planktonFileListTxt = new String[nbPlankton][];
-		for (int i=0; i<nbPlankton; i++)
-			planktonFileListTxt[i] = new String[nbForcingDt];
-
-		FileInputStream configFile;
-		try
-		{
-			configFile=new FileInputStream(new File(planktonFilesPath,fileName));
-		}
-		catch (FileNotFoundException ex)
-		{System.out.println("LTL config file "+fileName+" doesn't exist");return;}
-
-		Reader r= new BufferedReader(new InputStreamReader(configFile));
-		StreamTokenizer st = new StreamTokenizer(r);
-		st.slashSlashComments(true);
-		st.slashStarComments(true);
-		st.quoteChar(';');
-
-		try
-		{
-			st.nextToken();
-			if((new Integer(st.sval).intValue())!=nbPlankton)
-				System.out.println("ERROR: different number of plankton groups between LTL file and config file ");
-			st.nextToken();
-			planktonDimX = new Integer(st.sval).intValue();
-			st.nextToken();
-			planktonDimY = new Integer(st.sval).intValue();
-			st.nextToken();
-			planktonDimZ = new Integer(st.sval).intValue();
-
-			st.nextToken();
-			nameLatFile = st.sval;
-			st.nextToken();
-			nameLongFile = st.sval;
-
-			for (int i=0; i<nbPlankton; i++){
-				for (int step=0;step<nbForcingDt;step++){
-					st.nextToken();
-					planktonFileListTxt[i][step] = st.sval;
-				}
-			}
-		}
-		catch(IOException ex)
-		{System.out.println("Reading error of LTL config file");return;}
-	}
-
-	public void configPlanktonNetcdf(String fileName)         // ******** read LTL CONFIGURATION file with size of LTL grid, file name of depth data...
-	{        
-		planktonFileListNetcdf = new String[nbForcingDt];
-
-		FileInputStream configFile;
-		try
-		{
-			configFile=new FileInputStream(new File(planktonFilesPath,fileName));
-		}
-		catch (FileNotFoundException ex)
-		{System.out.println("LTL config file "+fileName+" doesn't exist");return;}
-
-		Reader r= new BufferedReader(new InputStreamReader(configFile));
-		StreamTokenizer st = new StreamTokenizer(r);
-		st.slashSlashComments(true);
-		st.slashStarComments(true);
-		st.quoteChar(';');
-
-		try
-		{
-			st.nextToken();
-			if((new Integer(st.sval).intValue())!=nbPlankton)
-				System.out.println("ERROR: different number of plankton groups between LTL file and config file ");
-			st.nextToken();
-			planktonDimX = new Integer(st.sval).intValue();
-			st.nextToken();
-			planktonDimY = new Integer(st.sval).intValue();
-			st.nextToken();
-			planktonDimZ = new Integer(st.sval).intValue();
-
-			st.nextToken();
-			nameLatFile = st.sval;
-			st.nextToken();
-			nameLongFile = st.sval;
-
-			for (int step=0;step<nbForcingDt;step++){
-				st.nextToken();
-				planktonFileListNetcdf[step] = st.sval;
-			}
-
-			st.nextToken();
-			integrationDepth = new Float(st.sval).floatValue();
-
-			nameDepthFile = new String[planktonDimZ];
-			for (int i=0; i<planktonDimZ; i++){
-				st.nextToken();
-				nameDepthFile[i] = st.sval;
-			}
-
-		}
-		catch(IOException ex)
-		{System.out.println("Reading error of LTL config file");return;}
-
-	}
-
+	
 	public void initPlanktonMap()	// initialize matrix - read latitude, longitude and depth files
 	{
 		latitude = new float[planktonDimX][];
@@ -335,7 +315,7 @@ public class Coupling
 
 		// Initialisation plankton and table of data
 		for(int i=0; i<nbPlankton; i++) 
-			planktonList[i] = new Plankton(this, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i],conversionFactors[i], prodBiomFactors[i], simulation.osmose.accessibilityCoeffMatrix[i]);
+			planktonList[i] = new Plankton(this, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i],conversionFactors[i], prodBiomFactors[i], simulation.osmose.planktonAccessCoeffMatrix[i]);
 
 		if(filesFormat.equalsIgnoreCase("netcdf")){		// for NetCDF file - Structure depends of netcdf file
 			phyto1 = new ArrayDouble.D3(simulation.nbDt,planktonDimX,planktonDimY);         
@@ -414,10 +394,10 @@ public class Coupling
 
 			// atributes netcdf variables to local variables tempVar[]
 			// "SPHYTO", "SZOO", ... are specific to the netcdf file used as input
-			tempVar[0] = nc.findVariable("SPHYTO");
-			tempVar[1] = nc.findVariable("LPHYTO");
-			tempVar[2] = nc.findVariable("SZOO");
-			tempVar[3] = nc.findVariable("LZOO");
+			tempVar[0] = nc.findVariable(plktonNetcdfNames[0]);
+			tempVar[1] = nc.findVariable(plktonNetcdfNames[1]);
+			tempVar[2] = nc.findVariable(plktonNetcdfNames[2]);
+			tempVar[3] = nc.findVariable(plktonNetcdfNames[3]);
 
 			shape = tempVar[0].getShape();    // in ROMS benguela case : shape[0] = 1, shape[1] = 20, shape[2] = 144, shape[3] = 65
 

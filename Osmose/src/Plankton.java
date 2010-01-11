@@ -8,7 +8,7 @@
  * <p>Society : IRD, France </p>
  *
  * @author Yunne Shin, Morgane Travers
- * @version 2.0
+ * @version 2.1
  ******************************************************************************** 
  */
 

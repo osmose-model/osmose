@@ -8,7 +8,7 @@
  * <p>Society : IRD, France </p>
  *
  * @author Yunne Shin, Morgane Travers
- * @version 2.0
+ * @version 2.1
  ******************************************************************************** 
  */
 
@@ -16,13 +16,6 @@ import java.util.*;
 
 class Species
 {
-	public Species() {
-		try {
-			jbInit();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
 
 	Simulation simulation;
 	int numSerie;
@@ -82,15 +75,22 @@ class Species
 	long[] tabAbdIni;	//tab of abd for initializing the simulation nbDt*age
 	double[] tabBiomIni;
 
-	int nbStages;  // stage indirectly correponds to size classes:
+	int nbFeedingStages;  // stage indirectly correponds to size classes:
 	float[] sizeFeeding;
+	
+	int nbAccessStages;
+	float[] ageStagesTab;
+	
+	int nbDietStages;
+	float[] dietStagesTab;
 
 	public Species(Simulation simulation,int number,String name,float D,float F,
 			float longevity, float lInf, float K, float t0, float c, float bPower,
-			float alpha, float sizeMat, int nbStages, float[] sizeFeeding, float recruitAge, float recruitSize,
+			float alpha, float sizeMat, int nbFeedingStages, float[] sizeFeeding, float recruitAge, float recruitSize,
 			float[] seasonFishing, float[] seasonSpawning, float supAgeOfClass0,
-			float larvalSurvival, float sexRatio, float eggSize, float eggWeight, float growthAgeThreshold, float larvalLength, float larvalWeight,
-			float predationRate, float[] predPreySizesMax, float[] predPreySizesMin,float criticalPredSuccess, float starvMaxRate)
+			float larvalSurvival, float sexRatio, float eggSize, float eggWeight, float growthAgeThreshold, 
+			float predationRate, float[] predPreySizesMax, float[] predPreySizesMin,float criticalPredSuccess, float starvMaxRate,
+			int nbAccessStage, float[] accessAgeThreshold, int nbDietsStages, float[] dietStageThreshold)
 	{
 		this.simulation=simulation;
 		this.numSerie = simulation.numSerie;
@@ -108,7 +108,7 @@ class Species
 		this.bPower = bPower;
 		this.alpha=alpha;
 		this.sizeMat=sizeMat;
-		this.nbStages = nbStages;
+		this.nbFeedingStages = nbFeedingStages;
 		this.sizeFeeding = sizeFeeding;
 		this.recruitAge = recruitAge;
 		this.recruitSize = recruitSize;
@@ -127,9 +127,14 @@ class Species
 		this.predPreySizesMin = predPreySizesMin;
 		this.criticalPredSuccess = criticalPredSuccess;
 		this.starvMaxRate = starvMaxRate;
+		this.nbAccessStages = nbAccessStage;
+		this.ageStagesTab = accessAgeThreshold;
+		this.dietStagesTab = dietStageThreshold;
+		this.nbDietStages = nbDietsStages;
 
 		// START INITIALISATION of COHORTS
-		nbCohorts = (int)Math.round((longevity+1)*simulation.nbDt);
+		nbCohorts = (int)Math.round((longevity)*simulation.nbDt);
+
 		tabAbdIni = new long[nbCohorts];
 		tabBiomIni = new double[nbCohorts];
 		tabCohorts = new Cohort[nbCohorts];
@@ -174,18 +179,9 @@ class Species
 			maxDelta[i]=deltaMeanLength[i]+deltaMeanLength[i];
 		}
 
-
 		meanTLperAge = new float[nbCohorts];
-	}
 
-	/* not used anymore
-    public void surviveD()
-    {
-	for(int i=2;i<tabCohorts.length;i++)
-	    if(tabCohorts[i].abundance!=0)
-		tabCohorts[i].surviveD(D);
-    }
-	 */
+	}
 
 	public void growth()   //****NEW: comes from growth1 and growth2
 	{
@@ -346,15 +342,18 @@ class Species
 
 
 		if(abundance>9100000000000000000l)
-			System.out.println("beyond long format for species abd n�"+name);
+			System.out.println("beyond long format for species abd num"+name);
 
 		for(int i=0; i<tabCohorts.length;i++)
 		{
 			for(int j=0; j<tabCohorts[i].nbSchools; j++)
-				((School)tabCohorts[i].vectSchools.elementAt(j)).updateStage(sizeFeeding,nbStages);
+			{
+				((School)tabCohorts[i].vectSchools.elementAt(j)).updateFeedingStage(sizeFeeding,nbFeedingStages);
+				((School)tabCohorts[i].vectSchools.elementAt(j)).updateAccessStage(simulation.osmose.accessStageThreshold[number-1], simulation.osmose.nbAccessStage[number-1]);
+			}
 		}
 
-		if(!(nbCohorts==(int)Math.round((longevity+1)*simulation.nbDt)))
+		if(!(nbCohorts==(int)Math.round((longevity)*simulation.nbDt)))
 		{
 			nbCohorts=(int)Math.round((longevity+1)*simulation.nbDt);
 			System.out.println("PB of number of cohorts at the update stage: not equals to the initial number of cohorts");
@@ -626,17 +625,18 @@ class Species
 			meanSizeSpeCatch = sumCatch/abdCatch;
 
 //		calcul of length frequency in catch
+		if(simulation.sizeSpectrumPerSpeOutput)
+		{
 		int sizeTemp = 0;
 		for(int j=0;j<nbSchoolsTotCatch;j++)
 		{
 			if(sizeSchoolCatch[j]<simulation.osmose.spectrumMaxSize)
 			{
-				sizeTemp = (int) Math.floor(sizeSchoolCatch[j] / 5f);
-				simulation.spectrumTemp[1][number -
-				                           1][sizeTemp] += nbSchoolCatch[j];
+				sizeTemp = (int) Math.floor(sizeSchoolCatch[j] / simulation.osmose.classRange);
+				simulation.spectrumTemp[1][number-1][sizeTemp] += nbSchoolCatch[j];
 			}
 		}
-
+		}
 
 		/*	//Calculation of max size (according to abd percentages) per species
 

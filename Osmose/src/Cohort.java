@@ -8,7 +8,7 @@
  * <p>Society : IRD, France </p>
  *
  * @author Yunne Shin, Morgane Travers
- * @version 2.0
+ * @version 2.1
  ********************************************************************************
  */
 
@@ -28,6 +28,7 @@ class Cohort
 
 	float[] outOfZoneMortality;
 	boolean[] outOfZoneCohort;
+    float[] outOfZonePercentage;
 
 	float Z,Dd,Ff,Pp,Ss;   //effective mortalities tot(Z),div(D),fishing(F),preda(P),starva(S)
 	long nbDead,nbDeadDd, nbDeadFf, nbDeadPp, nbDeadSs;
@@ -45,27 +46,23 @@ class Cohort
 
 		outOfZoneMortality = new float[species.simulation.nbDt];
 		outOfZoneCohort = new boolean[species.simulation.nbDt];
+		outOfZonePercentage = new float[species.simulation.nbDt];
+		
 		for(int i=0;i<species.simulation.nbDt;i++)
 		{
 			// initialization by default
 			outOfZoneMortality[i] = 0;
 			outOfZoneCohort[i] = false;
+			outOfZonePercentage[i] = 0;
 		}
 
 		this.abundance = abundance;
 		this.oldAbundance = abundance;
 		this.biomass = biomass;
 
-		//************************************ CAS PART. MORGANE FEVRIER 2008 *************************************
+//		nbSchools = species.simulation.osmose.nbSchools[numSerie];
 
-		if(species.number==2){
-			nbSchools = 10 * species.simulation.osmose.nbSchools[numSerie];
-		}
-		else if((species.number==6)||(species.number==7)){
-			nbSchools = 3 * species.simulation.osmose.nbSchools[numSerie];
-		}
-		else
-			nbSchools = species.simulation.osmose.nbSchools[numSerie];
+		nbSchools = (int)(1+10/(species.longevity+1))*species.simulation.osmose.nbSchools[numSerie];
 		vectSchools = new Vector(nbSchools);
 		for(int i=0;i<nbSchools;i++)
 			vectSchools.addElement(new School(this,Math.round(((double)abundance)/nbSchools),iniLength,iniWeight));
