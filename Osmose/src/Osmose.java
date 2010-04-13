@@ -178,14 +178,13 @@ public class Osmose
 
 		}
 		
-		minTL = 1;
-		maxTL = 6;
+		minTL = 1.0f;
+		maxTL = 6.0f;
 		nbTLClass = (int)(1+((maxTL-minTL)/0.1f));   // TL classes of 0.1, from 1 to 6
 		tabTL = new float[nbTLClass];
 		tabTL[0] = minTL;
 		for (int i=1;i<nbTLClass;i++)
-			tabTL[i] = tabTL[i-1] + 0.1f;
-
+			tabTL[i] = minTL + i*0.1f;
 	}
 
 	public void runSeriesSimulations()
@@ -2115,6 +2114,12 @@ public class Osmose
 		}
 		pw = new PrintWriter(inputFile, true);
 
+		pw.println("// ------SAVING------");
+		pw.print("// Results saved every ");pw.print(savingDtMatrix[nSerie]);
+		pw.println(" time step(s) ");
+		pw.println("// Results averaged EXCEPT for yield (biomass and nb) where results are summed ");
+		pw.println();
+		
 		pw.println("// ---- simulation OPTIONS ---- ");
 		pw.print("// Lattice Size ");pw.print(';');pw.print(gridLinesTab[nSerie]);
 		pw.print('*');pw.println(gridColumnsTab[nSerie]);

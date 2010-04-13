@@ -1924,7 +1924,7 @@ class Simulation
 		for (int i=0;i<species.length;i++)
 		{
 			pr.print(";");
-			pr.print(Y[i]/(float)savingDt);
+			pr.print(Y[i]);
 		}
 		pr.println();
 		pr.close();
@@ -1952,7 +1952,7 @@ class Simulation
 		for (int i=0;i<species.length;i++)
 		{
 			pr.print(";");
-			pr.print(nY[i]/(float)savingDt);
+			pr.print(nY[i]);
 		}
 		pr.println();
 		pr.close();
