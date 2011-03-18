@@ -1,3 +1,4 @@
+
 /*******************************************************************************
  * <p>Titre : Cell class </p>
  *
@@ -11,45 +12,40 @@
  * @version 2.1 
  ******************************************************************************* 
  */
-
 import java.util.*;
 
-class Cell
-{
-	int posi,posj; 		//position in matrix i,j
-	float coordLat, coordLong;           // coordinates in degrees
-	Vector vectPresentSchools;
-	int nbPresentSchools;
-	Cell neighbors[];
-	boolean coast;
-	boolean isMPA;
-	boolean alreadyChosen;
+class Cell {
 
-	int spatialGroup;
-	
-	// for spatial distribution of schools
-	int nbMapsConcerned;        // number of distribution maps in which this cell is involved
-	Vector numMapsConcerned;    // list of these maps
+    int posi, posj; 		//position in matrix i,j
+    float coordLat, coordLong;           // coordinates in degrees
+    Vector vectPresentSchools;
+    int nbPresentSchools;
+    Cell neighbors[];
+    boolean coast;
+    boolean isMPA;
+    boolean alreadyChosen;
+    int spatialGroup;
+    // for spatial distribution of schools
+    int nbMapsConcerned;        // number of distribution maps in which this cell is involved
+    Vector numMapsConcerned;    // list of these maps
+    // for spatial interpolation with the grid of a LTL (low trophic levels) model
+    int nbCellsLTLGrid;        // number of cells of the LTL grid used to compute the LTL biomass of this cell
+    Vector icoordLTLGrid, jcoordLTLGrid;     // positions of the cells of the LTL grid used to compute the LTL biomass (position within the LTL grid)
 
-	// for spatial interpolation with the grid of a LTL (low trophic levels) model
-	int nbCellsLTLGrid;        // number of cells of the LTL grid used to compute the LTL biomass of this cell
-	Vector icoordLTLGrid, jcoordLTLGrid;     // positions of the cells of the LTL grid used to compute the LTL biomass (position within the LTL grid)
-
-	public Cell(int posi, int posj, float latitude, float longitude)
-	{
-		this.posi=posi;
-		this.posj=posj;
-		this.coordLat = latitude;
-		this.coordLong = longitude;
-		vectPresentSchools = new Vector();
-		nbPresentSchools=0;
-		coast=false;
-		isMPA=false;
-		nbMapsConcerned = 0;
-		numMapsConcerned = new Vector();
-		nbCellsLTLGrid = 0;
-		icoordLTLGrid = new Vector();
-		jcoordLTLGrid = new Vector();
-	}
+    public Cell(int posi, int posj, float latitude, float longitude) {
+        this.posi = posi;
+        this.posj = posj;
+        this.coordLat = latitude;
+        this.coordLong = longitude;
+        vectPresentSchools = new Vector();
+        nbPresentSchools = 0;
+        coast = false;
+        isMPA = false;
+        nbMapsConcerned = 0;
+        numMapsConcerned = new Vector();
+        nbCellsLTLGrid = 0;
+        icoordLTLGrid = new Vector();
+        jcoordLTLGrid = new Vector();
+    }
 }
 
