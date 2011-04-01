@@ -111,7 +111,6 @@ class Cohort {
                 if (!(outOfZoneCohort[species.simulation.dt]))// cohorts in the area during the time step
                 {
                     matrix[((School) vectSchools.elementAt(i)).posi][((School) vectSchools.elementAt(i)).posj].vectPresentSchools.removeElement(vectSchools.elementAt(i));
-                    matrix[((School) vectSchools.elementAt(i)).posi][((School) vectSchools.elementAt(i)).posj].nbPresentSchools--;
                 }
                 vectSchools.removeElementAt(i);
                 nbSchools--;
@@ -204,7 +203,6 @@ class Cohort {
             if (schoolCatchk.disappears) {
                 if (!outOfZoneCohort[species.simulation.dt]) {
                     matrix[schoolCatchk.posi][schoolCatchk.posj].vectPresentSchools.removeElement(schoolCatchk);
-                    matrix[schoolCatchk.posi][schoolCatchk.posj].nbPresentSchools--;
                 }
                 vectSchools.removeElement(schoolCatchk);
                 nbSchools--;
@@ -301,7 +299,6 @@ class Cohort {
                 if (schoolCatchk.disappears) {
                     if (!outOfZoneCohort[species.simulation.dt]) {
                         matrix[schoolCatchk.posi][schoolCatchk.posj].vectPresentSchools.removeElement(schoolCatchk);
-                        matrix[schoolCatchk.posi][schoolCatchk.posj].nbPresentSchools--;
                     }
                     vectSchools.removeElement(schoolCatchk);
                     nbSchools--;
@@ -396,7 +393,6 @@ class Cohort {
                 if (schoolCatchk.disappears) {
                     if (!outOfZoneCohort[species.simulation.dt]) {
                         matrix[schoolCatchk.posi][schoolCatchk.posj].vectPresentSchools.removeElement(schoolCatchk);
-                        matrix[schoolCatchk.posi][schoolCatchk.posj].nbPresentSchools--;
                     }
                     vectSchools.removeElement(schoolCatchk);
                     nbSchools--;

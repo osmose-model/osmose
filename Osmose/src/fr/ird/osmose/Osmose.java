@@ -1198,7 +1198,7 @@ public class Osmose {
                             tabCoastjMatrix[numSerie][i] = (new Integer(st.sval).intValue());
                         }
                         for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
-                            grid.matrix[tabCoastiMatrix[numSerie][i]][tabCoastjMatrix[numSerie][i]].coast = true;
+                            grid.matrix[tabCoastiMatrix[numSerie][i]][tabCoastjMatrix[numSerie][i]].setLand(true);
                         }
                     } else {
                         System.out.println("Error while reading coastFile for nb columns match");
@@ -1217,7 +1217,7 @@ public class Osmose {
 
     public void updateCoastCells(int numSerie) {
         for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
-            grid.matrix[tabCoastiMatrix[numSerie][i]][tabCoastjMatrix[numSerie][i]].coast = true;
+            grid.matrix[tabCoastiMatrix[numSerie][i]][tabCoastjMatrix[numSerie][i]].setLand(true);
         }
     }
 
@@ -1273,7 +1273,7 @@ public class Osmose {
                         }
                         boolean okForCoast = true;
                         for (int i = 0; i < tabi.length; i++) {
-                            if (grid.matrix[tabi[i]][tabj[i]].coast) {
+                            if (grid.matrix[tabi[i]][tabj[i]].isLand()) {
                                 okForCoast = false;
                                 break;
                             }
@@ -1425,12 +1425,11 @@ public class Osmose {
                                             mapCoordj[i][m] = (new Integer(st.sval).intValue());
                                         }
                                         for (int m = 0; m < mapCoordj[i].length; m++) {
-                                            if (grid.matrix[mapCoordi[i][m]][mapCoordj[i][m]].coast) {
+                                            if (grid.matrix[mapCoordi[i][m]][mapCoordj[i][m]].isLand()) {
                                                 System.out.println("Problem of coast in species area file for map " + m + " - " + i + " - " + mapCoordi[i][m] + "  " + mapCoordj[i][m]);
                                             }
                                         }
                                         for (int m = 0; m < mapCoordj[i].length; m++) {
-                                            grid.matrix[mapCoordi[i][m]][mapCoordj[i][m]].nbMapsConcerned++;
                                             grid.matrix[mapCoordi[i][m]][mapCoordj[i][m]].numMapsConcerned.add(new Integer(m));
                                         }
                                         if (densityMaps) {
@@ -1511,10 +1510,10 @@ public class Osmose {
                 int index = 0;
                 for (int l = 0; l < grid.nbLines; l++) {
                     for (int m = 0; m < grid.nbColumns; m++) {
-                        if (!matrix[l][m].coast) {
+                        if (!matrix[l][m].isLand()) {
                             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                                randomAreaCoordi[i][index] = matrix[l][m].posi;
-                                randomAreaCoordj[i][index] = matrix[l][m].posj;
+                                randomAreaCoordi[i][index] = matrix[l][m].getI();
+                                randomAreaCoordj[i][index] = matrix[l][m].getJ();
                             }
                             index++;
                         }
@@ -1526,19 +1525,19 @@ public class Osmose {
                 for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                     for (int l = 0; l < grid.nbLines; l++) {
                         for (int m = 0; m < grid.nbColumns; m++) {
-                            matrix[l][m].alreadyChosen = false;
+                            matrix[l][m].setAlreadyChosen(false);
                         }
                     }
                     Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie]];
                     int coordi, coordj;
                     coordi = (int) Math.round(Math.random() * (grid.nbLines - 1));
                     coordj = (int) Math.round(Math.random() * (grid.nbColumns - 1));
-                    while (matrix[coordi][coordj].coast) {
+                    while (matrix[coordi][coordj].isLand()) {
                         coordi = (int) Math.round(Math.random() * (grid.nbLines - 1));
                         coordj = (int) Math.round(Math.random() * (grid.nbColumns - 1));
                     }
                     tabCellsArea[0] = matrix[coordi][coordj];
-                    matrix[coordi][coordj].alreadyChosen = true;
+                    matrix[coordi][coordj].setAlreadyChosen(true);
                     //from initial cell, successive random sorting of the adjacent cells..
                     //until tabCellsArea is full
                     int indice1 = 0;
@@ -1550,11 +1549,11 @@ public class Osmose {
                             int indexNeighbor = 0;
                             while ((index < (tabCellsArea.length - 1))
                                     && (indexNeighbor < tabCellsArea[x].neighbors.length)) {
-                                if ((!tabCellsArea[x].neighbors[indexNeighbor].coast)
-                                        && (!tabCellsArea[x].neighbors[indexNeighbor].alreadyChosen)) {
+                                if ((!tabCellsArea[x].neighbors[indexNeighbor].isLand())
+                                        && (!tabCellsArea[x].neighbors[indexNeighbor].isAlreadyChosen())) {
                                     index++;
                                     tabCellsArea[index] = tabCellsArea[x].neighbors[indexNeighbor];
-                                    tabCellsArea[x].neighbors[indexNeighbor].alreadyChosen = true;
+                                    tabCellsArea[x].neighbors[indexNeighbor].setAlreadyChosen(true);
                                 }
                                 indexNeighbor++;
                             }
@@ -1563,8 +1562,8 @@ public class Osmose {
                         indice2 = index;
                     }
                     for (int m = 0; m < tabCellsArea.length; m++) {
-                        randomAreaCoordi[i][m] = tabCellsArea[m].posi;
-                        randomAreaCoordj[i][m] = tabCellsArea[m].posj;
+                        randomAreaCoordi[i][m] = tabCellsArea[m].getI();
+                        randomAreaCoordj[i][m] = tabCellsArea[m].getJ();
                     }
                 }
             }

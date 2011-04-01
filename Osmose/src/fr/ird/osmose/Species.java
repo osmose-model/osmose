@@ -381,7 +381,6 @@ class Species {
                             }
                             if (!(tabCohorts[i].outOfZoneCohort[simulation.dt])) {
                                 simulation.osmose.grid.matrix[schoolCatchk.posi][schoolCatchk.posj].vectPresentSchools.removeElement(schoolCatchk);
-                                simulation.osmose.grid.matrix[schoolCatchk.posi][schoolCatchk.posj].nbPresentSchools--;
                             }
                             tabCohorts[i].vectSchools.removeElement(schoolCatchk);
                             tabCohorts[i].nbSchools--;

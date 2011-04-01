@@ -180,12 +180,12 @@ class Simulation {
         if ((osmose.thereIsMPATab[numSerie]) && (t == osmose.MPAtStartTab[numSerie])) {
             RS = osmose.tabMPAiMatrix[numSerie].length / ((osmose.grid.nbLines) * osmose.grid.nbColumns);
             for (int index = 0; index < osmose.tabMPAiMatrix[numSerie].length; index++) {
-                osmose.grid.matrix[osmose.tabMPAiMatrix[numSerie][index]][osmose.tabMPAjMatrix[numSerie][index]].isMPA = true;
+                osmose.grid.matrix[osmose.tabMPAiMatrix[numSerie][index]][osmose.tabMPAjMatrix[numSerie][index]].setMPA(true);
             }
         } else if ((!osmose.thereIsMPATab[numSerie]) || (t > osmose.MPAtEndTab[numSerie])) {
             RS = 0;
             for (int index = 0; index < osmose.tabMPAiMatrix[numSerie].length; index++) {
-                osmose.grid.matrix[osmose.tabMPAiMatrix[numSerie][index]][osmose.tabMPAjMatrix[numSerie][index]].isMPA = false;
+                osmose.grid.matrix[osmose.tabMPAiMatrix[numSerie][index]][osmose.tabMPAjMatrix[numSerie][index]].setMPA(false);
             }
         }
 
@@ -221,7 +221,6 @@ class Simulation {
                 {
                     for (int j = 0; j < osmose.grid.nbColumns; j++) {
                         osmose.grid.matrix[i][j].vectPresentSchools.removeAllElements();
-                        osmose.grid.matrix[i][j].nbPresentSchools = 0;
                     }
                 }
                 distributeSpecies();      // update distribution
@@ -586,12 +585,12 @@ class Simulation {
         int dummy;
         for (int i = 0; i < grid.nbLines; i++) {
             for (int j = 0; j < grid.nbColumns; j++) {
-                int[] indexSchoolsSizes = new int[grid.matrix[i][j].nbPresentSchools];
-                for (int k = 0; k < grid.matrix[i][j].nbPresentSchools; k++) {
+                int[] indexSchoolsSizes = new int[grid.matrix[i][j].getNbPresentSchools()];
+                for (int k = 0; k < grid.matrix[i][j].getNbPresentSchools(); k++) {
                     indexSchoolsSizes[k] = k;
                 }
-                for (int k1 = 0; k1 < grid.matrix[i][j].nbPresentSchools; k1++) {
-                    for (int k2 = k1 + 1; k2 < grid.matrix[i][j].nbPresentSchools; k2++) {
+                for (int k1 = 0; k1 < grid.matrix[i][j].getNbPresentSchools(); k1++) {
+                    for (int k2 = k1 + 1; k2 < grid.matrix[i][j].getNbPresentSchools(); k2++) {
                         if (((School) grid.matrix[i][j].vectPresentSchools.elementAt(indexSchoolsSizes[k1])).length
                                 > ((School) grid.matrix[i][j].vectPresentSchools.elementAt(indexSchoolsSizes[k2])).length) {
                             dummy = indexSchoolsSizes[k1];
@@ -600,7 +599,7 @@ class Simulation {
                         }
                     }
                 }
-                School[] tabSchoolsTemp = new School[grid.matrix[i][j].nbPresentSchools];
+                School[] tabSchoolsTemp = new School[grid.matrix[i][j].getNbPresentSchools()];
                 for (int k = 0; k < tabSchoolsTemp.length; k++) {
                     tabSchoolsTemp[k] = (School) grid.matrix[i][j].vectPresentSchools.elementAt(indexSchoolsSizes[k]);
                 }
@@ -633,7 +632,6 @@ class Simulation {
                 for (int k = osmose.grid.matrix[i][j].vectPresentSchools.size() - 1; k >= 0; k--) {
                     if (((School) osmose.grid.matrix[i][j].vectPresentSchools.elementAt(k)).disappears) {
                         osmose.grid.matrix[i][j].vectPresentSchools.removeElementAt(k);
-                        osmose.grid.matrix[i][j].nbPresentSchools--;
                     }
                 }
                 osmose.grid.matrix[i][j].vectPresentSchools.trimToSize();
@@ -807,7 +805,7 @@ class Simulation {
                                 thisSchool.randomWalk();
 
                                 boolean stillInMap = false;
-                                for (int p = 0; p < osmose.grid.matrix[thisSchool.posi][thisSchool.posj].nbMapsConcerned; p++) {
+                                for (int p = 0; p < osmose.grid.matrix[thisSchool.posi][thisSchool.posj].getNbMapsConcerned(); p++) {
                                     if (((Integer) osmose.grid.matrix[thisSchool.posi][thisSchool.posj].numMapsConcerned.elementAt(p)).intValue() == osmose.numMap[i][j][dt]) {
                                         stillInMap = true;
                                     }
@@ -872,7 +870,7 @@ class Simulation {
                     cohij.abundanceCatchable = 0;
                     for (int k = 0; k < cohij.vectSchools.size(); k++) {
                         School schoolk = (School) cohij.vectSchools.elementAt(k);
-                        if (osmose.grid.matrix[schoolk.posi][schoolk.posj].isMPA) {
+                        if (osmose.grid.matrix[schoolk.posi][schoolk.posj].isMPA()) {
                             schoolk.isCatchable = false;
                         } else {
                             schoolk.isCatchable = true;

@@ -89,7 +89,7 @@ public class Plankton {
     // called during the spatial interpolation
     {
         float area;	// area of osmose cell in km^2
-        area = 111f * coupling.grid.dLat * 111f * (float) Math.cos(coupling.grid.matrix[i][j].coordLat * Math.PI / (90f * 2f)) * coupling.grid.dLong;
+        area = 111f * coupling.grid.dLat * 111f * (float) Math.cos(coupling.grid.matrix[i][j].getLat() * Math.PI / (90f * 2f)) * coupling.grid.dLong;
 
         biomass[i][j] += area * unitConversion(integratedData[x][y] / (float) nb);
         iniBiomass[i][j] += area * unitConversion(integratedData[x][y] / (float) nb);

@@ -94,15 +94,14 @@ class School {
         double rand = Math.random();
         // indexij to test the probability of presence
         indexij = (int) Math.round((nbCellsArea - 1) * rand);
-        posi = ((Cell) vectCells.elementAt((int) (Math.round((nbCellsArea - 1) * rand)))).posi;
-        posj = ((Cell) vectCells.elementAt((int) (Math.round((nbCellsArea - 1) * rand)))).posj;
+        posi = ((Cell) vectCells.elementAt((int) (Math.round((nbCellsArea - 1) * rand)))).getI();
+        posj = ((Cell) vectCells.elementAt((int) (Math.round((nbCellsArea - 1) * rand)))).getJ();
     }
 
     public void communicatePosition() {
         //function called when update of schools present in cells after having
         //removed all elements from vectPresentSchools in all cells
         grid.matrix[posi][posj].vectPresentSchools.addElement(this);
-        grid.matrix[posi][posj].nbPresentSchools++;
     }
 
     public void randomWalk() {
@@ -111,7 +110,7 @@ class School {
         Cell oldCell = grid.matrix[posi][posj];
 
         for (int i = 0; i < neighbors.length; i++) {
-            if (!neighbors[i].coast) {
+            if (!neighbors[i].isLand()) {
                 vectPossibleCells.addElement(neighbors[i]);
             }
         }

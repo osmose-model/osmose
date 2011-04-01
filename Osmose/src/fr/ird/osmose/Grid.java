@@ -56,10 +56,10 @@ class Grid {
     public void identifySpatialGroups() {
         for (int i = 0; i < nbLines; i++) {
             for (int j = 0; j < nbColumns; j++) {
-                if (matrix[i][j].coordLat >= (matrix[i][j].coordLong - 52.5)) {
-                    matrix[i][j].spatialGroup = 0;	// upwelling
+                if (matrix[i][j].getLat() >= (matrix[i][j].getLon() - 52.5)) {
+                    matrix[i][j].setSpatialGroup(Cell.SpatialGroup.UPWELLING);
                 } else {
-                    matrix[i][j].spatialGroup = 1;	// banc des aiguilles
+                    matrix[i][j].setSpatialGroup(Cell.SpatialGroup.AGULHAS_BANK);
                 }
             }
         }
@@ -73,7 +73,6 @@ class Grid {
         } else if (nbl == 2) {
             int[] tabIndexRandom = new int[3];
             Vector vectInd = new Vector();
-            ;
             int rand;
 
             for (int i = 0; i < tabIndexRandom.length; i++) {
