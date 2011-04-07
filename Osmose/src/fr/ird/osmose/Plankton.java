@@ -16,6 +16,15 @@ package fr.ird.osmose;
  */
 public class Plankton {
 
+    /*
+     * ********
+     * * Logs *
+     * ********
+     * 2011/04/07 phv
+     * Osmose and Simulation are called with Osmose.getInstance()
+     * and Osmose.getInstance().getSimulation()
+     */
+
     Coupling coupling;
     float trophicLevel;        // trophic level of the plankton group
     float sizeMin, sizeMax;      // min and max size of the group (uniform distribution)
@@ -63,9 +72,13 @@ public class Plankton {
                 biomass[i][j] = 0;
                 accessibleBiomass[i][j] = 0;
                 iniBiomass[i][j] = 0;
-                mortalityRate[i][j] = (accessibilityCoeff / 2f) * coupling.simulation.nbDt / 365f; // default = median of the max mortality rate (in day-1)
+                mortalityRate[i][j] = (accessibilityCoeff / 2f) * getSimulation().nbDt / 365f; // default = median of the max mortality rate (in day-1)
             }
         }
+    }
+
+    private Simulation getSimulation() {
+        return Osmose.getInstance().getSimulation();
     }
 
     public void verticalIntegration(float[][][] depthLayer, float maxDepth) // transforms dataInit into integratedData using the matrix depthLayer specifying the depth of each cell of the plankton grid
@@ -104,7 +117,7 @@ public class Plankton {
 
     public float biomToProd(float biomass) {
         float prod = 0f;
-        prod = biomass * prodBiomFactor / (float) coupling.simulation.nbDt;
+        prod = biomass * prodBiomFactor / (float) getSimulation().nbDt;
         return prod;
     }
 

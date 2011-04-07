@@ -219,7 +219,7 @@ public class Osmose {
                     initializeOptions();
                     System.out.println("options initialized");
 
-                    simulation = new Simulation(this, nbDtMatrix[x], savingDtMatrix[x], nbSpeciesTab[x], nameSpecMatrix[x], DMatrix[x], FMatrix[x],
+                    simulation = new Simulation(nbDtMatrix[x], savingDtMatrix[x], nbSpeciesTab[x], nameSpecMatrix[x], DMatrix[x], FMatrix[x],
                             longevityMatrix[x], lInfMatrix[x], KMatrix[x], t0Matrix[x], cMatrix[x], bPowerMatrix[x], alphaMatrix[x],
                             sizeMatMatrix[x], nbStagesMatrix[x], sizeFeedingMatrix[x], recruitAgeMatrix[x], recruitSizeMatrix[x],
                             seasonFishingMatrix[x], recruitMetricMatrix[x], seasonSpawningMatrix[x], supAgeOfClass0Matrix[x],
@@ -248,7 +248,7 @@ public class Osmose {
                         updateCoastCells(numSerie);
                     }
 
-                    simulation = new Simulation(this, nbDtMatrix[x], savingDtMatrix[x], nbSpeciesTab[x], nameSpecMatrix[x], DMatrix[x], FMatrix[x],
+                    simulation = new Simulation(nbDtMatrix[x], savingDtMatrix[x], nbSpeciesTab[x], nameSpecMatrix[x], DMatrix[x], FMatrix[x],
                             longevityMatrix[x], lInfMatrix[x], KMatrix[x], t0Matrix[x], cMatrix[x], bPowerMatrix[x], alphaMatrix[x],
                             sizeMatMatrix[x], nbStagesMatrix[x], sizeFeedingMatrix[x], recruitAgeMatrix[x], recruitSizeMatrix[x],
                             seasonFishingMatrix[x], recruitMetricMatrix[x], seasonSpawningMatrix[x], supAgeOfClass0Matrix[x],

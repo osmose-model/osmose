@@ -33,11 +33,12 @@ public class Coupling {
      * * Logs *
      * ********
      * 2011/04/07 phv
+     * Osmose and Simulation are called with Osmose.getInstance()
+     * and Osmose.getInstance().getSimulation()
      * Deleted the grid variable and replaced it by method getGrid() that calls
      * the Osmose grid.
      * ***
      */
-    Simulation simulation;
     int nbPlankton, nbForcingDt;
     // Tables of plankton information
     String[][] planktonFileListTxt;		// List of the file names of plankton matrix provided as input
@@ -71,14 +72,13 @@ public class Coupling {
     boolean isForcing;
     String[] cmd = {"/bin/sh", "-c", "./roms bengCoupling.in >toto.out"};
 
-    public Coupling(Simulation simulation, boolean isForcing) {
-        this.simulation = simulation;
-        planktonFilesPath = simulation.osmose.inputPathName;
+    public Coupling(boolean isForcing) {
+        planktonFilesPath = getOsmose().inputPathName;
         this.isForcing = isForcing;
         if (!isForcing) {
-            readCouplingConfigFile(simulation.osmose.couplingFileNameTab[simulation.numSerie]);
+            readCouplingConfigFile(getOsmose().couplingFileNameTab[getSimulation().numSerie]);
         } else {
-            startLTLModel = simulation.osmose.simulationTimeTab[simulation.numSerie] + 1;
+            startLTLModel = getOsmose().simulationTimeTab[getSimulation().numSerie] + 1;
         }
     }
 
@@ -86,10 +86,18 @@ public class Coupling {
         return Osmose.getInstance().getGrid();
     }
 
+    private Osmose getOsmose() {
+        return Osmose.getInstance();
+    }
+
+    private Simulation getSimulation() {
+       return getOsmose().getSimulation();
+    }
+
     public void readCouplingConfigFile(String couplingFileName) {
         FileInputStream couplingFile;
         try {
-            couplingFile = new FileInputStream(new File(simulation.osmose.inputPathName, couplingFileName));
+            couplingFile = new FileInputStream(new File(getOsmose().inputPathName, couplingFileName));
         } catch (FileNotFoundException ex) {
             System.out.println(" copuling configuration file doesn't exist: " + couplingFileName);
             return;
@@ -136,12 +144,12 @@ public class Coupling {
         try {
             st.nextToken();
             nbPlankton = (new Integer(st.sval)).intValue();
-            if (!(nbPlankton == simulation.osmose.nbPlanktonGroupsTab[simulation.numSerie])) {
+            if (!(nbPlankton == getOsmose().nbPlanktonGroupsTab[getSimulation().numSerie])) {
                 System.out.println("The number of plankton group in plankton structure file does not match the one from config file");
             }
             st.nextToken();
             nbForcingDt = (new Integer(st.sval)).intValue();
-            if (!(nbForcingDt == simulation.nbDt)) {
+            if (!(nbForcingDt == getSimulation().nbDt)) {
                 System.out.println("In the current version, the time step of plankton biomass should match the time step of osmose config");
             }
 
@@ -157,7 +165,7 @@ public class Coupling {
                 // filling tables
                 st.nextToken();
                 planktonNames[i] = st.sval;
-                simulation.osmose.planktonNamesTab[simulation.numSerie][i] = st.sval;
+                getOsmose().planktonNamesTab[getSimulation().numSerie][i] = st.sval;
                 st.nextToken();
                 minSize[i] = (new Float(st.sval)).floatValue();
                 st.nextToken();
@@ -324,14 +332,14 @@ public class Coupling {
 
         // Initialisation plankton and table of data
         for (int i = 0; i < nbPlankton; i++) {
-            planktonList[i] = new Plankton(this, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], simulation.osmose.planktonAccessCoeffMatrix[i]);
+            planktonList[i] = new Plankton(this, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
         }
 
         if (filesFormat.equalsIgnoreCase("netcdf")) {		// for NetCDF file - Structure depends of netcdf file
-            phyto1 = new ArrayDouble.D3(simulation.nbDt, planktonDimX, planktonDimY);
-            phyto2 = new ArrayDouble.D3(simulation.nbDt, planktonDimX, planktonDimY);
-            zoo1 = new ArrayDouble.D3(simulation.nbDt, planktonDimX, planktonDimY);
-            zoo2 = new ArrayDouble.D3(simulation.nbDt, planktonDimX, planktonDimY);
+            phyto1 = new ArrayDouble.D3(getSimulation().nbDt, planktonDimX, planktonDimY);
+            phyto2 = new ArrayDouble.D3(getSimulation().nbDt, planktonDimX, planktonDimY);
+            zoo1 = new ArrayDouble.D3(getSimulation().nbDt, planktonDimX, planktonDimY);
+            zoo2 = new ArrayDouble.D3(getSimulation().nbDt, planktonDimX, planktonDimY);
         }
     }
 
@@ -459,9 +467,9 @@ public class Coupling {
             }
         } else {
             if (filesFormat.equalsIgnoreCase("netcdf")) {
-                String nameTemp = simulation.osmose.inputPathName + simulation.osmose.fileSeparator + planktonFileListNetcdf[dt];
+                String nameTemp = getOsmose().inputPathName + getOsmose().fileSeparator + planktonFileListNetcdf[dt];
                 int timeIndex = 0;
-                if (simulation.t >= startLTLModel) // two-way coupling mode
+                if (getSimulation().t >= startLTLModel) // two-way coupling mode
                 {
                     readNetCDFFile(nameFileCoupling, timeIndex);
                 } else {
@@ -474,7 +482,7 @@ public class Coupling {
 
         mapInterpolation();      // from LTL grid to Osmose grid
 
-        if (simulation.t >= simulation.osmose.timeSeriesStart) {
+        if (getSimulation().t >= getOsmose().timeSeriesStart) {
             saveForDiet();       // save biomass of plankton before predation
         }
     }
@@ -482,11 +490,11 @@ public class Coupling {
     public void saveForDiet() // save biomass of plankton before predation
     {
         for (int p = 0; p < nbPlankton; p++) {
-            simulation.biomPerStage[simulation.species.length + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
+            getSimulation().biomPerStage[getSimulation().species.length + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     if (!getGrid().getCell(i, j).isLand()) {
-                        simulation.biomPerStage[simulation.species.length + p][0] += ((Plankton) planktonList[p]).biomass[i][j];
+                        getSimulation().biomPerStage[getSimulation().species.length + p][0] += ((Plankton) planktonList[p]).biomass[i][j];
                     }
                 }
             }
@@ -521,12 +529,12 @@ public class Coupling {
                 for (int y = 0; y < getGrid().getNbColumns(); y++) {
                     if (!getGrid().getCell(x, y).isLand()) {
                         if (planktonList[p].iniBiomass[x][y] != 0) {
-                            planktonList[p].mortalityRate[x][y] = (simulation.nbDt / 365f) * (planktonList[p].iniBiomass[x][y] - planktonList[p].biomass[x][y]) / planktonList[p].iniBiomass[x][y];
+                            planktonList[p].mortalityRate[x][y] = (getSimulation().nbDt / 365f) * (planktonList[p].iniBiomass[x][y] - planktonList[p].biomass[x][y]) / planktonList[p].iniBiomass[x][y];
                         } else {
                             planktonList[p].mortalityRate[x][y] = 0;
                         }
                     } else {
-                        planktonList[p].mortalityRate[x][y] = (planktonList[p].accessibilityCoeff / 2f) * (simulation.nbDt / 365f);
+                        planktonList[p].mortalityRate[x][y] = (planktonList[p].accessibilityCoeff / 2f) * (getSimulation().nbDt / 365f);
                     }
                 }
             }
@@ -547,9 +555,9 @@ public class Coupling {
         File targetFile;
         PrintWriter pr;
 
-        String mortalityFile = simulation.osmose.outputFileNameTab[simulation.numSerie] + "_planktonMortalityMatrix_Simu" + simulation.osmose.numSimu + ".csv";
+        String mortalityFile = getOsmose().outputFileNameTab[getSimulation().numSerie] + "_planktonMortalityMatrix_Simu" + getOsmose().numSimu + ".csv";
 
-        targetPath = new File(simulation.osmose.outputPathName + simulation.osmose.outputFileNameTab[simulation.numSerie] + simulation.osmose.fileSeparator + "planktonMortality");
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getSimulation().numSerie] + getOsmose().fileSeparator + "planktonMortality");
         targetPath.mkdirs();
 
         try {
@@ -563,7 +571,7 @@ public class Coupling {
         pr = new PrintWriter(planktonTime, true);
 
         for (int j = 0; j < getGrid().getNbLines(); j++) {
-            pr.print(simulation.t + simulation.dt / (float) simulation.nbDt);
+            pr.print(getSimulation().t + getSimulation().dt / (float) getSimulation().nbDt);
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
                 for (int i = 0; i < getGrid().getNbColumns(); i++) {
@@ -589,13 +597,13 @@ public class Coupling {
 
         Index ima = phyto1.getIndex();
 
-        for (int k = 0; k < simulation.nbDt; k++) {
+        for (int k = 0; k < getSimulation().nbDt; k++) {
             for (int i = 0; i < planktonDimX; i++) {
                 for (int j = 0; j < planktonDimY; j++) {
-                    phyto1.setDouble(ima.set(k, i, j), (double) saveMortality[0][i][j][simulation.dt]);
-                    phyto2.setDouble(ima.set(k, i, j), (double) saveMortality[1][i][j][simulation.dt]);
-                    zoo1.setDouble(ima.set(k, i, j), (double) saveMortality[2][i][j][simulation.dt]);
-                    zoo2.setDouble(ima.set(k, i, j), (double) saveMortality[3][i][j][simulation.dt]);
+                    phyto1.setDouble(ima.set(k, i, j), (double) saveMortality[0][i][j][getSimulation().dt]);
+                    phyto2.setDouble(ima.set(k, i, j), (double) saveMortality[1][i][j][getSimulation().dt]);
+                    zoo1.setDouble(ima.set(k, i, j), (double) saveMortality[2][i][j][getSimulation().dt]);
+                    zoo2.setDouble(ima.set(k, i, j), (double) saveMortality[3][i][j][getSimulation().dt]);
                 }
             }
         }
@@ -738,9 +746,9 @@ public class Coupling {
         File targetFile;
         PrintWriter pr;
 
-        String mortalityFile = simulation.osmose.outputFileNameTab[simulation.numSerie] + "_planktonBiomassMatrix_Simu" + simulation.osmose.numSimu + ".csv";
+        String mortalityFile = getOsmose().outputFileNameTab[getSimulation().numSerie] + "_planktonBiomassMatrix_Simu" + getOsmose().numSimu + ".csv";
 
-        targetPath = new File(simulation.osmose.outputPathName + simulation.osmose.outputFileNameTab[simulation.numSerie] + simulation.osmose.fileSeparator + "planktonBiomass");
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getSimulation().numSerie] + getOsmose().fileSeparator + "planktonBiomass");
         targetPath.mkdirs();
 
         try {
@@ -754,7 +762,7 @@ public class Coupling {
         pr = new PrintWriter(planktonTime, true);
 
         for (int j = 0; j < getGrid().getNbLines(); j++) {
-            pr.print(simulation.t + simulation.dt / (float) simulation.nbDt);
+            pr.print(getSimulation().t + getSimulation().dt / (float) getSimulation().nbDt);
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
                 for (int i = 0; i < getGrid().getNbColumns(); i++) {
@@ -776,7 +784,7 @@ public class Coupling {
         for (int x = 0; x < planktonDimX; x++) {
             for (int y = 0; y < planktonDimY; y++) {
                 for (int p = 0; p < nbPlankton; p++) {
-                    saveMortality[p][x][y][simulation.dt] = (planktonList[p].accessibilityCoeff / 2f) * (simulation.nbDt / 365f);
+                    saveMortality[p][x][y][getSimulation().dt] = (planktonList[p].accessibilityCoeff / 2f) * (getSimulation().nbDt / 365f);
                 }
             }
         }
@@ -790,7 +798,7 @@ public class Coupling {
                             for (int p = 0; p < nbPlankton; p++) {
                                 xTemp = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
                                 yTemp = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
-                                saveMortality[p][xTemp][yTemp][simulation.dt] = planktonList[p].mortalityRate[i][j];
+                                saveMortality[p][xTemp][yTemp][getSimulation().dt] = planktonList[p].mortalityRate[i][j];
                             }
                         }
                     } else {
@@ -822,7 +830,7 @@ public class Coupling {
                                     xTemp = ((Integer) getGrid().getCell(i - 1, j).icoordLTLGrid.elementAt(k)).intValue();
                                     yTemp = ((Integer) getGrid().getCell(i - 1, j).jcoordLTLGrid.elementAt(k)).intValue();
 
-                                    saveMortality[p][xTemp][yTemp][simulation.dt] += planktonList[p].mortalityRate[i - 1][j] / (float) nbCellsTemp;
+                                    saveMortality[p][xTemp][yTemp][getSimulation().dt] += planktonList[p].mortalityRate[i - 1][j] / (float) nbCellsTemp;
                                 }
                             }
                         }
@@ -832,7 +840,7 @@ public class Coupling {
                                     xTemp = ((Integer) getGrid().getCell(i + 1, j).icoordLTLGrid.elementAt(k)).intValue();
                                     yTemp = ((Integer) getGrid().getCell(i + 1, j).jcoordLTLGrid.elementAt(k)).intValue();
 
-                                    saveMortality[p][xTemp][yTemp][simulation.dt] += planktonList[p].mortalityRate[i + 1][j] / (float) nbCellsTemp;
+                                    saveMortality[p][xTemp][yTemp][getSimulation().dt] += planktonList[p].mortalityRate[i + 1][j] / (float) nbCellsTemp;
                                 }
                             }
                         }
@@ -843,7 +851,7 @@ public class Coupling {
                                     xTemp = ((Integer) getGrid().getCell(i, j - 1).icoordLTLGrid.elementAt(k)).intValue();
                                     yTemp = ((Integer) getGrid().getCell(i, j - 1).jcoordLTLGrid.elementAt(k)).intValue();
 
-                                    saveMortality[p][xTemp][yTemp][simulation.dt] += planktonList[p].mortalityRate[i][j - 1] / (float) nbCellsTemp;
+                                    saveMortality[p][xTemp][yTemp][getSimulation().dt] += planktonList[p].mortalityRate[i][j - 1] / (float) nbCellsTemp;
                                 }
                             }
                         }
@@ -854,7 +862,7 @@ public class Coupling {
                                     xTemp = ((Integer) getGrid().getCell(i, j + 1).icoordLTLGrid.elementAt(k)).intValue();
                                     yTemp = ((Integer) getGrid().getCell(i, j + 1).jcoordLTLGrid.elementAt(k)).intValue();
 
-                                    saveMortality[p][xTemp][yTemp][simulation.dt] += planktonList[p].mortalityRate[i][j + 1] / (float) nbCellsTemp;
+                                    saveMortality[p][xTemp][yTemp][getSimulation().dt] += planktonList[p].mortalityRate[i][j + 1] / (float) nbCellsTemp;
                                 }
                             }
                         }

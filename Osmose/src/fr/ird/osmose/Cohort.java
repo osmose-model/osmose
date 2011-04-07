@@ -22,6 +22,8 @@ public class Cohort extends ArrayList<School> {
      * * Logs *
      * ********
      * 2011/04/07 phv
+     * Osmose and Simulation are called with Osmose.getInstance()
+     * and Osmose.getInstance().getSimulation()
      * Deleted vector presentSchools. Cohort now extends ArrayList<School>
      * Deleted variable nbSchools. Replaced by this.size()
      * ***
@@ -48,11 +50,11 @@ public class Cohort extends ArrayList<School> {
         this.numSerie = species.numSerie;
         this.ageNbDt = ageNbDt;
 
-        outOfZoneMortality = new float[species.simulation.nbDt];
-        outOfZoneCohort = new boolean[species.simulation.nbDt];
-        outOfZonePercentage = new float[species.simulation.nbDt];
+        outOfZoneMortality = new float[getSimulation().nbDt];
+        outOfZoneCohort = new boolean[getSimulation().nbDt];
+        outOfZonePercentage = new float[getSimulation().nbDt];
 
-        for (int i = 0; i < species.simulation.nbDt; i++) {
+        for (int i = 0; i < getSimulation().nbDt; i++) {
             // initialization by default
             outOfZoneMortality[i] = 0;
             outOfZoneCohort[i] = false;
@@ -63,9 +65,9 @@ public class Cohort extends ArrayList<School> {
         this.oldAbundance = abundance;
         this.biomass = biomass;
 
-//		nbSchools = species.simulation.osmose.nbSchools[numSerie];
+//		nbSchools = getOsmose().nbSchools[numSerie];
 
-        int nbSchools = (int) (1 + 10 / (species.longevity + 1)) * species.simulation.osmose.nbSchools[numSerie];
+        int nbSchools = (int) (1 + 10 / (species.longevity + 1)) * getOsmose().nbSchools[numSerie];
         ensureCapacity(nbSchools);
         for (int i = 0; i < nbSchools; i++) {
             add(new School(this, Math.round(((double) abundance) / nbSchools), iniLength, iniWeight));
@@ -74,6 +76,14 @@ public class Cohort extends ArrayList<School> {
         int surplus = (int) abundance % nbSchools;
         get(0).setAbundance(get(0).getAbundance() + surplus);
         calculMeanGrowth();
+    }
+
+    private Osmose getOsmose() {
+        return Osmose.getInstance();
+    }
+
+    private Simulation getSimulation() {
+        return getOsmose().getSimulation();
     }
 
     public void surviveD(float D) {
@@ -114,7 +124,7 @@ public class Cohort extends ArrayList<School> {
         //REMOVING DEAD SCHOOLS FROM VECTBANCS and VECTPRESENTSCHOOLS
         for (int i = size() - 1; i >= 0; i--) {
             if (((School) get(i)).willDisappear()) {
-                if (!(outOfZoneCohort[species.simulation.dt]))// cohorts in the area during the time step
+                if (!(outOfZoneCohort[getSimulation().dt]))// cohorts in the area during the time step
                 {
                     ((School) get(i)).getCell().remove(get(i));
                 }
@@ -150,25 +160,25 @@ public class Cohort extends ArrayList<School> {
         for (int k = 0; k < nbSchoolsCatchable; k++) {
             School schoolCatchk = (School) schoolsCatchable.elementAt(k);
             // Vector of the length of fish of schools caught -> indicator Morgane 07-2004
-            species.simulation.tabSizeCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] = schoolCatchk.getLength();
+            getSimulation().tabSizeCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] = schoolCatchk.getLength();
 
             if (schoolCatchk.getAbundance() > Math.round(((double) nbDeadFfTheo) / nbSchoolsCatchable)) //case: enough fish in the school
             {
                 Yi += Math.round(((double) nbDeadFfTheo) / nbSchoolsCatchable) * ((double) schoolCatchk.getWeight()) / 1000000.;
                 schoolCatchk.setAbundance(schoolCatchk.getAbundance() - Math.round(((double) nbDeadFfTheo) / nbSchoolsCatchable));
                 // Vector of the number of fish of schools caught  -> indicator  MORGANE 07-2004
-                species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) Math.round(((double) nbDeadFfTheo) / nbSchoolsCatchable);
-                if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                    species.simulation.tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * Math.round(((float) nbDeadFfTheo) / nbSchoolsCatchable) * ((float) schoolCatchk.getWeight()) / 1000000f;
+                getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) Math.round(((double) nbDeadFfTheo) / nbSchoolsCatchable);
+                if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                    getSimulation().tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * Math.round(((float) nbDeadFfTheo) / nbSchoolsCatchable) * ((float) schoolCatchk.getWeight()) / 1000000f;
                 }
             } else //case: not enough fish in the school
             {
                 nbSurplusDead += Math.round(((double) nbDeadFfTheo) / nbSchoolsCatchable) - schoolCatchk.getAbundance();
                 Yi += ((double) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000.;
                 // Vector of the number of fish of schools caught   -> indicator   MORGANE 07-2004
-                species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) schoolCatchk.getAbundance();
-                if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                    species.simulation.tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * ((float) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000f;
+                getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) schoolCatchk.getAbundance();
+                if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                    getSimulation().tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * ((float) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000f;
                 }
                 schoolCatchk.setAbundance(0);
                 schoolCatchk.tagForRemoval();
@@ -182,18 +192,18 @@ public class Cohort extends ArrayList<School> {
                 ((School) schoolsCatchable.elementAt(index)).setAbundance(((School) schoolsCatchable.elementAt(index)).getAbundance() - nbSurplusDead);
                 Yi += ((double) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000.;
                 //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                species.simulation.tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) nbSurplusDead;
-                if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                    species.simulation.tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
+                getSimulation().tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) nbSurplusDead;
+                if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                    getSimulation().tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
                 }
                 nbSurplusDead = 0;
             } else {
                 nbSurplusDead -= ((School) schoolsCatchable.elementAt(index)).getAbundance();
                 Yi += ((double) ((School) schoolsCatchable.elementAt(index)).getAbundance()) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000.;
                 //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                species.simulation.tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) ((School) schoolsCatchable.elementAt(index)).getAbundance();
-                if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                    species.simulation.tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) ((School) schoolsCatchable.elementAt(index)).getAbundance()) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
+                getSimulation().tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) ((School) schoolsCatchable.elementAt(index)).getAbundance();
+                if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                    getSimulation().tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) ((School) schoolsCatchable.elementAt(index)).getAbundance()) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
                 }
                 ((School) schoolsCatchable.elementAt(index)).tagForRemoval();
                 ((School) schoolsCatchable.elementAt(index)).setAbundance(0);
@@ -205,7 +215,7 @@ public class Cohort extends ArrayList<School> {
         for (int k = schoolsCatchable.size() - 1; k >= 0; k--) {
             School schoolCatchk = (School) schoolsCatchable.elementAt(k);
             if (schoolCatchk.willDisappear()) {
-                if (!outOfZoneCohort[species.simulation.dt]) {
+                if (!outOfZoneCohort[getSimulation().dt]) {
                     schoolCatchk.getCell().remove(schoolCatchk);
                 }
                 remove(schoolCatchk);
@@ -227,11 +237,11 @@ public class Cohort extends ArrayList<School> {
         nbDeadFf = oldAbdCatch1 - abundance;
 
         // save of annual yield
-        if ((species.simulation.t) >= species.simulation.osmose.timeSeriesStart) {
-            species.simulation.savingYield[species.number - 1] += Yi;
+        if ((getSimulation().t) >= getOsmose().timeSeriesStart) {
+            getSimulation().savingYield[species.number - 1] += Yi;
             for (int k = 0; k < nbSchoolsCatchable; k++) //MORGANE 07-2004	    // Vector of the number of fish of schools caught
             {
-                species.simulation.savingNbYield[species.number - 1] += species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]];
+                getSimulation().savingNbYield[species.number - 1] += getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]];
             }
         }
         return nbSurplusDead;
@@ -249,22 +259,22 @@ public class Cohort extends ArrayList<School> {
             for (int k = 0; k < nbSchoolsCatchable; k++) {
                 School schoolCatchk = (School) schoolsCatchable.elementAt(k);
                 //MORGANE 07-2004	    // Vector of the length of fish of schools caught
-                species.simulation.tabSizeCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] = schoolCatchk.getLength();
+                getSimulation().tabSizeCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] = schoolCatchk.getLength();
                 if (schoolCatchk.getAbundance() > Math.round(((double) nbDeadFf) / nbSchoolsCatchable)) {
                     Yi += Math.round(((double) nbDeadFf) / nbSchoolsCatchable) * ((double) schoolCatchk.getWeight()) / 1000000.;
                     schoolCatchk.setAbundance(schoolCatchk.getAbundance() - Math.round(((double) nbDeadFf) / nbSchoolsCatchable));
                     //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                    species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) (nbDeadFf / nbSchoolsCatchable);
-                    if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                        species.simulation.tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * Math.round(((float) nbDeadFf) / nbSchoolsCatchable) * ((float) schoolCatchk.getWeight()) / 1000000f;
+                    getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) (nbDeadFf / nbSchoolsCatchable);
+                    if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                        getSimulation().tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * Math.round(((float) nbDeadFf) / nbSchoolsCatchable) * ((float) schoolCatchk.getWeight()) / 1000000f;
                     }
                 } else {
                     nbSurplusDead += Math.round(((double) nbDeadFf) / nbSchoolsCatchable) - schoolCatchk.getAbundance();
                     Yi += ((double) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000.;
                     //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                    species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) schoolCatchk.getAbundance();
-                    if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                        species.simulation.tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * ((float) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000f;
+                    getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) schoolCatchk.getAbundance();
+                    if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                        getSimulation().tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * ((float) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000f;
                     }
                     schoolCatchk.setAbundance(0);
                     schoolCatchk.tagForRemoval();
@@ -277,9 +287,9 @@ public class Cohort extends ArrayList<School> {
                     ((School) schoolsCatchable.elementAt(index)).setAbundance(((School) schoolsCatchable.elementAt(index)).getAbundance() - nbSurplusDead);
                     Yi += ((double) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000.;
                     //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                    species.simulation.tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) nbSurplusDead;
-                    if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                        species.simulation.tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
+                    getSimulation().tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) nbSurplusDead;
+                    if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                        getSimulation().tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
                     }
                     nbSurplusDead = 0;
                 } else {
@@ -287,8 +297,8 @@ public class Cohort extends ArrayList<School> {
                     Yi += ((double) ((School) schoolsCatchable.elementAt(index)).getAbundance())
                             * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000.;
                     //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                    species.simulation.tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) ((School) schoolsCatchable.elementAt(index)).getAbundance();
-                    species.simulation.tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) ((School) schoolsCatchable.elementAt(index)).getAbundance())
+                    getSimulation().tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) ((School) schoolsCatchable.elementAt(index)).getAbundance();
+                    getSimulation().tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) ((School) schoolsCatchable.elementAt(index)).getAbundance())
                             * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
                     ((School) schoolsCatchable.elementAt(index)).tagForRemoval();
                     ((School) schoolsCatchable.elementAt(index)).setAbundance(0);
@@ -299,7 +309,7 @@ public class Cohort extends ArrayList<School> {
             for (int k = schoolsCatchable.size() - 1; k >= 0; k--) {
                 School schoolCatchk = (School) schoolsCatchable.elementAt(k);
                 if (schoolCatchk.willDisappear()) {
-                    if (!outOfZoneCohort[species.simulation.dt]) {
+                    if (!outOfZoneCohort[getSimulation().dt]) {
                         schoolCatchk.getCell().remove(schoolCatchk);
                     }
                     remove(schoolCatchk);
@@ -314,11 +324,11 @@ public class Cohort extends ArrayList<School> {
                 ((School) schoolsCatchable.elementAt(i)).setBiomass(((double) ((School) schoolsCatchable.elementAt(i)).getAbundance()) * ((School) schoolsCatchable.elementAt(i)).getWeight() / 1000000.);
             }
         }
-        if ((species.simulation.t) >= species.simulation.osmose.timeSeriesStart) {
-            species.simulation.savingYield[species.number - 1] += Yi;
+        if ((getSimulation().t) >= getOsmose().timeSeriesStart) {
+            getSimulation().savingYield[species.number - 1] += Yi;
             for (int k = 0; k < nbSchoolsCatchable; k++) //MORGANE 07-2004	    // Vector of the number of fish of schools caught
             {
-                species.simulation.savingNbYield[species.number - 1] += species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]];
+                getSimulation().savingNbYield[species.number - 1] += getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]];
             }
 
         }
@@ -335,24 +345,24 @@ public class Cohort extends ArrayList<School> {
             for (int k = 0; k < nbSchoolsCatchable; k++) {
                 School schoolCatchk = (School) schoolsCatchable.elementAt(k);
                 //MORGANE 07-2004	    // Vector of the length of fish of schools caught
-                species.simulation.tabSizeCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] = schoolCatchk.getLength();
+                getSimulation().tabSizeCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] = schoolCatchk.getLength();
                 if (schoolCatchk.getAbundance() > Math.round(((double) abdToCatch) / nbSchoolsCatchable)) {
                     schoolCatchk.setAbundance(schoolCatchk.getAbundance() - Math.round(((double) abdToCatch) / nbSchoolsCatchable));
                     Yi += Math.round(((double) abdToCatch) / nbSchoolsCatchable)
                             * ((double) schoolCatchk.getWeight()) / 1000000.;
                     //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                    species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) abdToCatch / nbSchoolsCatchable;
-                    if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                        species.simulation.tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * Math.round(((float) abdToCatch) / nbSchoolsCatchable)
+                    getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) abdToCatch / nbSchoolsCatchable;
+                    if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                        getSimulation().tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * Math.round(((float) abdToCatch) / nbSchoolsCatchable)
                                 * ((float) schoolCatchk.getWeight()) / 1000000f;
                     }
                 } else {
                     nbSurplusDead += Math.round(((double) abdToCatch) / nbSchoolsCatchable) - schoolCatchk.getAbundance();
                     Yi += ((double) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000.;
                     //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                    species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) schoolCatchk.getAbundance();
-                    if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                        species.simulation.tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * ((float) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000f;
+                    getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]] += (float) schoolCatchk.getAbundance();
+                    if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                        getSimulation().tabTLCatch[species.number - 1] += schoolCatchk.getTrophicLevel()[ageNbDt] * ((float) schoolCatchk.getAbundance()) * schoolCatchk.getWeight() / 1000000f;
                     }
                     schoolCatchk.setAbundance(0);
                     schoolCatchk.tagForRemoval();
@@ -365,9 +375,9 @@ public class Cohort extends ArrayList<School> {
                     ((School) schoolsCatchable.elementAt(index)).setAbundance(((School) schoolsCatchable.elementAt(index)).getAbundance() - nbSurplusDead);
                     Yi += ((double) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000.;
                     //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                    species.simulation.tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) nbSurplusDead;
-                    if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                        species.simulation.tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
+                    getSimulation().tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) nbSurplusDead;
+                    if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                        getSimulation().tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) nbSurplusDead) * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
                     }
                     nbSurplusDead = 0;
                 } else {
@@ -375,9 +385,9 @@ public class Cohort extends ArrayList<School> {
                     Yi += ((double) ((School) schoolsCatchable.elementAt(index)).getAbundance())
                             * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000.;
                     //MORGANE 07-2004	    // Vector of the number of fish of schools caught
-                    species.simulation.tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) ((School) schoolsCatchable.elementAt(index)).getAbundance();
-                    if ((species.simulation.TLoutput) && (species.simulation.t >= species.simulation.osmose.timeSeriesStart)) {
-                        species.simulation.tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) ((School) schoolsCatchable.elementAt(index)).getAbundance())
+                    getSimulation().tabNbCatch[species.number - 1][index + species.cumulCatch[ageNbDt - 1]] += (float) ((School) schoolsCatchable.elementAt(index)).getAbundance();
+                    if ((getSimulation().TLoutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                        getSimulation().tabTLCatch[species.number - 1] += ((School) schoolsCatchable.elementAt(index)).getTrophicLevel()[ageNbDt] * ((float) ((School) schoolsCatchable.elementAt(index)).getAbundance())
                                 * ((School) schoolsCatchable.elementAt(index)).getWeight() / 1000000f;
                     }
                     ((School) schoolsCatchable.elementAt(index)).tagForRemoval();
@@ -389,7 +399,7 @@ public class Cohort extends ArrayList<School> {
             for (int k = schoolsCatchable.size() - 1; k >= 0; k--) {
                 School schoolCatchk = (School) schoolsCatchable.elementAt(k);
                 if (schoolCatchk.willDisappear()) {
-                    if (!outOfZoneCohort[species.simulation.dt]) {
+                    if (!outOfZoneCohort[getSimulation().dt]) {
                         schoolCatchk.getCell().remove(schoolCatchk);
                     }
                     remove(schoolCatchk);
@@ -403,12 +413,12 @@ public class Cohort extends ArrayList<School> {
             }
             nbDeadFf += abdToCatch;
         }
-        if ((species.simulation.t) >= species.simulation.osmose.timeSeriesStart) {
-            species.simulation.savingYield[species.number - 1] += Yi;                                       // ********saving of indicators to be done
+        if ((getSimulation().t) >= getOsmose().timeSeriesStart) {
+            getSimulation().savingYield[species.number - 1] += Yi;                                       // ********saving of indicators to be done
 
             for (int k = 0; k < nbSchoolsCatchable; k++) //MORGANE 07-2004	    // Vector of the number of fish of schools caught
             {
-                species.simulation.savingNbYield[species.number - 1] += species.simulation.tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]];
+                getSimulation().savingNbYield[species.number - 1] += getSimulation().tabNbCatch[species.number - 1][k + species.cumulCatch[ageNbDt - 1]];
             }
 
         }

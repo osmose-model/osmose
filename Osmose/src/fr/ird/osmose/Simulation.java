@@ -19,7 +19,14 @@ import java.util.*;
 
 public class Simulation {
 
-    Osmose osmose;
+    /*
+     * ********
+     * * Logs *
+     * ********
+     * 2011/04/07 phv
+     * Deleted variable Osmose. Must be called using Osmose.getInstance()
+     */
+
     Coupling couple;
     int numSerie, nbDt, savingDt;
     boolean randomDistribution = true;
@@ -79,7 +86,7 @@ public class Simulation {
     boolean outputClass0;
     boolean calibration;
 
-    public Simulation(Osmose osmose, int nbDt, int savingDt, int nbSpecies, String[] nameSpecies,
+    public Simulation(int nbDt, int savingDt, int nbSpecies, String[] nameSpecies,
             float[] D, float[] F, float[] longevity, float[] lInf, float[] K, float[] t0, float[] c, float[] bPower,
             float[] alpha, float[] sizeMat, int[] nbStages, float[][] sizeFeeding, float[] recruitAge, float[] recruitSize,
             float[][] seasonFishing, String recruitMetric, float[][] seasonSpawning, float[] supAgeOfClass0,
@@ -94,9 +101,8 @@ public class Simulation {
         t = 0;
         dt = 0;
         dtCount = 1;
-        osmose.simInitialized = true;
-        this.osmose = osmose;
-        this.numSerie = osmose.numSerie;
+        getOsmose().simInitialized = true;
+        this.numSerie = getOsmose().numSerie;
         this.nbDt = nbDt;
         this.savingDt = savingDt;
         this.nbSpecies = nbSpecies;
@@ -121,7 +127,7 @@ public class Simulation {
         //CREATION of the SPECIES
         species = new Species[nbSpecies];
         for (int i = 0; i < nbSpecies; i++) {
-            species[i] = new Species(this, i + 1, nameSpecies[i], D[i], F[i], longevity[i], lInf[i], K[i], t0[i],
+            species[i] = new Species(i + 1, nameSpecies[i], D[i], F[i], longevity[i], lInf[i], K[i], t0[i],
                     c[i], bPower[i], alpha[i], sizeMat[i], nbStages[i], sizeFeeding[i], recruitAge[i], recruitSize[i],
                     seasonFishing[i], seasonSpawning[i], supAgeOfClass0[i], larvalSurvival[i],
                     sexRatio[i], eggSize[i], eggWeight[i], growthAgeThreshold[i],
@@ -138,11 +144,11 @@ public class Simulation {
         }
 
         //INITIALISATION of SPECIES ABD ACCORDING TO SIZE SPECTRUM
-        if (osmose.calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {
+        if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {
             iniBySpeciesBiomass();
-        } else if (osmose.calibrationMethod[numSerie].equalsIgnoreCase("spectrum")) {
+        } else if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("spectrum")) {
             iniBySizeSpectrum();
-        } else if (osmose.calibrationMethod[numSerie].equalsIgnoreCase("random")) {
+        } else if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("random")) {
             iniRandomly();
         }
 
@@ -161,7 +167,7 @@ public class Simulation {
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
-                        ((School) species[i].tabCohorts[j].get(k)).rankSize(osmose.tabSizes, osmose.spectrumMaxSize);
+                        ((School) species[i].tabCohorts[j].get(k)).rankSize(getOsmose().tabSizes, getOsmose().spectrumMaxSize);
                     }
                 }
             }
@@ -170,6 +176,10 @@ public class Simulation {
 
     private Grid getGrid() {
         return Osmose.getInstance().getGrid();
+    }
+
+    private Osmose getOsmose() {
+        return Osmose.getInstance();
     }
 
     public void step() {
@@ -181,15 +191,15 @@ public class Simulation {
         }
 
         // calculation of relative size of MPA
-        if ((osmose.thereIsMPATab[numSerie]) && (t == osmose.MPAtStartTab[numSerie])) {
-            RS = osmose.tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
-            for (int index = 0; index < osmose.tabMPAiMatrix[numSerie].length; index++) {
-                getGrid().getCell(osmose.tabMPAiMatrix[numSerie][index], osmose.tabMPAjMatrix[numSerie][index]).setMPA(true);
+        if ((getOsmose().thereIsMPATab[numSerie]) && (t == getOsmose().MPAtStartTab[numSerie])) {
+            RS = getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
+            for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
+                getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(true);
             }
-        } else if ((!osmose.thereIsMPATab[numSerie]) || (t > osmose.MPAtEndTab[numSerie])) {
+        } else if ((!getOsmose().thereIsMPATab[numSerie]) || (t > getOsmose().MPAtEndTab[numSerie])) {
             RS = 0;
-            for (int index = 0; index < osmose.tabMPAiMatrix[numSerie].length; index++) {
-                getGrid().getCell(osmose.tabMPAiMatrix[numSerie][index], osmose.tabMPAjMatrix[numSerie][index]).setMPA(false);
+            for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
+                getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(false);
             }
         }
 
@@ -211,7 +221,7 @@ public class Simulation {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
                         ((School) species[i].tabCohorts[j].get(k)).updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
-                        ((School) species[i].tabCohorts[j].get(k)).updateAccessStage(osmose.accessStageThreshold[i], osmose.nbAccessStage[i]);
+                        ((School) species[i].tabCohorts[j].get(k)).updateAccessStage(getOsmose().accessStageThreshold[i], getOsmose().nbAccessStage[i]);
                         ((School) species[i].tabCohorts[j].get(k)).updateDietOutputStage(species[i].dietStagesTab, species[i].nbDietStages);
                     }
                 }
@@ -263,7 +273,7 @@ public class Simulation {
             randomOrder();
             rankSchoolsSizes();
 
-            if (t >= osmose.timeSeriesStart) // save fish biomass before predation process for diets data
+            if (t >= getOsmose().timeSeriesStart) // save fish biomass before predation process for diets data
             {
                 for (int i = 0; i < nbSpecies; i++) {
                     for (int j = 0; j < species[i].tabCohorts.length; j++) {
@@ -351,7 +361,7 @@ public class Simulation {
 
             //update spectra
             if (sizeSpectrumPerSpeOutput) {
-                for (int i = 0; i < osmose.nbSizeClass; i++) {
+                for (int i = 0; i < getOsmose().nbSizeClass; i++) {
                     //spectrumAbd[i]=0;
                     //spectrumBiom[i]=0;
                     for (int j = 0; j < species.length; j++) {
@@ -364,10 +374,10 @@ public class Simulation {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
                         if (sizeSpectrumPerSpeOutput) {
-                            ((School) species[i].tabCohorts[j].get(k)).rankSize(osmose.tabSizes, osmose.spectrumMaxSize);
+                            ((School) species[i].tabCohorts[j].get(k)).rankSize(getOsmose().tabSizes, getOsmose().spectrumMaxSize);
                         }
-                        if ((t >= osmose.timeSeriesStart) && ((TLoutput) || (TLDistriboutput))) {
-                            ((School) species[i].tabCohorts[j].get(k)).rankTL(osmose.tabTL);
+                        if ((t >= getOsmose().timeSeriesStart) && ((TLoutput) || (TLDistriboutput))) {
+                            ((School) species[i].tabCohorts[j].get(k)).rankTL(getOsmose().tabTL);
                         }
                     }
                 }
@@ -391,7 +401,7 @@ public class Simulation {
                 species[i].reproduce();
             }
 
-            if (t >= osmose.timeSeriesStart) {
+            if (t >= getOsmose().timeSeriesStart) {
                 dtCount++; // for saving
             }
             dt++;
@@ -411,19 +421,19 @@ public class Simulation {
         abdIniMin = 100;
         //a=-5.8;
         //b=35.5;
-        a = osmose.SSslope[numSerie];
-        b = osmose.SSintercept[numSerie];
+        a = getOsmose().SSslope[numSerie];
+        b = getOsmose().SSintercept[numSerie];
         //Calculation of abd lacking in each size class
         //calculation apart for first size class because minSize=0.05 (and not 0)
         tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));
         for (int i = 1; i < 20; i++) {
-            tempSpectrumAbd[i] = Math.round(Math.pow((i * osmose.classRange) + 5., a) * Math.exp(b));
+            tempSpectrumAbd[i] = Math.round(Math.pow((i * getOsmose().classRange) + 5., a) * Math.exp(b));
         }
         //tabSizes10[i]+5 is mean length of [tabSizes10[i],tabSizes10[i+1][
         //Sort the Lmax of each species in each size class
         for (int i = 0; i < nbSpeciesIni; i++) {
             int index1 = tempSpectrumAbd.length - 1;
-            while (species[i].tabMeanLength[species[i].nbCohorts - 1] < (index1 * osmose.classRange)) {
+            while (species[i].tabMeanLength[species[i].nbCohorts - 1] < (index1 * getOsmose().classRange)) {
                 index1--;
             }
             specInSizeClass10[index1].addElement(species[i]);
@@ -496,7 +506,7 @@ public class Simulation {
             speci.abundance = 0;
             speci.biomass = 0;
             double sumExp = 0;
-            abdIni = osmose.spBiomIniTab[numSerie][i] / (speci.tabMeanWeight[(int) Math.round(speci.nbCohorts / 2)] / 1000000);
+            abdIni = getOsmose().spBiomIniTab[numSerie][i] / (speci.tabMeanWeight[(int) Math.round(speci.nbCohorts / 2)] / 1000000);
 
             for (int j = speci.indexAgeClass0; j < speci.nbCohorts; j++) {
                 sumExp += Math.exp(-(j * (speci.D + speci.F + 0.5f) / (float) nbDt)); //0.5 = approximation of average natural mortality (by predation, senecence...)
@@ -520,7 +530,7 @@ public class Simulation {
                     speci.biomass += speci.tabBiomIni[j];
                 }
             }
-            correctingFactor = (float) (osmose.spBiomIniTab[numSerie][i] / speci.biomass);
+            correctingFactor = (float) (getOsmose().spBiomIniTab[numSerie][i] / speci.biomass);
 
             // we make corrections on initial abundance to fit the input biomass
             speci.biomass = 0;
@@ -551,9 +561,9 @@ public class Simulation {
     }
 
     public void iniPlanktonField(Simulation simu, boolean isForcing) {
-        couple = new Coupling(simu, isForcing);
-        couple.iniCouplingReading(osmose.planktonStructureFileNameTab[numSerie]);
-        couple.readInputPlanktonFiles(osmose.planktonFileNameTab[numSerie]);
+        couple = new Coupling(isForcing);
+        couple.iniCouplingReading(getOsmose().planktonStructureFileNameTab[numSerie]);
+        couple.readInputPlanktonFiles(getOsmose().planktonFileNameTab[numSerie]);
         couple.initPlanktonMap();
     }
 
@@ -665,9 +675,9 @@ public class Simulation {
     {
         if (randomDistribution) {
             for (int i = 0; i < species.length; i++) {
-                Vector vectCells = new Vector(osmose.randomAreaCoordi[i].length);
-                for (int m = 0; m < osmose.randomAreaCoordi[i].length; m++) {
-                    vectCells.addElement(getGrid().getCell(osmose.randomAreaCoordi[i][m], osmose.randomAreaCoordj[i][m]));
+                Vector vectCells = new Vector(getOsmose().randomAreaCoordi[i].length);
+                for (int m = 0; m < getOsmose().randomAreaCoordi[i].length; m++) {
+                    vectCells.addElement(getGrid().getCell(getOsmose().randomAreaCoordi[i][m], getOsmose().randomAreaCoordj[i][m]));
                 }
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
@@ -682,11 +692,11 @@ public class Simulation {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     if (!species[i].tabCohorts[j].outOfZoneCohort[0]) // 0=at the first time step
                     {
-                        Vector vectCells = new Vector(osmose.mapCoordi[osmose.numMap[i][j][0]].length);
+                        Vector vectCells = new Vector(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]].length);
                         tempMaxProbaPresence = 0;
-                        for (int m = 0; m < osmose.mapCoordi[osmose.numMap[i][j][0]].length; m++) {
-                            vectCells.addElement(getGrid().getCell(osmose.mapCoordi[osmose.numMap[i][j][0]][m], osmose.mapCoordj[osmose.numMap[i][j][0]][m]));
-                            tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][j][0]][m]));
+                        for (int m = 0; m < getOsmose().mapCoordi[getOsmose().numMap[i][j][0]].length; m++) {
+                            vectCells.addElement(getGrid().getCell(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]][m], getOsmose().mapCoordj[getOsmose().numMap[i][j][0]][m]));
+                            tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][0]][m]));
                         }
                         for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
                             School thisSchool = (School) species[i].tabCohorts[j].get(k);
@@ -698,7 +708,7 @@ public class Simulation {
                             School thisSchool = (School) species[i].tabCohorts[j].get(k);
                             thisSchool.randomDeal(vectCells);
                             thisSchool.setOutOfZoneSchool(false);
-                            while ((float) osmose.mapProbaPresence[osmose.numMap[i][j][0]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
+                            while ((float) getOsmose().mapProbaPresence[getOsmose().numMap[i][j][0]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
                                 thisSchool.randomDeal(vectCells);
                             }
                             thisSchool.communicatePosition();
@@ -713,9 +723,9 @@ public class Simulation {
         if (randomDistribution) {
             //distribute coh 0 & commPosition for 0 only, the others stay in the same cell
             for (int i = 0; i < species.length; i++) {
-                Vector vectCells = new Vector(osmose.randomAreaCoordi[i].length);
-                for (int m = 0; m < osmose.randomAreaCoordi[i].length; m++) {
-                    vectCells.addElement(getGrid().getCell(osmose.randomAreaCoordi[i][m], osmose.randomAreaCoordj[i][m]));
+                Vector vectCells = new Vector(getOsmose().randomAreaCoordi[i].length);
+                for (int m = 0; m < getOsmose().randomAreaCoordi[i].length; m++) {
+                    vectCells.addElement(getGrid().getCell(getOsmose().randomAreaCoordi[i][m], getOsmose().randomAreaCoordj[i][m]));
                 }
                 for (int k = 0; k < species[i].tabCohorts[0].size(); k++) {
                     ((School) species[i].tabCohorts[0].get(k)).randomDeal(vectCells);
@@ -737,9 +747,9 @@ public class Simulation {
                 //		{
                 Vector vectCellsCoh0 = new Vector();
                 tempMaxProbaPresence = 0;
-                for (int j = 0; j < osmose.mapCoordi[(osmose.numMap[i][0][dt])].length; j++) {
-                    vectCellsCoh0.addElement(getGrid().getCell(osmose.mapCoordi[(osmose.numMap[i][0][dt])][j], osmose.mapCoordj[(osmose.numMap[i][0][dt])][j]));
-                    tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][0][dt]][j]));
+                for (int j = 0; j < getOsmose().mapCoordi[(getOsmose().numMap[i][0][dt])].length; j++) {
+                    vectCellsCoh0.addElement(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][0][dt])][j], getOsmose().mapCoordj[(getOsmose().numMap[i][0][dt])][j]));
+                    tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][0][dt]][j]));
                 }
 
 
@@ -751,7 +761,7 @@ public class Simulation {
                     School thisSchool = (School) species[i].tabCohorts[0].get(k);
                     thisSchool.randomDeal(vectCellsCoh0);
                     thisSchool.setOutOfZoneSchool(false);
-                    while ((float) osmose.mapProbaPresence[osmose.numMap[i][0][dt]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
+                    while ((float) getOsmose().mapProbaPresence[getOsmose().numMap[i][0][dt]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
                         thisSchool.randomDeal(vectCellsCoh0);
                     }
                     thisSchool.communicatePosition();
@@ -769,7 +779,7 @@ public class Simulation {
                     }
 
                     boolean idem = false;
-                    if (osmose.numMap[i][j][dt] == osmose.numMap[i][j - 1][oldTime]) {
+                    if (getOsmose().numMap[i][j][dt] == getOsmose().numMap[i][j - 1][oldTime]) {
                         idem = true;
                     }
 
@@ -779,9 +789,9 @@ public class Simulation {
                         //		{
                         Vector vectCellsCoh = new Vector();
                         tempMaxProbaPresence = 0;
-                        for (int m = 0; m < osmose.mapCoordi[(osmose.numMap[i][j][dt])].length; m++) {
-                            vectCellsCoh.addElement(getGrid().getCell(osmose.mapCoordi[(osmose.numMap[i][j][dt])][m], osmose.mapCoordj[(osmose.numMap[i][j][dt])][m]));
-                            tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][j][dt]][m]));
+                        for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][dt])].length; m++) {
+                            vectCellsCoh.addElement(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][dt])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][dt])][m]));
+                            tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][dt]][m]));
                         }
                         for (int k = 0; k < species[i].tabCohorts[j].size(); k++) // Loop to initialize outOfZoneSchool= true
                         {
@@ -792,7 +802,7 @@ public class Simulation {
                             School thisSchool = (School) (species[i].tabCohorts[j].get(k));
                             thisSchool.setOutOfZoneSchool(false);
                             thisSchool.randomDeal(vectCellsCoh);
-                            while (osmose.mapProbaPresence[osmose.numMap[i][j][dt]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
+                            while (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][dt]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
                                 thisSchool.randomDeal(vectCellsCoh);
                             }
                             thisSchool.communicatePosition();
@@ -809,7 +819,7 @@ public class Simulation {
 
                                 boolean stillInMap = false;
                                 for (int p = 0; p < thisSchool.getCell().getNbMapsConcerned(); p++) {
-                                    if (((Integer) thisSchool.getCell().numMapsConcerned.elementAt(p)).intValue() == osmose.numMap[i][j][dt]) {
+                                    if (((Integer) thisSchool.getCell().numMapsConcerned.elementAt(p)).intValue() == getOsmose().numMap[i][j][dt]) {
                                         stillInMap = true;
                                     }
                                 }
@@ -817,12 +827,12 @@ public class Simulation {
                                 if (!stillInMap) {
                                     Vector vectCellsCoh = new Vector();
                                     tempMaxProbaPresence = 0;
-                                    for (int m = 0; m < osmose.mapCoordi[(osmose.numMap[i][j][dt])].length; m++) {
-                                        vectCellsCoh.addElement(getGrid().getCell(osmose.mapCoordi[(osmose.numMap[i][j][dt])][m], osmose.mapCoordj[(osmose.numMap[i][j][dt])][m]));
-                                        tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][j][dt]][m]));
+                                    for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][dt])].length; m++) {
+                                        vectCellsCoh.addElement(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][dt])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][dt])][m]));
+                                        tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][dt]][m]));
                                     }
 
-                                    while (osmose.mapProbaPresence[osmose.numMap[i][j][dt]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
+                                    while (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][dt]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
                                         thisSchool.randomDeal(vectCellsCoh);
                                     }
                                 }
@@ -836,8 +846,8 @@ public class Simulation {
     }
 
     public void assessCatchableSchools() {
-        if ((!osmose.thereIsMPATab[numSerie]) || (t < osmose.MPAtStartTab[numSerie])
-                || (t >= osmose.MPAtEndTab[numSerie]))// case where no MPA
+        if ((!getOsmose().thereIsMPATab[numSerie]) || (t < getOsmose().MPAtStartTab[numSerie])
+                || (t >= getOsmose().MPAtEndTab[numSerie]))// case where no MPA
         {
             for (int i = 0; i < species.length; i++) {
                 species[i].nbSchoolsTotCatch = 0;
@@ -869,7 +879,7 @@ public class Simulation {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     Cohort cohij = species[i].tabCohorts[j];
                     cohij.nbSchoolsCatchable = 0;
-                    cohij.schoolsCatchable = new Vector(osmose.nbSchools[numSerie]);
+                    cohij.schoolsCatchable = new Vector(getOsmose().nbSchools[numSerie]);
                     cohij.abundanceCatchable = 0;
                     for (int k = 0; k < cohij.size(); k++) {
                         School schoolk = (School) cohij.get(k);
@@ -994,17 +1004,17 @@ public class Simulation {
             distribTL = new float[species.length][][];
             for (int i = 0; i < species.length; i++) {
                 distribTL[i] = new float[2][];
-                distribTL[i][0] = new float[osmose.nbTLClass];    // age 0
-                distribTL[i][1] = new float[osmose.nbTLClass];    // without age 0
-                for (int j = 0; j < osmose.nbTLClass; j++) {
+                distribTL[i][0] = new float[getOsmose().nbTLClass];    // age 0
+                distribTL[i][1] = new float[getOsmose().nbTLClass];    // without age 0
+                for (int j = 0; j < getOsmose().nbTLClass; j++) {
                     distribTL[i][0][j] = 0;
                     distribTL[i][1][j] = 0;
                 }
             }
         }
         //ORGANIZING SIZE CLASSES of the spectrum at INITIALIZATION
-        //spectrumAbd = new float[osmose.nbSizeClass];
-        //spectrumBiom = new float[osmose.nbSizeClass];
+        //spectrumAbd = new float[getOsmose().nbSizeClass];
+        //spectrumBiom = new float[getOsmose().nbSizeClass];
 
         if (sizeSpectrumPerSpeOutput) {
             spectrumSpeciesAbd = new float[species.length][];
@@ -1012,12 +1022,12 @@ public class Simulation {
             spectrumTemp[0] = new float[species.length][];
             spectrumTemp[1] = new float[species.length][];
             for (int i = 0; i < species.length; i++) {
-                spectrumSpeciesAbd[i] = new float[osmose.nbSizeClass];
-                spectrumTemp[0][i] = new float[osmose.nbSizeClass];
-                spectrumTemp[1][i] = new float[osmose.nbSizeClass];
+                spectrumSpeciesAbd[i] = new float[getOsmose().nbSizeClass];
+                spectrumTemp[0][i] = new float[getOsmose().nbSizeClass];
+                spectrumTemp[1][i] = new float[getOsmose().nbSizeClass];
             }
             //calculation of spectrum values
-            for (int i = 0; i < osmose.nbSizeClass; i++) {
+            for (int i = 0; i < getOsmose().nbSizeClass; i++) {
                 //   spectrumAbd[i]=0;
                 //   spectrumBiom[i]=0;
                 for (int j = 0; j < species.length; j++) {
@@ -1070,7 +1080,7 @@ public class Simulation {
         double biomNo0;
         long abdNo0;
 
-        if (t >= osmose.timeSeriesStart) {
+        if (t >= getOsmose().timeSeriesStart) {
             for (int i = 0; i < species.length; i++) {
                 Species speci = species[i];
 
@@ -1078,7 +1088,7 @@ public class Simulation {
                 biomTemp[i] += speci.biomass;
 
                 if (sizeSpectrumPerSpeOutput) {
-                    for (int j = 0; j < osmose.nbSizeClass; j++) {
+                    for (int j = 0; j < getOsmose().nbSizeClass; j++) {
                         spectrumTemp[0][i][j] += spectrumSpeciesAbd[i][j];
                     }
                 }
@@ -1134,12 +1144,12 @@ public class Simulation {
                     saveMeanTLCatchperTime(timeSaving, tabTLCatch, savingYield);
                     saveMeanTLperAgeperTime(timeSaving, meanTLperAgeTemp, countTemp);
                     /*
-                    if(osmose.TLoutput)
+                    if(getOsmose().TLoutput)
                     {
                     for (int j=0;j<species[i].nbCohorts;j++)
-                    osmose.TLperAgeMatrix[osmose.numSimu][i][j][t-osmose.timeSeriesStart][indexSaving] = meanTLperAgeTemp[i][j]/countTemp[i][j];
+                    getOsmose().TLperAgeMatrix[getOsmose().numSimu][i][j][t-getOsmose().timeSeriesStart][indexSaving] = meanTLperAgeTemp[i][j]/countTemp[i][j];
                     }
-                    if(osmose.TLoutput)
+                    if(getOsmose().TLoutput)
                     {
                     for (int j=0;j<species[i].nbCohorts;j++)
                     {
@@ -1166,13 +1176,13 @@ public class Simulation {
                 }
                 if (calibration) {
                     for (int i = 0; i < species.length; i++) {
-                        osmose.BIOMQuadri[osmose.numSimu][i][0][t - osmose.timeSeriesStart][indexSaving] = (float) biomTempWithout0[i] / savingDt;
-                        osmose.BIOMQuadri[osmose.numSimu][i][1][t - osmose.timeSeriesStart][indexSaving] = (float) biomTemp[i] / savingDt;
+                        getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][t - getOsmose().timeSeriesStart][indexSaving] = (float) biomTempWithout0[i] / savingDt;
+                        getOsmose().BIOMQuadri[getOsmose().numSimu][i][1][t - getOsmose().timeSeriesStart][indexSaving] = (float) biomTemp[i] / savingDt;
                     }
                 }
                 for (int i = species.length; i < species.length + couple.nbPlankton; i++) {
                     if (calibration) {
-                        osmose.BIOMQuadri[osmose.numSimu][i][0][t - osmose.timeSeriesStart][indexSaving] = (float) biomPerStage[i][0] / savingDt;
+                        getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][t - getOsmose().timeSeriesStart][indexSaving] = (float) biomPerStage[i][0] / savingDt;
                     }
                     biomPerStage[i][0] = 0;
                 }
@@ -1217,13 +1227,13 @@ public class Simulation {
                         }
                     }
                     if (TLDistriboutput) {
-                        for (int j = 0; j < osmose.nbTLClass; j++) {
+                        for (int j = 0; j < getOsmose().nbTLClass; j++) {
                             distribTL[i][0][j] = 0;
                             distribTL[i][1][j] = 0;
                         }
                     }
                     if (sizeSpectrumPerSpeOutput) {
-                        for (int j = 0; j < osmose.nbSizeClass; j++) {
+                        for (int j = 0; j < getOsmose().nbSizeClass; j++) {
                             spectrumTemp[0][i][j] = 0;
                             spectrumTemp[1][i][j] = 0;
                         }
@@ -1239,8 +1249,8 @@ public class Simulation {
     public void initPredatorPressureFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String dietFile = osmose.outputFileNameTab[numSerie] + "_predatorPressureMatrix_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Diets");
+        String dietFile = getOsmose().outputFileNameTab[numSerie] + "_predatorPressureMatrix_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
         targetPath.mkdirs();
 
         try {
@@ -1278,8 +1288,8 @@ public class Simulation {
     public void initDietFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String dietFile = osmose.outputFileNameTab[numSerie] + "_dietMatrix_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Diets");
+        String dietFile = getOsmose().outputFileNameTab[numSerie] + "_dietMatrix_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
         targetPath.mkdirs();
 
         try {
@@ -1317,8 +1327,8 @@ public class Simulation {
     public void savePredatorPressureperTime(float time, float[][][][] diets, double[][] biom) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String dietFile = osmose.outputFileNameTab[numSerie] + "_predatorPressureMatrix_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Diets");
+        String dietFile = getOsmose().outputFileNameTab[numSerie] + "_predatorPressureMatrix_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
         targetPath.mkdirs();
 
         try {
@@ -1376,8 +1386,8 @@ public class Simulation {
     public void saveDietperTime(float time, float[][][][] diets, long[][] nbStomachs) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String dietFile = osmose.outputFileNameTab[numSerie] + "_dietMatrix_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Diets");
+        String dietFile = getOsmose().outputFileNameTab[numSerie] + "_dietMatrix_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
         targetPath.mkdirs();
 
         try {
@@ -1441,8 +1451,8 @@ public class Simulation {
     public void initBiomFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String biomFile = osmose.outputFileNameTab[numSerie] + "_biomass_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String biomFile = getOsmose().outputFileNameTab[numSerie] + "_biomass_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1471,8 +1481,8 @@ public class Simulation {
     public void initBiom0File() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String biomFile = osmose.outputFileNameTab[numSerie] + "_biomassClass0_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String biomFile = getOsmose().outputFileNameTab[numSerie] + "_biomassClass0_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1497,8 +1507,8 @@ public class Simulation {
     public void initAbdFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String abdFile = osmose.outputFileNameTab[numSerie] + "_abundance_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String abdFile = getOsmose().outputFileNameTab[numSerie] + "_abundance_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1522,8 +1532,8 @@ public class Simulation {
     public void initAbd0File() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String abdFile = osmose.outputFileNameTab[numSerie] + "_abundanceClass0_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String abdFile = getOsmose().outputFileNameTab[numSerie] + "_abundanceClass0_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1547,8 +1557,8 @@ public class Simulation {
     public void initYieldFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String yieldFile = osmose.outputFileNameTab[numSerie] + "_yield_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String yieldFile = getOsmose().outputFileNameTab[numSerie] + "_yield_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1572,8 +1582,8 @@ public class Simulation {
     public void initNbYieldFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String nbYieldFile = osmose.outputFileNameTab[numSerie] + "_yieldNB_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String nbYieldFile = getOsmose().outputFileNameTab[numSerie] + "_yieldNB_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1597,8 +1607,8 @@ public class Simulation {
     public void initMeanSizeFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanSizeFile = osmose.outputFileNameTab[numSerie] + "_meanSize_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String meanSizeFile = getOsmose().outputFileNameTab[numSerie] + "_meanSize_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -1622,8 +1632,8 @@ public class Simulation {
     public void initMeanSizeCatchFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanSizeFile = osmose.outputFileNameTab[numSerie] + "_meanSizeCatch_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String meanSizeFile = getOsmose().outputFileNameTab[numSerie] + "_meanSizeCatch_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -1647,8 +1657,8 @@ public class Simulation {
     public void initMeanTLFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanTLFile = osmose.outputFileNameTab[numSerie] + "_meanTL_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Trophic");
+        String meanTLFile = getOsmose().outputFileNameTab[numSerie] + "_meanTL_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
         try {
@@ -1672,8 +1682,8 @@ public class Simulation {
     public void initMeanTLCatchFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanTLFile = osmose.outputFileNameTab[numSerie] + "_meanTLCatch_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Trophic");
+        String meanTLFile = getOsmose().outputFileNameTab[numSerie] + "_meanTLCatch_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
         try {
@@ -1698,8 +1708,8 @@ public class Simulation {
     public void saveABDperTime(float time, long[] A) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String abdFile = osmose.outputFileNameTab[numSerie] + "_abundance_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String abdFile = getOsmose().outputFileNameTab[numSerie] + "_abundance_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1723,8 +1733,8 @@ public class Simulation {
     public void saveABD0perTime(float time, long[] A) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String abdFile = osmose.outputFileNameTab[numSerie] + "_abundanceClass0_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String abdFile = getOsmose().outputFileNameTab[numSerie] + "_abundanceClass0_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1748,8 +1758,8 @@ public class Simulation {
     public void saveBIOMperTime(float time, double[] B) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String biomFile = osmose.outputFileNameTab[numSerie] + "_biomass_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String biomFile = getOsmose().outputFileNameTab[numSerie] + "_biomass_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
         try {
             targetFile = new File(targetPath, biomFile);
@@ -1772,8 +1782,8 @@ public class Simulation {
     public void saveBIOM0perTime(float time, double[] B) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String biomFile = osmose.outputFileNameTab[numSerie] + "_biomassClass0_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String biomFile = getOsmose().outputFileNameTab[numSerie] + "_biomassClass0_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
         try {
             targetFile = new File(targetPath, biomFile);
@@ -1796,8 +1806,8 @@ public class Simulation {
     public void saveYieldperTime(float time, float[] Y) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String yieldFile = osmose.outputFileNameTab[numSerie] + "_yield_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String yieldFile = getOsmose().outputFileNameTab[numSerie] + "_yield_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1821,8 +1831,8 @@ public class Simulation {
     public void saveNbYieldperTime(float time, long[] nY) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String nbYieldFile = osmose.outputFileNameTab[numSerie] + "_yieldNB_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie]);
+        String nbYieldFile = getOsmose().outputFileNameTab[numSerie] + "_yieldNB_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
         targetPath.mkdirs();
 
         try {
@@ -1846,8 +1856,8 @@ public class Simulation {
     public void saveMeanSizeperTime(float time, float[] mL, long[] abd) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanSizeFile = osmose.outputFileNameTab[numSerie] + "_meanSize_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String meanSizeFile = getOsmose().outputFileNameTab[numSerie] + "_meanSize_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -1876,8 +1886,8 @@ public class Simulation {
     public void saveMeanSizeCatchperTime(float time, float[] mLY, long[] abd) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanSizeFile = osmose.outputFileNameTab[numSerie] + "_meanSizeCatch_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String meanSizeFile = getOsmose().outputFileNameTab[numSerie] + "_meanSizeCatch_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -1906,8 +1916,8 @@ public class Simulation {
     public void saveMeanTLperTime(float time, float[] mTL, double[] biom) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanTLFile = osmose.outputFileNameTab[numSerie] + "_meanTL_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Trophic");
+        String meanTLFile = getOsmose().outputFileNameTab[numSerie] + "_meanTL_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
         try {
@@ -1936,8 +1946,8 @@ public class Simulation {
     public void saveMeanTLCatchperTime(float time, float[] mTL, float[] biom) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanTLFile = osmose.outputFileNameTab[numSerie] + "_meanTLCatch_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Trophic");
+        String meanTLFile = getOsmose().outputFileNameTab[numSerie] + "_meanTLCatch_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
         try {
@@ -1966,8 +1976,8 @@ public class Simulation {
     public void saveMeanTLperAgeperTime(float time, float[][] mTL, int[][] nb) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanTLFile = osmose.outputFileNameTab[numSerie] + "_meanTLperAge_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Trophic");
+        String meanTLFile = getOsmose().outputFileNameTab[numSerie] + "_meanTLperAge_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
         try {
@@ -2000,8 +2010,8 @@ public class Simulation {
     public void initTLDistFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String TLDistFile = osmose.outputFileNameTab[numSerie] + "_TLDistrib_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Trophic");
+        String TLDistFile = getOsmose().outputFileNameTab[numSerie] + "_TLDistrib_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
         try {
@@ -2031,8 +2041,8 @@ public class Simulation {
     public void saveTLDistperTime(float time, float[][][] TLdist) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String TLDistFile = osmose.outputFileNameTab[numSerie] + "_TLDistrib_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "Trophic");
+        String TLDistFile = getOsmose().outputFileNameTab[numSerie] + "_TLDistrib_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
         try {
@@ -2045,10 +2055,10 @@ public class Simulation {
 
         pr = new PrintWriter(TLDistTime, true);
 
-        for (int j = 0; j < osmose.nbTLClass; j++) {
+        for (int j = 0; j < getOsmose().nbTLClass; j++) {
             pr.print(time);
             pr.print(';');
-            pr.print((osmose.tabTL[j]));
+            pr.print((getOsmose().tabTL[j]));
             pr.print(';');
             for (int i = 0; i < species.length; i++) {
                 pr.print(TLdist[i][0][j] / (float) savingDt);
@@ -2064,8 +2074,8 @@ public class Simulation {
     public void initSizeSpecPerSpFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = osmose.outputFileNameTab[numSerie] + "_SizeSpectrumPerSpecies_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrumPerSpecies_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -2099,8 +2109,8 @@ public class Simulation {
     public void saveSizeSpecPerSpperTime(float time, float[][] abdSize) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = osmose.outputFileNameTab[numSerie] + "_SizeSpectrumPerSpecies_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrumPerSpecies_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -2113,16 +2123,16 @@ public class Simulation {
 
         pr = new PrintWriter(SSperSpTime, true);
 
-        for (int j = 0; j < osmose.nbSizeClass; j++) {
+        for (int j = 0; j < getOsmose().nbSizeClass; j++) {
             pr.print(time);
             pr.print(';');
-            pr.print((osmose.tabSizes[j]));
+            pr.print((getOsmose().tabSizes[j]));
             pr.print(';');
             for (int i = 0; i < species.length; i++) {
                 pr.print(abdSize[i][j] / (float) savingDt);
                 pr.print(';');
             }
-            pr.print((osmose.tabSizesLn[j]));
+            pr.print((getOsmose().tabSizesLn[j]));
             pr.print(';');
             for (int i = 0; i < species.length; i++) {
                 pr.print(Math.log(abdSize[i][j] / (float) savingDt));
@@ -2136,8 +2146,8 @@ public class Simulation {
     public void initSizeSpecPerSpCatchFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = osmose.outputFileNameTab[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -2165,8 +2175,8 @@ public class Simulation {
     public void saveSizeSpecPerSpperCatchTime(float time, float[][] abdSize) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = osmose.outputFileNameTab[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -2179,10 +2189,10 @@ public class Simulation {
 
         pr = new PrintWriter(SSperSpTime, true);
 
-        for (int j = 0; j < osmose.nbSizeClass; j++) {
+        for (int j = 0; j < getOsmose().nbSizeClass; j++) {
             pr.print(time);
             pr.print(';');
-            pr.print((osmose.tabSizes[j]));
+            pr.print((getOsmose().tabSizes[j]));
             pr.print(';');
             for (int i = 0; i < species.length; i++) {
                 pr.print(abdSize[i][j] / (float) savingDt);
@@ -2196,8 +2206,8 @@ public class Simulation {
     public void initSizeSpecFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = osmose.outputFileNameTab[numSerie] + "_SizeSpectrum_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrum_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -2228,8 +2238,8 @@ public class Simulation {
         float sum;
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = osmose.outputFileNameTab[numSerie] + "_SizeSpectrum_Simu" + osmose.numSimu + ".csv";
-        targetPath = new File(osmose.outputPathName + osmose.outputFileNameTab[numSerie] + osmose.fileSeparator + "SizeIndicators");
+        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrum_Simu" + getOsmose().numSimu + ".csv";
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
         try {
@@ -2242,18 +2252,18 @@ public class Simulation {
 
         pr = new PrintWriter(SSperSpTime, true);
 
-        for (int j = 0; j < osmose.nbSizeClass; j++) {
+        for (int j = 0; j < getOsmose().nbSizeClass; j++) {
             sum = 0f;
             pr.print(time);
             pr.print(';');
-            pr.print((osmose.tabSizes[j]));
+            pr.print((getOsmose().tabSizes[j]));
             pr.print(';');
             for (int i = 0; i < species.length; i++) {
                 sum += abdSize[i][j] / (float) savingDt;
             }
             pr.print(sum);
             pr.print(';');
-            pr.print((osmose.tabSizesLn[j]));
+            pr.print((getOsmose().tabSizesLn[j]));
             pr.print(';');
             pr.print(Math.log(sum));
             pr.println();
