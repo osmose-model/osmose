@@ -450,8 +450,6 @@ public class Coupling {
 
     public void updatePlankton(int dt) // read files for the current time step
     {
-        System.out.println("UpdatePlankton at step " + dt);
-        long t0 = System.nanoTime();
         for (int i = 0; i < nbPlankton; i++) {
             planktonList[i].clearPlankton();      // put the biomass tables of plankton to 0
         }
@@ -479,8 +477,6 @@ public class Coupling {
         if (simulation.t >= simulation.osmose.timeSeriesStart) {
             saveForDiet();       // save biomass of plankton before predation
         }
-        long time = (System.nanoTime() - t0) / 1000L;
-        System.out.println("Fin UpdatePlankton at step " + dt + " elapsed (micro): " + time);
     }
 
     public void saveForDiet() // save biomass of plankton before predation

@@ -1,6 +1,5 @@
 package fr.ird.osmose;
 
-
 /*******************************************************************************
  * <p>Titre : Cohort class</p>
  *
@@ -16,13 +15,20 @@ package fr.ird.osmose;
  */
 import java.util.*;
 
-public class Cohort {
+public class Cohort extends ArrayList<School> {
 
+    /*
+     * ********
+     * * Logs *
+     * ********
+     * 2011/04/07 phv
+     * Deleted vector presentSchools. Cohort now extends ArrayList<School>
+     * Deleted variable nbSchools. Replaced by this.size()
+     * ***
+     */
     Species species;
     int numSerie;
     int ageNbDt;    //age in nbDt
-    int nbSchools;
-    Vector<School> vectSchools;
     long abundance, oldAbundance;
     double biomass;		//biomass in tonnes
     float meanLength;
@@ -59,14 +65,14 @@ public class Cohort {
 
 //		nbSchools = species.simulation.osmose.nbSchools[numSerie];
 
-        nbSchools = (int) (1 + 10 / (species.longevity + 1)) * species.simulation.osmose.nbSchools[numSerie];
-        vectSchools = new Vector(nbSchools);
+        int nbSchools = (int) (1 + 10 / (species.longevity + 1)) * species.simulation.osmose.nbSchools[numSerie];
+        ensureCapacity(nbSchools);
         for (int i = 0; i < nbSchools; i++) {
-            vectSchools.addElement(new School(this, Math.round(((double) abundance) / nbSchools), iniLength, iniWeight));
+            add(new School(this, Math.round(((double) abundance) / nbSchools), iniLength, iniWeight));
         }
 
         int surplus = (int) abundance % nbSchools;
-        ((School) (vectSchools.elementAt(0))).setAbundance(((School) (vectSchools.elementAt(0))).getAbundance() + surplus);
+        get(0).setAbundance(get(0).getAbundance() + surplus);
         calculMeanGrowth();
     }
 
@@ -76,51 +82,52 @@ public class Cohort {
         long nbDeadTemp = oldAbd - abundance;
         nbDeadDd += nbDeadTemp;
 
+        int nbSchools = size();
         long nbSurplusDead = nbDeadTemp % nbSchools;
 
         //NB of DEAD FISH are DISTRIBUTED UNIFORMLY
         for (int i = 0; i < nbSchools; i++) {
-            if (((School) vectSchools.elementAt(i)).getAbundance() > Math.round(((double) nbDeadTemp) / nbSchools)) {
-                ((School) vectSchools.elementAt(i)).setAbundance(((School) vectSchools.elementAt(i)).getAbundance() - Math.round(((double) nbDeadTemp) / nbSchools));
+            if (((School) get(i)).getAbundance() > Math.round(((double) nbDeadTemp) / nbSchools)) {
+                ((School) get(i)).setAbundance(((School) get(i)).getAbundance() - Math.round(((double) nbDeadTemp) / nbSchools));
             } else {
                 nbSurplusDead += Math.round(((double) nbDeadTemp) / nbSchools)
-                        - ((School) vectSchools.elementAt(i)).getAbundance();
-                ((School) vectSchools.elementAt(i)).setAbundance(0);
-                ((School) vectSchools.elementAt(i)).tagForRemoval();
+                        - ((School) get(i)).getAbundance();
+                ((School) get(i)).setAbundance(0);
+                ((School) get(i)).tagForRemoval();
             }
         }
 
         //SURPLUS of DEAD are DISTRIBUTED
         int index = 0;
-        while ((nbSurplusDead != 0) && (index < vectSchools.size())) {
-            if (((School) vectSchools.elementAt(index)).getAbundance() > nbSurplusDead) {
-                ((School) vectSchools.elementAt(index)).setAbundance(((School) vectSchools.elementAt(index)).getAbundance() - nbSurplusDead);
+        while ((nbSurplusDead != 0) && (index < size())) {
+            if (((School) get(index)).getAbundance() > nbSurplusDead) {
+                ((School) get(index)).setAbundance(((School) get(index)).getAbundance() - nbSurplusDead);
                 nbSurplusDead = 0;
             } else {
-                nbSurplusDead -= ((School) vectSchools.elementAt(index)).getAbundance();
-                ((School) vectSchools.elementAt(index)).tagForRemoval();
-                ((School) vectSchools.elementAt(index)).setAbundance(0);
+                nbSurplusDead -= ((School) get(index)).getAbundance();
+                ((School) get(index)).tagForRemoval();
+                ((School) get(index)).setAbundance(0);
             }
             index++;
         }
 
         //REMOVING DEAD SCHOOLS FROM VECTBANCS and VECTPRESENTSCHOOLS
-        for (int i = vectSchools.size() - 1; i >= 0; i--) {
-            if (((School) vectSchools.elementAt(i)).willDisappear()) {
+        for (int i = size() - 1; i >= 0; i--) {
+            if (((School) get(i)).willDisappear()) {
                 if (!(outOfZoneCohort[species.simulation.dt]))// cohorts in the area during the time step
                 {
-                    ((School) vectSchools.elementAt(i)).getCell().remove(vectSchools.elementAt(i));
+                    ((School) get(i)).getCell().remove(get(i));
                 }
-                vectSchools.removeElementAt(i);
+                remove(i);
                 nbSchools--;
             }
         }
 
         //UPDATE biomass of schools & cohort
         biomass = 0;
-        for (int i = 0; i < vectSchools.size(); i++) {
-            ((School) vectSchools.elementAt(i)).setBiomass(((double) ((School) vectSchools.elementAt(i)).getAbundance()) * ((School) vectSchools.elementAt(i)).getWeight() / 1000000.);
-            biomass += ((School) vectSchools.elementAt(i)).getBiomass();
+        for (int i = 0; i < size(); i++) {
+            ((School) get(i)).setBiomass(((double) ((School) get(i)).getAbundance()) * ((School) get(i)).getWeight() / 1000000.);
+            biomass += ((School) get(i)).getBiomass();
         }
     }
 
@@ -139,6 +146,7 @@ public class Cohort {
         double Yi = 0;
 
         //----FIRST, DEAD FISH ARE DISTRIBUTED UNIFORMLY----
+
         for (int k = 0; k < nbSchoolsCatchable; k++) {
             School schoolCatchk = (School) schoolsCatchable.elementAt(k);
             // Vector of the length of fish of schools caught -> indicator Morgane 07-2004
@@ -200,8 +208,7 @@ public class Cohort {
                 if (!outOfZoneCohort[species.simulation.dt]) {
                     schoolCatchk.getCell().remove(schoolCatchk);
                 }
-                vectSchools.removeElement(schoolCatchk);
-                nbSchools--;
+                remove(schoolCatchk);
                 schoolsCatchable.removeElementAt(k);
                 nbSchoolsCatchable--;
             }
@@ -209,8 +216,8 @@ public class Cohort {
         //UPDATE biomass of schools & cohort abd
         abundance = 0;
         abundanceCatchable = 0;
-        for (int k = 0; k < vectSchools.size(); k++) {
-            School schoolk = (School) vectSchools.elementAt(k);
+        for (int k = 0; k < size(); k++) {
+            School schoolk = (School) get(k);
             schoolk.setBiomass(((double) schoolk.getAbundance()) * schoolk.getWeight() / 1000000.);
             abundance += schoolk.getAbundance();
             if (schoolk.isCatchable()) {
@@ -295,8 +302,7 @@ public class Cohort {
                     if (!outOfZoneCohort[species.simulation.dt]) {
                         schoolCatchk.getCell().remove(schoolCatchk);
                     }
-                    vectSchools.removeElement(schoolCatchk);
-                    nbSchools--;
+                    remove(schoolCatchk);
                     schoolsCatchable.removeElementAt(k);
                     nbSchoolsCatchable--;
                 }
@@ -386,15 +392,14 @@ public class Cohort {
                     if (!outOfZoneCohort[species.simulation.dt]) {
                         schoolCatchk.getCell().remove(schoolCatchk);
                     }
-                    vectSchools.removeElement(schoolCatchk);
-                    nbSchools--;
+                    remove(schoolCatchk);
                 }
             }
             //UPDATE schools biomass & cohort abd
             abundance = 0;
-            for (int i = 0; i < vectSchools.size(); i++) {
-                ((School) vectSchools.elementAt(i)).setBiomass(((double) ((School) vectSchools.elementAt(i)).getAbundance()) * ((School) vectSchools.elementAt(i)).getWeight() / 1000000.);
-                abundance += ((School) vectSchools.elementAt(i)).getAbundance();
+            for (int i = 0; i < size(); i++) {
+                ((School) get(i)).setBiomass(((double) ((School) get(i)).getAbundance()) * ((School) get(i)).getWeight() / 1000000.);
+                abundance += ((School) get(i)).getAbundance();
             }
             nbDeadFf += abdToCatch;
         }
@@ -410,8 +415,8 @@ public class Cohort {
     }
 
     public void growth(float minDelta, float maxDelta, float c, float bPower) {
-        for (int i = 0; i < nbSchools; i++) {
-            ((School) vectSchools.elementAt(i)).growth(minDelta, maxDelta, c, bPower);
+        for (int i = 0; i < size(); i++) {
+            ((School) get(i)).growth(minDelta, maxDelta, c, bPower);
         }
     }
 
@@ -419,8 +424,8 @@ public class Cohort {
         double sumLengths = 0;
         double sumWeights = 0;
         long count = 0;
-        for (int i = 0; i < vectSchools.size(); i++) {
-            School schooli = (School) vectSchools.elementAt(i);
+        for (int i = 0; i < size(); i++) {
+            School schooli = (School) get(i);
             sumLengths += ((double) schooli.getLength()) * schooli.getAbundance();
             sumWeights += ((double) schooli.getWeight()) * schooli.getAbundance();
             count += schooli.getAbundance();

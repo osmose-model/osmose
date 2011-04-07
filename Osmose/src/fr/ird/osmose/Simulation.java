@@ -160,8 +160,8 @@ public class Simulation {
         if (sizeSpectrumPerSpeOutput) {
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
-                    for (int k = 0; k < species[i].tabCohorts[j].nbSchools; k++) {
-                        ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).rankSize(osmose.tabSizes, osmose.spectrumMaxSize);
+                    for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
+                        ((School) species[i].tabCohorts[j].get(k)).rankSize(osmose.tabSizes, osmose.spectrumMaxSize);
                     }
                 }
             }
@@ -209,10 +209,10 @@ public class Simulation {
             // update stages
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
-                    for (int k = 0; k < species[i].tabCohorts[j].vectSchools.size(); k++) {
-                        ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
-                        ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).updateAccessStage(osmose.accessStageThreshold[i], osmose.nbAccessStage[i]);
-                        ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).updateDietOutputStage(species[i].dietStagesTab, species[i].nbDietStages);
+                    for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
+                        ((School) species[i].tabCohorts[j].get(k)).updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
+                        ((School) species[i].tabCohorts[j].get(k)).updateAccessStage(osmose.accessStageThreshold[i], osmose.nbAccessStage[i]);
+                        ((School) species[i].tabCohorts[j].get(k)).updateDietOutputStage(species[i].dietStagesTab, species[i].nbDietStages);
                     }
                 }
             }
@@ -267,8 +267,8 @@ public class Simulation {
             {
                 for (int i = 0; i < nbSpecies; i++) {
                     for (int j = 0; j < species[i].tabCohorts.length; j++) {
-                        for (int k = 0; k < species[i].tabCohorts[j].nbSchools; k++) {
-                            biomPerStage[i][((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).dietOutputStage] += ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).getBiomass();
+                        for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
+                            biomPerStage[i][((School) species[i].tabCohorts[j].get(k)).dietOutputStage] += ((School) species[i].tabCohorts[j].get(k)).getBiomass();
                         }
                     }
                 }
@@ -323,9 +323,9 @@ public class Simulation {
                 tabNbCatch[i] = new float[species[i].nbSchoolsTotCatch];
             }
             for (int i = 0; i < species.length; i++) {
-                for (int b = 0; b < species[i].nbSchoolsTotCatch; b++) {
-                    tabSizeCatch[i][b] = 0;
-                    tabNbCatch[i][b] = 0;
+                for (int s = 0; s < species[i].nbSchoolsTotCatch; s++) {
+                    tabSizeCatch[i][s] = 0;
+                    tabNbCatch[i][s] = 0;
                 }
             }
             for (int i = 0; i < species.length; i++) {
@@ -362,12 +362,12 @@ public class Simulation {
 
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
-                    for (int k = 0; k < species[i].tabCohorts[j].vectSchools.size(); k++) {
+                    for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
                         if (sizeSpectrumPerSpeOutput) {
-                            ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).rankSize(osmose.tabSizes, osmose.spectrumMaxSize);
+                            ((School) species[i].tabCohorts[j].get(k)).rankSize(osmose.tabSizes, osmose.spectrumMaxSize);
                         }
                         if ((t >= osmose.timeSeriesStart) && ((TLoutput) || (TLDistriboutput))) {
-                            ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).rankTL(osmose.tabTL);
+                            ((School) species[i].tabCohorts[j].get(k)).rankTL(osmose.tabTL);
                         }
                     }
                 }
@@ -564,8 +564,8 @@ public class Simulation {
         for (int i = 0; i < species.length; i++) {
             for (int j = 0; j < species[i].tabCohorts.length; j++) {
                 if (!species[i].tabCohorts[j].outOfZoneCohort[dt]) {
-                    for (int k = 0; k < species[i].tabCohorts[j].nbSchools; k++) {
-                        vectSchoolsRandom.addElement(species[i].tabCohorts[j].vectSchools.elementAt(k));
+                    for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
+                        vectSchoolsRandom.addElement(species[i].tabCohorts[j].get(k));
                     }
                 }
             }
@@ -619,13 +619,12 @@ public class Simulation {
     public void assessNbSchools() {
         for (int i = 0; i < species.length; i++) {
             for (int j = 0; j < species[i].tabCohorts.length; j++) {
-                for (int k = species[i].tabCohorts[j].vectSchools.size() - 1; k >= 0; k--) {
-                    if (((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).willDisappear()) {
-                        species[i].tabCohorts[j].vectSchools.removeElementAt(k);
-                        species[i].tabCohorts[j].nbSchools--;
+                for (int k = species[i].tabCohorts[j].size() - 1; k >= 0; k--) {
+                    if (((School) species[i].tabCohorts[j].get(k)).willDisappear()) {
+                        species[i].tabCohorts[j].remove(k);
                     }
                 }
-                species[i].tabCohorts[j].vectSchools.trimToSize();
+                species[i].tabCohorts[j].trimToSize();
             }
         }
     }
@@ -653,9 +652,9 @@ public class Simulation {
         }
         for (int i = 0; i < species.length; i++) {
             for (int j = 0; j < species[i].tabCohorts.length; j++) {
-                for (int k = 0; k < species[i].tabCohorts[j].nbSchools; k++) {
+                for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
                     species[i].tabCohorts[j].abundance +=
-                            ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).getAbundance();
+                            ((School) species[i].tabCohorts[j].get(k)).getAbundance();
                 }
                 species[i].abundance += species[i].tabCohorts[j].abundance;
             }
@@ -671,9 +670,9 @@ public class Simulation {
                     vectCells.addElement(getGrid().getCell(osmose.randomAreaCoordi[i][m], osmose.randomAreaCoordj[i][m]));
                 }
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
-                    for (int k = 0; k < species[i].tabCohorts[j].vectSchools.size(); k++) {
-                        ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).randomDeal(vectCells);
-                        ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).communicatePosition();
+                    for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
+                        ((School) species[i].tabCohorts[j].get(k)).randomDeal(vectCells);
+                        ((School) species[i].tabCohorts[j].get(k)).communicatePosition();
                     }
                 }
             }
@@ -689,14 +688,14 @@ public class Simulation {
                             vectCells.addElement(getGrid().getCell(osmose.mapCoordi[osmose.numMap[i][j][0]][m], osmose.mapCoordj[osmose.numMap[i][j][0]][m]));
                             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][j][0]][m]));
                         }
-                        for (int k = 0; k < species[i].tabCohorts[j].vectSchools.size(); k++) {
-                            School thisSchool = (School) species[i].tabCohorts[j].vectSchools.elementAt(k);
+                        for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
+                            School thisSchool = (School) species[i].tabCohorts[j].get(k);
                             thisSchool.setOutOfZoneSchool(true);
                         }
 
-                        for (int k = 0; k < Math.round((float) species[i].tabCohorts[j].vectSchools.size() * (1 - species[i].tabCohorts[j].outOfZonePercentage[0] / 100)); k++) {
+                        for (int k = 0; k < Math.round((float) species[i].tabCohorts[j].size() * (1 - species[i].tabCohorts[j].outOfZonePercentage[0] / 100)); k++) {
                             // proba of presence: loop while to check if proba of presence> random proba
-                            School thisSchool = (School) species[i].tabCohorts[j].vectSchools.elementAt(k);
+                            School thisSchool = (School) species[i].tabCohorts[j].get(k);
                             thisSchool.randomDeal(vectCells);
                             thisSchool.setOutOfZoneSchool(false);
                             while ((float) osmose.mapProbaPresence[osmose.numMap[i][j][0]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
@@ -718,14 +717,14 @@ public class Simulation {
                 for (int m = 0; m < osmose.randomAreaCoordi[i].length; m++) {
                     vectCells.addElement(getGrid().getCell(osmose.randomAreaCoordi[i][m], osmose.randomAreaCoordj[i][m]));
                 }
-                for (int k = 0; k < species[i].tabCohorts[0].vectSchools.size(); k++) {
-                    ((School) species[i].tabCohorts[0].vectSchools.elementAt(k)).randomDeal(vectCells);
-                    ((School) species[i].tabCohorts[0].vectSchools.elementAt(k)).communicatePosition();
+                for (int k = 0; k < species[i].tabCohorts[0].size(); k++) {
+                    ((School) species[i].tabCohorts[0].get(k)).randomDeal(vectCells);
+                    ((School) species[i].tabCohorts[0].get(k)).communicatePosition();
                 }
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
-                    for (int k = 1; k < species[i].tabCohorts[j].vectSchools.size(); k++) {
-                        School thisSchool = (School) (species[i].tabCohorts[j].vectSchools.elementAt(k));
-                        //  ((QSchool)species[i].tabCohorts[j].vectSchools.elementAt(k)).communicatePosition();
+                    for (int k = 1; k < species[i].tabCohorts[j].size(); k++) {
+                        School thisSchool = (School) (species[i].tabCohorts[j].get(k));
+                        //  ((QSchool)species[i].tabCohorts[j].get(k)).communicatePosition();
                         thisSchool.randomWalk();
                         thisSchool.communicatePosition();
                     }
@@ -744,12 +743,12 @@ public class Simulation {
                 }
 
 
-                for (int k = 0; k < species[i].tabCohorts[0].vectSchools.size(); k++) {
-                    School thisSchool = (School) species[i].tabCohorts[0].vectSchools.elementAt(k);
+                for (int k = 0; k < species[i].tabCohorts[0].size(); k++) {
+                    School thisSchool = (School) species[i].tabCohorts[0].get(k);
                     thisSchool.setOutOfZoneSchool(true);
                 }
-                for (int k = 0; k < Math.round((float) species[i].tabCohorts[0].vectSchools.size() * (1f - (species[i].tabCohorts[0].outOfZonePercentage[dt] / 100f))); k++) {
-                    School thisSchool = (School) species[i].tabCohorts[0].vectSchools.elementAt(k);
+                for (int k = 0; k < Math.round((float) species[i].tabCohorts[0].size() * (1f - (species[i].tabCohorts[0].outOfZonePercentage[dt] / 100f))); k++) {
+                    School thisSchool = (School) species[i].tabCohorts[0].get(k);
                     thisSchool.randomDeal(vectCellsCoh0);
                     thisSchool.setOutOfZoneSchool(false);
                     while ((float) osmose.mapProbaPresence[osmose.numMap[i][0][dt]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
@@ -784,13 +783,13 @@ public class Simulation {
                             vectCellsCoh.addElement(getGrid().getCell(osmose.mapCoordi[(osmose.numMap[i][j][dt])][m], osmose.mapCoordj[(osmose.numMap[i][j][dt])][m]));
                             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][j][dt]][m]));
                         }
-                        for (int k = 0; k < species[i].tabCohorts[j].nbSchools; k++) // Loop to initialize outOfZoneSchool= true
+                        for (int k = 0; k < species[i].tabCohorts[j].size(); k++) // Loop to initialize outOfZoneSchool= true
                         {
-                            ((School) species[i].tabCohorts[j].vectSchools.elementAt(k)).setOutOfZoneSchool(true);
+                            ((School) species[i].tabCohorts[j].get(k)).setOutOfZoneSchool(true);
                         }
 
-                        for (int k = 0; k < Math.round((float) species[i].tabCohorts[j].nbSchools * (100f - species[i].tabCohorts[j].outOfZonePercentage[dt]) / 100f); k++) {
-                            School thisSchool = (School) (species[i].tabCohorts[j].vectSchools.elementAt(k));
+                        for (int k = 0; k < Math.round((float) species[i].tabCohorts[j].size() * (100f - species[i].tabCohorts[j].outOfZonePercentage[dt]) / 100f); k++) {
+                            School thisSchool = (School) (species[i].tabCohorts[j].get(k));
                             thisSchool.setOutOfZoneSchool(false);
                             thisSchool.randomDeal(vectCellsCoh);
                             while (osmose.mapProbaPresence[osmose.numMap[i][j][dt]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
@@ -803,8 +802,8 @@ public class Simulation {
 
                     } else // stay in the same map
                     {
-                        for (int k = 0; k < species[i].tabCohorts[j].nbSchools; k++) {
-                            School thisSchool = (School) (species[i].tabCohorts[j].vectSchools.elementAt(k));
+                        for (int k = 0; k < species[i].tabCohorts[j].size(); k++) {
+                            School thisSchool = (School) (species[i].tabCohorts[j].get(k));
                             if (!thisSchool.isOutOfZoneSchool()) {
                                 thisSchool.randomWalk();
 
@@ -844,11 +843,11 @@ public class Simulation {
                 species[i].nbSchoolsTotCatch = 0;
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     Cohort cohij = species[i].tabCohorts[j];
-                    cohij.nbSchoolsCatchable = cohij.nbSchools;
+                    cohij.nbSchoolsCatchable = cohij.size();
                     cohij.schoolsCatchable = new Vector(cohij.nbSchoolsCatchable);
                     cohij.abundanceCatchable = 0;
-                    for (int k = 0; k < cohij.vectSchools.size(); k++) {
-                        School schoolk = (School) cohij.vectSchools.elementAt(k);
+                    for (int k = 0; k < cohij.size(); k++) {
+                        School schoolk = (School) cohij.get(k);
                         cohij.schoolsCatchable.addElement(schoolk);
                         cohij.abundanceCatchable += schoolk.getAbundance();
                         schoolk.setCatchable(true);
@@ -872,8 +871,8 @@ public class Simulation {
                     cohij.nbSchoolsCatchable = 0;
                     cohij.schoolsCatchable = new Vector(osmose.nbSchools[numSerie]);
                     cohij.abundanceCatchable = 0;
-                    for (int k = 0; k < cohij.vectSchools.size(); k++) {
-                        School schoolk = (School) cohij.vectSchools.elementAt(k);
+                    for (int k = 0; k < cohij.size(); k++) {
+                        School schoolk = (School) cohij.get(k);
                         if (schoolk.getCell().isMPA()) {
                             schoolk.setCatchable(false);
                         } else {
@@ -1087,7 +1086,7 @@ public class Simulation {
                 //biom per stage rempli avant la prédation
 				/*               for (int j=0; j< speci.tabCohorts.length; j++)
                 for (int k=0; k<speci.tabCohorts[j].nbSchools; k++)
-                biomPerStage[i][((QSchool)speci.tabCohorts[j].vectSchools.elementAt(k)).stage] += ((QSchool)speci.tabCohorts[j].vectSchools.elementAt(k)).biomass;
+                biomPerStage[i][((QSchool)speci.tabCohorts[j].get(k)).stage] += ((QSchool)speci.tabCohorts[j].get(k)).biomass;
                  */
                 abdNo0 = 0;
                 biomNo0 = 0;
