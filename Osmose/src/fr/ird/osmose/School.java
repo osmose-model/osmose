@@ -30,6 +30,9 @@ public class School {
      * since Cell.neighbors[] has been deleted.
      * ***
      */
+///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
 
     /*
      * The Cell where is located the School
@@ -115,10 +118,20 @@ public class School {
      */
     private Grid grid;
 
-    public School(Cohort cohort, long abd, float length, float weight) {
+//////////////
+// Constructor
+//////////////
+    /**
+     * Create a new school.
+     * @param cohort of the school
+     * @param abundance, number of individuals in the school
+     * @param length [cm] of the individual
+     * @param weight [g] of the individual
+     */
+    public School(Cohort cohort, long abundance, float length, float weight) {
         this.cohort = cohort;
         this.numSerie = cohort.numSerie;
-        this.abundance = abd;
+        this.abundance = abundance;
         this.length = length;
         this.weight = weight;
         this.biomass = ((double) abundance) * weight / 1000000.;
@@ -156,16 +169,23 @@ public class School {
             dietTemp[i][0] = 0;
         }
         sumDiet = 0;
-        
+
     }
 
+////////////////////////////
+// Definition of the methods
+////////////////////////////
+    /**
+     * Gets the current location of the school
+     * @return the cell where is located the school
+     */
     public Cell getCell() {
         return cell;
     }
 
     /**
-     *
-     * @param cells
+     * Randomly choose one cell out the list of cells.
+     * @param cells, the list of cells for the random deal.
      */
     public void randomDeal(List<Cell> cells) {
 
@@ -182,6 +202,10 @@ public class School {
         cell.add(this);
     }
 
+    /**
+     * Randomly move the school in one of the neighbor cells (including the
+     * current cell).
+     */
     public void randomWalk() {
 
         /* Create a list of the accessible cells
