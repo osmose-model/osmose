@@ -118,7 +118,7 @@ public class School {
         Vector vectPossibleCells = new Vector();
         Cell currentCell = grid.getCell(posi, posj);
 
-        Iterator<Cell> neighbors = grid.getAdjacentCells(currentCell).iterator();
+        Iterator<Cell> neighbors = grid.getNeighborCells(currentCell).iterator();
         while (neighbors.hasNext()) {
             Cell neighbor = neighbors.next();
             if (!neighbor.isLand()) {

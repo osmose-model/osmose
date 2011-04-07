@@ -1555,7 +1555,7 @@ public class Osmose {
                     int index = 0;
                     while (index < (tabCellsArea.length - 1)) {
                         for (int iCell = iFirstSorted; iCell <= iLastSorted; iCell++) {
-                            ArrayList<Cell> neigbors = grid.getAdjacentCells(tabCellsArea[iCell]);
+                            ArrayList<Cell> neigbors = grid.getNeighborCells(tabCellsArea[iCell]);
                             Iterator<Cell> iter = neigbors.iterator();
                             while ((index < (tabCellsArea.length - 1)) && iter.hasNext()) {
                                 Cell cell = iter.next();
