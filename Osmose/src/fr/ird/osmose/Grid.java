@@ -1,6 +1,5 @@
 package fr.ird.osmose;
 
-
 /********************************************************************************
  * <p>Title : Grid class</p>
  *
@@ -18,6 +17,18 @@ package fr.ird.osmose;
 import java.util.*;
 
 class Grid {
+
+    /*
+     * ********
+     * * Logs *
+     * ********
+     * 2011/04/07 phv
+     * Deleted the identifyNeighbors function since neighbors variable has been
+     * deleted in Cell.java.
+     * Added function getAdjacentCells(Cell cell) that is called by Osmose when
+     * doing the random sorting of the cells for the random spatial distribution
+     * ***
+     */
 
     Osmose osmose;
     Cell[][] matrix;
@@ -49,7 +60,6 @@ class Grid {
             }
         }
 
-        identifyNeighbors(nbLines);
         identifySpatialGroups();
     }
 
@@ -65,218 +75,24 @@ class Grid {
         }
     }
 
-    public void identifyNeighbors(int nbl) {
-        //adjacent cells are sorted in random order for non bias when species.iniRepartitionAleat
-        if (nbl == 1) {
-            matrix[0][0].neighbors = new Cell[1];
-            matrix[0][0].neighbors[0] = matrix[0][0];
-        } else if (nbl == 2) {
-            int[] tabIndexRandom = new int[3];
-            Vector vectInd = new Vector();
-            int rand;
+    public ArrayList<Cell> getAdjacentCells(Cell cell) {
 
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                vectInd.addElement(new Integer(i));
-            }
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                vectInd.removeElementAt(rand);
-            }
-            matrix[0][0].neighbors = new Cell[3];
-            matrix[0][0].neighbors[tabIndexRandom[0]] = matrix[0][1];
-            matrix[0][0].neighbors[tabIndexRandom[1]] = matrix[1][0];
-            matrix[0][0].neighbors[tabIndexRandom[2]] = matrix[1][1];
+        int im1 = Math.max(cell.getI() - 1, 0);
+        int ip1 = Math.min(cell.getI() + 1, nbLines - 1);
+        int jm1 = Math.max(cell.getJ() - 1, 0);
+        int jp1 = Math.min(cell.getJ() + 1, nbColumns - 1);
 
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                vectInd.addElement(new Integer(i));
-            }
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                vectInd.removeElementAt(rand);
-            }
-            matrix[0][1].neighbors = new Cell[3];
-            matrix[0][1].neighbors[tabIndexRandom[0]] = matrix[0][0];
-            matrix[0][1].neighbors[tabIndexRandom[1]] = matrix[1][0];
-            matrix[0][1].neighbors[tabIndexRandom[2]] = matrix[1][1];
+        ArrayList<Cell> neighbors = new ArrayList();
 
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                vectInd.addElement(new Integer(i));
+        for (int i = im1; i <= ip1; i++) {
+            for (int j = jm1; j <= jp1; j++) {
+                neighbors.add(matrix[i][j]);
             }
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                vectInd.removeElementAt(rand);
-            }
-            matrix[1][0].neighbors = new Cell[3];
-            matrix[1][0].neighbors[tabIndexRandom[0]] = matrix[0][0];
-            matrix[1][0].neighbors[tabIndexRandom[1]] = matrix[0][1];
-            matrix[1][0].neighbors[tabIndexRandom[2]] = matrix[1][1];
-
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                vectInd.addElement(new Integer(i));
-            }
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                vectInd.removeElementAt(rand);
-            }
-            matrix[1][1].neighbors = new Cell[3];
-            matrix[1][1].neighbors[tabIndexRandom[0]] = matrix[0][1];
-            matrix[1][1].neighbors[tabIndexRandom[1]] = matrix[1][0];
-            matrix[1][1].neighbors[tabIndexRandom[2]] = matrix[0][0];
-        } else if (nbl > 2) {
-            int[] tabIndexRandom;
-            Vector vectInd = new Vector();
-            int rand;
-
-            for (int i = 1; i < nbLines - 1; i++) {
-                for (int j = 1; j < nbColumns - 1; j++) {
-                    tabIndexRandom = new int[8];
-                    for (int ind = 0; ind < tabIndexRandom.length; ind++) {
-                        vectInd.addElement(new Integer(ind));
-                    }
-                    for (int ind = 0; ind < tabIndexRandom.length; ind++) {
-                        rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                        tabIndexRandom[ind] = ((Integer) vectInd.elementAt(rand)).intValue();
-                        vectInd.removeElementAt(rand);
-                    }
-                    matrix[i][j].neighbors = new Cell[8];
-                    matrix[i][j].neighbors[tabIndexRandom[0]] = matrix[i - 1][j - 1];
-                    matrix[i][j].neighbors[tabIndexRandom[1]] = matrix[i - 1][j];
-                    matrix[i][j].neighbors[tabIndexRandom[2]] = matrix[i - 1][j + 1];
-                    matrix[i][j].neighbors[tabIndexRandom[3]] = matrix[i][j - 1];
-                    matrix[i][j].neighbors[tabIndexRandom[4]] = matrix[i][j + 1];
-                    matrix[i][j].neighbors[tabIndexRandom[5]] = matrix[i + 1][j - 1];
-                    matrix[i][j].neighbors[tabIndexRandom[6]] = matrix[i + 1][j];
-                    matrix[i][j].neighbors[tabIndexRandom[7]] = matrix[i + 1][j + 1];
-                }
-            }
-
-            for (int j = 1; j < nbColumns - 1; j++) {
-                tabIndexRandom = new int[5];
-                for (int i = 0; i < tabIndexRandom.length; i++) {
-                    vectInd.addElement(new Integer(i));
-                }
-                for (int i = 0; i < tabIndexRandom.length; i++) {
-                    rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                    tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                    vectInd.removeElementAt(rand);
-                }
-                matrix[0][j].neighbors = new Cell[5];
-                matrix[0][j].neighbors[tabIndexRandom[0]] = matrix[0][j - 1];
-                matrix[0][j].neighbors[tabIndexRandom[1]] = matrix[0][j + 1];
-                matrix[0][j].neighbors[tabIndexRandom[2]] = matrix[1][j - 1];
-                matrix[0][j].neighbors[tabIndexRandom[3]] = matrix[1][j];
-                matrix[0][j].neighbors[tabIndexRandom[4]] = matrix[1][j + 1];
-            }
-
-            for (int j = 1; j < nbColumns - 1; j++) {
-                tabIndexRandom = new int[5];
-                for (int i = 0; i < tabIndexRandom.length; i++) {
-                    vectInd.addElement(new Integer(i));
-                }
-                for (int i = 0; i < tabIndexRandom.length; i++) {
-                    rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                    tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                    vectInd.removeElementAt(rand);
-                }
-                matrix[nbLines - 1][j].neighbors = new Cell[5];
-                matrix[nbLines - 1][j].neighbors[tabIndexRandom[0]] = matrix[nbLines - 2][j - 1];
-                matrix[nbLines - 1][j].neighbors[tabIndexRandom[1]] = matrix[nbLines - 2][j];
-                matrix[nbLines - 1][j].neighbors[tabIndexRandom[2]] = matrix[nbLines - 2][j + 1];
-                matrix[nbLines - 1][j].neighbors[tabIndexRandom[3]] = matrix[nbLines - 1][j - 1];
-                matrix[nbLines - 1][j].neighbors[tabIndexRandom[4]] = matrix[nbLines - 1][j + 1];
-            }
-
-            for (int i = 1; i < nbLines - 1; i++) {
-                tabIndexRandom = new int[5];
-                for (int ind = 0; ind < tabIndexRandom.length; ind++) {
-                    vectInd.addElement(new Integer(ind));
-                }
-                for (int ind = 0; ind < tabIndexRandom.length; ind++) {
-                    rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                    tabIndexRandom[ind] = ((Integer) vectInd.elementAt(rand)).intValue();
-                    vectInd.removeElementAt(rand);
-                }
-                matrix[i][0].neighbors = new Cell[5];
-                matrix[i][0].neighbors[tabIndexRandom[0]] = matrix[i - 1][0];
-                matrix[i][0].neighbors[tabIndexRandom[1]] = matrix[i - 1][1];
-                matrix[i][0].neighbors[tabIndexRandom[2]] = matrix[i][1];
-                matrix[i][0].neighbors[tabIndexRandom[3]] = matrix[i + 1][0];
-                matrix[i][0].neighbors[tabIndexRandom[4]] = matrix[i + 1][1];
-            }
-            for (int i = 1; i < nbLines - 1; i++) {
-                tabIndexRandom = new int[5];
-                for (int ind = 0; ind < tabIndexRandom.length; ind++) {
-                    vectInd.addElement(new Integer(ind));
-                }
-                for (int ind = 0; ind < tabIndexRandom.length; ind++) {
-                    rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                    tabIndexRandom[ind] = ((Integer) vectInd.elementAt(rand)).intValue();
-                    vectInd.removeElementAt(rand);
-                }
-                matrix[i][nbColumns - 1].neighbors = new Cell[5];
-                matrix[i][nbColumns - 1].neighbors[tabIndexRandom[0]] = matrix[i - 1][nbColumns - 2];
-                matrix[i][nbColumns - 1].neighbors[tabIndexRandom[1]] = matrix[i - 1][nbColumns - 1];
-                matrix[i][nbColumns - 1].neighbors[tabIndexRandom[2]] = matrix[i][nbColumns - 2];
-                matrix[i][nbColumns - 1].neighbors[tabIndexRandom[3]] = matrix[i + 1][nbColumns - 2];
-                matrix[i][nbColumns - 1].neighbors[tabIndexRandom[4]] = matrix[i + 1][nbColumns - 1];
-            }
-            tabIndexRandom = new int[3];
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                vectInd.addElement(new Integer(i));
-            }
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                vectInd.removeElementAt(rand);
-            }
-            matrix[0][0].neighbors = new Cell[3];
-            matrix[0][0].neighbors[tabIndexRandom[0]] = matrix[0][1];
-            matrix[0][0].neighbors[tabIndexRandom[1]] = matrix[1][0];
-            matrix[0][0].neighbors[tabIndexRandom[2]] = matrix[1][1];
-
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                vectInd.addElement(new Integer(i));
-            }
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                vectInd.removeElementAt(rand);
-            }
-            matrix[0][nbColumns - 1].neighbors = new Cell[3];
-            matrix[0][nbColumns - 1].neighbors[tabIndexRandom[0]] = matrix[0][nbColumns - 2];
-            matrix[0][nbColumns - 1].neighbors[tabIndexRandom[1]] = matrix[1][nbColumns - 2];
-            matrix[0][nbColumns - 1].neighbors[tabIndexRandom[2]] = matrix[1][nbColumns - 1];
-
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                vectInd.addElement(new Integer(i));
-            }
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                vectInd.removeElementAt(rand);
-            }
-            matrix[nbLines - 1][0].neighbors = new Cell[3];
-            matrix[nbLines - 1][0].neighbors[tabIndexRandom[0]] = matrix[nbLines - 2][0];
-            matrix[nbLines - 1][0].neighbors[tabIndexRandom[1]] = matrix[nbLines - 2][1];
-            matrix[nbLines - 1][0].neighbors[tabIndexRandom[2]] = matrix[nbLines - 1][1];
-
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                vectInd.addElement(new Integer(i));
-            }
-            for (int i = 0; i < tabIndexRandom.length; i++) {
-                rand = (int) Math.round(Math.random() * (vectInd.size() - 1));
-                tabIndexRandom[i] = ((Integer) vectInd.elementAt(rand)).intValue();
-                vectInd.removeElementAt(rand);
-            }
-            matrix[nbLines - 1][nbColumns - 1].neighbors = new Cell[3];
-            matrix[nbLines - 1][nbColumns - 1].neighbors[tabIndexRandom[0]] = matrix[nbLines - 2][nbColumns - 2];
-            matrix[nbLines - 1][nbColumns - 1].neighbors[tabIndexRandom[1]] = matrix[nbLines - 2][nbColumns - 1];
-            matrix[nbLines - 1][nbColumns - 1].neighbors[tabIndexRandom[2]] = matrix[nbLines - 1][nbColumns - 2];
         }
+        neighbors.remove(cell);
+        Collections.shuffle(neighbors);
+        //return neighbors.toArray(new Cell[neighbors.size()]);
+        return neighbors;
     }
 }
 

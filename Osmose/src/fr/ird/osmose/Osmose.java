@@ -1,6 +1,5 @@
 package fr.ird.osmose;
 
-
 /*******************************************************************************
  * <p>Titre : Osmose </p>
  *
@@ -19,6 +18,17 @@ import java.io.*;
 import java.util.*;
 
 public class Osmose {
+
+    /*
+     * ********
+     * * Logs *
+     * ********
+     * 2011/04/07 phv
+     * public void distribRandom(). Recoded the random sorting of the adjacent
+     * cells using method Grid.getAdjacentCells since Cell.neighbors[] has been
+     * deleted.
+     * ***
+     */
 
     String OS_NAME = System.getProperty("os.name");
     String fileSeparator = System.getProperty("file.separator");
@@ -1538,28 +1548,28 @@ public class Osmose {
                     }
                     tabCellsArea[0] = matrix[coordi][coordj];
                     matrix[coordi][coordj].setAlreadyChosen(true);
-                    //from initial cell, successive random sorting of the adjacent cells..
-                    //until tabCellsArea is full
-                    int indice1 = 0;
-                    int indice2 = 0;
+                    /*
+                     * From initial cell, successive random sorting of
+                     * the adjacent cells until tabCellsArea is full
+                     */
+                    int iFirstSorted = 0;
+                    int iLastSorted = 0;
                     int index = 0;
                     while (index < (tabCellsArea.length - 1)) {
-                        for (int x = indice1; x <= indice2; x++) //for each new added cell we test neighbour cells
-                        {
-                            int indexNeighbor = 0;
-                            while ((index < (tabCellsArea.length - 1))
-                                    && (indexNeighbor < tabCellsArea[x].neighbors.length)) {
-                                if ((!tabCellsArea[x].neighbors[indexNeighbor].isLand())
-                                        && (!tabCellsArea[x].neighbors[indexNeighbor].isAlreadyChosen())) {
+                        for (int iCell = iFirstSorted; iCell <= iLastSorted; iCell++) {
+                            ArrayList<Cell> neigbors = grid.getAdjacentCells(tabCellsArea[iCell]);
+                            Iterator<Cell> iter = neigbors.iterator();
+                            while ((index < (tabCellsArea.length - 1)) && iter.hasNext()) {
+                                Cell cell = iter.next();
+                                if (!cell.isLand() && !cell.isAlreadyChosen()) {
                                     index++;
-                                    tabCellsArea[index] = tabCellsArea[x].neighbors[indexNeighbor];
-                                    tabCellsArea[x].neighbors[indexNeighbor].setAlreadyChosen(true);
+                                    cell.setAlreadyChosen(true);
+                                    tabCellsArea[index] = cell;
                                 }
-                                indexNeighbor++;
                             }
                         }
-                        indice1 = indice2 + 1;
-                        indice2 = index;
+                        iFirstSorted = iLastSorted + 1;
+                        iLastSorted = index;
                     }
                     for (int m = 0; m < tabCellsArea.length; m++) {
                         randomAreaCoordi[i][m] = tabCellsArea[m].getI();

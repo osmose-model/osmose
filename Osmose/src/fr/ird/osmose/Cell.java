@@ -18,8 +18,12 @@ import java.util.Vector;
 public class Cell {
 
     /*
-     * ***
-     * ** Logs
+     * ********
+     * * Logs *
+     * ********
+     * 2011/04/07 phv
+     * Deleted the neigbhors variable since it is not necessary to keep it
+     * in memory. It is sufficient to find them just when the program need them.
      * ***
      * 2011/04/01 phv
      * Renamed most variables
@@ -68,10 +72,6 @@ public class Cell {
      * List of schools in the cell
      */
     Vector vectPresentSchools;
-    /*
-     * List of surrounding cells
-     */
-    Cell neighbors[];
     /*
      * 
      */

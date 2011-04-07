@@ -18,6 +18,16 @@ import java.util.*;
 
 class School {
 
+     /*
+     * ********
+     * * Logs *
+     * ********
+     * 2011/04/07 phv
+     * public void randomWalk(). Recoded function by calling
+     * Grid.getAdjacentCells since Cell.neighbors[] has been deleted.
+     * ***
+     */
+
     Cohort cohort;
     int numSerie;
     int posi, posj;		//coordinates in the lattice (in cells)
@@ -106,15 +116,16 @@ class School {
 
     public void randomWalk() {
         Vector vectPossibleCells = new Vector();
-        Cell[] neighbors = grid.matrix[posi][posj].neighbors;
-        Cell oldCell = grid.matrix[posi][posj];
+        Cell currentCell = grid.matrix[posi][posj];
 
-        for (int i = 0; i < neighbors.length; i++) {
-            if (!neighbors[i].isLand()) {
-                vectPossibleCells.addElement(neighbors[i]);
+        Iterator<Cell> neighbors = grid.getAdjacentCells(currentCell).iterator();
+        while (neighbors.hasNext()) {
+            Cell neighbor = neighbors.next();
+            if (!neighbor.isLand()) {
+                vectPossibleCells.addElement(neighbor);
             }
         }
-        vectPossibleCells.addElement(oldCell);
+        vectPossibleCells.addElement(currentCell);
         distribute(vectPossibleCells);
     }
 
