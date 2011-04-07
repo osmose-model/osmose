@@ -27,6 +27,8 @@ public class Osmose {
      * Created static instance of the Osmose object.
      * Added a getGrid() method that other classes will call through the Osmose
      * instance.
+     * Added a getSimulation() method for other classes to get the simulation
+     * instance.
      * public void distribRandom(). Recoded the random sorting of the neighbor
      * cells using method Grid.getNeighborCells since Cell.neighbors[] has been
      * deleted.
@@ -48,7 +50,7 @@ public class Osmose {
     String initialPathFile = "filePath.txt";
 
     /* ***************************** DECLARING VARIABLES ******************************** */
-    Simulation simulation;
+    private Simulation simulation;
     private Grid grid;
     int nbSeriesSimus;	// nb of series
     int[] nbLoopTab;	// nb of simulations per serie
@@ -2545,5 +2547,9 @@ public class Osmose {
 
     public Grid getGrid() {
         return grid;
+    }
+
+    public Simulation getSimulation() {
+        return simulation;
     }
 }
