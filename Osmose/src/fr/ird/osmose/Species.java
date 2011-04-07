@@ -380,7 +380,7 @@ class Species {
                                 simulation.tabTLCatch[number - 1] += schoolCatchk.trophicLevel[schoolCatchk.cohort.ageNbDt] * ((float) (schoolCatchk.abundance * schoolCatchk.weight / 1000000));
                             }
                             if (!(tabCohorts[i].outOfZoneCohort[simulation.dt])) {
-                                simulation.osmose.grid.matrix[schoolCatchk.posi][schoolCatchk.posj].vectPresentSchools.removeElement(schoolCatchk);
+                                simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).vectPresentSchools.removeElement(schoolCatchk);
                             }
                             tabCohorts[i].vectSchools.removeElement(schoolCatchk);
                             tabCohorts[i].nbSchools--;

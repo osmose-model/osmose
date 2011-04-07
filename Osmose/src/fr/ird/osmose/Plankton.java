@@ -50,16 +50,16 @@ public class Plankton {
         }
 
         // Initialization matrix corresponding to osmose grid
-        mortalityRate = new float[coupling.grid.nbLines][];
-        biomass = new float[coupling.grid.nbLines][];
-        accessibleBiomass = new float[coupling.grid.nbLines][];
-        iniBiomass = new float[coupling.grid.nbLines][];
-        for (int i = 0; i < coupling.grid.nbLines; i++) {
-            biomass[i] = new float[coupling.grid.nbColumns];
-            accessibleBiomass[i] = new float[coupling.grid.nbColumns];
-            iniBiomass[i] = new float[coupling.grid.nbColumns];
-            mortalityRate[i] = new float[coupling.grid.nbColumns];
-            for (int j = 0; j < coupling.grid.nbColumns; j++) {
+        mortalityRate = new float[coupling.grid.getNbLines()][];
+        biomass = new float[coupling.grid.getNbLines()][];
+        accessibleBiomass = new float[coupling.grid.getNbLines()][];
+        iniBiomass = new float[coupling.grid.getNbLines()][];
+        for (int i = 0; i < coupling.grid.getNbLines(); i++) {
+            biomass[i] = new float[coupling.grid.getNbColumns()];
+            accessibleBiomass[i] = new float[coupling.grid.getNbColumns()];
+            iniBiomass[i] = new float[coupling.grid.getNbColumns()];
+            mortalityRate[i] = new float[coupling.grid.getNbColumns()];
+            for (int j = 0; j < coupling.grid.getNbColumns(); j++) {
                 biomass[i][j] = 0;
                 accessibleBiomass[i][j] = 0;
                 iniBiomass[i][j] = 0;
@@ -89,7 +89,7 @@ public class Plankton {
     // called during the spatial interpolation
     {
         float area;	// area of osmose cell in km^2
-        area = 111f * coupling.grid.dLat * 111f * (float) Math.cos(coupling.grid.matrix[i][j].getLat() * Math.PI / (90f * 2f)) * coupling.grid.dLong;
+        area = 111f * coupling.grid.getdLat() * 111f * (float) Math.cos(coupling.grid.getCell(i, j).getLat() * Math.PI / (90f * 2f)) * coupling.grid.getdLong();
 
         biomass[i][j] += area * unitConversion(integratedData[x][y] / (float) nb);
         iniBiomass[i][j] += area * unitConversion(integratedData[x][y] / (float) nb);
@@ -110,8 +110,8 @@ public class Plankton {
 
     public void clearPlankton() // clear the matrix for the next time step
     {
-        for (int i = 0; i < coupling.grid.nbLines; i++) {
-            for (int j = 0; j < coupling.grid.nbColumns; j++) {
+        for (int i = 0; i < coupling.grid.getNbLines(); i++) {
+            for (int j = 0; j < coupling.grid.getNbColumns(); j++) {
                 biomass[i][j] = 0;
                 accessibleBiomass[i][j] = 0;
                 iniBiomass[i][j] = 0;

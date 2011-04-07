@@ -105,12 +105,11 @@ class Cohort {
         }
 
         //REMOVING DEAD SCHOOLS FROM VECTBANCS and VECTPRESENTSCHOOLS
-        Cell[][] matrix = species.simulation.osmose.grid.matrix;
         for (int i = vectSchools.size() - 1; i >= 0; i--) {
             if (((School) vectSchools.elementAt(i)).disappears) {
                 if (!(outOfZoneCohort[species.simulation.dt]))// cohorts in the area during the time step
                 {
-                    matrix[((School) vectSchools.elementAt(i)).posi][((School) vectSchools.elementAt(i)).posj].vectPresentSchools.removeElement(vectSchools.elementAt(i));
+                    species.simulation.osmose.grid.getCell(((School) vectSchools.elementAt(i)).posi, ((School) vectSchools.elementAt(i)).posj).vectPresentSchools.removeElement(vectSchools.elementAt(i));
                 }
                 vectSchools.removeElementAt(i);
                 nbSchools--;
@@ -197,12 +196,11 @@ class Cohort {
         }
 
         //REMOVE DEAD SCHOOLS FROM VECTBANCS & VECTPRESENTSCHOOLS
-        Cell[][] matrix = species.simulation.osmose.grid.matrix;
         for (int k = schoolsCatchable.size() - 1; k >= 0; k--) {
             School schoolCatchk = (School) schoolsCatchable.elementAt(k);
             if (schoolCatchk.disappears) {
                 if (!outOfZoneCohort[species.simulation.dt]) {
-                    matrix[schoolCatchk.posi][schoolCatchk.posj].vectPresentSchools.removeElement(schoolCatchk);
+                    species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).vectPresentSchools.removeElement(schoolCatchk);
                 }
                 vectSchools.removeElement(schoolCatchk);
                 nbSchools--;
@@ -293,12 +291,11 @@ class Cohort {
                 index++;
             }
             //REMOVE DEAD SCHOOLS FROM VECTBANCS & VECTPRESENTSCHOOLS
-            Cell[][] matrix = species.simulation.osmose.grid.matrix;
             for (int k = schoolsCatchable.size() - 1; k >= 0; k--) {
                 School schoolCatchk = (School) schoolsCatchable.elementAt(k);
                 if (schoolCatchk.disappears) {
                     if (!outOfZoneCohort[species.simulation.dt]) {
-                        matrix[schoolCatchk.posi][schoolCatchk.posj].vectPresentSchools.removeElement(schoolCatchk);
+                        species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).vectPresentSchools.removeElement(schoolCatchk);
                     }
                     vectSchools.removeElement(schoolCatchk);
                     nbSchools--;
@@ -387,12 +384,11 @@ class Cohort {
                 index++;
             }
             //REMOVE DEAD SCHOOLS FROM VECTBANCS & VECTPRESENTSCHOOLS
-            Cell[][] matrix = species.simulation.osmose.grid.matrix;
             for (int k = schoolsCatchable.size() - 1; k >= 0; k--) {
                 School schoolCatchk = (School) schoolsCatchable.elementAt(k);
                 if (schoolCatchk.disappears) {
                     if (!outOfZoneCohort[species.simulation.dt]) {
-                        matrix[schoolCatchk.posi][schoolCatchk.posj].vectPresentSchools.removeElement(schoolCatchk);
+                        species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).vectPresentSchools.removeElement(schoolCatchk);
                     }
                     vectSchools.removeElement(schoolCatchk);
                     nbSchools--;

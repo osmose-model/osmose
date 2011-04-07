@@ -111,12 +111,12 @@ class School {
     public void communicatePosition() {
         //function called when update of schools present in cells after having
         //removed all elements from vectPresentSchools in all cells
-        grid.matrix[posi][posj].vectPresentSchools.addElement(this);
+        grid.getCell(posi, posj).vectPresentSchools.addElement(this);
     }
 
     public void randomWalk() {
         Vector vectPossibleCells = new Vector();
-        Cell currentCell = grid.matrix[posi][posj];
+        Cell currentCell = grid.getCell(posi, posj);
 
         Iterator<Cell> neighbors = grid.getAdjacentCells(currentCell).iterator();
         while (neighbors.hasNext()) {
@@ -167,7 +167,7 @@ class School {
     }
 
     public void predation() {
-        Cell myCell = grid.matrix[posi][posj];
+        Cell myCell = grid.getCell(posi, posj);
         Coupling myCouple = cohort.species.simulation.couple;
 
         float[] percentPlankton;
