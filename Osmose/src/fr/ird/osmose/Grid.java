@@ -16,7 +16,7 @@ package fr.ird.osmose;
  */
 import java.util.*;
 
-class Grid {
+public class Grid {
 
     /*
      * ********

@@ -24,12 +24,22 @@ public class Osmose {
      * * Logs *
      * ********
      * 2011/04/07 phv
-     * public void distribRandom(). Recoded the random sorting of the adjacent
-     * cells using method Grid.getAdjacentCells since Cell.neighbors[] has been
+     * Created static instance of the Osmose object.
+     * Added a getGrid() method that other classes will call through the Osmose
+     * instance.
+     * public void distribRandom(). Recoded the random sorting of the neighbor
+     * cells using method Grid.getNeighborCells since Cell.neighbors[] has been
      * deleted.
      * ***
      */
 
+    /*
+     * Static instance of Osmose
+     */
+    private static Osmose osmose = new Osmose();
+    /*
+     * 
+     */
     String OS_NAME = System.getProperty("os.name");
     String fileSeparator = System.getProperty("file.separator");
     String inputPathName, outputPathName;
@@ -39,7 +49,7 @@ public class Osmose {
 
     /* ***************************** DECLARING VARIABLES ******************************** */
     Simulation simulation;
-    Grid grid;
+    private Grid grid;
     int nbSeriesSimus;	// nb of series
     int[] nbLoopTab;	// nb of simulations per serie
     int numSerie, numSimu;
@@ -134,7 +144,7 @@ public class Osmose {
     int[] startingSavingTimeTab;
     boolean timeSeriesIsShortened;
 
-    public Osmose() {
+    public void initSimulation() {
         readPathFile();		// read the path of input files, written in the file pathFile.txt
 
         // create output folder
@@ -2524,8 +2534,16 @@ public class Osmose {
 
     public static void main(String args[]) {
         System.out.println(new Date());
-        Osmose osmose = new Osmose();
-        osmose.runSeriesSimulations();
+       osmose.initSimulation();
+       osmose.runSeriesSimulations();
         System.out.println(new Date());
+    }
+
+    public static Osmose getInstance() {
+        return osmose;
+    }
+
+    public Grid getGrid() {
+        return grid;
     }
 }

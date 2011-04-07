@@ -168,6 +168,10 @@ public class Simulation {
         }
     }
 
+    private Grid getGrid() {
+        return Osmose.getInstance().getGrid();
+    }
+
     public void step() {
         // screen display to check the period already simulated
         if (t % 5 == 0) {
@@ -178,14 +182,14 @@ public class Simulation {
 
         // calculation of relative size of MPA
         if ((osmose.thereIsMPATab[numSerie]) && (t == osmose.MPAtStartTab[numSerie])) {
-            RS = osmose.tabMPAiMatrix[numSerie].length / ((osmose.grid.getNbLines()) * osmose.grid.getNbColumns());
+            RS = osmose.tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
             for (int index = 0; index < osmose.tabMPAiMatrix[numSerie].length; index++) {
-                osmose.grid.getCell(osmose.tabMPAiMatrix[numSerie][index], osmose.tabMPAjMatrix[numSerie][index]).setMPA(true);
+                getGrid().getCell(osmose.tabMPAiMatrix[numSerie][index], osmose.tabMPAjMatrix[numSerie][index]).setMPA(true);
             }
         } else if ((!osmose.thereIsMPATab[numSerie]) || (t > osmose.MPAtEndTab[numSerie])) {
             RS = 0;
             for (int index = 0; index < osmose.tabMPAiMatrix[numSerie].length; index++) {
-                osmose.grid.getCell(osmose.tabMPAiMatrix[numSerie][index], osmose.tabMPAjMatrix[numSerie][index]).setMPA(false);
+                getGrid().getCell(osmose.tabMPAiMatrix[numSerie][index], osmose.tabMPAjMatrix[numSerie][index]).setMPA(false);
             }
         }
 
@@ -217,10 +221,10 @@ public class Simulation {
 
             if (!((dt == 0) && (t == 0))) // because distributeSpeciesIni() used at initialisation
             {
-                for (int i = 0; i < osmose.grid.getNbLines(); i++) // remove all the schools because of the last age class
+                for (int i = 0; i < getGrid().getNbLines(); i++) // remove all the schools because of the last age class
                 {
-                    for (int j = 0; j < osmose.grid.getNbColumns(); j++) {
-                        osmose.grid.getCell(i, j).clear();
+                    for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                        getGrid().getCell(i, j).clear();
                     }
                 }
                 distributeSpecies();      // update distribution
@@ -581,7 +585,7 @@ public class Simulation {
     }
 
     public void rankSchoolsSizes() {
-        Grid grid = osmose.grid;
+        Grid grid = getGrid();
         int dummy;
         for (int i = 0; i < grid.getNbLines(); i++) {
             for (int j = 0; j < grid.getNbColumns(); j++) {
@@ -627,14 +631,14 @@ public class Simulation {
     }
 
     public void assessPresentSchools() {
-        for (int i = 0; i < osmose.grid.getNbLines(); i++) {
-            for (int j = 0; j < osmose.grid.getNbColumns(); j++) {
-                for (int k = osmose.grid.getCell(i, j).size() - 1; k >= 0; k--) {
-                    if (((School) osmose.grid.getCell(i, j).get(k)).willDisappear()) {
-                        osmose.grid.getCell(i, j).remove(k);
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                for (int k = getGrid().getCell(i, j).size() - 1; k >= 0; k--) {
+                    if (((School) getGrid().getCell(i, j).get(k)).willDisappear()) {
+                        getGrid().getCell(i, j).remove(k);
                     }
                 }
-                osmose.grid.getCell(i, j).trimToSize();
+                getGrid().getCell(i, j).trimToSize();
             }
         }
     }
@@ -664,7 +668,7 @@ public class Simulation {
             for (int i = 0; i < species.length; i++) {
                 Vector vectCells = new Vector(osmose.randomAreaCoordi[i].length);
                 for (int m = 0; m < osmose.randomAreaCoordi[i].length; m++) {
-                    vectCells.addElement(osmose.grid.getCell(osmose.randomAreaCoordi[i][m], osmose.randomAreaCoordj[i][m]));
+                    vectCells.addElement(getGrid().getCell(osmose.randomAreaCoordi[i][m], osmose.randomAreaCoordj[i][m]));
                 }
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     for (int k = 0; k < species[i].tabCohorts[j].vectSchools.size(); k++) {
@@ -682,7 +686,7 @@ public class Simulation {
                         Vector vectCells = new Vector(osmose.mapCoordi[osmose.numMap[i][j][0]].length);
                         tempMaxProbaPresence = 0;
                         for (int m = 0; m < osmose.mapCoordi[osmose.numMap[i][j][0]].length; m++) {
-                            vectCells.addElement(osmose.grid.getCell(osmose.mapCoordi[osmose.numMap[i][j][0]][m], osmose.mapCoordj[osmose.numMap[i][j][0]][m]));
+                            vectCells.addElement(getGrid().getCell(osmose.mapCoordi[osmose.numMap[i][j][0]][m], osmose.mapCoordj[osmose.numMap[i][j][0]][m]));
                             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][j][0]][m]));
                         }
                         for (int k = 0; k < species[i].tabCohorts[j].vectSchools.size(); k++) {
@@ -712,7 +716,7 @@ public class Simulation {
             for (int i = 0; i < species.length; i++) {
                 Vector vectCells = new Vector(osmose.randomAreaCoordi[i].length);
                 for (int m = 0; m < osmose.randomAreaCoordi[i].length; m++) {
-                    vectCells.addElement(osmose.grid.getCell(osmose.randomAreaCoordi[i][m], osmose.randomAreaCoordj[i][m]));
+                    vectCells.addElement(getGrid().getCell(osmose.randomAreaCoordi[i][m], osmose.randomAreaCoordj[i][m]));
                 }
                 for (int k = 0; k < species[i].tabCohorts[0].vectSchools.size(); k++) {
                     ((School) species[i].tabCohorts[0].vectSchools.elementAt(k)).randomDeal(vectCells);
@@ -735,7 +739,7 @@ public class Simulation {
                 Vector vectCellsCoh0 = new Vector();
                 tempMaxProbaPresence = 0;
                 for (int j = 0; j < osmose.mapCoordi[(osmose.numMap[i][0][dt])].length; j++) {
-                    vectCellsCoh0.addElement(osmose.grid.getCell(osmose.mapCoordi[(osmose.numMap[i][0][dt])][j], osmose.mapCoordj[(osmose.numMap[i][0][dt])][j]));
+                    vectCellsCoh0.addElement(getGrid().getCell(osmose.mapCoordi[(osmose.numMap[i][0][dt])][j], osmose.mapCoordj[(osmose.numMap[i][0][dt])][j]));
                     tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][0][dt]][j]));
                 }
 
@@ -777,7 +781,7 @@ public class Simulation {
                         Vector vectCellsCoh = new Vector();
                         tempMaxProbaPresence = 0;
                         for (int m = 0; m < osmose.mapCoordi[(osmose.numMap[i][j][dt])].length; m++) {
-                            vectCellsCoh.addElement(osmose.grid.getCell(osmose.mapCoordi[(osmose.numMap[i][j][dt])][m], osmose.mapCoordj[(osmose.numMap[i][j][dt])][m]));
+                            vectCellsCoh.addElement(getGrid().getCell(osmose.mapCoordi[(osmose.numMap[i][j][dt])][m], osmose.mapCoordj[(osmose.numMap[i][j][dt])][m]));
                             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][j][dt]][m]));
                         }
                         for (int k = 0; k < species[i].tabCohorts[j].nbSchools; k++) // Loop to initialize outOfZoneSchool= true
@@ -815,7 +819,7 @@ public class Simulation {
                                     Vector vectCellsCoh = new Vector();
                                     tempMaxProbaPresence = 0;
                                     for (int m = 0; m < osmose.mapCoordi[(osmose.numMap[i][j][dt])].length; m++) {
-                                        vectCellsCoh.addElement(osmose.grid.getCell(osmose.mapCoordi[(osmose.numMap[i][j][dt])][m], osmose.mapCoordj[(osmose.numMap[i][j][dt])][m]));
+                                        vectCellsCoh.addElement(getGrid().getCell(osmose.mapCoordi[(osmose.numMap[i][j][dt])][m], osmose.mapCoordj[(osmose.numMap[i][j][dt])][m]));
                                         tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (osmose.mapProbaPresence[osmose.numMap[i][j][dt]][m]));
                                     }
 

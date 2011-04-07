@@ -1,6 +1,5 @@
 package fr.ird.osmose;
 
-
 /*******************************************************************************
  * <p>Titre : Coupling class </p>
  *
@@ -29,8 +28,16 @@ import ucar.ma2.Index;
 
 public class Coupling {
 
+    /*
+     * ********
+     * * Logs *
+     * ********
+     * 2011/04/07 phv
+     * Deleted the grid variable and replaced it by method getGrid() that calls
+     * the Osmose grid.
+     * ***
+     */
     Simulation simulation;
-    Grid grid;
     int nbPlankton, nbForcingDt;
     // Tables of plankton information
     String[][] planktonFileListTxt;		// List of the file names of plankton matrix provided as input
@@ -66,7 +73,6 @@ public class Coupling {
 
     public Coupling(Simulation simulation, boolean isForcing) {
         this.simulation = simulation;
-        this.grid = simulation.osmose.grid;
         planktonFilesPath = simulation.osmose.inputPathName;
         this.isForcing = isForcing;
         if (!isForcing) {
@@ -74,6 +80,10 @@ public class Coupling {
         } else {
             startLTLModel = simulation.osmose.simulationTimeTab[simulation.numSerie] + 1;
         }
+    }
+
+    public Grid getGrid() {
+        return Osmose.getInstance().getGrid();
     }
 
     public void readCouplingConfigFile(String couplingFileName) {
@@ -440,6 +450,8 @@ public class Coupling {
 
     public void updatePlankton(int dt) // read files for the current time step
     {
+        System.out.println("UpdatePlankton at step " + dt);
+        long t0 = System.nanoTime();
         for (int i = 0; i < nbPlankton; i++) {
             planktonList[i].clearPlankton();      // put the biomass tables of plankton to 0
         }
@@ -467,15 +479,17 @@ public class Coupling {
         if (simulation.t >= simulation.osmose.timeSeriesStart) {
             saveForDiet();       // save biomass of plankton before predation
         }
+        long time = (System.nanoTime() - t0) / 1000L;
+        System.out.println("Fin UpdatePlankton at step " + dt + " elapsed (micro): " + time);
     }
 
     public void saveForDiet() // save biomass of plankton before predation
     {
         for (int p = 0; p < nbPlankton; p++) {
             simulation.biomPerStage[simulation.species.length + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
-            for (int i = 0; i < grid.getNbLines(); i++) {
-                for (int j = 0; j < grid.getNbColumns(); j++) {
-                    if (!grid.getCell(i, j).isLand()) {
+            for (int i = 0; i < getGrid().getNbLines(); i++) {
+                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                    if (!getGrid().getCell(i, j).isLand()) {
                         simulation.biomPerStage[simulation.species.length + p][0] += ((Plankton) planktonList[p]).biomass[i][j];
                     }
                 }
@@ -505,11 +519,11 @@ public class Coupling {
 
     public void calculPlanktonMortality() // called if t>=startLTLModel, ie when in coupling mode
     {
-        // compute mortality rate in day-1 for the Osmose grid
+        // compute mortality rate in day-1 for the Osmose getGrid()
         for (int p = 0; p < nbPlankton; p++) {
-            for (int x = 0; x < grid.getNbLines(); x++) {
-                for (int y = 0; y < grid.getNbColumns(); y++) {
-                    if (!grid.getCell(x, y).isLand()) {
+            for (int x = 0; x < getGrid().getNbLines(); x++) {
+                for (int y = 0; y < getGrid().getNbColumns(); y++) {
+                    if (!getGrid().getCell(x, y).isLand()) {
                         if (planktonList[p].iniBiomass[x][y] != 0) {
                             planktonList[p].mortalityRate[x][y] = (simulation.nbDt / 365f) * (planktonList[p].iniBiomass[x][y] - planktonList[p].biomass[x][y]) / planktonList[p].iniBiomass[x][y];
                         } else {
@@ -522,7 +536,7 @@ public class Coupling {
             }
         }
 
-        // from osmose grid to LTL grid
+        // from osmose getGrid() to LTL grid
         mapInterpBack();
 
         // write and save in the forcing NetCDF file for two-way coupling
@@ -552,11 +566,11 @@ public class Coupling {
 
         pr = new PrintWriter(planktonTime, true);
 
-        for (int j = 0; j < grid.getNbLines(); j++) {
+        for (int j = 0; j < getGrid().getNbLines(); j++) {
             pr.print(simulation.t + simulation.dt / (float) simulation.nbDt);
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
-                for (int i = 0; i < grid.getNbColumns(); i++) {
+                for (int i = 0; i < getGrid().getNbColumns(); i++) {
                     pr.print(planktonList[p].mortalityRate[j][i]);
                     pr.print(";");
 
@@ -615,20 +629,20 @@ public class Coupling {
         for (int i = 0; i < planktonDimX; i++) {
             for (int j = 0; j < planktonDimY; j++) // consider only the LTL cells included within the Osmose grid
             {
-                if ((latitude[i][j] >= grid.getLatMin()) && (latitude[i][j] <= grid.getLatMax()) && (longitude[i][j] >= grid.getLongMin()) && (longitude[i][j] <= grid.getLongMax())) {
-                    // equations giving the position of ROMS cells within the Osmose grid, avoiding to read the whole matrix
+                if ((latitude[i][j] >= getGrid().getLatMin()) && (latitude[i][j] <= getGrid().getLatMax()) && (longitude[i][j] >= getGrid().getLongMin()) && (longitude[i][j] <= getGrid().getLongMax())) {
+                    // equations giving the position of ROMS cells within the Osmose getGrid(), avoiding to read the whole matrix
                     /*
                      * WARNING, phv, 2011/04/07
                      * I changed the calculation of posiTemp & posjTemp
                      * but it should be double checked.
                      */
-                    posiTemp = (int) Math.floor((latitude[i][j] - grid.getLatMin()) / grid.getdLat());    //************** Attention sign minus & latMax depend on the sign of lat and long
-                    posjTemp = (int) Math.floor((longitude[i][j] - grid.getLongMin()) / grid.getdLong());
-                    
+                    posiTemp = (int) Math.floor((latitude[i][j] - getGrid().getLatMin()) / getGrid().getdLat());    //************** Attention sign minus & latMax depend on the sign of lat and long
+                    posjTemp = (int) Math.floor((longitude[i][j] - getGrid().getLongMin()) / getGrid().getdLong());
+
                     // attach each LTL cells to the right Osmose cell (several LTL cells per Osmose cell is allowed)
-                    if (!grid.getCell(posiTemp, posjTemp).isLand()) {
-                        grid.getCell(posiTemp, posjTemp).icoordLTLGrid.addElement(new Integer(i));
-                        grid.getCell(posiTemp, posjTemp).jcoordLTLGrid.addElement(new Integer(j));
+                    if (!getGrid().getCell(posiTemp, posjTemp).isLand()) {
+                        getGrid().getCell(posiTemp, posjTemp).icoordLTLGrid.addElement(new Integer(i));
+                        getGrid().getCell(posiTemp, posjTemp).jcoordLTLGrid.addElement(new Integer(j));
                     }
                 }
             }
@@ -640,17 +654,17 @@ public class Coupling {
     {
         int tempX, tempY;
 
-        for (int i = 0; i < grid.getNbLines(); i++) {
-            for (int j = 0; j < grid.getNbColumns(); j++) {
-                if (!grid.getCell(i, j).isLand()) {
-                    if (grid.getCell(i, j).getNbCellsLTLGrid() != 0) // if this osmose cell is composed of at least one LTL cell
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                if (!getGrid().getCell(i, j).isLand()) {
+                    if (getGrid().getCell(i, j).getNbCellsLTLGrid() != 0) // if this osmose cell is composed of at least one LTL cell
                     {
-                        for (int k = 0; k < grid.getCell(i, j).getNbCellsLTLGrid(); k++) {
+                        for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
                             for (int p = 0; p < nbPlankton; p++) {
-                                tempX = ((Integer) grid.getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
-                                tempY = ((Integer) grid.getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
+                                tempX = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
+                                tempY = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
                                 // interpolate the plankton concentrations from the LTL cells
-                                ((Plankton) planktonList[p]).addCell(i, j, tempX, tempY, grid.getCell(i, j).getNbCellsLTLGrid());
+                                ((Plankton) planktonList[p]).addCell(i, j, tempX, tempY, getGrid().getCell(i, j).getNbCellsLTLGrid());
                             }
                         }
                     } else // if no LTL cell is associated with this osmose cell (because of curvilinear grid of ROMS)
@@ -658,61 +672,61 @@ public class Coupling {
                     {
                         int nbCellsTemp = 0;
                         if (i > 0) {
-                            if (!grid.getCell(i - 1, j).isLand()) {
-                                nbCellsTemp += grid.getCell(i - 1, j).getNbCellsLTLGrid();
+                            if (!getGrid().getCell(i - 1, j).isLand()) {
+                                nbCellsTemp += getGrid().getCell(i - 1, j).getNbCellsLTLGrid();
                             }
                         }
-                        if (i < grid.getNbLines() - 1) {
-                            if (!grid.getCell(i + 1, j).isLand()) {
-                                nbCellsTemp += grid.getCell(i + 1, j).getNbCellsLTLGrid();
+                        if (i < getGrid().getNbLines() - 1) {
+                            if (!getGrid().getCell(i + 1, j).isLand()) {
+                                nbCellsTemp += getGrid().getCell(i + 1, j).getNbCellsLTLGrid();
                             }
                         }
                         if (j > 0) {
-                            if (!grid.getCell(i, j - 1).isLand()) {
-                                nbCellsTemp += grid.getCell(i, j - 1).getNbCellsLTLGrid();
+                            if (!getGrid().getCell(i, j - 1).isLand()) {
+                                nbCellsTemp += getGrid().getCell(i, j - 1).getNbCellsLTLGrid();
                             }
                         }
-                        if (j < grid.getNbColumns() - 1) {
-                            if (!grid.getCell(i, j + 1).isLand()) {
-                                nbCellsTemp += grid.getCell(i, j + 1).getNbCellsLTLGrid();
+                        if (j < getGrid().getNbColumns() - 1) {
+                            if (!getGrid().getCell(i, j + 1).isLand()) {
+                                nbCellsTemp += getGrid().getCell(i, j + 1).getNbCellsLTLGrid();
                             }
                         }
 
                         if (i > 0) {
-                            for (int k = 0; k < grid.getCell(i - 1, j).getNbCellsLTLGrid(); k++) {
+                            for (int k = 0; k < getGrid().getCell(i - 1, j).getNbCellsLTLGrid(); k++) {
                                 for (int p = 0; p < nbPlankton; p++) {
-                                    tempX = ((Integer) grid.getCell(i - 1, j).icoordLTLGrid.elementAt(k)).intValue();
-                                    tempY = ((Integer) grid.getCell(i - 1, j).jcoordLTLGrid.elementAt(k)).intValue();
+                                    tempX = ((Integer) getGrid().getCell(i - 1, j).icoordLTLGrid.elementAt(k)).intValue();
+                                    tempY = ((Integer) getGrid().getCell(i - 1, j).jcoordLTLGrid.elementAt(k)).intValue();
                                     ((Plankton) planktonList[p]).addCell(i, j, tempX, tempY, nbCellsTemp);
                                 }
                             }
                         }
 
-                        if (i < grid.getNbLines() - 1) {
-                            for (int k = 0; k < grid.getCell(i + 1, j).getNbCellsLTLGrid(); k++) {
+                        if (i < getGrid().getNbLines() - 1) {
+                            for (int k = 0; k < getGrid().getCell(i + 1, j).getNbCellsLTLGrid(); k++) {
                                 for (int p = 0; p < nbPlankton; p++) {
-                                    tempX = ((Integer) grid.getCell(i + 1, j).icoordLTLGrid.elementAt(k)).intValue();
-                                    tempY = ((Integer) grid.getCell(i + 1, j).jcoordLTLGrid.elementAt(k)).intValue();
+                                    tempX = ((Integer) getGrid().getCell(i + 1, j).icoordLTLGrid.elementAt(k)).intValue();
+                                    tempY = ((Integer) getGrid().getCell(i + 1, j).jcoordLTLGrid.elementAt(k)).intValue();
                                     ((Plankton) planktonList[p]).addCell(i, j, tempX, tempY, nbCellsTemp);
                                 }
                             }
                         }
 
                         if (j > 0) {
-                            for (int k = 0; k < grid.getCell(i, j - 1).getNbCellsLTLGrid(); k++) {
+                            for (int k = 0; k < getGrid().getCell(i, j - 1).getNbCellsLTLGrid(); k++) {
                                 for (int p = 0; p < nbPlankton; p++) {
-                                    tempX = ((Integer) grid.getCell(i, j - 1).icoordLTLGrid.elementAt(k)).intValue();
-                                    tempY = ((Integer) grid.getCell(i, j - 1).jcoordLTLGrid.elementAt(k)).intValue();
+                                    tempX = ((Integer) getGrid().getCell(i, j - 1).icoordLTLGrid.elementAt(k)).intValue();
+                                    tempY = ((Integer) getGrid().getCell(i, j - 1).jcoordLTLGrid.elementAt(k)).intValue();
                                     ((Plankton) planktonList[p]).addCell(i, j, tempX, tempY, nbCellsTemp);
                                 }
                             }
                         }
 
-                        if (j < grid.getNbColumns() - 1) {
-                            for (int k = 0; k < grid.getCell(i, j + 1).getNbCellsLTLGrid(); k++) {
+                        if (j < getGrid().getNbColumns() - 1) {
+                            for (int k = 0; k < getGrid().getCell(i, j + 1).getNbCellsLTLGrid(); k++) {
                                 for (int p = 0; p < nbPlankton; p++) {
-                                    tempX = ((Integer) grid.getCell(i, j + 1).icoordLTLGrid.elementAt(k)).intValue();
-                                    tempY = ((Integer) grid.getCell(i, j + 1).jcoordLTLGrid.elementAt(k)).intValue();
+                                    tempX = ((Integer) getGrid().getCell(i, j + 1).icoordLTLGrid.elementAt(k)).intValue();
+                                    tempY = ((Integer) getGrid().getCell(i, j + 1).jcoordLTLGrid.elementAt(k)).intValue();
                                     ((Plankton) planktonList[p]).addCell(i, j, tempX, tempY, nbCellsTemp);
                                 }
                             }
@@ -743,11 +757,11 @@ public class Coupling {
 
         pr = new PrintWriter(planktonTime, true);
 
-        for (int j = 0; j < grid.getNbLines(); j++) {
+        for (int j = 0; j < getGrid().getNbLines(); j++) {
             pr.print(simulation.t + simulation.dt / (float) simulation.nbDt);
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
-                for (int i = 0; i < grid.getNbColumns(); i++) {
+                for (int i = 0; i < getGrid().getNbColumns(); i++) {
                     pr.print(planktonList[p].biomass[j][i]);
                     pr.print(";");
 
@@ -772,55 +786,55 @@ public class Coupling {
         }
 
         // realize the interpolation in the other way than mapInterpolation()
-        for (int i = 0; i < grid.getNbLines(); i++) {
-            for (int j = 0; j < grid.getNbColumns(); j++) {
-                if ((!grid.getCell(i, j).isLand()) && (grid.getCell(i, j).getNbMapsConcerned() != 0)) {
-                    if (grid.getCell(i, j).getNbCellsLTLGrid() != 0) {
-                        for (int k = 0; k < grid.getCell(i, j).getNbCellsLTLGrid(); k++) {
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                if ((!getGrid().getCell(i, j).isLand()) && (getGrid().getCell(i, j).getNbMapsConcerned() != 0)) {
+                    if (getGrid().getCell(i, j).getNbCellsLTLGrid() != 0) {
+                        for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
                             for (int p = 0; p < nbPlankton; p++) {
-                                xTemp = ((Integer) grid.getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
-                                yTemp = ((Integer) grid.getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
+                                xTemp = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
+                                yTemp = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
                                 saveMortality[p][xTemp][yTemp][simulation.dt] = planktonList[p].mortalityRate[i][j];
                             }
                         }
                     } else {
                         int nbCellsTemp = 0;
                         if (i > 0) {
-                            if (!grid.getCell(i - 1, j).isLand()) {
-                                nbCellsTemp += grid.getCell(i - 1, j).getNbCellsLTLGrid();
+                            if (!getGrid().getCell(i - 1, j).isLand()) {
+                                nbCellsTemp += getGrid().getCell(i - 1, j).getNbCellsLTLGrid();
                             }
                         }
-                        if (i < grid.getNbLines() - 1) {
-                            if (!grid.getCell(i + 1, j).isLand()) {
-                                nbCellsTemp += grid.getCell(i + 1, j).getNbCellsLTLGrid();
+                        if (i < getGrid().getNbLines() - 1) {
+                            if (!getGrid().getCell(i + 1, j).isLand()) {
+                                nbCellsTemp += getGrid().getCell(i + 1, j).getNbCellsLTLGrid();
                             }
                         }
                         if (j > 0) {
-                            if (!grid.getCell(i, j - 1).isLand()) {
-                                nbCellsTemp += grid.getCell(i, j - 1).getNbCellsLTLGrid();
+                            if (!getGrid().getCell(i, j - 1).isLand()) {
+                                nbCellsTemp += getGrid().getCell(i, j - 1).getNbCellsLTLGrid();
                             }
                         }
-                        if (j < grid.getNbColumns() - 1) {
-                            if (!grid.getCell(i, j + 1).isLand()) {
-                                nbCellsTemp += grid.getCell(i, j + 1).getNbCellsLTLGrid();
+                        if (j < getGrid().getNbColumns() - 1) {
+                            if (!getGrid().getCell(i, j + 1).isLand()) {
+                                nbCellsTemp += getGrid().getCell(i, j + 1).getNbCellsLTLGrid();
                             }
                         }
 
                         if (i > 0) {
                             for (int p = 0; p < nbPlankton; p++) {
-                                for (int k = 0; k < grid.getCell(i - 1, j).getNbCellsLTLGrid(); k++) {
-                                    xTemp = ((Integer) grid.getCell(i - 1, j).icoordLTLGrid.elementAt(k)).intValue();
-                                    yTemp = ((Integer) grid.getCell(i - 1, j).jcoordLTLGrid.elementAt(k)).intValue();
+                                for (int k = 0; k < getGrid().getCell(i - 1, j).getNbCellsLTLGrid(); k++) {
+                                    xTemp = ((Integer) getGrid().getCell(i - 1, j).icoordLTLGrid.elementAt(k)).intValue();
+                                    yTemp = ((Integer) getGrid().getCell(i - 1, j).jcoordLTLGrid.elementAt(k)).intValue();
 
                                     saveMortality[p][xTemp][yTemp][simulation.dt] += planktonList[p].mortalityRate[i - 1][j] / (float) nbCellsTemp;
                                 }
                             }
                         }
-                        if (i < grid.getNbLines() - 1) {
+                        if (i < getGrid().getNbLines() - 1) {
                             for (int p = 0; p < nbPlankton; p++) {
-                                for (int k = 0; k < grid.getCell(i + 1, j).getNbCellsLTLGrid(); k++) {
-                                    xTemp = ((Integer) grid.getCell(i + 1, j).icoordLTLGrid.elementAt(k)).intValue();
-                                    yTemp = ((Integer) grid.getCell(i + 1, j).jcoordLTLGrid.elementAt(k)).intValue();
+                                for (int k = 0; k < getGrid().getCell(i + 1, j).getNbCellsLTLGrid(); k++) {
+                                    xTemp = ((Integer) getGrid().getCell(i + 1, j).icoordLTLGrid.elementAt(k)).intValue();
+                                    yTemp = ((Integer) getGrid().getCell(i + 1, j).jcoordLTLGrid.elementAt(k)).intValue();
 
                                     saveMortality[p][xTemp][yTemp][simulation.dt] += planktonList[p].mortalityRate[i + 1][j] / (float) nbCellsTemp;
                                 }
@@ -829,20 +843,20 @@ public class Coupling {
 
                         if (j > 0) {
                             for (int p = 0; p < nbPlankton; p++) {
-                                for (int k = 0; k < grid.getCell(i, j - 1).getNbCellsLTLGrid(); k++) {
-                                    xTemp = ((Integer) grid.getCell(i, j - 1).icoordLTLGrid.elementAt(k)).intValue();
-                                    yTemp = ((Integer) grid.getCell(i, j - 1).jcoordLTLGrid.elementAt(k)).intValue();
+                                for (int k = 0; k < getGrid().getCell(i, j - 1).getNbCellsLTLGrid(); k++) {
+                                    xTemp = ((Integer) getGrid().getCell(i, j - 1).icoordLTLGrid.elementAt(k)).intValue();
+                                    yTemp = ((Integer) getGrid().getCell(i, j - 1).jcoordLTLGrid.elementAt(k)).intValue();
 
                                     saveMortality[p][xTemp][yTemp][simulation.dt] += planktonList[p].mortalityRate[i][j - 1] / (float) nbCellsTemp;
                                 }
                             }
                         }
 
-                        if (j < grid.getNbColumns() - 1) {
+                        if (j < getGrid().getNbColumns() - 1) {
                             for (int p = 0; p < nbPlankton; p++) {
-                                for (int k = 0; k < grid.getCell(i, j + 1).getNbCellsLTLGrid(); k++) {
-                                    xTemp = ((Integer) grid.getCell(i, j + 1).icoordLTLGrid.elementAt(k)).intValue();
-                                    yTemp = ((Integer) grid.getCell(i, j + 1).jcoordLTLGrid.elementAt(k)).intValue();
+                                for (int k = 0; k < getGrid().getCell(i, j + 1).getNbCellsLTLGrid(); k++) {
+                                    xTemp = ((Integer) getGrid().getCell(i, j + 1).icoordLTLGrid.elementAt(k)).intValue();
+                                    yTemp = ((Integer) getGrid().getCell(i, j + 1).jcoordLTLGrid.elementAt(k)).intValue();
 
                                     saveMortality[p][xTemp][yTemp][simulation.dt] += planktonList[p].mortalityRate[i][j + 1] / (float) nbCellsTemp;
                                 }

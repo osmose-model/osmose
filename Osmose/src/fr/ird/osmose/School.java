@@ -113,10 +113,6 @@ public class School {
     int dietOutputStage;
     private float[][] dietTemp;
     private float sumDiet;
-    /*
-     * The grid of the simulation.
-     */
-    private Grid grid;
 
 //////////////
 // Constructor
@@ -135,7 +131,6 @@ public class School {
         this.length = length;
         this.weight = weight;
         this.biomass = ((double) abundance) * weight / 1000000.;
-        grid = cohort.species.simulation.osmose.grid;
         disappears = false;
         catchable = true;
 
@@ -212,7 +207,7 @@ public class School {
          * => neighbor cells that are not in land + current cell
          */
         List<Cell> accessibleCells = new ArrayList();
-        Iterator<Cell> neighbors = grid.getNeighborCells(cell).iterator();
+        Iterator<Cell> neighbors = getGrid().getNeighborCells(cell).iterator();
         while (neighbors.hasNext()) {
             Cell neighbor = neighbors.next();
             if (!neighbor.isLand()) {
@@ -223,6 +218,10 @@ public class School {
 
         /* Randomly choose the new cell */
         randomDeal(accessibleCells);
+    }
+
+    private Grid getGrid() {
+        return Osmose.getInstance().getGrid();
     }
 
     public void updateAccessStage(float[] ageStages, int nbAccessStages) {
