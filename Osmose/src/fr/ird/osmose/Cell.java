@@ -13,15 +13,21 @@ package fr.ird.osmose;
  * @version 2.1 
  ******************************************************************************* 
  */
+import java.util.ArrayList;
 import java.util.Vector;
 
-public class Cell {
+public class Cell extends ArrayList<School> {
 
     /*
      * ********
      * * Logs *
      * ********
      * 2011/04/07 phv
+     * Deleted the vectPresentSchools variable.
+     * Cell extends ArrayList<School> it means that a cell is now an array of
+     * schools. Therefore to add, remove or get a school it is straighforward:
+     * cell.add(school) cell.get(k) cell.remove(scholl), etc.
+     * Deleted numPresentSchools, replaced by cell.size().
      * Deleted the neigbhors variable since it is not necessary to keep it
      * in memory. It is sufficient to find them just when the program need them.
      * ***
@@ -69,10 +75,6 @@ public class Cell {
      */
     private SpatialGroup spatialGroup;
     /*
-     * List of schools in the cell
-     */
-    Vector vectPresentSchools;
-    /*
      * 
      */
     private boolean alreadyChosen;
@@ -113,7 +115,6 @@ public class Cell {
         this.j = j;
         this.lat = lat;
         this.lon = lon;
-        vectPresentSchools = new Vector();
         land = false;
         mpa = false;
         numMapsConcerned = new Vector();
@@ -223,13 +224,6 @@ public class Cell {
     }
 
     /**
-     * @return the nbPresentSchools
-     */
-    public int getNbPresentSchools() {
-        return vectPresentSchools.size();
-    }
-
-    /**
      * The number of distribution maps in which this cell is involved
      * @return the nbMapsConcerned
      */
@@ -256,6 +250,10 @@ public class Cell {
      */
     public int getNbCellsLTLGrid() {
         return icoordLTLGrid.size();
+    }
+
+    public School getSchool(int index) {
+        return get(index);
     }
 }
 

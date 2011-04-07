@@ -17,7 +17,7 @@ package fr.ird.osmose;
 import java.io.*;
 import java.util.*;
 
-class Simulation {
+public class Simulation {
 
     Osmose osmose;
     Coupling couple;
@@ -220,7 +220,7 @@ class Simulation {
                 for (int i = 0; i < osmose.grid.getNbLines(); i++) // remove all the schools because of the last age class
                 {
                     for (int j = 0; j < osmose.grid.getNbColumns(); j++) {
-                        osmose.grid.getCell(i, j).vectPresentSchools.removeAllElements();
+                        osmose.grid.getCell(i, j).clear();
                     }
                 }
                 distributeSpecies();      // update distribution
@@ -585,27 +585,27 @@ class Simulation {
         int dummy;
         for (int i = 0; i < grid.getNbLines(); i++) {
             for (int j = 0; j < grid.getNbColumns(); j++) {
-                int[] indexSchoolsSizes = new int[grid.getCell(i, j).getNbPresentSchools()];
-                for (int k = 0; k < grid.getCell(i, j).getNbPresentSchools(); k++) {
+                int[] indexSchoolsSizes = new int[grid.getCell(i, j).size()];
+                for (int k = 0; k < grid.getCell(i, j).size(); k++) {
                     indexSchoolsSizes[k] = k;
                 }
-                for (int k1 = 0; k1 < grid.getCell(i, j).getNbPresentSchools(); k1++) {
-                    for (int k2 = k1 + 1; k2 < grid.getCell(i, j).getNbPresentSchools(); k2++) {
-                        if (((School) grid.getCell(i, j).vectPresentSchools.elementAt(indexSchoolsSizes[k1])).length
-                                > ((School) grid.getCell(i, j).vectPresentSchools.elementAt(indexSchoolsSizes[k2])).length) {
+                for (int k1 = 0; k1 < grid.getCell(i, j).size(); k1++) {
+                    for (int k2 = k1 + 1; k2 < grid.getCell(i, j).size(); k2++) {
+                        if (((School) grid.getCell(i, j).get(indexSchoolsSizes[k1])).length
+                                > ((School) grid.getCell(i, j).get(indexSchoolsSizes[k2])).length) {
                             dummy = indexSchoolsSizes[k1];
                             indexSchoolsSizes[k1] = indexSchoolsSizes[k2];
                             indexSchoolsSizes[k2] = dummy;
                         }
                     }
                 }
-                School[] tabSchoolsTemp = new School[grid.getCell(i, j).getNbPresentSchools()];
+                School[] tabSchoolsTemp = new School[grid.getCell(i, j).size()];
                 for (int k = 0; k < tabSchoolsTemp.length; k++) {
-                    tabSchoolsTemp[k] = (School) grid.getCell(i, j).vectPresentSchools.elementAt(indexSchoolsSizes[k]);
+                    tabSchoolsTemp[k] = (School) grid.getCell(i, j).get(indexSchoolsSizes[k]);
                 }
-                grid.getCell(i, j).vectPresentSchools.removeAllElements();
+                grid.getCell(i, j).clear();
                 for (int k = 0; k < tabSchoolsTemp.length; k++) {
-                    grid.getCell(i, j).vectPresentSchools.addElement(tabSchoolsTemp[k]);
+                    grid.getCell(i, j).add(tabSchoolsTemp[k]);
                 }
             }
         }
@@ -629,12 +629,12 @@ class Simulation {
     public void assessPresentSchools() {
         for (int i = 0; i < osmose.grid.getNbLines(); i++) {
             for (int j = 0; j < osmose.grid.getNbColumns(); j++) {
-                for (int k = osmose.grid.getCell(i, j).vectPresentSchools.size() - 1; k >= 0; k--) {
-                    if (((School) osmose.grid.getCell(i, j).vectPresentSchools.elementAt(k)).disappears) {
-                        osmose.grid.getCell(i, j).vectPresentSchools.removeElementAt(k);
+                for (int k = osmose.grid.getCell(i, j).size() - 1; k >= 0; k--) {
+                    if (((School) osmose.grid.getCell(i, j).get(k)).disappears) {
+                        osmose.grid.getCell(i, j).remove(k);
                     }
                 }
-                osmose.grid.getCell(i, j).vectPresentSchools.trimToSize();
+                osmose.grid.getCell(i, j).trimToSize();
             }
         }
     }

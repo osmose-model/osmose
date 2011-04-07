@@ -16,7 +16,7 @@ package fr.ird.osmose;
  */
 import java.util.*;
 
-class School {
+public class School {
 
      /*
      * ********
@@ -111,7 +111,7 @@ class School {
     public void communicatePosition() {
         //function called when update of schools present in cells after having
         //removed all elements from vectPresentSchools in all cells
-        grid.getCell(posi, posj).vectPresentSchools.addElement(this);
+        grid.getCell(posi, posj).add(this);
     }
 
     public void randomWalk() {
@@ -182,16 +182,16 @@ class School {
         //************ Calculation of available fish******************
 
         int indexMax = 0;
-        while ((indexMax < (myCell.vectPresentSchools.size() - 1))
-                && (critPreySizeMax >= ((School) myCell.vectPresentSchools.elementAt(indexMax)).length)) {
+        while ((indexMax < (myCell.size() - 1))
+                && (critPreySizeMax >= ((School) myCell.get(indexMax)).length)) {
             indexMax++;
         }
         //indexMax is the index of vectBP which corresponds to the sup limit of the possible prey sizes
         //for this school, vectPresentSchools(indexMax) is not a possible prey school.
 
         int indexMin = 0;
-        while ((indexMin < (myCell.vectPresentSchools.size() - 1))
-                && (critPreySizeMin > ((School) myCell.vectPresentSchools.elementAt(indexMin)).length)) {
+        while ((indexMin < (myCell.size() - 1))
+                && (critPreySizeMin > ((School) myCell.get(indexMin)).length)) {
             indexMin++;
         }
         //indexMin is the index of vectBP which corresponds to the inf limit of the possible prey sizes
@@ -203,9 +203,9 @@ class School {
         for (int k = indexMin; k < indexMax; k++) {
 
             float tempAccess;
-            School preySchool = (School) myCell.vectPresentSchools.elementAt(k);
+            School preySchool = (School) myCell.get(k);
             tempAccess = cohort.species.simulation.osmose.accessibilityMatrix[preySchool.cohort.species.number - 1][preySchool.accessibilityStage][cohort.species.number - 1][accessibilityStage];
-            biomAccessibleTot += ((School) myCell.vectPresentSchools.elementAt(k)).biomass * tempAccess;
+            biomAccessibleTot += ((School) myCell.get(k)).biomass * tempAccess;
         }
         //************ Calculation of available plankton ***************
         for (int i = 0; i < myCouple.nbPlankton; i++) {
@@ -245,7 +245,7 @@ class School {
                 biomassToPredate -= biomAccessibleTot;
                 // ***********Predation of fish*********************
                 for (int k = 0; k < tabIndices.length; k++) {
-                    School mySchoolk = (School) myCell.vectPresentSchools.elementAt(tabIndices[k]);
+                    School mySchoolk = (School) myCell.get(tabIndices[k]);
                     float tempAccess = cohort.species.simulation.osmose.accessibilityMatrix[mySchoolk.cohort.species.number - 1][mySchoolk.accessibilityStage][cohort.species.number - 1][accessibilityStage];
 
                     float TLprey;
@@ -293,7 +293,7 @@ class School {
             {
                 // *********** Predation on fish ******************
                 for (int k = 0; k < tabIndices.length; k++) {
-                    School mySchoolk = (School) myCell.vectPresentSchools.elementAt(tabIndices[k]);
+                    School mySchoolk = (School) myCell.get(tabIndices[k]);
                     float tempAccess = cohort.species.simulation.osmose.accessibilityMatrix[mySchoolk.cohort.species.number - 1][mySchoolk.accessibilityStage][cohort.species.number - 1][accessibilityStage];
 
                     float TLprey;

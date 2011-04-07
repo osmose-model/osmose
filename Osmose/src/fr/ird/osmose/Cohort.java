@@ -16,13 +16,13 @@ package fr.ird.osmose;
  */
 import java.util.*;
 
-class Cohort {
+public class Cohort {
 
     Species species;
     int numSerie;
     int ageNbDt;    //age in nbDt
     int nbSchools;
-    Vector vectSchools;
+    Vector<School> vectSchools;
     long abundance, oldAbundance;
     double biomass;		//biomass in tonnes
     float meanLength;
@@ -109,7 +109,7 @@ class Cohort {
             if (((School) vectSchools.elementAt(i)).disappears) {
                 if (!(outOfZoneCohort[species.simulation.dt]))// cohorts in the area during the time step
                 {
-                    species.simulation.osmose.grid.getCell(((School) vectSchools.elementAt(i)).posi, ((School) vectSchools.elementAt(i)).posj).vectPresentSchools.removeElement(vectSchools.elementAt(i));
+                    species.simulation.osmose.grid.getCell(((School) vectSchools.elementAt(i)).posi, ((School) vectSchools.elementAt(i)).posj).remove(vectSchools.elementAt(i));
                 }
                 vectSchools.removeElementAt(i);
                 nbSchools--;
@@ -200,7 +200,7 @@ class Cohort {
             School schoolCatchk = (School) schoolsCatchable.elementAt(k);
             if (schoolCatchk.disappears) {
                 if (!outOfZoneCohort[species.simulation.dt]) {
-                    species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).vectPresentSchools.removeElement(schoolCatchk);
+                    species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).remove(schoolCatchk);
                 }
                 vectSchools.removeElement(schoolCatchk);
                 nbSchools--;
@@ -295,7 +295,7 @@ class Cohort {
                 School schoolCatchk = (School) schoolsCatchable.elementAt(k);
                 if (schoolCatchk.disappears) {
                     if (!outOfZoneCohort[species.simulation.dt]) {
-                        species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).vectPresentSchools.removeElement(schoolCatchk);
+                        species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).remove(schoolCatchk);
                     }
                     vectSchools.removeElement(schoolCatchk);
                     nbSchools--;
@@ -388,7 +388,7 @@ class Cohort {
                 School schoolCatchk = (School) schoolsCatchable.elementAt(k);
                 if (schoolCatchk.disappears) {
                     if (!outOfZoneCohort[species.simulation.dt]) {
-                        species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).vectPresentSchools.removeElement(schoolCatchk);
+                        species.simulation.osmose.grid.getCell(schoolCatchk.posi, schoolCatchk.posj).remove(schoolCatchk);
                     }
                     vectSchools.removeElement(schoolCatchk);
                     nbSchools--;
