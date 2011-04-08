@@ -198,7 +198,7 @@ public class Species {
                 }
             }
 
-            if ((tabCohorts[i].outOfZoneCohort[getSimulation().dt]))//||(i==0))
+            if ((tabCohorts[i].getOutOfZoneCohort()[getSimulation().dt]))//||(i==0))
             {
                 for (int k = 0; k < tabCohorts[i].size(); k++) {
                     School schoolk = ((School) tabCohorts[i].get(k));
@@ -207,7 +207,7 @@ public class Species {
                     schoolk.setBiomass(((double) schoolk.getAbundance()) * schoolk.getWeight() / 1000000.);
                 }
             } else {
-                if (tabCohorts[i].abundance != 0) {
+                if (tabCohorts[i].getAbundance() != 0) {
                     tabCohorts[i].growth(minDelta[i], maxDelta[i], c, bPower);
                 }
             }
@@ -217,10 +217,9 @@ public class Species {
     public void reproduce() {
         //CALCULATION of Spawning Stock Biomass (SSB) with an update of cohorts biomass
         for (int i = 0; i < tabCohorts.length; i++) {
-            tabCohorts[i].biomass = 0;
+            tabCohorts[i].setBiomass(0);
             for (int j = 0; j < tabCohorts[i].size(); j++) {
-                tabCohorts[i].biomass +=
-                        ((School) tabCohorts[i].get(j)).getBiomass();
+                tabCohorts[i].setBiomass(tabCohorts[i].getBiomass() + ((School) tabCohorts[i].get(j)).getBiomass());
             }
         }
         SSB = 0;
@@ -232,7 +231,7 @@ public class Species {
         }
         for (int i = indexMin; i < tabSchoolsRanked.length; i++) {
             SSB += tabSchoolsRanked[i].getBiomass();
-            tempTL += tabSchoolsRanked[i].getTrophicLevel()[tabSchoolsRanked[i].getCohort().ageNbDt] * tabSchoolsRanked[i].getBiomass();
+            tempTL += tabSchoolsRanked[i].getTrophicLevel()[tabSchoolsRanked[i].getCohort().getAgeNbDt()] * tabSchoolsRanked[i].getBiomass();
         }
 
         nbEggs = Math.round(sexRatio * alpha * seasonSpawning[getSimulation().dt] * SSB * 1000000);
@@ -264,22 +263,7 @@ public class Species {
         //MAKING COHORTS GOING UP to the UPPER AGE CLASS
         //species, age, caseLeftUpAireCoh, tabCasesAireCoh do not change
         for (int i = tabCohorts.length - 1; i > 0; i--) {
-            tabCohorts[i].clear();
-            tabCohorts[i].addAll(tabCohorts[i - 1]);
-            tabCohorts[i].abundance = tabCohorts[i - 1].abundance;
-            tabCohorts[i].biomass = tabCohorts[i - 1].biomass;
-            tabCohorts[i].nbDead = tabCohorts[i - 1].nbDead;
-            tabCohorts[i].nbDeadDd = tabCohorts[i - 1].nbDeadDd;
-            tabCohorts[i].nbDeadPp = tabCohorts[i - 1].nbDeadPp;
-            tabCohorts[i].nbDeadSs = tabCohorts[i - 1].nbDeadSs;
-            tabCohorts[i].nbDeadFf = tabCohorts[i - 1].nbDeadFf;
-            tabCohorts[i].Z = tabCohorts[i - 1].Z;
-            tabCohorts[i].Dd = tabCohorts[i - 1].Dd;
-            tabCohorts[i].Pp = tabCohorts[i - 1].Pp;
-            tabCohorts[i].Ss = tabCohorts[i - 1].Ss;
-            tabCohorts[i].Ff = tabCohorts[i - 1].Ff;
-            tabCohorts[i].oldAbundance = tabCohorts[i - 1].oldAbundance;
-
+            tabCohorts[i].upperAgeClass(tabCohorts[i - 1]);
             for (int j = 0; j < tabCohorts[i].size(); j++) {
                 ((School) tabCohorts[i].get(j)).setCohort(tabCohorts[i]);
             }
@@ -287,21 +271,21 @@ public class Species {
 
         //UPDATE AGE CLASS 0
         Cohort coh0 = tabCohorts[0];
-        coh0.abundance = nbEggs;
-        coh0.biomass = ((double) nbEggs) * eggWeight / 1000000.;
+        coh0.setAbundance(nbEggs);
+        coh0.setBiomass(((double) nbEggs) * eggWeight / 1000000.);
         coh0.clear();
         if (nbEggs == 0) {
             // do nothing, zero school
         } else if (nbEggs < getOsmose().nbSchools[numSerie]) {
             coh0.add(new School(coh0, nbEggs, eggSize, eggWeight));
-            ((School) coh0.get(0)).setBiomass(coh0.biomass);
+            ((School) coh0.get(0)).setBiomass(coh0.getBiomass());
         } else if (nbEggs >= getOsmose().nbSchools[numSerie]) {
             int nbSchools = getOsmose().nbSchools[numSerie];
             coh0.ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                coh0.add(new School(coh0, Math.round(((double) coh0.abundance) / (float) nbSchools), eggSize, eggWeight));
+                coh0.add(new School(coh0, Math.round(((double) coh0.getAbundance()) / (float) nbSchools), eggSize, eggWeight));
             }
-            int surplus = (int) coh0.abundance % coh0.size();
+            int surplus = (int) coh0.getAbundance() % coh0.size();
             ((School) (coh0.get(0))).setAbundance(((School) (coh0.get(0))).getAbundance() + surplus);
             for (int i = 0; i < coh0.size(); i++) {
                 ((School) coh0.get(i)).setBiomass(((double) ((School) coh0.get(i)).getAbundance()) * eggWeight / 1000000.);
@@ -369,7 +353,7 @@ public class Species {
         if (getSimulation().targetFishing) //different F per species
         {
             for (int i = indexRecruitAge; i < tabCohorts.length; i++) {
-                if (tabCohorts[i].abundance != 0) {
+                if (tabCohorts[i].getAbundance() != 0) {
                     nbSurplusDead += tabCohorts[i].fishing1(F * seasonFishing[getSimulation().dt]);
                 }
             }
@@ -379,9 +363,9 @@ public class Species {
                 Vector vectCohCatchable = new Vector(nbCohorts);
                 long abdCatchableTot = 0;
                 for (int i = indexRecruitAge; i < tabCohorts.length; i++) {
-                    if (tabCohorts[i].abundance != 0) {
+                    if (tabCohorts[i].getAbundance() != 0) {
                         vectCohCatchable.addElement(tabCohorts[i]);
-                        abdCatchableTot += tabCohorts[i].abundanceCatchable;
+                        abdCatchableTot += tabCohorts[i].getAbundanceCatchable();
                     }
                 }
                 if (nbSurplusDead >= abdCatchableTot) // not enough fish even in other cohorts
@@ -392,16 +376,16 @@ public class Species {
                                 if ((getSimulation().t) >= getOsmose().timeSeriesStart) {
                                     getSimulation().savingYield[number - 1] +=
                                             ((float) (school.getAbundance() * school.getWeight() / 1000000));
-                                    getSimulation().tabTLCatch[number - 1] += school.getTrophicLevel()[school.getCohort().ageNbDt] * ((float) (school.getAbundance() * school.getWeight() / 1000000));
+                                    getSimulation().tabTLCatch[number - 1] += school.getTrophicLevel()[school.getCohort().getAgeNbDt()] * ((float) (school.getAbundance() * school.getWeight() / 1000000));
                                 }
-                                if (!(tabCohorts[i].outOfZoneCohort[getSimulation().dt])) {
+                                if (!(tabCohorts[i].getOutOfZoneCohort()[getSimulation().dt])) {
                                     school.getCell().remove(school);
                                 }
                                 tabCohorts[i].remove(school);
                             }
                         }
-                        tabCohorts[i].abundance -= tabCohorts[i].abundanceCatchable;
-                        tabCohorts[i].nbDeadFf += tabCohorts[i].abundanceCatchable;
+                        tabCohorts[i].setAbundance(tabCohorts[i].getAbundance() - tabCohorts[i].getAbundanceCatchable());
+                        tabCohorts[i].setNbDeadFf(tabCohorts[i].getNbDeadFf() + tabCohorts[i].getAbundanceCatchable());
                     }
 
                 } else // enough fish in other cohorts
@@ -409,7 +393,7 @@ public class Species {
                     long abdToCatch;
                     for (int i = 0; i < vectCohCatchable.size(); i++) {
                         abdToCatch = Math.round(((double) nbSurplusDead)
-                                * ((Cohort) vectCohCatchable.elementAt(i)).abundanceCatchable / abdCatchableTot);
+                                * ((Cohort) vectCohCatchable.elementAt(i)).getAbundanceCatchable() / abdCatchableTot);
                         ((Cohort) vectCohCatchable.elementAt(i)).fishingSurplus(abdToCatch);
                     }
                 }
@@ -417,7 +401,7 @@ public class Species {
         } else //same F per species
         {
             for (int i = indexRecruitAge; i < tabCohorts.length; i++) {
-                if ((tabCohorts[i].abundance != 0) && (getSimulation().RS != 1.)) {
+                if ((tabCohorts[i].getAbundance() != 0) && (getSimulation().RS != 1.)) {
                     tabCohorts[i].fishing2((float) (F * seasonFishing[getSimulation().dt] / (1 - getSimulation().RS)));
                 }
             }

@@ -1416,7 +1416,7 @@ public class Osmose {
                                                         numMap[numSpForMap][tempAge[m] * nbDtMatrix[numSerie] + h][tempDt[n]] = i;
                                                     }
                                                     if (mapCoordi[i].length == 0) {
-                                                        if (!simulation.species[numSpForMap].tabCohorts[(tempAge[m] * nbDtMatrix[numSerie]) + h].outOfZoneCohort[tempDt[n]]) {
+                                                        if (!simulation.species[numSpForMap].tabCohorts[(tempAge[m] * nbDtMatrix[numSerie]) + h].getOutOfZoneCohort()[tempDt[n]]) {
                                                             System.out.println("Match error between species areas and migration file");
                                                         }
                                                     }
@@ -1640,8 +1640,8 @@ public class Osmose {
                             tempMortality = (new Float(st.sval)).floatValue();
                             for (int n = 0; n < nbDtPerCase; n++) {
                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                    simulation.species[numSpOutOfZone - 1].tabCohorts[tempAge[m] * nbDtMatrix[numSerie] + h].outOfZoneCohort[tempDt[n]] = true;
-                                    simulation.species[numSpOutOfZone - 1].tabCohorts[tempAge[m] * nbDtMatrix[numSerie] + h].outOfZoneMortality[tempDt[n]] = tempMortality;
+                                    simulation.species[numSpOutOfZone - 1].tabCohorts[tempAge[m] * nbDtMatrix[numSerie] + h].getOutOfZoneCohort()[tempDt[n]] = true;
+                                    simulation.species[numSpOutOfZone - 1].tabCohorts[tempAge[m] * nbDtMatrix[numSerie] + h].getOutOfZoneMortality()[tempDt[n]] = tempMortality;
                                 }
                             }
                         }
@@ -1772,7 +1772,7 @@ public class Osmose {
             }
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                 for (int j = simulation.species[i].indexAgeClass0; j < simulation.species[i].nbCohorts; j++) {
-                    iniBiomass[x][i] += (float) simulation.species[i].tabCohorts[j].biomass;
+                    iniBiomass[x][i] += (float) simulation.species[i].tabCohorts[j].getBiomass();
                 }
             }
         }

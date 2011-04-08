@@ -16,12 +16,15 @@ package fr.ird.osmose;
 import java.util.*;
 
 public class Cohort extends ArrayList<School> {
-
     /*
      * ********
      * * Logs *
      * ********
      * 2011/04/08 phv
+     * Encapsulated fields.
+     * Unplugged function calculMeanGrowth() since it is not used in this
+     * version of Osmose.
+     * Deleted variable oldAbundance.
      * Deleted vector vectCatchableSchools. It is faster to loop on the whole
      * list of schools and check wether they are catchable or not.
      * 2011/04/07 phv
@@ -31,25 +34,74 @@ public class Cohort extends ArrayList<School> {
      * Deleted variable nbSchools. Replaced by this.size()
      * ***
      */
-    Species species;
-    int numSerie;
-    int ageNbDt;    //age in nbDt
-    long abundance, oldAbundance;
-    double biomass;		//biomass in tonnes
-    float meanLength;
-    float meanWeight;
-    float[] outOfZoneMortality;
-    boolean[] outOfZoneCohort;
-    float[] outOfZonePercentage;
-    float Z, Dd, Ff, Pp, Ss;   //effective mortalities tot(Z),div(D),fishing(F),preda(P),starva(S)
-    long nbDead, nbDeadDd, nbDeadFf, nbDeadPp, nbDeadSs;
-    int nbSchoolsCatchable;
-    long abundanceCatchable;
 
+///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
+    /*
+     * Species of the cohort
+     */
+    private Species species;
+    /*
+     * Age of the cohort expressed in number of time steps.
+     */
+    private int ageNbDt;
+    /*
+     * Abundance of the cohort, number of individuals
+     */
+    private long abundance;
+    /*
+     * Biomass [ton] of the cohort
+     */
+    private double biomass;
+    /*
+     * Mean length [cm] of the schools in the cohort
+     */
+    private float meanLength;
+    /*
+     * Mean weight [g] of the schools in the cohort
+     */
+    private float meanWeight;
+    /*
+     * 
+     */
+    private float[] outOfZoneMortality;
+    private boolean[] outOfZoneCohort;
+    private float[] outOfZonePercentage;
+    private float Z;
+    private float Dd;
+    private float Ff;
+    private float Pp;
+    private float Ss;
+    private long nbDead;
+    private long nbDeadDd;
+    private long nbDeadFf;
+    private long nbDeadPp;
+    private long nbDeadSs;
+    /*
+     * Number of catchable schools (~ not in MPA areas)
+     */
+    private int nbSchoolsCatchable;
+    /*
+     * Abundance of catchable schools
+     */
+    private long abundanceCatchable;
+
+//////////////
+// Constructor
+//////////////
+    /**
+     * 
+     * @param species
+     * @param ageNbDt
+     * @param abundance
+     * @param biomass
+     * @param iniLength
+     * @param iniWeight
+     */
     public Cohort(Species species, int ageNbDt, long abundance, double biomass,
             float iniLength, float iniWeight) {
         this.species = species;
-        this.numSerie = species.numSerie;
         this.ageNbDt = ageNbDt;
 
         outOfZoneMortality = new float[getSimulation().nbDt];
@@ -64,12 +116,11 @@ public class Cohort extends ArrayList<School> {
         }
 
         this.abundance = abundance;
-        this.oldAbundance = abundance;
         this.biomass = biomass;
 
 //		nbSchools = getOsmose().nbSchools[numSerie];
 
-        int nbSchools = (int) (1 + 10 / (species.longevity + 1)) * getOsmose().nbSchools[numSerie];
+        int nbSchools = (int) (1 + 10 / (species.longevity + 1)) * getOsmose().nbSchools[getOsmose().numSerie];
         ensureCapacity(nbSchools);
         for (int i = 0; i < nbSchools; i++) {
             add(new School(this, Math.round(((double) abundance) / nbSchools), iniLength, iniWeight));
@@ -77,9 +128,12 @@ public class Cohort extends ArrayList<School> {
 
         int surplus = (int) abundance % nbSchools;
         get(0).setAbundance(get(0).getAbundance() + surplus);
-        calculMeanGrowth();
+        //calculMeanGrowth();
     }
 
+////////////////////////////
+// Definition of the methods
+////////////////////////////
     private Osmose getOsmose() {
         return Osmose.getInstance();
     }
@@ -138,9 +192,9 @@ public class Cohort extends ArrayList<School> {
 
         //UPDATE biomass of schools & cohort
         biomass = 0;
-        for (int i = 0; i < size(); i++) {
-            ((School) get(i)).setBiomass(((double) ((School) get(i)).getAbundance()) * ((School) get(i)).getWeight() / 1000000.);
-            biomass += ((School) get(i)).getBiomass();
+        for (School school : this) {
+            school.setBiomass(((double) school.getAbundance()) * school.getWeight() / 1000000.);
+            biomass += school.getBiomass();
         }
     }
 
@@ -474,5 +528,211 @@ public class Cohort extends ArrayList<School> {
         }
         meanLength = (float) sumLengths / count;
         meanWeight = (float) sumWeights / count;
+    }
+
+    public void upperAgeClass(Cohort upperAgerCohort) {
+        clear();
+        addAll(upperAgerCohort);
+        abundance = upperAgerCohort.getAbundance();
+        biomass = upperAgerCohort.getBiomass();
+        nbDead = upperAgerCohort.getNbDead();
+        nbDeadDd = upperAgerCohort.getNbDeadDd();
+        nbDeadPp = upperAgerCohort.getNbDeadPp();
+        nbDeadSs = upperAgerCohort.getNbDeadSs();
+        nbDeadFf = upperAgerCohort.getNbDeadFf();
+        Z = upperAgerCohort.getZ();
+        Dd = upperAgerCohort.getDd();
+        Pp = upperAgerCohort.getPp();
+        Ss = upperAgerCohort.getSs();
+        Ff = upperAgerCohort.getFf();
+    }
+
+    /**
+     * @return the species
+     */
+    public Species getSpecies() {
+        return species;
+    }
+
+    /**
+     * @return the ageNbDt
+     */
+    public int getAgeNbDt() {
+        return ageNbDt;
+    }
+
+    /**
+     * @return the abundance
+     */
+    public long getAbundance() {
+        return abundance;
+    }
+
+    /**
+     * @param abundance the abundance to set
+     */
+    public void setAbundance(long abundance) {
+        this.abundance = abundance;
+    }
+
+    /**
+     * @return the biomass
+     */
+    public double getBiomass() {
+        return biomass;
+    }
+
+    /**
+     * @param biomass the biomass to set
+     */
+    public void setBiomass(double biomass) {
+        this.biomass = biomass;
+    }
+
+    /**
+     * @return the outOfZoneMortality
+     */
+    public float[] getOutOfZoneMortality() {
+        return outOfZoneMortality;
+    }
+
+    /**
+     * @return the outOfZoneCohort
+     */
+    public boolean[] getOutOfZoneCohort() {
+        return outOfZoneCohort;
+    }
+
+    /**
+     * @return the outOfZonePercentage
+     */
+    public float[] getOutOfZonePercentage() {
+        return outOfZonePercentage;
+    }
+
+    /**
+     * @return the Z
+     */
+    public float getZ() {
+        return Z;
+    }
+
+    /**
+     * @return the Dd
+     */
+    public float getDd() {
+        return Dd;
+    }
+
+    /**
+     * @return the Ff
+     */
+    public float getFf() {
+        return Ff;
+    }
+
+    /**
+     * @return the Pp
+     */
+    public float getPp() {
+        return Pp;
+    }
+
+    /**
+     * @return the Ss
+     */
+    public float getSs() {
+        return Ss;
+    }
+
+    /**
+     * @return the nbDead
+     */
+    public long getNbDead() {
+        return nbDead;
+    }
+
+    /**
+     * @return the nbDeadDd
+     */
+    public long getNbDeadDd() {
+        return nbDeadDd;
+    }
+
+    /**
+     * @param nbDeadDd the nbDeadDd to set
+     */
+    public void setNbDeadDd(long nbDeadDd) {
+        this.nbDeadDd = nbDeadDd;
+    }
+
+    /**
+     * @return the nbDeadFf
+     */
+    public long getNbDeadFf() {
+        return nbDeadFf;
+    }
+
+    /**
+     * @param nbDeadFf the nbDeadFf to set
+     */
+    public void setNbDeadFf(long nbDeadFf) {
+        this.nbDeadFf = nbDeadFf;
+    }
+
+    /**
+     * @return the nbDeadPp
+     */
+    public long getNbDeadPp() {
+        return nbDeadPp;
+    }
+
+    /**
+     * @param nbDeadPp the nbDeadPp to set
+     */
+    public void setNbDeadPp(long nbDeadPp) {
+        this.nbDeadPp = nbDeadPp;
+    }
+
+    /**
+     * @return the nbDeadSs
+     */
+    public long getNbDeadSs() {
+        return nbDeadSs;
+    }
+
+    /**
+     * @param nbDeadSs the nbDeadSs to set
+     */
+    public void setNbDeadSs(long nbDeadSs) {
+        this.nbDeadSs = nbDeadSs;
+    }
+
+    /**
+     * @return the nbSchoolsCatchable
+     */
+    public int getNbSchoolsCatchable() {
+        return nbSchoolsCatchable;
+    }
+
+    /**
+     * @param nbSchoolsCatchable the nbSchoolsCatchable to set
+     */
+    public void setNbSchoolsCatchable(int nbSchoolsCatchable) {
+        this.nbSchoolsCatchable = nbSchoolsCatchable;
+    }
+
+    /**
+     * @return the abundanceCatchable
+     */
+    public long getAbundanceCatchable() {
+        return abundanceCatchable;
+    }
+
+    /**
+     * @param abundanceCatchable the abundanceCatchable to set
+     */
+    public void setAbundanceCatchable(long abundanceCatchable) {
+        this.abundanceCatchable = abundanceCatchable;
     }
 }
