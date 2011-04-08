@@ -1,6 +1,5 @@
 package fr.ird.osmose;
 
-
 /********************************************************************************
  * <p>Titre : Species class</p>
  *
@@ -18,15 +17,18 @@ import java.util.*;
 
 public class Species {
 
-     /*
+    /*
      * ********
      * * Logs *
      * ********
+     * 2011/04/08 phv
+     * Deleted the constructor with all the parameters. Parameters are now read
+     * in a new method called init().
+     * ***
      * 2011/04/07 phv
      * Deleted variable simulation. Osmose and Simulation are called with
      * Osmose.getInstance() and Osmose.getInstance().getSimulation()
      */
-
     int numSerie;
     //DESCRIPTORS
     int number;  		//num of the species [1...12]
@@ -80,51 +82,50 @@ public class Species {
     int nbDietStages;
     float[] dietStagesTab;
 
-    public Species(int number, String name, float D, float F,
-            float longevity, float lInf, float K, float t0, float c, float bPower,
-            float alpha, float sizeMat, int nbFeedingStages, float[] sizeFeeding, float recruitAge, float recruitSize,
-            float[] seasonFishing, float[] seasonSpawning, float supAgeOfClass0,
-            float larvalSurvival, float sexRatio, float eggSize, float eggWeight, float growthAgeThreshold,
-            float predationRate, float[] predPreySizesMax, float[] predPreySizesMin, float criticalPredSuccess, float starvMaxRate,
-            int nbAccessStage, float[] accessAgeThreshold, int nbDietsStages, float[] dietStageThreshold) {
+    public Species(int number) {
+        this.number = number;
+    }
+
+    public void init() {
+
         this.numSerie = getSimulation().numSerie;
 
         // INITIALISATION of PARAM
-        this.number = number;
-        this.name = name;
-        this.D = D;
-        this.F = F;
-        this.longevity = longevity;
-        this.lInf = lInf;
-        this.K = K;
-        this.t0 = t0;
-        this.c = c;
-        this.bPower = bPower;
-        this.alpha = alpha;
-        this.sizeMat = sizeMat;
-        this.nbFeedingStages = nbFeedingStages;
-        this.sizeFeeding = sizeFeeding;
-        this.recruitAge = recruitAge;
-        this.recruitSize = recruitSize;
-        this.seasonFishing = seasonFishing;
-        this.seasonSpawning = seasonSpawning;
-        this.supAgeOfClass0 = supAgeOfClass0;//age from which the species biomass-0 is calculated
+        int iSpec = number - 1;
+        this.name = getOsmose().nameSpecMatrix[numSerie][iSpec];
+        this.D = getOsmose().DMatrix[numSerie][iSpec];
+        this.F = getOsmose().FMatrix[numSerie][iSpec];
+        this.longevity = getOsmose().longevityMatrix[numSerie][iSpec];
+        this.lInf = getOsmose().lInfMatrix[numSerie][iSpec];
+        this.K = getOsmose().KMatrix[numSerie][iSpec];
+        this.t0 = getOsmose().t0Matrix[numSerie][iSpec];
+        this.c = getOsmose().cMatrix[numSerie][iSpec];
+        this.bPower = getOsmose().bPowerMatrix[numSerie][iSpec];
+        this.alpha = getOsmose().alphaMatrix[numSerie][iSpec];
+        this.sizeMat = getOsmose().sizeMatMatrix[numSerie][iSpec];
+        this.nbFeedingStages = getOsmose().nbStagesMatrix[numSerie][iSpec];
+        this.sizeFeeding = getOsmose().sizeFeedingMatrix[numSerie][iSpec];
+        this.recruitAge = getOsmose().recruitAgeMatrix[numSerie][iSpec];
+        this.recruitSize = getOsmose().recruitSizeMatrix[numSerie][iSpec];
+        this.seasonFishing = getOsmose().seasonFishingMatrix[numSerie][iSpec];
+        this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][iSpec];
+        this.supAgeOfClass0 = getOsmose().supAgeOfClass0Matrix[numSerie][iSpec];//age from which the species biomass-0 is calculated
         this.indexAgeClass0 = (int) Math.ceil(supAgeOfClass0 * getSimulation().nbDt);      // index of supAgeOfClass0 used in tabCohorts table
-        this.larvalSurvival = larvalSurvival;
-        this.sexRatio = sexRatio;
-        this.eggSize = eggSize;
-        this.eggWeight = eggWeight;
-        this.growthAgeThreshold = growthAgeThreshold;
+        this.larvalSurvival = getOsmose().larvalSurvivalMatrix[numSerie][iSpec];
+        this.sexRatio = getOsmose().sexRatioMatrix[numSerie][iSpec];
+        this.eggSize = getOsmose().eggSizeMatrix[numSerie][iSpec];
+        this.eggWeight = getOsmose().eggWeightMatrix[numSerie][iSpec];
+        this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][iSpec];
 
-        this.predationRate = predationRate;
-        this.predPreySizesMax = predPreySizesMax;
-        this.predPreySizesMin = predPreySizesMin;
-        this.criticalPredSuccess = criticalPredSuccess;
-        this.starvMaxRate = starvMaxRate;
-        this.nbAccessStages = nbAccessStage;
-        this.ageStagesTab = accessAgeThreshold;
-        this.dietStagesTab = dietStageThreshold;
-        this.nbDietStages = nbDietsStages;
+        this.predationRate = getOsmose().predationRateMatrix[numSerie][iSpec];
+        this.predPreySizesMax = getOsmose().predPreySizesMaxMatrix[numSerie][iSpec];
+        this.predPreySizesMin = getOsmose().predPreySizesMinMatrix[numSerie][iSpec];
+        this.criticalPredSuccess = getOsmose().criticalPredSuccessMatrix[numSerie][iSpec];
+        this.starvMaxRate = getOsmose().starvMaxRateMatrix[numSerie][iSpec];
+        this.nbAccessStages = getOsmose().nbAccessStage[iSpec];
+        this.ageStagesTab = getOsmose().accessStageThreshold[iSpec];
+        this.dietStagesTab = getOsmose().dietStageThreshold[numSerie][iSpec];
+        this.nbDietStages = getOsmose().nbDietsStages[numSerie][iSpec];
 
         // START INITIALISATION of COHORTS
         nbCohorts = (int) Math.round((longevity) * getSimulation().nbDt);
@@ -172,7 +173,6 @@ public class Species {
         }
 
         meanTLperAge = new float[nbCohorts];
-
     }
 
     private Osmose getOsmose() {

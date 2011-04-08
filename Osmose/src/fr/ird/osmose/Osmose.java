@@ -219,15 +219,8 @@ public class Osmose {
                     initializeOptions();
                     System.out.println("options initialized");
 
-                    simulation = new Simulation(nbDtMatrix[x], savingDtMatrix[x], nbSpeciesTab[x], nameSpecMatrix[x], DMatrix[x], FMatrix[x],
-                            longevityMatrix[x], lInfMatrix[x], KMatrix[x], t0Matrix[x], cMatrix[x], bPowerMatrix[x], alphaMatrix[x],
-                            sizeMatMatrix[x], nbStagesMatrix[x], sizeFeedingMatrix[x], recruitAgeMatrix[x], recruitSizeMatrix[x],
-                            seasonFishingMatrix[x], recruitMetricMatrix[x], seasonSpawningMatrix[x], supAgeOfClass0Matrix[x],
-                            larvalSurvivalMatrix[x], sexRatioMatrix[x], eggSizeMatrix[x], eggWeightMatrix[x], growthAgeThresholdMatrix[x],
-                            predationRateMatrix[x], predPreySizesMaxMatrix[x], predPreySizesMinMatrix[x], criticalPredSuccessMatrix[x], starvMaxRateMatrix[x], nbAccessStage, accessStageThreshold,
-                            TLoutputMatrix[x], TLDistriboutputMatrix[x], dietsOutputMatrix[x], dietOutputMetrics[x], nbDietsStages[x], dietStageThreshold[x], meanSizeOutputMatrix[x],
-                            sizeSpectrumOutputMatrix[x], sizeSpectrumPerSpeOutputMatrix[x], planktonMortalityOutputMatrix[x], calibrationMatrix[x], outputClass0Matrix[x], isForcing[x]);
-
+                    simulation = new Simulation();
+                    simulation.init();
                     System.out.println("simulation initialized");
 
                     initializeOutOfZoneCarac();
@@ -248,16 +241,9 @@ public class Osmose {
                         updateCoastCells(numSerie);
                     }
 
-                    simulation = new Simulation(nbDtMatrix[x], savingDtMatrix[x], nbSpeciesTab[x], nameSpecMatrix[x], DMatrix[x], FMatrix[x],
-                            longevityMatrix[x], lInfMatrix[x], KMatrix[x], t0Matrix[x], cMatrix[x], bPowerMatrix[x], alphaMatrix[x],
-                            sizeMatMatrix[x], nbStagesMatrix[x], sizeFeedingMatrix[x], recruitAgeMatrix[x], recruitSizeMatrix[x],
-                            seasonFishingMatrix[x], recruitMetricMatrix[x], seasonSpawningMatrix[x], supAgeOfClass0Matrix[x],
-                            larvalSurvivalMatrix[x], sexRatioMatrix[x], eggSizeMatrix[x], eggWeightMatrix[x], growthAgeThresholdMatrix[x],
-                            predationRateMatrix[x], predPreySizesMaxMatrix[x], predPreySizesMinMatrix[x], criticalPredSuccessMatrix[x], starvMaxRateMatrix[x], nbAccessStage, accessStageThreshold,
-                            TLoutputMatrix[x], TLDistriboutputMatrix[x], dietsOutputMatrix[x], dietOutputMetrics[x], nbDietsStages[x], dietStageThreshold[x], meanSizeOutputMatrix[x],
-                            sizeSpectrumOutputMatrix[x], sizeSpectrumPerSpeOutputMatrix[x],
-                            planktonMortalityOutputMatrix[x], calibrationMatrix[x], outputClass0Matrix[x], isForcing[x]);
-
+                    simulation = new Simulation();
+                    simulation.init();
+                    
                     initializeOutOfZoneCarac();
                     initializeSpeciesAreas();
                     System.out.println();

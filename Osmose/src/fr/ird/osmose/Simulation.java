@@ -23,6 +23,8 @@ public class Simulation {
      * ********
      * * Logs *
      * ********
+     * 2011/04/08 phv
+     * Deleted the constructor. Parameters are now loaded in the init() method.
      * 2011/04/07 phv
      * Deleted variable Osmose. Must be called using Osmose.getInstance()
      */
@@ -85,54 +87,42 @@ public class Simulation {
     boolean planktonMortalityOutput;
     boolean outputClass0;
     boolean calibration;
+    boolean isForcing;
 
-    public Simulation(int nbDt, int savingDt, int nbSpecies, String[] nameSpecies,
-            float[] D, float[] F, float[] longevity, float[] lInf, float[] K, float[] t0, float[] c, float[] bPower,
-            float[] alpha, float[] sizeMat, int[] nbStages, float[][] sizeFeeding, float[] recruitAge, float[] recruitSize,
-            float[][] seasonFishing, String recruitMetric, float[][] seasonSpawning, float[] supAgeOfClass0,
-            float[] larvalSurvival, float[] sexRatio, float[] eggSize, float[] eggWeight, float[] growthAgeThreshold,
-            float[] predationRate, float[][] predPreySizesMax, float[][] predPreySizesMin, float[] criticalPredSuccess, float[] starvMaxRate,
-            int[] nbAccessStage, float[][] accessStageThreshold,
-            boolean TLoutput, boolean TLDistriboutput, boolean dietsOutput, String dietMetric, int[] nbDietsStages, float[][] dietStageThreshold, boolean meanSizeOutput,
-            boolean sizeSpectrumOutput, boolean sizeSpectrumPerSpeOutput,
-            boolean planktonMortalityOutput, boolean calibration, boolean outputClass0, boolean isForcing) {
-
-
+    public void init() {
+        
         t = 0;
         dt = 0;
         dtCount = 1;
         getOsmose().simInitialized = true;
         this.numSerie = getOsmose().numSerie;
-        this.nbDt = nbDt;
-        this.savingDt = savingDt;
-        this.nbSpecies = nbSpecies;
-        this.recruitMetric = recruitMetric;
-        nbSpeciesIni = nbSpecies;
+        this.nbDt = getOsmose().nbDtMatrix[numSerie];
+        this.savingDt = getOsmose().savingDtMatrix[numSerie];
+        this.nbSpecies = getOsmose(). nbSpeciesTab[numSerie];
+        this.recruitMetric = getOsmose().recruitMetricMatrix[numSerie];
+        nbSpeciesIni = getOsmose().nbSpeciesTab[numSerie];
 
-        this.calibration = calibration;
+        this.calibration = getOsmose().calibrationMatrix[numSerie];
 
-        this.TLoutput = TLoutput;
-        this.TLDistriboutput = TLDistriboutput;
-        this.dietsOutput = dietsOutput;
-        this.dietMetric = dietMetric;
-        this.meanSizeOutput = meanSizeOutput;
-        this.sizeSpectrumOutput = sizeSpectrumOutput;
-        this.sizeSpectrumPerSpeOutput = sizeSpectrumPerSpeOutput;
-        this.planktonMortalityOutput = planktonMortalityOutput;
-        this.outputClass0 = outputClass0;
+        this.TLoutput = getOsmose().TLoutputMatrix[numSerie];
+        this.TLDistriboutput = getOsmose().TLDistriboutputMatrix[numSerie];
+        this.dietsOutput = getOsmose().dietsOutputMatrix[numSerie];
+        this.dietMetric = getOsmose().dietOutputMetrics[numSerie];
+        this.meanSizeOutput = getOsmose().meanSizeOutputMatrix[numSerie];
+        this.sizeSpectrumOutput = getOsmose().sizeSpectrumOutputMatrix[numSerie];
+        this.sizeSpectrumPerSpeOutput = getOsmose().sizeSpectrumPerSpeOutputMatrix[numSerie];
+        this.planktonMortalityOutput = getOsmose().planktonMortalityOutputMatrix[numSerie];
+        this.outputClass0 = getOsmose().outputClass0Matrix[numSerie];
 
         // Initialise plankton matrix
-        iniPlanktonField(this, isForcing);
+        this.isForcing = getOsmose().isForcing[numSerie];
+        iniPlanktonField(isForcing);
 
         //CREATION of the SPECIES
         species = new Species[nbSpecies];
         for (int i = 0; i < nbSpecies; i++) {
-            species[i] = new Species(i + 1, nameSpecies[i], D[i], F[i], longevity[i], lInf[i], K[i], t0[i],
-                    c[i], bPower[i], alpha[i], sizeMat[i], nbStages[i], sizeFeeding[i], recruitAge[i], recruitSize[i],
-                    seasonFishing[i], seasonSpawning[i], supAgeOfClass0[i], larvalSurvival[i],
-                    sexRatio[i], eggSize[i], eggWeight[i], growthAgeThreshold[i],
-                    predationRate[i], predPreySizesMax[i], predPreySizesMin[i], criticalPredSuccess[i], starvMaxRate[i],
-                    nbAccessStage[i], accessStageThreshold[i], nbDietsStages[i], dietStageThreshold[i]);
+            species[i] = new Species(i + 1);
+            species[i].init();
         }
 
         // determine if fishing is species-based or similar for all species
@@ -560,7 +550,7 @@ public class Simulation {
         }
     }
 
-    public void iniPlanktonField(Simulation simu, boolean isForcing) {
+    public void iniPlanktonField(boolean isForcing) {
         couple = new Coupling(isForcing);
         couple.iniCouplingReading(getOsmose().planktonStructureFileNameTab[numSerie]);
         couple.readInputPlanktonFiles(getOsmose().planktonFileNameTab[numSerie]);
