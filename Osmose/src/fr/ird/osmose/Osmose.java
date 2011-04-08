@@ -1379,8 +1379,8 @@ public class Osmose {
 
                                     for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                                         Species speci = simulation.species[i];
-                                        numMap[i] = new int[speci.tabCohorts.length][];
-                                        for (int j = 0; j < speci.tabCohorts.length; j++) {
+                                        numMap[i] = new int[speci.getNumberCohorts()][];
+                                        for (int j = 0; j < speci.getNumberCohorts(); j++) {
                                             numMap[i][j] = new int[nbDtMatrix[numSerie]];
                                         }
                                     }
@@ -1412,11 +1412,11 @@ public class Osmose {
                                             for (int n = 0; n < nbDtPerMap; n++) {
                                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
                                                     int tempo = tempAge[m] * nbDtMatrix[numSerie] + h;
-                                                    if ((tempAge[m] * nbDtMatrix[numSerie] + h) < simulation.species[numSpForMap].tabCohorts.length) {
+                                                    if ((tempAge[m] * nbDtMatrix[numSerie] + h) < simulation.species[numSpForMap].getNumberCohorts()) {
                                                         numMap[numSpForMap][tempAge[m] * nbDtMatrix[numSerie] + h][tempDt[n]] = i;
                                                     }
                                                     if (mapCoordi[i].length == 0) {
-                                                        if (!simulation.species[numSpForMap].tabCohorts[(tempAge[m] * nbDtMatrix[numSerie]) + h].getOutOfZoneCohort()[tempDt[n]]) {
+                                                        if (!simulation.species[numSpForMap].getCohort((tempAge[m] * nbDtMatrix[numSerie]) + h).getOutOfZoneCohort()[tempDt[n]]) {
                                                             System.out.println("Match error between species areas and migration file");
                                                         }
                                                     }
@@ -1640,8 +1640,8 @@ public class Osmose {
                             tempMortality = (new Float(st.sval)).floatValue();
                             for (int n = 0; n < nbDtPerCase; n++) {
                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                    simulation.species[numSpOutOfZone - 1].tabCohorts[tempAge[m] * nbDtMatrix[numSerie] + h].getOutOfZoneCohort()[tempDt[n]] = true;
-                                    simulation.species[numSpOutOfZone - 1].tabCohorts[tempAge[m] * nbDtMatrix[numSerie] + h].getOutOfZoneMortality()[tempDt[n]] = tempMortality;
+                                    simulation.species[numSpOutOfZone - 1].getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).getOutOfZoneCohort()[tempDt[n]] = true;
+                                    simulation.species[numSpOutOfZone - 1].getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).getOutOfZoneMortality()[tempDt[n]] = tempMortality;
                                 }
                             }
                         }
@@ -1772,7 +1772,7 @@ public class Osmose {
             }
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                 for (int j = simulation.species[i].indexAgeClass0; j < simulation.species[i].nbCohorts; j++) {
-                    iniBiomass[x][i] += (float) simulation.species[i].tabCohorts[j].getBiomass();
+                    iniBiomass[x][i] += (float) simulation.species[i].getCohort(j).getBiomass();
                 }
             }
         }

@@ -21,6 +21,7 @@ public class Cohort extends ArrayList<School> {
      * * Logs *
      * ********
      * 2011/04/08 phv
+     * Added function getSchool() that is more meaningfull than just get()
      * Added variable indexSpecies = species.number - 1
      * Encapsulated fields.
      * Unplugged function calculMeanGrowth() since it is not used in this
@@ -133,7 +134,7 @@ public class Cohort extends ArrayList<School> {
         }
 
         int surplus = (int) abundance % nbSchools;
-        get(0).setAbundance(get(0).getAbundance() + surplus);
+        getSchool(0).setAbundance(getSchool(0).getAbundance() + surplus);
         //calculMeanGrowth();
     }
 
@@ -148,6 +149,10 @@ public class Cohort extends ArrayList<School> {
         return getOsmose().getSimulation();
     }
 
+    public School getSchool(int index) {
+        return get(index);
+    }
+
     public void surviveD(float D) {
         long oldAbd = abundance;
         abundance = Math.round(oldAbd * Math.exp(-D));      // D is already divided by the time step in Qsimulation
@@ -159,26 +164,26 @@ public class Cohort extends ArrayList<School> {
 
         //NB of DEAD FISH are DISTRIBUTED UNIFORMLY
         for (int i = 0; i < nbSchools; i++) {
-            if (((School) get(i)).getAbundance() > Math.round(((double) nbDeadTemp) / nbSchools)) {
-                ((School) get(i)).setAbundance(((School) get(i)).getAbundance() - Math.round(((double) nbDeadTemp) / nbSchools));
+            if (getSchool(i).getAbundance() > Math.round(((double) nbDeadTemp) / nbSchools)) {
+                getSchool(i).setAbundance(getSchool(i).getAbundance() - Math.round(((double) nbDeadTemp) / nbSchools));
             } else {
                 nbSurplusDead += Math.round(((double) nbDeadTemp) / nbSchools)
-                        - ((School) get(i)).getAbundance();
-                ((School) get(i)).setAbundance(0);
-                ((School) get(i)).tagForRemoval();
+                        - getSchool(i).getAbundance();
+                getSchool(i).setAbundance(0);
+                getSchool(i).tagForRemoval();
             }
         }
 
         //SURPLUS of DEAD are DISTRIBUTED
         int index = 0;
         while ((nbSurplusDead != 0) && (index < size())) {
-            if (((School) get(index)).getAbundance() > nbSurplusDead) {
-                ((School) get(index)).setAbundance(((School) get(index)).getAbundance() - nbSurplusDead);
+            if (getSchool(index).getAbundance() > nbSurplusDead) {
+                getSchool(index).setAbundance(getSchool(index).getAbundance() - nbSurplusDead);
                 nbSurplusDead = 0;
             } else {
-                nbSurplusDead -= ((School) get(index)).getAbundance();
-                ((School) get(index)).tagForRemoval();
-                ((School) get(index)).setAbundance(0);
+                nbSurplusDead -= getSchool(index).getAbundance();
+                getSchool(index).tagForRemoval();
+                getSchool(index).setAbundance(0);
             }
             index++;
         }
@@ -518,7 +523,7 @@ public class Cohort extends ArrayList<School> {
 
     public void growth(float minDelta, float maxDelta, float c, float bPower) {
         for (int i = 0; i < size(); i++) {
-            ((School) get(i)).growth(minDelta, maxDelta, c, bPower);
+            getSchool(i).growth(minDelta, maxDelta, c, bPower);
         }
     }
 
@@ -527,7 +532,7 @@ public class Cohort extends ArrayList<School> {
         double sumWeights = 0;
         long count = 0;
         for (int i = 0; i < size(); i++) {
-            School schooli = (School) get(i);
+            School schooli = getSchool(i);
             sumLengths += ((double) schooli.getLength()) * schooli.getAbundance();
             sumWeights += ((double) schooli.getWeight()) * schooli.getAbundance();
             count += schooli.getAbundance();
