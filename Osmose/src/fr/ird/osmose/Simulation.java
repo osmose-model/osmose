@@ -1,6 +1,5 @@
 package fr.ird.osmose;
 
-
 /*******************************************************************************
  * <p>Titre : Simulation class</p>
  *
@@ -28,7 +27,6 @@ public class Simulation {
      * 2011/04/07 phv
      * Deleted variable Osmose. Must be called using Osmose.getInstance()
      */
-
     Coupling couple;
     int numSerie, nbDt, savingDt;
     boolean randomDistribution = true;
@@ -90,7 +88,7 @@ public class Simulation {
     boolean isForcing;
 
     public void init() {
-        
+
         t = 0;
         dt = 0;
         dtCount = 1;
@@ -98,7 +96,7 @@ public class Simulation {
         this.numSerie = getOsmose().numSerie;
         this.nbDt = getOsmose().nbDtMatrix[numSerie];
         this.savingDt = getOsmose().savingDtMatrix[numSerie];
-        this.nbSpecies = getOsmose(). nbSpeciesTab[numSerie];
+        this.nbSpecies = getOsmose().nbSpeciesTab[numSerie];
         this.recruitMetric = getOsmose().recruitMetricMatrix[numSerie];
         nbSpeciesIni = getOsmose().nbSpeciesTab[numSerie];
 
@@ -836,7 +834,9 @@ public class Simulation {
     }
 
     public void assessCatchableSchools() {
-        if ((!getOsmose().thereIsMPATab[numSerie]) || (t < getOsmose().MPAtStartTab[numSerie])
+
+        if ((!getOsmose().thereIsMPATab[numSerie])
+                || (t < getOsmose().MPAtStartTab[numSerie])
                 || (t >= getOsmose().MPAtEndTab[numSerie]))// case where no MPA
         {
             for (int i = 0; i < species.length; i++) {
@@ -844,11 +844,11 @@ public class Simulation {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     Cohort cohij = species[i].tabCohorts[j];
                     cohij.nbSchoolsCatchable = cohij.size();
-                    cohij.schoolsCatchable = new Vector(cohij.nbSchoolsCatchable);
+                    //cohij.schoolsCatchable = new Vector(cohij.nbSchoolsCatchable);
                     cohij.abundanceCatchable = 0;
                     for (int k = 0; k < cohij.size(); k++) {
                         School schoolk = (School) cohij.get(k);
-                        cohij.schoolsCatchable.addElement(schoolk);
+                        //cohij.schoolsCatchable.addElement(schoolk);
                         cohij.abundanceCatchable += schoolk.getAbundance();
                         schoolk.setCatchable(true);
                     }
@@ -869,7 +869,7 @@ public class Simulation {
                 for (int j = 0; j < species[i].tabCohorts.length; j++) {
                     Cohort cohij = species[i].tabCohorts[j];
                     cohij.nbSchoolsCatchable = 0;
-                    cohij.schoolsCatchable = new Vector(getOsmose().nbSchools[numSerie]);
+                    //cohij.schoolsCatchable = new Vector(getOsmose().nbSchools[numSerie]);
                     cohij.abundanceCatchable = 0;
                     for (int k = 0; k < cohij.size(); k++) {
                         School schoolk = (School) cohij.get(k);
@@ -878,11 +878,11 @@ public class Simulation {
                         } else {
                             schoolk.setCatchable(true);
                             cohij.nbSchoolsCatchable++;
-                            cohij.schoolsCatchable.addElement(schoolk);
+                            //cohij.schoolsCatchable.addElement(schoolk);
                             cohij.abundanceCatchable += schoolk.getAbundance();
                         }
                     }
-                    cohij.schoolsCatchable.trimToSize();
+                    //cohij.schoolsCatchable.trimToSize();
                 }
                 species[i].cumulCatch[0] = 0;
                 species[i].cumulCatch[0] = species[i].tabCohorts[0].nbSchoolsCatchable;

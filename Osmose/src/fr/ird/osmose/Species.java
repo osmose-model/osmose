@@ -387,17 +387,18 @@ public class Species {
                 if (nbSurplusDead >= abdCatchableTot) // not enough fish even in other cohorts
                 {
                     for (int i = indexRecruitAge; i < tabCohorts.length; i++) {
-                        for (int k = tabCohorts[i].schoolsCatchable.size() - 1; k >= 0; k--) {
-                            School schoolCatchk = (School) tabCohorts[i].schoolsCatchable.elementAt(k);
-                            if ((getSimulation().t) >= getOsmose().timeSeriesStart) {
-                                getSimulation().savingYield[number - 1] +=
-                                        ((float) (schoolCatchk.getAbundance() * schoolCatchk.getWeight() / 1000000));
-                                getSimulation().tabTLCatch[number - 1] += schoolCatchk.getTrophicLevel()[schoolCatchk.getCohort().ageNbDt] * ((float) (schoolCatchk.getAbundance() * schoolCatchk.getWeight() / 1000000));
+                        for (School school : tabCohorts[i]) {
+                            if (school.isCatchable()) {
+                                if ((getSimulation().t) >= getOsmose().timeSeriesStart) {
+                                    getSimulation().savingYield[number - 1] +=
+                                            ((float) (school.getAbundance() * school.getWeight() / 1000000));
+                                    getSimulation().tabTLCatch[number - 1] += school.getTrophicLevel()[school.getCohort().ageNbDt] * ((float) (school.getAbundance() * school.getWeight() / 1000000));
+                                }
+                                if (!(tabCohorts[i].outOfZoneCohort[getSimulation().dt])) {
+                                    school.getCell().remove(school);
+                                }
+                                tabCohorts[i].remove(school);
                             }
-                            if (!(tabCohorts[i].outOfZoneCohort[getSimulation().dt])) {
-                                schoolCatchk.getCell().remove(schoolCatchk);
-                            }
-                            tabCohorts[i].remove(schoolCatchk);
                         }
                         tabCohorts[i].abundance -= tabCohorts[i].abundanceCatchable;
                         tabCohorts[i].nbDeadFf += tabCohorts[i].abundanceCatchable;
