@@ -22,6 +22,10 @@ public class Grid {
      * ********
      * * Logs *
      * ********
+     * 2011/04/11 phv
+     * Deprecated identifySpatialGroups since it looks Benguela specific
+     * function.
+     * ***
      * 2011/04/07 phv
      * Encapsulated all the variables and propagated the changes to the other
      * classes.
@@ -101,8 +105,6 @@ public class Grid {
 
         /* make the grid */
         matrix = makeGrid();
-
-        identifySpatialGroups();
     }
 
 ////////////////////////////
@@ -138,18 +140,10 @@ public class Grid {
 
     /*
      * phv: looks like a specific method to Benguela system...
+     * 2011/04/11 Tagged as deprecated
      */
-    public void identifySpatialGroups() {
-        for (int i = 0; i < getNbLines(); i++) {
-            for (int j = 0; j < getNbColumns(); j++) {
-                if (matrix[i][j].getLat() >= (matrix[i][j].getLon() - 52.5)) {
-                    matrix[i][j].setSpatialGroup(Cell.SpatialGroup.UPWELLING);
-                } else {
-                    matrix[i][j].setSpatialGroup(Cell.SpatialGroup.AGULHAS_BANK);
-                }
-            }
-        }
-    }
+    @Deprecated
+    public void identifySpatialGroups() {}
 
     /**
      * Get the adjacent cells of a given cell. Cells are randomly sorted.
@@ -169,10 +163,10 @@ public class Grid {
      */
     public ArrayList<Cell> getNeighborCells(Cell cell) {
 
-        int im1 = Math.max(cell.getI() - 1, 0);
-        int ip1 = Math.min(cell.getI() + 1, getNbLines() - 1);
-        int jm1 = Math.max(cell.getJ() - 1, 0);
-        int jp1 = Math.min(cell.getJ() + 1, getNbColumns() - 1);
+        int im1 = Math.max(cell.get_igrid() - 1, 0);
+        int ip1 = Math.min(cell.get_igrid() + 1, getNbLines() - 1);
+        int jm1 = Math.max(cell.get_jgrid() - 1, 0);
+        int jp1 = Math.min(cell.get_jgrid() + 1, getNbColumns() - 1);
 
         ArrayList<Cell> neighbors = new ArrayList();
 

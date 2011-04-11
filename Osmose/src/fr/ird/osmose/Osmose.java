@@ -1518,8 +1518,8 @@ public class Osmose {
                     for (int m = 0; m < grid.getNbColumns(); m++) {
                         if (!grid.getCell(l, m).isLand()) {
                             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                                randomAreaCoordi[i][index] = grid.getCell(l, m).getI();
-                                randomAreaCoordj[i][index] = grid.getCell(l, m).getJ();
+                                randomAreaCoordi[i][index] = grid.getCell(l, m).get_igrid();
+                                randomAreaCoordj[i][index] = grid.getCell(l, m).get_jgrid();
                             }
                             index++;
                         }
@@ -1568,8 +1568,8 @@ public class Osmose {
                         iLastSorted = index;
                     }
                     for (int m = 0; m < tabCellsArea.length; m++) {
-                        randomAreaCoordi[i][m] = tabCellsArea[m].getI();
-                        randomAreaCoordj[i][m] = tabCellsArea[m].getJ();
+                        randomAreaCoordi[i][m] = tabCellsArea[m].get_igrid();
+                        randomAreaCoordj[i][m] = tabCellsArea[m].get_jgrid();
                     }
                 }
             }

@@ -23,6 +23,9 @@ public class Cell extends ArrayList<School> {
      * * Logs *
      * ********
      * 2011/04/07 phv
+     * Deleted the spatialGroup variable.
+     * ***
+     * 2011/04/07 phv
      * Deleted the vectPresentSchools variable.
      * Cell extends ArrayList<School> it means that a cell is now an array of
      * schools. Therefore to add, remove or get a school it is straighforward:
@@ -69,19 +72,14 @@ public class Cell extends ArrayList<School> {
      */
     private boolean mpa;
     /*
-     * The spatial group the cells belongs too.
-     * @see enum SpatialGroup
-    }
-     */
-    private SpatialGroup spatialGroup;
-    /*
-     * 
+     * Whether the cell is already used when randomly dealing the schools in
+     * the grid.
      */
     private boolean alreadyChosen;
     /*
      * list of the maps in which this cell is involved
      */
-    Vector numMapsConcerned;    // list of the maps in which this cell is involved
+    Vector numMapsConcerned;
     /*
      * For spatial interpolation with the grid of
      * a LTL (low trophic levels) model.
@@ -89,14 +87,6 @@ public class Cell extends ArrayList<School> {
      * (position within the LTL grid)
      */
     Vector icoordLTLGrid, jcoordLTLGrid;
-
-///////////////////////////
-// Declaration of the enum
-//////////////////////////
-    public enum SpatialGroup {
-
-        UPWELLING, AGULHAS_BANK;
-    }
 
 //////////////
 // Constructor
@@ -128,28 +118,28 @@ public class Cell extends ArrayList<School> {
     /**
      * @return the i
      */
-    public int getI() {
+    public int get_igrid() {
         return i;
     }
 
     /**
      * @param i the i to set
      */
-    public void setI(int i) {
+    public void set_igrid(int i) {
         this.i = i;
     }
 
     /**
      * @return the j
      */
-    public int getJ() {
+    public int get_jgrid() {
         return j;
     }
 
     /**
      * @param j the j to set
      */
-    public void setJ(int j) {
+    public void set_jgrid(int j) {
         this.j = j;
     }
 
@@ -210,20 +200,6 @@ public class Cell extends ArrayList<School> {
     }
 
     /**
-     * @return the spatialGroup
-     */
-    public SpatialGroup getSpatialGroup() {
-        return spatialGroup;
-    }
-
-    /**
-     * @param spatialGroup the spatialGroup to set
-     */
-    public void setSpatialGroup(SpatialGroup spatialGroup) {
-        this.spatialGroup = spatialGroup;
-    }
-
-    /**
      * The number of distribution maps in which this cell is involved
      * @return the nbMapsConcerned
      */
@@ -252,6 +228,11 @@ public class Cell extends ArrayList<School> {
         return icoordLTLGrid.size();
     }
 
+    /**
+     * Returns the school(index) in the cell
+     * @param index
+     * @return the school(index)
+     */
     public School getSchool(int index) {
         return get(index);
     }

@@ -328,7 +328,7 @@ public class School {
                 float tempAccess;
                 tempAccess =getOsmose().accessibilityMatrix[getSimulation().nbSpecies + i][0][getCohort().getSpecies().number - 1][accessibilityStage];
                 percentPlankton[i] = myCouple.planktonList[i].calculPercent(critPreySizeMin, critPreySizeMax);
-                biomAccessibleTot += percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.getI()][cell.getJ()];
+                biomAccessibleTot += percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
             }
         }
 
@@ -392,10 +392,10 @@ public class School {
                         float tempAccess;
                         tempAccess = getOsmose().accessibilityMatrix[getSimulation().nbSpecies + i][0][getCohort().getSpecies().number - 1][accessibilityStage];
 
-                        double tempBiomEaten = percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.getI()][cell.getJ()];
+                        double tempBiomEaten = percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
 
-                        myCouple.planktonList[i].accessibleBiomass[cell.getI()][cell.getJ()] -= tempBiomEaten;
-                        myCouple.planktonList[i].biomass[cell.getI()][cell.getJ()] -= tempBiomEaten;
+                        myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()] -= tempBiomEaten;
+                        myCouple.planktonList[i].biomass[cell.get_igrid()][cell.get_jgrid()] -= tempBiomEaten;
                         getTrophicLevel()[cohort.getAgeNbDt()] += myCouple.planktonList[i].trophicLevel * (float) (tempBiomEaten / biomAccessibleTot);
                         if ((getSimulation().dietsOutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
                             dietTemp[getSimulation().species.length + i][0] += tempBiomEaten;
@@ -440,10 +440,10 @@ public class School {
                         float tempAccess;
                         tempAccess = getOsmose().accessibilityMatrix[getSimulation().nbSpecies + i][0][getCohort().getSpecies().number - 1][accessibilityStage];
 
-                        double tempBiomEaten = percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.getI()][cell.getJ()] * biomassToPredate / biomAccessibleTot;
+                        double tempBiomEaten = percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()] * biomassToPredate / biomAccessibleTot;
 
-                        myCouple.planktonList[i].accessibleBiomass[cell.getI()][cell.getJ()] -= tempBiomEaten;
-                        myCouple.planktonList[i].biomass[cell.getI()][cell.getJ()] -= tempBiomEaten;
+                        myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()] -= tempBiomEaten;
+                        myCouple.planktonList[i].biomass[cell.get_igrid()][cell.get_jgrid()] -= tempBiomEaten;
                         getTrophicLevel()[cohort.getAgeNbDt()] += myCouple.planktonList[i].trophicLevel * (float) (tempBiomEaten / biomassToPredate);
 
                         if ((getSimulation().dietsOutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
