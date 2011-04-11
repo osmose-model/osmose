@@ -68,7 +68,7 @@ public class School {
      */
     private float weight;
     /*
-     * Trophic level per age
+     * Table of the TL of this school at each time step
      */
     private float[] trophicLevel;
     /*
@@ -133,28 +133,39 @@ public class School {
         this.abundance = abundance;
         this.length = length;
         this.weight = weight;
-        this.biomass = ((double) abundance) * weight / 1000000.;
+        this.biomass = ((double) abundance) * weight / 1000000.d;
         species = cohort.getSpecies();
         disappears = false;
         catchable = true;
-
-        // initialisation TLs
-        trophicLevel = new float[species.nbCohorts];    // table of the TL of this school at each time step
-        for (int t = 0; t < species.nbCohorts; t++) {
-            trophicLevel[t] = 0f;
+        outOfZoneSchool = false;
+        /*
+         * Initialisation TLs
+         * trophicLevel = table of the TL of this school at each time step
+         */
+        trophicLevel = new float[species.nbCohorts];
+        for (int step = 0; step < species.nbCohorts; step++) {
+            trophicLevel[step] = 0f;
         }
+        /*
+         * Initialisation of the previous age because predation is based on TL
+         * at the previous time step
+         */
         if (cohort.getAgeNbDt() == 0) {
-            trophicLevel[cohort.getAgeNbDt()] = species.TLeggs;   // initialisation of the previous age because predation is based on TL at the previous time step
+            /* Egg stage */
+            trophicLevel[0] = species.TLeggs;
         }
         if (cohort.getAgeNbDt() != 0) {
-            trophicLevel[cohort.getAgeNbDt() - 1] = 3f;   // initialisation of the previous age because predation is based on TL at the previous time step
+            /*
+             * 2011/04/11 phv : do not understand since TLeggs = 3 as well...
+             */
+            trophicLevel[cohort.getAgeNbDt() - 1] = 3f;
         }
-        // initialisation of stage
+        /*
+         * Initialisation of stage
+         */
         updateFeedingStage(species.sizeFeeding, species.nbFeedingStages);
         updateAccessStage(species.ageStagesTab, species.nbAccessStages);
         updateDietOutputStage(species.dietStagesTab, species.nbDietStages);
-
-        this.outOfZoneSchool = false;
 
         dietTemp = new float[getSimulation().species.length + getSimulation().couple.nbPlankton][];
         for (int i = 0; i < getSimulation().species.length; i++) {
@@ -208,8 +219,7 @@ public class School {
     }
 
     /**
-     * Function called when update of schools present in cells after having
-     * removed all elements from vectPresentSchools in all cells
+     * Link the school and the cell where it is located.
      */
     public void communicatePosition() {
         cell.add(this);
