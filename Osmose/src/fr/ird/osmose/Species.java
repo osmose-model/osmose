@@ -21,6 +21,13 @@ public class Species {
      * ********
      * * Logs *
      * ********
+     * 2011/04/11 phv
+     * Deprecated function rankSchools. Replaced by function sortSchoolsByLength
+     * and deleted variable tabSchoolsRanked.
+     * Deleted variable nbEggs and SSB since they are only used in function
+     * reproduce as local variables.
+     * Encapsulated variables index, name, abundance, biomass, tabChorts and
+     * nbCohorts.
      * 2011/04/08 phv
      * Added a getSchool(ageClass, index) instead of
      * tabCohorts[ageClass].getSchool(index)
@@ -31,19 +38,45 @@ public class Species {
      * Deleted variable simulation. Osmose and Simulation are called with
      * Osmose.getInstance() and Osmose.getInstance().getSimulation()
      */
-    //DESCRIPTORS
-    int number;  		//num of the species [1...12]
-    String name;			//name of the species
-    long abundance;
-    long nbEggs;
-    double biomass;		//total biomass in tonnes
-    private Cohort[] tabCohorts;       //[nb cohorts=(int)Math.round((longevity+1)*simulation.nbDt)
-    int nbCohorts;              //=(int)Math.round((longevity+1)*simulation.nbDt
-    double SSB;
-    //MORGANE 07-2004
-    //those attributes are used for the calculation of indicators
-    int nbSchoolsTot;    //nb of schools per species
-    School[] tabSchoolsRanked, schoolsRanked;  //schools sorted according to their size, dim = nbSchoolsTot
+///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
+    /*
+     * ******************************
+     * * Description of the species *
+     * ******************************
+     */
+    /*
+     * Index of the species [0 : numberTotalSpecies - 1]
+     */
+    private int index;
+    /*
+     * Name of the species
+     */
+    private String name;
+    /*
+     * Number of individuals of the species
+     */
+    private long abundance;
+    /*
+     * Total biomass in tons
+     */
+    private double biomass;
+    /*
+     * List of the cohorts
+     */
+    private Cohort[] tabCohorts;
+    /*
+     * Number of the cohorts = (int) Math.round((longevity + 1) * simulation.nbDt
+     */
+    private int nbCohorts;
+    /*
+     * **************
+     * * Indicators *
+     * **************
+     * MORGANE 07-2004
+     * Those attributes are used for the calculation of indicators.
+     */
     int nbSchoolsTotCatch;	//nb of schools fished per species
     int[] cumulCatch;           //dim of 3 tables=nbSchoolsTotCatch
     float[] nbSchoolCatch;	//fished schools sorted according to their size
@@ -53,7 +86,11 @@ public class Species {
     float meanTLSpe;
     float[] meanTLperAge;
     float TLeggs = 3f;
-    //LIFE HISTORY PARAMETERS
+    /*
+     * ***************************
+     * * Life history parameters *
+     * ***************************
+     */
     float D;//D0;		//mortality rates year-1
     float F;
     float longevity;              //in years
@@ -83,50 +120,56 @@ public class Species {
     int nbDietStages;
     float[] dietStagesTab;
 
+    /**
+     * Create a new species
+     * @param number, an integer, the number of the species {1 : nbTotSpecies}
+     */
     public Species(int number) {
-        this.number = number;
+        index = number - 1;
     }
 
+    /*
+     * Initialize the parameters of the species 
+     */
     public void init() {
 
         int numSerie = getSimulation().numSerie;
 
         // INITIALISATION of PARAM
-        int iSpec = number - 1;
-        this.name = getOsmose().nameSpecMatrix[numSerie][iSpec];
-        this.D = getOsmose().DMatrix[numSerie][iSpec];
-        this.F = getOsmose().FMatrix[numSerie][iSpec];
-        this.longevity = getOsmose().longevityMatrix[numSerie][iSpec];
-        this.lInf = getOsmose().lInfMatrix[numSerie][iSpec];
-        this.K = getOsmose().KMatrix[numSerie][iSpec];
-        this.t0 = getOsmose().t0Matrix[numSerie][iSpec];
-        this.c = getOsmose().cMatrix[numSerie][iSpec];
-        this.bPower = getOsmose().bPowerMatrix[numSerie][iSpec];
-        this.alpha = getOsmose().alphaMatrix[numSerie][iSpec];
-        this.sizeMat = getOsmose().sizeMatMatrix[numSerie][iSpec];
-        this.nbFeedingStages = getOsmose().nbStagesMatrix[numSerie][iSpec];
-        this.sizeFeeding = getOsmose().sizeFeedingMatrix[numSerie][iSpec];
-        this.recruitAge = getOsmose().recruitAgeMatrix[numSerie][iSpec];
-        this.recruitSize = getOsmose().recruitSizeMatrix[numSerie][iSpec];
-        this.seasonFishing = getOsmose().seasonFishingMatrix[numSerie][iSpec];
-        this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][iSpec];
-        this.supAgeOfClass0 = getOsmose().supAgeOfClass0Matrix[numSerie][iSpec];//age from which the species biomass-0 is calculated
+        this.name = getOsmose().nameSpecMatrix[numSerie][index];
+        this.D = getOsmose().DMatrix[numSerie][index];
+        this.F = getOsmose().FMatrix[numSerie][index];
+        this.longevity = getOsmose().longevityMatrix[numSerie][index];
+        this.lInf = getOsmose().lInfMatrix[numSerie][index];
+        this.K = getOsmose().KMatrix[numSerie][index];
+        this.t0 = getOsmose().t0Matrix[numSerie][index];
+        this.c = getOsmose().cMatrix[numSerie][index];
+        this.bPower = getOsmose().bPowerMatrix[numSerie][index];
+        this.alpha = getOsmose().alphaMatrix[numSerie][index];
+        this.sizeMat = getOsmose().sizeMatMatrix[numSerie][index];
+        this.nbFeedingStages = getOsmose().nbStagesMatrix[numSerie][index];
+        this.sizeFeeding = getOsmose().sizeFeedingMatrix[numSerie][index];
+        this.recruitAge = getOsmose().recruitAgeMatrix[numSerie][index];
+        this.recruitSize = getOsmose().recruitSizeMatrix[numSerie][index];
+        this.seasonFishing = getOsmose().seasonFishingMatrix[numSerie][index];
+        this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][index];
+        this.supAgeOfClass0 = getOsmose().supAgeOfClass0Matrix[numSerie][index];//age from which the species biomass-0 is calculated
         this.indexAgeClass0 = (int) Math.ceil(supAgeOfClass0 * getSimulation().nbDt);      // index of supAgeOfClass0 used in tabCohorts table
-        this.larvalSurvival = getOsmose().larvalSurvivalMatrix[numSerie][iSpec];
-        this.sexRatio = getOsmose().sexRatioMatrix[numSerie][iSpec];
-        this.eggSize = getOsmose().eggSizeMatrix[numSerie][iSpec];
-        this.eggWeight = getOsmose().eggWeightMatrix[numSerie][iSpec];
-        this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][iSpec];
+        this.larvalSurvival = getOsmose().larvalSurvivalMatrix[numSerie][index];
+        this.sexRatio = getOsmose().sexRatioMatrix[numSerie][index];
+        this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
+        this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
+        this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];
 
-        this.predationRate = getOsmose().predationRateMatrix[numSerie][iSpec];
-        this.predPreySizesMax = getOsmose().predPreySizesMaxMatrix[numSerie][iSpec];
-        this.predPreySizesMin = getOsmose().predPreySizesMinMatrix[numSerie][iSpec];
-        this.criticalPredSuccess = getOsmose().criticalPredSuccessMatrix[numSerie][iSpec];
-        this.starvMaxRate = getOsmose().starvMaxRateMatrix[numSerie][iSpec];
-        this.nbAccessStages = getOsmose().nbAccessStage[iSpec];
-        this.ageStagesTab = getOsmose().accessStageThreshold[iSpec];
-        this.dietStagesTab = getOsmose().dietStageThreshold[numSerie][iSpec];
-        this.nbDietStages = getOsmose().nbDietsStages[numSerie][iSpec];
+        this.predationRate = getOsmose().predationRateMatrix[numSerie][index];
+        this.predPreySizesMax = getOsmose().predPreySizesMaxMatrix[numSerie][index];
+        this.predPreySizesMin = getOsmose().predPreySizesMinMatrix[numSerie][index];
+        this.criticalPredSuccess = getOsmose().criticalPredSuccessMatrix[numSerie][index];
+        this.starvMaxRate = getOsmose().starvMaxRateMatrix[numSerie][index];
+        this.nbAccessStages = getOsmose().nbAccessStage[index];
+        this.ageStagesTab = getOsmose().accessStageThreshold[index];
+        this.dietStagesTab = getOsmose().dietStageThreshold[numSerie][index];
+        this.nbDietStages = getOsmose().nbDietsStages[numSerie][index];
 
         // START INITIALISATION of COHORTS
         nbCohorts = (int) Math.round((longevity) * getSimulation().nbDt);
@@ -200,6 +243,38 @@ public class Species {
         return tabCohorts[classAge].getSchool(indexSchool);
     }
 
+    public int getIndex() {
+        return index;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public long getAbundance() {
+        return abundance;
+    }
+
+    public void resetAbundance() {
+        abundance = 0;
+    }
+
+    public void incrementAbundance(long incr) {
+        this.abundance += incr;
+    }
+
+    public double getBiomass() {
+        return biomass;
+    }
+
+    public void resetBiomass() {
+        biomass = 0.d;
+    }
+
+    public void incrementBiomass(double incr) {
+        biomass += incr;
+    }
+
     public void growth() //****NEW: comes from growth1 and growth2
     {
 
@@ -239,19 +314,20 @@ public class Species {
                 getCohort(i).setBiomass(getCohort(i).getBiomass() + getSchool(i, j).getBiomass());
             }
         }
-        SSB = 0;
+        double SSB = 0;
         float tempTL = 0f;
         int indexMin = 0;
-        while ((indexMin < tabSchoolsRanked.length)
-                && (tabSchoolsRanked[indexMin].getLength() < sizeMat)) {
+        List<School> tabSchoolsRanked = sortSchoolsByLength();
+        while ((indexMin < tabSchoolsRanked.size())
+                && (tabSchoolsRanked.get(indexMin).getLength() < sizeMat)) {
             indexMin++;
         }
-        for (int i = indexMin; i < tabSchoolsRanked.length; i++) {
-            SSB += tabSchoolsRanked[i].getBiomass();
-            tempTL += tabSchoolsRanked[i].getTrophicLevel()[tabSchoolsRanked[i].getCohort().getAgeNbDt()] * tabSchoolsRanked[i].getBiomass();
+        for (int i = indexMin; i < tabSchoolsRanked.size(); i++) {
+            SSB += tabSchoolsRanked.get(i).getBiomass();
+            tempTL += tabSchoolsRanked.get(i).getTrophicLevel()[tabSchoolsRanked.get(i).getCohort().getAgeNbDt()] * tabSchoolsRanked.get(i).getBiomass();
         }
 
-        nbEggs = Math.round(sexRatio * alpha * seasonSpawning[getSimulation().dt] * SSB * 1000000);
+        long nbEggs = Math.round(sexRatio * alpha * seasonSpawning[getSimulation().dt] * SSB * 1000000);
         if (nbEggs > 9100000000000000000l) {
             System.out.println("beyond long format for eggs numbers");
         }
@@ -341,7 +417,7 @@ public class Species {
         for (int i = 0; i < nbCohorts; i++) {
             for (int j = 0; j < getCohort(i).size(); j++) {
                 getSchool(i, j).updateFeedingStage(sizeFeeding, nbFeedingStages);
-                getSchool(i, j).updateAccessStage(getOsmose().accessStageThreshold[number - 1], getOsmose().nbAccessStage[number - 1]);
+                getSchool(i, j).updateAccessStage(getOsmose().accessStageThreshold[index], getOsmose().nbAccessStage[index]);
             }
         }
 
@@ -391,9 +467,9 @@ public class Species {
                         for (School school : getCohort(i)) {
                             if (school.isCatchable()) {
                                 if ((getSimulation().t) >= getOsmose().timeSeriesStart) {
-                                    getSimulation().savingYield[number - 1] +=
+                                    getSimulation().savingYield[index] +=
                                             ((float) (school.getAbundance() * school.getWeight() / 1000000));
-                                    getSimulation().tabTLCatch[number - 1] += school.getTrophicLevel()[school.getCohort().getAgeNbDt()] * ((float) (school.getAbundance() * school.getWeight() / 1000000));
+                                    getSimulation().tabTLCatch[index] += school.getTrophicLevel()[school.getCohort().getAgeNbDt()] * ((float) (school.getAbundance() * school.getWeight() / 1000000));
                                 }
                                 if (!(getCohort(i).getOutOfZoneCohort()[getSimulation().dt])) {
                                     school.getCell().remove(school);
@@ -430,43 +506,27 @@ public class Species {
 //		Not programmed for the moment. If recruitment size in input, transformed at initialisation into recruitment age
     }
 
-    public void rankSchools() // NEW    morgane 02-2007
-    {
-        //Sort schools of all ages in the ecosystem according to their length
-        nbSchoolsTot = 0;
-        for (int j = 0; j < nbCohorts; j++) {
-            nbSchoolsTot += getCohort(j).size();
+    /**
+     * NEW morgane 02-2007
+     * Sort schools of all ages in the ecosystem according to their length
+     * @deprecated 2011/04/12 phv. Replaced by function sortSchoolsByLength()
+     */
+    @Deprecated
+    public void rankSchools() {
+    }
+
+    /**
+     * Sort all the schools of this species according to their length.
+     * @return a List of the Schools of this species sorted by length.
+     */
+    public List<School> sortSchoolsByLength() {
+
+        List<School> schools = new ArrayList();
+        for (Cohort cohort : tabCohorts) {
+            schools.addAll(cohort);
         }
-        tabSchoolsRanked = new School[nbSchoolsTot];
-        int dummy;
-        int index = 0;
-        for (int j = 0; j < nbCohorts; j++) {
-            for (int k = 0; k < getCohort(j).size(); k++) {
-                tabSchoolsRanked[index] = getSchool(j, k);
-                index++;
-            }
-        }
-        int[] indexSchoolsSizes = new int[nbSchoolsTot];
-        for (int k = 0; k < nbSchoolsTot; k++) {
-            indexSchoolsSizes[k] = k;
-        }
-        for (int k1 = 0; k1 < nbSchoolsTot; k1++) {
-            for (int k2 = k1 + 1; k2 < nbSchoolsTot; k2++) {
-                if (((School) tabSchoolsRanked[indexSchoolsSizes[k1]]).getLength()
-                        > ((School) tabSchoolsRanked[indexSchoolsSizes[k2]]).getLength()) {
-                    dummy = indexSchoolsSizes[k1];
-                    indexSchoolsSizes[k1] = indexSchoolsSizes[k2];
-                    indexSchoolsSizes[k2] = dummy;
-                }
-            }
-        }
-        School[] tabSchoolsTemp = new School[nbSchoolsTot];
-        for (int k = 0; k < tabSchoolsTemp.length; k++) {
-            tabSchoolsTemp[k] = (School) tabSchoolsRanked[indexSchoolsSizes[k]];
-        }
-        for (int k = 0; k < tabSchoolsTemp.length; k++) {
-            tabSchoolsRanked[k] = (School) tabSchoolsTemp[k];
-        }
+        Collections.sort(schools, new SchoolComparator());
+        return schools;
     }
 
     // ---------MORGANE 07-2004-----------
@@ -565,11 +625,9 @@ public class Species {
         nbSchoolCatch = new float[nbSchoolsTotCatch];
         sizeSchoolCatch = new float[nbSchoolsTotCatch];
         int dummy;
-        int index = 0;
         for (int k = 0; k < nbSchoolsTotCatch; k++) {
-            nbSchoolCatch[index] = getSimulation().tabNbCatch[number - 1][k];
-            sizeSchoolCatch[index] = getSimulation().tabSizeCatch[number - 1][k];
-            index++;
+            nbSchoolCatch[k] = getSimulation().tabNbCatch[index][k];
+            sizeSchoolCatch[k] = getSimulation().tabSizeCatch[index][k];
         }
 
 
@@ -619,7 +677,7 @@ public class Species {
             for (int j = 0; j < nbSchoolsTotCatch; j++) {
                 if (sizeSchoolCatch[j] < getOsmose().spectrumMaxSize) {
                     sizeTemp = (int) Math.floor(sizeSchoolCatch[j] / getOsmose().classRange);
-                    getSimulation().spectrumTemp[1][number - 1][sizeTemp] += nbSchoolCatch[j];
+                    getSimulation().spectrumTemp[1][index][sizeTemp] += nbSchoolCatch[j];
                 }
             }
         }
@@ -706,6 +764,14 @@ public class Species {
         }
         if (nbCohorts != nbCohorts) {
             System.out.println("nb= " + nbCohorts + " ,   length = " + nbCohorts);
+        }
+    }
+
+    private class SchoolComparator implements Comparator<School> {
+
+        @Override
+        public int compare(School o1, School o2) {
+            return Float.compare(o1.getLength(), o2.getLength());
         }
     }
 }

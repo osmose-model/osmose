@@ -1771,7 +1771,7 @@ public class Osmose {
                 iniBiomass[x][i] = 0;
             }
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                for (int j = simulation.species[i].indexAgeClass0; j < simulation.species[i].nbCohorts; j++) {
+                for (int j = simulation.species[i].indexAgeClass0; j < simulation.species[i].getNumberCohorts(); j++) {
                     iniBiomass[x][i] += (float) simulation.species[i].getCohort(j).getBiomass();
                 }
             }
@@ -1947,7 +1947,7 @@ public class Osmose {
         pw.print("Name ");
         for (int i = 0; i < simulation.species.length; i++) {
             pw.print(';');
-            pw.print(simulation.species[i].name);
+            pw.print(simulation.species[i].getName());
         }
         pw.println();
         pw.print("D ");

@@ -108,7 +108,7 @@ public class Cohort extends ArrayList<School> {
     public Cohort(Species species, int ageNbDt, long abundance, double biomass,
             float iniLength, float iniWeight) {
         this.species = species;
-        indexSpecies = species.number - 1;
+        indexSpecies = species.getIndex();
         this.ageNbDt = ageNbDt;
 
         outOfZoneMortality = new float[getSimulation().nbDt];
