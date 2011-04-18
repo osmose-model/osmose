@@ -22,6 +22,11 @@ public class Simulation {
      * ********
      * * Logs *
      * ********
+     * 2011/04/18 phv
+     * Deleted variables tabSchoolsRandom, specInSizeClass10 that only had local
+     * use.
+     * Replaced randomOrder() function by shuffleSchools() function.
+     * Simplified the rankSchoolsSizes() method.
      * 2011/04/08 phv
      * Deleted the constructor. Parameters are now loaded in the init() method.
      * 2011/04/07 phv
@@ -33,7 +38,6 @@ public class Simulation {
     int t, dt, dtCount; // years, time steps, for saving
     int nbSpecies, nbSpeciesIni;
     Species[] species;
-    School[] tabSchoolsRandom;
     String recruitMetric;
     //spectrum
 //	float[] spectrumAbd, spectrumBiom;
@@ -64,7 +68,6 @@ public class Simulation {
     // initialisation param for species abd in function of an input size spectrum
     double a, b;	    //coeff of the relation nb=length^a * expb
     //in Rice : a=-5.8; b=35.5*/
-    Vector[] specInSizeClass10;	//tab of vectors of species belonging to [0-10[....[140-150[
     long[] abdGapSizeClass10;	//tab of abd to fill in 10cm size class
     long abdIniMin;			//initial min abd of last age class of a species
     boolean targetFishing;
@@ -257,7 +260,10 @@ public class Simulation {
             couple.updatePlankton(dt);     // update plankton fields either from LTL run or from data
 
             // *** PREDATION ***
-            randomOrder();
+            /*
+             * 2011/04/18 phv : do not understand why do we sort schools
+             * by length here ?
+             */
             rankSchoolsSizes();
 
             if (t >= getOsmose().timeSeriesStart) // save fish biomass before predation process for diets data
@@ -275,12 +281,14 @@ public class Simulation {
                 couple.savePlanktonBiomass();
             }
 
-            for (int i = 0; i < tabSchoolsRandom.length; i++) {
-                if (!tabSchoolsRandom[i].willDisappear()) {
-                    if (!(((Cohort) tabSchoolsRandom[i].getCohort()).getAgeNbDt() == 0)) // eggs do not predate other organisms
-                    {
-                        tabSchoolsRandom[i].predation();
-                    }
+
+            List<School> randomSchools = suffleSchools();
+            Iterator<School> randomIterator = randomSchools.iterator();
+            while (randomIterator.hasNext()) {
+                School school = randomIterator.next();
+                /* eggs do not predate other organisms */
+                if (!school.willDisappear() && school.getCohort().getAgeNbDt() != 0) {
+                    school.predation();
                 }
             }
 
@@ -290,9 +298,11 @@ public class Simulation {
 
 
             // *** STARVATION MORTALITY ***
-            for (int i = 0; i < tabSchoolsRandom.length; i++) {
-                if (!tabSchoolsRandom[i].willDisappear()) {
-                    tabSchoolsRandom[i].surviveP();
+            randomIterator = randomSchools.iterator();
+            while (randomIterator.hasNext()) {
+                School school = randomIterator.next();
+                if (!school.willDisappear()) {
+                    school.surviveP();
                 }
             }
 
@@ -398,7 +408,8 @@ public class Simulation {
     //initialisation according to a spectrum [10cm], from 0 to 200cm
     {
         long[] tempSpectrumAbd = new long[20];
-        specInSizeClass10 = new Vector[20];    //20 classes size 0 a 200
+        /* tab of vectors of species belonging to [0-10[....[140-150[ */
+        Vector[] specInSizeClass10 = new Vector[20];    //20 classes size 0 a 200
         for (int i = 0; i < specInSizeClass10.length; i++) {
             specInSizeClass10[i] = new Vector(nbSpeciesIni);
         }
@@ -557,61 +568,28 @@ public class Simulation {
         couple.initPlanktonMap();
     }
 
-    public void randomOrder() {
-        //schools are sorted randomly for predation  ---- ALL SCHOOLS
-        int capaIni = 30 * 10 * species.length;
-        Vector vectSchoolsRandom = new Vector(capaIni, 1);
-        for (int i = 0; i < species.length; i++) {
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                if (!species[i].getCohort(j).getOutOfZoneCohort()[dt]) {
-                    for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                        vectSchoolsRandom.addElement(species[i].getCohort(j).getSchool(k));
-                    }
+    /*
+     * Randomly sort all schools for predation.
+     */
+    public List<School> suffleSchools() {
+
+        ArrayList<School> schools = new ArrayList();
+        for (Species sp : species) {
+            for (Cohort cohort : sp.getCohorts()) {
+                if (!cohort.getOutOfZoneCohort()[dt]) {
+                    schools.addAll(cohort);
                 }
             }
         }
-
-        vectSchoolsRandom.trimToSize();
-        tabSchoolsRandom = new School[vectSchoolsRandom.size()];
-        int z = 0;
-        while (z < tabSchoolsRandom.length) {
-            int random = (int) Math.round((vectSchoolsRandom.size() - 1) * Math.random());
-            tabSchoolsRandom[z] = (School) vectSchoolsRandom.elementAt(random);
-            vectSchoolsRandom.removeElementAt(random);
-            z++;
-        }
-        vectSchoolsRandom.removeAllElements();
-        vectSchoolsRandom.trimToSize();
+        Collections.shuffle(schools);
+        return schools;
     }
 
     public void rankSchoolsSizes() {
-        Grid grid = getGrid();
-        int dummy;
-        for (int i = 0; i < grid.getNbLines(); i++) {
-            for (int j = 0; j < grid.getNbColumns(); j++) {
-                int[] indexSchoolsSizes = new int[grid.getCell(i, j).size()];
-                for (int k = 0; k < grid.getCell(i, j).size(); k++) {
-                    indexSchoolsSizes[k] = k;
-                }
-                for (int k1 = 0; k1 < grid.getCell(i, j).size(); k1++) {
-                    for (int k2 = k1 + 1; k2 < grid.getCell(i, j).size(); k2++) {
-                        if (((School) grid.getCell(i, j).get(indexSchoolsSizes[k1])).getLength()
-                                > ((School) grid.getCell(i, j).get(indexSchoolsSizes[k2])).getLength()) {
-                            dummy = indexSchoolsSizes[k1];
-                            indexSchoolsSizes[k1] = indexSchoolsSizes[k2];
-                            indexSchoolsSizes[k2] = dummy;
-                        }
-                    }
-                }
-                School[] tabSchoolsTemp = new School[grid.getCell(i, j).size()];
-                for (int k = 0; k < tabSchoolsTemp.length; k++) {
-                    tabSchoolsTemp[k] = (School) grid.getCell(i, j).get(indexSchoolsSizes[k]);
-                }
-                grid.getCell(i, j).clear();
-                for (int k = 0; k < tabSchoolsTemp.length; k++) {
-                    grid.getCell(i, j).add(tabSchoolsTemp[k]);
-                }
-            }
+
+        Iterator<Cell> iterator = getGrid().getCells().iterator();
+        while (iterator.hasNext()) {
+            iterator.next().sortSchoolsByLength();
         }
     }
 

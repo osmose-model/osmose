@@ -13,7 +13,9 @@ package fr.ird.osmose;
  * @version 2.1 
  ******************************************************************************* 
  */
+import fr.ird.osmose.util.SchoolLengthComparator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Vector;
 
 public class Cell extends ArrayList<School> {
@@ -22,6 +24,8 @@ public class Cell extends ArrayList<School> {
      * ********
      * * Logs *
      * ********
+     * 2011/04/18 phv
+     * Added a sortSchoolsByLength() function
      * 2011/04/07 phv
      * Deleted the spatialGroup variable.
      * ***
@@ -42,7 +46,6 @@ public class Cell extends ArrayList<School> {
      * is sufficient to request the associated vector size.
      * ***
      */
-    
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -235,6 +238,13 @@ public class Cell extends ArrayList<School> {
      */
     public School getSchool(int index) {
         return get(index);
+    }
+
+    /**
+     * Sort all the schools in this cell according to their length.
+     */
+    public void sortSchoolsByLength() {
+        Collections.sort(this, new SchoolLengthComparator());
     }
 }
 

@@ -22,6 +22,8 @@ public class Grid {
      * ********
      * * Logs *
      * ********
+     * 2011/04/18 phv
+     * Added a getCells() function
      * 2011/04/11 phv
      * Deprecated identifySpatialGroups since it looks Benguela specific
      * function.
@@ -138,12 +140,27 @@ public class Grid {
         return matrix[i][j];
     }
 
+    /**
+     * Get a list of the cells.
+     * @return a List<Cell> of the cells.
+     */
+    public List<Cell> getCells() {
+        ArrayList<Cell> cells = new ArrayList(nbLines * nbColumns);
+        for (int i = nbLines; i-- > 0;) {
+            for (int j = nbColumns; j-- > 0;) {
+                cells.add(matrix[i][j]);
+            }
+        }
+        return cells;
+    }
+
     /*
      * phv: looks like a specific method to Benguela system...
      * 2011/04/11 Tagged as deprecated
      */
     @Deprecated
-    public void identifySpatialGroups() {}
+    public void identifySpatialGroups() {
+    }
 
     /**
      * Get the adjacent cells of a given cell. Cells are randomly sorted.

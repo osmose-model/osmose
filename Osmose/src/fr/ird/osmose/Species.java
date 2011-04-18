@@ -13,6 +13,7 @@ package fr.ird.osmose;
  * @version 2.1
  ******************************************************************************** 
  */
+import fr.ird.osmose.util.SchoolLengthComparator;
 import java.util.*;
 
 public class Species {
@@ -233,6 +234,10 @@ public class Species {
 
     public void setCohort(int classAge, Cohort cohort) {
         tabCohorts[classAge] = cohort;
+    }
+
+    public Cohort[] getCohorts() {
+        return tabCohorts;
     }
 
     public int getNumberCohorts() {
@@ -525,7 +530,7 @@ public class Species {
         for (Cohort cohort : tabCohorts) {
             schools.addAll(cohort);
         }
-        Collections.sort(schools, new SchoolComparator());
+        Collections.sort(schools, new SchoolLengthComparator());
         return schools;
     }
 
@@ -764,14 +769,6 @@ public class Species {
         }
         if (nbCohorts != nbCohorts) {
             System.out.println("nb= " + nbCohorts + " ,   length = " + nbCohorts);
-        }
-    }
-
-    private class SchoolComparator implements Comparator<School> {
-
-        @Override
-        public int compare(School o1, School o2) {
-            return Float.compare(o1.getLength(), o2.getLength());
         }
     }
 }
