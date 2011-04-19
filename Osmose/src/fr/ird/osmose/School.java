@@ -167,14 +167,14 @@ public class School {
         updateAccessStage(species.ageStagesTab, species.nbAccessStages);
         updateDietOutputStage(species.dietStagesTab, species.nbDietStages);
 
-        dietTemp = new float[getSimulation().species.length + getSimulation().couple.nbPlankton][];
-        for (int i = 0; i < getSimulation().species.length; i++) {
-            dietTemp[i] = new float[getSimulation().species[i].nbDietStages];
-            for (int s = 0; s < getSimulation().species[i].nbDietStages; s++) {
+        dietTemp = new float[getSimulation().getNbSpecies() + getSimulation().getCoupling().nbPlankton][];
+        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+            dietTemp[i] = new float[getSimulation().getSpecies(i).nbDietStages];
+            for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                 dietTemp[i][s] = 0;
             }
         }
-        for (int i = getSimulation().species.length; i < getSimulation().species.length + getSimulation().couple.nbPlankton; i++) {
+        for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getCoupling().nbPlankton; i++) {
             dietTemp[i] = new float[1];
             dietTemp[i][0] = 0;
         }
@@ -281,7 +281,7 @@ public class School {
             }
         } else if (getSimulation().dietMetric.equalsIgnoreCase("age")) {
             for (int i = 1; i < nbStages; i++) {
-                int tempAge = Math.round(thresholdTab[i - 1] * getSimulation().nbDt);
+                int tempAge = Math.round(thresholdTab[i - 1] * getSimulation().getNbTimeStepsPerYear());
                 if (getLength() >= tempAge) {
                     dietOutputStage++;
                 }
@@ -291,12 +291,12 @@ public class School {
 
     public void predation() {
 
-        Coupling myCouple = getSimulation().couple;
+        Coupling myCouple = getSimulation().getCoupling();
 
         float[] percentPlankton;
         percentPlankton = new float[myCouple.nbPlankton];
 
-        biomassToPredate = getBiomass() * getCohort().getSpecies().predationRate / (float) getSimulation().nbDt;
+        biomassToPredate = getBiomass() * getCohort().getSpecies().predationRate / (float) getSimulation().getNbTimeStepsPerYear();
         double biomassToPredateIni = biomassToPredate;
 
         critPreySizeMax = getLength() / getCohort().getSpecies().predPreySizesMax[feedingStage];
@@ -336,7 +336,7 @@ public class School {
                 percentPlankton[i] = 0.0f;
             } else {
                 float tempAccess;
-                tempAccess =getOsmose().accessibilityMatrix[getSimulation().nbSpecies + i][0][getCohort().getSpecies().getIndex()][accessibilityStage];
+                tempAccess =getOsmose().accessibilityMatrix[getSimulation().getNbSpecies() + i][0][getCohort().getSpecies().getIndex()][accessibilityStage];
                 percentPlankton[i] = myCouple.planktonList[i].calculPercent(critPreySizeMin, critPreySizeMax);
                 biomAccessibleTot += percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
             }
@@ -381,7 +381,7 @@ public class School {
 
                     getTrophicLevel()[cohort.getAgeNbDt()] += TLprey * (float) (mySchoolk.getBiomass() * tempAccess / biomAccessibleTot);
 
-                    if ((getSimulation().dietsOutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                    if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
                         dietTemp[mySchoolk.species.getIndex()][mySchoolk.dietOutputStage] += mySchoolk.getBiomass() * tempAccess;
                     }
                     //
@@ -397,18 +397,18 @@ public class School {
 
                 }
                 //**********Predation on plankton**************
-                for (int i = 0; i < getSimulation().couple.nbPlankton; i++) {
+                for (int i = 0; i < getSimulation().getCoupling().nbPlankton; i++) {
                     if (percentPlankton[i] != 0.0f) {
                         float tempAccess;
-                        tempAccess = getOsmose().accessibilityMatrix[getSimulation().nbSpecies + i][0][getCohort().getSpecies().getIndex()][accessibilityStage];
+                        tempAccess = getOsmose().accessibilityMatrix[getSimulation().getNbSpecies() + i][0][getCohort().getSpecies().getIndex()][accessibilityStage];
 
                         double tempBiomEaten = percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
 
                         myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()] -= tempBiomEaten;
                         myCouple.planktonList[i].biomass[cell.get_igrid()][cell.get_jgrid()] -= tempBiomEaten;
                         getTrophicLevel()[cohort.getAgeNbDt()] += myCouple.planktonList[i].trophicLevel * (float) (tempBiomEaten / biomAccessibleTot);
-                        if ((getSimulation().dietsOutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
-                            dietTemp[getSimulation().species.length + i][0] += tempBiomEaten;
+                        if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
+                            dietTemp[getSimulation().getNbSpecies() + i][0] += tempBiomEaten;
                         }
                     }
                 }
@@ -429,7 +429,7 @@ public class School {
 
                     getTrophicLevel()[cohort.getAgeNbDt()] += TLprey * (float) (mySchoolk.getBiomass() * tempAccess / biomAccessibleTot);// TL of the prey at the previous time step because all schools hav'nt predate yet
 
-                    if ((getSimulation().dietsOutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
+                    if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
                         dietTemp[mySchoolk.species.getIndex()][mySchoolk.dietOutputStage] += mySchoolk.getBiomass() * tempAccess * biomassToPredate / biomAccessibleTot;
                     }
 
@@ -445,10 +445,10 @@ public class School {
 
                 }
                 //************ Predation on plankton ***************
-                for (int i = 0; i < getSimulation().couple.nbPlankton; i++) {
+                for (int i = 0; i < getSimulation().getCoupling().nbPlankton; i++) {
                     if (percentPlankton[i] != 0.0f) {
                         float tempAccess;
-                        tempAccess = getOsmose().accessibilityMatrix[getSimulation().nbSpecies + i][0][getCohort().getSpecies().getIndex()][accessibilityStage];
+                        tempAccess = getOsmose().accessibilityMatrix[getSimulation().getNbSpecies() + i][0][getCohort().getSpecies().getIndex()][accessibilityStage];
 
                         double tempBiomEaten = percentPlankton[i] * tempAccess * myCouple.planktonList[i].accessibleBiomass[cell.get_igrid()][cell.get_jgrid()] * biomassToPredate / biomAccessibleTot;
 
@@ -456,8 +456,8 @@ public class School {
                         myCouple.planktonList[i].biomass[cell.get_igrid()][cell.get_jgrid()] -= tempBiomEaten;
                         getTrophicLevel()[cohort.getAgeNbDt()] += myCouple.planktonList[i].trophicLevel * (float) (tempBiomEaten / biomassToPredate);
 
-                        if ((getSimulation().dietsOutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
-                            dietTemp[getSimulation().species.length + i][0] += tempBiomEaten;
+                        if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
+                            dietTemp[getSimulation().getNbSpecies() + i][0] += tempBiomEaten;
                         }
                     }
                 }
@@ -472,36 +472,36 @@ public class School {
             getTrophicLevel()[getCohort().getAgeNbDt()] = getTrophicLevel()[getCohort().getAgeNbDt() - 1];     // no food available, so current TL = previous TL
         }
         predSuccessRate = (float) (1 - biomassToPredate / biomassToPredateIni);     // = predSuccessRate for the current time step
-        if ((getSimulation().dietsOutput) && (getSimulation().t >= getOsmose().timeSeriesStart)) {
-            for (int i = 0; i < getSimulation().species.length; i++) {
-                for (int s = 0; s < getSimulation().species[i].nbDietStages; s++) {
+        if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
+            for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+                for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     sumDiet += dietTemp[i][s];
                     getSimulation().predatorsPressureMatrix[species.getIndex()][dietOutputStage][i][s] += dietTemp[i][s];
                 }
             }
-            for (int i = getSimulation().species.length; i < getSimulation().species.length + getSimulation().couple.nbPlankton; i++) {
+            for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getCoupling().nbPlankton; i++) {
                 sumDiet += dietTemp[i][0];
                 getSimulation().predatorsPressureMatrix[species.getIndex()][dietOutputStage][i][0] += dietTemp[i][0];
             }
 
             if (sumDiet != 0) {
                 getSimulation().nbStomachs[species.getIndex()][dietOutputStage] += getAbundance();
-                for (int i = 0; i < getSimulation().species.length; i++) {
-                    for (int s = 0; s < getSimulation().species[i].nbDietStages; s++) {
+                for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+                    for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                         getSimulation().dietsMatrix[species.getIndex()][dietOutputStage][i][s] += getAbundance() * dietTemp[i][s] / sumDiet;
                     }
                 }
-                for (int i = getSimulation().species.length; i < getSimulation().species.length + getSimulation().couple.nbPlankton; i++) {
+                for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getCoupling().nbPlankton; i++) {
                     getSimulation().dietsMatrix[species.getIndex()][dietOutputStage][i][0] += getAbundance() * dietTemp[i][0] / sumDiet;
                 }
                 sumDiet = 0;
             }
-            for (int i = 0; i < getSimulation().species.length; i++) {
-                for (int s = 0; s < getSimulation().species[i].nbDietStages; s++) {
+            for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+                for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     dietTemp[i][s] = 0;
                 }
             }
-            for (int i = getSimulation().species.length; i < getSimulation().species.length + getSimulation().couple.nbPlankton; i++) {
+            for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getCoupling().nbPlankton; i++) {
                 dietTemp[i][0] = 0;
             }
 
@@ -518,7 +518,7 @@ public class School {
                 mortalityRate = 0;
                 System.out.print("starvation bug ");
             }
-            nbDead = (long) (Math.round((double) getAbundance()) * (1 - Math.exp(-mortalityRate / (float) getSimulation().nbDt)));
+            nbDead = (long) (Math.round((double) getAbundance()) * (1 - Math.exp(-mortalityRate / (float) getSimulation().getNbTimeStepsPerYear())));
 
             setAbundance(getAbundance() - nbDead);
 

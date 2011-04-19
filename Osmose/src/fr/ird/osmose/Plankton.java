@@ -72,7 +72,7 @@ public class Plankton {
                 biomass[i][j] = 0;
                 accessibleBiomass[i][j] = 0;
                 iniBiomass[i][j] = 0;
-                mortalityRate[i][j] = (accessibilityCoeff / 2f) * getSimulation().nbDt / 365f; // default = median of the max mortality rate (in day-1)
+                mortalityRate[i][j] = (accessibilityCoeff / 2f) * getSimulation().getNbTimeStepsPerYear() / 365f; // default = median of the max mortality rate (in day-1)
             }
         }
     }
@@ -117,7 +117,7 @@ public class Plankton {
 
     public float biomToProd(float biomass) {
         float prod = 0f;
-        prod = biomass * prodBiomFactor / (float) getSimulation().nbDt;
+        prod = biomass * prodBiomFactor / (float) getSimulation().getNbTimeStepsPerYear();
         return prod;
     }
 

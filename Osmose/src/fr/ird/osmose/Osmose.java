@@ -1378,7 +1378,7 @@ public class Osmose {
 
 
                                     for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                                        Species speci = simulation.species[i];
+                                        Species speci = simulation.getSpecies(i);
                                         numMap[i] = new int[speci.getNumberCohorts()][];
                                         for (int j = 0; j < speci.getNumberCohorts(); j++) {
                                             numMap[i][j] = new int[nbDtMatrix[numSerie]];
@@ -1412,11 +1412,11 @@ public class Osmose {
                                             for (int n = 0; n < nbDtPerMap; n++) {
                                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
                                                     int tempo = tempAge[m] * nbDtMatrix[numSerie] + h;
-                                                    if ((tempAge[m] * nbDtMatrix[numSerie] + h) < simulation.species[numSpForMap].getNumberCohorts()) {
+                                                    if ((tempAge[m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(numSpForMap).getNumberCohorts()) {
                                                         numMap[numSpForMap][tempAge[m] * nbDtMatrix[numSerie] + h][tempDt[n]] = i;
                                                     }
                                                     if (mapCoordi[i].length == 0) {
-                                                        if (!simulation.species[numSpForMap].getCohort((tempAge[m] * nbDtMatrix[numSerie]) + h).getOutOfZoneCohort()[tempDt[n]]) {
+                                                        if (!simulation.getSpecies(numSpForMap).getCohort((tempAge[m] * nbDtMatrix[numSerie]) + h).getOutOfZoneCohort()[tempDt[n]]) {
                                                             System.out.println("Match error between species areas and migration file");
                                                         }
                                                     }
@@ -1640,8 +1640,8 @@ public class Osmose {
                             tempMortality = (new Float(st.sval)).floatValue();
                             for (int n = 0; n < nbDtPerCase; n++) {
                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                    simulation.species[numSpOutOfZone - 1].getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).getOutOfZoneCohort()[tempDt[n]] = true;
-                                    simulation.species[numSpOutOfZone - 1].getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).getOutOfZoneMortality()[tempDt[n]] = tempMortality;
+                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).getOutOfZoneCohort()[tempDt[n]] = true;
+                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).getOutOfZoneMortality()[tempDt[n]] = tempMortality;
                                 }
                             }
                         }
@@ -1771,8 +1771,8 @@ public class Osmose {
                 iniBiomass[x][i] = 0;
             }
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                for (int j = simulation.species[i].indexAgeClass0; j < simulation.species[i].getNumberCohorts(); j++) {
-                    iniBiomass[x][i] += (float) simulation.species[i].getCohort(j).getBiomass();
+                for (int j = simulation.getSpecies(i).indexAgeClass0; j < simulation.getSpecies(i).getNumberCohorts(); j++) {
+                    iniBiomass[x][i] += (float) simulation.getSpecies(i).getCohort(j).getBiomass();
                 }
             }
         }
@@ -1787,8 +1787,8 @@ public class Osmose {
             for(int i=0;i<nbSpeciesTab[numSerie];i++)
             iniBiomass[xx][i] = 0;
             for(int i=0;i<nbSpeciesTab[numSerie];i++)
-            for(int j=simulation.species[i].indexAgeClass0;j<simulation.species[i].nbCohorts;j++)
-            iniBiomass[xx][i] += (float) simulation.species[i].tabCohorts[j].biomass;
+            for(int j=simulation.getSpecies(i).indexAgeClass0;j<simulation.getSpecies(i).nbCohorts;j++)
+            iniBiomass[xx][i] += (float) simulation.getSpecies(i).tabCohorts[j].biomass;
              */
             int tempIndex = (int) nbDtMatrix[numSerie] / savingDtMatrix[numSerie];
 
@@ -1945,94 +1945,94 @@ public class Osmose {
         pw.print(nbSpeciesTab[nSerie]);
         pw.println(';');
         pw.print("Name ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].getName());
+            pw.print(simulation.getSpecies(i).getName());
         }
         pw.println();
         pw.print("D ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].D);
+            pw.print(simulation.getSpecies(i).D);
         }
         pw.println();
         pw.print("F ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].F);
+            pw.print(simulation.getSpecies(i).F);
         }
         pw.println();
         pw.print("recruitment age ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].recruitAge);
+            pw.print(simulation.getSpecies(i).recruitAge);
         }
         pw.println();
         pw.print("longevity ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].longevity);
+            pw.print(simulation.getSpecies(i).longevity);
         }
         pw.println();
         pw.print("lInf ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].lInf);
+            pw.print(simulation.getSpecies(i).lInf);
         }
         pw.println();
         pw.print("K ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].K);
+            pw.print(simulation.getSpecies(i).K);
         }
         pw.println();
         pw.print("t0 ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].t0);
+            pw.print(simulation.getSpecies(i).t0);
         }
         pw.println();
         pw.print("c ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].c);
+            pw.print(simulation.getSpecies(i).c);
         }
         pw.println();
         pw.print("b ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].bPower);
+            pw.print(simulation.getSpecies(i).bPower);
         }
         pw.println();
 
         pw.print("relFecund ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].alpha);
+            pw.print(simulation.getSpecies(i).alpha);
         }
         pw.println();
         pw.print("sizeMat ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].sizeMat);
+            pw.print(simulation.getSpecies(i).sizeMat);
         }
         pw.println();
         pw.print("eggSize ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].eggSize);
+            pw.print(simulation.getSpecies(i).eggSize);
         }
         pw.println();
         pw.print("eggWeight ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].eggWeight);
+            pw.print(simulation.getSpecies(i).eggWeight);
         }
         pw.println();
         pw.print("sex ratio ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].sexRatio);
+            pw.print(simulation.getSpecies(i).sexRatio);
         }
         pw.println();
 
@@ -2041,22 +2041,22 @@ public class Osmose {
 
         pw.print("Initial biomass for serie : ");
 
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
             pw.print(iniBiomass[nSerie][i]);
         }
         pw.println();
         pw.println("// -----  CALIBRATION ---- ");
         pw.print("Larval mortality ");
-        for (int i = 0; i < simulation.species.length; i++) {
+        for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.species[i].larvalSurvival);
+            pw.print(simulation.getSpecies(i).larvalSurvival);
         }
         pw.println();
         pw.print("accessibility coefficient ");
-        for (int i = 0; i < simulation.couple.nbPlankton; i++) {
+        for (int i = 0; i < simulation.getCoupling().nbPlankton; i++) {
             pw.print(';');
-            pw.print(simulation.couple.planktonList[i].accessibilityCoeff);
+            pw.print(simulation.getCoupling().planktonList[i].accessibilityCoeff);
         }
         pw.close();
         System.out.println("Input data saved");
@@ -2515,7 +2515,7 @@ public class Osmose {
 
     public void runSimulation() {
 
-        while (simulation.t < simulationTimeTab[numSerie]) {
+        while (simulation.getYear() < simulationTimeTab[numSerie]) {
             simulation.step();
         }
     }

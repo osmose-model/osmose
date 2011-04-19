@@ -68,7 +68,7 @@ public class Species {
      */
     private Cohort[] tabCohorts;
     /*
-     * Number of the cohorts = (int) Math.round((longevity + 1) * simulation.nbDt
+     * Number of the cohorts = (int) Math.round((longevity + 1) * simulation.getNbTimeSteps()
      */
     private int nbCohorts;
     /*
@@ -134,7 +134,7 @@ public class Species {
      */
     public void init() {
 
-        int numSerie = getSimulation().numSerie;
+        int numSerie = getOsmose().numSerie;
 
         // INITIALISATION of PARAM
         this.name = getOsmose().nameSpecMatrix[numSerie][index];
@@ -155,7 +155,7 @@ public class Species {
         this.seasonFishing = getOsmose().seasonFishingMatrix[numSerie][index];
         this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][index];
         this.supAgeOfClass0 = getOsmose().supAgeOfClass0Matrix[numSerie][index];//age from which the species biomass-0 is calculated
-        this.indexAgeClass0 = (int) Math.ceil(supAgeOfClass0 * getSimulation().nbDt);      // index of supAgeOfClass0 used in tabCohorts table
+        this.indexAgeClass0 = (int) Math.ceil(supAgeOfClass0 * getSimulation().getNbTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
         this.larvalSurvival = getOsmose().larvalSurvivalMatrix[numSerie][index];
         this.sexRatio = getOsmose().sexRatioMatrix[numSerie][index];
         this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
@@ -173,7 +173,7 @@ public class Species {
         this.nbDietStages = getOsmose().nbDietsStages[numSerie][index];
 
         // START INITIALISATION of COHORTS
-        nbCohorts = (int) Math.round((longevity) * getSimulation().nbDt);
+        nbCohorts = (int) Math.round((longevity) * getSimulation().getNbTimeStepsPerYear());
 
         tabAbdIni = new long[nbCohorts];
         tabBiomIni = new double[nbCohorts];
@@ -189,7 +189,7 @@ public class Species {
         tabMeanWeight[0] = eggWeight;
 
         for (int i = 1; i < nbCohorts; i++) {
-            decimalAge = i / (float) getSimulation().nbDt;
+            decimalAge = i / (float) getSimulation().getNbTimeStepsPerYear();
             if (decimalAge < growthAgeThreshold) {
                 float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
                 if (lengthAtAgePart < eggSize) {
@@ -210,7 +210,7 @@ public class Species {
         deltaMeanLength = new float[nbCohorts];
 
         for (int i = 0; i < nbCohorts - 1; i++) {
-            decimalAge = i / (float) getSimulation().nbDt;
+            decimalAge = i / (float) getSimulation().getNbTimeStepsPerYear();
             deltaMeanLength[i] = tabMeanLength[i + 1] - tabMeanLength[i];
 
             minDelta[i] = deltaMeanLength[i] - deltaMeanLength[i];
@@ -295,7 +295,7 @@ public class Species {
                 }
             }
 
-            if ((getCohort(i).getOutOfZoneCohort()[getSimulation().dt]))//||(i==0))
+            if ((getCohort(i).getOutOfZoneCohort()[getSimulation().getIndexTime()]))//||(i==0))
             {
                 for (int k = 0; k < getCohort(i).size(); k++) {
                     School schoolk = getSchool(i, k);
@@ -332,7 +332,7 @@ public class Species {
             tempTL += tabSchoolsRanked.get(i).getTrophicLevel()[tabSchoolsRanked.get(i).getCohort().getAgeNbDt()] * tabSchoolsRanked.get(i).getBiomass();
         }
 
-        long nbEggs = Math.round(sexRatio * alpha * seasonSpawning[getSimulation().dt] * SSB * 1000000);
+        long nbEggs = Math.round(sexRatio * alpha * seasonSpawning[getSimulation().getIndexTime()] * SSB * 1000000);
         if (nbEggs > 9100000000000000000l) {
             System.out.println("beyond long format for eggs numbers");
         }
@@ -342,7 +342,7 @@ public class Species {
         /*         long nbDeadSenescence = tabCohorts[nbCohorts-1].abundance;           //*************** Pas pris en compte pour l'instant
         //***************** pas ok
         QCell[][] matrix = getOsmose().grid.matrix;
-        if(!tabCohorts[nbCohorts-1].outOfZoneCohort[getSimulation().dt])
+        if(!tabCohorts[nbCohorts-1].outOfZoneCohort[getSimulation().getDt()])
         for(int k=0;k<tabCohorts[nbCohorts-1].nbSchools;k++)
         {
         QSchool oldSchoolk = (QSchool)tabCohorts[nbCohorts-1].getSchool(k);
@@ -426,12 +426,12 @@ public class Species {
             }
         }
 
-        if (!(nbCohorts == (int) Math.round((longevity) * getSimulation().nbDt))) {
-            nbCohorts = (int) Math.round((longevity + 1) * getSimulation().nbDt);
+        if (!(nbCohorts == (int) Math.round((longevity) * getSimulation().getNbTimeStepsPerYear()))) {
+            nbCohorts = (int) Math.round((longevity + 1) * getSimulation().getNbTimeStepsPerYear());
             System.out.println("PB of number of cohorts at the update stage: not equals to the initial number of cohorts");
             // Morgane 03-2007
         }
-//		nbCohorts=(longevity+1)*getSimulation().nbDt;
+//		nbCohorts=(longevity+1)*getSimulation().getNbTimeSteps();
 //		for(int i=0;i<nbCohorts;i++)
 //		if(getCohort(i).abundance==0)
 //		this.nbCohorts--;
@@ -446,13 +446,13 @@ public class Species {
     public void fishingA() // with recruit AGE as metric, calendar age
     {
         long nbSurplusDead = 0;
-        int indexRecruitAge = Math.round(recruitAge * getSimulation().nbDt);
+        int indexRecruitAge = Math.round(recruitAge * getSimulation().getNbTimeStepsPerYear());
 
         if (getSimulation().targetFishing) //different F per species
         {
             for (int i = indexRecruitAge; i < nbCohorts; i++) {
                 if (getCohort(i).getAbundance() != 0) {
-                    nbSurplusDead += getCohort(i).fishing1(F * seasonFishing[getSimulation().dt]);
+                    nbSurplusDead += getCohort(i).fishing1(F * seasonFishing[getSimulation().getIndexTime()]);
                 }
             }
 
@@ -471,12 +471,12 @@ public class Species {
                     for (int i = indexRecruitAge; i < nbCohorts; i++) {
                         for (School school : getCohort(i)) {
                             if (school.isCatchable()) {
-                                if ((getSimulation().t) >= getOsmose().timeSeriesStart) {
+                                if ((getSimulation().getYear()) >= getOsmose().timeSeriesStart) {
                                     getSimulation().savingYield[index] +=
                                             ((float) (school.getAbundance() * school.getWeight() / 1000000));
                                     getSimulation().tabTLCatch[index] += school.getTrophicLevel()[school.getCohort().getAgeNbDt()] * ((float) (school.getAbundance() * school.getWeight() / 1000000));
                                 }
-                                if (!(getCohort(i).getOutOfZoneCohort()[getSimulation().dt])) {
+                                if (!(getCohort(i).getOutOfZoneCohort()[getSimulation().getIndexTime()])) {
                                     school.getCell().remove(school);
                                 }
                                 getCohort(i).remove(school);
@@ -500,7 +500,7 @@ public class Species {
         {
             for (int i = indexRecruitAge; i < nbCohorts; i++) {
                 if ((getCohort(i).getAbundance() != 0) && (getSimulation().RS != 1.)) {
-                    getCohort(i).fishing2((float) (F * seasonFishing[getSimulation().dt] / (1 - getSimulation().RS)));
+                    getCohort(i).fishing2((float) (F * seasonFishing[getSimulation().getIndexTime()] / (1 - getSimulation().RS)));
                 }
             }
         }
