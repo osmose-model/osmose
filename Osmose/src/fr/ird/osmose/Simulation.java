@@ -121,7 +121,6 @@ public class Simulation {
 
         year = 0;
         indexTime = 0;
-        getOsmose().simInitialized = true;
         numSerie = getOsmose().numSerie;
         nbTimeStepsPerYear = getOsmose().nbDtMatrix[numSerie];
         recordFrequency = getOsmose().savingDtMatrix[numSerie];
@@ -191,9 +190,9 @@ public class Simulation {
     public void step() {
         // screen display to check the period already simulated
         if (year % 5 == 0) {
-            System.out.println("t" + year + " -> " + new Date());   // t is annual
+            System.out.println("year " + year + " | CPU time " + new Date());   // t is annual
         } else {
-            System.out.println("t" + year);
+            System.out.println("year " + year);
         }
 
         // calculation of relative size of MPA

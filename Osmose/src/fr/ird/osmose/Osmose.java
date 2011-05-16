@@ -42,17 +42,14 @@ public class Osmose {
     /*
      * 
      */
-    String OS_NAME = System.getProperty("os.name");
-    String fileSeparator = System.getProperty("file.separator");
+    final static String fileSeparator = System.getProperty("file.separator");
     String inputPathName, outputPathName;
-    // Name of the initial file read by the program, where the path to all input files is specified.
-    // This "filePath.txt" file must be located in the same folder than folder \src of the .java files
-    String initialPathFile = "filePath.txt";
-
-    /* ***************************** DECLARING VARIABLES ******************************** */
+    /*
+     * 
+     */
     private Simulation simulation;
     private Grid grid;
-    int nbSeriesSimus;	// nb of series
+    private int nbSeriesSimus;	// nb of series
     int[] nbLoopTab;	// nb of simulations per serie
     int numSerie, numSimu;
     // TABLES OF INPUT FILES NAMES (one entry per serie)
@@ -64,9 +61,10 @@ public class Osmose {
     String[] size0FileNameTab, migrationFileNameTab, accessibilitiesFileNameTab,
             reproductionFileNameTab, fishingSeasonFileNameTab, /* � creer*/
             couplingFileNameTab;
-    boolean simInitialized = false;
     boolean[] isForcing;
-    //INFOS in SPECIES PARAMETERS FILE
+    /*
+     * SPECIES PARAMETERS FILE
+     */
     int[] nbSpeciesTab;
     String[][] nameSpecMatrix, maturityMetricMatrix;
     String[] recruitMetricMatrix;
@@ -81,24 +79,34 @@ public class Osmose {
     float[][] predationRateMatrix, criticalPredSuccessMatrix;
     float[][] eggSizeMatrix, eggWeightMatrix, sexRatioMatrix, growthAgeThresholdMatrix;
     float[][] supAgeOfClass0Matrix;
-    // INFOS for FISHING
+    /*
+     * FISHING
+     */
     String[] globalOrCohortTab;
     float[][] FMatrix, recruitSizeMatrix;
     float[][][] seasonFishingMatrix;
-    // INFOS for PLANKTON groups
+    /*
+     * PLANKTON groups
+     */
     int[] nbPlanktonGroupsTab;
     String[][] planktonNamesTab;
-    //INFOS for CONFIG & OPTIONS
+    /*
+     * CONFIG & OPTIONS
+     */
     int[] gridLinesTab, gridColumnsTab;
     float[] upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
     int[] simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
-    //Parameters
+    /*
+     * Parameters
+     */
     int[] nbSchools;
     float[] planktonAccessCoeffMatrix;
     int[] nbAccessStage;
     float[][] accessStageThreshold;
     float[][][][] accessibilityMatrix;
-    // SPECIES AREAS FILE
+    /*
+     * SPECIES AREAS FILE
+     */
     String[] areasFileNameTab;	              //choice between "Random" or fileName
     int[] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
     int[][] randomAreaCoordi, randomAreaCoordj;//species areas in random cases [species][cell]
@@ -106,11 +114,15 @@ public class Osmose {
     int[][] mapCoordi, mapCoordj;      //    coord of maps [numMap][cell]
     float[][] mapProbaPresence; // Probability of presence of a cohort [numMap][cell]
     boolean densityMaps;
-    //coastline
+    /*
+     * COASTLINE
+     */
     String[] coastFileNameTab;	              //choice between "None" or fileName
     int[][] tabCoastiMatrix, tabCoastjMatrix;   //coordinates of the cells representing land
     int[] nbCellsCoastTab;
-    //MPAs coordinates
+    /*
+     * MPAs coordinates
+     */
     String[] mpaFileNameTab;
     int[][] tabMPAiMatrix, tabMPAjMatrix;     //coord i et j of the matrix delimiting a mpa
     boolean[] thereIsMPATab;		      //signify that 1 mpa is implemented even if t<tStart
@@ -120,7 +132,9 @@ public class Osmose {
     //for mortalities, 3 dim, the last is for the mean on the simulation period
     float[][][][][] BIOMQuadri;   //[numSimu][species][with or without age 0][t][dt]
     float[][] iniBiomass; //used for saving the biomass after initialization
-    // FOR INDICATORS OUTPUT
+    /*
+     * INDICATORS OUTPUT
+     */
     boolean[] TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
             sizeSpectrumOutputMatrix, sizeSpectrumPerSpeOutputMatrix,
             planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix;
@@ -150,6 +164,7 @@ public class Osmose {
         readPathFile();		// read the path of input files, written in the file pathFile.txt
 
         // create output folder
+        String OS_NAME = System.getProperty("os.name");
         if (OS_NAME.startsWith("Linux")) {
             outputPathName = inputPathName + "/output/";
         } else if (OS_NAME.startsWith("Windows")) {
@@ -324,7 +339,7 @@ public class Osmose {
     {
         FileInputStream pathFile;
         try {
-            pathFile = new FileInputStream(new File(initialPathFile));
+            pathFile = new FileInputStream(new File("filePath.txt"));
         } catch (FileNotFoundException ex) {
             System.out.println("initial path file doesn't exist");
             return;
@@ -336,6 +351,7 @@ public class Osmose {
         st.slashStarComments(true);
         st.quoteChar(';');
 
+        System.out.println("1. Reading the filePath.txt");
         try {
             st.nextToken();
             inputPathName = st.sval;
@@ -343,10 +359,12 @@ public class Osmose {
             System.out.println("Reading error of path file");
             return;
         }
+        System.out.println("  Folder with the configuration files: " + inputPathName);
     }
 
     // read the first file, that should be named INPUT.txt, situated at the path given by filePath.txt
     public void readInputFile() {
+        System.out.println("2. Reading file INPUT.txt");
         FileInputStream inputFile;
         try {
             inputFile = new FileInputStream(new File(inputPathName, "INPUT.txt"));
@@ -364,8 +382,9 @@ public class Osmose {
         try {
             st.nextToken();
             nbSeriesSimus = (new Integer(st.sval)).intValue();
+            System.out.println("  Number of series = " + nbSeriesSimus);
         } catch (IOException ex) {
-            System.out.println("Reading error of INPUT file");
+            System.out.println("  Reading error of INPUT file");
             return;
         }
 
@@ -376,84 +395,99 @@ public class Osmose {
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 nbLoopTab[x] = (new Integer(st.sval)).intValue();
+                System.out.println("  Number of replicated simulations per serie = " + nbLoopTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 configFileNameTab[x] = st.sval;
+                System.out.println("  Configuration file = " + configFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 speciesFileNameTab[x] = st.sval;
+                System.out.println("  Species file = " + speciesFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 predationFileNameTab[x] = st.sval;
+                System.out.println("  Predation file = " + predationFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 fishingFileNameTab[x] = st.sval;
+                System.out.println("  Fishing file = " + fishingFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 areasFileNameTab[x] = st.sval;
+                System.out.println("  Areas file = " + areasFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 planktonStructureFileNameTab[x] = st.sval;
+                System.out.println("  Plankton groups file = " + planktonStructureFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 planktonFileNameTab[x] = st.sval;
+                System.out.println("  Plankton data file = " + planktonFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 calibrationFileNameTab[x] = st.sval;
+                System.out.println("  Calibration file = " + calibrationFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 indicatorsFileNameTab[x] = st.sval;
+                System.out.println("  Indicators file = " + indicatorsFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 accessibilitiesFileNameTab[x] = st.sval;
+                System.out.println("  Accessibilities file = " + accessibilitiesFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 size0FileNameTab[x] = st.sval;
+                System.out.println("  Size age-class zero file = " + size0FileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 reproductionFileNameTab[x] = st.sval;
+                System.out.println("  Reproduction file = " + reproductionFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 fishingSeasonFileNameTab[x] = st.sval;
+                System.out.println("  Fishing season file = " + fishingSeasonFileNameTab[x]);
             }
-
-
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 migrationFileNameTab[x] = st.sval;
+                System.out.println("  Migration file = " + migrationFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 coastFileNameTab[x] = st.sval;
+                System.out.println("  Coast file = " + coastFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 mpaFileNameTab[x] = st.sval;
+                System.out.println("  MPA file = " + mpaFileNameTab[x]);
             }
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
                 couplingFileNameTab[x] = st.sval;
+                System.out.println("  Coupling file = " + couplingFileNameTab[x]);
             }
-
-
             inputFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of INPUT file");
             return;
         }
+        System.out.println("EOF for step 2. Reading file INPUT.txt");
     }
 
     public void initializeNbSeriesInTables(int nbSeriesSimus) {
