@@ -93,6 +93,8 @@ public class Osmose {
     /*
      * CONFIG & OPTIONS
      */
+    String[] gridTypeTab;
+    String[] gridFileTab, lonFieldTab, latFieldTab, maskFieldTab;
     int[] gridLinesTab, gridColumnsTab;
     float[] upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
     int[] simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
@@ -258,7 +260,7 @@ public class Osmose {
 
                     simulation = new Simulation();
                     simulation.init();
-                    
+
                     initializeOutOfZoneCarac();
                     initializeSpeciesAreas();
                     System.out.println();
@@ -514,6 +516,11 @@ public class Osmose {
         fishingSeasonFileNameTab = new String[nbSeriesSimus];
 
         //--- CONFIGURATION file---
+        gridTypeTab = new String[nbSeriesSimus];
+        gridFileTab = new String[nbSeriesSimus];
+        lonFieldTab = new String[nbSeriesSimus];
+        latFieldTab = new String[nbSeriesSimus];
+        maskFieldTab = new String[nbSeriesSimus];
         gridLinesTab = new int[nbSeriesSimus];
         gridColumnsTab = new int[nbSeriesSimus];
         simulationTimeTab = new int[nbSeriesSimus];
@@ -970,6 +977,21 @@ public class Osmose {
             st.nextToken();
             nbSchools[numSerie] = 1 + Math.round(((new Integer(st.sval)).intValue()) / nbDtMatrix[numSerie]);
 
+            /* Additional parameters to read the grid from NetCDF file */
+            gridTypeTab[numSerie] = "make";
+            st.nextToken();
+            if (null != st.sval) {
+                gridTypeTab[numSerie] = "netcdf";
+                String filename = new File(inputPathName, st.sval).toString();
+                gridFileTab[numSerie] = filename;
+                st.nextToken();
+                lonFieldTab[numSerie] = st.sval;
+                st.nextToken();
+                latFieldTab[numSerie] = st.sval;
+                st.nextToken();
+                maskFieldTab[numSerie] = st.sval;
+            }
+
             configFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of configuration file");
@@ -1178,12 +1200,18 @@ public class Osmose {
     }
 
     public void initializeOptions() {
-        grid = new Grid(gridLinesTab[numSerie], gridColumnsTab[numSerie], upLeftLatTab[numSerie],
-                lowRightLatTab[numSerie], upLeftLongTab[numSerie], lowRightLongTab[numSerie]);
-        if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
-            nbCellsCoastTab[numSerie] = 0;
+
+        if (gridTypeTab[numSerie].equalsIgnoreCase("make")) {
+
+            grid = new Grid(gridLinesTab[numSerie], gridColumnsTab[numSerie], upLeftLatTab[numSerie],
+                    lowRightLatTab[numSerie], upLeftLongTab[numSerie], lowRightLongTab[numSerie]);
+            if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
+                nbCellsCoastTab[numSerie] = 0;
+            } else {
+                initializeCoast();
+            }
         } else {
-            initializeCoast();
+            grid = new Grid(gridFileTab[numSerie], lonFieldTab[numSerie], latFieldTab[numSerie], maskFieldTab[numSerie]);
         }
 
         initializeMPA();
@@ -1537,8 +1565,8 @@ public class Osmose {
             }
             //initialise random sorting of distribution areas
 
-            int nbCasesDispos = ((int) (gridLinesTab[numSerie] * gridColumnsTab[numSerie]))
-                    - nbCellsCoastTab[numSerie];
+            //int nbCasesDispos = ((int) (gridLinesTab[numSerie] * gridColumnsTab[numSerie])) - nbCellsCoastTab[numSerie];
+            int nbCasesDispos = grid.getNumberAvailableCells();
 
             //Case where random distribution on the whole (grid-coast)
             if (speciesAreasSizeTab[numSerie] >= nbCasesDispos) {
@@ -2556,8 +2584,8 @@ public class Osmose {
 
     public static void main(String args[]) {
         System.out.println(new Date());
-       osmose.initSimulation();
-       osmose.runSeriesSimulations();
+        osmose.initSimulation();
+        osmose.runSeriesSimulations();
         System.out.println(new Date());
     }
 

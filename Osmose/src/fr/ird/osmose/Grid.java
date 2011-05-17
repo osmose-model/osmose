@@ -14,7 +14,12 @@ package fr.ird.osmose;
  * @version 2.1 
  ******************************************************************************** 
  */
+import java.io.IOException;
 import java.util.*;
+import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayDouble.D2;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.dataset.NetcdfDataset;
 
 public class Grid {
 
@@ -109,6 +114,20 @@ public class Grid {
         matrix = makeGrid();
     }
 
+    /**
+     * Create a new grid by reading longitude and latitude in a NetCDF file.
+     * 
+     * @param gridFile, filename of the NetCDF grid file
+     * @param strLon, name of the longitude variable
+     * @param strLat, name of the latitude variable
+     * @param strMask, name of the mask variable (land / ocean)
+     */
+    public Grid(String gridFile, String strLon, String strLat, String strMask) {
+
+        matrix = readGrid(gridFile, strLon, strLat, strMask);
+        getDimGeogArea();
+    }
+
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
@@ -126,6 +145,51 @@ public class Grid {
                 longitude = longMin + (float) (j + 0.5) * dLong;
                 grid[i][j] = new Cell(i, j, latitude, longitude);
             }
+        }
+        return grid;
+    }
+
+    /**
+     * Reads the longitude and latitude of the grid in a NetCDF file and returns
+     * a Cell[][] array.
+     * @param gridFile
+     * @param strLon
+     * @param strLat
+     * @param strMask
+     * @return
+     */private Cell[][] readGrid(String gridFile, String strLon, String strLat, String strMask) {
+
+        NetcdfFile ncGrid = null;
+
+        try {
+            ncGrid = NetcdfDataset.openFile(gridFile, null);
+        } catch (IOException ex) {
+            System.err.println("Failed to open grid file " + gridFile);
+            ex.printStackTrace();
+            return null;
+        }
+
+        int[] shape = ncGrid.findVariable(strLat).getShape();
+        nbLines = shape[0];
+        nbColumns = shape[1];
+        System.out.println("Grid ==> nbLines: " + nbLines + " nbColumns: " + nbColumns);
+        Cell[][] grid = new Cell[nbLines][nbColumns];
+        try {
+            ArrayDouble.D2 arrLon = (D2) ncGrid.findVariable(strLon).read();
+            ArrayDouble.D2 arrLat = (D2) ncGrid.findVariable(strLat).read();
+            ArrayDouble.D2 arrMask = (D2) ncGrid.findVariable(strMask).read();
+            for (int i = 0; i < nbLines; i++) {
+                for (int j = 0; j < nbColumns; j++) {
+                    boolean land = arrMask.get(i, j) == 0;
+                    float lat = (float) arrLat.get(i, j);
+                    float lon = (float) arrLon.get(i, j);
+                    grid[i][j] = new Cell(i, j, lat, lon, land);
+                    //System.out.println("Cell(" + i + ", " + j + ") lat=" + lat + " lon=" + lon + " land=" + land);
+                }
+            }
+        } catch (IOException ex) {
+            System.err.println("Problem reading lon lat mask fields in grid file.");
+            ex.printStackTrace();
         }
         return grid;
     }
@@ -196,6 +260,76 @@ public class Grid {
         /* Random sorting of the adjacent cells */
         Collections.shuffle(neighbors);
         return neighbors;
+    }
+
+    /*
+     * Returns the number of cells of the grid that are not inland.
+     */
+    public int getNumberAvailableCells() {
+        int nbCells = 0;
+
+        for (int i = 0; i < nbLines; i++) {
+            for (int j = 0; j < nbColumns; j++) {
+                if (!matrix[i][j].isLand()) {
+                    nbCells++;
+                }
+            }
+        }
+        return nbCells;
+    }
+
+    /**
+     * Computes longMin, latMin, longMax, latMax.
+     * Computes the dimension of a cell, assuming that we work in a regular grid
+     */
+    private void getDimGeogArea() {
+
+        //--------------------------------------
+        // Calculate the Physical Space extrema
+
+        longMin = Float.MAX_VALUE;
+        longMax = -longMin;
+        latMin = Float.MAX_VALUE;
+        latMax = -latMin;
+        int i = nbLines;
+        int j = 0;
+
+        while (i-- > 0) {
+            j = nbColumns;
+            while (j-- > 0) {
+                if (matrix[i][j].getLon() >= longMax) {
+                    longMax = matrix[i][j].getLon();
+                }
+                if (matrix[i][j].getLon() <= longMin) {
+                    longMin = matrix[i][j].getLon();
+                }
+                if (matrix[i][j].getLat() >= latMax) {
+                    latMax = matrix[i][j].getLat();
+                }
+                if (matrix[i][j].getLat() <= latMin) {
+                    latMin = matrix[i][j].getLat();
+                }
+            }
+        }
+        //System.out.println("lonmin " + lonMin + " lonmax " + lonMax + " latmin " + latMin + " latmax " + latMax);
+        //System.out.println("depth max " + depthMax);
+
+        float float_tmp;
+        if (longMin > longMax) {
+            float_tmp = longMin;
+            longMin = longMax;
+            longMax = float_tmp;
+        }
+
+        if (latMin > latMax) {
+            float_tmp = latMin;
+            latMin = latMax;
+            latMax = float_tmp;
+        }
+
+        /* size of a cell */
+        dLat = (latMax - latMin) / (float) nbLines;
+        dLong = (longMax - longMin) / (float) nbColumns;
     }
 
     /**

@@ -104,11 +104,15 @@ public class Cell extends ArrayList<School> {
      * @param lon a float, the longitude of the cell, °E
      */
     public Cell(int i, int j, float lat, float lon) {
+        this(i, j, lat, lon, false);
+    }
+
+    public Cell(int i, int j, float lat, float lon, boolean land) {
         this.i = i;
         this.j = j;
         this.lat = lat;
         this.lon = lon;
-        land = false;
+        this.land = land;
         mpa = false;
         numMapsConcerned = new Vector();
         icoordLTLGrid = new Vector();
