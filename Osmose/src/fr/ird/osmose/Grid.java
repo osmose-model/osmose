@@ -52,11 +52,11 @@ public class Grid {
     /*
      * Number of lines
      */
-    private int nbLines;
+    private int ny;
     /*
      * Number od columns
      */
-    private int nbColumns;
+    private int nx;
     /*
      * Latitude °N of upper left corner of the grid
      */
@@ -97,8 +97,8 @@ public class Grid {
     public Grid(int nbl, int nbc, float upleftLat, float lowrightLat, float upleftLong, float lowrightLong) {
 
         /* grid dimension */
-        this.nbLines = nbl;
-        this.nbColumns = nbc;
+        this.ny = nbl;
+        this.nx = nbc;
 
         /* geographical extension of the grid */
         this.latMax = upleftLat;
@@ -107,8 +107,8 @@ public class Grid {
         this.longMin = upleftLong;
 
         /* size of a cell */
-        dLat = (latMax - latMin) / (float) nbLines;
-        dLong = (longMax - longMin) / (float) nbColumns;
+        dLat = (latMax - latMin) / (float) ny;
+        dLong = (longMax - longMin) / (float) nx;
 
         /* make the grid */
         matrix = makeGrid();
@@ -137,11 +137,11 @@ public class Grid {
      */
     private Cell[][] makeGrid() {
 
-        Cell[][] grid = new Cell[nbLines][nbColumns];
+        Cell[][] grid = new Cell[nx][ny];
         float latitude, longitude;
-        for (int i = 0; i < nbLines; i++) {
+        for (int i = 0; i < nx; i++) {
             latitude = latMax - (float) (i + 0.5f) * dLat;
-            for (int j = 0; j < nbColumns; j++) {
+            for (int j = 0; j < ny; j++) {
                 longitude = longMin + (float) (j + 0.5) * dLong;
                 grid[i][j] = new Cell(i, j, latitude, longitude);
             }
@@ -170,19 +170,19 @@ public class Grid {
         }
 
         int[] shape = ncGrid.findVariable(strLat).getShape();
-        nbLines = shape[0];
-        nbColumns = shape[1];
-        System.out.println("Grid ==> nbLines: " + nbLines + " nbColumns: " + nbColumns);
-        Cell[][] grid = new Cell[nbLines][nbColumns];
+        ny = shape[0];
+        nx = shape[1];
+        System.out.println("Grid ==> nbLines: " + ny + " nbColumns: " + nx);
+        Cell[][] grid = new Cell[nx][ny];
         try {
             ArrayDouble.D2 arrLon = (D2) ncGrid.findVariable(strLon).read();
             ArrayDouble.D2 arrLat = (D2) ncGrid.findVariable(strLat).read();
             ArrayDouble.D2 arrMask = (D2) ncGrid.findVariable(strMask).read();
-            for (int i = 0; i < nbLines; i++) {
-                for (int j = 0; j < nbColumns; j++) {
-                    boolean land = arrMask.get(i, j) == 0;
-                    float lat = (float) arrLat.get(i, j);
-                    float lon = (float) arrLon.get(i, j);
+            for (int j = 0; j < ny; j++) {
+                for (int i = 0; i < nx; i++) {
+                    boolean land = arrMask.get(j, i) < 1;
+                    float lat = (float) arrLat.get(j, i);
+                    float lon = (float) arrLon.get(j, i);
                     grid[i][j] = new Cell(i, j, lat, lon, land);
                     //System.out.println("Cell(" + i + ", " + j + ") lat=" + lat + " lon=" + lon + " land=" + land);
                 }
@@ -209,9 +209,9 @@ public class Grid {
      * @return a List<Cell> of the cells.
      */
     public List<Cell> getCells() {
-        ArrayList<Cell> cells = new ArrayList(nbLines * nbColumns);
-        for (int i = nbLines; i-- > 0;) {
-            for (int j = nbColumns; j-- > 0;) {
+        ArrayList<Cell> cells = new ArrayList(ny * nx);
+        for (int i = nx; i-- > 0;) {
+            for (int j = ny; j-- > 0;) {
                 cells.add(matrix[i][j]);
             }
         }
@@ -245,9 +245,9 @@ public class Grid {
     public ArrayList<Cell> getNeighborCells(Cell cell) {
 
         int im1 = Math.max(cell.get_igrid() - 1, 0);
-        int ip1 = Math.min(cell.get_igrid() + 1, getNbLines() - 1);
+        int ip1 = Math.min(cell.get_igrid() + 1, get_nx() - 1);
         int jm1 = Math.max(cell.get_jgrid() - 1, 0);
-        int jp1 = Math.min(cell.get_jgrid() + 1, getNbColumns() - 1);
+        int jp1 = Math.min(cell.get_jgrid() + 1, get_ny() - 1);
 
         ArrayList<Cell> neighbors = new ArrayList();
 
@@ -268,8 +268,8 @@ public class Grid {
     public int getNumberAvailableCells() {
         int nbCells = 0;
 
-        for (int i = 0; i < nbLines; i++) {
-            for (int j = 0; j < nbColumns; j++) {
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
                 if (!matrix[i][j].isLand()) {
                     nbCells++;
                 }
@@ -291,11 +291,11 @@ public class Grid {
         longMax = -longMin;
         latMin = Float.MAX_VALUE;
         latMax = -latMin;
-        int i = nbLines;
+        int i = nx;
         int j = 0;
 
         while (i-- > 0) {
-            j = nbColumns;
+            j = ny;
             while (j-- > 0) {
                 if (matrix[i][j].getLon() >= longMax) {
                     longMax = matrix[i][j].getLon();
@@ -328,22 +328,22 @@ public class Grid {
         }
 
         /* size of a cell */
-        dLat = (latMax - latMin) / (float) nbLines;
-        dLong = (longMax - longMin) / (float) nbColumns;
+        dLat = (latMax - latMin) / (float) ny;
+        dLong = (longMax - longMin) / (float) nx;
     }
 
     /**
      * @return the number of lines
      */
-    public int getNbLines() {
-        return nbLines;
+    public int get_ny() {
+        return ny;
     }
 
     /**
      * @return the number of columns
      */
-    public int getNbColumns() {
-        return nbColumns;
+    public int get_nx() {
+        return nx;
     }
 
     /**
