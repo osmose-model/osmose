@@ -59,16 +59,16 @@ public class Plankton {
         }
 
         // Initialization matrix corresponding to osmose grid
-        mortalityRate = new float[coupling.getGrid().get_nx()][];
-        biomass = new float[coupling.getGrid().get_nx()][];
-        accessibleBiomass = new float[coupling.getGrid().get_nx()][];
-        iniBiomass = new float[coupling.getGrid().get_nx()][];
-        for (int i = 0; i < coupling.getGrid().get_nx(); i++) {
-            biomass[i] = new float[coupling.getGrid().get_ny()];
-            accessibleBiomass[i] = new float[coupling.getGrid().get_ny()];
-            iniBiomass[i] = new float[coupling.getGrid().get_ny()];
-            mortalityRate[i] = new float[coupling.getGrid().get_ny()];
-            for (int j = 0; j < coupling.getGrid().get_ny(); j++) {
+        mortalityRate = new float[coupling.getGrid().getNbLines()][];
+        biomass = new float[coupling.getGrid().getNbLines()][];
+        accessibleBiomass = new float[coupling.getGrid().getNbLines()][];
+        iniBiomass = new float[coupling.getGrid().getNbLines()][];
+        for (int i = 0; i < coupling.getGrid().getNbLines(); i++) {
+            biomass[i] = new float[coupling.getGrid().getNbColumns()];
+            accessibleBiomass[i] = new float[coupling.getGrid().getNbColumns()];
+            iniBiomass[i] = new float[coupling.getGrid().getNbColumns()];
+            mortalityRate[i] = new float[coupling.getGrid().getNbColumns()];
+            for (int j = 0; j < coupling.getGrid().getNbColumns(); j++) {
                 biomass[i][j] = 0;
                 accessibleBiomass[i][j] = 0;
                 iniBiomass[i][j] = 0;
@@ -123,8 +123,8 @@ public class Plankton {
 
     public void clearPlankton() // clear the matrix for the next time step
     {
-        for (int i = 0; i < coupling.getGrid().get_nx(); i++) {
-            for (int j = 0; j < coupling.getGrid().get_ny(); j++) {
+        for (int i = 0; i < coupling.getGrid().getNbLines(); i++) {
+            for (int j = 0; j < coupling.getGrid().getNbColumns(); j++) {
                 biomass[i][j] = 0;
                 accessibleBiomass[i][j] = 0;
                 iniBiomass[i][j] = 0;

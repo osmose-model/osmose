@@ -52,11 +52,11 @@ public class Grid {
     /*
      * Number of lines
      */
-    private int ny;
+    private int nbLines;
     /*
      * Number od columns
      */
-    private int nx;
+    private int nbColumns;
     /*
      * Latitude °N of upper left corner of the grid
      */
@@ -97,8 +97,8 @@ public class Grid {
     public Grid(int nbl, int nbc, float upleftLat, float lowrightLat, float upleftLong, float lowrightLong) {
 
         /* grid dimension */
-        this.ny = nbl;
-        this.nx = nbc;
+        this.nbLines = nbl;
+        this.nbColumns = nbc;
 
         /* geographical extension of the grid */
         this.latMax = upleftLat;
@@ -107,8 +107,8 @@ public class Grid {
         this.longMin = upleftLong;
 
         /* size of a cell */
-        dLat = (latMax - latMin) / (float) ny;
-        dLong = (longMax - longMin) / (float) nx;
+        dLat = (latMax - latMin) / (float) nbLines;
+        dLong = (longMax - longMin) / (float) nbColumns;
 
         /* make the grid */
         matrix = makeGrid();
@@ -116,7 +116,7 @@ public class Grid {
 
     /**
      * Create a new grid by reading longitude and latitude in a NetCDF file.
-     * 
+     *
      * @param gridFile, filename of the NetCDF grid file
      * @param strLon, name of the longitude variable
      * @param strLat, name of the latitude variable
@@ -137,11 +137,11 @@ public class Grid {
      */
     private Cell[][] makeGrid() {
 
-        Cell[][] grid = new Cell[nx][ny];
+        Cell[][] grid = new Cell[nbLines][nbColumns];
         float latitude, longitude;
-        for (int i = 0; i < nx; i++) {
+        for (int i = 0; i < nbLines; i++) {
             latitude = latMax - (float) (i + 0.5f) * dLat;
-            for (int j = 0; j < ny; j++) {
+            for (int j = 0; j < nbColumns; j++) {
                 longitude = longMin + (float) (j + 0.5) * dLong;
                 grid[i][j] = new Cell(i, j, latitude, longitude);
             }
@@ -170,19 +170,24 @@ public class Grid {
         }
 
         int[] shape = ncGrid.findVariable(strLat).getShape();
-        ny = shape[0];
-        nx = shape[1];
-        System.out.println("Grid ==> nbLines: " + ny + " nbColumns: " + nx);
-        Cell[][] grid = new Cell[nx][ny];
+        nbLines = shape[0];
+        nbColumns = shape[1];
+        System.out.println("Grid ==> nbLines: " + nbLines + " nbColumns: " + nbColumns);
+        Cell[][] grid = new Cell[nbLines][nbColumns];
         try {
             ArrayDouble.D2 arrLon = (D2) ncGrid.findVariable(strLon).read();
             ArrayDouble.D2 arrLat = (D2) ncGrid.findVariable(strLat).read();
             ArrayDouble.D2 arrMask = (D2) ncGrid.findVariable(strMask).read();
-            for (int j = 0; j < ny; j++) {
-                for (int i = 0; i < nx; i++) {
-                    boolean land = arrMask.get(j, i) < 1;
-                    float lat = (float) arrLat.get(j, i);
-                    float lon = (float) arrLon.get(j, i);
+            /*
+             * Careful: i is related to nbLines = Y dimension in the grid file
+             * and j is related to nbColumns = X dim in the grid file.
+             * This is opposite to usual convention...
+             */
+            for (int j = 0; j < nbColumns; j++) {
+                for (int i = 0; i < nbLines; i++) {
+                    boolean land = arrMask.get(i, j) < 1;
+                    float lat = (float) arrLat.get(i, j);
+                    float lon = (float) arrLon.get(i, j);
                     grid[i][j] = new Cell(i, j, lat, lon, land);
                     //System.out.println("Cell(" + i + ", " + j + ") lat=" + lat + " lon=" + lon + " land=" + land);
                 }
@@ -209,9 +214,9 @@ public class Grid {
      * @return a List<Cell> of the cells.
      */
     public List<Cell> getCells() {
-        ArrayList<Cell> cells = new ArrayList(ny * nx);
-        for (int i = nx; i-- > 0;) {
-            for (int j = ny; j-- > 0;) {
+        ArrayList<Cell> cells = new ArrayList(nbLines * nbColumns);
+        for (int i = nbLines; i-- > 0;) {
+            for (int j = nbColumns; j-- > 0;) {
                 cells.add(matrix[i][j]);
             }
         }
@@ -245,9 +250,9 @@ public class Grid {
     public ArrayList<Cell> getNeighborCells(Cell cell) {
 
         int im1 = Math.max(cell.get_igrid() - 1, 0);
-        int ip1 = Math.min(cell.get_igrid() + 1, get_nx() - 1);
+        int ip1 = Math.min(cell.get_igrid() + 1, getNbLines() - 1);
         int jm1 = Math.max(cell.get_jgrid() - 1, 0);
-        int jp1 = Math.min(cell.get_jgrid() + 1, get_ny() - 1);
+        int jp1 = Math.min(cell.get_jgrid() + 1, getNbColumns() - 1);
 
         ArrayList<Cell> neighbors = new ArrayList();
 
@@ -268,8 +273,8 @@ public class Grid {
     public int getNumberAvailableCells() {
         int nbCells = 0;
 
-        for (int i = 0; i < nx; i++) {
-            for (int j = 0; j < ny; j++) {
+        for (int i = 0; i < nbLines; i++) {
+            for (int j = 0; j < nbColumns; j++) {
                 if (!matrix[i][j].isLand()) {
                     nbCells++;
                 }
@@ -291,11 +296,11 @@ public class Grid {
         longMax = -longMin;
         latMin = Float.MAX_VALUE;
         latMax = -latMin;
-        int i = nx;
+        int i = nbLines;
         int j = 0;
 
         while (i-- > 0) {
-            j = ny;
+            j = nbColumns;
             while (j-- > 0) {
                 if (matrix[i][j].getLon() >= longMax) {
                     longMax = matrix[i][j].getLon();
@@ -328,22 +333,22 @@ public class Grid {
         }
 
         /* size of a cell */
-        dLat = (latMax - latMin) / (float) ny;
-        dLong = (longMax - longMin) / (float) nx;
+        dLat = (latMax - latMin) / (float) nbLines;
+        dLong = (longMax - longMin) / (float) nbColumns;
     }
 
     /**
      * @return the number of lines
      */
-    public int get_ny() {
-        return ny;
+    public int getNbLines() {
+        return nbLines;
     }
 
     /**
      * @return the number of columns
      */
-    public int get_nx() {
-        return nx;
+    public int getNbColumns() {
+        return nbColumns;
     }
 
     /**

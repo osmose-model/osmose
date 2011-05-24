@@ -180,6 +180,12 @@ public class Osmose {
         initializeSizeAndTLSpectrum();
     }
 
+    public void loadMPAs() {
+        for (int index = 0; index < tabMPAiMatrix[numSerie].length; index++) {
+            getGrid().getCell(tabMPAiMatrix[numSerie][index], tabMPAjMatrix[numSerie][index]).setMPA(true);
+        }
+    }
+
     public void initializeSizeAndTLSpectrum() {
         if (sizeSpectrumOutputMatrix[numSerie] || sizeSpectrumPerSpeOutputMatrix[numSerie]) {
             //initialisation of the size spectrum features
@@ -1203,13 +1209,13 @@ public class Osmose {
 
         if (gridTypeTab[numSerie].equalsIgnoreCase("make")) {
 
-            grid = new Grid(gridLinesTab[numSerie], gridColumnsTab[numSerie], upLeftLatTab[numSerie],
-                    lowRightLatTab[numSerie], upLeftLongTab[numSerie], lowRightLongTab[numSerie]);
-            if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
-                nbCellsCoastTab[numSerie] = 0;
-            } else {
-                initializeCoast();
-            }
+        grid = new Grid(gridLinesTab[numSerie], gridColumnsTab[numSerie], upLeftLatTab[numSerie],
+                lowRightLatTab[numSerie], upLeftLongTab[numSerie], lowRightLongTab[numSerie]);
+        if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
+            nbCellsCoastTab[numSerie] = 0;
+        } else {
+            initializeCoast();
+        }
         } else {
             grid = new Grid(gridFileTab[numSerie], lonFieldTab[numSerie], latFieldTab[numSerie], maskFieldTab[numSerie]);
         }
@@ -1399,7 +1405,6 @@ public class Osmose {
                 st.nextToken();
                 speciesAreasSizeTab[numSerie] = (new Integer(st.sval)).intValue();
                 distribRandom();
-                System.out.println("Random distribution of species [OK]");
             } else if (distribMethod.equalsIgnoreCase("maps"))/* *******CASE FILE AREAS - densities or presence/absence********* */ {
                 if (numSimu == 0) {//1
                     //areas data are read from file areasFile
@@ -1569,6 +1574,7 @@ public class Osmose {
 
             //int nbCasesDispos = ((int) (gridLinesTab[numSerie] * gridColumnsTab[numSerie])) - nbCellsCoastTab[numSerie];
             int nbCasesDispos = grid.getNumberAvailableCells();
+
             //Case where random distribution on the whole (grid-coast)
             if (speciesAreasSizeTab[numSerie] >= nbCasesDispos) {
                 speciesAreasSizeTab[numSerie] = nbCasesDispos;
@@ -1577,12 +1583,12 @@ public class Osmose {
                     randomAreaCoordj[i] = new int[speciesAreasSizeTab[numSerie]];
                 }
                 int index = 0;
-                for (int j = 0; j < grid.get_ny(); j++) {
-                    for (int i = 0; i < grid.get_nx(); i++) {
-                        if (!grid.getCell(i, j).isLand()) {
-                            for (int sp = 0; sp < nbSpeciesTab[numSerie]; sp++) {
-                                randomAreaCoordi[sp][index] = grid.getCell(i, j).get_igrid();
-                                randomAreaCoordj[sp][index] = grid.getCell(i, j).get_jgrid();
+                for (int l = 0; l < grid.getNbLines(); l++) {
+                    for (int m = 0; m < grid.getNbColumns(); m++) {
+                        if (!grid.getCell(l, m).isLand()) {
+                            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                                randomAreaCoordi[i][index] = grid.getCell(l, m).get_igrid();
+                                randomAreaCoordj[i][index] = grid.getCell(l, m).get_jgrid();
                             }
                             index++;
                         }
@@ -1591,19 +1597,19 @@ public class Osmose {
             } //case where random disribution on speciesAreasSize cells
             //random sorting of connex cells for each species
             else {
-                for (int sp = 0; sp < nbSpeciesTab[numSerie]; sp++) {
-                    for (int j = 0; j < grid.get_ny(); j++) {
-                        for (int i = 0; i < grid.get_nx(); i++) {
-                            grid.getCell(i, j).setAlreadyChosen(false);
+                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                    for (int l = 0; l < grid.getNbLines(); l++) {
+                        for (int m = 0; m < grid.getNbColumns(); m++) {
+                            grid.getCell(l, m).setAlreadyChosen(false);
                         }
                     }
                     Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie]];
                     int coordi, coordj;
-                    coordi = (int) Math.round(Math.random() * (grid.get_nx() - 1));
-                    coordj = (int) Math.round(Math.random() * (grid.get_ny() - 1));
+                    coordi = (int) Math.round(Math.random() * (grid.getNbLines() - 1));
+                    coordj = (int) Math.round(Math.random() * (grid.getNbColumns() - 1));
                     while (grid.getCell(coordi, coordj).isLand()) {
-                        coordi = (int) Math.round(Math.random() * (grid.get_nx() - 1));
-                        coordj = (int) Math.round(Math.random() * (grid.get_ny() - 1));
+                        coordi = (int) Math.round(Math.random() * (grid.getNbLines() - 1));
+                        coordj = (int) Math.round(Math.random() * (grid.getNbColumns() - 1));
                     }
                     tabCellsArea[0] = grid.getCell(coordi, coordj);
                     grid.getCell(coordi, coordj).setAlreadyChosen(true);
@@ -1631,8 +1637,8 @@ public class Osmose {
                         iLastSorted = index;
                     }
                     for (int m = 0; m < tabCellsArea.length; m++) {
-                        randomAreaCoordi[sp][m] = tabCellsArea[m].get_igrid();
-                        randomAreaCoordj[sp][m] = tabCellsArea[m].get_jgrid();
+                        randomAreaCoordi[i][m] = tabCellsArea[m].get_igrid();
+                        randomAreaCoordj[i][m] = tabCellsArea[m].get_jgrid();
                     }
                 }
             }
@@ -2578,7 +2584,6 @@ public class Osmose {
 
     public void runSimulation() {
 
-        System.out.println("RUN SIMULATION");
         while (simulation.getYear() < simulationTimeTab[numSerie]) {
             simulation.step();
         }

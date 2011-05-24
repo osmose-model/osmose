@@ -85,26 +85,9 @@ public class LTLForcingGL extends Coupling {
         planktonDimY = shape[1];
         planktonDimX = shape[2];
 
-        depthOfLayer = new float[planktonDimX][][];
-        saveMortality = new float[nbPlankton][][][];
-        for (int p = 0; p < nbPlankton; p++) {
-            saveMortality[p] = new float[planktonDimX][][];
-        }
+        depthOfLayer = new float[planktonDimX][planktonDimY][planktonDimZ];
+        saveMortality = new float[nbPlankton][planktonDimX][planktonDimY][planktonDimZ];
 
-        for (int i = 0; i < planktonDimX; i++) {
-            depthOfLayer[i] = new float[planktonDimY][];
-            for (int j = 0; j < planktonDimY; j++) {
-                depthOfLayer[i][j] = new float[planktonDimZ];
-            }
-            for (int p = 0; p < nbPlankton; p++) {
-                saveMortality[p][i] = new float[planktonDimY][];
-            }
-            for (int p = 0; p < nbPlankton; p++) {
-                for (int y = 0; y < planktonDimY; y++) {
-                    saveMortality[p][i][y] = new float[nbForcingDt];
-                }
-            }
-        }
         try {
             ArrayDouble.D3 arrDepth = (D3) ncGrid.findVariable(zlevelName).read();
             for (int i = 0; i < planktonDimX; i++) {
@@ -116,11 +99,11 @@ public class LTLForcingGL extends Coupling {
             }
             ncGrid.close();
 
-            for (int i = 0; i < planktonDimX; i++) {
-                for (int j = 0; j < planktonDimY; j++) {
-                    if (!getGrid().getCell(i, j).isLand()) {
-                        getGrid().getCell(i, j).icoordLTLGrid.addElement(i);
-                        getGrid().getCell(i, j).jcoordLTLGrid.addElement(j);
+            for (int x = 0; x < planktonDimX; x++) {
+                for (int y = 0; y < planktonDimY; y++) {
+                    if (!getGrid().getCell(y, x).isLand()) {
+                        getGrid().getCell(y, x).icoordLTLGrid.addElement(y);
+                        getGrid().getCell(y, x).jcoordLTLGrid.addElement(x);
                     }
                 }
             }
@@ -171,8 +154,6 @@ public class LTLForcingGL extends Coupling {
 
         try {
             nc = NetcdfFile.open(name);
-            // in ROMS benguela case : shape[0] = 1, shape[1] = 20, shape[2] = 144, shape[3] = 65
-
             // read data and put them in the local arrays
             for (int i = 0; i < nbPlankton; i++) {
                 tempVar[i] = nc.findVariable(plktonNetcdfNames[i]);
@@ -212,4 +193,27 @@ public class LTLForcingGL extends Coupling {
     public void calculPlanktonMortality() {
         throw new UnsupportedOperationException("Not available in forcing mode.");
     }
+
+    // CASE SPECIFIC - depends of the LTL grid
+    // from ECO3M (vertically integrated) towards OSMOSE
+    @Override
+    public void mapInterpolation() {
+
+        int tempX, tempY;
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                if (!getGrid().getCell(i, j).isLand()) {
+                    for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
+                        for (int p = 0; p < nbPlankton; p++) {
+                            tempY = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
+                            tempX = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
+                            // interpolate the plankton concentrations from the LTL cells
+                            ((Plankton) planktonList[p]).addCell(i, j, tempX, tempY, getGrid().getCell(i, j).getNbCellsLTLGrid());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
 }

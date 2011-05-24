@@ -110,8 +110,8 @@ public class GridUI extends JPanel {
         graphic.fillRect(0, 0, w, h);
 
         CellUI cell = new CellUI();
-        for (int i = getGrid().get_nx() - 1; i-- > 0;) {
-            for (int j = getGrid().get_ny() - 1; j-- > 0;) {
+        for (int i = getGrid().getNbLines() - 1; i-- > 0;) {
+            for (int j = getGrid().getNbColumns() - 1; j-- > 0;) {
                 cell.draw(i, j, w, h);
                 graphic.setColor(cell.getColor(i, j));
                 graphic.fillPolygon(cell);
@@ -318,6 +318,7 @@ public class GridUI extends JPanel {
 
         getOsmose().initSimulation();
         getOsmose().initializeOptions();
+        getOsmose().loadMPAs();
         GridUI grid = new GridUI();
         grid.init();
         grid.setGridVisible(true);

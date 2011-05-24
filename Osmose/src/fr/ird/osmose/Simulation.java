@@ -197,7 +197,7 @@ public class Simulation {
 
         // calculation of relative size of MPA
         if ((getOsmose().thereIsMPATab[numSerie]) && (year == getOsmose().MPAtStartTab[numSerie])) {
-            RS = getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().get_ny()) * getGrid().get_nx());
+            RS = getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
             for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
                 getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(true);
             }
@@ -235,9 +235,9 @@ public class Simulation {
 
             if (!((indexTime == 0) && (year == 0))) // because distributeSpeciesIni() used at initialisation
             {
-                for (int i = 0; i < getGrid().get_nx(); i++) // remove all the schools because of the last age class
+                for (int i = 0; i < getGrid().getNbLines(); i++) // remove all the schools because of the last age class
                 {
-                    for (int j = 0; j < getGrid().get_ny(); j++) {
+                    for (int j = 0; j < getGrid().getNbColumns(); j++) {
                         getGrid().getCell(i, j).clear();
                     }
                 }
@@ -580,8 +580,8 @@ public class Simulation {
     }
 
     public void iniPlanktonField(boolean isForcing) {
-        coupling = new Coupling(isForcing);
-        //coupling = new LTLForcingGL();
+        //coupling = new Coupling(isForcing);
+        coupling = new LTLForcingGL();
         coupling.iniCouplingReading(getOsmose().planktonStructureFileNameTab[numSerie]);
         coupling.readInputPlanktonFiles(getOsmose().planktonFileNameTab[numSerie]);
         coupling.initPlanktonMap();
@@ -627,8 +627,8 @@ public class Simulation {
     }
 
     public void assessPresentSchools() {
-        for (int i = 0; i < getGrid().get_nx(); i++) {
-            for (int j = 0; j < getGrid().get_ny(); j++) {
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
                 for (int k = getGrid().getCell(i, j).size() - 1; k >= 0; k--) {
                     if (((School) getGrid().getCell(i, j).getSchool(k)).willDisappear()) {
                         getGrid().getCell(i, j).remove(k);
