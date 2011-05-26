@@ -580,8 +580,8 @@ public class Simulation {
     }
 
     public void iniPlanktonField(boolean isForcing) {
-        //coupling = new Coupling(isForcing);
-        coupling = new LTLForcingGL();
+        coupling = new Coupling(isForcing);
+        //coupling = new LTLForcingGL();
         coupling.iniCouplingReading(getOsmose().planktonStructureFileNameTab[numSerie]);
         coupling.readInputPlanktonFiles(getOsmose().planktonFileNameTab[numSerie]);
         coupling.initPlanktonMap();
