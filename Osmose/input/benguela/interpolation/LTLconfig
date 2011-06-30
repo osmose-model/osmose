@@ -1,0 +1,87 @@
+////////////////
+//
+// PLANKTON DATA
+//
+////////////////
+//
+/*
+ * 9.1. Number of plankton groups
+ * Assertion: ${8.1} == ${9.1}
+ */
+;4;  
+/*
+ * 9.2. Name of latitude file
+ * (latitude of ROMS cells, X * Y file)
+ */
+;Grid/latitude.txt;
+/*
+ * 9.3. Name of longitude file
+ * (longitude of ROMS cells, X * Y file)
+ */
+;Grid/longitude.txt;
+/*
+ * 9.4. Format of plankton file names.
+ * Accepted values: "netcdf" or "text"
+ */
+;netcdf;
+/*
+ * 9.5. Variable names in the NetCDF file corresponding to the plankton groups.
+ * Ignored parameter for ${9.4} == "text"
+ */
+;SPHYTO;
+;LPHYTO;
+;SZOO;
+;LZOO;
+/*
+ * 9.6. List of plankton files
+ */
+;interpolation/beng_avg_1.nc;
+;interpolation/beng_avg_2.nc;
+;interpolation/beng_avg_3.nc;
+;interpolation/beng_avg_4.nc;
+;interpolation/beng_avg_5.nc;
+;interpolation/beng_avg_6.nc;
+;interpolation/beng_avg_7.nc;
+;interpolation/beng_avg_8.nc;
+;interpolation/beng_avg_9.nc;
+;interpolation/beng_avg_10.nc;
+;interpolation/beng_avg_11.nc;
+;interpolation/beng_avg_12.nc;
+;interpolation/beng_avg_13.nc;
+;interpolation/beng_avg_14.nc;
+;interpolation/beng_avg_15.nc;
+;interpolation/beng_avg_16.nc;
+;interpolation/beng_avg_17.nc;
+;interpolation/beng_avg_18.nc;
+;interpolation/beng_avg_19.nc;
+;interpolation/beng_avg_20.nc;
+;interpolation/beng_avg_21.nc;
+;interpolation/beng_avg_22.nc;
+;interpolation/beng_avg_23.nc;
+;interpolation/beng_avg_24.nc;
+/*
+ * 9.6. Filename of depth files
+ * Z * files giving the height of vertical layer in each cell (X * Y)
+ */
+;Grid/depth1.txt;
+;Grid/depth2.txt;
+;Grid/depth3.txt;
+;Grid/depth4.txt;
+;Grid/depth5.txt;
+;Grid/depth6.txt;
+;Grid/depth7.txt;
+;Grid/depth8.txt;
+;Grid/depth9.txt;
+;Grid/depth10.txt;
+;Grid/depth11.txt;
+;Grid/depth12.txt;
+;Grid/depth13.txt;
+;Grid/depth14.txt;
+;Grid/depth15.txt;
+;Grid/depth16.txt;
+;Grid/depth17.txt;
+;Grid/depth18.txt;
+;Grid/depth19.txt;
+;Grid/depth20.txt;
+//
+// EOF - PLANKTON DATA

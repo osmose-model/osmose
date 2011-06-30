@@ -1,0 +1,14 @@
+
+// Input File required when two-way coupling is activated
+// SPECIFIC TO ROMS MODEL
+// FOR OTHER MODELS AND CONFIGURATION, MODIFICATIONS ARE REQUIRED WITHIN THE JAVA CODE (Coupling.java and Plankton.java) 
+
+;30;	// starting time of the two-way coupling (before that, spin up realised in forcing mode)
+
+;./roms bengCoupling.in >toto.out; // command to be launched in the terminal to run the LTL model
+
+;/home/morgane/PhDModel/Roms_tools/Run/Coupling/bengCoupling_avg.nc; // Name of file providing plankton concentration during two-way coupling (created by the LTL model)
+
+;/home/morgane/PhDModel/Roms_tools/Run/Coupling/bengCoupling_frc.nc; // Name of file for retroaction : forcing file containing mortality fields for plankton - to be read by the LTL model
+
+

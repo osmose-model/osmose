@@ -1,1 +1,1 @@
-;C:\\appli_Benguela90;
+;input/benguela/;

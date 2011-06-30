@@ -1,0 +1,62 @@
+//////////////////////
+//
+// OSMOSE SPECIES FILE
+//
+//////////////////////
+/*
+ * 4.1. Number of species
+ */
+;11;
+/*
+ * 4.2. Name of the species
+ */
+;anchovy;;euphausiids;;shall. w. hake;;deepw. hake;;horse mack.;;lanternfish;;lightfish;;redeye;;sardine;;silver kob;;snoek;
+/*
+ * 4.3. Other mortality, D
+ */
+;0.403;;0.1;;0.228;;0.174;;0.314;;0.226;;0.226;;0.208;;0.365;;0.228;;0.132;
+/*
+ * 4.4. Longevity [year]
+ */
+;5;;1;;15;;15;;8;;2;;2;;6;;10;;25;;10;
+/*
+ * 4.5. Linf [cm]
+ */
+;14.8;;1.84;;270.6;;219.4;;54.5;;7;;6;;30.1;;26;;116;;115.3;
+/*
+ * 4.6. K
+ */
+;1.37;;1.682;;0.039;;0.049;;0.183;;1.66;;1.15;;0.71;;0.26;;0.120;;0.294;
+/*
+ * 4.7. t0
+ */
+;-0.03;;-0.198;;-0.73;;-0.914;;-0.65;;0.06;;0.06;;0.28;;-1.50;;-1.47;;-0.1;
+/*
+ * 4.8. c
+ */
+;0.007;;0.00738;;0.00654;;0.00785;;0.009;;0.008;;0.008;;0.009;;0.009;;0.007;;0.018;
+/*
+ * 4.9. b
+ */
+;3;;3.16;;3.0425;;2.9759;;3;;3;;3;;3;;3;;3;;3;
+/*
+ * 4.10. Relative fecundity
+ * Unit = Annual fecondity per gram of mature female
+ */
+;8000;;42254;;500;;500;;250;;646;;334;;750;;2400;;150;;130;
+/*
+ * 4.11. Maturity criterion
+ * Either based on 'age' or 'size'
+ */
+;age;;size;;age;;age;;age;;age;;age;;age;;size;;age;;size;
+/*
+ * 4.12. Maturity threshold value
+ * Unit = [year] or [cm] depending on the maturity criterion
+ */
+;1;;1.05;;4;;4;;3;;0.5;;0.5;;1;;18;;2;;73;
+/*
+ * 4.13. Sex ratio
+ * Expressed as a percent of females.
+ * For instance, sex ratio = 0.5 means as much females as males 
+ */
+;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;
