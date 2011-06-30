@@ -43,7 +43,7 @@ public class Osmose {
      * 
      */
     final static String fileSeparator = System.getProperty("file.separator");
-    String inputPathName, outputPathName;
+    String inputPathName, outputPathName, inputTxtName;
     /*
      * 
      */
@@ -163,15 +163,6 @@ public class Osmose {
     boolean timeSeriesIsShortened;
 
     public void initSimulation() {
-        readPathFile();		// read the path of input files, written in the file pathFile.txt
-
-        // create output folder
-        String OS_NAME = System.getProperty("os.name");
-        if (OS_NAME.startsWith("Linux")) {
-            outputPathName = inputPathName + "/output/";
-        } else if (OS_NAME.startsWith("Windows")) {
-            outputPathName = inputPathName + ".\\output\\";
-        }
 
         readInputFile();	// read the first file containing the file names of all other input files
         for (int x = 0; x < nbSeriesSimus; x++) {
@@ -343,14 +334,13 @@ public class Osmose {
 
     }
 
-    public void readPathFile() // read the file situated within the source code directory
+    public String readPathFile() // read the file situated within the source code directory
     {
-        FileInputStream pathFile;
+        FileInputStream pathFile = null;
         try {
             pathFile = new FileInputStream(new File("filePath.txt"));
         } catch (FileNotFoundException ex) {
-            System.out.println("initial path file doesn't exist");
-            return;
+            System.err.println("initial path file doesn't exist");
         }
 
         Reader r = new BufferedReader(new InputStreamReader(pathFile));
@@ -362,12 +352,11 @@ public class Osmose {
         System.out.println("1. Reading the filePath.txt");
         try {
             st.nextToken();
-            inputPathName = st.sval;
+            return st.sval;
         } catch (IOException ex) {
-            System.out.println("Reading error of path file");
-            return;
+            System.err.println("Reading error of path file");
+            return null;
         }
-        System.out.println("  Folder with the configuration files: " + inputPathName);
     }
 
     // read the first file, that should be named INPUT.txt, situated at the path given by filePath.txt
@@ -375,7 +364,7 @@ public class Osmose {
         System.out.println("2. Reading file INPUT.txt");
         FileInputStream inputFile;
         try {
-            inputFile = new FileInputStream(new File(inputPathName, "INPUT.txt"));
+            inputFile = new FileInputStream(new File(inputPathName, inputTxtName));
         } catch (FileNotFoundException ex) {
             System.out.println("INPUT file doesn't exist");
             return;
@@ -2589,8 +2578,36 @@ public class Osmose {
         }
     }
 
+    /*
+     * Function for dealing with command line arguments
+     * From David K. for the GA
+     */
+    private void loadArgs( String[] args ) {
+	// Get command line arguments
+	if (args.length>0) {
+	    inputPathName = args[0];
+	} else {
+	    // This will not have trailing file separator - no idea if this is a problem
+	    inputPathName = readPathFile();
+	}
+
+	if (args.length>1) {
+	    outputPathName = args[1];
+	} else {
+		    outputPathName = inputPathName + fileSeparator + "output" + fileSeparator;
+	}
+
+	if (args.length>2) {
+	    inputTxtName = args[2];
+	} else {
+	    inputTxtName = "INPUT.txt";
+	}
+
+    }
+
     public static void main(String args[]) {
         System.out.println(new Date());
+        osmose.loadArgs(args);
         osmose.initSimulation();
         osmose.runSeriesSimulations();
         System.out.println(new Date());
