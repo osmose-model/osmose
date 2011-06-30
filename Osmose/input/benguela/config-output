@@ -63,13 +63,18 @@
 ;10;
 // ----- Mortalities data -----
 /*
- * Plankton mortality
+ * 11.13. Plankton mortality
  */
 ;true;
 /* 
- * Incorporation of first stage in the calcul of indicators ?
+ * 11.14. Incorporation of first stage in the calcul of indicators ?
  */
 ;false;
+/*
+ * 11.15. Spatialized outputs
+ * If 'true' creates a NetCDF file with spatialized biomass, mean-size and trophic level variables for each species.
+ */
+;true;
 //
 // EOF - INDICATORS
 ///////////////////
