@@ -316,6 +316,7 @@ public class GridUI extends JPanel {
 
     public static void main(String args[]) {
 
+        getOsmose().loadArgs(args);
         getOsmose().initSimulation();
         getOsmose().initializeOptions();
         getOsmose().loadMPAs();
