@@ -352,7 +352,8 @@ public class Osmose {
         System.out.println("1. Reading the filePath.txt");
         try {
             st.nextToken();
-            return st.sval;
+            File inputFile = new File(st.sval);
+            return inputFile.getAbsolutePath();
         } catch (IOException ex) {
             System.err.println("Reading error of path file");
             return null;
@@ -2589,6 +2590,7 @@ public class Osmose {
 	} else {
 	    // This will not have trailing file separator - no idea if this is a problem
 	    inputPathName = readPathFile();
+            System.out.println("Input path ==> " + inputPathName);
 	}
 
 	if (args.length>1) {
