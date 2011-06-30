@@ -16,7 +16,6 @@ import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D3;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
-import ucar.nc2.dataset.NetcdfDataset;
 
 /**
  *
@@ -74,7 +73,7 @@ public class LTLForcingGL extends Coupling {
         NetcdfFile ncGrid = null;
         String gridFilename = getOsmose().inputPathName + getOsmose().fileSeparator + planktonFileListNetcdf[0];
         try {
-            ncGrid = NetcdfDataset.openFile(gridFilename, null);
+            ncGrid = NetcdfFile.open(gridFilename, null);
         } catch (IOException ex) {
             System.err.println("Failed to open plankton grid file " + gridFilename);
             ex.printStackTrace();

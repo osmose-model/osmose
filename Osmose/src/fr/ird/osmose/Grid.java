@@ -19,7 +19,6 @@ import java.util.*;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D2;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.dataset.NetcdfDataset;
 
 public class Grid {
 
@@ -162,7 +161,7 @@ public class Grid {
         NetcdfFile ncGrid = null;
 
         try {
-            ncGrid = NetcdfDataset.openFile(gridFile, null);
+            ncGrid = NetcdfFile.open(gridFile, null);
         } catch (IOException ex) {
             System.err.println("Failed to open grid file " + gridFile);
             ex.printStackTrace();
