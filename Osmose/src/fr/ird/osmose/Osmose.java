@@ -14,8 +14,12 @@ package fr.ird.osmose;
  * @version 2.1
  ******************************************************************************* 
  */
+import fr.ird.osmose.util.IOTools;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.nc2.NetcdfFileWriteable;
 
 public class Osmose {
 
@@ -139,7 +143,7 @@ public class Osmose {
      */
     boolean[] TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
             sizeSpectrumOutputMatrix, sizeSpectrumPerSpeOutputMatrix,
-            planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix;
+            planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix, spatializedOutputs;
     String[] dietsConfigFileName, dietOutputMetrics;
     int[][] nbDietsStages;
     float[][][] dietStageThreshold;
@@ -161,6 +165,10 @@ public class Osmose {
     int timeSeriesLength, timeSeriesStart;
     int[] startingSavingTimeTab;
     boolean timeSeriesIsShortened;
+    /**
+     * Object for creating/writing netCDF files.
+     */
+    private static NetcdfFileWriteable ncOut;
 
     public void initSimulation() {
 
@@ -229,6 +237,9 @@ public class Osmose {
                 freeMem = r.freeMemory();
                 System.out.println("Simulation " + xx + "        **** FREE MEMORY = " + freeMem);
 
+                if (spatializedOutputs[numSerie]) {
+                    createNCFile(numSerie);
+                }
                 if (numSimu == 0) {
                     initializeOptions();
                     System.out.println("options initialized");
@@ -264,6 +275,9 @@ public class Osmose {
                 }
 
                 runSimulation();
+                if (spatializedOutputs[numSerie]) {
+                    closeNCFile();
+                }
                 System.out.print("simu " + numSimu + " end -> ");
                 System.out.println(new Date());
             }
@@ -604,6 +618,7 @@ public class Osmose {
         planktonMortalityOutputMatrix = new boolean[nbSeriesSimus];
         calibrationMatrix = new boolean[nbSeriesSimus];
         outputClass0Matrix = new boolean[nbSeriesSimus];
+        spatializedOutputs = new boolean[nbSeriesSimus];
         dietsConfigFileName = new String[nbSeriesSimus];
         dietOutputMetrics = new String[nbSeriesSimus];
         nbDietsStages = new int[nbSeriesSimus][];
@@ -1187,6 +1202,18 @@ public class Osmose {
             planktonMortalityOutputMatrix[numSerie] = (new Boolean(st.sval)).booleanValue();
             st.nextToken();
             outputClass0Matrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            try {
+                /*
+                 * phv 2011/06/30
+                 * Read additional parameters "spatialized outputs"
+                 * Since it might not exist in most configurations I catch any
+                 * exception and set it as false by default.
+                 */
+                st.nextToken();
+                spatializedOutputs[numSerie] = (new Boolean(st.sval)).booleanValue();
+            } catch (Exception ex) {
+                spatializedOutputs[numSerie] = false;
+            }
 
             indicFile.close();
         } catch (IOException ex) {
@@ -1199,13 +1226,13 @@ public class Osmose {
 
         if (gridTypeTab[numSerie].equalsIgnoreCase("make")) {
 
-        grid = new Grid(gridLinesTab[numSerie], gridColumnsTab[numSerie], upLeftLatTab[numSerie],
-                lowRightLatTab[numSerie], upLeftLongTab[numSerie], lowRightLongTab[numSerie]);
-        if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
-            nbCellsCoastTab[numSerie] = 0;
-        } else {
-            initializeCoast();
-        }
+            grid = new Grid(gridLinesTab[numSerie], gridColumnsTab[numSerie], upLeftLatTab[numSerie],
+                    lowRightLatTab[numSerie], upLeftLongTab[numSerie], lowRightLongTab[numSerie]);
+            if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
+                nbCellsCoastTab[numSerie] = 0;
+            } else {
+                initializeCoast();
+            }
         } else {
             grid = new Grid(gridFileTab[numSerie], lonFieldTab[numSerie], latFieldTab[numSerie], maskFieldTab[numSerie]);
         }
@@ -1931,6 +1958,56 @@ public class Osmose {
         }
     }
 
+    private void createNCFile(int nSerie) {
+        try {
+            ncOut = NetcdfFileWriteable.createNew("");
+            ncOut.setLocation(makeFileLocation(nSerie));
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Closes the NetCDF file.
+     */
+    private void closeNCFile() {
+        try {
+            ncOut.close();
+            String strFilePart = ncOut.getLocation();
+            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
+            File filePart = new File(strFilePart);
+            File fileBase = new File(strFileBase);
+            filePart.renameTo(fileBase);
+        } catch (Exception ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> " + ex.toString());
+        }
+    }
+
+    public NetcdfFileWriteable getNCOut() {
+        return ncOut;
+    }
+
+    private String makeFileLocation(int nSerie) throws IOException {
+
+        StringBuilder filename = new StringBuilder();
+        filename.append(outputPathName);
+        filename.append(outputFileNameTab[nSerie]);
+        filename.append(fileSeparator);
+        filename.append(outputFileNameTab[nSerie]);
+        filename.append("_spatialized.nc");
+        File file = new File(filename.toString());
+        try {
+            IOTools.makeDirectories(file.getAbsolutePath());
+            file.createNewFile();
+            file.delete();
+        } catch (Exception ex) {
+            IOException ioex = new IOException("{Ouput} Failed to create NetCDF file " + filename + " ==> " + ex.getMessage());
+            ioex.setStackTrace(ex.getStackTrace());
+            throw ioex;
+        }
+        return filename + ".part";
+    }
+
     public void saveSerieSimulations(int nSerie) // ************************** seuls les fichiers biomasses, abundances, yield,
     //**************************size, mortalites et size spectrum per species sont OK � 100%
     {
@@ -2583,27 +2660,27 @@ public class Osmose {
      * Function for dealing with command line arguments
      * From David K. for the GA
      */
-    private void loadArgs( String[] args ) {
-	// Get command line arguments
-	if (args.length>0) {
-	    inputPathName = args[0];
-	} else {
-	    // This will not have trailing file separator - no idea if this is a problem
-	    inputPathName = readPathFile();
+    public void loadArgs(String[] args) {
+        // Get command line arguments
+        if (args.length > 0) {
+            inputPathName = args[0];
+        } else {
+            // This will not have trailing file separator - no idea if this is a problem
+            inputPathName = readPathFile();
             System.out.println("Input path ==> " + inputPathName);
-	}
+        }
 
-	if (args.length>1) {
-	    outputPathName = args[1];
-	} else {
-		    outputPathName = inputPathName + fileSeparator + "output" + fileSeparator;
-	}
+        if (args.length > 1) {
+            outputPathName = args[1];
+        } else {
+            outputPathName = inputPathName + fileSeparator + "output" + fileSeparator;
+        }
 
-	if (args.length>2) {
-	    inputTxtName = args[2];
-	} else {
-	    inputTxtName = "INPUT.txt";
-	}
+        if (args.length > 2) {
+            inputTxtName = args[2];
+        } else {
+            inputTxtName = "INPUT.txt";
+        }
 
     }
 

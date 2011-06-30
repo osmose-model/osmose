@@ -15,6 +15,13 @@ package fr.ird.osmose;
  */
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.DataType;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFileWriteable;
 
 public class Simulation {
 
@@ -76,7 +83,7 @@ public class Simulation {
     /*
      * Output of TL distribution per species
      */
-    float[][][] distribTL; 
+    float[][][] distribTL;
     /*
      * Characteristics of caught schools by species
      */
@@ -163,6 +170,9 @@ public class Simulation {
         }
 
         // Initialize all the tables required for saving output
+        if (getOsmose().spatializedOutputs[numSerie]) {
+            initSpatializedSaving();
+        }
         initSaving();
 
         //Initialisation indicators
@@ -409,6 +419,9 @@ public class Simulation {
             }
 
             // *** SAVE THE TIME STEP ***
+            if (getOsmose().spatializedOutputs[numSerie]) {
+                saveSpatializedStep();
+            }
             saveStep();
 
             // *** REPRODUCTION ***
@@ -894,6 +907,30 @@ public class Simulation {
         }
     }
 
+    public void initSpatializedSaving() {
+
+        NetcdfFileWriteable nc = getOsmose().getNCOut();
+        /*
+         * Create dimensions
+         */
+        Dimension speciesDim = nc.addDimension("species", getNbSpecies());
+        Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
+        Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
+        Dimension timeDim = nc.addUnlimitedDimension("time");
+        /*
+         * Add variables
+         */
+        nc.addVariable("time", DataType.FLOAT, new Dimension[]{timeDim});
+        nc.addVariable("biomass", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
+        nc.addVariable("mean_size", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
+        nc.addVariable("trophic_level", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
+        try {
+            nc.create();
+        } catch (IOException ex) {
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void initSaving() {
         abdTemp = new long[species.length];
         abdTempWithout0 = new long[species.length];
@@ -1059,6 +1096,66 @@ public class Simulation {
         if (sizeSpectrumOutput) {
             initSizeSpecFile();
         }
+    }
+
+    public void saveSpatializedStep() {
+
+        if (year < getOsmose().timeSeriesStart) {
+            return;
+        }
+
+        float[][][] biomass = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][][] mean_size = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][][] tl = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+
+
+        for (Cell cell : getGrid().getCells()) {
+            int[] nbSchools = new int[getNbSpecies()];
+            for (School school : cell) {
+                nbSchools[school.getCohort().getSpecies().getIndex()] += 1;
+                biomass[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
+                mean_size[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getLength();
+                tl[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getTrophicLevel()[indexTime];
+            }
+            for (int ispec = 0; ispec < getNbSpecies(); ispec++) {
+                if (nbSchools[ispec] > 0) {
+                    mean_size[ispec][cell.get_igrid()][cell.get_jgrid()] /= nbSchools[ispec];
+                    tl[ispec][cell.get_igrid()][cell.get_jgrid()] /= nbSchools[ispec];
+                }
+            }
+        }
+
+        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        for (int kspec = 0; kspec < getNbSpecies(); kspec++) {
+            for (int i = 0; i < getGrid().getNbLines(); i++) {
+                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                    arrBiomass.set(0, kspec, i, j, biomass[kspec][i][j]);
+                    arrSize.set(0, kspec, i, j, mean_size[kspec][i][j]);
+                    arrTL.set(0, kspec, i, j, tl[kspec][i][j]);
+                }
+            }
+        }
+
+        float timeSaving = year + (indexTime + 1f) / (float) nbTimeStepsPerYear;
+        ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
+        arrTime.set(0, timeSaving);
+
+        NetcdfFileWriteable nc = getOsmose().getNCOut();
+        int index = nc.getUnlimitedDimension().getLength();
+        //System.out.println("NetCDF saving time " + indexTime + " - " + timeSaving);
+        try {
+            nc.write("time", new int[]{index}, arrTime);
+            nc.write("biomass", new int[]{index, 0, 0, 0}, arrBiomass);
+            nc.write("mean_size", new int[]{index, 0, 0, 0}, arrSize);
+            nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
+        } catch (IOException ex) {
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     public void saveStep() {
