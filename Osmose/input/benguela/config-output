@@ -74,7 +74,7 @@
  * 11.15. Spatialized outputs
  * If 'true' creates a NetCDF file with spatialized biomass, mean-size and trophic level variables for each species.
  */
-;true;
+;false;
 //
 // EOF - INDICATORS
 ///////////////////
