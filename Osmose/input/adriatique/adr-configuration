@@ -8,25 +8,26 @@
 // Time parameters
 // Some general parameters
 // 2011/07/07 albouy : created file for Adriatic configuration
+// 2011/07/07 albouy : assigned input parameters for adr-configuration
 ////////////////// 
 // Grid parameters
 //
 /* 
  * 3.1. Number of lines 
  */
-;10O;
+;311;
 /*
  * 3.2. Number of columns
  */
-;1OO;
+;287;
 /*
  * 3.3. Latitudes of up-left and low-right corners
  */
-;-28.2;;-37.5; 
+;39;;45.82; 
 /*
  * 3.4. Longitudes of up-left and low-right corners
  */
-;16;;24.4; 
+;12.2;; 20.78; 
 //
 //////////////////
 // Time parameters
@@ -35,7 +36,7 @@
  * 3.5. Duration of the simulation
  * Unit = number of years
  */
-;20;
+;50;
 /*
  * 3.6. Number of time steps per year
  * For instance nb time-step = 24 ==> dt = 15 days
@@ -61,7 +62,7 @@
 /* 
  * 3.10. Number of plankton groups
  */
-;4;
+;7;
 /*
  * 3.11. Coupling status
  * 'forcing' = one-way coupling is the default status
