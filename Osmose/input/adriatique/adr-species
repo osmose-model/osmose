@@ -1,0 +1,70 @@
+//////////////////////
+//
+// OSMOSE SPECIES FILE
+//
+// 2011/07/08 albouy created file adr-species
+//
+///////////////////
+/*
+ * 4.1. Number of species
+ */
+;11;
+/*
+ * 4.2. Name of the species
+ */
+;euphausiids;;european pilchard;;round sardinella;;european anchovy;; horse mackerel;; mackerel;;chub mackrel;;atlantic bonito;;hake;;european sprat;;blue whiting;
+/*
+ * 4.3. Other mortality, D
+ */
+;0.1;;0.62;;0.62;;0.58;;0.96;;0.06;;0.06;;0.3903;;0.33;;1.30;0.62; //dernier paramètre pas sur  
+
+/*
+ * 4.4. Longevity [year]
+ */
+;1;;10;;7;;7;;12;;11;;18;;7;;8;;6;;20;
+
+/*
+ * 4.5. Linf [cm]
+ */
+;1.84;;20.5;;30;;19.4;;38.1;;42;;47.596;;80.6;;92.83;;14.2;;32.7;
+/*
+ * 4.6. K
+ */
+;1.682;;0.46;;0.35;;0.57;;0.215;;0.37;;0.154;;0.36;;0.097;;0.368;;0.247;
+/*
+ * 4.7. t0
+ */
+;-0.198;;-0.5;;-0.42;;-0.5;;-0.39;;-0.5;;-2.177;;-1.37;;-0.629;;-2.3;;-0.35;
+/*
+ * 4.8. c
+ */
+;0.00738;;0.004;;0.0043;;0.0039;;0.0061;;0.0141;;0.0066;;0.082;;0.00257;;0.0602;;0.006;
+
+/*
+ * 4.9. b
+ */
+;3.16;;3.22;;3.26;;3.16;;3.07;;2.88;;3.14;;3.13;;3.29;;3.051;;3.029;
+
+/*
+ * 4.10. Relative fecundity
+ * Unit = Annual fecondity per gram of mature female
+ */
+;42254;;156.25;;26.5;;161.25;;104.508;;417.421;;401.291;;65;;811.172;;9.654;;30;
+
+/*
+ * 4.11. Maturity criterion
+ * Either based on 'age' or 'size'
+ */
+;age;;age;;age;;age;;age;;age;;age;;age;;age;;age;;age;
+/*
+ * 4.12. Maturity threshold value
+ * Unit = [year] or [cm] depending on the maturity criterion
+ */
+;1.05;;2;;1.9;;1.9;;2.9;;2;;2.5;;1.5;;3;;1.5;;2;
+
+/*
+ * 4.13. Sex ratio
+ * Expressed as a percent of females.
+ * For instance, sex ratio = 0.5 means as much females as males 
+ */
+;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;
