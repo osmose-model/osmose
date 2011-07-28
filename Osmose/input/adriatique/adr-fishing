@@ -1,0 +1,28 @@
+///////////////
+//
+// FISHING FILE
+//
+///////////////
+//
+/*
+ * 6.1. Implemention of mortality model
+ * 'global' = per species or 'cohort' = per cohort
+ * At the moment 'cohort' option is not implemented. Please leave 'global'
+ */
+;global;
+/*
+ * 6.2. Annual mortality rate F
+ */
+0;;0.14;;0.14;;0.29;;0,03;;0.94;;0.94;;0.006;;1.06;;0.60;;0.14; // end value aproximative value
+
+/*
+ * 6.3. Recruitment criterion
+ * Either 'age' or 'size' (same for all species)
+ */
+;age;
+/*
+ * 6.4. Recruitment value
+ * [year] or [cm] depending the recruitment criterion
+ */
+;1;;1;;1;;1;;2;;1;;1;;1;;2;;1;;1;
+

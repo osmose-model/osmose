@@ -15,19 +15,19 @@
 /* 
  * 3.1. Number of lines 
  */
-;311;
+;392;
 /*
  * 3.2. Number of columns
  */
-;287;
+;281;
 /*
  * 3.3. Latitudes of up-left and low-right corners
  */
-;39;;45.82; 
+;38.975;;46; 
 /*
  * 3.4. Longitudes of up-left and low-right corners
  */
-;12.2;; 20.78; 
+;11;; 20.8; 
 //
 //////////////////
 // Time parameters
