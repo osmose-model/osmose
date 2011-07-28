@@ -13,7 +13,7 @@
 /*
  * 6.2. Annual mortality rate F
  */
-0;;0.14;;0.14;;0.29;;0,03;;0.94;;0.94;;0.006;;1.06;;0.60;;0.14; // end value aproximative value
+;0;;0.14;;0.14;;0.29;;0.03;;0.94;;0.94;;0.006;;1.06;;0.60;;0.14; // end value aproximative value
 
 /*
  * 6.3. Recruitment criterion
