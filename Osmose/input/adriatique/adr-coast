@@ -11,7 +11,7 @@
  * 17.1. Number of lines
  * Assertion: ${17.1} == ${3.1}
  */
-;392;
+;349;
 /*
  * 17.2. Number of columns
  * Assertion: ${17.2} == ${3.2}
