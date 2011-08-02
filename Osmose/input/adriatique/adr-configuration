@@ -15,15 +15,15 @@
 /* 
  * 3.1. Number of lines 
  */
-;349;
+;350;
 /*
  * 3.2. Number of columns
  */
-;281;
+;282;
 /*
  * 3.3. Latitudes of up-left and low-right corners
- */
-;38.975;;46; 
+ */ 
+;38.975;;46;
 /*
  * 3.4. Longitudes of up-left and low-right corners
  */
