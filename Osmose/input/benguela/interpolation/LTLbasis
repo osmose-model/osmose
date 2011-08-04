@@ -7,7 +7,7 @@
 /*
  * 8.1. Number of plankton groups
  */
-;7;
+;4;
 /*
  * 8.2. Number of time-steps for the forcing
  */
@@ -28,15 +28,6 @@
 ;Diatoms;	  ;0.002;;0.02;	;1;  ;0.72; ;133.3;
 ;Ciliates;	  ;0.002;;0.02;	;2;  ;0.675;;482;
 ;Copepods;	  ;0.02; ;0.3;	;2.5;;1;    ;20;
-
-;Diatoms;;;0.002;;0.02;	;1;  ;a completer;;133.3;
-;Flagellates;;
-;PicoPhytoPlankton;;
-;Dinoflagellates;;0.0002;;0.002;;1;  ; a completer; ;133.3;
-;Omnivorous mesozooplankton;;
-;Microzooplankton;;
-;Heterotrophic nanoflagellates (HNAN);;
-
 /*
  * 8.4. Number of plankton grid dimensions
  */
@@ -44,18 +35,18 @@
 /*
  * 8.5. Number of columns in plankton grid
  */
-;311;
+;144;
 /*
  * 8.6. Number of lines in plankton grid
  */
-;287;
+;65;
 /*
  * 8.7. Number of vertical levels in plankton grid
  * Ignored parameter unless ${8.4} == 3
  */
-;26;
+;20;
 /*
  * 8.8. Integration depth
  * Plankton biomass will be vertically integrated from 0 meter to ${8.8} meter
  */
-;;
+;-100;
