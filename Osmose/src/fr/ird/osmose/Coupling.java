@@ -645,10 +645,12 @@ public class Coupling {
                      * WARNING, phv, 2011/04/07
                      * I changed the calculation of posiTemp & posjTemp
                      * but it should be double checked.
+                     * 2011/08/04 phv, looks like the change in positemp led to
+                     * different outputs... so I reverted the change.
                      */
-                    posiTemp = (int) Math.floor((latitude[i][j] - getGrid().getLatMin()) / getGrid().getdLat());    //************** Attention sign minus & latMax depend on the sign of lat and long
+                    posiTemp = (int) Math.floor(-(latitude[i][j] - getGrid().getLatMax()) / getGrid().getdLat());    //************** Attention sign minus & latMax depend on the sign of lat and long
                     posjTemp = (int) Math.floor((longitude[i][j] - getGrid().getLongMin()) / getGrid().getdLong());
-
+                    
                     // attach each LTL cells to the right Osmose cell (several LTL cells per Osmose cell is allowed)
                     if (!getGrid().getCell(posiTemp, posjTemp).isLand()) {
                         getGrid().getCell(posiTemp, posjTemp).icoordLTLGrid.addElement(new Integer(i));
