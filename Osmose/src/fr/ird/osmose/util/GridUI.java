@@ -16,6 +16,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
  *
@@ -56,7 +57,7 @@ public class GridUI extends JPanel {
      */
     private static RenderingHints hints = null;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    private int height = 800, width = 600;
+    private int height = 1600, width = 1200;
     private boolean isGridVisible = false;
 
 ///////////////
@@ -330,9 +331,14 @@ public class GridUI extends JPanel {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //3. Create components and put them in the frame.
-        frame.getContentPane().add(grid, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(grid);
+        frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 
         //4. Size the frame.
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        scrollPane.setPreferredSize(grid.getSize());
+        scrollPane.revalidate();
         frame.pack();
         frame.setLocationRelativeTo(null);
 
