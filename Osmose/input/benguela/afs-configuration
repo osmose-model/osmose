@@ -69,7 +69,11 @@
  */
 ;forcing;
 /*
- * 3.12. Initial number of schools per annual cohort
+ * 3.12. Canonical name of the Java class that implements the forcing / coupling
+ */
+;fr.ird.osmose.LTLCouplingRomsPisces
+/*
+ * 3.13. Initial number of schools per annual cohort
  */
 ;120;
 //

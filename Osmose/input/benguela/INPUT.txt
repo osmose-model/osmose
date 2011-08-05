@@ -42,7 +42,7 @@
  * 7. Areas filename
  * File of species distributions by age & time step
  */
-;afs-areas-random;
+;afs-areas-maps;
 /*
  * 8. Plankton groups filename
  */
@@ -64,7 +64,7 @@
  * 12. Accessibilities filename
  * 'default' means accessibility = 1
  */
-;default;
+;afs-accessibility;
 /*
  * 13. Size of age-class zero filename
  * 'default' means egg size = 1mm

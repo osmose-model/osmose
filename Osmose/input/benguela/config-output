@@ -37,35 +37,35 @@
 /*
  * 11.7. Mean size per species
  */
-;true;
+;false;
 /*
  * 11.8. Size spectrum
  */
-;true;
+;false;
 /*
  * 11.9. Size spectrum per species
  */
-;true;
+;false;
 /*
  * 11.10. Spectrum min size
  * Ignored parameter when ${11.9} == false
  */
-;0;
+//;0;
 /*
  * 11.11. Spectrum max size
  * Ignored parameter when ${11.9} == false
  */
-;205;
+//;205;
 /*
  * 11.12. Class range
  * Ignored parameter when ${11.9} == false
  */
-;10;
+//;10;
 // ----- Mortalities data -----
 /*
  * 11.13. Plankton mortality
  */
-;true;
+;false;
 /* 
  * 11.14. Incorporation of first stage in the calcul of indicators ?
  */
