@@ -66,6 +66,7 @@ public class Osmose {
             reproductionFileNameTab, fishingSeasonFileNameTab, /* � creer*/
             couplingFileNameTab;
     boolean[] isForcing;
+    private String lowTLClassName;
     /*
      * SPECIES PARAMETERS FILE
      */
@@ -540,7 +541,7 @@ public class Osmose {
         startingSavingTimeTab = new int[nbSeriesSimus];
         nbSpeciesTab = new int[nbSeriesSimus];
         isForcing = new boolean[nbSeriesSimus];
-
+        
         //--- COAST file---
         upLeftLatTab = new float[nbSeriesSimus];
         lowRightLatTab = new float[nbSeriesSimus];
@@ -984,6 +985,15 @@ public class Osmose {
             } else {
                 System.out.println("In configuration file you have to specify either COUPLING or FORCING");
             }
+            
+            /* addition phv 2011/08/02
+             * since Coupling.java (renamed as LTLCouplingRomsPisces) is model
+             * specific, I had to code new classes for ECO3M (Danial for GL) and
+             * BFM (Camille Adriatic). So in the config file I added a parameter 3.12
+             * to identify the Java class that implements the forcing/coupling.
+             */
+            st.nextToken();
+            lowTLClassName = st.sval;
 
             st.nextToken();
             nbSchools[numSerie] = 1 + Math.round(((new Integer(st.sval)).intValue()) / nbDtMatrix[numSerie]);
@@ -2190,9 +2200,9 @@ public class Osmose {
         }
         pw.println();
         pw.print("accessibility coefficient ");
-        for (int i = 0; i < simulation.getCoupling().nbPlankton; i++) {
+        for (int i = 0; i < simulation.getForcing().getNbPlanktonGroups(); i++) {
             pw.print(';');
-            pw.print(simulation.getCoupling().planktonList[i].accessibilityCoeff);
+            pw.print(simulation.getForcing().getPlankton(i).accessibilityCoeff);
         }
         pw.close();
         System.out.println("Input data saved");
@@ -2654,6 +2664,10 @@ public class Osmose {
         while (simulation.getYear() < simulationTimeTab[numSerie]) {
             simulation.step();
         }
+    }
+    
+    public String getLTLClassName() {
+    	return lowTLClassName;    	
     }
 
     /*

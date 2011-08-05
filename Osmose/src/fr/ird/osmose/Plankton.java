@@ -25,7 +25,7 @@ public class Plankton {
      * and Osmose.getInstance().getSimulation()
      */
 
-    Coupling coupling;
+    private LTLForcing forcing;
     float trophicLevel;        // trophic level of the plankton group
     float sizeMin, sizeMax;      // min and max size of the group (uniform distribution)
     String name;     // e.g.   phytoplankton, diatoms, copepods...
@@ -36,39 +36,39 @@ public class Plankton {
     float[][] biomass, accessibleBiomass, iniBiomass, integratedData;         // table of transformed values in 2D
     float[][] mortalityRate;     // table for output values in 2D
 
-    public Plankton(Coupling coupling, String name, float sizeMin, float sizeMax, float trophicLevel, float conversionFactor, float prodBiomFactor, float accessCoeff) {
+    public Plankton(LTLForcing forcing, String name, float sizeMin, float sizeMax, float trophicLevel, float conversionFactor, float prodBiomFactor, float accessCoeff) {
         this.name = name;
         this.sizeMin = sizeMin;
         this.sizeMax = sizeMax;
         this.trophicLevel = trophicLevel;
         this.conversionFactor = conversionFactor;
         this.prodBiomFactor = prodBiomFactor;
-        this.coupling = coupling;
+        this.forcing = forcing;
         this.accessibilityCoeff = accessCoeff;
 
         // Initialization matrix corresponding to plankton grid, eg ROMS curvilinear grid
-        dataInit = new float[coupling.planktonDimX][][];
-        integratedData = new float[coupling.planktonDimX][];
+        dataInit = new float[forcing.getPlanktonDimX()][][];
+        integratedData = new float[forcing.getPlanktonDimX()][];
 
-        for (int i = 0; i < coupling.planktonDimX; i++) {
-            integratedData[i] = new float[coupling.planktonDimY];
-            dataInit[i] = new float[coupling.planktonDimY][];
-            for (int j = 0; j < coupling.planktonDimY; j++) {
-                dataInit[i][j] = new float[coupling.planktonDimZ];
+        for (int i = 0; i < forcing.getPlanktonDimX(); i++) {
+            integratedData[i] = new float[forcing.getPlanktonDimY()];
+            dataInit[i] = new float[forcing.getPlanktonDimY()][];
+            for (int j = 0; j < forcing.getPlanktonDimY(); j++) {
+                dataInit[i][j] = new float[forcing.getPlanktonDimZ()];
             }
         }
 
         // Initialization matrix corresponding to osmose grid
-        mortalityRate = new float[coupling.getGrid().getNbLines()][];
-        biomass = new float[coupling.getGrid().getNbLines()][];
-        accessibleBiomass = new float[coupling.getGrid().getNbLines()][];
-        iniBiomass = new float[coupling.getGrid().getNbLines()][];
-        for (int i = 0; i < coupling.getGrid().getNbLines(); i++) {
-            biomass[i] = new float[coupling.getGrid().getNbColumns()];
-            accessibleBiomass[i] = new float[coupling.getGrid().getNbColumns()];
-            iniBiomass[i] = new float[coupling.getGrid().getNbColumns()];
-            mortalityRate[i] = new float[coupling.getGrid().getNbColumns()];
-            for (int j = 0; j < coupling.getGrid().getNbColumns(); j++) {
+        mortalityRate = new float[getGrid().getNbLines()][];
+        biomass = new float[getGrid().getNbLines()][];
+        accessibleBiomass = new float[getGrid().getNbLines()][];
+        iniBiomass = new float[getGrid().getNbLines()][];
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            biomass[i] = new float[getGrid().getNbColumns()];
+            accessibleBiomass[i] = new float[getGrid().getNbColumns()];
+            iniBiomass[i] = new float[getGrid().getNbColumns()];
+            mortalityRate[i] = new float[getGrid().getNbColumns()];
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
                 biomass[i][j] = 0;
                 accessibleBiomass[i][j] = 0;
                 iniBiomass[i][j] = 0;
@@ -102,7 +102,7 @@ public class Plankton {
     // called during the spatial interpolation
     {
         float area;	// area of osmose cell in km^2
-        area = 111f * coupling.getGrid().getdLat() * 111f * (float) Math.cos(coupling.getGrid().getCell(i, j).getLat() * Math.PI / (90f * 2f)) * coupling.getGrid().getdLong();
+        area = 111f * getGrid().getdLat() * 111f * (float) Math.cos(getGrid().getCell(i, j).getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
 
         biomass[i][j] += area * unitConversion(integratedData[x][y] / (float) nb);
         iniBiomass[i][j] += area * unitConversion(integratedData[x][y] / (float) nb);
@@ -123,8 +123,8 @@ public class Plankton {
 
     public void clearPlankton() // clear the matrix for the next time step
     {
-        for (int i = 0; i < coupling.getGrid().getNbLines(); i++) {
-            for (int j = 0; j < coupling.getGrid().getNbColumns(); j++) {
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
                 biomass[i][j] = 0;
                 accessibleBiomass[i][j] = 0;
                 iniBiomass[i][j] = 0;
@@ -137,5 +137,9 @@ public class Plankton {
         float tempPercent;
         tempPercent = (Math.min(sizeMax, CritMax) - Math.max(sizeMin, CritMin)) / (sizeMax - sizeMin);
         return tempPercent;
+    }
+
+    private Grid getGrid() {
+        return Osmose.getInstance().getGrid();
     }
 }

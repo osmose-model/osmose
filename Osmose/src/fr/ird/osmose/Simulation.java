@@ -45,9 +45,13 @@ public class Simulation {
 // Declaration of the variables
 ///////////////////////////////
     /*
-     * Coupling with PISCES model.
+     * Coupling with Biogeochimical model.
      */
-    private Coupling coupling;
+    private LTLCoupling coupling;
+    /*
+     * Forcing with Biogeochimical model.
+     */
+    private LTLForcing forcing;
     /*
      * The number of the current scenario
      */
@@ -275,13 +279,13 @@ public class Simulation {
             Runtime.getRuntime().gc();
             long freeMem = Runtime.getRuntime().freeMemory();
 
-            if ((!coupling.isForcing) && (year >= coupling.startLTLModel)) // if LTL model to be run, run it
+            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) // if LTL model to be run, run it
             {
                 System.out.print(". " + new Date() + "       Free mem = " + freeMem);
                 coupling.runLTLModel();
                 System.out.println("      -> OK ");
             }
-            coupling.updatePlankton(indexTime);     // update plankton fields either from LTL run or from data
+            forcing.updatePlankton(indexTime);     // update plankton fields either from LTL run or from data
 
             // *** PREDATION ***
             /*
@@ -300,7 +304,7 @@ public class Simulation {
                     }
                 }
             }
-            if ((year >= coupling.startLTLModel - 1)) // save grid of plankton biomass one year before coupling so forcing mode is also saved
+            if (coupling != null && (year >= coupling.getStartYearLTLModel() - 1)) // save grid of plankton biomass one year before coupling so forcing mode is also saved
             {
                 coupling.savePlanktonBiomass();
             }
@@ -316,7 +320,7 @@ public class Simulation {
                 }
             }
 
-            if ((!coupling.isForcing) && (year >= coupling.startLTLModel)) {
+            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
                 coupling.calculPlanktonMortality();
             }
 
@@ -593,11 +597,38 @@ public class Simulation {
     }
 
     public void iniPlanktonField(boolean isForcing) {
-        coupling = new Coupling(isForcing);
-        //coupling = new LTLForcingGL();
-        coupling.iniCouplingReading(getOsmose().planktonStructureFileNameTab[numSerie]);
-        coupling.readInputPlanktonFiles(getOsmose().planktonFileNameTab[numSerie]);
-        coupling.initPlanktonMap();
+
+        if (isForcing) {
+            coupling = null;
+            try {
+                try {
+                    forcing = (LTLForcing) Class.forName(getOsmose().getLTLClassName()).newInstance();
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            try {
+                try {
+                    coupling = (LTLCoupling) Class.forName(getOsmose().getLTLClassName()).newInstance();
+                    forcing = coupling;
+                    coupling.readCouplingConfigFile(getOsmose().couplingFileNameTab[numSerie]);
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        forcing.readLTLConfigFile1(getOsmose().planktonStructureFileNameTab[numSerie]);
+        forcing.readLTLConfigFile2(getOsmose().planktonFileNameTab[numSerie]);
+        forcing.initPlanktonMap();
     }
 
     /*
@@ -939,7 +970,7 @@ public class Simulation {
         savingYield = new float[species.length];
         savingNbYield = new long[species.length];
         tabTLCatch = new float[species.length];
-        biomPerStage = new double[species.length + coupling.nbPlankton][];
+        biomPerStage = new double[species.length + forcing.getNbPlanktonGroups()][];
 
         if (meanSizeOutput) {
             meanSizeTemp = new float[species.length];
@@ -972,7 +1003,7 @@ public class Simulation {
                 meanTLtemp[i] = 0f;
             }
         }
-        for (int i = species.length; i < species.length + coupling.nbPlankton; i++) {
+        for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
             biomPerStage[i] = new double[1];                  // only & stage per plankton group
             biomPerStage[i][0] = 0;
         }
@@ -988,8 +1019,8 @@ public class Simulation {
                 predatorsPressureMatrix[i] = new float[species[i].nbDietStages][][];
                 for (int s = 0; s < species[i].nbDietStages; s++) {
                     nbStomachs[i][s] = 0;
-                    dietsMatrix[i][s] = new float[species.length + coupling.nbPlankton][];
-                    predatorsPressureMatrix[i][s] = new float[species.length + coupling.nbPlankton][];
+                    dietsMatrix[i][s] = new float[species.length + forcing.getNbPlanktonGroups()][];
+                    predatorsPressureMatrix[i][s] = new float[species.length + forcing.getNbPlanktonGroups()][];
                     for (int j = 0; j < species.length; j++) {
                         dietsMatrix[i][s][j] = new float[species[j].nbDietStages];
                         predatorsPressureMatrix[i][s][j] = new float[species[j].nbDietStages];
@@ -998,7 +1029,7 @@ public class Simulation {
                             predatorsPressureMatrix[i][s][j][st] = 0f;
                         }
                     }
-                    for (int j = species.length; j < species.length + coupling.nbPlankton; j++) {
+                    for (int j = species.length; j < species.length + forcing.getNbPlanktonGroups(); j++) {
                         dietsMatrix[i][s][j] = new float[1];
                         dietsMatrix[i][s][j][0] = 0f;
                         predatorsPressureMatrix[i][s][j] = new float[1];
@@ -1275,7 +1306,7 @@ public class Simulation {
                         getOsmose().BIOMQuadri[getOsmose().numSimu][i][1][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomTemp[i] / recordFrequency;
                     }
                 }
-                for (int i = species.length; i < species.length + coupling.nbPlankton; i++) {
+                for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
                     if (calibration) {
                         getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomPerStage[i][0] / recordFrequency;
                     }
@@ -1315,7 +1346,7 @@ public class Simulation {
                                     predatorsPressureMatrix[i][s][j][st] = 0f;
                                 }
                             }
-                            for (int j = species.length; j < species.length + coupling.nbPlankton; j++) {
+                            for (int j = species.length; j < species.length + forcing.getNbPlanktonGroups(); j++) {
                                 dietsMatrix[i][s][j][0] = 0f;
                                 predatorsPressureMatrix[i][s][j][0] = 0f;
                             }
@@ -1459,10 +1490,10 @@ public class Simulation {
                 pr.println();
             }
         }
-        for (int j = species.length; j < (species.length + coupling.nbPlankton); j++) {
+        for (int j = species.length; j < (species.length + forcing.getNbPlanktonGroups()); j++) {
             pr.print(time);
             pr.print(";");
-            pr.print(coupling.planktonNames[j - species.length]);
+            pr.print(forcing.getPlanktonName(j - species.length));
             pr.print(";");
             for (int i = 0; i < species.length; i++) {
                 for (int s = 0; s < species[i].nbDietStages; s++) // 4 Stages
@@ -1522,10 +1553,10 @@ public class Simulation {
                 pr.println();
             }
         }
-        for (int j = species.length; j < (species.length + coupling.nbPlankton); j++) {
+        for (int j = species.length; j < (species.length + forcing.getNbPlanktonGroups()); j++) {
             pr.print(time);
             pr.print(";");
-            pr.print(coupling.planktonNames[j - species.length]);
+            pr.print(forcing.getPlanktonName(j - species.length));
             pr.print(";");
             for (int i = 0; i < species.length; i++) {
                 for (int s = 0; s < species[i].nbDietStages; s++) {
@@ -2378,8 +2409,8 @@ public class Simulation {
         return species[index];
     }
 
-    public Coupling getCoupling() {
-        return coupling;
+    public LTLForcing getForcing() {
+        return forcing;
     }
 
     public int getNbTimeStepsPerYear() {
