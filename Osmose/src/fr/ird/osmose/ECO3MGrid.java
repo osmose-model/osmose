@@ -121,4 +121,9 @@ public class ECO3MGrid extends AbstractGrid {
 
         return grid;
     }
+
+    @Override
+    public int getStride() {
+        return stride;
+    }
 }

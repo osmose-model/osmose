@@ -1250,6 +1250,7 @@ public class Osmose {
 
     public void initializeOptions() {
         try {
+            System.out.println("Initialize grid: " + gridClassNameTab[numSerie]);
             grid = (IGrid) Class.forName(gridClassNameTab[numSerie]).newInstance();
             grid.init();
             if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {

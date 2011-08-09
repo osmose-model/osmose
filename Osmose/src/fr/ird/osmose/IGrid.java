@@ -66,6 +66,12 @@ public interface IGrid {
     public int getNbColumns();
 
     /**
+     * @return the stride that has been used for creating the Osmose grid
+     * from an existing refined grid.
+     */
+    public int getStride();
+
+    /**
      * @return the latitude °N of the upper left corner of the grid
      */
     public float getLatMax();

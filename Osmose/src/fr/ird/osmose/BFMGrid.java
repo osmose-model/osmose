@@ -124,4 +124,9 @@ public class BFMGrid extends AbstractGrid {
         return grid;
     }
 
+    @Override
+    public int getStride() {
+        return stride;
+    }
+
 }

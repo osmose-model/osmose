@@ -76,5 +76,10 @@ public class OriginalGrid extends AbstractGrid {
         }
         return grid;
     }
+
+    @Override
+    public int getStride() {
+        return 1;
+    }
 }
 
