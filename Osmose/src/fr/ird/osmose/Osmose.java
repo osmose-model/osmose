@@ -52,7 +52,7 @@ public class Osmose {
      * 
      */
     private Simulation simulation;
-    private Grid grid;
+    private IGrid grid;
     private int nbSeriesSimus;	// nb of series
     int[] nbLoopTab;	// nb of simulations per serie
     int numSerie, numSimu;
@@ -66,7 +66,7 @@ public class Osmose {
             reproductionFileNameTab, fishingSeasonFileNameTab, /* � creer*/
             couplingFileNameTab;
     boolean[] isForcing;
-    private String lowTLClassName;
+    private String[] lowTLClassNameTab;
     /*
      * SPECIES PARAMETERS FILE
      */
@@ -98,8 +98,9 @@ public class Osmose {
     /*
      * CONFIG & OPTIONS
      */
-    String[] gridTypeTab;
+    String[] gridClassNameTab;
     String[] gridFileTab, lonFieldTab, latFieldTab, maskFieldTab;
+    int[] strideTab;
     int[] gridLinesTab, gridColumnsTab;
     float[] upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
     int[] simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
@@ -261,8 +262,17 @@ public class Osmose {
                     System.out.println("output data initialized");
 
                 } else {
-                    grid = new Grid(gridLinesTab[numSerie], gridColumnsTab[numSerie], upLeftLatTab[numSerie],
-                            lowRightLatTab[numSerie], upLeftLongTab[numSerie], lowRightLongTab[numSerie]);
+                    try {
+                        grid = (IGrid) Class.forName(gridClassNameTab[numSerie]).newInstance();
+                        grid.init();
+                    } catch (InstantiationException ex) {
+                        Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IllegalAccessException ex) {
+                        Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
                     if (!coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
                         updateCoastCells(numSerie);
                     }
@@ -527,11 +537,12 @@ public class Osmose {
         fishingSeasonFileNameTab = new String[nbSeriesSimus];
 
         //--- CONFIGURATION file---
-        gridTypeTab = new String[nbSeriesSimus];
+        gridClassNameTab = new String[nbSeriesSimus];
         gridFileTab = new String[nbSeriesSimus];
         lonFieldTab = new String[nbSeriesSimus];
         latFieldTab = new String[nbSeriesSimus];
         maskFieldTab = new String[nbSeriesSimus];
+        strideTab = new int[nbSeriesSimus];
         gridLinesTab = new int[nbSeriesSimus];
         gridColumnsTab = new int[nbSeriesSimus];
         simulationTimeTab = new int[nbSeriesSimus];
@@ -541,7 +552,7 @@ public class Osmose {
         startingSavingTimeTab = new int[nbSeriesSimus];
         nbSpeciesTab = new int[nbSeriesSimus];
         isForcing = new boolean[nbSeriesSimus];
-        
+
         //--- COAST file---
         upLeftLatTab = new float[nbSeriesSimus];
         lowRightLatTab = new float[nbSeriesSimus];
@@ -985,7 +996,7 @@ public class Osmose {
             } else {
                 System.out.println("In configuration file you have to specify either COUPLING or FORCING");
             }
-            
+
             /* addition phv 2011/08/02
              * since Coupling.java (renamed as LTLCouplingRomsPisces) is model
              * specific, I had to code new classes for ECO3M (Danial for GL) and
@@ -993,16 +1004,16 @@ public class Osmose {
              * to identify the Java class that implements the forcing/coupling.
              */
             st.nextToken();
-            lowTLClassName = st.sval;
+            lowTLClassNameTab[numSerie] = st.sval;
 
             st.nextToken();
             nbSchools[numSerie] = 1 + Math.round(((new Integer(st.sval)).intValue()) / nbDtMatrix[numSerie]);
 
             /* Additional parameters to read the grid from NetCDF file */
-            gridTypeTab[numSerie] = "make";
             st.nextToken();
             if (null != st.sval) {
-                gridTypeTab[numSerie] = "netcdf";
+                gridClassNameTab[numSerie] = st.sval;
+                st.nextToken();
                 String filename = new File(inputPathName, st.sval).toString();
                 gridFileTab[numSerie] = filename;
                 st.nextToken();
@@ -1011,6 +1022,10 @@ public class Osmose {
                 latFieldTab[numSerie] = st.sval;
                 st.nextToken();
                 maskFieldTab[numSerie] = st.sval;
+                st.nextToken();
+                strideTab[numSerie] = Integer.valueOf(st.sval);
+            } else {
+                gridClassNameTab[numSerie] = OriginalGrid.class.getCanonicalName();
             }
 
             configFile.close();
@@ -1233,21 +1248,22 @@ public class Osmose {
     }
 
     public void initializeOptions() {
-
-        if (gridTypeTab[numSerie].equalsIgnoreCase("make")) {
-
-            grid = new Grid(gridLinesTab[numSerie], gridColumnsTab[numSerie], upLeftLatTab[numSerie],
-                    lowRightLatTab[numSerie], upLeftLongTab[numSerie], lowRightLongTab[numSerie]);
+        try {
+            grid = (IGrid) Class.forName(gridClassNameTab[numSerie]).newInstance();
+            grid.init();
             if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
                 nbCellsCoastTab[numSerie] = 0;
             } else {
                 initializeCoast();
             }
-        } else {
-            grid = new Grid(gridFileTab[numSerie], lonFieldTab[numSerie], latFieldTab[numSerie], maskFieldTab[numSerie]);
+            initializeMPA();
+        } catch (InstantiationException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        initializeMPA();
     }
 
     public void initializeCoast() {
@@ -2665,9 +2681,9 @@ public class Osmose {
             simulation.step();
         }
     }
-    
+
     public String getLTLClassName() {
-    	return lowTLClassName;    	
+        return lowTLClassNameTab[numSerie];
     }
 
     /*
@@ -2710,7 +2726,7 @@ public class Osmose {
         return osmose;
     }
 
-    public Grid getGrid() {
+    public IGrid getGrid() {
         return grid;
     }
 

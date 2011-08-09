@@ -248,7 +248,7 @@ public class School {
         randomDeal(accessibleCells);
     }
 
-    private Grid getGrid() {
+    private IGrid getGrid() {
         return getOsmose().getGrid();
     }
 

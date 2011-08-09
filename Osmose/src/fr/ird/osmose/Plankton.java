@@ -139,7 +139,7 @@ public class Plankton {
         return tempPercent;
     }
 
-    private Grid getGrid() {
+    private IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
 }

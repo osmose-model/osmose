@@ -193,7 +193,7 @@ public class Simulation {
         }
     }
 
-    private Grid getGrid() {
+    private IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
 

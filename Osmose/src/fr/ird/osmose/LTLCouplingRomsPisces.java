@@ -82,7 +82,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         startLTLModel = getOsmose().simulationTimeTab[numSerie] + 1;
     }
 
-    public Grid getGrid() {
+    public IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
 
