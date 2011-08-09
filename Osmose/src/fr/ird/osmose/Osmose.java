@@ -552,6 +552,7 @@ public class Osmose {
         startingSavingTimeTab = new int[nbSeriesSimus];
         nbSpeciesTab = new int[nbSeriesSimus];
         isForcing = new boolean[nbSeriesSimus];
+        lowTLClassNameTab = new String[nbSeriesSimus];
 
         //--- COAST file---
         upLeftLatTab = new float[nbSeriesSimus];
