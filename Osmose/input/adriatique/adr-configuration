@@ -70,8 +70,36 @@
  */
 ;forcing;
 /*
- * 3.12. Initial number of schools per annual cohort
+ * 3.12. Canonical name of the Java class that implements the forcing / coupling
+ */
+;fr.ird.osmose.LTLForcingBFM;
+/*
+ * 3.13. Initial number of schools per annual cohort
  */
 ;120;
+/*
+ * 3.14. Class name of the Java class that implemets the Osmose grid
+ */
+;fr.ird.osmose.BFMGrid;
+/*
+ * 3.15. Name of the ECO3M grid file
+ */
+;interpolation/result_bfm199001_2w.nc;
+/*
+ * 3.16. Name of the longitude variable in the ECO3M grid file
+ */
+;lon;
+/*
+ * 3.17. Name of the latitude variable in the ECO3M grid file
+ */
+;lat;
+/*
+ * 3.18. Name of the mask variable in the ECO3M grid file
+ */
+;mask;
+/*
+ * 3.19. Stride for reading the BFM Grid;
+ */
+;5;
 //
 // EOF - CONFIGURATION FILE 

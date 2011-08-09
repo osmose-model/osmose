@@ -92,7 +92,7 @@
  * 17. Coastline filename
  * 'default' means no coast in the grid
  */
-;adr-coast;
+;default;
 /*
  * 18. MPA filename
  * 'default' means no MPA
