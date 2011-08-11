@@ -25,7 +25,6 @@ public class Plankton {
      * and Osmose.getInstance().getSimulation()
      */
 
-    private LTLForcing forcing;
     float trophicLevel;        // trophic level of the plankton group
     float sizeMin, sizeMax;      // min and max size of the group (uniform distribution)
     String name;     // e.g.   phytoplankton, diatoms, copepods...
@@ -36,42 +35,28 @@ public class Plankton {
     float[][] biomass, accessibleBiomass, iniBiomass, integratedData;         // table of transformed values in 2D
     float[][] mortalityRate;     // table for output values in 2D
 
-    public Plankton(LTLForcing forcing, String name, float sizeMin, float sizeMax, float trophicLevel, float conversionFactor, float prodBiomFactor, float accessCoeff) {
+    public Plankton(String name, float sizeMin, float sizeMax, float trophicLevel, float conversionFactor, float prodBiomFactor, float accessCoeff) {
         this.name = name;
         this.sizeMin = sizeMin;
         this.sizeMax = sizeMax;
         this.trophicLevel = trophicLevel;
         this.conversionFactor = conversionFactor;
         this.prodBiomFactor = prodBiomFactor;
-        this.forcing = forcing;
         this.accessibilityCoeff = accessCoeff;
 
-        // Initialization matrix corresponding to plankton grid, eg ROMS curvilinear grid
-        dataInit = new float[forcing.getPlanktonDimX()][][];
-        integratedData = new float[forcing.getPlanktonDimX()][];
+        LTLForcing forcing = Osmose.getInstance().getSimulation().getForcing();
 
-        for (int i = 0; i < forcing.getPlanktonDimX(); i++) {
-            integratedData[i] = new float[forcing.getPlanktonDimY()];
-            dataInit[i] = new float[forcing.getPlanktonDimY()][];
-            for (int j = 0; j < forcing.getPlanktonDimY(); j++) {
-                dataInit[i][j] = new float[forcing.getPlanktonDimZ()];
-            }
-        }
+        // Initialization matrix corresponding to plankton grid, eg ROMS curvilinear grid
+        dataInit = new float[forcing.getPlanktonDimX()][forcing.getPlanktonDimY()][forcing.getPlanktonDimZ()];
+        integratedData = new float[forcing.getPlanktonDimX()][forcing.getPlanktonDimY()];
 
         // Initialization matrix corresponding to osmose grid
-        mortalityRate = new float[getGrid().getNbLines()][];
-        biomass = new float[getGrid().getNbLines()][];
-        accessibleBiomass = new float[getGrid().getNbLines()][];
-        iniBiomass = new float[getGrid().getNbLines()][];
+        mortalityRate = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        accessibleBiomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        iniBiomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
         for (int i = 0; i < getGrid().getNbLines(); i++) {
-            biomass[i] = new float[getGrid().getNbColumns()];
-            accessibleBiomass[i] = new float[getGrid().getNbColumns()];
-            iniBiomass[i] = new float[getGrid().getNbColumns()];
-            mortalityRate[i] = new float[getGrid().getNbColumns()];
             for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                biomass[i][j] = 0;
-                accessibleBiomass[i][j] = 0;
-                iniBiomass[i][j] = 0;
                 mortalityRate[i][j] = (accessibilityCoeff / 2f) * getSimulation().getNbTimeStepsPerYear() / 365f; // default = median of the max mortality rate (in day-1)
             }
         }
@@ -121,15 +106,14 @@ public class Plankton {
         return prod;
     }
 
-    public void clearPlankton() // clear the matrix for the next time step
-    {
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                biomass[i][j] = 0;
-                accessibleBiomass[i][j] = 0;
-                iniBiomass[i][j] = 0;
-            }
-        }
+    /*
+     * Clear matrices for next time step
+     */
+    public void clearPlankton() {
+
+        biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        accessibleBiomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        iniBiomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
     }
 
     public float calculPercent(float CritMin, float CritMax) // used during the predation process : compute the percentage of plankton size range available to a predator (according to its size)

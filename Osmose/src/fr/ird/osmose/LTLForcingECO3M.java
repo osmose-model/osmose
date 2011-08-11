@@ -202,7 +202,7 @@ public class LTLForcingECO3M implements LTLForcing {
 
             // Initialisation plankton and table of data
             for (int i = 0; i < nbPlankton; i++) {
-                planktonList[i] = new Plankton(this, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
+                planktonList[i] = new Plankton(planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
             }
 
         } catch (IOException ex) {

@@ -336,7 +336,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
 
         // Initialisation plankton and table of data
         for (int i = 0; i < nbPlankton; i++) {
-            planktonList[i] = new Plankton(this, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
+            planktonList[i] = new Plankton(planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
         }
 
         if (filesFormat.equalsIgnoreCase("netcdf")) {		// for NetCDF file - Structure depends of netcdf file
