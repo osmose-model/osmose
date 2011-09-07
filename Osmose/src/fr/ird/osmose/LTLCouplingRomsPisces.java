@@ -542,7 +542,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
                             planktonList[p].mortalityRate[x][y] = 0;
                         }
                     } else {
-                        planktonList[p].mortalityRate[x][y] = (planktonList[p].accessibilityCoeff / 2f) * (getSimulation().getNbTimeStepsPerYear() / 365f);
+                        planktonList[p].mortalityRate[x][y] = (planktonList[p].getAccessibilityCoeff() / 2f) * (getSimulation().getNbTimeStepsPerYear() / 365f);
                     }
                 }
             }
@@ -796,7 +796,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         for (int x = 0; x < planktonDimX; x++) {
             for (int y = 0; y < planktonDimY; y++) {
                 for (int p = 0; p < nbPlankton; p++) {
-                    saveMortality[p][x][y][getSimulation().getIndexTime()] = (planktonList[p].accessibilityCoeff / 2f) * (getSimulation().getNbTimeStepsPerYear() / 365f);
+                    saveMortality[p][x][y][getSimulation().getIndexTime()] = (planktonList[p].getAccessibilityCoeff() / 2f) * (getSimulation().getNbTimeStepsPerYear() / 365f);
                 }
             }
         }

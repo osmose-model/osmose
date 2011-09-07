@@ -46,7 +46,7 @@ public class Osmose {
     /*
      * 
      */
-    final static String fileSeparator = System.getProperty("file.separator");
+    final String fileSeparator = System.getProperty("file.separator");
     String inputPathName, outputPathName, inputTxtName;
     /*
      * 
@@ -2220,7 +2220,7 @@ public class Osmose {
         pw.print("accessibility coefficient ");
         for (int i = 0; i < simulation.getForcing().getNbPlanktonGroups(); i++) {
             pw.print(';');
-            pw.print(simulation.getForcing().getPlankton(i).accessibilityCoeff);
+            pw.print(simulation.getForcing().getPlankton(i).getAccessibilityCoeff());
         }
         pw.close();
         System.out.println("Input data saved");

@@ -1,6 +1,5 @@
 package fr.ird.osmose;
 
-
 /********************************************************************************
  * <p>Titre : Plankton class </p>
  *
@@ -24,13 +23,12 @@ public class Plankton {
      * Osmose and Simulation are called with Osmose.getInstance()
      * and Osmose.getInstance().getSimulation()
      */
-
     float trophicLevel;        // trophic level of the plankton group
-    float sizeMin, sizeMax;      // min and max size of the group (uniform distribution)
-    String name;     // e.g.   phytoplankton, diatoms, copepods...
-    float accessibilityCoeff; // percentage of plankton biomass available for fish
-    float conversionFactor;   // factor to be used in order to transform biomass from plankton unit (eg mmolN/m2) towards wet weight (tons/km2)
-    float prodBiomFactor;   // factor to be used to transform biomass into production (per year)
+    private float sizeMin, sizeMax;
+    private String name;     // e.g.   phytoplankton, diatoms, copepods...
+    private float accessibilityCoeff; // percentage of plankton biomass available for fish
+    private float conversionFactor;   // factor to be used in order to transform biomass from plankton unit (eg mmolN/m2) towards wet weight (tons/km2)
+    private float prodBiomFactor;   // factor to be used to transform biomass into production (per year)
     float[][][] dataInit;      // table of intial values in 3D -> Dimensions are case-specific
     float[][] biomass, accessibleBiomass, iniBiomass, integratedData;         // table of transformed values in 2D
     float[][] mortalityRate;     // table for output values in 2D
@@ -75,7 +73,9 @@ public class Plankton {
                 integr = 0f;
                 for (int k = 0; k < depthLayer[i][j].length - 1; k++) {
                     if (depthLayer[i][j][k] > maxDepth) {
-                        integr += (Math.abs(depthLayer[i][j][k] - depthLayer[i][j][k + 1])) * ((dataInit[i][j][k] + dataInit[i][j][k + 1]) / 2f);
+                        if (dataInit[i][j][k] >= 0 && dataInit[i][j][k + 1] >= 0) {
+                            integr += (Math.abs(depthLayer[i][j][k] - depthLayer[i][j][k + 1])) * ((dataInit[i][j][k] + dataInit[i][j][k + 1]) / 2f);
+                        }
                     }
                 }
                 integratedData[i][j] = integr;
@@ -91,7 +91,7 @@ public class Plankton {
 
         biomass[i][j] += area * unitConversion(integratedData[x][y] / (float) nb);
         iniBiomass[i][j] += area * unitConversion(integratedData[x][y] / (float) nb);
-        accessibleBiomass[i][j] += area * unitConversion(accessibilityCoeff * integratedData[x][y] / (float) nb);
+        accessibleBiomass[i][j] += area * unitConversion(getAccessibilityCoeff() * integratedData[x][y] / (float) nb);
     }
 
     public float unitConversion(float concentration) {
@@ -125,5 +125,33 @@ public class Plankton {
 
     private IGrid getGrid() {
         return Osmose.getInstance().getGrid();
+    }
+
+    /**
+     * @return the sizeMax
+     */
+    public float getSizeMax() {
+        return sizeMax;
+    }
+
+    /**
+     * @return the sizeMin
+     */
+    public float getSizeMin() {
+        return sizeMin;
+    }
+
+    /**
+     * @return the accessibilityCoeff
+     */
+    public float getAccessibilityCoeff() {
+        return accessibilityCoeff;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
     }
 }

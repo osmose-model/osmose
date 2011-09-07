@@ -332,7 +332,7 @@ public class School {
         }
         //************ Calculation of available plankton ***************
         for (int i = 0; i < myForcing.getNbPlanktonGroups(); i++) {
-            if ((critPreySizeMin > myForcing.getPlankton(i).sizeMax) || (critPreySizeMax < myForcing.getPlankton(i).sizeMin)) {
+            if ((critPreySizeMin > myForcing.getPlankton(i).getSizeMax()) || (critPreySizeMax < myForcing.getPlankton(i).getSizeMin())) {
                 percentPlankton[i] = 0.0f;
             } else {
                 float tempAccess;
