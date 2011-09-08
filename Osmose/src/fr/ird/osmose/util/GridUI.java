@@ -371,7 +371,7 @@ public class GridUI extends JPanel {
         try {
             fw = new FileWriter("grid_osmose_stride" + getOsmose().getGrid().getStride() + ".csv");
             PrintWriter pw = new PrintWriter(fw);
-            pw.println("lat , lon");
+            pw.println("lat , lon, mask (land = 0 water = 1)");
             int nbL = getOsmose().getGrid().getNbLines();
             int nbC = getOsmose().getGrid().getNbColumns();
             for (int l = 0; l < nbL; l++) {
@@ -379,7 +379,9 @@ public class GridUI extends JPanel {
                     Cell cell = getOsmose().getGrid().getCell(l, c);
                     pw.print(cell.getLat());
                     pw.print(" , ");
-                    pw.println(cell.getLon());
+                    pw.print(cell.getLon());
+                    pw.print(" , ");
+                    pw.println(cell.isLand() ? 0 : 1);
                 }
             }
             //Flush the output to the file
