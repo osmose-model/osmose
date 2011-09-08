@@ -4,7 +4,9 @@
  */
 package fr.ird.osmose.util;
 
-import fr.ird.osmose.Grid;
+import fr.ird.osmose.Cell;
+import fr.ird.osmose.OriginalGrid;
+import fr.ird.osmose.IGrid;
 import fr.ird.osmose.Osmose;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -14,6 +16,11 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -57,7 +64,7 @@ public class GridUI extends JPanel {
      */
     private static RenderingHints hints = null;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
-    private int height = 1600, width = 1200;
+    private int height = 800, width = 600;
     private boolean isGridVisible = false;
 
 ///////////////
@@ -226,12 +233,36 @@ public class GridUI extends JPanel {
         return height;
     }
 
+    /**
+     * Computes the geodesic distance between the two points
+     * (lat1, lon1) and (lat2, lon2)
+     * @param lat1 a double, the latitude of the first point
+     * @param lon1 a double, the longitude of the first point
+     * @param lat2 double, the latitude of the second point
+     * @param lon2 double, the longitude of the second point
+     * @return a double, the curvilinear absciss s(A[lat1, lon1]B[lat2, lon2])
+     */
+    public static double geodesicDistance(double lat1, double lon1, double lat2, double lon2) {
+
+        double d = 0.d;
+        double lat1_rad = Math.PI * lat1 / 180.d;
+        double lat2_rad = Math.PI * lat2 / 180.d;
+        double lon1_rad = Math.PI * lon1 / 180.d;
+        double lon2_rad = Math.PI * lon2 / 180.d;
+
+        d = 2 * 6367000.d
+                * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2_rad - lat1_rad) / 2), 2)
+                + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
+
+        return d;
+    }
+
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width, height);
     }
 
-    public static Grid getGrid() {
+    public static IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
 
@@ -315,12 +346,69 @@ public class GridUI extends JPanel {
         //---------- End of class CellUI
     }
 
+    private static void getCellSize(int i, int j) {
+
+        double lat1 = getGrid().getCell(i, j).getLat();
+        double lon1 = getGrid().getCell(i, j).getLon();
+        double lat2 = getGrid().getCell(i, j + 1).getLat();
+        double lon2 = getGrid().getCell(i, j + 1).getLon();
+        double gd = geodesicDistance(lat1, lon1, lat2, lon2);
+
+        System.out.println("gd1: " + gd + " meters");
+
+        lat1 = getGrid().getCell(i, j).getLat();
+        lon1 = getGrid().getCell(i, j).getLon();
+        lat2 = getGrid().getCell(i + 1, j).getLat();
+        lon2 = getGrid().getCell(i + 1, j).getLon();
+        gd = geodesicDistance(lat1, lon1, lat2, lon2);
+
+        System.out.println("gd2: " + gd + " meters"); 
+    }
+
+    private static void writeGridCSV() {
+        FileWriter fw = null;
+
+        try {
+            fw = new FileWriter("grid_osmose_stride" + getOsmose().getGrid().getStride() + ".csv");
+            PrintWriter pw = new PrintWriter(fw);
+            pw.println("lat , lon");
+            int nbL = getOsmose().getGrid().getNbLines();
+            int nbC = getOsmose().getGrid().getNbColumns();
+            for (int l = 0; l < nbL; l++) {
+                for (int c = 0; c < nbC; c++) {
+                    Cell cell = getOsmose().getGrid().getCell(l, c);
+                    pw.print(cell.getLat());
+                    pw.print(" , ");
+                    pw.println(cell.getLon());
+                }
+            }
+            //Flush the output to the file
+            pw.flush();
+            //Close the Print Writer
+            pw.close();
+            //Close the File Writer
+            fw.close();
+        } catch (IOException ex) {
+            Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fw.close();
+            } catch (IOException ex) {
+                Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+           
+        }
+    }
+
     public static void main(String args[]) {
 
         getOsmose().loadArgs(args);
         getOsmose().initSimulation();
         getOsmose().initializeOptions();
         getOsmose().loadMPAs();
+        //getCellSize(1, 1);
+        //getCellSize(10, 10);
+        writeGridCSV();
         GridUI grid = new GridUI();
         grid.init();
         grid.setGridVisible(true);
