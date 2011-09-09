@@ -36,7 +36,7 @@
  * 3.5. Duration of the simulation
  * Unit = number of years
  */
-;50;
+;20;
 /*
  * 3.6. Number of time steps per year
  * For instance nb time-step = 24 ==> dt = 15 days
@@ -62,7 +62,7 @@
 /* 
  * 3.10. Number of plankton groups
  */
-;7;
+;4;
 /*
  * 3.11. Coupling status
  * 'forcing' = one-way coupling is the default status

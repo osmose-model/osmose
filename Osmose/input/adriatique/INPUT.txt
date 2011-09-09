@@ -52,7 +52,7 @@
 /*
  * 9. Plankton data filename
  */    	
-;interpolation/LTLconfig;
+;interpolation/LTLforcing;
 /*
  * 10. Calibration filename
  */
@@ -86,8 +86,9 @@
 /*
  * 16. Migration filename
  * File of migration occurrence out of the zone
+ * 'default' means no migratory species.
  */
-;adr-migration;
+;default;
 /*
  * 17. Coastline filename
  * 'default' means no coast in the grid
