@@ -2735,4 +2735,22 @@ public class Osmose {
     public Simulation getSimulation() {
         return simulation;
     }
+
+    public String resolvePath(String path) {
+        String pathname = resolveFile(path);
+        if (!pathname.endsWith(File.separator)) {
+            pathname += File.separator;
+        }
+        return pathname;
+    }
+
+    public String resolveFile(String filename) {
+        try {
+        File file = new File(inputPathName);
+        String pathname = new File(file.toURI().resolve(new File(filename).toURI())).getAbsolutePath();
+        return pathname;
+        } catch(Exception e) {
+            return filename;
+        }
+    }
 }
