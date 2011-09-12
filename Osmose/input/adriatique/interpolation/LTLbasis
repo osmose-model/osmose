@@ -52,4 +52,4 @@
  * 8.8. Integration depth
  * Plankton biomass will be vertically integrated from 0 meter to ${8.8} meter
  */
-;100;
+;-100;
