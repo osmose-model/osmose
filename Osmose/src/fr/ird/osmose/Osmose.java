@@ -2716,7 +2716,10 @@ public class Osmose {
 
     }
 
-    public static void main(String args[]) {
+    /*
+     * Point d'entrée du programme
+     */
+    public static void main(String... args) {
         System.out.println(new Date());
         osmose.loadArgs(args);
         osmose.initSimulation();
