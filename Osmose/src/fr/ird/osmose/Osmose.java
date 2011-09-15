@@ -390,7 +390,7 @@ public class Osmose {
         System.out.println("2. Reading file INPUT.txt");
         FileInputStream inputFile;
         try {
-            inputFile = new FileInputStream(new File(inputPathName, inputTxtName));
+            inputFile = new FileInputStream(resolveFile(inputTxtName));
         } catch (FileNotFoundException ex) {
             System.out.println("INPUT file doesn't exist");
             return;
@@ -641,7 +641,7 @@ public class Osmose {
     public void readSpeciesFile(String speciesFileName, int numSerie) {
         FileInputStream speciesFile;
         try {
-            speciesFile = new FileInputStream(new File(inputPathName, speciesFileName));
+            speciesFile = new FileInputStream(resolveFile(speciesFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("Species file " + speciesFileName + " doesn't exist");
             return;
@@ -734,7 +734,7 @@ public class Osmose {
         } else {
             FileInputStream reproductionFile;
             try {
-                reproductionFile = new FileInputStream(new File(inputPathName, reproductionFileName));
+                reproductionFile = new FileInputStream(resolveFile(reproductionFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("reproduction file doesn't exist: " + reproductionFileName);
                 return;
@@ -786,7 +786,7 @@ public class Osmose {
         } else {
             FileInputStream fishingFile;
             try {
-                fishingFile = new FileInputStream(new File(inputPathName, fishingFileName));
+                fishingFile = new FileInputStream(resolveFile(fishingFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("fishing file doesn't exist: " + fishingFileName);
                 return;
@@ -828,7 +828,7 @@ public class Osmose {
     public void readFishingFile(String fishingFileName, int numSerie) {
         FileInputStream fishingFile;
         try {
-            fishingFile = new FileInputStream(new File(inputPathName, fishingFileName));
+            fishingFile = new FileInputStream(resolveFile(fishingFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("fishing file doesn't exist: " + fishingFileName);
             return;
@@ -889,7 +889,7 @@ public class Osmose {
     public void readCalibrationFile(String calibrationFileName, int numSerie) {
         FileInputStream calibFile;
         try {
-            calibFile = new FileInputStream(new File(inputPathName, calibrationFileName));
+            calibFile = new FileInputStream(resolveFile(calibrationFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("abdIni file doesn't exist: " + calibrationFileName);
             return;
@@ -945,7 +945,7 @@ public class Osmose {
     public void readConfigurationFile(String configFileName, int numSerie) {
         FileInputStream configFile;
         try {
-            configFile = new FileInputStream(new File(inputPathName, configFileName));
+            configFile = new FileInputStream(resolveFile(configFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("configuration file doesn't exist: " + configFileName);
             return;
@@ -1015,7 +1015,7 @@ public class Osmose {
             if (null != st.sval) {
                 gridClassNameTab[numSerie] = st.sval;
                 st.nextToken();
-                String filename = new File(inputPathName, st.sval).toString();
+                String filename = resolveFile(st.sval).toString();
                 gridFileTab[numSerie] = filename;
                 st.nextToken();
                 lonFieldTab[numSerie] = st.sval;
@@ -1090,7 +1090,7 @@ public class Osmose {
         } else {
             FileInputStream optionFile;
             try {
-                optionFile = new FileInputStream(new File(inputPathName, optionFileName));
+                optionFile = new FileInputStream(resolveFile(optionFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("option file doesn't exist: " + optionFileName);
                 return;
@@ -1127,7 +1127,7 @@ public class Osmose {
     public void readPredationFile(String predationFileName, int numSerie) {
         FileInputStream predationFile;
         try {
-            predationFile = new FileInputStream(new File(inputPathName, predationFileName));
+            predationFile = new FileInputStream(resolveFile(predationFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("predation file doesn't exist: " + predationFileName);
             return;
@@ -1179,7 +1179,7 @@ public class Osmose {
     public void readIndicatorsFile(String indicatorsFileName, int numSerie) {
         FileInputStream indicFile;
         try {
-            indicFile = new FileInputStream(new File(inputPathName, indicatorsFileName));
+            indicFile = new FileInputStream(resolveFile(indicatorsFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("output config file doesn't exist: " + indicatorsFileName);
             return;
@@ -1276,7 +1276,7 @@ public class Osmose {
             FileInputStream coastFile;
 
             try {
-                coastFile = new FileInputStream(new File(inputPathName, coastFileNameTab[numSerie]));
+                coastFile = new FileInputStream(resolveFile(coastFileNameTab[numSerie]));
             } catch (FileNotFoundException ex) {
                 System.out.println("Error while opening coastFile");
                 return;
@@ -1353,7 +1353,7 @@ public class Osmose {
             FileInputStream mpaFile;
             int[] tabi, tabj;
             try {
-                mpaFile = new FileInputStream(new File(inputPathName, mpaFileNameTab[numSerie]));
+                mpaFile = new FileInputStream(resolveFile(mpaFileNameTab[numSerie]));
             } catch (FileNotFoundException ex) {
                 System.out.println("Error while opening mpaFile");
                 return;
@@ -1431,7 +1431,7 @@ public class Osmose {
         String distribMethod;
 
         try {
-            areasFile = new FileInputStream(new File(inputPathName, areasFileNameTab[numSerie]));
+            areasFile = new FileInputStream(resolveFile(areasFileNameTab[numSerie]));
         } catch (FileNotFoundException ex) {
             System.out.println("Error while opening areasFile");
             return;
@@ -1707,7 +1707,7 @@ public class Osmose {
 
             FileInputStream outOfZoneFile;
             try {
-                outOfZoneFile = new FileInputStream(new File(inputPathName, migrationFileNameTab[numSerie]));
+                outOfZoneFile = new FileInputStream(resolveFile(migrationFileNameTab[numSerie]));
             } catch (FileNotFoundException ex) {
                 System.out.println("migration file doesn't exist: " + migrationFileNameTab[numSerie]);
                 return;
@@ -1794,7 +1794,7 @@ public class Osmose {
         {
             FileInputStream accessFile;
             try {
-                accessFile = new FileInputStream(new File(inputPathName, accessFileName));
+                accessFile = new FileInputStream(resolveFile(accessFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("accessibility file doesn't exist: " + accessFileName);
                 return;
@@ -1942,7 +1942,7 @@ public class Osmose {
         } else {
             FileInputStream dietConfigFile;
             try {
-                dietConfigFile = new FileInputStream(new File(inputPathName, dietsConfigFileName));
+                dietConfigFile = new FileInputStream(resolveFile(dietsConfigFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("diet configuration file doesn't exist: " + dietsConfigFileName);
                 return;
@@ -2750,7 +2750,7 @@ public class Osmose {
     public String resolveFile(String filename) {
         try {
         File file = new File(inputPathName);
-        String pathname = new File(file.toURI().resolve(new File(filename).toURI())).getAbsolutePath();
+        String pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
         return pathname;
         } catch(Exception e) {
             return filename;
