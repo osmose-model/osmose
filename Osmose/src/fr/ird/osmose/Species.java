@@ -295,7 +295,7 @@ public class Species {
                 }
             }
 
-            if ((getCohort(i).getOutOfZoneCohort()[getSimulation().getIndexTime()]))//||(i==0))
+            if ((getCohort(i).isOut(getSimulation().getIndexTime())))//||(i==0))
             {
                 for (int k = 0; k < getCohort(i).size(); k++) {
                     School schoolk = getSchool(i, k);
@@ -476,7 +476,7 @@ public class Species {
                                             ((float) (school.getAbundance() * school.getWeight() / 1000000));
                                     getSimulation().tabTLCatch[index] += school.getTrophicLevel()[school.getCohort().getAgeNbDt()] * ((float) (school.getAbundance() * school.getWeight() / 1000000));
                                 }
-                                if (!(getCohort(i).getOutOfZoneCohort()[getSimulation().getIndexTime()])) {
+                                if (!(getCohort(i).isOut(getSimulation().getIndexTime()))) {
                                     school.getCell().remove(school);
                                 }
                                 getCohort(i).remove(school);

@@ -599,19 +599,21 @@ public class Cohort extends ArrayList<School> {
     public void setBiomass(double biomass) {
         this.biomass = biomass;
     }
-
-    /**
-     * @return the outOfZoneMortality
-     */
-    public float[] getOutOfZoneMortality() {
-        return outOfZoneMortality;
+    
+    public float getOutMortality(int indexTime) {
+        return outOfZoneMortality[indexTime];
     }
-
-    /**
-     * @return the outOfZoneCohort
-     */
-    public boolean[] getOutOfZoneCohort() {
-        return outOfZoneCohort;
+    
+    public void setOutMortality(int indexTime, float mortality) {
+        outOfZoneMortality[indexTime] = mortality;
+    }
+    
+    public void setOut(int indexTime, boolean isOut) {
+        outOfZoneCohort[indexTime] = isOut;
+    }
+    
+    public boolean isOut(int indexTime) {
+        return outOfZoneCohort[indexTime];
     }
 
     /**

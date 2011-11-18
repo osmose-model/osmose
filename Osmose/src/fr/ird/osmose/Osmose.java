@@ -250,7 +250,7 @@ public class Osmose {
                     simulation.init();
                     System.out.println("simulation initialized");
 
-                    initializeOutOfZoneCarac();
+                    readMigrationFile();
                     System.out.println("migration caracteristics initialized");
 
                     initializeSpeciesAreas();
@@ -280,7 +280,7 @@ public class Osmose {
                     simulation = new Simulation();
                     simulation.init();
 
-                    initializeOutOfZoneCarac();
+                    readMigrationFile();
                     initializeSpeciesAreas();
                     System.out.println();
                 }
@@ -1529,7 +1529,7 @@ public class Osmose {
                                                         numMap[numSpForMap][tempAge[m] * nbDtMatrix[numSerie] + h][tempDt[n]] = i;
                                                     }
                                                     if (mapCoordi[i].length == 0) {
-                                                        if (!simulation.getSpecies(numSpForMap).getCohort((tempAge[m] * nbDtMatrix[numSerie]) + h).getOutOfZoneCohort()[tempDt[n]]) {
+                                                        if (!simulation.getSpecies(numSpForMap).getCohort((tempAge[m] * nbDtMatrix[numSerie]) + h).isOut(tempDt[n])) {
                                                             System.out.println("Match error between species areas and migration file");
                                                         }
                                                     }
@@ -1690,7 +1690,7 @@ public class Osmose {
         }
     }
 
-    public void initializeOutOfZoneCarac() {
+    public void readMigrationFile() {
         if (migrationFileNameTab[numSerie].equalsIgnoreCase("default")) {
             System.out.println("No migrations implemented (default)");
         } else {
@@ -1754,8 +1754,8 @@ public class Osmose {
                             tempMortality = (new Float(st.sval)).floatValue();
                             for (int n = 0; n < nbDtPerCase; n++) {
                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).getOutOfZoneCohort()[tempDt[n]] = true;
-                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).getOutOfZoneMortality()[tempDt[n]] = tempMortality;
+                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).setOut(tempDt[n], true);
+                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).setOutMortality(tempDt[n], tempMortality);
                                 }
                             }
                         }
