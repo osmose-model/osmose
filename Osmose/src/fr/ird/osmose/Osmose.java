@@ -1779,7 +1779,11 @@ public class Osmose {
                 accessibilityMatrix[i][0] = new float[nbSpeciesTab[numSerie]][];
                 for (int j = 0; j < nbSpeciesTab[numSerie]; j++) {
                     accessibilityMatrix[i][0][j] = new float[1];
-                    accessibilityMatrix[i][0][j][0] = 1f;
+                    /*
+                     * phv 2011/11/18 set default access matrix to 0.8 for
+                     * being compatible with Osmose 2.0
+                     */
+                    accessibilityMatrix[i][0][j][0] = 0.8f;
                 }
             }
             for (int i = nbSpeciesTab[numSerie]; i < nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]; i++) {
