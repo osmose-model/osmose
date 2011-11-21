@@ -266,11 +266,11 @@ public class Simulation {
                 //Additional mortalities for ages 0: no-fecundation of eggs, starvation more pronounced
                 //than for sup ages (rel. to CC), predation by other species are not explicit
                 if (species[i].getCohort(0).getAbundance() != 0) {
-                    species[i].getCohort(0).surviveD(species[i].larvalSurvival + (species[i].getCohort(0).getOutOfZoneMortality()[indexTime] / (float) nbTimeStepsPerYear));     //additional larval mortality
+                    species[i].getCohort(0).surviveD(species[i].larvalSurvival + (species[i].getCohort(0).getOutMortality(indexTime) / (float) nbTimeStepsPerYear));     //additional larval mortality
                 }
                 for (int j = 1; j < species[i].getNumberCohorts(); j++) {
                     if (species[i].getCohort(j).getAbundance() != 0) {
-                        species[i].getCohort(j).surviveD((species[i].D + species[i].getCohort(j).getOutOfZoneMortality()[indexTime]) / (float) nbTimeStepsPerYear);
+                        species[i].getCohort(j).surviveD((species[i].D + species[i].getCohort(j).getOutMortality(indexTime)) / (float) nbTimeStepsPerYear);
                     }
                 }
             }
@@ -639,7 +639,7 @@ public class Simulation {
         ArrayList<School> schools = new ArrayList();
         for (Species sp : species) {
             for (Cohort cohort : sp.getCohorts()) {
-                if (!cohort.getOutOfZoneCohort()[indexTime]) {
+                if (!cohort.isOut(indexTime)) {
                     schools.addAll(cohort);
                 }
             }
@@ -720,7 +720,7 @@ public class Simulation {
         {
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    if (!species[i].getCohort(j).getOutOfZoneCohort()[0]) // 0=at the first time step
+                    if (!species[i].getCohort(j).isOut(0)) // 0=at the first time step
                     {
                         Vector vectCells = new Vector(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]].length);
                         tempMaxProbaPresence = 0;
@@ -945,6 +945,7 @@ public class Simulation {
          * Create dimensions
          */
         Dimension speciesDim = nc.addDimension("species", getNbSpecies());
+        Dimension ltlDim = nc.addDimension("ltl", getForcing().getNbPlanktonGroups());
         Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
         Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
         Dimension timeDim = nc.addUnlimitedDimension("time");
@@ -955,6 +956,7 @@ public class Simulation {
         nc.addVariable("biomass", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
         nc.addVariable("mean_size", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
         nc.addVariable("trophic_level", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
+        nc.addVariable("ltl_biomass", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, linesDim, columnsDim});
         try {
             nc.create();
         } catch (IOException ex) {
@@ -1138,15 +1140,17 @@ public class Simulation {
         float[][][] biomass = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
         float[][][] mean_size = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
         float[][][] tl = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-
+        float[][][] ltlbiomass = new float[getForcing().getNbPlanktonGroups()][getGrid().getNbLines()][getGrid().getNbColumns()];
 
         for (Cell cell : getGrid().getCells()) {
             int[] nbSchools = new int[getNbSpecies()];
             for (School school : cell) {
-                nbSchools[school.getCohort().getSpecies().getIndex()] += 1;
-                biomass[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
-                mean_size[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getLength();
-                tl[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getTrophicLevel()[indexTime];
+                if (school.getCohort().getAgeNbDt() > school.getCohort().getSpecies().indexAgeClass0) {
+                    nbSchools[school.getCohort().getSpecies().getIndex()] += 1;
+                    biomass[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
+                    mean_size[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getLength();
+                    tl[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getTrophicLevel()[indexTime];
+                }
             }
             for (int ispec = 0; ispec < getNbSpecies(); ispec++) {
                 if (nbSchools[ispec] > 0) {
@@ -1154,17 +1158,28 @@ public class Simulation {
                     tl[ispec][cell.get_igrid()][cell.get_jgrid()] /= nbSchools[ispec];
                 }
             }
+            for (int iltl = 0; iltl < getForcing().getNbPlanktonGroups(); iltl++) {
+                ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getForcing().getPlankton(iltl).biomass[cell.get_igrid()][cell.get_jgrid()];
+            }
         }
 
         ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getForcing().getNbPlanktonGroups(), getGrid().getNbLines(), getGrid().getNbColumns());
         for (int kspec = 0; kspec < getNbSpecies(); kspec++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     arrBiomass.set(0, kspec, i, j, biomass[kspec][i][j]);
                     arrSize.set(0, kspec, i, j, mean_size[kspec][i][j]);
                     arrTL.set(0, kspec, i, j, tl[kspec][i][j]);
+                }
+            }
+        }
+        for (int kltl = 0; kltl < getForcing().getNbPlanktonGroups(); kltl++) {
+            for (int i = 0; i < getGrid().getNbLines(); i++) {
+                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                    arrLTL.set(0, kltl, i, j, ltlbiomass[kltl][i][j]);
                 }
             }
         }
@@ -1181,6 +1196,7 @@ public class Simulation {
             nc.write("biomass", new int[]{index, 0, 0, 0}, arrBiomass);
             nc.write("mean_size", new int[]{index, 0, 0, 0}, arrSize);
             nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
+            nc.write("ltl_biomass", new int[]{index, 0, 0, 0}, arrLTL);
         } catch (IOException ex) {
             Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
