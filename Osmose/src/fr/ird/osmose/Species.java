@@ -120,6 +120,10 @@ public class Species {
     float[] ageStagesTab;
     int nbDietStages;
     float[] dietStagesTab;
+    private boolean reproduceLocally;
+    private float biomassFluxIn;
+    private float meanLengthIn;
+    private int ageMeanIn;
 
     /**
      * Create a new species
@@ -171,7 +175,17 @@ public class Species {
         this.ageStagesTab = getOsmose().accessStageThreshold[index];
         this.dietStagesTab = getOsmose().dietStageThreshold[numSerie][index];
         this.nbDietStages = getOsmose().nbDietsStages[numSerie][index];
-
+        /*
+         * phv 2011/11/21
+         * Added new parameters for species reproducing outside the simulated
+         * area.
+         */
+        this.reproduceLocally = getOsmose().reproduceLocallyTab[numSerie][index];
+        this.biomassFluxIn = getOsmose().biomassFluxInTab[numSerie][index];
+        this.meanLengthIn = getOsmose().meanLengthFishInTab[numSerie][index];
+        this.ageMeanIn = (int) Math.round((t0 - (Math.log(1 - meanLengthIn / lInf)) / K) * getSimulation().getNbTimeStepsPerYear());
+        //System.out.println(name + " reproLocal ? " + reproduceLocally + " biomassIn: " + biomassFluxIn + " lengthIn: " + meanLengthIn + " ageIn: " + ageMeanIn);
+        
         // START INITIALISATION of COHORTS
         nbCohorts = (int) Math.round((longevity) * getSimulation().getNbTimeStepsPerYear());
 
@@ -311,6 +325,66 @@ public class Species {
         }
     }
 
+    public boolean isReproduceLocally() {
+        return reproduceLocally;
+    }
+
+    /*
+     * phv 2011/11/22
+     * Created new function for modeling incoming flux of biomass for species
+     * that do not reproduce in the simulated domain.
+     */
+    public void incomingFlux() {
+        /*
+         * Update Cohort biomass
+         */
+        for (int i = 0; i < nbCohorts; i++) {
+            getCohort(i).setBiomass(0);
+            for (int j = 0; j < getCohort(i).size(); j++) {
+                getCohort(i).setBiomass(getCohort(i).getBiomass() + getSchool(i, j).getBiomass());
+            }
+        }
+        /*
+         * Making cohorts going up to the upper age class
+         */
+        for (int i = nbCohorts - 1; i > ageMeanIn; i--) {
+            getCohort(i).upperAgeClass(tabCohorts[i - 1]);
+            for (int j = 0; j < getCohort(i).size(); j++) {
+                getSchool(i, j).setCohort(getCohort(i));
+            }
+        }
+        /*
+         * Reset all cohorts younger than ageMeanIn
+         */
+        for (int i = ageMeanIn - 1; i > 0; i--) {
+            tabCohorts[i].setAbundance(0);
+            tabCohorts[i].setBiomass(0);
+            tabCohorts[i].clear();
+        }
+        /*
+         * Incoming flux
+         */
+        double biomassIn = biomassFluxIn * seasonSpawning[getSimulation().getIndexTime()];
+        float meanWeigthIn = (float) (c * Math.pow(meanLengthIn, bPower));
+        long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
+        tabCohorts[ageMeanIn].setAbundance(abundanceIn);
+        tabCohorts[ageMeanIn].setBiomass(biomassIn);
+        tabCohorts[ageMeanIn].clear();
+        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
+        if (abundanceIn > 0 && abundanceIn < nbSchools) {
+            tabCohorts[ageMeanIn].add(new School(tabCohorts[ageMeanIn], abundanceIn, meanLengthIn, meanWeigthIn));
+        } else if (abundanceIn >= nbSchools) {
+            int mod = (int) (abundanceIn % nbSchools);
+            int abdSchool = (int) (abundanceIn / nbSchools);
+            for (int i = 0; i < nbSchools; i++) {
+                int abd = abdSchool;
+                abdSchool += (i < mod) ? 1 : 0;
+                tabCohorts[ageMeanIn].add(new School(tabCohorts[ageMeanIn], abdSchool, meanLengthIn, meanWeigthIn));
+            }
+        }
+        //System.out.println(name + " incoming flux " + biomassIn + " [tons] + ageIn: " + ageMeanIn);
+    }
+
     public void reproduce() {
         //CALCULATION of Spawning Stock Biomass (SSB) with an update of cohorts biomass
         for (int i = 0; i < nbCohorts; i++) {
@@ -337,27 +411,6 @@ public class Species {
             System.out.println("beyond long format for eggs numbers");
         }
 
-        // REMOVING THE OLDEST COHORT from the system
-
-        /*         long nbDeadSenescence = tabCohorts[nbCohorts-1].abundance;           //*************** Pas pris en compte pour l'instant
-        //***************** pas ok
-        QCell[][] matrix = getOsmose().grid.matrix;
-        if(!tabCohorts[nbCohorts-1].outOfZoneCohort[getSimulation().getDt()])
-        for(int k=0;k<tabCohorts[nbCohorts-1].nbSchools;k++)
-        {
-        QSchool oldSchoolk = (QSchool)tabCohorts[nbCohorts-1].getSchool(k);
-        matrix[oldSchoolk.posi][oldSchoolk.get_jgrid()].vectPresentSchools.removeElement(oldSchoolk);
-        matrix[oldSchoolk.posi][oldSchoolk.get_jgrid()].nbPresentSchools--;
-        }
-
-        for(int i=0;i<getOsmose().grid.nbLines;i++)
-        for(int j=0;j<getOsmose().grid.nbColumns;j++)
-        matrix[i][j].vectPresentSchools.trimToSize();
-
-        tabCohorts[nbCohorts-1].vectSchools.removeAllElements();
-        tabCohorts[nbCohorts-1].nbSchools=0;
-        tabCohorts[nbCohorts-1].vectSchools.trimToSize();
-         */
         //MAKING COHORTS GOING UP to the UPPER AGE CLASS
         //species, age, caseLeftUpAireCoh, tabCasesAireCoh do not change
         for (int i = nbCohorts - 1; i > 0; i--) {
@@ -616,7 +669,7 @@ public class Species {
         {
         sumMat += ((QSchool)schoolsRanked[j]).abundance;
         }
-
+        
         }
         lMatTemp1 = 0;
         if((getSimulation().t>=getOsmose().timeSeriesStart)&&(abdWithout0!=0))
@@ -651,7 +704,7 @@ public class Species {
         float[][] tabSchoolsCatchTemp = new float[nbSchoolsTotCatch][];
         for (int i=0;i<nbSchoolsTotCatch;i++)
         tabSchoolsCatchTemp[i] = new float[2];
-
+        
         for(int k=0;k<tabSchoolsCatchTemp.length;k++)
         {
         tabSchoolsCatchTemp[k][0]=nbSchoolCatch[indexSchoolsSizes[k]];
@@ -688,7 +741,7 @@ public class Species {
         }
 
         /*	//Calculation of max size (according to abd percentages) per species
-
+        
         float limiteCatch = 0;
         for (int p=0;p<getOsmose().nbPercent;p++)
         {
@@ -704,9 +757,9 @@ public class Species {
         if((getSimulation().t>=getOsmose().timeSeriesStart)&&(j<nbSchoolsTotCatch))
         getOsmose().maxSizeCatch[getOsmose().numSimu][number-1][p][getSimulation().t-getOsmose().timeSeriesStart] = sizeSchoolCatch[j];
         }
-
+        
         //Calculation of the proportion of mature fish
-
+        
         float lMatTemp = 0;
         for (int i=0;i<getOsmose().nbPercent;i++)
         {

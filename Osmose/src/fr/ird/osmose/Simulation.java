@@ -430,7 +430,16 @@ public class Simulation {
 
             // *** REPRODUCTION ***
             for (int i = 0; i < species.length; i++) {
-                species[i].reproduce();
+                /*
+                 * phv 2011/11/22
+                 * Added species that can reproduce outside the simulated domain
+                 * and we only model an incoming flux of biomass.
+                 */
+                if (species[i].isReproduceLocally()) {
+                    species[i].reproduce();
+                } else {
+                    species[i].incomingFlux();
+                }
             }
 
             indexTime++;
@@ -748,7 +757,7 @@ public class Simulation {
             }
         }//end file areas
     }
-
+    
     public void distributeSpecies() {
         if (randomDistribution) {
             //distribute coh 0 & commPosition for 0 only, the others stay in the same cell

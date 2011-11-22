@@ -84,6 +84,9 @@ public class Osmose {
     float[][] predationRateMatrix, criticalPredSuccessMatrix;
     float[][] eggSizeMatrix, eggWeightMatrix, sexRatioMatrix, growthAgeThresholdMatrix;
     float[][] supAgeOfClass0Matrix;
+    boolean[][] reproduceLocallyTab;
+    float[][] biomassFluxInTab;
+    float[][] meanLengthFishInTab;
     /*
      * FISHING
      */
@@ -588,6 +591,9 @@ public class Osmose {
         sexRatioMatrix = new float[nbSeriesSimus][];
         sizeFeedingMatrix = new float[nbSeriesSimus][][];
         nbStagesMatrix = new int[nbSeriesSimus][];
+        reproduceLocallyTab = new boolean[nbSeriesSimus][];
+        biomassFluxInTab = new float[nbSeriesSimus][];
+        meanLengthFishInTab = new float[nbSeriesSimus][];
 
         //--- CALIBRATION file---
         calibrationMethod = new String[nbSeriesSimus];
@@ -710,6 +716,38 @@ public class Osmose {
                 for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                     st.nextToken();
                     sexRatioMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                }
+                /*
+                 * phv 2011/11/21
+                 * Determine wether reproduction occurs locally or outside the
+                 * simulated domain.
+                 * Then for species reproducing outside it reads the incoming
+                 * biomass caracteristics.
+                 */
+                reproduceLocallyTab[numSerie] = new boolean[nbSpeciesTab[numSerie]];
+                biomassFluxInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
+                meanLengthFishInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
+                st.nextToken();
+                int nbReproOut = 0;
+                if (null != st.sval) {
+                    for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                        reproduceLocallyTab[numSerie][i] = st.sval.matches("in");
+                        if (!reproduceLocallyTab[numSerie][i]) {
+                            nbReproOut++;
+                        }
+                        st.nextToken();
+                    }
+                    for (int i = 0; i < nbReproOut; i++) {
+                        int indexSpecies = new Integer(st.sval).intValue();
+                        st.nextToken();
+                        biomassFluxInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                        st.nextToken();
+                        meanLengthFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                    }
+                } else {
+                    for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                        reproduceLocallyTab[numSerie][i] = true;
+                    }
                 }
             } else {
                 System.out.println("Uncorrect number of species in species file");
@@ -2331,7 +2369,7 @@ public class Osmose {
             pw.print("std-0");pw.print(';');pw.print(std);pw.print(';');
             pw.print("cv-0");pw.print(';');pw.print(tabCv[i][0][xx]);pw.print(';');
             pw.println();
-
+            
             }
              */
             pw.print("sys-0");
@@ -2425,7 +2463,7 @@ public class Osmose {
                 pw.print("std-0");pw.print(';');pw.print(std);pw.print(';');
                 pw.print("cv-0");pw.print(';');pw.print(tabCv[i][0][xx]);pw.print(';');
                 pw.println();
-
+                
                 }
                  */
                 pw.print("sys");
@@ -2492,7 +2530,7 @@ public class Osmose {
         pw.print(STD);pw.print(';');
         pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
         }
-
+        
          */
         MEAN = mean(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0]);
         STD = std(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0]);
@@ -2753,10 +2791,10 @@ public class Osmose {
 
     public String resolveFile(String filename) {
         try {
-        File file = new File(inputPathName);
-        String pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
-        return pathname;
-        } catch(Exception e) {
+            File file = new File(inputPathName);
+            String pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
+            return pathname;
+        } catch (Exception e) {
             return filename;
         }
     }
