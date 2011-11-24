@@ -479,7 +479,7 @@ public class Simulation {
         }
         //calculate spectrumMaxIndex
         int spectrumMaxIndex = specInSizeClass10.length - 1;
-        while (specInSizeClass10[spectrumMaxIndex].size() == 0) {
+        while (specInSizeClass10[spectrumMaxIndex].isEmpty()) {
             spectrumMaxIndex--;
         }
 
@@ -548,55 +548,67 @@ public class Simulation {
             speci.resetAbundance();
             speci.resetBiomass();
             double sumExp = 0;
-            abdIni = getOsmose().spBiomIniTab[numSerie][i] / (speci.tabMeanWeight[(int) Math.round(speci.getNumberCohorts() / 2)] / 1000000);
+            /*
+             * phv 2011/11/24
+             * For species that do not reproduce locally, initial biomass is set
+             * to zero.
+             */
+            if (!speci.isReproduceLocally()) {
+                for (int j = 0; j < speci.getCohorts().length; j++) {
+                    speci.tabAbdIni[j] = 0;
+                    speci.tabBiomIni[j] = 0;
+                }
+            } else {
+                abdIni = getOsmose().spBiomIniTab[numSerie][i] / (speci.tabMeanWeight[(int) Math.round(speci.getNumberCohorts() / 2)] / 1000000);
 
-            for (int j = speci.indexAgeClass0; j < speci.getNumberCohorts(); j++) {
-                sumExp += Math.exp(-(j * (speci.D + speci.F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
-            }
-            speci.tabAbdIni[0] = (long) ((abdIni) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
-            speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
-            if (speci.indexAgeClass0 <= 0) {
+                for (int j = speci.indexAgeClass0; j < speci.getNumberCohorts(); j++) {
+                    sumExp += Math.exp(-(j * (speci.D + speci.F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
+                }
+                speci.tabAbdIni[0] = (long) ((abdIni) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
+                speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
+                if (speci.indexAgeClass0 <= 0) {
+                    speci.incrementBiomass(speci.tabBiomIni[0]);
+                }
+
+                speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
+                speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
+                if (speci.indexAgeClass0 <= 1) {
+                    speci.incrementBiomass(speci.tabBiomIni[1]);
+                }
+
+                for (int j = 2; j < speci.getNumberCohorts(); j++) {
+                    speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
+                    speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
+                    if (speci.indexAgeClass0 <= j) {
+                        speci.incrementBiomass(speci.tabBiomIni[j]);
+                    }
+                }
+                correctingFactor = (float) (getOsmose().spBiomIniTab[numSerie][i] / speci.getBiomass());
+
+                // we make corrections on initial abundance to fit the input biomass
+                speci.resetBiomass();
+
+                speci.tabAbdIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
+                speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
+                speci.incrementAbundance(speci.tabAbdIni[0]);
                 speci.incrementBiomass(speci.tabBiomIni[0]);
-            }
+                /*
+                 * 2011/04/11 phv : commented line since nbEggs is only used in
+                 * Species.reproduce as local variable.
+                 */
+                //speci.nbEggs = speci.tabAbdIni[0];
 
-            speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
-            speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
-            if (speci.indexAgeClass0 <= 1) {
+                speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
+                speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
+                speci.incrementAbundance(speci.tabAbdIni[1]);
                 speci.incrementBiomass(speci.tabBiomIni[1]);
-            }
 
-            for (int j = 2; j < speci.getNumberCohorts(); j++) {
-                speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
-                speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
-                if (speci.indexAgeClass0 <= j) {
+                for (int j = 2; j < speci.getNumberCohorts(); j++) {
+                    speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
+                    speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
+                    speci.incrementAbundance(speci.tabAbdIni[j]);
                     speci.incrementBiomass(speci.tabBiomIni[j]);
                 }
-            }
-            correctingFactor = (float) (getOsmose().spBiomIniTab[numSerie][i] / speci.getBiomass());
-
-            // we make corrections on initial abundance to fit the input biomass
-            speci.resetBiomass();
-
-            speci.tabAbdIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
-            speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
-            speci.incrementAbundance(speci.tabAbdIni[0]);
-            speci.incrementBiomass(speci.tabBiomIni[0]);
-            /*
-             * 2011/04/11 phv : commented line since nbEggs is only used in
-             * Species.reproduce as local variable.
-             */
-            //speci.nbEggs = speci.tabAbdIni[0];
-
-            speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
-            speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
-            speci.incrementAbundance(speci.tabAbdIni[1]);
-            speci.incrementBiomass(speci.tabBiomIni[1]);
-
-            for (int j = 2; j < speci.getNumberCohorts(); j++) {
-                speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
-                speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
-                speci.incrementAbundance(speci.tabAbdIni[j]);
-                speci.incrementBiomass(speci.tabBiomIni[j]);
             }
             // and we create the cohorts
             for (int j = 0; j < speci.getNumberCohorts(); j++) {
@@ -714,13 +726,13 @@ public class Simulation {
     {
         if (randomDistribution) {
             for (int i = 0; i < species.length; i++) {
-                Vector vectCells = new Vector(getOsmose().randomAreaCoordi[i].length);
+                List<Cell> cells = new ArrayList(getOsmose().randomAreaCoordi[i].length);
                 for (int m = 0; m < getOsmose().randomAreaCoordi[i].length; m++) {
-                    vectCells.addElement(getGrid().getCell(getOsmose().randomAreaCoordi[i][m], getOsmose().randomAreaCoordj[i][m]));
+                    cells.add(getGrid().getCell(getOsmose().randomAreaCoordi[i][m], getOsmose().randomAreaCoordj[i][m]));
                 }
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                     for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                        ((School) species[i].getCohort(j).getSchool(k)).randomDeal(vectCells);
+                        ((School) species[i].getCohort(j).getSchool(k)).randomDeal(cells);
                         ((School) species[i].getCohort(j).getSchool(k)).communicatePosition();
                     }
                 }
@@ -731,10 +743,10 @@ public class Simulation {
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                     if (!species[i].getCohort(j).isOut(0)) // 0=at the first time step
                     {
-                        Vector vectCells = new Vector(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]].length);
+                        List<Cell> cells = new ArrayList(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]].length);
                         tempMaxProbaPresence = 0;
                         for (int m = 0; m < getOsmose().mapCoordi[getOsmose().numMap[i][j][0]].length; m++) {
-                            vectCells.addElement(getGrid().getCell(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]][m], getOsmose().mapCoordj[getOsmose().numMap[i][j][0]][m]));
+                            cells.add(getGrid().getCell(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]][m], getOsmose().mapCoordj[getOsmose().numMap[i][j][0]][m]));
                             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][0]][m]));
                         }
                         for (int k = 0; k < species[i].getCohort(j).size(); k++) {
@@ -745,10 +757,10 @@ public class Simulation {
                         for (int k = 0; k < Math.round((float) species[i].getCohort(j).size() * (1 - species[i].getCohort(j).getOutOfZonePercentage()[0] / 100)); k++) {
                             // proba of presence: loop while to check if proba of presence> random proba
                             School thisSchool = (School) species[i].getCohort(j).getSchool(k);
-                            thisSchool.randomDeal(vectCells);
+                            thisSchool.randomDeal(cells);
                             thisSchool.setOutOfZoneSchool(false);
                             while ((float) getOsmose().mapProbaPresence[getOsmose().numMap[i][j][0]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
-                                thisSchool.randomDeal(vectCells);
+                                thisSchool.randomDeal(cells);
                             }
                             thisSchool.communicatePosition();
                         }
@@ -757,51 +769,50 @@ public class Simulation {
             }
         }//end file areas
     }
-    
+
     public void distributeSpecies() {
+        /*
+         * Random distribution
+         */
         if (randomDistribution) {
-            //distribute coh 0 & commPosition for 0 only, the others stay in the same cell
             for (int i = 0; i < species.length; i++) {
-                Vector vectCells = new Vector(getOsmose().randomAreaCoordi[i].length);
+                List<Cell> cells = new ArrayList(getOsmose().randomAreaCoordi[i].length);
                 for (int m = 0; m < getOsmose().randomAreaCoordi[i].length; m++) {
-                    vectCells.addElement(getGrid().getCell(getOsmose().randomAreaCoordi[i][m], getOsmose().randomAreaCoordj[i][m]));
+                    cells.add(getGrid().getCell(getOsmose().randomAreaCoordi[i][m], getOsmose().randomAreaCoordj[i][m]));
                 }
-                for (int k = 0; k < species[i].getCohort(0).size(); k++) {
-                    ((School) species[i].getCohort(0).getSchool(k)).randomDeal(vectCells);
-                    ((School) species[i].getCohort(0).getSchool(k)).communicatePosition();
-                }
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    for (int k = 1; k < species[i].getCohort(j).size(); k++) {
-                        School thisSchool = (School) (species[i].getCohort(j).getSchool(k));
-                        //  ((QSchool)species[i].getCohort(j).getSchool(k)).communicatePosition();
-                        thisSchool.randomWalk();
-                        thisSchool.communicatePosition();
+                for (Cohort cohort : species[i].getCohorts()) {
+                    for (School school : cohort) {
+                        if (school.isUnlocated()) {
+                            school.randomDeal(cells);
+                        } else {
+                            school.randomWalk();
+                        }
+                        school.communicatePosition();
                     }
                 }
             }
-        } else//species areas given by file
-        {
+        } else {
+            /*
+             * Species areas given by file
+             */
             for (int i = 0; i < species.length; i++) {
-                //		if(!species[i].getCohort(0).outOfZoneCohort[dt])  //distribute coh 0
-                //		{
-                Vector vectCellsCoh0 = new Vector();
+
+                List<Cell> cellsCohort0 = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])].length);
                 tempMaxProbaPresence = 0;
                 for (int j = 0; j < getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])].length; j++) {
-                    vectCellsCoh0.addElement(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])][j], getOsmose().mapCoordj[(getOsmose().numMap[i][0][indexTime])][j]));
-                    tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][0][indexTime]][j]));
+                    cellsCohort0.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])][j], getOsmose().mapCoordj[(getOsmose().numMap[i][0][indexTime])][j]));
+                    tempMaxProbaPresence = Math.max(tempMaxProbaPresence, getOsmose().mapProbaPresence[getOsmose().numMap[i][0][indexTime]][j]);
                 }
 
-
-                for (int k = 0; k < species[i].getCohort(0).size(); k++) {
-                    School thisSchool = (School) species[i].getCohort(0).getSchool(k);
-                    thisSchool.setOutOfZoneSchool(true);
+                for (School school : species[i].getCohort(0)) {
+                    school.setOutOfZoneSchool(true);
                 }
                 for (int k = 0; k < Math.round((float) species[i].getCohort(0).size() * (1f - (species[i].getCohort(0).getOutOfZonePercentage()[indexTime] / 100f))); k++) {
                     School thisSchool = (School) species[i].getCohort(0).getSchool(k);
-                    thisSchool.randomDeal(vectCellsCoh0);
+                    thisSchool.randomDeal(cellsCohort0);
                     thisSchool.setOutOfZoneSchool(false);
                     while ((float) getOsmose().mapProbaPresence[getOsmose().numMap[i][0][indexTime]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
-                        thisSchool.randomDeal(vectCellsCoh0);
+                        thisSchool.randomDeal(cellsCohort0);
                     }
                     thisSchool.communicatePosition();
                 }
@@ -854,27 +865,37 @@ public class Simulation {
                         for (int k = 0; k < species[i].getCohort(j).size(); k++) {
                             School thisSchool = (School) (species[i].getCohort(j).getSchool(k));
                             if (!thisSchool.isOutOfZoneSchool()) {
-                                thisSchool.randomWalk();
-
                                 boolean stillInMap = false;
-                                for (int p = 0; p < thisSchool.getCell().getNbMapsConcerned(); p++) {
-                                    if (((Integer) thisSchool.getCell().numMapsConcerned.elementAt(p)).intValue() == getOsmose().numMap[i][j][indexTime]) {
-                                        stillInMap = true;
+                                if (!thisSchool.isUnlocated()) {
+                                    thisSchool.randomWalk();
+
+                                    for (int p = 0; p < thisSchool.getCell().getNbMapsConcerned(); p++) {
+                                        if (((Integer) thisSchool.getCell().numMapsConcerned.elementAt(p)).intValue() == getOsmose().numMap[i][j][indexTime]) {
+                                            stillInMap = true;
+                                        }
                                     }
+                                } else {
+                                    List<Cell> cells = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length);
+                                    for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length; m++) {
+                                        cells.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
+                                    }
+                                    thisSchool.randomDeal(cells);
+                                    stillInMap = false;
                                 }
 
                                 if (!stillInMap) {
-                                    Vector vectCellsCoh = new Vector();
+                                    List<Cell> cells = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length);
                                     tempMaxProbaPresence = 0;
                                     for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length; m++) {
-                                        vectCellsCoh.addElement(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
+                                        cells.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
                                         tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][indexTime]][m]));
                                     }
 
                                     while (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][indexTime]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
-                                        thisSchool.randomDeal(vectCellsCoh);
+                                        thisSchool.randomDeal(cells);
                                     }
                                 }
+
                                 thisSchool.communicatePosition();
                             }
                         }

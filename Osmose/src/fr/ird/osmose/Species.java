@@ -184,8 +184,9 @@ public class Species {
         this.biomassFluxIn = getOsmose().biomassFluxInTab[numSerie][index];
         this.meanLengthIn = getOsmose().meanLengthFishInTab[numSerie][index];
         this.ageMeanIn = (int) Math.round((t0 - (Math.log(1 - meanLengthIn / lInf)) / K) * getSimulation().getNbTimeStepsPerYear());
+        ageMeanIn = Math.max(ageMeanIn, 0);
         //System.out.println(name + " reproLocal ? " + reproduceLocally + " biomassIn: " + biomassFluxIn + " lengthIn: " + meanLengthIn + " ageIn: " + ageMeanIn);
-        
+
         // START INITIALISATION of COHORTS
         nbCohorts = (int) Math.round((longevity) * getSimulation().getNbTimeStepsPerYear());
 
