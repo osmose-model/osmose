@@ -87,6 +87,7 @@ public class Osmose {
     boolean[][] reproduceLocallyTab;
     float[][] biomassFluxInTab;
     float[][] meanLengthFishInTab;
+    float[][] meanAgeFishInTab;
     /*
      * FISHING
      */
@@ -594,6 +595,7 @@ public class Osmose {
         reproduceLocallyTab = new boolean[nbSeriesSimus][];
         biomassFluxInTab = new float[nbSeriesSimus][];
         meanLengthFishInTab = new float[nbSeriesSimus][];
+        meanAgeFishInTab= new float[nbSeriesSimus][];
 
         //--- CALIBRATION file---
         calibrationMethod = new String[nbSeriesSimus];
@@ -727,6 +729,7 @@ public class Osmose {
                 reproduceLocallyTab[numSerie] = new boolean[nbSpeciesTab[numSerie]];
                 biomassFluxInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
                 meanLengthFishInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
+                meanAgeFishInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
                 st.nextToken();
                 int nbReproOut = 0;
                 if (null != st.sval) {
@@ -738,11 +741,13 @@ public class Osmose {
                         st.nextToken();
                     }
                     for (int i = 0; i < nbReproOut; i++) {
-                        int indexSpecies = new Integer(st.sval).intValue();
+                        int indexSpecies = new Integer(st.sval).intValue() - 1;
                         st.nextToken();
                         biomassFluxInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
                         st.nextToken();
                         meanLengthFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                        st.nextToken();
+                        meanAgeFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
                     }
                 } else {
                     for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {

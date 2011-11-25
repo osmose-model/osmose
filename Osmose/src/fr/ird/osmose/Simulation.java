@@ -1175,7 +1175,7 @@ public class Simulation {
         for (Cell cell : getGrid().getCells()) {
             int[] nbSchools = new int[getNbSpecies()];
             for (School school : cell) {
-                if (school.getCohort().getAgeNbDt() > school.getCohort().getSpecies().indexAgeClass0) {
+                if (school.getCohort().getAgeNbDt() > school.getCohort().getSpecies().indexAgeClass0 && !school.getCohort().isOut(indexTime)) {
                     nbSchools[school.getCohort().getSpecies().getIndex()] += 1;
                     biomass[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
                     mean_size[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getLength();
