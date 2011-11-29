@@ -26,6 +26,7 @@
  * 4. Species filename
  * File for species biological parameters
  */	
+//;afs-species-new;
 ;afs-species;
 /* 
  * 5. Predation filename
@@ -43,6 +44,7 @@
  * File of species distributions by age & time step
  */
 ;afs-areas-maps;
+//;afs-areas-random;
 /*
  * 8. Plankton groups filename
  */
@@ -50,7 +52,8 @@
 /*
  * 9. Plankton data filename
  */    	
-;interpolation/LTLconfig;
+//;interpolation/LTLconfig;
+;interpolation/afs-ltlforcing;
 /*
  * 10. Calibration filename
  */
@@ -59,17 +62,19 @@
  * 11. Ouput filename
  * File specifying which indicators have to be provided
  */
-;config-output;
+;afs-output;
 /*
  * 12. Accessibilities filename
  * 'default' means accessibility = 1
  */
 ;afs-accessibility;
+//;default;
 /*
  * 13. Size of age-class zero filename
  * 'default' means egg size = 1mm
  */
-;default;
+;afs-size0;
+//;default;
 /*
  * 14. Reproduction filename
  * File for reproduction parameters & seasonality
@@ -80,7 +85,7 @@
  * 15. Fishing seasonality filename
  * 'defautl' means uniform fishing all year long
  */
-;default;
+;afs-fishing-seasonality;
 /*
  * 16. Migration filename
  * File of migration occurrence out of the zone
@@ -102,5 +107,6 @@
  * The parameter is ignored unless forcing = true in the configuration filename
  */
 ;none;
+//;afs-coupling;
 //
 // EOF - INPUT.txt
