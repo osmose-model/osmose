@@ -45,9 +45,6 @@
 /*
  *
  */
-;eta_rho;
-;xi_rho;
-;s_rho;
 ;lon_rho;
 ;lat_rho;
 ;h;

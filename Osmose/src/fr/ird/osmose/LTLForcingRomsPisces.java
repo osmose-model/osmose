@@ -33,7 +33,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     private String[] plktonNetcdfNames;
     private String gridFileName;
     private String strCs_r, strHC;
-    private String strEta, strXi, strS, strLon, strLat, strH;
+    private String strLon, strLat, strH;
     float[][] latitude, longitude;
 
     @Override
@@ -69,12 +69,6 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
             gridFileName = st.sval;
 
             st.nextToken();
-            strEta = st.sval;
-            st.nextToken();
-            strXi = st.sval;
-            st.nextToken();
-            strS = st.sval;
-            st.nextToken();
             strLon = st.sval;
             st.nextToken();
             strLat = st.sval;
@@ -105,9 +99,14 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         /*
          * read dimensions
          */
-        setDimX(ncIn.findDimension(strEta).getLength());
-        setDimY(ncIn.findDimension(strXi).getLength());
-        setDimZ(ncIn.findDimension(strS).getLength());
+        try {
+            int[] shape = ncIn.findVariable(strLon).getShape();
+            setDimX(shape[0]);
+            setDimY(shape[1]);
+            setDimZ(getCs_r(ncIn).length);
+        } catch (IOException ex) {
+            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+        }
         /*
          * Read lon & lat
          */
