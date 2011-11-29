@@ -748,6 +748,7 @@ public class Osmose {
                         meanLengthFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
                         st.nextToken();
                         meanAgeFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                        st.nextToken();
                     }
                 } else {
                     for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
@@ -1489,11 +1490,13 @@ public class Osmose {
         try {
             st.nextToken();
             distribMethod = st.sval;
-            if (distribMethod.equalsIgnoreCase("random")) /* *******RANDOM CASE********* */ {
+            if (distribMethod.equalsIgnoreCase("random")) {
+                /* *******RANDOM CASE********* */
                 st.nextToken();
                 speciesAreasSizeTab[numSerie] = (new Integer(st.sval)).intValue();
                 distribRandom();
-            } else if (distribMethod.equalsIgnoreCase("maps"))/* *******CASE FILE AREAS - densities or presence/absence********* */ {
+            } else if (distribMethod.equalsIgnoreCase("maps")) {
+                /* *******CASE FILE AREAS - densities or presence/absence********* */
                 if (numSimu == 0) {//1
                     //areas data are read from file areasFile
 
@@ -1542,7 +1545,6 @@ public class Osmose {
                                     }
 
                                     for (int i = 0; i < nbMaps; i++) {
-                                        st.nextToken();
                                         numSpForMap = new Integer(st.sval).intValue() - 1;   //because species number between 1 and nbSpecies
                                         st.nextToken();
                                         nbAgePerMap = new Integer(st.sval).intValue();
@@ -1573,7 +1575,7 @@ public class Osmose {
                                                     }
                                                     if (mapCoordi[i].length == 0) {
                                                         if (!simulation.getSpecies(numSpForMap).getCohort((tempAge[m] * nbDtMatrix[numSerie]) + h).isOut(tempDt[n])) {
-                                                            System.out.println("Match error between species areas and migration file");
+                                                            System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(numSpForMap).getName());
                                                         }
                                                     }
                                                 }
@@ -1606,6 +1608,7 @@ public class Osmose {
                                             }
                                         }
 
+                                    st.nextToken();
                                     }
                                     simulation.randomDistribution = false;
 

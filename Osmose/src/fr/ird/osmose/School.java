@@ -233,6 +233,15 @@ public class School {
         return unlocated;
     }
 
+    /*
+     * This method should be called when a school is momentarily out of the
+     * simulated area.
+     */
+    public void breakaway() {
+        cell.remove(this);
+        unlocated = true;
+    }
+
     /**
      * Randomly move the school in one of the neighbor cells (including the
      * current cell).

@@ -796,7 +796,18 @@ public class Simulation {
              * Species areas given by file
              */
             for (int i = 0; i < species.length; i++) {
-
+                /*
+                 * phv 2011/11/29
+                 * There is no reason to distribute species that are presently
+                 * out of the simulated area.
+                 */
+                if (species[i].getCohort(0).isOut(indexTime)) {
+                    for (School school : species[i].getCohort(0)) {
+                        school.breakaway();
+                    }
+                    return;
+                }
+                
                 List<Cell> cellsCohort0 = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])].length);
                 tempMaxProbaPresence = 0;
                 for (int j = 0; j < getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])].length; j++) {
@@ -821,6 +832,18 @@ public class Simulation {
                 //compare areas (ages to end): age a, sem2 with age a+1, sem 1
                 // if diff, distribute
                 for (int j = 1; j < species[i].getNumberCohorts(); j++) {
+                    /*
+                 * phv 2011/11/29
+                 * There is no reason to distribute species that are presently
+                 * out of the simulated area.
+                 */
+                    if (species[i].getCohort(i).isOut(indexTime)) {
+                        for (School school : species[i].getCohort(i)) {
+                            school.breakaway();
+                        }
+                        return;
+                    }
+                    
                     int oldTime;
                     if (indexTime == 0) {
                         oldTime = nbTimeStepsPerYear - 1;
