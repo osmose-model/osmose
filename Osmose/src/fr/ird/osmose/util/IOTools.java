@@ -157,15 +157,26 @@ public class IOTools {
         return listrel;
     }
 
-    public static void cleanDirectory(File directory) {
+    public static void deleteDirectoryOnExit(File directory) {
 
         for (File file : directory.listFiles()) {
             if (file.isDirectory()) {
-                cleanDirectory(file);
+                deleteDirectoryOnExit(file);
             }
             file.deleteOnExit();
         }
         directory.deleteOnExit();
+    }
+    
+    public static void deleteDirectory(File directory) {
+
+        for (File file : directory.listFiles()) {
+            if (file.isDirectory()) {
+                deleteDirectory(file);
+            }
+            file.delete();
+        }
+        directory.delete();
     }
 
     public static void browse(URI uri) throws IOException {

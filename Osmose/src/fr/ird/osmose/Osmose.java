@@ -242,7 +242,13 @@ public class Osmose {
                 r.gc();
                 freeMem = r.freeMemory();
                 System.out.println("Simulation " + xx + "        **** FREE MEMORY = " + freeMem);
-
+                /*
+                 * Delete older output directory and all its content
+                 */
+                File targetPath = new File(outputPathName + outputFileNameTab[numSerie]);
+                if (targetPath.exists()) {
+                    IOTools.deleteDirectory(targetPath);
+                }
                 if (spatializedOutputs[numSerie]) {
                     createNCFile(numSerie);
                 }
@@ -595,7 +601,7 @@ public class Osmose {
         reproduceLocallyTab = new boolean[nbSeriesSimus][];
         biomassFluxInTab = new float[nbSeriesSimus][];
         meanLengthFishInTab = new float[nbSeriesSimus][];
-        meanAgeFishInTab= new float[nbSeriesSimus][];
+        meanAgeFishInTab = new float[nbSeriesSimus][];
 
         //--- CALIBRATION file---
         calibrationMethod = new String[nbSeriesSimus];
@@ -1608,7 +1614,7 @@ public class Osmose {
                                             }
                                         }
 
-                                    st.nextToken();
+                                        st.nextToken();
                                     }
                                     simulation.randomDistribution = false;
 
