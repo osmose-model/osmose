@@ -1,0 +1,94 @@
+/////////////////
+//
+// PREDATION FILE
+//
+/////////////////
+//
+/*
+ * 5.1. Predation rate
+ * Unit = grams of food per gram of fish and per year
+ */
+;3.5;;3.5;;3.5;;3.5;;3.5;;3.5;;3.5;;3.5;;3.5;
+/*
+ * 5.2. Critical predation efficiency
+ */
+;0.57;;0.57;;0.57;;0.57;;0.57;;0.57;;0.57;;0.57;;0.57;
+/*
+ * 5.3. Maximal starvation mortality rate, per year
+ */
+;1;;1;;1;;1;;1;;1;;1;;1;;1;
+/*
+ * 5.4. Stages, size thresholds and predation size ratios for each species
+ * One block of options (for one species) is defined as follows:
+ * // name of the species, commented
+ * ;number of stages considered;
+ * ;size thresholds between stages; (x number of stages - 1)
+ * ;min and max size ratios for stage 1
+ * ;min and max size ratios for stage 2
+ * ;... until last stage
+ * For a single stage, the block is defined as follows:
+ * // name of the species, commented
+ * ;1; (only on stage)
+ * ;min and max size ratios for stage 1
+ */
+// --------anchovy--------
+
+;3;
+;0.8; //data from Urtizberea et al., 2008 (0.4-0.8cm)
+;8; // Aldanondo et al. 2010 says 7cm in Cantabrian Sea, 11cm in the Bay of Biscay
+;80;;4;
+;900;;9;
+;2000;;4; //Data from Eneko bachiller
+
+// --------sardine--------
+;2;
+;3; //from Dulcic 1995 (larvae ->0.4-3cm)
+;500;;4;
+;4000;;30; //Data from Eneko bachiller
+
+
+// --------s hake--------
+;2;
+;15;
+;50;;3.5;
+;50;;2;
+//First stage (until 15cm set for Benguela, the other stage -> data from I. Quincoces
+
+// --------n hake--------
+;2;
+;15;
+;50;;3.5;
+;50;;2;
+
+// --------horse mackerel--------
+;2;
+;10;        
+;70;;10;
+;600;;5; //Data from Eneko Bachiller
+
+// --------Atlantic mackerel--------
+;2;
+;10;        
+;50;;10;
+;3500;;5;
+
+
+// --------Atlantic BFT--------
+;2;
+;80;        
+;100;;4;
+;100;;4;
+
+// --------Atlantic ALB--------
+;2;
+;80;        
+;70;;3;
+;70;;3;
+
+// --------Blue whiting--------
+;2;
+;10;
+;70;;10;
+;5000;;200;
+//
+// EOF - PREDATION FILE

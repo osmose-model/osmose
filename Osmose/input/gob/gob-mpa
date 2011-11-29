@@ -1,0 +1,37 @@
+///////////
+//
+// MPA FILE
+//
+///////////
+/*
+ * 18.1. Number of lines
+ * Assertion: ${18.1} == ${3.1}
+ */
+;33;
+/*
+ * 18.2. Number of columns
+ * Assertion: ${18.2} == ${3.2}
+ */
+;53;
+/*
+ * 18.3. Total number of cells for the MPA
+ */
+;1;
+/*
+ * 18.4. MPA start year
+ */
+;5;
+/*
+ * 18.5. MPA end year
+ */
+;10;
+/*
+ * 18.6. MPA i coordinates
+ */ 
+;0;
+/*
+ * 18.7. MPA j coordinates
+ */
+;0;
+//
+// EOF - MPA

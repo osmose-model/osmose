@@ -1,0 +1,80 @@
+//////////////////
+//
+// INDICATORS FILE
+//
+//////////////////
+//
+// Selection of indicators provided as output : "false" (not provided) or "true" (provided)
+//
+/*
+ * 11.1. Output folder
+ */
+;biscay;
+/*
+ * 11.2. Type of simulation
+ * Accepted values: "run" or "calibration"
+ * In case of calibration, only the biomass is given as input in the appropriate form for the AG method.
+ */
+;run;
+// ----- Trophodynamics indicators -----
+/* 
+ * 11.3. Mean TL per species
+ */
+;true;
+/*
+ * 11.4. Distribution of biomass per TL per species
+ */
+;true;
+/* 
+ * 11.5. Diets
+ */
+;true;
+/*
+ * 11.6. Diets configuration filename
+ */
+;byDefault;
+// ----- Size-based indicators -----
+/*
+ * 11.7. Mean size per species
+ */
+;true;
+/*
+ * 11.8. Size spectrum
+ */
+;true;
+/*
+ * 11.9. Size spectrum per species
+ */
+;true;
+/*
+ * 11.10. Spectrum min size
+ * Ignored parameter when ${11.9} == false
+ */
+;0;
+/*
+ * 11.11. Spectrum max size
+ * Ignored parameter when ${11.9} == false
+ */
+;205;
+/*
+ * 11.12. Class range
+ * Ignored parameter when ${11.9} == false
+ */
+;10;
+// ----- Mortalities data -----
+/*
+ * 11.13. Plankton mortality
+ */
+;true;
+/* 
+ * 11.14. Incorporation of first stage in the calcul of indicators ?
+ */
+;false;
+/*
+ * 11.15. Spatialized outputs
+ * If 'true' creates a NetCDF file with spatialized biomass, mean-size and trophic level variables for each species.
+ */
+;false;
+//
+// EOF - INDICATORS
+///////////////////

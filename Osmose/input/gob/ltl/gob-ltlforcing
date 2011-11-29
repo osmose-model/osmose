@@ -1,0 +1,57 @@
+////////////////
+//
+// PLANKTON DATA
+//
+////////////////
+//
+/*
+ * 9.1. Names of the plankton variables in the NetCDF plankton files.
+ */
+;SPHYTO;
+;LPHYTO;
+;SZOO;
+;LZOO;
+/*
+ * 9.2. List of plankton files
+ */
+;ltl/biscay_avg_1.nc;
+;ltl/biscay_avg_2.nc;
+;ltl/biscay_avg_3.nc;
+;ltl/biscay_avg_4.nc;
+;ltl/biscay_avg_5.nc;
+;ltl/biscay_avg_6.nc;
+;ltl/biscay_avg_7.nc;
+;ltl/biscay_avg_8.nc;
+;ltl/biscay_avg_9.nc;
+;ltl/biscay_avg_10.nc;
+;ltl/biscay_avg_11.nc;
+;ltl/biscay_avg_12.nc;
+;ltl/biscay_avg_13.nc;
+;ltl/biscay_avg_14.nc;
+;ltl/biscay_avg_15.nc;
+;ltl/biscay_avg_16.nc;
+;ltl/biscay_avg_17.nc;
+;ltl/biscay_avg_18.nc;
+;ltl/biscay_avg_19.nc;
+;ltl/biscay_avg_20.nc;
+;ltl/biscay_avg_21.nc;
+;ltl/biscay_avg_22.nc;
+;ltl/biscay_avg_23.nc;
+;ltl/biscay_avg_24.nc;
+/*
+ * 9.6. Filename of grid file
+ */
+;ltl/2002_12_roms_avg.nc;
+/*
+ *
+ */
+;eta_rho;
+;xi_rho;
+;s_rho;
+;lon_rho;
+;lat_rho;
+;h;
+;Cs_r;
+;hc;
+//
+// EOF - PLANKTON DATA

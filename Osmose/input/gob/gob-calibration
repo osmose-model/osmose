@@ -1,0 +1,35 @@
+///////////////////
+//
+// CALIBRATION FILE
+//
+///////////////////
+/*
+ * 10.1. Calibration method
+ * Accepted values: "spectrum" or "biomass"
+ */
+;biomass;
+/*
+ * 10.2. Case "Biomass" - Target biomass for each species
+ */
+;34855;;435287;;25000;;140000;;56593;;722500;;78724;;32600;;360000;
+/*
+ * 10.2. Case "Spectrum" - Spectrum slope and intercept
+ * a & b such as spectrumAbundance = Math.round(Math.pow((i*osmose.classRange)+5.,a)*Math.exp(b));
+ */
+// ;-5.8;
+// ;35.5;
+/*  
+ * 10.3. Larval mortality for each species 
+ */
+;2.5;;2.50;;4.5;;3.2;;1.9;;6;;6;;3;;2.5;
+/*
+ * 10.4. Min age for biomass
+ */
+;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;;0.5;
+/*
+ * Accessibility plakotn coefficients
+ */
+;0.000577234;;0.00541438;;0.00948318;;0.112514;
+//
+// EOF - CALIBRATION
+////////////////////
