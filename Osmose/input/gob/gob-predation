@@ -37,7 +37,8 @@
 ;0.8; //data from Urtizberea et al., 2008 (0.4-0.8cm)
 ;8; // Aldanondo et al. 2010 says 7cm in Cantabrian Sea, 11cm in the Bay of Biscay
 ;80;;4;
-;900;;9;
+;500;;4;
+//;900;;9;
 ;2000;;4; //Data from Eneko bachiller
 
 // --------sardine--------
@@ -51,14 +52,14 @@
 ;2;
 ;15;
 ;50;;3.5;
-;50;;2;
-//First stage (until 15cm set for Benguela, the other stage -> data from I. Quincoces
+;50;;3.5;
+//First stage (until 15cm set for Benguela, the other stage -> data from I. Quincoces(2)
 
 // --------n hake--------
 ;2;
 ;15;
 ;50;;3.5;
-;50;;2;
+;50;;3.5;
 
 // --------horse mackerel--------
 ;2;
@@ -75,15 +76,17 @@
 
 // --------Atlantic BFT--------
 ;2;
-;80;        
-;100;;4;
-;100;;4;
+;1;        
+;300;;1;
+;300;;1;
+//;100;;4;
 
 // --------Atlantic ALB--------
 ;2;
-;80;        
-;70;;3;
-;70;;3;
+;1;        
+;300;;1;
+;300;;1;
+//;70;;3;
 
 // --------Blue whiting--------
 ;2;

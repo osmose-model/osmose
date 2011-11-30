@@ -75,18 +75,18 @@
 
 // ---- Atl_bft: Bluefin Tuna
 ;7;
-;5000;
+;15000;
 ;100;
 ;3;
 
 // ---- Alt_alb: Albacore Tuna
 ;8;
-;8000;
+;25000;
 ;50;
 ;3;
 
 // ---- Blue_wh: Blue Whiting
 ;9;
-;20000;
+;100000;
 ;8;
 ;0.3;
