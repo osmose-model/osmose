@@ -124,18 +124,16 @@ public class Cohort extends ArrayList<School> {
 
         this.abundance = abundance;
         this.biomass = biomass;
+        if (biomass > 0.d) {
+            int nbSchools = (int) (1 + 10 / (species.longevity + 1)) * getOsmose().nbSchools[getOsmose().numSerie];
+            ensureCapacity(nbSchools);
+            for (int i = 0; i < nbSchools; i++) {
+                add(new School(this, Math.round(((double) abundance) / nbSchools), iniLength, iniWeight));
+            }
 
-//		nbSchools = getOsmose().nbSchools[numSerie];
-
-        int nbSchools = (int) (1 + 10 / (species.longevity + 1)) * getOsmose().nbSchools[getOsmose().numSerie];
-        ensureCapacity(nbSchools);
-        for (int i = 0; i < nbSchools; i++) {
-            add(new School(this, Math.round(((double) abundance) / nbSchools), iniLength, iniWeight));
+            int surplus = (int) abundance % nbSchools;
+            getSchool(0).setAbundance(getSchool(0).getAbundance() + surplus);
         }
-
-        int surplus = (int) abundance % nbSchools;
-        getSchool(0).setAbundance(getSchool(0).getAbundance() + surplus);
-        //calculMeanGrowth();
     }
 
 ////////////////////////////
@@ -599,19 +597,19 @@ public class Cohort extends ArrayList<School> {
     public void setBiomass(double biomass) {
         this.biomass = biomass;
     }
-    
+
     public float getOutMortality(int indexTime) {
         return outOfZoneMortality[indexTime];
     }
-    
+
     public void setOutMortality(int indexTime, float mortality) {
         outOfZoneMortality[indexTime] = mortality;
     }
-    
+
     public void setOut(int indexTime, boolean isOut) {
         outOfZoneCohort[indexTime] = isOut;
     }
-    
+
     public boolean isOut(int indexTime) {
         return outOfZoneCohort[indexTime];
     }

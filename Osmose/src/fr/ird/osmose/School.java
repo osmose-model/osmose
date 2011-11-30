@@ -56,10 +56,6 @@ public class School {
      */
     int indexij;
     /*
-     * Tag for outOfZone schools
-     */
-    private boolean outOfZoneSchool;
-    /*
      * length of the individuals in the school in centimeters
      */
     private float length;
@@ -138,7 +134,6 @@ public class School {
         species = cohort.getSpecies();
         disappears = false;
         catchable = true;
-        outOfZoneSchool = false;
         /*
          * Initialisation TLs
          * trophicLevel = table of the TL of this school at each time step
@@ -238,8 +233,10 @@ public class School {
      * simulated area.
      */
     public void breakaway() {
-        cell.remove(this);
-        unlocated = true;
+        if (!unlocated) {
+            cell.remove(this);
+            unlocated = true;
+        }
     }
 
     /**
@@ -324,8 +321,8 @@ public class School {
         int indexMax = 0;
         while ((indexMax < (cell.size() - 1))
                 && (critPreySizeMax >= ((School) cell.get(indexMax)).getLength())) {
-            indexMax++;
-        }
+                indexMax++;
+            }
         //indexMax is the index of vectBP which corresponds to the sup limit of the possible prey sizes
         //for this school, vectPresentSchools(indexMax) is not a possible prey school.
 
@@ -660,20 +657,6 @@ public class School {
             }
 
         }
-    }
-
-    /**
-     * @return the outOfZoneSchool
-     */
-    public boolean isOutOfZoneSchool() {
-        return outOfZoneSchool;
-    }
-
-    /**
-     * @param outOfZoneSchool the outOfZoneSchool to set
-     */
-    public void setOutOfZoneSchool(boolean outOfZoneSchool) {
-        this.outOfZoneSchool = outOfZoneSchool;
     }
 
     /**

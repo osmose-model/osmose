@@ -749,16 +749,11 @@ public class Simulation {
                             cells.add(getGrid().getCell(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]][m], getOsmose().mapCoordj[getOsmose().numMap[i][j][0]][m]));
                             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][0]][m]));
                         }
-                        for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                            School thisSchool = (School) species[i].getCohort(j).getSchool(k);
-                            thisSchool.setOutOfZoneSchool(true);
-                        }
 
                         for (int k = 0; k < Math.round((float) species[i].getCohort(j).size() * (1 - species[i].getCohort(j).getOutOfZonePercentage()[0] / 100)); k++) {
                             // proba of presence: loop while to check if proba of presence> random proba
                             School thisSchool = (School) species[i].getCohort(j).getSchool(k);
                             thisSchool.randomDeal(cells);
-                            thisSchool.setOutOfZoneSchool(false);
                             while ((float) getOsmose().mapProbaPresence[getOsmose().numMap[i][j][0]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
                                 thisSchool.randomDeal(cells);
                             }
@@ -805,9 +800,9 @@ public class Simulation {
                     for (School school : species[i].getCohort(0)) {
                         school.breakaway();
                     }
-                    return;
+                    continue;
                 }
-                
+
                 List<Cell> cellsCohort0 = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])].length);
                 tempMaxProbaPresence = 0;
                 for (int j = 0; j < getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])].length; j++) {
@@ -815,35 +810,30 @@ public class Simulation {
                     tempMaxProbaPresence = Math.max(tempMaxProbaPresence, getOsmose().mapProbaPresence[getOsmose().numMap[i][0][indexTime]][j]);
                 }
 
-                for (School school : species[i].getCohort(0)) {
-                    school.setOutOfZoneSchool(true);
-                }
                 for (int k = 0; k < Math.round((float) species[i].getCohort(0).size() * (1f - (species[i].getCohort(0).getOutOfZonePercentage()[indexTime] / 100f))); k++) {
                     School thisSchool = (School) species[i].getCohort(0).getSchool(k);
                     thisSchool.randomDeal(cellsCohort0);
-                    thisSchool.setOutOfZoneSchool(false);
                     while ((float) getOsmose().mapProbaPresence[getOsmose().numMap[i][0][indexTime]][thisSchool.indexij] < (float) Math.random() * tempMaxProbaPresence) {
                         thisSchool.randomDeal(cellsCohort0);
                     }
                     thisSchool.communicatePosition();
                 }
-                //		}
 
                 //compare areas (ages to end): age a, sem2 with age a+1, sem 1
                 // if diff, distribute
                 for (int j = 1; j < species[i].getNumberCohorts(); j++) {
                     /*
-                 * phv 2011/11/29
-                 * There is no reason to distribute species that are presently
-                 * out of the simulated area.
-                 */
-                    if (species[i].getCohort(i).isOut(indexTime)) {
-                        for (School school : species[i].getCohort(i)) {
+                     * phv 2011/11/29
+                     * There is no reason to distribute species that are presently
+                     * out of the simulated area.
+                     */
+                    if (species[i].getCohort(j).isOut(indexTime)) {
+                        for (School school : species[i].getCohort(j)) {
                             school.breakaway();
                         }
-                        return;
+                        continue;
                     }
-                    
+
                     int oldTime;
                     if (indexTime == 0) {
                         oldTime = nbTimeStepsPerYear - 1;
@@ -856,27 +846,21 @@ public class Simulation {
                         idem = true;
                     }
 
-                    if (!idem)// distribute in new area
-                    {
-                        //		if(!species[i].getCohort(j).outOfZoneCohort[dt])      //if is in the area during the time step
-                        //		{
-                        Vector vectCellsCoh = new Vector();
+                    if (!idem) {
+                        // distribute in new area
+                        List<Cell> cells = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length);
+                        //System.out.println(species[i].getName() + " cohort " + species[i].getCohort(j).getAgeNbDt() + " step " + indexTime + " map " + getOsmose().numMap[i][j][indexTime] + " nbcells " + getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length);
                         tempMaxProbaPresence = 0;
                         for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length; m++) {
-                            vectCellsCoh.addElement(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
+                            cells.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
                             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][indexTime]][m]));
-                        }
-                        for (int k = 0; k < species[i].getCohort(j).size(); k++) // Loop to initialize outOfZoneSchool= true
-                        {
-                            ((School) species[i].getCohort(j).getSchool(k)).setOutOfZoneSchool(true);
                         }
 
                         for (int k = 0; k < Math.round((float) species[i].getCohort(j).size() * (100f - species[i].getCohort(j).getOutOfZonePercentage()[indexTime]) / 100f); k++) {
                             School thisSchool = (School) (species[i].getCohort(j).getSchool(k));
-                            thisSchool.setOutOfZoneSchool(false);
-                            thisSchool.randomDeal(vectCellsCoh);
+                            thisSchool.randomDeal(cells);
                             while (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][indexTime]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
-                                thisSchool.randomDeal(vectCellsCoh);
+                                thisSchool.randomDeal(cells);
                             }
                             thisSchool.communicatePosition();
                         }
@@ -887,40 +871,37 @@ public class Simulation {
                     {
                         for (int k = 0; k < species[i].getCohort(j).size(); k++) {
                             School thisSchool = (School) (species[i].getCohort(j).getSchool(k));
-                            if (!thisSchool.isOutOfZoneSchool()) {
-                                boolean stillInMap = false;
-                                if (!thisSchool.isUnlocated()) {
-                                    thisSchool.randomWalk();
+                            boolean stillInMap = false;
+                            if (!thisSchool.isUnlocated()) {
+                                thisSchool.randomWalk();
 
-                                    for (int p = 0; p < thisSchool.getCell().getNbMapsConcerned(); p++) {
-                                        if (((Integer) thisSchool.getCell().numMapsConcerned.elementAt(p)).intValue() == getOsmose().numMap[i][j][indexTime]) {
-                                            stillInMap = true;
-                                        }
-                                    }
-                                } else {
-                                    List<Cell> cells = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length);
-                                    for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length; m++) {
-                                        cells.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
-                                    }
-                                    thisSchool.randomDeal(cells);
-                                    stillInMap = false;
-                                }
-
-                                if (!stillInMap) {
-                                    List<Cell> cells = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length);
-                                    tempMaxProbaPresence = 0;
-                                    for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length; m++) {
-                                        cells.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
-                                        tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][indexTime]][m]));
-                                    }
-
-                                    while (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][indexTime]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
-                                        thisSchool.randomDeal(cells);
+                                for (int p = 0; p < thisSchool.getCell().getNbMapsConcerned(); p++) {
+                                    if (((Integer) thisSchool.getCell().numMapsConcerned.elementAt(p)).intValue() == getOsmose().numMap[i][j][indexTime]) {
+                                        stillInMap = true;
                                     }
                                 }
-
-                                thisSchool.communicatePosition();
+                            } else {
+                                List<Cell> cells = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length);
+                                for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length; m++) {
+                                    cells.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
+                                }
+                                thisSchool.randomDeal(cells);
+                                stillInMap = false;
                             }
+
+                            if (!stillInMap) {
+                                List<Cell> cells = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length);
+                                tempMaxProbaPresence = 0;
+                                for (int m = 0; m < getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])].length; m++) {
+                                    cells.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][j][indexTime])][m], getOsmose().mapCoordj[(getOsmose().numMap[i][j][indexTime])][m]));
+                                    tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][indexTime]][m]));
+                                }
+
+                                while (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][indexTime]][thisSchool.indexij] < Math.random() * tempMaxProbaPresence) {
+                                    thisSchool.randomDeal(cells);
+                                }
+                            }
+                            thisSchool.communicatePosition();
                         }
                     }
                 }//end loop cohort
