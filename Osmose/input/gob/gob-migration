@@ -7,8 +7,17 @@
 /*
  * 16.1. Number of species considered for migration out of zone
  */
-;2;
+;3;
 
+// ---- ATLANTIC MACKEREL
+;6;
+;9;
+;8;
+;3;;4;;5;;6;;7;;8;;9;;10;;11;
+;17;;18;;19;;20;;21;;22;;23;;24;
+;0;;0;;0;;0;;0;;0;;0;;0;;0;
+
+// ---- ATLANTIC BLUEFIN TUNA
 ;7;	//Atl_bft
 ;3;	//number of age classes (years)
 ;14;	//number of time steps
@@ -17,19 +26,12 @@
 ;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;21;;22;;23;;24;	//nº time steps
 ;0;;0;;0;
 
+// ---- ATLANTIC ALBACORE TUNA
 ;8;	//Atl_alb
 ;3;	//number of age classes (years)
 ;14;	//number of time steps
 ;1;;2;;3;	//nº ages
 ;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;21;;22;;23;;24;	//nº time steps
 ;0;;0;;0;
-
-//;9;	//Blue_whiting
-//;18;	//number of age classes (years)
-//;24;	//number of time steps
-//;0;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;	//nº ages
-//;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;	//nº time steps
-//;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;;1.9;
-
 //
 // EOF - MIGRATION

@@ -3185,28 +3185,28 @@
 
 // Juvenile (Age +3) distribution (September - December)
 /* n° species ATLANTIC MACKEREL */	;6;
-/*nb age classes concerned */	;10;
+/*nb age classes concerned */	;9;
 /*nb time steps */		;8;
-/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;
 /*n° of the time steps */	;17;;18;;19;;20;;21;;22;;23;;24;
-/* nb cells */			;1;
-/* coordinates i */		;0;
-/* coordinates j */		;0;
+/* nb cells */			;0;
+/* coordinates i */		
+/* coordinates j */		
 
 /* n° species ATLANTIC BLUEFIN TUNA */	;7;
-/*nb age classes concerned */	;15;
+/*nb age classes concerned */	;3;
 /*nb time steps */		;10;
-/*n° of the age classes*/	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;
+/*n° of the age classes*/	;1;;2;;3;
 /*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;
-/* nb cells */			;1;
-/* coordinates i */		;0;
-/* coordinates j */		;0;
+/* nb cells */			;0;
+/* coordinates i */		
+/* coordinates j */		
 
 
 /* n° species ATLANTIC BLUEFIN TUNA */	;7;
-/*nb age classes concerned */	;15;
+/*nb age classes concerned */	;3;
 /*nb time steps */		;10;
-/*n° of the age classes*/	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;
+/*n° of the age classes*/	;1;;2;;3;
 /*n° of the time steps */	;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;
 /* nb cells */			;995;
 /* coordinates i */		;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;
@@ -3269,27 +3269,27 @@
 ;0;;1;;2;
 
 /* n° species ATLANTIC BLUEFIN TUNA */	;7;
-/*nb age classes concerned */	;15;
+/*nb age classes concerned */	;3;
 /*nb time steps */		;4;
-/*n° of the age classes*/	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;
+/*n° of the age classes*/	;1;;2;;3;
 /*n° of the time steps */	;21;;22;;23;;24;
-/* nb cells */			;1;
-/* coordinates i */		;0;
-/* coordinates j */		;0;
+/* nb cells */			;0;
+/* coordinates i */		
+/* coordinates j */		
 
 /* n° species ATLANTIC ALBACORE TUNA */	;8;
-/*nb age classes concerned */	;4;
+/*nb age classes concerned */	;3;
 /*nb time steps */		;10;
-/*n° of the age classes*/	;1;;2;;3;;4;
+/*n° of the age classes*/	;1;;2;;3;
 /*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;
-/* nb cells */			;1;
-/* coordinates i */		;0;
-/* coordinates j */		;0;
+/* nb cells */			;0;
+/* coordinates i */		
+/* coordinates j */		
 
 /* n° species ATLANTIC ALBACORE TUNA */	;8;
-/*nb age classes concerned */	;4;
+/*nb age classes concerned */	;3;
 /*nb time steps */		;10;
-/*n° of the age classes*/	;1;;2;;3;;4;
+/*n° of the age classes*/	;1;;2;;3;
 /*n° of the time steps */	;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;
 /* nb cells */			;995;
 /* coordinates i */		;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;;0;
@@ -3352,23 +3352,23 @@
 ;0;;1;;2;
 
 /* n° species ATLANTIC ALBACORE TUNA */	;8;
-/*nb age classes concerned */	;4;
+/*nb age classes concerned */	;3;
 /*nb time steps */		;4;
-/*n° of the age classes*/	;1;;2;;3;;4;
+/*n° of the age classes*/	;1;;2;;3;
 /*n° of the time steps */	;21;;22;;23;;24;
-/* nb cells */			;1;
-/* coordinates i */		;0;
-/* coordinates j */		;0;
+/* nb cells */			;0;
+/* coordinates i */		
+/* coordinates j */		
 
 //Egg and larval distribution (January - March)
-/* n° species BLUE WHITING */	;9;
-/*nb age classes concerned */	;1;
-/*nb time steps */		;6;
-/*n° of the age classes*/	;0;
-/*n° of the time steps */	;1;;2;;3;;4;;5;;6;
-/* nb cells */			;1;
-/* coordinates i */		;0;
-/* coordinates j */		;0;
+/* n° species BLUE WHITING */	//;9;
+/*nb age classes concerned */	//;1;
+/*nb time steps */		//;6;
+/*n° of the age classes*/	//;0;
+/*n° of the time steps */	//;1;;2;;3;;4;;5;;6;
+/* nb cells */			//;0;
+/* coordinates i */		
+/* coordinates j */		
 
 //Juvenile distribution Age-0 (April-May)
 /* n° species BLUE WHITING */	;9;
@@ -3602,14 +3602,5 @@
 ;0;;1;;2;;3;;4;;5;;6;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;;25;;26;;27;;28;;29;;30;;31;;32;;33;;34;;35;;36;;37;;38;;39;;40;;41;;47;;48;;49;
 ;0;;1;;2;;3;;4;;12;;13;;14;;15;;16;;17;;18;;19;;22;;23;;24;;25;;26;;27;;28;;29;;30;;31;;32;;33;;34;;35;;36;;37;;38;;39;;40;;41;;47;;48;;49;
 ;0;;1;;2;;3;;25;;26;;27;;28;;29;;30;;31;;32;;33;;34;;35;;36;;37;;38;;39;;40;;41;;42;;43;;44;;45;;46;;47;;48;
-
-/* n° species BLUE WHITING */	;9;
-/*nb age classes concerned */	;17;
-/*nb time steps */		;24;
-/*n° of the age classes*/	;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;
-/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
-/* nb cells */			;1;
-/* coordinates i */		;0;
-/* coordinates j */		;0;
 
 // EOF - SPECIES AREAS FILE
