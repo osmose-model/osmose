@@ -76,14 +76,14 @@
 
 // --------Atlantic BFT--------
 ;2;
-;1;        
+;1;      
 ;100;;2;
 ;100;;2;
 //These limits take into account the entire size of tunas (50-200cm), although in the model they always have 100cm
 
 // --------Atlantic ALB--------
 ;2;
-;1;        
+;1;     
 ;100;;1.5;
 ;100;;1.5;
 //These limits take into account the entire size of tunas (30-120cm), although in the model they always have 70cm
