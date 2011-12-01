@@ -173,8 +173,10 @@ public class Species {
         this.starvMaxRate = getOsmose().starvMaxRateMatrix[numSerie][index];
         this.nbAccessStages = getOsmose().nbAccessStage[index];
         this.ageStagesTab = getOsmose().accessStageThreshold[index];
-        this.dietStagesTab = getOsmose().dietStageThreshold[numSerie][index];
-        this.nbDietStages = getOsmose().nbDietsStages[numSerie][index];
+        if (getOsmose().dietsOutputMatrix[getOsmose().numSerie]) {
+            this.dietStagesTab = getOsmose().dietStageThreshold[numSerie][index];
+            this.nbDietStages = getOsmose().nbDietsStages[numSerie][index];
+        }
         /*
          * phv 2011/11/21
          * Added new parameters for species reproducing outside the simulated

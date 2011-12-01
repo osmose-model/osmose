@@ -285,6 +285,11 @@ public class School {
     }
 
     public void updateDietOutputStage(float[] thresholdTab, int nbStages) {
+
+        if (!getOsmose().dietsOutputMatrix[getOsmose().numSerie]) {
+            return;
+        }
+
         dietOutputStage = 0;
 
         if (getSimulation().dietMetric.equalsIgnoreCase("size")) {
@@ -321,8 +326,8 @@ public class School {
         int indexMax = 0;
         while ((indexMax < (cell.size() - 1))
                 && (critPreySizeMax >= ((School) cell.get(indexMax)).getLength())) {
-                indexMax++;
-            }
+            indexMax++;
+        }
         //indexMax is the index of vectBP which corresponds to the sup limit of the possible prey sizes
         //for this school, vectPresentSchools(indexMax) is not a possible prey school.
 

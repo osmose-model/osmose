@@ -294,7 +294,7 @@ public class Simulation {
              */
             rankSchoolsSizes();
 
-            if (year >= getOsmose().timeSeriesStart) // save fish biomass before predation process for diets data
+            if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) // save fish biomass before predation process for diets data
             {
                 for (int i = 0; i < species.length; i++) {
                     for (int j = 0; j < species[i].getNumberCohorts(); j++) {
