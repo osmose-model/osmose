@@ -75,18 +75,18 @@
 
 // ---- Atl_bft: Bluefin Tuna
 ;7;
-;15000;
+;15000; // min 5000 max 15000
 ;100;
 ;3; //Longevity - 1. The fish enter in the area at age 3, stay 8 time steps and leave to not come back. Younger fish compensated with predator-prey size ratios.
 
 // ---- Alt_alb: Albacore Tuna
 ;8;
-;50000;
-;70;
-;3;//Longevity - 1. The fish enter in the area at age 3, stay 8 time steps and leave to not come back.Compensated with predator-prey size ratios. Younger fish compensated with predator-prey size ratios.
+;50000; // min 20000 max 50000
+;50;
+;3;
 
 // ---- Blue_wh: Blue Whiting
 ;9;
-;100000;//Value aproximated from Carrera et al 2001
+;100000; // min 10000 max 100000
 ;8;
 ;0.3;

@@ -12,6 +12,10 @@
  * 10.2. Case "Biomass" - Target biomass for each species
  */
 ;110000;;370000;;25000;;140000;;230000;;722500;;78724;;32600;;360000;
+// Min biomass
+//;50000;;200000;;10000;;100000;;150000;;300000;;
+//Max biomass
+//;200000;;500000;;50000;;200000;;500000;;1000000;;
 /*
  * 10.2. Case "Spectrum" - Spectrum slope and intercept
  * a & b such as spectrumAbundance = Math.round(Math.pow((i*osmose.classRange)+5.,a)*Math.exp(b));
