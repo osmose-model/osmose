@@ -11,7 +11,8 @@
 /*
  * 10.2. Case "Biomass" - Target biomass for each species
  */
-;786143;;6000000;;388300;;647900;;532800;;1577268;;675972;;1369720;;460000;;10400;;74140;
+//;euphausiids;;european pilchard;;round sardinella;;european anchovy;; horse mackerel;; mackerel;;chub mackrel;;atlantic bonito;;hake;;european sprat;;blue whiting;
+;2000001;;1000000;;775;;70000;;215000;;102000;;102001;;48000;;15000;;10001;;75001;
 /*
  * 10.2. Case "Spectrum" - Spectrum slope and intercept
  * a & b such as spectrumAbundance = Math.round(Math.pow((i*osmose.classRange)+5.,a)*Math.exp(b));
