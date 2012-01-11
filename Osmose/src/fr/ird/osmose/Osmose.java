@@ -171,6 +171,14 @@ public class Osmose {
     int timeSeriesLength, timeSeriesStart;
     int[] startingSavingTimeTab;
     boolean timeSeriesIsShortened;
+    // migration
+    float[][] migrationTempMortality;
+    int[][] migrationTempAge, migrationTempDt;
+    // distribution
+    int[][] areasTempAge;
+    int[][] areasTempDt;
+    int[] areasNumSpForMap;
+    String areaDistribMethod;
     /**
      * Object for creating/writing netCDF files.
      */
@@ -1253,19 +1261,19 @@ public class Osmose {
             }
 
             st.nextToken();
-            TLoutputMatrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            TLoutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            TLDistriboutputMatrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            TLDistriboutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            dietsOutputMatrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            dietsOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
             dietsConfigFileName[numSerie] = st.sval;
             st.nextToken();
-            meanSizeOutputMatrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            meanSizeOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            sizeSpectrumOutputMatrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            sizeSpectrumOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            sizeSpectrumPerSpeOutputMatrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            sizeSpectrumPerSpeOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             if (sizeSpectrumOutputMatrix[numSerie] || sizeSpectrumPerSpeOutputMatrix[numSerie]) {
                 st.nextToken();
                 spectrumMinSize = (new Float(st.sval)).floatValue();
@@ -1275,7 +1283,7 @@ public class Osmose {
                 classRange = (new Float(st.sval)).floatValue();
             }
             st.nextToken();
-            planktonMortalityOutputMatrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            planktonMortalityOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
             outputClass0Matrix[numSerie] = (new Boolean(st.sval)).booleanValue();
             try {
@@ -1286,7 +1294,7 @@ public class Osmose {
                  * exception and set it as false by default.
                  */
                 st.nextToken();
-                spatializedOutputs[numSerie] = (new Boolean(st.sval)).booleanValue();
+                spatializedOutputs[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             } catch (Exception ex) {
                 spatializedOutputs[numSerie] = false;
             }
@@ -1478,7 +1486,6 @@ public class Osmose {
     {
         //areas data are read from file areasFile
         FileInputStream areasFile;
-        String distribMethod;
 
         try {
             areasFile = new FileInputStream(resolveFile(areasFileNameTab[numSerie]));
@@ -1495,13 +1502,13 @@ public class Osmose {
 
         try {
             st.nextToken();
-            distribMethod = st.sval;
-            if (distribMethod.equalsIgnoreCase("random")) {
+            areaDistribMethod = st.sval;
+            if (areaDistribMethod.equalsIgnoreCase("random")) {
                 /* *******RANDOM CASE********* */
                 st.nextToken();
                 speciesAreasSizeTab[numSerie] = (new Integer(st.sval)).intValue();
                 distribRandom();
-            } else if (distribMethod.equalsIgnoreCase("maps")) {
+            } else if (areaDistribMethod.equalsIgnoreCase("maps")) {
                 /* *******CASE FILE AREAS - densities or presence/absence********* */
                 if (numSimu == 0) {//1
                     //areas data are read from file areasFile
@@ -1537,10 +1544,10 @@ public class Osmose {
                                         densityMaps = false;
                                     }
 
-                                    int numSpForMap, nbAgePerMap, nbDtPerMap;
-                                    int[] tempAge;
-                                    int[] tempDt;
-
+                                    areasNumSpForMap = new int[nbMaps];
+                                    int nbAgePerMap, nbDtPerMap;
+                                    areasTempAge = new int[nbMaps][];
+                                    areasTempDt = new int[nbMaps][];
 
                                     for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                                         Species speci = simulation.getSpecies(i);
@@ -1551,20 +1558,20 @@ public class Osmose {
                                     }
 
                                     for (int i = 0; i < nbMaps; i++) {
-                                        numSpForMap = new Integer(st.sval).intValue() - 1;   //because species number between 1 and nbSpecies
+                                        areasNumSpForMap[i] = new Integer(st.sval).intValue() - 1;   //because species number between 1 and nbSpecies
                                         st.nextToken();
                                         nbAgePerMap = new Integer(st.sval).intValue();
-                                        tempAge = new int[nbAgePerMap];
+                                        areasTempAge[i] = new int[nbAgePerMap];
                                         st.nextToken();
                                         nbDtPerMap = new Integer(st.sval).intValue();
-                                        tempDt = new int[nbDtPerMap];
+                                        areasTempDt[i] = new int[nbDtPerMap];
                                         for (int k = 0; k < nbAgePerMap; k++) {
                                             st.nextToken();
-                                            tempAge[k] = new Integer(st.sval).intValue();
+                                            areasTempAge[i][k] = new Integer(st.sval).intValue();
                                         }
                                         for (int k = 0; k < nbDtPerMap; k++) {
                                             st.nextToken();
-                                            tempDt[k] = new Integer(st.sval).intValue() - 1;
+                                            areasTempDt[i][k] = new Integer(st.sval).intValue() - 1;
                                         }
                                         st.nextToken();
 
@@ -1575,13 +1582,13 @@ public class Osmose {
                                         for (int m = 0; m < nbAgePerMap; m++) {
                                             for (int n = 0; n < nbDtPerMap; n++) {
                                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                                    int tempo = tempAge[m] * nbDtMatrix[numSerie] + h;
-                                                    if ((tempAge[m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(numSpForMap).getNumberCohorts()) {
-                                                        numMap[numSpForMap][tempAge[m] * nbDtMatrix[numSerie] + h][tempDt[n]] = i;
+                                                    int tempo = areasTempAge[i][m] * nbDtMatrix[numSerie] + h;
+                                                    if ((areasTempAge[i][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[i]).getNumberCohorts()) {
+                                                        numMap[areasNumSpForMap[i]][areasTempAge[i][m] * nbDtMatrix[numSerie] + h][areasTempDt[i][n]] = i;
                                                     }
                                                     if (mapCoordi[i].length == 0) {
-                                                        if (!simulation.getSpecies(numSpForMap).getCohort((tempAge[m] * nbDtMatrix[numSerie]) + h).isOut(tempDt[n])) {
-                                                            System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(numSpForMap).getName());
+                                                        if (!simulation.getSpecies(areasNumSpForMap[i]).getCohort((areasTempAge[i][m] * nbDtMatrix[numSerie]) + h).isOut(areasTempDt[i][n])) {
+                                                            System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(areasNumSpForMap[i]).getName());
                                                         }
                                                     }
                                                 }
@@ -1773,8 +1780,9 @@ public class Osmose {
 
             int nbSpOutOfZone, numSpOutOfZone;
             int nbAgePerCase, nbDtPerCase;
-            float tempMortality;
-            int[] tempAge, tempDt;
+            migrationTempAge = new int[nbSpeciesTab[numSerie]][];
+            migrationTempDt = new int[nbSpeciesTab[numSerie]][];
+            migrationTempMortality = new float[nbSpeciesTab[numSerie]][];
 
             try {
                 st.nextToken();
@@ -1787,27 +1795,28 @@ public class Osmose {
                         numSpOutOfZone = (new Integer(st.sval)).intValue();
                         st.nextToken();
                         nbAgePerCase = new Integer(st.sval).intValue();
-                        tempAge = new int[nbAgePerCase];
                         st.nextToken();
                         nbDtPerCase = new Integer(st.sval).intValue();
-                        tempDt = new int[nbDtPerCase];
+                        migrationTempAge[numSpOutOfZone - 1] = new int[nbAgePerCase];
+                        migrationTempDt[numSpOutOfZone - 1] = new int[nbDtPerCase];
+                        migrationTempMortality[numSpOutOfZone - 1] = new float[nbAgePerCase];
 
                         for (int k = 0; k < nbAgePerCase; k++) {
                             st.nextToken();
-                            tempAge[k] = new Integer(st.sval).intValue();
+                            migrationTempAge[numSpOutOfZone - 1][k] = new Integer(st.sval).intValue();
                         }
                         for (int k = 0; k < nbDtPerCase; k++) {
                             st.nextToken();
-                            tempDt[k] = new Integer(st.sval).intValue() - 1;
+                            migrationTempDt[numSpOutOfZone - 1][k] = new Integer(st.sval).intValue() - 1;
                         }
 
                         for (int m = 0; m < nbAgePerCase; m++) {
                             st.nextToken();
-                            tempMortality = (new Float(st.sval)).floatValue();
+                            migrationTempMortality[numSpOutOfZone - 1][m] = (new Float(st.sval)).floatValue();
                             for (int n = 0; n < nbDtPerCase; n++) {
                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).setOut(tempDt[n], true);
-                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(tempAge[m] * nbDtMatrix[numSerie] + h).setOutMortality(tempDt[n], tempMortality);
+                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(migrationTempAge[numSpOutOfZone - 1][m] * nbDtMatrix[numSerie] + h).setOut(migrationTempDt[numSpOutOfZone - 1][n], true);
+                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(migrationTempAge[numSpOutOfZone - 1][m] * nbDtMatrix[numSerie] + h).setOutMortality(migrationTempDt[numSpOutOfZone - 1][n], migrationTempMortality[numSpOutOfZone - 1][m]);
                                 }
                             }
                         }
@@ -2111,6 +2120,10 @@ public class Osmose {
 
     }
 
+    /*
+     * phv 2011/12/07 obsolete function. Parameters and options added by
+     * Morgane have not been included here.
+     */
     public void saveInputParameters(File targetPath, String inputFileName, int nSerie) {
 
         FileOutputStream inputFile;
@@ -2811,5 +2824,20 @@ public class Osmose {
         } catch (Exception e) {
             return filename;
         }
+    }
+
+    public void initAll(String args[]) {
+
+        loadArgs(args);
+        initSimulation();
+        initializeOptions();
+        loadMPAs();
+        initializeOptions();
+        simulation = new Simulation();
+        simulation.init();
+        readMigrationFile();
+        initializeSpeciesAreas();
+        initializeOutputData();
+        readMigrationFile();
     }
 }

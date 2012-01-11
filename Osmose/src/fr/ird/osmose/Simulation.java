@@ -294,8 +294,11 @@ public class Simulation {
              */
             rankSchoolsSizes();
 
-            if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) // save fish biomass before predation process for diets data
-            {
+            /* 
+             * save fish biomass before predation process for diets data
+             * (last column of predatorPressure output file in Diets/)
+             */
+            if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
                 for (int i = 0; i < species.length; i++) {
                     for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                         for (int k = 0; k < species[i].getCohort(j).size(); k++) {
@@ -1188,7 +1191,13 @@ public class Simulation {
             }
             for (int ispec = 0; ispec < getNbSpecies(); ispec++) {
                 if (nbSchools[ispec] > 0) {
+                    /*
+                     * phv 2011/12/08 no good !! mean size must weighted by abundance !
+                     */
                     mean_size[ispec][cell.get_igrid()][cell.get_jgrid()] /= nbSchools[ispec];
+                    /*
+                     * phv 2011/12/07 no good !! tl must weighted by biomass !
+                     */
                     tl[ispec][cell.get_igrid()][cell.get_jgrid()] /= nbSchools[ispec];
                 }
             }
