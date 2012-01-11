@@ -60,7 +60,7 @@
  * 11. Ouput filename
  * File specifying which indicators have to be provided
  */
-;gob-output;
+;gob-output-clbr;
 /*
  * 12. Accessibilities filename
  * 'default' means accessibility = 1
