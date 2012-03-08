@@ -952,7 +952,7 @@ public class Simulation {
                     cohij.setAbundanceCatchable(0);
                     for (int k = 0; k < cohij.size(); k++) {
                         School schoolk = (School) cohij.getSchool(k);
-                        if (schoolk.getCell().isMPA()) {
+                        if (schoolk.isUnlocated() || schoolk.getCell().isMPA()) {
                             schoolk.setCatchable(false);
                         } else {
                             schoolk.setCatchable(true);
