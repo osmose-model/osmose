@@ -254,7 +254,7 @@ public class Osmose {
                  * Delete older output directory and all its content
                  */
                 File targetPath = new File(outputPathName + outputFileNameTab[numSerie]);
-                if (targetPath.exists()) {
+                if ((numSimu == 0) && targetPath.exists()) {
                     IOTools.deleteDirectory(targetPath);
                 }
                 if (spatializedOutputs[numSerie]) {
@@ -2833,6 +2833,9 @@ public class Osmose {
         initializeOptions();
         loadMPAs();
         initializeOptions();
+        if (spatializedOutputs[numSerie]) {
+            createNCFile(numSerie);
+        }
         simulation = new Simulation();
         simulation.init();
         readMigrationFile();
