@@ -90,7 +90,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     public void initPlanktonMap() {
 
         NetcdfFile ncIn = null;
-        String ncpathname = getOsmose().inputPathName + getOsmose().fileSeparator + gridFileName;
+        String ncpathname = getOsmose().resolveFile(gridFileName);
         try {
             ncIn = NetcdfFile.open(ncpathname, null);
         } catch (IOException ex) {
@@ -156,7 +156,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
-        String nameTemp = getOsmose().inputPathName + File.separator + planktonFileListNetcdf[dt];
+        String nameTemp = getOsmose().resolveFile(planktonFileListNetcdf[dt]);
         readNetCDFFile(nameTemp);
         mapInterpolation();
         if (getSimulation().getYear() >= getOsmose().timeSeriesStart) {
