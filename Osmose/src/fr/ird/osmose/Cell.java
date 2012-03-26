@@ -119,6 +119,11 @@ public class Cell extends ArrayList<School> {
         jcoordLTLGrid = new Vector();
     }
 
+    @Override
+    public Cell clone() {
+        return new Cell(this.i, this.j, this.lat, this.lon, this.isLand());
+    }
+
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////

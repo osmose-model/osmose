@@ -1663,6 +1663,35 @@ public class Osmose {
         simulation.distributeSpeciesIni();
     }
 
+    public List<Cell> getMap(int numMap) {
+
+        int length = mapCoordi[numMap].length;
+        List<Cell> list = new ArrayList(length);
+        for (int k = 0; k < length; k++) {
+            list.add(getGrid().getCell(mapCoordi[numMap][k], mapCoordj[numMap][k]));
+        }
+        return list;
+    }
+
+    public String getMapDetails(int numMap) {
+        StringBuilder str = new StringBuilder();
+        str.append("Map: ");
+        str.append(numMap);
+        str.append(" - Species: ");
+        str.append(getSimulation().getSpecies(areasNumSpForMap[numMap]).getName());
+        str.append(" - Age class: ");
+        for (int k = 0; k < areasTempAge[numMap].length; k++) {
+            str.append(areasTempAge[numMap][k]);
+            str.append(" ");
+        }
+        str.append("- Time step: ");
+        for (int k = 0; k < areasTempDt[numMap].length; k++) {
+            str.append(areasTempDt[numMap][k]);
+            str.append(" ");
+        }
+        return str.toString();
+    }
+
     public void distribRandom() {
 
         simulation.randomDistribution = true;
@@ -2113,7 +2142,7 @@ public class Osmose {
         targetPath = new File(outputPathName + outputFileNameTab[nSerie]);
         targetPath.mkdirs();
 
-        saveInputParameters(targetPath, inputFileName, nSerie);
+        //saveInputParameters(targetPath, inputFileName, nSerie);
         if (calibrationMatrix[nSerie]) {
             saveBIOMData(targetPath, inputFileName, biomFileName);
         }
