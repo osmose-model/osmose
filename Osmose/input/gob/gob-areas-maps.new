@@ -1,0 +1,553 @@
+/////////////////////
+//
+// SPECIES AREAS FILE
+//
+/////////////////////
+//
+// Species areas coordinates
+/*
+ * 7.1. Type of distribution
+ * Either 'random' or 'maps'
+ * For 'random' refer to file afs-areas-random since they are not implemented the
+ * same way.
+ */
+;csv;
+/*
+ * 7.2. Total number of maps
+ * Including empty maps (= when species migrates out of zone)
+ */
+;65; 
+/*
+ * 7.3. Distribution maps
+ */
+/// Larvae and juvenile distribution (january-march)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;
+/*csv file of the map */	;maps/map01-anchovy.csv;
+
+//Larvae and juvenile distribution (april)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;7;;8;
+/*csv file of the map */	;maps/map02-anchovy.csv;
+
+//Larvae and juvenile distribution (may)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;9;;10;
+/*csv file of the map */	;maps/map03-anchovy.csv;
+
+//Larvae and juvenile distribution (june)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;11;;12;
+/*csv file of the map */	;maps/map04-anchovy.csv;
+
+//Larvae and juvenile distribution (july)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;13;;14;
+/*csv file of the map */	;maps/map05-anchovy.csv;
+
+//Larvae and juvenile distribution (august)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;15;;16;
+/*csv file of the map */	;maps/map06-anchovy.csv;
+
+//Larvae and juvenile distribution (september)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;17;;18;
+/*csv file of the map */	;maps/map07-anchovy.csv;
+
+//Larvae and juvenile distribution (October)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;19;;20;
+/*csv file of the map */	;maps/map08-anchovy.csv;
+
+//Larvae and juvenile distribution (November-December)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;21;;22;;23;;24;
+/*csv file of the map */	;maps/map09-anchovy.csv;
+
+//Adult distribution (January-February)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;5;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;
+/*n° of the time steps */	;1;;2;;3;;4;
+/*csv file of the map */	;maps/map10-anchovy.csv;
+
+
+//Adult distribution(March)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;5;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;
+/*n° of the time steps */	;5;;6;
+/*csv file of the map */	;maps/map11-anchovy.csv;
+ 
+
+//Adult (April)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;5;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;
+/*n° of the time steps */	;7;;8;
+/*csv file of the map */	;maps/map12-anchovy.csv;
+
+//Adult (May)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;5;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;
+/*n° of the time steps */	;9;;10;
+/*csv file of the map */	;maps/map13-anchovy.csv;
+
+//Adult (June-July)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;5;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;
+/*n° of the time steps */	;11;;12;
+/*csv file of the map */	;maps/map14-anchovy.csv;
+
+//Adult (August)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;5;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;
+/*n° of the time steps */	;13;;14;
+/*csv file of the map */	;maps/map15-anchovy.csv;
+
+//Adult (September-December)
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;5;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;
+/*n° of the time steps */	;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map16-anchovy.csv;
+
+
+//Sardine larvae (January - February)
+/* n° species SARDINE */	;2;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;
+/*csv file of the map */	;maps/map17-sardine.csv;
+
+//Sardine larvae (March-May)
+/* n° species SARDINE */	;2;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;5;;6;;7;;8;;9;;10;
+/*csv file of the map */	;maps/map18-sardine.csv;
+
+
+//Sardine larvae (June - December)
+/* n° species SARDINE */	;2;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;14;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map19-sardine.csv;
+
+//Sardine juveniles Age-1 (January - December)
+/* n° species SARDINE */	;2;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map20-sardine.csv;
+
+//Sardine Adults (Age-2+) (January-February)
+/* n° species SARDINE */	;2;
+/*nb age classes concerned */	;9;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;2;;3;;4;;5;;6;;7;;8;;9;;10;
+/*n° of the time steps */	;1;;2;;3;;4;
+/*csv file of the map */	;maps/map21-sardine.csv;
+
+//Sardine Adults (Age-2+) (march-May)
+/* n° species SARDINE */	;2;
+/*nb age classes concerned */	;9;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;2;;3;;4;;5;;6;;7;;8;;9;;10;
+/*n° of the time steps */	;5;;6;;7;;8;;9;;10;
+/*csv file of the map */	;maps/map22-sardine.csv;
+
+//Sardine Adult (Age 2+) (June-December)
+/* n° species SARDINE */	;2;
+/*nb age classes concerned */	;9;
+/*nb time steps */		;14;
+/*n° of the age classes*/	;2;;3;;4;;5;;6;;7;;8;;9;;10;
+/*n° of the time steps */	;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map23-sardine.csv;
+
+//Egg distribution (January - April)
+/* n° species SOUTHERN HAKE  */	;3;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;8;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;
+// distribution based on Sanchez and Gil, 2000:
+/*csv file of the map */	;maps/map24-shake.csv;
+
+//Egg distribution (May - June)
+/* n° species SOUTHERN HAKE  */	;3;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;9;;10;;11;;12;
+// distribution based on Sanchez and Gil, 2000:
+/*csv file of the map */	;maps/map25-shake.csv;
+
+
+//Egg distribution (July - December)
+/* n° species SOUTHERN HAKE  */	;3;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+// distribution based on Sanchez and Gil, 2000:
+/*csv file of the map */	;maps/map26-shake.csv;
+
+//Juvenile distributio Age 1-2 (January - December)
+/* n° species  SOUTHERN HAKE */	;3;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map27-shake.csv;
+
+//Adult distribution Age-3+ (January - July)
+/* n° species  SOUTHERN HAKE */	;3;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map28-shake.csv;
+
+
+//Adult distribution Age-3+ (August - December)
+/* n° species  SOUTHERN HAKE */	;3;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map29-shake.csv;
+
+
+//Egg distribution (January - February)
+/*n° species NORTHERN HAKE */		;4;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;
+/*csv file of the map */	;maps/map30-nhake.csv;
+
+//Egg distribution (March)
+/*n° species NORTHERN HAKE */		;4;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;5;;6;
+/*csv file of the map */	;maps/map31-nhake.csv;
+
+//Egg distribution (April)
+/*n° species NORTHERN HAKE */		;4;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;7;;8;
+// distribution based on Alvarez et al., 2001:
+/*csv file of the map */	;maps/map32-nhake.csv;
+
+//Egg distribution (May - June)
+/*n° species NORTHERN HAKE */		;4;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;9;;10;;11;;12;
+// distribution based on Alvarez et al., 2001:
+/*csv file of the map */	;maps/map33-nhake.csv;
+
+//Juvenile distribution (July - December)
+/*n° species NORTHERN HAKE */		;4;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+// distribution based on Alvarez et al., 2001:
+/*csv file of the map */	;maps/map34-nhake.csv;
+
+//Juvenile distribution Age 1-2 (january - December)
+/* n° species NORTHERN HAKE */	;4;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map35-nhake.csv;
+
+//Adult distribution Age 3+ (January - July)
+/* n° species NORTHERN HAKE */	;4;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;14;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;
+/*csv file of the map */	;maps/map36-nhake.csv;
+
+//Adult distribution Age 3+ (August - December)
+/* n° species NORTHERN HAKE */	;4;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map37-nhake.csv;
+
+// Juvenile distribution (January - February)
+/* n° species HORSE MACKEREL */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;
+/*csv file of the map */	;maps/map38-horse_mack.csv;
+
+// Egg distribution (March - April)
+/* n° species HORSE MACKEREL */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;5;;6;;7;;8;
+/*csv file of the map */	;maps/map39-horse_mack.csv;
+
+// Egg distribution (May - June)
+/* n° species HORSE MACKEREL */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;9;;10;;11;;12;
+/*csv file of the map */	;maps/map40-horse_mack.csv;
+
+// Juvenile distribution (July - December)
+/* n° species HORSE MACKEREL */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map41-horse_mack.csv;
+
+// Juvenile distribution Age 1-2 (January - December)
+/* n° species HORSE MACKEREL */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map42-horse_mack.csv;
+
+// Adult distribution Age 3+ (January - February)
+/* n° species HORSE MACKEREL */	;5;
+/*nb age classes concerned */	;29;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;;25;;26;;27;;28;;29;;30;
+/*n° of the time steps */	;1;;2;;3;;4;
+/*csv file of the map */	;maps/map43-horse_mack.csv;
+
+
+//Adult distribution Age 3+ (March-August)
+/* n° species HORSE MACKEREL */	;5;
+/*nb age classes concerned */	;29;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;;25;;26;;27;;28;;29;;30;
+/*n° of the time steps */	;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;
+/*csv file of the map */	;maps/map44-horse_mack.csv;
+
+//Adult distribution Age 3+ (September December)
+/* n° species HORSE MACKEREL */	;5;
+/*nb age classes concerned */	;29;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;;25;;26;;27;;28;;29;;30;
+/*n° of the time steps */	;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map45-horse_mack.csv;
+
+//Juvenile distribution (Age 0) (January-February)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;
+/*csv file of the map */	;maps/map46-Atl_mack.csv;
+
+//Egg distribution (Age 0) (March - July)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;
+/*csv file of the map */	;maps/map47-Atl_mack.csv;
+
+//Juvenile distribution (Age 0) (August - December)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map48-Atl_mack.csv;
+
+// Juvenil1 (Age 1-2) distribution (January - December)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map49-Atl_mack.csv;
+
+// Juvenile (Age +3) distribution (January)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;1;;2;
+/*csv file of the map */	;maps/map50-Atl_mack.csv;
+
+// Juvenile (Age +3) distribution (February)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;3;;4;
+/*csv file of the map */	;maps/map51-Atl_mack.csv;
+
+// Juvenile (Age +3) distribution (March - May)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;5;;6;;7;;8;;9;;10;
+/*csv file of the map */	;maps/map52-Atl_mack.csv;
+
+// Juvenile (Age +3) distribution (June )
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;2;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;11;;12;
+/*csv file of the map */	;maps/map53-Atl_mack.csv;
+
+// Juvenile (Age +3) distribution (July - August)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;13;;14;;15;;16;
+/*csv file of the map */	;maps/map54-Atl_mack.csv;
+
+// Juvenile (Age +3) distribution (September - December)
+/* n° species ATLANTIC MACKEREL */	;6;
+/*nb age classes concerned */	;9;
+/*nb time steps */		;8;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;;11;
+/*n° of the time steps */	;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;null;	
+
+/* n° species ATLANTIC BLUEFIN TUNA */	;7;
+/*nb age classes concerned */	;3;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;1;;2;;3;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;
+/*csv file of the map */	;null;	
+
+
+/* n° species ATLANTIC BLUEFIN TUNA */	;7;
+/*nb age classes concerned */	;3;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;1;;2;;3;
+/*n° of the time steps */	;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;
+/*csv file of the map */	;maps/map57-Atl_bft.csv;
+
+/* n° species ATLANTIC BLUEFIN TUNA */	;7;
+/*nb age classes concerned */	;3;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;1;;2;;3;
+/*n° of the time steps */	;21;;22;;23;;24;
+/*csv file of the map */	;null;		
+
+/* n° species ATLANTIC ALBACORE TUNA */	;8;
+/*nb age classes concerned */	;3;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;1;;2;;3;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;
+/*csv file of the map */	;null;		
+
+/* n° species ATLANTIC ALBACORE TUNA */	;8;
+/*nb age classes concerned */	;3;
+/*nb time steps */		;10;
+/*n° of the age classes*/	;1;;2;;3;
+/*n° of the time steps */	;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;
+/*csv file of the map */	;maps/map60-Atl_alb.csv;
+
+/* n° species ATLANTIC ALBACORE TUNA */	;8;
+/*nb age classes concerned */	;3;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;1;;2;;3;
+/*n° of the time steps */	;21;;22;;23;;24;
+/*csv file of the map */	;null;		
+		
+
+//Juvenile distribution Age-0 (April-May)
+/* n° species BLUE WHITING */	;9;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;4;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;7;;8;;9;;10;
+/*csv file of the map */	;maps/map62-Blue_wh.csv;
+
+//Juvenile distribution Age-0 (June-December)
+/* n° species BLUE WHITING */	;9;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;14;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map63-Blue_wh.csv;
+
+// Juvenile distribution Age 1 (January December)
+/* n° species BLUE WHITING */	;9;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map64-Blue_wh.csv;
+
+// Juvenile distribution Age 2-3 (January December)
+/* n° species BLUE WHITING */	;9;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;2;;3;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map65-Blue_wh.csv;
+
+// EOF - SPECIES AREAS FILE
