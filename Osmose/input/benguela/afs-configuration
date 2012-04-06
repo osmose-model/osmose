@@ -35,7 +35,7 @@
  * 3.5. Duration of the simulation
  * Unit = number of years
  */
-;10;
+;20;
 /*
  * 3.6. Number of time steps per year
  * For instance nb time-step = 24 ==> dt = 15 days
