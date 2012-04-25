@@ -25,8 +25,11 @@
 /*  
  * 10.3. Larval mortality for each species 
  */
-;10.36;;10.68;;6.47;;0.45;;0.81;;2.57; // from calibration 20020207
-;6;;3;;2.5; // the last three species that don't get calibrated
+//;10.36;;10.68;;6.47;;0.45;;0.81;;2.57; // from calibration 20020207
+//;6;;3;;2.5; // the last three species that don't get calibrated
+//;8.360448;;2.241460;;7.492052;;4.0338263;;2.191358;;2.679056;;6;;3;;2.5; // from prelimonary calib es-ricardo 20020412
+;8.2;;3.5;;6.8;;3.1;;1.4;;2.5;;6;;3;;2.5; // from calibration with ag roliveros
+//
 //;2.5;;2.50;;4.5;;3.2;;1.9;;6;;6;;3;;2.5; // initial guess
 /*
  * 10.4. Min age for biomass
@@ -36,7 +39,8 @@
  * Accessibility plakotn coefficients
  */
 //;0.000577234;;0.00541438;;0.00948318;;0.112514; // initial guess
-;0.46496870;;0.02457339;;0.07175958;;0.11323922; // from calibration 20020207
+//;0.46496870;;0.02457339;;0.07175958;;0.11323922; // from calibration 20020207
+;0.00016;;0.00184;;0.000331;;0.16; // from calibration with ag roliveros
 //
 // EOF - CALIBRATION
 ////////////////////
