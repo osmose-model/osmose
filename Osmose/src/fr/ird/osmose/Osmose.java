@@ -14,6 +14,8 @@ package fr.ird.osmose;
  * @version 2.1
  ******************************************************************************* 
  */
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.util.IOTools;
 import java.io.*;
 import java.util.*;
@@ -271,7 +273,7 @@ public class Osmose {
                     readMigrationFile();
                     System.out.println("migration caracteristics initialized");
 
-                    initializeSpeciesAreas();
+                    readAreaFile();
                     System.out.println("areas initialized");
 
                     //in initialiserSpeciesareas, save in tabTemp the areas by cohort
@@ -299,7 +301,7 @@ public class Osmose {
                     simulation.init();
 
                     readMigrationFile();
-                    initializeSpeciesAreas();
+                    readAreaFile();
                     System.out.println();
                 }
 
@@ -1482,185 +1484,417 @@ public class Osmose {
         }
     }
 
-    public void initializeSpeciesAreas() //must be done after coast
-    {
-        //areas data are read from file areasFile
-        FileInputStream areasFile;
+    public void writeMapsAsCSV() {
 
+        int numberMaps = mapCoordi.length;
+        for (int k = 0; k < numberMaps; k++) {
+            try {
+                List<Cell> map = getMap(k);
+                String fileName = "maps/map" + numMapToString(k + 1, numberMaps) + "-" + getSimulation().getSpecies(areasNumSpForMap[k]).getName().trim() + ".csv";
+                CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+                // Golf of Lyons
+                /*
+                for (int j = getGrid().getNbColumns() - 1; j >= 0; j--) {
+                String[] entries = new String[getGrid().getNbLines()];
+                for (int i = 0; i < getGrid().getNbLines(); i++) {
+                if (getGrid().getCell(i, j).isLand()) {
+                entries[i] = String.valueOf(-99);
+                } else if (map.contains(getGrid().getCell(i, j))) {
+                entries[i] = String.valueOf(1);
+                } else {
+                entries[i] = String.valueOf(0);
+                }
+                }
+                writer.writeNext(entries);
+                }*/
+                // Benguela
+                for (int i = 0; i < getGrid().getNbLines(); i++) {
+                    String[] entries = new String[getGrid().getNbColumns()];
+                    for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                        if (getGrid().getCell(i, j).isLand()) {
+                            entries[j] = String.valueOf(-99);
+                        } else if (map.contains(getGrid().getCell(i, j))) {
+                            entries[j] = String.valueOf(1);
+                        } else {
+                            entries[j] = String.valueOf(0);
+                        }
+                    }
+                    writer.writeNext(entries);
+                }
+                writer.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+
+        }
+    }
+
+    private String numMapToString(int numMap, int numberMaps) {
+
+        String snumMap = String.valueOf(numMap);
+        int lengthNumberMaps = String.valueOf(numberMaps).length();
+        while (snumMap.length() < lengthNumberMaps) {
+            snumMap = "0" + snumMap;
+        }
+        return snumMap;
+    }
+
+    public void readAreaFile() {
+
+        /*
+         * Open areas-maps configuration file
+         */
+        FileInputStream areasFile;
         try {
             areasFile = new FileInputStream(resolveFile(areasFileNameTab[numSerie]));
         } catch (FileNotFoundException ex) {
             System.out.println("Error while opening areasFile");
             return;
         }
-
+        /*
+         * Initialize the reader
+         */
         Reader r = new BufferedReader(new InputStreamReader(areasFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-
         try {
             st.nextToken();
             areaDistribMethod = st.sval;
             if (areaDistribMethod.equalsIgnoreCase("random")) {
-                /* *******RANDOM CASE********* */
+                /*
+                 * RANDOM distribution
+                 */
                 st.nextToken();
                 speciesAreasSizeTab[numSerie] = (new Integer(st.sval)).intValue();
                 distribRandom();
             } else if (areaDistribMethod.equalsIgnoreCase("maps")) {
-                /* *******CASE FILE AREAS - densities or presence/absence********* */
-                if (numSimu == 0) {//1
-                    //areas data are read from file areasFile
+                /*
+                 * Distribution from MAPS
+                 * Maps are defined directly in the area configuration file
+                 */
+                if (numSimu == 0) {
+                    readAreaMAPS(st);
+                }
+                simulation.randomDistribution = false;
+            } else if (areaDistribMethod.equalsIgnoreCase("csv")) {
+                /*
+                 * Distribution from MAPS
+                 * Maps are defined in separated CSV files
+                 */
+                if (numSimu == 0) {
+                    readAreaCSV(st);
+                }
+                simulation.randomDistribution = false;
+            } else {
+                /*
+                 * Error in 1st entry of area file
+                 */
+                throw new UnsupportedOperationException("Distribution method is either 'random' | 'maps' | 'csv'");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                r.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        /*
+         * Initial distribution of the scools
+         */
+        simulation.distributeSpeciesIni();
+    }
 
-                    st.nextToken();
-                    if (new Integer(st.sval).intValue() == gridLinesTab[numSerie]) {//3
+    private void readAreaCSV(StreamTokenizer st) throws IOException {
+        /*
+         * get number of maps
+         */
+        st.nextToken();
+        int nbMaps = new Integer(st.sval).intValue();
+        /*
+         * initialize arrays
+         */
+        mapCoordi = new int[nbMaps][];
+        mapCoordj = new int[nbMaps][];
+        mapProbaPresence = new float[nbMaps][];
+        areasNumSpForMap = new int[nbMaps];
+        areasTempAge = new int[nbMaps][];
+        areasTempDt = new int[nbMaps][];
+        numMap = new int[nbSpeciesTab[numSerie]][][];
+        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            Species speci = simulation.getSpecies(i);
+            numMap[i] = new int[speci.getNumberCohorts()][];
+            for (int j = 0; j < speci.getNumberCohorts(); j++) {
+                numMap[i][j] = new int[nbDtMatrix[numSerie]];
+            }
+        }
+        /*
+         * Loop over the maps
+         */
+        for (int indexMap = 0; indexMap < nbMaps; indexMap++) {
+            /*
+             * read species number
+             */
+            st.nextToken();
+            areasNumSpForMap[indexMap] = new Integer(st.sval).intValue() - 1;   //because species number between 1 and nbSpecies
+            /*
+             * read number of class ages concerned by this map
+             */
+            st.nextToken();
+            int nbAgePerMap = new Integer(st.sval).intValue();
+            areasTempAge[indexMap] = new int[nbAgePerMap];
+            /*
+             * read number of time step over the year concerned by this map
+             */
+            st.nextToken();
+            int nbDtPerMap = new Integer(st.sval).intValue();
+            areasTempDt[indexMap] = new int[nbDtPerMap];
+            /*
+             * read the age classes concerned by this map
+             */
+            for (int k = 0; k < nbAgePerMap; k++) {
+                st.nextToken();
+                areasTempAge[indexMap][k] = new Integer(st.sval).intValue();
+            }
+            /*
+             * read the time steps over the year concerned by this map
+             */
+            for (int k = 0; k < nbDtPerMap; k++) {
+                st.nextToken();
+                areasTempDt[indexMap][k] = new Integer(st.sval).intValue() - 1;
+            }
+            /*
+             * read the name of the CSV file and load the map
+             * if name = "null" it means the species is out of the simulated
+             * domain at these age-class and time-step
+             */
+            st.nextToken();
+            if (!"null".equals(st.sval)) {
+                String csvFile = resolveFile(st.sval);
+                readCSVMap(csvFile, indexMap);
+            }
+        }
+    }
+
+    private void readCSVMap(String csvFile, int indexMap) {
+
+        try {
+            /*
+             * Read the CSV file
+             */
+            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            List<String[]> lines = reader.readAll();
+            /*
+             * Get the number of cells for the map
+             * phv 28 march 2012 - it is a loss of time to do twice the loop
+             * over the CSV file but no choice at the moment without changing
+             * mapCoordi, mapCoordj
+             */
+            int nbCells = 0;
+            for (String[] line : lines) {
+                for (String str : line) {
+                    if (Integer.valueOf(str) > 0) {
+                        nbCells++;
+                    }
+                }
+            }
+            /*
+             * Initialize the arrays
+             */
+            mapCoordi[indexMap] = new int[nbCells];
+            mapCoordj[indexMap] = new int[nbCells];
+            mapProbaPresence[indexMap] = new float[nbCells];
+            /*
+             * Set the numero of maps per species, age class and time step
+             */
+            for (int m = 0; m < areasTempAge[indexMap].length; m++) {
+                for (int n = 0; n < areasTempDt[indexMap].length; n++) {
+                    for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
+                        if ((areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[indexMap]).getNumberCohorts()) {
+                            numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h][areasTempDt[indexMap][n]] = indexMap;
+                        }
+                        if (mapCoordi[indexMap].length == 0) {
+                            if (!simulation.getSpecies(areasNumSpForMap[indexMap]).getCohort((areasTempAge[indexMap][m] * nbDtMatrix[numSerie]) + h).isOut(areasTempDt[indexMap][n])) {
+                                System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(areasNumSpForMap[indexMap]).getName());
+                            }
+                        }
+                    }
+                }
+            }
+            /*
+             * Identify the coordinates of the cells and set the probability
+             */
+            int indexCell = 0;
+            float invNbCells = 1.f / nbCells;
+            for (int i = 0; i < lines.size(); i++) {
+                String[] line = lines.get(i);
+                for (int j = 0; j < line.length; j++) {
+                    float val = Float.valueOf(line[j]);
+                    if (val > 0.f) {
+                        mapCoordi[indexMap][indexCell] = i;
+                        mapCoordj[indexMap][indexCell] = j;
+                        if (val < 1.f) {
+                            /*
+                             * value provided is directly a probability
+                             */
+                            mapProbaPresence[indexMap][indexCell] = val;
+                        } else if (val == 1.f) {
+                            /*
+                             * map is presence/absence so equal probability
+                             * of presence among cells
+                             */
+                            mapProbaPresence[indexMap][indexCell] = invNbCells;
+                            /*
+                             * else mapProbaPresence[indexMap][indexCell] = 0
+                             * default value at initialization of the array
+                             */
+                        }
+                        indexCell++;
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //System.out.println("Read CSV file " + csvFile + " [OK]");
+    }
+
+    public void readAreaMAPS(StreamTokenizer st) throws IOException {
+
+        /* *******CASE FILE AREAS - densities or presence/absence********* */
+        //areas data are read from file areasFile
+
+        st.nextToken();
+        if (new Integer(st.sval).intValue() == gridLinesTab[numSerie]) {//3
+            st.nextToken();
+            if (new Integer(st.sval).intValue() == gridColumnsTab[numSerie]) {//3
+                st.nextToken();
+
+                if (new Integer(st.sval).intValue() == nbSpeciesTab[numSerie]) {//4
+                    boolean okForLongevity = true;
+                    for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                         st.nextToken();
-                        if (new Integer(st.sval).intValue() == gridColumnsTab[numSerie]) {//3
+                        if (new Float(st.sval).floatValue() != longevityMatrix[numSerie][i]) {
+                            okForLongevity = false;
+                        }
+                    }
+
+                    if (okForLongevity) {//5
+                        numMap = new int[nbSpeciesTab[numSerie]][][];
+                        int nbMaps;
+                        st.nextToken();
+                        nbMaps = new Integer(st.sval).intValue();
+                        mapCoordi = new int[nbMaps][];
+                        mapCoordj = new int[nbMaps][];
+                        mapProbaPresence = new float[nbMaps][];
+
+                        st.nextToken();
+                        if ((st.sval).equalsIgnoreCase("density")) {
+                            densityMaps = true;
+                        } else {
+                            densityMaps = false;
+                        }
+
+                        areasNumSpForMap = new int[nbMaps];
+                        int nbAgePerMap, nbDtPerMap;
+                        areasTempAge = new int[nbMaps][];
+                        areasTempDt = new int[nbMaps][];
+
+                        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                            Species speci = simulation.getSpecies(i);
+                            numMap[i] = new int[speci.getNumberCohorts()][];
+                            for (int j = 0; j < speci.getNumberCohorts(); j++) {
+                                numMap[i][j] = new int[nbDtMatrix[numSerie]];
+                            }
+                        }
+
+                        for (int i = 0; i < nbMaps; i++) {
+                            areasNumSpForMap[i] = new Integer(st.sval).intValue() - 1;   //because species number between 1 and nbSpecies
+                            st.nextToken();
+                            nbAgePerMap = new Integer(st.sval).intValue();
+                            areasTempAge[i] = new int[nbAgePerMap];
+                            st.nextToken();
+                            nbDtPerMap = new Integer(st.sval).intValue();
+                            areasTempDt[i] = new int[nbDtPerMap];
+                            for (int k = 0; k < nbAgePerMap; k++) {
+                                st.nextToken();
+                                areasTempAge[i][k] = new Integer(st.sval).intValue();
+                            }
+                            for (int k = 0; k < nbDtPerMap; k++) {
+                                st.nextToken();
+                                areasTempDt[i][k] = new Integer(st.sval).intValue() - 1;
+                            }
                             st.nextToken();
 
-                            if (new Integer(st.sval).intValue() == nbSpeciesTab[numSerie]) {//4
-                                boolean okForLongevity = true;
-                                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                                    st.nextToken();
-                                    if (new Float(st.sval).floatValue() != longevityMatrix[numSerie][i]) {
-                                        okForLongevity = false;
+                            mapCoordi[i] = new int[(new Integer(st.sval).intValue())];
+                            mapCoordj[i] = new int[(new Integer(st.sval).intValue())];
+                            mapProbaPresence[i] = new float[new Integer(st.sval).intValue()];
+
+                            for (int m = 0; m < nbAgePerMap; m++) {
+                                for (int n = 0; n < nbDtPerMap; n++) {
+                                    for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
+                                        int tempo = areasTempAge[i][m] * nbDtMatrix[numSerie] + h;
+                                        if ((areasTempAge[i][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[i]).getNumberCohorts()) {
+                                            numMap[areasNumSpForMap[i]][areasTempAge[i][m] * nbDtMatrix[numSerie] + h][areasTempDt[i][n]] = i;
+                                        }
+                                        if (mapCoordi[i].length == 0) {
+                                            if (!simulation.getSpecies(areasNumSpForMap[i]).getCohort((areasTempAge[i][m] * nbDtMatrix[numSerie]) + h).isOut(areasTempDt[i][n])) {
+                                                System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(areasNumSpForMap[i]).getName());
+                                            }
+                                        }
                                     }
                                 }
-
-                                if (okForLongevity) {//5
-                                    numMap = new int[nbSpeciesTab[numSerie]][][];
-                                    int nbMaps;
-                                    st.nextToken();
-                                    nbMaps = new Integer(st.sval).intValue();
-                                    mapCoordi = new int[nbMaps][];
-                                    mapCoordj = new int[nbMaps][];
-                                    mapProbaPresence = new float[nbMaps][];
-
-                                    st.nextToken();
-                                    if ((st.sval).equalsIgnoreCase("density")) {
-                                        densityMaps = true;
-                                    } else {
-                                        densityMaps = false;
-                                    }
-
-                                    areasNumSpForMap = new int[nbMaps];
-                                    int nbAgePerMap, nbDtPerMap;
-                                    areasTempAge = new int[nbMaps][];
-                                    areasTempDt = new int[nbMaps][];
-
-                                    for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                                        Species speci = simulation.getSpecies(i);
-                                        numMap[i] = new int[speci.getNumberCohorts()][];
-                                        for (int j = 0; j < speci.getNumberCohorts(); j++) {
-                                            numMap[i][j] = new int[nbDtMatrix[numSerie]];
-                                        }
-                                    }
-
-                                    for (int i = 0; i < nbMaps; i++) {
-                                        areasNumSpForMap[i] = new Integer(st.sval).intValue() - 1;   //because species number between 1 and nbSpecies
-                                        st.nextToken();
-                                        nbAgePerMap = new Integer(st.sval).intValue();
-                                        areasTempAge[i] = new int[nbAgePerMap];
-                                        st.nextToken();
-                                        nbDtPerMap = new Integer(st.sval).intValue();
-                                        areasTempDt[i] = new int[nbDtPerMap];
-                                        for (int k = 0; k < nbAgePerMap; k++) {
-                                            st.nextToken();
-                                            areasTempAge[i][k] = new Integer(st.sval).intValue();
-                                        }
-                                        for (int k = 0; k < nbDtPerMap; k++) {
-                                            st.nextToken();
-                                            areasTempDt[i][k] = new Integer(st.sval).intValue() - 1;
-                                        }
-                                        st.nextToken();
-
-                                        mapCoordi[i] = new int[(new Integer(st.sval).intValue())];
-                                        mapCoordj[i] = new int[(new Integer(st.sval).intValue())];
-                                        mapProbaPresence[i] = new float[new Integer(st.sval).intValue()];
-
-                                        for (int m = 0; m < nbAgePerMap; m++) {
-                                            for (int n = 0; n < nbDtPerMap; n++) {
-                                                for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                                    int tempo = areasTempAge[i][m] * nbDtMatrix[numSerie] + h;
-                                                    if ((areasTempAge[i][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[i]).getNumberCohorts()) {
-                                                        numMap[areasNumSpForMap[i]][areasTempAge[i][m] * nbDtMatrix[numSerie] + h][areasTempDt[i][n]] = i;
-                                                    }
-                                                    if (mapCoordi[i].length == 0) {
-                                                        if (!simulation.getSpecies(areasNumSpForMap[i]).getCohort((areasTempAge[i][m] * nbDtMatrix[numSerie]) + h).isOut(areasTempDt[i][n])) {
-                                                            System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(areasNumSpForMap[i]).getName());
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        for (int m = 0; m < mapCoordi[i].length; m++) {
-                                            st.nextToken();
-                                            mapCoordi[i][m] = (new Integer(st.sval).intValue());
-                                        }
-                                        for (int m = 0; m < mapCoordj[i].length; m++) {
-                                            st.nextToken();
-                                            mapCoordj[i][m] = (new Integer(st.sval).intValue());
-                                        }
-                                        for (int m = 0; m < mapCoordj[i].length; m++) {
-                                            if (grid.getCell(mapCoordi[i][m], mapCoordj[i][m]).isLand()) {
-                                                System.out.println("Problem of coast in species area file for map " + m + " - " + i + " - " + mapCoordi[i][m] + "  " + mapCoordj[i][m]);
-                                            }
-                                        }
-                                        for (int m = 0; m < mapCoordj[i].length; m++) {
-                                            grid.getCell(mapCoordi[i][m], mapCoordj[i][m]).numMapsConcerned.add(new Integer(m));
-                                        }
-                                        if (densityMaps) {
-                                            for (int m = 0; m < mapProbaPresence[i].length; m++) {
-                                                st.nextToken();
-                                                mapProbaPresence[i][m] = new Float(st.sval).intValue();
-                                            }
-                                        } else {
-                                            for (int m = 0; m < mapProbaPresence[i].length; m++) {
-                                                mapProbaPresence[i][m] = 1f / (float) mapProbaPresence[i].length;
-                                            }
-                                        }
-
-                                        st.nextToken();
-                                    }
-                                    simulation.randomDistribution = false;
-
-                                }//5
-                                else {
-                                    System.out.println("Error while reading the distribution file for longevities match");
-                                }
-                            }//4
-                            else {
-                                System.out.println("Spatial error while reading file for species number match");
                             }
-                        }//3
-                        else {
-                            System.out.println("Error while reading the distribution file for nb columns match");
+                            for (int m = 0; m < mapCoordi[i].length; m++) {
+                                st.nextToken();
+                                mapCoordi[i][m] = (new Integer(st.sval).intValue());
+                            }
+                            for (int m = 0; m < mapCoordj[i].length; m++) {
+                                st.nextToken();
+                                mapCoordj[i][m] = (new Integer(st.sval).intValue());
+                            }
+                            for (int m = 0; m < mapCoordj[i].length; m++) {
+                                if (grid.getCell(mapCoordi[i][m], mapCoordj[i][m]).isLand()) {
+                                    System.out.println("Problem of coast in species area file for map " + m + " - " + i + " - " + mapCoordi[i][m] + "  " + mapCoordj[i][m]);
+                                }
+                            }
+                            for (int m = 0; m < mapCoordj[i].length; m++) {
+                                grid.getCell(mapCoordi[i][m], mapCoordj[i][m]).numMapsConcerned.add(new Integer(m));
+                            }
+                            if (densityMaps) {
+                                for (int m = 0; m < mapProbaPresence[i].length; m++) {
+                                    st.nextToken();
+                                    mapProbaPresence[i][m] = new Float(st.sval).intValue();
+                                }
+                            } else {
+                                for (int m = 0; m < mapProbaPresence[i].length; m++) {
+                                    mapProbaPresence[i][m] = 1f / (float) mapProbaPresence[i].length;
+                                }
+                            }
+
+                            st.nextToken();
                         }
-                    }//3
+
+                    }//5
                     else {
-                        System.out.println("Error while reading the distribution file for nb lines match");
+                        System.out.println("Error while reading the distribution file for longevities match");
                     }
-                    areasFile.close();
-
-                }//1
-                if (numSimu > 0) {
-                    simulation.randomDistribution = false;
+                }//4
+                else {
+                    System.out.println("Spatial error while reading file for species number match");
                 }
-
-            } else {
-                System.out.println("In distribution file, the first entry must be RANDOM or MAPS");
+            }//3
+            else {
+                System.out.println("Error while reading the distribution file for nb columns match");
             }
-
-        } catch (IOException ex) {
-            System.out.println("Error while reading areasFile");
-            return;
+        }//3
+        else {
+            System.out.println("Error while reading the distribution file for nb lines match");
         }
-
-        //################################################
-        //## FOR ALL CASES/ sim0 or not, random or not
-        //################################################
-        simulation.distributeSpeciesIni();
     }
 
     public List<Cell> getMap(int numMap) {
@@ -2868,7 +3102,7 @@ public class Osmose {
         simulation = new Simulation();
         simulation.init();
         readMigrationFile();
-        initializeSpeciesAreas();
+        readAreaFile();
         initializeOutputData();
         readMigrationFile();
     }
