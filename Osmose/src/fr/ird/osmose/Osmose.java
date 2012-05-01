@@ -815,7 +815,7 @@ public class Osmose {
                         tempSum = 0;
                         seasonSpawningMatrix[numSerie][i] = new float[nbDtMatrix[numSerie]];
                         for (int j = 0; j < nbDtMatrix[numSerie]; j++) {
-                            st.nextToken();
+                        	st.nextToken();
                             seasonSpawningMatrix[numSerie][i][j] = (new Float(st.sval)).floatValue() / 100; //percentage
                             tempSum += (new Float(st.sval)).floatValue();
                         }
@@ -1570,7 +1570,7 @@ public class Osmose {
                 st.nextToken();
                 speciesAreasSizeTab[numSerie] = (new Integer(st.sval)).intValue();
                 distribRandom();
-            } else if (areaDistribMethod.equalsIgnoreCase("maps")) {
+            } else if (areaDistribMethod.equalsIgnoreCase("maps")){
                 /*
                  * Distribution from MAPS
                  * Maps are defined directly in the area configuration file
@@ -1697,7 +1697,8 @@ public class Osmose {
             int nbCells = 0;
             for (String[] line : lines) {
                 for (String str : line) {
-                    if (Integer.valueOf(str) > 0) {
+                    //if (Integer.valueOf(str) > 0) {
+                	if (Float.valueOf(str) > 0.f) {
                         nbCells++;
                     }
                 }
@@ -2172,6 +2173,7 @@ public class Osmose {
                                 for (int m = 0; m < nbAccessStage[k]; m++) {
                                     st.nextToken();
                                     accessibilityMatrix[i][0][k][m] = (new Float(st.sval)).floatValue();
+                                    
                                 }
                             }
                         }
