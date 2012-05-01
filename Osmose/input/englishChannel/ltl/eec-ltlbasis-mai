@@ -1,0 +1,58 @@
+///////////////////////
+//
+// PLANKTON GROUPS FILE
+//
+///////////////////////
+//
+/*
+ * 8.1. Number of plankton groups
+ */
+;10;
+/*
+ * 8.2. Number of time-steps for the forcing
+ */
+;24;
+/*
+ * 8.3. Plankton group definition
+ * Each plankton group is defined as follows:
+ * ;name;;min size;;max size;;trophic level;;conversion factor;;biom2prod factor;
+ * Where:
+ * name is the name of the group (phytoplankton, diatoms, copepods,...)
+ * sizes [cm], min and max size of the group, assuming uniform distribution
+ * trophic level MIN AND MAX of the plankton group
+ * Conversion factor, from input unit (eg mmolN/m2 if coming from roms model) to tons/km2
+ * biom2prod factor, factor to transform biomass into production (per year) -> will be ignored
+ */
+//;name;;min size;;max size;;TLmini;;conversion factor;;biom2prod factor;
+;NanoPico;	  ;0.00002;;0.0002;	;1;	;0.72;  ;1;
+;Dinoflagellates;;0.0002;;0.002;;1;  ;0.72; ;1;
+;Diatoms;	  ;0.002;;0.02;	;1;   ;0.72; ;1;
+;Microzoo;	  ;0.002;;0.02;	;2;  ;0.675;;1;
+;Mesozoo;	  ;0.02; ;0.3;	;2;	;1;;1;
+;OmniCrust;;1;;2.2;	;2.5;	;1;;1;
+;OmniOphiu;;3.5;;12;	;2.5;	;1;;1;
+;DeposiCrust;;0.6;;1.5;	;2;	;1;;1;
+;DeposiUrchin;;1.2;;1.8;	;2;	;1;;1;
+;BigDeposiv;;2;;10;	;2;	;1;;1;
+/*
+ * 8.4. Number of plankton grid dimensions
+ */
+;2;
+/*
+ * 8.5. Number of columns in plankton grid
+ */
+;80;
+/*
+ * 8.6. Number of lines in plankton grid
+ */
+;40;
+/*
+ * 8.7. Number of vertical levels in plankton grid
+ * Ignored parameter unless ${8.4} == 3
+ */
+;1;
+/*
+ * 8.8. Integration depth
+ * Plankton biomass will be vertically integrated from 0 meter to ${8.8} meter
+ */
+;-100;
