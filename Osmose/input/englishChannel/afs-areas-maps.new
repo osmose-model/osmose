@@ -1,0 +1,359 @@
+/////////////////////
+//
+// SPECIES AREAS FILE
+//
+/////////////////////
+//
+// Species areas coordinates
+/*
+ * 7.1. Type of distribution
+ * Either 'random' or 'maps' or 'csv'
+ * For 'random' refer to file afs-areas-random since they are not implemented the
+ * same way.
+ */
+;csv;
+/*
+ * 7.2. Total number of maps
+ * Including empty maps (= when species migrates out of zone)
+ */
+;50;
+/*
+ * 7.3. Distribution maps
+ */
+/*n° species HORSE MACKEREL*/		;1;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/horsemack0.csv;
+
+/*n° species HORSE MACKEREL*/		;1;
+/*nb age classes concerned */	;15;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/horsemack1.csv;
+
+/*n° species LESSER SPOTTED DOGFISH*/		;2;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;
+/*csv file of the map */	;maps/dogfish0summer.csv;
+
+/*n° species LESSER SPOTTED DOGFISH*/		;2;
+/*nb age classes concerned */	;12;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;
+/*csv file of the map */	;maps/dogfish1summer.csv;
+
+/*n° species LESSER SPOTTED DOGFISH*/		;2;
+/*nb age classes concerned */	;13;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/dogfishwinter.csv;
+
+
+/*n° species WHITING*/		;3;
+/*nb age classes concerned */	;4;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;2;;3;;4;;5;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;
+/*csv file of the map */	;maps/map09-anchovy.csv;
+
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;4;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;2;;3;;4;;5;
+/*n° of the time steps */	;7;;8;;9;;10;;11;;12;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map10-anchovy.csv;
+
+/*n° species ANCHOVY*/		;1;
+/*nb age classes concerned */	;4;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;2;;3;;4;;5;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;
+/*csv file of the map */	;maps/map11-anchovy.csv;
+
+
+/* n° species EUPHAUSIIDS*/	;2;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map12-euphausiids.csv;
+
+/* n° species SHALLOW W HAKE */	;3;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map13-shallow-water-hake.csv;
+
+/* n° species SHALLOW W HAKE */	;3;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map14-shallow-water-hake.csv;
+
+/* n° species SHALLOW W HAKE */	;3;
+/*nb age classes concerned */	;3;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;3;;4;;5;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map15-shallow-water-hake.csv;
+
+/* n° species SHALLOW W HAKE */	;3;
+/*nb age classes concerned */	;10;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map16-shallow-water-hake.csv;
+
+/* n° species DEEP W HAKE */	;4;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;0;;1;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map17-deep-water-hake.csv;
+
+/* n° species DEEP W HAKE */	;4;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map18-deep-water-hake.csv;
+
+/* n° species DEEP W HAKE */	;4;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;3;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map19-deep-water-hake.csv;
+
+/* n° species DEEP W HAKE */	;4;
+/*nb age classes concerned */	;12;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map20-deep-water-hake.csv;
+
+
+/* n° species HORSE MACK */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map21-horse-mackerel.csv;
+
+/* n° species HORSE MACK */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map22-horse-mackerel.csv;
+
+/* n° species HORSE MACK */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map23-horse-mackerel.csv;
+
+/* n° species HORSE MACK */	;5;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;3;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map24-horse-mackerel.csv;
+
+/* n° species HORSE MACK */	;5;
+/*nb age classes concerned */	;5;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;4;;5;;6;;7;;8;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map25-horse-mackerel.csv;
+
+
+/* n° species LANTERN FISH*/	;6;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*csv file of the map */	;maps/map26-lanternfish.csv;
+
+/* n° species LANTERN FISH*/	;6;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map27-lanternfish.csv;
+
+/* n° species LANTERN FISH*/	;6;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map28-lanternfish.csv;
+
+
+/* n° species LIGHTFISH */	;7;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*csv file of the map */	;maps/map29-lightfish.csv;
+
+/* n° species LIGHTFISH */	;7;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map30-lightfish.csv;
+
+/* n° species LIGHTFISH */	;7;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map31-lightfish.csv;
+
+/* n° species ROUND HERRING */	;8;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;
+/*csv file of the map */	;maps/map32-redeye.csv;
+
+/* n° species ROUND HERRING */	;8;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;7;;8;;9;;10;;11;;12;
+/*csv file of the map */	;maps/map33-redeye.csv;
+
+/* n° species ROUND HERRING */	;8;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;
+/*csv file of the map */	;maps/map34-redeye.csv;
+
+/* n° species ROUND HERRING */	;8;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map35-redeye.csv;
+
+/* n° species ROUND HERRING */	;8;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map36-redeye.csv;
+
+/* n° species ROUND HERRING */	;8;
+/*nb age classes concerned */	;4;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;3;;4;;5;;6;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map37-redeye.csv;
+
+
+/* n° species SARDINE */	;9;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;
+/*csv file of the map */	;maps/map38-sardine.csv;
+
+/* n° species SARDINE */	;9;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;7;;8;;9;;10;;11;;12;
+/*csv file of the map */	;maps/map39-sardine.csv;
+
+/* n° species SARDINE */	;9;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;
+/*csv file of the map */	;maps/map40-sardine.csv;
+
+/* n° species SARDINE */	;9;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map41-sardine.csv;
+
+/* n° species SARDINE */	;9;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map42-sardine.csv;
+
+/* n° species SARDINE */	;9;
+/*nb age classes concerned */	;8;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;
+/*csv file of the map */	;maps/map43-sardine.csv;
+
+/* n° species SARDINE */	;9;
+/*nb age classes concerned */	;8;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;
+/*n° of the time steps */	;7;;8;;9;;10;;11;;12;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map44-sardine.csv;
+
+/* n° species SARDINE */	;9;
+/*nb age classes concerned */	;8;
+/*nb time steps */		;6;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;
+/*csv file of the map */	;maps/map45-sardine.csv;
+
+/* n° species SILVER KOB */	;10;
+/*nb age classes concerned */	;26;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;0;;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;;25;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map46-silver-kob.csv;
+
+
+/* n° species SNOEK */		;11;
+/*nb age classes concerned */	;1;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;0;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map47-snoek.csv;
+
+/* n° species SNOEK */		;11;
+/*nb age classes concerned */	;2;
+/*nb time steps */		;24;
+/*n° of the age classes*/	;1;;2;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map48-snoek.csv;
+
+/* n° species SNOEK */		;11;
+/*nb age classes concerned */	;8;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;
+/*n° of the time steps */	;1;;2;;3;;4;;5;;6;;7;;8;;9;;10;;11;;12;
+/*csv file of the map */	;maps/map49-snoek.csv;
+
+/* n° species SNOEK */		;11;
+/*nb age classes concerned */	;8;
+/*nb time steps */		;12;
+/*n° of the age classes*/	;3;;4;;5;;6;;7;;8;;9;;10;
+/*n° of the time steps */	;13;;14;;15;;16;;17;;18;;19;;20;;21;;22;;23;;24;
+/*csv file of the map */	;maps/map50-snoek.csv;
+//
+// EOF - SPECIES AREAS FILE
