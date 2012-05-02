@@ -15,7 +15,7 @@
  * Accepted values: "run" or "calibration"
  * In case of calibration, only the biomass is given as input in the appropriate form for the AG method.
  */
-;run;
+;calibration;
 // ----- Trophodynamics indicators -----
 /* 
  * 11.3. Mean TL per species
@@ -33,6 +33,7 @@
  * 11.6. Diets configuration filename
  */
 ;byDefault;
+ //;eec-diet;
 // ----- Size-based indicators -----
 /*
  * 11.7. Mean size per species
@@ -55,12 +56,12 @@
  * 11.11. Spectrum max size
  * Ignored parameter when ${11.9} == false
  */
-//;205;
+//;105;
 /*
  * 11.12. Class range
  * Ignored parameter when ${11.9} == false
  */
-//;10;
+//;5;
 // ----- Mortalities data -----
 /*
  * 11.13. Plankton mortality

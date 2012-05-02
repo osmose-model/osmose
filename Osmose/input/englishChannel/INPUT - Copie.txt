@@ -43,7 +43,7 @@
  * File of species distributions by age & time step
  */
 //;afs-areas-maps;
-;eec-areas-maps2.new;
+;eec-areas-maps.new;
 /*
  * 8. Plankton groups filename
  */

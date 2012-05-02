@@ -45,11 +45,11 @@
  * 3.7. Record frequency
  * Expressed as number of time-steps
  */
-;1;
+;24;
 /*
  * 3.8. Starting year for saving
  */
-;0;
+;20;
 //
 ///////////////////
 // Other parameters

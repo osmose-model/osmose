@@ -1,0 +1,37 @@
+
+;11; //nb species
+;10; //nb LTL
+;size;
+
+;2; //nb stades
+;5; //size threshold
+
+;3; //nb stades
+;5;;20; //size threshold
+
+;2; //nb stades
+;5; //size threshold
+
+;2; //nb stades
+;5; //size threshold
+
+;2; //nb stades
+;5; //size threshold
+
+;2; //nb stades
+;5; //size threshold
+
+;2; //nb stades
+;5; //size threshold
+
+;2; //nb stades
+;5; //size threshold
+
+;2; //nb stades
+;5; //size threshold
+
+;3; //nb stades
+;5;;20; //size threshold
+
+;2; //nb stades
+;5; //size threshold
