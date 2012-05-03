@@ -11,8 +11,8 @@
 /*
  * 10.2. Case "Biomass" - Target biomass for each species
  */
-;55586;;33563;;44908;;66944;;16990;;19806;;17563;;7193;;12160;;6966;;3281;
-
+//;55586;;33563;;44908;;66944;;16990;;19806;;17563;;7193;;12160;;6966;;3281;
+;55586;;33563;;44908;;66944;;16990;;0;;17563;;7193;;12160;;6966;;3281;
 /*
  * 10.2. Case "Spectrum" - Spectrum slope and intercept
  * a & b such as spectrumAbundance = Math.round(Math.pow((i*osmose.classRange)+5.,a)*Math.exp(b));
@@ -22,7 +22,7 @@
 /*  
  * 10.3. Larval mortality for each species 
  */
-;1;;1;;1;;1;;1;;1;;1;;1;;1;;1;;1;
+;3;;8;;0;5;;1;;1;;1;;1;;0;;8;;5;
 /*
  * 10.4. Min age for biomass
  */
@@ -30,7 +30,7 @@
 /*
  * Accessibility plankton coefficients
  */
-;1;;1;;1;;1;;1;;5;;5;;5;;5;;5;
+;1;;1;;1;;1;;1;;1;;1;;1;;1;;1;
 //
 // EOF - CALIBRATION
 ////////////////////

@@ -45,7 +45,7 @@
  * 3.7. Record frequency
  * Expressed as number of time-steps
  */
-;24;
+;6;
 /*
  * 3.8. Starting year for saving
  */
