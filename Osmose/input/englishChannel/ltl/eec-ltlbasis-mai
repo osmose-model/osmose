@@ -24,16 +24,16 @@
  * biom2prod factor, factor to transform biomass into production (per year) -> will be ignored
  */
 //;name;;min size;;max size;;TLmini;;conversion factor;;biom2prod factor;
-;NanoPico;	  ;0.00002;;0.0002;	;1;	;0.72;  ;1;
-;Dinoflagellates;;0.0002;;0.002;;1;  ;0.72; ;1;
-;Diatoms;	  ;0.002;;0.02;	;1;   ;0.72; ;1;
-;Microzoo;	  ;0.002;;0.02;	;2;  ;0.675;;1;
-;Mesozoo;	  ;0.02; ;0.5;	;2;	;1;;1;
-;OmniCrust;;1;;2.2;	;2.5;	;1;;1;
-;OmniOphiu;;3.5;;12;	;2.5;	;1;;1;
-;DeposiCrust;;0.6;;1.5;	;2;	;1;;1;
-;DeposiUrchin;;1.2;;1.8;	;2;	;1;;1;
-;BigDeposiv;;2;;10;	;2;	;1;;1;
+;NanoPico;	  ;0.00002;;0.0002;	;1;	;0.72;  ;24;
+;Dinoflagellates;;0.0002;;0.002;;1;  ;0.72; ;24;
+;Diatoms;	  ;0.002;;0.02;	;1;   ;0.72; ;24;
+;Microzoo;	  ;0.002;;0.02;	;2;  ;0.675;;24;
+;Mesozoo;	  ;0.02; ;0.5;	;2;	;1;;24;
+;OmniCrust;;1;;2.2;	;2.5;	;1;;24;
+;OmniOphiu;;3.5;;12;	;2.5;	;1;;24;
+;DeposiCrust;;0.6;;1.5;	;2;	;1;;24;
+;DeposiUrchin;;1.2;;1.8;	;2;	;1;;24;
+;BigDeposiv;;2;;10;	;2;	;1;;24;
 /*
  * 8.4. Number of plankton grid dimensions
  */
