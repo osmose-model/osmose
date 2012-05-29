@@ -289,7 +289,7 @@
 /*
  * 9.5. Name of the BFM Temperature file
  */
-;/media/phynx/storage/bfm/adriatic_emanuela-clementi/19900101_T.nc
+;/media/phynx/storage/bfm/adriatic_emanuela-clementi/19900101_T.nc;
 /*
  * 9.6. Name of the Z-level variable in the Temperature NetCDF file
  */

@@ -48,11 +48,11 @@
 /*
  * 8. Plankton groups filename
  */
-;interpolation/LTLbasis;
+;ltl/LTLbasis;
 /*
  * 9. Plankton data filename
  */    	
-;interpolation/LTLforcing;
+;ltl/LTLforcing;
 /*
  * 10. Calibration filename
  */
