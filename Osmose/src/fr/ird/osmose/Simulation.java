@@ -310,8 +310,9 @@ public class Simulation {
             if (coupling != null && (year >= coupling.getStartYearLTLModel() - 1)) // save grid of plankton biomass one year before coupling so forcing mode is also saved
             {
                 coupling.savePlanktonBiomass();
+            } else if (getOsmose().planktonBiomassOutputMatrix[numSerie]) {
+                forcing.savePlanktonBiomass();
             }
-
 
             List<School> randomSchools = suffleSchools();
             Iterator<School> randomIterator = randomSchools.iterator();

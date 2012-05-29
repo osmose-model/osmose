@@ -152,6 +152,7 @@ public class Osmose {
     boolean[] TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
             sizeSpectrumOutputMatrix, sizeSpectrumPerSpeOutputMatrix,
             planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix, spatializedOutputs;
+    boolean[] planktonBiomassOutputMatrix;
     String[] dietsConfigFileName, dietOutputMetrics;
     int[][] nbDietsStages;
     float[][][] dietStageThreshold;
@@ -329,7 +330,7 @@ public class Osmose {
         readSeasonalityReproFile(reproductionFileNameTab[numSerie], numSerie);
         readSeasonalityFishingFile(fishingSeasonFileNameTab[numSerie], numSerie);
         readsize0File(size0FileNameTab[numSerie], numSerie);
-        readIndicatorsFile(indicatorsFileNameTab[numSerie], numSerie);
+        readOutputConfigurationFile(indicatorsFileNameTab[numSerie], numSerie);
         if (dietsOutputMatrix[numSerie]) {
             readDietsOutputFile(dietsConfigFileName[numSerie], numSerie);
         }
@@ -367,7 +368,7 @@ public class Osmose {
             readsize0File(size0FileNameTab[newNumSerie], newNumSerie);
         }
         if (!(indicatorsFileNameTab[newNumSerie].equals(indicatorsFileNameTab[previousNumSerie]))) {
-            readIndicatorsFile(indicatorsFileNameTab[newNumSerie], newNumSerie);
+            readOutputConfigurationFile(indicatorsFileNameTab[newNumSerie], newNumSerie);
         }
 
         if (dietsOutputMatrix[newNumSerie]) {
@@ -656,6 +657,7 @@ public class Osmose {
         calibrationMatrix = new boolean[nbSeriesSimus];
         outputClass0Matrix = new boolean[nbSeriesSimus];
         spatializedOutputs = new boolean[nbSeriesSimus];
+        planktonBiomassOutputMatrix = new boolean[nbSeriesSimus];
         dietsConfigFileName = new String[nbSeriesSimus];
         dietOutputMetrics = new String[nbSeriesSimus];
         nbDietsStages = new int[nbSeriesSimus][];
@@ -1236,7 +1238,7 @@ public class Osmose {
         }
     }
 
-    public void readIndicatorsFile(String indicatorsFileName, int numSerie) {
+    public void readOutputConfigurationFile(String indicatorsFileName, int numSerie) {
         FileInputStream indicFile;
         try {
             indicFile = new FileInputStream(resolveFile(indicatorsFileName));
@@ -1299,6 +1301,18 @@ public class Osmose {
                 spatializedOutputs[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             } catch (Exception ex) {
                 spatializedOutputs[numSerie] = false;
+            }
+            try {
+                /*
+                 * phv 2012/05/29
+                 * Read additional parameters "palnkton biomass"
+                 * Since it might not exist in most configurations I catch any
+                 * exception and set it as false by default.
+                 */
+                st.nextToken();
+                planktonBiomassOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+            } catch (Exception ex) {
+                planktonBiomassOutputMatrix[numSerie] = false;
             }
 
             indicFile.close();
