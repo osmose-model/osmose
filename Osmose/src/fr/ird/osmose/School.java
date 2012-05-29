@@ -348,6 +348,11 @@ public class School {
             School preySchool = (School) cell.get(k);
             tempAccess = getOsmose().accessibilityMatrix[preySchool.getCohort().getSpecies().getIndex()][preySchool.accessibilityStage][getCohort().getSpecies().getIndex()][accessibilityStage];
             biomAccessibleTot += ((School) cell.get(k)).getBiomass() * tempAccess;
+            /*if (k == indexMin) {
+                System.out.println("I am " + getCohort().getSpecies().getName() + " stage " + accessibilityStage + " and can only predate " + tempAccess + " on species " + preySchool.getCohort().getSpecies().getName() + " stage " + preySchool.accessibilityStage);
+                System.out.println("On the contrary " + preySchool.getCohort().getSpecies().getName() + " stage " + preySchool.accessibilityStage + " is accessible " + tempAccess + " to " + getCohort().getSpecies().getName() + " stage " + accessibilityStage);
+
+            }*/
         }
         //************ Calculation of available plankton ***************
         for (int i = 0; i < myForcing.getNbPlanktonGroups(); i++) {

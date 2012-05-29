@@ -86,7 +86,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         depthOfLayer = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
 
         try {
-            ArrayDouble.D3 arrDepth = (D3) ncGrid.findVariable(zlevelName).read().flip(0);
+            ArrayDouble.D3 arrDepth = (D3) ncGrid.findVariable(zlevelName).read().flip(1);
             for (int i = 0; i < getPlanktonDimX(); i++) {
                 for (int j = 0; j < getPlanktonDimY(); j++) {
                     for (int z = 0; z < getPlanktonDimZ(); z++) {
@@ -101,12 +101,12 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     for (int ii = 0; ii < stride; ii++) {
                         for (int jj = 0; jj < stride; jj++) {
-                            getGrid().getCell(i, j).icoordLTLGrid.addElement(j * stride + jj);
-                            getGrid().getCell(i, j).jcoordLTLGrid.addElement(i * stride + ii);
+                                getGrid().getCell(i, j).icoordLTLGrid.addElement(j * stride + jj);
+                                getGrid().getCell(i, j).jcoordLTLGrid.addElement(i * stride + ii);
+                            }
                         }
                     }
                 }
-            }
 
             initPlanktonList();
 
@@ -145,7 +145,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             // read data and put them in the local arrays
             for (int i = 0; i < getNbPlanktonGroups(); i++) {
                 tempVar[i] = nc.findVariable(plktonNetcdfNames[i]);
-                tempArray[i] = (ArrayDouble.D3) tempVar[i].read().flip(0);
+                tempArray[i] = (ArrayDouble.D3) tempVar[i].read().flip(1);
             }
             shape = tempVar[0].getShape();
 
@@ -189,10 +189,10 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
                 if (!getGrid().getCell(i, j).isLand()) {
                     for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
                         for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                            tempY = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
-                            tempX = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
+                            tempX = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
+                            tempY = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
                             /*if (p == 0) {
-                            System.out.println("osmose cell (" + i + ", " + j + ") contains ECO3M cell (" + tempX + ", " + tempY + ")");
+                                System.out.println("osmose cell (" + i + ", " + j + ") contains ECO3M cell (" + tempX + ", " + tempY + ")");
                             }*/
                             // interpolate the plankton concentrations from the LTL cells
                             getPlanktonGroup(p).addCell(i, j, tempX, tempY, getGrid().getCell(i, j).getNbCellsLTLGrid());
