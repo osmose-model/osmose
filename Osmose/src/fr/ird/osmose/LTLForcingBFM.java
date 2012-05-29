@@ -224,7 +224,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
 
     private void readNetCDFFile(String name, int dt) {
 
-        System.out.println("Reading " + name + " time " + dt);
+        //System.out.println("Reading " + name + " time " + dt);
 
         try {
             /*
