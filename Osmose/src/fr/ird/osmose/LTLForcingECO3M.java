@@ -70,7 +70,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     public void initPlanktonMap() {
 
         NetcdfFile ncGrid = null;
-        String gridFilename = getOsmose().inputPathName + getOsmose().fileSeparator + planktonFileListNetcdf[0];
+        String gridFilename = getOsmose().resolveFile(planktonFileListNetcdf[0]);
         try {
             ncGrid = NetcdfFile.open(gridFilename, null);
         } catch (IOException ex) {
@@ -120,8 +120,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
-        String nameTemp = getOsmose().inputPathName + File.separator + planktonFileListNetcdf[dt];
-        readNetCDFFile(nameTemp);
+        readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[dt]));
         mapInterpolation();
         if (getSimulation().getYear() >= getOsmose().timeSeriesStart) {
             saveForDiet();       // save biomass of plankton before predation
