@@ -524,6 +524,7 @@ public class Species {
                 if (nbSurplusDead >= abdCatchableTot) // not enough fish even in other cohorts
                 {
                     for (int i = indexRecruitAge; i < nbCohorts; i++) {
+                        List<School> schoolsToRemove = new ArrayList();
                         for (School school : getCohort(i)) {
                             if (school.isCatchable()) {
                                 if ((getSimulation().getYear()) >= getOsmose().timeSeriesStart) {
@@ -534,9 +535,13 @@ public class Species {
                                 if (!(getCohort(i).isOut(getSimulation().getIndexTime()))) {
                                     school.getCell().remove(school);
                                 }
-                                getCohort(i).remove(school);
+                                school.tagForRemoval();
+                                schoolsToRemove.add(school);
                             }
                         }
+                        // remove schools
+                        getCohort(i).removeAll(schoolsToRemove);
+                        
                         getCohort(i).setAbundance(getCohort(i).getAbundance() - getCohort(i).getAbundanceCatchable());
                         getCohort(i).setNbDeadFf(getCohort(i).getNbDeadFf() + getCohort(i).getAbundanceCatchable());
                     }
