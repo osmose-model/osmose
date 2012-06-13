@@ -1,10 +1,12 @@
 package fr.ird.osmose;
 
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * <p>Titre : Osmose </p>
  *
- * <p>Description : Main class of the Osmose model - reads the input files and initialize the series and simulations
- * - save the biomass file in case of calibration - run the simulations </p>
+ * <p>Description : Main class of the Osmose model - reads the input files and
+ * initialize the series and simulations - save the biomass file in case of
+ * calibration - run the simulations </p>
  *
  * <p>Copyright : Copyright (c) may 2009</p>
  *
@@ -12,7 +14,7 @@ package fr.ird.osmose;
  *
  * @author Yunne Shin, Morgane Travers
  * @version 2.1
- ******************************************************************************* 
+ * ******************************************************************************
  */
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -27,18 +29,12 @@ public class Osmose {
 
     /*
      * ********
-     * * Logs *
-     * ********
-     * 2011/04/07 phv
-     * Created static instance of the Osmose object.
-     * Added a getGrid() method that other classes will call through the Osmose
-     * instance.
-     * Added a getSimulation() method for other classes to get the simulation
-     * instance.
-     * public void distribRandom(). Recoded the random sorting of the neighbor
-     * cells using method Grid.getNeighborCells since Cell.neighbors[] has been
-     * deleted.
-     * ***
+     * * Logs * ******** 2011/04/07 phv Created static instance of the Osmose
+     * object. Added a getGrid() method that other classes will call through the
+     * Osmose instance. Added a getSimulation() method for other classes to get
+     * the simulation instance. public void distribRandom(). Recoded the random
+     * sorting of the neighbor cells using method Grid.getNeighborCells since
+     * Cell.neighbors[] has been deleted. ***
      */
 
     /*
@@ -46,12 +42,12 @@ public class Osmose {
      */
     private static Osmose osmose = new Osmose();
     /*
-     * 
+     *
      */
     final String fileSeparator = System.getProperty("file.separator");
     String inputPathName, outputPathName, inputTxtName;
     /*
-     * 
+     *
      */
     private Simulation simulation;
     private IGrid grid;
@@ -65,7 +61,9 @@ public class Osmose {
             indicatorsFileNameTab;
     // Tables of Optional Input Files names (with entries as file name or "default")
     String[] size0FileNameTab, migrationFileNameTab, accessibilitiesFileNameTab,
-            reproductionFileNameTab, fishingSeasonFileNameTab, /* � creer*/
+            reproductionFileNameTab, fishingSeasonFileNameTab, /*
+             * � creer
+             */
             couplingFileNameTab;
     boolean[] isForcing;
     private String[] lowTLClassNameTab;
@@ -240,13 +238,11 @@ public class Osmose {
             System.out.println();
             System.out.println("SERIE " + x);
             /*
-            if(x==0)	// for the first serie : all input files are read and kept in memory
-            readAllInputFiles(x);
-            else	// for the following series, only the files that differ from the previous one are read, other input are already in memory
-            {
-            int previousSerie = x-1;
-            checkInputFilesChange(x, previousSerie);
-            }
+             * if(x==0)	// for the first serie : all input files are read and
+             * kept in memory readAllInputFiles(x); else	// for the following
+             * series, only the files that differ from the previous one are
+             * read, other input are already in memory { int previousSerie =
+             * x-1; checkInputFilesChange(x, previousSerie); }
              */
             for (int xx = 0; xx < nbLoopTab[x]; xx++) {
                 numSimu = xx;
@@ -738,11 +734,9 @@ public class Osmose {
                     sexRatioMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
                 }
                 /*
-                 * phv 2011/11/21
-                 * Determine wether reproduction occurs locally or outside the
-                 * simulated domain.
-                 * Then for species reproducing outside it reads the incoming
-                 * biomass caracteristics.
+                 * phv 2011/11/21 Determine wether reproduction occurs locally
+                 * or outside the simulated domain. Then for species reproducing
+                 * outside it reads the incoming biomass caracteristics.
                  */
                 reproduceLocallyTab[numSerie] = new boolean[nbSpeciesTab[numSerie]];
                 biomassFluxInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
@@ -817,7 +811,7 @@ public class Osmose {
                         tempSum = 0;
                         seasonSpawningMatrix[numSerie][i] = new float[nbDtMatrix[numSerie]];
                         for (int j = 0; j < nbDtMatrix[numSerie]; j++) {
-                        	st.nextToken();
+                            st.nextToken();
                             seasonSpawningMatrix[numSerie][i][j] = (new Float(st.sval)).floatValue() / 100; //percentage
                             tempSum += (new Float(st.sval)).floatValue();
                         }
@@ -1060,11 +1054,12 @@ public class Osmose {
                 System.out.println("In configuration file you have to specify either COUPLING or FORCING");
             }
 
-            /* addition phv 2011/08/02
-             * since Coupling.java (renamed as LTLCouplingRomsPisces) is model
-             * specific, I had to code new classes for ECO3M (Danial for GL) and
-             * BFM (Camille Adriatic). So in the config file I added a parameter 3.12
-             * to identify the Java class that implements the forcing/coupling.
+            /*
+             * addition phv 2011/08/02 since Coupling.java (renamed as
+             * LTLCouplingRomsPisces) is model specific, I had to code new
+             * classes for ECO3M (Danial for GL) and BFM (Camille Adriatic). So
+             * in the config file I added a parameter 3.12 to identify the Java
+             * class that implements the forcing/coupling.
              */
             st.nextToken();
             lowTLClassNameTab[numSerie] = st.sval;
@@ -1072,7 +1067,9 @@ public class Osmose {
             st.nextToken();
             nbSchools[numSerie] = 1 + Math.round(((new Integer(st.sval)).intValue()) / nbDtMatrix[numSerie]);
 
-            /* Additional parameters to read the grid from NetCDF file */
+            /*
+             * Additional parameters to read the grid from NetCDF file
+             */
             st.nextToken();
             if (null != st.sval) {
                 gridClassNameTab[numSerie] = st.sval;
@@ -1292,10 +1289,9 @@ public class Osmose {
             outputClass0Matrix[numSerie] = (new Boolean(st.sval)).booleanValue();
             try {
                 /*
-                 * phv 2011/06/30
-                 * Read additional parameters "spatialized outputs"
-                 * Since it might not exist in most configurations I catch any
-                 * exception and set it as false by default.
+                 * phv 2011/06/30 Read additional parameters "spatialized
+                 * outputs" Since it might not exist in most configurations I
+                 * catch any exception and set it as false by default.
                  */
                 st.nextToken();
                 spatializedOutputs[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
@@ -1304,8 +1300,7 @@ public class Osmose {
             }
             try {
                 /*
-                 * phv 2012/05/29
-                 * Read additional parameters "palnkton biomass"
+                 * phv 2012/05/29 Read additional parameters "palnkton biomass"
                  * Since it might not exist in most configurations I catch any
                  * exception and set it as false by default.
                  */
@@ -1361,12 +1356,10 @@ public class Osmose {
             st.slashSlashComments(true);
             st.slashStarComments(true);
             st.quoteChar(';');
-            /*structure of file:
-            nb lines;
-            nb columns;
-            nb Cells for coast(land);
-            in lines coord i of coast;
-            in lines coord j of coast;
+            /*
+             * structure of file: nb lines; nb columns; nb Cells for
+             * coast(land); in lines coord i of coast; in lines coord j of
+             * coast;
              */
             try {
                 st.nextToken();
@@ -1437,13 +1430,11 @@ public class Osmose {
             st.slashSlashComments(true);
             st.slashStarComments(true);
             st.quoteChar(';');
-            /*structure of file: (diff with osmose: MPAtStart et MPAtEnd in addition)
-            nb lines;
-            nb columns;
-            nbCells of mpa;
-            MPAtstart;MPAtEnd;
-            in lines, coord i of mpa;
-            in lines coord j of mpa;
+            /*
+             * structure of file: (diff with osmose: MPAtStart et MPAtEnd in
+             * addition) nb lines; nb columns; nbCells of mpa;
+             * MPAtstart;MPAtEnd; in lines, coord i of mpa; in lines coord j of
+             * mpa;
              */
             try {
                 st.nextToken();
@@ -1457,31 +1448,53 @@ public class Osmose {
                         MPAtStartTab[numSerie] = new Integer(st.sval).intValue();
                         st.nextToken();
                         MPAtEndTab[numSerie] = new Integer(st.sval).intValue();
-                        for (int i = 0; i < tabi.length; i++) {
-                            st.nextToken();
-                            tabi[i] = new Integer(st.sval).intValue();
+                        st.nextToken();
+                        /*
+                         * Check whether the next value is an integer ==> MPA is
+                         * defined directly in the file, or a string==> MPA is
+                         * defined in separate CSV file.
+                         */
+                        boolean mpaFromCSV = false;
+                        try {
+                            Integer.parseInt(st.sval);
+                        } catch (NumberFormatException ex) {
+                            mpaFromCSV = true;
                         }
-                        for (int j = 0; j < tabj.length; j++) {
-                            st.nextToken();
-                            tabj[j] = new Integer(st.sval).intValue();
-                        }
-                        boolean okForCoast = true;
-                        for (int i = 0; i < tabi.length; i++) {
-                            if (grid.getCell(tabi[i], tabj[i]).isLand()) {
-                                okForCoast = false;
-                                break;
-                            }
-                        }
-                        if (okForCoast) {
-                            tabMPAiMatrix[numSerie] = new int[tabi.length];
-                            tabMPAjMatrix[numSerie] = new int[tabj.length];
-                            for (int i = 0; i < tabi.length; i++) {
-                                tabMPAiMatrix[numSerie][i] = tabi[i];
-                                tabMPAjMatrix[numSerie][i] = tabj[i];
-                            }
+                        if (mpaFromCSV) {
+                            /*
+                             * Case CSV
+                             */
+                            readMPA(resolveFile(st.sval));
                         } else {
-                            System.out.println(
-                                    "Error while reading mpaFile for coast cells");
+                            /*
+                             * Case coordinates
+                             */
+                            for (int i = 0; i < tabi.length; i++) {
+                                tabi[i] = new Integer(st.sval).intValue();
+                                st.nextToken();
+                            }
+                            for (int j = 0; j < tabj.length; j++) {
+                                tabj[j] = new Integer(st.sval).intValue();
+                                st.nextToken();
+                            }
+                            boolean okForCoast = true;
+                            for (int i = 0; i < tabi.length; i++) {
+                                if (grid.getCell(tabi[i], tabj[i]).isLand()) {
+                                    okForCoast = false;
+                                    break;
+                                }
+                            }
+                            if (okForCoast) {
+                                tabMPAiMatrix[numSerie] = new int[tabi.length];
+                                tabMPAjMatrix[numSerie] = new int[tabj.length];
+                                for (int i = 0; i < tabi.length; i++) {
+                                    tabMPAiMatrix[numSerie][i] = tabi[i];
+                                    tabMPAjMatrix[numSerie][i] = tabj[i];
+                                }
+                            } else {
+                                System.out.println(
+                                        "Error while reading mpaFile for coast cells");
+                            }
                         }
                         mpaFile.close();
                     } else {
@@ -1498,6 +1511,30 @@ public class Osmose {
         }
     }
 
+    public void writeMPAasCSV() {
+
+        String fileName = "mpa.csv";
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+            for (int i = 0; i < getGrid().getNbLines(); i++) {
+                String[] entries = new String[getGrid().getNbColumns()];
+                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                    if (getGrid().getCell(i, j).isLand()) {
+                        entries[j] = String.valueOf(-99);
+                    } else if (getGrid().getCell(i, j).isMPA()) {
+                        entries[j] = String.valueOf(1);
+                    } else {
+                        entries[j] = String.valueOf(0);
+                    }
+                }
+                writer.writeNext(entries);
+            }
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void writeMapsAsCSV() {
 
         int numberMaps = mapCoordi.length;
@@ -1508,19 +1545,15 @@ public class Osmose {
                 CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
                 // Golf of Lyons
                 /*
-                for (int j = getGrid().getNbColumns() - 1; j >= 0; j--) {
-                String[] entries = new String[getGrid().getNbLines()];
-                for (int i = 0; i < getGrid().getNbLines(); i++) {
-                if (getGrid().getCell(i, j).isLand()) {
-                entries[i] = String.valueOf(-99);
-                } else if (map.contains(getGrid().getCell(i, j))) {
-                entries[i] = String.valueOf(1);
-                } else {
-                entries[i] = String.valueOf(0);
-                }
-                }
-                writer.writeNext(entries);
-                }*/
+                 * for (int j = getGrid().getNbColumns() - 1; j >= 0; j--) {
+                 * String[] entries = new String[getGrid().getNbLines()]; for
+                 * (int i = 0; i < getGrid().getNbLines(); i++) { if
+                 * (getGrid().getCell(i, j).isLand()) { entries[i] =
+                 * String.valueOf(-99); } else if
+                 * (map.contains(getGrid().getCell(i, j))) { entries[i] =
+                 * String.valueOf(1); } else { entries[i] = String.valueOf(0); }
+                 * } writer.writeNext(entries); }
+                 */
                 // Benguela
                 for (int i = 0; i < getGrid().getNbLines(); i++) {
                     String[] entries = new String[getGrid().getNbColumns()];
@@ -1584,10 +1617,10 @@ public class Osmose {
                 st.nextToken();
                 speciesAreasSizeTab[numSerie] = (new Integer(st.sval)).intValue();
                 distribRandom();
-            } else if (areaDistribMethod.equalsIgnoreCase("maps")){
+            } else if (areaDistribMethod.equalsIgnoreCase("maps")) {
                 /*
-                 * Distribution from MAPS
-                 * Maps are defined directly in the area configuration file
+                 * Distribution from MAPS Maps are defined directly in the area
+                 * configuration file
                  */
                 if (numSimu == 0) {
                     readAreaMAPS(st);
@@ -1595,8 +1628,7 @@ public class Osmose {
                 simulation.randomDistribution = false;
             } else if (areaDistribMethod.equalsIgnoreCase("csv")) {
                 /*
-                 * Distribution from MAPS
-                 * Maps are defined in separated CSV files
+                 * Distribution from CSV Maps are defined in separated CSV files
                  */
                 if (numSimu == 0) {
                     readAreaCSV(st);
@@ -1682,15 +1714,53 @@ public class Osmose {
                 areasTempDt[indexMap][k] = new Integer(st.sval).intValue() - 1;
             }
             /*
-             * read the name of the CSV file and load the map
-             * if name = "null" it means the species is out of the simulated
-             * domain at these age-class and time-step
+             * read the name of the CSV file and load the map if name = "null"
+             * it means the species is out of the simulated domain at these
+             * age-class and time-step
              */
             st.nextToken();
             if (!"null".equals(st.sval)) {
                 String csvFile = resolveFile(st.sval);
                 readCSVMap(csvFile, indexMap);
             }
+        }
+    }
+
+    private void readMPA(String csvFile) {
+        try {
+            /*
+             * Read the CSV file
+             */
+            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            List<String[]> lines = reader.readAll();
+            int nbCells = 0;
+            for (String[] line : lines) {
+                for (String str : line) {
+                    if (Integer.valueOf(str) > 0) {
+                        nbCells++;
+                    }
+                }
+            }
+
+            /*
+             * Identify the coordinates
+             */
+            int indexCell = 0;
+            tabMPAiMatrix[numSerie] = new int[nbCells];
+            tabMPAjMatrix[numSerie] = new int[nbCells];
+            for (int i = 0; i < lines.size(); i++) {
+                String[] line = lines.get(i);
+                for (int j = 0; j < line.length; j++) {
+                    float val = Float.valueOf(line[j]);
+                    if (val > 0.f) {
+                        tabMPAiMatrix[numSerie][indexCell] = i;
+                        tabMPAjMatrix[numSerie][indexCell] = j;
+                        indexCell++;
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1703,16 +1773,15 @@ public class Osmose {
             CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
             List<String[]> lines = reader.readAll();
             /*
-             * Get the number of cells for the map
-             * phv 28 march 2012 - it is a loss of time to do twice the loop
-             * over the CSV file but no choice at the moment without changing
-             * mapCoordi, mapCoordj
+             * Get the number of cells for the map phv 28 march 2012 - it is a
+             * loss of time to do twice the loop over the CSV file but no choice
+             * at the moment without changing mapCoordi, mapCoordj
              */
             int nbCells = 0;
             for (String[] line : lines) {
                 for (String str : line) {
                     //if (Integer.valueOf(str) > 0) {
-                	if (Float.valueOf(str) > 0.f) {
+                    if (Float.valueOf(str) > 0.f) {
                         nbCells++;
                     }
                 }
@@ -1759,8 +1828,8 @@ public class Osmose {
                             mapProbaPresence[indexMap][indexCell] = val;
                         } else if (val == 1.f) {
                             /*
-                             * map is presence/absence so equal probability
-                             * of presence among cells
+                             * map is presence/absence so equal probability of
+                             * presence among cells
                              */
                             mapProbaPresence[indexMap][indexCell] = invNbCells;
                             /*
@@ -1780,7 +1849,9 @@ public class Osmose {
 
     public void readAreaMAPS(StreamTokenizer st) throws IOException {
 
-        /* *******CASE FILE AREAS - densities or presence/absence********* */
+        /*
+         * *******CASE FILE AREAS - densities or presence/absence*********
+         */
         //areas data are read from file areasFile
 
         st.nextToken();
@@ -1996,8 +2067,8 @@ public class Osmose {
                     tabCellsArea[0] = grid.getCell(coordi, coordj);
                     grid.getCell(coordi, coordj).setAlreadyChosen(true);
                     /*
-                     * From initial cell, successive random sorting of
-                     * the adjacent cells until tabCellsArea is full
+                     * From initial cell, successive random sorting of the
+                     * adjacent cells until tabCellsArea is full
                      */
                     int iFirstSorted = 0;
                     int iLastSorted = 0;
@@ -2031,15 +2102,11 @@ public class Osmose {
         if (migrationFileNameTab[numSerie].equalsIgnoreCase("default")) {
             System.out.println("No migrations implemented (default)");
         } else {
-            /*Structure of file seasonalityFile (IN CAPITAL default options)
-            ;nb species migrating;
-            ;num of species
-            ;number of ages;
-            ;number of time steps
-            ;ages
-            ;time steps
-            ;mortality
-            ...  * nb species migrating
+            /*
+             * Structure of file seasonalityFile (IN CAPITAL default options)
+             * ;nb species migrating; ;num of species ;number of ages; ;number
+             * of time steps ;ages ;time steps ;mortality ... * nb species
+             * migrating
              */
 
             FileInputStream outOfZoneFile;
@@ -2119,8 +2186,8 @@ public class Osmose {
                 for (int j = 0; j < nbSpeciesTab[numSerie]; j++) {
                     accessibilityMatrix[i][0][j] = new float[1];
                     /*
-                     * phv 2011/11/18 set default access matrix to 0.8 for
-                     * being compatible with Osmose 2.0
+                     * phv 2011/11/18 set default access matrix to 0.8 for being
+                     * compatible with Osmose 2.0
                      */
                     accessibilityMatrix[i][0][j][0] = 0.8f;
                 }
@@ -2187,7 +2254,7 @@ public class Osmose {
                                 for (int m = 0; m < nbAccessStage[k]; m++) {
                                     st.nextToken();
                                     accessibilityMatrix[i][0][k][m] = (new Float(st.sval)).floatValue();
-                                    
+
                                 }
                             }
                         }
@@ -2241,12 +2308,13 @@ public class Osmose {
                 BIOMQuadri[xx] = new float[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][][][];
             }
 
-            /*			iniBiomass[xx] = new float[nbSpeciesTab[numSerie]];
-            for(int i=0;i<nbSpeciesTab[numSerie];i++)
-            iniBiomass[xx][i] = 0;
-            for(int i=0;i<nbSpeciesTab[numSerie];i++)
-            for(int j=simulation.getSpecies(i).indexAgeClass0;j<simulation.getSpecies(i).nbCohorts;j++)
-            iniBiomass[xx][i] += (float) simulation.getSpecies(i).tabCohorts[j].biomass;
+            /*
+             * iniBiomass[xx] = new float[nbSpeciesTab[numSerie]]; for(int
+             * i=0;i<nbSpeciesTab[numSerie];i++) iniBiomass[xx][i] = 0; for(int
+             * i=0;i<nbSpeciesTab[numSerie];i++) for(int
+             * j=simulation.getSpecies(i).indexAgeClass0;j<simulation.getSpecies(i).nbCohorts;j++)
+             * iniBiomass[xx][i] += (float)
+             * simulation.getSpecies(i).tabCohorts[j].biomass;
              */
             int tempIndex = (int) nbDtMatrix[numSerie] / savingDtMatrix[numSerie];
 
@@ -2400,8 +2468,8 @@ public class Osmose {
     }
 
     /*
-     * phv 2011/12/07 obsolete function. Parameters and options added by
-     * Morgane have not been included here.
+     * phv 2011/12/07 obsolete function. Parameters and options added by Morgane
+     * have not been included here.
      */
     public void saveInputParameters(File targetPath, String inputFileName, int nSerie) {
 
@@ -2436,20 +2504,20 @@ public class Osmose {
         pw.print("//Species areas file");
         pw.print(';');
         pw.println(areasFileNameTab[nSerie]);
-        /*		if(areasFileNameTab[nSerie].equalsIgnoreCase("Random"))
-        {
-        pw.print("//Species areas size");pw.print(';');pw.println(speciesAreasSizeTab[nSerie]);
-        }
-        pw.print("//Coast file");pw.print(';');pw.println(coastFileNameTab[nSerie]);
-        if(!coastFileNameTab[nSerie].equalsIgnoreCase("default"))
-        {
-        pw.print("//Coast size");pw.print(';');pw.println(tabCoastiMatrix[nSerie].length);
-        }
-        pw.print("//MPA file");pw.print(';');pw.println(mpaFileNameTab[nSerie]);
-        if(!mpaFileNameTab[nSerie].equalsIgnoreCase("default"))
-        {
-        pw.print("//MPA size");pw.print(';');pw.println(tabMPAiMatrix[nSerie].length);
-        }
+        /*
+         * if(areasFileNameTab[nSerie].equalsIgnoreCase("Random")) {
+         * pw.print("//Species areas
+         * size");pw.print(';');pw.println(speciesAreasSizeTab[nSerie]); }
+         * pw.print("//Coast
+         * file");pw.print(';');pw.println(coastFileNameTab[nSerie]);
+         * if(!coastFileNameTab[nSerie].equalsIgnoreCase("default")) {
+         * pw.print("//Coast
+         * size");pw.print(';');pw.println(tabCoastiMatrix[nSerie].length); }
+         * pw.print("//MPA
+         * file");pw.print(';');pw.println(mpaFileNameTab[nSerie]);
+         * if(!mpaFileNameTab[nSerie].equalsIgnoreCase("default")) {
+         * pw.print("//MPA
+         * size");pw.print(';');pw.println(tabMPAiMatrix[nSerie].length); }
          */ pw.println();
         pw.println("// ----- BIOLOGICAL PARAMETERS -----   ");
         pw.print("Nb species ");
@@ -2659,24 +2727,23 @@ public class Osmose {
                 pw.print(';');
                 pw.println();
             }
-            /*   for(int i=nbSpeciesTab[numSerie]; i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab[numSerie]; i++)
-            {
-            pw.print("Plankton Gr"+(i-nbSpeciesTab[numSerie]+1));pw.print(';');
-            for(int t=0;t<timeSeriesLength;t++)
-            for(int dt=0;dt<nbDtSavePerYear[numSerie];dt++)
-            {
-            pw.print( BIOMQuadri[xx][i][0][t][dt] );
-            pw.print(';');
-            }
-            tabMean[i][0][xx]=mean2(BIOMQuadri[xx][i][0]);
-            std=std2(BIOMQuadri[xx][i][0]);
-            tabCv[i][0][xx]=std/tabMean[i][0][xx];
-            pw.print(';');pw.print("mean-0");pw.print(';');pw.print(tabMean[i][0][xx]);pw.print(';');
-            pw.print("std-0");pw.print(';');pw.print(std);pw.print(';');
-            pw.print("cv-0");pw.print(';');pw.print(tabCv[i][0][xx]);pw.print(';');
-            pw.println();
-            
-            }
+            /*
+             * for(int i=nbSpeciesTab[numSerie];
+             * i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab[numSerie]; i++) {
+             * pw.print("Plankton
+             * Gr"+(i-nbSpeciesTab[numSerie]+1));pw.print(';'); for(int
+             * t=0;t<timeSeriesLength;t++) for(int
+             * dt=0;dt<nbDtSavePerYear[numSerie];dt++) { pw.print(
+             * BIOMQuadri[xx][i][0][t][dt] ); pw.print(';'); }
+             * tabMean[i][0][xx]=mean2(BIOMQuadri[xx][i][0]);
+             * std=std2(BIOMQuadri[xx][i][0]);
+             * tabCv[i][0][xx]=std/tabMean[i][0][xx];
+             * pw.print(';');pw.print("mean-0");pw.print(';');pw.print(tabMean[i][0][xx]);pw.print(';');
+             * pw.print("std-0");pw.print(';');pw.print(std);pw.print(';');
+             * pw.print("cv-0");pw.print(';');pw.print(tabCv[i][0][xx]);pw.print(';');
+             * pw.println();
+             *
+             * }
              */
             pw.print("sys-0");
             pw.print(';');
@@ -2753,24 +2820,23 @@ public class Osmose {
                     pw.print(';');
                     pw.println();
                 }
-                /*   for(int i=nbSpeciesTab[numSerie]; i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab[numSerie]; i++)
-                {
-                pw.print("Plankton Gr"+(i-nbSpeciesTab[numSerie]+1));pw.print(';');
-                for(int t=0;t<timeSeriesLength;t++)
-                for(int dt=0;dt<nbDtSavePerYear[numSerie];dt++)
-                {
-                pw.print( BIOMQuadri[xx][i][0][t][dt] );
-                pw.print(';');
-                }
-                tabMean[i][0][xx]=mean2(BIOMQuadri[xx][i][0]);
-                std=std2(BIOMQuadri[xx][i][0]);
-                tabCv[i][0][xx]=std/tabMean[i][0][xx];
-                pw.print(';');pw.print("mean-0");pw.print(';');pw.print(tabMean[i][0][xx]);pw.print(';');
-                pw.print("std-0");pw.print(';');pw.print(std);pw.print(';');
-                pw.print("cv-0");pw.print(';');pw.print(tabCv[i][0][xx]);pw.print(';');
-                pw.println();
-                
-                }
+                /*
+                 * for(int i=nbSpeciesTab[numSerie];
+                 * i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab[numSerie]; i++)
+                 * { pw.print("Plankton
+                 * Gr"+(i-nbSpeciesTab[numSerie]+1));pw.print(';'); for(int
+                 * t=0;t<timeSeriesLength;t++) for(int
+                 * dt=0;dt<nbDtSavePerYear[numSerie];dt++) { pw.print(
+                 * BIOMQuadri[xx][i][0][t][dt] ); pw.print(';'); }
+                 * tabMean[i][0][xx]=mean2(BIOMQuadri[xx][i][0]);
+                 * std=std2(BIOMQuadri[xx][i][0]);
+                 * tabCv[i][0][xx]=std/tabMean[i][0][xx];
+                 * pw.print(';');pw.print("mean-0");pw.print(';');pw.print(tabMean[i][0][xx]);pw.print(';');
+                 * pw.print("std-0");pw.print(';');pw.print(std);pw.print(';');
+                 * pw.print("cv-0");pw.print(';');pw.print(tabCv[i][0][xx]);pw.print(';');
+                 * pw.println();
+                 *
+                 * }
                  */
                 pw.print("sys");
                 pw.print(';');
@@ -2827,16 +2893,16 @@ public class Osmose {
             pw.print(mean(tabCv[i][0]));
             pw.println(';');
         }
-        /*     for(int i=nbSpeciesTab[numSerie];i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab;i++)
-        {
-        MEAN = mean(tabMean[i][0]);
-        STD = std(tabMean[i][0]);
-        CV = STD/MEAN;
-        pw.print("Plankton group "+(i+1-nbSpeciesTab[numSerie]));pw.print(';');pw.print(MEAN);pw.print(';');
-        pw.print(STD);pw.print(';');
-        pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
-        }
-        
+        /*
+         * for(int
+         * i=nbSpeciesTab[numSerie];i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab;i++)
+         * { MEAN = mean(tabMean[i][0]); STD = std(tabMean[i][0]); CV =
+         * STD/MEAN; pw.print("Plankton group
+         * "+(i+1-nbSpeciesTab[numSerie]));pw.print(';');pw.print(MEAN);pw.print(';');
+         * pw.print(STD);pw.print(';');
+         * pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
+         * }
+         *
          */
         MEAN = mean(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0]);
         STD = std(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0]);
@@ -2880,15 +2946,15 @@ public class Osmose {
                 pw.print(mean(tabCv[i][1]));
                 pw.println(';');
             }
-            /*     for(int i=nbSpeciesTab[numSerie];i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab;i++)
-            {
-            MEAN = mean(tabMean[i][0]);
-            STD = std(tabMean[i][0]);
-            CV = STD/MEAN;
-            pw.print("Plankton group "+(i+1-nbSpeciesTab[numSerie]));pw.print(';');pw.print(MEAN);pw.print(';');
-            pw.print(STD);pw.print(';');
-            pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
-            }
+            /*
+             * for(int
+             * i=nbSpeciesTab[numSerie];i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab;i++)
+             * { MEAN = mean(tabMean[i][0]); STD = std(tabMean[i][0]); CV =
+             * STD/MEAN; pw.print("Plankton group
+             * "+(i+1-nbSpeciesTab[numSerie]));pw.print(';');pw.print(MEAN);pw.print(';');
+             * pw.print(STD);pw.print(';');
+             * pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
+             * }
              */
             MEAN = mean(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1]);
             STD = std(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1]);
@@ -3037,8 +3103,7 @@ public class Osmose {
     }
 
     /*
-     * Function for dealing with command line arguments
-     * From David K. for the GA
+     * Function for dealing with command line arguments From David K. for the GA
      */
     public void loadArgs(String[] args) {
         // Get command line arguments
