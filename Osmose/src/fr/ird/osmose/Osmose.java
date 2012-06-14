@@ -1337,67 +1337,123 @@ public class Osmose {
         }
     }
 
+    private void readCoastAsCSV(String csvFile) {
+        try {
+            /*
+             * Read the CSV file
+             */
+            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            List<String[]> lines = reader.readAll();
+            int nbCells = 0;
+            for (String[] line : lines) {
+                for (String str : line) {
+                    if (Integer.valueOf(str) <= 0) {
+                        nbCells++;
+                    }
+                }
+            }
+            nbCellsCoastTab[numSerie] = nbCells;
+
+            /*
+             * Identify the coordinates
+             */
+            int indexCell = 0;
+            tabCoastiMatrix[numSerie] = new int[nbCells];
+            tabCoastjMatrix[numSerie] = new int[nbCells];
+            for (int i = 0; i < lines.size(); i++) {
+                String[] line = lines.get(i);
+                for (int j = 0; j < line.length; j++) {
+                    float val = Float.valueOf(line[j]);
+                    if (val <= 0.f) {
+                        tabCoastiMatrix[numSerie][indexCell] = i;
+                        tabCoastjMatrix[numSerie][indexCell] = j;
+                        indexCell++;
+                    }
+                }
+            }
+            for (int k = 0; k < tabCoastiMatrix[numSerie].length; k++) {
+                grid.getCell(tabCoastiMatrix[numSerie][k], tabCoastjMatrix[numSerie][k]).setLand(true);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void readCoastCoordinates(String coastFilename) {
+        FileInputStream coastFile;
+
+        try {
+            coastFile = new FileInputStream(coastFilename);
+        } catch (FileNotFoundException ex) {
+            System.out.println("Error while opening coastFile");
+            return;
+        }
+        //read nb of cells and compare to options
+        Reader r = new BufferedReader(new InputStreamReader(coastFile));
+        StreamTokenizer st = new StreamTokenizer(r);
+        st.slashSlashComments(true);
+        st.slashStarComments(true);
+        st.quoteChar(';');
+        /*
+         * structure of file: nb lines; nb columns; nb Cells for coast(land); in
+         * lines coord i of coast; in lines coord j of coast;
+         */
+        try {
+            st.nextToken();
+            if (new Integer(st.sval).intValue() == gridLinesTab[numSerie]) {
+                st.nextToken();
+                if (new Integer(st.sval).intValue() == gridColumnsTab[numSerie]) {
+
+                    st.nextToken();
+                    tabCoastiMatrix[numSerie] = new int[new Integer(st.sval).intValue()];
+                    tabCoastjMatrix[numSerie] = new int[new Integer(st.sval).intValue()];
+
+                    nbCellsCoastTab[numSerie] = new Integer(st.sval).intValue();
+
+                    for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
+
+                        st.nextToken();
+                        tabCoastiMatrix[numSerie][i] = (new Integer(st.sval).intValue());
+                    }
+
+                    for (int i = 0; i < tabCoastjMatrix[numSerie].length; i++) {
+
+                        st.nextToken();
+                        tabCoastjMatrix[numSerie][i] = (new Integer(st.sval).intValue());
+                    }
+                    for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
+                        grid.getCell(tabCoastiMatrix[numSerie][i], tabCoastjMatrix[numSerie][i]).setLand(true);
+                    }
+                } else {
+                    System.out.println("Error while reading coastFile for nb columns match");
+                }
+            } else {
+                System.out.println("Error while reading coastFile for nb lines match");
+            }
+
+            coastFile.close();
+        } catch (IOException ex) {
+            System.out.println("Error while reading coastFile");
+        }
+    }
+
     public void initializeCoast() {
         if (coastFileNameTab[numSerie].equalsIgnoreCase("default")) {
             System.out.println("No coast in the grid (default)");
         } else {
-            //read info in file coast
-            FileInputStream coastFile;
 
-            try {
-                coastFile = new FileInputStream(resolveFile(coastFileNameTab[numSerie]));
-            } catch (FileNotFoundException ex) {
-                System.out.println("Error while opening coastFile");
-                return;
-            }
-            //read nb of cells and compare to options
-            Reader r = new BufferedReader(new InputStreamReader(coastFile));
-            StreamTokenizer st = new StreamTokenizer(r);
-            st.slashSlashComments(true);
-            st.slashStarComments(true);
-            st.quoteChar(';');
-            /*
-             * structure of file: nb lines; nb columns; nb Cells for
-             * coast(land); in lines coord i of coast; in lines coord j of
-             * coast;
-             */
-            try {
-                st.nextToken();
-                if (new Integer(st.sval).intValue() == gridLinesTab[numSerie]) {
-                    st.nextToken();
-                    if (new Integer(st.sval).intValue() == gridColumnsTab[numSerie]) {
+            String filename = resolveFile(coastFileNameTab[numSerie]);
+            if (filename.endsWith("csv")) {
+                /*
+                 * load coast cell from CSV file
+                 */
+                readCoastAsCSV(filename);
+            } else {
 
-                        st.nextToken();
-                        tabCoastiMatrix[numSerie] = new int[new Integer(st.sval).intValue()];
-                        tabCoastjMatrix[numSerie] = new int[new Integer(st.sval).intValue()];
-
-                        nbCellsCoastTab[numSerie] = new Integer(st.sval).intValue();
-
-                        for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
-
-                            st.nextToken();
-                            tabCoastiMatrix[numSerie][i] = (new Integer(st.sval).intValue());
-                        }
-
-                        for (int i = 0; i < tabCoastjMatrix[numSerie].length; i++) {
-
-                            st.nextToken();
-                            tabCoastjMatrix[numSerie][i] = (new Integer(st.sval).intValue());
-                        }
-                        for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
-                            grid.getCell(tabCoastiMatrix[numSerie][i], tabCoastjMatrix[numSerie][i]).setLand(true);
-                        }
-                    } else {
-                        System.out.println("Error while reading coastFile for nb columns match");
-                    }
-                } else {
-                    System.out.println("Error while reading coastFile for nb lines match");
-                }
-
-                coastFile.close();
-            } catch (IOException ex) {
-                System.out.println("Error while reading coastFile");
-                return;
+                /*
+                 * load coast from old osmose coast file
+                 */
+                readCoastCoordinates(filename);
             }
         }
     }
