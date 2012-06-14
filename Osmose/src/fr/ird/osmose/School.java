@@ -114,6 +114,7 @@ public class School {
     private float[][] dietTemp;
     private float sumDiet;
     private boolean unlocated;
+    float catches;
 
 //////////////
 // Constructor

@@ -997,6 +997,10 @@ public class Simulation {
         nc.addVariableAttribute("abundance", "units", "number of fish");
         nc.addVariableAttribute("abundance", "description", "Number of fish per species and per cell");
         nc.addVariableAttribute("abundance", "_FillValue", -99.f);
+        nc.addVariable("yield", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
+        nc.addVariableAttribute("yield", "units", "ton");
+        nc.addVariableAttribute("yield", "description", "Catches, in tons, per species and per cell");
+        nc.addVariableAttribute("yield", "_FillValue", -99.f);
         nc.addVariable("mean_size", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
         nc.addVariableAttribute("mean_size", "units", "centimeter");
         nc.addVariableAttribute("mean_size", "description", "mean size, in centimeter, per species and per cell");
@@ -1238,6 +1242,7 @@ public class Simulation {
         float[][][] tl = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
         float[][][][] ltlbiomass = new float[getForcing().getNbPlanktonGroups()][2][getGrid().getNbLines()][getGrid().getNbColumns()];
         float[][][] abundance = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][][] yield = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
 
         for (Cell cell : getGrid().getCells()) {
             int[] nbSchools = new int[getNbSpecies()];
@@ -1251,6 +1256,7 @@ public class Simulation {
                     abundance[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
                     mean_size[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
                     tl[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
+                    yield[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
                 }
                 for (int iltl = 0; iltl < getForcing().getNbPlanktonGroups(); iltl++) {
                     ltlbiomass[iltl][0][cell.get_igrid()][cell.get_jgrid()] = fillValue;
@@ -1268,6 +1274,7 @@ public class Simulation {
                     abundance[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getAbundance();
                     mean_size[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getLength();
                     tl[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getTrophicLevel()[indexTime];
+                    yield[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += (school.catches *  school.getWeight() / 1000000.d);
                 }
             }
             for (int ispec = 0; ispec < getNbSpecies(); ispec++) {
@@ -1284,6 +1291,7 @@ public class Simulation {
 
         ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrAbundance = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D5 arrLTL = new ArrayFloat.D5(1, getForcing().getNbPlanktonGroups(), 2, getGrid().getNbLines(), getGrid().getNbColumns());
@@ -1294,6 +1302,7 @@ public class Simulation {
                     arrAbundance.set(0, kspec, i, j, abundance[kspec][i][j]);
                     arrSize.set(0, kspec, i, j, mean_size[kspec][i][j]);
                     arrTL.set(0, kspec, i, j, tl[kspec][i][j]);
+                    arrYield.set(0, kspec, i, j, yield[kspec][i][j]);
                 }
             }
         }
@@ -1317,6 +1326,7 @@ public class Simulation {
             nc.write("time", new int[]{index}, arrTime);
             nc.write("biomass", new int[]{index, 0, 0, 0}, arrBiomass);
             nc.write("abundance", new int[]{index, 0, 0, 0}, arrAbundance);
+            nc.write("yield", new int[]{index, 0, 0, 0}, arrYield);
             nc.write("mean_size", new int[]{index, 0, 0, 0}, arrSize);
             nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
             nc.write("ltl_biomass", new int[]{index, 0, 0, 0, 0}, arrLTL);
