@@ -147,8 +147,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     for (int ii = 0; ii < stride; ii++) {
                         for (int jj = 0; jj < stride; jj++) {
-                            getGrid().getCell(i, j).icoordLTLGrid.addElement(j * stride + jj);
-                            getGrid().getCell(i, j).jcoordLTLGrid.addElement(i * stride + ii);
+                            getGrid().getCell(getGrid().getNbLines() - i - 1, j).icoordLTLGrid.addElement(j * stride + jj);
+                            getGrid().getCell(getGrid().getNbLines() - i - 1, j).jcoordLTLGrid.addElement(i * stride + ii);
                         }
                     }
                 }
@@ -283,8 +283,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
                 if (!getGrid().getCell(i, j).isLand()) {
                     for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
                         for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                            tempY = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
-                            tempX = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
+                            tempX = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
+                            tempY = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
                             /*if (p == 0) {
                             System.out.println("osmose cell (" + i + ", " + j + ") contains ECO3M cell (" + tempX + ", " + tempY + ")");
                             }*/

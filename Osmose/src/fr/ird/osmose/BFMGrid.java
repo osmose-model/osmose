@@ -106,7 +106,7 @@ public class BFMGrid extends AbstractGrid {
         }
         int jmstr = lon.length;
         int imstr = lon[0].length;
-        Cell[][] grid = new Cell[imstr][jmstr];
+        Cell[][] grid = new Cell[jmstr][imstr];
         for (int i = 0; i < imstr; i++) {
             for (int j = 0; j < jmstr; j++) {
                 float fmask = 0.f;
@@ -117,7 +117,7 @@ public class BFMGrid extends AbstractGrid {
                 }
                 fmask = fmask / (stride * stride);
                 boolean land = (fmask > 0.5) ? false : true;
-                grid[i][j] = new Cell(i, j, (float) lat[j][i], (float) lon[j][i], land);
+                grid[jmstr - j - 1][i] = new Cell(jmstr - j - 1, i, (float) lat[j][i], (float) lon[j][i], land);
             }
         }
 
