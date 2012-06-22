@@ -1051,8 +1051,8 @@ public class Simulation {
             ArrayFloat.D2 arrLon = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
             ArrayFloat.D2 arrLat = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
             for (Cell cell : getGrid().getCells()) {
-                arrLon.set(cell.get_igrid(), cell.get_jgrid(), cell.getLon());
-                arrLat.set(cell.get_igrid(), cell.get_jgrid(), cell.getLat());
+                arrLon.set(getGrid().getNbLines() - cell.get_igrid() - 1, cell.get_jgrid(), cell.getLon());
+                arrLat.set(getGrid().getNbLines() - cell.get_igrid() - 1, cell.get_jgrid(), cell.getLat());
             }
             nc.write("longitude", arrLon);
             nc.write("latitude", arrLat);
@@ -1295,22 +1295,23 @@ public class Simulation {
         ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D5 arrLTL = new ArrayFloat.D5(1, getForcing().getNbPlanktonGroups(), 2, getGrid().getNbLines(), getGrid().getNbColumns());
+        int nl = getGrid().getNbLines() - 1;
         for (int kspec = 0; kspec < getNbSpecies(); kspec++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrBiomass.set(0, kspec, i, j, biomass[kspec][i][j]);
-                    arrAbundance.set(0, kspec, i, j, abundance[kspec][i][j]);
-                    arrSize.set(0, kspec, i, j, mean_size[kspec][i][j]);
-                    arrTL.set(0, kspec, i, j, tl[kspec][i][j]);
-                    arrYield.set(0, kspec, i, j, yield[kspec][i][j]);
+                    arrBiomass.set(0, kspec, nl - i, j, biomass[kspec][i][j]);
+                    arrAbundance.set(0, kspec, nl - i, j, abundance[kspec][i][j]);
+                    arrSize.set(0, kspec, nl - i, j, mean_size[kspec][i][j]);
+                    arrTL.set(0, kspec, nl - i, j, tl[kspec][i][j]);
+                    arrYield.set(0, kspec, nl - i, j, yield[kspec][i][j]);
                 }
             }
         }
         for (int kltl = 0; kltl < getForcing().getNbPlanktonGroups(); kltl++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrLTL.set(0, kltl, 0, i, j, ltlbiomass[kltl][0][i][j]);
-                    arrLTL.set(0, kltl, 1, i, j, ltlbiomass[kltl][1][i][j]);
+                    arrLTL.set(0, kltl, 0, nl - i, j, ltlbiomass[kltl][0][i][j]);
+                    arrLTL.set(0, kltl, 1, nl - i, j, ltlbiomass[kltl][1][i][j]);
                 }
             }
         }
