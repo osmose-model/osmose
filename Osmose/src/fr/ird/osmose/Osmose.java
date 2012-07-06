@@ -290,7 +290,7 @@ public class Osmose {
                         Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    if (!coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
+                    if (!(coastFileNameTab[numSerie].equalsIgnoreCase("None") || coastFileNameTab[numSerie].equalsIgnoreCase("default"))) {
                         updateCoastCells(numSerie);
                     }
 
@@ -1633,6 +1633,44 @@ public class Osmose {
         }
     }
 
+    public void writeGlobalDistributionMap() {
+        try {
+            int numberMaps = mapCoordi.length;
+            String fileName = "map-all.csv";
+            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+
+            int[][] area = new int[getGrid().getNbLines()][getGrid().getNbColumns()];
+            for (int k = 0; k < numberMaps; k++) {
+
+                if (areasNumSpForMap[k] == 1 || areasNumSpForMap[k] == 5 || areasNumSpForMap[k] == 6 || areasTempAge[k][0] == 0) {
+                    System.out.println(getSimulation().getSpecies(areasNumSpForMap[k]).getName() + " " + areasTempAge[k][0]);
+                    continue;
+                }
+
+                List<Cell> map = getMap(k);
+                for (Cell cell : map) {
+                    area[cell.get_igrid()][cell.get_jgrid()] = 1;
+                }
+            }
+
+            for (int i = 0; i < getGrid().getNbLines(); i++) {
+                String[] entries = new String[getGrid().getNbColumns()];
+                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                    if (getGrid().getCell(i, j).isLand()) {
+                        entries[j] = String.valueOf(-99);
+                    } else {
+                        entries[j] = String.valueOf(area[i][j]);
+                    }
+                }
+                writer.writeNext(entries);
+            }
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("########## map finished !");
+    }
+
     private String numMapToString(int numMap, int numberMaps) {
 
         String snumMap = String.valueOf(numMap);
@@ -2490,7 +2528,9 @@ public class Osmose {
         filename.append(outputFileNameTab[nSerie]);
         filename.append(fileSeparator);
         filename.append(outputFileNameTab[nSerie]);
-        filename.append("_spatialized.nc");
+        filename.append("_spatialized_Simu");
+        filename.append(nSerie);
+        filename.append(".nc");
         File file = new File(filename.toString());
         try {
             IOTools.makeDirectories(file.getAbsolutePath());
