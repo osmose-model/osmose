@@ -196,161 +196,122 @@ public class Simulation {
         return Osmose.getInstance();
     }
 
-    public void step() {
+    private void printProgress() {
         // screen display to check the period already simulated
         if (year % 5 == 0) {
             System.out.println("year " + year + " | CPU time " + new Date());   // t is annual
         } else {
             System.out.println("year " + year);
         }
+    }
 
-        // calculation of relative size of MPA
+    private int getRatioMPA() {
+        int ratio = 0;
         if ((getOsmose().thereIsMPATab[numSerie]) && (year == getOsmose().MPAtStartTab[numSerie])) {
-            RS = getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
+            ratio = getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
             for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
                 getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(true);
             }
         } else if ((!getOsmose().thereIsMPATab[numSerie]) || (year > getOsmose().MPAtEndTab[numSerie])) {
-            RS = 0;
+            ratio = 0;
             for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
                 getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(false);
             }
         }
+        return ratio;
+    }
 
+    private void clearNbDeadArrays() {
+        for (int i = 0; i < species.length; i++) {
+            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
+                species[i].getCohort(j).setNbDeadPp(0);
+                species[i].getCohort(j).setNbDeadSs(0);
+                species[i].getCohort(j).setNbDeadDd(0);
+                species[i].getCohort(j).setNbDeadFf(0);
+            }
+        }
+    }
 
-        while (indexTime < nbTimeStepsPerYear) // for each time step dt of the year t
-        {
-            // clear tables
-            for (int i = 0; i < species.length; i++) {
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    species[i].getCohort(j).setNbDeadPp(0);
-                    species[i].getCohort(j).setNbDeadSs(0);
-                    species[i].getCohort(j).setNbDeadDd(0);
-                    species[i].getCohort(j).setNbDeadFf(0);
+    private void updateStages() {
+        for (int i = 0; i < species.length; i++) {
+            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
+                for (int k = 0; k < species[i].getCohort(j).size(); k++) {
+                    ((School) species[i].getCohort(j).getSchool(k)).updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
+                    ((School) species[i].getCohort(j).getSchool(k)).updateAccessStage(getOsmose().accessStageThreshold[i], getOsmose().nbAccessStage[i]);
+                    ((School) species[i].getCohort(j).getSchool(k)).updateDietOutputStage(species[i].dietStagesTab, species[i].nbDietStages);
                 }
             }
-            // update stages
+        }
+    }
+
+    private void predation(List<School> randomSchools) {
+
+        Iterator<School> randomIterator = randomSchools.iterator();
+        // loop over the schools
+        while (randomIterator.hasNext()) {
+            School school = randomIterator.next();
+            // age class 0 do not predate
+            if (!school.willDisappear() && school.getCohort().getAgeNbDt() != 0) {
+                // call the School.predation() function
+                school.predation();
+            }
+        }
+    }
+
+    private void saveBiomassBeforePredation() {
+        /*
+         * save fish biomass before predation process for diets data (last
+         * column of predatorPressure output file in Diets/)
+         */
+        if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                     for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                        ((School) species[i].getCohort(j).getSchool(k)).updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
-                        ((School) species[i].getCohort(j).getSchool(k)).updateAccessStage(getOsmose().accessStageThreshold[i], getOsmose().nbAccessStage[i]);
-                        ((School) species[i].getCohort(j).getSchool(k)).updateDietOutputStage(species[i].dietStagesTab, species[i].nbDietStages);
+                        biomPerStage[i][((School) species[i].getCohort(j).getSchool(k)).dietOutputStage] += ((School) species[i].getCohort(j).getSchool(k)).getBiomass();
                     }
                 }
             }
+        }
+        if (coupling != null && (year >= coupling.getStartYearLTLModel() - 1)) // save grid of plankton biomass one year before coupling so forcing mode is also saved
+        {
+            coupling.savePlanktonBiomass();
+        } else if (getOsmose().planktonBiomassOutputMatrix[numSerie]) {
+            forcing.savePlanktonBiomass();
+        }
+    }
 
-            // ***** SPATIAL DISTRIBUTION of the species *****
-
-            if (!((indexTime == 0) && (year == 0))) // because distributeSpeciesIni() used at initialisation
-            {
-                for (int i = 0; i < getGrid().getNbLines(); i++) // remove all the schools because of the last age class
-                {
-                    for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                        getGrid().getCell(i, j).clear();
-                    }
-                }
-                distributeSpecies();      // update distribution
+    private void starvation(List<School> schools) {
+        for (School school : schools) {
+            if (!school.willDisappear()) {
+                school.surviveP();
             }
+        }
+    }
 
-            // ***** ADDITIONAL MORTALITY D *****
-            for (int i = 0; i < species.length; i++) {
-                //for all species, D is due to other predators (seals, seabirds)
-                //for migrating species, we add mortality because absents during a time step
-                //so they don't undergo mortalities due to predation and starvation
-                //Additional mortalities for ages 0: no-fecundation of eggs, starvation more pronounced
-                //than for sup ages (rel. to CC), predation by other species are not explicit
-                if (species[i].getCohort(0).getAbundance() != 0) {
-                    species[i].getCohort(0).surviveD(species[i].larvalSurvival + (species[i].getCohort(0).getOutMortality(indexTime) / (float) nbTimeStepsPerYear));     //additional larval mortality
-                }
-                for (int j = 1; j < species[i].getNumberCohorts(); j++) {
-                    if (species[i].getCohort(j).getAbundance() != 0) {
-                        species[i].getCohort(j).surviveD((species[i].D + species[i].getCohort(j).getOutMortality(indexTime)) / (float) nbTimeStepsPerYear);
-                    }
-                }
+    /**
+     * for all species, D is due to other predators (seals, seabirds) for
+     * migrating species, we add mortality because absents during a time step so
+     * they don't undergo mortalities due to predation and starvation Additional
+     * mortalities for ages 0: no-fecundation of eggs, starvation more
+     * pronounced than for sup ages (rel to CC), predation by other species are
+     * not explicit.
+     */
+    private void naturalMortality() {
+        for (int i = 0; i < species.length; i++) {
+
+            if (species[i].getCohort(0).getAbundance() != 0) {
+                species[i].getCohort(0).surviveD(species[i].larvalSurvival + (species[i].getCohort(0).getOutMortality(indexTime) / (float) nbTimeStepsPerYear));     //additional larval mortality
             }
-
-            // ***** UPDATE LTL DATA *****
-            Runtime.getRuntime().gc();
-            long freeMem = Runtime.getRuntime().freeMemory();
-
-            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) // if LTL model to be run, run it
-            {
-                System.out.print(". " + new Date() + "       Free mem = " + freeMem);
-                coupling.runLTLModel();
-                System.out.println("      -> OK ");
-            }
-            forcing.updatePlankton(indexTime);     // update plankton fields either from LTL run or from data
-
-            // *** PREDATION ***
-            /*
-             * 2011/04/18 phv : do not understand why do we sort schools by
-             * length here ?
-             */
-            rankSchoolsSizes();
-
-            /*
-             * save fish biomass before predation process for diets data (last
-             * column of predatorPressure output file in Diets/)
-             */
-            if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
-                for (int i = 0; i < species.length; i++) {
-                    for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                        for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                            biomPerStage[i][((School) species[i].getCohort(j).getSchool(k)).dietOutputStage] += ((School) species[i].getCohort(j).getSchool(k)).getBiomass();
-                        }
-                    }
+            for (int j = 1; j < species[i].getNumberCohorts(); j++) {
+                if (species[i].getCohort(j).getAbundance() != 0) {
+                    species[i].getCohort(j).surviveD((species[i].D + species[i].getCohort(j).getOutMortality(indexTime)) / (float) nbTimeStepsPerYear);
                 }
             }
-            if (coupling != null && (year >= coupling.getStartYearLTLModel() - 1)) // save grid of plankton biomass one year before coupling so forcing mode is also saved
-            {
-                coupling.savePlanktonBiomass();
-            } else if (getOsmose().planktonBiomassOutputMatrix[numSerie]) {
-                forcing.savePlanktonBiomass();
-            }
-
-            List<School> randomSchools = suffleSchools();
-            Iterator<School> randomIterator = randomSchools.iterator();
-            while (randomIterator.hasNext()) {
-                School school = randomIterator.next();
-                /*
-                 * eggs do not predate other organisms
-                 */
-                if (!school.willDisappear() && school.getCohort().getAgeNbDt() != 0) {
-                    school.predation();
-                }
-            }
-
-            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
-                coupling.calculPlanktonMortality();
-            }
-
-
-            // *** STARVATION MORTALITY ***
-            randomIterator = randomSchools.iterator();
-            while (randomIterator.hasNext()) {
-                School school = randomIterator.next();
-                if (!school.willDisappear()) {
-                    school.surviveP();
-                }
-            }
-
-            // *** UPDATE of disappeared schools ***
-            assessNbSchools();
-            assessPresentSchools();
-            assessAbdCohSpec();
-
-            // *** GROWTH ***
-            for (int i = 0; i < species.length; i++) {
-                if (species[i].getAbundance() != 0) {
-                    species[i].growth();
-                }
-            }
-
-            // *** FISHING ***
-            assessCatchableSchools();
-
-            //Initialisation of indicators tables
+        }
+    }
+    
+    private void clearCatchesIndicators() {
+        //Initialisation of indicators tables
             for (int i = 0; i < species.length; i++) {
                 tabSizeCatch[i] = new float[species[i].nbSchoolsTotCatch];
                 tabNbCatch[i] = new float[species[i].nbSchoolsTotCatch];
@@ -361,87 +322,158 @@ public class Simulation {
                     tabNbCatch[i][s] = 0;
                 }
             }
-            for (int i = 0; i < species.length; i++) {
-                if ((species[i].getAbundance() != 0) && (species[i].seasonFishing[indexTime] != 0) && (species[i].F != 0)) {
-                    species[i].fishingA();
+    }
+    
+    private void growth() {
+        for (int i = 0; i < species.length; i++) {
+                if (species[i].getAbundance() != 0) {
+                    species[i].growth();
                 }
             }
+    }
+    
+    private void fishing() {
+        for (int i = 0; i < species.length; i++) {
+            if ((species[i].getAbundance() != 0) && (species[i].seasonFishing[indexTime] != 0) && (species[i].F != 0)) {
+                species[i].fishingA();
+            }
+        }
+    }
+    
+    private void updateIndicators() {
+        for (int i = 0; i < species.length; i++) {
+            species[i].update();
+            if (species[i].getAbundance() == 0) {
+                /*
+                 * 2011/04/19 phv There is no reason for doing such a thing.
+                 * First, even though the current abundance of a species is
+                 * zero, the Species object is not deleted from the species[]
+                 * array. Secondly, in School.java, the array
+                 * accessibilityMatrix relies on the total number of species and
+                 * doest not seem to handle the fact that nbSpecies might
+                 * change. What I did : deleted the nbSpecies variable. Replaced
+                 * by getNbSpecies() function that returns species.length. I
+                 * keep here a local nbSpecies variable as a reminder.
+                 */
+                //nbSpecies--; Do Nothing
+            }
+        }
 
-
-            // *** UPDATE ***
-            for (int i = 0; i < species.length; i++) {
-                species[i].update();
-                if (species[i].getAbundance() == 0) {
-                    /*
-                     * 2011/04/19 phv There is no reason for doing such a thing.
-                     * First, even though the current abundance of a species is
-                     * zero, the Species object is not deleted from the
-                     * species[] array. Secondly, in School.java, the array
-                     * accessibilityMatrix relies on the total number of species
-                     * and doest not seem to handle the fact that nbSpecies
-                     * might change. What I did : deleted the nbSpecies
-                     * variable. Replaced by getNbSpecies() function that
-                     * returns species.length. I keep here a local nbSpecies
-                     * variable as a reminder.
-                     */
-                    //nbSpecies--; Do Nothing
+        //update spectra
+        if (sizeSpectrumPerSpeOutput) {
+            for (int i = 0; i < getOsmose().nbSizeClass; i++) {
+                //spectrumAbd[i]=0;
+                //spectrumBiom[i]=0;
+                for (int j = 0; j < species.length; j++) {
+                    spectrumSpeciesAbd[j][i] = 0;
                 }
             }
+        }
 
-            //update spectra
-            if (sizeSpectrumPerSpeOutput) {
-                for (int i = 0; i < getOsmose().nbSizeClass; i++) {
-                    //spectrumAbd[i]=0;
-                    //spectrumBiom[i]=0;
-                    for (int j = 0; j < species.length; j++) {
-                        spectrumSpeciesAbd[j][i] = 0;
+        for (int i = 0; i < species.length; i++) {
+            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
+                for (int k = 0; k < species[i].getCohort(j).size(); k++) {
+                    if (sizeSpectrumPerSpeOutput) {
+                        ((School) species[i].getCohort(j).getSchool(k)).rankSize(getOsmose().tabSizes, getOsmose().spectrumMaxSize);
+                    }
+                    if ((year >= getOsmose().timeSeriesStart) && ((TLoutput) || (TLDistriboutput))) {
+                        ((School) species[i].getCohort(j).getSchool(k)).rankTL(getOsmose().tabTL);
                     }
                 }
             }
-
-            for (int i = 0; i < species.length; i++) {
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                        if (sizeSpectrumPerSpeOutput) {
-                            ((School) species[i].getCohort(j).getSchool(k)).rankSize(getOsmose().tabSizes, getOsmose().spectrumMaxSize);
-                        }
-                        if ((year >= getOsmose().timeSeriesStart) && ((TLoutput) || (TLDistriboutput))) {
-                            ((School) species[i].getCohort(j).getSchool(k)).rankTL(getOsmose().tabTL);
-                        }
-                    }
-                }
+        }
+        //Stage Morgane - 07-2004  output of indicators
+        for (int i = 0; i < species.length; i++) {
+            if (meanSizeOutput) {
+                species[i].calculSizes();
+                species[i].calculSizesCatch();
             }
-            //Stage Morgane - 07-2004  output of indicators
-            for (int i = 0; i < species.length; i++) {
-                if (meanSizeOutput) {
-                    species[i].calculSizes();
-                    species[i].calculSizesCatch();
-                }
-                if ((TLoutput) || (TLDistriboutput)) {
-                    species[i].calculTL();
-                }
+            if ((TLoutput) || (TLDistriboutput)) {
+                species[i].calculTL();
             }
+        }
+    }
+    
+    private void reproduction() {
+        for (int i = 0; i < species.length; i++) {
+            /*
+             * phv 2011/11/22 Added species that can reproduce outside the
+             * simulated domain and we only model an incoming flux of biomass.
+             */
+            if (species[i].isReproduceLocally()) {
+                species[i].reproduce();
+            } else {
+                species[i].incomingFlux();
+            }
+        }
+    }
 
-            // *** SAVE THE TIME STEP ***
+    public void step() {
+
+        // Print in console the period already simulated
+        printProgress();
+        
+        // Calculation of relative size of MPA
+        RS = getRatioMPA();
+        
+        // Loop over the year
+        while (indexTime < nbTimeStepsPerYear) {
+            
+            // Clear some tables and update some stages at the begining of the step
+            clearNbDeadArrays();
+            updateStages();
+
+            // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
+            if (!((indexTime == 0) && (year == 0))) {
+                distributeSpecies();
+            }
+            List<School> schools = getSchools();
+
+            // Natural mortality (due to other predators)
+            naturalMortality();
+            
+           // Update LTL Data
+            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
+                coupling.runLTLModel();
+            }
+            forcing.updatePlankton(indexTime);
+
+            // Predation
+            rankSchoolsSizes();
+            saveBiomassBeforePredation();
+            Collections.shuffle(schools);
+            predation(schools);
+            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
+                coupling.calculPlanktonMortality();
+            }
+            
+            // Starvation
+            starvation(schools);
+            
+            // Update of disappeared schools
+            assessNbSchools();
+            assessPresentSchools();
+            assessAbdCohSpec();
+            
+            // Growth
+            growth();
+            
+            // Fishing
+            assessCatchableSchools();
+            clearCatchesIndicators();
+            fishing();
+            
+            // Save steps
+            updateIndicators();
             if (getOsmose().spatializedOutputs[numSerie]) {
                 saveSpatializedStep();
             }
             saveStep();
-
-            // *** REPRODUCTION ***
-            for (int i = 0; i < species.length; i++) {
-                /*
-                 * phv 2011/11/22 Added species that can reproduce outside the
-                 * simulated domain and we only model an incoming flux of
-                 * biomass.
-                 */
-                if (species[i].isReproduceLocally()) {
-                    species[i].reproduce();
-                } else {
-                    species[i].incomingFlux();
-                }
-            }
-
+            
+            // Reproduction
+            reproduction();
+            
+            // Increment time step
             indexTime++;
         }
         indexTime = 0;  //end of the year
@@ -653,11 +685,7 @@ public class Simulation {
         forcing.initPlanktonMap();
     }
 
-    /*
-     * Randomly sort all schools for predation.
-     */
-    public List<School> suffleSchools() {
-
+    public List<School> getSchools() {
         ArrayList<School> schools = new ArrayList();
         for (Species sp : species) {
             for (Cohort cohort : sp.getCohorts()) {
@@ -666,7 +694,6 @@ public class Simulation {
                 }
             }
         }
-        Collections.shuffle(schools);
         return schools;
     }
 
@@ -767,6 +794,14 @@ public class Simulation {
     }
 
     public void distributeSpecies() {
+        /*
+         * Clear all cells (to make sure we remove the last age class)
+         */
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                getGrid().getCell(i, j).clear();
+            }
+        }
         /*
          * Random distribution
          */
@@ -1274,7 +1309,7 @@ public class Simulation {
                     abundance[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getAbundance();
                     mean_size[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getLength();
                     tl[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getTrophicLevel()[indexTime];
-                    yield[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += (school.catches *  school.getWeight() / 1000000.d);
+                    yield[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += (school.catches * school.getWeight() / 1000000.d);
                 }
             }
             for (int ispec = 0; ispec < getNbSpecies(); ispec++) {
