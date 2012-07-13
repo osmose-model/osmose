@@ -86,7 +86,7 @@ public class School {
     /*
      * Available biomass [ton] of the school for predation by other schools
      */
-    private double biomassToPredate;
+    double biomassToPredate;
     /*
      * Maximum prey size [cm]
      */
@@ -115,6 +115,11 @@ public class School {
     private float sumDiet;
     private boolean unlocated;
     float catches;
+    //
+    double nDeadFishing;
+    double nDeadPredation;
+    double nDeadStarvation;
+    double nDeadNatural;
 
 //////////////
 // Constructor
@@ -703,6 +708,20 @@ public class School {
      */
     public float[] getTrophicLevel() {
         return trophicLevel;
+    }
+    
+    /**
+     * @return the trophicLevel
+     */
+    public int getFeedingStage() {
+        return feedingStage;
+    }
+    
+    /**
+     * @return the trophicLevel
+     */
+    public int getAccessibilityStage() {
+        return accessibilityStage;
     }
 
     /**
