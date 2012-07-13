@@ -938,13 +938,12 @@ public class Simulation {
                     school.nDeadFishing = nbDeadMatrix[is][ns + 2];
                     
                     // Update abundance
-//                    school.setAbundance(school.getAbundance()
-//                            - school.nDeadPredation
-//                            - school.nDeadStarvation
-//                            - school.nDeadNatural
-//                            - school.nDeadFishing);
+                    school.setAbundance(school.getAbundance()
+                            - school.nDeadPredation
+                            - school.nDeadStarvation
+                            - school.nDeadNatural
+                            - school.nDeadFishing);
                 }
-                
             }
         }
     }

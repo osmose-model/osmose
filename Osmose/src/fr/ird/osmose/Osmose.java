@@ -203,7 +203,7 @@ public class Osmose {
     public void initializeSizeAndTLSpectrum() {
         if (sizeSpectrumOutputMatrix[numSerie] || sizeSpectrumPerSpeOutputMatrix[numSerie]) {
             //initialisation of the size spectrum features
-            nbSizeClass = (int) (spectrumMaxSize / classRange);//size classes of 5 cm
+            nbSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
 
             tabSizes = new float[nbSizeClass];
             tabSizes[0] = spectrumMinSize;
