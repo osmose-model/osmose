@@ -51,7 +51,7 @@ public class Cohort extends ArrayList<School> {
     /*
      * Abundance of the cohort, number of individuals
      */
-    private long abundance;
+    private double abundance;
     /*
      * Biomass [ton] of the cohort
      */
@@ -87,7 +87,7 @@ public class Cohort extends ArrayList<School> {
     /*
      * Abundance of catchable schools
      */
-    private long abundanceCatchable;
+    private double abundanceCatchable;
     /*
      * Index of the species
      */
@@ -152,13 +152,13 @@ public class Cohort extends ArrayList<School> {
     }
 
     public void surviveD(float D) {
-        long oldAbd = abundance;
+        double oldAbd = abundance;
         abundance = Math.round(oldAbd * Math.exp(-D));      // D is already divided by the time step in Qsimulation
-        long nbDeadTemp = oldAbd - abundance;
+        double nbDeadTemp = oldAbd - abundance;
         nbDeadDd += nbDeadTemp;
 
         int nbSchools = size();
-        long nbSurplusDead = nbDeadTemp % nbSchools;
+        double nbSurplusDead = nbDeadTemp % nbSchools;
 
         //NB of DEAD FISH are DISTRIBUTED UNIFORMLY
         for (int i = 0; i < nbSchools; i++) {
@@ -209,7 +209,7 @@ public class Cohort extends ArrayList<School> {
 
     public long fishing1(float F) // indicator to be checked
     {
-        long oldAbdCatch1 = abundance;
+        double oldAbdCatch1 = abundance;
         long nbDeadFfTheo = Math.round(oldAbdCatch1 * (1 - Math.exp(-F)));   // F is already scaled to the time step trough seasonality
         //nbDeadFf = captures en nombre
 
@@ -313,7 +313,7 @@ public class Cohort extends ArrayList<School> {
                 abundanceCatchable += school.getAbundance();
             }
         }
-        nbDeadFf = oldAbdCatch1 - abundance;
+        nbDeadFf = (long) (oldAbdCatch1 - abundance);
 
         // save of annual yield
         if ((getSimulation().getYear()) >= getOsmose().timeSeriesStart) {
@@ -578,14 +578,14 @@ public class Cohort extends ArrayList<School> {
     /**
      * @return the abundance
      */
-    public long getAbundance() {
+    public double getAbundance() {
         return abundance;
     }
 
     /**
      * @param abundance the abundance to set
      */
-    public void setAbundance(long abundance) {
+    public void setAbundance(double abundance) {
         this.abundance = abundance;
     }
 
@@ -741,14 +741,14 @@ public class Cohort extends ArrayList<School> {
     /**
      * @return the abundanceCatchable
      */
-    public long getAbundanceCatchable() {
+    public double getAbundanceCatchable() {
         return abundanceCatchable;
     }
 
     /**
      * @param abundanceCatchable the abundanceCatchable to set
      */
-    public void setAbundanceCatchable(long abundanceCatchable) {
+    public void setAbundanceCatchable(double abundanceCatchable) {
         this.abundanceCatchable = abundanceCatchable;
     }
 }

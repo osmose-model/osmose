@@ -13,7 +13,10 @@ package fr.ird.osmose;
  * @version 2.1
  ******************************************************************************** 
  */
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 public class School {
 
@@ -70,7 +73,7 @@ public class School {
     /*
      * Number of individuals in the school
      */
-    private long abundance;
+    private double abundance;
     /*
      * Biomass of the school in tons
      */
@@ -114,7 +117,7 @@ public class School {
     private float[][] dietTemp;
     private float sumDiet;
     private boolean unlocated;
-    float catches;
+    double catches;
     //
     double nDeadFishing;
     double nDeadPredation;
@@ -734,14 +737,14 @@ public class School {
     /**
      * @return the abundance
      */
-    public long getAbundance() {
+    public double getAbundance() {
         return abundance;
     }
 
     /**
      * @param abundance the abundance to set
      */
-    public void setAbundance(long abundance) {
+    public void setAbundance(double abundance) {
         this.abundance = abundance;
     }
 

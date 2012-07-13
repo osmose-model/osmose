@@ -58,7 +58,7 @@ public class Species {
     /*
      * Number of individuals of the species
      */
-    private long abundance;
+    private double abundance;
     /*
      * Total biomass in tons
      */
@@ -272,7 +272,7 @@ public class Species {
         return name;
     }
 
-    public long getAbundance() {
+    public double getAbundance() {
         return abundance;
     }
 
@@ -280,7 +280,7 @@ public class Species {
         abundance = 0;
     }
 
-    public void incrementAbundance(long incr) {
+    public void incrementAbundance(double incr) {
         this.abundance += incr;
     }
 
@@ -543,7 +543,7 @@ public class Species {
                         getCohort(i).removeAll(schoolsToRemove);
                         
                         getCohort(i).setAbundance(getCohort(i).getAbundance() - getCohort(i).getAbundanceCatchable());
-                        getCohort(i).setNbDeadFf(getCohort(i).getNbDeadFf() + getCohort(i).getAbundanceCatchable());
+                        getCohort(i).setNbDeadFf((long) (getCohort(i).getNbDeadFf() + getCohort(i).getAbundanceCatchable()));
                     }
 
                 } else // enough fish in other cohorts
