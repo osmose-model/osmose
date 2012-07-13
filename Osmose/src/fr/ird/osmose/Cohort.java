@@ -1,9 +1,11 @@
 package fr.ird.osmose;
 
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * <p>Titre : Cohort class</p>
  *
- * <p>Description : groups the super-individuals (School). represents a cohort (not annual but for a tims step)</p>
+ * <p>Description : groups the super-individuals (School). represents a cohort
+ * (not annual but for a tims step)</p>
  *
  * <p>Copyright : Copyright (c) may 2009 </p>
  *
@@ -11,30 +13,23 @@ package fr.ird.osmose;
  *
  * @author Yunne Shin, Morgane Travers
  * @version 2.1
- ********************************************************************************
+ * *******************************************************************************
  */
 import java.util.*;
 
 public class Cohort extends ArrayList<School> {
     /*
      * ********
-     * * Logs *
-     * ********
-     * 2011/04/08 phv
-     * Added function getSchool() that is more meaningfull than just get()
-     * Added variable indexSpecies = species.number - 1
-     * Encapsulated fields.
-     * Unplugged function calculMeanGrowth() since it is not used in this
-     * version of Osmose.
-     * Deleted variable oldAbundance.
+     * * Logs * ******** 2011/04/08 phv Added function getSchool() that is more
+     * meaningfull than just get() Added variable indexSpecies = species.number
+     * - 1 Encapsulated fields. Unplugged function calculMeanGrowth() since it
+     * is not used in this version of Osmose. Deleted variable oldAbundance.
      * Deleted vector vectCatchableSchools. It is faster to loop on the whole
-     * list of schools and check wether they are catchable or not.
-     * 2011/04/07 phv
-     * Osmose and Simulation are called with Osmose.getInstance()
-     * and Osmose.getInstance().getSimulation()
-     * Deleted vector presentSchools. Cohort now extends ArrayList<School>
-     * Deleted variable nbSchools. Replaced by this.size()
-     * ***
+     * list of schools and check wether they are catchable or not. 2011/04/07
+     * phv Osmose and Simulation are called with Osmose.getInstance() and
+     * Osmose.getInstance().getSimulation() Deleted vector presentSchools.
+     * Cohort now extends ArrayList<School> Deleted variable nbSchools. Replaced
+     * by this.size() ***
      */
 
 ///////////////////////////////
@@ -65,7 +60,7 @@ public class Cohort extends ArrayList<School> {
      */
     private float meanWeight;
     /*
-     * 
+     *
      */
     private float[] outOfZoneMortality;
     private boolean[] outOfZoneCohort;
@@ -76,8 +71,8 @@ public class Cohort extends ArrayList<School> {
     private float Pp;
     private float Ss;
     private long nbDead;
-    private long nbDeadDd;
-    private long nbDeadFf;
+    long nbDeadDd;
+    long nbDeadFf;
     private long nbDeadPp;
     private long nbDeadSs;
     /*
@@ -97,7 +92,7 @@ public class Cohort extends ArrayList<School> {
 // Constructor
 //////////////
     /**
-     * 
+     *
      * @param species
      * @param ageNbDt
      * @param abundance
@@ -205,6 +200,21 @@ public class Cohort extends ArrayList<School> {
             school.setBiomass(((double) school.getAbundance()) * school.getWeight() / 1000000.);
             biomass += school.getBiomass();
         }
+    }
+
+    public void removeDeadSchools() {
+
+        List<School> schoolsToRemove = new ArrayList();
+        for (School school : this) {
+            if (school.willDisappear()) {
+                // cohorts in the area during the time step
+                if (!(outOfZoneCohort[getSimulation().getIndexTime()])) {
+                    school.getCell().remove(school);
+                }
+                schoolsToRemove.add(school);
+            }
+        }
+        removeAll(schoolsToRemove);
     }
 
     public long fishing1(float F) // indicator to be checked
@@ -582,6 +592,10 @@ public class Cohort extends ArrayList<School> {
         return abundance;
     }
 
+    public void incrementAbundance(double abundance) {
+        this.abundance += abundance;
+    }
+
     /**
      * @param abundance the abundance to set
      */
@@ -594,6 +608,10 @@ public class Cohort extends ArrayList<School> {
      */
     public double getBiomass() {
         return biomass;
+    }
+
+    public void incrementBiomass(double biomass) {
+        this.biomass += biomass;
     }
 
     /**
@@ -736,6 +754,13 @@ public class Cohort extends ArrayList<School> {
      */
     public void setNbSchoolsCatchable(int nbSchoolsCatchable) {
         this.nbSchoolsCatchable = nbSchoolsCatchable;
+    }
+    
+    /**
+     * @param nbSchoolsCatchable the nbSchoolsCatchable to set
+     */
+    public void incrementAbundanceCatchable(double abundanceCatchable) {
+        this.abundanceCatchable += abundanceCatchable;
     }
 
     /**
