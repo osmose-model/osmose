@@ -255,5 +255,23 @@ public class Cell extends ArrayList<School> {
     public void sortSchoolsByLength() {
         Collections.sort(this, new SchoolLengthComparator());
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("Cell (i:");
+        str.append(i);
+        str.append(", j:");
+        str.append(j);
+        str.append(")\n  lat: ");
+        str.append((float) lat);
+        str.append(" lon: ");
+        str.append((float) lon);
+        str.append("\n land? ");
+        str.append(land);
+        str.append("  mpa? ");
+        str.append(mpa);
+        return str.toString();
+    }
 }
 

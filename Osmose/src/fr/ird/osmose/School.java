@@ -213,6 +213,20 @@ public class School {
     public Cell getCell() {
         return cell;
     }
+    
+    /**
+     * Converts the specified biomass [tons] into abundance [scalar]
+     */
+    public double biom2abd(double biomass) {
+        return 1000000.d * biomass / weight;
+    }
+    
+    /**
+     * Converts the specified abundance [scalar] into biomass [tons]
+     */
+    public double adb2biom(double abundance) {
+        return abundance * weight / 1000000.d;
+    }
 
     /**
      * Randomly choose one cell out the list of cells.
