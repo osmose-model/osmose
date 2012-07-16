@@ -75,10 +75,6 @@ public class School {
      */
     private double abundance;
     /*
-     * Biomass of the school in tons
-     */
-    private double biomass;
-    /*
      * Predation success rate
      */
     private float predSuccessRate;
@@ -139,7 +135,6 @@ public class School {
         this.abundance = abundance;
         this.length = length;
         this.weight = weight;
-        this.biomass = ((double) abundance) * weight / 1000000.d;
         species = cohort.getSpecies();
         disappears = false;
         catchable = true;
@@ -434,11 +429,9 @@ public class School {
                     //
                     mySchoolk.cohort.setNbDeadPp(mySchoolk.cohort.getNbDeadPp() + Math.round((biomassAccessible * 1000000.) / mySchoolk.getWeight()));
 
-                    mySchoolk.setBiomass(mySchoolk.getBiomass() - biomassAccessible);
-                    mySchoolk.setAbundance(mySchoolk.getAbundance() - Math.round((biomassAccessible * 1000000.) / mySchoolk.getWeight()));
-                    if (mySchoolk.getAbundance() <= 0) {
+                    mySchoolk.setAbundance(mySchoolk.getAbundance() - mySchoolk.biom2abd(biomassAccessible));
+                    if (mySchoolk.getAbundance() < 1.d) {
                         mySchoolk.setAbundance(0);
-                        mySchoolk.setBiomass(0);
                         mySchoolk.tagForRemoval();
                     }
 
@@ -482,12 +475,9 @@ public class School {
                     }
 
                     mySchoolk.cohort.setNbDeadPp(mySchoolk.cohort.getNbDeadPp() + Math.round((biomassAccessible * biomassToPredate * 1000000.) / (mySchoolk.getWeight() * biomAccessibleTot)));
-                    mySchoolk.setAbundance(mySchoolk.getAbundance() - Math.round((biomassAccessible * biomassToPredate * 1000000.) / (mySchoolk.getWeight() * biomAccessibleTot)));
-                    mySchoolk.setBiomass(mySchoolk.getBiomass() - biomassAccessible * biomassToPredate / biomAccessibleTot);
-
-                    if (mySchoolk.getAbundance() <= 0) {
+                    mySchoolk.setAbundance(mySchoolk.getAbundance() - mySchoolk.biom2abd(biomassAccessible * biomassToPredate / biomAccessibleTot));
+                    if (mySchoolk.getAbundance() < 1.d) {
                         mySchoolk.setAbundance(0);
-                        mySchoolk.setBiomass(0);
                         mySchoolk.tagForRemoval();
                     }
 
@@ -579,13 +569,12 @@ public class School {
     }
 
     public void growth(float minDelta, float maxDelta, float c, float bPower) {
-        float previousW = (float) (c * Math.pow(getLength(), bPower));
+        
         //calculation of lengths according to predation efficiency
         if (predSuccessRate >= getCohort().getSpecies().criticalPredSuccess) {
             setLength(getLength() + minDelta + (maxDelta - minDelta) * ((predSuccessRate - getCohort().getSpecies().criticalPredSuccess) / (1 - getCohort().getSpecies().criticalPredSuccess)));
             setWeight((float) (c * Math.pow(getLength(), bPower)));
         }
-        setBiomass(((double) getAbundance()) * getWeight() / 1000000.);
 
         //		updateTL(previousW,weight);
         updateTLbis();
@@ -766,14 +755,7 @@ public class School {
      * @return the biomass
      */
     public double getBiomass() {
-        return biomass;
-    }
-
-    /**
-     * @param biomass the biomass to set
-     */
-    public void setBiomass(double biomass) {
-        this.biomass = biomass;
+        return adb2biom(abundance);
     }
 
     /**

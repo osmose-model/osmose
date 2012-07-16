@@ -325,7 +325,6 @@ public class Simulation {
                         school.setAbundance(0);
                         school.tagForRemoval();
                     }
-                    school.setBiomass(school.adb2biom(school.getAbundance()));
                     school.getCohort().nbDeadDd += nDead;
                 }
             }
@@ -653,7 +652,6 @@ public class Simulation {
                         school.tagForRemoval();
                         school.getCohort().setNbSchoolsCatchable(school.getCohort().getNbSchoolsCatchable() - 1);
                         }
-                        school.setBiomass(school.adb2biom(school.getAbundance()));
                         school.getCohort().nbDeadFf += nDead;
                     }
                     school.nDeadFishing = nDead;
@@ -1317,7 +1315,7 @@ public class Simulation {
         for (int i = 0; i < species.length; i++) {
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                 for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                    species[i].getCohort(j).setAbundance(species[i].getCohort(j).getAbundance() + ((School) species[i].getCohort(j).getSchool(k)).getAbundance());
+                    species[i].getCohort(j).incrementAbundance(species[i].getCohort(j).getSchool(k).getAbundance());
                 }
                 species[i].incrementAbundance(species[i].getCohort(j).getAbundance());
             }
@@ -2125,7 +2123,7 @@ public class Simulation {
             }   // end loop dtcount=dtSaving
         }
     }
-
+    
     public void initPredatorPressureFile() {
         File targetPath, targetFile;
         PrintWriter pr;

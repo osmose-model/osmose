@@ -307,7 +307,6 @@ public class Species {
                     School school0k = getSchool(0, k);
                     school0k.setLength(school0k.getLength() + deltaMeanLength[i]);
                     school0k.setWeight((float) (c * Math.pow(school0k.getLength(), bPower)));
-                    school0k.setBiomass(((double) school0k.getAbundance()) * school0k.getWeight() / 1000000.);
                 }
             }
 
@@ -317,7 +316,6 @@ public class Species {
                     School schoolk = getSchool(i, k);
                     schoolk.setLength(schoolk.getLength() + deltaMeanLength[i]);
                     schoolk.setWeight((float) (c * Math.pow(schoolk.getLength(), bPower)));
-                    schoolk.setBiomass(((double) schoolk.getAbundance()) * schoolk.getWeight() / 1000000.);
                 }
             } else {
                 if (getCohort(i).getAbundance() != 0) {
@@ -431,7 +429,6 @@ public class Species {
             // do nothing, zero school
         } else if (nbEggs < getOsmose().nbSchools[getOsmose().numSerie]) {
             coh0.add(new School(coh0, nbEggs, eggSize, eggWeight));
-            ((School) coh0.get(0)).setBiomass(coh0.getBiomass());
         } else if (nbEggs >= getOsmose().nbSchools[getOsmose().numSerie]) {
             int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
             coh0.ensureCapacity(nbSchools);
@@ -440,9 +437,6 @@ public class Species {
             }
             int surplus = (int) coh0.getAbundance() % coh0.size();
             ((School) (coh0.get(0))).setAbundance(((School) (coh0.get(0))).getAbundance() + surplus);
-            for (int i = 0; i < coh0.size(); i++) {
-                ((School) coh0.get(i)).setBiomass(((double) ((School) coh0.get(i)).getAbundance()) * eggWeight / 1000000.);
-            }
         }
         coh0.trimToSize();
         for (int i = 0; i < coh0.size(); i++) {

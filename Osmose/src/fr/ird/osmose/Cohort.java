@@ -197,7 +197,6 @@ public class Cohort extends ArrayList<School> {
         //UPDATE biomass of schools & cohort
         biomass = 0;
         for (School school : this) {
-            school.setBiomass(((double) school.getAbundance()) * school.getWeight() / 1000000.);
             biomass += school.getBiomass();
         }
     }
@@ -317,7 +316,6 @@ public class Cohort extends ArrayList<School> {
         abundanceCatchable = 0;
 
         for (School school : this) {
-            school.setBiomass(((double) school.getAbundance()) * school.getWeight() / 1000000.);
             abundance += school.getAbundance();
             if (school.isCatchable()) {
                 abundanceCatchable += school.getAbundance();
@@ -414,14 +412,9 @@ public class Cohort extends ArrayList<School> {
             }
             removeAll(schoolsToRemove);
 
-            //UPDATE schools biomasss & cohort abd
+            //UPDATE cohort abd
             abundance -= nbDeadFf;
             abundanceCatchable -= nbDeadFf;
-            for (School school : this) {
-                if (school.isCatchable()) {
-                    school.setBiomass(((double) school.getAbundance()) * school.getWeight() / 1000000.);
-                }
-            }
         }
         if ((getSimulation().getYear()) >= getOsmose().timeSeriesStart) {
             getSimulation().savingYield[indexSpecies] += Yi;
@@ -515,10 +508,9 @@ public class Cohort extends ArrayList<School> {
             }
             removeAll(schoolsToRemove);
 
-            //UPDATE schools biomass & cohort abd
+            //UPDATE cohort abd
             abundance = 0;
             for (School school : this) {
-                school.setBiomass(((double) school.getAbundance()) * school.getWeight() / 1000000.);
                 abundance += school.getAbundance();
             }
             nbDeadFf += abdToCatch;
