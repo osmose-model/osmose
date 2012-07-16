@@ -318,12 +318,14 @@ public class Simulation {
                 if (school.getAbundance() != 0.d) {
                     double nDead = computeNaturalMortality(school);
                     if (nDead >= school.getAbundance()) {
+                        nDead = school.getAbundance();
+                    }
+                    school.setAbundance(school.getAbundance() - nDead);
+                    if (school.getAbundance() < 1.d) {
                         school.setAbundance(0);
                         school.tagForRemoval();
-                        nDead = school.getAbundance();
-                    } else {
-                        school.setAbundance(school.getAbundance() - nDead);
                     }
+                    school.setBiomass(school.adb2biom(school.getAbundance()));
                     school.getCohort().nbDeadDd += nDead;
                 }
             }
@@ -338,7 +340,7 @@ public class Simulation {
                     cohort.setBiomass(0.d);
                     for (School school : cohort) {
                         cohort.incrementAbundance(school.getAbundance());
-                        cohort.incrementBiomass(school.adb2biom(school.getAbundance()));
+                        cohort.incrementBiomass(school.getBiomass());
                     }
                 }
             }
