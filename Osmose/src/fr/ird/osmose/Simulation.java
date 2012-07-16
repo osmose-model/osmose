@@ -645,13 +645,15 @@ public class Simulation {
                     double nDead = computeFishingMortality(school);
                     if (nDead != 0.d) {
                         if (nDead >= school.getAbundance()) {
-                            school.setAbundance(0);
-                            school.tagForRemoval();
                             nDead = school.getAbundance();
-                            school.getCohort().setNbSchoolsCatchable(school.getCohort().getNbSchoolsCatchable() - 1);
-                        } else {
-                            school.setAbundance(school.getAbundance() - nDead);
                         }
+                        school.setAbundance(school.getAbundance() - nDead);
+                        if (school.getAbundance() < 1.d) {
+                        school.setAbundance(0);
+                        school.tagForRemoval();
+                        school.getCohort().setNbSchoolsCatchable(school.getCohort().getNbSchoolsCatchable() - 1);
+                        }
+                        school.setBiomass(school.adb2biom(school.getAbundance()));
                         school.getCohort().nbDeadFf += nDead;
                     }
                     school.nDeadFishing = nDead;
@@ -672,7 +674,7 @@ public class Simulation {
                     int iSchool = 0;
                     for (School school : cohort) {
                         cohort.incrementAbundance(school.getAbundance());
-                        cohort.incrementBiomass(school.adb2biom(school.getAbundance()));
+                        cohort.incrementBiomass(school.getBiomass());
                         if (school.isCatchable() && j >= indexRecruitAge) {
                             cohort.incrementAbundanceCatchable(school.getAbundance());
                             // update indicators
