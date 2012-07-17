@@ -30,7 +30,7 @@ public class Indicators {
         int year = getSimulation().getYear();
         int index = getSimulation().getIndexTime();
         int nStepsYear = getSimulation().getNbTimeStepsPerYear();
-        int nStepsRecord = getSimulation().getRecordFrequency();
+        int nStepsRecord = getOsmose().savingDtMatrix[getOsmose().numSerie];
         //
         // UPDATE
         if (year >= getOsmose().timeSeriesStart) {
@@ -70,7 +70,7 @@ public class Indicators {
         // biomass & abundance
         biomassNoJuv = new double[nSpec];
         abundanceNoJuv = new double[nSpec];
-        if (getSimulation().outputClass0) {
+        if (getSimulation().outputClass0 || getSimulation().calibration) {
             biomassTot = new double[nSpec];
             abundanceTot = new double[nSpec];
         }
@@ -89,7 +89,7 @@ public class Indicators {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
             for (int j = 0; j < species.getNumberCohorts(); j++) {
-                if (getSimulation().outputClass0) {
+                if (getSimulation().outputClass0 || getSimulation().calibration) {
                     biomassTot[i] += species.getCohort(j).getBiomass();
                     abundanceTot[i] += species.getCohort(j).getAbundance();
                 }
@@ -114,8 +114,9 @@ public class Indicators {
     }
 
     /*
-     * Writes mean size per species. It must come before writeBiomassAndAbundance
-     * since the mean size is pondered by the abundance without juveniles.
+     * Writes mean size per species. It must come before
+     * writeBiomassAndAbundance since the mean size is pondered by the abundance
+     * without juveniles.
      *
      */
     public static void writeMeanSizes(float time) {
@@ -205,14 +206,20 @@ public class Indicators {
 
         StringBuilder filename;
 
-        double nsteps = getSimulation().getRecordFrequency();
+        double nsteps = getOsmose().savingDtMatrix[getOsmose().numSerie];
+        int year = getSimulation().getYear();
+        int indexSaving = (int) (getSimulation().getIndexTime() / nsteps);
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            if (getSimulation().outputClass0) {
+            if (getSimulation().outputClass0 || getSimulation().calibration) {
                 abundanceTot[i] = Math.floor(abundanceTot[i] / nsteps);
                 biomassTot[i] /= nsteps;
             }
             abundanceNoJuv[i] = Math.floor(abundanceNoJuv[i] / nsteps);
             biomassNoJuv[i] /= nsteps;
+            if (getSimulation().calibration) {
+                getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassNoJuv[i];
+                getOsmose().BIOMQuadri[getOsmose().numSimu][i][1][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassTot[i];
+            }
         }
 
         filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
