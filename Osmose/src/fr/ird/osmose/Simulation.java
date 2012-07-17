@@ -764,6 +764,7 @@ public class Simulation {
 
         // Print in console the period already simulated
         printProgress();
+        Indicators.reset();
 
         // Calculation of relative size of MPA
         RS = getRatioMPA();
@@ -820,6 +821,7 @@ public class Simulation {
             if (getOsmose().spatializedOutputs[numSerie]) {
                 saveSpatializedStep();
             }
+            Indicators.updateAndWriteIndicators();
             saveStep();
 
             // Reproduction
@@ -3176,6 +3178,10 @@ public class Simulation {
 
     public int getIndexTime() {
         return indexTime;
+    }
+    
+    public int getRecordFrequency() {
+        return recordFrequency;
     }
 
     class PredationOutcome {
