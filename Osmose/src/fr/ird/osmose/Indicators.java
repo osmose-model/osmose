@@ -168,7 +168,7 @@ public class Indicators {
     private static void writeVariable(float time, double[] variable, String filename) {
         PrintWriter pr;
         FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie] + "/new");
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
         path.mkdirs();
         File file = new File(path, filename);
         boolean isNew = !file.exists();
