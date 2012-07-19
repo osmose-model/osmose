@@ -77,7 +77,7 @@ public class School {
     /*
      * Predation success rate
      */
-    private float predSuccessRate;
+    float predSuccessRate;
     /*
      * whether the school will disappear at next time step
      */
