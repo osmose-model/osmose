@@ -408,7 +408,7 @@ public class Species {
 
         long nbEggs = Math.round(sexRatio * alpha * seasonSpawning[getSimulation().getIndexTime()] * SSB * 1000000);
         if (nbEggs > 9100000000000000000l) {
-            System.out.println("beyond long format for eggs numbers");
+            System.out.println("Egg number beyond long format for species " + name);
         }
 
         //MAKING COHORTS GOING UP to the UPPER AGE CLASS
@@ -465,7 +465,7 @@ public class Species {
 
 
         if (abundance > 9100000000000000000l) {
-            System.out.println("beyond long format for species abd num" + name);
+            System.out.println("Abundance beyond long format for species " + name);
         }
 
         for (int i = 0; i < nbCohorts; i++) {

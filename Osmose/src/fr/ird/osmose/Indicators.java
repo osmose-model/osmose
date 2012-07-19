@@ -124,7 +124,11 @@ public class Indicators {
         StringBuilder filename;
 
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            meanSize[i] = (float) (meanSize[i] / abundanceNoJuv[i]);
+            if (abundanceNoJuv[i] != 0) {
+                meanSize[i] = (float) (meanSize[i] / abundanceNoJuv[i]);
+            } else {
+                meanSize[i] = 0.f;
+            }
         }
 
         filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
@@ -155,7 +159,11 @@ public class Indicators {
         StringBuilder filename;
 
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            meanTL[i] = (float) (meanTL[i] / biomassNoJuv[i]);
+            if (biomassNoJuv[i] != 0.d) {
+                meanTL[i] = (float) (meanTL[i] / biomassNoJuv[i]);
+            } else {
+                meanTL[i] = 0.f;
+            }
         }
 
         filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);

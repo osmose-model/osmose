@@ -69,7 +69,7 @@ public class School {
     /*
      * Table of the TL of this school at each time step
      */
-    private float[] trophicLevel;
+    float[] trophicLevel;
     /*
      * Number of individuals in the school
      */
@@ -110,7 +110,7 @@ public class School {
      * 
      */
     int dietOutputStage;
-    private float[][] dietTemp;
+    float[][] dietTemp;
     private float sumDiet;
     private boolean unlocated;
     double catches;
@@ -510,6 +510,11 @@ public class School {
             trophicLevel[getCohort().getAgeNbDt()] = trophicLevel[getCohort().getAgeNbDt() - 1];     // no food available, so current TL = previous TL
         }
         predSuccessRate = (float) (1 - biomassToPredate / biomassToPredateIni);     // = predSuccessRate for the current time step
+        
+        updateDietIndicators();
+    }
+    
+    public void updateDietIndicators() {
         if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
