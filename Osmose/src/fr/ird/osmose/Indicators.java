@@ -131,7 +131,9 @@ public class Indicators {
             }
         }
 
-        filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename = new StringBuilder("SizeIndicators");
+        filename.append(File.separatorChar);
+        filename.append(getOsmose().outputFileNameTab[getOsmose().numSerie]);
         filename.append("_meanSize_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
@@ -166,7 +168,9 @@ public class Indicators {
             }
         }
 
-        filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename = new StringBuilder("Trophic");
+        filename.append(File.separatorChar);
+        filename.append(getOsmose().outputFileNameTab[getOsmose().numSerie]);
         filename.append("_meanTL_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");

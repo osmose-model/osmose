@@ -986,7 +986,7 @@ public class Simulation {
                 }
 
                 // Begining of iteration
-                int ITER_MAX = 1;
+                int ITER_MAX = 50;
                 int iteration = 0;
                 double error = Double.MAX_VALUE;
                 double ERR_MAX = 0.000001d;
@@ -995,13 +995,13 @@ public class Simulation {
 
                     // Update number of deads
                     for (int ipr = 0; ipr < (ns + npl); ipr++) {
-                        for (int imort = 0; imort < ns; imort++) {
-                            double abundance;
-                            if (ipr < ns) {
-                                abundance = cell.get(ipr).getAbundance();
-                            } else {
-                                abundance = forcing.getPlankton(ipr - ns).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
-                            }
+                        double abundance;
+                        if (ipr < ns) {
+                            abundance = cell.get(ipr).getAbundance();
+                        } else {
+                            abundance = forcing.getPlankton(ipr - ns).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+                        }
+                        for (int imort = 0; imort < ns + 3; imort++) {
                             nbDeadMatrix[ipr][imort] = (mortalityRateMatrix[ipr][imort] / totalMortalityRate[ipr]) * (1 - Math.exp(-totalMortalityRate[ipr])) * abundance;
                             nbDeadMatrix[ipr][imort] = clean(nbDeadMatrix[ipr][imort], 0.d);
                         }
@@ -1022,7 +1022,7 @@ public class Simulation {
                         School school = cell.get(ipd);
                         correctionFactor[ipd] = clean(Math.min(school.biomassToPredate / biomassPreyed[ipd], 1.d), 1.d);
                     }
-                    
+
                     // Update mortality rates
                     for (int ipr = 0; ipr < (ns + npl); ipr++) {
                         // 1. Predation
@@ -1057,8 +1057,9 @@ public class Simulation {
                 for (int is = 0; is < ns; is++) {
                     School school = cell.get(is);
                     // 1. Predation
+                    school.nDeadPredation = 0.d;
                     for (int ipd = 0; ipd < ns; ipd++) {
-                        school.nDeadPredation += Math.round(nbDeadMatrix[is][ipd]);
+                        school.nDeadPredation += nbDeadMatrix[is][ipd];
                     }
                     // update TL
                     if (biomassPreyed[is] > 0.d) {
@@ -1086,11 +1087,11 @@ public class Simulation {
                     }
 
                     // 2. Starvation
-                    school.nDeadStarvation = Math.round(nbDeadMatrix[is][ns]);
+                    school.nDeadStarvation = nbDeadMatrix[is][ns];
                     // 3. Natural mortality
-                    school.nDeadNatural = Math.round(nbDeadMatrix[is][ns + 1]);
+                    school.nDeadNatural = nbDeadMatrix[is][ns + 1];
                     // 4. Fishing
-                    school.nDeadFishing = Math.round(nbDeadMatrix[is][ns + 2]);
+                    school.nDeadFishing = nbDeadMatrix[is][ns + 2];
 
                     // Update abundance
                     double nDeadTotal = school.nDeadPredation
@@ -1098,6 +1099,11 @@ public class Simulation {
                             + school.nDeadNatural
                             + school.nDeadFishing;
                     //System.out.println(Math.round(school.getAbundance()) + " tot: " + nDeadTotal + " pred:" + school.nDeadPredation + " starv: " + school.nDeadStarvation + " nat: " + school.nDeadNatural + " fish: " + school.nDeadFishing);
+//                    int pPred = (int) (100 * school.nDeadPredation / school.getAbundance());
+//                    int pStar = (int) (100 * school.nDeadStarvation / school.getAbundance());
+//                    int pNatu = (int) (100 * school.nDeadNatural / school.getAbundance());
+//                    int pFish = (int) (100 * school.nDeadFishing / school.getAbundance());
+//                    System.out.println(pPred + " " + pStar + " " + pNatu + " " + pFish);
                     school.setAbundance(school.getAbundance() - nDeadTotal);
                     if (school.getAbundance() < 1.d) {
                         school.setAbundance(0.d);
