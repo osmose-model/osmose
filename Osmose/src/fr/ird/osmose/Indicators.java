@@ -214,6 +214,47 @@ public class Indicators {
         }
     }
 
+    public static void writeVariable(float time, double[][] variable, String filename) {
+        PrintWriter pr;
+        FileOutputStream fos = null;
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        path.mkdirs();
+        File file = new File(path, filename);
+        boolean isNew = !file.exists();
+        try {
+            fos = new FileOutputStream(file, true);
+            pr = new PrintWriter(fos, true);
+            if (isNew) {
+                pr.print("Time");
+                for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+                    for (int j = 0; j < variable[i].length; j++) {
+                        pr.print(";");
+                        pr.print(getSimulation().getSpecies(i).getName());
+                    }
+                }
+                pr.println();
+            }
+            pr.print(time);
+            for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+                for (int j = 0; j < variable[i].length; j++) {
+                    pr.print(";");
+                    pr.print(variable[i][j]);
+                    //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
+                }
+            }
+            pr.println();
+            pr.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
     public static void writeBiomassAndAbundance(float time) {
 
         StringBuilder filename;

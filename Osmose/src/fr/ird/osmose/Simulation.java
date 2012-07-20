@@ -529,7 +529,7 @@ public class Simulation {
             mortalityRate = Math.max(spec.starvMaxRate * (1 - school.predSuccessRate / spec.criticalPredSuccess), 0.d);
         }
 
-        return mortalityRate;
+        return mortalityRate / nbTimeStepsPerYear;
     }
 
     private void computePredSuccessRate(School school, double preyedBiomass) {
@@ -540,7 +540,7 @@ public class Simulation {
 
     private double computeStarvationMortality(School school) {
         double M = getStarvationMortalityRate(school);
-        return school.getAbundance() * (1 - Math.exp(-M / getNbTimeStepsPerYear()));
+        return school.getAbundance() * (1 - Math.exp(-M));
     }
 
     private float[] getPercentPlankton(School predator) {
@@ -924,6 +924,9 @@ public class Simulation {
      */
     public void computeMortality() {
 
+        boolean DEBUG = false;
+        double[][] mortality = new double[getNbSpecies()][4];
+
         for (Cell cell : getGrid().getCells()) {
             if (!(cell.isLand() || cell.isEmpty())) {
                 int ns = cell.size();
@@ -1098,6 +1101,14 @@ public class Simulation {
                             + school.nDeadStarvation
                             + school.nDeadNatural
                             + school.nDeadFishing;
+
+                    if (DEBUG) {
+                        mortality[school.getCohort().getSpecies().getIndex()][0] += school.adb2biom(school.nDeadPredation);
+                        mortality[school.getCohort().getSpecies().getIndex()][1] += school.adb2biom(school.nDeadStarvation);
+                        mortality[school.getCohort().getSpecies().getIndex()][2] += school.adb2biom(school.nDeadNatural);
+                        mortality[school.getCohort().getSpecies().getIndex()][3] += school.adb2biom(school.nDeadFishing);
+                    }
+
                     //System.out.println(Math.round(school.getAbundance()) + " tot: " + nDeadTotal + " pred:" + school.nDeadPredation + " starv: " + school.nDeadStarvation + " nat: " + school.nDeadNatural + " fish: " + school.nDeadFishing);
 //                    int pPred = (int) (100 * school.nDeadPredation / school.getAbundance());
 //                    int pStar = (int) (100 * school.nDeadStarvation / school.getAbundance());
@@ -1112,6 +1123,15 @@ public class Simulation {
                     }
                 }
             }
+        }
+
+        if (DEBUG) {
+            for (int i = 0; i < species.length; i++) {
+                for (int j = 0; j < 4; j++) {
+                    mortality[i][j] /= species[i].getBiomass();
+                }
+            }
+            Indicators.writeVariable(year + (indexTime + 1f) / (float) nbTimeStepsPerYear, mortality, "mortality.csv");
         }
 
         // Removing dead schools
