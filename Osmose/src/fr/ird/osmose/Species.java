@@ -299,39 +299,25 @@ public class Species {
         biomass += incr;
     }
 
-    public void growth() //****NEW: comes from growth1 and growth2
-    {
+    public void growth() {
 
-        for (int i = 0; i < nbCohorts; i++) {
-            //this had to be taken into account before the decision to take a straight line between eggs size and size at age 1
-            if (i == 0) // eggs
-            {
-                for (int k = 0; k < tabCohorts[0].size(); k++) {
-                    School school0k = getSchool(0, k);
-                    school0k.setLength(school0k.getLength() + deltaMeanLength[i]);
-                    school0k.setWeight((float) (c * Math.pow(school0k.getLength(), bPower)));
-                }
-            }
-
-            if ((getCohort(i).isOut(getSimulation().getIndexTime())))//||(i==0))
-            {
-                for (int k = 0; k < getCohort(i).size(); k++) {
-                    School schoolk = getSchool(i, k);
-                    schoolk.setLength(schoolk.getLength() + deltaMeanLength[i]);
-                    schoolk.setWeight((float) (c * Math.pow(schoolk.getLength(), bPower)));
+        for (int j = 0; j < nbCohorts; j++) {
+            Cohort cohort = tabCohorts[j];
+            if ((j == 0) || cohort.isOut(getSimulation().getIndexTime())) {
+                // Linear growth for eggs and migrating schools
+                for (School school : cohort) {
+                    school.setLength(school.getLength() + deltaMeanLength[j]);
+                    school.setWeight((float) (c * Math.pow(school.getLength(), bPower)));
                 }
             } else {
-                if (getCohort(i).getAbundance() != 0) {
-                    for (School school : getCohort(i)) {
-                        school.growth(minDelta[i], maxDelta[i], c, bPower);
+                // Growth based on predation success
+                if (cohort.getAbundance() != 0) {
+                    for (School school : cohort) {
+                        school.growth(minDelta[j], maxDelta[j], c, bPower);
                     }
                 }
             }
         }
-    }
-    
-    public int initialNumberSchools() {
-        return (int) (1 + 10 / (longevity + 1)) * getOsmose().nbSchools[getOsmose().numSerie];
     }
 
     public boolean isReproduceLocally() {
@@ -379,7 +365,7 @@ public class Species {
         tabCohorts[ageMeanIn].setAbundance(abundanceIn);
         tabCohorts[ageMeanIn].setBiomass(biomassIn);
         tabCohorts[ageMeanIn].clear();
-        int nbSchools = initialNumberSchools();
+        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
         if (abundanceIn > 0 && abundanceIn < nbSchools) {
             tabCohorts[ageMeanIn].add(new School(tabCohorts[ageMeanIn], abundanceIn, meanLengthIn, meanWeigthIn));
         } else if (abundanceIn >= nbSchools) {
@@ -395,13 +381,7 @@ public class Species {
     }
 
     public void reproduce() {
-        //CALCULATION of Spawning Stock Biomass (SSB) with an update of cohorts biomass
-        for (int i = 0; i < nbCohorts; i++) {
-            getCohort(i).setBiomass(0);
-            for (int j = 0; j < getCohort(i).size(); j++) {
-                getCohort(i).setBiomass(getCohort(i).getBiomass() + getSchool(i, j).getBiomass());
-            }
-        }
+        //CALCULATION of Spawning Stock Biomass (SSB)
         double SSB = 0;
         float tempTL = 0f;
         int indexMin = 0;
@@ -431,7 +411,7 @@ public class Species {
         coh0.setAbundance(nbEggs);
         coh0.setBiomass(nbEggs * eggWeight / 1000000.);
         coh0.clear();
-        int nbSchools = initialNumberSchools();
+        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
         if (nbEggs == 0.d) {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {

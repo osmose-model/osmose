@@ -120,7 +120,7 @@ public class Cohort extends ArrayList<School> {
         this.abundance = abundance;
         this.biomass = biomass;
         if (biomass > 0.d) {
-            int nbSchools = species.initialNumberSchools();
+            int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
             ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
                 add(new School(this, abundance / nbSchools, iniLength, iniWeight));

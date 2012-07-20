@@ -213,14 +213,14 @@ public class School {
      * Converts the specified biomass [tons] into abundance [scalar]
      */
     public double biom2abd(double biomass) {
-        return 1000000.d * biomass / weight;
+        return 1.e6d * biomass / weight;
     }
     
     /**
      * Converts the specified abundance [scalar] into biomass [tons]
      */
     public double adb2biom(double abundance) {
-        return abundance * weight / 1000000.d;
+        return abundance * weight / 1.e6d;
     }
 
     /**

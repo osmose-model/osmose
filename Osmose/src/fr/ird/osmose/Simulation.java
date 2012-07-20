@@ -1068,7 +1068,9 @@ public class Simulation {
                             if (ipr < ns) {
                                 School prey = cell.getSchool(ipr);
                                 double biomPrey = prey.adb2biom(nbDeadMatrix[ipr][is]);
-                                school.dietTemp[prey.getCohort().getSpecies().getIndex()][prey.dietOutputStage] += biomPrey;
+                                if (dietsOutput) {
+                                    school.dietTemp[prey.getCohort().getSpecies().getIndex()][prey.dietOutputStage] += biomPrey;
+                                }
                                 float TLprey;
                                 if ((prey.getCohort().getAgeNbDt() == 0) || (prey.getCohort().getAgeNbDt() == 1)) {
                                     TLprey = prey.getCohort().getSpecies().TLeggs;
@@ -1078,7 +1080,9 @@ public class Simulation {
                                 school.trophicLevel[school.getCohort().getAgeNbDt()] += TLprey * biomPrey / biomassPreyed[is];
                             } else {
                                 school.trophicLevel[school.getCohort().getAgeNbDt()] += forcing.getPlankton(ipr - ns).trophicLevel * nbDeadMatrix[ipr][is] / biomassPreyed[is];
-                                school.dietTemp[getNbSpecies() + (ipr - ns)][0] += nbDeadMatrix[ipr][is];
+                                if (dietsOutput) {
+                                    school.dietTemp[getNbSpecies() + (ipr - ns)][0] += nbDeadMatrix[ipr][is];
+                                }
                             }
                             //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);
                         }
@@ -1113,6 +1117,9 @@ public class Simulation {
 //                    int pNatu = (int) (100 * school.nDeadNatural / school.getAbundance());
 //                    int pFish = (int) (100 * school.nDeadFishing / school.getAbundance());
 //                    System.out.println(pPred + " " + pStar + " " + pNatu + " " + pFish);
+//                    if (nDeadTotal > (school.getAbundance() - 1)) {
+//                        nDeadTotal = school.getAbundance();
+//                    }
                     school.setAbundance(school.getAbundance() - nDeadTotal);
                     if (school.getAbundance() < 1.d) {
                         school.setAbundance(0.d);
@@ -1148,6 +1155,7 @@ public class Simulation {
                 cohort.removeDeadSchools();
                 cohort.setAbundance(0.d);
                 cohort.setBiomass(0.d);
+                cohort.setAbundanceCatchable(0);
                 int iSchool = 0;
                 for (School school : cohort) {
                     cohort.incrementAbundance(school.getAbundance());
