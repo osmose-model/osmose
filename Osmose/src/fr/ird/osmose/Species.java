@@ -14,7 +14,10 @@ package fr.ird.osmose;
  ******************************************************************************** 
  */
 import fr.ird.osmose.util.SchoolLengthComparator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
 
 public class Species {
 
@@ -319,10 +322,16 @@ public class Species {
                 }
             } else {
                 if (getCohort(i).getAbundance() != 0) {
-                    getCohort(i).growth(minDelta[i], maxDelta[i], c, bPower);
+                    for (School school : getCohort(i)) {
+                        school.growth(minDelta[i], maxDelta[i], c, bPower);
+                    }
                 }
             }
         }
+    }
+    
+    public int initialNumberSchools() {
+        return (int) (1 + 10 / (longevity + 1)) * getOsmose().nbSchools[getOsmose().numSerie];
     }
 
     public boolean isReproduceLocally() {
@@ -370,7 +379,7 @@ public class Species {
         tabCohorts[ageMeanIn].setAbundance(abundanceIn);
         tabCohorts[ageMeanIn].setBiomass(biomassIn);
         tabCohorts[ageMeanIn].clear();
-        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
+        int nbSchools = initialNumberSchools();
         if (abundanceIn > 0 && abundanceIn < nbSchools) {
             tabCohorts[ageMeanIn].add(new School(tabCohorts[ageMeanIn], abundanceIn, meanLengthIn, meanWeigthIn));
         } else if (abundanceIn >= nbSchools) {
@@ -406,11 +415,8 @@ public class Species {
             tempTL += tabSchoolsRanked.get(i).getTrophicLevel()[tabSchoolsRanked.get(i).getCohort().getAgeNbDt()] * tabSchoolsRanked.get(i).getBiomass();
         }
 
-        long nbEggs = Math.round(sexRatio * alpha * seasonSpawning[getSimulation().getIndexTime()] * SSB * 1000000);
-        if (nbEggs > 9100000000000000000l) {
-            System.out.println("Egg number beyond long format for species " + name);
-        }
-
+        double nbEggs = sexRatio * alpha * seasonSpawning[getSimulation().getIndexTime()] * SSB * 1000000;
+        
         //MAKING COHORTS GOING UP to the UPPER AGE CLASS
         //species, age, caseLeftUpAireCoh, tabCasesAireCoh do not change
         for (int i = nbCohorts - 1; i > 0; i--) {
@@ -423,20 +429,18 @@ public class Species {
         //UPDATE AGE CLASS 0
         Cohort coh0 = tabCohorts[0];
         coh0.setAbundance(nbEggs);
-        coh0.setBiomass(((double) nbEggs) * eggWeight / 1000000.);
+        coh0.setBiomass(nbEggs * eggWeight / 1000000.);
         coh0.clear();
-        if (nbEggs == 0) {
+        int nbSchools = initialNumberSchools();
+        if (nbEggs == 0.d) {
             // do nothing, zero school
-        } else if (nbEggs < getOsmose().nbSchools[getOsmose().numSerie]) {
+        } else if (nbEggs < nbSchools) {
             coh0.add(new School(coh0, nbEggs, eggSize, eggWeight));
-        } else if (nbEggs >= getOsmose().nbSchools[getOsmose().numSerie]) {
-            int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
+        } else if (nbEggs >= nbSchools) {
             coh0.ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                coh0.add(new School(coh0, Math.round(((double) coh0.getAbundance()) / (float) nbSchools), eggSize, eggWeight));
+                coh0.add(new School(coh0, coh0.getAbundance() / nbSchools, eggSize, eggWeight));
             }
-            int surplus = (int) coh0.getAbundance() % coh0.size();
-            ((School) (coh0.get(0))).setAbundance(((School) (coh0.get(0))).getAbundance() + surplus);
         }
         coh0.trimToSize();
         for (int i = 0; i < coh0.size(); i++) {
@@ -445,27 +449,15 @@ public class Species {
     }
 
     public void update() {
+        
         //UPDATE ABD and BIOMASS of SPECIES
         abundance = 0;
         biomass = 0;
-
-        /*	for(int i=0; i<nbCohorts;i++)
-        {
-        abundance+=getCohort(i).abundance;
-        biomass+=getCohort(i).biomass;
-        }
-         */
         for (int i = 0; i < nbCohorts; i++) {
             for (int k = 0; k < getCohort(i).size(); k++) {
                 abundance += getSchool(i, k).getAbundance();
                 biomass += getSchool(i, k).getBiomass();
             }
-        }
-
-
-
-        if (abundance > 9100000000000000000l) {
-            System.out.println("Abundance beyond long format for species " + name);
         }
 
         for (int i = 0; i < nbCohorts; i++) {
@@ -480,11 +472,6 @@ public class Species {
             System.out.println("PB of number of cohorts at the update stage: not equals to the initial number of cohorts");
             // Morgane 03-2007
         }
-//		nbCohorts=(longevity+1)*getSimulation().getNbTimeSteps();
-//		for(int i=0;i<nbCohorts;i++)
-//		if(getCohort(i).abundance==0)
-//		this.nbCohorts--;
-
 
         // UPDATE LENGTHS and MEAN WEIGHTS of AGE CLASSES
         for (int i = 0; i < nbCohorts; i++) {

@@ -121,7 +121,7 @@ public class Simulation {
     boolean planktonMortalityOutput;
     boolean outputClass0;
     boolean calibration;
-    final public static boolean SCHOOL_BASED = false;
+    final public static boolean SCHOOL_BASED = true;
 
     public void init() {
 
@@ -877,14 +877,12 @@ public class Simulation {
             // Compute mortality
             // (predation + fishing + natural mortality + starvation)
             computeMortality();
+            updatePopulation();
 
             // Update of disappeared schools and plancton mortality
             if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
                 coupling.calculPlanktonMortality();
             }
-            assessNbSchools();
-            assessPresentSchools();
-            assessAbdCohSpec();
 
             // Growth
             growth();
@@ -1133,11 +1131,18 @@ public class Simulation {
             }
             Indicators.writeVariable(year + (indexTime + 1f) / (float) nbTimeStepsPerYear, mortality, "mortality.csv");
         }
+    }
 
+    /*
+     * Update biomass and abundance from School to Species, throught Cohort.
+     */
+    public void updatePopulation() {
         // Removing dead schools
-        // Update biomass of schools & cohort
+        // Update biomass of schools & cohort & species
         for (int i = 0; i < species.length; i++) {
             int indexRecruitAge = Math.round(species[i].recruitAge * getNbTimeStepsPerYear());
+            species[i].resetAbundance();
+            species[i].resetBiomass();
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                 Cohort cohort = species[i].getCohort(j);
                 cohort.removeDeadSchools();
@@ -1163,6 +1168,8 @@ public class Simulation {
                         iSchool++;
                     }
                 }
+                species[i].incrementAbundance(cohort.getAbundance());
+                species[i].incrementBiomass(cohort.getBiomass());
             }
         }
     }

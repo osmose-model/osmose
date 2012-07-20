@@ -130,7 +130,7 @@ public class School {
      * @param length [cm] of the individual
      * @param weight [g] of the individual
      */
-    public School(Cohort cohort, long abundance, float length, float weight) {
+    public School(Cohort cohort, double abundance, float length, float weight) {
         this.cohort = cohort;
         this.abundance = abundance;
         this.length = length;

@@ -120,14 +120,11 @@ public class Cohort extends ArrayList<School> {
         this.abundance = abundance;
         this.biomass = biomass;
         if (biomass > 0.d) {
-            int nbSchools = (int) (1 + 10 / (species.longevity + 1)) * getOsmose().nbSchools[getOsmose().numSerie];
+            int nbSchools = species.initialNumberSchools();
             ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                add(new School(this, Math.round(((double) abundance) / nbSchools), iniLength, iniWeight));
+                add(new School(this, abundance, iniLength, iniWeight));
             }
-
-            int surplus = (int) abundance % nbSchools;
-            getSchool(0).setAbundance(getSchool(0).getAbundance() + surplus);
         }
     }
 
@@ -523,12 +520,6 @@ public class Cohort extends ArrayList<School> {
                 getSimulation().savingNbYield[indexSpecies] += getSimulation().tabNbCatch[indexSpecies][k + species.cumulCatch[ageNbDt - 1]];
             }
 
-        }
-    }
-
-    public void growth(float minDelta, float maxDelta, float c, float bPower) {
-        for (int i = 0; i < size(); i++) {
-            getSchool(i).growth(minDelta, maxDelta, c, bPower);
         }
     }
 
