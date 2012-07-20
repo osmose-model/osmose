@@ -123,7 +123,7 @@ public class Cohort extends ArrayList<School> {
             int nbSchools = species.initialNumberSchools();
             ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                add(new School(this, abundance, iniLength, iniWeight));
+                add(new School(this, abundance / nbSchools, iniLength, iniWeight));
             }
         }
     }
