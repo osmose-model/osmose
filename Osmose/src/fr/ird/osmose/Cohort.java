@@ -150,7 +150,7 @@ public class Cohort extends ArrayList<School> {
         nbDeadDd += nbDeadTemp;
 
         int nbSchools = size();
-        double nbSurplusDead = nbDeadTemp % nbSchools;
+        double nbSurplusDead = Math.round(nbDeadTemp % nbSchools);
 
         //NB of DEAD FISH are DISTRIBUTED UNIFORMLY
         for (int i = 0; i < nbSchools; i++) {
@@ -179,22 +179,14 @@ public class Cohort extends ArrayList<School> {
         }
 
         //REMOVING DEAD SCHOOLS FROM VECTBANCS and VECTPRESENTSCHOOLS
-        List<School> schoolsToRemove = new ArrayList();
-        for (School school : this) {
-            if (school.willDisappear()) {
-                // cohorts in the area during the time step
-                if (!(outOfZoneCohort[getSimulation().getIndexTime()])) {
-                    school.getCell().remove(school);
-                }
-                schoolsToRemove.add(school);
-            }
-        }
-        removeAll(schoolsToRemove);
+        removeDeadSchools();
 
         //UPDATE biomass of schools & cohort
         biomass = 0;
+        abundance = 0;
         for (School school : this) {
             biomass += school.getBiomass();
+            abundance += school.getAbundance();
         }
     }
 
@@ -738,7 +730,7 @@ public class Cohort extends ArrayList<School> {
     public void setNbSchoolsCatchable(int nbSchoolsCatchable) {
         this.nbSchoolsCatchable = nbSchoolsCatchable;
     }
-    
+
     /**
      * @param nbSchoolsCatchable the nbSchoolsCatchable to set
      */
