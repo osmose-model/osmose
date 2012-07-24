@@ -177,7 +177,7 @@ public class Indicators {
         writeVariable(time, meanTL, filename.toString());
     }
 
-    private static void writeVariable(float time, double[] variable, String filename) {
+    public static void writeVariable(float time, double[] variable, String filename) {
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
