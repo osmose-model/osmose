@@ -119,6 +119,8 @@ public class School {
     double nDeadPredation;
     double nDeadStarvation;
     double nDeadNatural;
+    //
+    double preyedBiomass;
 
 //////////////
 // Constructor
