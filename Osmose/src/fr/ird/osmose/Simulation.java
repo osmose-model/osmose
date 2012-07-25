@@ -616,15 +616,26 @@ public class Simulation {
         shuffleArray(seqPred);
         shuffleArray(seqFish);
         shuffleArray(seqNat);
-        int[] mortalitySource = new int[]{0, 1, 2};
+        int[][] mortalitySource = new int[10][4];
+        mortalitySource[0] = new int[]{0, 1, 2, 3};
+        mortalitySource[1] = new int[]{0, 1, 3, 2};
+        mortalitySource[2] = new int[]{2, 0, 1, 3};
+        mortalitySource[3] = new int[]{3, 0, 1, 2};
+        mortalitySource[4] = new int[]{2, 3, 0, 1};
+        mortalitySource[5] = new int[]{3, 2, 0, 1};
+        mortalitySource[6] = new int[]{0, 2, 1, 3};
+        mortalitySource[7] = new int[]{0, 3, 1, 2};
+        mortalitySource[8] = new int[]{2, 0, 3, 1};
+        mortalitySource[9] = new int[]{3, 0, 2, 1};
 
         for (int i = 0; i < ns; i++) {
-            shuffleArray(mortalitySource);
-            for (int j = 0; j < 3; j++) {
-                switch (mortalitySource[j]) {
+            int r = (int) (10.d * Math.random());
+            for (int j = 0; j < mortalitySource[r].length; j++) {
+                School predator;
+                switch (mortalitySource[r][j]) {
                     case 0:
-                        // Predation + Starvation
-                        School predator = cell.get(seqPred[i]);
+                        // Predation mortality
+                        predator = cell.get(seqPred[i]);
                         double[] preyUpon = computeSeqPredation(predator, subdt);
                         for (int ipr = 0; ipr < (ns + npl); ipr++) {
                             double predationMortalityRate;
@@ -641,18 +652,24 @@ public class Simulation {
                             deadMatrix[1][ipr][seqPred[i]] = predationMortalityRate;
 
                         }
-                        computePredSuccessRate(predator, sum(preyUpon));
+                        predator.preyedBiomass = sum(preyUpon);
+                        break;
+                    case 1:
+                        // Starvation mortality
+                        predator = cell.get(seqPred[i]);
+                        computeBiomassToPredate(predator, subdt);
+                        computePredSuccessRate(predator, predator.preyedBiomass);
                         deadMatrix[0][seqPred[i]][ns] = computeStarvationMortality(predator, subdt);
                         deadMatrix[1][seqPred[i]][ns] = getStarvationMortalityRate(predator, subdt);
                         predator.nDeadStarvation = deadMatrix[0][seqPred[i]][ns];
                         break;
-                    case 1:
+                    case 2:
                         // Natural mortality
                         deadMatrix[0][seqNat[i]][ns + 1] = computeNaturalMortality(cell.get(seqNat[i]), subdt);
                         deadMatrix[1][seqNat[i]][ns + 1] = getNaturalMortalityRate(cell.get(seqNat[i]), subdt);
                         cell.get(seqNat[i]).nDeadNatural = deadMatrix[0][seqNat[i]][ns + 1];
                         break;
-                    case 2:
+                    case 3:
                         // Fishing Mortality
                         deadMatrix[0][seqFish[i]][ns + 2] = computeFishingMortality(cell.get(seqFish[i]), subdt);
                         deadMatrix[1][seqFish[i]][ns + 2] = getFishingMortalityRate(cell.get(seqFish[i]), subdt);
@@ -701,7 +718,7 @@ public class Simulation {
     private void computePredSuccessRate(School school, double preyedBiomass) {
 
         // Compute the predation success rate
-        school.predSuccessRate = (float) (1.d - preyedBiomass / school.biomassToPredate);
+        school.predSuccessRate = Math.min((float) (preyedBiomass / school.biomassToPredate), 1.f);
     }
 
     private double computeStarvationMortality(School school, int subdt) {
