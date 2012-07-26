@@ -940,7 +940,7 @@ public class Simulation {
                                 prey.nDeadPredation += nDeadPredation[ipr];
                             }
                         }
-                        predator.preyedBiomass = sum(preyUpon);                    
+                        predator.preyedBiomass = sum(preyUpon);
                     }
                     // Apply predation mortality
                     for (int is = 0; is < ns; is++) {
@@ -1100,34 +1100,27 @@ public class Simulation {
 
         int[] seqPred = new int[ns];
         for (int i = 0; i < ns; i++) {
+            cell.get(i).hasPredated = false;
             seqPred[i] = i;
         }
         int[] seqFish = Arrays.copyOf(seqPred, ns);
         int[] seqNat = Arrays.copyOf(seqPred, ns);
+        int[] seqStarv = Arrays.copyOf(seqPred, ns);
         shuffleArray(seqPred);
         shuffleArray(seqFish);
         shuffleArray(seqNat);
-        int[][] mortalitySource = new int[10][4];
+        shuffleArray(seqStarv);
+        int[] mortalitySource = new int[]{0, 1, 2, 3};
         // 0 = predation
         // 1 = starvation
         // 2 = natural
         // 3 = fishing
-        mortalitySource[0] = new int[]{0, 1, 2, 3};
-        mortalitySource[1] = new int[]{0, 1, 3, 2};
-        mortalitySource[2] = new int[]{2, 0, 1, 3};
-        mortalitySource[3] = new int[]{3, 0, 1, 2};
-        mortalitySource[4] = new int[]{2, 3, 0, 1};
-        mortalitySource[5] = new int[]{3, 2, 0, 1};
-        mortalitySource[6] = new int[]{0, 2, 1, 3};
-        mortalitySource[7] = new int[]{0, 3, 1, 2};
-        mortalitySource[8] = new int[]{2, 0, 3, 1};
-        mortalitySource[9] = new int[]{3, 0, 2, 1};
 
         for (int i = 0; i < ns; i++) {
-            int r = (int) (10.d * Math.random());
-            for (int j = 0; j < mortalitySource[r].length; j++) {
+            shuffleArray(mortalitySource);
+            for (int j = 0; j < mortalitySource.length; j++) {
                 School predator;
-                switch (mortalitySource[r][j]) {
+                switch (mortalitySource[j]) {
                     case 0:
                         // Predation mortality
                         predator = cell.get(seqPred[i]);
@@ -1143,14 +1136,21 @@ public class Simulation {
 
                         }
                         predator.preyedBiomass = sum(preyUpon);
+                        predator.hasPredated = true;
+                        computePredSuccessRate(predator, predator.preyedBiomass);
                         break;
                     case 1:
                         // Starvation mortality
-                        predator = cell.get(seqPred[i]);
-                        computeBiomassToPredate(predator, subdt);
-                        computePredSuccessRate(predator, predator.preyedBiomass);
-                        nDeadMatrix[seqPred[i]][ns] = computeStarvationMortality(predator, subdt);
-                        predator.nDeadStarvation = nDeadMatrix[seqPred[i]][ns];
+                        predator = cell.get(seqStarv[i]);
+                        if (predator.hasPredated) {
+                            computeBiomassToPredate(predator, subdt);
+                            // here we recalculate the predation success rate
+                            // since it might have changed if other mortality
+                            // applied after predation
+                            computePredSuccessRate(predator, predator.preyedBiomass);
+                            nDeadMatrix[seqStarv[i]][ns] = computeStarvationMortality(predator, subdt);
+                            predator.nDeadStarvation = nDeadMatrix[seqStarv[i]][ns];
+                        }
                         break;
                     case 2:
                         // Natural mortality
