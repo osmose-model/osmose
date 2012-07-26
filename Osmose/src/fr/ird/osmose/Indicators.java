@@ -198,7 +198,8 @@ public class Indicators {
             pr.print(time);
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 pr.print(";");
-                pr.print(variable[i]);
+                //pr.print(variable[i]);
+                pr.print((long) variable[i]);
                 //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
             }
             pr.println();
@@ -214,7 +215,7 @@ public class Indicators {
         }
     }
 
-    public static void writeVariable(float time, double[][] variable, String filename) {
+    public static void writeVariable(float time, double[][] variable, String filename, String[] headers) {
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
@@ -233,12 +234,23 @@ public class Indicators {
                     }
                 }
                 pr.println();
+                if (null != headers) {
+                    pr.print("Headers");
+                    for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+                        for (int j = 0; j < headers.length; j++) {
+                            pr.print(";");
+                            pr.print(headers[j]);
+                        }
+                    }
+                }
+                pr.println();
             }
             pr.print(time);
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int j = 0; j < variable[i].length; j++) {
                     pr.print(";");
-                    pr.print(variable[i][j]);
+                    //pr.print(variable[i][j]);
+                    pr.print((long) variable[i][j]);
                     //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
                 }
             }
