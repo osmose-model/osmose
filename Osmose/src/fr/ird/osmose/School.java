@@ -121,6 +121,8 @@ public class School {
     double nDeadNatural;
     //
     double preyedBiomass;
+    //
+    boolean hasPredated;
 
 //////////////
 // Constructor
