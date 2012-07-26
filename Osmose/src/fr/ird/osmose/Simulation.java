@@ -1298,10 +1298,79 @@ public class Simulation {
 
         int ns = cell.size();
         int npl = forcing.getNbPlanktonGroups();
-        double[][] nDeadMatrix = null, mortalityRateMatrix;
+        double[][] mortalityRateMatrix = new double[ns + npl][ns + 3];
+        double[][] nDeadMatrix = new double[ns + npl][ns + 3];
         double[] totalMortalityRate = new double[ns + npl];
 
+        
+        //
+        // Assess all mortality independently from each other
+        Collections.shuffle(cell);
+        for (int ipd = 0; ipd < ns; ipd++) {
+            // Predation mortality 
+            School predator = cell.get(ipd);
+            double[] preyUpon = computeSeqPredation(predator, subdt);
+            for (int ipr = 0; ipr < (ns + npl); ipr++) {
+                double predationMortalityRate;
+                if (ipr < ns) {
+                    School school = cell.get(ipr);
+                    nDeadMatrix[ipr][ipd] = school.biom2abd(preyUpon[ipr]);
+                    predationMortalityRate = Math.log(getAbundance(school) / (getAbundance(school) - nDeadMatrix[ipr][ipd]));
+                    school.nDeadPredation += nDeadMatrix[ipr][ipd];
+                } else {
+                    nDeadMatrix[ipr][ipd] = preyUpon[ipr];
+                    double planktonAbundance = forcing.getPlankton(ipr - ns).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+                    predationMortalityRate = Math.log(planktonAbundance / (planktonAbundance - preyUpon[ipr]));
+                }
+                mortalityRateMatrix[ipr][ipd] = predationMortalityRate;
 
+            }
+            predator.preyedBiomass = sum(preyUpon);
+        }
+        
+        for (int is = 0; is < ns; is++) {
+            School school = cell.get(is);
+            school.nDeadPredation = 0.d;
+            // 2. Starvation
+            computePredSuccessRate(school, school.preyedBiomass);
+            nDeadMatrix[is][ns] = computeStarvationMortality(school, subdt);
+            mortalityRateMatrix[is][ns] = getStarvationMortalityRate(school, subdt);
+
+            // 3. Natural mortality
+            nDeadMatrix[is][ns + 1] = computeNaturalMortality(school, subdt);
+            mortalityRateMatrix[is][ns + 1] = getNaturalMortalityRate(school, subdt);
+
+            // 4. Fishing mortality
+            nDeadMatrix[is][ns + 2] = computeFishingMortality(school, subdt);
+            mortalityRateMatrix[is][ns + 2] = getFishingMortalityRate(school, subdt);
+        }
+
+        //
+        // Compute total mortality rate for schools and plankton
+        // Sum mortality rates from every source for every school and
+        // every plankton group
+        for (int ipr = 0; ipr < (ns + npl); ipr++) {
+            for (int imort = 0; imort < (ns + 3); imort++) {
+                totalMortalityRate[ipr] += mortalityRateMatrix[ipr][imort];
+            }
+        }
+
+        //
+        // Update number of deads
+        for (int ipr = 0; ipr < (ns + npl); ipr++) {
+            double abundance;
+            if (ipr < ns) {
+                abundance = cell.get(ipr).getAbundance();
+            } else {
+                abundance = forcing.getPlankton(ipr - ns).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+            }
+            for (int imort = 0; imort < ns + 3; imort++) {
+                nDeadMatrix[ipr][imort] = (mortalityRateMatrix[ipr][imort] / totalMortalityRate[ipr]) * (1 - Math.exp(-totalMortalityRate[ipr])) * abundance;
+                nDeadMatrix[ipr][imort] = clean(nDeadMatrix[ipr][imort], 0.d);
+            }
+        }
+        
+        
 
         return nDeadMatrix;
     }
