@@ -167,6 +167,7 @@ public class Simulation {
         } else if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("random")) {
             iniRandomly();
         }
+        updateBiomassAndAbundance();
 
         // Initialize all the tables required for saving output
         if (getOsmose().spatializedOutputs[numSerie]) {
@@ -1143,11 +1144,6 @@ public class Simulation {
                         // Starvation mortality
                         predator = cell.get(seqStarv[i]);
                         if (predator.hasPredated) {
-                            computeBiomassToPredate(predator, subdt);
-                            // here we recalculate the predation success rate
-                            // since it might have changed if other mortality
-                            // applied after predation
-                            computePredSuccessRate(predator, predator.preyedBiomass);
                             nDeadMatrix[seqStarv[i]][ns] = computeStarvationMortality(predator, subdt);
                             predator.nDeadStarvation = nDeadMatrix[seqStarv[i]][ns];
                         }
@@ -1201,13 +1197,13 @@ public class Simulation {
 
             }
             predator.preyedBiomass = sum(preyUpon);
+            computePredSuccessRate(predator, predator.preyedBiomass);
         }
 
         for (int is = 0; is < ns; is++) {
             School school = cell.get(is);
             school.nDeadPredation = 0.d;
             // 2. Starvation
-            computePredSuccessRate(school, school.preyedBiomass);
             nDeadMatrix[is][ns] = computeStarvationMortality(school, subdt);
             mortalityRateMatrix[is][ns] = getStarvationMortalityRate(school, subdt);
 
@@ -1395,11 +1391,11 @@ public class Simulation {
         //
         double[][] mortality = null;
         if (DEBUG) {
-            mortality = new double[getNbSpecies()][5];
+            mortality = new double[getNbSpecies()][11];
             for (int i = 0; i < species.length; i++) {
                 int indexRecruitAge = Math.round(species[i].recruitAge * nbTimeStepsPerYear);
                 for (int j = indexRecruitAge; j < species[i].getNumberCohorts(); j++) {
-                    mortality[i][4] += species[i].getCohort(j).getAbundance();
+                    mortality[i][10] += species[i].getCohort(j).getAbundance();
                 }
             }
         }
@@ -1486,9 +1482,9 @@ public class Simulation {
                         int indexRecruitAge = Math.round(species[i].recruitAge * nbTimeStepsPerYear);
                         if (school.getCohort().getAgeNbDt() >= indexRecruitAge) {
                             mortality[i][0] += (school.nDeadPredation);
-                            mortality[i][1] += (school.nDeadStarvation);
-                            mortality[i][2] += (school.nDeadNatural);
-                            mortality[i][3] += (school.nDeadFishing);
+                            mortality[i][2] += (school.nDeadStarvation);
+                            mortality[i][4] += (school.nDeadNatural);
+                            mortality[i][6] += (school.nDeadFishing);
                         }
                     }
 
@@ -1512,13 +1508,19 @@ public class Simulation {
         }
 
         if (DEBUG) {
-//            for (int i = 0; i < species.length; i++) {
-//                for (int j = 0; j < 4; j++) {
-//                    mortality[i][j] /= species[i].getBiomass();
-//                }
-//            }
+            for (int i = 0; i < species.length; i++) {
+                for (int j = 0; j < 4; j++) {
+                    // Total nDeads
+                    mortality[i][8] += mortality[i][2 * j];
+                }
+                // Ftotal
+                mortality[i][9] = Math.log(mortality[i][10] / (mortality[i][10] - mortality[i][8]));
+                for (int j = 0; j < 4; j++) {
+                    mortality[i][2 * j + 1] = mortality[i][9] * mortality[i][2 * j] / ((1 - Math.exp(-mortality[i][9])) * mortality[i][10]);
+                }
+            }
             String filename = "nDead_Simu" + getOsmose().numSimu + ".csv";
-            String[] headers = new String[]{"Predation", "Starvation", "Natural", "Fishing", "Abundance"};
+            String[] headers = new String[]{"Predation", "Fpred", "Starvation", "Fstarv", "Natural", "Fnat", "Fishing", "Ffish", "Total", "Ftotal", "Abundance"};
             Indicators.writeVariable(year + (indexTime + 1f) / (float) nbTimeStepsPerYear, mortality, filename, headers);
         }
     }

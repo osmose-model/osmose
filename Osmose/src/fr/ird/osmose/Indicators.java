@@ -198,8 +198,8 @@ public class Indicators {
             pr.print(time);
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 pr.print(";");
-                //pr.print(variable[i]);
-                pr.print((long) variable[i]);
+                pr.print(variable[i]);
+                //pr.print((long) variable[i]);
                 //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
             }
             pr.println();
@@ -249,8 +249,8 @@ public class Indicators {
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int j = 0; j < variable[i].length; j++) {
                     pr.print(";");
-                    //pr.print(variable[i][j]);
-                    pr.print((long) variable[i][j]);
+                    pr.print(variable[i][j]);
+                    //pr.print((long) variable[i][j]);
                     //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
                 }
             }
