@@ -94,16 +94,11 @@ public class Plankton {
         accessibleBiomass[i][j] += area * unitConversion(getAccessibilityCoeff() * integratedData[x][y] / (float) nb);
     }
 
+    /*
+     * Converts plankton biomass (usually from mmolN/m2) to tons/km2
+     */
     public float unitConversion(float concentration) {
-        float biom = 0.f;
-        biom = biomToProd(concentration * conversionFactor);     //   (from mmolN/m2 to tons/km2)
-        return biom;
-    }
-
-    public float biomToProd(float biomass) {
-        float prod = 0f;
-        prod = biomass * prodBiomFactor / (float) getSimulation().getNbTimeStepsPerYear();
-        return prod;
+        return concentration * conversionFactor;
     }
 
     /*
