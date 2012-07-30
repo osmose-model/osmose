@@ -1114,7 +1114,7 @@ public class Simulation {
             }
             String filename = "nDead_Simu" + getOsmose().numSimu + ".csv";
             String[] headers = new String[]{"Predation", "Fpred", "Starvation", "Fstarv", "Natural", "Fnat", "Fishing", "Ffish", "Total", "Ftotal", "Abundance"};
-            Indicators.writeVariable(year + (indexTime + 1f) / (float) nbTimeStepsPerYear, mortality, filename, headers);
+            Indicators.writeVariable(year + (indexTime + 1f) / (float) nbTimeStepsPerYear, mortality, filename, headers, "Instaneous number of deads and mortality rates");
         }
     }
 

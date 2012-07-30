@@ -137,7 +137,7 @@ public class Indicators {
         filename.append("_meanSize_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
-        writeVariable(time, meanSize, filename.toString());
+        writeVariable(time, meanSize, filename.toString(), "Mean size of fish species in cm, weighted by fish numbers, and including/excluding first ages specified in input (in calibration file)");
     }
 
     public static void monitorMeanTL() {
@@ -174,10 +174,10 @@ public class Indicators {
         filename.append("_meanTL_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
-        writeVariable(time, meanTL, filename.toString());
+        writeVariable(time, meanTL, filename.toString(), "Mean Trophic Level of fish species, weighted by fish biomass, and including/excluding first ages specified in input (in calibration file)");
     }
 
-    public static void writeVariable(float time, double[] variable, String filename) {
+    public static void writeVariable(float time, double[] variable, String filename, String description) {
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
@@ -188,6 +188,8 @@ public class Indicators {
             fos = new FileOutputStream(file, true);
             pr = new PrintWriter(fos, true);
             if (isNew) {
+                pr.print("// ");
+                pr.println(description);
                 pr.print("Time");
                 for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                     pr.print(";");
@@ -215,7 +217,7 @@ public class Indicators {
         }
     }
 
-    public static void writeVariable(float time, double[][] variable, String filename, String[] headers) {
+    public static void writeVariable(float time, double[][] variable, String filename, String[] headers, String description) {
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
@@ -226,6 +228,10 @@ public class Indicators {
             fos = new FileOutputStream(file, true);
             pr = new PrintWriter(fos, true);
             if (isNew) {
+                if (null != description || !description.isEmpty()) {
+                    pr.print("// ");
+                    pr.println(description);
+                }
                 pr.print("Time");
                 for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                     for (int j = 0; j < variable[i].length; j++) {
@@ -288,29 +294,18 @@ public class Indicators {
         }
 
         filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
-        filename.append("_abundance_Simu");
-        filename.append(getOsmose().numSimu);
-        filename.append(".csv");
-        writeVariable(time, abundanceNoJuv, filename.toString());
-
-        filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
         filename.append("_biomass_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
-        writeVariable(time, biomassNoJuv, filename.toString());
+        writeVariable(time, biomassNoJuv, filename.toString(), "Mean biomass (tons), excluding first ages specified in input (typically in calibration file)");
 
         if (getSimulation().outputClass0) {
-            filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
-            filename.append("_abundanceClass0_Simu");
-            filename.append(getOsmose().numSimu);
-            filename.append(".csv");
-            writeVariable(time, abundanceTot, filename.toString());
 
             filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
-            filename.append("_biomassClass0_Simu");
+            filename.append("_biomass-total_Simu");
             filename.append(getOsmose().numSimu);
             filename.append(".csv");
-            writeVariable(time, biomassTot, filename.toString());
+            writeVariable(time, biomassTot, filename.toString(), "Mean biomass (tons), including first ages specified in input (typically in calibration file)");
         }
     }
 
