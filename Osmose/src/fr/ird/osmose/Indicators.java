@@ -24,6 +24,8 @@ public class Indicators {
     private static double[] meanSize;
     // Trophic Level
     private static double[] meanTL;
+    // Yields
+    public static double[] yield, yieldN;
 
     public static void updateAndWriteIndicators() {
 
@@ -58,6 +60,8 @@ public class Indicators {
                 }
                 // Biomass & abundance
                 writeBiomassAndAbundance(time);
+                // Yields
+                writeYields(time);
                 //
                 // RESET
                 reset();
@@ -74,6 +78,9 @@ public class Indicators {
             biomassTot = new double[nSpec];
             abundanceTot = new double[nSpec];
         }
+        // yield
+        yield = new double[nSpec];
+        yieldN = new double[nSpec];
         // size
         if (getSimulation().meanSizeOutput) {
             meanSize = new double[nSpec];
@@ -111,6 +118,24 @@ public class Indicators {
             meanSize[i] += species.meanSizeSpe * abundance;
         }
 
+    }
+    
+    public static void writeYields(float time) {
+        
+        StringBuilder filename;
+        filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename.append("_yield_Simu");
+        filename.append(getOsmose().numSimu);
+        filename.append(".csv");
+        String description = "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
+        writeVariable(time, yield, filename.toString(), description);        
+        
+        filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename.append("_yieldN_Simu");
+        filename.append(getOsmose().numSimu);
+        filename.append(".csv");
+        description = "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved";
+        writeVariable(time, yieldN, filename.toString(), description);    
     }
 
     /*
@@ -221,8 +246,8 @@ public class Indicators {
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
-        path.mkdirs();
         File file = new File(path, filename);
+        file.getParentFile().mkdirs();
         boolean isNew = !file.exists();
         try {
             fos = new FileOutputStream(file, true);

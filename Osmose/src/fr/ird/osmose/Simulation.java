@@ -108,8 +108,7 @@ public class Simulation {
     float[][] tabSizeCatch, tabNbCatch;
     float[] tabTLCatch;
     // for saving
-    long[] savingNbYield;
-    float[] savingYield, meanSizeCatchTemp;
+    float[] meanSizeCatchTemp;
     float[][][] spectrumTemp;
     float[][] meanTLperAgeTemp;
     int[][] countTemp;
@@ -1166,8 +1165,8 @@ public class Simulation {
                         cohort.nbDeadFf += school.nDeadFishing;
                         tabNbCatch[i][iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] += school.nDeadFishing;
                         if ((getYear()) >= getOsmose().timeSeriesStart) {
-                            savingYield[i] += school.adb2biom(school.nDeadFishing);
-                            savingNbYield[i] += school.nDeadFishing;
+                            Indicators.yield[i] += school.adb2biom(school.nDeadFishing);
+                            Indicators.yieldN[i] += school.nDeadFishing;
                             if (TLoutput) {
                                 tabTLCatch[i] += school.getTrophicLevel()[cohort.getAgeNbDt()] * school.adb2biom(school.nDeadFishing);
                             }
@@ -1802,8 +1801,6 @@ public class Simulation {
 
     public void initSaving() {
 
-        savingYield = new float[species.length];
-        savingNbYield = new long[species.length];
         tabTLCatch = new float[species.length];
         biomPerStage = new double[species.length + forcing.getNbPlanktonGroups()][];
 
@@ -1818,8 +1815,6 @@ public class Simulation {
 
 
         for (int i = 0; i < species.length; i++) {
-            savingYield[i] = 0;
-            savingNbYield[i] = 0;
             biomPerStage[i] = new double[species[i].nbDietStages];
             for (int j = 0; j < species[i].nbDietStages; j++) {
                 biomPerStage[i][j] = 0;
@@ -1918,9 +1913,6 @@ public class Simulation {
                 }
             }
         }
-
-        initYieldFile();
-        initNbYieldFile();
 
         if (meanSizeOutput) {
             initMeanSizeCatchFile();
@@ -2094,7 +2086,7 @@ public class Simulation {
                 }
 
                 if (meanSizeOutput) {
-                    meanSizeCatchTemp[i] += speci.meanSizeSpeCatch * (float) savingNbYield[i];
+                    meanSizeCatchTemp[i] += speci.meanSizeSpeCatch * (float) Indicators.yieldN[i];
                 }
                 if (TLoutput) {
                     for (int j = 0; j < speci.getNumberCohorts(); j++) {
@@ -2112,13 +2104,11 @@ public class Simulation {
             if (((indexTime + 1) % recordFrequency) == 0) {
                 float timeSaving = year + (indexTime + 1f) / (float) nbTimeStepsPerYear;
 
-                saveYieldperTime(timeSaving, savingYield);
-                saveNbYieldperTime(timeSaving, savingNbYield);
                 if (meanSizeOutput) {
-                    saveMeanSizeCatchperTime(timeSaving, meanSizeCatchTemp, savingNbYield);
+                    //saveMeanSizeCatchperTime(timeSaving, meanSizeCatchTemp, savingNbYield);
                 }
                 if (TLoutput) {
-                    saveMeanTLCatchperTime(timeSaving, tabTLCatch, savingYield);
+                    //saveMeanTLCatchperTime(timeSaving, tabTLCatch, savingYield);
                     saveMeanTLperAgeperTime(timeSaving, meanTLperAgeTemp, countTemp);
                     /*
                      * if(getOsmose().TLoutput) { for (int
@@ -2154,8 +2144,6 @@ public class Simulation {
 
                 // clear all saving tables
                 for (int i = 0; i < species.length; i++) {
-                    savingYield[i] = 0;
-                    savingNbYield[i] = 0;
                     tabTLCatch[i] = 0;
 
                     if (meanSizeOutput) {
@@ -2406,56 +2394,6 @@ public class Simulation {
         pr.close();
     }
 
-    public void initYieldFile() {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String yieldFile = getOsmose().outputFileNameTab[numSerie] + "_yield_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, yieldFile);
-            yieldTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(yieldTime, true);
-        pr.print("Time");
-        for (int i = 0; i < species.length; i++) {
-            pr.print(";");
-            pr.print(species[i].getName());
-        }
-        pr.println();
-        pr.close();
-    }
-
-    public void initNbYieldFile() {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String nbYieldFile = getOsmose().outputFileNameTab[numSerie] + "_yieldNB_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, nbYieldFile);
-            nbYieldTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(nbYieldTime, true);
-        pr.print("Time");
-        for (int i = 0; i < species.length; i++) {
-            pr.print(";");
-            pr.print(species[i].getName());
-        }
-        pr.println();
-        pr.close();
-    }
-
     public void initMeanSizeCatchFile() {
         File targetPath, targetFile;
         PrintWriter pr;
@@ -2503,56 +2441,6 @@ public class Simulation {
             pr.print(species[i].getName());
         }
 
-        pr.println();
-        pr.close();
-    }
-
-    public void saveYieldperTime(float time, float[] Y) {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String yieldFile = getOsmose().outputFileNameTab[numSerie] + "_yield_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, yieldFile);
-            yieldTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-        pr = new PrintWriter(yieldTime, true);
-
-        pr.print(time);
-        for (int i = 0; i < species.length; i++) {
-            pr.print(";");
-            pr.print(Y[i]);
-        }
-        pr.println();
-        pr.close();
-    }
-
-    public void saveNbYieldperTime(float time, long[] nY) {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String nbYieldFile = getOsmose().outputFileNameTab[numSerie] + "_yieldNB_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie]);
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, nbYieldFile);
-            nbYieldTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-        pr = new PrintWriter(nbYieldTime, true);
-
-        pr.print(time);
-        for (int i = 0; i < species.length; i++) {
-            pr.print(";");
-            pr.print(nY[i]);
-        }
         pr.println();
         pr.close();
     }
