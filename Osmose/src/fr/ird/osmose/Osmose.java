@@ -2291,7 +2291,7 @@ public class Osmose {
                 accessibilityMatrix[i][0] = new float[nbSpeciesTab[numSerie]][];
                 for (int j = 0; j < nbSpeciesTab[numSerie]; j++) {
                     accessibilityMatrix[i][0][j] = new float[1];
-                    accessibilityMatrix[i][0][j][0] = 1f;
+                    accessibilityMatrix[i][0][j][0] = 0.8f;
                 }
             }
         } else // in case of an accessibility file specified

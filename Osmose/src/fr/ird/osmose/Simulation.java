@@ -14,7 +14,10 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -137,7 +140,6 @@ public class Simulation {
     boolean planktonMortalityOutput;
     boolean outputClass0;
     boolean calibration;
-    final public static boolean SCHOOL_BASED = true;
 
     public void init() {
 
@@ -261,20 +263,6 @@ public class Simulation {
         }
     }
 
-    private void applyPredationMortality(List<School> randomSchools) {
-
-        Iterator<School> randomIterator = randomSchools.iterator();
-        // loop over the schools
-        while (randomIterator.hasNext()) {
-            School school = randomIterator.next();
-            // age class 0 do not predate
-            if (!school.willDisappear() && school.getCohort().getAgeNbDt() != 0) {
-                // call the School.predation() function
-                school.predation();
-            }
-        }
-    }
-
     private void saveBiomassBeforePredation() {
         /*
          * save fish biomass before predation process for diets data (last
@@ -297,104 +285,14 @@ public class Simulation {
         }
     }
 
-    private void applyStarvationMortality(List<School> schools) {
-        for (School school : schools) {
-            if (!school.willDisappear()) {
-                school.surviveP();
-            }
-        }
-    }
-
     /**
-     * for all species, D is due to other predators (seals, seabirds) for
+     * For all species, D is due to other predators (seals, seabirds) for
      * migrating species, we add mortality because absents during a time step so
      * they don't undergo mortalities due to predation and starvation Additional
      * mortalities for ages 0: no-fecundation of eggs, starvation more
      * pronounced than for sup ages (rel to CC), predation by other species are
      * not explicit.
      */
-    private void applyNaturalMortality() {
-
-        boolean DEBUG = false;
-        double[] natDead = null, nSchools = null, abd = null;
-        if (DEBUG) {
-            natDead = new double[species.length];
-            nSchools = new double[species.length];
-            abd = new double[species.length];
-            for (int i = 0; i < species.length; i++) {
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    abd[i] += species[i].getCohort(j).getAbundance();
-                }
-            }
-        }
-
-        if (!SCHOOL_BASED) {
-            for (int i = 0; i < species.length; i++) {
-                if (species[i].getCohort(0).getAbundance() != 0) {
-                    species[i].getCohort(0).surviveD(species[i].larvalSurvival + (species[i].getCohort(0).getOutMortality(indexTime) / (float) nbTimeStepsPerYear));     //additional larval mortality
-                    if (DEBUG) {
-                        natDead[i] += species[i].getCohort(0).nbDeadDd;
-                        nSchools[i] += species[i].getCohort(0).size();
-                    }
-                }
-                for (int j = 1; j < species[i].getNumberCohorts(); j++) {
-                    if (species[i].getCohort(j).getAbundance() != 0) {
-                        species[i].getCohort(j).surviveD((species[i].D + species[i].getCohort(j).getOutMortality(indexTime)) / (float) nbTimeStepsPerYear);
-                    }
-                    if (DEBUG) {
-                        nSchools[i] += species[i].getCohort(j).size();
-                        natDead[i] += species[i].getCohort(j).nbDeadDd;
-                    }
-                }
-            }
-        } else {
-            // apply natural mortality at school level
-            for (School school : getSchools()) {
-                double nDead = computeNaturalMortality(school, 1);
-                school.setAbundance(school.getAbundance() - nDead);
-                if (school.getAbundance() < 1.d) {
-                    nDead = school.getAbundance();
-                    school.setAbundance(0);
-                    school.tagForRemoval();
-                }
-                school.getCohort().nbDeadDd += nDead;
-            }
-
-            // Removing dead schools
-            // Update biomass of schools & cohort
-            for (int i = 0; i < species.length; i++) {
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    Cohort cohort = species[i].getCohort(j);
-                    cohort.removeDeadSchools();
-                    cohort.setAbundance(0.d);
-                    cohort.setBiomass(0.d);
-                    for (School school : cohort) {
-                        cohort.incrementAbundance(school.getAbundance());
-                        cohort.incrementBiomass(school.getBiomass());
-                        if (DEBUG && cohort.getAgeNbDt() >= 0) {
-                            nSchools[i] += 1;
-                        }
-                    }
-                    if (DEBUG && cohort.getAgeNbDt() >= 0) {
-                        natDead[i] += species[i].getCohort(j).nbDeadDd;
-                    }
-                }
-            }
-        }
-        if (DEBUG) {
-            double[] D = new double[species.length];
-            for (int i = 0; i < species.length; i++) {
-                D[i] = Math.log(abd[i] / (abd[i] - natDead[i])) * nbTimeStepsPerYear;
-            }
-            float time = getYear() + (getIndexTime() + 1f) / (float) nbTimeStepsPerYear;
-            Indicators.writeVariable(time, natDead, "natural.csv");
-            Indicators.writeVariable(time, nSchools, "schools.csv");
-            Indicators.writeVariable(time, abd, "abundance.csv");
-            Indicators.writeVariable(time, D, "natrate.csv");
-        }
-
-    }
-
     double getNaturalMortalityRate(School school, int subdt) {
         double D;
         Species spec = school.getCohort().getSpecies();
@@ -641,103 +539,6 @@ public class Simulation {
         }
     }
 
-    private void applyFishingMortality() {
-
-        boolean DEBUG = false;
-        double[] fishDead = null, nSchools = null, abd = null;
-        if (DEBUG) {
-            fishDead = new double[species.length];
-            nSchools = new double[species.length];
-            abd = new double[species.length];
-            for (int i = 0; i < species.length; i++) {
-                for (int j = 1; j < species[i].getNumberCohorts(); j++) {
-                    abd[i] += species[i].getCohort(j).getAbundance();
-                }
-            }
-        }
-
-        if (false) {
-            for (int i = 0; i < species.length; i++) {
-                if ((species[i].getAbundance() != 0) && (species[i].seasonFishing[indexTime] != 0) && (species[i].F != 0)) {
-                    species[i].fishingA();
-                }
-                for (int j = 1; j < species[i].getNumberCohorts(); j++) {
-                    fishDead[i] += species[i].getCohort(j).nbDeadFf;
-                    nSchools[i] += species[i].getCohort(j).size();
-                }
-            }
-            updateBiomassAndAbundance();
-        } else {
-
-            // Apply fishing mortality at school level
-            for (School school : getSchools()) {
-                if (school.getAbundance() != 0.d) {
-                    double nDead = computeFishingMortality(school, 1);
-                    if (nDead != 0.d) {
-                        school.setAbundance(school.getAbundance() - nDead);
-                        if (school.getAbundance() < 1.d) {
-                            nDead = school.getAbundance();
-                            school.setAbundance(0);
-                            school.getCohort().setNbSchoolsCatchable(school.getCohort().getNbSchoolsCatchable() - 1);
-                            school.tagForRemoval();
-                        }
-                        school.getCohort().nbDeadFf += nDead;
-                    }
-                    school.nDeadFishing = nDead;
-                }
-            }
-
-            // Remove dead schools
-            // Update biomass of schools & cohort
-            // Update indicators
-            for (int i = 0; i < species.length; i++) {
-                int indexRecruitAge = Math.round(species[i].recruitAge * nbTimeStepsPerYear);
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    Cohort cohort = species[i].getCohort(j);
-                    cohort.removeDeadSchools();
-                    cohort.setAbundance(0.d);
-                    cohort.setBiomass(0.d);
-                    cohort.setAbundanceCatchable(0.d);
-                    int iSchool = 0;
-                    for (School school : cohort) {
-                        cohort.incrementAbundance(school.getAbundance());
-                        cohort.incrementBiomass(school.getBiomass());
-                        if (school.isCatchable() && j >= indexRecruitAge) {
-                            cohort.incrementAbundanceCatchable(school.getAbundance());
-                            // update indicators
-                            tabNbCatch[i][iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] += school.nDeadFishing;
-                            if ((getYear()) >= getOsmose().timeSeriesStart) {
-                                savingYield[i] += school.adb2biom(school.nDeadFishing);
-                                savingNbYield[i] += school.nDeadFishing;
-                                if (TLoutput) {
-                                    tabTLCatch[i] += school.getTrophicLevel()[cohort.getAgeNbDt()] * school.adb2biom(school.nDeadFishing);
-                                }
-                            }
-                            iSchool++;
-                        }
-                        if (DEBUG) {
-                            nSchools[i] += 1;
-                        }
-                    }
-                    if (DEBUG) {
-                        fishDead[i] += species[i].getCohort(j).nbDeadFf;
-                    }
-                }
-            }
-        }
-        if (DEBUG) {
-            double[] F = new double[species.length];
-            for (int i = 0; i < species.length; i++) {
-                F[i] = Math.log(abd[i] / (abd[i] - fishDead[i])) * nbTimeStepsPerYear;
-            }
-            float time = getYear() + (getIndexTime() + 1f) / (float) nbTimeStepsPerYear;
-            Indicators.writeVariable(time, fishDead, "fishing.csv");
-            Indicators.writeVariable(time, nSchools, "schools.csv");
-            Indicators.writeVariable(time, abd, "abundance.csv");
-            Indicators.writeVariable(time, F, "fishrate.csv");
-        }
-    }
-
     private void updateIndicators() {
         for (int i = 0; i < species.length; i++) {
             species[i].update();
@@ -807,80 +608,6 @@ public class Simulation {
     }
 
     public void step() {
-
-        // Print in console the period already simulated
-        printProgress();
-        Indicators.reset();
-
-        // Calculation of relative size of MPA
-        RS = getRatioMPA();
-
-        // Loop over the year
-        while (indexTime < nbTimeStepsPerYear) {
-
-            // Clear some tables and update some stages at the begining of the step
-            clearNbDeadArrays();
-            updateStages();
-
-            // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
-            if (!((indexTime == 0) && (year == 0))) {
-                distributeSpecies();
-            }
-            List<School> schools = getSchools();
-
-            // Natural mortality (due to other predators)
-            applyNaturalMortality();
-
-            // Update LTL Data
-            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
-                coupling.runLTLModel();
-            }
-            forcing.updatePlankton(indexTime);
-
-            // Predation
-            rankSchoolsSizes();
-            saveBiomassBeforePredation();
-            Collections.shuffle(schools);
-            applyPredationMortality(schools);
-            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
-                coupling.calculPlanktonMortality();
-            }
-
-            // Starvation
-            applyStarvationMortality(schools);
-
-            // Update of disappeared schools
-            assessNbSchools();
-            assessPresentSchools();
-            assessAbdCohSpec();
-
-            // Growth
-            growth();
-
-            // Fishing
-            assessCatchableSchools();
-            clearCatchesIndicators();
-            applyFishingMortality();
-
-            // Save steps
-            updateIndicators();
-            if (getOsmose().spatializedOutputs[numSerie]) {
-                saveSpatializedStep();
-            }
-            Indicators.updateAndWriteIndicators();
-            saveStep();
-
-            // Reproduction
-            reproduction();
-
-            // Increment time step
-            indexTime++;
-        }
-        indexTime = 0;  //end of the year
-        year++; // go to following year
-    }
-
-    public void newStep() {
 
         // Print in console the period already simulated
         printProgress();
@@ -1807,7 +1534,7 @@ public class Simulation {
                  */
                 if (species[i].getCohort(0).isOut(indexTime)) {
                     for (School school : species[i].getCohort(0)) {
-                        school.breakaway();
+                        school.moveOut();
                     }
                     continue;
                 }
@@ -1837,7 +1564,7 @@ public class Simulation {
                      */
                     if (species[i].getCohort(j).isOut(indexTime)) {
                         for (School school : species[i].getCohort(j)) {
-                            school.breakaway();
+                            school.moveOut();
                         }
                         continue;
                     }
@@ -2383,8 +2110,7 @@ public class Simulation {
              * Save every 'recordFrequency' steps
              */
             if (((indexTime + 1) % recordFrequency) == 0) {
-                float timeSaving = (float) year + (indexTime + (recordFrequency / 2f) + 1f) / (float) nbTimeStepsPerYear;
-                timeSaving = year + (indexTime + 1f) / (float) nbTimeStepsPerYear;
+                float timeSaving = year + (indexTime + 1f) / (float) nbTimeStepsPerYear;
 
                 saveYieldperTime(timeSaving, savingYield);
                 saveNbYieldperTime(timeSaving, savingNbYield);
@@ -3237,39 +2963,6 @@ public class Simulation {
         int helper = a[i];
         a[i] = a[change];
         a[change] = helper;
-    }
-
-    class PredationOutcome {
-
-        double predationLoss;
-        double predationGain;
-        double accessibleBiomass;
-
-        PredationOutcome() {
-            predationLoss = 0.d;
-            predationGain = 0.d;
-            accessibleBiomass = 0.d;
-        }
-
-        public double getLoss() {
-            return predationLoss;
-        }
-
-        public double getGain() {
-            return predationGain;
-        }
-
-        public void loss(double loss) {
-            predationLoss += loss;
-        }
-
-        public void gain(double gain) {
-            predationGain += gain;
-        }
-
-        public void incrementAccessibleBiomass(double biomass) {
-            accessibleBiomass += biomass;
-        }
     }
 
     public enum AlgoMortality {

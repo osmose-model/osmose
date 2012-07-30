@@ -20,32 +20,6 @@ import java.util.Vector;
 
 public class Cell extends ArrayList<School> {
 
-    /*
-     * ********
-     * * Logs *
-     * ********
-     * 2011/04/18 phv
-     * Added a sortSchoolsByLength() function
-     * 2011/04/07 phv
-     * Deleted the spatialGroup variable.
-     * ***
-     * 2011/04/07 phv
-     * Deleted the vectPresentSchools variable.
-     * Cell extends ArrayList<School> it means that a cell is now an array of
-     * schools. Therefore to add, remove or get a school it is straighforward:
-     * cell.add(school) cell.get(k) cell.remove(scholl), etc.
-     * Deleted numPresentSchools, replaced by cell.size().
-     * Deleted the neigbhors variable since it is not necessary to keep it
-     * in memory. It is sufficient to find them just when the program need them.
-     * ***
-     * 2011/04/01 phv
-     * Renamed most variables
-     * Encapsulated variables i, j, lat, lon, land, map, spatialGroup,
-     * alreadyChoosen.
-     * Deleted useless variables such as nbPresentSchools, nbMapsConcerned. It
-     * is sufficient to request the associated vector size.
-     * ***
-     */
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
