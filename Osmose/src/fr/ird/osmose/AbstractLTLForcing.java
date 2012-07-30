@@ -177,7 +177,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         PrintWriter pr;
 
         int numSerie = getOsmose().numSerie;
-        String mortalityFile = getOsmose().outputFileNameTab[numSerie] + "_planktonBiomassMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String mortalityFile = getOsmose().outputPrefix[numSerie] + "_planktonBiomassMatrix_Simu" + getOsmose().numSimu + ".csv";
 
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "planktonBiomass");
         targetPath.mkdirs();

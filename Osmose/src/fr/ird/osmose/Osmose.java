@@ -58,7 +58,7 @@ public class Osmose {
     //for 1 serie of simus, same species parameters and options
     String[] configFileNameTab, speciesFileNameTab, predationFileNameTab, fishingFileNameTab,
             planktonFileNameTab, planktonStructureFileNameTab, calibrationFileNameTab, outputFileNameTab,
-            indicatorsFileNameTab;
+            indicatorsFileNameTab, outputPrefix;
     // Tables of Optional Input Files names (with entries as file name or "default")
     String[] size0FileNameTab, migrationFileNameTab, accessibilitiesFileNameTab,
             reproductionFileNameTab, fishingSeasonFileNameTab, /*
@@ -254,6 +254,26 @@ public class Osmose {
                  */
                 File targetPath = new File(outputPathName + outputFileNameTab[numSerie]);
                 if ((numSimu == 0) && targetPath.exists()) {
+//                    if (targetPath.list() != null) {
+//                        System.out.println("Output folder " + targetPath + " already contains some files and/or folders.");
+//                        System.out.println("Should we delete them (y=yes, n=no, c=cancel) ?");
+//                        try {
+//                            char answer = (char) System.in.read();
+//                            switch (answer) {
+//                                case 'y':
+//                                    IOTools.deleteDirectory(targetPath);
+//                                    break;
+//                                case 'n':
+//                                    break;
+//                                default:
+//                                    System.exit(0);
+//
+//                            }
+//                        } catch (IOException ex) {
+//                            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+//                            System.exit(0);
+//                        }
+//                    }
                     IOTools.deleteDirectory(targetPath);
                 }
                 if (spatializedOutputs[numSerie]) {
@@ -546,6 +566,7 @@ public class Osmose {
         coastFileNameTab = new String[nbSeriesSimus];
         mpaFileNameTab = new String[nbSeriesSimus];
         outputFileNameTab = new String[nbSeriesSimus];
+        outputPrefix = new String[nbSeriesSimus];
         planktonFileNameTab = new String[nbSeriesSimus];
         planktonStructureFileNameTab = new String[nbSeriesSimus];
         indicatorsFileNameTab = new String[nbSeriesSimus];
@@ -1254,6 +1275,8 @@ public class Osmose {
 
             st.nextToken();
             outputFileNameTab[numSerie] = st.sval;
+            String[] split = st.sval.split("/");
+            outputPrefix[numSerie] = split[split.length - 1];
 
             st.nextToken();
             calibrationMatrix[numSerie] = false;
@@ -2527,7 +2550,7 @@ public class Osmose {
         filename.append(outputPathName);
         filename.append(outputFileNameTab[nSerie]);
         filename.append(fileSeparator);
-        filename.append(outputFileNameTab[nSerie]);
+        filename.append(outputPrefix[nSerie]);
         filename.append("_spatialized_Simu");
         filename.append(nSerie);
         filename.append(".nc");
@@ -2550,8 +2573,8 @@ public class Osmose {
         //save in output files
         File targetPath;
 
-        String inputFileName = outputFileNameTab[nSerie] + "_I";
-        String biomFileName = outputFileNameTab[nSerie] + "_B.csv";
+        String inputFileName = outputPrefix[nSerie] + "_I";
+        String biomFileName = outputPrefix[nSerie] + "_B.csv";
 
         targetPath = new File(outputPathName + outputFileNameTab[nSerie]);
         targetPath.mkdirs();

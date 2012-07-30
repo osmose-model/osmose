@@ -123,14 +123,14 @@ public class Indicators {
     public static void writeYields(float time) {
         
         StringBuilder filename;
-        filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_yield_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
         String description = "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
         writeVariable(time, yield, filename.toString(), description);        
         
-        filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_yieldN_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
@@ -158,7 +158,7 @@ public class Indicators {
 
         filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_meanSize_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
@@ -195,7 +195,7 @@ public class Indicators {
 
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_meanTL_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
@@ -318,7 +318,7 @@ public class Indicators {
             }
         }
 
-        filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_biomass_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
@@ -326,7 +326,7 @@ public class Indicators {
 
         if (getSimulation().outputClass0) {
 
-            filename = new StringBuilder(getOsmose().outputFileNameTab[getOsmose().numSerie]);
+            filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
             filename.append("_biomass-total_Simu");
             filename.append(getOsmose().numSimu);
             filename.append(".csv");

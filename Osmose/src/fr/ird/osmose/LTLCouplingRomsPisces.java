@@ -563,7 +563,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         File targetFile;
         PrintWriter pr;
 
-        String mortalityFile = getOsmose().outputFileNameTab[numSerie] + "_planktonMortalityMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String mortalityFile = getOsmose().outputPrefix[numSerie] + "_planktonMortalityMatrix_Simu" + getOsmose().numSimu + ".csv";
 
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "planktonMortality");
         targetPath.mkdirs();
@@ -758,7 +758,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         File targetFile;
         PrintWriter pr;
 
-        String mortalityFile = getOsmose().outputFileNameTab[numSerie] + "_planktonBiomassMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String mortalityFile = getOsmose().outputPrefix[numSerie] + "_planktonBiomassMatrix_Simu" + getOsmose().numSimu + ".csv";
 
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "planktonBiomass");
         targetPath.mkdirs();

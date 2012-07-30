@@ -2195,7 +2195,7 @@ public class Simulation {
     public void initPredatorPressureFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String dietFile = getOsmose().outputFileNameTab[numSerie] + "_predatorPressureMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String dietFile = getOsmose().outputPrefix[numSerie] + "_predatorPressureMatrix_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
         targetPath.mkdirs();
 
@@ -2234,7 +2234,7 @@ public class Simulation {
     public void initDietFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String dietFile = getOsmose().outputFileNameTab[numSerie] + "_dietMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String dietFile = getOsmose().outputPrefix[numSerie] + "_dietMatrix_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
         targetPath.mkdirs();
 
@@ -2273,7 +2273,7 @@ public class Simulation {
     public void savePredatorPressureperTime(float time, float[][][][] diets, double[][] biom) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String dietFile = getOsmose().outputFileNameTab[numSerie] + "_predatorPressureMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String dietFile = getOsmose().outputPrefix[numSerie] + "_predatorPressureMatrix_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
         targetPath.mkdirs();
 
@@ -2332,7 +2332,7 @@ public class Simulation {
     public void saveDietperTime(float time, float[][][][] diets, long[][] nbStomachs) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String dietFile = getOsmose().outputFileNameTab[numSerie] + "_dietMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String dietFile = getOsmose().outputPrefix[numSerie] + "_dietMatrix_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
         targetPath.mkdirs();
 
@@ -2397,7 +2397,7 @@ public class Simulation {
     public void initMeanSizeCatchFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanSizeFile = getOsmose().outputFileNameTab[numSerie] + "_meanSizeCatch_Simu" + getOsmose().numSimu + ".csv";
+        String meanSizeFile = getOsmose().outputPrefix[numSerie] + "_meanSizeCatch_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
@@ -2422,7 +2422,7 @@ public class Simulation {
     public void initMeanTLCatchFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanTLFile = getOsmose().outputFileNameTab[numSerie] + "_meanTLCatch_Simu" + getOsmose().numSimu + ".csv";
+        String meanTLFile = getOsmose().outputPrefix[numSerie] + "_meanTLCatch_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
@@ -2448,7 +2448,7 @@ public class Simulation {
     public void saveMeanSizeCatchperTime(float time, float[] mLY, long[] abd) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanSizeFile = getOsmose().outputFileNameTab[numSerie] + "_meanSizeCatch_Simu" + getOsmose().numSimu + ".csv";
+        String meanSizeFile = getOsmose().outputPrefix[numSerie] + "_meanSizeCatch_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
@@ -2478,7 +2478,7 @@ public class Simulation {
     public void saveMeanTLCatchperTime(float time, float[] mTL, float[] biom) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanTLFile = getOsmose().outputFileNameTab[numSerie] + "_meanTLCatch_Simu" + getOsmose().numSimu + ".csv";
+        String meanTLFile = getOsmose().outputPrefix[numSerie] + "_meanTLCatch_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
@@ -2508,7 +2508,7 @@ public class Simulation {
     public void saveMeanTLperAgeperTime(float time, float[][] mTL, int[][] nb) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String meanTLFile = getOsmose().outputFileNameTab[numSerie] + "_meanTLperAge_Simu" + getOsmose().numSimu + ".csv";
+        String meanTLFile = getOsmose().outputPrefix[numSerie] + "_meanTLperAge_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
@@ -2542,7 +2542,7 @@ public class Simulation {
     public void initTLDistFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String TLDistFile = getOsmose().outputFileNameTab[numSerie] + "_TLDistrib_Simu" + getOsmose().numSimu + ".csv";
+        String TLDistFile = getOsmose().outputPrefix[numSerie] + "_TLDistrib_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
@@ -2573,7 +2573,7 @@ public class Simulation {
     public void saveTLDistperTime(float time, float[][][] TLdist) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String TLDistFile = getOsmose().outputFileNameTab[numSerie] + "_TLDistrib_Simu" + getOsmose().numSimu + ".csv";
+        String TLDistFile = getOsmose().outputPrefix[numSerie] + "_TLDistrib_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
         targetPath.mkdirs();
 
@@ -2606,7 +2606,7 @@ public class Simulation {
     public void initSizeSpecPerSpFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrumPerSpecies_Simu" + getOsmose().numSimu + ".csv";
+        String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrumPerSpecies_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
@@ -2641,7 +2641,7 @@ public class Simulation {
     public void saveSizeSpecPerSpperTime(float time, float[][] abdSize) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrumPerSpecies_Simu" + getOsmose().numSimu + ".csv";
+        String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrumPerSpecies_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
@@ -2678,7 +2678,7 @@ public class Simulation {
     public void initSizeSpecPerSpCatchFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + getOsmose().numSimu + ".csv";
+        String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
@@ -2707,7 +2707,7 @@ public class Simulation {
     public void saveSizeSpecPerSpperCatchTime(float time, float[][] abdSize) {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + getOsmose().numSimu + ".csv";
+        String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
@@ -2738,7 +2738,7 @@ public class Simulation {
     public void initSizeSpecFile() {
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrum_Simu" + getOsmose().numSimu + ".csv";
+        String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrum_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
@@ -2770,7 +2770,7 @@ public class Simulation {
         float sum;
         File targetPath, targetFile;
         PrintWriter pr;
-        String SSperSpFile = getOsmose().outputFileNameTab[numSerie] + "_SizeSpectrum_Simu" + getOsmose().numSimu + ".csv";
+        String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrum_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
