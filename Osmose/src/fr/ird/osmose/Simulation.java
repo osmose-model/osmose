@@ -857,7 +857,7 @@ public class Simulation {
                     predationMortalityRate = Math.log(school.getAbundance() / (school.getAbundance() - nDeadMatrix[ipr][ipd]));
                 } else {
                     nDeadMatrix[ipr][ipd] = predationMatrix[ipd][ipr];
-                    double planktonAbundance = forcing.getPlankton(ipr - ns).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+                    double planktonAbundance = forcing.getPlankton(ipr - ns).biomass[cell.get_igrid()][cell.get_jgrid()];
                     if (planktonAbundance > 0) {
                         predationMortalityRate = Math.log(planktonAbundance / (planktonAbundance - predationMatrix[ipd][ipr]));
                     } else {
