@@ -108,7 +108,6 @@ public class Simulation {
     float[][] tabSizeCatch, tabNbCatch;
     float[] tabTLCatch;
     // for saving
-    float[] meanSizeCatchTemp;
     float[][][] spectrumTemp;
     float[][] meanTLperAgeTemp;
     int[][] countTemp;
@@ -1148,6 +1147,8 @@ public class Simulation {
             int indexRecruitAge = Math.round(species[i].recruitAge * nbTimeStepsPerYear);
             species[i].resetAbundance();
             species[i].resetBiomass();
+            species[i].yield = 0.d;
+            species[i].yieldN = 0.d;
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                 Cohort cohort = species[i].getCohort(j);
                 cohort.removeDeadSchools();
@@ -1164,9 +1165,10 @@ public class Simulation {
                         // update fihsing indicators
                         cohort.nbDeadFf += school.nDeadFishing;
                         tabNbCatch[i][iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] += school.nDeadFishing;
+                        tabSizeCatch[i][iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] = school.getLength();
                         if ((getYear()) >= getOsmose().timeSeriesStart) {
-                            Indicators.yield[i] += school.adb2biom(school.nDeadFishing);
-                            Indicators.yieldN[i] += school.nDeadFishing;
+                            species[i].yield += school.adb2biom(school.nDeadFishing);
+                            species[i].yieldN += school.nDeadFishing;
                             if (TLoutput) {
                                 tabTLCatch[i] += school.getTrophicLevel()[cohort.getAgeNbDt()] * school.adb2biom(school.nDeadFishing);
                             }
@@ -1804,9 +1806,6 @@ public class Simulation {
         tabTLCatch = new float[species.length];
         biomPerStage = new double[species.length + forcing.getNbPlanktonGroups()][];
 
-        if (meanSizeOutput) {
-            meanSizeCatchTemp = new float[species.length];
-        }
         if (TLoutput) {
             for (int i = 0; i < species.length; i++) {
                 tabTLCatch[i] = 0;
@@ -1818,9 +1817,6 @@ public class Simulation {
             biomPerStage[i] = new double[species[i].nbDietStages];
             for (int j = 0; j < species[i].nbDietStages; j++) {
                 biomPerStage[i][j] = 0;
-            }
-            if (meanSizeOutput) {
-                meanSizeCatchTemp[i] = 0f;
             }
         }
         for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
@@ -1912,10 +1908,6 @@ public class Simulation {
                     spectrumTemp[1][j][i] = 0;
                 }
             }
-        }
-
-        if (meanSizeOutput) {
-            initMeanSizeCatchFile();
         }
 
         if (TLoutput) {
@@ -2085,9 +2077,6 @@ public class Simulation {
 
                 }
 
-                if (meanSizeOutput) {
-                    meanSizeCatchTemp[i] += speci.meanSizeSpeCatch * (float) Indicators.yieldN[i];
-                }
                 if (TLoutput) {
                     for (int j = 0; j < speci.getNumberCohorts(); j++) {
                         if (speci.meanTLperAge[j] != 0) {
@@ -2104,11 +2093,8 @@ public class Simulation {
             if (((indexTime + 1) % recordFrequency) == 0) {
                 float timeSaving = year + (indexTime + 1f) / (float) nbTimeStepsPerYear;
 
-                if (meanSizeOutput) {
-                    //saveMeanSizeCatchperTime(timeSaving, meanSizeCatchTemp, savingNbYield);
-                }
                 if (TLoutput) {
-                    //saveMeanTLCatchperTime(timeSaving, tabTLCatch, savingYield);
+                    saveMeanTLCatchperTime(timeSaving, tabTLCatch, Indicators.yield);
                     saveMeanTLperAgeperTime(timeSaving, meanTLperAgeTemp, countTemp);
                     /*
                      * if(getOsmose().TLoutput) { for (int
@@ -2145,10 +2131,6 @@ public class Simulation {
                 // clear all saving tables
                 for (int i = 0; i < species.length; i++) {
                     tabTLCatch[i] = 0;
-
-                    if (meanSizeOutput) {
-                        meanSizeCatchTemp[i] = 0;
-                    }
 
                     if (TLoutput) {
                         for (int j = 0; j < species[i].getNumberCohorts(); j++) {
@@ -2394,31 +2376,6 @@ public class Simulation {
         pr.close();
     }
 
-    public void initMeanSizeCatchFile() {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String meanSizeFile = getOsmose().outputPrefix[numSerie] + "_meanSizeCatch_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, meanSizeFile);
-            meanSizeTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(meanSizeTime, true);
-        pr.print("Time");
-        for (int i = 0; i < species.length; i++) {
-            pr.print(";");
-            pr.print(species[i].getName());
-        }
-        pr.println();
-        pr.close();
-    }
-
     public void initMeanTLCatchFile() {
         File targetPath, targetFile;
         PrintWriter pr;
@@ -2445,37 +2402,7 @@ public class Simulation {
         pr.close();
     }
 
-    public void saveMeanSizeCatchperTime(float time, float[] mLY, long[] abd) {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String meanSizeFile = getOsmose().outputPrefix[numSerie] + "_meanSizeCatch_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, meanSizeFile);
-            meanSizeTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(meanSizeTime, true);
-
-        pr.print(time);
-        for (int i = 0; i < species.length; i++) {
-            pr.print(";");
-            if (abd[i] != 0) {
-                pr.print((mLY[i] / (float) abd[i]));
-            } else {
-                pr.print("NaN");
-            }
-        }
-        pr.println();
-        pr.close();
-    }
-
-    public void saveMeanTLCatchperTime(float time, float[] mTL, float[] biom) {
+    public void saveMeanTLCatchperTime(float time, float[] mTL, double[] biom) {
         File targetPath, targetFile;
         PrintWriter pr;
         String meanTLFile = getOsmose().outputPrefix[numSerie] + "_meanTLCatch_Simu" + getOsmose().numSimu + ".csv";

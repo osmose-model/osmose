@@ -63,8 +63,8 @@ public class Species {
     int[] cumulCatch;           //dim of 3 tables=nbSchoolsTotCatch
     float[] nbSchoolCatch;	//fished schools sorted according to their size
     float[] sizeSchoolCatch;
-    float meanSizeSpe;	//mean size per species in the ecosystem
-    float meanSizeSpeCatch;	//mean size per species in catches
+    float meanSize;	//mean size per species in the ecosystem
+    float meanSizeCatch;	//mean size per species in catches
     float meanTLSpe;
     float[] meanTLperAge;
     float TLeggs = 3f;
@@ -105,6 +105,8 @@ public class Species {
     private float biomassFluxIn;
     private float meanLengthIn;
     private int ageMeanIn;
+    // yield
+    double yield, yieldN;
 
     /**
      * Create a new species
@@ -450,12 +452,11 @@ public class Species {
     }
 
     // ---------MORGANE 07-2004-----------
-    // allows to calculate some SBIs in the ecosystem...   A verifier
     public void calculSizes() {
 
         //Calculation of mean size per species
         float abdWithout0;
-        meanSizeSpe = 0;
+        meanSize = 0;
         float sum = 0;
         abdWithout0 = 0;
         for (int j = indexAgeClass0; j < nbCohorts; j++) //we don't consider age class 0 in the calculation of the mean
@@ -467,7 +468,7 @@ public class Species {
         }
 
         if (abdWithout0 != 0) {
-            meanSizeSpe = sum / abdWithout0;
+            meanSize = sum / abdWithout0;
         }
 
     }
@@ -484,7 +485,7 @@ public class Species {
 
         //Calculation of mean size per species
         float abdCatch;
-        meanSizeSpeCatch = 0;
+        meanSizeCatch = 0;
         float sumCatch = 0;
         abdCatch = 0;
         for (int j = 0; j < nbSchoolsTotCatch; j++) {
@@ -492,7 +493,7 @@ public class Species {
             abdCatch += nbSchoolCatch[j];
         }
         if (abdCatch != 0) {
-            meanSizeSpeCatch = sumCatch / abdCatch;
+            meanSizeCatch = sumCatch / abdCatch;
         }
 
         // calcul of length frequency in catch

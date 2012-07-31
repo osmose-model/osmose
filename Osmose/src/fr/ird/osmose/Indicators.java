@@ -22,6 +22,7 @@ public class Indicators {
     private static double[] abundanceNoJuv;
     // Size
     private static double[] meanSize;
+    private static double[] meanSizeCatch;
     // Trophic Level
     private static double[] meanTL;
     // Yields
@@ -38,6 +39,8 @@ public class Indicators {
         if (year >= getOsmose().timeSeriesStart) {
             // Biomass & abundance
             monitorBiomassAndAbundance();
+            // Yields
+            monitorYields();
             // Mean size
             if (getSimulation().meanSizeOutput) {
                 monitorMeanSizes();
@@ -84,6 +87,7 @@ public class Indicators {
         // size
         if (getSimulation().meanSizeOutput) {
             meanSize = new double[nSpec];
+            meanSizeCatch = new double[nSpec];
         }
         // Trophic level
         if (getSimulation().TLoutput) {
@@ -115,27 +119,35 @@ public class Indicators {
             for (int j = species.indexAgeClass0; j < species.getNumberCohorts(); j++) {
                 abundance += species.getCohort(j).getAbundance();
             }
-            meanSize[i] += species.meanSizeSpe * abundance;
+            meanSize[i] += species.meanSize * abundance;
+            meanSizeCatch[i] += species.meanSizeCatch * species.yieldN;
         }
-
     }
-    
+
+    public static void monitorYields() {
+        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+            Species species = getSimulation().getSpecies(i);
+            yield[i] += species.yield;
+            yieldN[i] += species.yieldN;
+        }
+    }
+
     public static void writeYields(float time) {
-        
+
         StringBuilder filename;
         filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_yield_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
         String description = "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
-        writeVariable(time, yield, filename.toString(), description);        
-        
+        writeVariable(time, yield, filename.toString(), description);
+
         filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_yieldN_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
         description = "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved";
-        writeVariable(time, yieldN, filename.toString(), description);    
+        writeVariable(time, yieldN, filename.toString(), description);
     }
 
     /*
@@ -147,12 +159,18 @@ public class Indicators {
     public static void writeMeanSizes(float time) {
 
         StringBuilder filename;
+        String description;
 
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            if (abundanceNoJuv[i] != 0) {
+            if (abundanceNoJuv[i] > 0) {
                 meanSize[i] = (float) (meanSize[i] / abundanceNoJuv[i]);
             } else {
-                meanSize[i] = 0.f;
+                meanSize[i] = Double.NaN;
+            }
+            if (yieldN[i] > 0) {
+                meanSizeCatch[i] = meanSizeCatch[i] / yieldN[i];
+            } else {
+                meanSizeCatch[i] = Double.NaN;
             }
         }
 
@@ -162,7 +180,17 @@ public class Indicators {
         filename.append("_meanSize_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
-        writeVariable(time, meanSize, filename.toString(), "Mean size of fish species in cm, weighted by fish numbers, and including/excluding first ages specified in input (in calibration file)");
+        description = "Mean size of fish species in cm, weighted by fish numbers, and excluding first ages specified in input (in calibration file)";
+        writeVariable(time, meanSize, filename.toString(), description);
+
+        filename = new StringBuilder("SizeIndicators");
+        filename.append(File.separatorChar);
+        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append("_meanSizeCatch_Simu");
+        filename.append(getOsmose().numSimu);
+        filename.append(".csv");
+        description = "Mean size of fish species in cm, weighted by fish numbers in the catches";
+        writeVariable(time, meanSizeCatch, filename.toString(), description);
     }
 
     public static void monitorMeanTL() {
@@ -206,8 +234,8 @@ public class Indicators {
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
-        path.mkdirs();
         File file = new File(path, filename);
+        file.getParentFile().mkdirs();
         boolean isNew = !file.exists();
         try {
             fos = new FileOutputStream(file, true);
