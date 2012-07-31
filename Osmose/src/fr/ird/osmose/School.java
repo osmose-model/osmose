@@ -438,18 +438,12 @@ public class School {
 
     public void rankSize(float[] tabSizes, float sizeMax) // for size spectrum output
     {
-        int indexMax = tabSizes.length - 1;
+        int iSize = tabSizes.length - 1;
         if (getLength() <= sizeMax) {
-            while (getLength() < tabSizes[indexMax]) {
-                indexMax--;
+            while (getLength() < tabSizes[iSize]) {
+                iSize--;
             }
-
-            //getSimulation().spectrumAbd[indexMax] += this.abundance;
-            //getSimulation().spectrumBiom[indexMax] += this.biomass;
-
-            //MORGANE 07-2004
-            // Size spectrum per species
-            getSimulation().spectrumSpeciesAbd[species.getIndex()][indexMax] += this.getAbundance();
+            getSimulation().spectrumSpeciesAbd[species.getIndex()][iSize] += getAbundance();
         }
     }
 

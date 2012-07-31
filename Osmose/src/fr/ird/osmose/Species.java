@@ -245,6 +245,14 @@ public class Species {
     public School getSchool(int classAge, int indexSchool) {
         return tabCohorts[classAge].getSchool(indexSchool);
     }
+    
+    public List<School> getSchools() {
+        List<School> schools = new ArrayList();
+        for (Cohort cohort : getCohorts()) {
+            schools.addAll(cohort);
+        }
+        return schools;
+    }
 
     public int getIndex() {
         return index;
@@ -494,17 +502,6 @@ public class Species {
         }
         if (abdCatch != 0) {
             meanSizeCatch = sumCatch / abdCatch;
-        }
-
-        // calcul of length frequency in catch
-        if (getSimulation().sizeSpectrumOutput || getSimulation().sizeSpectrumPerSpeOutput) {
-            int sizeTemp = 0;
-            for (int j = 0; j < nbSchoolsTotCatch; j++) {
-                if (sizeSchoolCatch[j] < getOsmose().spectrumMaxSize) {
-                    sizeTemp = (int) Math.floor(sizeSchoolCatch[j] / getOsmose().classRange);
-                    getSimulation().spectrumTemp[1][index][sizeTemp] += nbSchoolCatch[j];
-                }
-            }
         }
     }
 

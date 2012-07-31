@@ -108,7 +108,7 @@ public class Simulation {
     float[][] tabSizeCatch, tabNbCatch;
     float[] tabTLCatch;
     // for saving
-    float[][][] spectrumTemp;
+    float[][] spectrumTemp;
     float[][] meanTLperAgeTemp;
     int[][] countTemp;
     double[][] biomPerStage;
@@ -1889,25 +1889,8 @@ public class Simulation {
         //spectrumBiom = new float[getOsmose().nbSizeClass];
 
         if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
-            spectrumSpeciesAbd = new float[species.length][];
-            spectrumTemp = new float[2][][];
-            spectrumTemp[0] = new float[species.length][];
-            spectrumTemp[1] = new float[species.length][];
-            for (int i = 0; i < species.length; i++) {
-                spectrumSpeciesAbd[i] = new float[getOsmose().nbSizeClass];
-                spectrumTemp[0][i] = new float[getOsmose().nbSizeClass];
-                spectrumTemp[1][i] = new float[getOsmose().nbSizeClass];
-            }
-            //calculation of spectrum values
-            for (int i = 0; i < getOsmose().nbSizeClass; i++) {
-                //   spectrumAbd[i]=0;
-                //   spectrumBiom[i]=0;
-                for (int j = 0; j < species.length; j++) {
-                    spectrumSpeciesAbd[j][i] = 0;
-                    spectrumTemp[0][j][i] = 0;
-                    spectrumTemp[1][j][i] = 0;
-                }
-            }
+            spectrumSpeciesAbd = new float[species.length][getOsmose().nbSizeClass];
+            spectrumTemp = new float[species.length][getOsmose().nbSizeClass];
         }
 
         if (TLoutput) {
@@ -2055,7 +2038,7 @@ public class Simulation {
 
                 if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
                     for (int j = 0; j < getOsmose().nbSizeClass; j++) {
-                        spectrumTemp[0][i][j] += spectrumSpeciesAbd[i][j];
+                        spectrumTemp[i][j] += spectrumSpeciesAbd[i][j];
                     }
                 }
 
@@ -2097,10 +2080,10 @@ public class Simulation {
                 }
 
                 if (sizeSpectrumOutput) {
-                    saveSizeSpecperTime(timeSaving, spectrumTemp[0]);
+                    saveSizeSpecperTime(timeSaving, spectrumTemp);
                 }
                 if (sizeSpectrumPerSpeOutput) {
-                    saveSizeSpecPerSpperTime(timeSaving, spectrumTemp[0]);
+                    saveSizeSpecPerSpperTime(timeSaving, spectrumTemp);
                 }
                 for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
                     if (calibration) {
@@ -2144,8 +2127,7 @@ public class Simulation {
                     }
                     if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
                         for (int j = 0; j < getOsmose().nbSizeClass; j++) {
-                            spectrumTemp[0][i][j] = 0;
-                            spectrumTemp[1][i][j] = 0;
+                            spectrumTemp[i][j] = 0;
                         }
                     }
                 } // end clearing loop over species
