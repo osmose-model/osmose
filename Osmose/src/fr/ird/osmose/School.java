@@ -436,17 +436,6 @@ public class School {
         }
     }
 
-    public void rankSize(float[] tabSizes, float sizeMax) // for size spectrum output
-    {
-        int iSize = tabSizes.length - 1;
-        if (getLength() <= sizeMax) {
-            while (getLength() < tabSizes[iSize]) {
-                iSize--;
-            }
-            getSimulation().spectrumSpeciesAbd[species.getIndex()][iSize] += getAbundance();
-        }
-    }
-
     public void rankTL(float[] tabTL) // for TL distribution output
     {
         if ((trophicLevel[getCohort().getAgeNbDt()] >= 1) && (getBiomass() != 0)) {

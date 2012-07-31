@@ -23,6 +23,7 @@ public class Indicators {
     // Size
     private static double[] meanSize;
     private static double[] meanSizeCatch;
+    private static double[][] sizeSpectrum;
     // Trophic Level
     private static double[] meanTL;
     // Yields
@@ -45,6 +46,9 @@ public class Indicators {
             if (getSimulation().meanSizeOutput) {
                 monitorMeanSizes();
             }
+            if (getSimulation().sizeSpectrumOutput) {
+                monitorSizeSpectrum();
+            }
             // Trophic level
             if (getSimulation().TLoutput) {
                 monitorMeanTL();
@@ -56,6 +60,10 @@ public class Indicators {
                 // Mean size
                 if (getSimulation().meanSizeOutput) {
                     writeMeanSizes(time);
+                }
+                // Size spectrum
+                if (getSimulation().sizeSpectrumOutput) {
+                    writeSizeSpectrum(time);
                 }
                 // Trophic level
                 if (getSimulation().TLoutput) {
@@ -88,6 +96,9 @@ public class Indicators {
         if (getSimulation().meanSizeOutput) {
             meanSize = new double[nSpec];
             meanSizeCatch = new double[nSpec];
+        }
+        if (getSimulation().sizeSpectrumOutput || getSimulation().sizeSpectrumPerSpeOutput) {
+            sizeSpectrum = new double[nSpec][getOsmose().tabSizes.length];
         }
         // Trophic level
         if (getSimulation().TLoutput) {
@@ -132,14 +143,153 @@ public class Indicators {
         }
     }
 
+    public static void monitorSizeSpectrum() {
+        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+            for (School school : getSimulation().getSpecies(i).getSchools()) {
+                sizeSpectrum[i][getSizeRank(school)] += school.getAbundance();
+            }
+        }
+    }
+
+    private static int getSizeRank(School school) {
+
+        int iSize = getOsmose().tabSizes.length - 1;
+        if (school.getLength() <= getOsmose().spectrumMaxSize) {
+            while (school.getLength() < getOsmose().tabSizes[iSize]) {
+                iSize--;
+            }
+        }
+        return iSize;
+    }
+
+    public static void writeSizeSpectrum(float time) {
+
+        StringBuilder filename;
+        String description;
+        PrintWriter pr;
+        FileOutputStream fos = null;
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+
+        if (getSimulation().sizeSpectrumOutput) {
+            filename = new StringBuilder("SizeIndicators");
+            filename.append(File.separatorChar);
+            filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename.append("_SizeSpectrum_Simu");
+            filename.append(getOsmose().numSimu);
+            filename.append(".csv");
+            description = "Distribution of fish abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported. In logarithm, we consider the median of the size class, ie Ln(size [i]) = Ln((size [i]+size[i+1])/2)";
+            // Write the file
+            File file = new File(path, filename.toString());
+            file.getParentFile().mkdirs();
+            boolean isNew = !file.exists();
+            try {
+                fos = new FileOutputStream(file, true);
+                pr = new PrintWriter(fos, true);
+                if (isNew) {
+                    pr.print("// ");
+                    pr.println(description);
+                    pr.print("Time");
+                    pr.print(';');
+                    pr.print("size");
+                    pr.print(';');
+                    pr.print("Abundance");
+                    pr.print(';');
+                    pr.print("LN(size)");
+                    pr.print(';');
+                    pr.print("LN(Abd)");
+                    pr.print(';');
+                    pr.println();
+                }
+                for (int iSize = 0; iSize < getOsmose().nbSizeClass; iSize++) {
+                    double sum = 0f;
+                    pr.print(time);
+                    pr.print(';');
+                    pr.print((getOsmose().tabSizes[iSize]));
+                    pr.print(';');
+                    for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
+                        sum += sizeSpectrum[iSpec][iSize] / getSimulation().getRecordFrequency();
+                    }
+                    pr.print(sum);
+                    pr.print(';');
+                    pr.print((getOsmose().tabSizesLn[iSize]));
+                    pr.print(';');
+                    pr.print(Math.log(sum));
+                    pr.println();
+                }
+                pr.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    fos.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+        if (getSimulation().sizeSpectrumPerSpeOutput) {
+            filename = new StringBuilder("SizeIndicators");
+            filename.append(File.separatorChar);
+            filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename.append("_SizeSpectrumSpecies_Simu");
+            filename.append(getOsmose().numSimu);
+            filename.append(".csv");
+            description = "Distribution of fish species abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
+            // Write the file
+            File file = new File(path, filename.toString());
+            file.getParentFile().mkdirs();
+            boolean isNew = !file.exists();
+            try {
+                fos = new FileOutputStream(file, true);
+                pr = new PrintWriter(fos, true);
+                if (isNew) {
+                    pr.print("// ");
+                    pr.println(description);
+                    pr.print("Time");
+                    pr.print(';');
+                    pr.print("size");
+                    pr.print(';');
+                    for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+                        pr.print(getSimulation().getSpecies(i).getName());
+                        pr.print(';');
+                    }
+                    pr.println();
+                }
+                for (int iSize = 0; iSize < getOsmose().nbSizeClass; iSize++) {
+                    pr.print(time);
+                    pr.print(';');
+                    pr.print((getOsmose().tabSizes[iSize]));
+                    pr.print(';');
+                    for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
+                        pr.print(sizeSpectrum[iSpec][iSize] / getSimulation().getRecordFrequency());
+                        pr.print(';');
+                    }
+                    pr.println();
+                }
+                pr.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    fos.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
     public static void writeYields(float time) {
 
         StringBuilder filename;
+        String description;
+
         filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_yield_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
-        String description = "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
+        description = "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
         writeVariable(time, yield, filename.toString(), description);
 
         filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
