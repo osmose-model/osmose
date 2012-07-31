@@ -497,7 +497,7 @@ public class Species {
         }
 
         // calcul of length frequency in catch
-        if (getSimulation().sizeSpectrumPerSpeOutput) {
+        if (getSimulation().sizeSpectrumOutput || getSimulation().sizeSpectrumPerSpeOutput) {
             int sizeTemp = 0;
             for (int j = 0; j < nbSchoolsTotCatch; j++) {
                 if (sizeSchoolCatch[j] < getOsmose().spectrumMaxSize) {

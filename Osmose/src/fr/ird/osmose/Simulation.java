@@ -194,7 +194,7 @@ public class Simulation {
         //Initialisation indicators
         tabSizeCatch = new float[species.length][];
         tabNbCatch = new float[species.length][];
-        if (sizeSpectrumPerSpeOutput) {
+        if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                     for (int k = 0; k < species[i].getCohort(j).size(); k++) {
@@ -557,7 +557,7 @@ public class Simulation {
         }
 
         //update spectra
-        if (sizeSpectrumPerSpeOutput) {
+        if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
             for (int i = 0; i < getOsmose().nbSizeClass; i++) {
                 //spectrumAbd[i]=0;
                 //spectrumBiom[i]=0;
@@ -570,7 +570,7 @@ public class Simulation {
         for (int i = 0; i < species.length; i++) {
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                 for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                    if (sizeSpectrumPerSpeOutput) {
+                    if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
                         ((School) species[i].getCohort(j).getSchool(k)).rankSize(getOsmose().tabSizes, getOsmose().spectrumMaxSize);
                     }
                     if ((year >= getOsmose().timeSeriesStart) && ((TLoutput) || (TLDistriboutput))) {
@@ -1888,7 +1888,7 @@ public class Simulation {
         //spectrumAbd = new float[getOsmose().nbSizeClass];
         //spectrumBiom = new float[getOsmose().nbSizeClass];
 
-        if (sizeSpectrumPerSpeOutput) {
+        if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
             spectrumSpeciesAbd = new float[species.length][];
             spectrumTemp = new float[2][][];
             spectrumTemp[0] = new float[species.length][];
@@ -1923,7 +1923,6 @@ public class Simulation {
 
         if (sizeSpectrumPerSpeOutput) {
             initSizeSpecPerSpFile();
-            initSizeSpecPerSpCatchFile();
         }
         if (sizeSpectrumOutput) {
             initSizeSpecFile();
@@ -2049,32 +2048,15 @@ public class Simulation {
 
         int indexSaving;
         indexSaving = (int) indexTime / recordFrequency;
-        double biomNo0;
-        long abdNo0;
 
         if (year >= getOsmose().timeSeriesStart) {
             for (int i = 0; i < species.length; i++) {
                 Species speci = species[i];
 
-                if (sizeSpectrumPerSpeOutput) {
+                if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
                     for (int j = 0; j < getOsmose().nbSizeClass; j++) {
                         spectrumTemp[0][i][j] += spectrumSpeciesAbd[i][j];
                     }
-                }
-
-                //biom per stage rempli avant la prédation
-				/*
-                 * for (int j=0; j< speci.getNumberCohorts(); j++) for (int k=0;
-                 * k<speci.getCohort(j).nbSchools; k++)
-                 * biomPerStage[i][((QSchool)speci.getCohort(j).getSchool(k)).stage]
-                 * += ((QSchool)speci.getCohort(j).getSchool(k)).biomass;
-                 */
-                abdNo0 = 0;
-                biomNo0 = 0;
-                for (int k = speci.indexAgeClass0; k < speci.getNumberCohorts(); k++) {
-                    biomNo0 += speci.getCohort(k).getBiomass();
-                    abdNo0 += speci.getCohort(k).getAbundance();
-
                 }
 
                 if (TLoutput) {
@@ -2119,7 +2101,6 @@ public class Simulation {
                 }
                 if (sizeSpectrumPerSpeOutput) {
                     saveSizeSpecPerSpperTime(timeSaving, spectrumTemp[0]);
-                    saveSizeSpecPerSpperCatchTime(timeSaving, spectrumTemp[1]);
                 }
                 for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
                     if (calibration) {
@@ -2161,7 +2142,7 @@ public class Simulation {
                             distribTL[i][1][j] = 0;
                         }
                     }
-                    if (sizeSpectrumPerSpeOutput) {
+                    if (sizeSpectrumOutput || sizeSpectrumPerSpeOutput) {
                         for (int j = 0; j < getOsmose().nbSizeClass; j++) {
                             spectrumTemp[0][i][j] = 0;
                             spectrumTemp[1][i][j] = 0;
@@ -2555,12 +2536,6 @@ public class Simulation {
             pr.print(species[i].getName());
             pr.print(';');
         }
-        pr.print("LN(size)");
-        pr.print(';');
-        for (int i = 0; i < species.length; i++) {
-            pr.print(species[i].getName());
-            pr.print(';');
-        }
         pr.println();
         pr.close();
     }
@@ -2569,72 +2544,6 @@ public class Simulation {
         File targetPath, targetFile;
         PrintWriter pr;
         String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrumPerSpecies_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, SSperSpFile);
-            SSperSpTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(SSperSpTime, true);
-
-        for (int j = 0; j < getOsmose().nbSizeClass; j++) {
-            pr.print(time);
-            pr.print(';');
-            pr.print((getOsmose().tabSizes[j]));
-            pr.print(';');
-            for (int i = 0; i < species.length; i++) {
-                pr.print(abdSize[i][j] / (float) recordFrequency);
-                pr.print(';');
-            }
-            pr.print((getOsmose().tabSizesLn[j]));
-            pr.print(';');
-            for (int i = 0; i < species.length; i++) {
-                pr.print(Math.log(abdSize[i][j] / (float) recordFrequency));
-                pr.print(';');
-            }
-            pr.println();
-        }
-        pr.close();
-    }
-
-    public void initSizeSpecPerSpCatchFile() {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, SSperSpFile);
-            SSperSpTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(SSperSpTime, true);
-
-        pr.print("Time");
-        pr.print(';');
-        pr.print("size");
-        pr.print(';');
-        for (int i = 0; i < species.length; i++) {
-            pr.print(species[i].getName());
-            pr.print(';');
-        }
-        pr.println();
-        pr.close();
-    }
-
-    public void saveSizeSpecPerSpperCatchTime(float time, float[][] abdSize) {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String SSperSpFile = getOsmose().outputPrefix[numSerie] + "_SizeSpectrumPerSpeciesCatch_Simu" + getOsmose().numSimu + ".csv";
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "SizeIndicators");
         targetPath.mkdirs();
 
