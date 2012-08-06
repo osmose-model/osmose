@@ -378,7 +378,7 @@ public class Species {
         }
         for (int i = indexMin; i < tabSchoolsRanked.size(); i++) {
             SSB += tabSchoolsRanked.get(i).getBiomass();
-            tempTL += tabSchoolsRanked.get(i).getTrophicLevel()[tabSchoolsRanked.get(i).getCohort().getAgeNbDt()] * tabSchoolsRanked.get(i).getBiomass();
+            tempTL += tabSchoolsRanked.get(i).trophicLevel[tabSchoolsRanked.get(i).getCohort().getAgeNbDt()] * tabSchoolsRanked.get(i).getBiomass();
         }
 
         double nbEggs = sexRatio * alpha * seasonSpawning[getSimulation().getIndexTime()] * SSB * 1000000;
@@ -410,7 +410,7 @@ public class Species {
         }
         coh0.trimToSize();
         for (int i = 0; i < coh0.size(); i++) {
-            ((School) coh0.get(i)).getTrophicLevel()[0] = TLeggs; //tempTL/(float)SSB;
+            ((School) coh0.get(i)).trophicLevel[0] = TLeggs; //tempTL/(float)SSB;
         }
     }
 
@@ -518,8 +518,8 @@ public class Species {
         for (int j = indexAgeClass0; j < nbCohorts; j++) //we don't consider age class 0 in the calculation of the mean
         {
             for (int k = 0; k < getCohort(j).size(); k++) {
-                if (getSchool(j, k).getTrophicLevel()[j] != 0) {
-                    sum += getSchool(j, k).getBiomass() * getSchool(j, k).getTrophicLevel()[j];
+                if (getSchool(j, k).trophicLevel[j] != 0) {
+                    sum += getSchool(j, k).getBiomass() * getSchool(j, k).trophicLevel[j];
                     biomWithout0 += getSchool(j, k).getBiomass();
                 }
             }
@@ -539,8 +539,8 @@ public class Species {
             abd = 0;
             sum = 0;
             for (int k = 0; k < getCohort(j).size(); k++) {
-                if (getSchool(j, k).getTrophicLevel()[j] != 0) {
-                    sum += getSchool(j, k).getAbundance() * getSchool(j, k).getTrophicLevel()[j];
+                if (getSchool(j, k).trophicLevel[j] != 0) {
+                    sum += getSchool(j, k).getAbundance() * getSchool(j, k).trophicLevel[j];
                     abd += getSchool(j, k).getAbundance();
                 }
             }

@@ -366,20 +366,20 @@ public class School {
         }
 
         //		updateTL(previousW,weight);
-        updateTLbis();
+        //updateTLbis();
     }
 
-    public void updateTL(float previousW, float W) {
-        float previousTL, newTL;
-        if (getCohort().getAgeNbDt() != 0) {
-            previousTL = trophicLevel[getCohort().getAgeNbDt() - 1];
-        } else {
-            previousTL = getCohort().getSpecies().TLeggs;
-        }
-
-        newTL = ((previousW * previousTL) + ((W - previousW) * trophicLevel[getCohort().getAgeNbDt()])) / (W);   // weighting of new TL according to increase of weight dut to prey ingestion
-        trophicLevel[getCohort().getAgeNbDt()] = newTL;
-    }
+//    public void updateTL(float previousW, float W) {
+//        float previousTL, newTL;
+//        if (getCohort().getAgeNbDt() != 0) {
+//            previousTL = trophicLevel[getCohort().getAgeNbDt() - 1];
+//        } else {
+//            previousTL = getCohort().getSpecies().TLeggs;
+//        }
+//
+//        newTL = ((previousW * previousTL) + ((W - previousW) * trophicLevel[getCohort().getAgeNbDt()])) / (W);   // weighting of new TL according to increase of weight dut to prey ingestion
+//        trophicLevel[getCohort().getAgeNbDt()] = newTL;
+//    }
 
     public void updateTLbis() {
         float[] TLproie = new float[4];
@@ -479,13 +479,6 @@ public class School {
      */
     public void setWeight(float weight) {
         this.weight = weight;
-    }
-
-    /**
-     * @return the trophicLevel
-     */
-    public float[] getTrophicLevel() {
-        return trophicLevel;
     }
     
     /**

@@ -357,27 +357,45 @@ public class Indicators {
     /*
      * Writes mean TL per species. It must come before writeBiomassAndAbundance
      * since the mean size is pondered by the biomass without juveniles.
-     *
      */
     public static void writeMeanTL(float time) {
 
         StringBuilder filename;
+        String description;
 
+        double[] meanTLCatch = new double[getSimulation().getNbSpecies()];
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             if (biomassNoJuv[i] != 0.d) {
                 meanTL[i] = (float) (meanTL[i] / biomassNoJuv[i]);
             } else {
                 meanTL[i] = 0.f;
             }
+            if (yield[i] > 0) {
+                meanTLCatch[i] = getSimulation().tabTLCatch[i] / yield[i];
+            } else {
+                meanTLCatch[i] = Double.NaN;
+            }
         }
 
+        // Mean TL
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_meanTL_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
-        writeVariable(time, meanTL, filename.toString(), "Mean Trophic Level of fish species, weighted by fish biomass, and including/excluding first ages specified in input (in calibration file)");
+        description = "Mean Trophic Level of fish species, weighted by fish biomass, and including/excluding first ages specified in input (in calibration file)";
+        writeVariable(time, meanTL, filename.toString(), description);
+
+        // Mean TL for catches
+        filename = new StringBuilder("Trophic");
+        filename.append(File.separatorChar);
+        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append("_meanTLCatch-tmp_Simu");
+        filename.append(getOsmose().numSimu);
+        filename.append(".csv");
+        description = "Mean Trophic Level of fish species, weighted by fish catch";
+        writeVariable(time, meanTLCatch, filename.toString(), description);
     }
 
     public static void writeVariable(float time, double[] variable, String filename, String description) {
