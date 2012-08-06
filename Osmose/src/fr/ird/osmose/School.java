@@ -1,9 +1,11 @@
 package fr.ird.osmose;
 
-/********************************************************************************
+/**
+ * ******************************************************************************
  * <p>Titre : School class</p>
  *
- * <p>Description : Basic unit of Osmose model - represents a super-individual </p>
+ * <p>Description : Basic unit of Osmose model - represents a super-individual
+ * </p>
  *
  * <p>Copyright : Copyright (c) may 2009</p>
  *
@@ -11,7 +13,7 @@ package fr.ird.osmose;
  *
  * @author Yunne Shin, Morgane Travers
  * @version 2.1
- ******************************************************************************** 
+ * *******************************************************************************
  */
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -36,8 +38,8 @@ public class School {
      */
     private Species species;
     /*
-     * Index of the cell (i,j)
-     * phv: do not understand yet. @see Simulation.distributeSpeciesIni()
+     * Index of the cell (i,j) phv: do not understand yet. @see
+     * Simulation.distributeSpeciesIni()
      */
     int indexij;
     /*
@@ -89,7 +91,7 @@ public class School {
      */
     private int accessibilityStage;
     /*
-     * 
+     *
      */
     int dietOutputStage;
     float[][] dietTemp;
@@ -111,6 +113,7 @@ public class School {
 //////////////
     /**
      * Create a new school.
+     *
      * @param cohort of the school
      * @param abundance, number of individuals in the school
      * @param length [cm] of the individual
@@ -121,7 +124,7 @@ public class School {
         this.abundance = abundance;
         this.length = length;
         this.weight = weight;
-        
+
         // initialize school variables
         init();
     }
@@ -175,15 +178,16 @@ public class School {
         sumDiet = 0;
 
         /*
-         * phv 2011/11/22 This booleans means that the scool has been created but not located
-         * anywhere in the grid.
-         * unlocated will be set to false when we first call communicatePosition
+         * phv 2011/11/22 This booleans means that the scool has been created
+         * but not located anywhere in the grid. unlocated will be set to false
+         * when we first call communicatePosition
          */
         unlocated = true;
     }
     /*
      * Get the current Osmose instance
      */
+
     private Osmose getOsmose() {
         return Osmose.getInstance();
     }
@@ -197,19 +201,20 @@ public class School {
 
     /**
      * Gets the current location of the school
+     *
      * @return the cell where is located the school
      */
     public Cell getCell() {
         return cell;
     }
-    
+
     /**
      * Converts the specified biomass [tons] into abundance [scalar]
      */
     public double biom2abd(double biomass) {
         return 1.e6d * biomass / weight;
     }
-    
+
     /**
      * Converts the specified abundance [scalar] into biomass [tons]
      */
@@ -219,6 +224,7 @@ public class School {
 
     /**
      * Randomly choose one cell out the list of cells.
+     *
      * @param cells, the list of cells for the random deal.
      */
     public void randomDeal(List<Cell> cells) {
@@ -257,8 +263,9 @@ public class School {
      */
     public void randomWalk() {
 
-        /* Create a list of the accessible cells
-         * => neighbor cells that are not in land + current cell
+        /*
+         * Create a list of the accessible cells => neighbor cells that are not
+         * in land + current cell
          */
         List<Cell> accessibleCells = new ArrayList();
         Iterator<Cell> neighbors = getGrid().getNeighborCells(cell).iterator();
@@ -270,7 +277,9 @@ public class School {
         }
         accessibleCells.add(cell);
 
-        /* Randomly choose the new cell */
+        /*
+         * Randomly choose the new cell
+         */
         randomDeal(accessibleCells);
     }
 
@@ -319,7 +328,7 @@ public class School {
             }
         }
     }
-    
+
     public void updateDietIndicators() {
         if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
@@ -332,33 +341,23 @@ public class School {
                 sumDiet += dietTemp[i][0];
                 getSimulation().predatorsPressureMatrix[species.getIndex()][dietOutputStage][i][0] += dietTemp[i][0];
             }
-
-            if (sumDiet != 0) {
-                getSimulation().nbStomachs[species.getIndex()][dietOutputStage] += getAbundance();
-                for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-                    for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
-                        getSimulation().dietsMatrix[species.getIndex()][dietOutputStage][i][s] += getAbundance() * dietTemp[i][s] / sumDiet;
-                    }
-                }
-                for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
-                    getSimulation().dietsMatrix[species.getIndex()][dietOutputStage][i][0] += getAbundance() * dietTemp[i][0] / sumDiet;
-                }
-                sumDiet = 0;
+        }
+    }
+    
+    public void resetDietVariables() {
+        sumDiet = 0;
+        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+            for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+                dietTemp[i][s] = 0;
             }
-            for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-                for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
-                    dietTemp[i][s] = 0;
-                }
-            }
-            for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
-                dietTemp[i][0] = 0;
-            }
-
+        }
+        for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
+            dietTemp[i][0] = 0;
         }
     }
 
     public void growth(float minDelta, float maxDelta, float c, float bPower) {
-        
+
         //calculation of lengths according to predation efficiency
         if (predSuccessRate >= getCohort().getSpecies().criticalPredSuccess) {
             setLength(getLength() + minDelta + (maxDelta - minDelta) * ((predSuccessRate - getCohort().getSpecies().criticalPredSuccess) / (1 - getCohort().getSpecies().criticalPredSuccess)));
@@ -380,7 +379,6 @@ public class School {
 //        newTL = ((previousW * previousTL) + ((W - previousW) * trophicLevel[getCohort().getAgeNbDt()])) / (W);   // weighting of new TL according to increase of weight dut to prey ingestion
 //        trophicLevel[getCohort().getAgeNbDt()] = newTL;
 //    }
-
     public void updateTLbis() {
         float[] TLproie = new float[4];
         float[] deltaW = new float[4];
@@ -463,14 +461,14 @@ public class School {
     public void setWeight(float weight) {
         this.weight = weight;
     }
-    
+
     /**
      * @return the trophicLevel
      */
     public int getFeedingStage() {
         return feedingStage;
     }
-    
+
     /**
      * @return the trophicLevel
      */
@@ -543,5 +541,9 @@ public class School {
      */
     public void setCatchable(boolean catchable) {
         this.catchable = catchable;
+    }
+
+    public float getSumDiet() {
+        return sumDiet;
     }
 }

@@ -104,8 +104,7 @@ public class Simulation {
     float tempMaxProbaPresence;
     float[][] accessibilityMatrix;
     int[] nbAccessibilityStages;
-    float[][][][] dietsMatrix, predatorsPressureMatrix;
-    long[][] nbStomachs;
+    float[][][][] predatorsPressureMatrix;
     // initialisation param for species abd in function of an input size spectrum
     double a, b;	    //coeff of the relation nb=length^a * expb
     //in Rice : a=-5.8; b=35.5*/
@@ -594,6 +593,9 @@ public class Simulation {
             rankSchoolsSizes();
             saveBiomassBeforePredation();
             clearCatchesIndicators();
+            for (School school : getSchools()) {
+                school.resetDietVariables();
+            }
 
             // Compute mortality
             // (predation + fishing + natural mortality + starvation)
@@ -1783,28 +1785,18 @@ public class Simulation {
 
 
         if (dietsOutput) {
-            nbStomachs = new long[species.length][];
-            dietsMatrix = new float[species.length][][][];
             predatorsPressureMatrix = new float[species.length][][][];
             for (int i = 0; i < species.length; i++) {
-                nbStomachs[i] = new long[species[i].nbDietStages];
-                dietsMatrix[i] = new float[species[i].nbDietStages][][];
                 predatorsPressureMatrix[i] = new float[species[i].nbDietStages][][];
                 for (int s = 0; s < species[i].nbDietStages; s++) {
-                    nbStomachs[i][s] = 0;
-                    dietsMatrix[i][s] = new float[species.length + forcing.getNbPlanktonGroups()][];
                     predatorsPressureMatrix[i][s] = new float[species.length + forcing.getNbPlanktonGroups()][];
                     for (int j = 0; j < species.length; j++) {
-                        dietsMatrix[i][s][j] = new float[species[j].nbDietStages];
                         predatorsPressureMatrix[i][s][j] = new float[species[j].nbDietStages];
                         for (int st = 0; st < species[j].nbDietStages; st++) {
-                            dietsMatrix[i][s][j][st] = 0f;
                             predatorsPressureMatrix[i][s][j][st] = 0f;
                         }
                     }
                     for (int j = species.length; j < species.length + forcing.getNbPlanktonGroups(); j++) {
-                        dietsMatrix[i][s][j] = new float[1];
-                        dietsMatrix[i][s][j][0] = 0f;
                         predatorsPressureMatrix[i][s][j] = new float[1];
                         predatorsPressureMatrix[i][s][j][0] = 0f;
                     }
@@ -1813,11 +1805,7 @@ public class Simulation {
         }
 
         if (dietsOutput) {
-            initDietFile();
             initPredatorPressureFile();
-        }
-        if (TLDistriboutput) {
-            initTLDistFile();
         }
     }
 
@@ -1950,7 +1938,6 @@ public class Simulation {
                 float timeSaving = year + (indexTime + 1f) / (float) nbTimeStepsPerYear;
 
                 if (dietsOutput) {
-                    saveDietperTime(timeSaving, dietsMatrix, nbStomachs);
                     savePredatorPressureperTime(timeSaving, predatorsPressureMatrix, biomPerStage);
                 }
 
@@ -1967,16 +1954,13 @@ public class Simulation {
 
                     if (dietsOutput) {
                         for (int s = 0; s < species[i].nbDietStages; s++) {
-                            nbStomachs[i][s] = 0;
                             biomPerStage[i][s] = 0;
                             for (int j = 0; j < species.length; j++) {
                                 for (int st = 0; st < species[j].nbDietStages; st++) {
-                                    dietsMatrix[i][s][j][st] = 0f;
                                     predatorsPressureMatrix[i][s][j][st] = 0f;
                                 }
                             }
                             for (int j = species.length; j < species.length + forcing.getNbPlanktonGroups(); j++) {
-                                dietsMatrix[i][s][j][0] = 0f;
                                 predatorsPressureMatrix[i][s][j][0] = 0f;
                             }
                         }
@@ -2023,45 +2007,6 @@ public class Simulation {
         }
         pr.print(";");
         pr.print("Biomass");
-        pr.println();
-        pr.close();
-    }
-
-    public void initDietFile() {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String dietFile = getOsmose().outputPrefix[numSerie] + "_dietMatrix_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, dietFile);
-            dietTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(dietTime, true);
-        pr.print("Time");
-        pr.print(';');
-        pr.print("Prey");
-        for (int i = 0; i < species.length; i++) {
-            for (int s = 0; s < species[i].nbDietStages; s++) {
-                pr.print(";");
-                if (species[i].nbDietStages == 1) {
-                    pr.print(species[i].getName());    // Name predators
-                } else {
-                    if (s == 0) {
-                        pr.print(species[i].getName() + " < " + species[i].dietStagesTab[s]);    // Name predators
-                    } else {
-                        pr.print(species[i].getName() + " >" + species[i].dietStagesTab[s - 1]);    // Name predators
-                    }
-                }
-            }
-        }
-        pr.print(";");
-        pr.print("nbStomachs");
         pr.println();
         pr.close();
     }
@@ -2120,135 +2065,6 @@ public class Simulation {
                 }
             }
             pr.print(biom[j][0] / recordFrequency);
-            pr.println();
-        }
-        pr.close();
-    }
-
-    public void saveDietperTime(float time, float[][][][] diets, long[][] nbStomachs) {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String dietFile = getOsmose().outputPrefix[numSerie] + "_dietMatrix_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, dietFile);
-            dietTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-        pr = new PrintWriter(dietTime, true);
-
-
-        for (int j = 0; j < species.length; j++) {
-            for (int st = 0; st < species[j].nbDietStages; st++) {
-                pr.print(time);
-                pr.print(';');
-                if (species[j].nbDietStages == 1) {
-                    pr.print(species[j].getName());    // Name predators
-                } else {
-                    if (st == 0) {
-                        pr.print(species[j].getName() + " < " + species[j].dietStagesTab[st]);    // Name predators
-                    } else {
-                        pr.print(species[j].getName() + " >" + species[j].dietStagesTab[st - 1]);    // Name predators
-                    }
-                }
-                pr.print(";");
-                for (int i = 0; i < species.length; i++) {
-                    for (int s = 0; s < species[i].nbDietStages; s++) {
-                        if (nbStomachs[i][s] != 0) {
-                            pr.print(diets[i][s][j][st] / (float) nbStomachs[i][s]);
-                        } else {
-                            pr.print("NaN");
-                        }
-                        pr.print(";");
-                    }
-                }
-                pr.print(nbStomachs[j][st]);
-                pr.println();
-            }
-        }
-        for (int j = species.length; j < (species.length + forcing.getNbPlanktonGroups()); j++) {
-            pr.print(time);
-            pr.print(";");
-            pr.print(forcing.getPlanktonName(j - species.length));
-            pr.print(";");
-            for (int i = 0; i < species.length; i++) {
-                for (int s = 0; s < species[i].nbDietStages; s++) {
-                    if (nbStomachs[i][s] != 0) {
-                        pr.print(diets[i][s][j][0] / (float) nbStomachs[i][s]);
-                    } else {
-                        pr.print("NaN");
-                    }
-                    pr.print(";");
-                }
-            }
-            pr.println();
-        }
-        pr.close();
-    }
-
-    public void initTLDistFile() {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String TLDistFile = getOsmose().outputPrefix[numSerie] + "_TLDistrib_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, TLDistFile);
-            TLDistTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(TLDistTime, true);
-
-        pr.print("Time");
-        pr.print(';');
-        pr.print("TL");
-        pr.print(';');
-        for (int i = 0; i < species.length; i++) {
-            pr.print(species[i].getName() + " -0");
-            pr.print(';');
-            pr.print(species[i].getName() + " -1+");
-            pr.print(';');
-        }
-        pr.println();
-        pr.close();
-    }
-
-    public void saveTLDistperTime(float time, float[][][] TLdist) {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String TLDistFile = getOsmose().outputPrefix[numSerie] + "_TLDistrib_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Trophic");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, TLDistFile);
-            TLDistTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(TLDistTime, true);
-
-        for (int j = 0; j < getOsmose().nbTLClass; j++) {
-            pr.print(time);
-            pr.print(';');
-            pr.print((getOsmose().tabTL[j]));
-            pr.print(';');
-            for (int i = 0; i < species.length; i++) {
-                pr.print(TLdist[i][0][j] / (float) recordFrequency);
-                pr.print(';');
-                pr.print(TLdist[i][1][j] / (float) recordFrequency);
-                pr.print(';');
-            }
             pr.println();
         }
         pr.close();

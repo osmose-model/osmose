@@ -29,6 +29,9 @@ public class Indicators {
     private static double[][] distribTL;
     // Yields
     public static double[] yield, yieldN;
+    // Diets
+    private static double[][][][] diets;
+    private static double[][] nbStomachs;
 
     public static void updateAndWriteIndicators() {
 
@@ -57,6 +60,10 @@ public class Indicators {
             if (getSimulation().TLDistriboutput) {
                 monitorTLDistribution();
             }
+            // Diets
+            if (getSimulation().dietsOutput) {
+                monitorDiets();
+            }
             //
             // WRITE
             if (((index + 1) % nStepsRecord) == 0) {
@@ -76,6 +83,10 @@ public class Indicators {
                 if (getSimulation().TLDistriboutput) {
                     writeTLDistribution(time);
                 }
+                // Diets
+                if (getSimulation().dietsOutput) {
+                    writeDiets(time);
+                }
                 // Biomass & abundance
                 writeBiomassAndAbundance(time);
                 // Yields
@@ -89,6 +100,7 @@ public class Indicators {
 
     public static void reset() {
         int nSpec = getSimulation().getNbSpecies();
+        int nPrey = nSpec + getSimulation().getForcing().getNbPlanktonGroups();
         // biomass & abundance
         biomassNoJuv = new double[nSpec];
         abundanceNoJuv = new double[nSpec];
@@ -111,6 +123,25 @@ public class Indicators {
         if (getSimulation().TLoutput) {
             meanTL = new double[nSpec];
             distribTL = new double[nSpec][getOsmose().tabTL.length];
+        }
+        // Diets
+        if (getSimulation().dietsOutput) {
+            diets = new double[nSpec][][][];
+            nbStomachs = new double[nSpec][];
+            for (int i = 0; i < nSpec; i++) {
+                diets[i] = new double[getSimulation().getSpecies(i).nbDietStages][][];
+                nbStomachs[i] = new double[getSimulation().getSpecies(i).nbDietStages];
+                for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+                    diets[i][s] = new double[nPrey][];
+                    for (int ipr = 0; ipr < nPrey; ipr++) {
+                        if (ipr < nSpec) {
+                            diets[i][s][ipr] = new double[getSimulation().getSpecies(ipr).nbDietStages];
+                        } else {
+                            diets[i][s][ipr] = new double[1];
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -190,6 +221,130 @@ public class Indicators {
         return iTL;
     }
 
+    public static void monitorDiets() {
+        for (School school : getSimulation().getSchools()) {
+            int iSpec = school.getCohort().getSpecies().getIndex();
+            if (school.getSumDiet() > 0) {
+                nbStomachs[iSpec][school.dietOutputStage] += school.getAbundance();
+                for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+                    for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+                        //getSimulation().predatorsPressureMatrix[iSpec][school.dietOutputStage][i][s] += school.dietTemp[i][s];
+                        diets[iSpec][school.dietOutputStage][i][s] += school.getAbundance() * school.dietTemp[i][s] / school.getSumDiet();
+                    }
+
+                }
+            }
+            for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
+                //getSimulation().predatorsPressureMatrix[iSpec][school.dietOutputStage][i][0] += school.dietTemp[i][0];
+                diets[iSpec][school.dietOutputStage][i][0] += school.getAbundance() * school.dietTemp[i][0] / school.getSumDiet();
+            }
+        }
+    }
+
+    public static void writeDiets(float time) {
+        StringBuilder filename;
+        String description;
+        PrintWriter pr;
+        FileOutputStream fos = null;
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        int nSpec = getSimulation().getNbSpecies();
+
+        if (getSimulation().TLDistriboutput) {
+            filename = new StringBuilder("Trophic");
+            filename.append(File.separatorChar);
+            filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename.append("_dietMatrix_Simu");
+            filename.append(getOsmose().numSimu);
+            filename.append(".csv");
+            description = "% of prey species (in rows) in the diet of predator species (in col)";
+            // Write the file
+            File file = new File(path, filename.toString());
+            file.getParentFile().mkdirs();
+            boolean isNew = !file.exists();
+            try {
+                fos = new FileOutputStream(file, true);
+                pr = new PrintWriter(fos, true);
+                if (isNew) {
+                    pr.print("// ");
+                    pr.println(description);
+                    pr.print("Time");
+                    pr.print(';');
+                    pr.print("Prey");
+                    for (int i = 0; i < nSpec; i++) {
+                        Species species = getSimulation().getSpecies(i);
+                        for (int s = 0; s < species.nbDietStages; s++) {
+                            pr.print(";");
+                            if (species.nbDietStages == 1) {
+                                pr.print(species.getName());    // Name predators
+                            } else {
+                                if (s == 0) {
+                                    pr.print(species.getName() + " < " + species.dietStagesTab[s]);    // Name predators
+                                } else {
+                                    pr.print(species.getName() + " >" + species.dietStagesTab[s - 1]);    // Name predators
+                                }
+                            }
+                        }
+                    }
+                    pr.println();
+                }
+                for (int j = 0; j < nSpec; j++) {
+                    Species species = getSimulation().getSpecies(j);
+                    for (int st = 0; st < species.nbDietStages; st++) {
+                        pr.print(time);
+                        pr.print(';');
+                        if (species.nbDietStages == 1) {
+                            pr.print(species.getName());    // Name predators
+                        } else {
+                            if (st == 0) {
+                                pr.print(species.getName() + " < " + species.dietStagesTab[st]);    // Name predators
+                            } else {
+                                pr.print(species.getName() + " >" + species.dietStagesTab[st - 1]);    // Name predators
+                            }
+                        }
+                        pr.print(";");
+                        for (int i = 0; i < nSpec; i++) {
+                            for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+                                if (nbStomachs[i][s] >= 1) {
+                                    pr.print((float) (diets[i][s][j][st] / nbStomachs[i][s]));
+                                } else {
+                                    pr.print("NaN");
+                                }
+                                pr.print(";");
+                            }
+                        }
+                        pr.println();
+                    }
+                }
+                for (int j = nSpec; j < (nSpec + getSimulation().getForcing().getNbPlanktonGroups()); j++) {
+                    pr.print(time);
+                    pr.print(";");
+                    pr.print(getSimulation().getForcing().getPlanktonName(j - nSpec));
+                    pr.print(";");
+                    for (int i = 0; i < nSpec; i++) {
+                        for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+                            if (nbStomachs[i][s] >= 1) {
+                                pr.print((float) (diets[i][s][j][0] / nbStomachs[i][s]));
+                            } else {
+                                pr.print("NaN");
+                            }
+                            pr.print(";");
+                        }
+                    }
+                    pr.println();
+                }
+                pr.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    fos.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
     public static void writeTLDistribution(float time) {
 
         StringBuilder filename;
@@ -232,7 +387,7 @@ public class Indicators {
                     pr.print((getOsmose().tabTL[iTL]));
                     pr.print(';');
                     for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
-                        pr.print(distribTL[iSpec][iTL] / getSimulation().getRecordFrequency());
+                        pr.print((float) (distribTL[iSpec][iTL] / getSimulation().getRecordFrequency()));
                         pr.print(';');
                     }
                     pr.println();
@@ -297,11 +452,11 @@ public class Indicators {
                     for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
                         sum += sizeSpectrum[iSpec][iSize] / getSimulation().getRecordFrequency();
                     }
-                    pr.print(sum);
+                    pr.print((float) sum);
                     pr.print(';');
                     pr.print((getOsmose().tabSizesLn[iSize]));
                     pr.print(';');
-                    pr.print(Math.log(sum));
+                    pr.print((float) Math.log(sum));
                     pr.println();
                 }
                 pr.close();
@@ -350,7 +505,7 @@ public class Indicators {
                     pr.print((getOsmose().tabSizes[iSize]));
                     pr.print(';');
                     for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
-                        pr.print(sizeSpectrum[iSpec][iSize] / getSimulation().getRecordFrequency());
+                        pr.print((float) (sizeSpectrum[iSpec][iSize] / getSimulation().getRecordFrequency()));
                         pr.print(';');
                     }
                     pr.println();
@@ -509,7 +664,7 @@ public class Indicators {
             pr.print(time);
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 pr.print(";");
-                pr.print(variable[i]);
+                pr.print((float) variable[i]);
                 //pr.print((long) variable[i]);
                 //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
             }
@@ -564,7 +719,7 @@ public class Indicators {
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int j = 0; j < variable[i].length; j++) {
                     pr.print(";");
-                    pr.print(variable[i][j]);
+                    pr.print((float) variable[i][j]);
                     //pr.print((long) variable[i][j]);
                     //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
                 }
