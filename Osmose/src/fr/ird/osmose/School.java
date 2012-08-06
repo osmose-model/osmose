@@ -436,23 +436,6 @@ public class School {
         }
     }
 
-    public void rankTL(float[] tabTL) // for TL distribution output
-    {
-        if ((trophicLevel[getCohort().getAgeNbDt()] >= 1) && (getBiomass() != 0)) {
-            int indexMax = tabTL.length - 1;
-            while ((trophicLevel[getCohort().getAgeNbDt()] <= tabTL[indexMax]) && (indexMax > 0)) {
-                indexMax--;
-            }
-
-            if (getCohort().getAgeNbDt() < getCohort().getSpecies().supAgeOfClass0) {
-                getSimulation().distribTL[species.getIndex()][0][indexMax] += this.getBiomass();   // inferior to ageSupAgeClass0
-            } else {
-                getSimulation().distribTL[species.getIndex()][1][indexMax] += this.getBiomass();   // superior to ageSupAgeClass0
-            }
-
-        }
-    }
-
     /**
      * @return the length
      */

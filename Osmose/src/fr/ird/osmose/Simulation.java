@@ -95,10 +95,6 @@ public class Simulation {
      */
     private Species[] species;
     /*
-     * Output of TL distribution per species
-     */
-    float[][][] distribTL;
-    /*
      * Characteristics of caught schools by species
      */
     float[][] tabSizeCatch, tabNbCatch;
@@ -539,16 +535,7 @@ public class Simulation {
                 //nbSpecies--; Do Nothing
             }
         }
-
-        for (int i = 0; i < species.length; i++) {
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                    if ((year >= getOsmose().timeSeriesStart) && ((TLoutput) || (TLDistriboutput))) {
-                        ((School) species[i].getCohort(j).getSchool(k)).rankTL(getOsmose().tabTL);
-                    }
-                }
-            }
-        }
+        
         //Stage Morgane - 07-2004  output of indicators
         for (int i = 0; i < species.length; i++) {
             if (meanSizeOutput) {
@@ -1825,19 +1812,6 @@ public class Simulation {
             }
         }
 
-        if (TLDistriboutput) {
-            distribTL = new float[species.length][][];
-            for (int i = 0; i < species.length; i++) {
-                distribTL[i] = new float[2][];
-                distribTL[i][0] = new float[getOsmose().nbTLClass];    // age 0
-                distribTL[i][1] = new float[getOsmose().nbTLClass];    // without age 0
-                for (int j = 0; j < getOsmose().nbTLClass; j++) {
-                    distribTL[i][0][j] = 0;
-                    distribTL[i][1][j] = 0;
-                }
-            }
-        }
-
         if (dietsOutput) {
             initDietFile();
             initPredatorPressureFile();
@@ -1979,9 +1953,6 @@ public class Simulation {
                     saveDietperTime(timeSaving, dietsMatrix, nbStomachs);
                     savePredatorPressureperTime(timeSaving, predatorsPressureMatrix, biomPerStage);
                 }
-                if (TLDistriboutput) {
-                    saveTLDistperTime(timeSaving, distribTL);
-                }
 
                 for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
                     if (calibration) {
@@ -2008,12 +1979,6 @@ public class Simulation {
                                 dietsMatrix[i][s][j][0] = 0f;
                                 predatorsPressureMatrix[i][s][j][0] = 0f;
                             }
-                        }
-                    }
-                    if (TLDistriboutput) {
-                        for (int j = 0; j < getOsmose().nbTLClass; j++) {
-                            distribTL[i][0][j] = 0;
-                            distribTL[i][1][j] = 0;
                         }
                     }
                 } // end clearing loop over species
