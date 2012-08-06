@@ -126,6 +126,7 @@ public class Osmose {
     int[][] mapCoordi, mapCoordj;      //    coord of maps [numMap][cell]
     float[][] mapProbaPresence; // Probability of presence of a cohort [numMap][cell]
     boolean densityMaps;
+    ConnectivityMatrix[] connectivityMatrix;
     /*
      * COASTLINE
      */
@@ -1751,6 +1752,15 @@ public class Osmose {
                     readAreaCSV(st);
                 }
                 simulation.randomDistribution = false;
+            } else if (areaDistribMethod.equalsIgnoreCase("connectivity")) {
+                /*
+                 * Distribution from connectivity matrix defined in separated
+                 * CSV files
+                 */
+                if (numSimu == 0) {
+                    readConnectivity(st);
+                }
+                simulation.randomDistribution = false;
             } else {
                 /*
                  * Error in 1st entry of area file
@@ -1770,6 +1780,77 @@ public class Osmose {
          * Initial distribution of the scools
          */
         simulation.distributeSpeciesIni();
+    }
+
+    private void readConnectivity(StreamTokenizer st) throws IOException {
+        /*
+         * get number of maps
+         */
+        st.nextToken();
+        int nbMaps = new Integer(st.sval).intValue();
+        /*
+         * initialize arrays
+         */
+        mapCoordi = new int[nbMaps][];
+        mapCoordj = new int[nbMaps][];
+        connectivityMatrix = new ConnectivityMatrix[nbMaps];
+        areasNumSpForMap = new int[nbMaps];
+        areasTempAge = new int[nbMaps][];
+        areasTempDt = new int[nbMaps][];
+        numMap = new int[nbSpeciesTab[numSerie]][][];
+        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            Species speci = simulation.getSpecies(i);
+            numMap[i] = new int[speci.getNumberCohorts()][];
+            for (int j = 0; j < speci.getNumberCohorts(); j++) {
+                numMap[i][j] = new int[nbDtMatrix[numSerie]];
+            }
+        }
+        /*
+         * Loop over the maps
+         */
+        for (int indexMap = 0; indexMap < nbMaps; indexMap++) {
+            /*
+             * read species number
+             */
+            st.nextToken();
+            areasNumSpForMap[indexMap] = new Integer(st.sval).intValue() - 1;   //because species number between 1 and nbSpecies
+            /*
+             * read number of class ages concerned by this map
+             */
+            st.nextToken();
+            int nbAgePerMap = new Integer(st.sval).intValue();
+            areasTempAge[indexMap] = new int[nbAgePerMap];
+            /*
+             * read number of time step over the year concerned by this map
+             */
+            st.nextToken();
+            int nbDtPerMap = new Integer(st.sval).intValue();
+            areasTempDt[indexMap] = new int[nbDtPerMap];
+            /*
+             * read the age classes concerned by this map
+             */
+            for (int k = 0; k < nbAgePerMap; k++) {
+                st.nextToken();
+                areasTempAge[indexMap][k] = new Integer(st.sval).intValue();
+            }
+            /*
+             * read the time steps over the year concerned by this map
+             */
+            for (int k = 0; k < nbDtPerMap; k++) {
+                st.nextToken();
+                areasTempDt[indexMap][k] = new Integer(st.sval).intValue() - 1;
+            }
+            /*
+             * Read the name of the connectivity file and load the matrix If
+             * name = "null" it means the species is out of the simulated domain
+             * at these age-class and time-step
+             */
+            st.nextToken();
+            if (!"null".equals(st.sval)) {
+                String csvFile = resolveFile(st.sval);
+                connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
+            }
+        }
     }
 
     private void readAreaCSV(StreamTokenizer st) throws IOException {
