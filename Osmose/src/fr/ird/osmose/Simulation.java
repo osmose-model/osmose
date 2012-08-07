@@ -151,20 +151,18 @@ public class Simulation {
         }
     }
 
-    private int getRatioMPA() {
-        int ratio = 0;
+    private void setupMPA() {
         if ((getOsmose().thereIsMPATab[numSerie]) && (year == getOsmose().MPAtStartTab[numSerie])) {
-            ratio = getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
+            RS = (double) getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
             for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
                 getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(true);
             }
         } else if ((!getOsmose().thereIsMPATab[numSerie]) || (year > getOsmose().MPAtEndTab[numSerie])) {
-            ratio = 0;
+            RS = 0;
             for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
                 getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(false);
             }
         }
-        return ratio;
     }
 
     private void clearNbDeadArrays() {
@@ -497,7 +495,7 @@ public class Simulation {
         Indicators.reset();
 
         // Calculation of relative size of MPA
-        RS = getRatioMPA();
+        setupMPA();
 
         // Loop over the year
         while (indexTime < nbTimeStepsPerYear) {
