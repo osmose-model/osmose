@@ -49,21 +49,21 @@ public class Indicators {
             // Yields
             monitorYields();
             // Mean size
-            if (getSimulation().meanSizeOutput) {
+            if (getOsmose().isMeanSizeOutput()) {
                 monitorMeanSizes();
             }
-            if (getSimulation().sizeSpectrumOutput) {
+            if (getOsmose().isSizeSpectrumOutput() || getOsmose().isSizeSpectrumSpeciesOutput()) {
                 monitorSizeSpectrum();
             }
             // Trophic level
-            if (getSimulation().TLoutput) {
+            if (getOsmose().isTLOutput()) {
                 monitorMeanTL();
             }
-            if (getSimulation().TLDistriboutput) {
+            if (getOsmose().isTLDistribOutput()) {
                 monitorTLDistribution();
             }
             // Diets
-            if (getSimulation().dietsOutput) {
+            if (getOsmose().isDietOuput()) {
                 monitorPredation();
             }
             //
@@ -71,22 +71,22 @@ public class Indicators {
             if (((index + 1) % nStepsRecord) == 0) {
                 float time = getSimulation().getYear() + (getSimulation().getIndexTime() + 1f) / (float) nStepsYear;
                 // Mean size
-                if (getSimulation().meanSizeOutput) {
+                if (getOsmose().isMeanSizeOutput()) {
                     writeMeanSizes(time);
                 }
                 // Size spectrum
-                if (getSimulation().sizeSpectrumOutput) {
+                if (getOsmose().isSizeSpectrumOutput()) {
                     writeSizeSpectrum(time);
                 }
                 // Trophic level
-                if (getSimulation().TLoutput) {
+                if (getOsmose().isTLOutput()) {
                     writeMeanTL(time);
                 }
-                if (getSimulation().TLDistriboutput) {
+                if (getOsmose().isTLDistribOutput()) {
                     writeTLDistribution(time);
                 }
                 // Diets
-                if (getSimulation().dietsOutput) {
+                if (getOsmose().isDietOuput()) {
                     writeDiet(time);
                     writePredatorPressure(time);
                 }
@@ -107,7 +107,7 @@ public class Indicators {
         // biomass & abundance
         biomassNoJuv = new double[nSpec];
         abundanceNoJuv = new double[nSpec];
-        if (getSimulation().outputClass0 || getSimulation().calibration) {
+        if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
             biomassTot = new double[nSpec];
             abundanceTot = new double[nSpec];
         }
@@ -122,21 +122,21 @@ public class Indicators {
         yield = new double[nSpec];
         yieldN = new double[nSpec];
         // size
-        if (getSimulation().meanSizeOutput) {
+        if (getOsmose().isMeanSizeOutput()) {
             meanSize = new double[nSpec];
             meanSizeCatch = new double[nSpec];
         }
-        if (getSimulation().sizeSpectrumOutput || getSimulation().sizeSpectrumPerSpeOutput) {
+        if (getOsmose().isSizeSpectrumOutput() || getOsmose().isSizeSpectrumSpeciesOutput()) {
             sizeSpectrum = new double[nSpec][getOsmose().tabSizes.length];
         }
         // Trophic level
-        if (getSimulation().TLoutput) {
+        if (getOsmose().isTLOutput()) {
             meanTL = new double[nSpec];
             distribTL = new double[nSpec][getOsmose().tabTL.length];
             tabTLCatch = new double[nSpec];
         }
         // Diets
-        if (getSimulation().dietsOutput) {
+        if (getOsmose().isDietOuput()) {
             diet = new double[nSpec][][][];
             predatorPressure = new double[nSpec][][][];
             nbStomachs = new double[nSpec][];
@@ -166,7 +166,7 @@ public class Indicators {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
             for (int j = 0; j < species.getNumberCohorts(); j++) {
-                if (getSimulation().outputClass0 || getSimulation().calibration) {
+                if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
                     biomassTot[i] += species.getCohort(j).getBiomass();
                     abundanceTot[i] += species.getCohort(j).getAbundance();
                 }
@@ -367,7 +367,7 @@ public class Indicators {
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
         int nSpec = getSimulation().getNbSpecies();
-        int dtRecord = getSimulation().getRecordFrequency();
+        int dtRecord = getOsmose().getRecordFrequency();
 
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
@@ -500,7 +500,7 @@ public class Indicators {
                 pr.print((getOsmose().tabTL[iTL]));
                 pr.print(';');
                 for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
-                    pr.print((float) (distribTL[iSpec][iTL] / getSimulation().getRecordFrequency()));
+                    pr.print((float) (distribTL[iSpec][iTL] / getOsmose().getRecordFrequency()));
                     pr.print(';');
                 }
                 pr.println();
@@ -525,7 +525,7 @@ public class Indicators {
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
 
-        if (getSimulation().sizeSpectrumOutput) {
+        if (getOsmose().isSizeSpectrumOutput()) {
             filename = new StringBuilder("SizeIndicators");
             filename.append(File.separatorChar);
             filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
@@ -562,7 +562,7 @@ public class Indicators {
                     pr.print((getOsmose().tabSizes[iSize]));
                     pr.print(';');
                     for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
-                        sum += sizeSpectrum[iSpec][iSize] / getSimulation().getRecordFrequency();
+                        sum += sizeSpectrum[iSpec][iSize] / getOsmose().getRecordFrequency();
                     }
                     pr.print((float) sum);
                     pr.print(';');
@@ -583,7 +583,7 @@ public class Indicators {
             }
         }
 
-        if (getSimulation().sizeSpectrumPerSpeOutput) {
+        if (getOsmose().isSizeSpectrumSpeciesOutput()) {
             filename = new StringBuilder("SizeIndicators");
             filename.append(File.separatorChar);
             filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
@@ -617,7 +617,7 @@ public class Indicators {
                     pr.print((getOsmose().tabSizes[iSize]));
                     pr.print(';');
                     for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
-                        pr.print((float) (sizeSpectrum[iSpec][iSize] / getSimulation().getRecordFrequency()));
+                        pr.print((float) (sizeSpectrum[iSpec][iSize] / getOsmose().getRecordFrequency()));
                         pr.print(';');
                     }
                     pr.println();
@@ -859,7 +859,7 @@ public class Indicators {
         int year = getSimulation().getYear();
         int indexSaving = (int) (getSimulation().getIndexTime() / nsteps);
         for (int i = 0; i < nSpec; i++) {
-            if (getSimulation().outputClass0 || getSimulation().calibration) {
+            if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
                 abundanceTot[i] = Math.floor(abundanceTot[i] / nsteps);
                 biomassTot[i] /= nsteps;
             }
@@ -867,7 +867,7 @@ public class Indicators {
             biomassNoJuv[i] /= nsteps;
         }
 
-        if (getSimulation().calibration) {
+        if (getOsmose().isCalibrationOutput()) {
             for (int i = 0; i < nSpec; i++) {
                 getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassNoJuv[i];
                 getOsmose().BIOMQuadri[getOsmose().numSimu][i][1][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassTot[i];
@@ -883,7 +883,7 @@ public class Indicators {
         filename.append(".csv");
         writeVariable(time, biomassNoJuv, filename.toString(), "Mean biomass (tons), excluding first ages specified in input (typically in calibration file)");
 
-        if (getSimulation().outputClass0) {
+        if (getOsmose().isIncludeClassZero()) {
 
             filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
             filename.append("_biomass-total_Simu");

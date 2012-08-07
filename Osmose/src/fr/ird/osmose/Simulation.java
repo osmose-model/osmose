@@ -72,10 +72,6 @@ public class Simulation {
      */
     private int nbTimeStepsPerYear;
     /*
-     * Record frequency
-     */
-    private int recordFrequency;
-    /*
      * Random distribution of the schools in the grid
      */
     boolean randomDistribution = true;
@@ -106,19 +102,6 @@ public class Simulation {
     boolean targetFishing;
     double RS;		//ratio between mpa and total grid surfaces, RS for Relative Size of MPA
     FileOutputStream dietTime, biomTime, abdTime, TLDistTime, yieldTime, nbYieldTime, meanSizeTime, meanTLTime, SSperSpTime;
-//	*******Trophodynamics indicators
-    boolean TLoutput;
-    boolean TLDistriboutput;
-    boolean dietsOutput;
-    String dietMetric;
-//	*******Size-based indicators
-    boolean meanSizeOutput;
-    boolean sizeSpectrumOutput;
-    boolean sizeSpectrumPerSpeOutput;
-//	*******Mortalities data
-    boolean planktonMortalityOutput;
-    boolean outputClass0;
-    boolean calibration;
 
     public void init() {
 
@@ -126,17 +109,6 @@ public class Simulation {
         indexTime = 0;
         numSerie = getOsmose().numSerie;
         nbTimeStepsPerYear = getOsmose().nbDtMatrix[numSerie];
-        recordFrequency = getOsmose().savingDtMatrix[numSerie];
-        calibration = getOsmose().calibrationMatrix[numSerie];
-        TLoutput = getOsmose().TLoutputMatrix[numSerie];
-        TLDistriboutput = getOsmose().TLDistriboutputMatrix[numSerie];
-        dietsOutput = getOsmose().dietsOutputMatrix[numSerie];
-        dietMetric = getOsmose().dietOutputMetrics[numSerie];
-        meanSizeOutput = getOsmose().meanSizeOutputMatrix[numSerie];
-        sizeSpectrumOutput = getOsmose().sizeSpectrumOutputMatrix[numSerie];
-        sizeSpectrumPerSpeOutput = getOsmose().sizeSpectrumPerSpeOutputMatrix[numSerie];
-        planktonMortalityOutput = getOsmose().planktonMortalityOutputMatrix[numSerie];
-        outputClass0 = getOsmose().outputClass0Matrix[numSerie];
 
         // Initialise plankton matrix
         iniPlanktonField(getOsmose().isForcing[numSerie]);
@@ -514,11 +486,11 @@ public class Simulation {
     private void updateSpecies() {
         for (int i = 0; i < species.length; i++) {
             species[i].update();
-            if (meanSizeOutput) {
+            if (getOsmose().isMeanSizeOutput()) {
                 species[i].calculSizes();
                 species[i].calculSizesCatch();
             }
-            if ((TLoutput) || (TLDistriboutput)) {
+            if ((getOsmose().isTLOutput()) || (getOsmose().isTLDistribOutput())) {
                 species[i].calculTL();
             }
         }
@@ -976,7 +948,7 @@ public class Simulation {
                             if (ipr < ns) {
                                 School prey = cell.getSchool(ipr);
                                 double biomPrey = prey.adb2biom(nDeadMatrix[ipr][is]);
-                                if (dietsOutput) {
+                                if (getOsmose().isDietOuput()) {
                                     school.dietTemp[prey.getCohort().getSpecies().getIndex()][prey.dietOutputStage] += biomPrey;
                                 }
                                 float TLprey;
@@ -988,7 +960,7 @@ public class Simulation {
                                 school.trophicLevel[school.getCohort().getAgeNbDt()] += TLprey * biomPrey / preyedBiomass;
                             } else {
                                 school.trophicLevel[school.getCohort().getAgeNbDt()] += forcing.getPlankton(ipr - ns).trophicLevel * nDeadMatrix[ipr][is] / preyedBiomass;
-                                if (dietsOutput) {
+                                if (getOsmose().isDietOuput()) {
                                     school.dietTemp[getNbSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
                                 }
                             }
@@ -1105,7 +1077,7 @@ public class Simulation {
                         if ((getYear()) >= getOsmose().timeSeriesStart) {
                             species[i].yield += school.adb2biom(school.nDeadFishing);
                             species[i].yieldN += school.nDeadFishing;
-                            if (TLoutput) {
+                            if (getOsmose().isTLOutput()) {
                                 species[i].tabTLCatch += school.trophicLevel[cohort.getAgeNbDt()] * school.adb2biom(school.nDeadFishing);
                             }
                         }
@@ -1873,10 +1845,6 @@ public class Simulation {
 
     public int getIndexTime() {
         return indexTime;
-    }
-
-    public int getRecordFrequency() {
-        return recordFrequency;
     }
 
     public static void shuffleArray(int[] a) {

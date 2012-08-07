@@ -313,13 +313,13 @@ public class School {
 
         dietOutputStage = 0;
 
-        if (getSimulation().dietMetric.equalsIgnoreCase("size")) {
+        if (getOsmose().getDietOutputMetric().equalsIgnoreCase("size")) {
             for (int i = 1; i < nbStages; i++) {
                 if (getLength() >= thresholdTab[i - 1]) {
                     dietOutputStage++;
                 }
             }
-        } else if (getSimulation().dietMetric.equalsIgnoreCase("age")) {
+        } else if (getOsmose().getDietOutputMetric().equalsIgnoreCase("age")) {
             for (int i = 1; i < nbStages; i++) {
                 int tempAge = Math.round(thresholdTab[i - 1] * getSimulation().getNbTimeStepsPerYear());
                 if (getLength() >= tempAge) {
@@ -330,7 +330,7 @@ public class School {
     }
 
     public void updateDietVariables() {
-        if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
+        if ((getOsmose().isDietOuput()) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     sumDiet += dietTemp[i][s];

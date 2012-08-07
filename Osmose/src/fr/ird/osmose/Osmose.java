@@ -3387,4 +3387,48 @@ public class Osmose {
         initializeOutputData();
         readMigrationFile();
     }
+
+    public int getRecordFrequency() {
+        return savingDtMatrix[numSerie];
+    }
+
+    public boolean isCalibrationOutput() {
+        return calibrationMatrix[numSerie];
+    }
+
+    public boolean isTLOutput() {
+        return TLoutputMatrix[numSerie];
+    }
+
+    public boolean isTLDistribOutput() {
+        return TLDistriboutputMatrix[numSerie];
+    }
+
+    public boolean isDietOuput() {
+        return dietsOutputMatrix[numSerie];
+    }
+
+    public boolean isMeanSizeOutput() {
+        return meanSizeOutputMatrix[numSerie];
+    }
+
+    public boolean isSizeSpectrumOutput() {
+        return sizeSpectrumOutputMatrix[numSerie];
+    }
+
+    public boolean isSizeSpectrumSpeciesOutput() {
+        return sizeSpectrumPerSpeOutputMatrix[numSerie];
+    }
+
+    public boolean isPlanktonMortalityOutput() {
+        return planktonMortalityOutputMatrix[numSerie];
+    }
+    
+    public boolean isIncludeClassZero() {
+        return outputClass0Matrix[numSerie];
+    }
+    
+    public String getDietOutputMetric() {
+        return dietOutputMetrics[numSerie];
+    }
 }
