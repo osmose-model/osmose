@@ -329,7 +329,7 @@ public class School {
         }
     }
 
-    public void updateDietIndicators() {
+    public void updateDietVariables() {
         if ((getSimulation().dietsOutput) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {

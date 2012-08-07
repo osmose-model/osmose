@@ -122,9 +122,6 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         }
         readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[dt]));
         mapInterpolation();
-        if (getSimulation().getYear() >= getOsmose().timeSeriesStart) {
-            saveForDiet();       // save biomass of plankton before predation
-        }
     }
 
     private void readNetCDFFile(String nameOfFile) {

@@ -217,9 +217,6 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         int dtYear = getOsmose().getSimulation().getYear() * getOsmose().getSimulation().getNbTimeStepsPerYear() + dt;
         readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[dtYear / timeDim]), dt);
         mapInterpolation();
-        if (getSimulation().getYear() >= getOsmose().timeSeriesStart) {
-            saveForDiet();       // save biomass of plankton before predation
-        }
     }
 
     private void readNetCDFFile(String name, int dt) {

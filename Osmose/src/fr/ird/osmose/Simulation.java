@@ -14,10 +14,8 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,7 +52,6 @@ public class Simulation {
      * from every mortality source and provides instantaneous mortality rates.
      */
     public static final boolean DEBUG_MORTALITY = false;
-    
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -240,11 +237,20 @@ public class Simulation {
         }
     }
 
-    private void saveBiomassBeforePredation() {
-        /*
-         * save fish biomass before predation process for diets data (last
-         * column of predatorPressure output file in Diets/)
-         */
+    /*
+     * save fish biomass before any mortality process for diets data (last
+     * column of predatorPressure output file in Diets/)
+     */
+    private void saveBiomassBeforeMortality() {
+
+        // reset array
+        for (int i = 0; i < biomPerStage.length; i++) {
+            for (int s = 0; s < biomPerStage[i].length; s++) {
+                biomPerStage[i][s] = 0;
+            }
+        }
+
+        // update biomass
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
@@ -253,6 +259,7 @@ public class Simulation {
                     }
                 }
             }
+            getForcing().saveForDiet();
         }
         if (coupling != null && (year >= coupling.getStartYearLTLModel() - 1)) // save grid of plankton biomass one year before coupling so forcing mode is also saved
         {
@@ -516,27 +523,9 @@ public class Simulation {
         }
     }
 
-    private void updateIndicators() {
+    private void updateSpecies() {
         for (int i = 0; i < species.length; i++) {
             species[i].update();
-            if (species[i].getAbundance() == 0) {
-                /*
-                 * 2011/04/19 phv There is no reason for doing such a thing.
-                 * First, even though the current abundance of a species is
-                 * zero, the Species object is not deleted from the species[]
-                 * array. Secondly, in School.java, the array
-                 * accessibilityMatrix relies on the total number of species and
-                 * doest not seem to handle the fact that nbSpecies might
-                 * change. What I did : deleted the nbSpecies variable. Replaced
-                 * by getNbSpecies() function that returns species.length. I
-                 * keep here a local nbSpecies variable as a reminder.
-                 */
-                //nbSpecies--; Do Nothing
-            }
-        }
-        
-        //Stage Morgane - 07-2004  output of indicators
-        for (int i = 0; i < species.length; i++) {
             if (meanSizeOutput) {
                 species[i].calculSizes();
                 species[i].calculSizesCatch();
@@ -591,7 +580,7 @@ public class Simulation {
             // Preliminary actions before mortality processes
             assessCatchableSchools();
             rankSchoolsSizes();
-            saveBiomassBeforePredation();
+            saveBiomassBeforeMortality();
             clearCatchesIndicators();
             for (School school : getSchools()) {
                 school.resetDietVariables();
@@ -622,7 +611,7 @@ public class Simulation {
             growth();
 
             // Save steps
-            updateIndicators();
+            updateSpecies();
             if (getOsmose().spatializedOutputs[numSerie]) {
                 saveSpatializedStep();
             }
@@ -1118,7 +1107,7 @@ public class Simulation {
                 for (School school : cohort) {
                     cohort.incrementAbundance(school.getAbundance());
                     cohort.incrementBiomass(school.getBiomass());
-                    school.updateDietIndicators();
+                    school.updateDietVariables();
                     if (school.isCatchable() && j >= indexRecruitAge) {
                         cohort.incrementAbundanceCatchable(school.getAbundance());
                         // update fihsing indicators
@@ -1782,31 +1771,6 @@ public class Simulation {
             biomPerStage[i] = new double[1];                  // only & stage per plankton group
             biomPerStage[i][0] = 0;
         }
-
-
-        if (dietsOutput) {
-            predatorsPressureMatrix = new float[species.length][][][];
-            for (int i = 0; i < species.length; i++) {
-                predatorsPressureMatrix[i] = new float[species[i].nbDietStages][][];
-                for (int s = 0; s < species[i].nbDietStages; s++) {
-                    predatorsPressureMatrix[i][s] = new float[species.length + forcing.getNbPlanktonGroups()][];
-                    for (int j = 0; j < species.length; j++) {
-                        predatorsPressureMatrix[i][s][j] = new float[species[j].nbDietStages];
-                        for (int st = 0; st < species[j].nbDietStages; st++) {
-                            predatorsPressureMatrix[i][s][j][st] = 0f;
-                        }
-                    }
-                    for (int j = species.length; j < species.length + forcing.getNbPlanktonGroups(); j++) {
-                        predatorsPressureMatrix[i][s][j] = new float[1];
-                        predatorsPressureMatrix[i][s][j][0] = 0f;
-                    }
-                }
-            }
-        }
-
-        if (dietsOutput) {
-            initPredatorPressureFile();
-        }
     }
 
     public void saveSpatializedStep() {
@@ -1930,144 +1894,23 @@ public class Simulation {
         indexSaving = (int) indexTime / recordFrequency;
 
         if (year >= getOsmose().timeSeriesStart) {
-
             /*
              * Save every 'recordFrequency' steps
              */
             if (((indexTime + 1) % recordFrequency) == 0) {
-                float timeSaving = year + (indexTime + 1f) / (float) nbTimeStepsPerYear;
-
-                if (dietsOutput) {
-                    savePredatorPressureperTime(timeSaving, predatorsPressureMatrix, biomPerStage);
-                }
 
                 for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
                     if (calibration) {
                         getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomPerStage[i][0] / recordFrequency;
                     }
-                    biomPerStage[i][0] = 0;
                 }
 
                 // clear all saving tables
                 for (int i = 0; i < species.length; i++) {
                     tabTLCatch[i] = 0;
-
-                    if (dietsOutput) {
-                        for (int s = 0; s < species[i].nbDietStages; s++) {
-                            biomPerStage[i][s] = 0;
-                            for (int j = 0; j < species.length; j++) {
-                                for (int st = 0; st < species[j].nbDietStages; st++) {
-                                    predatorsPressureMatrix[i][s][j][st] = 0f;
-                                }
-                            }
-                            for (int j = species.length; j < species.length + forcing.getNbPlanktonGroups(); j++) {
-                                predatorsPressureMatrix[i][s][j][0] = 0f;
-                            }
-                        }
-                    }
                 } // end clearing loop over species
-
-
             }   // end loop dtcount=dtSaving
         }
-    }
-
-    public void initPredatorPressureFile() {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String dietFile = getOsmose().outputPrefix[numSerie] + "_predatorPressureMatrix_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, dietFile);
-            dietTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-
-        pr = new PrintWriter(dietTime, true);
-        pr.print("Time");
-        pr.print(';');
-        pr.print("Prey");
-        for (int i = 0; i < species.length; i++) {
-            for (int s = 0; s < species[i].nbDietStages; s++) {
-                pr.print(";");
-                if (species[i].nbDietStages == 1) {
-                    pr.print(species[i].getName());    // Name predators
-                } else {
-                    if (s == 0) {
-                        pr.print(species[i].getName() + " < " + species[i].dietStagesTab[s]);    // Name predators
-                    } else {
-                        pr.print(species[i].getName() + " >" + species[i].dietStagesTab[s - 1]);    // Name predators
-                    }
-                }
-            }
-        }
-        pr.print(";");
-        pr.print("Biomass");
-        pr.println();
-        pr.close();
-    }
-
-    public void savePredatorPressureperTime(float time, float[][][][] diets, double[][] biom) {
-        File targetPath, targetFile;
-        PrintWriter pr;
-        String dietFile = getOsmose().outputPrefix[numSerie] + "_predatorPressureMatrix_Simu" + getOsmose().numSimu + ".csv";
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "Diets");
-        targetPath.mkdirs();
-
-        try {
-            targetFile = new File(targetPath, dietFile);
-            dietTime = new FileOutputStream(targetFile, true);
-        } catch (IOException ie) {
-            System.err.println(ie.getMessage());
-            return;
-        }
-        pr = new PrintWriter(dietTime, true);
-
-
-        for (int j = 0; j < species.length; j++) {
-            for (int st = 0; st < species[j].nbDietStages; st++) {
-                pr.print(time);
-                pr.print(';');
-                if (species[j].nbDietStages == 1) {
-                    pr.print(species[j].getName());    // Name predators
-                } else {
-                    if (st == 0) {
-                        pr.print(species[j].getName() + " < " + species[j].dietStagesTab[st]);    // Name predators
-                    } else {
-                        pr.print(species[j].getName() + " >" + species[j].dietStagesTab[st - 1]);    // Name predators
-                    }
-                }
-                pr.print(";");
-                for (int i = 0; i < species.length; i++) {
-                    for (int s = 0; s < species[i].nbDietStages; s++) {
-                        pr.print(diets[i][s][j][st] / recordFrequency);
-                        pr.print(";");
-                    }
-                }
-                pr.print(biom[j][st] / recordFrequency);
-                pr.println();
-            }
-        }
-        for (int j = species.length; j < (species.length + forcing.getNbPlanktonGroups()); j++) {
-            pr.print(time);
-            pr.print(";");
-            pr.print(forcing.getPlanktonName(j - species.length));
-            pr.print(";");
-            for (int i = 0; i < species.length; i++) {
-                for (int s = 0; s < species[i].nbDietStages; s++) // 4 Stages
-                {
-                    pr.print(diets[i][s][j][0] / recordFrequency);
-                    pr.print(";");
-                }
-            }
-            pr.print(biom[j][0] / recordFrequency);
-            pr.println();
-        }
-        pr.close();
     }
 
     public int getNbSpecies() {

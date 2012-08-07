@@ -486,10 +486,6 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         }
 
         mapInterpolation();      // from LTL grid to Osmose grid
-
-        if (getSimulation().getYear() >= getOsmose().timeSeriesStart) {
-            saveForDiet();       // save biomass of plankton before predation
-        }
     }
 
     @Override

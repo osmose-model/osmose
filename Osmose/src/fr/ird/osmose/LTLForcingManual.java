@@ -109,10 +109,6 @@ public class LTLForcingManual extends AbstractLTLForcing {
         }*/
         updateData(dt);
         mapInterpolation();
-
-        if (getSimulation().getYear() >= getOsmose().timeSeriesStart) {
-            saveForDiet();       // save biomass of plankton before predation
-        }
     }
 
     @Override

@@ -159,9 +159,6 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         String nameTemp = getOsmose().resolveFile(planktonFileListNetcdf[dt]);
         readNetCDFFile(nameTemp);
         mapInterpolation();
-        if (getSimulation().getYear() >= getOsmose().timeSeriesStart) {
-            saveForDiet();       // save biomass of plankton before predation
-        }
     }
 
     private void readNetCDFFile(String nameOfFile) {
