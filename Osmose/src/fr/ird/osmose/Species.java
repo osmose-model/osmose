@@ -68,6 +68,7 @@ public class Species {
     float meanTLSpe;
     float[] meanTLperAge;
     float TLeggs = 3f;
+    float tabTLCatch;
     /*
      * ***************************
      * * Life history parameters *

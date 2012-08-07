@@ -95,13 +95,9 @@ public class Simulation {
      * Characteristics of caught schools by species
      */
     float[][] tabSizeCatch, tabNbCatch;
-    float[] tabTLCatch;
-    // for saving
-    double[][] biomPerStage;
     float tempMaxProbaPresence;
     float[][] accessibilityMatrix;
     int[] nbAccessibilityStages;
-    float[][][][] predatorsPressureMatrix;
     // initialisation param for species abd in function of an input size spectrum
     double a, b;	    //coeff of the relation nb=length^a * expb
     //in Rice : a=-5.8; b=35.5*/
@@ -174,7 +170,6 @@ public class Simulation {
         if (getOsmose().spatializedOutputs[numSerie]) {
             initSpatializedSaving();
         }
-        initSaving();
 
         //Initialisation indicators
         tabSizeCatch = new float[species.length][];
@@ -243,19 +238,12 @@ public class Simulation {
      */
     private void saveBiomassBeforeMortality() {
 
-        // reset array
-        for (int i = 0; i < biomPerStage.length; i++) {
-            for (int s = 0; s < biomPerStage[i].length; s++) {
-                biomPerStage[i][s] = 0;
-            }
-        }
-
         // update biomass
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
             for (int i = 0; i < species.length; i++) {
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                     for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                        biomPerStage[i][((School) species[i].getCohort(j).getSchool(k)).dietOutputStage] += ((School) species[i].getCohort(j).getSchool(k)).getBiomass();
+                        Indicators.biomPerStage[i][((School) species[i].getCohort(j).getSchool(k)).dietOutputStage] += ((School) species[i].getCohort(j).getSchool(k)).getBiomass();
                     }
                 }
             }
@@ -615,7 +603,6 @@ public class Simulation {
             if (getOsmose().spatializedOutputs[numSerie]) {
                 saveSpatializedStep();
             }
-            saveStep();
             Indicators.updateAndWriteIndicators();
 
             // Reproduction
@@ -1097,6 +1084,7 @@ public class Simulation {
             species[i].resetBiomass();
             species[i].yield = 0.d;
             species[i].yieldN = 0.d;
+            species[i].tabTLCatch = 0.f;
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                 Cohort cohort = species[i].getCohort(j);
                 cohort.removeDeadSchools();
@@ -1118,7 +1106,7 @@ public class Simulation {
                             species[i].yield += school.adb2biom(school.nDeadFishing);
                             species[i].yieldN += school.nDeadFishing;
                             if (TLoutput) {
-                                tabTLCatch[i] += school.trophicLevel[cohort.getAgeNbDt()] * school.adb2biom(school.nDeadFishing);
+                                species[i].tabTLCatch += school.trophicLevel[cohort.getAgeNbDt()] * school.adb2biom(school.nDeadFishing);
                             }
                         }
                         iSchool++;
@@ -1749,30 +1737,6 @@ public class Simulation {
 
     }
 
-    public void initSaving() {
-
-        tabTLCatch = new float[species.length];
-        biomPerStage = new double[species.length + forcing.getNbPlanktonGroups()][];
-
-        if (TLoutput) {
-            for (int i = 0; i < species.length; i++) {
-                tabTLCatch[i] = 0;
-            }
-        }
-
-
-        for (int i = 0; i < species.length; i++) {
-            biomPerStage[i] = new double[species[i].nbDietStages];
-            for (int j = 0; j < species[i].nbDietStages; j++) {
-                biomPerStage[i][j] = 0;
-            }
-        }
-        for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
-            biomPerStage[i] = new double[1];                  // only & stage per plankton group
-            biomPerStage[i][0] = 0;
-        }
-    }
-
     public void saveSpatializedStep() {
 
         if (year < getOsmose().timeSeriesStart) {
@@ -1879,38 +1843,6 @@ public class Simulation {
             Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-    }
-
-    public void saveStep() {
-
-        /*
-         * Start saving for year >= timeSeriesStart
-         */
-        if (year < getOsmose().timeSeriesStart) {
-            return;
-        }
-
-        int indexSaving;
-        indexSaving = (int) indexTime / recordFrequency;
-
-        if (year >= getOsmose().timeSeriesStart) {
-            /*
-             * Save every 'recordFrequency' steps
-             */
-            if (((indexTime + 1) % recordFrequency) == 0) {
-
-                for (int i = species.length; i < species.length + forcing.getNbPlanktonGroups(); i++) {
-                    if (calibration) {
-                        getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomPerStage[i][0] / recordFrequency;
-                    }
-                }
-
-                // clear all saving tables
-                for (int i = 0; i < species.length; i++) {
-                    tabTLCatch[i] = 0;
-                } // end clearing loop over species
-            }   // end loop dtcount=dtSaving
-        }
     }
 
     public int getNbSpecies() {

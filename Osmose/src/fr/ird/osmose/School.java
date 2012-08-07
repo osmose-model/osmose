@@ -334,16 +334,14 @@ public class School {
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     sumDiet += dietTemp[i][s];
-                    getSimulation().predatorsPressureMatrix[species.getIndex()][dietOutputStage][i][s] += dietTemp[i][s];
                 }
             }
             for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
                 sumDiet += dietTemp[i][0];
-                getSimulation().predatorsPressureMatrix[species.getIndex()][dietOutputStage][i][0] += dietTemp[i][0];
             }
         }
     }
-    
+
     public void resetDietVariables() {
         sumDiet = 0;
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {

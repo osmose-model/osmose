@@ -17,6 +17,7 @@ public class Indicators {
     // Biomass
     private static double[] biomassTot;
     private static double[] biomassNoJuv;
+    public static double[][] biomPerStage;
     // Abundance
     private static double[] abundanceTot;
     private static double[] abundanceNoJuv;
@@ -27,6 +28,7 @@ public class Indicators {
     // Trophic Level
     private static double[] meanTL;
     private static double[][] distribTL;
+    public static double[] tabTLCatch;
     // Yields
     public static double[] yield, yieldN;
     // Diets
@@ -109,6 +111,13 @@ public class Indicators {
             biomassTot = new double[nSpec];
             abundanceTot = new double[nSpec];
         }
+        biomPerStage = new double[nPrey][];
+        for (int i = 0; i < nSpec; i++) {
+            biomPerStage[i] = new double[getSimulation().getSpecies(i).nbDietStages];
+        }
+        for (int i = nSpec; i < nPrey; i++) {
+            biomPerStage[i] = new double[1];
+        }
         // yield
         yield = new double[nSpec];
         yieldN = new double[nSpec];
@@ -124,6 +133,7 @@ public class Indicators {
         if (getSimulation().TLoutput) {
             meanTL = new double[nSpec];
             distribTL = new double[nSpec][getOsmose().tabTL.length];
+            tabTLCatch = new double[nSpec];
         }
         // Diets
         if (getSimulation().dietsOutput) {
@@ -419,7 +429,7 @@ public class Indicators {
                             pr.print(";");
                         }
                     }
-                    pr.print((float) (getSimulation().biomPerStage[j][st] / dtRecord));
+                    pr.print((float) (biomPerStage[j][st] / dtRecord));
                     pr.println();
                 }
             }
@@ -434,7 +444,7 @@ public class Indicators {
                         pr.print(";");
                     }
                 }
-                pr.print(getSimulation().biomPerStage[j][0] / dtRecord);
+                pr.print(biomPerStage[j][0] / dtRecord);
                 pr.println();
             }
             pr.close();
@@ -696,6 +706,7 @@ public class Indicators {
                 biomass += species.getCohort(j).getBiomass();
             }
             meanTL[i] += species.meanTLSpe * biomass;
+            tabTLCatch[i] += species.tabTLCatch;
         }
     }
 
@@ -716,7 +727,7 @@ public class Indicators {
                 meanTL[i] = 0.f;
             }
             if (yield[i] > 0) {
-                meanTLCatch[i] = getSimulation().tabTLCatch[i] / yield[i];
+                meanTLCatch[i] = tabTLCatch[i] / yield[i];
             } else {
                 meanTLCatch[i] = Double.NaN;
             }
@@ -842,20 +853,27 @@ public class Indicators {
     public static void writeBiomassAndAbundance(float time) {
 
         StringBuilder filename;
+        int nSpec = getSimulation().getNbSpecies();
 
         double nsteps = getOsmose().savingDtMatrix[getOsmose().numSerie];
         int year = getSimulation().getYear();
         int indexSaving = (int) (getSimulation().getIndexTime() / nsteps);
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+        for (int i = 0; i < nSpec; i++) {
             if (getSimulation().outputClass0 || getSimulation().calibration) {
                 abundanceTot[i] = Math.floor(abundanceTot[i] / nsteps);
                 biomassTot[i] /= nsteps;
             }
             abundanceNoJuv[i] = Math.floor(abundanceNoJuv[i] / nsteps);
             biomassNoJuv[i] /= nsteps;
-            if (getSimulation().calibration) {
+        }
+
+        if (getSimulation().calibration) {
+            for (int i = 0; i < nSpec; i++) {
                 getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassNoJuv[i];
                 getOsmose().BIOMQuadri[getOsmose().numSimu][i][1][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassTot[i];
+            }
+            for (int i = nSpec; i < nSpec + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
+                getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) (biomPerStage[i][0] / nsteps);
             }
         }
 

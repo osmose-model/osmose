@@ -492,11 +492,11 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
     public void saveForDiet() // save biomass of plankton before predation
     {
         for (int p = 0; p < nbPlankton; p++) {
-            getSimulation().biomPerStage[getSimulation().getNbSpecies() + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
+            Indicators.biomPerStage[getSimulation().getNbSpecies() + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     if (!getGrid().getCell(i, j).isLand()) {
-                        getSimulation().biomPerStage[getSimulation().getNbSpecies() + p][0] += ((Plankton) planktonList[p]).biomass[i][j];
+                        Indicators.biomPerStage[getSimulation().getNbSpecies() + p][0] += ((Plankton) planktonList[p]).biomass[i][j];
                     }
                 }
             }
