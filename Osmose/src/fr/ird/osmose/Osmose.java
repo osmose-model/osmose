@@ -181,6 +181,7 @@ public class Osmose {
     int[][] areasTempDt;
     int[] areasNumSpForMap;
     String areaDistribMethod;
+    SpatialDistribution spatialDistribution;
     /**
      * Object for creating/writing netCDF files.
      */
@@ -1734,6 +1735,7 @@ public class Osmose {
                  */
                 st.nextToken();
                 speciesAreasSizeTab[numSerie] = (new Integer(st.sval)).intValue();
+                spatialDistribution = SpatialDistribution.RANDOM;
                 distribRandom();
             } else if (areaDistribMethod.equalsIgnoreCase("maps")) {
                 /*
@@ -1743,7 +1745,7 @@ public class Osmose {
                 if (numSimu == 0) {
                     readAreaMAPS(st);
                 }
-                simulation.randomDistribution = false;
+                spatialDistribution = SpatialDistribution.MAPS;
             } else if (areaDistribMethod.equalsIgnoreCase("csv")) {
                 /*
                  * Distribution from CSV Maps are defined in separated CSV files
@@ -1751,7 +1753,7 @@ public class Osmose {
                 if (numSimu == 0) {
                     readAreaCSV(st);
                 }
-                simulation.randomDistribution = false;
+                spatialDistribution = SpatialDistribution.MAPS;
             } else if (areaDistribMethod.equalsIgnoreCase("connectivity")) {
                 /*
                  * Distribution from connectivity matrix defined in separated
@@ -1760,7 +1762,9 @@ public class Osmose {
                 if (numSimu == 0) {
                     readConnectivity(st);
                 }
-                simulation.randomDistribution = false;
+                speciesAreasSizeTab[numSerie] = (int) (0.75 * getGrid().getNumberAvailableCells());
+                distribRandom();
+                spatialDistribution = SpatialDistribution.CONNECTIVITY;
             } else {
                 /*
                  * Error in 1st entry of area file
@@ -1808,6 +1812,7 @@ public class Osmose {
         /*
          * Loop over the maps
          */
+        System.out.println("Loading connectivity matrix... (it might take several minutes)");
         for (int indexMap = 0; indexMap < nbMaps; indexMap++) {
             /*
              * read species number
@@ -1849,8 +1854,21 @@ public class Osmose {
             if (!"null".equals(st.sval)) {
                 String csvFile = resolveFile(st.sval);
                 connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
+                /*
+                 * Set the numero of maps per species, age class and time step
+                 */
+                for (int m = 0; m < areasTempAge[indexMap].length; m++) {
+                    for (int n = 0; n < areasTempDt[indexMap].length; n++) {
+                        for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
+                            if ((areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[indexMap]).getNumberCohorts()) {
+                                numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h][areasTempDt[indexMap][n]] = indexMap;
+                            }
+                        }
+                    }
+                }
             }
         }
+        System.out.println("Connectivity matrix loaded");
     }
 
     private void readAreaCSV(StreamTokenizer st) throws IOException {
@@ -2212,7 +2230,6 @@ public class Osmose {
 
     public void distribRandom() {
 
-        simulation.randomDistribution = true;
         if (numSimu == 0) {
             //creation of randomAreaCoordi and j
             randomAreaCoordi = new int[nbSpeciesTab[numSerie]][];
@@ -3423,12 +3440,19 @@ public class Osmose {
     public boolean isPlanktonMortalityOutput() {
         return planktonMortalityOutputMatrix[numSerie];
     }
-    
+
     public boolean isIncludeClassZero() {
         return outputClass0Matrix[numSerie];
     }
-    
+
     public String getDietOutputMetric() {
         return dietOutputMetrics[numSerie];
+    }
+
+    public enum SpatialDistribution {
+
+        RANDOM,
+        MAPS,
+        CONNECTIVITY;
     }
 }

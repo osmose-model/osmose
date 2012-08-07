@@ -19,8 +19,7 @@ import java.util.logging.Logger;
 public class ConnectivityMatrix {
 
     private int indexMatrix;
-    ConnectivityLine[] clines;
-    int[] indexCells;
+    HashMap<Integer, ConnectivityLine> clines;
 
     public ConnectivityMatrix(int indexMatrix, String csvFile) {
         this.indexMatrix = indexMatrix;
@@ -33,8 +32,7 @@ public class ConnectivityMatrix {
 
     private void readConnectivityFile(String csvFile) {
 
-        clines = new ConnectivityLine[getOsmose().getGrid().getNumberAvailableCells()];
-        indexCells = new int[clines.length];
+        clines = new HashMap();
 
         try {
             /*
@@ -44,15 +42,11 @@ public class ConnectivityMatrix {
             try {
                 String[] line;
                 int index = 0;
-                int i = 0;
                 while ((line = reader.readNext()) != null) {
                     Cell cell = getOsmose().getGrid().getCell(index);
                     if (!cell.isLand()) {
-                        clines[i]  = new ConnectivityLine(cell, line);
-                        indexCells[i] = index;
-                        i++;
+                        clines.put(cell.getIndex(), new ConnectivityLine(cell, line));
                     }
-                    index++;
                 }
 
             } catch (IOException ex) {
