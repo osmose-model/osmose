@@ -87,9 +87,9 @@ public class Simulation {
      */
     private Species[] species;
     /*
-     * Initialisation param for species abd in function of an input size spectrum
-     * Coeff of the relation nb = length^a * exp(b)
-     * In Rice : a=-5.8; b=35.5
+     * Initialisation param for species abd in function of an input size
+     * spectrum Coeff of the relation nb = length^a * exp(b) In Rice : a=-5.8;
+     * b=35.5
      */
     double a, b;
     /*
@@ -877,6 +877,13 @@ public class Simulation {
             }
         }
 
+        // Save abundances before any mortality applies
+        // for computing mortality rates later on.
+        for (Species spe : species) {
+            spe.updateAbundancePerStages();
+        }
+
+        // Loop over cells
         for (Cell cell : getGrid().getCells()) {
             if (!(cell.isLand() || cell.isEmpty())) {
                 int ns = cell.size();
@@ -981,6 +988,11 @@ public class Simulation {
                     }
                 }
             }
+        }
+
+        // Compute mortality rates
+        for (Species spe : species) {
+            spe.computeMortalityRates();
         }
 
         if (DEBUG_MORTALITY) {

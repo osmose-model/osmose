@@ -1,6 +1,7 @@
 package fr.ird.osmose;
 
-/********************************************************************************
+/**
+ * ******************************************************************************
  * <p>Titre : Species class</p>
  *
  * <p>Description : groups species specificities - biological processes </p>
@@ -11,7 +12,7 @@ package fr.ird.osmose;
  *
  * @author Yunne Shin, Morgane Travers
  * @version 2.1
- ******************************************************************************** 
+ * *******************************************************************************
  */
 import fr.ird.osmose.util.SchoolLengthComparator;
 import java.util.ArrayList;
@@ -25,8 +26,7 @@ public class Species {
 ///////////////////////////////
     /*
      * ******************************
-     * * Description of the species *
-     * ******************************
+     * * Description of the species * ******************************
      */
     /*
      * Index of the species [0 : numberTotalSpecies - 1]
@@ -49,15 +49,14 @@ public class Species {
      */
     private Cohort[] tabCohorts;
     /*
-     * Number of the cohorts = (int) Math.round((longevity + 1) * simulation.getNbTimeSteps()
+     * Number of the cohorts = (int) Math.round((longevity + 1) *
+     * simulation.getNbTimeSteps()
      */
     private int nbCohorts;
     /*
      * **************
-     * * Indicators *
-     * **************
-     * MORGANE 07-2004
-     * Those attributes are used for the calculation of indicators.
+     * * Indicators * ************** MORGANE 07-2004 Those attributes are used
+     * for the calculation of indicators.
      */
     int nbSchoolsTotCatch;	//nb of schools fished per species
     int[] cumulCatch;           //dim of 3 tables=nbSchoolsTotCatch
@@ -71,8 +70,7 @@ public class Species {
     float tabTLCatch;
     /*
      * ***************************
-     * * Life history parameters *
-     * ***************************
+     * * Life history parameters * ***************************
      */
     float D;//D0;		//mortality rates year-1
     float F;
@@ -108,9 +106,16 @@ public class Species {
     private int ageMeanIn;
     // yield
     double yield, yieldN;
+    /*
+     * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
+     * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
+     */
+    double[][] nDead, mortalityRate;
+    double[] abundanceStage;
 
     /**
      * Create a new species
+     *
      * @param number, an integer, the number of the species {1 : nbTotSpecies}
      */
     public Species(int number) {
@@ -118,7 +123,7 @@ public class Species {
     }
 
     /*
-     * Initialize the parameters of the species 
+     * Initialize the parameters of the species
      */
     public void init() {
 
@@ -162,9 +167,8 @@ public class Species {
             this.nbDietStages = getOsmose().nbDietsStages[numSerie][index];
         }
         /*
-         * phv 2011/11/21
-         * Added new parameters for species reproducing outside the simulated
-         * area.
+         * phv 2011/11/21 Added new parameters for species reproducing outside
+         * the simulated area.
          */
         this.reproduceLocally = getOsmose().reproduceLocallyTab[numSerie][index];
         this.biomassFluxIn = getOsmose().biomassFluxInTab[numSerie][index];
@@ -246,7 +250,7 @@ public class Species {
     public School getSchool(int classAge, int indexSchool) {
         return tabCohorts[classAge].getSchool(indexSchool);
     }
-    
+
     public List<School> getSchools() {
         List<School> schools = new ArrayList();
         for (Cohort cohort : getCohorts()) {
@@ -287,6 +291,71 @@ public class Species {
         biomass += incr;
     }
 
+    public void updateAbundancePerStages() {
+        abundanceStage = new double[3];
+        // Eggs & larvae
+        for (School school : tabCohorts[0]) {
+            abundanceStage[0] += school.getAbundance();
+        }
+        // Pre-recruits
+        int indexRecruitAge = Math.round(recruitAge * getSimulation().getNbTimeStepsPerYear());
+        for (int j = 1; j < indexRecruitAge; j++) {
+            for (School school : tabCohorts[j]) {
+                abundanceStage[1] += school.getAbundance();
+            }
+        }
+        // Recruits
+        for (int j = indexRecruitAge; j < tabCohorts.length; j++) {
+            for (School school : tabCohorts[j]) {
+                abundanceStage[2] += school.getAbundance();
+            }
+        }
+    }
+
+    public void computeMortalityRates() {
+        mortalityRate = new double[4][3];
+        nDead = new double[4][3];
+        // Update number od deads
+        // Eggs & larvae
+        for (School school : tabCohorts[0]) {
+            nDead[0][0] += school.nDeadPredation;
+            nDead[1][0] += school.nDeadStarvation;
+            nDead[2][0] += school.nDeadNatural;
+            nDead[3][0] += school.nDeadFishing;
+        }
+        // Pre-recruits
+        int indexRecruitAge = Math.round(recruitAge * getSimulation().getNbTimeStepsPerYear());
+        for (int j = 1; j < indexRecruitAge; j++) {
+            for (School school : tabCohorts[j]) {
+                nDead[0][1] += school.nDeadPredation;
+                nDead[1][1] += school.nDeadStarvation;
+                nDead[2][1] += school.nDeadNatural;
+                nDead[3][1] += school.nDeadFishing;
+            }
+        }
+        // Recruits
+        for (int j = indexRecruitAge; j < tabCohorts.length; j++) {
+            for (School school : tabCohorts[j]) {
+                nDead[0][2] += school.nDeadPredation;
+                nDead[1][2] += school.nDeadStarvation;
+                nDead[2][2] += school.nDeadNatural;
+                nDead[3][2] += school.nDeadFishing;
+            }
+        }
+
+        // Compute total mortality rate
+        for (int iStage = 0; iStage < 3; iStage++) {
+            double nDeadTot = 0;
+            for (int iDeath = 0; iDeath < 4; iDeath++) {
+                nDeadTot += nDead[iDeath][iStage];
+            }
+            double Ftot = Math.log(abundanceStage[iStage] / (abundanceStage[iStage] - nDeadTot));
+            for (int iDeath = 0; iDeath < 4; iDeath++) {
+                mortalityRate[iDeath][iStage] = Ftot * nDead[iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iStage]);
+            }
+        }
+    }
+
     public void growth() {
 
         for (int j = 0; j < nbCohorts; j++) {
@@ -313,9 +382,8 @@ public class Species {
     }
 
     /*
-     * phv 2011/11/22
-     * Created new function for modeling incoming flux of biomass for species
-     * that do not reproduce in the simulated domain.
+     * phv 2011/11/22 Created new function for modeling incoming flux of biomass
+     * for species that do not reproduce in the simulated domain.
      */
     public void incomingFlux() {
         /*
@@ -383,7 +451,7 @@ public class Species {
         }
 
         double nbEggs = sexRatio * alpha * seasonSpawning[getSimulation().getIndexTime()] * SSB * 1000000;
-        
+
         //MAKING COHORTS GOING UP to the UPPER AGE CLASS
         //species, age, caseLeftUpAireCoh, tabCasesAireCoh do not change
         for (int i = nbCohorts - 1; i > 0; i--) {
@@ -416,7 +484,7 @@ public class Species {
     }
 
     public void update() {
-        
+
         //UPDATE ABD and BIOMASS of SPECIES
         abundance = 0;
         biomass = 0;
@@ -448,6 +516,7 @@ public class Species {
 
     /**
      * Sort all the schools of this species according to their length.
+     *
      * @return a List of the Schools of this species sorted by length.
      */
     public List<School> sortSchoolsByLength() {
@@ -501,11 +570,11 @@ public class Species {
     }
 
     public void calculTL() {
-        
+
         float biomWithout0 = 0;
         float abd = 0;
         float sum = 0;
-        
+
         // ********** Calcul of mean trophic level of the species, without age 0
 
         meanTLSpe = 0;
