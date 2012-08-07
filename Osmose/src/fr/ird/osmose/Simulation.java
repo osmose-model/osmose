@@ -14,7 +14,6 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -88,20 +87,19 @@ public class Simulation {
      */
     private Species[] species;
     /*
-     * Characteristics of caught schools by species
+     * Initialisation param for species abd in function of an input size spectrum
+     * Coeff of the relation nb = length^a * exp(b)
+     * In Rice : a=-5.8; b=35.5
      */
-    float[][] tabSizeCatch, tabNbCatch;
-    float tempMaxProbaPresence;
-    float[][] accessibilityMatrix;
-    int[] nbAccessibilityStages;
-    // initialisation param for species abd in function of an input size spectrum
-    double a, b;	    //coeff of the relation nb=length^a * expb
-    //in Rice : a=-5.8; b=35.5*/
-    long[] abdGapSizeClass10;	//tab of abd to fill in 10cm size class
-    long abdIniMin;			//initial min abd of last age class of a species
-    boolean targetFishing;
-    double RS;		//ratio between mpa and total grid surfaces, RS for Relative Size of MPA
-    FileOutputStream dietTime, biomTime, abdTime, TLDistTime, yieldTime, nbYieldTime, meanSizeTime, meanTLTime, SSperSpTime;
+    double a, b;
+    /*
+     * Initial min abd of last age class of a species
+     */
+    long abdIniMin;
+    /*
+     * Ratio between MPA and total grid surfaces, RS for Relative Size of MPA
+     */
+    double RS;
 
     public void init() {
 
@@ -120,14 +118,6 @@ public class Simulation {
             species[i].init();
         }
 
-        // determine if fishing is species-based or similar for all species
-        targetFishing = false;
-        for (int i = 1; i < species.length; i++) {
-            if (species[i].F != species[0].F) {
-                targetFishing = true;
-            }
-        }
-
         //INITIALISATION of SPECIES ABD ACCORDING TO SIZE SPECTRUM
         if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {
             iniBySpeciesBiomass();
@@ -142,10 +132,6 @@ public class Simulation {
         if (getOsmose().spatializedOutputs[numSerie]) {
             initSpatializedSaving();
         }
-
-        //Initialisation indicators
-        tabSizeCatch = new float[species.length][];
-        tabNbCatch = new float[species.length][];
     }
 
     private IGrid getGrid() {
@@ -459,14 +445,8 @@ public class Simulation {
     private void clearCatchesIndicators() {
         //Initialisation of indicators tables
         for (int i = 0; i < species.length; i++) {
-            tabSizeCatch[i] = new float[species[i].nbSchoolsTotCatch];
-            tabNbCatch[i] = new float[species[i].nbSchoolsTotCatch];
-        }
-        for (int i = 0; i < species.length; i++) {
-            for (int s = 0; s < species[i].nbSchoolsTotCatch; s++) {
-                tabSizeCatch[i][s] = 0;
-                tabNbCatch[i][s] = 0;
-            }
+            species[i].sizeSchoolCatch = new float[species[i].nbSchoolsTotCatch];
+            species[i].nSchoolCatch = new float[species[i].nbSchoolsTotCatch];
         }
     }
 
@@ -1072,8 +1052,8 @@ public class Simulation {
                         cohort.incrementAbundanceCatchable(school.getAbundance());
                         // update fihsing indicators
                         cohort.nbDeadFf += school.nDeadFishing;
-                        tabNbCatch[i][iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] += school.nDeadFishing;
-                        tabSizeCatch[i][iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] = school.getLength();
+                        species[i].nSchoolCatch[iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] += school.nDeadFishing;
+                        species[i].sizeSchoolCatch[iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] = school.getLength();
                         if ((getYear()) >= getOsmose().timeSeriesStart) {
                             species[i].yield += school.adb2biom(school.nDeadFishing);
                             species[i].yieldN += school.nDeadFishing;
@@ -1382,7 +1362,7 @@ public class Simulation {
                     if (!species[i].getCohort(j).isOut(0)) // 0=at the first time step
                     {
                         List<Cell> cells = new ArrayList(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]].length);
-                        tempMaxProbaPresence = 0;
+                        float tempMaxProbaPresence = 0;
                         for (int m = 0; m < getOsmose().mapCoordi[getOsmose().numMap[i][j][0]].length; m++) {
                             cells.add(getGrid().getCell(getOsmose().mapCoordi[getOsmose().numMap[i][j][0]][m], getOsmose().mapCoordj[getOsmose().numMap[i][j][0]][m]));
                             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][0]][m]));
@@ -1449,7 +1429,7 @@ public class Simulation {
                 }
 
                 List<Cell> cellsCohort0 = new ArrayList(getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])].length);
-                tempMaxProbaPresence = 0;
+                float tempMaxProbaPresence = 0;
                 for (int j = 0; j < getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])].length; j++) {
                     cellsCohort0.add(getGrid().getCell(getOsmose().mapCoordi[(getOsmose().numMap[i][0][indexTime])][j], getOsmose().mapCoordj[(getOsmose().numMap[i][0][indexTime])][j]));
                     tempMaxProbaPresence = Math.max(tempMaxProbaPresence, getOsmose().mapProbaPresence[getOsmose().numMap[i][0][indexTime]][j]);

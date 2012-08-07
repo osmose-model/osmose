@@ -61,7 +61,7 @@ public class Species {
      */
     int nbSchoolsTotCatch;	//nb of schools fished per species
     int[] cumulCatch;           //dim of 3 tables=nbSchoolsTotCatch
-    float[] nbSchoolCatch;	//fished schools sorted according to their size
+    float[] nSchoolCatch;	//fished schools sorted according to their size
     float[] sizeSchoolCatch;
     float meanSize;	//mean size per species in the ecosystem
     float meanSizeCatch;	//mean size per species in catches
@@ -485,12 +485,6 @@ public class Species {
     //---------------MORGANE  07-2004
     //same as previously, but for fished schools
     public void calculSizesCatch() {
-        nbSchoolCatch = new float[nbSchoolsTotCatch];
-        sizeSchoolCatch = new float[nbSchoolsTotCatch];
-        for (int k = 0; k < nbSchoolsTotCatch; k++) {
-            nbSchoolCatch[k] = getSimulation().tabNbCatch[index][k];
-            sizeSchoolCatch[k] = getSimulation().tabSizeCatch[index][k];
-        }
 
         //Calculation of mean size per species
         float abdCatch;
@@ -498,8 +492,8 @@ public class Species {
         float sumCatch = 0;
         abdCatch = 0;
         for (int j = 0; j < nbSchoolsTotCatch; j++) {
-            sumCatch += nbSchoolCatch[j] * sizeSchoolCatch[j];
-            abdCatch += nbSchoolCatch[j];
+            sumCatch += nSchoolCatch[j] * sizeSchoolCatch[j];
+            abdCatch += nSchoolCatch[j];
         }
         if (abdCatch != 0) {
             meanSizeCatch = sumCatch / abdCatch;
