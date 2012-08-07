@@ -25,6 +25,13 @@ public interface IGrid {
      * @return Cell(i, j)
      */
     public Cell getCell(int i, int j);
+    
+    /**
+     * Get the grid cell at index
+     * @param index of the cell
+     * @return Cell(index)
+     */
+    public Cell getCell(int index);
 
     /**
      * Get a list of the cells.

@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package fr.ird.osmose;
 
 import java.util.ArrayList;
@@ -78,6 +77,7 @@ public abstract class AbstractGrid implements IGrid {
 
     /**
      * Get the grid cell at index (i, j)
+     *
      * @param i, index i of the cell
      * @param j, index j of the cell
      * @return Cell(i, j)
@@ -87,8 +87,16 @@ public abstract class AbstractGrid implements IGrid {
         return matrix[i][j];
     }
 
+    @Override
+    public Cell getCell(int index) {
+        int i = index / nbColumns;
+        int j = index - i * nbColumns;
+        return matrix[i][j];
+    }
+
     /**
      * Get a list of the cells.
+     *
      * @return a List<Cell> of the cells.
      */
     @Override
@@ -104,19 +112,14 @@ public abstract class AbstractGrid implements IGrid {
 
     /**
      * Get the adjacent cells of a given cell. Cells are randomly sorted.
-     * @see Collections.shuffle()
-     * For cell(i, j) returns 8 surrounding cells:
-     * cell(i - 1, j - 1)
-     * cell(i - 1, j)
-     * cell(i - 1, j + 1)
-     * cell(i, j - 1)
-     * cell(i, j + 1)
-     * cell(i + 1, j - 1)
-     * cell(i + 1, j)
-     * cell(i + 1, j + 1)
-     * For cells at the edge of the grid, only returns 3 or 5 cells.
+     *
+     * @see Collections.shuffle() For cell(i, j) returns 8 surrounding cells:
+     * cell(i - 1, j - 1) cell(i - 1, j) cell(i - 1, j + 1) cell(i, j - 1)
+     * cell(i, j + 1) cell(i + 1, j - 1) cell(i + 1, j) cell(i + 1, j + 1) For
+     * cells at the edge of the grid, only returns 3 or 5 cells.
      * @param cell
-     * @return an ArrayList of the cells surrounding <code>cell</code>
+     * @return an ArrayList of the cells surrounding
+     * <code>cell</code>
      */
     @Override
     public ArrayList<Cell> getNeighborCells(Cell cell) {
@@ -134,7 +137,9 @@ public abstract class AbstractGrid implements IGrid {
             }
         }
         neighbors.remove(cell);
-        /* Random sorting of the adjacent cells */
+        /*
+         * Random sorting of the adjacent cells
+         */
         Collections.shuffle(neighbors);
         return neighbors;
     }
@@ -157,14 +162,14 @@ public abstract class AbstractGrid implements IGrid {
     }
 
     /**
-     * Computes longMin, latMin, longMax, latMax.
-     * Computes the dimension of a cell, assuming that we work in a regular grid
+     * Computes longMin, latMin, longMax, latMax. Computes the dimension of a
+     * cell, assuming that we work in a regular grid
      */
     private void getDimGeogArea() {
 
-        /* Set nbLines and nbColumns
-         * Useless for Osmose grid since it is a parameter given by the user
-         * But has to be done for the Netcdf grids.
+        /*
+         * Set nbLines and nbColumns Useless for Osmose grid since it is a
+         * parameter given by the user But has to be done for the Netcdf grids.
          */
         nbLines = matrix.length;
         setNbColumns(matrix[0].length);
@@ -212,7 +217,9 @@ public abstract class AbstractGrid implements IGrid {
             setLatMax(float_tmp);
         }
 
-        /* size of a cell */
+        /*
+         * size of a cell
+         */
         dLat = (latMax - latMin) / (float) nbLines;
         dLong = (longMax - longMin) / (float) nbColumns;
     }
@@ -323,5 +330,4 @@ public abstract class AbstractGrid implements IGrid {
     public void setLongMin(float longMin) {
         this.longMin = longMin;
     }
-
 }

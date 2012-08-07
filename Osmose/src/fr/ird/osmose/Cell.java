@@ -23,7 +23,11 @@ public class Cell extends ArrayList<School> {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-
+    
+    /*
+     * Cell index such as index = j * nColumns + i
+     */
+    private int index;
     /*
      * Grid i-coordinate
      */
@@ -84,6 +88,7 @@ public class Cell extends ArrayList<School> {
     public Cell(int i, int j, float lat, float lon, boolean land) {
         this.i = i;
         this.j = j;
+        index = j * getGrid().getNbColumns() + i;
         this.lat = lat;
         this.lon = lon;
         this.land = land;
@@ -101,6 +106,14 @@ public class Cell extends ArrayList<School> {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
+    /**
+     * 
+     * @return the index of the cell 
+     */
+    public int getIndex() {
+        return index;
+    }
+    
     /**
      * @return the i
      */
@@ -228,6 +241,10 @@ public class Cell extends ArrayList<School> {
      */
     public void sortSchoolsByLength() {
         Collections.sort(this, new SchoolLengthComparator());
+    }
+    
+    final public static IGrid getGrid() {
+        return Osmose.getInstance().getGrid();
     }
     
     @Override
