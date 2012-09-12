@@ -324,7 +324,6 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         for (int p = 0; p < getNbPlanktonGroups(); p++) {
             getPlankton(p).integratedData = data[dt][p];
-            System.out.println(getPlankton(p).getName() + " " + getPlankton(p).integratedData[190][5]);
         }
     }
     
