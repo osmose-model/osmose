@@ -27,23 +27,23 @@ public class Cell extends ArrayList<School> {
     /*
      * Cell index such as index = j * nColumns + i
      */
-    private int index;
+    private final int index;
     /*
      * Grid i-coordinate
      */
-    private int i;
+    private final int i;
     /*
      * Grid j-coordinate
      */
-    private int j;
+    private final int j;
     /*
      * latitude [°N] of the center of the cell
      */
-    private float lat;
+    private final float lat;
     /*
      * Longitude [°E] of the center of cell
      */
-    private float lon;
+    private final float lon;
     /*
      * Whether the cell is inland
      */
@@ -122,24 +122,10 @@ public class Cell extends ArrayList<School> {
     }
 
     /**
-     * @param i the i to set
-     */
-    public void set_igrid(int i) {
-        this.i = i;
-    }
-
-    /**
      * @return the j
      */
     public int get_jgrid() {
         return j;
-    }
-
-    /**
-     * @param j the j to set
-     */
-    public void set_jgrid(int j) {
-        this.j = j;
     }
 
     /**
@@ -150,24 +136,10 @@ public class Cell extends ArrayList<School> {
     }
 
     /**
-     * @param lat the lat to set
-     */
-    public void setLat(float lat) {
-        this.lat = lat;
-    }
-
-    /**
      * @return the lon
      */
     public float getLon() {
         return lon;
-    }
-
-    /**
-     * @param lon the lon to set
-     */
-    public void setLon(float lon) {
-        this.lon = lon;
     }
 
     /**
