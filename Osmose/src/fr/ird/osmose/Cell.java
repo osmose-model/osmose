@@ -88,7 +88,7 @@ public class Cell extends ArrayList<School> {
     public Cell(int i, int j, float lat, float lon, boolean land) {
         this.i = i;
         this.j = j;
-        index = j * getGrid().getNbColumns() + i;
+        index = i * getGrid().getNbColumns() + j;
         this.lat = lat;
         this.lon = lon;
         this.land = land;
