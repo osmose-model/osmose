@@ -47,6 +47,7 @@ public class ConnectivityMatrix {
                     if (!cell.isLand()) {
                         clines.put(cell.getIndex(), new ConnectivityLine(cell, line));
                     }
+                    index++;
                 }
 
             } catch (IOException ex) {
@@ -88,6 +89,7 @@ public class ConnectivityMatrix {
                 if (val > 0) {
                     indexCells[i] = iCell;
                     connectivity[i] = val;
+                    i++;
                 }
             }
         }
