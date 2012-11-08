@@ -5,6 +5,15 @@
 package fr.ird.osmose;
 
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
+import ucar.ma2.DataType;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFileWriteable;
 
 /**
  *
@@ -161,7 +170,18 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     }
 
     @Override
-    public void savePlanktonBiomass() {
+    public void savePlanktonBiomass(String format) {
+        switch (format) {
+            case "csv":
+                savePlanktonBiomassCSV();
+                break;
+            case "netcdf":
+                savePlanktonBiomassNetCDF();
+                break;
+        }
+    }
+
+    public void savePlanktonBiomassCSV() {
         File targetPath;
         File targetFile;
         PrintWriter pr;
@@ -196,6 +216,96 @@ public abstract class AbstractLTLForcing implements LTLForcing {
             pr.println();
         }
         pr.close();
+    }
+
+    private void savePlanktonBiomassNetCDF() {
+
+        int numSerie = getOsmose().numSerie;
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        StringBuilder filename = new StringBuilder("planktonBiomass");
+        filename.append(File.separatorChar);
+        filename.append("Simu");
+        filename.append(numSerie);
+        filename.append(File.separatorChar);
+        filename.append("osm_integrated_Y");
+        filename.append((getSimulation().getYear() + 1));
+        filename.append("S");
+        filename.append((getSimulation().getIndexTime() + 1));
+        filename.append(".nc");
+        File file = new File(path, filename.toString());
+        file.getParentFile().mkdirs();
+
+        // Create NetcdfFileWriteable
+        NetcdfFileWriteable nc = null;
+        try {
+            nc = NetcdfFileWriteable.createNew("");
+            nc.setLocation(file.toString());
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        /*
+         * Create dimensions
+         */
+        Dimension columnsDim = nc.addDimension("xi_rho", getGrid().getNbColumns());
+        Dimension linesDim = nc.addDimension("eta_rho", getGrid().getNbLines());
+        /*
+         * Add variables
+         */
+        nc.addVariable("lon_rho", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
+        nc.addVariableAttribute("lon_rho", "units", "degree");
+        nc.addVariable("lat_rho", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
+        nc.addVariableAttribute("lat_rho", "units", "degree");
+        for (int p = 0; p < nbPlankton; p++) {
+            nc.addVariable(getPlanktonName(p), DataType.DOUBLE, new Dimension[]{linesDim, columnsDim});
+            nc.addVariableAttribute(getPlanktonName(p), "units", "tons/km2");
+        }
+
+        try {
+            /*
+             * Validates the structure of the NetCDF file.
+             */
+            nc.create();
+            /*
+             * Writes variable longitude and latitude
+             */
+            ArrayFloat.D2 arrLon = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
+            ArrayFloat.D2 arrLat = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
+            for (int i = 0; i < getGrid().getNbColumns(); i++) {
+                for (int j = 0; j < getGrid().getNbLines(); j++) {
+                    arrLon.set(j, i, getGrid().getCell(j, i).getLon());
+                    arrLat.set(j, i, getGrid().getCell(j, i).getLat());
+                }
+            }
+            nc.write("lon_rho", arrLon);
+            nc.write("lat_rho", arrLat);
+            /*
+             * Write plankton biomass
+             */
+            //double area = 111.138d * getGrid().getdLat() * 111.138d * getGrid().getdLong();
+            for (int p = 0; p < nbPlankton; p++) {
+                ArrayDouble.D2 arrPlankton = new ArrayDouble.D2(getGrid().getNbLines(), getGrid().getNbColumns());
+                for (int j = 0; j < getGrid().getNbLines(); j++) {
+                    for (int i = 0; i < getGrid().getNbColumns(); i++) {
+                        if (getGrid().getCell(j, i).isLand()) {
+                            arrPlankton.set(j, i, Double.NaN);
+                        } else {
+                            double area = 111f * getGrid().getdLat() * 111f * (float) Math.cos(getGrid().getCell(j, i).getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
+                            arrPlankton.set(j, i, planktonList[p].biomass[j][i] / area);
+                        }
+                    }
+                }
+                nc.write(getPlanktonName(p), arrPlankton);
+            }
+            /*
+             * Close NetCDF
+             */
+            nc.close();
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public int getNbForcingDt() {

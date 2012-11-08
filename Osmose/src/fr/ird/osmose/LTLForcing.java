@@ -17,7 +17,7 @@ public interface LTLForcing {
     public void updatePlankton(int dt);
     public void mapInterpolation();
     public void saveForDiet();
-    public void savePlanktonBiomass();
+    public void savePlanktonBiomass(String fileFormat);
     public int getNbPlanktonGroups();
     public String getPlanktonName(int indexGroup);
     public Plankton getPlankton(int indexGroup);

@@ -749,7 +749,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
     }
 
     @Override
-    public void savePlanktonBiomass() {
+    public void savePlanktonBiomass(String format) {
         File targetPath;
         File targetFile;
         PrintWriter pr;

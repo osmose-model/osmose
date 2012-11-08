@@ -151,7 +151,7 @@ public class Osmose {
     boolean[] TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
             sizeSpectrumOutputMatrix, sizeSpectrumPerSpeOutputMatrix,
             planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix, spatializedOutputs;
-    boolean[] planktonBiomassOutputMatrix;
+    String[] planktonBiomassOutputMatrix;
     String[] dietsConfigFileName, dietOutputMetrics;
     int[][] nbDietsStages;
     float[][][] dietStageThreshold;
@@ -675,7 +675,7 @@ public class Osmose {
         calibrationMatrix = new boolean[nbSeriesSimus];
         outputClass0Matrix = new boolean[nbSeriesSimus];
         spatializedOutputs = new boolean[nbSeriesSimus];
-        planktonBiomassOutputMatrix = new boolean[nbSeriesSimus];
+        planktonBiomassOutputMatrix = new String[nbSeriesSimus];
         dietsConfigFileName = new String[nbSeriesSimus];
         dietOutputMetrics = new String[nbSeriesSimus];
         nbDietsStages = new int[nbSeriesSimus][];
@@ -1324,14 +1324,19 @@ public class Osmose {
             }
             try {
                 /*
-                 * phv 2012/05/29 Read additional parameters "palnkton biomass"
+                 * phv 2012/05/29 Read additional parameters "plankton biomass"
                  * Since it might not exist in most configurations I catch any
                  * exception and set it as false by default.
+                 * phv 2012/11/08 Parameter can be either 'csv' or 'netcdf'
+                 * to choose the format.
                  */
                 st.nextToken();
-                planktonBiomassOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+                planktonBiomassOutputMatrix[numSerie] = st.sval;
             } catch (Exception ex) {
-                planktonBiomassOutputMatrix[numSerie] = false;
+                planktonBiomassOutputMatrix[numSerie] = "";
+            }
+            if (!planktonBiomassOutputMatrix[numSerie].matches("csv") & !planktonBiomassOutputMatrix[numSerie].matches("netcdf")) {
+                planktonBiomassOutputMatrix[numSerie] = "";
             }
             
             indicFile.close();
