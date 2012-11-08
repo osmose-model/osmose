@@ -91,9 +91,8 @@ public class Osmose {
     /*
      * FISHING
      */
-    String[] globalOrCohortTab;
-    float[][] FMatrix, recruitSizeMatrix;
-    float[][][] seasonFishingMatrix;
+    float[][] recruitSizeMatrix;
+    float[][] fishingRates;
     /*
      * PLANKTON groups
      */
@@ -345,7 +344,7 @@ public class Osmose {
         readCalibrationFile(calibrationFileNameTab[numSerie], numSerie);
         
         readSeasonalityReproFile(reproductionFileNameTab[numSerie], numSerie);
-        readSeasonalityFishingFile(fishingSeasonFileNameTab[numSerie], numSerie);
+        //readSeasonalityFishingFile(fishingSeasonFileNameTab[numSerie], numSerie);
         readsize0File(size0FileNameTab[numSerie], numSerie);
         readOutputConfigurationFile(indicatorsFileNameTab[numSerie], numSerie);
         if (dietsOutputMatrix[numSerie]) {
@@ -375,9 +374,9 @@ public class Osmose {
         if (!(reproductionFileNameTab[newNumSerie].equals(reproductionFileNameTab[previousNumSerie]))) {
             readSeasonalityReproFile(reproductionFileNameTab[newNumSerie], newNumSerie);
         }
-        if (!(fishingSeasonFileNameTab[newNumSerie].equals(fishingSeasonFileNameTab[previousNumSerie]))) {
-            readSeasonalityFishingFile(fishingSeasonFileNameTab[newNumSerie], newNumSerie);
-        }
+//        if (!(fishingSeasonFileNameTab[newNumSerie].equals(fishingSeasonFileNameTab[previousNumSerie]))) {
+//            readSeasonalityFishingFile(fishingSeasonFileNameTab[newNumSerie], newNumSerie);
+//        }
         if (!(accessibilitiesFileNameTab[newNumSerie].equals(accessibilitiesFileNameTab[previousNumSerie]))) {
             readAccessibilitiesFile(accessibilitiesFileNameTab[newNumSerie], newNumSerie);
         }
@@ -644,12 +643,9 @@ public class Osmose {
         seasonSpawningMatrix = new float[nbSeriesSimus][][];
 
         //--- FISHING file---
-        globalOrCohortTab = new String[nbSeriesSimus];
-        FMatrix = new float[nbSeriesSimus][];
         recruitSizeMatrix = new float[nbSeriesSimus][];
         recruitAgeMatrix = new float[nbSeriesSimus][];
         recruitMetricMatrix = new String[nbSeriesSimus];
-        seasonFishingMatrix = new float[nbSeriesSimus][][];
 
         //--- SPATIAL initialisations---
         speciesAreasSizeTab = new int[nbSeriesSimus][];
@@ -851,65 +847,60 @@ public class Osmose {
         }
     }
     
-    public void readSeasonalityFishingFile(String fishingFileName, int numSerie) {
-        if (fishingFileName.equalsIgnoreCase("default")) {
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                seasonFishingMatrix[numSerie][i] = new float[nbDtMatrix[numSerie]];
-                for (int j = 0; j < nbDtMatrix[numSerie]; j++) {
-                    seasonFishingMatrix[numSerie][i][j] = (float) 1 / (float) nbDtMatrix[numSerie];
+    private void readFishingRates(String csvFile) {
+        
+        try {
+            /*
+             * Read the CSV file
+             */
+            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            List<String[]> lines = reader.readAll();
+            /*
+             * Check dimensions of the file
+             * We expect nb_columns = nb_species + 1 (1st column for time step)
+             * and nb_rows = nb_steps_per_year  + 1 (1st column is the header)
+             * This case does just the same as the previous combination of
+             * one fishing rate per species + fishing seasonality
+             * or nb_rows = nb_steps_per_year * nb_years + 1
+             * This case is new and allows interannual variability for fishing
+             * rate.
+             */
+            int nb_rows = lines.size() - 1;
+            if (nb_rows != nbDtMatrix[numSerie] & nb_rows != nbDtMatrix[numSerie] * simulationTimeTab[numSerie]) {
+                System.out.println("Fishing rate file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nbDtMatrix[numSerie] + " or " + (nbDtMatrix[numSerie] * simulationTimeTab[numSerie]));
+                System.exit(1);
+            }
+            int nb_columns = lines.get(0).length - 1;
+            if (nb_columns != nbSpeciesTab[numSerie]) {
+                System.out.println("Wrong number of species in fishing rate file " + csvFile);
+                System.exit(1);
+            }
+            /*
+             * Reads the fishing rates
+             */
+            fishingRates = new float[nbSpeciesTab[numSerie]][nb_rows];
+            for (int step = 0; step < nb_rows; step++) {
+                String[] line = lines.get(step + 1); // skip header on 1st line
+                for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
+                    fishingRates[iSpec][step] = Float.valueOf(line[iSpec + 1]); // skip 1st column, the time step
                 }
             }
-            System.out.println("Fishing mortality is set constant over the year (default)");
-            
-        } else {
-            FileInputStream fishingFile;
-            try {
-                fishingFile = new FileInputStream(resolveFile(fishingFileName));
-            } catch (FileNotFoundException ex) {
-                System.out.println("fishing file doesn't exist: " + fishingFileName);
-                return;
-            }
-            
-            Reader r = new BufferedReader(new InputStreamReader(fishingFile));
-            StreamTokenizer st = new StreamTokenizer(r);
-            st.slashSlashComments(true);
-            st.slashStarComments(true);
-            st.quoteChar(';');
-            
-            float tempSum;
-            
-            try {
-                st.nextToken();
-                if (new Integer(st.sval).intValue() == nbDtMatrix[numSerie]) {
-                    for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                        tempSum = 0;
-                        seasonFishingMatrix[numSerie][i] = new float[nbDtMatrix[numSerie]];
-                        for (int j = 0; j < nbDtMatrix[numSerie]; j++) {
-                            st.nextToken();
-                            seasonFishingMatrix[numSerie][i][j] = (new Float(st.sval)).floatValue() / 100;   //percentage
-                            tempSum += (new Float(st.sval)).floatValue();
-                        }
-                        if (!((tempSum > 99.f) && (tempSum < 101.f))) {
-                            System.out.println("ERROR: sum of percents does not equal 100% in fishing seasonality file");
-                        }
-                    }
-                } else {
-                    System.out.println("Error in nb time steps defined in the fishing seasonality file");
-                }
-            } catch (IOException ex) {
-                System.out.println("Reading error of fishing seasonality file");
-                return;
-            }
+            reader.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        
     }
     
     public void readFishingFile(String fishingFileName, int numSerie) {
-        FileInputStream fishingFile;
+        
+        FileInputStream fishingFile = null;
         try {
             fishingFile = new FileInputStream(resolveFile(fishingFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("fishing file doesn't exist: " + fishingFileName);
-            return;
+            System.exit(1);
         }
         
         Reader r = new BufferedReader(new InputStreamReader(fishingFile));
@@ -920,17 +911,8 @@ public class Osmose {
         
         try {
             st.nextToken();
-            globalOrCohortTab[numSerie] = st.sval;
-            if (globalOrCohortTab[numSerie].equalsIgnoreCase("global")) {
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                    st.nextToken();
-                    FMatrix[numSerie][i] = (new Float(st.sval)).floatValue();    //annual F mortality
-                }
-            }
-            if (globalOrCohortTab[numSerie].equalsIgnoreCase("cohort")) //*******************TO DETAIL************************
-            {
-                System.out.println("The option F per cohort is not available now - please work with global F");
-            }
+            String fishingRateFile = st.sval;
+            readFishingRates(resolveFile(fishingRateFile));
             
             st.nextToken();
             recruitMetricMatrix[numSerie] = st.sval;
@@ -960,7 +942,6 @@ public class Osmose {
             }
         } catch (IOException ex) {
             System.out.println("Reading error of fishing seasonality file");
-            return;
         }
     }
     
@@ -1150,8 +1131,6 @@ public class Osmose {
         //----FISHING file------
         recruitSizeMatrix[numSerie] = new float[nbSpeciesExplicit];
         recruitAgeMatrix[numSerie] = new float[nbSpeciesExplicit];
-        seasonFishingMatrix[numSerie] = new float[nbSpeciesExplicit][];
-        FMatrix[numSerie] = new float[nbSpeciesExplicit];
         //--- ACCESSIBILITIES----
         planktonAccessCoeffMatrix = new float[nbOtherFood];
         nbAccessStage = new int[nbSpeciesExplicit];
@@ -1709,7 +1688,7 @@ public class Osmose {
         }
         return snumMap;
     }
-
+    
     public void readAreaFile() {
 
         /*
@@ -2577,7 +2556,7 @@ public class Osmose {
         pw.print("F ");
         for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.getSpecies(i).F);
+            pw.print("err");
         }
         pw.println();
         pw.print("recruitment age ");
