@@ -84,6 +84,7 @@ public class Species {
     int indexAgeClass0;          // index for the table tabCohort, in nbDt
     float recruitSize;
     float larvalSurvival;
+    float[] larvalMortalityRates;
     float[] seasonSpawning; //according to nbDt
     float sexRatio, eggSize, eggWeight, growthAgeThreshold,
             predationRate, criticalPredSuccess, starvMaxRate;
@@ -149,12 +150,20 @@ public class Species {
         this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][index];
         this.supAgeOfClass0 = getOsmose().supAgeOfClass0Matrix[numSerie][index];//age from which the species biomass-0 is calculated
         this.indexAgeClass0 = (int) Math.ceil(supAgeOfClass0 * getSimulation().getNbTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
-        this.larvalSurvival = getOsmose().larvalSurvivalMatrix[numSerie][index];
+        this.larvalMortalityRates = new float[getSimulation().getNbTimeStepsPerYear() * getOsmose().simulationTimeTab[numSerie]];
+        int t = 0;
+        for (int iStep = 0; iStep < larvalMortalityRates.length; iStep++) {
+            if (t > getOsmose().larvalMortalityRates[index].length - 1) {
+                t = 0;
+            }
+            larvalMortalityRates[iStep] = getOsmose().larvalMortalityRates[index][t];
+            t++;
+        }
         this.sexRatio = getOsmose().sexRatioMatrix[numSerie][index];
         this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
         this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
         this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];
-
+        
         this.predationRate = getOsmose().predationRateMatrix[numSerie][index];
         this.predPreySizesMax = getOsmose().predPreySizesMaxMatrix[numSerie][index];
         this.predPreySizesMin = getOsmose().predPreySizesMinMatrix[numSerie][index];
@@ -221,7 +230,7 @@ public class Species {
         }
 
         meanTLperAge = new float[nbCohorts];
-        
+
         /*
          * phv 2012/11/08 - Careful, F the annual mortality rate is calculated
          * as the annual average of the fishing rates over the years.
@@ -233,6 +242,18 @@ public class Species {
         if (getSimulation().isFishingInterannual) {
             F /= getOsmose().simulationTimeTab[numSerie];
         }
+
+        /*
+         * phv 2012/11/08 - Careful, larvalSurvival the annual mortality rate
+         * is calculated as the annual average of the larval mortality rates
+         * over the years.
+         * larvalSurvival is still used in Simulation.iniBySpeciesBiomass
+         */
+        for (int iStep = 0; iStep < larvalMortalityRates.length; iStep++) {
+            larvalSurvival += larvalMortalityRates[iStep];
+        }
+        larvalSurvival /= larvalMortalityRates.length;
+        System.out.println("Species " + name + " larval mortality " + larvalSurvival);
     }
 
     private Osmose getOsmose() {

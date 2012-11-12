@@ -235,7 +235,7 @@ public class Simulation {
         double D;
         Species spec = school.getCohort().getSpecies();
         if (school.getCohort().getAgeNbDt() == 0) {
-            D = spec.larvalSurvival + (spec.getCohort(0).getOutMortality(i_step_year) / (float) (nbTimeStepsPerYear * subdt));
+            D = (spec.larvalMortalityRates[i_step_simu] + (spec.getCohort(0).getOutMortality(i_step_year) / (float) (nbTimeStepsPerYear))) / (float) subdt;
         } else {
             D = (spec.D + school.getCohort().getOutMortality(i_step_year)) / (float) (nbTimeStepsPerYear * subdt);
         }

@@ -73,7 +73,7 @@ public class Osmose {
     int[] nbSpeciesTab;
     String[][] nameSpecMatrix, maturityMetricMatrix;
     String[] recruitMetricMatrix;
-    float[][] DMatrix, larvalSurvivalMatrix, starvMaxRateMatrix;
+    float[][] DMatrix, larvalMortalityRates, starvMaxRateMatrix;
     float[][] longevityMatrix;
     float[][] lInfMatrix, KMatrix, t0Matrix, cMatrix, bPowerMatrix;
     float[][] alphaMatrix, sizeMatMatrix;
@@ -184,22 +184,22 @@ public class Osmose {
      * Object for creating/writing netCDF files.
      */
     private static NetcdfFileWriteable ncOut;
-    
+
     public void initSimulation() {
-        
+
         readInputFile();	// read the first file containing the file names of all other input files
         for (int x = 0; x < nbSeriesSimus; x++) {
             readAllInputFiles(x);
         }
         initializeSizeAndTLSpectrum();
     }
-    
+
     public void loadMPAs() {
         for (int index = 0; index < tabMPAiMatrix[numSerie].length; index++) {
             getGrid().getCell(tabMPAiMatrix[numSerie][index], tabMPAjMatrix[numSerie][index]).setMPA(true);
         }
     }
-    
+
     public void initializeSizeAndTLSpectrum() {
         if (sizeSpectrumOutputMatrix[numSerie] || sizeSpectrumPerSpeOutputMatrix[numSerie]) {
             //initialisation of the size spectrum features
@@ -210,16 +210,16 @@ public class Osmose {
             for (int i = 1; i < nbSizeClass; i++) {
                 tabSizes[i] = i * classRange;
             }
-            
+
             tabSizesLn = new float[nbSizeClass];
             tabSizesLn[0] = (float) (Math.log(classRange / 2f));
-            
+
             for (int i = 1; i < nbSizeClass; i++) {
                 tabSizesLn[i] = (float) (Math.log(tabSizes[i] + (classRange / 2f)));
             }
-            
+
         }
-        
+
         minTL = 1.0f;
         maxTL = 6.0f;
         nbTLClass = (int) (1 + ((maxTL - minTL) / 0.1f));   // TL classes of 0.1, from 1 to 6
@@ -229,7 +229,7 @@ public class Osmose {
             tabTL[i] = minTL + i * 0.1f;
         }
     }
-    
+
     public void runSeriesSimulations() {
         Runtime r = Runtime.getRuntime();
         long freeMem = r.freeMemory();
@@ -282,14 +282,14 @@ public class Osmose {
                 if (numSimu == 0) {
                     initializeOptions();
                     System.out.println("options initialized");
-                    
+
                     simulation = new Simulation();
                     simulation.init();
                     System.out.println("simulation initialized");
-                    
+
                     readMigrationFile();
                     System.out.println("migration caracteristics initialized");
-                    
+
                     readAreaFile();
                     System.out.println("areas initialized");
 
@@ -297,7 +297,7 @@ public class Osmose {
                     //do not distribute the species in simulation()
                     initializeOutputData();
                     System.out.println("output data initialized");
-                    
+
                 } else {
                     try {
                         grid = (IGrid) Class.forName(gridClassNameTab[numSerie]).newInstance();
@@ -309,19 +309,19 @@ public class Osmose {
                     } catch (ClassNotFoundException ex) {
                         Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    
+
                     if (!(coastFileNameTab[numSerie].equalsIgnoreCase("None") || coastFileNameTab[numSerie].equalsIgnoreCase("default"))) {
                         updateCoastCells(numSerie);
                     }
-                    
+
                     simulation = new Simulation();
                     simulation.init();
-                    
+
                     readMigrationFile();
                     readAreaFile();
                     System.out.println();
                 }
-                
+
                 runSimulation();
                 if (spatializedOutputs[numSerie]) {
                     closeNCFile();
@@ -329,20 +329,20 @@ public class Osmose {
                 System.out.print("simu " + numSimu + " end -> ");
                 System.out.println(new Date());
             }
-            
+
             saveSerieSimulations(numSerie);
             simulation = null;
             grid = null;
         }
     }
-    
+
     public void readAllInputFiles(int numSerie) {
         readConfigurationFile(configFileNameTab[numSerie], numSerie);
         readSpeciesFile(speciesFileNameTab[numSerie], numSerie);
         readPredationFile(predationFileNameTab[numSerie], numSerie);
         readFishingFile(fishingFileNameTab[numSerie], numSerie);
         readCalibrationFile(calibrationFileNameTab[numSerie], numSerie);
-        
+
         readSeasonalityReproFile(reproductionFileNameTab[numSerie], numSerie);
         //readSeasonalityFishingFile(fishingSeasonFileNameTab[numSerie], numSerie);
         readsize0File(size0FileNameTab[numSerie], numSerie);
@@ -350,10 +350,10 @@ public class Osmose {
         if (dietsOutputMatrix[numSerie]) {
             readDietsOutputFile(dietsConfigFileName[numSerie], numSerie);
         }
-        
+
         readAccessibilitiesFile(accessibilitiesFileNameTab[numSerie], numSerie);
     }
-    
+
     public void checkInputFilesChange(int newNumSerie, int previousNumSerie) {
         if (!(configFileNameTab[newNumSerie].equals(configFileNameTab[previousNumSerie]))) {
             readConfigurationFile(configFileNameTab[newNumSerie], newNumSerie);
@@ -370,7 +370,7 @@ public class Osmose {
         if (!(calibrationFileNameTab[newNumSerie].equals(calibrationFileNameTab[previousNumSerie]))) {
             readCalibrationFile(calibrationFileNameTab[newNumSerie], newNumSerie);
         }
-        
+
         if (!(reproductionFileNameTab[newNumSerie].equals(reproductionFileNameTab[previousNumSerie]))) {
             readSeasonalityReproFile(reproductionFileNameTab[newNumSerie], newNumSerie);
         }
@@ -386,16 +386,16 @@ public class Osmose {
         if (!(indicatorsFileNameTab[newNumSerie].equals(indicatorsFileNameTab[previousNumSerie]))) {
             readOutputConfigurationFile(indicatorsFileNameTab[newNumSerie], newNumSerie);
         }
-        
+
         if (dietsOutputMatrix[newNumSerie]) {
             if (!(dietsConfigFileName[newNumSerie].equals(dietsConfigFileName[previousNumSerie]))) {
                 readDietsOutputFile(dietsConfigFileName[newNumSerie], newNumSerie);
             }
         }
-        
-        
+
+
     }
-    
+
     public String readPathFile() // read the file situated within the source code directory
     {
         FileInputStream pathFile = null;
@@ -404,13 +404,13 @@ public class Osmose {
         } catch (FileNotFoundException ex) {
             System.err.println("initial path file doesn't exist");
         }
-        
+
         Reader r = new BufferedReader(new InputStreamReader(pathFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        
+
         System.out.println("1. Reading the filePath.txt");
         try {
             st.nextToken();
@@ -432,13 +432,13 @@ public class Osmose {
             System.out.println("INPUT file doesn't exist");
             return;
         }
-        
+
         Reader r = new BufferedReader(new InputStreamReader(inputFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        
+
         try {
             st.nextToken();
             nbSeriesSimus = (new Integer(st.sval)).intValue();
@@ -450,7 +450,7 @@ public class Osmose {
 
         // give the right dimension to tables according to the number of series specified
         initializeNbSeriesInTables(nbSeriesSimus);
-        
+
         try {
             for (int x = 0; x < nbSeriesSimus; x++) {
                 st.nextToken();
@@ -549,7 +549,7 @@ public class Osmose {
         }
         System.out.println("EOF for step 2. Reading file INPUT.txt");
     }
-    
+
     public void initializeNbSeriesInTables(int nbSeriesSimus) {
         //****initialisation of tables dimensions****
         //--- INPUT file---
@@ -634,7 +634,7 @@ public class Osmose {
         //--- CALIBRATION file---
         calibrationMethod = new String[nbSeriesSimus];
         spBiomIniTab = new double[nbSeriesSimus][];
-        larvalSurvivalMatrix = new float[nbSeriesSimus][];
+        //larvalSurvivalMatrix = new float[nbSeriesSimus][];
         supAgeOfClass0Matrix = new float[nbSeriesSimus][];
         SSslope = new double[nbSeriesSimus];
         SSintercept = new double[nbSeriesSimus];
@@ -652,7 +652,7 @@ public class Osmose {
         tabCoastiMatrix = new int[nbSeriesSimus][];
         tabCoastjMatrix = new int[nbSeriesSimus][];
         nbCellsCoastTab = new int[nbSeriesSimus];
-        
+
         tabMPAiMatrix = new int[nbSeriesSimus][];
         tabMPAjMatrix = new int[nbSeriesSimus][];
         thereIsMPATab = new boolean[nbSeriesSimus];
@@ -677,7 +677,7 @@ public class Osmose {
         nbDietsStages = new int[nbSeriesSimus][];
         dietStageThreshold = new float[nbSeriesSimus][][];
     }
-    
+
     public void readSpeciesFile(String speciesFileName, int numSerie) {
         FileInputStream speciesFile;
         try {
@@ -686,13 +686,13 @@ public class Osmose {
             System.out.println("Species file " + speciesFileName + " doesn't exist");
             return;
         }
-        
+
         Reader r = new BufferedReader(new InputStreamReader(speciesFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        
+
         try {
             st.nextToken();
             if (new Integer(st.sval).intValue() == nbSpeciesTab[numSerie]) {
@@ -795,7 +795,7 @@ public class Osmose {
             return;
         }
     }
-    
+
     public void readSeasonalityReproFile(String reproductionFileName, int numSerie) {
         if (reproductionFileName.equalsIgnoreCase("default")) {
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
@@ -813,15 +813,15 @@ public class Osmose {
                 System.out.println("reproduction file doesn't exist: " + reproductionFileName);
                 return;
             }
-            
+
             Reader r = new BufferedReader(new InputStreamReader(reproductionFile));
             StreamTokenizer st = new StreamTokenizer(r);
             st.slashSlashComments(true);
             st.slashStarComments(true);
             st.quoteChar(';');
-            
+
             float tempSum;
-            
+
             try {
                 st.nextToken();
                 if (new Integer(st.sval).intValue() == nbDtMatrix[numSerie]) {
@@ -846,9 +846,9 @@ public class Osmose {
             }
         }
     }
-    
+
     private void readFishingRates(String csvFile) {
-        
+
         try {
             /*
              * Read the CSV file
@@ -858,7 +858,7 @@ public class Osmose {
             /*
              * Check dimensions of the file
              * We expect nb_columns = nb_species + 1 (1st column for time step)
-             * and nb_rows = nb_steps_per_year  + 1 (1st column is the header)
+             * and nb_rows = nb_steps_per_year  + 1 (1st row is the header)
              * This case does just the same as the previous combination of
              * one fishing rate per species + fishing seasonality
              * or nb_rows = nb_steps_per_year * nb_years + 1
@@ -889,12 +889,10 @@ public class Osmose {
         } catch (IOException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
     }
-    
+
     public void readFishingFile(String fishingFileName, int numSerie) {
-        
+
         FileInputStream fishingFile = null;
         try {
             fishingFile = new FileInputStream(resolveFile(fishingFileName));
@@ -902,21 +900,21 @@ public class Osmose {
             System.out.println("fishing file doesn't exist: " + fishingFileName);
             System.exit(1);
         }
-        
+
         Reader r = new BufferedReader(new InputStreamReader(fishingFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        
+
         try {
             st.nextToken();
             String fishingRateFile = st.sval;
             readFishingRates(resolveFile(fishingRateFile));
-            
+
             st.nextToken();
             recruitMetricMatrix[numSerie] = st.sval;
-            
+
             if (recruitMetricMatrix[numSerie].equalsIgnoreCase("age")) {
                 for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                     st.nextToken();
@@ -945,21 +943,58 @@ public class Osmose {
         }
     }
     
+    private void readLarvalMortalityRates(String csvFile) throws IOException {
+        
+        try (CSVReader reader = new CSVReader(new FileReader(csvFile), ';')) {
+            List<String[]> lines = reader.readAll();
+            /*
+             * Check dimensions of the file
+             * We expect nb_columns = nb_species + 1 (1st column for time step)
+             * and nb_rows = 2 (1st row is the header) for one larval mortality
+             * rate per species.
+             * or nb_rows = nb_steps_per_year  + 1 (1st row is the header)
+             * This case allows annual variability for larval mortality rate.
+             * or nb_rows = nb_steps_per_year * nb_years + 1 (1st row is the header)
+             * This case allows interannual variability for larval mortality rate.
+             */
+            int nb_rows = lines.size() - 1;
+            if (nb_rows != 1 & nb_rows != nbDtMatrix[numSerie] & nb_rows != nbDtMatrix[numSerie] * simulationTimeTab[numSerie]) {
+                System.out.println("Larval mortality rates file " + csvFile + " contains " + nb_rows + " rows. Should be either 1 or " + nbDtMatrix[numSerie] + " or " + (nbDtMatrix[numSerie] * simulationTimeTab[numSerie]));
+                System.exit(1);
+            }
+            int nb_columns = lines.get(0).length - 1;
+            if (nb_columns != nbSpeciesTab[numSerie]) {
+                System.out.println("Wrong number of species in larval mortality rates file " + csvFile);
+                System.exit(1);
+            }
+            /*
+             * Reads the larval mortality rates
+             */
+            larvalMortalityRates = new float[nbSpeciesTab[numSerie]][nb_rows];
+            for (int step = 0; step < nb_rows; step++) {
+                String[] line = lines.get(step + 1); // skip header on 1st line
+                for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
+                    larvalMortalityRates[iSpec][step] = Float.valueOf(line[iSpec + 1]); // skip 1st column, the time step
+                }
+            }
+        }
+    }
+
     public void readCalibrationFile(String calibrationFileName, int numSerie) {
-        FileInputStream calibFile;
+        FileInputStream calibFile = null;
         try {
             calibFile = new FileInputStream(resolveFile(calibrationFileName));
         } catch (FileNotFoundException ex) {
-            System.out.println("abdIni file doesn't exist: " + calibrationFileName);
-            return;
+            System.out.println("Calibration file doesn't exist: " + calibrationFileName);
+            System.exit(1);
         }
-        
+
         Reader r = new BufferedReader(new InputStreamReader(calibFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        
+
         try {
             st.nextToken();
             calibrationMethod[numSerie] = st.sval;
@@ -978,21 +1013,37 @@ public class Osmose {
             {
                 System.out.println("The option initialisation per random method is not implemented yet");
             }
-            
+
             supAgeOfClass0Matrix[numSerie] = new float[nbSpeciesTab[numSerie]];
-            larvalSurvivalMatrix[numSerie] = new float[nbSpeciesTab[numSerie]];
-            
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+
+            st.nextToken();
+            /*
+             * phv 2012/11/09
+             * Check whether following value is a Float
+             * YES: reads list a larval mortality rates directly in the
+             * calibration file, one per species
+             * NO: reads larval mortality rates from CSV file
+             */
+            try {
+                Float.valueOf(st.sval);
+                larvalMortalityRates = new float[nbSpeciesTab[numSerie]][1];
+                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                    larvalMortalityRates[i][0] = (new Float(st.sval)).floatValue();
+                    st.nextToken();
+                }
+            } catch (NumberFormatException ex) {
+                String larvalMortalityFile = st.sval;
+                readLarvalMortalityRates(resolveFile(larvalMortalityFile));
                 st.nextToken();
-                larvalSurvivalMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
             }
+
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                st.nextToken();
                 supAgeOfClass0Matrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                st.nextToken();
             }
             for (int i = 0; i < nbPlanktonGroupsTab[numSerie]; i++) {
-                st.nextToken();
                 planktonAccessCoeffMatrix[i] = (new Float(st.sval)).floatValue();
+                st.nextToken();
             }
             calibFile.close();
         } catch (IOException ex) {
@@ -1000,7 +1051,7 @@ public class Osmose {
             return;
         }
     }
-    
+
     public void readConfigurationFile(String configFileName, int numSerie) {
         FileInputStream configFile;
         try {
@@ -1009,13 +1060,13 @@ public class Osmose {
             System.out.println("configuration file doesn't exist: " + configFileName);
             return;
         }
-        
+
         Reader r = new BufferedReader(new InputStreamReader(configFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        
+
         try {
             st.nextToken();
             gridLinesTab[numSerie] = (new Integer(st.sval)).intValue();
@@ -1047,7 +1098,7 @@ public class Osmose {
             nbSpeciesTab[numSerie] = (new Integer(st.sval)).intValue();
             st.nextToken();
             nbPlanktonGroupsTab[numSerie] = (new Integer(st.sval)).intValue();
-            
+
             st.nextToken();
             if ((st.sval).equalsIgnoreCase("forcing")) {
                 isForcing[numSerie] = true;
@@ -1066,7 +1117,7 @@ public class Osmose {
              */
             st.nextToken();
             lowTLClassNameTab[numSerie] = st.sval;
-            
+
             st.nextToken();
             nbSchools[numSerie] = 1 + Math.round(((new Integer(st.sval)).intValue()) / nbDtMatrix[numSerie]);
 
@@ -1090,7 +1141,7 @@ public class Osmose {
             } else {
                 gridClassNameTab[numSerie] = OriginalGrid.class.getCanonicalName();
             }
-            
+
             configFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of configuration file");
@@ -1098,7 +1149,7 @@ public class Osmose {
         }
         initializeNbLivingGroups(numSerie, nbSpeciesTab[numSerie], nbPlanktonGroupsTab[numSerie]);
     }
-    
+
     public void initializeNbLivingGroups(int numSerie, int nbSpeciesExplicit, int nbOtherFood) {
 
         // setting tables length
@@ -1136,10 +1187,10 @@ public class Osmose {
         nbAccessStage = new int[nbSpeciesExplicit];
         accessStageThreshold = new float[nbSpeciesExplicit][];
         accessibilityMatrix = new float[nbSpeciesExplicit + nbOtherFood][][][];
-        
+
         planktonNamesTab[numSerie] = new String[nbOtherFood];
     }
-    
+
     public void readsize0File(String optionFileName, int numSerie) {
         if (optionFileName.equalsIgnoreCase("default")) {
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
@@ -1155,13 +1206,13 @@ public class Osmose {
                 System.out.println("option file doesn't exist: " + optionFileName);
                 return;
             }
-            
+
             Reader r = new BufferedReader(new InputStreamReader(optionFile));
             StreamTokenizer st = new StreamTokenizer(r);
             st.slashSlashComments(true);
             st.slashStarComments(true);
             st.quoteChar(';');
-            
+
             try {
                 for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                     st.nextToken();
@@ -1175,7 +1226,7 @@ public class Osmose {
                     st.nextToken();
                     growthAgeThresholdMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
                 }
-                
+
                 optionFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of option file");
@@ -1183,7 +1234,7 @@ public class Osmose {
             }
         }
     }
-    
+
     public void readPredationFile(String predationFileName, int numSerie) {
         FileInputStream predationFile;
         try {
@@ -1192,13 +1243,13 @@ public class Osmose {
             System.out.println("predation file doesn't exist: " + predationFileName);
             return;
         }
-        
+
         Reader r = new BufferedReader(new InputStreamReader(predationFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        
+
         try {
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                 st.nextToken();
@@ -1235,7 +1286,7 @@ public class Osmose {
             return;
         }
     }
-    
+
     public void readOutputConfigurationFile(String indicatorsFileName, int numSerie) {
         FileInputStream indicFile;
         try {
@@ -1244,26 +1295,26 @@ public class Osmose {
             System.out.println("output config file doesn't exist: " + indicatorsFileName);
             return;
         }
-        
+
         Reader r = new BufferedReader(new InputStreamReader(indicFile));
         StreamTokenizer st = new StreamTokenizer(r);
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        
+
         try {
-            
+
             st.nextToken();
             outputFileNameTab[numSerie] = st.sval;
             String[] split = st.sval.split("/");
             outputPrefix[numSerie] = split[split.length - 1];
-            
+
             st.nextToken();
             calibrationMatrix[numSerie] = false;
             if (st.sval.equalsIgnoreCase("calibration")) {
                 calibrationMatrix[numSerie] = true;
             }
-            
+
             st.nextToken();
             TLoutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
@@ -1317,14 +1368,14 @@ public class Osmose {
             if (!planktonBiomassOutputMatrix[numSerie].matches("csv") & !planktonBiomassOutputMatrix[numSerie].matches("netcdf")) {
                 planktonBiomassOutputMatrix[numSerie] = "";
             }
-            
+
             indicFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of output config file");
             return;
         }
     }
-    
+
     public void initializeOptions() {
         try {
             System.out.println("Initialize grid: " + gridClassNameTab[numSerie]);
@@ -1344,7 +1395,7 @@ public class Osmose {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void readCoastAsCSV(String csvFile) {
         try {
             /*
@@ -1386,10 +1437,10 @@ public class Osmose {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void readCoastCoordinates(String coastFilename) {
         FileInputStream coastFile;
-        
+
         try {
             coastFile = new FileInputStream(coastFilename);
         } catch (FileNotFoundException ex) {
@@ -1411,21 +1462,21 @@ public class Osmose {
             if (new Integer(st.sval).intValue() == gridLinesTab[numSerie]) {
                 st.nextToken();
                 if (new Integer(st.sval).intValue() == gridColumnsTab[numSerie]) {
-                    
+
                     st.nextToken();
                     tabCoastiMatrix[numSerie] = new int[new Integer(st.sval).intValue()];
                     tabCoastjMatrix[numSerie] = new int[new Integer(st.sval).intValue()];
-                    
+
                     nbCellsCoastTab[numSerie] = new Integer(st.sval).intValue();
-                    
+
                     for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
-                        
+
                         st.nextToken();
                         tabCoastiMatrix[numSerie][i] = (new Integer(st.sval).intValue());
                     }
-                    
+
                     for (int i = 0; i < tabCoastjMatrix[numSerie].length; i++) {
-                        
+
                         st.nextToken();
                         tabCoastjMatrix[numSerie][i] = (new Integer(st.sval).intValue());
                     }
@@ -1438,18 +1489,18 @@ public class Osmose {
             } else {
                 System.out.println("Error while reading coastFile for nb lines match");
             }
-            
+
             coastFile.close();
         } catch (IOException ex) {
             System.out.println("Error while reading coastFile");
         }
     }
-    
+
     public void initializeCoast() {
         if (coastFileNameTab[numSerie].equalsIgnoreCase("default")) {
             System.out.println("No coast in the grid (default)");
         } else {
-            
+
             String filename = resolveFile(coastFileNameTab[numSerie]);
             if (filename.endsWith("csv")) {
                 /*
@@ -1465,13 +1516,13 @@ public class Osmose {
             }
         }
     }
-    
+
     public void updateCoastCells(int numSerie) {
         for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
             grid.getCell(tabCoastiMatrix[numSerie][i], tabCoastjMatrix[numSerie][i]).setLand(true);
         }
     }
-    
+
     public void initializeMPA() {
         if (mpaFileNameTab[numSerie].equalsIgnoreCase("default")) {
             thereIsMPATab[numSerie] = false;
@@ -1574,9 +1625,9 @@ public class Osmose {
             thereIsMPATab[numSerie] = true;
         }
     }
-    
+
     public void writeMPAasCSV() {
-        
+
         String fileName = "mpa.csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
@@ -1598,9 +1649,9 @@ public class Osmose {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public void writeMapsAsCSV() {
-        
+
         int numberMaps = mapCoordi.length;
         for (int k = 0; k < numberMaps; k++) {
             try {
@@ -1636,31 +1687,31 @@ public class Osmose {
             } catch (IOException ex) {
                 Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            
+
+
         }
     }
-    
+
     public void writeGlobalDistributionMap() {
         try {
             int numberMaps = mapCoordi.length;
             String fileName = "map-all.csv";
             CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-            
+
             int[][] area = new int[getGrid().getNbLines()][getGrid().getNbColumns()];
             for (int k = 0; k < numberMaps; k++) {
-                
+
                 if (areasNumSpForMap[k] == 1 || areasNumSpForMap[k] == 5 || areasNumSpForMap[k] == 6 || areasTempAge[k][0] == 0) {
                     System.out.println(getSimulation().getSpecies(areasNumSpForMap[k]).getName() + " " + areasTempAge[k][0]);
                     continue;
                 }
-                
+
                 List<Cell> map = getMap(k);
                 for (Cell cell : map) {
                     area[cell.get_igrid()][cell.get_jgrid()] = 1;
                 }
             }
-            
+
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 String[] entries = new String[getGrid().getNbColumns()];
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
@@ -1678,9 +1729,9 @@ public class Osmose {
         }
         System.out.println("########## map finished !");
     }
-    
+
     private String numMapToString(int numMap, int numberMaps) {
-        
+
         String snumMap = String.valueOf(numMap);
         int lengthNumberMaps = String.valueOf(numberMaps).length();
         while (snumMap.length() < lengthNumberMaps) {
@@ -1688,7 +1739,7 @@ public class Osmose {
         }
         return snumMap;
     }
-    
+
     public void readAreaFile() {
 
         /*
@@ -1714,7 +1765,7 @@ public class Osmose {
         randomAreaCoordi = new int[nbSpeciesTab[numSerie]][];
         randomAreaCoordj = new int[nbSpeciesTab[numSerie]][];
         try {
-            
+
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                 st.nextToken();
                 String areaDistribMethod = st.sval;
@@ -1774,8 +1825,8 @@ public class Osmose {
                         break;
                 }
             }
-            
-            
+
+
         } catch (IOException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -1790,11 +1841,11 @@ public class Osmose {
          */
         simulation.distributeSpeciesIni();
     }
-    
+
     private void readConnectivity(StreamTokenizer st, int iSpec, int indexMap) throws IOException {
-        
+
         System.out.println("Reading connectivity matric for " + getSimulation().getSpecies(iSpec).getName() + " map " + indexMap);
-        
+
         areasNumSpForMap[indexMap] = iSpec;
         /*
          * read number of class ages concerned by this map
@@ -1846,9 +1897,9 @@ public class Osmose {
         }
         System.out.println("Connectivity matrix loaded");
     }
-    
+
     private void readAreaCSV(StreamTokenizer st, int iSpec, int indexMap) throws IOException {
-        
+
         areasNumSpForMap[indexMap] = iSpec;   //because species number between 1 and nbSpecies
             /*
          * read number of class ages concerned by this map
@@ -1887,7 +1938,7 @@ public class Osmose {
             readCSVMap(csvFile, indexMap);
         }
     }
-    
+
     private void readMPA(String csvFile) {
         try {
             /*
@@ -1925,9 +1976,9 @@ public class Osmose {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void readCSVMap(String csvFile, int indexMap) {
-        
+
         try {
             /*
              * Read the CSV file
@@ -2009,9 +2060,9 @@ public class Osmose {
         }
         //System.out.println("Read CSV file " + csvFile + " [OK]");
     }
-    
+
     public List<Cell> getMap(int numMap) {
-        
+
         int length = mapCoordi[numMap].length;
         List<Cell> list = new ArrayList(length);
         for (int k = 0; k < length; k++) {
@@ -2019,7 +2070,7 @@ public class Osmose {
         }
         return list;
     }
-    
+
     public String getMapDetails(int numMap) {
         StringBuilder str = new StringBuilder();
         str.append("Map: ");
@@ -2038,7 +2089,7 @@ public class Osmose {
         }
         return str.toString();
     }
-    
+
     public void distribRandom(int iSpec) {
 
         //int nbCasesDispos = ((int) (gridLinesTab[numSerie] * gridColumnsTab[numSerie])) - nbCellsCoastTab[numSerie];
@@ -2047,18 +2098,18 @@ public class Osmose {
         //Case where random distribution on the whole (grid-coast)
         if (speciesAreasSizeTab[numSerie][iSpec] >= nbCasesDispos) {
             speciesAreasSizeTab[numSerie][iSpec] = nbCasesDispos;
-            
+
             randomAreaCoordi[iSpec] = new int[speciesAreasSizeTab[numSerie][iSpec]];
             randomAreaCoordj[iSpec] = new int[speciesAreasSizeTab[numSerie][iSpec]];
-            
+
             int index = 0;
             for (int l = 0; l < grid.getNbLines(); l++) {
                 for (int m = 0; m < grid.getNbColumns(); m++) {
                     if (!grid.getCell(l, m).isLand()) {
-                        
+
                         randomAreaCoordi[iSpec][index] = grid.getCell(l, m).get_igrid();
                         randomAreaCoordj[iSpec][index] = grid.getCell(l, m).get_jgrid();
-                        
+
                         index++;
                     }
                 }
@@ -2112,7 +2163,7 @@ public class Osmose {
             }
         }
     }
-    
+
     public void readMigrationFile() {
         if (migrationFileNameTab[numSerie].equalsIgnoreCase("default")) {
             System.out.println("No migrations implemented (default)");
@@ -2123,7 +2174,7 @@ public class Osmose {
              * of time steps ;ages ;time steps ;mortality ... * nb species
              * migrating
              */
-            
+
             FileInputStream outOfZoneFile;
             try {
                 outOfZoneFile = new FileInputStream(resolveFile(migrationFileNameTab[numSerie]));
@@ -2131,19 +2182,19 @@ public class Osmose {
                 System.out.println("migration file doesn't exist: " + migrationFileNameTab[numSerie]);
                 return;
             }
-            
+
             Reader r = new BufferedReader(new InputStreamReader(outOfZoneFile));
             StreamTokenizer st = new StreamTokenizer(r);
             st.slashSlashComments(true);
             st.slashStarComments(true);
             st.quoteChar(';');
-            
+
             int nbSpOutOfZone, numSpOutOfZone;
             int nbAgePerCase, nbDtPerCase;
             migrationTempAge = new int[nbSpeciesTab[numSerie]][];
             migrationTempDt = new int[nbSpeciesTab[numSerie]][];
             migrationTempMortality = new float[nbSpeciesTab[numSerie]][];
-            
+
             try {
                 st.nextToken();
                 nbSpOutOfZone = (new Integer(st.sval)).intValue();
@@ -2160,7 +2211,7 @@ public class Osmose {
                         migrationTempAge[numSpOutOfZone - 1] = new int[nbAgePerCase];
                         migrationTempDt[numSpOutOfZone - 1] = new int[nbDtPerCase];
                         migrationTempMortality[numSpOutOfZone - 1] = new float[nbAgePerCase];
-                        
+
                         for (int k = 0; k < nbAgePerCase; k++) {
                             st.nextToken();
                             migrationTempAge[numSpOutOfZone - 1][k] = new Integer(st.sval).intValue();
@@ -2169,7 +2220,7 @@ public class Osmose {
                             st.nextToken();
                             migrationTempDt[numSpOutOfZone - 1][k] = new Integer(st.sval).intValue() - 1;
                         }
-                        
+
                         for (int m = 0; m < nbAgePerCase; m++) {
                             st.nextToken();
                             migrationTempMortality[numSpOutOfZone - 1][m] = (new Float(st.sval)).floatValue();
@@ -2189,7 +2240,7 @@ public class Osmose {
             }
         }
     }
-    
+
     public void readAccessibilitiesFile(String accessFileName, int numSerie) {
         if (accessFileName.equalsIgnoreCase("default")) // if no accessiblity file is specified, all accessibilities are set to 1
         {
@@ -2224,7 +2275,7 @@ public class Osmose {
                 System.out.println("accessibility file doesn't exist: " + accessFileName);
                 return;
             }
-            
+
             Reader r = new BufferedReader(new InputStreamReader(accessFile));
             StreamTokenizer st = new StreamTokenizer(r);
             st.slashSlashComments(true);
@@ -2269,7 +2320,7 @@ public class Osmose {
                                 for (int m = 0; m < nbAccessStage[k]; m++) {
                                     st.nextToken();
                                     accessibilityMatrix[i][0][k][m] = (new Float(st.sval)).floatValue();
-                                    
+
                                 }
                             }
                         }
@@ -2282,14 +2333,14 @@ public class Osmose {
             }
         }
     }
-    
+
     public void initializeOutputData() {
         //these param are function of the length of the temporal series saved
         if (startingSavingTimeTab[numSerie] > simulationTimeTab[numSerie]) {
             System.out.println("Starting time for saving higher than simulation time -> set to 0");
             startingSavingTimeTab[numSerie] = 0;
         }
-        
+
         if (startingSavingTimeTab[numSerie] == 0) {
             timeSeriesLength = simulationTimeTab[numSerie];
             timeSeriesStart = 0;
@@ -2299,11 +2350,11 @@ public class Osmose {
             timeSeriesLength = simulationTimeTab[numSerie] - startingSavingTimeTab[numSerie];
             timeSeriesIsShortened = true;
         }
-        
+
         if (calibrationMatrix[numSerie]) {
             BIOMQuadri = new float[nbLoopTab[numSerie]][][][][];
         }
-        
+
         iniBiomass = new float[nbSeriesSimus][];
         for (int x = 0; x < nbSeriesSimus; x++) {
             iniBiomass[x] = new float[nbSpeciesTab[numSerie]];
@@ -2316,8 +2367,8 @@ public class Osmose {
                 }
             }
         }
-        
-        
+
+
         for (int xx = 0; xx < nbLoopTab[numSerie]; xx++) {
             if (calibrationMatrix[numSerie]) {
                 BIOMQuadri[xx] = new float[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][][][];
@@ -2332,7 +2383,7 @@ public class Osmose {
              * simulation.getSpecies(i).tabCohorts[j].biomass;
              */
             int tempIndex = (int) nbDtMatrix[numSerie] / savingDtMatrix[numSerie];
-            
+
             if (calibrationMatrix[numSerie]) {
                 for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                     BIOMQuadri[xx][i] = new float[2][][];
@@ -2344,7 +2395,7 @@ public class Osmose {
                         BIOMQuadri[xx][i][1][tt] = new float[tempIndex];
                     }
                 }
-                
+
                 for (int i = nbSpeciesTab[numSerie]; i < nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]; i++) {
                     BIOMQuadri[xx][i] = new float[1][][];
                     BIOMQuadri[xx][i][0] = new float[timeSeriesLength][];   //without age 0
@@ -2355,7 +2406,7 @@ public class Osmose {
             }
         }
     }
-    
+
     public void readDietsOutputFile(String dietsConfigFileName, int numSerie) {
         nbDietsStages[numSerie] = new int[nbSpeciesTab[numSerie]];
         dietStageThreshold[numSerie] = new float[nbSpeciesTab[numSerie]][];
@@ -2374,13 +2425,13 @@ public class Osmose {
                 System.out.println("diet configuration file doesn't exist: " + dietsConfigFileName);
                 return;
             }
-            
+
             Reader r = new BufferedReader(new InputStreamReader(dietConfigFile));
             StreamTokenizer st = new StreamTokenizer(r);
             st.slashSlashComments(true);
             st.slashStarComments(true);
             st.quoteChar(';');
-            
+
             try {
                 st.nextToken();
                 if ((new Integer(st.sval)).intValue() == nbSpeciesTab[numSerie]) {
@@ -2403,7 +2454,7 @@ public class Osmose {
                         }
                     }
                 }
-                
+
                 dietConfigFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of diets config file");
@@ -2412,7 +2463,7 @@ public class Osmose {
             System.out.println("diets config file read");
         }
     }
-    
+
     private void createNCFile(int nSerie) {
         try {
             ncOut = NetcdfFileWriteable.createNew("");
@@ -2437,13 +2488,13 @@ public class Osmose {
             Logger.getLogger(Osmose.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> " + ex.toString());
         }
     }
-    
+
     public NetcdfFileWriteable getNCOut() {
         return ncOut;
     }
-    
+
     private String makeFileLocation(int nSerie) throws IOException {
-        
+
         StringBuilder filename = new StringBuilder();
         filename.append(outputPathName);
         filename.append(outputFileNameTab[nSerie]);
@@ -2464,16 +2515,16 @@ public class Osmose {
         }
         return filename + ".part";
     }
-    
+
     public void saveSerieSimulations(int nSerie) // ************************** seuls les fichiers biomasses, abundances, yield,
     //**************************size, mortalites et size spectrum per species sont OK � 100%
     {
         //save in output files
         File targetPath;
-        
+
         String inputFileName = outputPrefix[nSerie] + "_I";
         String biomFileName = outputPrefix[nSerie] + "_B.csv";
-        
+
         targetPath = new File(outputPathName + outputFileNameTab[nSerie]);
         targetPath.mkdirs();
 
@@ -2481,7 +2532,7 @@ public class Osmose {
         if (calibrationMatrix[nSerie]) {
             saveBIOMData(targetPath, inputFileName, biomFileName);
         }
-        
+
     }
 
     /*
@@ -2489,7 +2540,7 @@ public class Osmose {
      * have not been included here.
      */
     public void saveInputParameters(File targetPath, String inputFileName, int nSerie) {
-        
+
         FileOutputStream inputFile;
         File targetFile;
         PrintWriter pw;
@@ -2501,14 +2552,14 @@ public class Osmose {
             return;
         }
         pw = new PrintWriter(inputFile, true);
-        
+
         pw.println("// ------SAVING------");
         pw.print("// Results saved every ");
         pw.print(savingDtMatrix[nSerie]);
         pw.println(" time step(s) ");
         pw.println("// Results averaged EXCEPT for yield (biomass and nb) where results are summed ");
         pw.println();
-        
+
         pw.println("// ---- simulation OPTIONS ---- ");
         pw.print("// Lattice Size ");
         pw.print(';');
@@ -2517,7 +2568,7 @@ public class Osmose {
         pw.println(gridColumnsTab[nSerie]);
         pw.print("//Fish movement");
         pw.print(';');
-        
+
         pw.print("//Species areas file");
         pw.print(';');
         pw.println(areasFileNameTab[nSerie]);
@@ -2556,7 +2607,7 @@ public class Osmose {
         pw.print("F ");
         for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print("err");
+            pw.print(simulation.getSpecies(i).F);
         }
         pw.println();
         pw.print("recruitment age ");
@@ -2601,7 +2652,7 @@ public class Osmose {
             pw.print(simulation.getSpecies(i).bPower);
         }
         pw.println();
-        
+
         pw.print("relFecund ");
         for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
@@ -2632,12 +2683,12 @@ public class Osmose {
             pw.print(simulation.getSpecies(i).sexRatio);
         }
         pw.println();
-        
+
         pw.println("// -----  INITIALISATION ---- ");
         pw.println();
-        
+
         pw.print("Initial biomass for serie : ");
-        
+
         for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
             pw.print(iniBiomass[nSerie][i]);
@@ -2647,7 +2698,7 @@ public class Osmose {
         pw.print("Larval mortality ");
         for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.getSpecies(i).larvalSurvival);
+            pw.print(simulation.getSpecies(i).larvalMortalityRates);
         }
         pw.println();
         pw.print("accessibility coefficient ");
@@ -2658,17 +2709,17 @@ public class Osmose {
         pw.close();
         System.out.println("Input data saved");
     }
-    
+
     public void saveBIOMData(File targetPath, String inputFileName, String biomFileName) {
-        
+
         FileOutputStream biomFile;
         File targetFile;
         PrintWriter pw;
-        
+
         float[][][] tabMean, tabCv;
         tabMean = new float[nbSpeciesTab[numSerie] + 1 + nbPlanktonGroupsTab[numSerie]][][];
         tabCv = new float[nbSpeciesTab[numSerie] + 1 + nbPlanktonGroupsTab[numSerie]][][];
-        
+
         for (int i = 0; i <= nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]; i++) {
             tabMean[i] = new float[2][];
             tabMean[i][0] = new float[nbLoopTab[numSerie]];
@@ -2677,10 +2728,10 @@ public class Osmose {
             tabCv[i][0] = new float[nbLoopTab[numSerie]];
             tabCv[i][1] = new float[nbLoopTab[numSerie]];
         }
-        
+
         float MEAN, STD, CV;//mean, std et cv des moyennes de chaque simu
 
-        
+
         try {
             targetFile = new File(targetPath, biomFileName);
             biomFile = new FileOutputStream(targetFile);
@@ -2707,7 +2758,7 @@ public class Osmose {
             pw.println(';');
             pw.print("Time");
             pw.print(';');
-            
+
             for (int t = timeSeriesStart; t < simulationTimeTab[numSerie]; t++) {
                 for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
                     pw.print((float) (t + dt / (float) nbDtSavePerYear[numSerie]));
@@ -2715,7 +2766,7 @@ public class Osmose {
                 }
             }
             pw.println();
-            
+
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                 pw.print(nameSpecMatrix[numSerie][i]);
                 pw.print(';');
@@ -2808,7 +2859,7 @@ public class Osmose {
                     }
                 }
                 pw.println();
-                
+
                 for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                     pw.print(nameSpecMatrix[numSerie][i]);
                     pw.print(';');
@@ -2986,13 +3037,13 @@ public class Osmose {
             pw.print(';');
             pw.print(mean(tabCv[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1]));
             pw.println(';');
-            
+
         }
         pw.close();
-        
+
         System.out.println("biom data saved");
     }
-    
+
     public float mean(float[] val) {
         float mean;
         float sum = 0;
@@ -3003,7 +3054,7 @@ public class Osmose {
         mean = sum / n;
         return mean;
     }
-    
+
     public float mean2(float[][] val) {
         float mean;
         float sum = 0;
@@ -3017,7 +3068,7 @@ public class Osmose {
         mean = sum / n;
         return mean;
     }
-    
+
     public float mean2d(double[][] val) {
         float mean;
         float sum = 0;
@@ -3031,7 +3082,7 @@ public class Osmose {
         mean = sum / n;
         return mean;
     }
-    
+
     public float std(float[] val) {
         float std;
         double sum, sum2;
@@ -3048,7 +3099,7 @@ public class Osmose {
         std = (float) Math.sqrt(numerator / denominator);
         return std;
     }
-    
+
     public float std2(float[][] val) {
         float std;
         double sum, sum2;
@@ -3085,7 +3136,7 @@ public class Osmose {
         mean = sum / n;
         return mean;
     }
-    
+
     public float stdWithout0(float[][] val, float[][] abd) {
         float std;
         double sum, sum2;
@@ -3107,14 +3158,14 @@ public class Osmose {
         std = (float) Math.sqrt(numerator / denominator);
         return std;
     }
-    
+
     public void runSimulation() {
-        
+
         while (simulation.getYear() < simulationTimeTab[numSerie]) {
             simulation.step();
         }
     }
-    
+
     public String getLTLClassName() {
         return lowTLClassNameTab[numSerie];
     }
@@ -3131,19 +3182,19 @@ public class Osmose {
             inputPathName = readPathFile();
             System.out.println("Input path ==> " + inputPathName);
         }
-        
+
         if (args.length > 1) {
             outputPathName = args[1];
         } else {
             outputPathName = inputPathName + fileSeparator + "output" + fileSeparator;
         }
-        
+
         if (args.length > 2) {
             inputTxtName = args[2];
         } else {
             inputTxtName = "INPUT.txt";
         }
-        
+
     }
 
     /*
@@ -3156,19 +3207,19 @@ public class Osmose {
         osmose.runSeriesSimulations();
         System.out.println(new Date());
     }
-    
+
     public static Osmose getInstance() {
         return osmose;
     }
-    
+
     public IGrid getGrid() {
         return grid;
     }
-    
+
     public Simulation getSimulation() {
         return simulation;
     }
-    
+
     public String resolvePath(String path) {
         String pathname = resolveFile(path);
         if (!pathname.endsWith(File.separator)) {
@@ -3176,7 +3227,7 @@ public class Osmose {
         }
         return pathname;
     }
-    
+
     public String resolveFile(String filename) {
         try {
             File file = new File(inputPathName);
@@ -3186,9 +3237,9 @@ public class Osmose {
             return filename;
         }
     }
-    
+
     public void initAll(String args[]) {
-        
+
         loadArgs(args);
         initSimulation();
         initializeOptions();
@@ -3204,53 +3255,53 @@ public class Osmose {
         initializeOutputData();
         readMigrationFile();
     }
-    
+
     public int getRecordFrequency() {
         return savingDtMatrix[numSerie];
     }
-    
+
     public boolean isCalibrationOutput() {
         return calibrationMatrix[numSerie];
     }
-    
+
     public boolean isTLOutput() {
         return TLoutputMatrix[numSerie];
     }
-    
+
     public boolean isTLDistribOutput() {
         return TLDistriboutputMatrix[numSerie];
     }
-    
+
     public boolean isDietOuput() {
         return dietsOutputMatrix[numSerie];
     }
-    
+
     public boolean isMeanSizeOutput() {
         return meanSizeOutputMatrix[numSerie];
     }
-    
+
     public boolean isSizeSpectrumOutput() {
         return sizeSpectrumOutputMatrix[numSerie];
     }
-    
+
     public boolean isSizeSpectrumSpeciesOutput() {
         return sizeSpectrumPerSpeOutputMatrix[numSerie];
     }
-    
+
     public boolean isPlanktonMortalityOutput() {
         return planktonMortalityOutputMatrix[numSerie];
     }
-    
+
     public boolean isIncludeClassZero() {
         return outputClass0Matrix[numSerie];
     }
-    
+
     public String getDietOutputMetric() {
         return dietOutputMetrics[numSerie];
     }
-    
+
     public enum SpatialDistribution {
-        
+
         RANDOM,
         MAPS,
         CONNECTIVITY;
