@@ -132,7 +132,7 @@ public class Cohort extends ArrayList<School> {
         for (School school : this) {
             if (school.willDisappear()) {
                 // cohorts in the area during the time step
-                if (!(outOfZoneCohort[getSimulation().getIndexTime()])) {
+                if (!(outOfZoneCohort[getSimulation().getIndexTimeYear()])) {
                     school.getCell().remove(school);
                 }
                 schoolsToRemove.add(school);

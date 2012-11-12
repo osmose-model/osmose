@@ -253,7 +253,7 @@ public class Species {
             larvalSurvival += larvalMortalityRates[iStep];
         }
         larvalSurvival /= larvalMortalityRates.length;
-        System.out.println("Species " + name + " larval mortality " + larvalSurvival);
+        //System.out.println("Species " + name + " larval mortality " + larvalSurvival);
     }
 
     private Osmose getOsmose() {
@@ -393,7 +393,7 @@ public class Species {
 
         for (int j = 0; j < nbCohorts; j++) {
             Cohort cohort = tabCohorts[j];
-            if ((j == 0) || cohort.isOut(getSimulation().getIndexTime())) {
+            if ((j == 0) || cohort.isOut(getSimulation().getIndexTimeYear())) {
                 // Linear growth for eggs and migrating schools
                 for (School school : cohort) {
                     school.setLength(school.getLength() + deltaMeanLength[j]);
@@ -448,7 +448,7 @@ public class Species {
         /*
          * Incoming flux
          */
-        double biomassIn = biomassFluxIn * seasonSpawning[getSimulation().getIndexTime()];
+        double biomassIn = biomassFluxIn * seasonSpawning[getSimulation().getIndexTimeYear()];
         float meanWeigthIn = (float) (c * Math.pow(meanLengthIn, bPower));
         long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
         tabCohorts[ageMeanIn].setAbundance(abundanceIn);
@@ -483,7 +483,10 @@ public class Species {
             tempTL += tabSchoolsRanked.get(i).trophicLevel[tabSchoolsRanked.get(i).getCohort().getAgeNbDt()] * tabSchoolsRanked.get(i).getBiomass();
         }
 
-        double nbEggs = sexRatio * alpha * seasonSpawning[getSimulation().getIndexTime()] * SSB * 1000000;
+        double season = seasonSpawning.length > getSimulation().getNbTimeStepsPerYear()
+                ? seasonSpawning[getSimulation().getIndexTimeSimu()]
+                : seasonSpawning[getSimulation().getIndexTimeYear()];
+        double nbEggs = sexRatio * alpha * season * SSB * 1000000;
 
         //MAKING COHORTS GOING UP to the UPPER AGE CLASS
         //species, age, caseLeftUpAireCoh, tabCasesAireCoh do not change

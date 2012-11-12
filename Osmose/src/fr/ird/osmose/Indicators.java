@@ -40,7 +40,7 @@ public class Indicators {
     public static void updateAndWriteIndicators() {
         
         int year = getSimulation().getYear();
-        int index = getSimulation().getIndexTime();
+        int index = getSimulation().getIndexTimeYear();
         int nStepsYear = getSimulation().getNbTimeStepsPerYear();
         int nStepsRecord = getOsmose().savingDtMatrix[getOsmose().numSerie];
         //
@@ -73,7 +73,7 @@ public class Indicators {
             //
             // WRITE
             if (((index + 1) % nStepsRecord) == 0) {
-                float time = getSimulation().getYear() + (getSimulation().getIndexTime() + 1f) / (float) nStepsYear;
+                float time = getSimulation().getYear() + (getSimulation().getIndexTimeYear() + 1f) / (float) nStepsYear;
                 // Mean size
                 if (getOsmose().isMeanSizeOutput()) {
                     writeMeanSizes(time);
@@ -941,7 +941,7 @@ public class Indicators {
         
         double nsteps = getOsmose().savingDtMatrix[getOsmose().numSerie];
         int year = getSimulation().getYear();
-        int indexSaving = (int) (getSimulation().getIndexTime() / nsteps);
+        int indexSaving = (int) (getSimulation().getIndexTimeYear() / nsteps);
         for (int i = 0; i < nSpec; i++) {
             if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
                 abundanceTot[i] = Math.floor(abundanceTot[i] / nsteps);

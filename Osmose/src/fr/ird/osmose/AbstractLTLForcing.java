@@ -204,7 +204,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         pr = new PrintWriter(planktonTime, true);
 
         for (int j = 0; j < getGrid().getNbLines(); j++) {
-            pr.print(getSimulation().getYear() + getSimulation().getIndexTime() / (float) getSimulation().getNbTimeStepsPerYear());
+            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getSimulation().getNbTimeStepsPerYear());
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
                 for (int i = 0; i < getGrid().getNbColumns(); i++) {
@@ -230,7 +230,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         filename.append("osm_integrated_Y");
         filename.append((getSimulation().getYear() + 1));
         filename.append("S");
-        filename.append((getSimulation().getIndexTime() + 1));
+        filename.append((getSimulation().getIndexTimeYear() + 1));
         filename.append(".nc");
         File file = new File(path, filename.toString());
         file.getParentFile().mkdirs();

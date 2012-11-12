@@ -575,7 +575,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         pr = new PrintWriter(planktonTime, true);
 
         for (int j = 0; j < getGrid().getNbLines(); j++) {
-            pr.print(getSimulation().getYear() + getSimulation().getIndexTime() / (float) getSimulation().getNbTimeStepsPerYear());
+            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getSimulation().getNbTimeStepsPerYear());
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
                 for (int i = 0; i < getGrid().getNbColumns(); i++) {
@@ -604,10 +604,10 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         for (int k = 0; k < getSimulation().getNbTimeStepsPerYear(); k++) {
             for (int i = 0; i < planktonDimX; i++) {
                 for (int j = 0; j < planktonDimY; j++) {
-                    phyto1.setDouble(ima.set(k, i, j), (double) saveMortality[0][i][j][getSimulation().getIndexTime()]);
-                    phyto2.setDouble(ima.set(k, i, j), (double) saveMortality[1][i][j][getSimulation().getIndexTime()]);
-                    zoo1.setDouble(ima.set(k, i, j), (double) saveMortality[2][i][j][getSimulation().getIndexTime()]);
-                    zoo2.setDouble(ima.set(k, i, j), (double) saveMortality[3][i][j][getSimulation().getIndexTime()]);
+                    phyto1.setDouble(ima.set(k, i, j), (double) saveMortality[0][i][j][getSimulation().getIndexTimeYear()]);
+                    phyto2.setDouble(ima.set(k, i, j), (double) saveMortality[1][i][j][getSimulation().getIndexTimeYear()]);
+                    zoo1.setDouble(ima.set(k, i, j), (double) saveMortality[2][i][j][getSimulation().getIndexTimeYear()]);
+                    zoo2.setDouble(ima.set(k, i, j), (double) saveMortality[3][i][j][getSimulation().getIndexTimeYear()]);
                 }
             }
         }
@@ -770,7 +770,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         pr = new PrintWriter(planktonTime, true);
 
         for (int j = 0; j < getGrid().getNbLines(); j++) {
-            pr.print(getSimulation().getYear() + getSimulation().getIndexTime() / (float) getSimulation().getNbTimeStepsPerYear());
+            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getSimulation().getNbTimeStepsPerYear());
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
                 for (int i = 0; i < getGrid().getNbColumns(); i++) {
@@ -792,7 +792,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         for (int x = 0; x < planktonDimX; x++) {
             for (int y = 0; y < planktonDimY; y++) {
                 for (int p = 0; p < nbPlankton; p++) {
-                    saveMortality[p][x][y][getSimulation().getIndexTime()] = (planktonList[p].getAccessibilityCoeff() / 2f) * (getSimulation().getNbTimeStepsPerYear() / 365f);
+                    saveMortality[p][x][y][getSimulation().getIndexTimeYear()] = (planktonList[p].getAccessibilityCoeff() / 2f) * (getSimulation().getNbTimeStepsPerYear() / 365f);
                 }
             }
         }
@@ -806,7 +806,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
                             for (int p = 0; p < nbPlankton; p++) {
                                 xTemp = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
                                 yTemp = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
-                                saveMortality[p][xTemp][yTemp][getSimulation().getIndexTime()] = planktonList[p].mortalityRate[i][j];
+                                saveMortality[p][xTemp][yTemp][getSimulation().getIndexTimeYear()] = planktonList[p].mortalityRate[i][j];
                             }
                         }
                     } else {
@@ -838,7 +838,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
                                     xTemp = ((Integer) getGrid().getCell(i - 1, j).icoordLTLGrid.elementAt(k)).intValue();
                                     yTemp = ((Integer) getGrid().getCell(i - 1, j).jcoordLTLGrid.elementAt(k)).intValue();
 
-                                    saveMortality[p][xTemp][yTemp][getSimulation().getIndexTime()] += planktonList[p].mortalityRate[i - 1][j] / (float) nbCellsTemp;
+                                    saveMortality[p][xTemp][yTemp][getSimulation().getIndexTimeYear()] += planktonList[p].mortalityRate[i - 1][j] / (float) nbCellsTemp;
                                 }
                             }
                         }
@@ -848,7 +848,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
                                     xTemp = ((Integer) getGrid().getCell(i + 1, j).icoordLTLGrid.elementAt(k)).intValue();
                                     yTemp = ((Integer) getGrid().getCell(i + 1, j).jcoordLTLGrid.elementAt(k)).intValue();
 
-                                    saveMortality[p][xTemp][yTemp][getSimulation().getIndexTime()] += planktonList[p].mortalityRate[i + 1][j] / (float) nbCellsTemp;
+                                    saveMortality[p][xTemp][yTemp][getSimulation().getIndexTimeYear()] += planktonList[p].mortalityRate[i + 1][j] / (float) nbCellsTemp;
                                 }
                             }
                         }
@@ -859,7 +859,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
                                     xTemp = ((Integer) getGrid().getCell(i, j - 1).icoordLTLGrid.elementAt(k)).intValue();
                                     yTemp = ((Integer) getGrid().getCell(i, j - 1).jcoordLTLGrid.elementAt(k)).intValue();
 
-                                    saveMortality[p][xTemp][yTemp][getSimulation().getIndexTime()] += planktonList[p].mortalityRate[i][j - 1] / (float) nbCellsTemp;
+                                    saveMortality[p][xTemp][yTemp][getSimulation().getIndexTimeYear()] += planktonList[p].mortalityRate[i][j - 1] / (float) nbCellsTemp;
                                 }
                             }
                         }
@@ -870,7 +870,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
                                     xTemp = ((Integer) getGrid().getCell(i, j + 1).icoordLTLGrid.elementAt(k)).intValue();
                                     yTemp = ((Integer) getGrid().getCell(i, j + 1).jcoordLTLGrid.elementAt(k)).intValue();
 
-                                    saveMortality[p][xTemp][yTemp][getSimulation().getIndexTime()] += planktonList[p].mortalityRate[i][j + 1] / (float) nbCellsTemp;
+                                    saveMortality[p][xTemp][yTemp][getSimulation().getIndexTimeYear()] += planktonList[p].mortalityRate[i][j + 1] / (float) nbCellsTemp;
                                 }
                             }
                         }

@@ -1912,8 +1912,12 @@ public class Simulation {
         return year;
     }
 
-    public int getIndexTime() {
+    public int getIndexTimeYear() {
         return i_step_year;
+    }
+    
+    public int getIndexTimeSimu() {
+        return i_step_simu;
     }
 
     public static void shuffleArray(int[] a) {
