@@ -248,25 +248,29 @@ public class Simulation {
         return getAbundance(school) * (1.d - Math.exp(-D));
     }
 
-    private double getFishingMortalityRate(School school, int subdt) {
-        Species spec = school.getCohort().getSpecies();
-        return spec.fishingRates[isFishingInterannual ? i_step_simu : i_step_year] / subdt;
+     private double getFishingMortalityRate(School school, int subdt) {
+        if (isFishable(school)) {
+            Species spec = school.getCohort().getSpecies();
+            return spec.fishingRates[isFishingInterannual ? i_step_simu : i_step_year] / subdt;
+        } else {
+            return 0.d;
+        }
+    }
+
+    private boolean isFishable(School school) {
+        // Test whether fishing applies to this school
+        // 1. School is recruited
+        // 2. School is catchable (no MPA and no out of zone)
+        int indexRecruitAge = Math.round(school.getCohort().getSpecies().recruitAge * nbTimeStepsPerYear);
+        return (school.getCohort().getAgeNbDt() >= indexRecruitAge)
+                && school.isCatchable();
     }
 
     private double computeFishingMortality(School school, int subdt) {
 
-        Species spec = school.getCohort().getSpecies();
-        int indexRecruitAge = Math.round(spec.recruitAge * nbTimeStepsPerYear);
         double F = getFishingMortalityRate(school, subdt);
-        // Test whether fishing applies to this school
-        // 1. F != 0
-        // 2. School is recruited
-        // 3. School is catchable (no MPA and no out of zone)
-        boolean isFishable = (F != 0)
-                && (school.getCohort().getAgeNbDt() >= indexRecruitAge)
-                && school.isCatchable();
         double nDead = 0;
-        if (isFishable) {
+        if (F > 0) {
             nDead = getAbundance(school) * (1 - Math.exp(-F));
         }
         return nDead;
