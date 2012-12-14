@@ -248,7 +248,7 @@ public class Simulation {
         return getAbundance(school) * (1.d - Math.exp(-D));
     }
 
-     private double getFishingMortalityRate(School school, int subdt) {
+    private double getFishingMortalityRate(School school, int subdt) {
         if (isFishable(school)) {
             Species spec = school.getCohort().getSpecies();
             return spec.fishingRates[isFishingInterannual ? i_step_simu : i_step_year] / subdt;
@@ -1570,35 +1570,70 @@ public class Simulation {
                 // currently located
                 int iCell = school.getCell().getIndex();
                 ConnectivityLine cline = matrix.clines.get(iCell);
-                if (null == cline) {
-                    throw new NullPointerException("Could not find line associated to cell " + iCell + " in connectivity matrix " + school.getCell().isLand());
+
+                if (!school.getCell().isLand() && null == cline) { // TD ~~
+                    //if (null == cline) { // TD ~~
+                    throw new NullPointerException("Could not find line associated to cell "
+                            + iCell + " in connectivity matrix " + " ;isLand= " + school.getCell().isLand());
                 }
-                // computes the cumulative sum of this connectivity line
-                float[] cumSum = cumSum(cline.connectivity);
-                // choose the new cell
-                float random = (float) (Math.random() * cumSum[cumSum.length - 1]);
-                System.out.println(cumSum[cumSum.length - 1] + " " + random);
-                int iRandom = cumSum.length - 1;
-                while (random < cumSum[iRandom] && iRandom > 0) {
-                    iRandom--;
-                }
-                // here it is just a trick to say that we choosed the cell
-                // associated to iRandom using existing functions.
-                List<Cell> newCell = new ArrayList();
-                newCell.add(getGrid().getCell(cline.indexCells[iRandom]));
-                school.randomDeal(newCell);
-                school.communicatePosition();
-                System.out.println("I was in cell " + iCell + " and moving to cell " + school.getCell().getIndex() + " " + cline.connectivity[iRandom]);
+
+
+                // TD CHANGE 23.10.12
+                // Lines with only 0 come with length = 0
+                // cumsum can't work with it
+                // workaround: run cumsum only if length > 0 (otherwise keep initial 0 values)
+
+                // computes the cumulative sum of this connectivity line   
+                if (!school.getCell().isLand() && cline.connectivity.length > 0) { //++TD
+
+                    float[] cumSum = cumSum(cline.connectivity);
+
+                    //TD DEBUG 29.10.2012
+                    //if (indexTime >= (5 * nbTimeStepsPerYear) && school.getCell().isLand()) {
+                    if (i_step_year >= 1 && school.getCell().isLand()) {
+                        System.out.println("SCHOOL SWIMMING OUT OF THE POOL! <-----------------------------------");
+                    }
+                    //TD DEBUG 29.10.2012
+                    // choose the new cell
+                    // TD ~~ 24.10.2012
+                    //float random = (float) (Math.random() * cumSum[cumSum.length - 1]); // random 0-1 * plus grande valeur de cumsum (dernière valeur) --> ???
+                    //System.out.println("cumSum[cumSum.length - 1]: " + cumSum[cumSum.length - 1] + " random: " + random );
+                    // alternative : TD ~~
+                    float random = (float) (Math.random()); //TD ~~
+                    int iRandom = cumSum.length - 1; // on prend le dernier de la liste
+                    while (random < cumSum[iRandom] && iRandom > 0) { // et on redescend progressivement la liste jusqu'à trouver une valeur inférieure à random
+                        iRandom--;
+                    }
+                    // here it is just a trick to say that we choosed the cell
+                    // associated to iRandom using existing functions.
+                    List<Cell> newCell = new ArrayList();
+                    newCell.add(getGrid().getCell(cline.indexCells[iRandom]));
+                    school.randomDeal(newCell);
+                    school.communicatePosition();
+                    //TD ~
+                    // System.out.println("I was in cell " + iCell + " and moving to cell " + school.getCell().getIndex() + " " + cline.connectivity[iRandom]);
+                }//++TD
             }
         }
     }
 
     private float[] cumSum(float[] connectivity) {
+
+
         float[] cumSum = new float[connectivity.length];
         cumSum[0] = connectivity[0];
+
         for (int i = 1; i < cumSum.length; i++) {
             cumSum[i] += cumSum[i - 1] + connectivity[i];
         }
+
+        // TD ~~ 24.10.2012  --> normalisation cumSum
+        for (int i = 0; i < cumSum.length; i++) {
+            //System.out.println(cumSum[i] + "------------------------------>"); 
+            cumSum[i] += cumSum[i] / cumSum[cumSum.length - 1];
+            //System.out.println(cumSum[i] + "------------------------------>");
+        } // FIN TD ~~ 24.10.2012  --> normalisation cumSum
+        
         return cumSum;
     }
 
@@ -1919,7 +1954,7 @@ public class Simulation {
     public int getIndexTimeYear() {
         return i_step_year;
     }
-    
+
     public int getIndexTimeSimu() {
         return i_step_simu;
     }

@@ -75,9 +75,9 @@ public class ConnectivityMatrix {
             // Récupérer le nombre de cellules avec connectivité non nulle sur une ligne (pour une cellule donnée)
             for (String str : line) {
                 float val = Float.valueOf(str);
-                if (val > 0) {
-                    nCells++;
-                }
+                // if (val > 0) { // TD --
+                nCells++;
+                // } // TD --
             }
             indexCells = new int[nCells];
             connectivity = new float[nCells];
@@ -86,14 +86,13 @@ public class ConnectivityMatrix {
             int i = 0;
             for (int iCell = 0; iCell < line.length; iCell++) {
                 float val = Float.valueOf(line[iCell]);
-                if (val > 0) {
-                    indexCells[i] = iCell;
-                    connectivity[i] = val;
-                    i++;
-                }
+                //if (val > 0) {  // TD --
+                indexCells[i] = iCell;
+                connectivity[i] = val;
+                i++;
+                //}  // TD --
             }
         }
-
 //        private void cumSum() {
 //            cumSum = new float[connectivity.length];
 //            for (int i = 1; i < cumSum.length; i++) {
