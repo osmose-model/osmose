@@ -3221,7 +3221,12 @@ public class Osmose {
     public void runSimulation() {
 
         while (simulation.getYear() < simulationTimeTab[numSerie]) {
-            simulation.step();
+            if (Simulation.NEW_ALGO) {
+                simulation.step();
+            } else {
+                simulation.detailledStep();
+                //simulation.oldstep();
+            }
         }
     }
 
