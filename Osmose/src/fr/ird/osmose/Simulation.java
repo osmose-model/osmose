@@ -49,7 +49,7 @@ public class Simulation {
      * compete with each other. Stochasticity at both school and mortality
      * process levels.
      */
-    public static final AlgoMortality ALGO_MORTALITY = AlgoMortality.CASE3;
+    public static final AlgoMortality ALGO_MORTALITY = AlgoMortality.CASE1;
     /*
      * If not NEW_ALGO, whether processes should apply at school level or not.
      */
@@ -440,7 +440,7 @@ public class Simulation {
                 : abundance;
     }
 
-    public double[] computePredation(School predator, int subdt) {
+public double[] computePredation(School predator, int subdt) {
 
         Cell cell = predator.getCell();
         int nFish = cell.size();
@@ -464,6 +464,9 @@ public class Simulation {
 
         // Compute the potential biomass that predators could prey upon
         double biomassToPredate = computeBiomassToPredate(predator, subdt);
+        if (!NEW_ALGO) {
+            predator.biomassToPredate = biomassToPredate;
+        }
 
         // Distribute the predation over the preys
         if (biomAccessibleTot != 0) {
