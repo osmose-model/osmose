@@ -791,7 +791,7 @@ public double[] computePredation(School predator, int subdt) {
                     school.tagForRemoval();
                 }
                 school.getCohort().nbDeadDd += nDead;
-                school.nDeadNatural = nDead;
+                //school.nDeadNatural = nDead;
             }
             updateBiomassAndAbundance();
 
@@ -816,7 +816,7 @@ public double[] computePredation(School predator, int subdt) {
                             if (ipr < ns) {
                                 School prey = cell.get(ipr);
                                 nDeadPredation[ipr] += prey.biom2abd(preyUpon[ipr]);
-                                prey.nDeadPredation += nDeadPredation[ipr];
+                                prey.nDeadPredation += prey.biom2abd(preyUpon[ipr]);
                             }
                         }
                         predator.preyedBiomass = sum(preyUpon);
@@ -850,7 +850,7 @@ public double[] computePredation(School predator, int subdt) {
                     school.setAbundance(0);
                     school.tagForRemoval();
                 }
-                school.nDeadStarvation = nDead;
+                //school.nDeadStarvation = nDead;
             }
             updateBiomassAndAbundance();
 
@@ -872,7 +872,7 @@ public double[] computePredation(School predator, int subdt) {
                             school.tagForRemoval();
                         }
                         school.getCohort().nbDeadFf += nDead;
-                        school.nDeadFishing = nDead;
+                        //school.nDeadFishing = nDead;
                     }
                 }
             }
@@ -883,7 +883,7 @@ public double[] computePredation(School predator, int subdt) {
             for (Species spe : species) {
                 spe.computeMortalityRates();
             }
-
+            
             // Save steps
             Indicators.updateAndWriteIndicators();
             if (getOsmose().spatializedOutputs[numSerie]) {
