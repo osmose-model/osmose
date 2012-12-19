@@ -98,7 +98,15 @@ public class Plankton {
      * Converts plankton biomass (usually from mmolN/m2) to tons/km2
      */
     public float unitConversion(float concentration) {
+        // @WS2009
+        //return biomToProd(concentration * conversionFactor);
+        
+        // @SCHOOL2012
         return concentration * conversionFactor;
+    }
+
+    public float biomToProd(float biomass) {
+        return biomass * prodBiomFactor / (float) getSimulation().getNbTimeStepsPerYear();
     }
 
     /*

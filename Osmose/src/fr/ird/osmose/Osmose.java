@@ -3219,13 +3219,16 @@ public class Osmose {
     }
 
     public void runSimulation() {
+        
+        boolean NEW_STEP = Simulation.VERSION.equals(Simulation.Version.CASE1)
+                || Simulation.VERSION.equals(Simulation.Version.CASE2)
+                || Simulation.VERSION.equals(Simulation.Version.CASE3);
 
         while (simulation.getYear() < simulationTimeTab[numSerie]) {
-            if (Simulation.NEW_ALGO) {
-                simulation.step();
+            if (NEW_STEP) {
+                simulation.newStep();
             } else {
-                simulation.detailledStep();
-                //simulation.oldstep();
+                simulation.oldStep();
             }
         }
     }

@@ -18,7 +18,6 @@ import fr.ird.osmose.util.SchoolLengthComparator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Vector;
 
 public class Species {
 
@@ -386,9 +385,6 @@ public class Species {
             double Ftot = Math.log(abundanceStage[iStage] / (abundanceStage[iStage] - nDeadTot));
             for (int iDeath = 0; iDeath < 4; iDeath++) {
                 mortalityRate[iDeath][iStage] = Ftot * nDead[iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iStage]);
-                if (Double.isNaN(mortalityRate[iDeath][iStage])) {
-                    //System.out.println(name + " stage: " + iStage + " death: " + iDeath + " nDead:  " + nDead[iDeath][iStage] + " Ftot: " + Ftot + " abd: " + abundanceStage[iStage]);
-                }
             }
         }
     }
@@ -655,59 +651,5 @@ public class Species {
         if (nbCohorts != nbCohorts) {
             System.out.println("nb= " + nbCohorts + " ,   length = " + nbCohorts);
         }
-    }
-    
-    public void fishingA() // with recruit AGE as metric, calendar age
-    {
-        long nbSurplusDead = 0;
-        int indexRecruitAge = Math.round(recruitAge * getSimulation().getNbTimeStepsPerYear());
-
-            for (int i = indexRecruitAge; i < nbCohorts; i++) {
-                if (getCohort(i).getAbundance() != 0) {
-                    nbSurplusDead += getCohort(i).fishing1((float)getSimulation().getFishingMortalityRate(getCohort(i).get(0), 1));
-                }
-            }
-
-            if (nbSurplusDead != 0) //case not enough fish in a cohort -> surplus affected to other cohorts
-            {
-                Vector vectCohCatchable = new Vector(nbCohorts);
-                long abdCatchableTot = 0;
-                for (int i = indexRecruitAge; i < nbCohorts; i++) {
-                    if (getCohort(i).getAbundance() != 0) {
-                        vectCohCatchable.addElement(getCohort(i));
-                        abdCatchableTot += getCohort(i).getAbundanceCatchable();
-                    }
-                }
-                if (nbSurplusDead >= abdCatchableTot) // not enough fish even in other cohorts
-                {
-                    for (int i = indexRecruitAge; i < nbCohorts; i++) {
-                        List<School> schoolsToRemove = new ArrayList();
-                        for (School school : getCohort(i)) {
-                            if (school.isCatchable()) {
-                                if (!(getCohort(i).isOut(getSimulation().getIndexTimeYear()))) {
-                                    school.getCell().remove(school);
-                                }
-                                school.tagForRemoval();
-                                schoolsToRemove.add(school);
-                            }
-                        }
-                        // remove schools
-                        getCohort(i).removeAll(schoolsToRemove);
-                        
-                        getCohort(i).setAbundance(getCohort(i).getAbundance() - getCohort(i).getAbundanceCatchable());
-                        getCohort(i).setNbDeadFf((long) (getCohort(i).getNbDeadFf() + getCohort(i).getAbundanceCatchable()));
-                    }
-
-                } else // enough fish in other cohorts
-                {
-                    long abdToCatch;
-                    for (int i = 0; i < vectCohCatchable.size(); i++) {
-                        abdToCatch = Math.round(((double) nbSurplusDead)
-                                * ((Cohort) vectCohCatchable.elementAt(i)).getAbundanceCatchable() / abdCatchableTot);
-                        ((Cohort) vectCohCatchable.elementAt(i)).fishingSurplus(abdToCatch);
-                    }
-                }
-            }
-        
     }
 }
