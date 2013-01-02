@@ -55,7 +55,7 @@ public interface IGrid {
      * @param cell
      * @return an ArrayList of the cells surrounding <code>cell</code>
      */
-    public ArrayList<Cell> getNeighborCells(Cell cell);
+    public ArrayList<Cell> getNeighbourCells(Cell cell);
 
     /*
      * Returns the number of cells of the grid that are not inland.

@@ -795,9 +795,9 @@ public class Osmose {
             return;
         }
     }
-    
+
     private void readReproductionFile(String csvFile) throws IOException {
-        
+
         try (CSVReader reader = new CSVReader(new FileReader(csvFile), ';')) {
             List<String[]> lines = reader.readAll();
             /*
@@ -1001,9 +1001,9 @@ public class Osmose {
             System.out.println("Reading error of fishing seasonality file");
         }
     }
-    
+
     private void readLarvalMortalityRates(String csvFile) throws IOException {
-        
+
         try (CSVReader reader = new CSVReader(new FileReader(csvFile), ';')) {
             List<String[]> lines = reader.readAll();
             /*
@@ -2130,6 +2130,14 @@ public class Osmose {
         return list;
     }
 
+    public float getMaxProbaPresence(int numMap) {
+        float tempMaxProbaPresence = 0;
+        for (int m = 0; m < mapCoordi[numMap].length; m++) {
+            tempMaxProbaPresence = Math.max(tempMaxProbaPresence, mapProbaPresence[numMap][m]);
+        }
+        return tempMaxProbaPresence;
+    }
+
     public String getMapDetails(int numMap) {
         StringBuilder str = new StringBuilder();
         str.append("Map: ");
@@ -2202,7 +2210,7 @@ public class Osmose {
             int index = 0;
             while (index < (tabCellsArea.length - 1)) {
                 for (int iCell = iFirstSorted; iCell <= iLastSorted; iCell++) {
-                    ArrayList<Cell> neigbors = grid.getNeighborCells(tabCellsArea[iCell]);
+                    ArrayList<Cell> neigbors = grid.getNeighbourCells(tabCellsArea[iCell]);
                     Iterator<Cell> iter = neigbors.iterator();
                     while ((index < (tabCellsArea.length - 1)) && iter.hasNext()) {
                         Cell cell = iter.next();
@@ -3219,7 +3227,7 @@ public class Osmose {
     }
 
     public void runSimulation() {
-        
+
         boolean NEW_STEP = Simulation.VERSION.equals(Simulation.Version.CASE1)
                 || Simulation.VERSION.equals(Simulation.Version.CASE2)
                 || Simulation.VERSION.equals(Simulation.Version.CASE3);

@@ -800,7 +800,9 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         // realize the interpolation in the other way than mapInterpolation()
         for (int i = 0; i < getGrid().getNbLines(); i++) {
             for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                if ((!getGrid().getCell(i, j).isLand()) && (getGrid().getCell(i, j).getNbMapsConcerned() != 0)) {
+                // phv 2013-01-02 Deleted condition getCell(i, j).getNbMapsConcerned() since function has been removed
+                //if ((!getGrid().getCell(i, j).isLand()) && (getGrid().getCell(i, j).getNbMapsConcerned() != 0)) {
+                if (!getGrid().getCell(i, j).isLand()) {
                     if (getGrid().getCell(i, j).getNbCellsLTLGrid() != 0) {
                         for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
                             for (int p = 0; p < nbPlankton; p++) {

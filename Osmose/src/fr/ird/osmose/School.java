@@ -15,9 +15,6 @@ package fr.ird.osmose;
  * @version 2.1
  * *******************************************************************************
  */
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class School {
 
@@ -37,11 +34,6 @@ public class School {
      * Species of the school
      */
     private Species species;
-    /*
-     * Index of the cell (i,j) phv: do not understand yet. @see
-     * Simulation.distributeSpeciesIni()
-     */
-    int indexij;
     /*
      * length of the individuals in the school in centimeters
      */
@@ -221,17 +213,9 @@ public class School {
     public double adb2biom(double abundance) {
         return abundance * weight / 1.e6d;
     }
-
-    /**
-     * Randomly choose one cell out the list of cells.
-     *
-     * @param cells, the list of cells for the random deal.
-     */
-    public void randomDeal(List<Cell> cells) {
-
-        // indexij to test the probability of presence
-        indexij = (int) Math.round((cells.size() - 1) * Math.random());
-        cell = cells.get(indexij);
+    
+    public void moveToCell(Cell cell) {
+        this.cell = cell;
     }
 
     /**
@@ -255,36 +239,6 @@ public class School {
             cell.remove(this);
             unlocated = true;
         }
-    }
-
-    /**
-     * Randomly move the school in one of the neighbor cells (including the
-     * current cell).
-     */
-    public void randomWalk() {
-
-        /*
-         * Create a list of the accessible cells => neighbor cells that are not
-         * in land + current cell
-         */
-        List<Cell> accessibleCells = new ArrayList();
-        Iterator<Cell> neighbors = getGrid().getNeighborCells(cell).iterator();
-        while (neighbors.hasNext()) {
-            Cell neighbor = neighbors.next();
-            if (!neighbor.isLand()) {
-                accessibleCells.add(neighbor);
-            }
-        }
-        accessibleCells.add(cell);
-
-        /*
-         * Randomly choose the new cell
-         */
-        randomDeal(accessibleCells);
-    }
-
-    private IGrid getGrid() {
-        return getOsmose().getGrid();
     }
 
     public void updateAccessStage(float[] ageStages, int nbAccessStages) {
@@ -543,5 +497,19 @@ public class School {
 
     public float getSumDiet() {
         return sumDiet;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder("School");
+        str.append( "\n  Species: ");
+        str.append(getCohort().getSpecies().getName());
+        str.append("\n  Cohort: ");
+        float ageInYear = getCohort().getAgeNbDt() / (float) getSimulation().getNbTimeStepsPerYear();
+        str.append(ageInYear);
+        str.append(" [year]");
+        str.append("\n  Cell: ");
+        str.append(cell.getIndex());
+        return str.toString();
     }
 }

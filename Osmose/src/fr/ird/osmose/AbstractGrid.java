@@ -111,7 +111,8 @@ public abstract class AbstractGrid implements IGrid {
     }
 
     /**
-     * Get the adjacent cells of a given cell. Cells are randomly sorted.
+     * Get the adjacent cells of a given cell (cell included).
+     * Cells are randomly sorted.
      *
      * @see Collections.shuffle() For cell(i, j) returns 8 surrounding cells:
      * cell(i - 1, j - 1) cell(i - 1, j) cell(i - 1, j + 1) cell(i, j - 1)
@@ -122,26 +123,26 @@ public abstract class AbstractGrid implements IGrid {
      * <code>cell</code>
      */
     @Override
-    public ArrayList<Cell> getNeighborCells(Cell cell) {
+    public ArrayList<Cell> getNeighbourCells(Cell cell) {
 
         int im1 = Math.max(cell.get_igrid() - 1, 0);
         int ip1 = Math.min(cell.get_igrid() + 1, getNbLines() - 1);
         int jm1 = Math.max(cell.get_jgrid() - 1, 0);
         int jp1 = Math.min(cell.get_jgrid() + 1, getNbColumns() - 1);
 
-        ArrayList<Cell> neighbors = new ArrayList();
+        ArrayList<Cell> neighbours = new ArrayList();
 
         for (int i = im1; i <= ip1; i++) {
             for (int j = jm1; j <= jp1; j++) {
-                neighbors.add(matrix[i][j]);
+                neighbours.add(matrix[i][j]);
             }
         }
-        neighbors.remove(cell);
+        //neighbors.remove(cell);
         /*
          * Random sorting of the adjacent cells
          */
-        Collections.shuffle(neighbors);
-        return neighbors;
+        Collections.shuffle(neighbours);
+        return neighbours;
     }
 
     /*

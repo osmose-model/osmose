@@ -58,10 +58,6 @@ public class Cell extends ArrayList<School> {
      */
     private boolean alreadyChosen;
     /*
-     * list of the maps in which this cell is involved
-     */
-    Vector numMapsConcerned;
-    /*
      * For spatial interpolation with the grid of
      * a LTL (low trophic levels) model.
      * Positions of the cells of the LTL grid used to compute the LTL biomass
@@ -93,7 +89,6 @@ public class Cell extends ArrayList<School> {
         this.lon = lon;
         this.land = land;
         mpa = false;
-        numMapsConcerned = new Vector();
         icoordLTLGrid = new Vector();
         jcoordLTLGrid = new Vector();
     }
@@ -171,14 +166,6 @@ public class Cell extends ArrayList<School> {
     }
 
     /**
-     * The number of distribution maps in which this cell is involved
-     * @return the nbMapsConcerned
-     */
-    public int getNbMapsConcerned() {
-        return numMapsConcerned.size();
-    }
-
-    /**
      * @return the alreadyChosen
      */
     public boolean isAlreadyChosen() {
@@ -215,7 +202,7 @@ public class Cell extends ArrayList<School> {
         Collections.sort(this, new SchoolLengthComparator());
     }
     
-    final public static IGrid getGrid() {
+    public static IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
     
@@ -235,6 +222,23 @@ public class Cell extends ArrayList<School> {
         str.append("  mpa? ");
         str.append(mpa);
         return str.toString();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Cell) {
+            Cell otherCell = (Cell) other;
+            return otherCell.get_igrid() == i && otherCell.get_jgrid() == j;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 17 * hash + this.i;
+        hash = 17 * hash + this.j;
+        return hash;
     }
 }
 
