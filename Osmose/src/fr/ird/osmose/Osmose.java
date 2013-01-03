@@ -1879,8 +1879,6 @@ public class Osmose {
                         break;
                     case CONNECTIVITY:
                         readConnectivity(st, iSpec, indexMap);
-                        speciesAreasSizeTab[numSerie][iSpec] = (int) (0.75 * getGrid().getNumberAvailableCells());
-                        distribRandom(iSpec);
                         break;
                 }
             }
@@ -1898,12 +1896,10 @@ public class Osmose {
         /*
          * Initial distribution of the scools
          */
-        simulation.distributeSpeciesIni();
+        simulation.distributeSpecies();
     }
 
     private void readConnectivity(StreamTokenizer st, int iSpec, int indexMap) throws IOException {
-
-        System.out.println("Reading connectivity matric for " + getSimulation().getSpecies(iSpec).getName() + " map " + indexMap);
 
         areasNumSpForMap[indexMap] = iSpec;
         /*
@@ -1933,28 +1929,29 @@ public class Osmose {
             areasTempDt[indexMap][k] = new Integer(st.sval).intValue() - 1;
         }
         /*
-         * Read the name of the connectivity file and load the matrix If
-         * name = "null" it means the species is out of the simulated domain
-         * at these age-class and time-step
+         * read the name of the CSV file and load the map if name = "null"
+         * it means the species is out of the simulated domain at these
+         * age-class and time-step
          */
         st.nextToken();
         if (!"null".equals(st.sval)) {
             String csvFile = resolveFile(st.sval);
-            connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
-            /*
-             * Set the numero of maps per species, age class and time step
-             */
-            for (int m = 0; m < areasTempAge[indexMap].length; m++) {
-                for (int n = 0; n < areasTempDt[indexMap].length; n++) {
-                    for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                        if ((areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[indexMap]).getNumberCohorts()) {
-                            numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h][areasTempDt[indexMap][n]] = indexMap;
-                        }
-                    }
-                }
-            }
+            readCSVMap(csvFile, indexMap);
+            System.out.println("Loaded map " + indexMap + " " + csvFile);
         }
-        System.out.println("Connectivity matrix loaded");
+        /*
+         * Read the name of the connectivity file and load the matrix If
+         * name = "null" it means the species is out of the simulated domain
+         * at these age-class and time-step or the map is not connected to any
+         * other one so there is no need for a connectivity matrix
+         */
+        st.nextToken();
+        if (!"null".equals(st.sval)) {
+            System.out.println("Reading connectivity matric for " + getSimulation().getSpecies(iSpec).getName() + " map " + indexMap);
+            String csvFile = resolveFile(st.sval);
+            connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
+            System.out.println("Connectivity matrix loaded");
+        }
     }
 
     private void readAreaCSV(StreamTokenizer st, int iSpec, int indexMap) throws IOException {

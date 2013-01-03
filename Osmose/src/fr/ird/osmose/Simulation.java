@@ -1559,24 +1559,6 @@ public class Simulation {
         }
     }
 
-    /*
-     * ***NEW: correspond to distributeSpecies for initialization
-     */
-    public void distributeSpeciesIni() {
-
-        for (int iSpec = 0; iSpec < species.length; iSpec++) {
-            switch (getOsmose().spatialDistribution[iSpec]) {
-                case RANDOM:
-                case CONNECTIVITY:
-                    randomDistribution(iSpec);
-                    break;
-                case MAPS:
-                    mapsDistribution(iSpec);
-                    break;
-            }
-        }
-    }
-
     private void randomDistribution(int iSpec) {
 
         List<Cell> cells = new ArrayList(getOsmose().randomAreaCoordi[iSpec].length);
@@ -1694,6 +1676,13 @@ public class Simulation {
     private List<Cell> getAccessibleCells(School school, List<Cell> map) {
 
         Cell cell = school.getCell();
+        if (!map.contains(cell)) {
+            StringBuilder str = new StringBuilder("Inconsistency in moving ");
+            str.append(school.toString());
+            str.append("\n");
+            str.append("It is not in the geographical area it is supposed to be...");
+            System.out.println(str.toString());
+        }
         List<Cell> accessibleCells = new ArrayList();
         // 1. Get all surrounding cells
         Iterator<Cell> neighbours = getGrid().getNeighbourCells(cell).iterator();
@@ -1727,16 +1716,126 @@ public class Simulation {
         }
         return accessibleCells;
     }
+    
+    private void connectivityDistribution(int iSpec) {
+
+        // Loop over the cohorts
+        for (int j = 0; j < species[iSpec].getNumberCohorts(); j++) {
+            /*
+             * Do not distribute cohorts that are presently out of
+             * the simulated area.
+             */
+            if (species[iSpec].getCohort(j).isOut(i_step_year)) {
+                for (School school : species[iSpec].getCohort(j)) {
+                    school.moveOut();
+                }
+                continue; // go to next cohort, skip code that follows
+            }
+
+            // Get current map and max probability of presence
+            int numMap = getOsmose().numMap[iSpec][j][i_step_year];
+            List<Cell> map = getOsmose().getMap(numMap);
+            float tempMaxProbaPresence = getOsmose().getMaxProbaPresence(numMap);
+
+            // init = true if either cohort zero or first time-step of the simulation
+            boolean init = (j == 0) | (i_step_simu == 0);
+            /*
+             * boolean sameMap
+             * Check whether the map has changed from previous cohort
+             * and time-step.
+             */
+            boolean sameMap = false;
+            if (j > 0 && i_step_simu > 0) {
+                int oldTime;
+                if (i_step_year == 0) {
+                    oldTime = nbTimeStepsPerYear - 1;
+                } else {
+                    oldTime = i_step_year - 1;
+                }
+                if (numMap == getOsmose().numMap[iSpec][j - 1][oldTime]) {
+                    sameMap = true;
+                }
+            }
+
+            // Move the school
+            for (School school : species[iSpec].getCohort(j)) {
+                if (init || school.isUnlocated()) {
+                    /*
+                     * Random distribution in a map, either because it is cohort
+                     * zero or first time-step or because the
+                     * school was unlocated due to migration.
+                     */
+                    int indexCell;
+                    do {
+                        indexCell = (int) Math.round((map.size() - 1) * Math.random());
+                    } while (getOsmose().mapProbaPresence[getOsmose().numMap[iSpec][j][i_step_year]][indexCell] < Math.random() * tempMaxProbaPresence);
+                    school.moveToCell(map.get(indexCell));
+                } else if (sameMap) {
+                    // Random move in adjacent cells contained in the map.
+                    school.moveToCell(randomDeal(getAccessibleCells(school, map)));
+                } else {
+                    connectivityMoveSchool(school, numMap);
+                }
+                // Validate the move
+                school.communicatePosition();
+            } // end loop school
+        } // end loop cohort
+    }
+    
+    private void connectivityMoveSchool(School school, int numMap) {
+        // get the connectivity matrix associated to object school
+        // species i, cohort j and time step indexTime.
+        ConnectivityMatrix matrix = getOsmose().connectivityMatrix[numMap];
+        // get the connectivity of the cell where the school is
+        // currently located
+        int iCell = school.getCell().getIndex();
+        ConnectivityLine cline = matrix.clines.get(iCell);
+
+        if (!school.getCell().isLand() && null == cline) { // TD ~~
+            //if (null == cline) { // TD ~~
+            throw new NullPointerException("Could not find line associated to cell "
+                    + iCell + " in connectivity matrix " + " ;isLand= " + school.getCell().isLand());
+        }
+
+        // TD CHANGE 23.10.12
+        // Lines with only 0 come with length = 0
+        // cumsum can't work with it
+        // workaround: run cumsum only if length > 0 (otherwise keep initial 0 values)
+
+        // computes the cumulative sum of this connectivity line   
+        if (!school.getCell().isLand() && cline.connectivity.length > 0) { //++TD
+
+            float[] cumSum = cumSum(cline.connectivity);
+
+            //TD DEBUG 29.10.2012
+            //if (indexTime >= (5 * nbTimeStepsPerYear) && school.getCell().isLand()) {
+            if (i_step_year >= 1 && school.getCell().isLand()) {
+                System.out.println("SCHOOL SWIMMING OUT OF THE POOL! <-----------------------------------");
+            }
+            //TD DEBUG 29.10.2012
+            // choose the new cell
+            // TD ~~ 24.10.2012
+            //float random = (float) (Math.random() * cumSum[cumSum.length - 1]); // random 0-1 * plus grande valeur de cumsum (dernière valeur) --> ???
+            //System.out.println("cumSum[cumSum.length - 1]: " + cumSum[cumSum.length - 1] + " random: " + random );
+            // alternative : TD ~~
+            float random = (float) (Math.random()); //TD ~~
+            int iRandom = cumSum.length - 1; // on prend le dernier de la liste
+            while (random < cumSum[iRandom] && iRandom > 0) { // et on redescend progressivement la liste jusqu'à trouver une valeur inférieure à random
+                iRandom--;
+            }
+            school.moveToCell(getGrid().getCell(cline.indexCells[iRandom]));
+        }
+    }
 
     /**
      *
      * @param iSpec , the index of the Species
      */
-    private void connectivityDistribution(int iSpec) {
+    private void oldConnectivityDistribution(int iSpec) {
         // WARNING : migration is not implemented in this function yet
         // we assume all schools are in the domain at all time and every age
 
-        // cohort zero : random deal
+        // cohort zero : map distribution
         List<Cell> cells = new ArrayList(getOsmose().randomAreaCoordi[iSpec].length);
         for (int m = 0; m < getOsmose().randomAreaCoordi[iSpec].length; m++) {
             cells.add(getGrid().getCell(getOsmose().randomAreaCoordi[iSpec][m], getOsmose().randomAreaCoordj[iSpec][m]));
