@@ -205,17 +205,6 @@ public class Simulation {
         }
     }
 
-    private void clearNbDeadArrays() {
-        for (int i = 0; i < species.length; i++) {
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                species[i].getCohort(j).setNbDeadPp(0);
-                species[i].getCohort(j).setNbDeadSs(0);
-                species[i].getCohort(j).setNbDeadDd(0);
-                species[i].getCohort(j).setNbDeadFf(0);
-            }
-        }
-    }
-
     private void updateStages() {
         for (int i = 0; i < species.length; i++) {
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
@@ -555,8 +544,7 @@ public class Simulation {
         // Loop over the year
         while (i_step_year < nbTimeStepsPerYear) {
 
-            // Clear some tables and update some stages at the begining of the step
-            clearNbDeadArrays();
+            // Update some stages at the begining of the step
             updateStages();
 
             // Update LTL Data
@@ -634,8 +622,7 @@ public class Simulation {
         // Loop over the year
         while (i_step_year < nbTimeStepsPerYear) {
 
-            // Clear some tables and update some stages at the begining of the step
-            clearNbDeadArrays();
+            // Update some stages at the begining of the step
             updateStages();
 
             // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
@@ -662,7 +649,6 @@ public class Simulation {
                     school.setAbundance(0);
                     school.tagForRemoval();
                 }
-                school.getCohort().nbDeadDd += nDead;
                 //school.nDeadNatural = nDead;
             }
             updateBiomassAndAbundance();
@@ -743,7 +729,6 @@ public class Simulation {
                             school.getCohort().setNbSchoolsCatchable(school.getCohort().getNbSchoolsCatchable() - 1);
                             school.tagForRemoval();
                         }
-                        school.getCohort().nbDeadFf += nDead;
                         //school.nDeadFishing = nDead;
                     }
                 }
@@ -1270,7 +1255,6 @@ public class Simulation {
                     if (school.isCatchable() && j >= indexRecruitAge) {
                         cohort.incrementAbundanceCatchable(school.getAbundance());
                         // update fihsing indicators
-                        cohort.nbDeadFf += school.nDeadFishing;
                         species[i].nSchoolCatch[iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] += school.nDeadFishing;
                         species[i].sizeSchoolCatch[iSchool + species[i].cumulCatch[cohort.getAgeNbDt() - 1]] = school.getLength();
                         if ((getYear()) >= getOsmose().timeSeriesStart) {

@@ -543,11 +543,6 @@ public class Species {
             System.out.println("PB of number of cohorts at the update stage: not equals to the initial number of cohorts");
             // Morgane 03-2007
         }
-
-        // UPDATE LENGTHS and MEAN WEIGHTS of AGE CLASSES
-        for (int i = 0; i < nbCohorts; i++) {
-            getCohort(i).calculMeanGrowth();
-        }
     }
 
     /**
