@@ -1572,11 +1572,22 @@ public class Simulation {
                 } else {
                     school.moveToCell(randomDeal(getAccessibleCells(school)));
                 }
-                school.communicatePosition();
+                validateMove(school);
             }
         }
     }
-
+    
+    private void moveOut(School school) {
+        if (!school.isUnlocated()) {
+            school.getCell().remove(school);
+            school.setOffGrid();
+        }
+    }
+    
+    private void validateMove(School school) {
+        school.getCell().add(school);
+    }
+  
     private void mapsDistribution(int iSpec) {
 
         // Loop over the cohorts
@@ -1587,7 +1598,7 @@ public class Simulation {
              */
             if (species[iSpec].getCohort(j).isOut(i_step_year)) {
                 for (School school : species[iSpec].getCohort(j)) {
-                    school.moveOut();
+                    moveOut(school);
                 }
                 continue; // go to next cohort, skip code that follows
             }
@@ -1634,7 +1645,7 @@ public class Simulation {
                     school.moveToCell(randomDeal(getAccessibleCells(school, map)));
                 }
                 // Validate the move
-                school.communicatePosition();
+                validateMove(school);
             } // end loop school
         } // end loop cohort
     }
@@ -1727,7 +1738,7 @@ public class Simulation {
              */
             if (species[iSpec].getCohort(j).isOut(i_step_year)) {
                 for (School school : species[iSpec].getCohort(j)) {
-                    school.moveOut();
+                    moveOut(school);
                 }
                 continue; // go to next cohort, skip code that follows
             }
@@ -1777,7 +1788,7 @@ public class Simulation {
                     connectivityMoveSchool(school, numMap);
                 }
                 // Validate the move
-                school.communicatePosition();
+                validateMove(school);
             } // end loop school
         } // end loop cohort
     }
@@ -1842,7 +1853,7 @@ public class Simulation {
         }
         for (School school : species[iSpec].getCohort(0)) {
             school.moveToCell(randomDeal(cells));
-            school.communicatePosition();
+            validateMove(school);
         }
         // other cohorts
         for (int j = 1; j < species[iSpec].getNumberCohorts(); j++) {
@@ -1890,7 +1901,7 @@ public class Simulation {
                         iRandom--;
                     }
                     school.moveToCell(getGrid().getCell(cline.indexCells[iRandom]));
-                    school.communicatePosition();
+                    validateMove(school);
                     //TD ~
                     // System.out.println("I was in cell " + iCell + " and moving to cell " + school.getCell().getIndex() + " " + cline.connectivity[iRandom]);
                 }//++TD
