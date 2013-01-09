@@ -35,15 +35,7 @@ public class Cohort extends ArrayList<School> {
      * Biomass [ton] of the cohort
      */
     private double biomass;
-    /*
-     * Number of catchable schools (~ not in MPA areas)
-     */
-    private int nbSchoolsCatchable;
-    /*
-     * Abundance of catchable schools
-     */
-    private double abundanceCatchable;
-
+    
 //////////////
 // Constructor
 //////////////
@@ -148,40 +140,5 @@ public class Cohort extends ArrayList<School> {
      */
     public void setBiomass(double biomass) {
         this.biomass = biomass;
-    }
-
-    /**
-     * @return the nbSchoolsCatchable
-     */
-    public int getNbSchoolsCatchable() {
-        return nbSchoolsCatchable;
-    }
-
-    /**
-     * @param nbSchoolsCatchable the nbSchoolsCatchable to set
-     */
-    public void setNbSchoolsCatchable(int nbSchoolsCatchable) {
-        this.nbSchoolsCatchable = nbSchoolsCatchable;
-    }
-
-    /**
-     * @param nbSchoolsCatchable the nbSchoolsCatchable to set
-     */
-    public void incrementAbundanceCatchable(double abundanceCatchable) {
-        this.abundanceCatchable += abundanceCatchable;
-    }
-
-    /**
-     * @return the abundanceCatchable
-     */
-    public double getAbundanceCatchable() {
-        return abundanceCatchable;
-    }
-
-    /**
-     * @param abundanceCatchable the abundanceCatchable to set
-     */
-    public void setAbundanceCatchable(double abundanceCatchable) {
-        this.abundanceCatchable = abundanceCatchable;
     }
 }

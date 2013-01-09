@@ -58,6 +58,7 @@ public class Species {
      * * Indicators * ************** MORGANE 07-2004 Those attributes are used
      * for the calculation of indicators.
      */
+    int[] nbSchoolsCatchable; // number of schools catchable per age class
     int nbSchoolsTotCatch;	//nb of schools fished per species
     int[] cumulCatch;           //dim of 3 tables=nbSchoolsTotCatch
     float[] nSchoolCatch;	//fished schools sorted according to their size
@@ -261,7 +262,8 @@ public class Species {
         // migration
         outOfZoneMortality = new float[nbCohorts][getSimulation().getNbTimeStepsPerYear()];
         outOfZoneCohort = new boolean[nbCohorts][getSimulation().getNbTimeStepsPerYear()];
-
+        
+        nbSchoolsCatchable = new int[nbCohorts];
     }
 
     private Osmose getOsmose() {
