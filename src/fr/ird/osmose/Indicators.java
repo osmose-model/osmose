@@ -305,7 +305,7 @@ public class Indicators {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             for (School school : getSimulation().getSpecies(i).getSchools()) {
                 int ageClass1 = (int) Math.max(1, school.getCohort().getSpecies().supAgeOfClass0);
-                if ((school.getBiomass() > 0) && (school.getCohort().getAgeNbDt() >= ageClass1)) {
+                if ((school.getBiomass() > 0) && (school.getAge() >= ageClass1)) {
                     distribTL[i][getTLRank(school)] += school.getBiomass();
                 }
             }
@@ -315,7 +315,7 @@ public class Indicators {
     private static int getTLRank(School school) {
         
         int iTL = getOsmose().tabTL.length - 1;
-        while (school.trophicLevel[school.getCohort().getAgeNbDt()] <= getOsmose().tabTL[iTL] && (iTL > 0)) {
+        while (school.trophicLevel[school.getAge()] <= getOsmose().tabTL[iTL] && (iTL > 0)) {
             iTL--;
         }
         return iTL;

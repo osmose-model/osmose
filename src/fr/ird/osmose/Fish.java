@@ -63,9 +63,9 @@ public class Fish extends GridPoint {
      */
     String speciesName;
     /*
-     * age of the fish in seconds
+     * Age of the fish expressed in number of time steps.
      */
-    long age;
+    int age;
     /*
      * length of the individuals in the school in centimeters
      */
@@ -124,7 +124,7 @@ public class Fish extends GridPoint {
         return speciesName;
     }
 
-    public long getAge() {
+    public int getAge() {
         return age;
     }
     
@@ -219,7 +219,7 @@ public class Fish extends GridPoint {
     public void updateAccessStage(float[] ageStages, int nbAccessStages) {
         accessibilityStage = 0;
         for (int i = 1; i < nbAccessStages; i++) {
-            if (getCohort().getAgeNbDt() >= ageStages[i - 1]) {
+            if (getAge() >= ageStages[i - 1]) {
                 accessibilityStage++;
             }
         }

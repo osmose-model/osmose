@@ -28,10 +28,6 @@ public class Cohort extends ArrayList<School> {
      */
     private Species species;
     /*
-     * Age of the cohort expressed in number of time steps.
-     */
-    private int ageNbDt;
-    /*
      * Abundance of the cohort, number of individuals
      */
     private double abundance;
@@ -68,7 +64,6 @@ public class Cohort extends ArrayList<School> {
     public Cohort(Species species, int ageNbDt, long abundance, double biomass,
             float iniLength, float iniWeight) {
         this.species = species;
-        this.ageNbDt = ageNbDt;
 
         outOfZoneMortality = new float[getSimulation().getNbTimeStepsPerYear()];
         outOfZoneCohort = new boolean[getSimulation().getNbTimeStepsPerYear()];
@@ -85,7 +80,7 @@ public class Cohort extends ArrayList<School> {
             int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
             ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                add(new School(this, abundance / nbSchools, iniLength, iniWeight));
+                add(new School(this, abundance / nbSchools, iniLength, iniWeight, ageNbDt));
             }
         }
     }
@@ -132,13 +127,6 @@ public class Cohort extends ArrayList<School> {
      */
     public Species getSpecies() {
         return species;
-    }
-
-    /**
-     * @return the ageNbDt
-     */
-    public int getAgeNbDt() {
-        return ageNbDt;
     }
 
     /**

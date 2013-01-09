@@ -50,11 +50,12 @@ public class School extends Fish {
      * @param length [cm] of the individual
      * @param weight [g] of the individual
      */
-    public School(Cohort cohort, double abundance, float length, float weight) {
+    public School(Cohort cohort, double abundance, float length, float weight, int age) {
         super(cohort);
         this.abundance = abundance;
         this.length = length;
         this.weight = weight;
+        this.age = age;
 
         // initialize school variables
         init();
@@ -79,17 +80,17 @@ public class School extends Fish {
          * Initialisation of the previous age because predation is based on TL
          * at the previous time step
          */
-        if (cohort.getAgeNbDt() == 0) {
+        if (age == 0) {
             /*
              * Egg stage
              */
             trophicLevel[0] = species.TLeggs;
         }
-        if (cohort.getAgeNbDt() != 0) {
+        if (age != 0) {
             /*
              * 2011/04/11 phv : do not understand since TLeggs = 3 as well...
              */
-            trophicLevel[cohort.getAgeNbDt() - 1] = 3f;
+            trophicLevel[age - 1] = 3f;
         }
         /*
          * Initialisation of stage
@@ -187,7 +188,7 @@ public class School extends Fish {
         str.append( "\n  Species: ");
         str.append(getCohort().getSpecies().getName());
         str.append("\n  Cohort: ");
-        float ageInYear = getCohort().getAgeNbDt() / (float) getSimulation().getNbTimeStepsPerYear();
+        float ageInYear = getAge() / (float) getSimulation().getNbTimeStepsPerYear();
         str.append(ageInYear);
         str.append(" [year]");
         str.append("\n  Cell: ");
