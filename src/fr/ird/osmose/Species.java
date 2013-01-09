@@ -400,22 +400,16 @@ public class Species {
     }
 
     public void growth() {
-
-        for (int j = 0; j < nbCohorts; j++) {
-            Cohort cohort = tabCohorts[j];
+        
+        for (School school : getSchools()) {
+            int j = school.getAge();
             if ((j == 0) || isOut(j, getSimulation().getIndexTimeYear())) {
                 // Linear growth for eggs and migrating schools
-                for (School school : cohort) {
-                    school.setLength(school.getLength() + deltaMeanLength[j]);
-                    school.setWeight((float) (c * Math.pow(school.getLength(), bPower)));
-                }
+                school.setLength(school.getLength() + deltaMeanLength[j]);
+                school.setWeight((float) (c * Math.pow(school.getLength(), bPower)));
             } else {
                 // Growth based on predation success
-                if (cohort.getAbundance() != 0) {
-                    for (School school : cohort) {
-                        school.growth(minDelta[j], maxDelta[j], c, bPower);
-                    }
-                }
+                school.growth(minDelta[j], maxDelta[j], c, bPower);
             }
         }
     }
@@ -429,20 +423,13 @@ public class Species {
      * for species that do not reproduce in the simulated domain.
      */
     public void incomingFlux() {
-        /*
-         * Update Cohort biomass
-         */
-        for (int i = 0; i < nbCohorts; i++) {
-            getCohort(i).setBiomass(0);
-            for (int j = 0; j < getCohort(i).size(); j++) {
-                getCohort(i).setBiomass(getCohort(i).getBiomass() + getSchool(i, j).getBiomass());
-            }
-        }
+        
         /*
          * Making cohorts going up to the upper age class
          */
         for (int i = nbCohorts - 1; i > ageMeanIn; i--) {
-            getCohort(i).upperAgeClass(tabCohorts[i - 1]);
+            getCohort(i).clear();
+            getCohort(i).addAll(tabCohorts[i - 1]);
             for (int j = 0; j < getCohort(i).size(); j++) {
                 getSchool(i, j).age += 1;
             }
@@ -451,8 +438,6 @@ public class Species {
          * Reset all cohorts younger than ageMeanIn
          */
         for (int i = ageMeanIn - 1; i > 0; i--) {
-            tabCohorts[i].setAbundance(0);
-            tabCohorts[i].setBiomass(0);
             tabCohorts[i].clear();
         }
         /*
@@ -461,8 +446,6 @@ public class Species {
         double biomassIn = biomassFluxIn * seasonSpawning[getSimulation().getIndexTimeYear()];
         float meanWeigthIn = (float) (c * Math.pow(meanLengthIn, bPower));
         long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
-        tabCohorts[ageMeanIn].setAbundance(abundanceIn);
-        tabCohorts[ageMeanIn].setBiomass(biomassIn);
         tabCohorts[ageMeanIn].clear();
         int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
         if (abundanceIn > 0 && abundanceIn < nbSchools) {
@@ -501,7 +484,8 @@ public class Species {
         //MAKING COHORTS GOING UP to the UPPER AGE CLASS
         //species, age, caseLeftUpAireCoh, tabCasesAireCoh do not change
         for (int i = nbCohorts - 1; i > 0; i--) {
-            getCohort(i).upperAgeClass(tabCohorts[i - 1]);
+            getCohort(i).clear();
+            getCohort(i).addAll(tabCohorts[i - 1]);
             for (int j = 0; j < getCohort(i).size(); j++) {
                 getSchool(i, j).age += 1;
             }
@@ -509,8 +493,6 @@ public class Species {
 
         //UPDATE AGE CLASS 0
         Cohort coh0 = tabCohorts[0];
-        coh0.setAbundance(nbEggs);
-        coh0.setBiomass(nbEggs * eggWeight / 1000000.);
         coh0.clear();
         int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
         if (nbEggs == 0.d) {
@@ -520,7 +502,7 @@ public class Species {
         } else if (nbEggs >= nbSchools) {
             coh0.ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                coh0.add(new School(this, coh0.getAbundance() / nbSchools, eggSize, eggWeight, 0));
+                coh0.add(new School(this, nbEggs / nbSchools, eggSize, eggWeight, 0));
             }
         }
         coh0.trimToSize();

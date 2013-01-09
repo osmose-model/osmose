@@ -22,15 +22,6 @@ public class Cohort extends ArrayList<School> {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    /*
-     * Abundance of the cohort, number of individuals
-     */
-    private double abundance;
-    /*
-     * Biomass [ton] of the cohort
-     */
-    private double biomass;
-    
 //////////////
 // Constructor
 //////////////
@@ -45,8 +36,6 @@ public class Cohort extends ArrayList<School> {
      */
     public Cohort(Species species, int age, long abundance, double biomass,
             float iniLength, float iniWeight) {
-        this.abundance = abundance;
-        this.biomass = biomass;
         if (biomass > 0.d) {
             int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
             ensureCapacity(nbSchools);
@@ -65,48 +54,5 @@ public class Cohort extends ArrayList<School> {
 
     public School getSchool(int index) {
         return get(index);
-    }
-
-    public void upperAgeClass(Cohort upperAgerCohort) {
-        clear();
-        addAll(upperAgerCohort);
-        abundance = upperAgerCohort.getAbundance();
-        biomass = upperAgerCohort.getBiomass();
-    }
-
-    /**
-     * @return the abundance
-     */
-    public double getAbundance() {
-        return abundance;
-    }
-
-    public void incrementAbundance(double abundance) {
-        this.abundance += abundance;
-    }
-
-    /**
-     * @param abundance the abundance to set
-     */
-    public void setAbundance(double abundance) {
-        this.abundance = abundance;
-    }
-
-    /**
-     * @return the biomass
-     */
-    public double getBiomass() {
-        return biomass;
-    }
-
-    public void incrementBiomass(double biomass) {
-        this.biomass += biomass;
-    }
-
-    /**
-     * @param biomass the biomass to set
-     */
-    public void setBiomass(double biomass) {
-        this.biomass = biomass;
     }
 }

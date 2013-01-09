@@ -249,14 +249,14 @@ public class Indicators {
         
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
-            for (int j = 0; j < species.getNumberCohorts(); j++) {
+            for (School school : species.getSchools()) {
                 if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
-                    biomassTot[i] += species.getCohort(j).getBiomass();
-                    abundanceTot[i] += species.getCohort(j).getAbundance();
+                    biomassTot[i] += school.getBiomass();
+                    abundanceTot[i] += school.getAbundance();
                 }
-                if (j >= species.indexAgeClass0) {
-                    biomassNoJuv[i] += species.getCohort(j).getBiomass();
-                    abundanceNoJuv[i] += species.getCohort(j).getAbundance();
+                if (school.getAge() >= species.indexAgeClass0) {
+                    biomassNoJuv[i] += school.getBiomass();
+                    abundanceNoJuv[i] += school.getAbundance();
                 }
             }
         }
@@ -266,8 +266,10 @@ public class Indicators {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
             double abundance = 0.d;
-            for (int j = species.indexAgeClass0; j < species.getNumberCohorts(); j++) {
-                abundance += species.getCohort(j).getAbundance();
+            for (School school : species.getSchools()) {
+                if (school.getAge() >= species.indexAgeClass0) {
+                    abundance += school.getAbundance();
+                }
             }
             meanSize[i] += species.meanSize * abundance;
             meanSizeCatch[i] += species.meanSizeCatch * species.yieldN;
@@ -786,8 +788,10 @@ public class Indicators {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
             double biomass = 0.d;
-            for (int j = species.indexAgeClass0; j < species.getNumberCohorts(); j++) {
-                biomass += species.getCohort(j).getBiomass();
+            for (School school : species.getSchools()) {
+                if (school.getAge() >= species.indexAgeClass0) {
+                    biomass += school.getBiomass();
+                }
             }
             meanTL[i] += species.meanTLSpe * biomass;
             tabTLCatch[i] += species.tabTLCatch;

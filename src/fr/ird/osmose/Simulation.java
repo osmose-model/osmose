@@ -207,12 +207,10 @@ public class Simulation {
 
     private void updateStages() {
         for (int i = 0; i < species.length; i++) {
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                    ((School) species[i].getCohort(j).getSchool(k)).updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
-                    ((School) species[i].getCohort(j).getSchool(k)).updateAccessStage(getOsmose().accessStageThreshold[i], getOsmose().nbAccessStage[i]);
-                    ((School) species[i].getCohort(j).getSchool(k)).updateDietOutputStage(species[i].dietStagesTab, species[i].nbDietStages);
-                }
+            for (School school : species[i].getSchools()) {
+                school.updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
+                school.updateAccessStage(getOsmose().accessStageThreshold[i], getOsmose().nbAccessStage[i]);
+                school.updateDietOutputStage(species[i].dietStagesTab, species[i].nbDietStages);
             }
         }
     }
@@ -226,10 +224,8 @@ public class Simulation {
         // update biomass
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
             for (int i = 0; i < species.length; i++) {
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                        Indicators.biomPerStage[i][((School) species[i].getCohort(j).getSchool(k)).dietOutputStage] += ((School) species[i].getCohort(j).getSchool(k)).getBiomass();
-                    }
+                for (School school : species[i].getSchools()) {
+                    Indicators.biomPerStage[i][school.dietOutputStage] += school.getBiomass();
                 }
             }
             getForcing().saveForDiet();
@@ -1063,8 +1059,10 @@ public class Simulation {
             mortality = new double[getNbSpecies()][11];
             for (int i = 0; i < species.length; i++) {
                 int indexRecruitAge = Math.round(species[i].recruitAge * nbTimeStepsPerYear);
-                for (int j = indexRecruitAge; j < species[i].getNumberCohorts(); j++) {
-                    mortality[i][10] += species[i].getCohort(j).getAbundance();
+                for (School school : species[i].getSchools()) {
+                    if (school.getAge() >= indexRecruitAge) {
+                        mortality[i][10] += school.getAbundance();
+                    }
                 }
             }
         }
@@ -1229,16 +1227,11 @@ public class Simulation {
             species[i].resetAbundance();
             species[i].resetBiomass();
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                Cohort cohort = species[i].getCohort(j);
                 removeDeadSchools(species[i], j);
-                cohort.setAbundance(0.d);
-                cohort.setBiomass(0.d);
-                for (School school : cohort) {
-                    cohort.incrementAbundance(school.getAbundance());
-                    cohort.incrementBiomass(school.getBiomass());
-                }
-                species[i].incrementAbundance(cohort.getAbundance());
-                species[i].incrementBiomass(cohort.getBiomass());
+            }
+            for (School school : species[i].getSchools()) {
+                species[i].incrementAbundance(school.getAbundance());
+                species[i].incrementBiomass(school.getBiomass());
             }
         }
     }
@@ -1259,12 +1252,8 @@ public class Simulation {
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                 Cohort cohort = species[i].getCohort(j);
                 removeDeadSchools(species[i], j);
-                cohort.setAbundance(0.d);
-                cohort.setBiomass(0.d);
                 int iSchool = 0;
                 for (School school : cohort) {
-                    cohort.incrementAbundance(school.getAbundance());
-                    cohort.incrementBiomass(school.getBiomass());
                     school.updateDietVariables();
                     if (school.isCatchable() && j >= indexRecruitAge) {
                         // update fihsing indicators
@@ -1280,8 +1269,10 @@ public class Simulation {
                         iSchool++;
                     }
                 }
-                species[i].incrementAbundance(cohort.getAbundance());
-                species[i].incrementBiomass(cohort.getBiomass());
+            }
+            for (School school : species[i].getSchools()) {
+                species[i].incrementAbundance(school.getAbundance());
+                species[i].incrementBiomass(school.getBiomass());
             }
         }
     }
@@ -1508,51 +1499,6 @@ public class Simulation {
         Iterator<Cell> iterator = getGrid().getCells().iterator();
         while (iterator.hasNext()) {
             iterator.next().sortSchoolsByLength();
-        }
-    }
-
-    //update remaining schools in coh.vectSchools & vectPresentSchools(according to disappears)
-    public void assessNbSchools() {
-        for (int i = 0; i < species.length; i++) {
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                for (int k = species[i].getCohort(j).size() - 1; k >= 0; k--) {
-                    if (((School) species[i].getCohort(j).getSchool(k)).willDisappear()) {
-                        species[i].getCohort(j).remove(k);
-                    }
-                }
-                species[i].getCohort(j).trimToSize();
-            }
-        }
-    }
-
-    public void assessPresentSchools() {
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                for (int k = getGrid().getCell(i, j).size() - 1; k >= 0; k--) {
-                    if (((School) getGrid().getCell(i, j).getSchool(k)).willDisappear()) {
-                        getGrid().getCell(i, j).remove(k);
-                    }
-                }
-                getGrid().getCell(i, j).trimToSize();
-            }
-        }
-    }
-
-    public void assessAbdCohSpec() {
-        //update abd cohort and abd species
-        for (int i = 0; i < species.length; i++) {
-            species[i].resetAbundance();
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                species[i].getCohort(j).setAbundance(0);
-            }
-        }
-        for (int i = 0; i < species.length; i++) {
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                for (int k = 0; k < species[i].getCohort(j).size(); k++) {
-                    species[i].getCohort(j).incrementAbundance(species[i].getCohort(j).getSchool(k).getAbundance());
-                }
-                species[i].incrementAbundance(species[i].getCohort(j).getAbundance());
-            }
         }
     }
 
@@ -1959,12 +1905,10 @@ public class Simulation {
             for (int i = 0; i < species.length; i++) {
                 species[i].nbSchoolsTotCatch = 0;
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    Cohort cohij = species[i].getCohort(j);
-                    species[i].nbSchoolsCatchable[j] = cohij.size();
-                    for (int k = 0; k < cohij.size(); k++) {
-                        School schoolk = (School) cohij.getSchool(k);
-                        schoolk.setCatchable(true);
-                    }
+                    species[i].nbSchoolsCatchable[j] = species[i].getCohort(j).size();
+                }
+                for (School school : species[i].getSchools()) {
+                    school.setCatchable(true);
                 }
                 species[i].cumulCatch[0] = 0;
                 species[i].cumulCatch[0] = species[i].nbSchoolsCatchable[0];
@@ -1980,19 +1924,14 @@ public class Simulation {
             for (int i = 0; i < species.length; i++) {
                 species[i].nbSchoolsTotCatch = 0;
                 for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    Cohort cohij = species[i].getCohort(j);
-                    species[i].nbSchoolsCatchable[j] = 0;
-                    //cohij.schoolsCatchable = new Vector(getOsmose().nbSchools[numSerie]);
-                    for (int k = 0; k < cohij.size(); k++) {
-                        School schoolk = (School) cohij.getSchool(k);
-                        if (schoolk.isUnlocated() || schoolk.getCell().isMPA()) {
-                            schoolk.setCatchable(false);
+                    for (School school : species[i].getSchools()) {
+                        if (school.isUnlocated() || school.getCell().isMPA()) {
+                            school.setCatchable(false);
                         } else {
-                            schoolk.setCatchable(true);
+                            school.setCatchable(true);
                             species[i].nbSchoolsCatchable[j] += 1;
                         }
                     }
-                    //cohij.schoolsCatchable.trimToSize();
                 }
                 species[i].cumulCatch[0] = 0;
                 species[i].cumulCatch[0] = species[i].nbSchoolsCatchable[0];
