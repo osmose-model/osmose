@@ -120,8 +120,8 @@ public class Fish extends GridPoint {
         species = cohort.getSpecies();
     }
 
-    public String getSpecies() {
-        return speciesName;
+    public Species getSpecies() {
+        return species;
     }
 
     public int getAge() {

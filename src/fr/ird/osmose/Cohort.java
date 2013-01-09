@@ -36,11 +36,6 @@ public class Cohort extends ArrayList<School> {
      */
     private double biomass;
     /*
-     *
-     */
-    private float[] outOfZoneMortality;
-    private boolean[] outOfZoneCohort;
-    /*
      * Number of catchable schools (~ not in MPA areas)
      */
     private int nbSchoolsCatchable;
@@ -64,16 +59,6 @@ public class Cohort extends ArrayList<School> {
     public Cohort(Species species, int ageNbDt, long abundance, double biomass,
             float iniLength, float iniWeight) {
         this.species = species;
-
-        outOfZoneMortality = new float[getSimulation().getNbTimeStepsPerYear()];
-        outOfZoneCohort = new boolean[getSimulation().getNbTimeStepsPerYear()];
-
-        for (int i = 0; i < getSimulation().getNbTimeStepsPerYear(); i++) {
-            // initialization by default
-            outOfZoneMortality[i] = 0;
-            outOfZoneCohort[i] = false;
-        }
-
         this.abundance = abundance;
         this.biomass = biomass;
         if (biomass > 0.d) {
@@ -106,7 +91,7 @@ public class Cohort extends ArrayList<School> {
         for (School school : this) {
             if (school.willDisappear()) {
                 // cohorts in the area during the time step
-                if (!(outOfZoneCohort[getSimulation().getIndexTimeYear()])) {
+                if (!species.isOut(school.getAge(), getSimulation().getIndexTimeYear())) {
                     school.getCell().remove(school);
                 }
                 schoolsToRemove.add(school);
@@ -163,22 +148,6 @@ public class Cohort extends ArrayList<School> {
      */
     public void setBiomass(double biomass) {
         this.biomass = biomass;
-    }
-
-    public float getOutMortality(int indexTime) {
-        return outOfZoneMortality[indexTime];
-    }
-
-    public void setOutMortality(int indexTime, float mortality) {
-        outOfZoneMortality[indexTime] = mortality;
-    }
-
-    public void setOut(int indexTime, boolean isOut) {
-        outOfZoneCohort[indexTime] = isOut;
-    }
-
-    public boolean isOut(int indexTime) {
-        return outOfZoneCohort[indexTime];
     }
 
     /**

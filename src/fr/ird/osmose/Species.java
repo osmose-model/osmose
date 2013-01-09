@@ -114,6 +114,9 @@ public class Species {
      */
     double[][] nDead, mortalityRate;
     double[] abundanceStage;
+    // Migration
+    private float[][] outOfZoneMortality;
+    private boolean[][] outOfZoneCohort;
 
     /**
      * Create a new species
@@ -254,6 +257,11 @@ public class Species {
         }
         larvalSurvival /= larvalMortalityRates.length;
         //System.out.println("Species " + name + " larval mortality " + larvalSurvival);
+        
+        // migration
+        outOfZoneMortality = new float[nbCohorts][getSimulation().getNbTimeStepsPerYear()];
+        outOfZoneCohort = new boolean[nbCohorts][getSimulation().getNbTimeStepsPerYear()];
+
     }
 
     private Osmose getOsmose() {
@@ -393,7 +401,7 @@ public class Species {
 
         for (int j = 0; j < nbCohorts; j++) {
             Cohort cohort = tabCohorts[j];
-            if ((j == 0) || cohort.isOut(getSimulation().getIndexTimeYear())) {
+            if ((j == 0) || isOut(j, getSimulation().getIndexTimeYear())) {
                 // Linear growth for eggs and migrating schools
                 for (School school : cohort) {
                     school.setLength(school.getLength() + deltaMeanLength[j]);
@@ -646,5 +654,21 @@ public class Species {
         if (nbCohorts != nbCohorts) {
             System.out.println("nb= " + nbCohorts + " ,   length = " + nbCohorts);
         }
+    }
+    
+    public boolean isOut(int age, int indexTime) {
+        return outOfZoneCohort[age][indexTime];
+    }
+    
+     public void setOut(int age, int indexTime, boolean isOut) {
+        outOfZoneCohort[age][indexTime] = isOut;
+    }
+    
+    public float getOutMortality(int age, int indexTime) {
+        return outOfZoneMortality[age][indexTime];
+    }
+
+    public void setOutMortality(int age, int indexTime, float mortality) {
+        outOfZoneMortality[age][indexTime] = mortality;
     }
 }

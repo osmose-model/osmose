@@ -2072,7 +2072,7 @@ public class Osmose {
                             //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
                         }
                         if (mapCoordi[indexMap].length == 0) {
-                            if (!simulation.getSpecies(areasNumSpForMap[indexMap]).getCohort((areasTempAge[indexMap][m] * nbDtMatrix[numSerie]) + h).isOut(areasTempDt[indexMap][n])) {
+                            if (!simulation.getSpecies(areasNumSpForMap[indexMap]).isOut((areasTempAge[indexMap][m] * nbDtMatrix[numSerie]) + h, areasTempDt[indexMap][n])) {
                                 System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(areasNumSpForMap[indexMap]).getName());
                             }
                         }
@@ -2290,8 +2290,8 @@ public class Osmose {
                             migrationTempMortality[numSpOutOfZone - 1][m] = (new Float(st.sval)).floatValue();
                             for (int n = 0; n < nbDtPerCase; n++) {
                                 for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(migrationTempAge[numSpOutOfZone - 1][m] * nbDtMatrix[numSerie] + h).setOut(migrationTempDt[numSpOutOfZone - 1][n], true);
-                                    simulation.getSpecies(numSpOutOfZone - 1).getCohort(migrationTempAge[numSpOutOfZone - 1][m] * nbDtMatrix[numSerie] + h).setOutMortality(migrationTempDt[numSpOutOfZone - 1][n], migrationTempMortality[numSpOutOfZone - 1][m]);
+                                    simulation.getSpecies(numSpOutOfZone - 1).setOut(migrationTempAge[numSpOutOfZone - 1][m] * nbDtMatrix[numSerie] + h, migrationTempDt[numSpOutOfZone - 1][n], true);
+                                    simulation.getSpecies(numSpOutOfZone - 1).setOutMortality(migrationTempAge[numSpOutOfZone - 1][m] * nbDtMatrix[numSerie] + h, migrationTempDt[numSpOutOfZone - 1][n], migrationTempMortality[numSpOutOfZone - 1][m]);
                                 }
                             }
                         }

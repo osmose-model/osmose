@@ -254,9 +254,9 @@ public class Simulation {
         double D;
         Species spec = school.getCohort().getSpecies();
         if (school.getAge() == 0) {
-            D = (spec.larvalMortalityRates[i_step_simu] + (spec.getCohort(0).getOutMortality(i_step_year) / (float) (nbTimeStepsPerYear))) / (float) subdt;
+            D = (spec.larvalMortalityRates[i_step_simu] + (spec.getOutMortality(0, i_step_year) / (float) (nbTimeStepsPerYear))) / (float) subdt;
         } else {
-            D = (spec.D + school.getCohort().getOutMortality(i_step_year)) / (float) (nbTimeStepsPerYear * subdt);
+            D = (spec.D + school.getSpecies().getOutMortality(school.getAge(), i_step_year)) / (float) (nbTimeStepsPerYear * subdt);
         }
         return D;
     }
@@ -1481,9 +1481,9 @@ public class Simulation {
     public List<School> getSchools() {
         ArrayList<School> schools = new ArrayList();
         for (Species sp : species) {
-            for (Cohort cohort : sp.getCohorts()) {
-                if (!cohort.isOut(i_step_year)) {
-                    schools.addAll(cohort);
+            for (int j = 0; j < sp.getNumberCohorts(); j++) {
+                if (!sp.isOut(j, i_step_year)) {
+                    schools.addAll(sp.getCohort(j));
                 }
             }
         }
@@ -1580,7 +1580,7 @@ public class Simulation {
              * Do not distribute cohorts that are presently out of
              * the simulated area.
              */
-            if (species[iSpec].getCohort(j).isOut(i_step_year)) {
+            if (species[iSpec].isOut(j, i_step_year)) {
                 for (School school : species[iSpec].getCohort(j)) {
                     moveOut(school);
                 }
@@ -1720,7 +1720,7 @@ public class Simulation {
              * Do not distribute cohorts that are presently out of
              * the simulated area.
              */
-            if (species[iSpec].getCohort(j).isOut(i_step_year)) {
+            if (species[iSpec].isOut(j, i_step_year)) {
                 for (School school : species[iSpec].getCohort(j)) {
                     moveOut(school);
                 }
@@ -2130,7 +2130,7 @@ public class Simulation {
              * Cell in water
              */
             for (School school : cell) {
-                if (school.getAge() > school.getCohort().getSpecies().indexAgeClass0 && !school.getCohort().isOut(i_step_year)) {
+                if (school.getAge() > school.getCohort().getSpecies().indexAgeClass0 && !school.getSpecies().isOut(school.getAge(), i_step_year)) {
                     nbSchools[school.getCohort().getSpecies().getIndex()] += 1;
                     biomass[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
                     abundance[school.getCohort().getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getAbundance();
