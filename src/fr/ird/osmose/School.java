@@ -50,8 +50,8 @@ public class School extends Fish {
      * @param length [cm] of the individual
      * @param weight [g] of the individual
      */
-    public School(Cohort cohort, double abundance, float length, float weight, int age) {
-        super(cohort);
+    public School(Species species, double abundance, float length, float weight, int age) {
+        super(species);
         this.abundance = abundance;
         this.length = length;
         this.weight = weight;
@@ -186,7 +186,7 @@ public class School extends Fish {
     public String toString() {
         StringBuilder str = new StringBuilder("School");
         str.append( "\n  Species: ");
-        str.append(getCohort().getSpecies().getName());
+        str.append(getSpecies().getName());
         str.append("\n  Cohort: ");
         float ageInYear = getAge() / (float) getSimulation().getNbTimeStepsPerYear();
         str.append(ageInYear);

@@ -16,17 +16,12 @@ package fr.ird.osmose;
  * *******************************************************************************
  */
 import java.util.ArrayList;
-import java.util.List;
 
 public class Cohort extends ArrayList<School> {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    /*
-     * Species of the cohort
-     */
-    private Species species;
     /*
      * Abundance of the cohort, number of individuals
      */
@@ -42,22 +37,21 @@ public class Cohort extends ArrayList<School> {
     /**
      *
      * @param species
-     * @param ageNbDt
+     * @param age
      * @param abundance
      * @param biomass
      * @param iniLength
      * @param iniWeight
      */
-    public Cohort(Species species, int ageNbDt, long abundance, double biomass,
+    public Cohort(Species species, int age, long abundance, double biomass,
             float iniLength, float iniWeight) {
-        this.species = species;
         this.abundance = abundance;
         this.biomass = biomass;
         if (biomass > 0.d) {
             int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
             ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                add(new School(this, abundance / nbSchools, iniLength, iniWeight, ageNbDt));
+                add(new School(species, abundance / nbSchools, iniLength, iniWeight, age));
             }
         }
     }
@@ -69,27 +63,8 @@ public class Cohort extends ArrayList<School> {
         return Osmose.getInstance();
     }
 
-    private Simulation getSimulation() {
-        return getOsmose().getSimulation();
-    }
-
     public School getSchool(int index) {
         return get(index);
-    }
-
-    public void removeDeadSchools() {
-
-        List<School> schoolsToRemove = new ArrayList();
-        for (School school : this) {
-            if (school.willDisappear()) {
-                // cohorts in the area during the time step
-                if (!species.isOut(school.getAge(), getSimulation().getIndexTimeYear())) {
-                    school.getCell().remove(school);
-                }
-                schoolsToRemove.add(school);
-            }
-        }
-        removeAll(schoolsToRemove);
     }
 
     public void upperAgeClass(Cohort upperAgerCohort) {
@@ -97,13 +72,6 @@ public class Cohort extends ArrayList<School> {
         addAll(upperAgerCohort);
         abundance = upperAgerCohort.getAbundance();
         biomass = upperAgerCohort.getBiomass();
-    }
-
-    /**
-     * @return the species
-     */
-    public Species getSpecies() {
-        return species;
     }
 
     /**

@@ -304,7 +304,7 @@ public class Indicators {
     public static void monitorTLDistribution() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             for (School school : getSimulation().getSpecies(i).getSchools()) {
-                int ageClass1 = (int) Math.max(1, school.getCohort().getSpecies().supAgeOfClass0);
+                int ageClass1 = (int) Math.max(1, school.getSpecies().supAgeOfClass0);
                 if ((school.getBiomass() > 0) && (school.getAge() >= ageClass1)) {
                     distribTL[i][getTLRank(school)] += school.getBiomass();
                 }
@@ -323,7 +323,7 @@ public class Indicators {
     
     public static void monitorPredation() {
         for (School school : getSimulation().getSchools()) {
-            int iSpec = school.getCohort().getSpecies().getIndex();
+            int iSpec = school.getSpecies().getIndex();
             nbStomachs[iSpec][school.dietOutputStage] += school.getAbundance();
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {

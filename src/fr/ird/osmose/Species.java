@@ -444,7 +444,7 @@ public class Species {
         for (int i = nbCohorts - 1; i > ageMeanIn; i--) {
             getCohort(i).upperAgeClass(tabCohorts[i - 1]);
             for (int j = 0; j < getCohort(i).size(); j++) {
-                getSchool(i, j).setCohort(getCohort(i));
+                getSchool(i, j).age += 1;
             }
         }
         /*
@@ -466,13 +466,13 @@ public class Species {
         tabCohorts[ageMeanIn].clear();
         int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
         if (abundanceIn > 0 && abundanceIn < nbSchools) {
-            tabCohorts[ageMeanIn].add(new School(tabCohorts[ageMeanIn], abundanceIn, meanLengthIn, meanWeigthIn, ageMeanIn));
+            tabCohorts[ageMeanIn].add(new School(this, abundanceIn, meanLengthIn, meanWeigthIn, ageMeanIn));
         } else if (abundanceIn >= nbSchools) {
             int mod = (int) (abundanceIn % nbSchools);
             int abdSchool = (int) (abundanceIn / nbSchools);
             for (int i = 0; i < nbSchools; i++) {
                 abdSchool += (i < mod) ? 1 : 0;
-                tabCohorts[ageMeanIn].add(new School(tabCohorts[ageMeanIn], abdSchool, meanLengthIn, meanWeigthIn, ageMeanIn));
+                tabCohorts[ageMeanIn].add(new School(this, abdSchool, meanLengthIn, meanWeigthIn, ageMeanIn));
             }
         }
         //System.out.println(name + " incoming flux " + biomassIn + " [tons] + ageIn: " + ageMeanIn);
@@ -503,7 +503,7 @@ public class Species {
         for (int i = nbCohorts - 1; i > 0; i--) {
             getCohort(i).upperAgeClass(tabCohorts[i - 1]);
             for (int j = 0; j < getCohort(i).size(); j++) {
-                getSchool(i, j).setCohort(getCohort(i));
+                getSchool(i, j).age += 1;
             }
         }
 
@@ -516,11 +516,11 @@ public class Species {
         if (nbEggs == 0.d) {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {
-            coh0.add(new School(coh0, nbEggs, eggSize, eggWeight, 0));
+            coh0.add(new School(this, nbEggs, eggSize, eggWeight, 0));
         } else if (nbEggs >= nbSchools) {
             coh0.ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                coh0.add(new School(coh0, coh0.getAbundance() / nbSchools, eggSize, eggWeight, 0));
+                coh0.add(new School(this, coh0.getAbundance() / nbSchools, eggSize, eggWeight, 0));
             }
         }
         coh0.trimToSize();

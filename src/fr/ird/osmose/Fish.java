@@ -51,10 +51,6 @@ package fr.ird.osmose;
 public class Fish extends GridPoint {
 
     /*
-     * Cohort of the School
-     */
-    Cohort cohort;
-    /*
      * Species of the school
      */
     Species species;
@@ -115,9 +111,8 @@ public class Fish extends GridPoint {
      */
     int dietOutputStage;
 
-    public Fish(Cohort cohort) {
-        this.cohort = cohort;
-        species = cohort.getSpecies();
+    public Fish(Species species) {
+        this.species = species;
     }
 
     public Species getSpecies() {
@@ -203,17 +198,6 @@ public class Fish extends GridPoint {
      */
     public void setCatchable(boolean catchable) {
         this.catchable = catchable;
-    }
-    
-    /**
-     * @return the cohort
-     */
-    public Cohort getCohort() {
-        return cohort;
-    }
-    
-    public void setCohort(Cohort cohort) {
-        this.cohort = cohort;
     }
     
     public void updateAccessStage(float[] ageStages, int nbAccessStages) {
