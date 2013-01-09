@@ -282,21 +282,17 @@ public class Species {
         tabCohorts[classAge] = cohort;
     }
 
-    public Cohort[] getCohorts() {
-        return tabCohorts;
-    }
-
     public int getNumberCohorts() {
         return nbCohorts;
     }
 
     public School getSchool(int classAge, int indexSchool) {
-        return tabCohorts[classAge].getSchool(indexSchool);
+        return tabCohorts[classAge].get(indexSchool);
     }
 
     public List<School> getSchools() {
         List<School> schools = new ArrayList();
-        for (Cohort cohort : getCohorts()) {
+        for (Cohort cohort : tabCohorts) {
             schools.addAll(cohort);
         }
         return schools;

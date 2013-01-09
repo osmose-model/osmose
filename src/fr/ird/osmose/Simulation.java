@@ -1359,10 +1359,22 @@ public class Simulation {
                 speciesj.incrementBiomass(speciesj.tabBiomIni[0]);
                 //creation of the cohorts
                 for (int k = 0; k < speciesj.getNumberCohorts(); k++) {
-                    speciesj.setCohort(k, new Cohort(speciesj, k, speciesj.tabAbdIni[k], speciesj.tabBiomIni[k], speciesj.tabMeanLength[k], speciesj.tabMeanWeight[k]));
+                    speciesj.setCohort(k, createCohort(speciesj, k, speciesj.tabAbdIni[k], speciesj.tabMeanLength[k], speciesj.tabMeanWeight[k]));
                 }
             }
         }
+    }
+    
+    private Cohort createCohort(Species species, int age, long abundance, float iniLength, float iniWeight) {
+        Cohort cohort = new Cohort();
+        if (abundance > 0.d) {
+            int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
+            cohort.ensureCapacity(nbSchools);
+            for (int i = 0; i < nbSchools; i++) {
+                cohort.add(new School(species, abundance / nbSchools, iniLength, iniWeight, age));
+            }
+        }
+        return cohort;
     }
 
     public void iniRandomly() //************************** Nouvelle option : A faire
@@ -1384,7 +1396,7 @@ public class Simulation {
              * biomass is set to zero.
              */
             if (!speci.isReproduceLocally()) {
-                for (int j = 0; j < speci.getCohorts().length; j++) {
+                for (int j = 0; j < speci.getNumberCohorts(); j++) {
                     speci.tabAbdIni[j] = 0;
                     speci.tabBiomIni[j] = 0;
                 }
@@ -1442,7 +1454,7 @@ public class Simulation {
             }
             // and we create the cohorts
             for (int j = 0; j < speci.getNumberCohorts(); j++) {
-                speci.setCohort(j, new Cohort(speci, j, speci.tabAbdIni[j], speci.tabBiomIni[j], speci.tabMeanLength[j], speci.tabMeanWeight[j]));
+                speci.setCohort(j, createCohort(speci, j, speci.tabAbdIni[j], speci.tabMeanLength[j], speci.tabMeanWeight[j]));
             }
         }
     }
@@ -1508,15 +1520,13 @@ public class Simulation {
         for (int m = 0; m < getOsmose().randomAreaCoordi[iSpec].length; m++) {
             cells.add(getGrid().getCell(getOsmose().randomAreaCoordi[iSpec][m], getOsmose().randomAreaCoordj[iSpec][m]));
         }
-        for (Cohort cohort : species[iSpec].getCohorts()) {
-            for (School school : cohort) {
-                if (school.isUnlocated()) {
-                    school.moveToCell(randomDeal(cells));
-                } else {
-                    school.moveToCell(randomDeal(getAccessibleCells(school)));
-                }
-                validateMove(school);
+        for (School school : species[iSpec].getSchools()) {
+            if (school.isUnlocated()) {
+                school.moveToCell(randomDeal(cells));
+            } else {
+                school.moveToCell(randomDeal(getAccessibleCells(school)));
             }
+            validateMove(school);
         }
     }
     
