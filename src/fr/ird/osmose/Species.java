@@ -39,14 +39,6 @@ public class Species {
      */
     private String name;
     /*
-     * Number of individuals of the species
-     */
-    private double abundance;
-    /*
-     * Total biomass in tons
-     */
-    private double biomass;
-    /*
      * List of the cohorts
      */
     private Cohort[] tabCohorts;
@@ -285,30 +277,6 @@ public class Species {
         return name;
     }
 
-    public double getAbundance() {
-        return abundance;
-    }
-
-    public void resetAbundance() {
-        abundance = 0;
-    }
-
-    public void incrementAbundance(double incr) {
-        this.abundance += incr;
-    }
-
-    public double getBiomass() {
-        return biomass;
-    }
-
-    public void resetBiomass() {
-        biomass = 0.d;
-    }
-
-    public void incrementBiomass(double incr) {
-        biomass += incr;
-    }
-
     public void updateAbundancePerStages() {
         abundanceStage = new double[3];
         // Eggs & larvae
@@ -370,21 +338,6 @@ public class Species {
             double Ftot = Math.log(abundanceStage[iStage] / (abundanceStage[iStage] - nDeadTot));
             for (int iDeath = 0; iDeath < 4; iDeath++) {
                 mortalityRate[iDeath][iStage] = Ftot * nDead[iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iStage]);
-            }
-        }
-    }
-
-    public void growth() {
-
-        for (School school : getSchools()) {
-            int j = school.getAgeDt();
-            if ((j == 0) || isOut(j, getSimulation().getIndexTimeYear())) {
-                // Linear growth for eggs and migrating schools
-                school.setLength(school.getLength() + deltaMeanLength[j]);
-                school.setWeight((float) (c * Math.pow(school.getLength(), bPower)));
-            } else {
-                // Growth based on predation success
-                school.growth(minDelta[j], maxDelta[j], c, bPower);
             }
         }
     }
@@ -487,16 +440,6 @@ public class Species {
     }
 
     public void update() {
-
-        //UPDATE ABD and BIOMASS of SPECIES
-        abundance = 0;
-        biomass = 0;
-        for (int i = 0; i < nbCohorts; i++) {
-            for (int k = 0; k < getCohort(i).size(); k++) {
-                abundance += getSchool(i, k).getAbundance();
-                biomass += getSchool(i, k).getBiomass();
-            }
-        }
 
         for (int i = 0; i < nbCohorts; i++) {
             for (int j = 0; j < getCohort(i).size(); j++) {
