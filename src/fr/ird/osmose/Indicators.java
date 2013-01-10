@@ -21,6 +21,7 @@ public class Indicators {
     // Abundance
     private static double[] abundanceTot;
     private static double[] abundanceNoJuv;
+    private static double[][] abundanceStage;
     // Size
     private static double[] meanSize;
     private static double[] meanSizeCatch;
@@ -113,6 +114,7 @@ public class Indicators {
         // biomass & abundance
         biomassNoJuv = new double[nSpec];
         abundanceNoJuv = new double[nSpec];
+        abundanceStage = new double[nSpec][];
         if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
             biomassTot = new double[nSpec];
             abundanceTot = new double[nSpec];
@@ -170,17 +172,64 @@ public class Indicators {
         // [4] = mortalities ==> Predation / Starvation / Other / Fishing
         // [3] = stages ==> Eggs & larvae / Pre-recruits / Recruits
         mortalityRates = new double[nSpec][4][3];
+
+        // save abundance at the end of this step as a snapshot of the
+        // population at the beginning of next time step.
+        updateAbundancePerStages();
     }
 
     public static void monitorMortality() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
+            double[][] mortalityRate = computeMortalityRates(species);
             for (int iDeath = 0; iDeath < 4; iDeath++) {
                 for (int iStage = 0; iStage < 3; iStage++) {
-                    mortalityRates[i][iDeath][iStage] += species.mortalityRate[iDeath][iStage];
+                    mortalityRates[i][iDeath][iStage] += mortalityRate[iDeath][iStage];
                 }
             }
         }
+    }
+
+    /*
+     * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
+     * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
+     */
+    private static double[][] computeMortalityRates(Species species) {
+        double[][] mortalityRate = new double[4][3];
+        double[][] nDead = new double[4][3];
+        int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
+        for (School school : species.getSchools()) {
+            int iStage;
+            if (school.getAgeDt() == 0) {
+                // Eggs & larvae
+                iStage = 0;
+            } else if (school.getAgeDt() < indexRecruitAge) {
+                // Pre-recruits
+                iStage = 1;
+            } else {
+                // Recruits
+                iStage = 2;
+            }
+            // Update number od deads
+            nDead[0][iStage] += school.nDeadPredation;
+            nDead[1][iStage] += school.nDeadStarvation;
+            nDead[2][iStage] += school.nDeadNatural;
+            nDead[3][iStage] += school.nDeadFishing;
+        }
+
+        // Compute total mortality rate
+        int iSpec = species.getIndex();
+        for (int iStage = 0; iStage < 3; iStage++) {
+            double nDeadTot = 0;
+            for (int iDeath = 0; iDeath < 4; iDeath++) {
+                nDeadTot += nDead[iDeath][iStage];
+            }
+            double Ftot = Math.log(abundanceStage[iSpec][iStage] / (abundanceStage[iSpec][iStage] - nDeadTot));
+            for (int iDeath = 0; iDeath < 4; iDeath++) {
+                mortalityRate[iDeath][iStage] = Ftot * nDead[iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpec][iStage]);
+            }
+        }
+        return mortalityRate;
     }
 
     public static void writeMortality(float time) {
@@ -258,6 +307,31 @@ public class Indicators {
                     biomassNoJuv[i] += school.getBiomass();
                     abundanceNoJuv[i] += school.getAbundance();
                 }
+            }
+        }
+    }
+
+    /*
+     * Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
+     */
+    public static void updateAbundancePerStages() {
+        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+            Species species = getSimulation().getSpecies(i);
+            int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
+            abundanceStage[i] = new double[3];
+            for (School school : species.getSchools()) {
+                int iStage;
+                if (school.getAgeDt() == 0) {
+                    // Eggs & larvae
+                    iStage = 0;
+                } else if (school.getAgeDt() < indexRecruitAge) {
+                    // Pre-recruits
+                    iStage = 1;
+                } else {
+                    // Recruits
+                    iStage = 2;
+                }
+                abundanceStage[i][iStage] += school.getAbundance();
             }
         }
     }

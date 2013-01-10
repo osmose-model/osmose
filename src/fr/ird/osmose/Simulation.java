@@ -614,10 +614,6 @@ public class Simulation {
                 distributeSpecies();
             }
 
-            for (Species spe : species) {
-                spe.updateAbundancePerStages();
-            }
-
             // Natural mortality (due to other predators)
             for (School school : getSchools()) {
                 // reset indicators
@@ -709,17 +705,12 @@ public class Simulation {
                             school.setAbundance(0);
                             school.tagForRemoval();
                         }
-                        school.nDeadFishing = nDead;
+                        //school.nDeadFishing = nDead;
                     }
                 }
             }
             removeDeadSchools();
             updateSpecies();
-
-            // Compute mortality rates
-            for (Species spe : species) {
-                spe.computeMortalityRates();
-            }
 
             // Save steps
             Indicators.updateAndWriteIndicators();
@@ -1051,12 +1042,6 @@ public class Simulation {
             }
         }
 
-        // Save abundances before any mortality applies
-        // for computing mortality rates later on.
-        for (Species spe : species) {
-            spe.updateAbundancePerStages();
-        }
-
         // Loop over cells
         for (Cell cell : getGrid().getCells()) {
             if (!(cell.isLand() || cell.isEmpty())) {
@@ -1163,11 +1148,6 @@ public class Simulation {
                     }
                 }
             }
-        }
-
-        // Compute mortality rates
-        for (Species spe : species) {
-            spe.computeMortalityRates();
         }
 
         if (DEBUG_MORTALITY) {
@@ -1447,7 +1427,7 @@ public class Simulation {
     }
   
     private void mapsDistribution(int iSpec) {
-
+        
         // Loop over the cohorts
         for (int j = 0; j < species[iSpec].getNumberCohorts(); j++) {
             /*

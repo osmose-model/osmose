@@ -85,12 +85,6 @@ public class Species {
     private float biomassFluxIn;
     private float meanLengthIn;
     private int ageMeanIn;
-    /*
-     * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
-     * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
-     */
-    double[][] nDead, mortalityRate;
-    double[] abundanceStage;
     // Migration
     private float[][] outOfZoneMortality;
     private boolean[][] outOfZoneCohort;
@@ -257,10 +251,6 @@ public class Species {
         return nbCohorts;
     }
 
-    public School getSchool(int classAge, int indexSchool) {
-        return tabCohorts[classAge].get(indexSchool);
-    }
-
     public List<School> getSchools() {
         List<School> schools = new ArrayList();
         for (Cohort cohort : tabCohorts) {
@@ -277,71 +267,6 @@ public class Species {
         return name;
     }
 
-    public void updateAbundancePerStages() {
-        abundanceStage = new double[3];
-        // Eggs & larvae
-        for (School school : tabCohorts[0]) {
-            abundanceStage[0] += school.getAbundance();
-        }
-        // Pre-recruits
-        int indexRecruitAge = Math.round(recruitAge * getSimulation().getNbTimeStepsPerYear());
-        for (int j = 1; j < indexRecruitAge; j++) {
-            for (School school : tabCohorts[j]) {
-                abundanceStage[1] += school.getAbundance();
-            }
-        }
-        // Recruits
-        for (int j = indexRecruitAge; j < tabCohorts.length; j++) {
-            for (School school : tabCohorts[j]) {
-                abundanceStage[2] += school.getAbundance();
-            }
-        }
-    }
-
-    public void computeMortalityRates() {
-        mortalityRate = new double[4][3];
-        nDead = new double[4][3];
-        // Update number od deads
-        // Eggs & larvae
-        for (School school : tabCohorts[0]) {
-            nDead[0][0] += school.nDeadPredation;
-            nDead[1][0] += school.nDeadStarvation;
-            nDead[2][0] += school.nDeadNatural;
-            nDead[3][0] += school.nDeadFishing;
-        }
-        // Pre-recruits
-        int indexRecruitAge = Math.round(recruitAge * getSimulation().getNbTimeStepsPerYear());
-        for (int j = 1; j < indexRecruitAge; j++) {
-            for (School school : tabCohorts[j]) {
-                nDead[0][1] += school.nDeadPredation;
-                nDead[1][1] += school.nDeadStarvation;
-                nDead[2][1] += school.nDeadNatural;
-                nDead[3][1] += school.nDeadFishing;
-            }
-        }
-        // Recruits
-        for (int j = indexRecruitAge; j < tabCohorts.length; j++) {
-            for (School school : tabCohorts[j]) {
-                nDead[0][2] += school.nDeadPredation;
-                nDead[1][2] += school.nDeadStarvation;
-                nDead[2][2] += school.nDeadNatural;
-                nDead[3][2] += school.nDeadFishing;
-            }
-        }
-
-        // Compute total mortality rate
-        for (int iStage = 0; iStage < 3; iStage++) {
-            double nDeadTot = 0;
-            for (int iDeath = 0; iDeath < 4; iDeath++) {
-                nDeadTot += nDead[iDeath][iStage];
-            }
-            double Ftot = Math.log(abundanceStage[iStage] / (abundanceStage[iStage] - nDeadTot));
-            for (int iDeath = 0; iDeath < 4; iDeath++) {
-                mortalityRate[iDeath][iStage] = Ftot * nDead[iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iStage]);
-            }
-        }
-    }
-
     public boolean isReproduceLocally() {
         return reproduceLocally;
     }
@@ -355,18 +280,18 @@ public class Species {
         /*
          * Making cohorts going up to the upper age class
          */
-        for (int i = nbCohorts - 1; i > ageMeanIn; i--) {
-            getCohort(i).clear();
-            getCohort(i).addAll(tabCohorts[i - 1]);
-            for (int j = 0; j < getCohort(i).size(); j++) {
-                getSchool(i, j).age += 1;
+        for (int j = nbCohorts - 1; j > ageMeanIn; j--) {
+            tabCohorts[j].clear();
+            tabCohorts[j].addAll(tabCohorts[j - 1]);
+            for (School school : tabCohorts[j]) {
+                school.age += 1;
             }
         }
         /*
          * Reset all cohorts younger than ageMeanIn
          */
-        for (int i = ageMeanIn - 1; i > 0; i--) {
-            tabCohorts[i].clear();
+        for (int j = ageMeanIn - 1; j > 0; j--) {
+            tabCohorts[j].clear();
         }
         /*
          * Incoming flux
@@ -411,11 +336,11 @@ public class Species {
 
         //MAKING COHORTS GOING UP to the UPPER AGE CLASS
         //species, age, caseLeftUpAireCoh, tabCasesAireCoh do not change
-        for (int i = nbCohorts - 1; i > 0; i--) {
-            getCohort(i).clear();
-            getCohort(i).addAll(tabCohorts[i - 1]);
-            for (int j = 0; j < getCohort(i).size(); j++) {
-                getSchool(i, j).age += 1;
+        for (int j = nbCohorts - 1; j > 0; j--) {
+            tabCohorts[j].clear();
+            tabCohorts[j].addAll(tabCohorts[j - 1]);
+            for (School school : tabCohorts[j]) {
+                school.age += 1;
             }
         }
 
@@ -440,18 +365,9 @@ public class Species {
     }
 
     public void update() {
-
-        for (int i = 0; i < nbCohorts; i++) {
-            for (int j = 0; j < getCohort(i).size(); j++) {
-                getSchool(i, j).updateFeedingStage(sizeFeeding, nbFeedingStages);
-                getSchool(i, j).updateAccessStage(getOsmose().accessStageThreshold[index], getOsmose().nbAccessStage[index]);
-            }
-        }
-
-        if (!(nbCohorts == (int) Math.round((longevity) * getSimulation().getNbTimeStepsPerYear()))) {
-            nbCohorts = (int) Math.round((longevity + 1) * getSimulation().getNbTimeStepsPerYear());
-            System.out.println("PB of number of cohorts at the update stage: not equals to the initial number of cohorts");
-            // Morgane 03-2007
+        for (School school : getSchools()) {
+                school.updateFeedingStage(sizeFeeding, nbFeedingStages);
+                school.updateAccessStage(getOsmose().accessStageThreshold[index], getOsmose().nbAccessStage[index]);
         }
     }
 
