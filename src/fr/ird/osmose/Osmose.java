@@ -2427,7 +2427,7 @@ public class Osmose {
             }
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                 for (School school : simulation.getSpecies(i).getSchools()) {
-                    if (school.getAge() >= simulation.getSpecies(i).indexAgeClass0) {
+                    if (school.getAgeDt() >= simulation.getSpecies(i).indexAgeClass0) {
                         iniBiomass[x][i] += school.getBiomass();
                     }
                 }

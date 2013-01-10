@@ -249,10 +249,10 @@ public class Simulation {
     double getNaturalMortalityRate(School school, int subdt) {
         double D;
         Species spec = school.getSpecies();
-        if (school.getAge() == 0) {
+        if (school.getAgeDt() == 0) {
             D = (spec.larvalMortalityRates[i_step_simu] + (spec.getOutMortality(0, i_step_year) / (float) (nbTimeStepsPerYear))) / (float) subdt;
         } else {
-            D = (spec.D + school.getSpecies().getOutMortality(school.getAge(), i_step_year)) / (float) (nbTimeStepsPerYear * subdt);
+            D = (spec.D + school.getSpecies().getOutMortality(school.getAgeDt(), i_step_year)) / (float) (nbTimeStepsPerYear * subdt);
         }
         return D;
     }
@@ -277,7 +277,7 @@ public class Simulation {
         // 1. School is recruited
         // 2. School is catchable (no MPA and no out of zone)
         int indexRecruitAge = Math.round(school.getSpecies().recruitAge * nbTimeStepsPerYear);
-        return (school.getAge() >= indexRecruitAge)
+        return (school.getAgeDt() >= indexRecruitAge)
                 && school.isCatchable();
     }
 
@@ -684,7 +684,7 @@ public class Simulation {
                         if (school.getAbundance() < 1.d) {
                             school.setAbundance(0.d);
                             school.tagForRemoval();
-                            school.getSpecies().nbSchoolsCatchable[school.getAge()] -= 1;
+                            school.getSpecies().nbSchoolsCatchable[school.getAgeDt()] -= 1;
                         }
                     }
                 }
@@ -722,7 +722,7 @@ public class Simulation {
                         if (school.getAbundance() < 1.d) {
                             nDead = school.getAbundance();
                             school.setAbundance(0);
-                            school.getSpecies().nbSchoolsCatchable[school.getAge()] -= 1;
+                            school.getSpecies().nbSchoolsCatchable[school.getAgeDt()] -= 1;
                             school.tagForRemoval();
                         }
                         //school.nDeadFishing = nDead;
@@ -1060,7 +1060,7 @@ public class Simulation {
             for (int i = 0; i < species.length; i++) {
                 int indexRecruitAge = Math.round(species[i].recruitAge * nbTimeStepsPerYear);
                 for (School school : species[i].getSchools()) {
-                    if (school.getAge() >= indexRecruitAge) {
+                    if (school.getAgeDt() >= indexRecruitAge) {
                         mortality[i][10] += school.getAbundance();
                     }
                 }
@@ -1129,23 +1129,23 @@ public class Simulation {
                                     school.dietTemp[prey.getSpecies().getIndex()][prey.dietOutputStage] += biomPrey;
                                 }
                                 float TLprey;
-                                if ((prey.getAge() == 0) || (prey.getAge() == 1)) {
+                                if ((prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)) {
                                     TLprey = prey.getSpecies().TLeggs;
                                 } else {
-                                    TLprey = prey.trophicLevel[prey.getAge() - 1];
+                                    TLprey = prey.trophicLevel[prey.getAgeDt() - 1];
                                 }
-                                school.trophicLevel[school.getAge()] += TLprey * biomPrey / preyedBiomass;
+                                school.trophicLevel[school.getAgeDt()] += TLprey * biomPrey / preyedBiomass;
                             } else {
-                                school.trophicLevel[school.getAge()] += forcing.getPlankton(ipr - ns).trophicLevel * nDeadMatrix[ipr][is] / preyedBiomass;
+                                school.trophicLevel[school.getAgeDt()] += forcing.getPlankton(ipr - ns).trophicLevel * nDeadMatrix[ipr][is] / preyedBiomass;
                                 if (getOsmose().isDietOuput()) {
                                     school.dietTemp[getNbSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
                                 }
                             }
                             //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);
                         }
-                        school.trophicLevel[school.getAge()] += 1;
-                    } else if (school.getAge() > 0) {
-                        school.trophicLevel[school.getAge()] = school.trophicLevel[school.getAge() - 1];
+                        school.trophicLevel[school.getAgeDt()] += 1;
+                    } else if (school.getAgeDt() > 0) {
+                        school.trophicLevel[school.getAgeDt()] = school.trophicLevel[school.getAgeDt() - 1];
                     }
 
                     // 2. Starvation
@@ -1164,7 +1164,7 @@ public class Simulation {
                     if (DEBUG_MORTALITY) {
                         int i = school.getSpecies().getIndex();
                         int indexRecruitAge = Math.round(species[i].recruitAge * nbTimeStepsPerYear);
-                        if (school.getAge() >= indexRecruitAge) {
+                        if (school.getAgeDt() >= indexRecruitAge) {
                             mortality[i][0] += (school.nDeadPredation);
                             mortality[i][2] += (school.nDeadStarvation);
                             mortality[i][4] += (school.nDeadNatural);
@@ -1176,7 +1176,7 @@ public class Simulation {
                     if (school.getAbundance() < 1.d) {
                         school.setAbundance(0.d);
                         school.tagForRemoval();
-                        school.getSpecies().nbSchoolsCatchable[school.getAge()] -= 1;
+                        school.getSpecies().nbSchoolsCatchable[school.getAgeDt()] -= 1;
                     }
                 }
             }
@@ -1211,7 +1211,7 @@ public class Simulation {
         for (School school : species.getCohort(age)) {
             if (school.willDisappear()) {
                 // cohorts in the area during the time step
-                if (!species.isOut(school.getAge(), getIndexTimeYear())) {
+                if (!species.isOut(school.getAgeDt(), getIndexTimeYear())) {
                     school.getCell().remove(school);
                 }
                 schoolsToRemove.add(school);
@@ -1257,13 +1257,13 @@ public class Simulation {
                     school.updateDietVariables();
                     if (school.isCatchable() && j >= indexRecruitAge) {
                         // update fihsing indicators
-                        species[i].nSchoolCatch[iSchool + species[i].cumulCatch[school.getAge() - 1]] += school.nDeadFishing;
-                        species[i].sizeSchoolCatch[iSchool + species[i].cumulCatch[school.getAge() - 1]] = school.getLength();
+                        species[i].nSchoolCatch[iSchool + species[i].cumulCatch[school.getAgeDt() - 1]] += school.nDeadFishing;
+                        species[i].sizeSchoolCatch[iSchool + species[i].cumulCatch[school.getAgeDt() - 1]] = school.getLength();
                         if ((getYear()) >= getOsmose().timeSeriesStart) {
                             species[i].yield += school.adb2biom(school.nDeadFishing);
                             species[i].yieldN += school.nDeadFishing;
                             if (getOsmose().isTLOutput()) {
-                                species[i].tabTLCatch += school.trophicLevel[school.getAge()] * school.adb2biom(school.nDeadFishing);
+                                species[i].tabTLCatch += school.trophicLevel[school.getAgeDt()] * school.adb2biom(school.nDeadFishing);
                             }
                         }
                         iSchool++;
@@ -2085,7 +2085,7 @@ public class Simulation {
              * Cell in water
              */
             for (School school : cell) {
-                if (school.getAge() > school.getSpecies().indexAgeClass0 && !school.getSpecies().isOut(school.getAge(), i_step_year)) {
+                if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !school.getSpecies().isOut(school.getAgeDt(), i_step_year)) {
                     nbSchools[school.getSpecies().getIndex()] += 1;
                     biomass[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
                     abundance[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getAbundance();

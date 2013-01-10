@@ -188,7 +188,7 @@ public class School extends Fish {
         str.append( "\n  Species: ");
         str.append(getSpecies().getName());
         str.append("\n  Cohort: ");
-        float ageInYear = getAge() / (float) getSimulation().getNbTimeStepsPerYear();
+        float ageInYear = getAgeDt() / (float) getSimulation().getNbTimeStepsPerYear();
         str.append(ageInYear);
         str.append(" [year]");
         str.append("\n  Cell: ");

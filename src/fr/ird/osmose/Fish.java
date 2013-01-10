@@ -119,7 +119,7 @@ public class Fish extends GridPoint {
         return species;
     }
 
-    public int getAge() {
+    public int getAgeDt() {
         return age;
     }
     
@@ -203,7 +203,7 @@ public class Fish extends GridPoint {
     public void updateAccessStage(float[] ageStages, int nbAccessStages) {
         accessibilityStage = 0;
         for (int i = 1; i < nbAccessStages; i++) {
-            if (getAge() >= ageStages[i - 1]) {
+            if (getAgeDt() >= ageStages[i - 1]) {
                 accessibilityStage++;
             }
         }

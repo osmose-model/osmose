@@ -398,7 +398,7 @@ public class Species {
     public void growth() {
         
         for (School school : getSchools()) {
-            int j = school.getAge();
+            int j = school.getAgeDt();
             if ((j == 0) || isOut(j, getSimulation().getIndexTimeYear())) {
                 // Linear growth for eggs and migrating schools
                 school.setLength(school.getLength() + deltaMeanLength[j]);
@@ -469,7 +469,7 @@ public class Species {
         }
         for (int i = indexMin; i < tabSchoolsRanked.size(); i++) {
             SSB += tabSchoolsRanked.get(i).getBiomass();
-            tempTL += tabSchoolsRanked.get(i).trophicLevel[tabSchoolsRanked.get(i).getAge()] * tabSchoolsRanked.get(i).getBiomass();
+            tempTL += tabSchoolsRanked.get(i).trophicLevel[tabSchoolsRanked.get(i).getAgeDt()] * tabSchoolsRanked.get(i).getBiomass();
         }
 
         double season = seasonSpawning.length > getSimulation().getNbTimeStepsPerYear()

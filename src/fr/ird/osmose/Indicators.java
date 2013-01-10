@@ -254,7 +254,7 @@ public class Indicators {
                     biomassTot[i] += school.getBiomass();
                     abundanceTot[i] += school.getAbundance();
                 }
-                if (school.getAge() >= species.indexAgeClass0) {
+                if (school.getAgeDt() >= species.indexAgeClass0) {
                     biomassNoJuv[i] += school.getBiomass();
                     abundanceNoJuv[i] += school.getAbundance();
                 }
@@ -267,7 +267,7 @@ public class Indicators {
             Species species = getSimulation().getSpecies(i);
             double abundance = 0.d;
             for (School school : species.getSchools()) {
-                if (school.getAge() >= species.indexAgeClass0) {
+                if (school.getAgeDt() >= species.indexAgeClass0) {
                     abundance += school.getAbundance();
                 }
             }
@@ -307,7 +307,7 @@ public class Indicators {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             for (School school : getSimulation().getSpecies(i).getSchools()) {
                 int ageClass1 = (int) Math.max(1, school.getSpecies().supAgeOfClass0);
-                if ((school.getBiomass() > 0) && (school.getAge() >= ageClass1)) {
+                if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
                     distribTL[i][getTLRank(school)] += school.getBiomass();
                 }
             }
@@ -317,7 +317,7 @@ public class Indicators {
     private static int getTLRank(School school) {
         
         int iTL = getOsmose().tabTL.length - 1;
-        while (school.trophicLevel[school.getAge()] <= getOsmose().tabTL[iTL] && (iTL > 0)) {
+        while (school.trophicLevel[school.getAgeDt()] <= getOsmose().tabTL[iTL] && (iTL > 0)) {
             iTL--;
         }
         return iTL;
@@ -789,7 +789,7 @@ public class Indicators {
             Species species = getSimulation().getSpecies(i);
             double biomass = 0.d;
             for (School school : species.getSchools()) {
-                if (school.getAge() >= species.indexAgeClass0) {
+                if (school.getAgeDt() >= species.indexAgeClass0) {
                     biomass += school.getBiomass();
                 }
             }
