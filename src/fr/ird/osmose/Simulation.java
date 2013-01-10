@@ -30,7 +30,6 @@ public class Simulation {
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
-    
     public enum Version {
         /*
          * SCHOOL2012 stands for SCHOOLBASED processes, in sequential order
@@ -38,6 +37,7 @@ public class Simulation {
          * Similarily to WS2009 and conversely to SCHOOL2012_PROD, plankton
          * concentration are read like production.
          */
+
         SCHOOL2012_PROD,
         /*
          * SCHOOL2012 stands for SCHOOLBASED processes, in sequential order
@@ -1167,29 +1167,12 @@ public class Simulation {
             Indicators.writeVariable(year + (i_step_year + 1f) / (float) nbTimeStepsPerYear, mortality, filename, headers, "Instaneous number of deads and mortality rates");
         }
     }
-    
-    private void removeDeadSchools(Species species, int age) {
-
-        List<School> schoolsToRemove = new ArrayList();
-        for (School school : species.getCohort(age)) {
-            if (school.willDisappear()) {
-                // cohorts in the area during the time step
-                if (!species.isOut(school.getAgeDt(), getIndexTimeYear())) {
-                    school.getCell().remove(school);
-                }
-                schoolsToRemove.add(school);
-            }
-        }
-        species.getCohort(age).removeAll(schoolsToRemove);
-    }
 
     public void removeDeadSchools() {
         // Removing dead schools
         // Update biomass of schools & cohort & species
         for (int i = 0; i < species.length; i++) {
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                removeDeadSchools(species[i], j);
-            }
+            species[i].removeDeadSchools();
         }
     }
 
@@ -1258,7 +1241,7 @@ public class Simulation {
 
                 speciesj.tabAbdIni[0] = Math.round(speciesj.tabAbdIni[1] * Math.exp(10.));
                 speciesj.tabBiomIni[0] = ((double) speciesj.tabAbdIni[0]) * speciesj.tabMeanWeight[0] / 1000000.;
-                
+
                 //creation of the cohorts
                 for (int k = 0; k < speciesj.getNumberCohorts(); k++) {
                     speciesj.setCohort(k, createCohort(speciesj, k, speciesj.tabAbdIni[k], speciesj.tabMeanLength[k], speciesj.tabMeanWeight[k]));
@@ -1266,7 +1249,7 @@ public class Simulation {
             }
         }
     }
-    
+
     private Cohort createCohort(Species species, int age, long abundance, float iniLength, float iniWeight) {
         Cohort cohort = new Cohort();
         if (abundance > 0.d) {
@@ -1306,7 +1289,7 @@ public class Simulation {
                 for (int j = speci.indexAgeClass0; j < speci.getNumberCohorts(); j++) {
                     sumExp += Math.exp(-(j * (speci.D + speci.F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
                 }
-                
+
                 speci.tabAbdIni[0] = (long) ((abdIni) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
                 speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
                 if (speci.indexAgeClass0 <= 0) {
@@ -1324,7 +1307,7 @@ public class Simulation {
                         biomass += speci.tabBiomIni[j];
                     }
                 }
-                
+
                 correctingFactor = (float) (getOsmose().spBiomIniTab[numSerie][i] / biomass);
                 // we make corrections on initial abundance to fit the input biomass
                 speci.tabAbdIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
@@ -1336,7 +1319,7 @@ public class Simulation {
                     speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
                 }
             }
-            
+
             // create the cohorts
             for (int j = 0; j < speci.getNumberCohorts(); j++) {
                 speci.setCohort(j, createCohort(speci, j, speci.tabAbdIni[j], speci.tabMeanLength[j], speci.tabMeanWeight[j]));
@@ -1382,9 +1365,9 @@ public class Simulation {
     public List<School> getSchools() {
         ArrayList<School> schools = new ArrayList();
         for (Species sp : species) {
-            for (int j = 0; j < sp.getNumberCohorts(); j++) {
-                if (!sp.isOut(j, i_step_year)) {
-                    schools.addAll(sp.getCohort(j));
+            for (School school : sp.getSchools()) {
+                if (!sp.isOut(school.getAgeDt(), i_step_year)) {
+                    schools.add(school);
                 }
             }
         }
@@ -1414,37 +1397,36 @@ public class Simulation {
             validateMove(school);
         }
     }
-    
+
     private void moveOut(School school) {
         if (!school.isUnlocated()) {
             school.getCell().remove(school);
             school.setOffGrid();
         }
     }
-    
+
     private void validateMove(School school) {
         school.getCell().add(school);
     }
-  
+
     private void mapsDistribution(int iSpec) {
-        
-        // Loop over the cohorts
-        for (int j = 0; j < species[iSpec].getNumberCohorts(); j++) {
+
+        // loop over the schools of the species
+        for (School school : species[iSpec].getSchools()) {
+            int j = school.getAgeDt();
             /*
              * Do not distribute cohorts that are presently out of
              * the simulated area.
              */
             if (species[iSpec].isOut(j, i_step_year)) {
-                for (School school : species[iSpec].getCohort(j)) {
-                    moveOut(school);
-                }
-                continue; // go to next cohort, skip code that follows
+                moveOut(school);
+                continue;
             }
 
             // Get current map and max probability of presence
             int numMap = getOsmose().numMap[iSpec][j][i_step_year];
             List<Cell> map = getOsmose().getMap(numMap);
-            float tempMaxProbaPresence = getOsmose().getMaxProbaPresence(numMap);
+            float tempMaxProbaPresence = getOsmose().maxProbaPresence[numMap];
 
             /*
              * Check whether the map has changed from previous cohort
@@ -1466,30 +1448,29 @@ public class Simulation {
             }
 
             // Move the school
-            for (School school : species[iSpec].getCohort(j)) {
-                if (!sameMap || school.isUnlocated()) {
-                    /*
-                     * Random distribution in a map, either because the map has
-                     * changed from previous cohort and time-step, or because the
-                     * school was unlocated due to migration.
-                     */
-                    int indexCell;
-                    do {
-                        indexCell = (int) Math.round((map.size() - 1) * Math.random());
-                    } while (getOsmose().mapProbaPresence[getOsmose().numMap[iSpec][j][i_step_year]][indexCell] < Math.random() * tempMaxProbaPresence);
-                    school.moveToCell(map.get(indexCell));
-                } else {
-                    // Random move in adjacent cells contained in the map.
-                    school.moveToCell(randomDeal(getAccessibleCells(school, map)));
-                }
-                // Validate the move
-                validateMove(school);
-            } // end loop school
-        } // end loop cohort
+            if (!sameMap || school.isUnlocated()) {
+                /*
+                 * Random distribution in a map, either because the map has
+                 * changed from previous cohort and time-step, or because the
+                 * school was unlocated due to migration.
+                 */
+                int indexCell;
+                do {
+                    indexCell = (int) Math.round((map.size() - 1) * Math.random());
+                } while (getOsmose().mapProbaPresence[getOsmose().numMap[iSpec][j][i_step_year]][indexCell] < Math.random() * tempMaxProbaPresence);
+                school.moveToCell(map.get(indexCell));
+            } else {
+                // Random move in adjacent cells contained in the map.
+                school.moveToCell(randomDeal(getAccessibleCells(school, map)));
+            }
+            // Validate the move
+            validateMove(school);
+        } // end lood schools
     }
 
     /**
      * Randomly choose a cell among the given list of cells.
+     *
      * @param cells, a list of cells
      * @return a cell from the list of cells.
      */
@@ -1499,8 +1480,9 @@ public class Simulation {
     }
 
     /**
-     * For debugging purpose, check whether the school is located in a cell
-     * that belongs to the map number numMap
+     * For debugging purpose, check whether the school is located in a cell that
+     * belongs to the map number numMap
+     *
      * @param school to be tested
      * @param numMap, the number of the map
      * @return true if school is located in a cell contained in map number
@@ -1516,11 +1498,12 @@ public class Simulation {
     }
 
     /**
-     * Get the adjacent cells of a given school that are contained in the
-     * given map.
+     * Get the adjacent cells of a given school that are contained in the given
+     * map.
+     *
      * @param school
      * @param map
-     * @return 
+     * @return
      */
     private List<Cell> getAccessibleCells(School school, List<Cell> map) {
 
@@ -1549,6 +1532,7 @@ public class Simulation {
     /**
      * Create a list of the accessible cells for a given cell: neighbour cells
      * that are not in land + current cell
+     *
      * @param school
      * @return the list of cells accessible to the school
      */
@@ -1565,26 +1549,25 @@ public class Simulation {
         }
         return accessibleCells;
     }
-    
+
     private void connectivityDistribution(int iSpec) {
 
-        // Loop over the cohorts
-        for (int j = 0; j < species[iSpec].getNumberCohorts(); j++) {
+        // loop over the schools of the species
+        for (School school : species[iSpec].getSchools()) {
+            int j = school.getAgeDt();
             /*
              * Do not distribute cohorts that are presently out of
              * the simulated area.
              */
             if (species[iSpec].isOut(j, i_step_year)) {
-                for (School school : species[iSpec].getCohort(j)) {
-                    moveOut(school);
-                }
-                continue; // go to next cohort, skip code that follows
+                moveOut(school);
+                continue;
             }
 
             // Get current map and max probability of presence
             int numMap = getOsmose().numMap[iSpec][j][i_step_year];
             List<Cell> map = getOsmose().getMap(numMap);
-            float tempMaxProbaPresence = getOsmose().getMaxProbaPresence(numMap);
+            float tempMaxProbaPresence = getOsmose().maxProbaPresence[numMap];
 
             // init = true if either cohort zero or first time-step of the simulation
             boolean init = (j == 0) | (i_step_simu == 0);
@@ -1607,30 +1590,28 @@ public class Simulation {
             }
 
             // Move the school
-            for (School school : species[iSpec].getCohort(j)) {
-                if (init || school.isUnlocated()) {
-                    /*
-                     * Random distribution in a map, either because it is cohort
-                     * zero or first time-step or because the
-                     * school was unlocated due to migration.
-                     */
-                    int indexCell;
-                    do {
-                        indexCell = (int) Math.round((map.size() - 1) * Math.random());
-                    } while (getOsmose().mapProbaPresence[getOsmose().numMap[iSpec][j][i_step_year]][indexCell] < Math.random() * tempMaxProbaPresence);
-                    school.moveToCell(map.get(indexCell));
-                } else if (sameMap) {
-                    // Random move in adjacent cells contained in the map.
-                    school.moveToCell(randomDeal(getAccessibleCells(school, map)));
-                } else {
-                    connectivityMoveSchool(school, numMap);
-                }
-                // Validate the move
-                validateMove(school);
-            } // end loop school
-        } // end loop cohort
+            if (init || school.isUnlocated()) {
+                /*
+                 * Random distribution in a map, either because it is cohort
+                 * zero or first time-step or because the
+                 * school was unlocated due to migration.
+                 */
+                int indexCell;
+                do {
+                    indexCell = (int) Math.round((map.size() - 1) * Math.random());
+                } while (getOsmose().mapProbaPresence[getOsmose().numMap[iSpec][j][i_step_year]][indexCell] < Math.random() * tempMaxProbaPresence);
+                school.moveToCell(map.get(indexCell));
+            } else if (sameMap) {
+                // Random move in adjacent cells contained in the map.
+                school.moveToCell(randomDeal(getAccessibleCells(school, map)));
+            } else {
+                connectivityMoveSchool(school, numMap);
+            }
+            // Validate the move
+            validateMove(school);
+        } // end loop school
     }
-    
+
     private void connectivityMoveSchool(School school, int numMap) {
         // get the connectivity matrix associated to object school
         // species i, cohort j and time step indexTime.

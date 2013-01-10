@@ -239,10 +239,6 @@ public class Species {
         return getOsmose().getSimulation();
     }
 
-    public Cohort getCohort(int classAge) {
-        return tabCohorts[classAge];
-    }
-
     public void setCohort(int classAge, Cohort cohort) {
         tabCohorts[classAge] = cohort;
     }
@@ -269,6 +265,28 @@ public class Species {
 
     public boolean isReproduceLocally() {
         return reproduceLocally;
+    }
+    
+    public void removeDeadSchools() {
+        for (int j = 0; j < getNumberCohorts(); j++) {
+            removeDeadSchools(j);
+        }
+    }
+    
+    
+    private void removeDeadSchools(int ageDt) {
+
+        List<School> schoolsToRemove = new ArrayList();
+        for (School school : tabCohorts[ageDt]) {
+            if (school.willDisappear()) {
+                // cohorts in the area during the time step
+                if (!isOut(school.getAgeDt(), getSimulation().getIndexTimeYear())) {
+                    school.getCell().remove(school);
+                }
+                schoolsToRemove.add(school);
+            }
+        }
+        tabCohorts[ageDt].removeAll(schoolsToRemove);
     }
 
     /*

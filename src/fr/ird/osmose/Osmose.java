@@ -122,8 +122,9 @@ public class Osmose {
     int[][] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
     int[][] randomAreaCoordi, randomAreaCoordj;//species areas in random cases [species][cell]
     int[][][] numMap;        //gives a number of map for[species][cohort][dt]
-    int[][] mapCoordi, mapCoordj;      //    coord of maps [numMap][cell]
+    List<Cell>[] maps;
     float[][] mapProbaPresence; // Probability of presence of a cohort [numMap][cell]
+    float[] maxProbaPresence;
     boolean densityMaps;
     ConnectivityMatrix[] connectivityMatrix;
     /*
@@ -1711,7 +1712,7 @@ public class Osmose {
 
     public void writeMapsAsCSV() {
 
-        int numberMaps = mapCoordi.length;
+        int numberMaps = maps.length;
         for (int k = 0; k < numberMaps; k++) {
             try {
                 List<Cell> map = getMap(k);
@@ -1753,7 +1754,7 @@ public class Osmose {
 
     public void writeGlobalDistributionMap() {
         try {
-            int numberMaps = mapCoordi.length;
+            int numberMaps = maps.length;
             String fileName = "map-all.csv";
             CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
 
@@ -1843,10 +1844,10 @@ public class Osmose {
              */
             st.nextToken();
             int nbMaps = new Integer(st.sval).intValue();
-            mapCoordi = new int[nbMaps][];
-            mapCoordj = new int[nbMaps][];
+            maps = new ArrayList[nbMaps];
             connectivityMatrix = new ConnectivityMatrix[nbMaps];
             mapProbaPresence = new float[nbMaps][];
+            maxProbaPresence = new float[nbMaps];
             areasNumSpForMap = new int[nbMaps];
             areasTempAge = new int[nbMaps][];
             areasTempDt = new int[nbMaps][];
@@ -2058,8 +2059,7 @@ public class Osmose {
             /*
              * Initialize the arrays
              */
-            mapCoordi[indexMap] = new int[nbCells];
-            mapCoordj[indexMap] = new int[nbCells];
+            maps[indexMap] = new ArrayList(nbCells);
             mapProbaPresence[indexMap] = new float[nbCells];
             /*
              * Set the numero of maps per species, age class and time step
@@ -2071,7 +2071,7 @@ public class Osmose {
                             numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h][areasTempDt[indexMap][n]] = indexMap;
                             //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
                         }
-                        if (mapCoordi[indexMap].length == 0) {
+                        if (nbCells == 0) {
                             if (!simulation.getSpecies(areasNumSpForMap[indexMap]).isOut((areasTempAge[indexMap][m] * nbDtMatrix[numSerie]) + h, areasTempDt[indexMap][n])) {
                                 System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(areasNumSpForMap[indexMap]).getName());
                             }
@@ -2089,8 +2089,7 @@ public class Osmose {
                 for (int j = 0; j < line.length; j++) {
                     float val = Float.valueOf(line[j]);
                     if (val > 0.f) {
-                        mapCoordi[indexMap][indexCell] = i;
-                        mapCoordj[indexMap][indexCell] = j;
+                        maps[indexMap].add(getGrid().getCell(i, j));
                         if (val < 1.f) {
                             /*
                              * value provided is directly a probability
@@ -2111,6 +2110,7 @@ public class Osmose {
                     }
                 }
             }
+            maxProbaPresence[indexMap] = getMaxProbaPresence(indexMap);
         } catch (IOException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -2119,17 +2119,12 @@ public class Osmose {
 
     public List<Cell> getMap(int numMap) {
 
-        int length = mapCoordi[numMap].length;
-        List<Cell> list = new ArrayList(length);
-        for (int k = 0; k < length; k++) {
-            list.add(getGrid().getCell(mapCoordi[numMap][k], mapCoordj[numMap][k]));
-        }
-        return list;
+        return maps[numMap];
     }
 
-    public float getMaxProbaPresence(int numMap) {
+    private float getMaxProbaPresence(int numMap) {
         float tempMaxProbaPresence = 0;
-        for (int m = 0; m < mapCoordi[numMap].length; m++) {
+        for (int m = 0; m < maps[numMap].size(); m++) {
             tempMaxProbaPresence = Math.max(tempMaxProbaPresence, mapProbaPresence[numMap][m]);
         }
         return tempMaxProbaPresence;
