@@ -84,7 +84,7 @@ public class School extends Fish {
             /*
              * Egg stage
              */
-            trophicLevel[0] = species.TLeggs;
+            trophicLevel[0] = species.TL_EGG;
         }
         if (age != 0) {
             /*

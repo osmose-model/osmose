@@ -480,14 +480,6 @@ public class Simulation {
         return index;
     }
 
-    private void clearCatchesIndicators() {
-        //Initialisation of indicators tables
-        for (int i = 0; i < species.length; i++) {
-            species[i].sizeSchoolCatch = new float[species[i].nbSchoolsTotCatch];
-            species[i].nSchoolCatch = new float[species[i].nbSchoolsTotCatch];
-        }
-    }
-
     private void growth() {
         for (School school : getSchools()) {
             school.predSuccessRate = computePredSuccessRate(school.biomassToPredate, school.preyedBiomass);
@@ -504,13 +496,6 @@ public class Simulation {
     private void updateSpecies() {
         for (int i = 0; i < species.length; i++) {
             species[i].update();
-            if (getOsmose().isMeanSizeOutput()) {
-                species[i].calculSizes();
-                species[i].calculSizesCatch();
-            }
-            if ((getOsmose().isTLOutput()) || (getOsmose().isTLDistribOutput())) {
-                species[i].calculTL();
-            }
         }
     }
 
@@ -555,10 +540,8 @@ public class Simulation {
             }
 
             // Preliminary actions before mortality processes
-            assessCatchableSchools();
             rankSchoolsSizes();
             saveBiomassBeforeMortality();
-            clearCatchesIndicators();
             for (School school : getSchools()) {
                 school.resetDietVariables();
             }
@@ -574,10 +557,8 @@ public class Simulation {
                 school.preyedBiomass = 0;
             }
 
-            for (int t = 0; t < SUB_DT; t++) {
-                computeMortality(SUB_DT, VERSION);
-                updatePopulation();
-            }
+            computeMortality(1, VERSION);
+            updateBiomassAndAbundance();
 
             // Update of disappeared schools and plancton mortality
             if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
@@ -684,7 +665,6 @@ public class Simulation {
                         if (school.getAbundance() < 1.d) {
                             school.setAbundance(0.d);
                             school.tagForRemoval();
-                            school.getSpecies().nbSchoolsCatchable[school.getAgeDt()] -= 1;
                         }
                     }
                 }
@@ -712,8 +692,6 @@ public class Simulation {
             growth();
 
             // Fishing
-            assessCatchableSchools();
-            clearCatchesIndicators();
             for (School school : getSchools()) {
                 if (school.getAbundance() != 0.d) {
                     double nDead = computeFishingMortality(school, 1);
@@ -722,14 +700,13 @@ public class Simulation {
                         if (school.getAbundance() < 1.d) {
                             nDead = school.getAbundance();
                             school.setAbundance(0);
-                            school.getSpecies().nbSchoolsCatchable[school.getAgeDt()] -= 1;
                             school.tagForRemoval();
                         }
-                        //school.nDeadFishing = nDead;
+                        school.nDeadFishing = nDead;
                     }
                 }
             }
-            updatePopulation();
+            updateBiomassAndAbundance();
             updateSpecies();
 
             // Compute mortality rates
@@ -1130,7 +1107,7 @@ public class Simulation {
                                 }
                                 float TLprey;
                                 if ((prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)) {
-                                    TLprey = prey.getSpecies().TLeggs;
+                                    TLprey = Species.TL_EGG;
                                 } else {
                                     TLprey = prey.trophicLevel[prey.getAgeDt() - 1];
                                 }
@@ -1176,7 +1153,6 @@ public class Simulation {
                     if (school.getAbundance() < 1.d) {
                         school.setAbundance(0.d);
                         school.tagForRemoval();
-                        school.getSpecies().nbSchoolsCatchable[school.getAgeDt()] -= 1;
                     }
                 }
             }
@@ -1228,47 +1204,6 @@ public class Simulation {
             species[i].resetBiomass();
             for (int j = 0; j < species[i].getNumberCohorts(); j++) {
                 removeDeadSchools(species[i], j);
-            }
-            for (School school : species[i].getSchools()) {
-                species[i].incrementAbundance(school.getAbundance());
-                species[i].incrementBiomass(school.getBiomass());
-            }
-        }
-    }
-
-    /*
-     * Update biomass and abundance from School to Species, throught Cohort.
-     */
-    public void updatePopulation() {
-        // Removing dead schools
-        // Update biomass of schools & cohort & species
-        for (int i = 0; i < species.length; i++) {
-            int indexRecruitAge = Math.round(species[i].recruitAge * nbTimeStepsPerYear);
-            species[i].resetAbundance();
-            species[i].resetBiomass();
-            species[i].yield = 0.d;
-            species[i].yieldN = 0.d;
-            species[i].tabTLCatch = 0.f;
-            for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                Cohort cohort = species[i].getCohort(j);
-                removeDeadSchools(species[i], j);
-                int iSchool = 0;
-                for (School school : cohort) {
-                    school.updateDietVariables();
-                    if (school.isCatchable() && j >= indexRecruitAge) {
-                        // update fihsing indicators
-                        species[i].nSchoolCatch[iSchool + species[i].cumulCatch[school.getAgeDt() - 1]] += school.nDeadFishing;
-                        species[i].sizeSchoolCatch[iSchool + species[i].cumulCatch[school.getAgeDt() - 1]] = school.getLength();
-                        if ((getYear()) >= getOsmose().timeSeriesStart) {
-                            species[i].yield += school.adb2biom(school.nDeadFishing);
-                            species[i].yieldN += school.nDeadFishing;
-                            if (getOsmose().isTLOutput()) {
-                                species[i].tabTLCatch += school.trophicLevel[school.getAgeDt()] * school.adb2biom(school.nDeadFishing);
-                            }
-                        }
-                        iSchool++;
-                    }
-                }
             }
             for (School school : species[i].getSchools()) {
                 species[i].incrementAbundance(school.getAbundance());
@@ -1791,77 +1726,6 @@ public class Simulation {
         }
     }
 
-    /**
-     *
-     * @param iSpec , the index of the Species
-     */
-    private void oldConnectivityDistribution(int iSpec) {
-        // WARNING : migration is not implemented in this function yet
-        // we assume all schools are in the domain at all time and every age
-
-        // cohort zero : map distribution
-        List<Cell> cells = new ArrayList(getOsmose().randomAreaCoordi[iSpec].length);
-        for (int m = 0; m < getOsmose().randomAreaCoordi[iSpec].length; m++) {
-            cells.add(getGrid().getCell(getOsmose().randomAreaCoordi[iSpec][m], getOsmose().randomAreaCoordj[iSpec][m]));
-        }
-        for (School school : species[iSpec].getCohort(0)) {
-            school.moveToCell(randomDeal(cells));
-            validateMove(school);
-        }
-        // other cohorts
-        for (int j = 1; j < species[iSpec].getNumberCohorts(); j++) {
-            for (School school : species[iSpec].getCohort(j)) {
-                int numMap = getOsmose().numMap[iSpec][j][i_step_year];
-                // get the connectivity matrix associated to object school
-                // species i, cohort j and time step indexTime.
-                ConnectivityMatrix matrix = getOsmose().connectivityMatrix[numMap];
-                // get the connectivity of the cell where the school is
-                // currently located
-                int iCell = school.getCell().getIndex();
-                ConnectivityLine cline = matrix.clines.get(iCell);
-
-                if (!school.getCell().isLand() && null == cline) { // TD ~~
-                    //if (null == cline) { // TD ~~
-                    throw new NullPointerException("Could not find line associated to cell "
-                            + iCell + " in connectivity matrix " + " ;isLand= " + school.getCell().isLand());
-                }
-
-
-                // TD CHANGE 23.10.12
-                // Lines with only 0 come with length = 0
-                // cumsum can't work with it
-                // workaround: run cumsum only if length > 0 (otherwise keep initial 0 values)
-
-                // computes the cumulative sum of this connectivity line   
-                if (!school.getCell().isLand() && cline.connectivity.length > 0) { //++TD
-
-                    float[] cumSum = cumSum(cline.connectivity);
-
-                    //TD DEBUG 29.10.2012
-                    //if (indexTime >= (5 * nbTimeStepsPerYear) && school.getCell().isLand()) {
-                    if (i_step_year >= 1 && school.getCell().isLand()) {
-                        System.out.println("SCHOOL SWIMMING OUT OF THE POOL! <-----------------------------------");
-                    }
-                    //TD DEBUG 29.10.2012
-                    // choose the new cell
-                    // TD ~~ 24.10.2012
-                    //float random = (float) (Math.random() * cumSum[cumSum.length - 1]); // random 0-1 * plus grande valeur de cumsum (dernière valeur) --> ???
-                    //System.out.println("cumSum[cumSum.length - 1]: " + cumSum[cumSum.length - 1] + " random: " + random );
-                    // alternative : TD ~~
-                    float random = (float) (Math.random()); //TD ~~
-                    int iRandom = cumSum.length - 1; // on prend le dernier de la liste
-                    while (random < cumSum[iRandom] && iRandom > 0) { // et on redescend progressivement la liste jusqu'à trouver une valeur inférieure à random
-                        iRandom--;
-                    }
-                    school.moveToCell(getGrid().getCell(cline.indexCells[iRandom]));
-                    validateMove(school);
-                    //TD ~
-                    // System.out.println("I was in cell " + iCell + " and moving to cell " + school.getCell().getIndex() + " " + cline.connectivity[iRandom]);
-                }//++TD
-            }
-        }
-    }
-
     private float[] cumSum(float[] connectivity) {
 
 
@@ -1902,55 +1766,6 @@ public class Simulation {
                 case CONNECTIVITY:
                     connectivityDistribution(iSpec);
                     break;
-            }
-        }
-    }
-
-    public void assessCatchableSchools() {
-
-        if ((!getOsmose().thereIsMPATab[numSerie])
-                || (year < getOsmose().MPAtStartTab[numSerie])
-                || (year >= getOsmose().MPAtEndTab[numSerie]))// case where no MPA
-        {
-            for (int i = 0; i < species.length; i++) {
-                species[i].nbSchoolsTotCatch = 0;
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    species[i].nbSchoolsCatchable[j] = species[i].getCohort(j).size();
-                }
-                for (School school : species[i].getSchools()) {
-                    school.setCatchable(true);
-                }
-                species[i].cumulCatch[0] = 0;
-                species[i].cumulCatch[0] = species[i].nbSchoolsCatchable[0];
-                species[i].nbSchoolsTotCatch += species[i].nbSchoolsCatchable[0];
-                for (int j = 1; j < species[i].getNumberCohorts(); j++) {
-                    species[i].cumulCatch[j] = 0;
-                    species[i].cumulCatch[j] = species[i].cumulCatch[j - 1] + species[i].nbSchoolsCatchable[j];
-                    species[i].nbSchoolsTotCatch += species[i].nbSchoolsCatchable[j];
-                }
-            }
-        } else//case MPA
-        {
-            for (int i = 0; i < species.length; i++) {
-                species[i].nbSchoolsTotCatch = 0;
-                for (int j = 0; j < species[i].getNumberCohorts(); j++) {
-                    for (School school : species[i].getSchools()) {
-                        if (school.isUnlocated() || school.getCell().isMPA()) {
-                            school.setCatchable(false);
-                        } else {
-                            school.setCatchable(true);
-                            species[i].nbSchoolsCatchable[j] += 1;
-                        }
-                    }
-                }
-                species[i].cumulCatch[0] = 0;
-                species[i].cumulCatch[0] = species[i].nbSchoolsCatchable[0];
-                species[i].nbSchoolsTotCatch += species[i].nbSchoolsCatchable[0];
-                for (int j = 1; j < species[i].getNumberCohorts(); j++) {
-                    species[i].cumulCatch[j] = 0;
-                    species[i].cumulCatch[j] = species[i].cumulCatch[j - 1] + species[i].nbSchoolsCatchable[j];
-                    species[i].nbSchoolsTotCatch += species[i].nbSchoolsCatchable[j];
-                }
             }
         }
     }

@@ -21,6 +21,8 @@ import java.util.List;
 
 public class Species {
 
+    final static public float TL_EGG = 3f;
+    
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -53,22 +55,6 @@ public class Species {
      * simulation.getNbTimeSteps()
      */
     private int nbCohorts;
-    /*
-     * **************
-     * * Indicators * ************** MORGANE 07-2004 Those attributes are used
-     * for the calculation of indicators.
-     */
-    int[] nbSchoolsCatchable; // number of schools catchable per age class
-    int nbSchoolsTotCatch;	//nb of schools fished per species
-    int[] cumulCatch;           //dim of 3 tables=nbSchoolsTotCatch
-    float[] nSchoolCatch;	//fished schools sorted according to their size
-    float[] sizeSchoolCatch;
-    float meanSize;	//mean size per species in the ecosystem
-    float meanSizeCatch;	//mean size per species in catches
-    float meanTLSpe;
-    float[] meanTLperAge;
-    float TLeggs = 3f;
-    float tabTLCatch;
     /*
      * ***************************
      * * Life history parameters * ***************************
@@ -107,8 +93,6 @@ public class Species {
     private float biomassFluxIn;
     private float meanLengthIn;
     private int ageMeanIn;
-    // yield
-    double yield, yieldN;
     /*
      * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
      * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
@@ -167,7 +151,7 @@ public class Species {
         this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
         this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
         this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];
-        
+
         this.predationRate = getOsmose().predationRateMatrix[numSerie][index];
         this.predPreySizesMax = getOsmose().predPreySizesMaxMatrix[numSerie][index];
         this.predPreySizesMin = getOsmose().predPreySizesMinMatrix[numSerie][index];
@@ -195,7 +179,6 @@ public class Species {
         tabAbdIni = new long[nbCohorts];
         tabBiomIni = new double[nbCohorts];
         tabCohorts = new Cohort[nbCohorts];
-        cumulCatch = new int[nbCohorts];
 
         // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
         tabMeanLength = new float[nbCohorts];
@@ -233,8 +216,6 @@ public class Species {
             maxDelta[i] = deltaMeanLength[i] + deltaMeanLength[i];
         }
 
-        meanTLperAge = new float[nbCohorts];
-
         /*
          * phv 2012/11/08 - Careful, F the annual mortality rate is calculated
          * as the annual average of the fishing rates over the years.
@@ -258,12 +239,10 @@ public class Species {
         }
         larvalSurvival /= larvalMortalityRates.length;
         //System.out.println("Species " + name + " larval mortality " + larvalSurvival);
-        
+
         // migration
         outOfZoneMortality = new float[nbCohorts][getSimulation().getNbTimeStepsPerYear()];
         outOfZoneCohort = new boolean[nbCohorts][getSimulation().getNbTimeStepsPerYear()];
-        
-        nbSchoolsCatchable = new int[nbCohorts];
     }
 
     private Osmose getOsmose() {
@@ -396,7 +375,7 @@ public class Species {
     }
 
     public void growth() {
-        
+
         for (School school : getSchools()) {
             int j = school.getAgeDt();
             if ((j == 0) || isOut(j, getSimulation().getIndexTimeYear())) {
@@ -419,7 +398,7 @@ public class Species {
      * for species that do not reproduce in the simulated domain.
      */
     public void incomingFlux() {
-        
+
         /*
          * Making cohorts going up to the upper age class
          */
@@ -503,7 +482,7 @@ public class Species {
         }
         coh0.trimToSize();
         for (int i = 0; i < coh0.size(); i++) {
-            ((School) coh0.get(i)).trophicLevel[0] = TLeggs; //tempTL/(float)SSB;
+            ((School) coh0.get(i)).trophicLevel[0] = TL_EGG; //tempTL/(float)SSB;
         }
     }
 
@@ -548,102 +527,14 @@ public class Species {
         return schools;
     }
 
-    // ---------MORGANE 07-2004-----------
-    public void calculSizes() {
-
-        //Calculation of mean size per species
-        float abdWithout0;
-        meanSize = 0;
-        float sum = 0;
-        abdWithout0 = 0;
-        for (int j = indexAgeClass0; j < nbCohorts; j++) //we don't consider age class 0 in the calculation of the mean
-        {
-            for (int k = 0; k < getCohort(j).size(); k++) {
-                sum += getSchool(j, k).getAbundance() * getSchool(j, k).getLength();
-                abdWithout0 += getSchool(j, k).getAbundance();
-            }
-        }
-
-        if (abdWithout0 != 0) {
-            meanSize = sum / abdWithout0;
-        }
-
-    }
-
-    //---------------MORGANE  07-2004
-    //same as previously, but for fished schools
-    public void calculSizesCatch() {
-
-        //Calculation of mean size per species
-        float abdCatch;
-        meanSizeCatch = 0;
-        float sumCatch = 0;
-        abdCatch = 0;
-        for (int j = 0; j < nbSchoolsTotCatch; j++) {
-            sumCatch += nSchoolCatch[j] * sizeSchoolCatch[j];
-            abdCatch += nSchoolCatch[j];
-        }
-        if (abdCatch != 0) {
-            meanSizeCatch = sumCatch / abdCatch;
-        }
-    }
-
-    public void calculTL() {
-
-        float biomWithout0 = 0;
-        float abd = 0;
-        float sum = 0;
-
-        // ********** Calcul of mean trophic level of the species, without age 0
-
-        meanTLSpe = 0;
-
-        for (int j = indexAgeClass0; j < nbCohorts; j++) //we don't consider age class 0 in the calculation of the mean
-        {
-            for (int k = 0; k < getCohort(j).size(); k++) {
-                if (getSchool(j, k).trophicLevel[j] != 0) {
-                    sum += getSchool(j, k).getBiomass() * getSchool(j, k).trophicLevel[j];
-                    biomWithout0 += getSchool(j, k).getBiomass();
-                }
-            }
-        }
-
-        if (biomWithout0 != 0) {
-            meanTLSpe = sum / biomWithout0;
-        }
-
-        // ********* Calcul of mean trophic level per age
-
-        for (int j = 0; j < nbCohorts; j++) {
-            meanTLperAge[j] = 0;
-        }
-
-        for (int j = 0; j < nbCohorts; j++) {
-            abd = 0;
-            sum = 0;
-            for (int k = 0; k < getCohort(j).size(); k++) {
-                if (getSchool(j, k).trophicLevel[j] != 0) {
-                    sum += getSchool(j, k).getAbundance() * getSchool(j, k).trophicLevel[j];
-                    abd += getSchool(j, k).getAbundance();
-                }
-            }
-            if (abd != 0) {
-                meanTLperAge[j] = sum / abd;
-            }
-        }
-        if (nbCohorts != nbCohorts) {
-            System.out.println("nb= " + nbCohorts + " ,   length = " + nbCohorts);
-        }
-    }
-    
     public boolean isOut(int age, int indexTime) {
         return outOfZoneCohort[age][indexTime];
     }
-    
-     public void setOut(int age, int indexTime, boolean isOut) {
+
+    public void setOut(int age, int indexTime, boolean isOut) {
         outOfZoneCohort[age][indexTime] = isOut;
     }
-    
+
     public float getOutMortality(int age, int indexTime) {
         return outOfZoneMortality[age][indexTime];
     }

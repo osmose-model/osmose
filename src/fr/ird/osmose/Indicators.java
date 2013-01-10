@@ -36,9 +36,9 @@ public class Indicators {
     private static double[][] nbStomachs;
     // Mortality
     private static double[][][] mortalityRates;
-    
+
     public static void updateAndWriteIndicators() {
-        
+
         int year = getSimulation().getYear();
         int index = getSimulation().getIndexTimeYear();
         int nStepsYear = getSimulation().getNbTimeStepsPerYear();
@@ -106,7 +106,7 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void reset() {
         int nSpec = getSimulation().getNbSpecies();
         int nPrey = nSpec + getSimulation().getForcing().getNbPlanktonGroups();
@@ -171,7 +171,7 @@ public class Indicators {
         // [3] = stages ==> Eggs & larvae / Pre-recruits / Recruits
         mortalityRates = new double[nSpec][4][3];
     }
-    
+
     public static void monitorMortality() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
@@ -182,7 +182,7 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void writeMortality(float time) {
         StringBuilder filename;
         String description;
@@ -190,7 +190,7 @@ public class Indicators {
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
         int nSpec = getSimulation().getNbSpecies();
-        
+
         for (int i = 0; i < nSpec; i++) {
             filename = new StringBuilder("Mortality");
             filename.append(File.separatorChar);
@@ -244,9 +244,9 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void monitorBiomassAndAbundance() {
-        
+
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
             for (School school : species.getSchools()) {
@@ -261,7 +261,11 @@ public class Indicators {
             }
         }
     }
-    
+
+    /*
+     * monitorMeanSizes uses yieldN indicator and therefore must be called
+     * after monitorYield.
+     */
     public static void monitorMeanSizes() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
@@ -271,19 +275,63 @@ public class Indicators {
                     abundance += school.getAbundance();
                 }
             }
-            meanSize[i] += species.meanSize * abundance;
-            meanSizeCatch[i] += species.meanSizeCatch * species.yieldN;
+            meanSize[i] += computeMeanSize(species) * abundance;
+            meanSizeCatch[i] += computeSizeCatches(species) * yieldN[i];
         }
     }
-    
+
+    private static double computeMeanSize(Species species) {
+
+        //Calculation of mean size per species
+        float abdWithout0 = 0;
+        double size = 0;
+        float sum = 0;
+        int indexAgeClass0 = species.indexAgeClass0;
+        for (School school : species.getSchools()) {
+            if (school.getAgeDt() > indexAgeClass0) {
+                sum += school.getAbundance() * school.getLength();
+                abdWithout0 += school.getAbundance();
+            }
+        }
+
+        if (abdWithout0 != 0) {
+            size = sum / abdWithout0;
+        }
+        return size;
+    }
+
+    private static double computeSizeCatches(Species species) {
+
+        //Calculation of mean size per species
+        float abdCatch = 0;
+        double size = 0;
+        float sumCatch = 0;
+        int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
+        for (School school : species.getSchools()) {
+            if (school.isCatchable() && school.getAgeDt() >= indexRecruitAge) {
+                sumCatch += school.nDeadFishing * school.getLength();
+                abdCatch += school.nDeadFishing;
+            }
+        }
+        if (abdCatch != 0) {
+            size = sumCatch / abdCatch;
+        }
+        return size;
+    }
+
     public static void monitorYields() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
-            yield[i] += species.yield;
-            yieldN[i] += species.yieldN;
+            int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
+            for (School school : species.getSchools()) {
+                if (school.isCatchable() && school.getAgeDt() >= indexRecruitAge) {
+                    yield[i] += school.adb2biom(school.nDeadFishing);
+                    yieldN[i] += school.nDeadFishing;
+                }
+            }
         }
     }
-    
+
     public static void monitorSizeSpectrum() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             for (School school : getSimulation().getSpecies(i).getSchools()) {
@@ -291,9 +339,9 @@ public class Indicators {
             }
         }
     }
-    
+
     private static int getSizeRank(School school) {
-        
+
         int iSize = getOsmose().tabSizes.length - 1;
         if (school.getLength() <= getOsmose().spectrumMaxSize) {
             while (school.getLength() < getOsmose().tabSizes[iSize]) {
@@ -302,7 +350,7 @@ public class Indicators {
         }
         return iSize;
     }
-    
+
     public static void monitorTLDistribution() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             for (School school : getSimulation().getSpecies(i).getSchools()) {
@@ -313,16 +361,16 @@ public class Indicators {
             }
         }
     }
-    
+
     private static int getTLRank(School school) {
-        
+
         int iTL = getOsmose().tabTL.length - 1;
         while (school.trophicLevel[school.getAgeDt()] <= getOsmose().tabTL[iTL] && (iTL > 0)) {
             iTL--;
         }
         return iTL;
     }
-    
+
     public static void monitorPredation() {
         for (School school : getSimulation().getSchools()) {
             int iSpec = school.getSpecies().getIndex();
@@ -343,7 +391,7 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void writeDiet(float time) {
         StringBuilder filename;
         String description;
@@ -351,7 +399,7 @@ public class Indicators {
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
         int nSpec = getSimulation().getNbSpecies();
-        
+
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
@@ -445,7 +493,7 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void writePredatorPressure(float time) {
         StringBuilder filename;
         String description;
@@ -454,7 +502,7 @@ public class Indicators {
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
         int nSpec = getSimulation().getNbSpecies();
         int dtRecord = getOsmose().getRecordFrequency();
-        
+
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
@@ -544,15 +592,15 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void writeTLDistribution(float time) {
-        
+
         StringBuilder filename;
         String description;
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
-        
+
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
@@ -602,15 +650,15 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void writeSizeSpectrum(float time) {
-        
+
         StringBuilder filename;
         String description;
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
-        
+
         if (getOsmose().isSizeSpectrumOutput()) {
             filename = new StringBuilder("SizeIndicators");
             filename.append(File.separatorChar);
@@ -668,7 +716,7 @@ public class Indicators {
                 }
             }
         }
-        
+
         if (getOsmose().isSizeSpectrumSpeciesOutput()) {
             filename = new StringBuilder("SizeIndicators");
             filename.append(File.separatorChar);
@@ -720,19 +768,19 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void writeYields(float time) {
-        
+
         StringBuilder filename;
         String description;
-        
+
         filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_yield_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
         description = "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
         writeVariable(time, yield, filename.toString(), description);
-        
+
         filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_yieldN_Simu");
         filename.append(getOsmose().numSimu);
@@ -748,10 +796,10 @@ public class Indicators {
      *
      */
     public static void writeMeanSizes(float time) {
-        
+
         StringBuilder filename;
         String description;
-        
+
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             if (abundanceNoJuv[i] > 0) {
                 meanSize[i] = (float) (meanSize[i] / abundanceNoJuv[i]);
@@ -764,7 +812,7 @@ public class Indicators {
                 meanSizeCatch[i] = Double.NaN;
             }
         }
-        
+
         filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
@@ -773,7 +821,7 @@ public class Indicators {
         filename.append(".csv");
         description = "Mean size of fish species in cm, weighted by fish numbers, and excluding first ages specified in input (in calibration file)";
         writeVariable(time, meanSize, filename.toString(), description);
-        
+
         filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
@@ -783,7 +831,7 @@ public class Indicators {
         description = "Mean size of fish species in cm, weighted by fish numbers in the catches";
         writeVariable(time, meanSizeCatch, filename.toString(), description);
     }
-    
+
     public static void monitorMeanTL() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
@@ -793,9 +841,44 @@ public class Indicators {
                     biomass += school.getBiomass();
                 }
             }
-            meanTL[i] += species.meanTLSpe * biomass;
-            tabTLCatch[i] += species.tabTLCatch;
+            meanTL[i] += computeTL(species) * biomass;
+            tabTLCatch[i] += computeTLCatches(species);
         }
+    }
+
+    /*
+     * Calcul of mean trophic level of the species, without age 0
+     */
+    private static double computeTL(Species species) {
+
+        float biomWithout0 = 0;
+        float sum = 0;
+        double meanTLSpecies = 0;
+        for (School school : species.getSchools()) {
+            int age = school.getAgeDt();
+            if (age >= species.indexAgeClass0 && school.trophicLevel[age] != 0) {
+                sum += school.getBiomass() * school.trophicLevel[age];
+                biomWithout0 += school.getBiomass();
+            }
+        }
+
+        if (biomWithout0 != 0) {
+            meanTLSpecies = sum / biomWithout0;
+        }
+
+        return meanTLSpecies;
+    }
+
+    private static double computeTLCatches(Species species) {
+
+        double catchesTL = 0;
+        int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
+        for (School school : species.getSchools()) {
+            if (school.isCatchable() && school.getAgeDt() >= indexRecruitAge) {
+                catchesTL += school.trophicLevel[school.getAgeDt()] * school.adb2biom(school.nDeadFishing);
+            }
+        }
+        return catchesTL;
     }
 
     /*
@@ -803,10 +886,10 @@ public class Indicators {
      * since the mean size is pondered by the biomass without juveniles.
      */
     public static void writeMeanTL(float time) {
-        
+
         StringBuilder filename;
         String description;
-        
+
         double[] meanTLCatch = new double[getSimulation().getNbSpecies()];
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             if (biomassNoJuv[i] != 0.d) {
@@ -841,7 +924,7 @@ public class Indicators {
         description = "Mean Trophic Level of fish species, weighted by fish catch";
         writeVariable(time, meanTLCatch, filename.toString(), description);
     }
-    
+
     public static void writeVariable(float time, double[] variable, String filename, String description) {
         PrintWriter pr;
         FileOutputStream fos = null;
@@ -881,7 +964,7 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void writeVariable(float time, double[][] variable, String filename, String[] headers, String description) {
         PrintWriter pr;
         FileOutputStream fos = null;
@@ -937,12 +1020,12 @@ public class Indicators {
             }
         }
     }
-    
+
     public static void writeBiomassAndAbundance(float time) {
-        
+
         StringBuilder filename;
         int nSpec = getSimulation().getNbSpecies();
-        
+
         double nsteps = getOsmose().savingDtMatrix[getOsmose().numSerie];
         int year = getSimulation().getYear();
         int indexSaving = (int) (getSimulation().getIndexTimeYear() / nsteps);
@@ -954,7 +1037,7 @@ public class Indicators {
             abundanceNoJuv[i] = Math.floor(abundanceNoJuv[i] / nsteps);
             biomassNoJuv[i] /= nsteps;
         }
-        
+
         if (getOsmose().isCalibrationOutput()) {
             for (int i = 0; i < nSpec; i++) {
                 getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassNoJuv[i];
@@ -964,15 +1047,15 @@ public class Indicators {
                 getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) (biomPerStage[i][0] / nsteps);
             }
         }
-        
+
         filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
         filename.append("_biomass_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
         writeVariable(time, biomassNoJuv, filename.toString(), "Mean biomass (tons), excluding first ages specified in input (typically in calibration file)");
-        
+
         if (getOsmose().isIncludeClassZero()) {
-            
+
             filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
             filename.append("_biomass-total_Simu");
             filename.append(getOsmose().numSimu);
@@ -986,11 +1069,11 @@ public class Indicators {
     public static IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
-    
+
     public static Osmose getOsmose() {
         return Osmose.getInstance();
     }
-    
+
     public static Simulation getSimulation() {
         return Osmose.getInstance().getSimulation();
     }
