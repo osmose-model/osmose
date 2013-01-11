@@ -197,13 +197,12 @@ public class Indicators {
     private static double[][] computeMortalityRates(Species species) {
         double[][] mortalityRate = new double[4][3];
         double[][] nDead = new double[4][3];
-        int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
         for (School school : species.getSchools()) {
             int iStage;
             if (school.getAgeDt() == 0) {
                 // Eggs & larvae
                 iStage = 0;
-            } else if (school.getAgeDt() < indexRecruitAge) {
+            } else if (school.getAgeDt() < species.recruitAge) {
                 // Pre-recruits
                 iStage = 1;
             } else {
@@ -317,14 +316,13 @@ public class Indicators {
     public static void updateAbundancePerStages() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
-            int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
             abundanceStage[i] = new double[3];
             for (School school : species.getSchools()) {
                 int iStage;
                 if (school.getAgeDt() == 0) {
                     // Eggs & larvae
                     iStage = 0;
-                } else if (school.getAgeDt() < indexRecruitAge) {
+                } else if (school.getAgeDt() < species.recruitAge) {
                     // Pre-recruits
                     iStage = 1;
                 } else {
@@ -380,9 +378,8 @@ public class Indicators {
         float abdCatch = 0;
         double size = 0;
         float sumCatch = 0;
-        int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
         for (School school : species.getSchools()) {
-            if (school.isCatchable() && school.getAgeDt() >= indexRecruitAge) {
+            if (school.isCatchable() && school.getAgeDt() >= species.recruitAge) {
                 sumCatch += school.nDeadFishing * school.getLength();
                 abdCatch += school.nDeadFishing;
             }
@@ -396,9 +393,8 @@ public class Indicators {
     public static void monitorYields() {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             Species species = getSimulation().getSpecies(i);
-            int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
             for (School school : species.getSchools()) {
-                if (school.isCatchable() && school.getAgeDt() >= indexRecruitAge) {
+                if (school.isCatchable() && school.getAgeDt() >= species.recruitAge) {
                     yield[i] += school.adb2biom(school.nDeadFishing);
                     yieldN[i] += school.nDeadFishing;
                 }
@@ -447,7 +443,7 @@ public class Indicators {
 
     public static void monitorPredation() {
         for (School school : getSimulation().getSchools()) {
-            int iSpec = school.getSpecies().getIndex();
+            int iSpec = school.getSpeciesIndex();
             nbStomachs[iSpec][school.dietOutputStage] += school.getAbundance();
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
@@ -946,9 +942,8 @@ public class Indicators {
     private static double computeTLCatches(Species species) {
 
         double catchesTL = 0;
-        int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
         for (School school : species.getSchools()) {
-            if (school.isCatchable() && school.getAgeDt() >= indexRecruitAge) {
+            if (school.isCatchable() && school.getAgeDt() >= species.recruitAge) {
                 catchesTL += school.trophicLevel * school.adb2biom(school.nDeadFishing);
             }
         }

@@ -119,11 +119,15 @@ public class Fish extends GridPoint {
         return species;
     }
 
+    public int getSpeciesIndex() {
+        return species.getIndex();
+    }
+
     public int getAgeDt() {
         return age;
     }
-    
-     /**
+
+    /**
      * @return the length
      */
     public float getLength() {
@@ -192,7 +196,7 @@ public class Fish extends GridPoint {
     public void setCatchable(boolean catchable) {
         this.catchable = catchable;
     }
-    
+
     public void updateAccessStage(float[] ageStages, int nbAccessStages) {
         accessibilityStage = 0;
         for (int i = 1; i < nbAccessStages; i++) {
@@ -234,7 +238,7 @@ public class Fish extends GridPoint {
             }
         }
     }
-    
+
     public void growth(float minDelta, float maxDelta, float c, float bPower) {
 
         //calculation of lengths according to predation efficiency
@@ -243,5 +247,4 @@ public class Fish extends GridPoint {
             weight = (float) (c * Math.pow(getLength(), bPower));
         }
     }
-
 }
