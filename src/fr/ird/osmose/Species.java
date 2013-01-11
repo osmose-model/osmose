@@ -53,7 +53,7 @@ public class Species extends ArrayList<School> {
     float lInf, K, t0, c, bPower;	//von bertalanffy growth parameters
     float alpha;  		//nb of eggs per gram of mature female
     float sizeMat;
-    float recruitAge;            //year
+    int recruitAge;            //year
     float supAgeOfClass0;        // year
     int indexAgeClass0;          // index for the table tabCohort, in nbDt
     float recruitSize;
@@ -114,7 +114,7 @@ public class Species extends ArrayList<School> {
         this.sizeMat = getOsmose().sizeMatMatrix[numSerie][index];
         this.nbFeedingStages = getOsmose().nbStagesMatrix[numSerie][index];
         this.sizeFeeding = getOsmose().sizeFeedingMatrix[numSerie][index];
-        this.recruitAge = getOsmose().recruitAgeMatrix[numSerie][index];
+        this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[numSerie][index] * getSimulation().getNbTimeStepsPerYear());
         this.recruitSize = getOsmose().recruitSizeMatrix[numSerie][index];
         this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][index];
         this.supAgeOfClass0 = getOsmose().supAgeOfClass0Matrix[numSerie][index];//age from which the species biomass-0 is calculated

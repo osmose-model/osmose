@@ -2420,11 +2420,10 @@ public class Osmose {
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                 iniBiomass[x][i] = 0;
             }
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                for (School school : simulation.getSpecies(i).getSchools()) {
-                    if (school.getAgeDt() >= simulation.getSpecies(i).indexAgeClass0) {
-                        iniBiomass[x][i] += school.getBiomass();
-                    }
+            for (School school : getSimulation().getSchools()) {
+                int i = school.getSpeciesIndex();
+                if (school.getAgeDt() >= simulation.getSpecies(i).indexAgeClass0) {
+                    iniBiomass[x][i] += school.getBiomass();
                 }
             }
         }
@@ -2671,7 +2670,7 @@ public class Osmose {
             pw.print(simulation.getSpecies(i).F);
         }
         pw.println();
-        pw.print("recruitment age ");
+        pw.print("recruitment age in dt ");
         for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
             pw.print(simulation.getSpecies(i).recruitAge);
