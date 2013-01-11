@@ -71,9 +71,9 @@ public class Fish extends GridPoint {
      */
     float weight;
     /*
-     * Table of the TL of this school at each time step
+     * TL of this fish, amd its variation in a time-step
      */
-    float[] trophicLevel;
+    float trophicLevel, tmpTL;
     /*
      * Predation success rate
      */
@@ -163,13 +163,6 @@ public class Fish extends GridPoint {
      */
     public int getAccessibilityStage() {
         return accessibilityStage;
-    }
-
-    /**
-     * @param trophicLevel the trophicLevel to set
-     */
-    public void setTrophicLevel(float[] trophicLevel) {
-        this.trophicLevel = trophicLevel;
     }
 
     /**

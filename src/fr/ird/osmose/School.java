@@ -70,28 +70,9 @@ public class School extends Fish {
     private void init() {
         disappears = false;
         catchable = true;
-        /*
-         * Initialisation TLs trophicLevel = table of the TL of this school at
-         * each time step
-         */
-        trophicLevel = new float[species.getNumberCohorts()];
+        trophicLevel = Species.TL_EGG;
+        tmpTL = 0.f;
 
-        /*
-         * Initialisation of the previous age because predation is based on TL
-         * at the previous time step
-         */
-        if (age == 0) {
-            /*
-             * Egg stage
-             */
-            trophicLevel[0] = species.TL_EGG;
-        }
-        if (age != 0) {
-            /*
-             * 2011/04/11 phv : do not understand since TLeggs = 3 as well...
-             */
-            trophicLevel[age - 1] = 3f;
-        }
         /*
          * Initialisation of stage
          */

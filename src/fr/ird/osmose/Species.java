@@ -316,7 +316,7 @@ public class Species extends ArrayList<School> {
         }
         for (int i = indexMin; i < size(); i++) {
             SSB += get(i).getBiomass();
-            tempTL += get(i).trophicLevel[get(i).getAgeDt()] * get(i).getBiomass();
+            tempTL += get(i).trophicLevel * get(i).getBiomass();
         }
 
         double season = seasonSpawning.length > getSimulation().getNbTimeStepsPerYear()
@@ -342,12 +342,10 @@ public class Species extends ArrayList<School> {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {
             School school0 = new School(this, nbEggs, eggSize, eggWeight, 0);
-            school0.trophicLevel[0] = TL_EGG;
             add(school0);
         } else if (nbEggs >= nbSchools) {
             for (int i = 0; i < nbSchools; i++) {
                 School school0 = new School(this, nbEggs / nbSchools, eggSize, eggWeight, 0);
-                school0.trophicLevel[0] = TL_EGG;
                 add(school0);
             }
         }
@@ -355,6 +353,7 @@ public class Species extends ArrayList<School> {
 
     public void update() {
         for (School school : this) {
+            school.trophicLevel = school.tmpTL;
             school.updateFeedingStage(sizeFeeding, nbFeedingStages);
             school.updateAccessStage(getOsmose().accessStageThreshold[index], getOsmose().nbAccessStage[index]);
         }

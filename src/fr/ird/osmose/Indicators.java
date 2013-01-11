@@ -439,7 +439,7 @@ public class Indicators {
     private static int getTLRank(School school) {
 
         int iTL = getOsmose().tabTL.length - 1;
-        while (school.trophicLevel[school.getAgeDt()] <= getOsmose().tabTL[iTL] && (iTL > 0)) {
+        while (school.trophicLevel <= getOsmose().tabTL[iTL] && (iTL > 0)) {
             iTL--;
         }
         return iTL;
@@ -930,8 +930,8 @@ public class Indicators {
         double meanTLSpecies = 0;
         for (School school : species.getSchools()) {
             int age = school.getAgeDt();
-            if (age >= species.indexAgeClass0 && school.trophicLevel[age] != 0) {
-                sum += school.getBiomass() * school.trophicLevel[age];
+            if (age >= species.indexAgeClass0 && school.trophicLevel != 0) {
+                sum += school.getBiomass() * school.trophicLevel;
                 biomWithout0 += school.getBiomass();
             }
         }
@@ -949,7 +949,7 @@ public class Indicators {
         int indexRecruitAge = Math.round(species.recruitAge * getSimulation().getNbTimeStepsPerYear());
         for (School school : species.getSchools()) {
             if (school.isCatchable() && school.getAgeDt() >= indexRecruitAge) {
-                catchesTL += school.trophicLevel[school.getAgeDt()] * school.adb2biom(school.nDeadFishing);
+                catchesTL += school.trophicLevel * school.adb2biom(school.nDeadFishing);
             }
         }
         return catchesTL;

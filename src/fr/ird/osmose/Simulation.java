@@ -72,7 +72,7 @@ public class Simulation {
      * Choose the version of Osmose tu run.
      * @see enum Version for details.
      */
-    public static final Version VERSION = Version.SCHOOL2012_BIOM;
+    public static final Version VERSION = Version.CASE3;
     /*
      * Subdivise the main time step in smaller time steps for applying
      * mortality. Should only be 1 so far, still problems to fix.
@@ -1089,6 +1089,7 @@ public class Simulation {
                     }
                     school.preyedBiomass += preyedBiomass;
                     // update TL
+                    school.tmpTL = 0;
                     if (preyedBiomass > 0.d) {
                         for (int ipr = 0; ipr < (ns + npl); ipr++) {
                             if (ipr < ns) {
@@ -1097,24 +1098,21 @@ public class Simulation {
                                 if (getOsmose().isDietOuput()) {
                                     school.dietTemp[prey.getSpecies().getIndex()][prey.dietOutputStage] += biomPrey;
                                 }
-                                float TLprey;
-                                if ((prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)) {
-                                    TLprey = Species.TL_EGG;
-                                } else {
-                                    TLprey = prey.trophicLevel[prey.getAgeDt() - 1];
-                                }
-                                school.trophicLevel[school.getAgeDt()] += TLprey * biomPrey / preyedBiomass;
+                                float TLprey = (prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)
+                                        ? Species.TL_EGG
+                                        : prey.trophicLevel;
+                                school.tmpTL += TLprey * biomPrey / preyedBiomass;
                             } else {
-                                school.trophicLevel[school.getAgeDt()] += forcing.getPlankton(ipr - ns).trophicLevel * nDeadMatrix[ipr][is] / preyedBiomass;
+                                school.tmpTL += forcing.getPlankton(ipr - ns).trophicLevel * nDeadMatrix[ipr][is] / preyedBiomass;
                                 if (getOsmose().isDietOuput()) {
                                     school.dietTemp[getNbSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
                                 }
                             }
                             //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);
                         }
-                        school.trophicLevel[school.getAgeDt()] += 1;
-                    } else if (school.getAgeDt() > 0) {
-                        school.trophicLevel[school.getAgeDt()] = school.trophicLevel[school.getAgeDt() - 1];
+                        school.tmpTL += 1;
+                    } else {
+                        school.tmpTL = school.trophicLevel;
                     }
 
                     // 2. Starvation
@@ -1834,7 +1832,7 @@ public class Simulation {
                     biomass[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
                     abundance[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getAbundance();
                     mean_size[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getLength();
-                    tl[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.trophicLevel[i_step_year];
+                    tl[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += school.trophicLevel;
                     //yield[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += (school.catches * school.getWeight() / 1000000.d);
                 }
             }
