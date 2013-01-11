@@ -179,56 +179,44 @@ public class Indicators {
     }
 
     public static void monitorMortality() {
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            Species species = getSimulation().getSpecies(i);
-            double[][] mortalityRate = computeMortalityRates(species);
-            for (int iDeath = 0; iDeath < 4; iDeath++) {
-                for (int iStage = 0; iStage < 3; iStage++) {
-                    mortalityRates[i][iDeath][iStage] += mortalityRate[iDeath][iStage];
-                }
-            }
-        }
-    }
 
-    /*
-     * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
-     * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
-     */
-    private static double[][] computeMortalityRates(Species species) {
-        double[][] mortalityRate = new double[4][3];
-        double[][] nDead = new double[4][3];
-        for (School school : species.getSchools()) {
+        /*
+         * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
+         * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
+         */
+        double[][][] nDead = new double[getSimulation().getNbSpecies()][4][3];
+        for (School school : getSimulation().getSchools()) {
             int iStage;
             if (school.getAgeDt() == 0) {
                 // Eggs & larvae
                 iStage = 0;
-            } else if (school.getAgeDt() < species.recruitAge) {
+            } else if (school.getAgeDt() < school.getSpecies().recruitAge) {
                 // Pre-recruits
                 iStage = 1;
             } else {
                 // Recruits
                 iStage = 2;
             }
+            int i = school.getSpeciesIndex();
             // Update number od deads
-            nDead[0][iStage] += school.nDeadPredation;
-            nDead[1][iStage] += school.nDeadStarvation;
-            nDead[2][iStage] += school.nDeadNatural;
-            nDead[3][iStage] += school.nDeadFishing;
+            nDead[i][0][iStage] += school.nDeadPredation;
+            nDead[i][1][iStage] += school.nDeadStarvation;
+            nDead[i][2][iStage] += school.nDeadNatural;
+            nDead[i][3][iStage] += school.nDeadFishing;
         }
 
-        // Compute total mortality rate
-        int iSpec = species.getIndex();
-        for (int iStage = 0; iStage < 3; iStage++) {
-            double nDeadTot = 0;
-            for (int iDeath = 0; iDeath < 4; iDeath++) {
-                nDeadTot += nDead[iDeath][iStage];
-            }
-            double Ftot = Math.log(abundanceStage[iSpec][iStage] / (abundanceStage[iSpec][iStage] - nDeadTot));
-            for (int iDeath = 0; iDeath < 4; iDeath++) {
-                mortalityRate[iDeath][iStage] = Ftot * nDead[iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpec][iStage]);
+        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+            for (int iStage = 0; iStage < 3; iStage++) {
+                double nDeadTot = 0;
+                for (int iDeath = 0; iDeath < 4; iDeath++) {
+                    nDeadTot += nDead[i][iDeath][iStage];
+                }
+                double Ftot = Math.log(abundanceStage[i][iStage] / (abundanceStage[i][iStage] - nDeadTot));
+                for (int iDeath = 0; iDeath < 4; iDeath++) {
+                    mortalityRates[i][iDeath][iStage] += Ftot * nDead[i][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[i][iStage]);
+                }
             }
         }
-        return mortalityRate;
     }
 
     public static void writeMortality(float time) {
@@ -334,55 +322,14 @@ public class Indicators {
      * after monitorYield.
      */
     public static void monitorMeanSizes() {
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            Species species = getSimulation().getSpecies(i);
-            double abundance = 0.d;
-            for (School school : species.getSchools()) {
-                if (school.getAgeDt() >= species.indexAgeClass0) {
-                    abundance += school.getAbundance();
-                }
-            }
-            meanSize[i] += computeMeanSize(species) * abundance;
-            meanSizeCatch[i] += computeSizeCatches(species) * yieldN[i];
-        }
-    }
 
-    private static double computeMeanSize(Species species) {
-
-        //Calculation of mean size per species
-        float abdWithout0 = 0;
-        double size = 0;
-        float sum = 0;
-        int indexAgeClass0 = species.indexAgeClass0;
-        for (School school : species.getSchools()) {
-            if (school.getAgeDt() > indexAgeClass0) {
-                sum += school.getAbundance() * school.getLength();
-                abdWithout0 += school.getAbundance();
+        for (School school : getSimulation().getSchools()) {
+            if (school.getAgeDt() > school.getSpecies().indexAgeClass0) {
+                int i = school.getSpeciesIndex();
+                meanSize[i] += school.getAbundance() * school.getLength();
+                meanSizeCatch[i] += school.nDeadFishing * school.getLength();
             }
         }
-
-        if (abdWithout0 != 0) {
-            size = sum / abdWithout0;
-        }
-        return size;
-    }
-
-    private static double computeSizeCatches(Species species) {
-
-        //Calculation of mean size per species
-        float abdCatch = 0;
-        double size = 0;
-        float sumCatch = 0;
-        for (School school : species.getSchools()) {
-            if (school.isCatchable() && school.getAgeDt() >= species.recruitAge) {
-                sumCatch += school.nDeadFishing * school.getLength();
-                abdCatch += school.nDeadFishing;
-            }
-        }
-        if (abdCatch != 0) {
-            size = sumCatch / abdCatch;
-        }
-        return size;
     }
 
     public static void monitorYields() {
@@ -414,12 +361,12 @@ public class Indicators {
     }
 
     public static void monitorTLDistribution() {
-        
+
         for (School school : getSimulation().getSchools()) {
             int ageClass1 = (int) Math.max(1, school.getSpecies().supAgeOfClass0);
-                if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
-                    distribTL[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
-                }
+            if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
+                distribTL[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
+            }
         }
     }
 
@@ -894,51 +841,14 @@ public class Indicators {
     }
 
     public static void monitorMeanTL() {
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            Species species = getSimulation().getSpecies(i);
-            double biomass = 0.d;
-            for (School school : species.getSchools()) {
-                if (school.getAgeDt() >= species.indexAgeClass0) {
-                    biomass += school.getBiomass();
-                }
-            }
-            meanTL[i] += computeTL(species) * biomass;
-            tabTLCatch[i] += computeTLCatches(species);
-        }
-    }
 
-    /*
-     * Calcul of mean trophic level of the species, without age 0
-     */
-    private static double computeTL(Species species) {
-
-        float biomWithout0 = 0;
-        float sum = 0;
-        double meanTLSpecies = 0;
-        for (School school : species.getSchools()) {
-            int age = school.getAgeDt();
-            if (age >= species.indexAgeClass0 && school.trophicLevel != 0) {
-                sum += school.getBiomass() * school.trophicLevel;
-                biomWithout0 += school.getBiomass();
+        for (School school : getSimulation().getSchools()) {
+            if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
+                int i = school.getSpeciesIndex();
+                meanTL[i] += school.getBiomass() * school.trophicLevel;
+                tabTLCatch[i] += school.trophicLevel * school.adb2biom(school.nDeadFishing);
             }
         }
-
-        if (biomWithout0 != 0) {
-            meanTLSpecies = sum / biomWithout0;
-        }
-
-        return meanTLSpecies;
-    }
-
-    private static double computeTLCatches(Species species) {
-
-        double catchesTL = 0;
-        for (School school : species.getSchools()) {
-            if (school.isCatchable() && school.getAgeDt() >= species.recruitAge) {
-                catchesTL += school.trophicLevel * school.adb2biom(school.nDeadFishing);
-            }
-        }
-        return catchesTL;
     }
 
     /*
