@@ -114,7 +114,7 @@ public class Indicators {
         // biomass & abundance
         biomassNoJuv = new double[nSpec];
         abundanceNoJuv = new double[nSpec];
-        abundanceStage = new double[nSpec][];
+        abundanceStage = new double[nSpec][3];
         if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
             biomassTot = new double[nSpec];
             abundanceTot = new double[nSpec];
@@ -295,17 +295,15 @@ public class Indicators {
 
     public static void monitorBiomassAndAbundance() {
 
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            Species species = getSimulation().getSpecies(i);
-            for (School school : species.getSchools()) {
-                if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
-                    biomassTot[i] += school.getBiomass();
-                    abundanceTot[i] += school.getAbundance();
-                }
-                if (school.getAgeDt() >= species.indexAgeClass0) {
-                    biomassNoJuv[i] += school.getBiomass();
-                    abundanceNoJuv[i] += school.getAbundance();
-                }
+        for (School school : getSimulation().getSchools()) {
+            int i = school.getSpeciesIndex();
+            if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
+                biomassTot[i] += school.getBiomass();
+                abundanceTot[i] += school.getAbundance();
+            }
+            if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
+                biomassNoJuv[i] += school.getBiomass();
+                abundanceNoJuv[i] += school.getAbundance();
             }
         }
     }
@@ -314,23 +312,20 @@ public class Indicators {
      * Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
      */
     public static void updateAbundancePerStages() {
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            Species species = getSimulation().getSpecies(i);
-            abundanceStage[i] = new double[3];
-            for (School school : species.getSchools()) {
-                int iStage;
-                if (school.getAgeDt() == 0) {
-                    // Eggs & larvae
-                    iStage = 0;
-                } else if (school.getAgeDt() < species.recruitAge) {
-                    // Pre-recruits
-                    iStage = 1;
-                } else {
-                    // Recruits
-                    iStage = 2;
-                }
-                abundanceStage[i][iStage] += school.getAbundance();
+
+        for (School school : getSimulation().getSchools()) {
+            int iStage;
+            if (school.getAgeDt() == 0) {
+                // Eggs & larvae
+                iStage = 0;
+            } else if (school.getAgeDt() < school.getSpecies().recruitAge) {
+                // Pre-recruits
+                iStage = 1;
+            } else {
+                // Recruits
+                iStage = 2;
             }
+            abundanceStage[school.getSpeciesIndex()][iStage] += school.getAbundance();
         }
     }
 
@@ -391,22 +386,19 @@ public class Indicators {
     }
 
     public static void monitorYields() {
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            Species species = getSimulation().getSpecies(i);
-            for (School school : species.getSchools()) {
-                if (school.isCatchable() && school.getAgeDt() >= species.recruitAge) {
-                    yield[i] += school.adb2biom(school.nDeadFishing);
-                    yieldN[i] += school.nDeadFishing;
-                }
+
+        for (School school : getSimulation().getSchools()) {
+            if (school.isCatchable() && school.getAgeDt() >= school.getSpecies().recruitAge) {
+                int i = school.getSpeciesIndex();
+                yield[i] += school.adb2biom(school.nDeadFishing);
+                yieldN[i] += school.nDeadFishing;
             }
         }
     }
 
     public static void monitorSizeSpectrum() {
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            for (School school : getSimulation().getSpecies(i).getSchools()) {
-                sizeSpectrum[i][getSizeRank(school)] += school.getAbundance();
-            }
+        for (School school : getSimulation().getSchools()) {
+            sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getAbundance();
         }
     }
 
@@ -422,13 +414,12 @@ public class Indicators {
     }
 
     public static void monitorTLDistribution() {
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            for (School school : getSimulation().getSpecies(i).getSchools()) {
-                int ageClass1 = (int) Math.max(1, school.getSpecies().supAgeOfClass0);
+        
+        for (School school : getSimulation().getSchools()) {
+            int ageClass1 = (int) Math.max(1, school.getSpecies().supAgeOfClass0);
                 if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
-                    distribTL[i][getTLRank(school)] += school.getBiomass();
+                    distribTL[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
                 }
-            }
         }
     }
 

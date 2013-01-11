@@ -120,7 +120,8 @@ public class Osmose {
      */
     String[] areasFileNameTab;	              //choice between "Random" or fileName
     int[][] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
-    int[][] randomAreaCoordi, randomAreaCoordj;//species areas in random cases [species][cell]
+    //int[][] randomAreaCoordi, randomAreaCoordj;//species areas in random cases [species][cell]
+    List<Cell>[] randomMaps;
     int[][][] numMap;        //gives a number of map for[species][cohort][dt]
     List<Cell>[] maps;
     float[][] mapProbaPresence; // Probability of presence of a cohort [numMap][cell]
@@ -1822,8 +1823,7 @@ public class Osmose {
         st.quoteChar(';');
         spatialDistribution = new SpatialDistribution[nbSpeciesTab[numSerie]];
         speciesAreasSizeTab[numSerie] = new int[nbSpeciesTab[numSerie]];
-        randomAreaCoordi = new int[nbSpeciesTab[numSerie]][];
-        randomAreaCoordj = new int[nbSpeciesTab[numSerie]][];
+        randomMaps = new ArrayList[nbSpeciesTab[numSerie]];
         try {
 
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
@@ -2158,17 +2158,12 @@ public class Osmose {
         if (speciesAreasSizeTab[numSerie][iSpec] >= nbCasesDispos) {
             speciesAreasSizeTab[numSerie][iSpec] = nbCasesDispos;
 
-            randomAreaCoordi[iSpec] = new int[speciesAreasSizeTab[numSerie][iSpec]];
-            randomAreaCoordj[iSpec] = new int[speciesAreasSizeTab[numSerie][iSpec]];
-
+            randomMaps[iSpec] = new ArrayList(speciesAreasSizeTab[numSerie][iSpec]);
             int index = 0;
             for (int l = 0; l < grid.getNbLines(); l++) {
                 for (int m = 0; m < grid.getNbColumns(); m++) {
                     if (!grid.getCell(l, m).isLand()) {
-
-                        randomAreaCoordi[iSpec][index] = grid.getCell(l, m).get_igrid();
-                        randomAreaCoordj[iSpec][index] = grid.getCell(l, m).get_jgrid();
-
+                        randomMaps[iSpec].add(getGrid().getCell(l, m));
                         index++;
                     }
                 }
@@ -2176,14 +2171,14 @@ public class Osmose {
         } //case where random disribution on speciesAreasSize cells
         //random sorting of connex cells for each species
         else {
-            randomAreaCoordi[iSpec] = new int[speciesAreasSizeTab[numSerie][iSpec]];
-            randomAreaCoordj[iSpec] = new int[speciesAreasSizeTab[numSerie][iSpec]];
+            int nCells = speciesAreasSizeTab[numSerie][iSpec];
+            randomMaps[iSpec] = new ArrayList(nCells);
             for (int l = 0; l < grid.getNbLines(); l++) {
                 for (int m = 0; m < grid.getNbColumns(); m++) {
                     grid.getCell(l, m).setAlreadyChosen(false);
                 }
             }
-            Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpec]];
+            //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpec]];
             int coordi, coordj;
             coordi = (int) Math.round(Math.random() * (grid.getNbLines() - 1));
             coordj = (int) Math.round(Math.random() * (grid.getNbColumns() - 1));
@@ -2191,7 +2186,7 @@ public class Osmose {
                 coordi = (int) Math.round(Math.random() * (grid.getNbLines() - 1));
                 coordj = (int) Math.round(Math.random() * (grid.getNbColumns() - 1));
             }
-            tabCellsArea[0] = grid.getCell(coordi, coordj);
+            randomMaps[iSpec].add(grid.getCell(coordi, coordj));
             grid.getCell(coordi, coordj).setAlreadyChosen(true);
             /*
              * From initial cell, successive random sorting of the
@@ -2200,25 +2195,21 @@ public class Osmose {
             int iFirstSorted = 0;
             int iLastSorted = 0;
             int index = 0;
-            while (index < (tabCellsArea.length - 1)) {
+            while (index < (nCells - 1)) {
                 for (int iCell = iFirstSorted; iCell <= iLastSorted; iCell++) {
-                    ArrayList<Cell> neigbors = grid.getNeighbourCells(tabCellsArea[iCell]);
+                    ArrayList<Cell> neigbors = grid.getNeighbourCells(randomMaps[iSpec].get(iCell));
                     Iterator<Cell> iter = neigbors.iterator();
-                    while ((index < (tabCellsArea.length - 1)) && iter.hasNext()) {
+                    while ((index < (nCells - 1)) && iter.hasNext()) {
                         Cell cell = iter.next();
                         if (!cell.isLand() && !cell.isAlreadyChosen()) {
                             index++;
                             cell.setAlreadyChosen(true);
-                            tabCellsArea[index] = cell;
+                            randomMaps[iSpec].add(cell);
                         }
                     }
                 }
                 iFirstSorted = iLastSorted + 1;
                 iLastSorted = index;
-            }
-            for (int m = 0; m < tabCellsArea.length; m++) {
-                randomAreaCoordi[iSpec][m] = tabCellsArea[m].get_igrid();
-                randomAreaCoordj[iSpec][m] = tabCellsArea[m].get_jgrid();
             }
         }
     }
