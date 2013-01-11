@@ -1244,22 +1244,20 @@ public class Simulation {
 
                 //creation of the cohorts
                 for (int k = 0; k < speciesj.getNumberCohorts(); k++) {
-                    speciesj.setCohort(k, createCohort(speciesj, k, speciesj.tabAbdIni[k], speciesj.tabMeanLength[k], speciesj.tabMeanWeight[k]));
+                    createCohort(speciesj, k, speciesj.tabAbdIni[k], speciesj.tabMeanLength[k], speciesj.tabMeanWeight[k]);
                 }
             }
         }
     }
 
-    private Cohort createCohort(Species species, int age, long abundance, float iniLength, float iniWeight) {
-        Cohort cohort = new Cohort();
+    private void createCohort(Species species, int age, long abundance, float iniLength, float iniWeight) {
         if (abundance > 0.d) {
+            //System.out.println(species.getName() + " " + age);
             int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
-            cohort.ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                cohort.add(new School(species, abundance / nbSchools, iniLength, iniWeight, age));
+                species.add(new School(species, abundance / nbSchools, iniLength, iniWeight, age));
             }
         }
-        return cohort;
     }
 
     public void iniRandomly() //************************** Nouvelle option : A faire
@@ -1322,7 +1320,7 @@ public class Simulation {
 
             // create the cohorts
             for (int j = 0; j < speci.getNumberCohorts(); j++) {
-                speci.setCohort(j, createCohort(speci, j, speci.tabAbdIni[j], speci.tabMeanLength[j], speci.tabMeanWeight[j]));
+                createCohort(speci, j, speci.tabAbdIni[j], speci.tabMeanLength[j], speci.tabMeanWeight[j]);
             }
         }
     }

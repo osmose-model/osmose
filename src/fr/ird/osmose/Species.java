@@ -19,10 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Species {
+public class Species extends ArrayList<School> {
 
     final static public float TL_EGG = 3f;
-    
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -38,10 +37,6 @@ public class Species {
      * Name of the species
      */
     private String name;
-    /*
-     * List of the cohorts
-     */
-    private Cohort[] tabCohorts;
     /*
      * Number of the cohorts = (int) Math.round((longevity + 1) *
      * simulation.getNbTimeSteps()
@@ -164,7 +159,6 @@ public class Species {
 
         tabAbdIni = new long[nbCohorts];
         tabBiomIni = new double[nbCohorts];
-        tabCohorts = new Cohort[nbCohorts];
 
         // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
         tabMeanLength = new float[nbCohorts];
@@ -239,20 +233,12 @@ public class Species {
         return getOsmose().getSimulation();
     }
 
-    public void setCohort(int classAge, Cohort cohort) {
-        tabCohorts[classAge] = cohort;
-    }
-
     public int getNumberCohorts() {
         return nbCohorts;
     }
 
     public List<School> getSchools() {
-        List<School> schools = new ArrayList();
-        for (Cohort cohort : tabCohorts) {
-            schools.addAll(cohort);
-        }
-        return schools;
+        return this;
     }
 
     public int getIndex() {
@@ -266,27 +252,18 @@ public class Species {
     public boolean isReproduceLocally() {
         return reproduceLocally;
     }
-    
-    public void removeDeadSchools() {
-        for (int j = 0; j < getNumberCohorts(); j++) {
-            removeDeadSchools(j);
-        }
-    }
-    
-    
-    private void removeDeadSchools(int ageDt) {
 
+    public void removeDeadSchools() {
         List<School> schoolsToRemove = new ArrayList();
-        for (School school : tabCohorts[ageDt]) {
+        for (School school : this) {
             if (school.willDisappear()) {
-                // cohorts in the area during the time step
-                if (!isOut(school.getAgeDt(), getSimulation().getIndexTimeYear())) {
+                if (!school.isUnlocated()) {
                     school.getCell().remove(school);
                 }
                 schoolsToRemove.add(school);
             }
         }
-        tabCohorts[ageDt].removeAll(schoolsToRemove);
+        removeAll(schoolsToRemove);
     }
 
     /*
@@ -297,36 +274,31 @@ public class Species {
 
         /*
          * Making cohorts going up to the upper age class
+         * Kill old schools
          */
-        for (int j = nbCohorts - 1; j > ageMeanIn; j--) {
-            tabCohorts[j].clear();
-            tabCohorts[j].addAll(tabCohorts[j - 1]);
-            for (School school : tabCohorts[j]) {
-                school.age += 1;
+        for (School school : this) {
+            school.age += 1;
+            if (school.getAgeDt() > (nbCohorts - 1)) {
+                school.tagForRemoval();
             }
         }
-        /*
-         * Reset all cohorts younger than ageMeanIn
-         */
-        for (int j = ageMeanIn - 1; j > 0; j--) {
-            tabCohorts[j].clear();
-        }
+        removeDeadSchools();
+
         /*
          * Incoming flux
          */
         double biomassIn = biomassFluxIn * seasonSpawning[getSimulation().getIndexTimeYear()];
         float meanWeigthIn = (float) (c * Math.pow(meanLengthIn, bPower));
         long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
-        tabCohorts[ageMeanIn].clear();
         int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
         if (abundanceIn > 0 && abundanceIn < nbSchools) {
-            tabCohorts[ageMeanIn].add(new School(this, abundanceIn, meanLengthIn, meanWeigthIn, ageMeanIn));
+            add(new School(this, abundanceIn, meanLengthIn, meanWeigthIn, ageMeanIn));
         } else if (abundanceIn >= nbSchools) {
             int mod = (int) (abundanceIn % nbSchools);
             int abdSchool = (int) (abundanceIn / nbSchools);
             for (int i = 0; i < nbSchools; i++) {
                 abdSchool += (i < mod) ? 1 : 0;
-                tabCohorts[ageMeanIn].add(new School(this, abdSchool, meanLengthIn, meanWeigthIn, ageMeanIn));
+                add(new School(this, abdSchool, meanLengthIn, meanWeigthIn, ageMeanIn));
             }
         }
         //System.out.println(name + " incoming flux " + biomassIn + " [tons] + ageIn: " + ageMeanIn);
@@ -337,14 +309,14 @@ public class Species {
         double SSB = 0;
         float tempTL = 0f;
         int indexMin = 0;
-        List<School> tabSchoolsRanked = sortSchoolsByLength();
-        while ((indexMin < tabSchoolsRanked.size())
-                && (tabSchoolsRanked.get(indexMin).getLength() < sizeMat)) {
+        Collections.sort(this, new SchoolLengthComparator());
+        while ((indexMin < size())
+                && (get(indexMin).getLength() < sizeMat)) {
             indexMin++;
         }
-        for (int i = indexMin; i < tabSchoolsRanked.size(); i++) {
-            SSB += tabSchoolsRanked.get(i).getBiomass();
-            tempTL += tabSchoolsRanked.get(i).trophicLevel[tabSchoolsRanked.get(i).getAgeDt()] * tabSchoolsRanked.get(i).getBiomass();
+        for (int i = indexMin; i < size(); i++) {
+            SSB += get(i).getBiomass();
+            tempTL += get(i).trophicLevel[get(i).getAgeDt()] * get(i).getBiomass();
         }
 
         double season = seasonSpawning.length > getSimulation().getNbTimeStepsPerYear()
@@ -352,56 +324,40 @@ public class Species {
                 : seasonSpawning[getSimulation().getIndexTimeYear()];
         double nbEggs = sexRatio * alpha * season * SSB * 1000000;
 
-        //MAKING COHORTS GOING UP to the UPPER AGE CLASS
-        //species, age, caseLeftUpAireCoh, tabCasesAireCoh do not change
-        for (int j = nbCohorts - 1; j > 0; j--) {
-            tabCohorts[j].clear();
-            tabCohorts[j].addAll(tabCohorts[j - 1]);
-            for (School school : tabCohorts[j]) {
-                school.age += 1;
+        /*
+         * Making cohorts going up to the upper age class
+         * Kill old schools
+         */
+        for (School school : this) {
+            school.age += 1;
+            if (school.getAgeDt() > (nbCohorts - 1)) {
+                school.tagForRemoval();
             }
         }
+        removeDeadSchools();
 
         //UPDATE AGE CLASS 0
-        Cohort coh0 = tabCohorts[0];
-        coh0.clear();
         int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
         if (nbEggs == 0.d) {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {
-            coh0.add(new School(this, nbEggs, eggSize, eggWeight, 0));
+            School school0 = new School(this, nbEggs, eggSize, eggWeight, 0);
+            school0.trophicLevel[0] = TL_EGG;
+            add(school0);
         } else if (nbEggs >= nbSchools) {
-            coh0.ensureCapacity(nbSchools);
             for (int i = 0; i < nbSchools; i++) {
-                coh0.add(new School(this, nbEggs / nbSchools, eggSize, eggWeight, 0));
+                School school0 = new School(this, nbEggs / nbSchools, eggSize, eggWeight, 0);
+                school0.trophicLevel[0] = TL_EGG;
+                add(school0);
             }
-        }
-        coh0.trimToSize();
-        for (int i = 0; i < coh0.size(); i++) {
-            ((School) coh0.get(i)).trophicLevel[0] = TL_EGG; //tempTL/(float)SSB;
         }
     }
 
     public void update() {
-        for (School school : getSchools()) {
-                school.updateFeedingStage(sizeFeeding, nbFeedingStages);
-                school.updateAccessStage(getOsmose().accessStageThreshold[index], getOsmose().nbAccessStage[index]);
+        for (School school : this) {
+            school.updateFeedingStage(sizeFeeding, nbFeedingStages);
+            school.updateAccessStage(getOsmose().accessStageThreshold[index], getOsmose().nbAccessStage[index]);
         }
-    }
-
-    /**
-     * Sort all the schools of this species according to their length.
-     *
-     * @return a List of the Schools of this species sorted by length.
-     */
-    public List<School> sortSchoolsByLength() {
-
-        List<School> schools = new ArrayList();
-        for (Cohort cohort : tabCohorts) {
-            schools.addAll(cohort);
-        }
-        Collections.sort(schools, new SchoolLengthComparator());
-        return schools;
     }
 
     public boolean isOut(int age, int indexTime) {
