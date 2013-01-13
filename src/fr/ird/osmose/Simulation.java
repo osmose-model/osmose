@@ -15,6 +15,8 @@ package fr.ird.osmose;
  * ******************************************************************************
  */
 import fr.ird.osmose.ConnectivityMatrix.ConnectivityLine;
+import fr.ird.osmose.filter.PresentSchoolFilter;
+import fr.ird.osmose.filter.SpeciesFilter;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -86,6 +88,7 @@ public class Simulation {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
+    private Population population;
     /*
      * Coupling with Biogeochimical model.
      */
@@ -139,6 +142,8 @@ public class Simulation {
     boolean isFishingInterannual;
 
     public void init() {
+        
+        population = new Population();
 
         year = 0;
         i_step_year = 0;
@@ -206,7 +211,7 @@ public class Simulation {
     }
 
     private void updateStages() {
-        for (School school : getSchools()) {
+        for (School school : population) {
             int i = school.getSpeciesIndex();
             school.updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
             school.updateAccessStage(getOsmose().accessStageThreshold[i], getOsmose().nbAccessStage[i]);
@@ -223,7 +228,7 @@ public class Simulation {
         // update biomass
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
 
-            for (School school : getSchools()) {
+            for (School school : getPresentSchools()) {
                 Indicators.biomPerStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
             }
             getForcing().saveForDiet();
@@ -479,7 +484,7 @@ public class Simulation {
 
     private void growth() {
 
-        for (School school : getSchools()) {
+        for (School school : getPresentSchools()) {
             school.predSuccessRate = computePredSuccessRate(school.biomassToPredate, school.preyedBiomass);
             Species spec = school.getSpecies();
             int j = school.getAgeDt();
@@ -494,12 +499,6 @@ public class Simulation {
         }
     }
 
-    private void updateSpecies() {
-        for (int i = 0; i < species.length; i++) {
-            species[i].update();
-        }
-    }
-
     private void reproduction() {
         for (int i = 0; i < species.length; i++) {
             /*
@@ -507,9 +506,9 @@ public class Simulation {
              * simulated domain and we only model an incoming flux of biomass.
              */
             if (species[i].isReproduceLocally()) {
-                species[i].reproduce();
+                reproduce(species[i]);
             } else {
-                species[i].incomingFlux();
+                incomingFlux(species[i]);
             }
         }
     }
@@ -543,13 +542,11 @@ public class Simulation {
             // Preliminary actions before mortality processes
             rankSchoolsSizes();
             saveBiomassBeforeMortality();
-            for (School school : getSchools()) {
-                school.resetDietVariables();
-            }
 
             // Compute mortality
             // (predation + fishing + natural mortality + starvation)
-            for (School school : getSchools()) {
+            for (School school : population) {
+                school.resetDietVariables();
                 school.nDeadFishing = 0;
                 school.nDeadNatural = 0;
                 school.nDeadPredation = 0;
@@ -570,7 +567,6 @@ public class Simulation {
             growth();
 
             // Save steps
-            updateSpecies();
             if (getOsmose().spatializedOutputs[numSerie]) {
                 saveSpatializedStep();
             }
@@ -578,6 +574,7 @@ public class Simulation {
 
             // Reproduction
             reproduction();
+            removeDeadSchools();
 
             // Increment time step
             i_step_year++;
@@ -609,7 +606,7 @@ public class Simulation {
             }
 
             // Natural mortality (due to other predators)
-            for (School school : getSchools()) {
+            for (School school : population) {
                 // reset indicators
                 school.nDeadPredation = 0;
                 school.nDeadStarvation = 0;
@@ -674,7 +671,7 @@ public class Simulation {
             }
 
             // Starvation
-            for (School school : getSchools()) {
+            for (School school : getPresentSchools()) {
                 double nDead = computeStarvationMortality(school, 1);
                 school.setAbundance(school.getAbundance() - nDead);
                 if (school.getAbundance() < 1.d) {
@@ -689,7 +686,7 @@ public class Simulation {
             growth();
 
             // Fishing
-            for (School school : getSchools()) {
+            for (School school : getPresentSchools()) {
                 if (school.getAbundance() != 0.d) {
                     double nDead = computeFishingMortality(school, 1);
                     if (nDead != 0.d) {
@@ -704,7 +701,6 @@ public class Simulation {
                 }
             }
             removeDeadSchools();
-            updateSpecies();
 
             // Save steps
             Indicators.updateAndWriteIndicators();
@@ -714,6 +710,7 @@ public class Simulation {
 
             // Reproduction
             reproduction();
+            removeDeadSchools();
 
             // Increment time step
             i_step_year++;
@@ -1026,7 +1023,7 @@ public class Simulation {
         double[][] mortality = null;
         if (DEBUG_MORTALITY) {
             mortality = new double[getNbSpecies()][11];
-            for (School school : getSchools()) {
+            for (School school : population) {
                 if (school.getAgeDt() >= school.getSpecies().recruitAge) {
                     mortality[school.getSpeciesIndex()][10] += school.getAbundance();
                 }
@@ -1135,6 +1132,9 @@ public class Simulation {
                         school.tagForRemoval();
                     }
                 }
+                for (School school : cell) {
+                    school.trophicLevel = school.tmpTL;
+                }
             }
         }
 
@@ -1158,10 +1158,16 @@ public class Simulation {
 
     public void removeDeadSchools() {
         // Removing dead schools
-        // Update biomass of schools & cohort & species
-        for (int i = 0; i < species.length; i++) {
-            species[i].removeDeadSchools();
+        List<School> schoolsToRemove = new ArrayList();
+        for (School school : population) {
+            if (school.willDisappear()) {
+                if (!school.isUnlocated()) {
+                    school.getCell().remove(school);
+                }
+                schoolsToRemove.add(school);
+            }
         }
+        population.removeAll(schoolsToRemove);
     }
 
     public void iniBySizeSpectrum() //************************************* A VERIFIER : � adapter eu nouveau pas de temps si besoin**************************
@@ -1243,7 +1249,7 @@ public class Simulation {
             //System.out.println(species.getName() + " " + age);
             int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
             for (int i = 0; i < nbSchools; i++) {
-                species.add(new School(species, abundance / nbSchools, iniLength, iniWeight, age));
+                population.add(new School(species, abundance / nbSchools, iniLength, iniWeight, age));
             }
         }
     }
@@ -1348,16 +1354,12 @@ public class Simulation {
         forcing.initPlanktonMap();
     }
 
-    public List<School> getSchools() {
-        ArrayList<School> schools = new ArrayList();
-        for (Species sp : species) {
-            for (School school : sp.getSchools()) {
-                if (!sp.isOut(school.getAgeDt(), i_step_year)) {
-                    schools.add(school);
-                }
-            }
-        }
-        return schools;
+    public List<School> getPresentSchools() {
+        return FilteredSets.subset(population, new PresentSchoolFilter(i_step_year));
+    }
+
+    public Population getPopulation() {
+        return population;
     }
 
     public void rankSchoolsSizes() {
@@ -1663,7 +1665,7 @@ public class Simulation {
                 getGrid().getCell(i, j).clear();
             }
         }
-        for (School school : getSchools()) {
+        for (School school : population) {
             switch (getOsmose().spatialDistribution[school.getSpeciesIndex()]) {
                 case RANDOM:
                     randomDistribution(school);
@@ -1676,6 +1678,88 @@ public class Simulation {
                     break;
             }
         }
+    }
+
+    public List<School> getSchools(Species species) {
+        return FilteredSets.subset(population, new SpeciesFilter(species.getIndex()));
+    }
+
+    private void reproduce(Species species) {
+
+        double SSB = 0;
+        List<School> schools = getSchools(species);
+        for (School school : schools) {
+            if (school.getLength() >= species.sizeMat) {
+                SSB += school.getBiomass();
+            }
+        }
+
+        double season = species.seasonSpawning.length > getNbTimeStepsPerYear()
+                ? species.seasonSpawning[getIndexTimeSimu()]
+                : species.seasonSpawning[getIndexTimeYear()];
+        double nbEggs = species.sexRatio * species.alpha * season * SSB * 1000000;
+
+        /*
+         * Making cohorts going up to the upper age class
+         * Kill old schools
+         */
+        for (School school : schools) {
+            school.age += 1;
+            if (school.getAgeDt() > (species.getNumberCohorts() - 1)) {
+                school.tagForRemoval();
+            }
+        }
+
+        //UPDATE AGE CLASS 0
+        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
+        if (nbEggs == 0.d) {
+            // do nothing, zero school
+        } else if (nbEggs < nbSchools) {
+            School school0 = new School(species, nbEggs, species.eggSize, species.eggWeight, 0);
+            population.add(school0);
+        } else if (nbEggs >= nbSchools) {
+            for (int i = 0; i < nbSchools; i++) {
+                School school0 = new School(species, nbEggs / nbSchools, species.eggSize, species.eggWeight, 0);
+                population.add(school0);
+            }
+        }
+    }
+    
+    /*
+     * phv 2011/11/22 Created new function for modeling incoming flux of biomass
+     * for species that do not reproduce in the simulated domain.
+     */
+    public void incomingFlux(Species species) {
+
+        /*
+         * Making cohorts going up to the upper age class
+         * Kill old schools
+         */
+        for (School school : getSchools(species)) {
+            school.age += 1;
+            if (school.getAgeDt() > (species.getNumberCohorts() - 1)) {
+                school.tagForRemoval();
+            }
+        }
+
+        /*
+         * Incoming flux
+         */
+        double biomassIn = species.biomassFluxIn * species.seasonSpawning[i_step_year];
+        float meanWeigthIn = (float) (species.c * Math.pow(species.meanLengthIn, species.bPower));
+        long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
+        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
+        if (abundanceIn > 0 && abundanceIn < nbSchools) {
+            population.add(new School(species, abundanceIn, species.meanLengthIn, meanWeigthIn, species.ageMeanIn));
+        } else if (abundanceIn >= nbSchools) {
+            int mod = (int) (abundanceIn % nbSchools);
+            int abdSchool = (int) (abundanceIn / nbSchools);
+            for (int i = 0; i < nbSchools; i++) {
+                abdSchool += (i < mod) ? 1 : 0;
+                population.add(new School(species, abdSchool, species.meanLengthIn, meanWeigthIn, species.ageMeanIn));
+            }
+        }
+        //System.out.println(name + " incoming flux " + biomassIn + " [tons] + ageIn: " + ageMeanIn);
     }
 
     public void initSpatializedSaving() {
@@ -1927,17 +2011,5 @@ public class Simulation {
         int helper = a[i];
         a[i] = a[change];
         a[change] = helper;
-    }
-
-    public enum AlgoMortality {
-
-        CASE1("Iteration algo proposed by Ricardo"),
-        CASE2("Simultaneous processess but predation integrates competition between schools"),
-        CASE3("All processes compete with each other");
-        String description;
-
-        AlgoMortality(String description) {
-            this.description = description;
-        }
     }
 }

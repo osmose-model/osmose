@@ -185,7 +185,7 @@ public class Indicators {
          * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
          */
         double[][][] nDead = new double[getSimulation().getNbSpecies()][4][3];
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             int iStage;
             if (school.getAgeDt() == 0) {
                 // Eggs & larvae
@@ -283,7 +283,7 @@ public class Indicators {
 
     public static void monitorBiomassAndAbundance() {
 
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             int i = school.getSpeciesIndex();
             if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
                 biomassTot[i] += school.getBiomass();
@@ -301,7 +301,7 @@ public class Indicators {
      */
     public static void updateAbundancePerStages() {
 
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             int iStage;
             if (school.getAgeDt() == 0) {
                 // Eggs & larvae
@@ -323,7 +323,7 @@ public class Indicators {
      */
     public static void monitorMeanSizes() {
 
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             if (school.getAgeDt() > school.getSpecies().indexAgeClass0) {
                 int i = school.getSpeciesIndex();
                 meanSize[i] += school.getAbundance() * school.getLength();
@@ -334,7 +334,7 @@ public class Indicators {
 
     public static void monitorYields() {
 
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             if (school.isCatchable() && school.getAgeDt() >= school.getSpecies().recruitAge) {
                 int i = school.getSpeciesIndex();
                 yield[i] += school.adb2biom(school.nDeadFishing);
@@ -344,7 +344,7 @@ public class Indicators {
     }
 
     public static void monitorSizeSpectrum() {
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getAbundance();
         }
     }
@@ -362,7 +362,7 @@ public class Indicators {
 
     public static void monitorTLDistribution() {
 
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             int ageClass1 = (int) Math.max(1, school.getSpecies().supAgeOfClass0);
             if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
                 distribTL[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
@@ -380,7 +380,7 @@ public class Indicators {
     }
 
     public static void monitorPredation() {
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             int iSpec = school.getSpeciesIndex();
             nbStomachs[iSpec][school.dietOutputStage] += school.getAbundance();
             for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
@@ -842,7 +842,7 @@ public class Indicators {
 
     public static void monitorMeanTL() {
 
-        for (School school : getSimulation().getSchools()) {
+        for (School school : getSimulation().getPopulation()) {
             if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
                 int i = school.getSpeciesIndex();
                 meanTL[i] += school.getBiomass() * school.trophicLevel;

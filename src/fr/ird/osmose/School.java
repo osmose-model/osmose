@@ -71,7 +71,6 @@ public class School extends Fish {
         disappears = false;
         catchable = true;
         trophicLevel = Species.TL_EGG;
-        tmpTL = 0.f;
 
         /*
          * Initialisation of stage

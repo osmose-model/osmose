@@ -14,12 +14,8 @@ package fr.ird.osmose;
  * @version 2.1
  * *******************************************************************************
  */
-import fr.ird.osmose.util.SchoolLengthComparator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-public class Species extends ArrayList<School> {
+public class Species {
 
     final static public float TL_EGG = 3f;
 ///////////////////////////////
@@ -77,9 +73,9 @@ public class Species extends ArrayList<School> {
     int nbDietStages;
     float[] dietStagesTab;
     private boolean reproduceLocally;
-    private float biomassFluxIn;
-    private float meanLengthIn;
-    private int ageMeanIn;
+    float biomassFluxIn;
+    float meanLengthIn;
+    int ageMeanIn;
     // Migration
     private float[][] outOfZoneMortality;
     private boolean[][] outOfZoneCohort;
@@ -91,6 +87,11 @@ public class Species extends ArrayList<School> {
      */
     public Species(int number) {
         index = number - 1;
+    }
+    
+    public Species(int index, String name) {
+        this.index = index;
+        this.name = name;
     }
 
     /*
@@ -237,10 +238,6 @@ public class Species extends ArrayList<School> {
         return nbCohorts;
     }
 
-    public List<School> getSchools() {
-        return this;
-    }
-
     public int getIndex() {
         return index;
     }
@@ -251,112 +248,6 @@ public class Species extends ArrayList<School> {
 
     public boolean isReproduceLocally() {
         return reproduceLocally;
-    }
-
-    public void removeDeadSchools() {
-        List<School> schoolsToRemove = new ArrayList();
-        for (School school : this) {
-            if (school.willDisappear()) {
-                if (!school.isUnlocated()) {
-                    school.getCell().remove(school);
-                }
-                schoolsToRemove.add(school);
-            }
-        }
-        removeAll(schoolsToRemove);
-    }
-
-    /*
-     * phv 2011/11/22 Created new function for modeling incoming flux of biomass
-     * for species that do not reproduce in the simulated domain.
-     */
-    public void incomingFlux() {
-
-        /*
-         * Making cohorts going up to the upper age class
-         * Kill old schools
-         */
-        for (School school : this) {
-            school.age += 1;
-            if (school.getAgeDt() > (nbCohorts - 1)) {
-                school.tagForRemoval();
-            }
-        }
-        removeDeadSchools();
-
-        /*
-         * Incoming flux
-         */
-        double biomassIn = biomassFluxIn * seasonSpawning[getSimulation().getIndexTimeYear()];
-        float meanWeigthIn = (float) (c * Math.pow(meanLengthIn, bPower));
-        long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
-        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
-        if (abundanceIn > 0 && abundanceIn < nbSchools) {
-            add(new School(this, abundanceIn, meanLengthIn, meanWeigthIn, ageMeanIn));
-        } else if (abundanceIn >= nbSchools) {
-            int mod = (int) (abundanceIn % nbSchools);
-            int abdSchool = (int) (abundanceIn / nbSchools);
-            for (int i = 0; i < nbSchools; i++) {
-                abdSchool += (i < mod) ? 1 : 0;
-                add(new School(this, abdSchool, meanLengthIn, meanWeigthIn, ageMeanIn));
-            }
-        }
-        //System.out.println(name + " incoming flux " + biomassIn + " [tons] + ageIn: " + ageMeanIn);
-    }
-
-    public void reproduce() {
-        //CALCULATION of Spawning Stock Biomass (SSB)
-        double SSB = 0;
-        float tempTL = 0f;
-        int indexMin = 0;
-        Collections.sort(this, new SchoolLengthComparator());
-        while ((indexMin < size())
-                && (get(indexMin).getLength() < sizeMat)) {
-            indexMin++;
-        }
-        for (int i = indexMin; i < size(); i++) {
-            SSB += get(i).getBiomass();
-            tempTL += get(i).trophicLevel * get(i).getBiomass();
-        }
-
-        double season = seasonSpawning.length > getSimulation().getNbTimeStepsPerYear()
-                ? seasonSpawning[getSimulation().getIndexTimeSimu()]
-                : seasonSpawning[getSimulation().getIndexTimeYear()];
-        double nbEggs = sexRatio * alpha * season * SSB * 1000000;
-
-        /*
-         * Making cohorts going up to the upper age class
-         * Kill old schools
-         */
-        for (School school : this) {
-            school.age += 1;
-            if (school.getAgeDt() > (nbCohorts - 1)) {
-                school.tagForRemoval();
-            }
-        }
-        removeDeadSchools();
-
-        //UPDATE AGE CLASS 0
-        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
-        if (nbEggs == 0.d) {
-            // do nothing, zero school
-        } else if (nbEggs < nbSchools) {
-            School school0 = new School(this, nbEggs, eggSize, eggWeight, 0);
-            add(school0);
-        } else if (nbEggs >= nbSchools) {
-            for (int i = 0; i < nbSchools; i++) {
-                School school0 = new School(this, nbEggs / nbSchools, eggSize, eggWeight, 0);
-                add(school0);
-            }
-        }
-    }
-
-    public void update() {
-        for (School school : this) {
-            school.trophicLevel = school.tmpTL;
-            school.updateFeedingStage(sizeFeeding, nbFeedingStages);
-            school.updateAccessStage(getOsmose().accessStageThreshold[index], getOsmose().nbAccessStage[index]);
-        }
     }
 
     public boolean isOut(int age, int indexTime) {
