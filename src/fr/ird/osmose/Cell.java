@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.Vector;
 
 public class Cell extends ArrayList<School> {
+    
+    final public static float LAND_VALUE = -99.f; 
 
 ///////////////////////////////
 // Declaration of the variables

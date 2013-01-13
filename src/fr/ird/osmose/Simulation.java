@@ -1406,7 +1406,7 @@ public class Simulation {
 
         // Get current map and max probability of presence
         int numMap = getOsmose().numMap[i][j][i_step_year];
-        List<Cell> map = getOsmose().getMap(numMap);
+        GridMap map = getOsmose().getMap(numMap);
         float tempMaxProbaPresence = getOsmose().maxProbaPresence[numMap];
 
         /*
@@ -1436,10 +1436,13 @@ public class Simulation {
              * school was unlocated due to migration.
              */
             int indexCell;
+            int nCells = getGrid().getNbColumns() * getGrid().getNbLines();
+            double proba;
             do {
-                indexCell = (int) Math.round((map.size() - 1) * Math.random());
-            } while (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][i_step_year]][indexCell] < Math.random() * tempMaxProbaPresence);
-            school.moveToCell(map.get(indexCell));
+                indexCell = (int) Math.round((nCells - 1) * Math.random());
+                proba = getOsmose().maps[getOsmose().numMap[i][j][i_step_year]].getValue(getGrid().getCell(indexCell));
+            } while (proba <= 0 || proba < Math.random() * tempMaxProbaPresence);
+            school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.
             school.moveToCell(randomDeal(getAccessibleCells(school, map)));
@@ -1470,8 +1473,8 @@ public class Simulation {
      */
     private boolean checkSchoolDistribution(School school, int numMap) {
         Cell cell = school.getCell();
-        List<Cell> map = getOsmose().getMap(numMap);
-        if (map.contains(cell)) {
+        GridMap map = getOsmose().getMap(numMap);
+        if (map.getValue(cell) > 0) {
             return true;
         }
         return false;
@@ -1485,10 +1488,10 @@ public class Simulation {
      * @param map
      * @return
      */
-    private List<Cell> getAccessibleCells(School school, List<Cell> map) {
+    private List<Cell> getAccessibleCells(School school, GridMap map) {
 
         Cell cell = school.getCell();
-        if (!map.contains(cell)) {
+        if (map.getValue(cell) <= 0) {
             StringBuilder str = new StringBuilder("Inconsistency in moving ");
             str.append(school.toString());
             str.append("\n");
@@ -1502,7 +1505,7 @@ public class Simulation {
             Cell neighbour = neighbours.next();
             // 2. Eliminate cell that is on land
             // 3. Add the cell if it is within the current map of distribution 
-            if (!neighbour.isLand() && map.contains(neighbour)) {
+            if (!neighbour.isLand() && map.getValue(neighbour) > 0) {
                 accessibleCells.add(neighbour);
             }
         }
@@ -1546,7 +1549,7 @@ public class Simulation {
 
         // Get current map and max probability of presence
         int numMap = getOsmose().numMap[i][j][i_step_year];
-        List<Cell> map = getOsmose().getMap(numMap);
+        GridMap map = getOsmose().getMap(numMap);
         float tempMaxProbaPresence = getOsmose().maxProbaPresence[numMap];
 
         // init = true if either cohort zero or first time-step of the simulation
@@ -1577,10 +1580,13 @@ public class Simulation {
              * school was unlocated due to migration.
              */
             int indexCell;
+            int nCells = getGrid().getNbColumns() * getGrid().getNbLines();
+            double proba;
             do {
-                indexCell = (int) Math.round((map.size() - 1) * Math.random());
-            } while (getOsmose().mapProbaPresence[getOsmose().numMap[i][j][i_step_year]][indexCell] < Math.random() * tempMaxProbaPresence);
-            school.moveToCell(map.get(indexCell));
+                indexCell = (int) Math.round((nCells - 1) * Math.random());
+                proba = getOsmose().maps[getOsmose().numMap[i][j][i_step_year]].getValue(getGrid().getCell(indexCell));
+            } while (proba <= 0 || proba < Math.random() * tempMaxProbaPresence);
+            school.moveToCell(getGrid().getCell(indexCell));
         } else if (sameMap) {
             // Random move in adjacent cells contained in the map.
             school.moveToCell(randomDeal(getAccessibleCells(school, map)));

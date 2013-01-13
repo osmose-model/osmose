@@ -123,8 +123,7 @@ public class Osmose {
     //int[][] randomAreaCoordi, randomAreaCoordj;//species areas in random cases [species][cell]
     List<Cell>[] randomMaps;
     int[][][] numMap;        //gives a number of map for[species][cohort][dt]
-    List<Cell>[] maps;
-    float[][] mapProbaPresence; // Probability of presence of a cohort [numMap][cell]
+    GridMap[] maps;
     float[] maxProbaPresence;
     boolean densityMaps;
     ConnectivityMatrix[] connectivityMatrix;
@@ -865,8 +864,7 @@ public class Osmose {
             } catch (IOException ex) {
                 Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } 
-        else {
+        } else {
             FileInputStream reproductionFile;
             try {
                 reproductionFile = new FileInputStream(resolveFile(reproductionFileName));
@@ -1711,96 +1709,6 @@ public class Osmose {
         }
     }
 
-    public void writeMapsAsCSV() {
-
-        int numberMaps = maps.length;
-        for (int k = 0; k < numberMaps; k++) {
-            try {
-                List<Cell> map = getMap(k);
-                String fileName = "maps/map" + numMapToString(k + 1, numberMaps) + "-" + getSimulation().getSpecies(areasNumSpForMap[k]).getName().trim() + ".csv";
-                CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-                // Golf of Lyons
-                /*
-                 * for (int j = getGrid().getNbColumns() - 1; j >= 0; j--) {
-                 * String[] entries = new String[getGrid().getNbLines()]; for
-                 * (int i = 0; i < getGrid().getNbLines(); i++) { if
-                 * (getGrid().getCell(i, j).isLand()) { entries[i] =
-                 * String.valueOf(-99); } else if
-                 * (map.contains(getGrid().getCell(i, j))) { entries[i] =
-                 * String.valueOf(1); } else { entries[i] = String.valueOf(0); }
-                 * } writer.writeNext(entries); }
-                 */
-                // Benguela
-                for (int i = 0; i < getGrid().getNbLines(); i++) {
-                    String[] entries = new String[getGrid().getNbColumns()];
-                    for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                        if (getGrid().getCell(i, j).isLand()) {
-                            entries[j] = String.valueOf(-99);
-                        } else if (map.contains(getGrid().getCell(i, j))) {
-                            entries[j] = String.valueOf(1);
-                        } else {
-                            entries[j] = String.valueOf(0);
-                        }
-                    }
-                    writer.writeNext(entries);
-                }
-                writer.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-
-        }
-    }
-
-    public void writeGlobalDistributionMap() {
-        try {
-            int numberMaps = maps.length;
-            String fileName = "map-all.csv";
-            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-
-            int[][] area = new int[getGrid().getNbLines()][getGrid().getNbColumns()];
-            for (int k = 0; k < numberMaps; k++) {
-
-                if (areasNumSpForMap[k] == 1 || areasNumSpForMap[k] == 5 || areasNumSpForMap[k] == 6 || areasTempAge[k][0] == 0) {
-                    System.out.println(getSimulation().getSpecies(areasNumSpForMap[k]).getName() + " " + areasTempAge[k][0]);
-                    continue;
-                }
-
-                List<Cell> map = getMap(k);
-                for (Cell cell : map) {
-                    area[cell.get_igrid()][cell.get_jgrid()] = 1;
-                }
-            }
-
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                String[] entries = new String[getGrid().getNbColumns()];
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    if (getGrid().getCell(i, j).isLand()) {
-                        entries[j] = String.valueOf(-99);
-                    } else {
-                        entries[j] = String.valueOf(area[i][j]);
-                    }
-                }
-                writer.writeNext(entries);
-            }
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        System.out.println("########## map finished !");
-    }
-
-    private String numMapToString(int numMap, int numberMaps) {
-
-        String snumMap = String.valueOf(numMap);
-        int lengthNumberMaps = String.valueOf(numberMaps).length();
-        while (snumMap.length() < lengthNumberMaps) {
-            snumMap = "0" + snumMap;
-        }
-        return snumMap;
-    }
-
     public void readAreaFile() {
 
         /*
@@ -1844,9 +1752,8 @@ public class Osmose {
              */
             st.nextToken();
             int nbMaps = new Integer(st.sval).intValue();
-            maps = new ArrayList[nbMaps];
+            maps = new GridMap[nbMaps];
             connectivityMatrix = new ConnectivityMatrix[nbMaps];
-            mapProbaPresence = new float[nbMaps][];
             maxProbaPresence = new float[nbMaps];
             areasNumSpForMap = new int[nbMaps];
             areasTempAge = new int[nbMaps][];
@@ -2059,8 +1966,7 @@ public class Osmose {
             /*
              * Initialize the arrays
              */
-            maps[indexMap] = new ArrayList(nbCells);
-            mapProbaPresence[indexMap] = new float[nbCells];
+            maps[indexMap] = new GridMap();
             /*
              * Set the numero of maps per species, age class and time step
              */
@@ -2089,18 +1995,17 @@ public class Osmose {
                 for (int j = 0; j < line.length; j++) {
                     float val = Float.valueOf(line[j]);
                     if (val > 0.f) {
-                        maps[indexMap].add(getGrid().getCell(i, j));
                         if (val < 1.f) {
                             /*
                              * value provided is directly a probability
                              */
-                            mapProbaPresence[indexMap][indexCell] = val;
+                            maps[indexMap].setValue(i, j, val);
                         } else if (val == 1.f) {
                             /*
                              * map is presence/absence so equal probability of
                              * presence among cells
                              */
-                            mapProbaPresence[indexMap][indexCell] = invNbCells;
+                            maps[indexMap].setValue(i, j, invNbCells);
                             /*
                              * else mapProbaPresence[indexMap][indexCell] = 0
                              * default value at initialization of the array
@@ -2117,15 +2022,16 @@ public class Osmose {
         //System.out.println("Read CSV file " + csvFile + " [OK]");
     }
 
-    public List<Cell> getMap(int numMap) {
-
+    public GridMap getMap(int numMap) {
         return maps[numMap];
     }
 
     private float getMaxProbaPresence(int numMap) {
         float tempMaxProbaPresence = 0;
-        for (int m = 0; m < maps[numMap].size(); m++) {
-            tempMaxProbaPresence = Math.max(tempMaxProbaPresence, mapProbaPresence[numMap][m]);
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                tempMaxProbaPresence = Math.max(tempMaxProbaPresence, maps[numMap].getValue(i, j));
+            }
         }
         return tempMaxProbaPresence;
     }
