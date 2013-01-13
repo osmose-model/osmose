@@ -140,9 +140,13 @@ public class Simulation {
      * years of simulation
      */
     boolean isFishingInterannual;
+    /*
+     * Random generator
+     */
+    private static Random random = new Random();
 
     public void init() {
-        
+
         population = new Population();
 
         year = 0;
@@ -1730,7 +1734,7 @@ public class Simulation {
             }
         }
     }
-    
+
     /*
      * phv 2011/11/22 Created new function for modeling incoming flux of biomass
      * for species that do not reproduce in the simulated domain.
@@ -2004,18 +2008,15 @@ public class Simulation {
     }
 
     public static void shuffleArray(int[] a) {
-        int n = a.length;
-        Random random = new Random();
-        random.nextInt();
-        for (int i = 0; i < n; i++) {
-            int change = i + random.nextInt(n - i);
-            swap(a, i, change);
+        // Shuffle array
+        for (int i = a.length; i > 1; i--) {
+            swap(a, i - 1, random.nextInt(i));
         }
     }
 
-    private static void swap(int[] a, int i, int change) {
-        int helper = a[i];
-        a[i] = a[change];
-        a[change] = helper;
+    private static void swap(int[] a, int i, int j) {
+        int tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
     }
 }
