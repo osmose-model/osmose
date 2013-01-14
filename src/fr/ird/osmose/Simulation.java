@@ -156,11 +156,11 @@ public class Simulation {
 
         //INITIALISATION of SPECIES ABD ACCORDING TO SIZE SPECTRUM
         if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {
-            iniBySpeciesBiomass();
+            new BiomassPopulator().populate();
         } else if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("spectrum")) {
-            iniBySizeSpectrum();
+            new SpectrumPopulator().populate();
         } else if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("random")) {
-            iniRandomly();
+            throw new UnsupportedOperationException("Random initialization not supported yet.");
         }
 
         // Initialize all the tables required for saving output
@@ -1153,155 +1153,6 @@ public class Simulation {
             String filename = "nDead_Simu" + getOsmose().numSimu + ".csv";
             String[] headers = new String[]{"Predation", "Fpred", "Starvation", "Fstarv", "Natural", "Fnat", "Fishing", "Ffish", "Total", "Ftotal", "Abundance"};
             Indicators.writeVariable(year + (i_step_year + 1f) / (float) nbTimeStepsPerYear, mortality, filename, headers, "Instaneous number of deads and mortality rates");
-        }
-    }
-
-    public void iniBySizeSpectrum() //************************************* A VERIFIER : � adapter eu nouveau pas de temps si besoin**************************
-    //initialisation according to a spectrum [10cm], from 0 to 200cm
-    {
-        long[] tempSpectrumAbd = new long[20];
-        /*
-         * tab of vectors of species belonging to [0-10[....[140-150[
-         */
-        Vector[] specInSizeClass10 = new Vector[20];    //20 classes size 0 a 200
-        for (int i = 0; i < specInSizeClass10.length; i++) {
-            specInSizeClass10[i] = new Vector(species.length);
-        }
-        long abdIniMin = 100;
-        //a=-5.8;
-        //b=35.5;
-        double a = getOsmose().SSslope[numSerie];
-        double b = getOsmose().SSintercept[numSerie];
-        //Calculation of abd lacking in each size class
-        //calculation apart for first size class because minSize=0.05 (and not 0)
-        tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));
-        for (int i = 1; i < 20; i++) {
-            tempSpectrumAbd[i] = Math.round(Math.pow((i * getOsmose().classRange) + 5., a) * Math.exp(b));
-        }
-        //tabSizes10[i]+5 is mean length of [tabSizes10[i],tabSizes10[i+1][
-        //Sort the Lmax of each species in each size class
-        for (int i = 0; i < species.length; i++) {
-            int index1 = tempSpectrumAbd.length - 1;
-            while (species[i].tabMeanLength[species[i].getLongevity() - 1] < (index1 * getOsmose().classRange)) {
-                index1--;
-            }
-            specInSizeClass10[index1].addElement(species[i]);
-        }
-        //calculate spectrumMaxIndex
-        int spectrumMaxIndex = specInSizeClass10.length - 1;
-        while (specInSizeClass10[spectrumMaxIndex].isEmpty()) {
-            spectrumMaxIndex--;
-        }
-
-        //Calculate abd species and cohorts
-        for (int i = spectrumMaxIndex; i >= 0; i--) {
-            for (int j = 0; j < specInSizeClass10[i].size(); j++) {
-                Species speciesj = ((Species) specInSizeClass10[i].elementAt(j));
-                speciesj.tabAbdIni[speciesj.getLongevity() - 1] = Math.round(((double) tempSpectrumAbd[i])
-                        / specInSizeClass10[i].size());
-                speciesj.tabBiomIni[speciesj.getLongevity() - 1] = ((double) speciesj.tabAbdIni[speciesj.getLongevity() - 1]) * speciesj.tabMeanWeight[speciesj.getLongevity() - 1] / 1000000.;
-                //we consider that D0->1 = 10 for the first age class (month or year, whatever nbDt), D0-1year->2 = 1 and D=0.4 otherwise
-                //we calculate abd & biom of coh, and in parallel abd & biom of species & we create cohorts
-
-                for (int k = speciesj.getLongevity() - 2; k >= (2 * nbTimeStepsPerYear); k--) {
-                    speciesj.tabAbdIni[k] = Math.round(speciesj.tabAbdIni[k + 1] * Math.exp((0.5 / (float) nbTimeStepsPerYear)));
-                    speciesj.tabBiomIni[k] = ((double) speciesj.tabAbdIni[k]) * speciesj.tabMeanWeight[k] / 1000000.;
-                }
-                int kTemp;
-                if (speciesj.getLongevity() <= nbTimeStepsPerYear) {
-                    kTemp = speciesj.getLongevity() - 2;
-                } else {
-                    kTemp = (2 * nbTimeStepsPerYear) - 1;
-                }
-
-                for (int k = kTemp; k >= 1; k--) {
-                    speciesj.tabAbdIni[k] = Math.round(speciesj.tabAbdIni[k + 1] * Math.exp((1. / (float) nbTimeStepsPerYear)));
-                    speciesj.tabBiomIni[k] = ((double) speciesj.tabAbdIni[k]) * speciesj.tabMeanWeight[k] / 1000000.;
-                }
-
-                speciesj.tabAbdIni[0] = Math.round(speciesj.tabAbdIni[1] * Math.exp(10.));
-                speciesj.tabBiomIni[0] = ((double) speciesj.tabAbdIni[0]) * speciesj.tabMeanWeight[0] / 1000000.;
-
-                //creation of the cohorts
-                for (int k = 0; k < speciesj.getLongevity(); k++) {
-                    createCohort(speciesj, k, speciesj.tabAbdIni[k], speciesj.tabMeanLength[k], speciesj.tabMeanWeight[k]);
-                }
-            }
-        }
-    }
-
-    private void createCohort(Species species, int age, long abundance, float iniLength, float iniWeight) {
-        if (abundance > 0.d) {
-            //System.out.println(species.getName() + " " + age);
-            int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
-            for (int i = 0; i < nbSchools; i++) {
-                population.add(new School(species, abundance / nbSchools, iniLength, iniWeight, age));
-            }
-        }
-    }
-
-    public void iniRandomly() //************************** Nouvelle option : A faire
-    {
-    }
-
-    public void iniBySpeciesBiomass() {
-        float correctingFactor;
-        double abdIni;
-
-        for (int i = 0; i < species.length; i++) {
-            //We calculate abd & biom ini of cohorts, and in parallel biom of species
-            Species speci = species[i];
-            double biomass = 0;
-            double sumExp = 0;
-            /*
-             * phv 2011/11/24 For species that do not reproduce locally, initial
-             * biomass is set to zero.
-             */
-            if (!speci.isReproduceLocally()) {
-                for (int j = 0; j < speci.getLongevity(); j++) {
-                    speci.tabAbdIni[j] = 0;
-                    speci.tabBiomIni[j] = 0;
-                }
-            } else {
-                abdIni = getOsmose().spBiomIniTab[numSerie][i] / (speci.tabMeanWeight[(int) Math.round(speci.getLongevity() / 2)] / 1000000);
-                for (int j = speci.indexAgeClass0; j < speci.getLongevity(); j++) {
-                    sumExp += Math.exp(-(j * (speci.D + speci.F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
-                }
-
-                speci.tabAbdIni[0] = (long) ((abdIni) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
-                speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
-                if (speci.indexAgeClass0 <= 0) {
-                    biomass += speci.tabBiomIni[0];
-                }
-                speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
-                speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
-                if (speci.indexAgeClass0 <= 1) {
-                    biomass += speci.tabBiomIni[1];
-                }
-                for (int j = 2; j < speci.getLongevity(); j++) {
-                    speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
-                    speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
-                    if (speci.indexAgeClass0 <= j) {
-                        biomass += speci.tabBiomIni[j];
-                    }
-                }
-
-                correctingFactor = (float) (getOsmose().spBiomIniTab[numSerie][i] / biomass);
-                // we make corrections on initial abundance to fit the input biomass
-                speci.tabAbdIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
-                speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
-                speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
-                speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
-                for (int j = 2; j < speci.getLongevity(); j++) {
-                    speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
-                    speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
-                }
-            }
-
-            // create the cohorts
-            for (int j = 0; j < speci.getLongevity(); j++) {
-                createCohort(speci, j, speci.tabAbdIni[j], speci.tabMeanLength[j], speci.tabMeanWeight[j]);
-            }
         }
     }
 
