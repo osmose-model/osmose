@@ -48,7 +48,7 @@ public class GrowthProcess extends AbstractProcess {
                 school.setWeight((float) (species.c * Math.pow(school.getLength(), species.bPower)));
             } else {
                 // Growth based on predation success
-                school.growth(minDelta[i][j], maxDelta[i][j], species.c, species.bPower);
+                growth(school, minDelta[i][j], maxDelta[i][j], species.c, species.bPower);
             }
         }
     }

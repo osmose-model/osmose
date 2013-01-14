@@ -81,7 +81,7 @@ public class Fish extends GridPoint {
     /*
      * whether the school will disappear at next time step
      */
-    boolean disappears;
+    boolean alive;
     /*
      * Available biomass [ton] of the school for predation by other schools
      */
@@ -172,15 +172,15 @@ public class Fish extends GridPoint {
     /**
      * @return whether the shcool will disappear at next time step
      */
-    public boolean willDisappear() {
-        return disappears;
+    public boolean isAlive() {
+        return alive;
     }
 
     /**
      * Tag the school as about to disappear
      */
-    public void tagForRemoval() {
-        disappears = true;
+    public void kill() {
+        alive = false;
     }
 
     /**
@@ -236,15 +236,6 @@ public class Fish extends GridPoint {
                     dietOutputStage++;
                 }
             }
-        }
-    }
-
-    public void growth(float minDelta, float maxDelta, float c, float bPower) {
-
-        //calculation of lengths according to predation efficiency
-        if (predSuccessRate >= species.criticalPredSuccess) {
-            length = (length + minDelta + (maxDelta - minDelta) * ((predSuccessRate - species.criticalPredSuccess) / (1 - species.criticalPredSuccess)));
-            weight = (float) (c * Math.pow(getLength(), bPower));
         }
     }
 }

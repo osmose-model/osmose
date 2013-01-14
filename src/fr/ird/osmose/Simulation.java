@@ -616,7 +616,7 @@ public class Simulation {
                 if (school.getAbundance() < 1.d) {
                     nDead = school.getAbundance();
                     school.setAbundance(0);
-                    school.tagForRemoval();
+                    school.kill();
                 }
                 //school.nDeadNatural = nDead;
             }
@@ -651,7 +651,7 @@ public class Simulation {
                         school.setAbundance(school.getAbundance() - nDeadPredation[is]);
                         if (school.getAbundance() < 1.d) {
                             school.setAbundance(0.d);
-                            school.tagForRemoval();
+                            school.kill();
                         }
                     }
                 }
@@ -663,7 +663,7 @@ public class Simulation {
                 school.setAbundance(school.getAbundance() - nDead);
                 if (school.getAbundance() < 1.d) {
                     school.setAbundance(0);
-                    school.tagForRemoval();
+                    school.kill();
                 }
                 //school.nDeadStarvation = nDead;
             }
@@ -680,7 +680,7 @@ public class Simulation {
                         if (school.getAbundance() < 1.d) {
                             nDead = school.getAbundance();
                             school.setAbundance(0);
-                            school.tagForRemoval();
+                            school.kill();
                         }
                         //school.nDeadFishing = nDead;
                     }
@@ -1120,7 +1120,7 @@ public class Simulation {
                     school.setAbundance(school.getAbundance() - nDeadTotal);
                     if (school.getAbundance() < 1.d) {
                         school.setAbundance(0.d);
-                        school.tagForRemoval();
+                        school.kill();
                     }
                 }
                 for (School school : schools) {
@@ -1503,7 +1503,7 @@ public class Simulation {
         for (School school : schools) {
             school.age += 1;
             if (school.getAgeDt() > (species.getLongevity() - 1)) {
-                school.tagForRemoval();
+                school.kill();
             }
         }
 
@@ -1535,7 +1535,7 @@ public class Simulation {
         for (School school : getSchools(species)) {
             school.age += 1;
             if (school.getAgeDt() > (species.getLongevity() - 1)) {
-                school.tagForRemoval();
+                school.kill();
             }
         }
 

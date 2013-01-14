@@ -68,7 +68,7 @@ public class School extends Fish {
      * Initialize the school state variables
      */
     private void init() {
-        disappears = false;
+        alive = true;
         catchable = true;
         trophicLevel = Species.TL_EGG;
 
