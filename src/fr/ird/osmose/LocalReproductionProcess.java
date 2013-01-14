@@ -62,11 +62,11 @@ public class LocalReproductionProcess extends AbstractProcess {
         if (nbEggs == 0.d) {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {
-            School school0 = new School(species, nbEggs, species.eggSize, species.eggWeight, 0);
+            School school0 = new School(species, nbEggs, species.eggSize, 0);
             getPopulation().add(school0);
         } else if (nbEggs >= nbSchools) {
             for (int i = 0; i < nbSchools; i++) {
-                School school0 = new School(species, nbEggs / nbSchools, species.eggSize, species.eggWeight, 0);
+                School school0 = new School(species, nbEggs / nbSchools, species.eggSize, 0);
                 getPopulation().add(school0);
             }
         }

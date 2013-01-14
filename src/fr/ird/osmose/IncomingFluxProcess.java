@@ -54,13 +54,13 @@ public class IncomingFluxProcess extends AbstractProcess {
         long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
         int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
         if (abundanceIn > 0 && abundanceIn < nbSchools) {
-            getPopulation().add(new School(species, abundanceIn, meanLengthIn, meanWeigthIn, ageMeanIn));
+            getPopulation().add(new School(species, abundanceIn, meanLengthIn, ageMeanIn));
         } else if (abundanceIn >= nbSchools) {
             int mod = (int) (abundanceIn % nbSchools);
             int abdSchool = (int) (abundanceIn / nbSchools);
             for (int i = 0; i < nbSchools; i++) {
                 abdSchool += (i < mod) ? 1 : 0;
-                getPopulation().add(new School(species, abdSchool, meanLengthIn, meanWeigthIn, ageMeanIn));
+                getPopulation().add(new School(species, abdSchool, meanLengthIn, ageMeanIn));
             }
         }
     }

@@ -44,7 +44,8 @@ public class Species {
     float D;//D0;		//mortality rates year-1
     float[] fishingRates;
     
-    float lInf, K, t0, c, bPower;	//von bertalanffy growth parameters
+    float lInf, K, t0;	//von bertalanffy growth parameters
+    private float c, bPower;
     float sizeMat;
     int recruitAge;            //year
     /*
@@ -173,15 +174,12 @@ public class Species {
         meanWeight[0] = eggWeight;
         for (int i = 1; i < longevity; i++) {
             meanWeight[i] = (float) computeWeight(tabMeanLength[i]);
-            if (meanWeight[i] < eggWeight) {
-                meanWeight[i] = eggWeight;
-            }
         }
         return meanWeight;
     }
     
     public float computeWeight(float length) {
-        return (float) (c * (Math.pow(length, bPower)));
+        return Math.max(eggWeight, (float) (c * (Math.pow(length, bPower))));
     }
 
     private Osmose getOsmose() {

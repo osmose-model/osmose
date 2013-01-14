@@ -67,10 +67,6 @@ public class Fish extends GridPoint {
      */
     float length;
     /*
-     * weight of individual of the school in grams
-     */
-    float weight;
-    /*
      * TL of this fish, amd its variation in a time-step
      */
     float trophicLevel, tmpTL;
@@ -145,14 +141,9 @@ public class Fish extends GridPoint {
      * @return the weight
      */
     public float getWeight() {
-        return weight;
-    }
-
-    /**
-     * @param weight the weight to set
-     */
-    public void setWeight(float weight) {
-        this.weight = weight;
+        return age == 0
+                ? species.eggWeight
+                : species.computeWeight(length);
     }
 
     /**
