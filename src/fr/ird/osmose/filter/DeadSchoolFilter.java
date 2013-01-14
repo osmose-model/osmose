@@ -47,7 +47,7 @@ public class DeadSchoolFilter implements IFilter<School> {
 
     @Override
     public boolean accept(School school) {
-        return school.willDisappear();
+        return !school.isAlive();
     }
     
 }
