@@ -80,7 +80,7 @@ public class BiomassPopulator extends Populator {
                 if (abundanceIni[age] > 0.d) {
                     int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
                     for (int k = 0; k < nbSchools; k++) {
-                        getPopulation().add(new School(species, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
+                        getPopulation().add(new School(species, abundanceIni[age] / nbSchools, meanLength[age], age));
                     }
                 }
             }

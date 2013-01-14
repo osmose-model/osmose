@@ -14,17 +14,12 @@ package fr.ird.osmose;
  * @version 2.1
  * *******************************************************************************
  */
-
 public class Species {
 
     final static public float TL_EGG = 3f;
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
-    /*
-     * ******************************
-     * * Description of the species * ******************************
-     */
+/////////////////////////////
+// Description of the species
+/////////////////////////////
     /*
      * Index of the species [0 : numberTotalSpecies - 1]
      */
@@ -33,18 +28,28 @@ public class Species {
      * Name of the species
      */
     private String name;
+//////////////////////////
+// Life history parameters
+//////////////////////////
     /*
      * Longevity expressed in number of time steps
      */
     private int longevity;
     /*
-     * ***************************
-     * * Life history parameters * ***************************
+     * Natural mortality rates year-1
      */
-    float D;//D0;		//mortality rates year-1
+    float D;
+    /*
+     * Fishing mortality rates
+     */
     float[] fishingRates;
-    
-    float lInf, K, t0;	//von bertalanffy growth parameters
+    /*
+     * Von bertalanffy growth parameters
+     */
+    private float lInf, K, t0;
+    /*
+     * Allometric parameters
+     */
     private float c, bPower;
     float sizeMat;
     int recruitAge;            //year
@@ -65,11 +70,10 @@ public class Species {
     int nbDietStages;
     float[] dietStagesTab;
     private boolean reproduceLocally;
-   
     // Migration
     private float[][] outOfZoneMortality;
     private boolean[][] outOfZoneCohort;
-    
+
     /**
      * Create a new species
      *
@@ -78,7 +82,7 @@ public class Species {
     public Species(int number) {
         index = number - 1;
     }
-    
+
     public Species(int index, String name) {
         this.index = index;
         this.name = name;
@@ -144,7 +148,7 @@ public class Species {
         outOfZoneMortality = new float[longevity][getSimulation().getNbTimeStepsPerYear()];
         outOfZoneCohort = new boolean[longevity][getSimulation().getNbTimeStepsPerYear()];
     }
-    
+
     public float[] getMeanLength() {
 
         // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
@@ -177,7 +181,7 @@ public class Species {
         }
         return meanWeight;
     }
-    
+
     public float computeWeight(float length) {
         return Math.max(eggWeight, (float) (c * (Math.pow(length, bPower))));
     }
