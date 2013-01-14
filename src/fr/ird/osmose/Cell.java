@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Vector;
 
-public class Cell extends ArrayList<School> {
+public class Cell {
     
     final public static float LAND_VALUE = -99.f; 
 
@@ -186,22 +186,6 @@ public class Cell extends ArrayList<School> {
      */
     public int getNbCellsLTLGrid() {
         return icoordLTLGrid.size();
-    }
-
-    /**
-     * Returns the school(index) in the cell
-     * @param index
-     * @return the school(index)
-     */
-    public School getSchool(int index) {
-        return get(index);
-    }
-
-    /**
-     * Sort all the schools in this cell according to their length.
-     */
-    public void sortSchoolsByLength() {
-        Collections.sort(this, new SchoolLengthComparator());
     }
     
     public static IGrid getGrid() {
