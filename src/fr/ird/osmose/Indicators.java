@@ -371,7 +371,7 @@ public class Indicators {
     public static void monitorTLDistribution() {
 
         for (School school : schools) {
-            int ageClass1 = (int) Math.max(1, school.getSpecies().supAgeOfClass0);
+            int ageClass1 = (int) Math.max(1, school.getSpecies().indexAgeClass0);
             if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
                 distribTL[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
             }

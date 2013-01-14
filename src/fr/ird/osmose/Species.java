@@ -43,24 +43,21 @@ public class Species {
      */
     float D;//D0;		//mortality rates year-1
     float[] fishingRates;
-    float F;
     
     float lInf, K, t0, c, bPower;	//von bertalanffy growth parameters
     float alpha;  		//nb of eggs per gram of mature female
     float sizeMat;
     int recruitAge;            //year
-    float supAgeOfClass0;        // year
-    int indexAgeClass0;          // index for the table tabCohort, in nbDt
+    /*
+     * Age from which the species biomass-0 is calculated, expressed in dt
+     */
+    int indexAgeClass0;
     float recruitSize;
-    float larvalSurvival;
     float[] larvalMortalityRates;
     float[] seasonSpawning; //according to nbDt
     float sexRatio, eggSize, eggWeight, growthAgeThreshold,
             predationRate, criticalPredSuccess, starvMaxRate;
     float[] predPreySizesMax, predPreySizesMin;
-    float[] minDelta;
-    float[] maxDelta;
-    float[] deltaMeanLength;
     int nbFeedingStages;  // stage indirectly correponds to size classes:
     float[] sizeFeeding;
     int nbAccessStages;
@@ -112,8 +109,7 @@ public class Species {
         this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[numSerie][index] * getSimulation().getNbTimeStepsPerYear());
         this.recruitSize = getOsmose().recruitSizeMatrix[numSerie][index];
         this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][index];
-        this.supAgeOfClass0 = getOsmose().supAgeOfClass0Matrix[numSerie][index];//age from which the species biomass-0 is calculated
-        this.indexAgeClass0 = (int) Math.ceil(supAgeOfClass0 * getSimulation().getNbTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
+        this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[numSerie][index] * getSimulation().getNbTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
         this.larvalMortalityRates = new float[getSimulation().getNbTimeStepsPerYear() * getOsmose().simulationTimeTab[numSerie]];
         int t = 0;
         for (int iStep = 0; iStep < larvalMortalityRates.length; iStep++) {
@@ -151,42 +147,6 @@ public class Species {
 
         // START INITIALISATION of COHORTS
         longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNbTimeStepsPerYear());
-
-        minDelta = new float[longevity];
-        maxDelta = new float[longevity];
-        deltaMeanLength = new float[longevity];
-        
-        float[] meanLength = getMeanLength();
-        for (int i = 0; i < longevity - 1; i++) {
-            deltaMeanLength[i] = meanLength[i + 1] - meanLength[i];
-
-            minDelta[i] = deltaMeanLength[i] - deltaMeanLength[i];
-            maxDelta[i] = deltaMeanLength[i] + deltaMeanLength[i];
-        }
-
-        /*
-         * phv 2012/11/08 - Careful, F the annual mortality rate is calculated
-         * as the annual average of the fishing rates over the years.
-         * F is still used in Simulation.iniBySpeciesBiomass
-         */
-        for (int iStep = 0; iStep < fishingRates.length; iStep++) {
-            F += fishingRates[iStep];
-        }
-        if (getSimulation().isFishingInterannual) {
-            F /= getOsmose().simulationTimeTab[numSerie];
-        }
-
-        /*
-         * phv 2012/11/08 - Careful, larvalSurvival the annual mortality rate
-         * is calculated as the annual average of the larval mortality rates
-         * over the years.
-         * larvalSurvival is still used in Simulation.iniBySpeciesBiomass
-         */
-        for (int iStep = 0; iStep < larvalMortalityRates.length; iStep++) {
-            larvalSurvival += larvalMortalityRates[iStep];
-        }
-        larvalSurvival /= larvalMortalityRates.length;
-        //System.out.println("Species " + name + " larval mortality " + larvalSurvival);
 
         // migration
         outOfZoneMortality = new float[longevity][getSimulation().getNbTimeStepsPerYear()];

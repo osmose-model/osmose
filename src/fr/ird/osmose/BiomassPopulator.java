@@ -37,23 +37,26 @@ public class BiomassPopulator extends Populator {
                     biomassIni[j] = 0;
                 }
             } else {
+                double larvalSurvival = getLarvalMortalityRate(species);
+                double F = getFishingMortalityRate(species);
+                
                 abdIni = getOsmose().spBiomIniTab[numSerie][i] / (meanWeight[(int) Math.round(species.getLongevity() / 2)] / 1000000);
                 for (int j = species.indexAgeClass0; j < species.getLongevity(); j++) {
-                    sumExp += Math.exp(-(j * (species.D + species.F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
+                    sumExp += Math.exp(-(j * (species.D + F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
                 }
 
-                abundanceIni[0] = (long) ((abdIni) / (Math.exp(-species.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
+                abundanceIni[0] = (long) ((abdIni) / (Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
                 biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
                 if (species.indexAgeClass0 <= 0) {
                     biomass += biomassIni[0];
                 }
-                abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-species.larvalSurvival / (float) nbTimeStepsPerYear));
+                abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear));
                 biomassIni[1] = ((double) abundanceIni[1]) * meanWeight[1] / 1000000.;
                 if (species.indexAgeClass0 <= 1) {
                     biomass += biomassIni[1];
                 }
                 for (int j = 2; j < species.getLongevity(); j++) {
-                    abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.D + 0.5f + species.F) / (float) nbTimeStepsPerYear));
+                    abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.D + 0.5f + F) / (float) nbTimeStepsPerYear));
                     biomassIni[j] = ((double) abundanceIni[j]) * meanWeight[j] / 1000000.;
                     if (species.indexAgeClass0 <= j) {
                         biomass += biomassIni[j];
@@ -62,12 +65,12 @@ public class BiomassPopulator extends Populator {
 
                 correctingFactor = (float) (getOsmose().spBiomIniTab[numSerie][i] / biomass);
                 // we make corrections on initial abundance to fit the input biomass
-                abundanceIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-species.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
+                abundanceIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
                 biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
-                abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-species.larvalSurvival / (float) nbTimeStepsPerYear));
+                abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear));
                 biomassIni[1] = ((double) abundanceIni[1]) * meanWeight[1] / 1000000.;
                 for (int j = 2; j < species.getLongevity(); j++) {
-                    abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.D + 0.5f + species.F) / (float) nbTimeStepsPerYear));
+                    abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.D + 0.5f + F) / (float) nbTimeStepsPerYear));
                     biomassIni[j] = ((double) abundanceIni[j]) * meanWeight[j] / 1000000.;
                 }
             }
@@ -82,5 +85,35 @@ public class BiomassPopulator extends Populator {
                 }
             }
         }
+    }
+
+    /*
+     * The annual mortality rate is calculated as the annual average of
+     * the larval mortality rates over the years.
+     */
+    private double getLarvalMortalityRate(Species species) {
+
+        double rate = 0.d;
+        for (int iStep = 0; iStep < species.larvalMortalityRates.length; iStep++) {
+            rate += species.larvalMortalityRates[iStep];
+        }
+        rate /= species.larvalMortalityRates.length;
+        return rate;
+    }
+
+    /*
+     * F the annual mortality rate is calculated as the annual average
+     * of the fishing rates over the years. 
+     */
+    private double getFishingMortalityRate(Species species) {
+        double F = 0;
+        for (int iStep = 0; iStep < species.fishingRates.length; iStep++) {
+            F += species.fishingRates[iStep];
+        }
+        
+        if (getSimulation().isFishingInterannual) {
+            F /= getOsmose().simulationTimeTab[getOsmose().numSerie];
+        }
+        return F;
     }
 }
