@@ -40,10 +40,6 @@ public class Species {
      */
     float D;
     /*
-     * Fishing mortality rates
-     */
-    float[] fishingRates;
-    /*
      * Von bertalanffy growth parameters
      */
     private float lInf, K, t0;
@@ -98,7 +94,6 @@ public class Species {
         // INITIALISATION of PARAM
         this.name = getOsmose().nameSpecMatrix[numSerie][index];
         this.D = getOsmose().DMatrix[numSerie][index];
-        this.fishingRates = getOsmose().fishingRates[index];
         this.lInf = getOsmose().lInfMatrix[numSerie][index];
         this.K = getOsmose().KMatrix[numSerie][index];
         this.t0 = getOsmose().t0Matrix[numSerie][index];

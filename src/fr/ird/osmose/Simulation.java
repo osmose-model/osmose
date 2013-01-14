@@ -120,11 +120,6 @@ public class Simulation {
      */
     private Species[] species;
     /*
-     * Whether fishing rates are the same every year or change throughout the
-     * years of simulation
-     */
-    boolean isFishingInterannual;
-    /*
      * Random generator
      */
     private static Random random = new Random();
@@ -140,6 +135,10 @@ public class Simulation {
      * Reproduction processes for every Species
      */
     AbstractProcess[] reproductionProcess;
+    /*
+     * 
+     */
+    AbstractProcess fishingProcess;
 
     public void init() {
 
@@ -161,6 +160,25 @@ public class Simulation {
             species[i] = new Species(i + 1);
             species[i].init();
         }
+        
+        // initialize fishing process
+        fishingProcess = new FishingProcess();
+        fishingProcess.loadParameters();
+        
+        // initiliaza growth process
+        growthProcess = new GrowthProcess();
+        growthProcess.loadParameters();
+        
+        // Reproduction processes
+        reproductionProcess = new AbstractProcess[species.length];
+        for (int i = 0; i < species.length; i++) {
+            if (species[i].isReproduceLocally()) {
+                reproductionProcess[i] = new LocalReproductionProcess(species[i]);
+            }else {
+                reproductionProcess[i] = new IncomingFluxProcess(species[i]);
+            }   
+            reproductionProcess[i].loadParameters();
+        }
 
         //INITIALISATION of SPECIES ABD ACCORDING TO SIZE SPECTRUM
         if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {
@@ -175,22 +193,7 @@ public class Simulation {
         if (getOsmose().spatializedOutputs[numSerie]) {
             initSpatializedSaving();
         }
-
-        isFishingInterannual = getOsmose().fishingRates[0].length > nbTimeStepsPerYear;
-        
-        // initiliaza growth process
-        growthProcess = new GrowthProcess();
-        growthProcess.loadParameters();
-        
-        // Reproduction processes
-        reproductionProcess = new AbstractProcess[species.length];
-        for (int i = 0; i < species.length; i++) {
-            if (species[i].isReproduceLocally()) {
-                reproductionProcess[i] = new LocalReproductionProcess(species[i]);
-            }else {
-                reproductionProcess[i] = new IncomingFluxProcess(species[i]);
-            }          
-        }
+       
     }
 
     private IGrid getGrid() {
@@ -302,33 +305,6 @@ public class Simulation {
         return getAbundance(school) * (1.d - Math.exp(-D));
     }
 
-    public double getFishingMortalityRate(School school, int subdt) {
-        if (isFishable(school)) {
-            Species spec = school.getSpecies();
-            return spec.fishingRates[isFishingInterannual ? i_step_simu : i_step_year] / subdt;
-        } else {
-            return 0.d;
-        }
-    }
-
-    private boolean isFishable(School school) {
-        // Test whether fishing applies to this school
-        // 1. School is recruited
-        // 2. School is catchable (no MPA and no out of zone)
-        return (school.getAgeDt() >= school.getSpecies().recruitAge)
-                && school.isCatchable();
-    }
-
-    private double computeFishingMortality(School school, int subdt) {
-
-        double F = getFishingMortalityRate(school, subdt);
-        double nDead = 0;
-        if (F > 0) {
-            nDead = getAbundance(school) * (1 - Math.exp(-F));
-        }
-        return nDead;
-    }
-
     private double computeBiomassToPredate(School predator, int subdt) {
         return getBiomass(predator) * predator.getSpecies().predationRate / (double) (nbTimeStepsPerYear * subdt);
     }
@@ -337,7 +313,7 @@ public class Simulation {
         return school.adb2biom(getAbundance(school));
     }
 
-    private double getAbundance(School school) {
+    public double getAbundance(School school) {
         double nDeadTotal = school.nDeadPredation
                 + school.nDeadStarvation
                 + school.nDeadNatural
@@ -678,20 +654,7 @@ public class Simulation {
             growthProcess.run();
 
             // Fishing
-            for (School school : getPresentSchools()) {
-                if (school.getAbundance() != 0.d) {
-                    double nDead = computeFishingMortality(school, 1);
-                    if (nDead != 0.d) {
-                        school.setAbundance(school.getAbundance() - nDead);
-                        if (school.getAbundance() < 1.d) {
-                            nDead = school.getAbundance();
-                            school.setAbundance(0);
-                            school.kill();
-                        }
-                        //school.nDeadFishing = nDead;
-                    }
-                }
-            }
+            fishingProcess.run();
 
             // Save steps
             Indicators.updateAndWriteIndicators();
@@ -775,7 +738,7 @@ public class Simulation {
                         break;
                     case 3:
                         // Fishing Mortality
-                        nDeadMatrix[seqFish[i]][ns + 2] = computeFishingMortality(schools.get(seqFish[i]), subdt);
+                        nDeadMatrix[seqFish[i]][ns + 2] = FishingProcess.computeFishingMortality(schools.get(seqFish[i]), subdt);
                         schools.get(seqFish[i]).nDeadFishing = nDeadMatrix[seqFish[i]][ns + 2];
                         break;
                 }
@@ -832,8 +795,8 @@ public class Simulation {
             mortalityRateMatrix[is][ns + 1] = getNaturalMortalityRate(school, subdt);
 
             // 4. Fishing mortality
-            nDeadMatrix[is][ns + 2] = computeFishingMortality(school, subdt);
-            mortalityRateMatrix[is][ns + 2] = getFishingMortalityRate(school, subdt);
+            nDeadMatrix[is][ns + 2] = FishingProcess.computeFishingMortality(school, subdt);
+            mortalityRateMatrix[is][ns + 2] = FishingProcess.getFishingMortalityRate(school, subdt);
         }
 
         //
@@ -917,7 +880,7 @@ public class Simulation {
             mortalityRateMatrix[is][ns + 1] = getNaturalMortalityRate(school, subdt);
 
             // 4. Fishing mortality
-            mortalityRateMatrix[is][ns + 2] = getFishingMortalityRate(school, subdt);
+            mortalityRateMatrix[is][ns + 2] = FishingProcess.getFishingMortalityRate(school, subdt);
         }
 
         //

@@ -11,19 +11,19 @@ public abstract class AbstractProcess {
     
     abstract public void run();
     
-    public Osmose getOsmose() {
+    public static Osmose getOsmose() {
         return Osmose.getInstance();
     }
     
-    public IGrid getGrid() {
+    public static IGrid getGrid() {
         return getOsmose().getGrid();
     }
 
-    public Simulation getSimulation() {
+    public static Simulation getSimulation() {
         return getOsmose().getSimulation();
     }
 
-    public Population getPopulation() {
+    public static Population getPopulation() {
         return getSimulation().getPopulation();
     }
     

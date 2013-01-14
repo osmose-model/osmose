@@ -38,7 +38,7 @@ public class BiomassPopulator extends Populator {
                 }
             } else {
                 double larvalSurvival = getLarvalMortalityRate(species);
-                double F = getFishingMortalityRate(species);
+                double F = FishingProcess.getFishingMortalityRate(species);
                 
                 abdIni = getOsmose().spBiomIniTab[numSerie][i] / (meanWeight[(int) Math.round(species.getLongevity() / 2)] / 1000000);
                 for (int j = species.indexAgeClass0; j < species.getLongevity(); j++) {
@@ -99,21 +99,5 @@ public class BiomassPopulator extends Populator {
         }
         rate /= species.larvalMortalityRates.length;
         return rate;
-    }
-
-    /*
-     * F the annual mortality rate is calculated as the annual average
-     * of the fishing rates over the years. 
-     */
-    private double getFishingMortalityRate(Species species) {
-        double F = 0;
-        for (int iStep = 0; iStep < species.fishingRates.length; iStep++) {
-            F += species.fishingRates[iStep];
-        }
-        
-        if (getSimulation().isFishingInterannual) {
-            F /= getOsmose().simulationTimeTab[getOsmose().numSerie];
-        }
-        return F;
     }
 }
