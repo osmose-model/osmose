@@ -74,7 +74,7 @@ public class Species {
     // Migration
     private float[][] outOfZoneMortality;
     private boolean[][] outOfZoneCohort;
-
+    
     /**
      * Create a new species
      *
@@ -155,7 +155,7 @@ public class Species {
         minDelta = new float[longevity];
         maxDelta = new float[longevity];
         deltaMeanLength = new float[longevity];
-
+        
         float[] meanLength = getMeanLength();
         for (int i = 0; i < longevity - 1; i++) {
             deltaMeanLength[i] = meanLength[i + 1] - meanLength[i];
@@ -219,6 +219,7 @@ public class Species {
     public float[] getMeanWeight(float[] tabMeanLength) {
 
         float[] meanWeight = new float[longevity];
+        meanWeight[0] = eggWeight;
         for (int i = 1; i < longevity; i++) {
             meanWeight[i] = (float) (c * (Math.pow(tabMeanLength[i], bPower)));
             if (meanWeight[i] < eggWeight) {
