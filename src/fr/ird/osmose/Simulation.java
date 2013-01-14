@@ -136,6 +136,10 @@ public class Simulation {
      * Growth process
      */
     AbstractProcess growthProcess;
+    /*
+     * Reproduction processes for every Species
+     */
+    AbstractProcess[] reproductionProcess;
 
     public void init() {
 
@@ -177,6 +181,16 @@ public class Simulation {
         // initiliaza growth process
         growthProcess = new GrowthProcess();
         growthProcess.loadParameters();
+        
+        // Reproduction processes
+        reproductionProcess = new AbstractProcess[species.length];
+        for (int i = 0; i < species.length; i++) {
+            if (species[i].isReproduceLocally()) {
+                reproductionProcess[i] = new LocalReproductionProcess(species[i]);
+            }else {
+                reproductionProcess[i] = new IncomingFluxProcess(species[i]);
+            }          
+        }
     }
 
     private IGrid getGrid() {
@@ -507,15 +521,7 @@ public class Simulation {
 
     private void reproduction() {
         for (int i = 0; i < species.length; i++) {
-            /*
-             * phv 2011/11/22 Added species that can reproduce outside the
-             * simulated domain and we only model an incoming flux of biomass.
-             */
-            if (species[i].isReproduceLocally()) {
-                reproduce(species[i]);
-            } else {
-                incomingFlux(species[i]);
-            }
+            reproductionProcess[i].run();
         }
     }
 
@@ -1479,84 +1485,6 @@ public class Simulation {
 
     public List<School> getSchools(Species species) {
         return FilteredSets.subset(population, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
-    }
-
-    private void reproduce(Species species) {
-
-        double SSB = 0;
-        List<School> schools = getSchools(species);
-        for (School school : schools) {
-            if (school.getLength() >= species.sizeMat) {
-                SSB += school.getBiomass();
-            }
-        }
-
-        double season = species.seasonSpawning.length > getNbTimeStepsPerYear()
-                ? species.seasonSpawning[getIndexTimeSimu()]
-                : species.seasonSpawning[getIndexTimeYear()];
-        double nbEggs = species.sexRatio * species.alpha * season * SSB * 1000000;
-
-        /*
-         * Making cohorts going up to the upper age class
-         * Kill old schools
-         */
-        for (School school : schools) {
-            school.age += 1;
-            if (school.getAgeDt() > (species.getLongevity() - 1)) {
-                school.kill();
-            }
-        }
-
-        //UPDATE AGE CLASS 0
-        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
-        if (nbEggs == 0.d) {
-            // do nothing, zero school
-        } else if (nbEggs < nbSchools) {
-            School school0 = new School(species, nbEggs, species.eggSize, species.eggWeight, 0);
-            population.add(school0);
-        } else if (nbEggs >= nbSchools) {
-            for (int i = 0; i < nbSchools; i++) {
-                School school0 = new School(species, nbEggs / nbSchools, species.eggSize, species.eggWeight, 0);
-                population.add(school0);
-            }
-        }
-    }
-
-    /*
-     * phv 2011/11/22 Created new function for modeling incoming flux of biomass
-     * for species that do not reproduce in the simulated domain.
-     */
-    public void incomingFlux(Species species) {
-
-        /*
-         * Making cohorts going up to the upper age class
-         * Kill old schools
-         */
-        for (School school : getSchools(species)) {
-            school.age += 1;
-            if (school.getAgeDt() > (species.getLongevity() - 1)) {
-                school.kill();
-            }
-        }
-
-        /*
-         * Incoming flux
-         */
-        double biomassIn = species.biomassFluxIn * species.seasonSpawning[i_step_year];
-        float meanWeigthIn = (float) (species.c * Math.pow(species.meanLengthIn, species.bPower));
-        long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
-        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
-        if (abundanceIn > 0 && abundanceIn < nbSchools) {
-            population.add(new School(species, abundanceIn, species.meanLengthIn, meanWeigthIn, species.ageMeanIn));
-        } else if (abundanceIn >= nbSchools) {
-            int mod = (int) (abundanceIn % nbSchools);
-            int abdSchool = (int) (abundanceIn / nbSchools);
-            for (int i = 0; i < nbSchools; i++) {
-                abdSchool += (i < mod) ? 1 : 0;
-                population.add(new School(species, abdSchool, species.meanLengthIn, meanWeigthIn, species.ageMeanIn));
-            }
-        }
-        //System.out.println(name + " incoming flux " + biomassIn + " [tons] + ageIn: " + ageMeanIn);
     }
 
     public void initSpatializedSaving() {
