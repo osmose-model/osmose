@@ -45,7 +45,6 @@ public class Species {
     float[] fishingRates;
     
     float lInf, K, t0, c, bPower;	//von bertalanffy growth parameters
-    float alpha;  		//nb of eggs per gram of mature female
     float sizeMat;
     int recruitAge;            //year
     /*
@@ -55,7 +54,7 @@ public class Species {
     float recruitSize;
     float[] larvalMortalityRates;
     float[] seasonSpawning; //according to nbDt
-    float sexRatio, eggSize, eggWeight, growthAgeThreshold,
+    float eggSize, eggWeight, growthAgeThreshold,
             predationRate, criticalPredSuccess, starvMaxRate;
     float[] predPreySizesMax, predPreySizesMin;
     int nbFeedingStages;  // stage indirectly correponds to size classes:
@@ -65,9 +64,7 @@ public class Species {
     int nbDietStages;
     float[] dietStagesTab;
     private boolean reproduceLocally;
-    float biomassFluxIn;
-    float meanLengthIn;
-    int ageMeanIn;
+   
     // Migration
     private float[][] outOfZoneMortality;
     private boolean[][] outOfZoneCohort;
@@ -102,7 +99,6 @@ public class Species {
         this.t0 = getOsmose().t0Matrix[numSerie][index];
         this.c = getOsmose().cMatrix[numSerie][index];
         this.bPower = getOsmose().bPowerMatrix[numSerie][index];
-        this.alpha = getOsmose().alphaMatrix[numSerie][index];
         this.sizeMat = getOsmose().sizeMatMatrix[numSerie][index];
         this.nbFeedingStages = getOsmose().nbStagesMatrix[numSerie][index];
         this.sizeFeeding = getOsmose().sizeFeedingMatrix[numSerie][index];
@@ -119,7 +115,6 @@ public class Species {
             larvalMortalityRates[iStep] = getOsmose().larvalMortalityRates[index][t];
             t++;
         }
-        this.sexRatio = getOsmose().sexRatioMatrix[numSerie][index];
         this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
         this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
         this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];
@@ -140,10 +135,6 @@ public class Species {
          * the simulated area.
          */
         this.reproduceLocally = getOsmose().reproduceLocallyTab[numSerie][index];
-        this.biomassFluxIn = getOsmose().biomassFluxInTab[numSerie][index];
-        this.meanLengthIn = getOsmose().meanLengthFishInTab[numSerie][index];
-        this.ageMeanIn = (int) Math.round(getOsmose().meanAgeFishInTab[numSerie][index] * getSimulation().getNbTimeStepsPerYear());
-        //System.out.println(name + " reproLocal ? " + reproduceLocally + " biomassIn: " + biomassFluxIn + " lengthIn: " + meanLengthIn + " ageIn: " + ageMeanIn);
 
         // START INITIALISATION of COHORTS
         longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNbTimeStepsPerYear());
@@ -181,12 +172,16 @@ public class Species {
         float[] meanWeight = new float[longevity];
         meanWeight[0] = eggWeight;
         for (int i = 1; i < longevity; i++) {
-            meanWeight[i] = (float) (c * (Math.pow(tabMeanLength[i], bPower)));
+            meanWeight[i] = (float) computeWeight(tabMeanLength[i]);
             if (meanWeight[i] < eggWeight) {
                 meanWeight[i] = eggWeight;
             }
         }
         return meanWeight;
+    }
+    
+    public float computeWeight(float length) {
+        return (float) (c * (Math.pow(length, bPower)));
     }
 
     private Osmose getOsmose() {

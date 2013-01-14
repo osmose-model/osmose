@@ -10,6 +10,14 @@ import java.util.List;
 public class LocalReproductionProcess extends AbstractProcess {
     
     private Species species;
+    /*
+     * Percentage of female in the population
+     */
+    private double sexRatio;
+    /*
+     * Number of eggs per gram of mature female
+     */
+    private double alpha;
     
     public LocalReproductionProcess(Species species) {
         this.species = species;
@@ -17,6 +25,10 @@ public class LocalReproductionProcess extends AbstractProcess {
 
     @Override
     public void loadParameters() {
+        int numSerie = getOsmose().numSerie;
+        int index = species.getIndex();
+        sexRatio = getOsmose().sexRatioMatrix[numSerie][index];
+        alpha = getOsmose().alphaMatrix[numSerie][index];
     }
 
     @Override
@@ -32,7 +44,7 @@ public class LocalReproductionProcess extends AbstractProcess {
         double season = species.seasonSpawning.length > getSimulation().getNbTimeStepsPerYear()
                 ? species.seasonSpawning[getSimulation().getIndexTimeSimu()]
                 : species.seasonSpawning[getSimulation().getIndexTimeYear()];
-        double nbEggs = species.sexRatio * species.alpha * season * SSB * 1000000;
+        double nbEggs = sexRatio * alpha * season * SSB * 1000000;
 
         /*
          * Making cohorts going up to the upper age class
