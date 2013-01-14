@@ -132,6 +132,10 @@ public class Simulation {
      * Snapshot of the distribution of the schools on the grid
      */
     private List<School>[][] schoolMap;
+    /*
+     * Growth process
+     */
+    AbstractProcess growthProcess;
 
     public void init() {
 
@@ -169,6 +173,10 @@ public class Simulation {
         }
 
         isFishingInterannual = getOsmose().fishingRates[0].length > nbTimeStepsPerYear;
+        
+        // initiliaza growth process
+        growthProcess = new GrowthProcess();
+        growthProcess.loadParameters();
     }
 
     private IGrid getGrid() {
@@ -427,7 +435,7 @@ public class Simulation {
         return mortalityRate / (nbTimeStepsPerYear * subdt);
     }
 
-    private float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
+    float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
 
         // Compute the predation success rate
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
@@ -497,23 +505,6 @@ public class Simulation {
         return index;
     }
 
-    private void growth() {
-
-        for (School school : getPresentSchools()) {
-            school.predSuccessRate = computePredSuccessRate(school.biomassToPredate, school.preyedBiomass);
-            Species spec = school.getSpecies();
-            int j = school.getAgeDt();
-            if ((j == 0) || spec.isOut(j, getIndexTimeYear())) {
-                // Linear growth for eggs and migrating schools
-                school.setLength(school.getLength() + spec.deltaMeanLength[j]);
-                school.setWeight((float) (spec.c * Math.pow(school.getLength(), spec.bPower)));
-            } else {
-                // Growth based on predation success
-                school.growth(spec.minDelta[j], spec.maxDelta[j], spec.c, spec.bPower);
-            }
-        }
-    }
-
     private void reproduction() {
         for (int i = 0; i < species.length; i++) {
             /*
@@ -569,7 +560,7 @@ public class Simulation {
 
 
             // Growth
-            growth();
+            growthProcess.run();
 
             // Save steps
             if (getOsmose().spatializedOutputs[numSerie]) {
@@ -678,7 +669,7 @@ public class Simulation {
             }
 
             // Growth
-            growth();
+            growthProcess.run();
 
             // Fishing
             for (School school : getPresentSchools()) {
