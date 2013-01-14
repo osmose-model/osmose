@@ -5,10 +5,9 @@ package fr.ird.osmose;
  * @author pverley
  */
 public class BiomassPopulator extends Populator {
-    
+
     @Override
     public void loadParameters() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -21,60 +20,64 @@ public class BiomassPopulator extends Populator {
 
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             //We calculate abd & biom ini of cohorts, and in parallel biom of species
-            Species speci = getSimulation().getSpecies(i);
+            Species species = getSimulation().getSpecies(i);
             double biomass = 0;
             double sumExp = 0;
+            long[] abundanceIni = new long[species.getLongevity()];
+            double[] biomassIni = new double[species.getLongevity()];
+            float[] meanLength = species.getMeanLength();
+            float[] meanWeight = species.getMeanWeight(meanLength);
             /*
              * phv 2011/11/24 For species that do not reproduce locally, initial
              * biomass is set to zero.
              */
-            if (!speci.isReproduceLocally()) {
-                for (int j = 0; j < speci.getLongevity(); j++) {
-                    speci.tabAbdIni[j] = 0;
-                    speci.tabBiomIni[j] = 0;
+            if (!species.isReproduceLocally()) {
+                for (int j = 0; j < species.getLongevity(); j++) {
+                    abundanceIni[j] = 0;
+                    biomassIni[j] = 0;
                 }
             } else {
-                abdIni = getOsmose().spBiomIniTab[numSerie][i] / (speci.tabMeanWeight[(int) Math.round(speci.getLongevity() / 2)] / 1000000);
-                for (int j = speci.indexAgeClass0; j < speci.getLongevity(); j++) {
-                    sumExp += Math.exp(-(j * (speci.D + speci.F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
+                abdIni = getOsmose().spBiomIniTab[numSerie][i] / (meanWeight[(int) Math.round(species.getLongevity() / 2)] / 1000000);
+                for (int j = species.indexAgeClass0; j < species.getLongevity(); j++) {
+                    sumExp += Math.exp(-(j * (species.D + species.F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
                 }
 
-                speci.tabAbdIni[0] = (long) ((abdIni) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
-                speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
-                if (speci.indexAgeClass0 <= 0) {
-                    biomass += speci.tabBiomIni[0];
+                abundanceIni[0] = (long) ((abdIni) / (Math.exp(-species.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
+                biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
+                if (species.indexAgeClass0 <= 0) {
+                    biomass += biomassIni[0];
                 }
-                speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
-                speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
-                if (speci.indexAgeClass0 <= 1) {
-                    biomass += speci.tabBiomIni[1];
+                abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-species.larvalSurvival / (float) nbTimeStepsPerYear));
+                biomassIni[1] = ((double) abundanceIni[1]) * meanWeight[1] / 1000000.;
+                if (species.indexAgeClass0 <= 1) {
+                    biomass += biomassIni[1];
                 }
-                for (int j = 2; j < speci.getLongevity(); j++) {
-                    speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
-                    speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
-                    if (speci.indexAgeClass0 <= j) {
-                        biomass += speci.tabBiomIni[j];
+                for (int j = 2; j < species.getLongevity(); j++) {
+                    abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.D + 0.5f + species.F) / (float) nbTimeStepsPerYear));
+                    biomassIni[j] = ((double) abundanceIni[j]) * meanWeight[j] / 1000000.;
+                    if (species.indexAgeClass0 <= j) {
+                        biomass += biomassIni[j];
                     }
                 }
 
                 correctingFactor = (float) (getOsmose().spBiomIniTab[numSerie][i] / biomass);
                 // we make corrections on initial abundance to fit the input biomass
-                speci.tabAbdIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
-                speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
-                speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
-                speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
-                for (int j = 2; j < speci.getLongevity(); j++) {
-                    speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
-                    speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
+                abundanceIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-species.larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
+                biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
+                abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-species.larvalSurvival / (float) nbTimeStepsPerYear));
+                biomassIni[1] = ((double) abundanceIni[1]) * meanWeight[1] / 1000000.;
+                for (int j = 2; j < species.getLongevity(); j++) {
+                    abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.D + 0.5f + species.F) / (float) nbTimeStepsPerYear));
+                    biomassIni[j] = ((double) abundanceIni[j]) * meanWeight[j] / 1000000.;
                 }
             }
 
             // create the cohorts
-            for (int age = 0; age < speci.getLongevity(); age++) {
-                if (speci.tabAbdIni[age] > 0.d) {
+            for (int age = 0; age < species.getLongevity(); age++) {
+                if (abundanceIni[age] > 0.d) {
                     int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
                     for (int k = 0; k < nbSchools; k++) {
-                        getPopulation().add(new School(speci, speci.tabAbdIni[age] / nbSchools, speci.tabMeanLength[age], speci.tabMeanWeight[age], age));
+                        getPopulation().add(new School(species, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
                     }
                 }
             }

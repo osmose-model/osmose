@@ -58,13 +58,9 @@ public class Species {
     float sexRatio, eggSize, eggWeight, growthAgeThreshold,
             predationRate, criticalPredSuccess, starvMaxRate;
     float[] predPreySizesMax, predPreySizesMin;
-    float[] tabMeanWeight;      //tab of mean weights at nbDt*ages
-    float[] tabMeanLength;	//tab of mean lengths at nbDt*ages
     float[] minDelta;
     float[] maxDelta;
     float[] deltaMeanLength;
-    long[] tabAbdIni;	//tab of abd for initializing the simulation nbDt*age
-    double[] tabBiomIni;
     int nbFeedingStages;  // stage indirectly correponds to size classes:
     float[] sizeFeeding;
     int nbAccessStages;
@@ -156,40 +152,13 @@ public class Species {
         // START INITIALISATION of COHORTS
         longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNbTimeStepsPerYear());
 
-        tabAbdIni = new long[longevity];
-        tabBiomIni = new double[longevity];
-
-        // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
-        tabMeanLength = new float[longevity];
-        tabMeanWeight = new float[longevity];
-
-        float decimalAge;
-        tabMeanLength[0] = eggSize;
-        tabMeanWeight[0] = eggWeight;
-
-        for (int i = 1; i < longevity; i++) {
-            decimalAge = i / (float) getSimulation().getNbTimeStepsPerYear();
-            if (decimalAge < growthAgeThreshold) {
-                float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
-                if (lengthAtAgePart < eggSize) {
-                    lengthAtAgePart = eggSize;
-                }
-                tabMeanLength[i] = decimalAge * (float) (lengthAtAgePart - eggSize) + eggSize;    // linear growth for the 1st year as von Bertalanffy is not well adapted for the 1st year
-            } else {
-                tabMeanLength[i] = (float) (lInf * (1 - Math.exp(-K * (decimalAge - t0))));   // von Bertalnffy growth after the first year
-            }
-            tabMeanWeight[i] = (float) (c * (Math.pow(tabMeanLength[i], bPower)));
-            if (tabMeanWeight[i] < eggWeight) {
-                tabMeanWeight[i] = eggWeight;
-            }
-        }
-
         minDelta = new float[longevity];
         maxDelta = new float[longevity];
         deltaMeanLength = new float[longevity];
 
+        float[] meanLength = getMeanLength();
         for (int i = 0; i < longevity - 1; i++) {
-            deltaMeanLength[i] = tabMeanLength[i + 1] - tabMeanLength[i];
+            deltaMeanLength[i] = meanLength[i + 1] - meanLength[i];
 
             minDelta[i] = deltaMeanLength[i] - deltaMeanLength[i];
             maxDelta[i] = deltaMeanLength[i] + deltaMeanLength[i];
@@ -222,6 +191,41 @@ public class Species {
         // migration
         outOfZoneMortality = new float[longevity][getSimulation().getNbTimeStepsPerYear()];
         outOfZoneCohort = new boolean[longevity][getSimulation().getNbTimeStepsPerYear()];
+    }
+    
+    public float[] getMeanLength() {
+
+        // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
+        float[] meanLength = new float[longevity];
+
+        float decimalAge;
+        meanLength[0] = eggSize;
+
+        for (int i = 1; i < getLongevity(); i++) {
+            decimalAge = i / (float) getSimulation().getNbTimeStepsPerYear();
+            if (decimalAge < growthAgeThreshold) {
+                float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
+                if (lengthAtAgePart < eggSize) {
+                    lengthAtAgePart = eggSize;
+                }
+                meanLength[i] = decimalAge * (float) (lengthAtAgePart - eggSize) + eggSize;    // linear growth for the 1st year as von Bertalanffy is not well adapted for the 1st year
+            } else {
+                meanLength[i] = (float) (lInf * (1 - Math.exp(-K * (decimalAge - t0))));   // von Bertalnffy growth after the first year
+            }
+        }
+        return meanLength;
+    }
+
+    public float[] getMeanWeight(float[] tabMeanLength) {
+
+        float[] meanWeight = new float[longevity];
+        for (int i = 1; i < longevity; i++) {
+            meanWeight[i] = (float) (c * (Math.pow(tabMeanLength[i], bPower)));
+            if (meanWeight[i] < eggWeight) {
+                meanWeight[i] = eggWeight;
+            }
+        }
+        return meanWeight;
     }
 
     private Osmose getOsmose() {

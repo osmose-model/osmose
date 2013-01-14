@@ -44,7 +44,8 @@ public class SpectrumPopulator extends Populator {
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             int index1 = tempSpectrumAbd.length - 1;
             Species species = getSimulation().getSpecies(i);
-            while (species.tabMeanLength[species.getLongevity() - 1] < (index1 * getOsmose().classRange)) {
+            float[] meanLength = species.getMeanLength();
+            while (meanLength[species.getLongevity() - 1] < (index1 * getOsmose().classRange)) {
                 index1--;
             }
             specInSizeClass10[index1].add(species);
@@ -59,16 +60,16 @@ public class SpectrumPopulator extends Populator {
         for (int i = spectrumMaxIndex; i >= 0; i--) {
             for (int j = 0; j < specInSizeClass10[i].size(); j++) {
                 Species speciesj = ((Species) specInSizeClass10[i].get(j));
-                speciesj.tabAbdIni[speciesj.getLongevity() - 1] = Math.round(((double) tempSpectrumAbd[i])
-                        / specInSizeClass10[i].size());
-                speciesj.tabBiomIni[speciesj.getLongevity() - 1] = ((double) speciesj.tabAbdIni[speciesj.getLongevity() - 1]) * speciesj.tabMeanWeight[speciesj.getLongevity() - 1] / 1000000.;
+                float[] meanLength = speciesj.getMeanLength();
+                float[] meanWeight = speciesj.getMeanWeight(meanLength);
+                long[] abundanceIni = new long[speciesj.getLongevity()];
+                abundanceIni[speciesj.getLongevity() - 1] = Math.round(((double) tempSpectrumAbd[i]) / specInSizeClass10[i].size());
                 //we consider that D0->1 = 10 for the first age class (month or year, whatever nbDt), D0-1year->2 = 1 and D=0.4 otherwise
                 //we calculate abd & biom of coh, and in parallel abd & biom of species & we create cohorts
 
                 for (int k = speciesj.getLongevity() - 2; k >= (2 * nbTimeStepsPerYear); k--) {
-                    speciesj.tabAbdIni[k] = Math.round(speciesj.tabAbdIni[k + 1] * Math.exp((0.5 / (float) nbTimeStepsPerYear)));
-                    speciesj.tabBiomIni[k] = ((double) speciesj.tabAbdIni[k]) * speciesj.tabMeanWeight[k] / 1000000.;
-                }
+                    abundanceIni[k] = Math.round(abundanceIni[k + 1] * Math.exp((0.5 / (float) nbTimeStepsPerYear)));
+                    }
                 int kTemp;
                 if (speciesj.getLongevity() <= nbTimeStepsPerYear) {
                     kTemp = speciesj.getLongevity() - 2;
@@ -77,19 +78,17 @@ public class SpectrumPopulator extends Populator {
                 }
 
                 for (int k = kTemp; k >= 1; k--) {
-                    speciesj.tabAbdIni[k] = Math.round(speciesj.tabAbdIni[k + 1] * Math.exp((1. / (float) nbTimeStepsPerYear)));
-                    speciesj.tabBiomIni[k] = ((double) speciesj.tabAbdIni[k]) * speciesj.tabMeanWeight[k] / 1000000.;
+                    abundanceIni[k] = Math.round(abundanceIni[k + 1] * Math.exp((1. / (float) nbTimeStepsPerYear)));
                 }
 
-                speciesj.tabAbdIni[0] = Math.round(speciesj.tabAbdIni[1] * Math.exp(10.));
-                speciesj.tabBiomIni[0] = ((double) speciesj.tabAbdIni[0]) * speciesj.tabMeanWeight[0] / 1000000.;
+                abundanceIni[0] = Math.round(abundanceIni[1] * Math.exp(10.));
 
                 // Add schools to population
                 for (int age = 0; age < speciesj.getLongevity(); age++) {
-                    if (speciesj.tabAbdIni[age] > 0.d) {
+                    if (abundanceIni[age] > 0.d) {
                         int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
                         for (int k = 0; k < nbSchools; k++) {
-                            getPopulation().add(new School(speciesj, speciesj.tabAbdIni[age] / nbSchools, speciesj.tabMeanLength[age], speciesj.tabMeanWeight[age], age));
+                            getPopulation().add(new School(speciesj, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
                         }
                     }
                 }
