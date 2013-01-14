@@ -92,10 +92,6 @@ public class Simulation {
 ///////////////////////////////
     private Population population;
     /*
-     * Coupling with Biogeochimical model.
-     */
-    private LTLCoupling coupling;
-    /*
      * Forcing with Biogeochimical model.
      */
     private LTLForcing forcing;
@@ -124,20 +120,6 @@ public class Simulation {
      */
     private Species[] species;
     /*
-     * Initialisation param for species abd in function of an input size
-     * spectrum Coeff of the relation nb = length^a * exp(b) In Rice : a=-5.8;
-     * b=35.5
-     */
-    double a, b;
-    /*
-     * Initial min abd of last age class of a species
-     */
-    long abdIniMin;
-    /*
-     * Ratio between MPA and total grid surfaces, RS for Relative Size of MPA
-     */
-    double RS;
-    /*
      * Whether fishing rates are the same every year or change throughout the
      * years of simulation
      */
@@ -146,6 +128,9 @@ public class Simulation {
      * Random generator
      */
     private static Random random = new Random();
+    /*
+     * Snapshot of the distribution of the schools on the grid
+     */
     private List<School>[][] schoolMap;
 
     public void init() {
@@ -217,7 +202,7 @@ public class Simulation {
                 }
             }
         }
-        
+
         // fill up the map
         for (School school : population) {
             if (!school.isUnlocated()) {
@@ -225,19 +210,19 @@ public class Simulation {
             }
         }
     }
-    
+
     public List<School> getSchools(Cell cell) {
         return schoolMap[cell.get_igrid()][cell.get_jgrid()];
     }
 
     private void setupMPA() {
         if ((getOsmose().thereIsMPATab[numSerie]) && (year == getOsmose().MPAtStartTab[numSerie])) {
-            RS = (double) getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
+            //RS = (double) getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
             for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
                 getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(true);
             }
         } else if ((!getOsmose().thereIsMPATab[numSerie]) || (year > getOsmose().MPAtEndTab[numSerie])) {
-            RS = 0;
+            //RS = 0;
             for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
                 getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(false);
             }
@@ -267,12 +252,7 @@ public class Simulation {
             }
             getForcing().saveForDiet();
         }
-        if (coupling != null && (year >= coupling.getStartYearLTLModel() - 1)) // save grid of plankton biomass one year before coupling so forcing mode is also saved
-        {
-            coupling.savePlanktonBiomass("csv");
-        } else {
-            forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix[numSerie]);
-        }
+        forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix[numSerie]);
     }
 
     /**
@@ -563,10 +543,6 @@ public class Simulation {
             // Update some stages at the begining of the step
             updateStages();
 
-            // Update LTL Data
-            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
-                coupling.runLTLModel();
-            }
             forcing.updatePlankton(i_step_year);
 
             // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
@@ -591,10 +567,6 @@ public class Simulation {
 
             computeMortality(1, VERSION);
 
-            // Update of disappeared schools and plancton mortality
-            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
-                coupling.calculPlanktonMortality();
-            }
 
             // Growth
             growth();
@@ -607,7 +579,7 @@ public class Simulation {
 
             // Reproduction
             reproduction();
-            
+
             // Remove all dead schools
             population.removeDeadSchools();
 
@@ -658,10 +630,6 @@ public class Simulation {
                 //school.nDeadNatural = nDead;
             }
 
-            // Update LTL Data
-            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
-                coupling.runLTLModel();
-            }
             forcing.updatePlankton(i_step_year);
 
             // Predation
@@ -696,11 +664,6 @@ public class Simulation {
                         }
                     }
                 }
-            }
-
-            // Compute Plankton Mortality
-            if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
-                coupling.calculPlanktonMortality();
             }
 
             // Starvation
@@ -741,7 +704,7 @@ public class Simulation {
 
             // Reproduction
             reproduction();
-            
+
             // Remove dead school
             population.removeDeadSchools();
 
@@ -1204,11 +1167,11 @@ public class Simulation {
         for (int i = 0; i < specInSizeClass10.length; i++) {
             specInSizeClass10[i] = new Vector(species.length);
         }
-        abdIniMin = 100;
+        long abdIniMin = 100;
         //a=-5.8;
         //b=35.5;
-        a = getOsmose().SSslope[numSerie];
-        b = getOsmose().SSintercept[numSerie];
+        double a = getOsmose().SSslope[numSerie];
+        double b = getOsmose().SSintercept[numSerie];
         //Calculation of abd lacking in each size class
         //calculation apart for first size class because minSize=0.05 (and not 0)
         tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));
@@ -1219,7 +1182,7 @@ public class Simulation {
         //Sort the Lmax of each species in each size class
         for (int i = 0; i < species.length; i++) {
             int index1 = tempSpectrumAbd.length - 1;
-            while (species[i].tabMeanLength[species[i].getNumberCohorts() - 1] < (index1 * getOsmose().classRange)) {
+            while (species[i].tabMeanLength[species[i].getLongevity() - 1] < (index1 * getOsmose().classRange)) {
                 index1--;
             }
             specInSizeClass10[index1].addElement(species[i]);
@@ -1234,19 +1197,19 @@ public class Simulation {
         for (int i = spectrumMaxIndex; i >= 0; i--) {
             for (int j = 0; j < specInSizeClass10[i].size(); j++) {
                 Species speciesj = ((Species) specInSizeClass10[i].elementAt(j));
-                speciesj.tabAbdIni[speciesj.getNumberCohorts() - 1] = Math.round(((double) tempSpectrumAbd[i])
+                speciesj.tabAbdIni[speciesj.getLongevity() - 1] = Math.round(((double) tempSpectrumAbd[i])
                         / specInSizeClass10[i].size());
-                speciesj.tabBiomIni[speciesj.getNumberCohorts() - 1] = ((double) speciesj.tabAbdIni[speciesj.getNumberCohorts() - 1]) * speciesj.tabMeanWeight[speciesj.getNumberCohorts() - 1] / 1000000.;
+                speciesj.tabBiomIni[speciesj.getLongevity() - 1] = ((double) speciesj.tabAbdIni[speciesj.getLongevity() - 1]) * speciesj.tabMeanWeight[speciesj.getLongevity() - 1] / 1000000.;
                 //we consider that D0->1 = 10 for the first age class (month or year, whatever nbDt), D0-1year->2 = 1 and D=0.4 otherwise
                 //we calculate abd & biom of coh, and in parallel abd & biom of species & we create cohorts
 
-                for (int k = speciesj.getNumberCohorts() - 2; k >= (2 * nbTimeStepsPerYear); k--) {
+                for (int k = speciesj.getLongevity() - 2; k >= (2 * nbTimeStepsPerYear); k--) {
                     speciesj.tabAbdIni[k] = Math.round(speciesj.tabAbdIni[k + 1] * Math.exp((0.5 / (float) nbTimeStepsPerYear)));
                     speciesj.tabBiomIni[k] = ((double) speciesj.tabAbdIni[k]) * speciesj.tabMeanWeight[k] / 1000000.;
                 }
                 int kTemp;
-                if (speciesj.longevity <= 1) {
-                    kTemp = speciesj.getNumberCohorts() - 2;
+                if (speciesj.getLongevity() <= nbTimeStepsPerYear) {
+                    kTemp = speciesj.getLongevity() - 2;
                 } else {
                     kTemp = (2 * nbTimeStepsPerYear) - 1;
                 }
@@ -1260,7 +1223,7 @@ public class Simulation {
                 speciesj.tabBiomIni[0] = ((double) speciesj.tabAbdIni[0]) * speciesj.tabMeanWeight[0] / 1000000.;
 
                 //creation of the cohorts
-                for (int k = 0; k < speciesj.getNumberCohorts(); k++) {
+                for (int k = 0; k < speciesj.getLongevity(); k++) {
                     createCohort(speciesj, k, speciesj.tabAbdIni[k], speciesj.tabMeanLength[k], speciesj.tabMeanWeight[k]);
                 }
             }
@@ -1295,13 +1258,13 @@ public class Simulation {
              * biomass is set to zero.
              */
             if (!speci.isReproduceLocally()) {
-                for (int j = 0; j < speci.getNumberCohorts(); j++) {
+                for (int j = 0; j < speci.getLongevity(); j++) {
                     speci.tabAbdIni[j] = 0;
                     speci.tabBiomIni[j] = 0;
                 }
             } else {
-                abdIni = getOsmose().spBiomIniTab[numSerie][i] / (speci.tabMeanWeight[(int) Math.round(speci.getNumberCohorts() / 2)] / 1000000);
-                for (int j = speci.indexAgeClass0; j < speci.getNumberCohorts(); j++) {
+                abdIni = getOsmose().spBiomIniTab[numSerie][i] / (speci.tabMeanWeight[(int) Math.round(speci.getLongevity() / 2)] / 1000000);
+                for (int j = speci.indexAgeClass0; j < speci.getLongevity(); j++) {
                     sumExp += Math.exp(-(j * (speci.D + speci.F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
                 }
 
@@ -1315,7 +1278,7 @@ public class Simulation {
                 if (speci.indexAgeClass0 <= 1) {
                     biomass += speci.tabBiomIni[1];
                 }
-                for (int j = 2; j < speci.getNumberCohorts(); j++) {
+                for (int j = 2; j < speci.getLongevity(); j++) {
                     speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
                     speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
                     if (speci.indexAgeClass0 <= j) {
@@ -1329,14 +1292,14 @@ public class Simulation {
                 speci.tabBiomIni[0] = ((double) speci.tabAbdIni[0]) * speci.tabMeanWeight[0] / 1000000.;
                 speci.tabAbdIni[1] = Math.round(speci.tabAbdIni[0] * Math.exp(-speci.larvalSurvival / (float) nbTimeStepsPerYear));
                 speci.tabBiomIni[1] = ((double) speci.tabAbdIni[1]) * speci.tabMeanWeight[1] / 1000000.;
-                for (int j = 2; j < speci.getNumberCohorts(); j++) {
+                for (int j = 2; j < speci.getLongevity(); j++) {
                     speci.tabAbdIni[j] = Math.round(speci.tabAbdIni[j - 1] * Math.exp(-(speci.D + 0.5f + speci.F) / (float) nbTimeStepsPerYear));
                     speci.tabBiomIni[j] = ((double) speci.tabAbdIni[j]) * speci.tabMeanWeight[j] / 1000000.;
                 }
             }
 
             // create the cohorts
-            for (int j = 0; j < speci.getNumberCohorts(); j++) {
+            for (int j = 0; j < speci.getLongevity(); j++) {
                 createCohort(speci, j, speci.tabAbdIni[j], speci.tabMeanLength[j], speci.tabMeanWeight[j]);
             }
         }
@@ -1345,24 +1308,9 @@ public class Simulation {
     public void iniPlanktonField(boolean isForcing) {
 
         if (isForcing) {
-            coupling = null;
             try {
                 try {
                     forcing = (LTLForcing) Class.forName(getOsmose().getLTLClassName()).newInstance();
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            try {
-                try {
-                    coupling = (LTLCoupling) Class.forName(getOsmose().getLTLClassName()).newInstance();
-                    forcing = coupling;
-                    coupling.readCouplingConfigFile(getOsmose().couplingFileNameTab[numSerie]);
                 } catch (InstantiationException ex) {
                     Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IllegalAccessException ex) {
@@ -1380,7 +1328,7 @@ public class Simulation {
     public List<School> getPresentSchools() {
         return FilteredSets.subset(population, new PresentSchoolFilter(i_step_year));
     }
-    
+
     public List<School> getAliveSchools() {
         return FilteredSets.subset(population, new AliveSchoolFilter());
     }
@@ -1670,7 +1618,7 @@ public class Simulation {
     }
 
     public void distributeSpecies() {
-        
+
         for (School school : population) {
             switch (getOsmose().spatialDistribution[school.getSpeciesIndex()]) {
                 case RANDOM:
@@ -1688,7 +1636,7 @@ public class Simulation {
     }
 
     public List<School> getSchools(Species species) {
-        return FilteredSets.subset(population, new IFilter[] {new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
+        return FilteredSets.subset(population, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
     }
 
     private void reproduce(Species species) {
@@ -1712,7 +1660,7 @@ public class Simulation {
          */
         for (School school : schools) {
             school.age += 1;
-            if (school.getAgeDt() > (species.getNumberCohorts() - 1)) {
+            if (school.getAgeDt() > (species.getLongevity() - 1)) {
                 school.tagForRemoval();
             }
         }
@@ -1744,7 +1692,7 @@ public class Simulation {
          */
         for (School school : getSchools(species)) {
             school.age += 1;
-            if (school.getAgeDt() > (species.getNumberCohorts() - 1)) {
+            if (school.getAgeDt() > (species.getLongevity() - 1)) {
                 school.tagForRemoval();
             }
         }

@@ -34,10 +34,9 @@ public class Species {
      */
     private String name;
     /*
-     * Number of the cohorts = (int) Math.round((longevity + 1) *
-     * simulation.getNbTimeSteps()
+     * Longevity expressed in number of time steps
      */
-    private int nbCohorts;
+    private int longevity;
     /*
      * ***************************
      * * Life history parameters * ***************************
@@ -45,7 +44,7 @@ public class Species {
     float D;//D0;		//mortality rates year-1
     float[] fishingRates;
     float F;
-    float longevity;              //in years
+    
     float lInf, K, t0, c, bPower;	//von bertalanffy growth parameters
     float alpha;  		//nb of eggs per gram of mature female
     float sizeMat;
@@ -105,7 +104,6 @@ public class Species {
         this.name = getOsmose().nameSpecMatrix[numSerie][index];
         this.D = getOsmose().DMatrix[numSerie][index];
         this.fishingRates = getOsmose().fishingRates[index];
-        this.longevity = getOsmose().longevityMatrix[numSerie][index];
         this.lInf = getOsmose().lInfMatrix[numSerie][index];
         this.K = getOsmose().KMatrix[numSerie][index];
         this.t0 = getOsmose().t0Matrix[numSerie][index];
@@ -156,20 +154,20 @@ public class Species {
         //System.out.println(name + " reproLocal ? " + reproduceLocally + " biomassIn: " + biomassFluxIn + " lengthIn: " + meanLengthIn + " ageIn: " + ageMeanIn);
 
         // START INITIALISATION of COHORTS
-        nbCohorts = (int) Math.round((longevity) * getSimulation().getNbTimeStepsPerYear());
+        longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNbTimeStepsPerYear());
 
-        tabAbdIni = new long[nbCohorts];
-        tabBiomIni = new double[nbCohorts];
+        tabAbdIni = new long[longevity];
+        tabBiomIni = new double[longevity];
 
         // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
-        tabMeanLength = new float[nbCohorts];
-        tabMeanWeight = new float[nbCohorts];
+        tabMeanLength = new float[longevity];
+        tabMeanWeight = new float[longevity];
 
         float decimalAge;
         tabMeanLength[0] = eggSize;
         tabMeanWeight[0] = eggWeight;
 
-        for (int i = 1; i < nbCohorts; i++) {
+        for (int i = 1; i < longevity; i++) {
             decimalAge = i / (float) getSimulation().getNbTimeStepsPerYear();
             if (decimalAge < growthAgeThreshold) {
                 float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
@@ -186,11 +184,11 @@ public class Species {
             }
         }
 
-        minDelta = new float[nbCohorts];
-        maxDelta = new float[nbCohorts];
-        deltaMeanLength = new float[nbCohorts];
+        minDelta = new float[longevity];
+        maxDelta = new float[longevity];
+        deltaMeanLength = new float[longevity];
 
-        for (int i = 0; i < nbCohorts - 1; i++) {
+        for (int i = 0; i < longevity - 1; i++) {
             deltaMeanLength[i] = tabMeanLength[i + 1] - tabMeanLength[i];
 
             minDelta[i] = deltaMeanLength[i] - deltaMeanLength[i];
@@ -222,8 +220,8 @@ public class Species {
         //System.out.println("Species " + name + " larval mortality " + larvalSurvival);
 
         // migration
-        outOfZoneMortality = new float[nbCohorts][getSimulation().getNbTimeStepsPerYear()];
-        outOfZoneCohort = new boolean[nbCohorts][getSimulation().getNbTimeStepsPerYear()];
+        outOfZoneMortality = new float[longevity][getSimulation().getNbTimeStepsPerYear()];
+        outOfZoneCohort = new boolean[longevity][getSimulation().getNbTimeStepsPerYear()];
     }
 
     private Osmose getOsmose() {
@@ -234,8 +232,8 @@ public class Species {
         return getOsmose().getSimulation();
     }
 
-    public int getNumberCohorts() {
-        return nbCohorts;
+    public int getLongevity() {
+        return longevity;
     }
 
     public int getIndex() {

@@ -1761,8 +1761,8 @@ public class Osmose {
             numMap = new int[nbSpeciesTab[numSerie]][][];
             for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
                 Species speci = simulation.getSpecies(iSpec);
-                numMap[iSpec] = new int[speci.getNumberCohorts()][];
-                for (int j = 0; j < speci.getNumberCohorts(); j++) {
+                numMap[iSpec] = new int[speci.getLongevity()][];
+                for (int j = 0; j < speci.getLongevity(); j++) {
                     numMap[iSpec][j] = new int[nbDtMatrix[numSerie]];
                 }
             }
@@ -1973,7 +1973,7 @@ public class Osmose {
             for (int m = 0; m < areasTempAge[indexMap].length; m++) {
                 for (int n = 0; n < areasTempDt[indexMap].length; n++) {
                     for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                        if ((areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[indexMap]).getNumberCohorts()) {
+                        if ((areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[indexMap]).getLongevity()) {
                             numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h][areasTempDt[indexMap][n]] = indexMap;
                             //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
                         }
@@ -2569,10 +2569,10 @@ public class Osmose {
             pw.print(simulation.getSpecies(i).recruitAge);
         }
         pw.println();
-        pw.print("longevity ");
+        pw.print("longevity in dt");
         for (int i = 0; i < simulation.getNbSpecies(); i++) {
             pw.print(';');
-            pw.print(simulation.getSpecies(i).longevity);
+            pw.print(simulation.getSpecies(i).getLongevity());
         }
         pw.println();
         pw.print("lInf ");
