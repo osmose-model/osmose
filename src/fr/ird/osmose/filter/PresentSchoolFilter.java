@@ -18,7 +18,7 @@ public class PresentSchoolFilter  implements IFilter<School> {
 
     @Override
     public boolean accept(School school) {
-        return !school.getSpecies().isOut(school.getAgeDt(), currentTimeStep);
+        return !(school.willDisappear() || school.getSpecies().isOut(school.getAgeDt(), currentTimeStep));
     }
     
 }

@@ -15,6 +15,8 @@ package fr.ird.osmose;
  * ******************************************************************************
  */
 import fr.ird.osmose.ConnectivityMatrix.ConnectivityLine;
+import fr.ird.osmose.filter.AliveSchoolFilter;
+import fr.ird.osmose.filter.IFilter;
 import fr.ird.osmose.filter.PresentSchoolFilter;
 import fr.ird.osmose.filter.SpeciesFilter;
 import java.io.IOException;
@@ -175,7 +177,6 @@ public class Simulation {
         } else if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("random")) {
             iniRandomly();
         }
-        removeDeadSchools();
 
         // Initialize all the tables required for saving output
         if (getOsmose().spatializedOutputs[numSerie]) {
@@ -589,7 +590,6 @@ public class Simulation {
             }
 
             computeMortality(1, VERSION);
-            removeDeadSchools();
 
             // Update of disappeared schools and plancton mortality
             if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
@@ -607,7 +607,9 @@ public class Simulation {
 
             // Reproduction
             reproduction();
-            removeDeadSchools();
+            
+            // Remove all dead schools
+            population.removeDeadSchools();
 
             // Increment time step
             i_step_year++;
@@ -655,7 +657,6 @@ public class Simulation {
                 }
                 //school.nDeadNatural = nDead;
             }
-            removeDeadSchools();
 
             // Update LTL Data
             if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
@@ -696,7 +697,6 @@ public class Simulation {
                     }
                 }
             }
-            removeDeadSchools();
 
             // Compute Plankton Mortality
             if ((null != coupling) && (year >= coupling.getStartYearLTLModel())) {
@@ -713,7 +713,6 @@ public class Simulation {
                 }
                 //school.nDeadStarvation = nDead;
             }
-            removeDeadSchools();
 
             // Growth
             growth();
@@ -733,7 +732,6 @@ public class Simulation {
                     }
                 }
             }
-            removeDeadSchools();
 
             // Save steps
             Indicators.updateAndWriteIndicators();
@@ -743,7 +741,9 @@ public class Simulation {
 
             // Reproduction
             reproduction();
-            removeDeadSchools();
+            
+            // Remove dead school
+            population.removeDeadSchools();
 
             // Increment time step
             i_step_year++;
@@ -1193,17 +1193,6 @@ public class Simulation {
         }
     }
 
-    public void removeDeadSchools() {
-        // Removing dead schools
-        List<School> schoolsToRemove = new ArrayList();
-        for (School school : population) {
-            if (school.willDisappear()) {
-                schoolsToRemove.add(school);
-            }
-        }
-        population.removeAll(schoolsToRemove);
-    }
-
     public void iniBySizeSpectrum() //************************************* A VERIFIER : � adapter eu nouveau pas de temps si besoin**************************
     //initialisation according to a spectrum [10cm], from 0 to 200cm
     {
@@ -1390,6 +1379,10 @@ public class Simulation {
 
     public List<School> getPresentSchools() {
         return FilteredSets.subset(population, new PresentSchoolFilter(i_step_year));
+    }
+    
+    public List<School> getAliveSchools() {
+        return FilteredSets.subset(population, new AliveSchoolFilter());
     }
 
     public Population getPopulation() {
@@ -1695,7 +1688,7 @@ public class Simulation {
     }
 
     public List<School> getSchools(Species species) {
-        return FilteredSets.subset(population, new SpeciesFilter(species.getIndex()));
+        return FilteredSets.subset(population, new IFilter[] {new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
     }
 
     private void reproduce(Species species) {
