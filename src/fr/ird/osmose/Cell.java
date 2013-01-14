@@ -95,11 +95,6 @@ public class Cell {
         jcoordLTLGrid = new Vector();
     }
 
-    @Override
-    public Cell clone() {
-        return new Cell(this.i, this.j, this.lat, this.lon, this.isLand());
-    }
-
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
@@ -165,20 +160,6 @@ public class Cell {
      */
     public void setMPA(boolean mpa) {
         this.mpa = mpa;
-    }
-
-    /**
-     * @return the alreadyChosen
-     */
-    public boolean isAlreadyChosen() {
-        return alreadyChosen;
-    }
-
-    /**
-     * @param alreadyChosen the alreadyChosen to set
-     */
-    public void setAlreadyChosen(boolean alreadyChosen) {
-        this.alreadyChosen = alreadyChosen;
     }
 
     /**

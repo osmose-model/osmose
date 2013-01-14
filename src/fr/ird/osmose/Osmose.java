@@ -2079,11 +2079,7 @@ public class Osmose {
         else {
             int nCells = speciesAreasSizeTab[numSerie][iSpec];
             randomMaps[iSpec] = new ArrayList(nCells);
-            for (int l = 0; l < grid.getNbLines(); l++) {
-                for (int m = 0; m < grid.getNbColumns(); m++) {
-                    grid.getCell(l, m).setAlreadyChosen(false);
-                }
-            }
+            boolean[][] alreadyChoosen = new boolean[grid.getNbLines()][grid.getNbColumns()];
             //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpec]];
             int coordi, coordj;
             coordi = (int) Math.round(Math.random() * (grid.getNbLines() - 1));
@@ -2093,7 +2089,7 @@ public class Osmose {
                 coordj = (int) Math.round(Math.random() * (grid.getNbColumns() - 1));
             }
             randomMaps[iSpec].add(grid.getCell(coordi, coordj));
-            grid.getCell(coordi, coordj).setAlreadyChosen(true);
+            alreadyChoosen[coordi][coordj] = true;
             /*
              * From initial cell, successive random sorting of the
              * adjacent cells until tabCellsArea is full
@@ -2107,9 +2103,9 @@ public class Osmose {
                     Iterator<Cell> iter = neigbors.iterator();
                     while ((index < (nCells - 1)) && iter.hasNext()) {
                         Cell cell = iter.next();
-                        if (!cell.isLand() && !cell.isAlreadyChosen()) {
+                        if (!cell.isLand() && !alreadyChoosen[cell.get_igrid()][cell.get_jgrid()]) {
                             index++;
-                            cell.setAlreadyChosen(true);
+                            alreadyChoosen[cell.get_igrid()][cell.get_jgrid()] = true;
                             randomMaps[iSpec].add(cell);
                         }
                     }
