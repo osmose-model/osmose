@@ -5,6 +5,7 @@
 package fr.ird.osmose.util;
 
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.GridMap;
 import fr.ird.osmose.OriginalGrid;
 import fr.ird.osmose.IGrid;
 import fr.ird.osmose.Osmose;
@@ -67,7 +68,7 @@ public class SpatialMapUI extends JPanel {
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private int height = 800, width = 600;
     private boolean isGridVisible = false;
-    private static List<Cell> map;
+    private static GridMap map;
 
     private static int numMap = 5;
 
@@ -275,12 +276,7 @@ public class SpatialMapUI extends JPanel {
     }
 
     private boolean isInMap(int i, int j) {
-        for (Cell cell : map) {
-            if (cell.get_igrid() == i && cell.get_jgrid() == j) {
-                return true;
-            }
-        }
-        return false;
+        return map.getValue(i, j) > 0.f;
     }
 
     private class CellUI extends Polygon {

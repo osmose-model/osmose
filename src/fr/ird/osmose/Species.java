@@ -174,12 +174,15 @@ public class Species {
         meanWeight[0] = eggWeight;
         for (int i = 1; i < longevity; i++) {
             meanWeight[i] = (float) computeWeight(tabMeanLength[i]);
+            if (meanWeight[i] < eggWeight) {
+                meanWeight[i] = eggWeight;
+            }
         }
         return meanWeight;
     }
     
     public float computeWeight(float length) {
-        return Math.max(eggWeight, (float) (c * (Math.pow(length, bPower))));
+        return (float) (c * (Math.pow(length, bPower)));
     }
 
     private Osmose getOsmose() {
