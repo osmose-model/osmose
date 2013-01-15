@@ -50,10 +50,11 @@ public class School extends Fish {
      * @param length [cm] of the individual
      * @param weight [g] of the individual
      */
-    public School(Species species, double abundance, float length, int age) {
+    public School(Species species, double abundance, float length, float weight, int age) {
         super(species);
         this.abundance = abundance;
         this.length = length;
+        this.weight = weight;
         this.age = age;
 
         // initialize school variables
@@ -101,14 +102,14 @@ public class School extends Fish {
      * Converts the specified biomass [tons] into abundance [scalar]
      */
     public double biom2abd(double biomass) {
-        return 1.e6d * biomass / getWeight();
+        return 1.e6d * biomass / weight;
     }
 
     /**
      * Converts the specified abundance [scalar] into biomass [tons]
      */
     public double adb2biom(double abundance) {
-        return abundance * getWeight() / 1.e6d;
+        return abundance * weight / 1.e6d;
     }
 
     public void updateDietVariables() {

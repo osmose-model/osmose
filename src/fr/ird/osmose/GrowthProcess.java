@@ -45,6 +45,7 @@ public class GrowthProcess extends AbstractProcess {
             if ((j == 0) || species.isOut(j, getSimulation().getIndexTimeYear())) {
                 // Linear growth for eggs and migrating schools
                 school.setLength(school.getLength() + deltaMeanLength[i][j]);
+                school.setWeight(species.computeWeight(school.getLength()));
             } else {
                 // Growth based on predation success
                 growth(school, minDelta[i][j], maxDelta[i][j]);
@@ -59,6 +60,7 @@ public class GrowthProcess extends AbstractProcess {
         if (school.predSuccessRate >= species.criticalPredSuccess) {
             float length = (school.getLength() + minDelta + (maxDelta - minDelta) * ((school.predSuccessRate - species.criticalPredSuccess) / (1 - species.criticalPredSuccess)));
             school.setLength(length);
+            school.setWeight(species.computeWeight(length));
         }
     }
 }

@@ -61,6 +61,7 @@ public class SpectrumPopulator extends Populator {
             for (int j = 0; j < specInSizeClass10[i].size(); j++) {
                 Species speciesj = ((Species) specInSizeClass10[i].get(j));
                 float[] meanLength = speciesj.getMeanLength();
+                float[] meanWeight = speciesj.getMeanWeight(meanLength);
                 long[] abundanceIni = new long[speciesj.getLongevity()];
                 abundanceIni[speciesj.getLongevity() - 1] = Math.round(((double) tempSpectrumAbd[i]) / specInSizeClass10[i].size());
                 //we consider that D0->1 = 10 for the first age class (month or year, whatever nbDt), D0-1year->2 = 1 and D=0.4 otherwise
@@ -87,7 +88,7 @@ public class SpectrumPopulator extends Populator {
                     if (abundanceIni[age] > 0.d) {
                         int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
                         for (int k = 0; k < nbSchools; k++) {
-                            getPopulation().add(new School(speciesj, abundanceIni[age] / nbSchools, meanLength[age], age));
+                            getPopulation().add(new School(speciesj, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
                         }
                     }
                 }

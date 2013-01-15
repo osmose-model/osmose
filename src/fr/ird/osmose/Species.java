@@ -14,6 +14,7 @@ package fr.ird.osmose;
  * @version 2.1
  * *******************************************************************************
  */
+
 public class Species {
 
     final static public float TL_EGG = 3f;
@@ -69,7 +70,7 @@ public class Species {
     // Migration
     private float[][] outOfZoneMortality;
     private boolean[][] outOfZoneCohort;
-
+    
     /**
      * Create a new species
      *
@@ -78,7 +79,7 @@ public class Species {
     public Species(int number) {
         index = number - 1;
     }
-
+    
     public Species(int index, String name) {
         this.index = index;
         this.name = name;
@@ -143,7 +144,7 @@ public class Species {
         outOfZoneMortality = new float[longevity][getSimulation().getNbTimeStepsPerYear()];
         outOfZoneCohort = new boolean[longevity][getSimulation().getNbTimeStepsPerYear()];
     }
-
+    
     public float[] getMeanLength() {
 
         // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
@@ -176,7 +177,7 @@ public class Species {
         }
         return meanWeight;
     }
-
+    
     public float computeWeight(float length) {
         return Math.max(eggWeight, (float) (c * (Math.pow(length, bPower))));
     }
