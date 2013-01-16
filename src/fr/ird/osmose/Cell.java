@@ -13,6 +13,7 @@ package fr.ird.osmose;
  * @version 2.1 
  ******************************************************************************* 
  */
+import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.util.SchoolLengthComparator;
 import java.util.ArrayList;
 import java.util.Collections;

@@ -16,6 +16,8 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
+import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.grid.OriginalGrid;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.util.IOTools;
@@ -103,9 +105,9 @@ public class Osmose {
      */
     String[] gridClassNameTab;
     public String[] gridFileTab, lonFieldTab, latFieldTab, maskFieldTab;
-    int[] strideTab;
-    int[] gridLinesTab, gridColumnsTab;
-    float[] upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
+    public int[] strideTab;
+    public int[] gridLinesTab, gridColumnsTab;
+    public float[] upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
     int[] simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
     /*
      * Parameters

@@ -1,4 +1,6 @@
-package fr.ird.osmose;
+package fr.ird.osmose.grid;
+
+import fr.ird.osmose.Cell;
 
 /********************************************************************************
  * <p>Title : Grid class</p>

@@ -4,6 +4,8 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.grid.IGrid;
+
 /**
  * 
  * @author pverley

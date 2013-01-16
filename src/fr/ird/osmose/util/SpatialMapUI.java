@@ -6,9 +6,8 @@ package fr.ird.osmose.util;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.GridMap;
-import fr.ird.osmose.OriginalGrid;
-import fr.ird.osmose.IGrid;
 import fr.ird.osmose.Osmose;
+import fr.ird.osmose.grid.IGrid;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -20,7 +19,6 @@ import java.awt.image.BufferedImage;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;

@@ -4,6 +4,7 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.grid.IGrid;
 import java.io.*;
 import java.util.List;
 import java.util.logging.Level;

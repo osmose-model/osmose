@@ -1,5 +1,6 @@
 package fr.ird.osmose;
 
+import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 
 /********************************************************************************

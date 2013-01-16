@@ -4,17 +4,16 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.IGrid;
 import fr.ird.osmose.Indicators;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.Simulation;
+import fr.ird.osmose.grid.IGrid;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
