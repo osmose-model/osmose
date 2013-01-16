@@ -254,8 +254,9 @@ public class Indicators {
                 fos = new FileOutputStream(file, true);
                 pr = new PrintWriter(fos, true);
                 if (isNew) {
-                    pr.print("// ");
-                    pr.println(description);
+                    pr.print("\"");
+                    pr.print(description);
+                    pr.println("\"");
                     pr.print("Time");
                     pr.print(';');
                     pr.print("Fpred;Fpred;Fpred;");
@@ -432,8 +433,9 @@ public class Indicators {
             fos = new FileOutputStream(file, true);
             pr = new PrintWriter(fos, true);
             if (isNew) {
-                pr.print("// ");
-                pr.println(description);
+                pr.print("\"");
+                pr.print(description);
+                pr.println("\"");
                 pr.print("Time");
                 pr.print(';');
                 pr.print("Prey");
@@ -535,8 +537,9 @@ public class Indicators {
             fos = new FileOutputStream(file, true);
             pr = new PrintWriter(fos, true);
             if (isNew) {
-                pr.print("// ");
-                pr.println(description);
+                pr.print("\"");
+                pr.print(description);
+                pr.println("\"");
                 pr.print("Time");
                 pr.print(';');
                 pr.print("Prey");
@@ -633,8 +636,9 @@ public class Indicators {
             fos = new FileOutputStream(file, true);
             pr = new PrintWriter(fos, true);
             if (isNew) {
-                pr.print("// ");
-                pr.println(description);
+                pr.print("\"");
+                pr.print(description);
+                pr.println("\"");
                 pr.print("Time");
                 pr.print(';');
                 pr.print("TL");
@@ -692,8 +696,9 @@ public class Indicators {
                 fos = new FileOutputStream(file, true);
                 pr = new PrintWriter(fos, true);
                 if (isNew) {
-                    pr.print("// ");
-                    pr.println(description);
+                    pr.print("\"");
+                    pr.print(description);
+                    pr.println("\"");
                     pr.print("Time");
                     pr.print(';');
                     pr.print("size");
@@ -750,8 +755,9 @@ public class Indicators {
                 fos = new FileOutputStream(file, true);
                 pr = new PrintWriter(fos, true);
                 if (isNew) {
-                    pr.print("// ");
-                    pr.println(description);
+                    pr.print("\"");
+                    pr.print(description);
+                    pr.println("\"");
                     pr.print("Time");
                     pr.print(';');
                     pr.print("size");
@@ -915,8 +921,9 @@ public class Indicators {
             fos = new FileOutputStream(file, true);
             pr = new PrintWriter(fos, true);
             if (isNew) {
-                pr.print("// ");
-                pr.println(description);
+                pr.print("\"");
+                pr.print(description);
+                pr.println("\"");
                 pr.print("Time");
                 for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
                     pr.print(";");
@@ -956,8 +963,9 @@ public class Indicators {
             pr = new PrintWriter(fos, true);
             if (isNew) {
                 if (null != description || !description.isEmpty()) {
-                    pr.print("// ");
-                    pr.println(description);
+                    pr.print("\"");
+                    pr.print(description);
+                    pr.println("\"");
                 }
                 pr.print("Time");
                 for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
