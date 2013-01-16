@@ -1,5 +1,7 @@
 package fr.ird.osmose;
 
+import fr.ird.osmose.ltl.LTLForcing;
+
 /********************************************************************************
  * <p>Titre : Plankton class </p>
  *
@@ -29,8 +31,8 @@ public class Plankton {
     private float accessibilityCoeff; // percentage of plankton biomass available for fish
     private float conversionFactor;   // factor to be used in order to transform biomass from plankton unit (eg mmolN/m2) towards wet weight (tons/km2)
     private float prodBiomFactor;   // factor to be used to transform biomass into production (per year)
-    float[][][] dataInit;      // table of intial values in 3D -> Dimensions are case-specific
-    float[][] biomass, accessibleBiomass, iniBiomass, integratedData;         // table of transformed values in 2D
+    public float[][][] dataInit;      // table of intial values in 3D -> Dimensions are case-specific
+    public float[][] biomass, accessibleBiomass, iniBiomass, integratedData;         // table of transformed values in 2D
     float[][] mortalityRate;     // table for output values in 2D
 
     public Plankton(String name, float sizeMin, float sizeMax, float trophicLevel, float conversionFactor, float prodBiomFactor, float accessCoeff) {

@@ -2,9 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.osmose;
+package fr.ird.osmose.ltl;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.Osmose;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

@@ -44,8 +44,8 @@ public class Osmose {
     /*
      *
      */
-    final String fileSeparator = System.getProperty("file.separator");
-    String inputPathName, outputPathName, inputTxtName;
+    public final String fileSeparator = System.getProperty("file.separator");
+    public String inputPathName, outputPathName, inputTxtName;
     /*
      *
      */
@@ -56,7 +56,7 @@ public class Osmose {
     public int numSerie, numSimu;
     // TABLES OF INPUT FILES NAMES (one entry per serie)
     //for 1 serie of simus, same species parameters and options
-    String[] configFileNameTab, speciesFileNameTab, predationFileNameTab, fishingFileNameTab,
+    public String[] configFileNameTab, speciesFileNameTab, predationFileNameTab, fishingFileNameTab,
             planktonFileNameTab, planktonStructureFileNameTab, calibrationFileNameTab, outputFileNameTab,
             indicatorsFileNameTab, outputPrefix;
     // Tables of Optional Input Files names (with entries as file name or "default")
@@ -96,13 +96,13 @@ public class Osmose {
     /*
      * PLANKTON groups
      */
-    int[] nbPlanktonGroupsTab;
-    String[][] planktonNamesTab;
+    public int[] nbPlanktonGroupsTab;
+    public String[][] planktonNamesTab;
     /*
      * CONFIG & OPTIONS
      */
     String[] gridClassNameTab;
-    String[] gridFileTab, lonFieldTab, latFieldTab, maskFieldTab;
+    public String[] gridFileTab, lonFieldTab, latFieldTab, maskFieldTab;
     int[] strideTab;
     int[] gridLinesTab, gridColumnsTab;
     float[] upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
@@ -111,7 +111,7 @@ public class Osmose {
      * Parameters
      */
     public int[] nbSchools;
-    float[] planktonAccessCoeffMatrix;
+    public float[] planktonAccessCoeffMatrix;
     int[] nbAccessStage;
     float[][] accessStageThreshold;
     float[][][][] accessibilityMatrix;

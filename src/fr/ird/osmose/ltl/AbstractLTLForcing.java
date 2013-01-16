@@ -2,8 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.osmose;
+package fr.ird.osmose.ltl;
 
+import fr.ird.osmose.IGrid;
+import fr.ird.osmose.Indicators;
+import fr.ird.osmose.Osmose;
+import fr.ird.osmose.Plankton;
+import fr.ird.osmose.Simulation;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;

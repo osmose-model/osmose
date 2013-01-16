@@ -65,7 +65,7 @@ public class Cell {
      * Positions of the cells of the LTL grid used to compute the LTL biomass
      * (position within the LTL grid)
      */
-    Vector icoordLTLGrid, jcoordLTLGrid;
+    public Vector icoordLTLGrid, jcoordLTLGrid;
 
 //////////////
 // Constructor

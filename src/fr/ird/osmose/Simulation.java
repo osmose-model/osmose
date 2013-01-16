@@ -14,6 +14,7 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
+import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
 import fr.ird.osmose.process.FishingProcess;

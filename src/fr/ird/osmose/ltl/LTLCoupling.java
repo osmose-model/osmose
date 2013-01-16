@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package fr.ird.osmose;
+package fr.ird.osmose.ltl;
 
 /**
  *
