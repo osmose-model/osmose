@@ -8,6 +8,7 @@ import fr.ird.osmose.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
+import fr.ird.osmose.process.LTLForcingProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
 import fr.ird.osmose.process.PredationProcess;
 import fr.ird.osmose.process.ReproductionProcess;
@@ -18,7 +19,7 @@ import fr.ird.osmose.process.StarvationProcess;
  * @author pverley
  */
 public class SequentialMortalityStep extends AbstractStep {
-    
+
     /*
      * Growth process
      */
@@ -43,17 +44,21 @@ public class SequentialMortalityStep extends AbstractStep {
      * Predation mortality process
      */
     private AbstractProcess predationProcess;
-    
+    /*
+     * LTL forcing process
+     */
+    private AbstractProcess ltlForcingProcess;
+
     @Override
     public void init() {
         // initialize natural mortality process
         naturalMortalityProcess = new NaturalMortalityProcess();
         naturalMortalityProcess.init();
-        
+
         // initialize starvation process
         predationProcess = new PredationProcess();
         predationProcess.init();
-        
+
         // initialize starvation process
         starvationProcess = new StarvationProcess();
         starvationProcess.init();
@@ -70,47 +75,49 @@ public class SequentialMortalityStep extends AbstractStep {
         // Reproduction processes
         reproductionProcess = new ReproductionProcess();
         reproductionProcess.init();
+
+        ltlForcingProcess = new LTLForcingProcess();
+        ltlForcingProcess.init();
     }
 
     @Override
     public void step() {
         // Update some stages at the begining of the step
-            getSimulation().updateStages();
+        getSimulation().updateStages();
 
-            // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
-                getSimulation().distributeSpecies();
-            
+        // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
+        getSimulation().distributeSpecies();
 
-            // Natural mortality (due to other predators)
-            naturalMortalityProcess.run();
+        // Natural mortality (due to other predators)
+        naturalMortalityProcess.run();
 
-            getForcing().updatePlankton(getSimulation().getIndexTimeYear());
+        // Update plankton concentration
+        ltlForcingProcess.run();
 
-            getSimulation().saveBiomassBeforeMortality();
-            
-            // Predation
-            predationProcess.run();
-            
-            // Starvation
-            starvationProcess.run();
+        getSimulation().saveBiomassBeforeMortality();
 
-            // Growth
-            growthProcess.run();
+        // Predation
+        predationProcess.run();
 
-            // Fishing
-            fishingProcess.run();
+        // Starvation
+        starvationProcess.run();
 
-            // Save steps
-            Indicators.updateAndWriteIndicators();
-            if (getOsmose().spatializedOutputs[getOsmose().numSerie]) {
-                getSimulation().saveSpatializedStep();
-            }
+        // Growth
+        growthProcess.run();
 
-            // Reproduction
-            reproductionProcess.run();
+        // Fishing
+        fishingProcess.run();
 
-            // Remove dead school
-            getPopulation().removeDeadSchools();
+        // Save steps
+        Indicators.updateAndWriteIndicators();
+        if (getOsmose().spatializedOutputs[getOsmose().numSerie]) {
+            getSimulation().saveSpatializedStep();
+        }
+
+        // Reproduction
+        reproductionProcess.run();
+
+        // Remove dead school
+        getPopulation().removeDeadSchools();
     }
-    
 }

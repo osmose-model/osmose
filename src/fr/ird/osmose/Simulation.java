@@ -122,9 +122,10 @@ public class Simulation {
      */
     public void init() {
 
+        // Create a new population, empty at the moment
         population = new Population();
 
-
+        // Reset time variables
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
@@ -132,17 +133,14 @@ public class Simulation {
         nTimeStepsPerYear = getOsmose().nbDtMatrix[numSerie];
         nYear = getOsmose().simulationTimeTab[numSerie];
 
-        // Initializing plankton matrix
-        iniPlanktonField(getOsmose().isForcing[numSerie]);
-
-        // Creating the species
+        // Create the species
         species = new Species[getOsmose().nbSpeciesTab[numSerie]];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
             species[i].init();
         }
 
-        // Instantiating the Step
+        // Instantiate the Step
         switch (VERSION) {
             case SCHOOL2012_PROD:
             case SCHOOL2012_BIOM:
@@ -155,24 +153,15 @@ public class Simulation {
         }
         step.init();
 
-        // Initializing the population
+        // Initialize the population
         AbstractProcess populatingProcess = new PopulatingProcess();
         populatingProcess.init();
         populatingProcess.run();
 
-        // Initializing spatialized outputs
+        // Initialize spatialized outputs
         if (getOsmose().spatializedOutputs[numSerie]) {
             initSpatializedSaving();
         }
-
-    }
-
-    private IGrid getGrid() {
-        return Osmose.getInstance().getGrid();
-    }
-
-    private Osmose getOsmose() {
-        return Osmose.getInstance();
     }
 
     /**
@@ -265,24 +254,6 @@ public class Simulation {
             // Go to following year
             year++;
         }
-    }
-
-    public void iniPlanktonField(boolean isForcing) {
-
-        if (isForcing) {
-            try {
-                try {
-                    forcing = (LTLForcing) Class.forName(getOsmose().getLTLClassName()).newInstance();
-                } catch (InstantiationException | IllegalAccessException ex) {
-                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        forcing.readLTLConfigFile1(getOsmose().planktonStructureFileNameTab[numSerie]);
-        forcing.readLTLConfigFile2(getOsmose().planktonFileNameTab[numSerie]);
-        forcing.initPlanktonMap();
     }
 
     public List<School> getPresentSchools() {
@@ -809,6 +780,10 @@ public class Simulation {
     public LTLForcing getForcing() {
         return forcing;
     }
+    
+    public void setForcing(LTLForcing forcing) {
+        this.forcing = forcing;
+    }
 
     public int getNumberTimeStepsPerYear() {
         return nTimeStepsPerYear;
@@ -828,5 +803,13 @@ public class Simulation {
 
     public int getNumberYears() {
         return nYear;
+    }
+    
+    private IGrid getGrid() {
+        return Osmose.getInstance().getGrid();
+    }
+
+    private Osmose getOsmose() {
+        return Osmose.getInstance();
     }
 }
