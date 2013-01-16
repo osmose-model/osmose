@@ -14,6 +14,8 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
+import fr.ird.osmose.populator.BiomassPopulator;
+import fr.ird.osmose.populator.SpectrumPopulator;
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;

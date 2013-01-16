@@ -157,10 +157,10 @@ public class Osmose {
     float[][][] dietStageThreshold;
     //Initial abundances
     String[] calibrationMethod;
-    double[][] spBiomIniTab;
-    double[] SSslope, SSintercept;
+    public double[][] spBiomIniTab;
+    public double[] SSslope, SSintercept;
     //size spectrum
-    float spectrumMinSize, spectrumMaxSize, classRange;
+    public float spectrumMinSize, spectrumMaxSize, classRange;
     float[] tabSizes;//size classes of 10cm are used for ini and output
     float[] tabSizesLn;//for output
     int nbSizeClass;

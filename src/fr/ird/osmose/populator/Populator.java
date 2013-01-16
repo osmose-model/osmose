@@ -1,4 +1,9 @@
-package fr.ird.osmose;
+package fr.ird.osmose.populator;
+
+import fr.ird.osmose.IGrid;
+import fr.ird.osmose.Osmose;
+import fr.ird.osmose.Population;
+import fr.ird.osmose.Simulation;
 
 /**
  *

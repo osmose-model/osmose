@@ -1,5 +1,7 @@
-package fr.ird.osmose;
+package fr.ird.osmose.populator;
 
+import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
 

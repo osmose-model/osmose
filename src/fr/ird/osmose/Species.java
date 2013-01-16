@@ -53,7 +53,7 @@ public class Species {
     /*
      * Age from which the species biomass-0 is calculated, expressed in dt
      */
-    int indexAgeClass0;
+    public int indexAgeClass0;
     float recruitSize;
     public float[] seasonSpawning; //according to nbDt
     public float eggSize, eggWeight, growthAgeThreshold,
