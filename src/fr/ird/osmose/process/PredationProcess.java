@@ -30,7 +30,7 @@ public class PredationProcess extends AbstractProcess {
     @Override
     public void run() {
         for (Cell cell : getGrid().getCells()) {
-                List<School> schools = getSimulation().getSchools(cell);
+                List<School> schools = getPopulation().getSchools(cell);
                 Collections.shuffle(schools);
                 int ns = schools.size();
                 if (!(cell.isLand() || schools.isEmpty())) {
@@ -66,7 +66,7 @@ public class PredationProcess extends AbstractProcess {
     public static double[] computePredation(School predator, int subdt) {
 
         Cell cell = predator.getCell();
-        List<School> schools = getSimulation().getSchools(predator.getCell());
+        List<School> schools = getPopulation().getSchools(predator.getCell());
         int nFish = schools.size();
         double[] preyUpon = new double[schools.size() + getForcing().getNbPlanktonGroups()];
         // find the preys
@@ -139,7 +139,7 @@ public class PredationProcess extends AbstractProcess {
 
     public static double[][] computePredationMatrix(Cell cell, int subdt) {
 
-        List<School> schools = getSimulation().getSchools(cell);
+        List<School> schools = getPopulation().getSchools(cell);
         double[][] preyUpon = new double[schools.size() + getForcing().getNbPlanktonGroups()][schools.size() + getForcing().getNbPlanktonGroups()];
         // Loop over the schools of the cell
         for (School school : schools) {
@@ -188,7 +188,7 @@ public class PredationProcess extends AbstractProcess {
     private static int[] findPreys(School predator) {
 
         int iPred = predator.getSpeciesIndex();
-        List<School> schoolsInCell = getSimulation().getSchools(predator.getCell());
+        List<School> schoolsInCell = getPopulation().getSchools(predator.getCell());
         //schoolsInCell.remove(predator);
         float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getFeedingStage()];
         float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getFeedingStage()];

@@ -36,7 +36,7 @@ public class LocalReproductionProcess extends AbstractProcess {
     @Override
     public void run() {
         double SSB = 0;
-        List<School> schools = getSimulation().getSchools(species);
+        List<School> schools = getPopulation().getSchools(species);
         for (School school : schools) {
             if (school.getLength() >= species.sizeMat) {
                 SSB += school.getBiomass();

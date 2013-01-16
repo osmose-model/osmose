@@ -1,24 +1,8 @@
 package fr.ird.osmose;
 
-/**
- * *****************************************************************************
- * <p>Titre : Simulation class</p>
- *
- * <p>Description : </p>
- *
- * <p>Copyright : Copyright (c) may 2009</p>
- *
- * <p>Society : IRD, France </p>
- *
- * @author Yunne Shin, Morgane Travers
- * @version 2.1
- * ******************************************************************************
- */
 import fr.ird.osmose.ConnectivityMatrix.ConnectivityLine;
 import fr.ird.osmose.filter.AliveSchoolFilter;
-import fr.ird.osmose.filter.IFilter;
 import fr.ird.osmose.filter.PresentSchoolFilter;
-import fr.ird.osmose.filter.SpeciesFilter;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.process.AbstractProcess;
@@ -126,18 +110,20 @@ public class Simulation {
      */
     private Species[] species;
     /*
-     * Snapshot of the distribution of the schools on the grid
-     */
-    private List<School>[][] schoolMap;
-    /*
      * What should be done within one time step
      */
     private AbstractStep step;
 
+///////////////////////////////
+// Definition of the functions
+///////////////////////////////
+    /**
+     * Initialize the simulation
+     */
     public void init() {
 
         population = new Population();
-        schoolMap = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+
 
         year = 0;
         i_step_year = 0;
@@ -189,6 +175,9 @@ public class Simulation {
         return Osmose.getInstance();
     }
 
+    /**
+     * Print the progress of the simulation in text console
+     */
     private void progress() {
         // screen display to check the period already simulated
         if (year % 5 == 0) {
@@ -196,33 +185,6 @@ public class Simulation {
         } else {
             System.out.println("year " + year);
         }
-    }
-
-    private void updateSchoolMap() {
-
-        // reset the map
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                if (!getGrid().getCell(i, j).isLand()) {
-                    if (null == schoolMap[i][j]) {
-                        schoolMap[i][j] = new ArrayList();
-                    } else {
-                        schoolMap[i][j].clear();
-                    }
-                }
-            }
-        }
-
-        // fill up the map
-        for (School school : population) {
-            if (!school.isUnlocated()) {
-                schoolMap[school.getCell().get_igrid()][school.getCell().get_jgrid()].add(school);
-            }
-        }
-    }
-
-    public List<School> getSchools(Cell cell) {
-        return schoolMap[cell.get_igrid()][cell.get_jgrid()];
     }
 
     private void setupMPA() {
@@ -630,11 +592,7 @@ public class Simulation {
                     break;
             }
         }
-        updateSchoolMap();
-    }
-
-    public List<School> getSchools(Species species) {
-        return FilteredSets.subset(population, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
+        population.updateSchoolMap();
     }
 
     public void initSpatializedSaving() {
@@ -764,7 +722,7 @@ public class Simulation {
             /*
              * Cell in water
              */
-            for (School school : getSchools(cell)) {
+            for (School school : getPopulation().getSchools(cell)) {
                 if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !school.getSpecies().isOut(school.getAgeDt(), i_step_year)) {
                     nbSchools[school.getSpeciesIndex()] += 1;
                     biomass[school.getSpeciesIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();

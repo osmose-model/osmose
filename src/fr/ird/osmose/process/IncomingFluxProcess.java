@@ -42,7 +42,7 @@ public class IncomingFluxProcess extends AbstractProcess {
          * Making cohorts going up to the upper age class
          * Kill old schools
          */
-        for (School school : getSimulation().getSchools(species)) {
+        for (School school : getPopulation().getSchools(species)) {
             school.incrementAge();
             if (school.getAgeDt() > (species.getLongevity() - 1)) {
                 school.kill();

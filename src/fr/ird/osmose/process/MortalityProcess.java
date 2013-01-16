@@ -46,7 +46,7 @@ public class MortalityProcess extends AbstractProcess {
         
         // Loop over cells
         for (Cell cell : getGrid().getCells()) {
-            List<School> schools = getSimulation().getSchools(cell);
+            List<School> schools = getPopulation().getSchools(cell);
             if (!(cell.isLand() || schools.isEmpty())) {
                 int ns = schools.size();
                 int npl = getForcing().getNbPlanktonGroups();
@@ -156,7 +156,7 @@ public class MortalityProcess extends AbstractProcess {
         int ITER_MAX = 50;
         double ERR_MAX = 1.e-5d;
 
-        List<School> schools = getSimulation().getSchools(cell);
+        List<School> schools = getPopulation().getSchools(cell);
         int ns = schools.size();
         int npl = getForcing().getNbPlanktonGroups();
         double[][] nDeadMatrix = new double[ns + npl][ns + 3];
@@ -303,7 +303,7 @@ public class MortalityProcess extends AbstractProcess {
      */
     public double[][] computeMortality_case2(int subdt, Cell cell) {
 
-        List<School> schools = getSimulation().getSchools(cell);
+        List<School> schools = getPopulation().getSchools(cell);
         int ns = schools.size();
         int npl = getForcing().getNbPlanktonGroups();
         double[][] mortalityRateMatrix = new double[ns + npl][ns + 3];
@@ -392,7 +392,7 @@ public class MortalityProcess extends AbstractProcess {
      */
     public double[][] computeMortality_case3(int subdt, Cell cell) {
 
-        List<School> schools = getSimulation().getSchools(cell);
+        List<School> schools = getPopulation().getSchools(cell);
         int ns = schools.size();
         int npl = getForcing().getNbPlanktonGroups();
         double[][] nDeadMatrix = new double[ns + npl][ns + 3];
