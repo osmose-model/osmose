@@ -9,14 +9,16 @@ import fr.ird.osmose.Species;
  */
 public class GrowthProcess extends AbstractProcess {
 
-    float[][] minDelta;
-    float[][] maxDelta;
-    float[][] deltaMeanLength;
+    private float[][] minDelta;
+    private float[][] maxDelta;
+    private float[][] deltaMeanLength;
+    private float[] criticalPredSuccess;
 
     @Override
     public void loadParameters() {
 
         int nSpecies = getSimulation().getNbSpecies();
+        criticalPredSuccess = getOsmose().criticalPredSuccessMatrix[getOsmose().numSerie];
         minDelta = new float[nSpecies][];
         maxDelta = new float[nSpecies][];
         deltaMeanLength = new float[nSpecies][];
@@ -58,12 +60,12 @@ public class GrowthProcess extends AbstractProcess {
 
     public void growth(School school, float minDelta, float maxDelta) {
 
-        Species species = school.getSpecies();
+        int iSpec = school.getSpeciesIndex();
         //calculation of lengths according to predation efficiency
-        if (school.predSuccessRate >= species.criticalPredSuccess) {
-            float length = (school.getLength() + minDelta + (maxDelta - minDelta) * ((school.predSuccessRate - species.criticalPredSuccess) / (1 - species.criticalPredSuccess)));
+        if (school.predSuccessRate >= criticalPredSuccess[iSpec]) {
+            float length = (school.getLength() + minDelta + (maxDelta - minDelta) * ((school.predSuccessRate - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));
             school.setLength(length);
-            school.setWeight(species.computeWeight(length));
+            school.setWeight(school.getSpecies().computeWeight(length));
         }
     }
 }
