@@ -26,7 +26,7 @@ public class Plankton {
      * Osmose and Simulation are called with Osmose.getInstance()
      * and Osmose.getInstance().getSimulation()
      */
-    float trophicLevel;        // trophic level of the plankton group
+    public float trophicLevel;        // trophic level of the plankton group
     private float sizeMin, sizeMax;
     private String name;     // e.g.   phytoplankton, diatoms, copepods...
     private float accessibilityCoeff; // percentage of plankton biomass available for fish

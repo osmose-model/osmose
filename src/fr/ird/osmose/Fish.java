@@ -73,7 +73,7 @@ public class Fish extends GridPoint {
     /*
      * TL of this fish, amd its variation in a time-step
      */
-    float trophicLevel, tmpTL;
+    public float trophicLevel, tmpTL;
     /*
      * whether the school will disappear at next time step
      */
@@ -101,7 +101,7 @@ public class Fish extends GridPoint {
     /*
      *
      */
-    int dietOutputStage;
+    public int dietOutputStage;
 
     public Fish(Species species) {
         this.species = species;

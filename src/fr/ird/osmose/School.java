@@ -27,13 +27,13 @@ public class School extends Fish {
      */
     private double abundance;
     
-    float[][] dietTemp;
+    public float[][] dietTemp;
     private float sumDiet;
     //
-    double nDeadFishing;
+    public double nDeadFishing;
     public double nDeadPredation;
-    double nDeadStarvation;
-    double nDeadNatural;
+    public double nDeadStarvation;
+    public double nDeadNatural;
     //
     public double preyedBiomass;
     /*
@@ -45,7 +45,7 @@ public class School extends Fish {
      */
     public float predSuccessRate;
     //
-    boolean hasPredated;
+    public boolean hasPredated;
 
 //////////////
 // Constructor
