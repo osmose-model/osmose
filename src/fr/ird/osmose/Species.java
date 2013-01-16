@@ -56,8 +56,7 @@ public class Species {
     public int indexAgeClass0;
     float recruitSize;
     public float[] seasonSpawning; //according to nbDt
-    public float eggSize, eggWeight, growthAgeThreshold, predationRate;
-    float[] predPreySizesMax, predPreySizesMin;
+    public float eggSize, eggWeight, growthAgeThreshold;
     int nbFeedingStages;  // stage indirectly correponds to size classes:
     float[] sizeFeeding;
     int nbAccessStages;
@@ -108,10 +107,7 @@ public class Species {
         this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
         this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
         this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];
-
-        this.predationRate = getOsmose().predationRateMatrix[numSerie][index];
-        this.predPreySizesMax = getOsmose().predPreySizesMaxMatrix[numSerie][index];
-        this.predPreySizesMin = getOsmose().predPreySizesMinMatrix[numSerie][index];
+        
         this.nbAccessStages = getOsmose().nbAccessStage[index];
         this.ageStagesTab = getOsmose().accessStageThreshold[index];
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie]) {

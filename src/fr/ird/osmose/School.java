@@ -31,7 +31,7 @@ public class School extends Fish {
     private float sumDiet;
     //
     double nDeadFishing;
-    double nDeadPredation;
+    public double nDeadPredation;
     double nDeadStarvation;
     double nDeadNatural;
     //

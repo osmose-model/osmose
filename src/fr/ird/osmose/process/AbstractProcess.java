@@ -5,6 +5,7 @@ import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Population;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.ltl.LTLForcing;
 
 /**
  *
@@ -32,4 +33,7 @@ public abstract class AbstractProcess {
         return getSimulation().getPopulation();
     }
     
+    public static LTLForcing getForcing() {
+        return getSimulation().getForcing();
+    }
 }

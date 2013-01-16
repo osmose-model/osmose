@@ -80,7 +80,7 @@ public class Osmose {
     float[][] lInfMatrix, KMatrix, t0Matrix, cMatrix, bPowerMatrix;
     public float[][] alphaMatrix, sizeMatMatrix;
     float[][][] seasonSpawningMatrix;
-    float[][][] sizeFeedingMatrix, predPreySizesMinMatrix, predPreySizesMaxMatrix;
+    public float[][][] sizeFeedingMatrix, predPreySizesMinMatrix, predPreySizesMaxMatrix;
     int[][] nbStagesMatrix;
     float[][] recruitAgeMatrix;
     public float[][] predationRateMatrix, criticalPredSuccessMatrix;
@@ -116,7 +116,7 @@ public class Osmose {
     public float[] planktonAccessCoeffMatrix;
     int[] nbAccessStage;
     float[][] accessStageThreshold;
-    float[][][][] accessibilityMatrix;
+    public float[][][][] accessibilityMatrix;
     /*
      * SPECIES AREAS FILE
      */

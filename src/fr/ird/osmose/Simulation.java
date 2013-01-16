@@ -29,6 +29,7 @@ import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
 import fr.ird.osmose.process.LocalReproductionProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
+import fr.ird.osmose.process.PredationProcess;
 import fr.ird.osmose.process.StarvationProcess;
 import java.io.IOException;
 import java.util.*;
@@ -167,6 +168,10 @@ public class Simulation {
      * Starvation mortality process
      */
     AbstractProcess starvationProcess;
+    /*
+     * Predation mortality process
+     */
+    AbstractProcess predationProcess;
    
     public void init() {
 
@@ -193,6 +198,10 @@ public class Simulation {
         // initialize natural mortality process
         naturalMortalityProcess = new NaturalMortalityProcess();
         naturalMortalityProcess.loadParameters();
+        
+        // initialize starvation process
+        predationProcess = new PredationProcess();
+        predationProcess.loadParameters();
         
         // initialize starvation process
         starvationProcess = new StarvationProcess();
@@ -318,13 +327,9 @@ public class Simulation {
         forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix[numSerie]);
     }
 
-    private double computeBiomassToPredate(School predator, int subdt) {
-        return getBiomass(predator) * predator.getSpecies().predationRate / (double) (nTimeStepsPerYear * subdt);
-    }
+    
 
-    private double getBiomass(School school) {
-        return school.adb2biom(getAbundance(school));
-    }
+    
 
     public double getAbundance(School school) {
         double nDeadTotal = school.nDeadPredation
@@ -337,158 +342,13 @@ public class Simulation {
                 ? 0.d
                 : abundance;
     }
-
-    public double[] computePredation(School predator, int subdt) {
-
-        Cell cell = predator.getCell();
-        List<School> schools = getSchools(predator.getCell());
-        int nFish = schools.size();
-        double[] preyUpon = new double[schools.size() + forcing.getNbPlanktonGroups()];
-        // find the preys
-        int[] indexPreys = findPreys(predator);
-
-        // Compute accessible biomass
-        // 1. from preys
-        double biomAccessibleTot = 0.d;
-        for (int iPrey : indexPreys) {
-            biomAccessibleTot += getAccessibleBiomass(predator, schools.get(iPrey));
-        }
-        // 2. from plankton
-        float[] percentPlankton = getPercentPlankton(predator);
-        for (int i = 0; i < forcing.getNbPlanktonGroups(); i++) {
-            float tempAccess = getOsmose().accessibilityMatrix[getNbSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
-            biomAccessibleTot += percentPlankton[i] * tempAccess * forcing.getPlankton(i).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
-        }
-
-        // Compute the potential biomass that predators could prey upon
-        double biomassToPredate = computeBiomassToPredate(predator, subdt);
-        /*
-         * phv 20121219 - this is just a way to stick to what is done in
-         * Osmose version SCHOOL2012 and previous version.
-         * Tbe biomassToPredate variable of the predator is update on the fly.
-         * Should check how it is done in version WS2009 and make sure that it
-         * is equivalent to what is done here. It might have some consequences
-         * for School.predSuccessRate which influences growth and starvation.
-         */
-        if (VERSION.equals(Version.SCHOOL2012_BIOM) || VERSION.equals(Version.SCHOOL2012_PROD)) {
-            predator.biomassToPredate = biomassToPredate;
-        }
-
-        // Distribute the predation over the preys
-        if (biomAccessibleTot != 0) {
-            // There is less prey available than the predator can
-            // potentially prey upon. Predator will feed upon the total
-            // accessible biomass
-            if (biomAccessibleTot <= biomassToPredate) {
-                biomassToPredate = biomAccessibleTot;
-            }
-
-            // Assess the loss for the preys caused by this predator
-            // Assess the gain for the predator from preys
-            for (int iPrey : indexPreys) {
-                double ratio = getAccessibleBiomass(predator, schools.get(iPrey)) / biomAccessibleTot;
-                preyUpon[iPrey] = ratio * biomassToPredate;
-            }
-            // Assess the gain for the predator from plankton
-            // Assess the loss for the plankton caused by the predator
-            for (int i = 0; i < forcing.getNbPlanktonGroups(); i++) {
-                float tempAccess = getOsmose().accessibilityMatrix[getNbSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
-                double ratio = percentPlankton[i] * tempAccess * forcing.getPlankton(i).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()] / biomAccessibleTot;
-                preyUpon[nFish + i] = ratio * biomassToPredate;
-            }
-
-        } else {
-            // Case 2: there is no prey available
-            // No loss !
-        }
-        return preyUpon;
-    }
-
+    
     private double sum(double[] array) {
         double sum = 0.d;
         for (int i = 0; i < array.length; i++) {
             sum += array[i];
         }
         return sum;
-    }
-
-    private double[][] computePredationMatrix(Cell cell, int subdt) {
-
-        List<School> schools = getSchools(cell);
-        double[][] preyUpon = new double[schools.size() + forcing.getNbPlanktonGroups()][schools.size() + forcing.getNbPlanktonGroups()];
-        // Loop over the schools of the cell
-        for (School school : schools) {
-            school.nDeadPredation = 0;
-        }
-        for (int iPred = 0; iPred < schools.size(); iPred++) {
-            preyUpon[iPred] = computePredation(schools.get(iPred), subdt);
-        }
-        return preyUpon;
-    }
-
-    public float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
-
-        // Compute the predation success rate
-        return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
-    }
-
-    private float[] getPercentPlankton(School predator) {
-        float[] percentPlankton = new float[forcing.getNbPlanktonGroups()];
-        Species spec = predator.getSpecies();
-        float preySizeMax = predator.getLength() / spec.predPreySizesMax[predator.getFeedingStage()];
-        float preySizeMin = predator.getLength() / spec.predPreySizesMin[predator.getFeedingStage()];
-        for (int i = 0; i < forcing.getNbPlanktonGroups(); i++) {
-            if ((preySizeMin > forcing.getPlankton(i).getSizeMax()) || (preySizeMax < forcing.getPlankton(i).getSizeMin())) {
-                percentPlankton[i] = 0.0f;
-            } else {
-                percentPlankton[i] = forcing.getPlankton(i).calculPercent(preySizeMin, preySizeMax);
-            }
-        }
-        return percentPlankton;
-    }
-
-    /*
-     * Get the accessible biomass that predator can feed on prey
-     */
-    private double getAccessibleBiomass(School predator, School prey) {
-        return getAccessibility(predator, prey) * getBiomass(prey);
-    }
-
-    /*
-     * Get the accessible biomass that predator can feed on prey
-     */
-    private double getAccessibility(School predator, School prey) {
-        return getOsmose().accessibilityMatrix[prey.getSpeciesIndex()][prey.getAccessibilityStage()][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
-    }
-
-    /**
-     * Returns a list of preys for a given predator.
-     *
-     * @param predator
-     * @return the list of preys for this predator
-     */
-    private int[] findPreys(School predator) {
-
-        Species spec = predator.getSpecies();
-        List<School> schoolsInCell = getSchools(predator.getCell());
-        //schoolsInCell.remove(predator);
-        float preySizeMax = predator.getLength() / spec.predPreySizesMax[predator.getFeedingStage()];
-        float preySizeMin = predator.getLength() / spec.predPreySizesMin[predator.getFeedingStage()];
-        List<Integer> indexPreys = new ArrayList();
-        for (int iPrey = 0; iPrey < schoolsInCell.size(); iPrey++) {
-            School prey = schoolsInCell.get(iPrey);
-            if (prey.equals(predator)) {
-                continue;
-            }
-            if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
-                indexPreys.add(iPrey);
-            }
-        }
-        int[] index = new int[indexPreys.size()];
-        for (int iPrey = 0; iPrey < indexPreys.size(); iPrey++) {
-            index[iPrey] = indexPreys.get(iPrey);
-        }
-        return index;
     }
 
     private void reproduction() {
@@ -530,7 +390,7 @@ public class Simulation {
                 school.nDeadNatural = 0;
                 school.nDeadPredation = 0;
                 school.nDeadStarvation = 0;
-                school.biomassToPredate = computeBiomassToPredate(school, 1);
+                school.biomassToPredate = PredationProcess.computeBiomassToPredate(school, 1);
                 school.preyedBiomass = 0;
             }
 
@@ -586,40 +446,11 @@ public class Simulation {
 
             forcing.updatePlankton(i_step_year);
 
-            // Predation
             saveBiomassBeforeMortality();
-            for (Cell cell : getGrid().getCells()) {
-                List<School> schools = getSchools(cell);
-                Collections.shuffle(schools);
-                int ns = schools.size();
-                if (!(cell.isLand() || schools.isEmpty())) {
-                    double[] nDeadPredation = new double[ns];
-                    // Compute predation
-                    for (School predator : schools) {
-                        double[] preyUpon = computePredation(predator, 1);
-                        for (int ipr = 0; ipr < ns; ipr++) {
-                            if (ipr < ns) {
-                                School prey = schools.get(ipr);
-                                nDeadPredation[ipr] += prey.biom2abd(preyUpon[ipr]);
-                                prey.nDeadPredation += prey.biom2abd(preyUpon[ipr]);
-                            }
-                        }
-                        predator.preyedBiomass = sum(preyUpon);
-                    }
-                    // Apply predation mortality
-                    for (int is = 0; is < ns; is++) {
-                        School school = schools.get(is);
-                        school.nDeadPredation = 0;
-                        school.predSuccessRate = computePredSuccessRate(school.biomassToPredate, school.preyedBiomass);
-                        school.setAbundance(school.getAbundance() - nDeadPredation[is]);
-                        if (school.getAbundance() < 1.d) {
-                            school.setAbundance(0.d);
-                            school.kill();
-                        }
-                    }
-                }
-            }
-
+            
+            // Predation
+            predationProcess.run();
+            
             // Starvation
             starvationProcess.run();
 
@@ -682,7 +513,7 @@ public class Simulation {
                     case 0:
                         // Predation mortality
                         predator = schools.get(seqPred[i]);
-                        double[] preyUpon = computePredation(predator, subdt);
+                        double[] preyUpon = PredationProcess.computePredation(predator, subdt);
                         for (int ipr = 0; ipr < (ns + npl); ipr++) {
                             if (ipr < ns) {
                                 School school = schools.get(ipr);
@@ -694,7 +525,7 @@ public class Simulation {
 
                         }
                         predator.hasPredated = true;
-                        predator.predSuccessRate = computePredSuccessRate(computeBiomassToPredate(predator, subdt), sum(preyUpon));
+                        predator.predSuccessRate = PredationProcess.computePredSuccessRate(PredationProcess.computeBiomassToPredate(predator, subdt), sum(preyUpon));
                         break;
                     case 1:
                         // Starvation mortality
@@ -737,7 +568,7 @@ public class Simulation {
         for (int ipd = 0; ipd < ns; ipd++) {
             // Predation mortality 
             School predator = schools.get(ipd);
-            double[] preyUpon = computePredation(predator, subdt);
+            double[] preyUpon = PredationProcess.computePredation(predator, subdt);
             for (int ipr = 0; ipr < (ns + npl); ipr++) {
                 double predationMortalityRate;
                 if (ipr < ns) {
@@ -753,7 +584,7 @@ public class Simulation {
                 mortalityRateMatrix[ipr][ipd] = predationMortalityRate;
 
             }
-            predator.predSuccessRate = computePredSuccessRate(computeBiomassToPredate(predator, subdt), sum(preyUpon));
+            predator.predSuccessRate = PredationProcess.computePredSuccessRate(PredationProcess.computeBiomassToPredate(predator, subdt), sum(preyUpon));
         }
 
         for (int is = 0; is < ns; is++) {
@@ -818,7 +649,7 @@ public class Simulation {
 
         //
         // Initialize the number of deads and the mortality rates
-        double[][] predationMatrix = computePredationMatrix(cell, subdt);
+        double[][] predationMatrix = PredationProcess.computePredationMatrix(cell, subdt);
         for (int ipr = 0; ipr < (ns + npl); ipr++) {
             for (int ipd = 0; ipd < ns; ipd++) {
                 double predationMortalityRate;
@@ -846,7 +677,7 @@ public class Simulation {
             for (int ipr = 0; ipr < (ns + npl); ipr++) {
                 preyedBiomass += predationMatrix[is][ipr];
             }
-            school.predSuccessRate = computePredSuccessRate(computeBiomassToPredate(school, subdt), preyedBiomass);
+            school.predSuccessRate = PredationProcess.computePredSuccessRate(PredationProcess.computeBiomassToPredate(school, subdt), preyedBiomass);
             mortalityRateMatrix[is][ns] = StarvationProcess.getStarvationMortalityRate(school, subdt);
 
             // 3. Natural mortality
@@ -901,8 +732,8 @@ public class Simulation {
                     }
                     //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);
                 }
-                double biomassToPredate = computeBiomassToPredate(predator, subdt);
-                predator.predSuccessRate = computePredSuccessRate(biomassToPredate, preyedBiomass);
+                double biomassToPredate = PredationProcess.computeBiomassToPredate(predator, subdt);
+                predator.predSuccessRate = PredationProcess.computePredSuccessRate(biomassToPredate, preyedBiomass);
                 if (preyedBiomass > 0) {
                     correctionFactor[ipd] = Math.min(biomassToPredate / preyedBiomass, 1.d);
                 } else {
