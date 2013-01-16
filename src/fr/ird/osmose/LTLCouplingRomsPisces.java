@@ -151,7 +151,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
             }
             st.nextToken();
             nbForcingDt = (new Integer(st.sval)).intValue();
-            if (!(nbForcingDt == getSimulation().getNbTimeStepsPerYear())) {
+            if (!(nbForcingDt == getSimulation().getNumberTimeStepsPerYear())) {
                 System.out.println("In the current version, the time step of plankton biomass should match the time step of osmose config");
             }
 
@@ -340,10 +340,10 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         }
 
         if (filesFormat.equalsIgnoreCase("netcdf")) {		// for NetCDF file - Structure depends of netcdf file
-            phyto1 = new ArrayDouble.D3(getSimulation().getNbTimeStepsPerYear(), planktonDimX, planktonDimY);
-            phyto2 = new ArrayDouble.D3(getSimulation().getNbTimeStepsPerYear(), planktonDimX, planktonDimY);
-            zoo1 = new ArrayDouble.D3(getSimulation().getNbTimeStepsPerYear(), planktonDimX, planktonDimY);
-            zoo2 = new ArrayDouble.D3(getSimulation().getNbTimeStepsPerYear(), planktonDimX, planktonDimY);
+            phyto1 = new ArrayDouble.D3(getSimulation().getNumberTimeStepsPerYear(), planktonDimX, planktonDimY);
+            phyto2 = new ArrayDouble.D3(getSimulation().getNumberTimeStepsPerYear(), planktonDimX, planktonDimY);
+            zoo1 = new ArrayDouble.D3(getSimulation().getNumberTimeStepsPerYear(), planktonDimX, planktonDimY);
+            zoo2 = new ArrayDouble.D3(getSimulation().getNumberTimeStepsPerYear(), planktonDimX, planktonDimY);
         }
     }
 
@@ -533,12 +533,12 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
                 for (int y = 0; y < getGrid().getNbColumns(); y++) {
                     if (!getGrid().getCell(x, y).isLand()) {
                         if (planktonList[p].iniBiomass[x][y] != 0) {
-                            planktonList[p].mortalityRate[x][y] = (getSimulation().getNbTimeStepsPerYear() / 365f) * (planktonList[p].iniBiomass[x][y] - planktonList[p].biomass[x][y]) / planktonList[p].iniBiomass[x][y];
+                            planktonList[p].mortalityRate[x][y] = (getSimulation().getNumberTimeStepsPerYear() / 365f) * (planktonList[p].iniBiomass[x][y] - planktonList[p].biomass[x][y]) / planktonList[p].iniBiomass[x][y];
                         } else {
                             planktonList[p].mortalityRate[x][y] = 0;
                         }
                     } else {
-                        planktonList[p].mortalityRate[x][y] = (planktonList[p].getAccessibilityCoeff() / 2f) * (getSimulation().getNbTimeStepsPerYear() / 365f);
+                        planktonList[p].mortalityRate[x][y] = (planktonList[p].getAccessibilityCoeff() / 2f) * (getSimulation().getNumberTimeStepsPerYear() / 365f);
                     }
                 }
             }
@@ -575,7 +575,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         pr = new PrintWriter(planktonTime, true);
 
         for (int j = 0; j < getGrid().getNbLines(); j++) {
-            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getSimulation().getNbTimeStepsPerYear());
+            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getSimulation().getNumberTimeStepsPerYear());
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
                 for (int i = 0; i < getGrid().getNbColumns(); i++) {
@@ -601,7 +601,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
 
         Index ima = phyto1.getIndex();
 
-        for (int k = 0; k < getSimulation().getNbTimeStepsPerYear(); k++) {
+        for (int k = 0; k < getSimulation().getNumberTimeStepsPerYear(); k++) {
             for (int i = 0; i < planktonDimX; i++) {
                 for (int j = 0; j < planktonDimY; j++) {
                     phyto1.setDouble(ima.set(k, i, j), (double) saveMortality[0][i][j][getSimulation().getIndexTimeYear()]);
@@ -770,7 +770,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         pr = new PrintWriter(planktonTime, true);
 
         for (int j = 0; j < getGrid().getNbLines(); j++) {
-            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getSimulation().getNbTimeStepsPerYear());
+            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getSimulation().getNumberTimeStepsPerYear());
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
                 for (int i = 0; i < getGrid().getNbColumns(); i++) {
@@ -792,7 +792,7 @@ public class LTLCouplingRomsPisces implements LTLCoupling {
         for (int x = 0; x < planktonDimX; x++) {
             for (int y = 0; y < planktonDimY; y++) {
                 for (int p = 0; p < nbPlankton; p++) {
-                    saveMortality[p][x][y][getSimulation().getIndexTimeYear()] = (planktonList[p].getAccessibilityCoeff() / 2f) * (getSimulation().getNbTimeStepsPerYear() / 365f);
+                    saveMortality[p][x][y][getSimulation().getIndexTimeYear()] = (planktonList[p].getAccessibilityCoeff() / 2f) * (getSimulation().getNumberTimeStepsPerYear() / 365f);
                 }
             }
         }

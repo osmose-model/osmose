@@ -1,4 +1,7 @@
-package fr.ird.osmose;
+package fr.ird.osmose.process;
+
+import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 
 /**
  *
@@ -18,7 +21,7 @@ public class FishingProcess extends AbstractProcess {
 
     @Override
     public void loadParameters() {
-        isFishingInterannual = getOsmose().fishingRates[0].length > getSimulation().getNbTimeStepsPerYear();
+        isFishingInterannual = getOsmose().fishingRates[0].length > getSimulation().getNumberTimeStepsPerYear();
         fishingRates = new float[getSimulation().getNbSpecies()][];
         System.arraycopy(getOsmose().fishingRates, 0, fishingRates, 0, getSimulation().getNbSpecies());
     }
@@ -82,7 +85,7 @@ public class FishingProcess extends AbstractProcess {
         }
         
         if (isFishingInterannual) {
-            F /= getOsmose().simulationTimeTab[getOsmose().numSerie];
+            F /= getSimulation().getNumberYears();
         }
         return F;
     }

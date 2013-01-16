@@ -1,6 +1,8 @@
 
-package fr.ird.osmose;
+package fr.ird.osmose.process;
 
+import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 import java.util.List;
 
 /**
@@ -41,7 +43,7 @@ public class LocalReproductionProcess extends AbstractProcess {
             }
         }
 
-        double season = species.seasonSpawning.length > getSimulation().getNbTimeStepsPerYear()
+        double season = species.seasonSpawning.length > getSimulation().getNumberTimeStepsPerYear()
                 ? species.seasonSpawning[getSimulation().getIndexTimeSimu()]
                 : species.seasonSpawning[getSimulation().getIndexTimeYear()];
         double nbEggs = sexRatio * alpha * season * SSB * 1000000;
@@ -51,7 +53,7 @@ public class LocalReproductionProcess extends AbstractProcess {
          * Kill old schools
          */
         for (School school : schools) {
-            school.age += 1;
+            school.incrementAge();
             if (school.getAgeDt() > (species.getLongevity() - 1)) {
                 school.kill();
             }

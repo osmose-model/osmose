@@ -39,7 +39,7 @@ public class Species {
     /*
      * Natural mortality rates year-1
      */
-    float D;
+    public float D;
     /*
      * Von bertalanffy growth parameters
      */
@@ -48,15 +48,15 @@ public class Species {
      * Allometric parameters
      */
     private float c, bPower;
-    float sizeMat;
-    int recruitAge;            //year
+    public float sizeMat;
+    public int recruitAge;            //year
     /*
      * Age from which the species biomass-0 is calculated, expressed in dt
      */
     int indexAgeClass0;
     float recruitSize;
-    float[] seasonSpawning; //according to nbDt
-    float eggSize, eggWeight, growthAgeThreshold,
+    public float[] seasonSpawning; //according to nbDt
+    public float eggSize, eggWeight, growthAgeThreshold,
             predationRate, criticalPredSuccess, starvMaxRate;
     float[] predPreySizesMax, predPreySizesMin;
     int nbFeedingStages;  // stage indirectly correponds to size classes:
@@ -102,10 +102,10 @@ public class Species {
         this.sizeMat = getOsmose().sizeMatMatrix[numSerie][index];
         this.nbFeedingStages = getOsmose().nbStagesMatrix[numSerie][index];
         this.sizeFeeding = getOsmose().sizeFeedingMatrix[numSerie][index];
-        this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[numSerie][index] * getSimulation().getNbTimeStepsPerYear());
+        this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[numSerie][index] * getSimulation().getNumberTimeStepsPerYear());
         this.recruitSize = getOsmose().recruitSizeMatrix[numSerie][index];
         this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][index];
-        this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[numSerie][index] * getSimulation().getNbTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
+        this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[numSerie][index] * getSimulation().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
         this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
         this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
         this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];
@@ -128,11 +128,11 @@ public class Species {
         this.reproduceLocally = getOsmose().reproduceLocallyTab[numSerie][index];
 
         // START INITIALISATION of COHORTS
-        longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNbTimeStepsPerYear());
+        longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNumberTimeStepsPerYear());
 
         // migration
-        outOfZoneMortality = new float[longevity][getSimulation().getNbTimeStepsPerYear()];
-        outOfZoneCohort = new boolean[longevity][getSimulation().getNbTimeStepsPerYear()];
+        outOfZoneMortality = new float[longevity][getSimulation().getNumberTimeStepsPerYear()];
+        outOfZoneCohort = new boolean[longevity][getSimulation().getNumberTimeStepsPerYear()];
     }
     
     public float[] getMeanLength() {
@@ -144,7 +144,7 @@ public class Species {
         meanLength[0] = eggSize;
 
         for (int i = 1; i < getLongevity(); i++) {
-            decimalAge = i / (float) getSimulation().getNbTimeStepsPerYear();
+            decimalAge = i / (float) getSimulation().getNumberTimeStepsPerYear();
             if (decimalAge < growthAgeThreshold) {
                 float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
                 if (lengthAtAgePart < eggSize) {

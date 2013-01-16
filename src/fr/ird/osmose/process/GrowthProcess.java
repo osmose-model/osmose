@@ -1,4 +1,7 @@
-package fr.ird.osmose;
+package fr.ird.osmose.process;
+
+import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 
 /**
  *

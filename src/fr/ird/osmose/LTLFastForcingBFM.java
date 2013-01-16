@@ -207,9 +207,9 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getSimulation().getNbTimeStepsPerYear()][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
-        for (int dt = 0; dt < getSimulation().getNbTimeStepsPerYear(); dt++) {
-            int dtYear = getOsmose().getSimulation().getYear() * getOsmose().getSimulation().getNbTimeStepsPerYear() + dt;
+        data = new float[getSimulation().getNumberTimeStepsPerYear()][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
+        for (int dt = 0; dt < getSimulation().getNumberTimeStepsPerYear(); dt++) {
+            int dtYear = getOsmose().getSimulation().getYear() * getOsmose().getSimulation().getNumberTimeStepsPerYear() + dt;
             data[dt] = getIntegratedData(getOsmose().resolveFile(planktonFileListNetcdf[dtYear / timeDim]), dt);
         }
 

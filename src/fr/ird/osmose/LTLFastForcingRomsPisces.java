@@ -172,8 +172,8 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getSimulation().getNbTimeStepsPerYear()][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
-        for (int t = 0; t < getSimulation().getNbTimeStepsPerYear(); t++) {
+        data = new float[getSimulation().getNumberTimeStepsPerYear()][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
+        for (int t = 0; t < getSimulation().getNumberTimeStepsPerYear(); t++) {
             data[t] = getIntegratedData(getOsmose().resolveFile(planktonFileListNetcdf[t]));
         }
 

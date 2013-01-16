@@ -1,4 +1,7 @@
-package fr.ird.osmose;
+package fr.ird.osmose.process;
+
+import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 
 /**
  *
@@ -10,7 +13,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
     @Override
     public void loadParameters() {
-        larvalMortalityRates = new float[getSimulation().getNbSpecies()][getSimulation().getNbTimeStepsPerYear() * getOsmose().simulationTimeTab[getOsmose().numSerie]];
+        larvalMortalityRates = new float[getSimulation().getNbSpecies()][getSimulation().getNumberTimeStepsPerYear() * getSimulation().getNumberYears()];
         for (int iSpec = 0; iSpec < getSimulation().getNbSpecies(); iSpec++) {
             int t = 0;
             for (int iStep = 0; iStep < larvalMortalityRates[iSpec].length; iStep++) {
@@ -50,9 +53,9 @@ public class NaturalMortalityProcess extends AbstractProcess {
         double D;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
-            D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + (spec.getOutMortality(0, getSimulation().getIndexTimeYear()) / (float) (getSimulation().getNbTimeStepsPerYear()))) / (float) subdt;
+            D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + (spec.getOutMortality(0, getSimulation().getIndexTimeYear()) / (float) (getSimulation().getNumberTimeStepsPerYear()))) / (float) subdt;
         } else {
-            D = (spec.D + school.getSpecies().getOutMortality(school.getAgeDt(), getSimulation().getIndexTimeYear())) / (float) (getSimulation().getNbTimeStepsPerYear() * subdt);
+            D = (spec.D + school.getSpecies().getOutMortality(school.getAgeDt(), getSimulation().getIndexTimeYear())) / (float) (getSimulation().getNumberTimeStepsPerYear() * subdt);
         }
         return D;
     }

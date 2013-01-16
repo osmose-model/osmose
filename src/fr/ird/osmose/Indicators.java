@@ -45,7 +45,7 @@ public class Indicators {
 
         int year = getSimulation().getYear();
         int index = getSimulation().getIndexTimeYear();
-        int nStepsYear = getSimulation().getNbTimeStepsPerYear();
+        int nStepsYear = getSimulation().getNumberTimeStepsPerYear();
         int nStepsRecord = getOsmose().savingDtMatrix[getOsmose().numSerie];
         //
         // UPDATE

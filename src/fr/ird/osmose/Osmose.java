@@ -53,7 +53,7 @@ public class Osmose {
     private IGrid grid;
     private int nbSeriesSimus;	// nb of series
     int[] nbLoopTab;	// nb of simulations per serie
-    int numSerie, numSimu;
+    public int numSerie, numSimu;
     // TABLES OF INPUT FILES NAMES (one entry per serie)
     //for 1 serie of simus, same species parameters and options
     String[] configFileNameTab, speciesFileNameTab, predationFileNameTab, fishingFileNameTab,
@@ -73,26 +73,26 @@ public class Osmose {
     int[] nbSpeciesTab;
     String[][] nameSpecMatrix, maturityMetricMatrix;
     String[] recruitMetricMatrix;
-    float[][] DMatrix, larvalMortalityRates, starvMaxRateMatrix;
+    public float[][] DMatrix, larvalMortalityRates, starvMaxRateMatrix;
     float[][] longevityMatrix;
     float[][] lInfMatrix, KMatrix, t0Matrix, cMatrix, bPowerMatrix;
-    float[][] alphaMatrix, sizeMatMatrix;
+    public float[][] alphaMatrix, sizeMatMatrix;
     float[][][] seasonSpawningMatrix;
     float[][][] sizeFeedingMatrix, predPreySizesMinMatrix, predPreySizesMaxMatrix;
     int[][] nbStagesMatrix;
     float[][] recruitAgeMatrix;
     float[][] predationRateMatrix, criticalPredSuccessMatrix;
-    float[][] eggSizeMatrix, eggWeightMatrix, sexRatioMatrix, growthAgeThresholdMatrix;
+    public float[][] eggSizeMatrix, eggWeightMatrix, sexRatioMatrix, growthAgeThresholdMatrix;
     float[][] supAgeOfClass0Matrix;
     boolean[][] reproduceLocallyTab;
-    float[][] biomassFluxInTab;
-    float[][] meanLengthFishInTab;
-    float[][] meanAgeFishInTab;
+    public float[][] biomassFluxInTab;
+    public float[][] meanLengthFishInTab;
+    public float[][] meanAgeFishInTab;
     /*
      * FISHING
      */
     float[][] recruitSizeMatrix;
-    float[][] fishingRates;
+    public float[][] fishingRates;
     /*
      * PLANKTON groups
      */
@@ -110,7 +110,7 @@ public class Osmose {
     /*
      * Parameters
      */
-    int[] nbSchools;
+    public int[] nbSchools;
     float[] planktonAccessCoeffMatrix;
     int[] nbAccessStage;
     float[][] accessStageThreshold;
@@ -119,7 +119,7 @@ public class Osmose {
      * SPECIES AREAS FILE
      */
     String[] areasFileNameTab;	              //choice between "Random" or fileName
-    int[][] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
+    public int[][] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
     //int[][] randomAreaCoordi, randomAreaCoordj;//species areas in random cases [species][cell]
     List<Cell>[] randomMaps;
     int[][][] numMap;        //gives a number of map for[species][cohort][dt]

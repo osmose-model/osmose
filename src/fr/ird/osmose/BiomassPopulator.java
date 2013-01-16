@@ -1,5 +1,8 @@
 package fr.ird.osmose;
 
+import fr.ird.osmose.process.FishingProcess;
+import fr.ird.osmose.process.NaturalMortalityProcess;
+
 /**
  *
  * @author pverley
@@ -16,7 +19,7 @@ public class BiomassPopulator extends Populator {
         float correctingFactor;
         double abdIni;
         int numSerie = getOsmose().numSerie;
-        float nbTimeStepsPerYear = getSimulation().getNbTimeStepsPerYear();
+        float nbTimeStepsPerYear = getSimulation().getNumberTimeStepsPerYear();
 
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             //We calculate abd & biom ini of cohorts, and in parallel biom of species

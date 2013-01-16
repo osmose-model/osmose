@@ -1,4 +1,7 @@
-package fr.ird.osmose;
+package fr.ird.osmose.process;
+
+import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 
 /**
  *
@@ -30,7 +33,7 @@ public class IncomingFluxProcess extends AbstractProcess {
         int index = species.getIndex();
         biomassFluxIn = getOsmose().biomassFluxInTab[numSerie][index];
         meanLengthIn = getOsmose().meanLengthFishInTab[numSerie][index];
-        ageMeanIn = (int) Math.round(getOsmose().meanAgeFishInTab[numSerie][index] * getSimulation().getNbTimeStepsPerYear());
+        ageMeanIn = (int) Math.round(getOsmose().meanAgeFishInTab[numSerie][index] * getSimulation().getNumberTimeStepsPerYear());
     }
 
     @Override
@@ -40,7 +43,7 @@ public class IncomingFluxProcess extends AbstractProcess {
          * Kill old schools
          */
         for (School school : getSimulation().getSchools(species)) {
-            school.age += 1;
+            school.incrementAge();
             if (school.getAgeDt() > (species.getLongevity() - 1)) {
                 school.kill();
             }

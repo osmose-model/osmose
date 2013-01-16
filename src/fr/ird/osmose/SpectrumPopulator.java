@@ -20,7 +20,7 @@ public class SpectrumPopulator extends Populator {
     public void populate() {
 
         int numSerie = getOsmose().numSerie;
-        int nbTimeStepsPerYear = getSimulation().getNbTimeStepsPerYear();
+        int nbTimeStepsPerYear = getSimulation().getNumberTimeStepsPerYear();
 
         long[] tempSpectrumAbd = new long[20];
         /*

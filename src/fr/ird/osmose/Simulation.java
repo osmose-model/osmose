@@ -14,6 +14,12 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
+import fr.ird.osmose.process.GrowthProcess;
+import fr.ird.osmose.process.NaturalMortalityProcess;
+import fr.ird.osmose.process.FishingProcess;
+import fr.ird.osmose.process.IncomingFluxProcess;
+import fr.ird.osmose.process.LocalReproductionProcess;
+import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.ConnectivityMatrix.ConnectivityLine;
 import fr.ird.osmose.filter.AliveSchoolFilter;
 import fr.ird.osmose.filter.IFilter;
@@ -102,7 +108,11 @@ public class Simulation {
     /*
      * Number of time-steps in one year
      */
-    private int nbTimeStepsPerYear;
+    private int nTimeStepsPerYear;
+    /*
+     * Number of years of simulation
+     */
+    private int nYear;
     /*
      * Time of the simulation in [year]
      */
@@ -153,7 +163,8 @@ public class Simulation {
         i_step_year = 0;
         i_step_simu = 0;
         numSerie = getOsmose().numSerie;
-        nbTimeStepsPerYear = getOsmose().nbDtMatrix[numSerie];
+        nTimeStepsPerYear = getOsmose().nbDtMatrix[numSerie];
+        nYear = getOsmose().simulationTimeTab[numSerie];
 
         // Initialise plankton matrix
         iniPlanktonField(getOsmose().isForcing[numSerie]);
@@ -289,7 +300,7 @@ public class Simulation {
     }
 
     private double computeBiomassToPredate(School predator, int subdt) {
-        return getBiomass(predator) * predator.getSpecies().predationRate / (double) (nbTimeStepsPerYear * subdt);
+        return getBiomass(predator) * predator.getSpecies().predationRate / (double) (nTimeStepsPerYear * subdt);
     }
 
     private double getBiomass(School school) {
@@ -405,10 +416,10 @@ public class Simulation {
             mortalityRate = Math.max(spec.starvMaxRate * (1 - school.predSuccessRate / spec.criticalPredSuccess), 0.d);
         }
 
-        return mortalityRate / (nbTimeStepsPerYear * subdt);
+        return mortalityRate / (nTimeStepsPerYear * subdt);
     }
 
-    float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
+    public float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
 
         // Compute the predation success rate
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
@@ -494,7 +505,7 @@ public class Simulation {
         setupMPA();
 
         // Loop over the year
-        while (i_step_year < nbTimeStepsPerYear) {
+        while (i_step_year < nTimeStepsPerYear) {
 
             // Update some stages at the begining of the step
             updateStages();
@@ -558,7 +569,7 @@ public class Simulation {
         setupMPA();
 
         // Loop over the year
-        while (i_step_year < nbTimeStepsPerYear) {
+        while (i_step_year < nTimeStepsPerYear) {
 
             // Update some stages at the begining of the step
             updateStages();
@@ -1080,7 +1091,7 @@ public class Simulation {
             }
             String filename = "nDead_Simu" + getOsmose().numSimu + ".csv";
             String[] headers = new String[]{"Predation", "Fpred", "Starvation", "Fstarv", "Natural", "Fnat", "Fishing", "Ffish", "Total", "Ftotal", "Abundance"};
-            Indicators.writeVariable(year + (i_step_year + 1f) / (float) nbTimeStepsPerYear, mortality, filename, headers, "Instaneous number of deads and mortality rates");
+            Indicators.writeVariable(year + (i_step_year + 1f) / (float) nTimeStepsPerYear, mortality, filename, headers, "Instaneous number of deads and mortality rates");
         }
     }
 
@@ -1157,7 +1168,7 @@ public class Simulation {
         if (j > 0 && i_step_simu > 0) {
             int oldTime;
             if (i_step_year == 0) {
-                oldTime = nbTimeStepsPerYear - 1;
+                oldTime = nTimeStepsPerYear - 1;
             } else {
                 oldTime = i_step_year - 1;
             }
@@ -1299,7 +1310,7 @@ public class Simulation {
         if (j > 0 && i_step_simu > 0) {
             int oldTime;
             if (i_step_year == 0) {
-                oldTime = nbTimeStepsPerYear - 1;
+                oldTime = nTimeStepsPerYear - 1;
             } else {
                 oldTime = i_step_year - 1;
             }
@@ -1596,7 +1607,7 @@ public class Simulation {
             }
         }
 
-        float timeSaving = year + (i_step_year + 1f) / (float) nbTimeStepsPerYear;
+        float timeSaving = year + (i_step_year + 1f) / (float) nTimeStepsPerYear;
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, timeSaving);
 
@@ -1637,8 +1648,8 @@ public class Simulation {
         return forcing;
     }
 
-    public int getNbTimeStepsPerYear() {
-        return nbTimeStepsPerYear;
+    public int getNumberTimeStepsPerYear() {
+        return nTimeStepsPerYear;
     }
 
     public int getYear() {
@@ -1651,6 +1662,10 @@ public class Simulation {
 
     public int getIndexTimeSimu() {
         return i_step_simu;
+    }
+    
+    public int getNumberYears() {
+        return nYear;
     }
 
     public static void shuffleArray(int[] a) {

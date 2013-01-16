@@ -35,7 +35,15 @@ public class School extends Fish {
     double nDeadStarvation;
     double nDeadNatural;
     //
-    double preyedBiomass;
+    public double preyedBiomass;
+    /*
+     * Available biomass [ton] of the school for predation by other schools
+     */
+    public double biomassToPredate;
+    /*
+     * Predation success rate
+     */
+    public float predSuccessRate;
     //
     boolean hasPredated;
 
@@ -168,7 +176,7 @@ public class School extends Fish {
         str.append( "\n  Species: ");
         str.append(getSpecies().getName());
         str.append("\n  Cohort: ");
-        float ageInYear = getAgeDt() / (float) getSimulation().getNbTimeStepsPerYear();
+        float ageInYear = getAgeDt() / (float) getSimulation().getNumberTimeStepsPerYear();
         str.append(ageInYear);
         str.append(" [year]");
         str.append("\n  Cell: ");

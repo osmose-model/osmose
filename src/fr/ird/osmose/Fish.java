@@ -75,17 +75,9 @@ public class Fish extends GridPoint {
      */
     float trophicLevel, tmpTL;
     /*
-     * Predation success rate
-     */
-    float predSuccessRate;
-    /*
      * whether the school will disappear at next time step
      */
     boolean alive;
-    /*
-     * Available biomass [ton] of the school for predation by other schools
-     */
-    double biomassToPredate;
     /*
      * Maximum prey size [cm]
      */
@@ -125,6 +117,10 @@ public class Fish extends GridPoint {
 
     public int getAgeDt() {
         return age;
+    }
+
+    public void incrementAge() {
+        age += 1;
     }
 
     /**
@@ -231,7 +227,7 @@ public class Fish extends GridPoint {
             }
         } else if (getOsmose().getDietOutputMetric().equalsIgnoreCase("age")) {
             for (int i = 1; i < nbStages; i++) {
-                int tempAge = Math.round(thresholdTab[i - 1] * getSimulation().getNbTimeStepsPerYear());
+                int tempAge = Math.round(thresholdTab[i - 1] * getSimulation().getNumberTimeStepsPerYear());
                 if (getLength() >= tempAge) {
                     dietOutputStage++;
                 }
