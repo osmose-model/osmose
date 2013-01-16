@@ -32,6 +32,9 @@ import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.process.PredationProcess;
 import fr.ird.osmose.process.ReproductionProcess;
 import fr.ird.osmose.process.StarvationProcess;
+import fr.ird.osmose.step.AbstractStep;
+import fr.ird.osmose.step.ConcomitantMortalityStep;
+import fr.ird.osmose.step.SequentialMortalityStep;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -95,7 +98,6 @@ public class Simulation {
      * @see enum Version for details.
      */
     public static final Version VERSION = Version.CASE3;
-    
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -137,34 +139,10 @@ public class Simulation {
      */
     private List<School>[][] schoolMap;
     /*
-     * Growth process
+     * What should be done within one time step
      */
-    AbstractProcess growthProcess;
-    /*
-     * Reproduction process
-     */
-    AbstractProcess reproductionProcess;
-    /*
-     * Fishing process
-     */
-    AbstractProcess fishingProcess;
-    /*
-     * Natural mortality process
-     */
-    AbstractProcess naturalMortalityProcess;
-    /*
-     * Starvation mortality process
-     */
-    AbstractProcess starvationProcess;
-    /*
-     * Predation mortality process
-     */
-    AbstractProcess predationProcess;
-    /*
-     * Generic mortality process that encompasses all mortality processes
-     */
-    AbstractProcess mortalityProcess;
-   
+    private AbstractStep step;
+
     public void init() {
 
         population = new Population();
@@ -177,51 +155,35 @@ public class Simulation {
         nTimeStepsPerYear = getOsmose().nbDtMatrix[numSerie];
         nYear = getOsmose().simulationTimeTab[numSerie];
 
-        // Initialise plankton matrix
+        // Initializing plankton matrix
         iniPlanktonField(getOsmose().isForcing[numSerie]);
 
-        //CREATION of the SPECIES
+        // Creating the species
         species = new Species[getOsmose().nbSpeciesTab[numSerie]];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
             species[i].init();
         }
 
-        // initialize natural mortality process
-        naturalMortalityProcess = new NaturalMortalityProcess();
-        naturalMortalityProcess.loadParameters();
-        
-        // initialize starvation process
-        predationProcess = new PredationProcess();
-        predationProcess.loadParameters();
-        
-        // initialize starvation process
-        starvationProcess = new StarvationProcess();
-        starvationProcess.loadParameters();
+        // Instantiating the Step
+        switch (VERSION) {
+            case SCHOOL2012_PROD:
+            case SCHOOL2012_BIOM:
+                step = new SequentialMortalityStep();
+                break;
+            case CASE1:
+            case CASE2:
+            case CASE3:
+                step = new ConcomitantMortalityStep();
+        }
+        step.init();
 
-
-        // initialize fishing process
-        fishingProcess = new FishingProcess();
-        fishingProcess.loadParameters();
-        
-        // Initialize general mortality process
-        mortalityProcess = new MortalityProcess();
-        mortalityProcess.loadParameters();
-
-        // initiliaza growth process
-        growthProcess = new GrowthProcess();
-        growthProcess.loadParameters();
-
-        // Reproduction processes
-        reproductionProcess = new ReproductionProcess();
-        reproductionProcess.loadParameters();
-        
-        // Initialize the population
+        // Initializing the population
         AbstractProcess populatingProcess = new PopulatingProcess();
         populatingProcess.loadParameters();
         populatingProcess.run();
 
-        // Initialize all the tables required for saving output
+        // Initializing spatialized outputs
         if (getOsmose().spatializedOutputs[numSerie]) {
             initSpatializedSaving();
         }
@@ -236,7 +198,7 @@ public class Simulation {
         return Osmose.getInstance();
     }
 
-    private void printProgress() {
+    private void progress() {
         // screen display to check the period already simulated
         if (year % 5 == 0) {
             System.out.println("year " + year + " | CPU time " + new Date());   // t is annual
@@ -286,7 +248,7 @@ public class Simulation {
         }
     }
 
-    private void updateStages() {
+    public void updateStages() {
         for (School school : population) {
             int i = school.getSpeciesIndex();
             school.updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
@@ -299,7 +261,7 @@ public class Simulation {
      * save fish biomass before any mortality process for diets data (last
      * column of predatorPressure output file in Diets/)
      */
-    private void saveBiomassBeforeMortality() {
+    public void saveBiomassBeforeMortality() {
 
         // update biomass
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
@@ -312,10 +274,6 @@ public class Simulation {
         forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix[numSerie]);
     }
 
-    
-
-    
-
     public double getAbundance(School school) {
         double nDeadTotal = school.nDeadPredation
                 + school.nDeadStarvation
@@ -327,130 +285,33 @@ public class Simulation {
                 ? 0.d
                 : abundance;
     }
-    
-   
 
-    public void newStep() {
+    public void run() {
 
-        // Print in console the period already simulated
-        printProgress();
-        Indicators.reset();
+        while (year < nYear) {
 
-        // Calculation of relative size of MPA
-        setupMPA();
+            // Print progress in console
+            progress();
 
-        // Loop over the year
-        while (i_step_year < nTimeStepsPerYear) {
+            // Reset indicators
+            Indicators.reset();
 
-            // Update some stages at the begining of the step
-            updateStages();
+            // Calculate relative size of MPA
+            setupMPA();
 
-            forcing.updatePlankton(i_step_year);
-
-            // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
-            if (i_step_simu > 0) {
-                distributeSpecies();
+            // Loop over the year
+            while (i_step_year < nTimeStepsPerYear) {
+                // Run a new step
+                step.step();
+                // Increment time step
+                i_step_year++;
+                i_step_simu++;
             }
-
-            // Preliminary actions before mortality processes
-            saveBiomassBeforeMortality();
-
-            // Compute mortality
-            // (predation + fishing + natural mortality + starvation)
-            for (School school : population) {
-                school.resetDietVariables();
-                school.nDeadFishing = 0;
-                school.nDeadNatural = 0;
-                school.nDeadPredation = 0;
-                school.nDeadStarvation = 0;
-                school.biomassToPredate = PredationProcess.computeBiomassToPredate(school, 1);
-                school.preyedBiomass = 0;
-            }
-
-            mortalityProcess.run();
-
-
-            // Growth
-            growthProcess.run();
-
-            // Save steps
-            if (getOsmose().spatializedOutputs[numSerie]) {
-                saveSpatializedStep();
-            }
-            Indicators.updateAndWriteIndicators();
-
-            // Reproduction
-            reproductionProcess.run();
-
-            // Remove all dead schools
-            population.removeDeadSchools();
-
-            // Increment time step
-            i_step_year++;
-            i_step_simu++;
+            // End of the year
+            i_step_year = 0;
+            // Go to following year
+            year++;
         }
-        i_step_year = 0;  //end of the year
-        year++; // go to following year
-
-    }
-
-    public void oldStep() {
-
-        // Print in console the period already simulated
-        printProgress();
-        Indicators.reset();
-
-        // Calculation of relative size of MPA
-        setupMPA();
-
-        // Loop over the year
-        while (i_step_year < nTimeStepsPerYear) {
-
-            // Update some stages at the begining of the step
-            updateStages();
-
-            // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
-            if (!((i_step_year == 0) && (year == 0))) {
-                distributeSpecies();
-            }
-
-            // Natural mortality (due to other predators)
-            naturalMortalityProcess.run();
-
-            forcing.updatePlankton(i_step_year);
-
-            saveBiomassBeforeMortality();
-            
-            // Predation
-            predationProcess.run();
-            
-            // Starvation
-            starvationProcess.run();
-
-            // Growth
-            growthProcess.run();
-
-            // Fishing
-            fishingProcess.run();
-
-            // Save steps
-            Indicators.updateAndWriteIndicators();
-            if (getOsmose().spatializedOutputs[numSerie]) {
-                saveSpatializedStep();
-            }
-
-            // Reproduction
-            reproductionProcess.run();
-
-            // Remove dead school
-            population.removeDeadSchools();
-
-            // Increment time step
-            i_step_year++;
-            i_step_simu++;
-        }
-        i_step_year = 0;  //end of the year
-        year++; // go to following year
     }
 
     public void iniPlanktonField(boolean isForcing) {
@@ -1025,6 +886,4 @@ public class Simulation {
     public int getNumberYears() {
         return nYear;
     }
-
-    
 }

@@ -150,7 +150,7 @@ public class Osmose {
     /*
      * INDICATORS OUTPUT
      */
-    boolean[] TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
+    public boolean[] TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
             sizeSpectrumOutputMatrix, sizeSpectrumPerSpeOutputMatrix,
             planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix, spatializedOutputs;
     String[] planktonBiomassOutputMatrix;
@@ -325,7 +325,8 @@ public class Osmose {
                     System.out.println();
                 }
 
-                runSimulation();
+                simulation.run();
+                
                 if (spatializedOutputs[numSerie]) {
                     closeNCFile();
                 }
@@ -2937,21 +2938,6 @@ public class Osmose {
         denominator = (double) n * (n - 1);
         std = (float) Math.sqrt(numerator / denominator);
         return std;
-    }
-
-    public void runSimulation() {
-
-        boolean NEW_STEP = Simulation.VERSION.equals(Simulation.Version.CASE1)
-                || Simulation.VERSION.equals(Simulation.Version.CASE2)
-                || Simulation.VERSION.equals(Simulation.Version.CASE3);
-
-        while (simulation.getYear() < simulationTimeTab[numSerie]) {
-            if (NEW_STEP) {
-                simulation.newStep();
-            } else {
-                simulation.oldStep();
-            }
-        }
     }
 
     public String getLTLClassName() {
