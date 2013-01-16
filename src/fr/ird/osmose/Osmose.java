@@ -86,7 +86,7 @@ public class Osmose {
     public float[][] predationRateMatrix, criticalPredSuccessMatrix;
     public float[][] eggSizeMatrix, eggWeightMatrix, sexRatioMatrix, growthAgeThresholdMatrix;
     float[][] supAgeOfClass0Matrix;
-    boolean[][] reproduceLocallyTab;
+    public boolean[][] reproduceLocallyTab;
     public float[][] biomassFluxInTab;
     public float[][] meanLengthFishInTab;
     public float[][] meanAgeFishInTab;

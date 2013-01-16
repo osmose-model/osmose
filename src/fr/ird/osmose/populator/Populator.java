@@ -3,6 +3,7 @@ package fr.ird.osmose.populator;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Population;
 import fr.ird.osmose.Simulation;
+import fr.ird.osmose.Species;
 import fr.ird.osmose.grid.IGrid;
 
 /**
@@ -29,5 +30,9 @@ public abstract class Populator {
 
     public Population getPopulation() {
         return getSimulation().getPopulation();
+    }
+    
+    public Species getSpecies(int index) {
+        return getSimulation().getSpecies(index);
     }
 }

@@ -30,6 +30,7 @@ import fr.ird.osmose.process.IncomingFluxProcess;
 import fr.ird.osmose.process.LocalReproductionProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
 import fr.ird.osmose.process.PredationProcess;
+import fr.ird.osmose.process.ReproductionProcess;
 import fr.ird.osmose.process.StarvationProcess;
 import java.io.IOException;
 import java.util.*;
@@ -153,9 +154,9 @@ public class Simulation {
      */
     AbstractProcess growthProcess;
     /*
-     * Reproduction processes for every Species
+     * Reproduction process
      */
-    AbstractProcess[] reproductionProcess;
+    AbstractProcess reproductionProcess;
     /*
      * Fishing process
      */
@@ -217,15 +218,9 @@ public class Simulation {
         growthProcess.loadParameters();
 
         // Reproduction processes
-        reproductionProcess = new AbstractProcess[species.length];
-        for (int i = 0; i < species.length; i++) {
-            if (species[i].isReproduceLocally()) {
-                reproductionProcess[i] = new LocalReproductionProcess(species[i]);
-            } else {
-                reproductionProcess[i] = new IncomingFluxProcess(species[i]);
-            }
-            reproductionProcess[i].loadParameters();
-        }
+        reproductionProcess = new ReproductionProcess();
+        reproductionProcess.loadParameters();
+        
 
         //INITIALISATION of SPECIES ABD ACCORDING TO SIZE SPECTRUM
         if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {
@@ -351,12 +346,6 @@ public class Simulation {
         return sum;
     }
 
-    private void reproduction() {
-        for (int i = 0; i < species.length; i++) {
-            reproductionProcess[i].run();
-        }
-    }
-
     public void newStep() {
 
         // Print in console the period already simulated
@@ -407,7 +396,7 @@ public class Simulation {
             Indicators.updateAndWriteIndicators();
 
             // Reproduction
-            reproduction();
+            reproductionProcess.run();
 
             // Remove all dead schools
             population.removeDeadSchools();
@@ -467,7 +456,7 @@ public class Simulation {
             }
 
             // Reproduction
-            reproduction();
+            reproductionProcess.run();
 
             // Remove dead school
             population.removeDeadSchools();

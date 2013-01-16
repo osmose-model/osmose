@@ -63,7 +63,6 @@ public class Species {
     float[] ageStagesTab;
     int nbDietStages;
     float[] dietStagesTab;
-    private boolean reproduceLocally;
     // Migration
     private float[][] outOfZoneMortality;
     private boolean[][] outOfZoneCohort;
@@ -114,11 +113,6 @@ public class Species {
             this.dietStagesTab = getOsmose().dietStageThreshold[numSerie][index];
             this.nbDietStages = getOsmose().nbDietsStages[numSerie][index];
         }
-        /*
-         * phv 2011/11/21 Added new parameters for species reproducing outside
-         * the simulated area.
-         */
-        this.reproduceLocally = getOsmose().reproduceLocallyTab[numSerie][index];
 
         // START INITIALISATION of COHORTS
         longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNumberTimeStepsPerYear());
@@ -187,11 +181,7 @@ public class Species {
     public String getName() {
         return name;
     }
-
-    public boolean isReproduceLocally() {
-        return reproduceLocally;
-    }
-
+    
     public boolean isOut(int age, int indexTime) {
         return outOfZoneCohort[age][indexTime];
     }

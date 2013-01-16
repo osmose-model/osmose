@@ -45,7 +45,7 @@ public class SpectrumPopulator extends Populator {
         //Sort the Lmax of each species in each size class
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
             int index1 = tempSpectrumAbd.length - 1;
-            Species species = getSimulation().getSpecies(i);
+            Species species = getSpecies(i);
             float[] meanLength = species.getMeanLength();
             while (meanLength[species.getLongevity() - 1] < (index1 * getOsmose().classRange)) {
                 index1--;

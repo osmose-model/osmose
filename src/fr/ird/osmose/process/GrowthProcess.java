@@ -24,7 +24,7 @@ public class GrowthProcess extends AbstractProcess {
         deltaMeanLength = new float[nSpecies][];
 
         for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
-            Species species = getSimulation().getSpecies(i);
+            Species species = getSpecies(i);
             int longevity = species.getLongevity();
             minDelta[i] = new float[longevity];
             maxDelta[i] = new float[longevity];
