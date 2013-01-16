@@ -26,7 +26,7 @@ public class LocalReproductionProcess extends AbstractProcess {
     }
 
     @Override
-    public void loadParameters() {
+    public void init() {
         int numSerie = getOsmose().numSerie;
         int index = species.getIndex();
         sexRatio = getOsmose().sexRatioMatrix[numSerie][index];

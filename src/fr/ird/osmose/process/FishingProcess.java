@@ -20,7 +20,7 @@ public class FishingProcess extends AbstractProcess {
     static private float[][] fishingRates;
 
     @Override
-    public void loadParameters() {
+    public void init() {
         isFishingInterannual = getOsmose().fishingRates[0].length > getSimulation().getNumberTimeStepsPerYear();
         fishingRates = new float[getSimulation().getNbSpecies()][];
         System.arraycopy(getOsmose().fishingRates, 0, fishingRates, 0, getSimulation().getNbSpecies());

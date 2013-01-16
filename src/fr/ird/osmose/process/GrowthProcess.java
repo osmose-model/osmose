@@ -15,7 +15,7 @@ public class GrowthProcess extends AbstractProcess {
     private float[] criticalPredSuccess;
 
     @Override
-    public void loadParameters() {
+    public void init() {
 
         int nSpecies = getSimulation().getNbSpecies();
         criticalPredSuccess = getOsmose().criticalPredSuccessMatrix[getOsmose().numSerie];

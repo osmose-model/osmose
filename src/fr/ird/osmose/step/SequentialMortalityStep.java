@@ -48,28 +48,28 @@ public class SequentialMortalityStep extends AbstractStep {
     public void init() {
         // initialize natural mortality process
         naturalMortalityProcess = new NaturalMortalityProcess();
-        naturalMortalityProcess.loadParameters();
+        naturalMortalityProcess.init();
         
         // initialize starvation process
         predationProcess = new PredationProcess();
-        predationProcess.loadParameters();
+        predationProcess.init();
         
         // initialize starvation process
         starvationProcess = new StarvationProcess();
-        starvationProcess.loadParameters();
+        starvationProcess.init();
 
 
         // initialize fishing process
         fishingProcess = new FishingProcess();
-        fishingProcess.loadParameters();
+        fishingProcess.init();
 
         // initiliaza growth process
         growthProcess = new GrowthProcess();
-        growthProcess.loadParameters();
+        growthProcess.init();
 
         // Reproduction processes
         reproductionProcess = new ReproductionProcess();
-        reproductionProcess.loadParameters();
+        reproductionProcess.init();
     }
 
     @Override

@@ -8,7 +8,7 @@ import fr.ird.osmose.SimulationLinker;
  */
 public abstract class AbstractProcess extends SimulationLinker {
 
-    abstract public void loadParameters();
+    abstract public void init();
 
     abstract public void run();
 }

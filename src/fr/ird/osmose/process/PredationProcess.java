@@ -21,7 +21,7 @@ public class PredationProcess extends AbstractProcess {
     private static float[] predationRate;
 
     @Override
-    public void loadParameters() {
+    public void init() {
         predPreySizesMax = getOsmose().predPreySizesMaxMatrix[getOsmose().numSerie];
         predPreySizesMin = getOsmose().predPreySizesMinMatrix[getOsmose().numSerie];
         predationRate = getOsmose().predationRateMatrix[getOsmose().numSerie];

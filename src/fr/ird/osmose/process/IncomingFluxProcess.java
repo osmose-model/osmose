@@ -28,7 +28,7 @@ public class IncomingFluxProcess extends AbstractProcess {
     }
 
     @Override
-    public void loadParameters() {
+    public void init() {
         int numSerie = getOsmose().numSerie;
         int index = species.getIndex();
         biomassFluxIn = getOsmose().biomassFluxInTab[numSerie][index];

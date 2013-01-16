@@ -30,7 +30,7 @@ public class ReproductionProcess extends AbstractProcess {
     private AbstractProcess[] reproductionProcess;
 
     @Override
-    public void loadParameters() {
+    public void init() {
 
         int nSpecies = getSimulation().getNbSpecies();
         int numSerie = getOsmose().numSerie;
@@ -41,7 +41,7 @@ public class ReproductionProcess extends AbstractProcess {
             } else {
                 reproductionProcess[i] = new IncomingFluxProcess(getSpecies(i));
             }
-            reproductionProcess[i].loadParameters();
+            reproductionProcess[i].init();
         }
     }
 

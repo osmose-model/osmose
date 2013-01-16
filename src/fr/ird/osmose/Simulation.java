@@ -21,17 +21,8 @@ import fr.ird.osmose.filter.PresentSchoolFilter;
 import fr.ird.osmose.filter.SpeciesFilter;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
-import fr.ird.osmose.populator.BiomassPopulator;
-import fr.ird.osmose.populator.SpectrumPopulator;
 import fr.ird.osmose.process.AbstractProcess;
-import fr.ird.osmose.process.FishingProcess;
-import fr.ird.osmose.process.GrowthProcess;
-import fr.ird.osmose.process.MortalityProcess;
-import fr.ird.osmose.process.NaturalMortalityProcess;
 import fr.ird.osmose.process.PopulatingProcess;
-import fr.ird.osmose.process.PredationProcess;
-import fr.ird.osmose.process.ReproductionProcess;
-import fr.ird.osmose.process.StarvationProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
 import fr.ird.osmose.step.SequentialMortalityStep;
@@ -180,7 +171,7 @@ public class Simulation {
 
         // Initializing the population
         AbstractProcess populatingProcess = new PopulatingProcess();
-        populatingProcess.loadParameters();
+        populatingProcess.init();
         populatingProcess.run();
 
         // Initializing spatialized outputs
@@ -320,9 +311,7 @@ public class Simulation {
             try {
                 try {
                     forcing = (LTLForcing) Class.forName(getOsmose().getLTLClassName()).newInstance();
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
+                } catch (InstantiationException | IllegalAccessException ex) {
                     Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } catch (ClassNotFoundException ex) {
@@ -733,9 +722,7 @@ public class Simulation {
             }
             nc.write("longitude", arrLon);
             nc.write("latitude", arrLat);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (InvalidRangeException | IOException ex) {
             Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -841,9 +828,7 @@ public class Simulation {
             nc.write("mean_size", new int[]{index, 0, 0, 0}, arrSize);
             nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
             nc.write("ltl_biomass", new int[]{index, 0, 0, 0, 0}, arrLTL);
-        } catch (IOException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
+        } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
         }
 

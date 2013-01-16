@@ -16,7 +16,7 @@ public class StarvationProcess extends AbstractProcess {
     private static float[] criticalPredSuccess;
 
     @Override
-    public void loadParameters() {
+    public void init() {
         starvMaxRate = getOsmose().starvMaxRateMatrix[getOsmose().numSerie];
         criticalPredSuccess = getOsmose().criticalPredSuccessMatrix[getOsmose().numSerie];
     }

@@ -17,7 +17,7 @@ public class PopulatingProcess extends AbstractProcess {
     private AbstractPopulator populator;
 
     @Override
-    public void loadParameters() {
+    public void init() {
         
         int numSerie = getOsmose().numSerie;
         if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {

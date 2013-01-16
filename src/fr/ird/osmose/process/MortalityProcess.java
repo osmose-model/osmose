@@ -31,7 +31,7 @@ public class MortalityProcess extends AbstractProcess {
     private final int subdt = 1;
 
     @Override
-    public void loadParameters() {
+    public void init() {
         random = new Random();
     }
 

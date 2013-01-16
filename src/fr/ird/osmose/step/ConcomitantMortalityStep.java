@@ -43,28 +43,28 @@ public class ConcomitantMortalityStep extends AbstractStep {
          * for they will be called by the other processes.
          */
         // initialize natural mortality process
-        new NaturalMortalityProcess().loadParameters();
+        new NaturalMortalityProcess().init();
 
         // initialize starvation process
-        new PredationProcess().loadParameters();
+        new PredationProcess().init();
 
         // initialize starvation process
-       new StarvationProcess().loadParameters();
+       new StarvationProcess().init();
 
         // initialize fishing process
-        new FishingProcess().loadParameters();
+        new FishingProcess().init();
 
         // Initialize general mortality process
         mortalityProcess = new MortalityProcess();
-        mortalityProcess.loadParameters();
+        mortalityProcess.init();
 
         // initiliaza growth process
         growthProcess = new GrowthProcess();
-        growthProcess.loadParameters();
+        growthProcess.init();
 
         // Reproduction processes
         reproductionProcess = new ReproductionProcess();
-        reproductionProcess.loadParameters();
+        reproductionProcess.init();
     }
 
     @Override
