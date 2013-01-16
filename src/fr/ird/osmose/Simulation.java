@@ -28,6 +28,7 @@ import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.MortalityProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
+import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.process.PredationProcess;
 import fr.ird.osmose.process.ReproductionProcess;
 import fr.ird.osmose.process.StarvationProcess;
@@ -182,7 +183,7 @@ public class Simulation {
         //CREATION of the SPECIES
         species = new Species[getOsmose().nbSpeciesTab[numSerie]];
         for (int i = 0; i < species.length; i++) {
-            species[i] = new Species(i + 1);
+            species[i] = new Species(i);
             species[i].init();
         }
 
@@ -215,15 +216,10 @@ public class Simulation {
         reproductionProcess = new ReproductionProcess();
         reproductionProcess.loadParameters();
         
-
-        //INITIALISATION of SPECIES ABD ACCORDING TO SIZE SPECTRUM
-        if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {
-            new BiomassPopulator().populate();
-        } else if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("spectrum")) {
-            new SpectrumPopulator().populate();
-        } else if (getOsmose().calibrationMethod[numSerie].equalsIgnoreCase("random")) {
-            throw new UnsupportedOperationException("Random initialization not supported yet.");
-        }
+        // Initialize the population
+        AbstractProcess populatingProcess = new PopulatingProcess();
+        populatingProcess.loadParameters();
+        populatingProcess.run();
 
         // Initialize all the tables required for saving output
         if (getOsmose().spatializedOutputs[numSerie]) {

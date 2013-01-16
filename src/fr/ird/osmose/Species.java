@@ -70,10 +70,10 @@ public class Species {
     /**
      * Create a new species
      *
-     * @param number, an integer, the number of the species {1 : nbTotSpecies}
+     * @param index, an integer, the index of the species {0 : nbTotSpecies - 1}
      */
-    public Species(int number) {
-        index = number - 1;
+    public Species(int index) {
+        this.index = index;
     }
     
     public Species(int index, String name) {

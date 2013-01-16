@@ -158,7 +158,7 @@ public class Osmose {
     int[][] nbDietsStages;
     float[][][] dietStageThreshold;
     //Initial abundances
-    String[] calibrationMethod;
+    public String[] calibrationMethod;
     public double[][] spBiomIniTab;
     public double[] SSslope, SSintercept;
     //size spectrum
