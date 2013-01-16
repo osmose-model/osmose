@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author pverley
  */
-public class SpectrumPopulator extends Populator {
+public class SpectrumPopulator extends AbstractPopulator {
 
     @Override
     public void loadParameters() {

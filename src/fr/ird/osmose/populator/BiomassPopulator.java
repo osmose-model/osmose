@@ -9,7 +9,7 @@ import fr.ird.osmose.process.NaturalMortalityProcess;
  *
  * @author pverley
  */
-public class BiomassPopulator extends Populator {
+public class BiomassPopulator extends AbstractPopulator {
 
     @Override
     public void loadParameters() {

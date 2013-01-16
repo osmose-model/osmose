@@ -5,7 +5,7 @@
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.populator.BiomassPopulator;
-import fr.ird.osmose.populator.Populator;
+import fr.ird.osmose.populator.AbstractPopulator;
 import fr.ird.osmose.populator.SpectrumPopulator;
 
 /**
@@ -14,7 +14,7 @@ import fr.ird.osmose.populator.SpectrumPopulator;
  */
 public class PopulatingProcess extends AbstractProcess {
     
-    private Populator populator;
+    private AbstractPopulator populator;
 
     @Override
     public void loadParameters() {
