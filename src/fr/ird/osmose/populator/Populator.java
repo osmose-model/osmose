@@ -1,38 +1,14 @@
 package fr.ird.osmose.populator;
 
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.Population;
-import fr.ird.osmose.Simulation;
-import fr.ird.osmose.Species;
-import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.SimulationLinker;
 
 /**
  *
  * @author pverley
  */
-public abstract class Populator {
+public abstract class Populator extends SimulationLinker {
 
     abstract public void loadParameters();
     
     abstract public void populate();
-
-    public Osmose getOsmose() {
-        return Osmose.getInstance();
-    }
-    
-    public IGrid getGrid() {
-        return getOsmose().getGrid();
-    }
-
-    public Simulation getSimulation() {
-        return getOsmose().getSimulation();
-    }
-
-    public Population getPopulation() {
-        return getSimulation().getPopulation();
-    }
-    
-    public Species getSpecies(int index) {
-        return getSimulation().getSpecies(index);
-    }
 }

@@ -8,7 +8,7 @@ import fr.ird.osmose.Indicators;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.Simulation;
-import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.SimulationLinker;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +23,7 @@ import ucar.nc2.NetcdfFileWriteable;
  *
  * @author pverley
  */
-public abstract class AbstractLTLForcing implements LTLForcing {
+public abstract class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
 
     private int nbPlankton, nbForcingDt;
     private String[] planktonNames;		// list of names of plankton groups
@@ -159,18 +159,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     @Override
     public int getPlanktonDimZ() {
         return planktonDimZ;
-    }
-
-    public IGrid getGrid() {
-        return Osmose.getInstance().getGrid();
-    }
-
-    Osmose getOsmose() {
-        return Osmose.getInstance();
-    }
-
-    Simulation getSimulation() {
-        return getOsmose().getSimulation();
     }
 
     @Override
