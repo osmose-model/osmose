@@ -55,7 +55,6 @@ public class Species {
      */
     int indexAgeClass0;
     float recruitSize;
-    float[] larvalMortalityRates;
     float[] seasonSpawning; //according to nbDt
     float eggSize, eggWeight, growthAgeThreshold,
             predationRate, criticalPredSuccess, starvMaxRate;
@@ -107,15 +106,6 @@ public class Species {
         this.recruitSize = getOsmose().recruitSizeMatrix[numSerie][index];
         this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][index];
         this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[numSerie][index] * getSimulation().getNbTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
-        this.larvalMortalityRates = new float[getSimulation().getNbTimeStepsPerYear() * getOsmose().simulationTimeTab[numSerie]];
-        int t = 0;
-        for (int iStep = 0; iStep < larvalMortalityRates.length; iStep++) {
-            if (t > getOsmose().larvalMortalityRates[index].length - 1) {
-                t = 0;
-            }
-            larvalMortalityRates[iStep] = getOsmose().larvalMortalityRates[index][t];
-            t++;
-        }
         this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
         this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
         this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];

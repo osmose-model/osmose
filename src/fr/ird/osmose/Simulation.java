@@ -136,9 +136,13 @@ public class Simulation {
      */
     AbstractProcess[] reproductionProcess;
     /*
-     * 
+     * Fishing process
      */
     AbstractProcess fishingProcess;
+    /*
+     * Natural mortality process
+     */
+    AbstractProcess naturalMortalityProcess;
 
     public void init() {
 
@@ -160,6 +164,10 @@ public class Simulation {
             species[i] = new Species(i + 1);
             species[i].init();
         }
+        
+        // initialize fishing process
+        naturalMortalityProcess = new NaturalMortalityProcess();
+        naturalMortalityProcess.loadParameters();
         
         // initialize fishing process
         fishingProcess = new FishingProcess();
@@ -278,31 +286,6 @@ public class Simulation {
             getForcing().saveForDiet();
         }
         forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix[numSerie]);
-    }
-
-    /**
-     * For all species, D is due to other predators (seals, seabirds) for
-     * migrating species, we add mortality because absents during a time step so
-     * they don't undergo mortalities due to predation and starvation Additional
-     * mortalities for ages 0: no-fecundation of eggs, starvation more
-     * pronounced than for sup ages (rel to CC), predation by other species are
-     * not explicit.
-     */
-    double getNaturalMortalityRate(School school, int subdt) {
-        double D;
-        Species spec = school.getSpecies();
-        if (school.getAgeDt() == 0) {
-            D = (spec.larvalMortalityRates[i_step_simu] + (spec.getOutMortality(0, i_step_year) / (float) (nbTimeStepsPerYear))) / (float) subdt;
-        } else {
-            D = (spec.D + school.getSpecies().getOutMortality(school.getAgeDt(), i_step_year)) / (float) (nbTimeStepsPerYear * subdt);
-        }
-        return D;
-    }
-
-    double computeNaturalMortality(School school, int subdt) {
-
-        double D = getNaturalMortalityRate(school, subdt);
-        return getAbundance(school) * (1.d - Math.exp(-D));
     }
 
     private double computeBiomassToPredate(School predator, int subdt) {
@@ -586,22 +569,7 @@ public class Simulation {
             }
 
             // Natural mortality (due to other predators)
-            for (School school : population) {
-                // reset indicators
-                school.nDeadPredation = 0;
-                school.nDeadStarvation = 0;
-                school.nDeadNatural = 0;
-                school.nDeadFishing = 0;
-                school.preyedBiomass = 0;
-                double nDead = computeNaturalMortality(school, 1);
-                school.setAbundance(school.getAbundance() - nDead);
-                if (school.getAbundance() < 1.d) {
-                    nDead = school.getAbundance();
-                    school.setAbundance(0);
-                    school.kill();
-                }
-                //school.nDeadNatural = nDead;
-            }
+            naturalMortalityProcess.run();
 
             forcing.updatePlankton(i_step_year);
 
@@ -733,7 +701,7 @@ public class Simulation {
                         break;
                     case 2:
                         // Natural mortality
-                        nDeadMatrix[seqNat[i]][ns + 1] = computeNaturalMortality(schools.get(seqNat[i]), subdt);
+                        nDeadMatrix[seqNat[i]][ns + 1] = NaturalMortalityProcess.computeNaturalMortality(schools.get(seqNat[i]), subdt);
                         schools.get(seqNat[i]).nDeadNatural = nDeadMatrix[seqNat[i]][ns + 1];
                         break;
                     case 3:
@@ -791,8 +759,8 @@ public class Simulation {
             mortalityRateMatrix[is][ns] = getStarvationMortalityRate(school, subdt);
 
             // 3. Natural mortality
-            nDeadMatrix[is][ns + 1] = computeNaturalMortality(school, subdt);
-            mortalityRateMatrix[is][ns + 1] = getNaturalMortalityRate(school, subdt);
+            nDeadMatrix[is][ns + 1] = NaturalMortalityProcess.computeNaturalMortality(school, subdt);
+            mortalityRateMatrix[is][ns + 1] = NaturalMortalityProcess.getNaturalMortalityRate(school, subdt);
 
             // 4. Fishing mortality
             nDeadMatrix[is][ns + 2] = FishingProcess.computeFishingMortality(school, subdt);
@@ -877,7 +845,7 @@ public class Simulation {
             mortalityRateMatrix[is][ns] = getStarvationMortalityRate(school, subdt);
 
             // 3. Natural mortality
-            mortalityRateMatrix[is][ns + 1] = getNaturalMortalityRate(school, subdt);
+            mortalityRateMatrix[is][ns + 1] = NaturalMortalityProcess.getNaturalMortalityRate(school, subdt);
 
             // 4. Fishing mortality
             mortalityRateMatrix[is][ns + 2] = FishingProcess.getFishingMortalityRate(school, subdt);
