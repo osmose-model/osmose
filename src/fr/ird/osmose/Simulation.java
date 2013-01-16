@@ -14,21 +14,21 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
-import fr.ird.osmose.grid.IGrid;
-import fr.ird.osmose.populator.BiomassPopulator;
-import fr.ird.osmose.populator.SpectrumPopulator;
-import fr.ird.osmose.ltl.LTLForcing;
-import fr.ird.osmose.process.GrowthProcess;
-import fr.ird.osmose.process.NaturalMortalityProcess;
-import fr.ird.osmose.process.FishingProcess;
-import fr.ird.osmose.process.IncomingFluxProcess;
-import fr.ird.osmose.process.LocalReproductionProcess;
-import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.ConnectivityMatrix.ConnectivityLine;
 import fr.ird.osmose.filter.AliveSchoolFilter;
 import fr.ird.osmose.filter.IFilter;
 import fr.ird.osmose.filter.PresentSchoolFilter;
 import fr.ird.osmose.filter.SpeciesFilter;
+import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.populator.BiomassPopulator;
+import fr.ird.osmose.populator.SpectrumPopulator;
+import fr.ird.osmose.process.AbstractProcess;
+import fr.ird.osmose.process.FishingProcess;
+import fr.ird.osmose.process.GrowthProcess;
+import fr.ird.osmose.process.IncomingFluxProcess;
+import fr.ird.osmose.process.LocalReproductionProcess;
+import fr.ird.osmose.process.NaturalMortalityProcess;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -61,24 +61,29 @@ public class Simulation {
          */
         SCHOOL2012_BIOM,
         /*
-         * CASE1: syncrhomous updating of biomass in between all processes
-         * we assume every cause is independant and
-         * concomitant. No stochasticity neither competition within predation
-         * process: every predator sees preys as they are at current time-step
+         * CASE1
+         * > It is assumed that every cause is independant and concomitant.
+         * > No stochasticity neither competition within predation process: every
+         * predator sees preys as they are at the begining of the time-step.
+         * > Synchromous updating of school biomass.
          */
         CASE1,
         /*
-         * CASE2: asynchronous updating of biomass within predation mortality
-         * and synchronous updating of biomass between all processes.
-         * we assume every cause is independant and concomitant.
-         * Stochasticity and competition within predation process: prey and predator
-         * biomass are being updated on the fly.
+         * CASE2
+         * > It is assumed that every cause is independant and concomitant.
+         * > Stochasticity and competition within predation process: prey and
+         * predator biomass are being updated on the fly virtually (indeed the
+         * update is not effective outside the predation process,
+         * it is just temporal).
+         * > Synchronous updating of school biomass.
          */
         CASE2,
-        /*CASE3: asynchronous updating of biomasses in between all processes
-         * we assume every cause
-         * compete with each other. Stochasticity at both school and mortality
-         * process levels.
+        /*
+         * CASE3
+         * > It is assumed that every cause compete with each other.
+         * > Stochasticity and competition within predation process.
+         * > Asynchronous updating of school biomass (it means biomass are updated
+         * on the fly).
          */
         CASE3;
     }
@@ -179,27 +184,27 @@ public class Simulation {
             species[i] = new Species(i + 1);
             species[i].init();
         }
-        
+
         // initialize fishing process
         naturalMortalityProcess = new NaturalMortalityProcess();
         naturalMortalityProcess.loadParameters();
-        
+
         // initialize fishing process
         fishingProcess = new FishingProcess();
         fishingProcess.loadParameters();
-        
+
         // initiliaza growth process
         growthProcess = new GrowthProcess();
         growthProcess.loadParameters();
-        
+
         // Reproduction processes
         reproductionProcess = new AbstractProcess[species.length];
         for (int i = 0; i < species.length; i++) {
             if (species[i].isReproduceLocally()) {
                 reproductionProcess[i] = new LocalReproductionProcess(species[i]);
-            }else {
+            } else {
                 reproductionProcess[i] = new IncomingFluxProcess(species[i]);
-            }   
+            }
             reproductionProcess[i].loadParameters();
         }
 
@@ -216,7 +221,7 @@ public class Simulation {
         if (getOsmose().spatializedOutputs[numSerie]) {
             initSpatializedSaving();
         }
-       
+
     }
 
     private IGrid getGrid() {
@@ -1667,7 +1672,7 @@ public class Simulation {
     public int getIndexTimeSimu() {
         return i_step_simu;
     }
-    
+
     public int getNumberYears() {
         return nYear;
     }
