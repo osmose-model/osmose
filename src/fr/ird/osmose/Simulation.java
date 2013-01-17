@@ -2,6 +2,7 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;

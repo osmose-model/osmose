@@ -16,10 +16,10 @@ package fr.ird.osmose;
  * @version 2.1
  * ******************************************************************************
  */
-import fr.ird.osmose.grid.IGrid;
-import fr.ird.osmose.grid.OriginalGrid;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.grid.OriginalGrid;
 import fr.ird.osmose.util.IOTools;
 import java.io.*;
 import java.util.*;
@@ -109,7 +109,7 @@ public class Osmose {
     public int[] strideTab;
     public int[] gridLinesTab, gridColumnsTab;
     public float[] upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
-    int[] simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
+    public int[] simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
     /*
      * Parameters
      */
@@ -144,7 +144,7 @@ public class Osmose {
     //tables for output storage by series of simulations
     //4 dimensions : simu, species,val(total OR total-0), step t
     //for mortalities, 3 dim, the last is for the mean on the simulation period
-    float[][][][][] BIOMQuadri;   //[numSimu][species][with or without age 0][t][dt]
+    public float[][][][][] BIOMQuadri;   //[numSimu][species][with or without age 0][t][dt]
     float[][] iniBiomass; //used for saving the biomass after initialization
     /*
      * INDICATORS OUTPUT
@@ -162,16 +162,16 @@ public class Osmose {
     public double[] SSslope, SSintercept;
     //size spectrum
     public float spectrumMinSize, spectrumMaxSize, classRange;
-    float[] tabSizes;//size classes of 10cm are used for ini and output
-    float[] tabSizesLn;//for output
-    int nbSizeClass;
+    public float[] tabSizes;//size classes of 10cm are used for ini and output
+    public float[] tabSizesLn;//for output
+    public int nbSizeClass;
     // TL distrib
-    int nbTLClass;
+    public  int nbTLClass;
     float minTL;
     float maxTL;
-    float[] tabTL;
+    public float[] tabTL;
     //param allowing to adapt the size of output tables depending on simulation time
-    int timeSeriesLength, timeSeriesStart;
+    public int timeSeriesLength, timeSeriesStart;
     int[] startingSavingTimeTab;
     boolean timeSeriesIsShortened;
     // migration

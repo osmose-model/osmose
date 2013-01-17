@@ -4,7 +4,7 @@
  */
 package fr.ird.osmose.step;
 
-import fr.ird.osmose.Indicators;
+import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;

@@ -61,8 +61,8 @@ public class Species {
     float[] sizeFeeding;
     int nbAccessStages;
     float[] ageStagesTab;
-    int nbDietStages;
-    float[] dietStagesTab;
+    public int nbDietStages;
+    public float[] dietStagesTab;
     // Migration
     private float[][] outOfZoneMortality;
     private boolean[][] outOfZoneCohort;

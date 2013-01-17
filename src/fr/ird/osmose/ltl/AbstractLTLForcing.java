@@ -4,11 +4,11 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.Indicators;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.SimulationLinker;
+import fr.ird.osmose.output.Indicators;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;

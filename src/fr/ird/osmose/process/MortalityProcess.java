@@ -5,7 +5,6 @@
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Indicators;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.Species;
