@@ -323,7 +323,7 @@ public class MortalityProcess extends AbstractProcess {
                 if (ipr < ns) {
                     School school = schools.get(ipr);
                     nDeadMatrix[ipr][ipd] = school.biom2abd(preyUpon[ipr]);
-                    predationMortalityRate = Math.log(getSimulation().getAbundance(school) / (getSimulation().getAbundance(school) - nDeadMatrix[ipr][ipd]));
+                    predationMortalityRate = Math.log(school.getInstantaneousAbundance() / (school.getInstantaneousAbundance() - nDeadMatrix[ipr][ipd]));
                     school.nDeadPredation += nDeadMatrix[ipr][ipd];
                 } else {
                     nDeadMatrix[ipr][ipd] = preyUpon[ipr];

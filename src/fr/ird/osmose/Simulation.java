@@ -213,18 +213,6 @@ public class Simulation {
         forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix[numSerie]);
     }
 
-    public double getAbundance(School school) {
-        double nDeadTotal = school.nDeadPredation
-                + school.nDeadStarvation
-                + school.nDeadNatural
-                + school.nDeadFishing;
-        double abundance = school.getAbundance() - nDeadTotal;
-        //if (nDeadTotal > 0) System.out.println("Abundance changed " + " " + school.nDeadPredation + " " +  school.nDeadStarvation + " " + school.nDeadNatural + " " + school.nDeadFishing);
-        return (abundance < 1)
-                ? 0.d
-                : abundance;
-    }
-
     public void run() {
 
         while (year < nYear) {

@@ -176,7 +176,7 @@ public class PredationProcess extends AbstractProcess {
      * Get the accessible biomass that predator can feed on prey
      */
     private static double getAccessibleBiomass(School predator, School prey) {
-        return getAccessibility(predator, prey) * getBiomass(prey);
+        return getAccessibility(predator, prey) * prey.getInstantaneousBiomass();
     }
     
     /**
@@ -210,7 +210,7 @@ public class PredationProcess extends AbstractProcess {
     }
     
     public static double computeBiomassToPredate(School predator, int subdt) {
-        return getBiomass(predator) * predationRate[predator.getSpeciesIndex()] / (double) (getSimulation().getNumberTimeStepsPerYear() * subdt);
+        return predator.getInstantaneousBiomass() * predationRate[predator.getSpeciesIndex()] / (double) (getSimulation().getNumberTimeStepsPerYear() * subdt);
     }
     
     /*
@@ -218,10 +218,5 @@ public class PredationProcess extends AbstractProcess {
      */
     private static double getAccessibility(School predator, School prey) {
         return getOsmose().accessibilityMatrix[prey.getSpeciesIndex()][prey.getAccessibilityStage()][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
-    }
-    
-    private static double getBiomass(School school) {
-        return school.adb2biom(getSimulation().getAbundance(school));
-    }
-    
+    } 
 }

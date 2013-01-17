@@ -49,7 +49,7 @@ public class FishingProcess extends AbstractProcess {
         double F = getFishingMortalityRate(school, subdt);
         double nDead = 0;
         if (F > 0) {
-            nDead = getSimulation().getAbundance(school) * (1 - Math.exp(-F));
+            nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
         }
         return nDead;
     }

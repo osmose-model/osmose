@@ -36,7 +36,7 @@ public class StarvationProcess extends AbstractProcess {
     
     public static double computeStarvationMortality(School school, int subdt) {
         double M = getStarvationMortalityRate(school, subdt);
-        return getSimulation().getAbundance(school) * (1 - Math.exp(-M));
+        return school.getInstantaneousAbundance() * (1 - Math.exp(-M));
     }
     
     public static double getStarvationMortalityRate(School school, int subdt) {

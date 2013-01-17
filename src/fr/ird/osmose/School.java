@@ -151,6 +151,18 @@ public class School extends Fish {
     public double getAbundance() {
         return abundance;
     }
+    
+    public double getInstantaneousAbundance() {
+        double nDeadTotal = nDeadPredation
+                + nDeadStarvation
+                + nDeadNatural
+                + nDeadFishing;
+        double abundanceTmp = abundance - nDeadTotal;
+        //if (nDeadTotal > 0) System.out.println("Abundance changed " + " " + school.nDeadPredation + " " +  school.nDeadStarvation + " " + school.nDeadNatural + " " + school.nDeadFishing);
+        return (abundanceTmp < 1)
+                ? 0.d
+                : abundanceTmp;
+    }
 
     /**
      * @param abundance the abundance to set
@@ -164,6 +176,10 @@ public class School extends Fish {
      */
     public double getBiomass() {
         return adb2biom(abundance);
+    }
+    
+    public double getInstantaneousBiomass() {
+        return adb2biom(getInstantaneousAbundance());
     }
 
     public float getSumDiet() {

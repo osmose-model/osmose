@@ -63,7 +63,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
     static public double computeNaturalMortality(School school, int subdt) {
 
         double D = getNaturalMortalityRate(school, subdt);
-        return getSimulation().getAbundance(school) * (1.d - Math.exp(-D));
+        return school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
     }
 
     /*
