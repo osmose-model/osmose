@@ -14,12 +14,20 @@ import java.util.List;
  */
 public class MovementProcess extends AbstractProcess {
     
+    private final static float ONE_DEG_LATITUDE_IN_METER = 111138.f;
     private AbstractProcess[] movements;
+    /*
+     * Ranges of movement in cell during one Osmose time step
+     */
+    private static int[] range;
 
     @Override
     public void init() {
-        movements = new AbstractProcess[getSimulation().getNumberSpecies()];
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+        int nSpecies = getSimulation().getNumberSpecies();
+        range = getOsmose().range[getOsmose().numSerie];
+        movements = new AbstractProcess[nSpecies];
+        for (int i = 0; i < nSpecies; i++) {
+            range[i] = 0;
             switch (getOsmose().spatialDistribution[i]) {
                 case RANDOM:
                     movements[i] = new RandomDistributionProcess(getSimulation().getSpecies(i));
@@ -63,7 +71,7 @@ public class MovementProcess extends AbstractProcess {
         }
         List<Cell> accessibleCells = new ArrayList();
         // 1. Get all surrounding cells
-        Iterator<Cell> neighbours = getGrid().getNeighbourCells(cell).iterator();
+        Iterator<Cell> neighbours = getGrid().getNeighbourCells(cell, range[school.getSpeciesIndex()]).iterator();
         while (neighbours.hasNext()) {
             Cell neighbour = neighbours.next();
             // 2. Eliminate cell that is on land
@@ -97,7 +105,7 @@ public class MovementProcess extends AbstractProcess {
 
         Cell cell = school.getCell();
         List<Cell> accessibleCells = new ArrayList();
-        Iterator<Cell> neighbors = getGrid().getNeighbourCells(cell).iterator();
+        Iterator<Cell> neighbors = getGrid().getNeighbourCells(cell, range[school.getSpeciesIndex()]).iterator();
         while (neighbors.hasNext()) {
             Cell neighbor = neighbors.next();
             if (!neighbor.isLand()) {

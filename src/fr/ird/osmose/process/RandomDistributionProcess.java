@@ -82,7 +82,7 @@ public class RandomDistributionProcess extends AbstractProcess {
             int index = 0;
             while (index < (nCells - 1)) {
                 for (int iCell = iFirstSorted; iCell <= iLastSorted; iCell++) {
-                    ArrayList<Cell> neigbors = getGrid().getNeighbourCells(randomMap.get(iCell));
+                    ArrayList<Cell> neigbors = getGrid().getNeighbourCells(randomMap.get(iCell), 1);
                     Iterator<Cell> iter = neigbors.iterator();
                     while ((index < (nCells - 1)) && iter.hasNext()) {
                         Cell cell = iter.next();

@@ -113,7 +113,8 @@ public abstract class AbstractGrid implements IGrid {
     }
 
     /**
-     * Get the adjacent cells of a given cell (cell included).
+     * Get the adjacent cells of a given cell (cell included) within a given
+     * range of cells.
      * Cells are randomly sorted.
      *
      * @see Collections.shuffle() For cell(i, j) returns 8 surrounding cells:
@@ -121,16 +122,17 @@ public abstract class AbstractGrid implements IGrid {
      * cell(i, j + 1) cell(i + 1, j - 1) cell(i + 1, j) cell(i + 1, j + 1) For
      * cells at the edge of the grid, only returns 3 or 5 cells.
      * @param cell
+     * @param range, and integer, the range of the neighbourhood
      * @return an ArrayList of the cells surrounding
      * <code>cell</code>
      */
     @Override
-    public ArrayList<Cell> getNeighbourCells(Cell cell) {
+    public ArrayList<Cell> getNeighbourCells(Cell cell, int range) {
 
-        int im1 = Math.max(cell.get_igrid() - 1, 0);
-        int ip1 = Math.min(cell.get_igrid() + 1, getNbLines() - 1);
-        int jm1 = Math.max(cell.get_jgrid() - 1, 0);
-        int jp1 = Math.min(cell.get_jgrid() + 1, getNbColumns() - 1);
+        int im1 = Math.max(cell.get_igrid() - range, 0);
+        int ip1 = Math.min(cell.get_igrid() + range, getNbLines() - 1);
+        int jm1 = Math.max(cell.get_jgrid() - range, 0);
+        int jp1 = Math.min(cell.get_jgrid() + range, getNbColumns() - 1);
 
         ArrayList<Cell> neighbours = new ArrayList();
 

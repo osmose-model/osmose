@@ -90,6 +90,7 @@ public class Osmose {
     public float[][] biomassFluxInTab;
     public float[][] meanLengthFishInTab;
     public float[][] meanAgeFishInTab;
+    public int[][] range;
     /*
      * FISHING
      */
@@ -283,13 +284,13 @@ public class Osmose {
                 if (numSimu == 0) {
                     initializeOptions();
                     System.out.println("options initialized");
-                    
+
                     readMigrationFile();
                     System.out.println("migration caracteristics initialized");
 
                     readAreaFile();
                     System.out.println("areas initialized");
-                    
+
                     simulation = new Simulation();
                     simulation.init();
                     System.out.println("simulation initialized");
@@ -314,16 +315,16 @@ public class Osmose {
                     if (!(coastFileNameTab[numSerie].equalsIgnoreCase("None") || coastFileNameTab[numSerie].equalsIgnoreCase("default"))) {
                         updateCoastCells(numSerie);
                     }
-                    
+
                     readMigrationFile();
                     readAreaFile();
-                    
+
                     simulation = new Simulation();
                     simulation.init();
                 }
 
                 simulation.run();
-                
+
                 if (spatializedOutputs[numSerie]) {
                     closeNCFile();
                 }
@@ -625,6 +626,7 @@ public class Osmose {
         maturityMetricMatrix = new String[nbSeriesSimus][];
         sizeMatMatrix = new float[nbSeriesSimus][];
         sexRatioMatrix = new float[nbSeriesSimus][];
+        range = new int[nbSeriesSimus][];
         sizeFeedingMatrix = new float[nbSeriesSimus][][];
         nbStagesMatrix = new int[nbSeriesSimus][];
         reproduceLocallyTab = new boolean[nbSeriesSimus][];
@@ -761,29 +763,48 @@ public class Osmose {
                 biomassFluxInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
                 meanLengthFishInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
                 meanAgeFishInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
+                range[numSerie] = new int[nbSpeciesTab[numSerie]];
                 st.nextToken();
                 int nbReproOut = 0;
                 if (null != st.sval) {
-                    for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                        reproduceLocallyTab[numSerie][i] = st.sval.matches("in");
-                        if (!reproduceLocallyTab[numSerie][i]) {
-                            nbReproOut++;
+                    if (Character.isDigit(st.sval.charAt(0))) {
+                        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                            range[numSerie][i] = Integer.getInteger(st.sval);
+                            st.nextToken();
                         }
-                        st.nextToken();
-                    }
-                    for (int i = 0; i < nbReproOut; i++) {
-                        int indexSpecies = new Integer(st.sval).intValue() - 1;
-                        st.nextToken();
-                        biomassFluxInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
-                        st.nextToken();
-                        meanLengthFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
-                        st.nextToken();
-                        meanAgeFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
-                        st.nextToken();
+                    } else {
+                        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                            reproduceLocallyTab[numSerie][i] = st.sval.matches("in");
+                            if (!reproduceLocallyTab[numSerie][i]) {
+                                nbReproOut++;
+                            }
+                            st.nextToken();
+                        }
+                        for (int i = 0; i < nbReproOut; i++) {
+                            int indexSpecies = new Integer(st.sval).intValue() - 1;
+                            st.nextToken();
+                            biomassFluxInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                            st.nextToken();
+                            meanLengthFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                            st.nextToken();
+                            meanAgeFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                            st.nextToken();
+                        }
+                        if (null != st.sval) {
+                            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                                range[numSerie][i] = Integer.valueOf(st.sval);
+                                st.nextToken();
+                            }
+                        } else {
+                            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                                range[numSerie][i] = 1;
+                            }
+                        }
                     }
                 } else {
                     for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
                         reproduceLocallyTab[numSerie][i] = true;
+                        range[numSerie][i] = 1;
                     }
                 }
             } else {
@@ -839,7 +860,7 @@ public class Osmose {
                     if ((iStep + 1) % nbDtMatrix[numSerie] == 0) {
                         if (!((sum > 0.99f) && (sum < 1.01f))) {
                             int year = (iStep + 1) / nbDtMatrix[numSerie];
-                            System.out.println("ERROR: sum of percents does not equal 100% in spawning seasonality file " +  csvFile + " for species " + nameSpecMatrix[numSerie][iSpec] + " in year " + year);
+                            System.out.println("ERROR: sum of percents does not equal 100% in spawning seasonality file " + csvFile + " for species " + nameSpecMatrix[numSerie][iSpec] + " in year " + year);
                             System.exit(1);
                         }
                         sum = 0;

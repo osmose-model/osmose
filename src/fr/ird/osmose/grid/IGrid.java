@@ -41,7 +41,9 @@ public interface IGrid {
     public List<Cell> getCells();
 
     /**
-     * Get the adjacent cells of a given cell. Cells are randomly sorted.
+     * Get the adjacent cells of a given cell (including itself) within a given
+     * range of cells.
+     * Cells are randomly sorted.
      * @see Collections.shuffle()
      * For cell(i, j) returns 8 surrounding cells:
      * cell(i - 1, j - 1)
@@ -54,9 +56,10 @@ public interface IGrid {
      * cell(i + 1, j + 1)
      * For cells at the edge of the grid, only returns 3 or 5 cells.
      * @param cell
+     * @param range, and integer, the range of the neighbourhood
      * @return an ArrayList of the cells surrounding <code>cell</code>
      */
-    public ArrayList<Cell> getNeighbourCells(Cell cell);
+    public ArrayList<Cell> getNeighbourCells(Cell cell, int range);
 
     /*
      * Returns the number of cells of the grid that are not inland.
