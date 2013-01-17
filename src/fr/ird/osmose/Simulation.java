@@ -1,8 +1,5 @@
 package fr.ird.osmose;
 
-import fr.ird.osmose.ConnectivityMatrix.ConnectivityLine;
-import fr.ird.osmose.filter.AliveSchoolFilter;
-import fr.ird.osmose.filter.PresentSchoolFilter;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.process.AbstractProcess;
@@ -208,7 +205,7 @@ public class Simulation {
         // update biomass
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
 
-            for (School school : getPresentSchools()) {
+            for (School school : getPopulation().getPresentSchools()) {
                 Indicators.biomPerStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
             }
             getForcing().saveForDiet();
@@ -256,14 +253,6 @@ public class Simulation {
         }
     }
 
-    public List<School> getPresentSchools() {
-        return FilteredSets.subset(population, new PresentSchoolFilter(i_step_year));
-    }
-
-    public List<School> getAliveSchools() {
-        return FilteredSets.subset(population, new AliveSchoolFilter());
-    }
-
     public Population getPopulation() {
         return population;
     }
@@ -274,7 +263,7 @@ public class Simulation {
         /*
          * Create dimensions
          */
-        Dimension speciesDim = nc.addDimension("species", getNbSpecies());
+        Dimension speciesDim = nc.addDimension("species", getNumberSpecies());
         Dimension ltlDim = nc.addDimension("ltl", getForcing().getNbPlanktonGroups());
         Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
         Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
@@ -330,7 +319,7 @@ public class Simulation {
         }
         nc.addGlobalAttribute("dimension_ltl", str.toString());
         str = new StringBuilder();
-        for (int ispec = 0; ispec < getNbSpecies(); ispec++) {
+        for (int ispec = 0; ispec < getNumberSpecies(); ispec++) {
             str.append(ispec);
             str.append("=");
             str.append(getSpecies(ispec).getName());
@@ -365,21 +354,21 @@ public class Simulation {
             return;
         }
 
-        float[][][] biomass = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][] mean_size = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][] tl = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][][] biomass = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][][] mean_size = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][][] tl = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
         float[][][][] ltlbiomass = new float[getForcing().getNbPlanktonGroups()][2][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][] abundance = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][] yield = new float[this.getNbSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][][] abundance = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][][] yield = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
 
         for (Cell cell : getGrid().getCells()) {
-            int[] nbSchools = new int[getNbSpecies()];
+            int[] nbSchools = new int[getNumberSpecies()];
             /*
              * Cell on land
              */
             if (cell.isLand()) {
                 float fillValue = -99.f;
-                for (int ispec = 0; ispec < getNbSpecies(); ispec++) {
+                for (int ispec = 0; ispec < getNumberSpecies(); ispec++) {
                     biomass[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
                     abundance[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
                     mean_size[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
@@ -405,7 +394,7 @@ public class Simulation {
                     //yield[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += (school.catches * school.getWeight() / 1000000.d);
                 }
             }
-            for (int ispec = 0; ispec < getNbSpecies(); ispec++) {
+            for (int ispec = 0; ispec < getNumberSpecies(); ispec++) {
                 if (nbSchools[ispec] > 0) {
                     mean_size[ispec][cell.get_igrid()][cell.get_jgrid()] /= abundance[ispec][cell.get_igrid()][cell.get_jgrid()];
                     tl[ispec][cell.get_igrid()][cell.get_jgrid()] /= biomass[ispec][cell.get_igrid()][cell.get_jgrid()];
@@ -417,14 +406,14 @@ public class Simulation {
             }
         }
 
-        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrAbundance = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, getNbSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrAbundance = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D5 arrLTL = new ArrayFloat.D5(1, getForcing().getNbPlanktonGroups(), 2, getGrid().getNbLines(), getGrid().getNbColumns());
         int nl = getGrid().getNbLines() - 1;
-        for (int kspec = 0; kspec < getNbSpecies(); kspec++) {
+        for (int kspec = 0; kspec < getNumberSpecies(); kspec++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     arrBiomass.set(0, kspec, nl - i, j, biomass[kspec][i][j]);
@@ -465,7 +454,7 @@ public class Simulation {
 
     }
 
-    public int getNbSpecies() {
+    public int getNumberSpecies() {
         return species.length;
     }
 

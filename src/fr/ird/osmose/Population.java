@@ -1,8 +1,11 @@
 package fr.ird.osmose;
 
+import fr.ird.osmose.filter.FilteredSet;
+import fr.ird.osmose.filter.FilteredSets;
 import fr.ird.osmose.filter.AliveSchoolFilter;
 import fr.ird.osmose.filter.DeadSchoolFilter;
 import fr.ird.osmose.filter.IFilter;
+import fr.ird.osmose.filter.PresentSchoolFilter;
 import fr.ird.osmose.filter.SpeciesFilter;
 import fr.ird.osmose.grid.IGrid;
 import java.util.ArrayList;
@@ -48,6 +51,25 @@ public class Population extends FilteredSet<School> {
     public List<School> getSchools(Cell cell) {
         return schoolMap[cell.get_igrid()][cell.get_jgrid()];
     }
+    
+    /**
+     * Get a list of the schools that are physically located on the grid at 
+     * current time step.
+     * 
+     * @return a List of the schools present on the grid at current time step
+     */
+    public List<School> getPresentSchools() {
+        return FilteredSets.subset(this, new PresentSchoolFilter(getSimulation().getIndexTimeYear()));
+    }
+    
+    /**
+     * Get a list of the alive schools.
+     * 
+     * @return a list of the alive schools
+     */
+    public List<School> getAliveSchools() {
+        return FilteredSets.subset(this, new AliveSchoolFilter());
+    }
 
     /**
      * Take a snapshot of the distribution of the schools on the grid
@@ -84,5 +106,9 @@ public class Population extends FilteredSet<School> {
      */
     private IGrid getGrid() {
         return Osmose.getInstance().getGrid();
+    }
+    
+    private static Simulation getSimulation() {
+        return Osmose.getInstance().getSimulation();
     }
 }

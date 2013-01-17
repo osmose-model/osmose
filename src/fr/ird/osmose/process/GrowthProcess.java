@@ -17,13 +17,13 @@ public class GrowthProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        int nSpecies = getSimulation().getNbSpecies();
+        int nSpecies = getSimulation().getNumberSpecies();
         criticalPredSuccess = getOsmose().criticalPredSuccessMatrix[getOsmose().numSerie];
         minDelta = new float[nSpecies][];
         maxDelta = new float[nSpecies][];
         deltaMeanLength = new float[nSpecies][];
 
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
             Species species = getSpecies(i);
             int longevity = species.getLongevity();
             minDelta[i] = new float[longevity];
@@ -42,7 +42,7 @@ public class GrowthProcess extends AbstractProcess {
 
     @Override
     public void run() {
-        for (School school : getSimulation().getPresentSchools()) {
+        for (School school : getPopulation().getPresentSchools()) {
             school.predSuccessRate = PredationProcess.computePredSuccessRate(school.biomassToPredate, school.preyedBiomass);
             Species species = school.getSpecies();
             int i = species.getIndex();

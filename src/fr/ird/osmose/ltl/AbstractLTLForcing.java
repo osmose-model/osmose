@@ -120,11 +120,11 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     public void saveForDiet() {
 
         for (int p = 0; p < nbPlankton; p++) {
-            Indicators.biomPerStage[getSimulation().getNbSpecies() + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
+            Indicators.biomPerStage[getSimulation().getNumberSpecies() + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     if (!getGrid().getCell(i, j).isLand()) {
-                        Indicators.biomPerStage[getSimulation().getNbSpecies() + p][0] += ((Plankton) planktonList[p]).biomass[i][j];
+                        Indicators.biomPerStage[getSimulation().getNumberSpecies() + p][0] += ((Plankton) planktonList[p]).biomass[i][j];
                     }
                 }
             }

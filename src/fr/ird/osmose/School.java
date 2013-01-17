@@ -87,11 +87,11 @@ public class School extends Fish {
         updateAccessStage(species.ageStagesTab, species.nbAccessStages);
         updateDietOutputStage(species.dietStagesTab, species.nbDietStages);
 
-        dietTemp = new float[getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups()][];
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+        dietTemp = new float[getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups()][];
+        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
             dietTemp[i] = new float[getSimulation().getSpecies(i).nbDietStages];
         }
-        for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
             dietTemp[i] = new float[]{0.f};
         }
         sumDiet = 0;
@@ -122,12 +122,12 @@ public class School extends Fish {
 
     public void updateDietVariables() {
         if ((getOsmose().isDietOuput()) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
-            for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+            for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     sumDiet += dietTemp[i][s];
                 }
             }
-            for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
+            for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
                 sumDiet += dietTemp[i][0];
             }
         }
@@ -135,12 +135,12 @@ public class School extends Fish {
 
     public void resetDietVariables() {
         sumDiet = 0;
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
             for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                 dietTemp[i][s] = 0;
             }
         }
-        for (int i = getSimulation().getNbSpecies(); i < getSimulation().getNbSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
             dietTemp[i][0] = 0;
         }
     }

@@ -18,8 +18,8 @@ public class MovementProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        movements = new AbstractProcess[getSimulation().getNbSpecies()];
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+        movements = new AbstractProcess[getSimulation().getNumberSpecies()];
+        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
             switch (getOsmose().spatialDistribution[i]) {
                 case RANDOM:
                     movements[i] = new RandomDistributionProcess(getSimulation().getSpecies(i));

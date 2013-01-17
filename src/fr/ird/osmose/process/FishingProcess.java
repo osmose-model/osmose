@@ -22,13 +22,13 @@ public class FishingProcess extends AbstractProcess {
     @Override
     public void init() {
         isFishingInterannual = getOsmose().fishingRates[0].length > getSimulation().getNumberTimeStepsPerYear();
-        fishingRates = new float[getSimulation().getNbSpecies()][];
-        System.arraycopy(getOsmose().fishingRates, 0, fishingRates, 0, getSimulation().getNbSpecies());
+        fishingRates = new float[getSimulation().getNumberSpecies()][];
+        System.arraycopy(getOsmose().fishingRates, 0, fishingRates, 0, getSimulation().getNumberSpecies());
     }
 
     @Override
     public void run() {
-        for (School school : getSimulation().getPresentSchools()) {
+        for (School school : getPopulation().getPresentSchools()) {
             if (school.getAbundance() != 0.d) {
                 double nDead = computeFishingMortality(school, 1);
                 if (nDead != 0.d) {

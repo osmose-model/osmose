@@ -32,7 +32,7 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        int nSpecies = getSimulation().getNbSpecies();
+        int nSpecies = getSimulation().getNumberSpecies();
         int numSerie = getOsmose().numSerie;
         reproductionProcess = new AbstractProcess[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
@@ -47,7 +47,7 @@ public class ReproductionProcess extends AbstractProcess {
 
     @Override
     public void run() {
-        for (int i = 0; i < getSimulation().getNbSpecies(); i++) {
+        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
             reproductionProcess[i].run();
         }
     }
