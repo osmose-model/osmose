@@ -122,13 +122,11 @@ public class Osmose {
      */
     String[] areasFileNameTab;	              //choice between "Random" or fileName
     public int[][] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
-    //int[][] randomAreaCoordi, randomAreaCoordj;//species areas in random cases [species][cell]
-    List<Cell>[] randomMaps;
-    int[][][] numMap;        //gives a number of map for[species][cohort][dt]
-    GridMap[] maps;
-    float[] maxProbaPresence;
+    public int[][][] numMap;        //gives a number of map for[species][cohort][dt]
+    public GridMap[] maps;
+    public float[] maxProbaPresence;
     boolean densityMaps;
-    ConnectivityMatrix[] connectivityMatrix;
+    public ConnectivityMatrix[] connectivityMatrix;
     /*
      * COASTLINE
      */
@@ -182,7 +180,7 @@ public class Osmose {
     int[][] areasTempAge;
     int[][] areasTempDt;
     int[] areasNumSpForMap;
-    SpatialDistribution[] spatialDistribution;
+    public SpatialDistribution[] spatialDistribution;
     /**
      * Object for creating/writing netCDF files.
      */
@@ -285,16 +283,16 @@ public class Osmose {
                 if (numSimu == 0) {
                     initializeOptions();
                     System.out.println("options initialized");
-
-                    simulation = new Simulation();
-                    simulation.init();
-                    System.out.println("simulation initialized");
-
+                    
                     readMigrationFile();
                     System.out.println("migration caracteristics initialized");
 
                     readAreaFile();
                     System.out.println("areas initialized");
+                    
+                    simulation = new Simulation();
+                    simulation.init();
+                    System.out.println("simulation initialized");
 
                     //in initialiserSpeciesareas, save in tabTemp the areas by cohort
                     //do not distribute the species in simulation()
@@ -316,13 +314,12 @@ public class Osmose {
                     if (!(coastFileNameTab[numSerie].equalsIgnoreCase("None") || coastFileNameTab[numSerie].equalsIgnoreCase("default"))) {
                         updateCoastCells(numSerie);
                     }
-
-                    simulation = new Simulation();
-                    simulation.init();
-
+                    
                     readMigrationFile();
                     readAreaFile();
-                    System.out.println();
+                    
+                    simulation = new Simulation();
+                    simulation.init();
                 }
 
                 simulation.run();
@@ -1734,7 +1731,6 @@ public class Osmose {
         st.quoteChar(';');
         spatialDistribution = new SpatialDistribution[nbSpeciesTab[numSerie]];
         speciesAreasSizeTab[numSerie] = new int[nbSpeciesTab[numSerie]];
-        randomMaps = new ArrayList[nbSpeciesTab[numSerie]];
         try {
 
             for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
@@ -1763,9 +1759,9 @@ public class Osmose {
             areasTempDt = new int[nbMaps][];
             numMap = new int[nbSpeciesTab[numSerie]][][];
             for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
-                Species speci = simulation.getSpecies(iSpec);
-                numMap[iSpec] = new int[speci.getLongevity()][];
-                for (int j = 0; j < speci.getLongevity(); j++) {
+                int longevity = (int) Math.round((longevityMatrix[numSerie][iSpec]) * nbDtMatrix[numSerie]);
+                numMap[iSpec] = new int[longevity][];
+                for (int j = 0; j < longevity; j++) {
                     numMap[iSpec][j] = new int[nbDtMatrix[numSerie]];
                 }
             }
@@ -1783,7 +1779,7 @@ public class Osmose {
                     case RANDOM:
                         st.nextToken();
                         speciesAreasSizeTab[numSerie][iSpec] = (new Integer(st.sval)).intValue();
-                        distribRandom(iSpec);
+                        //distribRandom(iSpec);
                         break;
                     case MAPS:
                         readAreaCSV(st, iSpec, indexMap);
@@ -1804,10 +1800,6 @@ public class Osmose {
                 Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        /*
-         * Initial distribution of the scools
-         */
-        simulation.distributeSpecies();
     }
 
     private void readConnectivity(StreamTokenizer st, int iSpec, int indexMap) throws IOException {
@@ -1976,13 +1968,14 @@ public class Osmose {
             for (int m = 0; m < areasTempAge[indexMap].length; m++) {
                 for (int n = 0; n < areasTempDt[indexMap].length; n++) {
                     for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                        if ((areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) < simulation.getSpecies(areasNumSpForMap[indexMap]).getLongevity()) {
+                        int longevity = (int) Math.round((longevityMatrix[numSerie][areasNumSpForMap[indexMap]]) * nbDtMatrix[numSerie]);
+                        if ((areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) < longevity) {
                             numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h][areasTempDt[indexMap][n]] = indexMap;
                             //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
                         }
                         if (nbCells == 0) {
                             if (!simulation.getSpecies(areasNumSpForMap[indexMap]).isOut((areasTempAge[indexMap][m] * nbDtMatrix[numSerie]) + h, areasTempDt[indexMap][n])) {
-                                System.out.println("Match error between species areas and migration file for " + simulation.getSpecies(areasNumSpForMap[indexMap]).getName());
+                                System.out.println("Match error between species areas and migration file for " + nameSpecMatrix[numSerie][areasNumSpForMap[indexMap]]);
                             }
                         }
                     }
@@ -2056,67 +2049,6 @@ public class Osmose {
             str.append(" ");
         }
         return str.toString();
-    }
-
-    public void distribRandom(int iSpec) {
-
-        //int nbCasesDispos = ((int) (gridLinesTab[numSerie] * gridColumnsTab[numSerie])) - nbCellsCoastTab[numSerie];
-        int nbCasesDispos = grid.getNumberAvailableCells();
-
-        //Case where random distribution on the whole (grid-coast)
-        if (speciesAreasSizeTab[numSerie][iSpec] >= nbCasesDispos) {
-            speciesAreasSizeTab[numSerie][iSpec] = nbCasesDispos;
-
-            randomMaps[iSpec] = new ArrayList(speciesAreasSizeTab[numSerie][iSpec]);
-            int index = 0;
-            for (int l = 0; l < grid.getNbLines(); l++) {
-                for (int m = 0; m < grid.getNbColumns(); m++) {
-                    if (!grid.getCell(l, m).isLand()) {
-                        randomMaps[iSpec].add(getGrid().getCell(l, m));
-                        index++;
-                    }
-                }
-            }
-        } //case where random disribution on speciesAreasSize cells
-        //random sorting of connex cells for each species
-        else {
-            int nCells = speciesAreasSizeTab[numSerie][iSpec];
-            randomMaps[iSpec] = new ArrayList(nCells);
-            boolean[][] alreadyChoosen = new boolean[grid.getNbLines()][grid.getNbColumns()];
-            //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpec]];
-            int coordi, coordj;
-            coordi = (int) Math.round(Math.random() * (grid.getNbLines() - 1));
-            coordj = (int) Math.round(Math.random() * (grid.getNbColumns() - 1));
-            while (grid.getCell(coordi, coordj).isLand()) {
-                coordi = (int) Math.round(Math.random() * (grid.getNbLines() - 1));
-                coordj = (int) Math.round(Math.random() * (grid.getNbColumns() - 1));
-            }
-            randomMaps[iSpec].add(grid.getCell(coordi, coordj));
-            alreadyChoosen[coordi][coordj] = true;
-            /*
-             * From initial cell, successive random sorting of the
-             * adjacent cells until tabCellsArea is full
-             */
-            int iFirstSorted = 0;
-            int iLastSorted = 0;
-            int index = 0;
-            while (index < (nCells - 1)) {
-                for (int iCell = iFirstSorted; iCell <= iLastSorted; iCell++) {
-                    ArrayList<Cell> neigbors = grid.getNeighbourCells(randomMaps[iSpec].get(iCell));
-                    Iterator<Cell> iter = neigbors.iterator();
-                    while ((index < (nCells - 1)) && iter.hasNext()) {
-                        Cell cell = iter.next();
-                        if (!cell.isLand() && !alreadyChoosen[cell.get_igrid()][cell.get_jgrid()]) {
-                            index++;
-                            alreadyChoosen[cell.get_igrid()][cell.get_jgrid()] = true;
-                            randomMaps[iSpec].add(cell);
-                        }
-                    }
-                }
-                iFirstSorted = iLastSorted + 1;
-                iLastSorted = index;
-            }
-        }
     }
 
     public void readMigrationFile() {

@@ -9,6 +9,7 @@ import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.LTLForcingProcess;
+import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
 import fr.ird.osmose.process.PredationProcess;
 import fr.ird.osmose.process.ReproductionProcess;
@@ -48,6 +49,10 @@ public class SequentialMortalityStep extends AbstractStep {
      * LTL forcing process
      */
     private AbstractProcess ltlForcingProcess;
+    /*
+     * Movement process
+     */
+    private AbstractProcess movementProcess;
 
     @Override
     public void init() {
@@ -76,8 +81,13 @@ public class SequentialMortalityStep extends AbstractStep {
         reproductionProcess = new ReproductionProcess();
         reproductionProcess.init();
 
+        // LTL Forcing
         ltlForcingProcess = new LTLForcingProcess();
         ltlForcingProcess.init();
+
+        // Movement of the schools
+        movementProcess = new MovementProcess();
+        movementProcess.init();
     }
 
     @Override
@@ -85,8 +95,8 @@ public class SequentialMortalityStep extends AbstractStep {
         // Update some stages at the begining of the step
         getSimulation().updateStages();
 
-        // Spatial distribution (distributeSpeciesIni() for year0 & indexTime0)
-        getSimulation().distributeSpecies();
+        // Spatial distribution
+        movementProcess.run();
 
         // Natural mortality (due to other predators)
         naturalMortalityProcess.run();

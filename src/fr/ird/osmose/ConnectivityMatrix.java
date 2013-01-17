@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class ConnectivityMatrix {
 
     private int indexMatrix;
-    HashMap<Integer, ConnectivityLine> clines;
+    public HashMap<Integer, ConnectivityLine> clines;
 
     public ConnectivityMatrix(int indexMatrix, String csvFile) {
         this.indexMatrix = indexMatrix;
@@ -66,8 +66,8 @@ public class ConnectivityMatrix {
     public class ConnectivityLine {
 
         int indexCell;
-        int[] indexCells;
-        float[] connectivity;
+        public int[] indexCells;
+        public float[] connectivity;
 
         public ConnectivityLine(Cell cell, String[] line) {
 
