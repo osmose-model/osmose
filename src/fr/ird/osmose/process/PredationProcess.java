@@ -69,6 +69,10 @@ public class PredationProcess extends AbstractProcess {
         List<School> schools = getPopulation().getSchools(predator.getCell());
         int nFish = schools.size();
         double[] preyUpon = new double[schools.size() + getForcing().getNbPlanktonGroups()];
+        // egg do not predate
+        if (predator.getAgeDt() == 0) {
+            return preyUpon;
+        }
         // find the preys
         int[] indexPreys = findPreys(predator);
 

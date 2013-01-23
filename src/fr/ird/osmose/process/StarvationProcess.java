@@ -41,6 +41,11 @@ public class StarvationProcess extends AbstractProcess {
     
     public static double getStarvationMortalityRate(School school, int subdt) {
         
+        // no starvation for eggs
+        if (school.getAgeDt() == 0) {
+            return 0.d;
+        }
+        
         int iSpec = school.getSpeciesIndex();
         // Compute the predation mortality rate
         double mortalityRate = 0;
