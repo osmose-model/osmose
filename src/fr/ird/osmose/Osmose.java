@@ -1871,7 +1871,7 @@ public class Osmose {
          */
         st.nextToken();
         if (!"null".equals(st.sval)) {
-            System.out.println("Reading connectivity matric for " + getSimulation().getSpecies(iSpec).getName() + " map " + indexMap);
+            System.out.println("Reading connectivity matric for " + nameSpecMatrix[numSerie][iSpec] + " map " + indexMap);
             String csvFile = resolveFile(st.sval);
             connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
             System.out.println("Connectivity matrix loaded");
