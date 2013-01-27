@@ -8,8 +8,8 @@ import fr.ird.osmose.School;
  */
 public class BiomassIndicator extends AbstractIndicator {
 
-    private static double[] biomassTot;
-    private static double[] biomassNoJuv;
+    private double[] biomassTot;
+    private double[] biomassNoJuv;
     
     @Override
     public void reset() {
@@ -22,7 +22,7 @@ public class BiomassIndicator extends AbstractIndicator {
     @Override
     public void update(School school) {
         int i = school.getSpeciesIndex();
-        if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
+        if (getOsmose().isIncludeClassZero()) {
             biomassTot[i] += school.getBiomass();
         }
         if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
@@ -32,7 +32,7 @@ public class BiomassIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !getOsmose().isCalibrationOutput();
     }
     
     @Override
@@ -50,6 +50,23 @@ public class BiomassIndicator extends AbstractIndicator {
             biomassNoJuv[i] /= nsteps;
         }
 
+        filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append("_biomass_Simu");
+        filename.append(getOsmose().numSimu);
+        filename.append(".csv");
+        Indicators.writeVariable(time, biomassNoJuv, filename.toString(), "Mean biomass (tons), excluding first ages specified in input (typically in calibration file)");
+
+        if (getOsmose().isIncludeClassZero()) {
+            filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename.append("_biomass-total_Simu");
+            filename.append(getOsmose().numSimu);
+            filename.append(".csv");
+            Indicators.writeVariable(time, biomassTot, filename.toString(), "Mean biomass (tons), including first ages specified in input (typically in calibration file)");
+        }
+    }
+}
+
+// keep it temporarilly as a reminder of how BIOMQuadri is recorded for calibration
 //        if (getOsmose().isCalibrationOutput()) {
 //            for (int i = 0; i < nSpec; i++) {
 //                getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassNoJuv[i];
@@ -59,20 +76,3 @@ public class BiomassIndicator extends AbstractIndicator {
 //                getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) (biomPerStage[i][0] / nsteps);
 //            }
 //        }
-
-        filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
-        filename.append("_biomass_Simu");
-        filename.append(getOsmose().numSimu);
-        filename.append(".csv");
-        Indicators.writeVariable(time, biomassNoJuv, filename.toString(), "Mean biomass (tons), excluding first ages specified in input (typically in calibration file)");
-
-        if (getOsmose().isIncludeClassZero()) {
-
-            filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
-            filename.append("_biomass-total_Simu");
-            filename.append(getOsmose().numSimu);
-            filename.append(".csv");
-            Indicators.writeVariable(time, biomassTot, filename.toString(), "Mean biomass (tons), including first ages specified in input (typically in calibration file)");
-        }
-    }
-}
