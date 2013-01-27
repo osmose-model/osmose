@@ -45,9 +45,29 @@ public class MortalityIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-
+        
         nDead = new double[getNSpecies()][CAUSES][STAGES];
         abundanceStage = new double[getNSpecies()][STAGES];
+        // save abundance at the end of this step as a snapshot of the
+        // population at the beginning of next time step.
+        updateAbundancePerStages();
+    }
+    
+    public void updateAbundancePerStages() {
+        for (School school : getPopulation().getAliveSchools()) {
+            int iStage;
+            if (school.getAgeDt() == 0) {
+                // Eggss
+                iStage = EGG;
+            } else if (school.getAgeDt() < school.getSpecies().recruitAge) {
+                // Pre-recruits
+                iStage = PRE_RECRUIT;
+            } else {
+                // Recruits
+                iStage = RECRUIT;
+            }
+            abundanceStage[school.getSpeciesIndex()][iStage] += school.getAbundance();
+        }
     }
 
     @Override
@@ -68,8 +88,7 @@ public class MortalityIndicator extends AbstractIndicator {
         nDead[iSpecies][STARVATION][iStage] += school.nDeadStarvation;
         nDead[iSpecies][NATURAL][iStage] += school.nDeadNatural;
         nDead[iSpecies][FISHING][iStage] += school.nDeadFishing;
-        // Update abundance per stages
-        abundanceStage[school.getSpeciesIndex()][iStage] += school.getAbundance();
+        
     }
 
     @Override

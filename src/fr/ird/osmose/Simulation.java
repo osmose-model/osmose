@@ -135,6 +135,7 @@ public class Simulation {
         species = new Species[getOsmose().nbSpeciesTab[numSerie]];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
+            // Initialize species
             species[i].init();
         }
 
@@ -149,6 +150,7 @@ public class Simulation {
             case CASE3:
                 step = new ConcomitantMortalityStep();
         }
+        // Intialize the step
         step.init();
 
         // Initialize the population
@@ -160,6 +162,9 @@ public class Simulation {
         if (getOsmose().spatializedOutputs[numSerie]) {
             initSpatializedSaving();
         }
+        
+        // Initialize the indicators
+        Indicators.init();
     }
 
     /**
@@ -206,10 +211,10 @@ public class Simulation {
         // update biomass
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
 
-            for (School school : getPopulation().getPresentSchools()) {
-                Indicators.biomPerStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
-            }
-            getForcing().saveForDiet();
+//            for (School school : getPopulation().getPresentSchools()) {
+//                Indicators.biomPerStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
+//            }
+//            getForcing().saveForDiet();
         }
         forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix[numSerie]);
     }
@@ -220,9 +225,6 @@ public class Simulation {
 
             // Print progress in console
             progress();
-
-            // Reset indicators
-            Indicators.reset();
 
             // Calculate relative size of MPA
             setupMPA();
