@@ -42,15 +42,18 @@ public class MortalityIndicator extends AbstractIndicator {
      * Abundance per stages [SPECIES][STAGES]
      */
     private double[][] abundanceStage;
+    
+    @Override
+    public void init() {
+        // save abundance at the beginning of the time step
+        updateAbundancePerStages();
+    }
 
     @Override
     public void reset() {
         
         nDead = new double[getNSpecies()][CAUSES][STAGES];
         abundanceStage = new double[getNSpecies()][STAGES];
-        // save abundance at the end of this step as a snapshot of the
-        // population at the beginning of next time step.
-        updateAbundancePerStages();
     }
     
     public void updateAbundancePerStages() {

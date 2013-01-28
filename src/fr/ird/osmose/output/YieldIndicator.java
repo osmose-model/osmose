@@ -13,6 +13,11 @@ import fr.ird.osmose.School;
 public class YieldIndicator extends AbstractIndicator {
 
     public double[] yield, yieldN;
+    
+    @Override
+    public void init() {
+        // Nothing to do
+    }
 
     @Override
     public void reset() {

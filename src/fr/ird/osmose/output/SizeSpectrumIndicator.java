@@ -20,6 +20,11 @@ import java.util.logging.Logger;
 public class SizeSpectrumIndicator extends AbstractIndicator {
 
     private double[][] sizeSpectrum;
+    
+    @Override
+    public void init() {
+        // Nothing to do
+    }
 
     @Override
     public void reset() {

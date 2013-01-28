@@ -18,6 +18,11 @@ public class MeanSizeIndicator extends AbstractIndicator {
     // Catches
     private double[] meanSizeCatch;    
     private double[] yieldN;
+    
+    @Override
+    public void init() {
+        // Nothing to do
+    }
 
     @Override
     public void reset() {

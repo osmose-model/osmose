@@ -14,6 +14,11 @@ public class AbundanceIndicator extends AbstractIndicator {
 
     private double[] abundanceTot;
     private double[] abundanceNoJuv;
+    
+    @Override
+    public void init() {
+        // Nothing to do
+    }
 
     @Override
     public void reset() {

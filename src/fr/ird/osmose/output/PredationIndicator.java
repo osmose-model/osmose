@@ -26,6 +26,11 @@ public class PredationIndicator extends AbstractIndicator {
      * Biomass per diet stages [SPECIES][STAGES]
      */
     private double[][] biomPerStage;
+    
+    @Override
+    public void init() {
+        // Nothing to do
+    }
 
     @Override
     public void reset() {

@@ -12,6 +12,11 @@ public class BiomassIndicator extends AbstractIndicator {
     private double[] biomassNoJuv;
     
     @Override
+    public void init() {
+        // Nothing to do
+    }
+    
+    @Override
     public void reset() {
         biomassNoJuv = new double[getNSpecies()];
         if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {

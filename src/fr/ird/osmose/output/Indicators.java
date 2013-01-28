@@ -40,6 +40,14 @@ public class Indicators extends SimulationLinker {
             }
         }
     }
+    
+    public static void initStep() {
+        for (AbstractIndicator indicator : indicators) {
+            if (indicator.isEnabled()) {
+                indicator.init();
+            }
+        }
+    }
 
     public static void updateAndWriteIndicators() {
 
