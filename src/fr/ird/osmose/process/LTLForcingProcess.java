@@ -17,11 +17,11 @@ public class LTLForcingProcess extends AbstractProcess {
     @Override
     public void init() {
         try {
-            try {
-                getSimulation().setForcing((LTLForcing) Class.forName(getOsmose().getLTLClassName()).newInstance());
-            } catch (InstantiationException | IllegalAccessException ex) {
-                Logger.getLogger(LTLForcingProcess.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            getSimulation().setForcing((LTLForcing) Class.forName(getOsmose().getLTLClassName()).newInstance());
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(LTLForcingProcess.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(LTLForcingProcess.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(LTLForcingProcess.class.getName()).log(Level.SEVERE, null, ex);
         }

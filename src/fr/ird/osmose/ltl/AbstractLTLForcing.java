@@ -118,7 +118,6 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 
     @Override
     public void saveForDiet() {
-
 //        for (int p = 0; p < nbPlankton; p++) {
 //            Indicators.biomPerStage[getSimulation().getNumberSpecies() + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
 //            for (int i = 0; i < getGrid().getNbLines(); i++) {
@@ -163,13 +162,11 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 
     @Override
     public void savePlanktonBiomass(String format) {
-        switch (format) {
-            case "csv":
-                savePlanktonBiomassCSV();
-                break;
-            case "netcdf":
-                savePlanktonBiomassNetCDF();
-                break;
+        
+        if (format.matches("csv")) {
+            savePlanktonBiomassCSV();
+        } else if (format.matches("netcdf")) {
+            savePlanktonBiomassNetCDF();
         }
     }
 

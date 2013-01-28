@@ -333,7 +333,9 @@ public class Simulation {
             }
             nc.write("longitude", arrLon);
             nc.write("latitude", arrLat);
-        } catch (InvalidRangeException | IOException ex) {
+        } catch (IOException ex) {
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
             Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -439,7 +441,9 @@ public class Simulation {
             nc.write("mean_size", new int[]{index, 0, 0, 0}, arrSize);
             nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
             nc.write("ltl_biomass", new int[]{index, 0, 0, 0, 0}, arrLTL);
-        } catch (IOException | InvalidRangeException ex) {
+        } catch (IOException ex) {
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
             Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
         }
 
