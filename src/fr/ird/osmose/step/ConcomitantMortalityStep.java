@@ -87,13 +87,13 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
     @Override
     public void step() {
+
+        // Update some stages at the begining of the step
+        getSimulation().updateStages();
         
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
         Indicators.initStep();
-
-        // Update some stages at the begining of the step
-        getSimulation().updateStages();
 
         // Update plankton concentration
         ltlForcingProcess.run();

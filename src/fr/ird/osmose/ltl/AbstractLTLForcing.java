@@ -115,19 +115,24 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             System.out.println("Reading error of LTL structure file");
         }
     }
-
+    
+    /**
+     * Computes the biomass of the specified plankton over the domain.
+     * 
+     * @param iPlankton, the index of the plankton group
+     * @return the cumulated biomass over the domain in ton/km2
+     */
     @Override
-    public void saveForDiet() {
-//        for (int p = 0; p < nbPlankton; p++) {
-//            Indicators.biomPerStage[getSimulation().getNumberSpecies() + p][0] = 0; //biomPerStage[][0] because just 1 stage per plankton group
-//            for (int i = 0; i < getGrid().getNbLines(); i++) {
-//                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-//                    if (!getGrid().getCell(i, j).isLand()) {
-//                        Indicators.biomPerStage[getSimulation().getNumberSpecies() + p][0] += ((Plankton) planktonList[p]).biomass[i][j];
-//                    }
-//                }
-//            }
-//        }
+    public double getBiomass(int iPlankton) {
+        double biomass = 0.d;
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                    if (!getGrid().getCell(i, j).isLand()) {
+                        biomass += ((Plankton) planktonList[iPlankton]).biomass[i][j];
+                    }
+                }
+            }
+        return biomass;
     }
 
     @Override

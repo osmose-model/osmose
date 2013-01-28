@@ -23,13 +23,20 @@ public class PredationIndicator extends AbstractIndicator {
     private double[][][][] diet, predatorPressure;
     private double[][] nbStomachs;
     /*
-     * Biomass per diet stages [SPECIES][STAGES]
+     * Biomass per diet stages [SPECIES][DIET_STAGES]
      */
-    private double[][] biomPerStage;
-    
+    private double[][] biomassStage;
+
     @Override
     public void init() {
-        // Nothing to do
+        for (School school : getPopulation().getPresentSchools()) {
+            biomassStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
+        }
+        int nSpec = getNSpecies();
+        int nPrey = nSpec + getSimulation().getForcing().getNbPlanktonGroups();
+        for (int iPlankton = nSpec; iPlankton < nPrey; iPlankton++) {
+            biomassStage[iPlankton][0] += getForcing().getBiomass(iPlankton);
+        }
     }
 
     @Override
@@ -39,7 +46,9 @@ public class PredationIndicator extends AbstractIndicator {
         diet = new double[nSpec][][][];
         predatorPressure = new double[nSpec][][][];
         nbStomachs = new double[nSpec][];
+        biomassStage = new double[nPrey][];
         for (int i = 0; i < nSpec; i++) {
+            biomassStage[i] = new double[getSimulation().getSpecies(i).nbDietStages];
             diet[i] = new double[getSimulation().getSpecies(i).nbDietStages][][];
             predatorPressure[i] = new double[getSimulation().getSpecies(i).nbDietStages][][];
             nbStomachs[i] = new double[getSimulation().getSpecies(i).nbDietStages];
@@ -56,6 +65,10 @@ public class PredationIndicator extends AbstractIndicator {
                     }
                 }
             }
+        }
+        for (int i = nSpec; i < nPrey; i++) {
+            // we consider just 1 stage per plankton group
+            biomassStage[i] = new double[1];
         }
     }
 
@@ -89,7 +102,7 @@ public class PredationIndicator extends AbstractIndicator {
         writeDiet(time);
         writePredatorPressure(time);
     }
-    
+
     public void writeDiet(float time) {
         StringBuilder filename;
         String description;
@@ -263,7 +276,7 @@ public class PredationIndicator extends AbstractIndicator {
                             pr.print(";");
                         }
                     }
-                    pr.print((float) (biomPerStage[j][st] / dtRecord));
+                    pr.print((float) (biomassStage[j][st] / dtRecord));
                     pr.println();
                 }
             }
@@ -278,7 +291,7 @@ public class PredationIndicator extends AbstractIndicator {
                         pr.print(";");
                     }
                 }
-                pr.print(biomPerStage[j][0] / dtRecord);
+                pr.print(biomassStage[j][0] / dtRecord);
                 pr.println();
             }
             pr.close();
