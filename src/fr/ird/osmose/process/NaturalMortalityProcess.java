@@ -34,8 +34,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
             school.setAbundance(school.getAbundance() - nDead);
             if (school.getAbundance() < 1.d) {
                 //nDead = school.getAbundance();
-                school.setAbundance(0);
-                school.kill();
+                school.setAbundance(0.d);
             }
             //school.nDeadNatural = nDead;
         }

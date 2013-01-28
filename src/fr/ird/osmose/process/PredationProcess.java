@@ -55,7 +55,6 @@ public class PredationProcess extends AbstractProcess {
                         school.setAbundance(school.getAbundance() - nDeadPredation[is]);
                         if (school.getAbundance() < 1.d) {
                             school.setAbundance(0.d);
-                            school.kill();
                         }
                     }
                 }

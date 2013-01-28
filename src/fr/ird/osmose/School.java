@@ -76,7 +76,6 @@ public class School extends Fish {
      * Initialize the school state variables
      */
     private void init() {
-        alive = true;
         catchable = true;
         trophicLevel = Species.TL_EGG;
 
@@ -184,6 +183,13 @@ public class School extends Fish {
 
     public float getSumDiet() {
         return sumDiet;
+    }
+    
+    /**
+     * @return whether the school is alive or not
+     */
+    public boolean isAlive() {
+        return abundance > 0;
     }
     
     @Override

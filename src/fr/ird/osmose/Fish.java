@@ -75,10 +75,6 @@ public class Fish extends GridPoint {
      */
     public float trophicLevel, tmpTL;
     /*
-     * whether the school will disappear at next time step
-     */
-    boolean alive;
-    /*
      * Maximum prey size [cm]
      */
     float critPreySizeMax;
@@ -163,20 +159,6 @@ public class Fish extends GridPoint {
      */
     public int getAccessibilityStage() {
         return accessibilityStage;
-    }
-
-    /**
-     * @return whether the shcool will disappear at next time step
-     */
-    public boolean isAlive() {
-        return alive;
-    }
-
-    /**
-     * Tag the school as about to disappear
-     */
-    public void kill() {
-        alive = false;
     }
 
     /**

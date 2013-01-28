@@ -55,7 +55,7 @@ public class LocalReproductionProcess extends AbstractProcess {
         for (School school : schools) {
             school.incrementAge();
             if (school.getAgeDt() > (species.getLongevity() - 1)) {
-                school.kill();
+                school.setAbundance(0.d);
             }
         }
 

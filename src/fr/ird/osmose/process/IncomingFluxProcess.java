@@ -45,7 +45,7 @@ public class IncomingFluxProcess extends AbstractProcess {
         for (School school : getPopulation().getSchools(species)) {
             school.incrementAge();
             if (school.getAgeDt() > (species.getLongevity() - 1)) {
-                school.kill();
+                school.setAbundance(0.d);
             }
         }
 

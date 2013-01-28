@@ -133,7 +133,6 @@ public class MortalityProcess extends AbstractProcess {
                     school.setAbundance(school.getAbundance() - nDeadTotal);
                     if (school.getAbundance() < 1.d) {
                         school.setAbundance(0.d);
-                        school.kill();
                     }
                 }
                 for (School school : schools) {

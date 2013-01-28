@@ -27,8 +27,7 @@ public class StarvationProcess extends AbstractProcess {
                 double nDead = computeStarvationMortality(school, 1);
                 school.setAbundance(school.getAbundance() - nDead);
                 if (school.getAbundance() < 1.d) {
-                    school.setAbundance(0);
-                    school.kill();
+                    school.setAbundance(0.d);
                 }
                 //school.nDeadStarvation = nDead;
             }
