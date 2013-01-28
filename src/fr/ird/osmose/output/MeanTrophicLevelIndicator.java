@@ -55,7 +55,6 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
         StringBuilder filename;
         String description;
 
-        double[] meanTLCatch = new double[getSimulation().getNumberSpecies()];
         for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
             if (biomass[i] > 0.d) {
                 meanTL[i] = (float) (meanTL[i] / biomass[i]);
@@ -83,7 +82,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
-        filename.append("_meanTLCatch-tmp_Simu");
+        filename.append("_meanTLCatch_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
         description = "Mean Trophic Level of fish species, weighted by fish catch";
