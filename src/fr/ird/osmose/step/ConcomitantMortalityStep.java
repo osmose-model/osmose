@@ -107,7 +107,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Compute mortality
         // (predation + fishing + natural mortality + starvation)
         for (School school : getPopulation()) {
-            school.resetDietVariables();
+            school.resetDietVariable();
             school.nDeadFishing = 0;
             school.nDeadNatural = 0;
             school.nDeadPredation = 0;

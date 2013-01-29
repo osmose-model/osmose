@@ -98,7 +98,7 @@ public class MortalityProcess extends AbstractProcess {
                                 School prey = schools.get(ipr);
                                 double biomPrey = prey.adb2biom(nDeadMatrix[ipr][is]);
                                 if (getOsmose().isDietOuput()) {
-                                    school.dietTemp[prey.getSpeciesIndex()][prey.dietOutputStage] += biomPrey;
+                                    school.diet[prey.getSpeciesIndex()][prey.dietOutputStage] += biomPrey;
                                 }
                                 float TLprey = (prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)
                                         ? Species.TL_EGG
@@ -107,7 +107,7 @@ public class MortalityProcess extends AbstractProcess {
                             } else {
                                 school.tmpTL += getForcing().getPlankton(ipr - ns).trophicLevel * nDeadMatrix[ipr][is] / preyedBiomass;
                                 if (getOsmose().isDietOuput()) {
-                                    school.dietTemp[getSimulation().getNumberSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
+                                    school.diet[getSimulation().getNumberSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
                                 }
                             }
                             //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);

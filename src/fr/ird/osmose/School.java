@@ -15,7 +15,6 @@ package fr.ird.osmose;
  * @version 2.1
  * *******************************************************************************
  */
-
 public class School extends Fish {
 
 ///////////////////////////////
@@ -26,9 +25,7 @@ public class School extends Fish {
      * Number of individuals in the school
      */
     private double abundance;
-    
-    public float[][] dietTemp;
-    private float sumDiet;
+    public float[][] diet;
     //
     public double nDeadFishing;
     public double nDeadPredation;
@@ -76,32 +73,16 @@ public class School extends Fish {
      * Initialize the school state variables
      */
     private void init() {
+        
         catchable = true;
         trophicLevel = Species.TL_EGG;
-
-        /*
-         * Initialisation of stage
-         */
+        //Initialisation of stage
         updateFeedingStage(species.sizeFeeding, species.nbFeedingStages);
         updateAccessStage(species.ageStagesTab, species.nbAccessStages);
         updateDietOutputStage(species.dietStagesTab, species.nbDietStages);
-
-        dietTemp = new float[getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups()][];
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
-            dietTemp[i] = new float[getSimulation().getSpecies(i).nbDietStages];
-        }
-        for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
-            dietTemp[i] = new float[]{0.f};
-        }
-        sumDiet = 0;
-
-        /*
-         * phv 2011/11/22 This booleans means that the scool has been created
-         * but not located anywhere in the grid. unlocated will be set to false
-         * when we first call communicatePosition
-         * phv 2013/01/08 Replaced the boolean by negative coordinates for the
-         * school.
-         */
+        //
+        resetDietVariable();
+        // Unlocated
         setOffGrid();
     }
 
@@ -119,28 +100,13 @@ public class School extends Fish {
         return abundance * weight / 1.e6d;
     }
 
-    public void updateDietVariables() {
-        if ((getOsmose().isDietOuput()) && (getSimulation().getYear() >= getOsmose().timeSeriesStart)) {
-            for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
-                for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
-                    sumDiet += dietTemp[i][s];
-                }
-            }
-            for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
-                sumDiet += dietTemp[i][0];
-            }
-        }
-    }
-
-    public void resetDietVariables() {
-        sumDiet = 0;
+    public void resetDietVariable() {
+        diet = new float[getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups()][];
         for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
-            for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
-                dietTemp[i][s] = 0;
-            }
+            diet[i] = new float[getSimulation().getSpecies(i).nbDietStages];
         }
         for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
-            dietTemp[i][0] = 0;
+            diet[i] = new float[1];
         }
     }
 
@@ -150,7 +116,7 @@ public class School extends Fish {
     public double getAbundance() {
         return abundance;
     }
-    
+
     public double getInstantaneousAbundance() {
         double nDeadTotal = nDeadPredation
                 + nDeadStarvation
@@ -176,26 +142,22 @@ public class School extends Fish {
     public double getBiomass() {
         return adb2biom(abundance);
     }
-    
+
     public double getInstantaneousBiomass() {
         return adb2biom(getInstantaneousAbundance());
     }
 
-    public float getSumDiet() {
-        return sumDiet;
-    }
-    
     /**
      * @return whether the school is alive or not
      */
     public boolean isAlive() {
         return abundance > 0;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder("School");
-        str.append( "\n  Species: ");
+        str.append("\n  Species: ");
         str.append(getSpecies().getName());
         str.append("\n  Cohort: ");
         float ageInYear = getAgeDt() / (float) getSimulation().getNumberTimeStepsPerYear();
