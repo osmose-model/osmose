@@ -37,25 +37,35 @@ public class MortalityIndicator extends AbstractIndicator {
     /*
      * Mortality rates array [SPECIES][CAUSES][STAGES]
      */
-    private double[][][] nDead;
+    double[][][] mortalityRates;
+    /*
+     * Number of deads [SPECIES][CAUSES][STAGES]
+     */
+    double[][][] nDead;
     /*
      * Abundance per stages [SPECIES][STAGES]
      */
     private double[][] abundanceStage;
-    
+
     @Override
     public void init() {
+        // Cumulate the mortality rates
+        updateMortalityRates();
         // save abundance at the beginning of the time step
         updateAbundancePerStages();
+        // Reset the nDead array used to compute the mortality rates of current
+        // time step
+        nDead = new double[getNSpecies()][CAUSES][STAGES];
     }
 
     @Override
     public void reset() {
-        
+
         nDead = new double[getNSpecies()][CAUSES][STAGES];
+        mortalityRates = new double[getNSpecies()][CAUSES][STAGES];
         abundanceStage = new double[getNSpecies()][STAGES];
     }
-    
+
     public void updateAbundancePerStages() {
         for (School school : getPopulation().getAliveSchools()) {
             int iStage;
@@ -91,7 +101,6 @@ public class MortalityIndicator extends AbstractIndicator {
         nDead[iSpecies][STARVATION][iStage] += school.nDeadStarvation;
         nDead[iSpecies][NATURAL][iStage] += school.nDeadNatural;
         nDead[iSpecies][FISHING][iStage] += school.nDeadFishing;
-        
     }
 
     @Override
@@ -107,6 +116,7 @@ public class MortalityIndicator extends AbstractIndicator {
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
 
+        updateMortalityRates();
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             filename = new StringBuilder("Mortality");
             filename.append(File.separatorChar);
@@ -141,14 +151,13 @@ public class MortalityIndicator extends AbstractIndicator {
                 }
                 pr.print(time);
                 pr.print(";");
-                double[][] mortalityRates = this.computeMortalityRates(iSpecies);
                 for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
                     for (int iStage = 0; iStage < STAGES; iStage++) {
                         if (iDeath == 2) {
                             // instantenous mortality rate for Natural mortality
-                            pr.print(mortalityRates[iDeath][iStage] / getOsmose().savingDtMatrix[getOsmose().numSerie]);
+                            pr.print(mortalityRates[iSpecies][iDeath][iStage] / getOsmose().savingDtMatrix[getOsmose().numSerie]);
                         } else {
-                            pr.print(mortalityRates[iDeath][iStage]);
+                            pr.print(mortalityRates[iSpecies][iDeath][iStage]);
                         }
                         pr.print(";");
                     }
@@ -167,18 +176,18 @@ public class MortalityIndicator extends AbstractIndicator {
         }
     }
 
-    private double[][] computeMortalityRates(int iSpecies) {
-        double[][] mortalityRates = new double[CAUSES][STAGES];
-        for (int iStage = 0; iStage < STAGES; iStage++) {
-            double nDeadTot = 0;
-            for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
-                nDeadTot += nDead[iSpecies][iDeath][iStage];
-            }
-            double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
-            for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
-                mortalityRates[iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
+    private void updateMortalityRates() {
+        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+            for (int iStage = 0; iStage < STAGES; iStage++) {
+                double nDeadTot = 0;
+                for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
+                    nDeadTot += nDead[iSpecies][iDeath][iStage];
+                }
+                double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
+                for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
+                    mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
+                }
             }
         }
-        return mortalityRates;
     }
 }
