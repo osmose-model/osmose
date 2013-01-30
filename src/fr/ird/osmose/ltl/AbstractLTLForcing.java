@@ -45,8 +45,8 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 
         int numSerie = getOsmose().numSerie;
         FileInputStream LTLFile;
-        try {
-            LTLFile = new FileInputStream(new File(getOsmose().inputPathName, planktonStructureFileName));
+         try {
+            LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonStructureFileName)));
         } catch (FileNotFoundException ex) {
             System.out.println("LTL file " + planktonStructureFileName + " doesn't exist");
             return;

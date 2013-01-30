@@ -34,7 +34,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         FileInputStream LTLFile;
         try {
-            LTLFile = new FileInputStream(new File(getOsmose().inputPathName, planktonFileName));
+            LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
         } catch (FileNotFoundException ex) {
             System.out.println("LTL file " + planktonFileName + " doesn't exist");
             return;
