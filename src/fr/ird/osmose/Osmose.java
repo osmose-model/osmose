@@ -181,6 +181,8 @@ public class Osmose {
     int[][] areasTempAge;
     int[][] areasTempDt;
     int[] areasNumSpForMap;
+    private String[] mapFile;
+    private int[] mapIndexNoTwin;
     public SpatialDistribution[] spatialDistribution;
     /**
      * Object for creating/writing netCDF files.
@@ -234,7 +236,7 @@ public class Osmose {
 
     public void runSeriesSimulations() {
         Runtime r = Runtime.getRuntime();
-        long freeMem = r.freeMemory();
+        long freeMem;
         for (int x = 0; x < nbSeriesSimus; x++) {
             numSerie = x;
             System.out.println();
@@ -814,7 +816,7 @@ public class Osmose {
             speciesFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of species file");
-            return;
+            System.exit(0);
         }
     }
 
@@ -922,7 +924,7 @@ public class Osmose {
                 }
             } catch (IOException ex) {
                 System.out.println("Reading error of reproduction seasonality file");
-                return;
+                System.exit(0);
             }
         }
     }
@@ -1127,7 +1129,7 @@ public class Osmose {
             calibFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of calibration file");
-            return;
+            System.exit(0);
         }
     }
 
@@ -1309,7 +1311,7 @@ public class Osmose {
                 optionFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of option file");
-                return;
+                System.exit(0);
             }
         }
     }
@@ -1362,7 +1364,7 @@ public class Osmose {
             predationFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of predation file");
-            return;
+            System.exit(0);
         }
     }
 
@@ -1419,7 +1421,7 @@ public class Osmose {
             st.nextToken();
             planktonMortalityOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            outputClass0Matrix[numSerie] = (new Boolean(st.sval)).booleanValue();
+            outputClass0Matrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
             try {
                 /*
                  * phv 2011/06/30 Read additional parameters "spatialized
@@ -1451,7 +1453,7 @@ public class Osmose {
             indicFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of output config file");
-            return;
+            System.exit(0);
         }
     }
 
@@ -1775,6 +1777,8 @@ public class Osmose {
             connectivityMatrix = new ConnectivityMatrix[nbMaps];
             maxProbaPresence = new float[nbMaps];
             areasNumSpForMap = new int[nbMaps];
+            mapFile = new String[nbMaps];
+            mapIndexNoTwin = new int[nbMaps];
             areasTempAge = new int[nbMaps][];
             areasTempDt = new int[nbMaps][];
             numMap = new int[nbSpeciesTab[numSerie]][][];
@@ -1820,6 +1824,38 @@ public class Osmose {
                 Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        
+        eliminateTwinMap();
+    }
+    
+    /**
+     * This function eliminates twins in the list of maps of distribution
+     */
+    private void eliminateTwinMap() {
+        mapIndexNoTwin = new int[mapFile.length];
+        for (int k = 0; k < mapFile.length; k++) {
+            String file = mapFile[k];
+            mapIndexNoTwin[k] = k;
+            for (int l = k - 1; l >= 0; l--) {
+                if (file.matches(mapFile[l])) {
+                    mapIndexNoTwin[k] = mapIndexNoTwin[l];
+                    // Delete twin maps
+                    maps[k] = null;
+                    connectivityMatrix[k] = null;
+                    break;
+                }
+            }
+            //System.out.println("Map " + k + " has index " + mapIndexNoTwin[k] + " " + mapFile[k]);
+        }
+
+        for (int iSpec = 0; iSpec < numMap.length; iSpec++) {
+            for (int iAge = 0; iAge < numMap[iSpec].length; iAge++) {
+                for (int iStep = 0; iStep < numMap[iSpec][iAge].length; iStep++) {
+                    int indexMap = numMap[iSpec][iAge][iStep];
+                    numMap[iSpec][iAge][iStep] = mapIndexNoTwin[indexMap];
+                }
+            }
+        }
     }
 
     private void readConnectivity(StreamTokenizer st, int iSpec, int indexMap) throws IOException {
@@ -1859,6 +1895,7 @@ public class Osmose {
         st.nextToken();
         if (!"null".equals(st.sval)) {
             String csvFile = resolveFile(st.sval);
+            mapFile[indexMap] = csvFile;
             readCSVMap(csvFile, indexMap);
             System.out.println("Loaded map " + indexMap + " " + csvFile);
         }
@@ -1914,6 +1951,7 @@ public class Osmose {
         st.nextToken();
         if (!"null".equals(st.sval)) {
             String csvFile = resolveFile(st.sval);
+            mapFile[indexMap] = st.sval;
             readCSVMap(csvFile, indexMap);
         }
     }
@@ -2143,7 +2181,7 @@ public class Osmose {
                 outOfZoneFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of out of zone species file");
-                return;
+                System.exit(0);
             }
         }
     }
@@ -2236,7 +2274,7 @@ public class Osmose {
                 accessFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of accessibilities file");
-                return;
+                System.exit(0);
             }
         }
     }
@@ -2393,7 +2431,7 @@ public class Osmose {
             File fileBase = new File(strFileBase);
             filePart.renameTo(fileBase);
         } catch (Exception ex) {
-            Logger.getLogger(Osmose.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> " + ex.toString());
+            Logger.getLogger(Osmose.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
     }
 
