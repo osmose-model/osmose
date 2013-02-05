@@ -126,7 +126,7 @@ public class MortalityIndicator extends AbstractIndicator {
             filename.append("_Simu");
             filename.append(getOsmose().numSimu);
             filename.append(".csv");
-            description = "Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat) & Fishing (F) mortality rates per time step of saving, except for Mnat that is expressed in osmose time step. To get annual mortality rates, sum the mortality rates within one year.";
+            description = "Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat) & Fishing (F) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. To get annual mortality rates, sum the mortality rates within one year.";
             // Write the file
             File file = new File(path, filename.toString());
             file.getParentFile().mkdirs();
@@ -153,8 +153,8 @@ public class MortalityIndicator extends AbstractIndicator {
                 pr.print(";");
                 for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
                     for (int iStage = 0; iStage < STAGES; iStage++) {
-                        if (iDeath == 2) {
-                            // instantenous mortality rate for Natural mortality
+                        if (iDeath == NATURAL && iStage == EGG) {
+                            // instantenous mortality rate for eggs natural mortality 
                             pr.print(mortalityRates[iSpecies][iDeath][iStage] / getOsmose().savingDtMatrix[getOsmose().numSerie]);
                         } else {
                             pr.print(mortalityRates[iSpecies][iDeath][iStage]);
