@@ -47,7 +47,7 @@ public class GrowthProcess extends AbstractProcess {
             Species species = school.getSpecies();
             int i = species.getIndex();
             int j = school.getAgeDt();
-            if ((j == 0) || species.isOut(j, getSimulation().getIndexTimeYear())) {
+            if ((j == 0) || MovementProcess.isOut(school)) {
                 // Linear growth for eggs and migrating schools
                 school.setLength(school.getLength() + deltaMeanLength[i][j]);
                 school.setWeight(species.computeWeight(school.getLength()));

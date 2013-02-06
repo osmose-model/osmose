@@ -59,7 +59,7 @@ public class Population extends FilteredSet<School> {
      * @return a List of the schools present on the grid at current time step
      */
     public List<School> getPresentSchools() {
-        return FilteredSets.subset(this, new PresentSchoolFilter(getSimulation().getIndexTimeYear()));
+        return FilteredSets.subset(this, new PresentSchoolFilter());
     }
     
     /**

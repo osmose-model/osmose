@@ -14,7 +14,6 @@ package fr.ird.osmose;
  * @version 2.1
  * *******************************************************************************
  */
-
 public class Species {
 
     final static public float TL_EGG = 3f;
@@ -63,10 +62,7 @@ public class Species {
     float[] ageStagesTab;
     public int nbDietStages;
     public float[] dietStagesTab;
-    // Migration
-    private float[][] outOfZoneMortality;
-    private boolean[][] outOfZoneCohort;
-    
+
     /**
      * Create a new species
      *
@@ -75,7 +71,7 @@ public class Species {
     public Species(int index) {
         this.index = index;
     }
-    
+
     public Species(int index, String name) {
         this.index = index;
         this.name = name;
@@ -106,7 +102,7 @@ public class Species {
         this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
         this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
         this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];
-        
+
         this.nbAccessStages = getOsmose().nbAccessStage[index];
         this.ageStagesTab = getOsmose().accessStageThreshold[index];
         if (getOsmose().dietsOutputMatrix[getOsmose().numSerie]) {
@@ -116,12 +112,8 @@ public class Species {
 
         // START INITIALISATION of COHORTS
         longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNumberTimeStepsPerYear());
-
-        // migration
-        outOfZoneMortality = new float[longevity][getSimulation().getNumberTimeStepsPerYear()];
-        outOfZoneCohort = new boolean[longevity][getSimulation().getNumberTimeStepsPerYear()];
     }
-    
+
     public float[] getMeanLength() {
 
         // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
@@ -157,7 +149,7 @@ public class Species {
         }
         return meanWeight;
     }
-    
+
     public float computeWeight(float length) {
         return (float) (c * (Math.pow(length, bPower)));
     }
@@ -180,21 +172,5 @@ public class Species {
 
     public String getName() {
         return name;
-    }
-    
-    public boolean isOut(int age, int indexTime) {
-        return outOfZoneCohort[age][indexTime];
-    }
-
-    public void setOut(int age, int indexTime, boolean isOut) {
-        outOfZoneCohort[age][indexTime] = isOut;
-    }
-
-    public float getOutMortality(int age, int indexTime) {
-        return outOfZoneMortality[age][indexTime];
-    }
-
-    public void setOutMortality(int age, int indexTime, float mortality) {
-        outOfZoneMortality[age][indexTime] = mortality;
     }
 }

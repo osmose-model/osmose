@@ -175,8 +175,8 @@ public class Osmose {
     int[] startingSavingTimeTab;
     boolean timeSeriesIsShortened;
     // migration
-    float[][] migrationTempMortality;
-    int[][] migrationTempAge, migrationTempDt;
+    public float[][] migrationTempMortality;
+    public int[][] migrationTempAge, migrationTempDt;
     // distribution
     int[][] areasTempAge;
     int[][] areasTempDt;
@@ -1824,10 +1824,10 @@ public class Osmose {
                 Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
+
         eliminateTwinMap();
     }
-    
+
     /**
      * This function eliminates twins in the list of maps of distribution
      */
@@ -2031,11 +2031,11 @@ public class Osmose {
                             numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h][areasTempDt[indexMap][n]] = indexMap;
                             //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
                         }
-                        if (nbCells == 0) {
-                            if (!simulation.getSpecies(areasNumSpForMap[indexMap]).isOut((areasTempAge[indexMap][m] * nbDtMatrix[numSerie]) + h, areasTempDt[indexMap][n])) {
-                                System.out.println("Match error between species areas and migration file for " + nameSpecMatrix[numSerie][areasNumSpForMap[indexMap]]);
-                            }
-                        }
+//                        if (nbCells == 0) {
+//                            if (!simulation.getSpecies(areasNumSpForMap[indexMap]).isOut((areasTempAge[indexMap][m] * nbDtMatrix[numSerie]) + h, areasTempDt[indexMap][n])) {
+//                                System.out.println("Match error between species areas and migration file for " + nameSpecMatrix[numSerie][areasNumSpForMap[indexMap]]);
+//                            }
+//                        }
                     }
                 }
             }
@@ -2134,7 +2134,7 @@ public class Osmose {
             st.slashStarComments(true);
             st.quoteChar(';');
 
-            int nbSpOutOfZone, numSpOutOfZone;
+            int nbSpOutOfZone, iSpec;
             int nbAgePerCase, nbDtPerCase;
             migrationTempAge = new int[nbSpeciesTab[numSerie]][];
             migrationTempDt = new int[nbSpeciesTab[numSerie]][];
@@ -2148,33 +2148,27 @@ public class Osmose {
                 } else {
                     for (int i = 0; i < nbSpOutOfZone; i++) {
                         st.nextToken();
-                        numSpOutOfZone = (new Integer(st.sval)).intValue();
+                        iSpec = (new Integer(st.sval)).intValue() - 1;
                         st.nextToken();
                         nbAgePerCase = new Integer(st.sval).intValue();
                         st.nextToken();
                         nbDtPerCase = new Integer(st.sval).intValue();
-                        migrationTempAge[numSpOutOfZone - 1] = new int[nbAgePerCase];
-                        migrationTempDt[numSpOutOfZone - 1] = new int[nbDtPerCase];
-                        migrationTempMortality[numSpOutOfZone - 1] = new float[nbAgePerCase];
+                        migrationTempAge[iSpec] = new int[nbAgePerCase];
+                        migrationTempDt[iSpec] = new int[nbDtPerCase];
+                        migrationTempMortality[iSpec] = new float[nbAgePerCase];
 
                         for (int k = 0; k < nbAgePerCase; k++) {
                             st.nextToken();
-                            migrationTempAge[numSpOutOfZone - 1][k] = new Integer(st.sval).intValue();
+                            migrationTempAge[iSpec][k] = new Integer(st.sval).intValue();
                         }
                         for (int k = 0; k < nbDtPerCase; k++) {
                             st.nextToken();
-                            migrationTempDt[numSpOutOfZone - 1][k] = new Integer(st.sval).intValue() - 1;
+                            migrationTempDt[iSpec][k] = new Integer(st.sval).intValue() - 1;
                         }
 
                         for (int m = 0; m < nbAgePerCase; m++) {
                             st.nextToken();
-                            migrationTempMortality[numSpOutOfZone - 1][m] = (new Float(st.sval)).floatValue();
-                            for (int n = 0; n < nbDtPerCase; n++) {
-                                for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                                    simulation.getSpecies(numSpOutOfZone - 1).setOut(migrationTempAge[numSpOutOfZone - 1][m] * nbDtMatrix[numSerie] + h, migrationTempDt[numSpOutOfZone - 1][n], true);
-                                    simulation.getSpecies(numSpOutOfZone - 1).setOutMortality(migrationTempAge[numSpOutOfZone - 1][m] * nbDtMatrix[numSerie] + h, migrationTempDt[numSpOutOfZone - 1][n], migrationTempMortality[numSpOutOfZone - 1][m]);
-                                }
-                            }
+                            migrationTempMortality[iSpec][m] = (new Float(st.sval)).floatValue();
                         }
                     }
                 }

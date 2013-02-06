@@ -38,7 +38,7 @@ public class MapDistributionProcess extends AbstractProcess {
          * Do not distribute cohorts that are presently out of
          * the simulated area.
          */
-        if (species.isOut(age, i_step_year)) {
+        if (MovementProcess.isOut(school)) {
             school.setOffGrid();
             return;
         }

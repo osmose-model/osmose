@@ -4,6 +4,7 @@ import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
+import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
@@ -378,7 +379,7 @@ public class Simulation {
              * Cell in water
              */
             for (School school : getPopulation().getSchools(cell)) {
-                if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !school.getSpecies().isOut(school.getAgeDt(), i_step_year)) {
+                if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !MovementProcess.isOut(school)) {
                     nbSchools[school.getSpeciesIndex()] += 1;
                     biomass[school.getSpeciesIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
                     abundance[school.getSpeciesIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getAbundance();

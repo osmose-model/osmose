@@ -20,10 +20,35 @@ public class MovementProcess extends AbstractProcess {
      * Ranges of movement in cell during one Osmose time step
      */
     private static int[] range;
+    /*
+     * Migration
+     */
+    private static float[][][] outOfZoneMortality;
+    private static boolean[][][] outOfZoneCohort;
 
     @Override
     public void init() {
         int nSpecies = getSimulation().getNumberSpecies();
+        // init migration
+        outOfZoneMortality = new float[nSpecies][][];
+        outOfZoneCohort = new boolean[nSpecies][][];
+        for (int index = 0; index < nSpecies; index++) {
+            int longevity = getSpecies(index).getLongevity();
+            outOfZoneMortality[index] = new float[longevity][getSimulation().getNumberTimeStepsPerYear()];
+            outOfZoneCohort[index] = new boolean[longevity][getSimulation().getNumberTimeStepsPerYear()];
+            if (null != getOsmose().migrationTempAge[index]) {
+                int nbStepYear = getSimulation().getNumberTimeStepsPerYear();
+                for (int m = 0; m < getOsmose().migrationTempAge[index].length; m++) {
+                    for (int n = 0; n < getOsmose().migrationTempDt[index].length; n++) {
+                        for (int h = 0; h < nbStepYear; h++) {
+                            outOfZoneCohort[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = true;
+                            outOfZoneMortality[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = getOsmose().migrationTempMortality[index][m];
+                        }
+                    }
+                }
+            }
+        }
+        // init distribution
         range = getOsmose().range[getOsmose().numSerie];
         movements = new AbstractProcess[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
@@ -115,4 +140,11 @@ public class MovementProcess extends AbstractProcess {
         return accessibleCells;
     }
     
+    public static boolean isOut(School school) {
+        return outOfZoneCohort[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
+    }
+
+    public static float getOutMortality(School school) {
+        return outOfZoneMortality[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
+    }
 }
