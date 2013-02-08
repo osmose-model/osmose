@@ -11,16 +11,16 @@ import fr.ird.osmose.Species;
  */
 public class MapDistributionProcess extends AbstractProcess {
     
+    private MovementProcess parent;
     private Species species;
-    int[][] numMaps;
     
-    public MapDistributionProcess(Species species) {
+    public MapDistributionProcess(Species species, MovementProcess parent) {
         this.species = species;
+        this.parent = parent;
     }
 
     @Override
     public void init() {
-        numMaps = getOsmose().numMap[species.getIndex()];
     }
 
     @Override
@@ -44,9 +44,9 @@ public class MapDistributionProcess extends AbstractProcess {
         }
 
         // Get current map and max probability of presence
-        int numMap = numMaps[age][i_step_year];
-        GridMap map = getOsmose().getMap(numMap);
-        float tempMaxProbaPresence = getOsmose().maxProbaPresence[numMap];
+        int indexMap = parent.getIndexMap(school);
+        GridMap map = parent.getMap(indexMap);
+        float tempMaxProbaPresence = parent.getMaxProbaPresence(indexMap);
 
         /*
          * Check whether the map has changed from previous cohort
@@ -62,7 +62,8 @@ public class MapDistributionProcess extends AbstractProcess {
             } else {
                 oldTime = i_step_year - 1;
             }
-            if (numMap == numMaps[age - 1][oldTime]) {
+            int previousIndexMap = parent.getIndexMap(school.getSpeciesIndex(), age - 1, oldTime);
+            if (indexMap == previousIndexMap) {
                 sameMap = true;
             }
         }
@@ -79,14 +80,12 @@ public class MapDistributionProcess extends AbstractProcess {
             double proba;
             do {
                 indexCell = (int) Math.round((nCells - 1) * Math.random());
-                proba = getOsmose().maps[numMaps[age][i_step_year]].getValue(getGrid().getCell(indexCell));
+                proba = parent.getMap(school).getValue(getGrid().getCell(indexCell));
             } while (proba <= 0 || proba < Math.random() * tempMaxProbaPresence);
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.
-            school.moveToCell(MovementProcess.randomDeal(MovementProcess.getAccessibleCells(school, map)));
+            school.moveToCell(parent.randomDeal(parent.getAccessibleCells(school, map)));
         }
     }
-    
-    
 }

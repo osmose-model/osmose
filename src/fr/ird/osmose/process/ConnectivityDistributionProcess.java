@@ -12,16 +12,16 @@ import fr.ird.osmose.Species;
  */
 public class ConnectivityDistributionProcess extends AbstractProcess {
     
+    private MovementProcess parent;
     private Species species;
-    int[][] numMaps;
     
-    public ConnectivityDistributionProcess(Species species) {
+    public ConnectivityDistributionProcess(Species species, MovementProcess parent) {
         this.species = species;
+        this.parent = parent;
     }
 
     @Override
     public void init() {
-       numMaps = getOsmose().numMap[species.getIndex()];
     }
 
     @Override
@@ -48,10 +48,10 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
         }
 
         // Get current map and max probability of presence
-        int numMap = numMaps[age][i_step_year];
-        GridMap map = getOsmose().getMap(numMap);
-        float tempMaxProbaPresence = getOsmose().maxProbaPresence[numMap];
-
+        int indexMap = parent.getIndexMap(school);
+        GridMap map = parent.getMap(indexMap);
+        float tempMaxProbaPresence = parent.getMaxProbaPresence(indexMap);
+        
         // init = true if either cohort zero or first time-step of the simulation
         boolean init = (age == 0) | (i_step_simu == 0);
         /*
@@ -67,7 +67,8 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
             } else {
                 oldTime = i_step_year - 1;
             }
-            if (numMap == numMaps[age - 1][oldTime]) {
+            int previousIndexMap = parent.getIndexMap(school.getSpeciesIndex(), age - 1, oldTime);
+            if (indexMap == previousIndexMap) {
                 sameMap = true;
             }
         }
@@ -84,24 +85,25 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
             double proba;
             do {
                 indexCell = (int) Math.round((nCells - 1) * Math.random());
-                proba = getOsmose().maps[numMaps[age][i_step_year]].getValue(getGrid().getCell(indexCell));
+                proba = parent.getMap(school).getValue(getGrid().getCell(indexCell));
             } while (proba <= 0 || proba < Math.random() * tempMaxProbaPresence);
             school.moveToCell(getGrid().getCell(indexCell));
         } else if (sameMap) {
             // Random move in adjacent cells contained in the map.
-            school.moveToCell(MovementProcess.randomDeal(MovementProcess.getAccessibleCells(school, map)));
+            school.moveToCell(parent.randomDeal(parent.getAccessibleCells(school, map)));
         } else {
-            connectivityMoveSchool(school, numMap);
+            connectivityMoveSchool(school, indexMap);
         }
     }
 
-    private void connectivityMoveSchool(School school, int numMap) {
+    private void connectivityMoveSchool(School school, int indexMap) {
         // get the connectivity matrix associated to object school
         // species i, cohort j and time step indexTime.
-        ConnectivityMatrix matrix = getOsmose().connectivityMatrix[numMap];
+        ConnectivityMatrix matrix = parent.getMatrix(indexMap);
         // get the connectivity of the cell where the school is
         // currently located
         int iCell = school.getCell().getIndex();
+        //System.out.println(indexMap + " " + (matrix == null) + " " + school.getAgeDt() + " " + getSimulation().getIndexTimeYear() + " " + school.isUnlocated());
         ConnectivityMatrix.ConnectivityLine cline = matrix.clines.get(iCell);
 
         if (!school.getCell().isLand() && null == cline) { // TD ~~

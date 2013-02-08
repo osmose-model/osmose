@@ -30,19 +30,13 @@ import ucar.nc2.NetcdfFileWriteable;
 public class Osmose {
 
     /*
-     * ********
-     * * Logs * ******** 2011/04/07 phv Created static instance of the Osmose
-     * object. Added a getGrid() method that other classes will call through the
-     * Osmose instance. Added a getSimulation() method for other classes to get
-     * the simulation instance. public void distribRandom(). Recoded the random
-     * sorting of the neighbor cells using method Grid.getNeighborCells since
-     * Cell.neighbors[] has been deleted. ***
-     */
-
-    /*
      * Static instance of Osmose
      */
     private static Osmose osmose = new Osmose();
+    // phv 20130208
+    // Temporary flag to be able to read new format for HABITAT configuration
+    // file with agemin and agemax specified.
+    public final static boolean NEW_AREA_FILE = false;
     /*
      *
      */
@@ -121,7 +115,7 @@ public class Osmose {
     /*
      * SPECIES AREAS FILE
      */
-    String[] areasFileNameTab;	              //choice between "Random" or fileName
+    public String[] areasFileNameTab;	              //choice between "Random" or fileName
     public int[][] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
     public int[][][] numMap;        //gives a number of map for[species][cohort][dt]
     public GridMap[] maps;
@@ -290,7 +284,9 @@ public class Osmose {
                     readMigrationFile();
                     System.out.println("migration caracteristics initialized");
 
-                    readAreaFile();
+                    if (!NEW_AREA_FILE) {
+                        readAreaFile();
+                    }
                     System.out.println("areas initialized");
 
                     simulation = new Simulation();
@@ -319,7 +315,9 @@ public class Osmose {
                     }
 
                     readMigrationFile();
-                    readAreaFile();
+                    if (!NEW_AREA_FILE) {
+                        readAreaFile();
+                    }
 
                     simulation = new Simulation();
                     simulation.init();

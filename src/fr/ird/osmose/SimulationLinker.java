@@ -37,4 +37,7 @@ public class SimulationLinker {
         return Osmose.getInstance().getSimulation().getSpecies(index);
     }
     
+    public static String resolveFile(String filename) {
+        return Osmose.getInstance().resolveFile(filename);
+    }
 }

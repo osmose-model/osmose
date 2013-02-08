@@ -13,17 +13,19 @@ import java.util.List;
  */
 public class RandomDistributionProcess extends AbstractProcess {
 
+    private MovementProcess parent;
     private Species species;
-    int areaSize;
-    List<Cell> randomMap;
+    private int areaSize;
+    private List<Cell> randomMap;
 
-    public RandomDistributionProcess(Species species) {
+    public RandomDistributionProcess(Species species, MovementProcess parent) {
         this.species = species;
+        this.parent = parent;
     }
 
     @Override
     public void init() {
-        areaSize = getOsmose().speciesAreasSizeTab[getOsmose().numSerie][species.getIndex()];
+        areaSize = parent.getSizeRandomMap(species.getIndex());
         createRandomMap();
     }
 
@@ -31,9 +33,9 @@ public class RandomDistributionProcess extends AbstractProcess {
     public void run() {
         for (School school : getPopulation().getSchools(species)) {
             if (school.isUnlocated()) {
-                school.moveToCell(MovementProcess.randomDeal(randomMap));
+                school.moveToCell(parent.randomDeal(randomMap));
             } else {
-                school.moveToCell(MovementProcess.randomDeal(MovementProcess.getAccessibleCells(school)));
+                school.moveToCell(parent.randomDeal(parent.getAccessibleCells(school)));
             }
         }
     }
