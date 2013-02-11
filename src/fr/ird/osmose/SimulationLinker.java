@@ -40,4 +40,13 @@ public class SimulationLinker {
     public static String resolveFile(String filename) {
         return Osmose.getInstance().resolveFile(filename);
     }
+    
+    /**
+     * The number of simulated species
+     *
+     * @return the number of simulated species
+     */
+    public int getNSpecies() {
+        return Osmose.getInstance().getSimulation().getNumberSpecies();
+    }
 }

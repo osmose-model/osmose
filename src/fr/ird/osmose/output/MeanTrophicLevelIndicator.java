@@ -11,7 +11,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanTrophicLevelIndicator extends AbstractIndicator {
+public class MeanTrophicLevelIndicator extends SchoolBasedIndicator {
 
     private double[] meanTL;
     private double[] biomass;

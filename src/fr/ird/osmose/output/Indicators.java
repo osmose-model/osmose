@@ -4,7 +4,6 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
 import fr.ird.osmose.SimulationLinker;
 import java.io.*;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.logging.Logger;
 public class Indicators extends SimulationLinker {
 
     // List of the indicators
-    private static List<AbstractIndicator> indicators;
+    private static List<Indicator> indicators;
 
     public static void init() {
         indicators = new ArrayList();
@@ -33,8 +32,9 @@ public class Indicators extends SimulationLinker {
         indicators.add(new MeanTrophicLevelIndicator());
         indicators.add(new TrophicLevelSpectrumIndicator());
         indicators.add(new PredationIndicator());
+        indicators.add(new SpatialIndicator());
 
-        for (AbstractIndicator indicator : indicators) {
+        for (Indicator indicator : indicators) {
             if (indicator.isEnabled()) {
                 indicator.reset();
             }
@@ -42,7 +42,7 @@ public class Indicators extends SimulationLinker {
     }
     
     public static void initStep() {
-        for (AbstractIndicator indicator : indicators) {
+        for (Indicator indicator : indicators) {
             if (indicator.isEnabled()) {
                 indicator.init();
             }
@@ -58,11 +58,9 @@ public class Indicators extends SimulationLinker {
         //
         // UPDATE
         if (year >= getOsmose().timeSeriesStart) {
-            for (AbstractIndicator indicator : indicators) {
+            for (Indicator indicator : indicators) {
                 if (indicator.isEnabled()) {
-                    for (School school : getPopulation().getAliveSchools()) {
-                        indicator.update(school);
-                    }
+                    indicator.update();
                     if (((index + 1) % nStepsRecord) == 0) {
                         float time = getSimulation().getYear() + (getSimulation().getIndexTimeYear() + 1f) / (float) nStepsYear;
                         indicator.write(time);

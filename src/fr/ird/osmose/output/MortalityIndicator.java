@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class MortalityIndicator extends AbstractIndicator {
+public class MortalityIndicator extends SchoolBasedIndicator {
 
     /*
      * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits

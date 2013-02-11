@@ -10,7 +10,7 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class YieldIndicator extends AbstractIndicator {
+public class YieldIndicator extends SchoolBasedIndicator {
 
     public double[] yield, yieldN;
     

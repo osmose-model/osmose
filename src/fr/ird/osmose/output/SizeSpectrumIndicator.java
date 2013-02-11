@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class SizeSpectrumIndicator extends AbstractIndicator {
+public class SizeSpectrumIndicator extends SchoolBasedIndicator {
 
     private double[][] sizeSpectrum;
     

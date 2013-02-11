@@ -122,9 +122,6 @@ public class ConcomitantMortalityStep extends AbstractStep {
         growthProcess.run();
 
         // Save steps
-        if (getOsmose().spatializedOutputs[getOsmose().numSerie]) {
-            getSimulation().saveSpatializedStep();
-        }
         Indicators.updateAndWriteIndicators();
 
         // Reproduction

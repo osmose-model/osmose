@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
+public class TrophicLevelSpectrumIndicator extends SchoolBasedIndicator {
 
     /*
      * Trophic level distribution [SPECIES][TL_SPECTRUM]

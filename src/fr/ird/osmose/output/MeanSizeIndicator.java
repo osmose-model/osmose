@@ -11,7 +11,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanSizeIndicator extends AbstractIndicator {
+public class MeanSizeIndicator extends SchoolBasedIndicator {
 
     private double[] meanSize;
     private double[] abundance;

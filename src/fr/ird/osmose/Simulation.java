@@ -4,20 +4,11 @@ import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
-import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
 import fr.ird.osmose.step.SequentialMortalityStep;
-import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import ucar.ma2.ArrayFloat;
-import ucar.ma2.DataType;
-import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
 
 public class Simulation {
 
@@ -158,11 +149,6 @@ public class Simulation {
         AbstractProcess populatingProcess = new PopulatingProcess();
         populatingProcess.init();
         populatingProcess.run();
-
-        // Initialize spatialized outputs
-        if (getOsmose().spatializedOutputs[numSerie]) {
-            initSpatializedSaving();
-        }
         
         // Initialize the indicators
         Indicators.init();
@@ -247,207 +233,6 @@ public class Simulation {
 
     public Population getPopulation() {
         return population;
-    }
-
-    public void initSpatializedSaving() {
-
-        NetcdfFileWriteable nc = getOsmose().getNCOut();
-        /*
-         * Create dimensions
-         */
-        Dimension speciesDim = nc.addDimension("species", getNumberSpecies());
-        Dimension ltlDim = nc.addDimension("ltl", getForcing().getNbPlanktonGroups());
-        Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
-        Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
-        Dimension timeDim = nc.addUnlimitedDimension("time");
-        Dimension stepDim = nc.addDimension("step", 2);
-        /*
-         * Add variables
-         */
-        nc.addVariable("time", DataType.FLOAT, new Dimension[]{timeDim});
-        nc.addVariableAttribute("time", "units", "year");
-        nc.addVariableAttribute("time", "description", "time ellapsed, in years, since the begining of the simulation");
-        nc.addVariable("biomass", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
-        nc.addVariableAttribute("biomass", "units", "ton");
-        nc.addVariableAttribute("biomass", "description", "biomass, in tons, per species and per cell");
-        nc.addVariableAttribute("biomass", "_FillValue", -99.f);
-        nc.addVariable("abundance", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
-        nc.addVariableAttribute("abundance", "units", "number of fish");
-        nc.addVariableAttribute("abundance", "description", "Number of fish per species and per cell");
-        nc.addVariableAttribute("abundance", "_FillValue", -99.f);
-        nc.addVariable("yield", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
-        nc.addVariableAttribute("yield", "units", "ton");
-        nc.addVariableAttribute("yield", "description", "Catches, in tons, per species and per cell");
-        nc.addVariableAttribute("yield", "_FillValue", -99.f);
-        nc.addVariable("mean_size", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
-        nc.addVariableAttribute("mean_size", "units", "centimeter");
-        nc.addVariableAttribute("mean_size", "description", "mean size, in centimeter, per species and per cell");
-        nc.addVariableAttribute("mean_size", "_FillValue", -99.f);
-        nc.addVariable("trophic_level", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
-        nc.addVariableAttribute("trophic_level", "units", "scalar");
-        nc.addVariableAttribute("trophic_level", "description", "trophic level per species and per cell");
-        nc.addVariableAttribute("trophic_level", "_FillValue", -99.f);
-        nc.addVariable("ltl_biomass", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, stepDim, linesDim, columnsDim});
-        nc.addVariableAttribute("ltl_biomass", "units", "ton/km2");
-        nc.addVariableAttribute("ltl_biomass", "description", "plankton biomass, in tons per km2 integrated on water column, per group and per cell");
-        nc.addVariableAttribute("ltl_biomass", "step", "step=0 before predation, step=1 after predation");
-        nc.addVariableAttribute("ltl_biomass", "_FillValue", -99.f);
-        nc.addVariable("latitude", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
-        nc.addVariableAttribute("latitude", "units", "degree");
-        nc.addVariableAttribute("latitude", "description", "latitude of the center of the cell");
-        nc.addVariable("longitude", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
-        nc.addVariableAttribute("longitude", "units", "degree");
-        nc.addVariableAttribute("longitude", "description", "longitude of the center of the cell");
-        /*
-         * Add global attributes
-         */
-        nc.addGlobalAttribute("dimension_step", "step=0 before predation, step=1 after predation");
-        StringBuilder str = new StringBuilder();
-        for (int kltl = 0; kltl < getForcing().getNbPlanktonGroups(); kltl++) {
-            str.append(kltl);
-            str.append("=");
-            str.append(getForcing().getPlanktonName(kltl));
-            str.append(" ");
-        }
-        nc.addGlobalAttribute("dimension_ltl", str.toString());
-        str = new StringBuilder();
-        for (int ispec = 0; ispec < getNumberSpecies(); ispec++) {
-            str.append(ispec);
-            str.append("=");
-            str.append(getSpecies(ispec).getName());
-            str.append(" ");
-        }
-        nc.addGlobalAttribute("dimension_species", str.toString());
-        try {
-            /*
-             * Validates the structure of the NetCDF file.
-             */
-            nc.create();
-            /*
-             * Writes variable longitude and latitude
-             */
-            ArrayFloat.D2 arrLon = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
-            ArrayFloat.D2 arrLat = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
-            for (Cell cell : getGrid().getCells()) {
-                arrLon.set(getGrid().getNbLines() - cell.get_igrid() - 1, cell.get_jgrid(), cell.getLon());
-                arrLat.set(getGrid().getNbLines() - cell.get_igrid() - 1, cell.get_jgrid(), cell.getLat());
-            }
-            nc.write("longitude", arrLon);
-            nc.write("latitude", arrLat);
-        } catch (IOException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
-    public void saveSpatializedStep() {
-
-        if (year < getOsmose().timeSeriesStart) {
-            return;
-        }
-
-        float[][][] biomass = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][] mean_size = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][] tl = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][][] ltlbiomass = new float[getForcing().getNbPlanktonGroups()][2][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][] abundance = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-        float[][][] yield = new float[this.getNumberSpecies()][getGrid().getNbLines()][getGrid().getNbColumns()];
-
-        for (Cell cell : getGrid().getCells()) {
-            int[] nbSchools = new int[getNumberSpecies()];
-            /*
-             * Cell on land
-             */
-            if (cell.isLand()) {
-                float fillValue = -99.f;
-                for (int ispec = 0; ispec < getNumberSpecies(); ispec++) {
-                    biomass[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
-                    abundance[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
-                    mean_size[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
-                    tl[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
-                    yield[ispec][cell.get_igrid()][cell.get_jgrid()] = fillValue;
-                }
-                for (int iltl = 0; iltl < getForcing().getNbPlanktonGroups(); iltl++) {
-                    ltlbiomass[iltl][0][cell.get_igrid()][cell.get_jgrid()] = fillValue;
-                    ltlbiomass[iltl][1][cell.get_igrid()][cell.get_jgrid()] = fillValue;
-                }
-                continue;
-            }
-            /*
-             * Cell in water
-             */
-            for (School school : getPopulation().getSchools(cell)) {
-                if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !MovementProcess.isOut(school)) {
-                    nbSchools[school.getSpeciesIndex()] += 1;
-                    biomass[school.getSpeciesIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getBiomass();
-                    abundance[school.getSpeciesIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getAbundance();
-                    mean_size[school.getSpeciesIndex()][cell.get_igrid()][cell.get_jgrid()] += school.getLength();
-                    tl[school.getSpeciesIndex()][cell.get_igrid()][cell.get_jgrid()] += school.trophicLevel;
-                    //yield[school.getSpecies().getIndex()][cell.get_igrid()][cell.get_jgrid()] += (school.catches * school.getWeight() / 1000000.d);
-                }
-            }
-            for (int ispec = 0; ispec < getNumberSpecies(); ispec++) {
-                if (nbSchools[ispec] > 0) {
-                    mean_size[ispec][cell.get_igrid()][cell.get_jgrid()] /= abundance[ispec][cell.get_igrid()][cell.get_jgrid()];
-                    tl[ispec][cell.get_igrid()][cell.get_jgrid()] /= biomass[ispec][cell.get_igrid()][cell.get_jgrid()];
-                }
-            }
-            for (int iltl = 0; iltl < getForcing().getNbPlanktonGroups(); iltl++) {
-                ltlbiomass[iltl][0][cell.get_igrid()][cell.get_jgrid()] = getForcing().getPlankton(iltl).biomass[cell.get_igrid()][cell.get_jgrid()];
-                ltlbiomass[iltl][1][cell.get_igrid()][cell.get_jgrid()] = getForcing().getPlankton(iltl).iniBiomass[cell.get_igrid()][cell.get_jgrid()];
-            }
-        }
-
-        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrAbundance = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, getNumberSpecies(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D5 arrLTL = new ArrayFloat.D5(1, getForcing().getNbPlanktonGroups(), 2, getGrid().getNbLines(), getGrid().getNbColumns());
-        int nl = getGrid().getNbLines() - 1;
-        for (int kspec = 0; kspec < getNumberSpecies(); kspec++) {
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrBiomass.set(0, kspec, nl - i, j, biomass[kspec][i][j]);
-                    arrAbundance.set(0, kspec, nl - i, j, abundance[kspec][i][j]);
-                    arrSize.set(0, kspec, nl - i, j, mean_size[kspec][i][j]);
-                    arrTL.set(0, kspec, nl - i, j, tl[kspec][i][j]);
-                    arrYield.set(0, kspec, nl - i, j, yield[kspec][i][j]);
-                }
-            }
-        }
-        for (int kltl = 0; kltl < getForcing().getNbPlanktonGroups(); kltl++) {
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrLTL.set(0, kltl, 0, nl - i, j, ltlbiomass[kltl][0][i][j]);
-                    arrLTL.set(0, kltl, 1, nl - i, j, ltlbiomass[kltl][1][i][j]);
-                }
-            }
-        }
-
-        float timeSaving = year + (i_step_year + 1f) / (float) nTimeStepsPerYear;
-        ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
-        arrTime.set(0, timeSaving);
-
-        NetcdfFileWriteable nc = getOsmose().getNCOut();
-        int index = nc.getUnlimitedDimension().getLength();
-        //System.out.println("NetCDF saving time " + indexTime + " - " + timeSaving);
-        try {
-            nc.write("time", new int[]{index}, arrTime);
-            nc.write("biomass", new int[]{index, 0, 0, 0}, arrBiomass);
-            nc.write("abundance", new int[]{index, 0, 0, 0}, arrAbundance);
-            nc.write("yield", new int[]{index, 0, 0, 0}, arrYield);
-            nc.write("mean_size", new int[]{index, 0, 0, 0}, arrSize);
-            nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
-            nc.write("ltl_biomass", new int[]{index, 0, 0, 0, 0}, arrLTL);
-        } catch (IOException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
     }
 
     public int getNumberSpecies() {

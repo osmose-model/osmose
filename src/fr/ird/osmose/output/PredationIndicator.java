@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class PredationIndicator extends AbstractIndicator {
+public class PredationIndicator extends SchoolBasedIndicator {
 
     private double[][][][] diet, predatorPressure;
     private double[][] nbStomachs;

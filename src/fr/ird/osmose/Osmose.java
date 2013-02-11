@@ -25,7 +25,6 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import ucar.nc2.NetcdfFileWriteable;
 
 public class Osmose {
 
@@ -178,10 +177,6 @@ public class Osmose {
     private String[] mapFile;
     private int[] mapIndexNoTwin;
     public SpatialDistribution[] spatialDistribution;
-    /**
-     * Object for creating/writing netCDF files.
-     */
-    private static NetcdfFileWriteable ncOut;
 
     public void initSimulation() {
 
@@ -274,9 +269,6 @@ public class Osmose {
 //                    }
                     IOTools.deleteDirectory(targetPath);
                 }
-                if (spatializedOutputs[numSerie]) {
-                    createNCFile(numSerie);
-                }
                 if (numSimu == 0) {
                     initializeOptions();
                     System.out.println("options initialized");
@@ -325,9 +317,6 @@ public class Osmose {
 
                 simulation.run();
 
-                if (spatializedOutputs[numSerie]) {
-                    closeNCFile();
-                }
                 System.out.print("simu " + numSimu + " end -> ");
                 System.out.println(new Date());
             }
@@ -2402,58 +2391,6 @@ public class Osmose {
         }
     }
 
-    private void createNCFile(int nSerie) {
-        try {
-            ncOut = NetcdfFileWriteable.createNew("");
-            ncOut.setLocation(makeFileLocation(nSerie));
-        } catch (IOException ex) {
-            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    /**
-     * Closes the NetCDF file.
-     */
-    private void closeNCFile() {
-        try {
-            ncOut.close();
-            String strFilePart = ncOut.getLocation();
-            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
-            File filePart = new File(strFilePart);
-            File fileBase = new File(strFileBase);
-            filePart.renameTo(fileBase);
-        } catch (Exception ex) {
-            Logger.getLogger(Osmose.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
-        }
-    }
-
-    public NetcdfFileWriteable getNCOut() {
-        return ncOut;
-    }
-
-    private String makeFileLocation(int nSerie) throws IOException {
-
-        StringBuilder filename = new StringBuilder();
-        filename.append(outputPathName);
-        filename.append(outputFileNameTab[nSerie]);
-        filename.append(fileSeparator);
-        filename.append(outputPrefix[nSerie]);
-        filename.append("_spatialized_Simu");
-        filename.append(nSerie);
-        filename.append(".nc");
-        File file = new File(filename.toString());
-        try {
-            IOTools.makeDirectories(file.getAbsolutePath());
-            file.createNewFile();
-            file.delete();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("{Ouput} Failed to create NetCDF file " + filename + " ==> " + ex.getMessage());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        return filename + ".part";
-    }
-
     public void saveSerieSimulations(int nSerie) // ************************** seuls les fichiers biomasses, abundances, yield,
     //**************************size, mortalites et size spectrum per species sont OK � 100%
     {
@@ -3001,9 +2938,6 @@ public class Osmose {
         initializeOptions();
         loadMPAs();
         initializeOptions();
-        if (spatializedOutputs[numSerie]) {
-            createNCFile(numSerie);
-        }
         simulation = new Simulation();
         simulation.init();
         readMigrationFile();

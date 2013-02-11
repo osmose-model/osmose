@@ -6,7 +6,7 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class BiomassIndicator extends AbstractIndicator {
+public class BiomassIndicator extends SchoolBasedIndicator {
 
     private double[] biomassTot;
     private double[] biomassNoJuv;

@@ -125,9 +125,6 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Save steps
         Indicators.updateAndWriteIndicators();
-        if (getOsmose().spatializedOutputs[getOsmose().numSerie]) {
-            getSimulation().saveSpatializedStep();
-        }
 
         // Reproduction
         reproductionProcess.run();

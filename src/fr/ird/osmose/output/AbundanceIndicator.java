@@ -10,7 +10,7 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class AbundanceIndicator extends AbstractIndicator {
+public class AbundanceIndicator extends SchoolBasedIndicator {
 
     private double[] abundanceTot;
     private double[] abundanceNoJuv;
