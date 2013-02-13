@@ -33,6 +33,7 @@ public class Indicators extends SimulationLinker {
         indicators.add(new TrophicLevelSpectrumIndicator());
         indicators.add(new PredationIndicator());
         indicators.add(new SpatialIndicator());
+        indicators.add(new BiomassCalibrationIndicator());
 
         for (Indicator indicator : indicators) {
             if (indicator.isEnabled()) {

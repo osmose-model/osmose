@@ -19,7 +19,7 @@ public class BiomassIndicator extends SchoolBasedIndicator {
     @Override
     public void reset() {
         biomassNoJuv = new double[getNSpecies()];
-        if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
+        if (getOsmose().isIncludeClassZero()) {
             biomassTot = new double[getNSpecies()];
         }
     }
@@ -46,8 +46,6 @@ public class BiomassIndicator extends SchoolBasedIndicator {
         int nSpec = getSimulation().getNumberSpecies();
 
         double nsteps = getOsmose().savingDtMatrix[getOsmose().numSerie];
-        int year = getSimulation().getYear();
-        int indexSaving = (int) (getSimulation().getIndexTimeYear() / nsteps);
         for (int i = 0; i < nSpec; i++) {
             if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
                 biomassTot[i] /= nsteps;
@@ -70,14 +68,3 @@ public class BiomassIndicator extends SchoolBasedIndicator {
         }
     }
 }
-
-// keep it temporarilly as a reminder of how BIOMQuadri is recorded for calibration
-//        if (getOsmose().isCalibrationOutput()) {
-//            for (int i = 0; i < nSpec; i++) {
-//                getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassNoJuv[i];
-//                getOsmose().BIOMQuadri[getOsmose().numSimu][i][1][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassTot[i];
-//            }
-//            for (int i = nSpec; i < nSpec + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
-//                getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) (biomPerStage[i][0] / nsteps);
-//            }
-//        }
