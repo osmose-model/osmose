@@ -5,6 +5,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -17,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class MortalityIndicator extends SchoolBasedIndicator {
+public class MortalityIndicator extends SimulationLinker implements Indicator {
 
     /*
      * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
@@ -49,8 +50,6 @@ public class MortalityIndicator extends SchoolBasedIndicator {
 
     @Override
     public void init() {
-        // Cumulate the mortality rates
-        updateMortalityRates();
         // save abundance at the beginning of the time step
         updateAbundancePerStages();
         // Reset the nDead array used to compute the mortality rates of current
@@ -84,23 +83,27 @@ public class MortalityIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
+    public void update() {
         int iStage;
-        if (school.getAgeDt() == 0) {
-            iStage = EGG;
-        } else if (school.getAgeDt() < school.getSpecies().recruitAge) {
-            // Pre-recruits
-            iStage = PRE_RECRUIT;
-        } else {
-            // Recruits
-            iStage = RECRUIT;
+        for (School school : getPopulation().getAliveSchools()) {
+            if (school.getAgeDt() == 0) {
+                iStage = EGG;
+            } else if (school.getAgeDt() < school.getSpecies().recruitAge) {
+                // Pre-recruits
+                iStage = PRE_RECRUIT;
+            } else {
+                // Recruits
+                iStage = RECRUIT;
+            }
+            int iSpecies = school.getSpeciesIndex();
+            // Update number of deads
+            nDead[iSpecies][PREDATION][iStage] += school.nDeadPredation;
+            nDead[iSpecies][STARVATION][iStage] += school.nDeadStarvation;
+            nDead[iSpecies][NATURAL][iStage] += school.nDeadNatural;
+            nDead[iSpecies][FISHING][iStage] += school.nDeadFishing;
         }
-        int iSpecies = school.getSpeciesIndex();
-        // Update number of deads
-        nDead[iSpecies][PREDATION][iStage] += school.nDeadPredation;
-        nDead[iSpecies][STARVATION][iStage] += school.nDeadStarvation;
-        nDead[iSpecies][NATURAL][iStage] += school.nDeadNatural;
-        nDead[iSpecies][FISHING][iStage] += school.nDeadFishing;
+        // Cumulate the mortality rates
+        updateMortalityRates();
     }
 
     @Override
