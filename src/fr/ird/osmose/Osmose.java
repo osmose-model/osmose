@@ -145,7 +145,7 @@ public class Osmose {
     public boolean[] TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
             sizeSpectrumOutputMatrix, sizeSpectrumPerSpeOutputMatrix,
             planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix, spatializedOutputs;
-    String[] planktonBiomassOutputMatrix;
+    public String[] planktonBiomassOutputMatrix;
     String[] dietsConfigFileName, dietOutputMetrics;
     int[][] nbDietsStages;
     float[][][] dietStageThreshold;
