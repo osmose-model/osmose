@@ -100,8 +100,6 @@ public class SequentialMortalityStep extends AbstractStep {
         // Update plankton concentration
         getForcing().updatePlankton(getSimulation().getIndexTimeYear());
 
-        getSimulation().saveBiomassBeforeMortality();
-
         // Predation
         predationProcess.run();
 

@@ -92,9 +92,6 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Spatial distribution
         movementProcess.run();
 
-        // Preliminary actions before mortality processes
-        getSimulation().saveBiomassBeforeMortality();
-
         // Compute mortality
         // (predation + fishing + natural mortality + starvation)
         for (School school : getPopulation()) {

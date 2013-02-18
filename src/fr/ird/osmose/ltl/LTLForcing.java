@@ -23,7 +23,6 @@ public interface LTLForcing {
     public void updatePlankton(int iStepSimu);
     public void mapInterpolation();
     public double getBiomass(int iPlankton);
-    public void savePlanktonBiomass(String fileFormat);
     public int getNbPlanktonGroups();
     public String getPlanktonName(int indexGroup);
     public Plankton getPlankton(int indexGroup);

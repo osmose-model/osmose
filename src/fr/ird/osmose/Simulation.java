@@ -185,22 +185,6 @@ public class Simulation {
         }
     }
 
-    /*
-     * save fish biomass before any mortality process for diets data (last
-     * column of predatorPressure output file in Diets/)
-     */
-    public void saveBiomassBeforeMortality() {
-
-        // update biomass
-        if (getOsmose().dietsOutputMatrix && (year >= getOsmose().timeSeriesStart)) {
-//            for (School school : getPopulation().getPresentSchools()) {
-//                Indicators.biomPerStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
-//            }
-//            getForcing().saveForDiet();
-        }
-        getOsmose().getForcing().savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix);
-    }
-
     public void run() {
 
         while (year < getOsmose().getNumberYears()) {
