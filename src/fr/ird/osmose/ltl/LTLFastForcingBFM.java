@@ -293,7 +293,6 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
         int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
-        System.out.println(iStepYear + " " + getSimulation().getIndexTimeYear());
         updateData(iStepYear);
         mapInterpolation();
     }
