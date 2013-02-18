@@ -65,7 +65,7 @@ public class SizeSpectrumIndicator extends SchoolBasedIndicator {
             filename.append(File.separatorChar);
             filename.append(getOsmose().outputPrefix);
             filename.append("_SizeSpectrum_Simu");
-            filename.append(getOsmose().numSimu);
+            filename.append(getSimulation().getReplica());
             filename.append(".csv");
             description = "Distribution of fish abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported. In logarithm, we consider the median of the size class, ie Ln(size [i]) = Ln((size [i]+size[i+1])/2)";
             // Write the file
@@ -124,7 +124,7 @@ public class SizeSpectrumIndicator extends SchoolBasedIndicator {
             filename.append(File.separatorChar);
             filename.append(getOsmose().outputPrefix);
             filename.append("_SizeSpectrumSpecies_Simu");
-            filename.append(getOsmose().numSimu);
+            filename.append(getSimulation().getReplica());
             filename.append(".csv");
             description = "Distribution of fish species abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
             // Write the file

@@ -61,14 +61,14 @@ public class AbundanceIndicator extends SchoolBasedIndicator {
 
         filename = new StringBuilder(getOsmose().outputPrefix);
         filename.append("_abundance_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         Indicators.writeVariable(time, abundanceNoJuv, filename.toString(), "Mean abundance (number of fish), excluding first ages specified in input (typically in calibration file)");
 
         if (getOsmose().isIncludeClassZero()) {
             filename = new StringBuilder(getOsmose().outputPrefix);
             filename.append("_abundance-total_Simu");
-            filename.append(getOsmose().numSimu);
+            filename.append(getSimulation().getReplica());
             filename.append(".csv");
             Indicators.writeVariable(time, abundanceTot, filename.toString(), "Mean abundance (number of fish), including first ages specified in input (typically in calibration file)");
         }

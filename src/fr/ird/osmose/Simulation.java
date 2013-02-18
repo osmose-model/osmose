@@ -62,6 +62,17 @@ public class Simulation {
      * @see enum Version for details.
      */
     public static final Version VERSION = Version.CASE3;
+    /*
+     * 
+     */
+    private final int replica;
+
+///////////////////////////////
+// Constructor
+///////////////////////////////    
+    public Simulation(int replica) {
+        this.replica = replica;
+    }
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
@@ -269,5 +280,9 @@ public class Simulation {
 
     private Osmose getOsmose() {
         return Osmose.getInstance();
+    }
+    
+    public final int getReplica() {
+        return replica;
     }
 }

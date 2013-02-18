@@ -46,14 +46,14 @@ public class YieldIndicator extends SchoolBasedIndicator {
 
         filename = new StringBuilder(getOsmose().outputPrefix);
         filename.append("_yield_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
         Indicators.writeVariable(time, yield, filename.toString(), description);
 
         filename = new StringBuilder(getOsmose().outputPrefix);
         filename.append("_yieldN_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved";
         Indicators.writeVariable(time, yieldN, filename.toString(), description);

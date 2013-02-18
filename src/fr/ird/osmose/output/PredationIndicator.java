@@ -130,7 +130,7 @@ public class PredationIndicator extends SchoolBasedIndicator {
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
         filename.append("_dietMatrix_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "% of prey species (in rows) in the diet of predator species (in col)";
         // Write the file
@@ -234,7 +234,7 @@ public class PredationIndicator extends SchoolBasedIndicator {
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
         filename.append("_predatorPressure_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "Biomass of prey species (in tons per time step of saving, in rows) eaten by a predator species (in col). The last column reports the biomass of prey at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)";
         // Write the file

@@ -73,7 +73,7 @@ public class MeanSizeIndicator extends SchoolBasedIndicator {
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
         filename.append("_meanSize_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "Mean size of fish species in cm, weighted by fish numbers, and excluding first ages specified in input (in calibration file)";
         Indicators.writeVariable(time, meanSize, filename.toString(), description);
@@ -82,7 +82,7 @@ public class MeanSizeIndicator extends SchoolBasedIndicator {
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
         filename.append("_meanSizeCatch_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "Mean size of fish species in cm, weighted by fish numbers in the catches";
         Indicators.writeVariable(time, meanSizeCatch, filename.toString(), description);

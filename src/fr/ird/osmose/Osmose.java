@@ -52,7 +52,6 @@ public class Osmose {
      */
     private LTLForcing forcing;
     int nbLoopTab;	// nb of simulations per serie
-    public int numSimu;
     // TABLES OF INPUT FILES NAMES (one entry per serie)
     //for 1 serie of simus, same species parameters and options
     public String configFileNameTab, speciesFileNameTab, predationFileNameTab, fishingFileNameTab,
@@ -187,7 +186,6 @@ public class Osmose {
         readInputFile();	// read the first file containing the file names of all other input files
         readAllInputFiles(0);
         initializeSizeAndTLSpectrum();
-        simulation = new Simulation();
     }
 
     public void loadMPAs() {
@@ -234,14 +232,15 @@ public class Osmose {
             IOTools.deleteDirectory(targetPath);
         }
         // Loop over the number of replica
-        for (numSimu = 0; numSimu < nbLoopTab; numSimu++) {
+        for (int replica = 0; replica < nbLoopTab; replica++) {
             long begin = System.currentTimeMillis();
             System.out.println();
-            System.out.println("Replicate " + numSimu + "...");
+            System.out.println("Replicate " + replica + "...");
+            simulation = new Simulation(replica);
             simulation.init();
             simulation.run();
             int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-            System.out.println("Replicate " + numSimu + " [OK] (time ellapsed:  " + time + " seconds)");
+            System.out.println("Replicate " + replica + " [OK] (time ellapsed:  " + time + " seconds)");
         }
         // Save summary for calibration
         if (calibrationMatrix) {

@@ -73,7 +73,7 @@ public class MeanTrophicLevelIndicator extends SchoolBasedIndicator {
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
         filename.append("_meanTL_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "Mean Trophic Level of fish species, weighted by fish biomass, and including/excluding first ages specified in input (in calibration file)";
         Indicators.writeVariable(time, meanTL, filename.toString(), description);
@@ -83,7 +83,7 @@ public class MeanTrophicLevelIndicator extends SchoolBasedIndicator {
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
         filename.append("_meanTLCatch_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "Mean Trophic Level of fish species, weighted by fish catch";
         Indicators.writeVariable(time, meanTLCatch, filename.toString(), description);

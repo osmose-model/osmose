@@ -68,7 +68,7 @@ public class TrophicLevelSpectrumIndicator extends SchoolBasedIndicator {
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
         filename.append("_TLDistrib_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         description = "Distribution of species biomass (tons) by 0.1 TL class, and excluding first ages specified in input (in calibration file)";
         // Write the file

@@ -131,7 +131,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             filename.append("_mortalityRate_");
             filename.append(getSimulation().getSpecies(iSpecies).getName());
             filename.append("_Simu");
-            filename.append(getOsmose().numSimu);
+            filename.append(getSimulation().getReplica());
             filename.append(".csv");
             description = "Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat) & Fishing (F) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. To get annual mortality rates, sum the mortality rates within one year.";
             // Write the file

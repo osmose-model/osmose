@@ -55,14 +55,14 @@ public class BiomassIndicator extends SchoolBasedIndicator {
 
         filename = new StringBuilder(getOsmose().outputPrefix);
         filename.append("_biomass_Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(".csv");
         Indicators.writeVariable(time, biomassNoJuv, filename.toString(), "Mean biomass (tons), excluding first ages specified in input (typically in calibration file)");
 
         if (getOsmose().isIncludeClassZero()) {
             filename = new StringBuilder(getOsmose().outputPrefix);
             filename.append("_biomass-total_Simu");
-            filename.append(getOsmose().numSimu);
+            filename.append(getSimulation().getReplica());
             filename.append(".csv");
             Indicators.writeVariable(time, biomassTot, filename.toString(), "Mean biomass (tons), including first ages specified in input (typically in calibration file)");
         }

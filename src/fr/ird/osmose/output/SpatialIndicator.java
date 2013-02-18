@@ -58,7 +58,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
          * Create the NetCDF file at first time step
          */
         if (getSimulation().getIndexTimeSimu() == 0) {
-            createNCFile(getOsmose().numSimu);
+            createNCFile(getSimulation().getReplica());
         }
     }
 

@@ -48,8 +48,8 @@ public class BiomassCalibrationIndicator extends SchoolBasedIndicator {
             biomassNoJuv[i] /= nsteps;
         }
         for (int i = 0; i < nSpec; i++) {
-            getOsmose().BIOMQuadri[getOsmose().numSimu][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassNoJuv[i];
-            getOsmose().BIOMQuadri[getOsmose().numSimu][i][1][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassTot[i];
+            getOsmose().BIOMQuadri[getSimulation().getReplica()][i][0][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassNoJuv[i];
+            getOsmose().BIOMQuadri[getSimulation().getReplica()][i][1][year - getOsmose().timeSeriesStart][indexSaving] = (float) biomassTot[i];
         }
     }
 }

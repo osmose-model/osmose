@@ -8,7 +8,6 @@ import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.SimulationLinker;
-import fr.ird.osmose.output.Indicators;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -180,7 +179,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         File targetFile;
         PrintWriter pr;
 
-        String mortalityFile = getOsmose().outputPrefix + "_planktonBiomassMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String mortalityFile = getOsmose().outputPrefix + "_planktonBiomassMatrix_Simu" + getSimulation().getReplica() + ".csv";
 
         targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab + getOsmose().fileSeparator + "planktonBiomass");
         targetPath.mkdirs();
@@ -217,7 +216,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         StringBuilder filename = new StringBuilder("planktonBiomass");
         filename.append(File.separatorChar);
         filename.append("Simu");
-        filename.append(getOsmose().numSimu);
+        filename.append(getSimulation().getReplica());
         filename.append(File.separatorChar);
         filename.append("osm_integrated_Y");
         filename.append((getSimulation().getYear() + 1));
