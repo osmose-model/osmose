@@ -20,6 +20,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.grid.OriginalGrid;
+import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.util.IOTools;
 import java.io.*;
 import java.util.*;
@@ -46,6 +47,10 @@ public class Osmose {
      */
     private Simulation simulation;
     private IGrid grid;
+    /*
+     * Forcing with Biogeochimical model.
+     */
+    private LTLForcing forcing;
     int nbLoopTab;	// nb of simulations per serie
     public int numSimu;
     // TABLES OF INPUT FILES NAMES (one entry per serie)
@@ -265,6 +270,7 @@ public class Osmose {
         }
         readMPAFile();
         initializeOutputData();
+        initForcing();
     }
 
     public String readPathFile() // read the file situated within the source code directory
@@ -1192,6 +1198,22 @@ public class Osmose {
                 grid.getCell(tabCoastiMatrix[k], tabCoastjMatrix[k]).setLand(true);
             }
         }
+    }
+    
+    public void initForcing() {
+        try {
+            forcing = (LTLForcing) Class.forName(getLTLClassName()).newInstance();
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        getForcing().readLTLConfigFile1(planktonStructureFileNameTab);
+        getForcing().readLTLConfigFile2(planktonFileNameTab);
+        getForcing().initPlanktonMap();
+        getForcing().createPlanktonGroups();
     }
 
     private void readCoastAsCSV(String csvFile) {
@@ -2598,6 +2620,10 @@ public class Osmose {
 
     public IGrid getGrid() {
         return grid;
+    }
+    
+    public LTLForcing getForcing() {
+        return forcing;
     }
 
     public Simulation getSimulation() {

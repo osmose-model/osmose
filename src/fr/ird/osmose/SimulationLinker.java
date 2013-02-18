@@ -30,7 +30,7 @@ public class SimulationLinker {
     }
     
     public static LTLForcing getForcing() {
-        return Osmose.getInstance().getSimulation().getForcing();
+        return Osmose.getInstance().getForcing();
     }
     
     public static Species getSpecies(int index) {

@@ -42,12 +42,8 @@ public class LTLFastForcing extends AbstractLTLForcing {
         /*
          * Link LTL cells to Osmose cells, which is straighforward here
          */
-        //findValidMapIndex();
         linkMapIndex();
-        /*
-         * Initialize plankton list
-         */
-        initPlanktonList();
+        
         loadData();
     }
 

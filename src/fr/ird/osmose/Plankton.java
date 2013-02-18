@@ -1,6 +1,5 @@
 package fr.ird.osmose;
 
-import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 
 /********************************************************************************
@@ -16,7 +15,7 @@ import fr.ird.osmose.ltl.LTLForcing;
  * @version 2.1
  ******************************************************************************** 
  */
-public class Plankton {
+public class Plankton extends SimulationLinker {
 
     /*
      * ********
@@ -44,12 +43,13 @@ public class Plankton {
         this.conversionFactor = conversionFactor;
         this.prodBiomFactor = prodBiomFactor;
         this.accessibilityCoeff = accessCoeff;
-
-        LTLForcing forcing = Osmose.getInstance().getSimulation().getForcing();
+    }
+    
+    public void init() {
 
         // Initialization matrix corresponding to plankton grid, eg ROMS curvilinear grid
-        dataInit = new float[forcing.getPlanktonDimX()][forcing.getPlanktonDimY()][forcing.getPlanktonDimZ()];
-        integratedData = new float[forcing.getPlanktonDimX()][forcing.getPlanktonDimY()];
+        dataInit = new float[getForcing().getPlanktonDimX()][getForcing().getPlanktonDimY()][getForcing().getPlanktonDimZ()];
+        integratedData = new float[getForcing().getPlanktonDimX()][getForcing().getPlanktonDimY()];
 
         // Initialization matrix corresponding to osmose grid
         mortalityRate = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
@@ -62,11 +62,7 @@ public class Plankton {
             }
         }
     }
-
-    private Simulation getSimulation() {
-        return Osmose.getInstance().getSimulation();
-    }
-
+    
     public void verticalIntegration(float[][][] depthLayer, float maxDepth) // transforms dataInit into integratedData using the matrix depthLayer specifying the depth of each cell of the plankton grid
     // vertical integration is realized from 0 to maxDepth (eg -100) meters
     {
@@ -127,11 +123,7 @@ public class Plankton {
         float tempPercent;
         tempPercent = (Math.min(sizeMax, CritMax) - Math.max(sizeMin, CritMin)) / (sizeMax - sizeMin);
         return tempPercent;
-    }
-
-    private IGrid getGrid() {
-        return Osmose.getInstance().getGrid();
-    }
+    }    
 
     /**
      * @return the sizeMax

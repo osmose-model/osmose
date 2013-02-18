@@ -153,7 +153,6 @@ public class LTLForcingBFM extends AbstractLTLForcing {
                 }
             }
 
-            initPlanktonList();
             indexMapping();
 
         } catch (IOException ex) {

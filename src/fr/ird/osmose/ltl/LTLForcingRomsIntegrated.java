@@ -69,10 +69,7 @@ public class LTLForcingRomsIntegrated extends AbstractLTLForcing {
          */
         //findValidMapIndex();
         linkMapIndex();
-        /*
-         * Initialize plankton list
-         */
-        initPlanktonList();
+
         loadData();
     }
 

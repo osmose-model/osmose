@@ -108,8 +108,6 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
                     }
                 }
 
-            initPlanktonList();
-
         } catch (IOException ex) {
             ex.printStackTrace();
         }

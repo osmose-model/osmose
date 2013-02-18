@@ -1,7 +1,6 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.grid.IGrid;
-import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.PopulatingProcess;
@@ -68,10 +67,6 @@ public class Simulation {
 ///////////////////////////////
     private Population population;
     /*
-     * Forcing with Biogeochimical model.
-     */
-    private LTLForcing forcing;
-    /*
      * Number of time-steps in one year
      */
     private int nTimeStepsPerYear;
@@ -126,6 +121,11 @@ public class Simulation {
             species[i].init();
         }
 
+        // Init plankton groups
+        for (int iLTL = 0; iLTL < getOsmose().getForcing().getNbPlanktonGroups(); iLTL++) {
+            getOsmose().getForcing().getPlankton(iLTL).init();
+        }
+
         // Instantiate the Step
         switch (VERSION) {
             case SCHOOL2012_PROD:
@@ -144,7 +144,7 @@ public class Simulation {
         AbstractProcess populatingProcess = new PopulatingProcess();
         populatingProcess.init();
         populatingProcess.run();
-        
+
         // Initialize the indicators
         Indicators.init();
     }
@@ -192,13 +192,12 @@ public class Simulation {
 
         // update biomass
         if (getOsmose().dietsOutputMatrix && (year >= getOsmose().timeSeriesStart)) {
-
 //            for (School school : getPopulation().getPresentSchools()) {
 //                Indicators.biomPerStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
 //            }
 //            getForcing().saveForDiet();
         }
-        forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix);
+        getOsmose().getForcing().savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix);
     }
 
     public void run() {
@@ -244,14 +243,6 @@ public class Simulation {
         return species[index];
     }
 
-    public LTLForcing getForcing() {
-        return forcing;
-    }
-    
-    public void setForcing(LTLForcing forcing) {
-        this.forcing = forcing;
-    }
-
     public int getNumberTimeStepsPerYear() {
         return nTimeStepsPerYear;
     }
@@ -271,7 +262,7 @@ public class Simulation {
     public int getNumberYears() {
         return nYear;
     }
-    
+
     private IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }

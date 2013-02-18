@@ -9,7 +9,6 @@ import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
-import fr.ird.osmose.process.LTLForcingProcess;
 import fr.ird.osmose.process.MortalityProcess;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
@@ -35,10 +34,6 @@ public class ConcomitantMortalityStep extends AbstractStep {
      * Generic mortality process that encompasses all mortality processes
      */
     private AbstractProcess mortalityProcess;
-    /*
-     * LTL forcing process
-     */
-    private AbstractProcess ltlForcingProcess;
     /*
      * Movement process
      */
@@ -75,10 +70,6 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Reproduction processes
         reproductionProcess = new ReproductionProcess();
         reproductionProcess.init();
-
-        // LTL forcing
-        ltlForcingProcess = new LTLForcingProcess();
-        ltlForcingProcess.init();
         
         // Movement of the schools
         movementProcess = new MovementProcess();
@@ -96,7 +87,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         Indicators.initStep();
 
         // Update plankton concentration
-        ltlForcingProcess.run();
+        getForcing().updatePlankton(getSimulation().getIndexTimeYear());
 
         // Spatial distribution
         movementProcess.run();

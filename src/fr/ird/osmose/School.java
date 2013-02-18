@@ -101,11 +101,11 @@ public class School extends Fish {
     }
 
     public void resetDietVariable() {
-        diet = new float[getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups()][];
+        diet = new float[getSimulation().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups()][];
         for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
             diet[i] = new float[getSimulation().getSpecies(i).nbDietStages];
         }
-        for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getSimulation().getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups(); i++) {
             diet[i] = new float[1];
         }
     }

@@ -85,7 +85,7 @@ public class PredationProcess extends AbstractProcess {
         float[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getForcing().getNbPlanktonGroups(); i++) {
             float tempAccess = getOsmose().accessibilityMatrix[getSimulation().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
-            biomAccessibleTot += percentPlankton[i] * tempAccess * getSimulation().getForcing().getPlankton(i).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+            biomAccessibleTot += percentPlankton[i] * tempAccess * getForcing().getPlankton(i).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
         }
 
         // Compute the potential biomass that predators could prey upon

@@ -106,7 +106,6 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
                 }
             }
 
-            initPlanktonList();
         } catch (IOException ex) {
             Logger.getLogger(LTLFastForcingECO3M.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -120,8 +119,8 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getSimulation().getNumberTimeStepsPerYear()][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
-        for (int t = 0; t < getSimulation().getNumberTimeStepsPerYear(); t++) {
+        data = new float[getOsmose().nbDtMatrix][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
+        for (int t = 0; t < getOsmose().nbDtMatrix; t++) {
             data[t] = getIntegratedData(getOsmose().resolveFile(planktonFileListNetcdf[t]));
         }
 

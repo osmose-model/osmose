@@ -65,7 +65,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             }
             st.nextToken();
             nbForcingDt = (new Integer(st.sval)).intValue();
-            if (!(nbForcingDt == getSimulation().getNumberTimeStepsPerYear())) {
+            if (!(nbForcingDt == getOsmose().nbDtMatrix)) {
                 System.out.println("In the current version, the time step of plankton biomass should match the time step of osmose config");
             }
 
@@ -112,6 +112,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             }
         } catch (IOException ex) {
             System.out.println("Reading error of LTL structure file");
+            System.exit(1);
         }
     }
     
@@ -315,7 +316,8 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         this.planktonDimZ = nz;
     }
 
-    void initPlanktonList() {
+    @Override
+    public void createPlanktonGroups() {
         planktonList = new Plankton[getNbPlanktonGroups()];
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             planktonList[i] = new Plankton(planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);

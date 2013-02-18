@@ -8,7 +8,6 @@ import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
-import fr.ird.osmose.process.LTLForcingProcess;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
 import fr.ird.osmose.process.PredationProcess;
@@ -46,10 +45,6 @@ public class SequentialMortalityStep extends AbstractStep {
      */
     private AbstractProcess predationProcess;
     /*
-     * LTL forcing process
-     */
-    private AbstractProcess ltlForcingProcess;
-    /*
      * Movement process
      */
     private AbstractProcess movementProcess;
@@ -81,10 +76,6 @@ public class SequentialMortalityStep extends AbstractStep {
         reproductionProcess = new ReproductionProcess();
         reproductionProcess.init();
 
-        // LTL Forcing
-        ltlForcingProcess = new LTLForcingProcess();
-        ltlForcingProcess.init();
-
         // Movement of the schools
         movementProcess = new MovementProcess();
         movementProcess.init();
@@ -107,7 +98,7 @@ public class SequentialMortalityStep extends AbstractStep {
         naturalMortalityProcess.run();
 
         // Update plankton concentration
-        ltlForcingProcess.run();
+        getForcing().updatePlankton(getSimulation().getIndexTimeYear());
 
         getSimulation().saveBiomassBeforeMortality();
 

@@ -71,10 +71,7 @@ public class LTLForcingManual extends AbstractLTLForcing {
                 getGrid().getCell(i, j).jcoordLTLGrid.addElement(j);
             }
         }
-        /*
-         * Initialize plankton list
-         */
-        initPlanktonList();
+
         loadData();
     }
 

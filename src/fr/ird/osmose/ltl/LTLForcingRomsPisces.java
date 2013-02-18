@@ -145,10 +145,6 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
          * Determine cell overlap for spatial integration
          */
         findValidMapIndex();
-        /*
-         * Initialize plankton list
-         */
-        initPlanktonList();
     }
 
     @Override

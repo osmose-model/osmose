@@ -138,10 +138,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
         }
-        /*
-         * Initialize plankton list
-         */
-        initPlanktonList();
+
         loadData();
     }
 

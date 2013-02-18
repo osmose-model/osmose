@@ -26,6 +26,7 @@ public interface LTLForcing {
     public int getPlanktonDimX();
     public int getPlanktonDimY();
     public int getPlanktonDimZ();
+    public void createPlanktonGroups();
 
 
 }
