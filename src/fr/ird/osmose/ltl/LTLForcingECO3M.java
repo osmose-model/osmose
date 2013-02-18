@@ -114,11 +114,12 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    public void updatePlankton(int dt) {
+    public void updatePlankton(int iStepSimu) {
+        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
-        readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[dt]));
+        readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[iStepYear]));
         mapInterpolation();
     }
 

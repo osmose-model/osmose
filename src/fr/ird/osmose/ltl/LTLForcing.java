@@ -16,7 +16,11 @@ public interface LTLForcing {
     public void readLTLConfigFile1(String planktonStructureFileName);
     public void readLTLConfigFile2(String planktonFileName);
     public void initPlanktonMap();
-    public void updatePlankton(int dt);
+    /**
+     * Update plankton biomass for current time step
+     * @param iStepSimu, the current time index of the simulation
+     */
+    public void updatePlankton(int iStepSimu);
     public void mapInterpolation();
     public double getBiomass(int iPlankton);
     public void savePlanktonBiomass(String fileFormat);

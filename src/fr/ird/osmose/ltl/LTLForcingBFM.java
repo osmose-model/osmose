@@ -208,12 +208,12 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     }
 
     @Override
-    public void updatePlankton(int dt) {
+    public void updatePlankton(int iStepSimu) {
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
-        int dtYear = getOsmose().getSimulation().getYear() * getOsmose().getNumberTimeStepsPerYear() + dt;
-        readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[dtYear / timeDim]), dt);
+        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
+        readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[iStepYear / timeDim]), iStepYear);
         mapInterpolation();
     }
 

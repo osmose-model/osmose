@@ -193,10 +193,11 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
         mapInterpolation();
     }
 
-    private void updateData(int dt) {
+    private void updateData(int iStepSimu) {
 
+        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
         for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            getPlankton(p).integratedData = data[dt][p];
+            getPlankton(p).integratedData = data[iStepYear][p];
         }
     }
 

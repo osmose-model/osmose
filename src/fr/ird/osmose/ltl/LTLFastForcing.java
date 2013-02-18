@@ -48,8 +48,8 @@ public class LTLFastForcing extends AbstractLTLForcing {
     }
 
     @Override
-    public void updatePlankton(int dt) {
-
+    public void updatePlankton(int iStepSimu) {
+        
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }

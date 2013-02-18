@@ -89,15 +89,17 @@ public class LTLForcingManual extends AbstractLTLForcing {
         System.out.println("All plankton data loaded !");
     }
 
-    private void updateData(int dt) {
+    private void updateData(int iStepYear) {
 
         for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            getPlankton(p).integratedData = data[dt][p];
+            getPlankton(p).integratedData = data[iStepYear][p];
         }
     }
 
     @Override
-    public void updatePlankton(int dt) {
+    public void updatePlankton(int iStepSimu) {
+        
+        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
@@ -105,7 +107,7 @@ public class LTLForcingManual extends AbstractLTLForcing {
             String nameTemp = getOsmose().resolveFile(planktonFileList[p][dt]);
             readCSVFile(nameTemp, p);
         }*/
-        updateData(dt);
+        updateData(iStepYear);
         mapInterpolation();
     }
 

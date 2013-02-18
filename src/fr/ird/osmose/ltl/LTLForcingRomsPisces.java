@@ -148,11 +148,12 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     }
 
     @Override
-    public void updatePlankton(int dt) {
+    public void updatePlankton(int iStepSimu) {
+        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
-        String nameTemp = getOsmose().resolveFile(planktonFileListNetcdf[dt]);
+        String nameTemp = getOsmose().resolveFile(planktonFileListNetcdf[iStepYear]);
         readNetCDFFile(nameTemp);
         mapInterpolation();
     }
