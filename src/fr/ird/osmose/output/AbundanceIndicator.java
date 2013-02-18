@@ -10,11 +10,11 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class AbundanceIndicator extends SchoolBasedIndicator {
+public class AbundanceIndicator extends AbstractIndicator {
 
     private double[] abundanceTot;
     private double[] abundanceNoJuv;
-    
+
     @Override
     public void init() {
         // Nothing to do
@@ -29,16 +29,17 @@ public class AbundanceIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
+    public void update() {
 
-        int i = school.getSpeciesIndex();
-        if (getOsmose().isIncludeClassZero()) {
-            abundanceTot[i] += school.getAbundance();
+        for (School school : getPopulation().getAliveSchools()) {
+            int i = school.getSpeciesIndex();
+            if (getOsmose().isIncludeClassZero()) {
+                abundanceTot[i] += school.getAbundance();
+            }
+            if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
+                abundanceNoJuv[i] += school.getAbundance();
+            }
         }
-        if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
-            abundanceNoJuv[i] += school.getAbundance();
-        }
-
     }
 
     @Override

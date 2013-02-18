@@ -19,7 +19,7 @@ import ucar.nc2.NetcdfFileWriteable;
  *
  * @author pverley
  */
-public class SpatialIndicator extends SimulationLinker implements Indicator {
+public class SpatialIndicator extends AbstractIndicator {
 
     /**
      * _FillValue attribute for cells on land

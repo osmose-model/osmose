@@ -10,10 +10,10 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class YieldIndicator extends SchoolBasedIndicator {
+public class YieldIndicator extends AbstractIndicator {
 
     public double[] yield, yieldN;
-    
+
     @Override
     public void init() {
         // Nothing to do
@@ -28,10 +28,12 @@ public class YieldIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
-        int i = school.getSpeciesIndex();
-        yield[i] += school.adb2biom(school.nDeadFishing);
-        yieldN[i] += school.nDeadFishing;
+    public void update() {
+        for (School school : getPopulation().getAliveSchools()) {
+            int i = school.getSpeciesIndex();
+            yield[i] += school.adb2biom(school.nDeadFishing);
+            yieldN[i] += school.nDeadFishing;
+        }
     }
 
     @Override

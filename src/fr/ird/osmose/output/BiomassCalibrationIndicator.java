@@ -6,7 +6,7 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class BiomassCalibrationIndicator extends SchoolBasedIndicator {
+public class BiomassCalibrationIndicator extends AbstractIndicator {
 
     private double[] biomassTot;
     private double[] biomassNoJuv;
@@ -23,11 +23,14 @@ public class BiomassCalibrationIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
-        int i = school.getSpeciesIndex();
-        biomassTot[i] += school.getBiomass();
-        if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
-            biomassNoJuv[i] += school.getBiomass();
+    public void update() {
+        
+        for (School school : getPopulation().getAliveSchools()) {
+            int i = school.getSpeciesIndex();
+            biomassTot[i] += school.getBiomass();
+            if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
+                biomassNoJuv[i] += school.getBiomass();
+            }
         }
     }
 
@@ -38,7 +41,7 @@ public class BiomassCalibrationIndicator extends SchoolBasedIndicator {
 
     @Override
     public void write(float time) {
-        
+
         int nSpec = getSimulation().getNumberSpecies();
         double nsteps = getOsmose().savingDtMatrix;
         int year = getSimulation().getYear();

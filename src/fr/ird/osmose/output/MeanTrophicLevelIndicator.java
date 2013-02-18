@@ -11,14 +11,14 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanTrophicLevelIndicator extends SchoolBasedIndicator {
+public class MeanTrophicLevelIndicator extends AbstractIndicator {
 
     private double[] meanTL;
     private double[] biomass;
     // Catches
     private double[] meanTLCatch;
     private double[] yield;
-    
+
     @Override
     public void init() {
         // Nothing to do
@@ -34,14 +34,16 @@ public class MeanTrophicLevelIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
-        if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
-            int i = school.getSpeciesIndex();
-            meanTL[i] += school.getBiomass() * school.trophicLevel;
-            biomass[i] += school.getBiomass();
-            // Catches
-            meanTLCatch[i] += school.trophicLevel * school.adb2biom(school.nDeadFishing);
-            yield[i] += school.adb2biom(school.nDeadFishing);
+    public void update() {
+        for (School school : getPopulation().getAliveSchools()) {
+            if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
+                int i = school.getSpeciesIndex();
+                meanTL[i] += school.getBiomass() * school.trophicLevel;
+                biomass[i] += school.getBiomass();
+                // Catches
+                meanTLCatch[i] += school.trophicLevel * school.adb2biom(school.nDeadFishing);
+                yield[i] += school.adb2biom(school.nDeadFishing);
+            }
         }
     }
 

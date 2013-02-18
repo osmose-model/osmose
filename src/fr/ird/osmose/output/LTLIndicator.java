@@ -17,7 +17,7 @@ import ucar.nc2.NetcdfFileWriteable;
  *
  * @author pverley
  */
-public class LTLIndicator extends SimulationLinker implements Indicator {
+public class LTLIndicator extends AbstractIndicator {
 
     /**
      * _FillValue attribute for cells on land

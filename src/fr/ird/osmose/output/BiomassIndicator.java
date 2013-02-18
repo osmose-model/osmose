@@ -6,16 +6,16 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class BiomassIndicator extends SchoolBasedIndicator {
+public class BiomassIndicator extends AbstractIndicator {
 
     private double[] biomassTot;
     private double[] biomassNoJuv;
-    
+
     @Override
     public void init() {
         // Nothing to do
     }
-    
+
     @Override
     public void reset() {
         biomassNoJuv = new double[getNSpecies()];
@@ -25,13 +25,15 @@ public class BiomassIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
-        int i = school.getSpeciesIndex();
-        if (getOsmose().isIncludeClassZero()) {
-            biomassTot[i] += school.getBiomass();
-        }
-        if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
-            biomassNoJuv[i] += school.getBiomass();
+    public void update() {
+        for (School school : getPopulation().getAliveSchools()) {
+            int i = school.getSpeciesIndex();
+            if (getOsmose().isIncludeClassZero()) {
+                biomassTot[i] += school.getBiomass();
+            }
+            if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
+                biomassNoJuv[i] += school.getBiomass();
+            }
         }
     }
 
@@ -39,7 +41,7 @@ public class BiomassIndicator extends SchoolBasedIndicator {
     public boolean isEnabled() {
         return !getOsmose().isCalibrationOutput();
     }
-    
+
     @Override
     public void write(float time) {
         StringBuilder filename;

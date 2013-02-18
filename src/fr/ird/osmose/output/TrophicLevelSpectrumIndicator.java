@@ -17,13 +17,13 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class TrophicLevelSpectrumIndicator extends SchoolBasedIndicator {
+public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     /*
      * Trophic level distribution [SPECIES][TL_SPECTRUM]
      */
     private double[][] trophicLevelSpectrum;
-    
+
     @Override
     public void init() {
         // Nothing to do
@@ -35,13 +35,15 @@ public class TrophicLevelSpectrumIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
-        int ageClass1 = (int) Math.max(1, school.getSpecies().indexAgeClass0);
-        if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
-            trophicLevelSpectrum[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
+    public void update() {
+        for (School school : getPopulation().getAliveSchools()) {
+            int ageClass1 = (int) Math.max(1, school.getSpecies().indexAgeClass0);
+            if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
+                trophicLevelSpectrum[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
+            }
         }
     }
-    
+
     private static int getTLRank(School school) {
 
         int iTL = getOsmose().tabTL.length - 1;

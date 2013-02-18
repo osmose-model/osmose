@@ -17,10 +17,10 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class SizeSpectrumIndicator extends SchoolBasedIndicator {
+public class SizeSpectrumIndicator extends AbstractIndicator {
 
     private double[][] sizeSpectrum;
-    
+
     @Override
     public void init() {
         // Nothing to do
@@ -32,8 +32,10 @@ public class SizeSpectrumIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
-        sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getAbundance();
+    public void update() {
+        for (School school : getPopulation().getAliveSchools()) {
+            sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getAbundance();
+        }
     }
 
     @Override

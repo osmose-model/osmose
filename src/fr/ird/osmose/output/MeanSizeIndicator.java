@@ -11,14 +11,14 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanSizeIndicator extends SchoolBasedIndicator {
+public class MeanSizeIndicator extends AbstractIndicator {
 
     private double[] meanSize;
     private double[] abundance;
     // Catches
-    private double[] meanSizeCatch;    
+    private double[] meanSizeCatch;
     private double[] yieldN;
-    
+
     @Override
     public void init() {
         // Nothing to do
@@ -35,14 +35,16 @@ public class MeanSizeIndicator extends SchoolBasedIndicator {
     }
 
     @Override
-    public void update(School school) {
-        if (school.getAgeDt() > school.getSpecies().indexAgeClass0) {
-            int i = school.getSpeciesIndex();
-            meanSize[i] += school.getAbundance() * school.getLength();
-            abundance[i] += school.getAbundance();
-            // Catches
-            meanSizeCatch[i] += school.nDeadFishing * school.getLength();
-            yieldN[i] += school.nDeadFishing;
+    public void update() {
+        for (School school : getPopulation().getAliveSchools()) {
+            if (school.getAgeDt() > school.getSpecies().indexAgeClass0) {
+                int i = school.getSpeciesIndex();
+                meanSize[i] += school.getAbundance() * school.getLength();
+                abundance[i] += school.getAbundance();
+                // Catches
+                meanSizeCatch[i] += school.nDeadFishing * school.getLength();
+                yieldN[i] += school.nDeadFishing;
+            }
         }
     }
 
