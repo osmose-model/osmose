@@ -82,36 +82,34 @@ public class Species {
      */
     public void init() {
 
-        int numSerie = getOsmose().numSerie;
-
         // INITIALISATION of PARAM
-        this.name = getOsmose().nameSpecMatrix[numSerie][index];
-        this.D = getOsmose().DMatrix[numSerie][index];
-        this.lInf = getOsmose().lInfMatrix[numSerie][index];
-        this.K = getOsmose().KMatrix[numSerie][index];
-        this.t0 = getOsmose().t0Matrix[numSerie][index];
-        this.c = getOsmose().cMatrix[numSerie][index];
-        this.bPower = getOsmose().bPowerMatrix[numSerie][index];
-        this.sizeMat = getOsmose().sizeMatMatrix[numSerie][index];
-        this.nbFeedingStages = getOsmose().nbStagesMatrix[numSerie][index];
-        this.sizeFeeding = getOsmose().sizeFeedingMatrix[numSerie][index];
-        this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[numSerie][index] * getSimulation().getNumberTimeStepsPerYear());
-        this.recruitSize = getOsmose().recruitSizeMatrix[numSerie][index];
-        this.seasonSpawning = getOsmose().seasonSpawningMatrix[numSerie][index];
-        this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[numSerie][index] * getSimulation().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
-        this.eggSize = getOsmose().eggSizeMatrix[numSerie][index];
-        this.eggWeight = getOsmose().eggWeightMatrix[numSerie][index];
-        this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[numSerie][index];
+        this.name = getOsmose().nameSpecMatrix[index];
+        this.D = getOsmose().DMatrix[index];
+        this.lInf = getOsmose().lInfMatrix[index];
+        this.K = getOsmose().KMatrix[index];
+        this.t0 = getOsmose().t0Matrix[index];
+        this.c = getOsmose().cMatrix[index];
+        this.bPower = getOsmose().bPowerMatrix[index];
+        this.sizeMat = getOsmose().sizeMatMatrix[index];
+        this.nbFeedingStages = getOsmose().nbStagesMatrix[index];
+        this.sizeFeeding = getOsmose().sizeFeedingMatrix[index];
+        this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[index] * getSimulation().getNumberTimeStepsPerYear());
+        this.recruitSize = getOsmose().recruitSizeMatrix[index];
+        this.seasonSpawning = getOsmose().seasonSpawningMatrix[index];
+        this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[index] * getSimulation().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
+        this.eggSize = getOsmose().eggSizeMatrix[index];
+        this.eggWeight = getOsmose().eggWeightMatrix[index];
+        this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[index];
 
         this.nbAccessStages = getOsmose().nbAccessStage[index];
         this.ageStagesTab = getOsmose().accessStageThreshold[index];
-        if (getOsmose().dietsOutputMatrix[getOsmose().numSerie]) {
-            this.dietStagesTab = getOsmose().dietStageThreshold[numSerie][index];
-            this.nbDietStages = getOsmose().nbDietsStages[numSerie][index];
+        if (getOsmose().dietsOutputMatrix) {
+            this.dietStagesTab = getOsmose().dietStageThreshold[index];
+            this.nbDietStages = getOsmose().nbDietsStages[index];
         }
 
         // START INITIALISATION of COHORTS
-        longevity = (int) Math.round((getOsmose().longevityMatrix[numSerie][index]) * getSimulation().getNumberTimeStepsPerYear());
+        longevity = (int) Math.round((getOsmose().longevityMatrix[index]) * getSimulation().getNumberTimeStepsPerYear());
     }
 
     public float[] getMeanLength() {

@@ -1,9 +1,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.School;
 import fr.ird.osmose.SimulationLinker;
-import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.util.IOTools;
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +47,7 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
          * Create the NetCDF file at first time step
          */
         if (getSimulation().getIndexTimeSimu() == 0) {
-            createNCFile(getOsmose().numSerie);
+            createNCFile(getOsmose().numSimu);
         }
     }
 
@@ -115,13 +113,13 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
         }
     }
 
-    private void createNCFile(int nSerie) {
+    private void createNCFile(int iSimu) {
         /*
          * Create NetCDF file
          */
         try {
             nc = NetcdfFileWriteable.createNew("");
-            nc.setLocation(makeFileLocation(nSerie));
+            nc.setLocation(makeFileLocation(iSimu));
         } catch (IOException ex) {
             Logger.getLogger(LTLIndicator.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -202,7 +200,7 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
 
     private String makeFileLocation(int nSerie) throws IOException {
 
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append("planktonBiomass");

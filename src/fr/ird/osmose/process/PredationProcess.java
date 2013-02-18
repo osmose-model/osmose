@@ -22,9 +22,9 @@ public class PredationProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        predPreySizesMax = getOsmose().predPreySizesMaxMatrix[getOsmose().numSerie];
-        predPreySizesMin = getOsmose().predPreySizesMinMatrix[getOsmose().numSerie];
-        predationRate = getOsmose().predationRateMatrix[getOsmose().numSerie];
+        predPreySizesMax = getOsmose().predPreySizesMaxMatrix;
+        predPreySizesMin = getOsmose().predPreySizesMinMatrix;
+        predationRate = getOsmose().predationRateMatrix;
     }
 
     @Override

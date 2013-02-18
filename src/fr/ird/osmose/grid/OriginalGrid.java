@@ -45,16 +45,16 @@ public class OriginalGrid extends AbstractGrid {
      */
     @Override
     public void readParameters() {
-        int numSerie = getOsmose().numSerie;
+       
         /* grid dimension */
-        setNbLines(getOsmose().gridLinesTab[numSerie]);
-        setNbColumns(getOsmose().gridColumnsTab[numSerie]);
+        setNbLines(getOsmose().gridLinesTab);
+        setNbColumns(getOsmose().gridColumnsTab);
 
         /* geographical extension of the grid */
-        setLatMax(getOsmose().upLeftLatTab[numSerie]);
-        setLatMin(getOsmose().lowRightLatTab[numSerie]);
-        setLongMax(getOsmose().lowRightLongTab[numSerie]);
-        setLongMin(getOsmose().upLeftLongTab[numSerie]);
+        setLatMax(getOsmose().upLeftLatTab);
+        setLatMin(getOsmose().lowRightLatTab);
+        setLongMax(getOsmose().lowRightLongTab);
+        setLongMin(getOsmose().upLeftLongTab);
     }
 
     /*

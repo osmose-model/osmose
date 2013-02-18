@@ -123,12 +123,12 @@ public class PredationIndicator extends SchoolBasedIndicator {
         String description;
         PrintWriter pr;
         FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
         int nSpec = getSimulation().getNumberSpecies();
 
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix);
         filename.append("_dietMatrix_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
@@ -226,13 +226,13 @@ public class PredationIndicator extends SchoolBasedIndicator {
         String description;
         PrintWriter pr;
         FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
         int nSpec = getSimulation().getNumberSpecies();
         int dtRecord = getOsmose().getRecordFrequency();
 
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix);
         filename.append("_predatorPressure_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");

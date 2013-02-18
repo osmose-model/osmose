@@ -82,7 +82,7 @@ public class MovementProcess extends AbstractProcess {
             }
         }
         // init distribution
-        range = getOsmose().range[getOsmose().numSerie];
+        range = getOsmose().range;
         movements = new AbstractProcess[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
             switch (getSpatialDistribution(i)) {
@@ -187,7 +187,7 @@ public class MovementProcess extends AbstractProcess {
          */
         FileInputStream areasFile = null;
         try {
-            areasFile = new FileInputStream(resolveFile(getOsmose().areasFileNameTab[getOsmose().numSerie]));
+            areasFile = new FileInputStream(resolveFile(getOsmose().areasFileNameTab));
         } catch (FileNotFoundException ex) {
             System.out.println("Error while opening areasFile");
             System.exit(1);
@@ -425,7 +425,7 @@ public class MovementProcess extends AbstractProcess {
 
     int getSizeRandomMap(int iSpec) {
         return (null == sizeRandomMap)
-                ? getOsmose().speciesAreasSizeTab[getOsmose().numSerie][iSpec]
+                ? getOsmose().speciesAreasSizeTab[iSpec]
                 : sizeRandomMap[iSpec];
     }
 

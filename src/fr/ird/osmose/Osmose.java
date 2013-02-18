@@ -46,67 +46,67 @@ public class Osmose {
      */
     private Simulation simulation;
     private IGrid grid;
-    private int nbSeriesSimus;	// nb of series
-    int[] nbLoopTab;	// nb of simulations per serie
-    public int numSerie, numSimu;
+    int nbLoopTab;	// nb of simulations per serie
+    public int numSimu;
     // TABLES OF INPUT FILES NAMES (one entry per serie)
     //for 1 serie of simus, same species parameters and options
-    public String[] configFileNameTab, speciesFileNameTab, predationFileNameTab, fishingFileNameTab,
+    public String configFileNameTab, speciesFileNameTab, predationFileNameTab, fishingFileNameTab,
             planktonFileNameTab, planktonStructureFileNameTab, calibrationFileNameTab, outputFileNameTab,
             indicatorsFileNameTab, outputPrefix;
     // Tables of Optional Input Files names (with entries as file name or "default")
-    String[] size0FileNameTab, migrationFileNameTab, accessibilitiesFileNameTab,
+    String size0FileNameTab, migrationFileNameTab, accessibilitiesFileNameTab,
             reproductionFileNameTab, fishingSeasonFileNameTab, /*
              * � creer
              */
             couplingFileNameTab;
-    boolean[] isForcing;
-    private String[] lowTLClassNameTab;
+    boolean isForcing;
+    private String lowTLClassNameTab;
     /*
      * SPECIES PARAMETERS FILE
      */
-    int[] nbSpeciesTab;
-    String[][] nameSpecMatrix, maturityMetricMatrix;
-    String[] recruitMetricMatrix;
-    public float[][] DMatrix, larvalMortalityRates, starvMaxRateMatrix;
-    float[][] longevityMatrix;
-    float[][] lInfMatrix, KMatrix, t0Matrix, cMatrix, bPowerMatrix;
-    public float[][] alphaMatrix, sizeMatMatrix;
-    float[][][] seasonSpawningMatrix;
-    public float[][][] sizeFeedingMatrix, predPreySizesMinMatrix, predPreySizesMaxMatrix;
-    int[][] nbStagesMatrix;
-    float[][] recruitAgeMatrix;
-    public float[][] predationRateMatrix, criticalPredSuccessMatrix;
-    public float[][] eggSizeMatrix, eggWeightMatrix, sexRatioMatrix, growthAgeThresholdMatrix;
-    float[][] supAgeOfClass0Matrix;
-    public boolean[][] reproduceLocallyTab;
-    public float[][] biomassFluxInTab;
-    public float[][] meanLengthFishInTab;
-    public float[][] meanAgeFishInTab;
-    public int[][] range;
+    int nbSpeciesTab;
+    String[] nameSpecMatrix, maturityMetricMatrix;
+    String recruitMetricMatrix;
+    public float[] DMatrix, starvMaxRateMatrix;
+    public float[][] larvalMortalityRates;
+    float[] longevityMatrix;
+    float[] lInfMatrix, KMatrix, t0Matrix, cMatrix, bPowerMatrix;
+    public float[] alphaMatrix, sizeMatMatrix;
+    float[][] seasonSpawningMatrix;
+    public float[][] sizeFeedingMatrix, predPreySizesMinMatrix, predPreySizesMaxMatrix;
+    int[] nbStagesMatrix;
+    float[] recruitAgeMatrix;
+    public float[] predationRateMatrix, criticalPredSuccessMatrix;
+    public float[] eggSizeMatrix, eggWeightMatrix, sexRatioMatrix, growthAgeThresholdMatrix;
+    float[] supAgeOfClass0Matrix;
+    public boolean[] reproduceLocallyTab;
+    public float[] biomassFluxInTab;
+    public float[] meanLengthFishInTab;
+    public float[] meanAgeFishInTab;
+    public int[] range;
     /*
      * FISHING
      */
-    float[][] recruitSizeMatrix;
+    float[] recruitSizeMatrix;
     public float[][] fishingRates;
     /*
      * PLANKTON groups
      */
-    public int[] nbPlanktonGroupsTab;
-    public String[][] planktonNamesTab;
+    public int nbPlanktonGroupsTab;
+    public String[] planktonNamesTab;
     /*
      * CONFIG & OPTIONS
      */
-    String[] gridClassNameTab;
-    public String[] gridFileTab, lonFieldTab, latFieldTab, maskFieldTab;
-    public int[] strideTab;
-    public int[] gridLinesTab, gridColumnsTab;
-    public float[] upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
-    public int[] simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
+    String gridClassNameTab;
+    public String gridFileTab, lonFieldTab, latFieldTab, maskFieldTab;
+    public int strideTab;
+    public int gridLinesTab, gridColumnsTab;
+    public float upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
+    public int simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
     /*
      * Parameters
      */
-    public int[] nbSchools;
+    public int nbSchools;
     public float[] planktonAccessCoeffMatrix;
     int[] nbAccessStage;
     float[][] accessStageThreshold;
@@ -114,8 +114,8 @@ public class Osmose {
     /*
      * SPECIES AREAS FILE
      */
-    public String[] areasFileNameTab;	              //choice between "Random" or fileName
-    public int[][] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
+    public String areasFileNameTab;	              //choice between "Random" or fileName
+    public int[] speciesAreasSizeTab;	    //used only for Qsimulation.iniRepartitionAleat() ie for random distribution
     public int[][][] numMap;        //gives a number of map for[species][cohort][dt]
     public GridMap[] maps;
     public float[] maxProbaPresence;
@@ -124,16 +124,16 @@ public class Osmose {
     /*
      * COASTLINE
      */
-    String[] coastFileNameTab;	              //choice between "None" or fileName
-    int[][] tabCoastiMatrix, tabCoastjMatrix;   //coordinates of the cells representing land
-    int[] nbCellsCoastTab;
+    String coastFileNameTab;	              //choice between "None" or fileName
+    int[] tabCoastiMatrix, tabCoastjMatrix;   //coordinates of the cells representing land
+    int nbCellsCoastTab;
     /*
      * MPAs coordinates
      */
-    String[] mpaFileNameTab;
-    int[][] tabMPAiMatrix, tabMPAjMatrix;     //coord i et j of the matrix delimiting a mpa
-    boolean[] thereIsMPATab;		      //signify that 1 mpa is implemented even if t<tStart
-    int[] MPAtStartTab, MPAtEndTab;	      //start and end of MPA in years
+    String mpaFileNameTab;
+    int[] tabMPAiMatrix, tabMPAjMatrix;     //coord i et j of the matrix delimiting a mpa
+    boolean thereIsMPATab;		      //signify that 1 mpa is implemented even if t<tStart
+    int MPAtStartTab, MPAtEndTab;	      //start and end of MPA in years
     //tables for output storage by series of simulations
     //4 dimensions : simu, species,val(total OR total-0), step t
     //for mortalities, 3 dim, the last is for the mean on the simulation period
@@ -141,17 +141,17 @@ public class Osmose {
     /*
      * INDICATORS OUTPUT
      */
-    public boolean[] TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
+    public boolean TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
             sizeSpectrumOutputMatrix, sizeSpectrumPerSpeOutputMatrix,
             planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix, spatializedOutputs;
-    public String[] planktonBiomassOutputMatrix;
-    String[] dietsConfigFileName, dietOutputMetrics;
-    int[][] nbDietsStages;
-    float[][][] dietStageThreshold;
+    public String planktonBiomassOutputMatrix;
+    String dietsConfigFileName, dietOutputMetrics;
+    int[] nbDietsStages;
+    float[][] dietStageThreshold;
     //Initial abundances
-    public String[] calibrationMethod;
-    public double[][] spBiomIniTab;
-    public double[] SSslope, SSintercept;
+    public String calibrationMethod;
+    public double[] spBiomIniTab;
+    public double SSslope, SSintercept;
     //size spectrum
     public float spectrumMinSize, spectrumMaxSize, classRange;
     public float[] tabSizes;//size classes of 10cm are used for ini and output
@@ -164,7 +164,7 @@ public class Osmose {
     public float[] tabTL;
     //param allowing to adapt the size of output tables depending on simulation time
     public int timeSeriesLength, timeSeriesStart;
-    int[] startingSavingTimeTab;
+    int startingSavingTimeTab;
     boolean timeSeriesIsShortened;
     // migration
     public float[][] migrationTempMortality;
@@ -180,21 +180,19 @@ public class Osmose {
     public void init() {
 
         readInputFile();	// read the first file containing the file names of all other input files
-        for (int x = 0; x < nbSeriesSimus; x++) {
-            readAllInputFiles(x);
-        }
+        readAllInputFiles(0);
         initializeSizeAndTLSpectrum();
         simulation = new Simulation();
     }
 
     public void loadMPAs() {
-        for (int index = 0; index < tabMPAiMatrix[numSerie].length; index++) {
-            getGrid().getCell(tabMPAiMatrix[numSerie][index], tabMPAjMatrix[numSerie][index]).setMPA(true);
+        for (int index = 0; index < tabMPAiMatrix.length; index++) {
+            getGrid().getCell(tabMPAiMatrix[index], tabMPAjMatrix[index]).setMPA(true);
         }
     }
 
     public void initializeSizeAndTLSpectrum() {
-        if (sizeSpectrumOutputMatrix[numSerie] || sizeSpectrumPerSpeOutputMatrix[numSerie]) {
+        if (sizeSpectrumOutputMatrix || sizeSpectrumPerSpeOutputMatrix) {
             //initialisation of the size spectrum features
             nbSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
 
@@ -225,14 +223,13 @@ public class Osmose {
 
     public void run() {
 
-        numSerie = 0;
         // Delete existing output directory
-        File targetPath = new File(outputPathName + outputFileNameTab[numSerie]);
+        File targetPath = new File(outputPathName + outputFileNameTab);
         if (targetPath.exists()) {
             IOTools.deleteDirectory(targetPath);
         }
         // Loop over the number of replica
-        for (numSimu = 0; numSimu < nbLoopTab[numSerie]; numSimu++) {
+        for (numSimu = 0; numSimu < nbLoopTab; numSimu++) {
             long begin = System.currentTimeMillis();
             System.out.println();
             System.out.println("Replicate " + numSimu + "...");
@@ -242,24 +239,24 @@ public class Osmose {
             System.out.println("Replicate " + numSimu + " [OK] (time ellapsed:  " + time + " seconds)");
         }
         // Save summary for calibration
-        if (calibrationMatrix[numSerie]) {
+        if (calibrationMatrix) {
             saveSerieSimulations();
         }
     }
 
     public void readAllInputFiles(int numSerie) {
-        readConfigurationFile(configFileNameTab[numSerie], numSerie);
-        readSpeciesFile(speciesFileNameTab[numSerie], numSerie);
-        readPredationFile(predationFileNameTab[numSerie], numSerie);
-        readFishingFile(fishingFileNameTab[numSerie], numSerie);
-        readCalibrationFile(calibrationFileNameTab[numSerie], numSerie);
-        readSeasonalityReproFile(reproductionFileNameTab[numSerie], numSerie);
-        readsize0File(size0FileNameTab[numSerie], numSerie);
-        readOutputConfigurationFile(indicatorsFileNameTab[numSerie], numSerie);
-        if (dietsOutputMatrix[numSerie]) {
-            readDietsOutputFile(dietsConfigFileName[numSerie], numSerie);
+        readConfigurationFile(configFileNameTab, numSerie);
+        readSpeciesFile(speciesFileNameTab, numSerie);
+        readPredationFile(predationFileNameTab, numSerie);
+        readFishingFile(fishingFileNameTab, numSerie);
+        readCalibrationFile(calibrationFileNameTab, numSerie);
+        readSeasonalityReproFile(reproductionFileNameTab, numSerie);
+        readsize0File(size0FileNameTab, numSerie);
+        readOutputConfigurationFile(indicatorsFileNameTab, numSerie);
+        if (dietsOutputMatrix) {
+            readDietsOutputFile(dietsConfigFileName, numSerie);
         }
-        readAccessibilitiesFile(accessibilitiesFileNameTab[numSerie], numSerie);
+        readAccessibilitiesFile(accessibilitiesFileNameTab, numSerie);
         readMigrationFile();
         readCoastFile();
         initGrid();
@@ -315,242 +312,90 @@ public class Osmose {
 
         try {
             st.nextToken();
-            nbSeriesSimus = (new Integer(st.sval)).intValue();
-            System.out.println("  Number of series = " + nbSeriesSimus);
         } catch (IOException ex) {
             System.out.println("  Reading error of INPUT file");
             System.exit(1);
         }
 
-        // give the right dimension to tables according to the number of series specified
-        initializeNbSeriesInTables(nbSeriesSimus);
-
         try {
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                nbLoopTab[x] = (new Integer(st.sval)).intValue();
-                System.out.println("  Number of replicated simulations per serie = " + nbLoopTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                configFileNameTab[x] = st.sval;
-                System.out.println("  Configuration file = " + configFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                speciesFileNameTab[x] = st.sval;
-                System.out.println("  Species file = " + speciesFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                predationFileNameTab[x] = st.sval;
-                System.out.println("  Predation file = " + predationFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                fishingFileNameTab[x] = st.sval;
-                System.out.println("  Fishing file = " + fishingFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                areasFileNameTab[x] = st.sval;
-                System.out.println("  Areas file = " + areasFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                planktonStructureFileNameTab[x] = st.sval;
-                System.out.println("  Plankton groups file = " + planktonStructureFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                planktonFileNameTab[x] = st.sval;
-                System.out.println("  Plankton data file = " + planktonFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                calibrationFileNameTab[x] = st.sval;
-                System.out.println("  Calibration file = " + calibrationFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                indicatorsFileNameTab[x] = st.sval;
-                System.out.println("  Indicators file = " + indicatorsFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                accessibilitiesFileNameTab[x] = st.sval;
-                System.out.println("  Accessibilities file = " + accessibilitiesFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                size0FileNameTab[x] = st.sval;
-                System.out.println("  Size age-class zero file = " + size0FileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                reproductionFileNameTab[x] = st.sval;
-                System.out.println("  Reproduction file = " + reproductionFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                fishingSeasonFileNameTab[x] = st.sval;
-                System.out.println("  Fishing season file = " + fishingSeasonFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                migrationFileNameTab[x] = st.sval;
-                System.out.println("  Migration file = " + migrationFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                coastFileNameTab[x] = st.sval;
-                System.out.println("  Coast file = " + coastFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                mpaFileNameTab[x] = st.sval;
-                System.out.println("  MPA file = " + mpaFileNameTab[x]);
-            }
-            for (int x = 0; x < nbSeriesSimus; x++) {
-                st.nextToken();
-                couplingFileNameTab[x] = st.sval;
-                System.out.println("  Coupling file = " + couplingFileNameTab[x]);
-            }
+            st.nextToken();
+            nbLoopTab = (new Integer(st.sval)).intValue();
+            System.out.println("  Number of replicated simulations = " + nbLoopTab);
+
+            st.nextToken();
+            configFileNameTab = st.sval;
+            System.out.println("  Configuration file = " + configFileNameTab);
+
+            st.nextToken();
+            speciesFileNameTab = st.sval;
+            System.out.println("  Species file = " + speciesFileNameTab);
+
+            st.nextToken();
+            predationFileNameTab = st.sval;
+            System.out.println("  Predation file = " + predationFileNameTab);
+
+            st.nextToken();
+            fishingFileNameTab = st.sval;
+            System.out.println("  Fishing file = " + fishingFileNameTab);
+
+            st.nextToken();
+            areasFileNameTab = st.sval;
+            System.out.println("  Areas file = " + areasFileNameTab);
+
+            st.nextToken();
+            planktonStructureFileNameTab = st.sval;
+            System.out.println("  Plankton groups file = " + planktonStructureFileNameTab);
+
+            st.nextToken();
+            planktonFileNameTab = st.sval;
+            System.out.println("  Plankton data file = " + planktonFileNameTab);
+
+            st.nextToken();
+            calibrationFileNameTab = st.sval;
+            System.out.println("  Calibration file = " + calibrationFileNameTab);
+
+            st.nextToken();
+            indicatorsFileNameTab = st.sval;
+            System.out.println("  Indicators file = " + indicatorsFileNameTab);
+
+            st.nextToken();
+            accessibilitiesFileNameTab = st.sval;
+            System.out.println("  Accessibilities file = " + accessibilitiesFileNameTab);
+
+            st.nextToken();
+            size0FileNameTab = st.sval;
+            System.out.println("  Size age-class zero file = " + size0FileNameTab);
+
+            st.nextToken();
+            reproductionFileNameTab = st.sval;
+            System.out.println("  Reproduction file = " + reproductionFileNameTab);
+
+            st.nextToken();
+            fishingSeasonFileNameTab = st.sval;
+            System.out.println("  Fishing season file = " + fishingSeasonFileNameTab);
+
+            st.nextToken();
+            migrationFileNameTab = st.sval;
+            System.out.println("  Migration file = " + migrationFileNameTab);
+
+            st.nextToken();
+            coastFileNameTab = st.sval;
+            System.out.println("  Coast file = " + coastFileNameTab);
+
+            st.nextToken();
+            mpaFileNameTab = st.sval;
+            System.out.println("  MPA file = " + mpaFileNameTab);
+
+            st.nextToken();
+            couplingFileNameTab = st.sval;
+            System.out.println("  Coupling file = " + couplingFileNameTab);
+
             inputFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of INPUT file");
             System.exit(1);
         }
         System.out.println("EOF for step 2. Reading file INPUT.txt");
-    }
-
-    public void initializeNbSeriesInTables(int nbSeriesSimus) {
-        //****initialisation of tables dimensions****
-        //--- INPUT file---
-        nbLoopTab = new int[nbSeriesSimus];
-        speciesFileNameTab = new String[nbSeriesSimus];
-        configFileNameTab = new String[nbSeriesSimus];
-        size0FileNameTab = new String[nbSeriesSimus];
-        predationFileNameTab = new String[nbSeriesSimus];
-        calibrationFileNameTab = new String[nbSeriesSimus];
-        fishingFileNameTab = new String[nbSeriesSimus];
-        reproductionFileNameTab = new String[nbSeriesSimus];
-        areasFileNameTab = new String[nbSeriesSimus];
-        migrationFileNameTab = new String[nbSeriesSimus];
-        coastFileNameTab = new String[nbSeriesSimus];
-        mpaFileNameTab = new String[nbSeriesSimus];
-        outputFileNameTab = new String[nbSeriesSimus];
-        outputPrefix = new String[nbSeriesSimus];
-        planktonFileNameTab = new String[nbSeriesSimus];
-        planktonStructureFileNameTab = new String[nbSeriesSimus];
-        indicatorsFileNameTab = new String[nbSeriesSimus];
-        couplingFileNameTab = new String[nbSeriesSimus];
-        accessibilitiesFileNameTab = new String[nbSeriesSimus];
-        fishingSeasonFileNameTab = new String[nbSeriesSimus];
-
-        //--- CONFIGURATION file---
-        gridClassNameTab = new String[nbSeriesSimus];
-        gridFileTab = new String[nbSeriesSimus];
-        lonFieldTab = new String[nbSeriesSimus];
-        latFieldTab = new String[nbSeriesSimus];
-        maskFieldTab = new String[nbSeriesSimus];
-        strideTab = new int[nbSeriesSimus];
-        gridLinesTab = new int[nbSeriesSimus];
-        gridColumnsTab = new int[nbSeriesSimus];
-        simulationTimeTab = new int[nbSeriesSimus];
-        nbDtMatrix = new int[nbSeriesSimus];
-        savingDtMatrix = new int[nbSeriesSimus];
-        nbDtSavePerYear = new int[nbSeriesSimus];
-        startingSavingTimeTab = new int[nbSeriesSimus];
-        nbSpeciesTab = new int[nbSeriesSimus];
-        isForcing = new boolean[nbSeriesSimus];
-        lowTLClassNameTab = new String[nbSeriesSimus];
-
-        //--- COAST file---
-        upLeftLatTab = new float[nbSeriesSimus];
-        lowRightLatTab = new float[nbSeriesSimus];
-        upLeftLongTab = new float[nbSeriesSimus];
-        lowRightLongTab = new float[nbSeriesSimus];
-
-        //--- OPTION file---
-        nbSchools = new int[nbSeriesSimus];
-        eggSizeMatrix = new float[nbSeriesSimus][];
-        eggWeightMatrix = new float[nbSeriesSimus][];
-        growthAgeThresholdMatrix = new float[nbSeriesSimus][];
-        predationRateMatrix = new float[nbSeriesSimus][];
-        predPreySizesMinMatrix = new float[nbSeriesSimus][][];
-        predPreySizesMaxMatrix = new float[nbSeriesSimus][][];
-        criticalPredSuccessMatrix = new float[nbSeriesSimus][];
-        starvMaxRateMatrix = new float[nbSeriesSimus][];
-
-        //--- SPECIES file---
-        nbPlanktonGroupsTab = new int[nbSeriesSimus];
-        planktonNamesTab = new String[nbSeriesSimus][];
-        nameSpecMatrix = new String[nbSeriesSimus][];
-        DMatrix = new float[nbSeriesSimus][];
-        longevityMatrix = new float[nbSeriesSimus][];
-        lInfMatrix = new float[nbSeriesSimus][];
-        KMatrix = new float[nbSeriesSimus][];
-        t0Matrix = new float[nbSeriesSimus][];
-        cMatrix = new float[nbSeriesSimus][];
-        bPowerMatrix = new float[nbSeriesSimus][];
-        alphaMatrix = new float[nbSeriesSimus][];
-        maturityMetricMatrix = new String[nbSeriesSimus][];
-        sizeMatMatrix = new float[nbSeriesSimus][];
-        sexRatioMatrix = new float[nbSeriesSimus][];
-        range = new int[nbSeriesSimus][];
-        sizeFeedingMatrix = new float[nbSeriesSimus][][];
-        nbStagesMatrix = new int[nbSeriesSimus][];
-        reproduceLocallyTab = new boolean[nbSeriesSimus][];
-        biomassFluxInTab = new float[nbSeriesSimus][];
-        meanLengthFishInTab = new float[nbSeriesSimus][];
-        meanAgeFishInTab = new float[nbSeriesSimus][];
-
-        //--- CALIBRATION file---
-        calibrationMethod = new String[nbSeriesSimus];
-        spBiomIniTab = new double[nbSeriesSimus][];
-        //larvalSurvivalMatrix = new float[nbSeriesSimus][];
-        supAgeOfClass0Matrix = new float[nbSeriesSimus][];
-        SSslope = new double[nbSeriesSimus];
-        SSintercept = new double[nbSeriesSimus];
-
-        //--- REPRODUCTION file---
-        seasonSpawningMatrix = new float[nbSeriesSimus][][];
-
-        //--- FISHING file---
-        recruitSizeMatrix = new float[nbSeriesSimus][];
-        recruitAgeMatrix = new float[nbSeriesSimus][];
-        recruitMetricMatrix = new String[nbSeriesSimus];
-
-        //--- SPATIAL initialisations---
-        speciesAreasSizeTab = new int[nbSeriesSimus][];
-        tabCoastiMatrix = new int[nbSeriesSimus][];
-        tabCoastjMatrix = new int[nbSeriesSimus][];
-        nbCellsCoastTab = new int[nbSeriesSimus];
-
-        tabMPAiMatrix = new int[nbSeriesSimus][];
-        tabMPAjMatrix = new int[nbSeriesSimus][];
-        thereIsMPATab = new boolean[nbSeriesSimus];
-        MPAtStartTab = new int[nbSeriesSimus];
-        MPAtEndTab = new int[nbSeriesSimus];
-
-        //--- OUTPUT INDICATORS ---
-
-        TLoutputMatrix = new boolean[nbSeriesSimus];
-        TLDistriboutputMatrix = new boolean[nbSeriesSimus];
-        dietsOutputMatrix = new boolean[nbSeriesSimus];
-        meanSizeOutputMatrix = new boolean[nbSeriesSimus];
-        sizeSpectrumOutputMatrix = new boolean[nbSeriesSimus];
-        sizeSpectrumPerSpeOutputMatrix = new boolean[nbSeriesSimus];
-        planktonMortalityOutputMatrix = new boolean[nbSeriesSimus];
-        calibrationMatrix = new boolean[nbSeriesSimus];
-        outputClass0Matrix = new boolean[nbSeriesSimus];
-        spatializedOutputs = new boolean[nbSeriesSimus];
-        planktonBiomassOutputMatrix = new String[nbSeriesSimus];
-        dietsConfigFileName = new String[nbSeriesSimus];
-        dietOutputMetrics = new String[nbSeriesSimus];
-        nbDietsStages = new int[nbSeriesSimus][];
-        dietStageThreshold = new float[nbSeriesSimus][][];
     }
 
     public void readSpeciesFile(String speciesFileName, int numSerie) {
@@ -570,84 +415,84 @@ public class Osmose {
 
         try {
             st.nextToken();
-            if (new Integer(st.sval).intValue() == nbSpeciesTab[numSerie]) {
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            if (new Integer(st.sval).intValue() == nbSpeciesTab) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    nameSpecMatrix[numSerie][i] = st.sval;
+                    nameSpecMatrix[i] = st.sval;
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    DMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    DMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    longevityMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    longevityMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    lInfMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    lInfMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    KMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    KMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    t0Matrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    t0Matrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    cMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    cMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    bPowerMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    bPowerMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    alphaMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    alphaMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    maturityMetricMatrix[numSerie][i] = st.sval;
+                    maturityMetricMatrix[i] = st.sval;
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                    if (maturityMetricMatrix[numSerie][i].equalsIgnoreCase("age")) //conversion from maturity age to maturity size through von Bertalanffy equation
+                for (int i = 0; i < nbSpeciesTab; i++) {
+                    if (maturityMetricMatrix[i].equalsIgnoreCase("age")) //conversion from maturity age to maturity size through von Bertalanffy equation
                     {
                         st.nextToken();
-                        sizeMatMatrix[numSerie][i] = lInfMatrix[numSerie][i] * (float) (1 - Math.exp(-KMatrix[numSerie][i]
-                                * ((new Float(st.sval).floatValue()) - t0Matrix[numSerie][i])));             //***** to checked if not too big fish (same test than for recruit age)
+                        sizeMatMatrix[i] = lInfMatrix[i] * (float) (1 - Math.exp(-KMatrix[i]
+                                * ((new Float(st.sval).floatValue()) - t0Matrix[i])));             //***** to checked if not too big fish (same test than for recruit age)
                     } else {
                         st.nextToken();
-                        sizeMatMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                        sizeMatMatrix[i] = (new Float(st.sval)).floatValue();
                     }
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    sexRatioMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    sexRatioMatrix[i] = (new Float(st.sval)).floatValue();
                 }
                 /*
                  * phv 2011/11/21 Determine wether reproduction occurs locally
                  * or outside the simulated domain. Then for species reproducing
                  * outside it reads the incoming biomass caracteristics.
                  */
-                reproduceLocallyTab[numSerie] = new boolean[nbSpeciesTab[numSerie]];
-                biomassFluxInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
-                meanLengthFishInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
-                meanAgeFishInTab[numSerie] = new float[nbSpeciesTab[numSerie]];
-                range[numSerie] = new int[nbSpeciesTab[numSerie]];
+                reproduceLocallyTab = new boolean[nbSpeciesTab];
+                biomassFluxInTab = new float[nbSpeciesTab];
+                meanLengthFishInTab = new float[nbSpeciesTab];
+                meanAgeFishInTab = new float[nbSpeciesTab];
+                range = new int[nbSpeciesTab];
                 st.nextToken();
                 int nbReproOut = 0;
                 if (null != st.sval) {
                     if (Character.isDigit(st.sval.charAt(0))) {
-                        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                            range[numSerie][i] = Integer.getInteger(st.sval);
+                        for (int i = 0; i < nbSpeciesTab; i++) {
+                            range[i] = Integer.getInteger(st.sval);
                             st.nextToken();
                         }
                     } else {
-                        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                            reproduceLocallyTab[numSerie][i] = st.sval.matches("in");
-                            if (!reproduceLocallyTab[numSerie][i]) {
+                        for (int i = 0; i < nbSpeciesTab; i++) {
+                            reproduceLocallyTab[i] = st.sval.matches("in");
+                            if (!reproduceLocallyTab[i]) {
                                 nbReproOut++;
                             }
                             st.nextToken();
@@ -655,28 +500,28 @@ public class Osmose {
                         for (int i = 0; i < nbReproOut; i++) {
                             int indexSpecies = new Integer(st.sval).intValue() - 1;
                             st.nextToken();
-                            biomassFluxInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                            biomassFluxInTab[indexSpecies] = new Float(st.sval).floatValue();
                             st.nextToken();
-                            meanLengthFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                            meanLengthFishInTab[indexSpecies] = new Float(st.sval).floatValue();
                             st.nextToken();
-                            meanAgeFishInTab[numSerie][indexSpecies] = new Float(st.sval).floatValue();
+                            meanAgeFishInTab[indexSpecies] = new Float(st.sval).floatValue();
                             st.nextToken();
                         }
                         if (null != st.sval) {
-                            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                                range[numSerie][i] = Integer.valueOf(st.sval);
+                            for (int i = 0; i < nbSpeciesTab; i++) {
+                                range[i] = Integer.valueOf(st.sval);
                                 st.nextToken();
                             }
                         } else {
-                            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                                range[numSerie][i] = 1;
+                            for (int i = 0; i < nbSpeciesTab; i++) {
+                                range[i] = 1;
                             }
                         }
                     }
                 } else {
-                    for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                        reproduceLocallyTab[numSerie][i] = true;
-                        range[numSerie][i] = 1;
+                    for (int i = 0; i < nbSpeciesTab; i++) {
+                        reproduceLocallyTab[i] = true;
+                        range[i] = 1;
                     }
                 }
             } else {
@@ -703,36 +548,36 @@ public class Osmose {
          * This case allows interannual variability for reproduction.
          */
         int nb_rows = lines.size() - 1;
-        if (nb_rows != nbDtMatrix[numSerie] & nb_rows != nbDtMatrix[numSerie] * simulationTimeTab[numSerie]) {
-            System.out.println("Reproduction seasonality file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nbDtMatrix[numSerie] + " or " + (nbDtMatrix[numSerie] * simulationTimeTab[numSerie]));
+        if (nb_rows != nbDtMatrix & nb_rows != nbDtMatrix * simulationTimeTab) {
+            System.out.println("Reproduction seasonality file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nbDtMatrix + " or " + (nbDtMatrix * simulationTimeTab));
             System.exit(1);
         }
         int nb_columns = lines.get(0).length - 1;
-        if (nb_columns != nbSpeciesTab[numSerie]) {
+        if (nb_columns != nbSpeciesTab) {
             System.out.println("Wrong number of species in reproduction seasonality file " + csvFile);
             System.exit(1);
         }
         /*
          * Reads the larval mortality rates
          */
-        seasonSpawningMatrix[numSerie] = new float[nbSpeciesTab[numSerie]][nb_rows];
+        seasonSpawningMatrix = new float[nbSpeciesTab][nb_rows];
         for (int step = 0; step < nb_rows; step++) {
             String[] line = lines.get(step + 1); // skip header on 1st line
-            for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
-                seasonSpawningMatrix[numSerie][iSpec][step] = Float.valueOf(line[iSpec + 1]) / 100.f; // skip 1st column, the time step
+            for (int iSpec = 0; iSpec < nbSpeciesTab; iSpec++) {
+                seasonSpawningMatrix[iSpec][step] = Float.valueOf(line[iSpec + 1]) / 100.f; // skip 1st column, the time step
             }
         }
         /*
          * Check that sum of % == 100% every year for every species
          */
-        for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
+        for (int iSpec = 0; iSpec < nbSpeciesTab; iSpec++) {
             double sum = 0;
-            for (int iStep = 0; iStep < seasonSpawningMatrix[numSerie][iSpec].length; iStep++) {
-                sum += seasonSpawningMatrix[numSerie][iSpec][iStep];
-                if ((iStep + 1) % nbDtMatrix[numSerie] == 0) {
+            for (int iStep = 0; iStep < seasonSpawningMatrix[iSpec].length; iStep++) {
+                sum += seasonSpawningMatrix[iSpec][iStep];
+                if ((iStep + 1) % nbDtMatrix == 0) {
                     if (!((sum > 0.99f) && (sum < 1.01f))) {
-                        int year = (iStep + 1) / nbDtMatrix[numSerie];
-                        System.out.println("ERROR: sum of percents does not equal 100% in spawning seasonality file " + csvFile + " for species " + nameSpecMatrix[numSerie][iSpec] + " in year " + year);
+                        int year = (iStep + 1) / nbDtMatrix;
+                        System.out.println("ERROR: sum of percents does not equal 100% in spawning seasonality file " + csvFile + " for species " + nameSpecMatrix[iSpec] + " in year " + year);
                         System.exit(1);
                     }
                     sum = 0;
@@ -744,10 +589,10 @@ public class Osmose {
 
     public void readSeasonalityReproFile(String reproductionFileName, int numSerie) {
         if (reproductionFileName.equalsIgnoreCase("default")) {
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                seasonSpawningMatrix[numSerie][i] = new float[nbDtMatrix[numSerie]];
-                for (int j = 0; j < nbDtMatrix[numSerie]; j++) {
-                    seasonSpawningMatrix[numSerie][i][j] = (float) 1 / (float) nbDtMatrix[numSerie];
+            for (int i = 0; i < nbSpeciesTab; i++) {
+                seasonSpawningMatrix[i] = new float[nbDtMatrix];
+                for (int j = 0; j < nbDtMatrix; j++) {
+                    seasonSpawningMatrix[i][j] = (float) 1 / (float) nbDtMatrix;
                 }
             }
             System.out.println("Reproduction is set constant over the year (default)");
@@ -776,13 +621,13 @@ public class Osmose {
 
             try {
                 st.nextToken();
-                if (new Integer(st.sval).intValue() == nbDtMatrix[numSerie]) {
-                    for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                if (new Integer(st.sval).intValue() == nbDtMatrix) {
+                    for (int i = 0; i < nbSpeciesTab; i++) {
                         tempSum = 0;
-                        seasonSpawningMatrix[numSerie][i] = new float[nbDtMatrix[numSerie]];
-                        for (int j = 0; j < nbDtMatrix[numSerie]; j++) {
+                        seasonSpawningMatrix[i] = new float[nbDtMatrix];
+                        for (int j = 0; j < nbDtMatrix; j++) {
                             st.nextToken();
-                            seasonSpawningMatrix[numSerie][i][j] = (new Float(st.sval)).floatValue() / 100; //percentage
+                            seasonSpawningMatrix[i][j] = (new Float(st.sval)).floatValue() / 100; //percentage
                             tempSum += (new Float(st.sval)).floatValue();
                         }
                         if (!((tempSum > 99.f) && (tempSum < 101.f))) {
@@ -818,22 +663,22 @@ public class Osmose {
              * rate.
              */
             int nb_rows = lines.size() - 1;
-            if (nb_rows != nbDtMatrix[numSerie] & nb_rows != nbDtMatrix[numSerie] * simulationTimeTab[numSerie]) {
-                System.out.println("Fishing rate file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nbDtMatrix[numSerie] + " or " + (nbDtMatrix[numSerie] * simulationTimeTab[numSerie]));
+            if (nb_rows != nbDtMatrix & nb_rows != nbDtMatrix * simulationTimeTab) {
+                System.out.println("Fishing rate file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nbDtMatrix + " or " + (nbDtMatrix * simulationTimeTab));
                 System.exit(1);
             }
             int nb_columns = lines.get(0).length - 1;
-            if (nb_columns != nbSpeciesTab[numSerie]) {
+            if (nb_columns != nbSpeciesTab) {
                 System.out.println("Wrong number of species in fishing rate file " + csvFile);
                 System.exit(1);
             }
             /*
              * Reads the fishing rates
              */
-            fishingRates = new float[nbSpeciesTab[numSerie]][nb_rows];
+            fishingRates = new float[nbSpeciesTab][nb_rows];
             for (int step = 0; step < nb_rows; step++) {
                 String[] line = lines.get(step + 1); // skip header on 1st line
-                for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
+                for (int iSpec = 0; iSpec < nbSpeciesTab; iSpec++) {
                     fishingRates[iSpec][step] = Float.valueOf(line[iSpec + 1]); // skip 1st column, the time step
                 }
             }
@@ -865,28 +710,28 @@ public class Osmose {
             readFishingRates(resolveFile(fishingRateFile));
 
             st.nextToken();
-            recruitMetricMatrix[numSerie] = st.sval;
+            recruitMetricMatrix = st.sval;
 
-            if (recruitMetricMatrix[numSerie].equalsIgnoreCase("age")) {
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            if (recruitMetricMatrix.equalsIgnoreCase("age")) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    recruitAgeMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    recruitAgeMatrix[i] = (new Float(st.sval)).floatValue();
                 }
             } else {
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    recruitSizeMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
-                    if (recruitSizeMatrix[numSerie][i] < lInfMatrix[numSerie][i]) {
-                        recruitAgeMatrix[numSerie][i] = (float) (-((Math.log(1 - (recruitSizeMatrix[numSerie][i] / lInfMatrix[numSerie][i]))) / KMatrix[numSerie][i])) + t0Matrix[numSerie][i];
+                    recruitSizeMatrix[i] = (new Float(st.sval)).floatValue();
+                    if (recruitSizeMatrix[i] < lInfMatrix[i]) {
+                        recruitAgeMatrix[i] = (float) (-((Math.log(1 - (recruitSizeMatrix[i] / lInfMatrix[i]))) / KMatrix[i])) + t0Matrix[i];
                     } else {
-                        recruitAgeMatrix[numSerie][i] = longevityMatrix[numSerie][i] + 1;
+                        recruitAgeMatrix[i] = longevityMatrix[i] + 1;
                     }
-                    if (recruitAgeMatrix[numSerie][i] < 0.6)//due to inverse von Bert transformation
+                    if (recruitAgeMatrix[i] < 0.6)//due to inverse von Bert transformation
                     {
-                        recruitAgeMatrix[numSerie][i] = (float) 0.6; // >0.5 to avoid Math.round() problems
+                        recruitAgeMatrix[i] = (float) 0.6; // >0.5 to avoid Math.round() problems
                     }
-                    if (recruitAgeMatrix[numSerie][i] > longevityMatrix[numSerie][i]) {
-                        recruitAgeMatrix[numSerie][i] = longevityMatrix[numSerie][i] + 1;
+                    if (recruitAgeMatrix[i] > longevityMatrix[i]) {
+                        recruitAgeMatrix[i] = longevityMatrix[i] + 1;
                     }
                 }
             }
@@ -910,22 +755,22 @@ public class Osmose {
          * This case allows interannual variability for larval mortality rate.
          */
         int nb_rows = lines.size() - 1;
-        if (nb_rows != 1 & nb_rows != nbDtMatrix[numSerie] & nb_rows != nbDtMatrix[numSerie] * simulationTimeTab[numSerie]) {
-            System.out.println("Larval mortality rates file " + csvFile + " contains " + nb_rows + " rows. Should be either 1 or " + nbDtMatrix[numSerie] + " or " + (nbDtMatrix[numSerie] * simulationTimeTab[numSerie]));
+        if (nb_rows != 1 & nb_rows != nbDtMatrix & nb_rows != nbDtMatrix * simulationTimeTab) {
+            System.out.println("Larval mortality rates file " + csvFile + " contains " + nb_rows + " rows. Should be either 1 or " + nbDtMatrix + " or " + (nbDtMatrix * simulationTimeTab));
             System.exit(1);
         }
         int nb_columns = lines.get(0).length - 1;
-        if (nb_columns != nbSpeciesTab[numSerie]) {
+        if (nb_columns != nbSpeciesTab) {
             System.out.println("Wrong number of species in larval mortality rates file " + csvFile);
             System.exit(1);
         }
         /*
          * Reads the larval mortality rates
          */
-        larvalMortalityRates = new float[nbSpeciesTab[numSerie]][nb_rows];
+        larvalMortalityRates = new float[nbSpeciesTab][nb_rows];
         for (int step = 0; step < nb_rows; step++) {
             String[] line = lines.get(step + 1); // skip header on 1st line
-            for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
+            for (int iSpec = 0; iSpec < nbSpeciesTab; iSpec++) {
                 larvalMortalityRates[iSpec][step] = Float.valueOf(line[iSpec + 1]); // skip 1st column, the time step
             }
         }
@@ -948,24 +793,24 @@ public class Osmose {
 
         try {
             st.nextToken();
-            calibrationMethod[numSerie] = st.sval;
-            if (calibrationMethod[numSerie].equalsIgnoreCase("biomass")) {
-                spBiomIniTab[numSerie] = new double[nbSpeciesTab[numSerie]];
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            calibrationMethod = st.sval;
+            if (calibrationMethod.equalsIgnoreCase("biomass")) {
+                spBiomIniTab = new double[nbSpeciesTab];
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    spBiomIniTab[numSerie][i] = (new Double(st.sval)).doubleValue();
+                    spBiomIniTab[i] = (new Double(st.sval)).doubleValue();
                 }
-            } else if (calibrationMethod[numSerie].equalsIgnoreCase("spectrum")) {
+            } else if (calibrationMethod.equalsIgnoreCase("spectrum")) {
                 st.nextToken();
-                SSslope[numSerie] = (new Double(st.sval)).doubleValue();
+                SSslope = (new Double(st.sval)).doubleValue();
                 st.nextToken();
-                SSintercept[numSerie] = (new Double(st.sval)).doubleValue();
-            } else if (calibrationMethod[numSerie].equalsIgnoreCase("random")) //*****************TO DETAIL****************************
+                SSintercept = (new Double(st.sval)).doubleValue();
+            } else if (calibrationMethod.equalsIgnoreCase("random")) //*****************TO DETAIL****************************
             {
                 System.out.println("The option initialisation per random method is not implemented yet");
             }
 
-            supAgeOfClass0Matrix[numSerie] = new float[nbSpeciesTab[numSerie]];
+            supAgeOfClass0Matrix = new float[nbSpeciesTab];
 
             st.nextToken();
             /*
@@ -977,8 +822,8 @@ public class Osmose {
              */
             try {
                 Float.valueOf(st.sval);
-                larvalMortalityRates = new float[nbSpeciesTab[numSerie]][1];
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                larvalMortalityRates = new float[nbSpeciesTab][1];
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     larvalMortalityRates[i][0] = (new Float(st.sval)).floatValue();
                     st.nextToken();
                 }
@@ -988,11 +833,11 @@ public class Osmose {
                 st.nextToken();
             }
 
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                supAgeOfClass0Matrix[numSerie][i] = (new Float(st.sval)).floatValue();
+            for (int i = 0; i < nbSpeciesTab; i++) {
+                supAgeOfClass0Matrix[i] = (new Float(st.sval)).floatValue();
                 st.nextToken();
             }
-            for (int i = 0; i < nbPlanktonGroupsTab[numSerie]; i++) {
+            for (int i = 0; i < nbPlanktonGroupsTab; i++) {
                 planktonAccessCoeffMatrix[i] = (new Float(st.sval)).floatValue();
                 st.nextToken();
             }
@@ -1020,41 +865,41 @@ public class Osmose {
 
         try {
             st.nextToken();
-            gridLinesTab[numSerie] = (new Integer(st.sval)).intValue();
+            gridLinesTab = (new Integer(st.sval)).intValue();
             st.nextToken();
-            gridColumnsTab[numSerie] = (new Integer(st.sval)).intValue();
+            gridColumnsTab = (new Integer(st.sval)).intValue();
             st.nextToken();
-            upLeftLatTab[numSerie] = new Float(st.sval).floatValue();
+            upLeftLatTab = new Float(st.sval).floatValue();
             st.nextToken();
-            lowRightLatTab[numSerie] = new Float(st.sval).floatValue();
+            lowRightLatTab = new Float(st.sval).floatValue();
             st.nextToken();
-            upLeftLongTab[numSerie] = new Float(st.sval).floatValue();
+            upLeftLongTab = new Float(st.sval).floatValue();
             st.nextToken();
-            lowRightLongTab[numSerie] = new Float(st.sval).floatValue();
+            lowRightLongTab = new Float(st.sval).floatValue();
             st.nextToken();
-            simulationTimeTab[numSerie] = (new Integer(st.sval)).intValue();
+            simulationTimeTab = (new Integer(st.sval)).intValue();
             st.nextToken();
-            nbDtMatrix[numSerie] = (new Integer(st.sval)).intValue();
+            nbDtMatrix = (new Integer(st.sval)).intValue();
             st.nextToken();
-            savingDtMatrix[numSerie] = (new Integer(st.sval)).intValue();
-            if (!((nbDtMatrix[numSerie] % savingDtMatrix[numSerie]) == 0)) {
+            savingDtMatrix = (new Integer(st.sval)).intValue();
+            if (!((nbDtMatrix % savingDtMatrix) == 0)) {
                 System.out.println("The number of time steps per year is not a multiple of the number of time steps for saving");
                 System.out.println("Thus, saving is realized at each time step");
-                savingDtMatrix[numSerie] = 1;
+                savingDtMatrix = 1;
             }
-            nbDtSavePerYear[numSerie] = (int) nbDtMatrix[numSerie] / savingDtMatrix[numSerie];
+            nbDtSavePerYear = (int) nbDtMatrix / savingDtMatrix;
             st.nextToken();
-            startingSavingTimeTab[numSerie] = (new Integer(st.sval)).intValue();
+            startingSavingTimeTab = (new Integer(st.sval)).intValue();
             st.nextToken();
-            nbSpeciesTab[numSerie] = (new Integer(st.sval)).intValue();
+            nbSpeciesTab = (new Integer(st.sval)).intValue();
             st.nextToken();
-            nbPlanktonGroupsTab[numSerie] = (new Integer(st.sval)).intValue();
+            nbPlanktonGroupsTab = (new Integer(st.sval)).intValue();
 
             st.nextToken();
             if ((st.sval).equalsIgnoreCase("forcing")) {
-                isForcing[numSerie] = true;
+                isForcing = true;
             } else if ((st.sval).equalsIgnoreCase("coupling")) {
-                isForcing[numSerie] = false;
+                isForcing = false;
             } else {
                 System.out.println("In configuration file you have to specify either COUPLING or FORCING");
             }
@@ -1067,30 +912,30 @@ public class Osmose {
              * class that implements the forcing/coupling.
              */
             st.nextToken();
-            lowTLClassNameTab[numSerie] = st.sval;
+            lowTLClassNameTab = st.sval;
 
             st.nextToken();
-            nbSchools[numSerie] = 1 + Math.round(((new Integer(st.sval)).intValue()) / nbDtMatrix[numSerie]);
+            nbSchools = 1 + Math.round(((new Integer(st.sval)).intValue()) / nbDtMatrix);
 
             /*
              * Additional parameters to read the grid from NetCDF file
              */
             st.nextToken();
             if (null != st.sval) {
-                gridClassNameTab[numSerie] = st.sval;
+                gridClassNameTab = st.sval;
                 st.nextToken();
                 String filename = resolveFile(st.sval).toString();
-                gridFileTab[numSerie] = filename;
+                gridFileTab = filename;
                 st.nextToken();
-                lonFieldTab[numSerie] = st.sval;
+                lonFieldTab = st.sval;
                 st.nextToken();
-                latFieldTab[numSerie] = st.sval;
+                latFieldTab = st.sval;
                 st.nextToken();
-                maskFieldTab[numSerie] = st.sval;
+                maskFieldTab = st.sval;
                 st.nextToken();
-                strideTab[numSerie] = Integer.valueOf(st.sval);
+                strideTab = Integer.valueOf(st.sval);
             } else {
-                gridClassNameTab[numSerie] = OriginalGrid.class.getCanonicalName();
+                gridClassNameTab = OriginalGrid.class.getCanonicalName();
             }
 
             configFile.close();
@@ -1098,56 +943,56 @@ public class Osmose {
             System.out.println("Reading error of configuration file");
             System.exit(1);
         }
-        initializeNbLivingGroups(numSerie, nbSpeciesTab[numSerie], nbPlanktonGroupsTab[numSerie]);
+        initializeNbLivingGroups(numSerie, nbSpeciesTab, nbPlanktonGroupsTab);
     }
 
     public void initializeNbLivingGroups(int numSerie, int nbSpeciesExplicit, int nbOtherFood) {
 
         // setting tables length
         //----OPTION file------
-        eggSizeMatrix[numSerie] = new float[nbSpeciesExplicit];
-        eggWeightMatrix[numSerie] = new float[nbSpeciesExplicit];
-        growthAgeThresholdMatrix[numSerie] = new float[nbSpeciesExplicit];
-        predationRateMatrix[numSerie] = new float[nbSpeciesExplicit];
-        predPreySizesMaxMatrix[numSerie] = new float[nbSpeciesExplicit][];
-        predPreySizesMinMatrix[numSerie] = new float[nbSpeciesExplicit][];
-        criticalPredSuccessMatrix[numSerie] = new float[nbSpeciesExplicit];
-        starvMaxRateMatrix[numSerie] = new float[nbSpeciesExplicit];
+        eggSizeMatrix = new float[nbSpeciesExplicit];
+        eggWeightMatrix = new float[nbSpeciesExplicit];
+        growthAgeThresholdMatrix = new float[nbSpeciesExplicit];
+        predationRateMatrix = new float[nbSpeciesExplicit];
+        predPreySizesMaxMatrix = new float[nbSpeciesExplicit][];
+        predPreySizesMinMatrix = new float[nbSpeciesExplicit][];
+        criticalPredSuccessMatrix = new float[nbSpeciesExplicit];
+        starvMaxRateMatrix = new float[nbSpeciesExplicit];
         //----SPECIES file------
-        nameSpecMatrix[numSerie] = new String[nbSpeciesExplicit];
-        DMatrix[numSerie] = new float[nbSpeciesExplicit];
-        longevityMatrix[numSerie] = new float[nbSpeciesExplicit];
-        lInfMatrix[numSerie] = new float[nbSpeciesExplicit];
-        KMatrix[numSerie] = new float[nbSpeciesExplicit];
-        t0Matrix[numSerie] = new float[nbSpeciesExplicit];
-        cMatrix[numSerie] = new float[nbSpeciesExplicit];
-        bPowerMatrix[numSerie] = new float[nbSpeciesExplicit];
-        alphaMatrix[numSerie] = new float[nbSpeciesExplicit];
-        maturityMetricMatrix[numSerie] = new String[nbSpeciesExplicit];
-        sizeMatMatrix[numSerie] = new float[nbSpeciesExplicit];
-        sexRatioMatrix[numSerie] = new float[nbSpeciesExplicit];
-        sizeFeedingMatrix[numSerie] = new float[nbSpeciesExplicit][];
-        nbStagesMatrix[numSerie] = new int[nbSpeciesExplicit];
+        nameSpecMatrix = new String[nbSpeciesExplicit];
+        DMatrix = new float[nbSpeciesExplicit];
+        longevityMatrix = new float[nbSpeciesExplicit];
+        lInfMatrix = new float[nbSpeciesExplicit];
+        KMatrix = new float[nbSpeciesExplicit];
+        t0Matrix = new float[nbSpeciesExplicit];
+        cMatrix = new float[nbSpeciesExplicit];
+        bPowerMatrix = new float[nbSpeciesExplicit];
+        alphaMatrix = new float[nbSpeciesExplicit];
+        maturityMetricMatrix = new String[nbSpeciesExplicit];
+        sizeMatMatrix = new float[nbSpeciesExplicit];
+        sexRatioMatrix = new float[nbSpeciesExplicit];
+        sizeFeedingMatrix = new float[nbSpeciesExplicit][];
+        nbStagesMatrix = new int[nbSpeciesExplicit];
         //----REPRODUCTION file------
-        seasonSpawningMatrix[numSerie] = new float[nbSpeciesExplicit][];
+        seasonSpawningMatrix = new float[nbSpeciesExplicit][];
         //----FISHING file------
-        recruitSizeMatrix[numSerie] = new float[nbSpeciesExplicit];
-        recruitAgeMatrix[numSerie] = new float[nbSpeciesExplicit];
+        recruitSizeMatrix = new float[nbSpeciesExplicit];
+        recruitAgeMatrix = new float[nbSpeciesExplicit];
         //--- ACCESSIBILITIES----
         planktonAccessCoeffMatrix = new float[nbOtherFood];
         nbAccessStage = new int[nbSpeciesExplicit];
         accessStageThreshold = new float[nbSpeciesExplicit][];
         accessibilityMatrix = new float[nbSpeciesExplicit + nbOtherFood][][][];
 
-        planktonNamesTab[numSerie] = new String[nbOtherFood];
+        planktonNamesTab = new String[nbOtherFood];
     }
 
     public void readsize0File(String optionFileName, int numSerie) {
         if (optionFileName.equalsIgnoreCase("default")) {
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                eggSizeMatrix[numSerie][i] = 0.1f;	// by default : egg diameter set to 1mm
-                eggWeightMatrix[numSerie][i] = 0.0005386f;	// weight of egg by default, considering a sphere with the water density
-                growthAgeThresholdMatrix[numSerie][i] = 1.0f;	// by default, von Bertalanffy model considered valid after 1 year old, linear growth from 0 to 1 year
+            for (int i = 0; i < nbSpeciesTab; i++) {
+                eggSizeMatrix[i] = 0.1f;	// by default : egg diameter set to 1mm
+                eggWeightMatrix[i] = 0.0005386f;	// weight of egg by default, considering a sphere with the water density
+                growthAgeThresholdMatrix[i] = 1.0f;	// by default, von Bertalanffy model considered valid after 1 year old, linear growth from 0 to 1 year
             }
         } else {
             FileInputStream optionFile = null;
@@ -1155,7 +1000,7 @@ public class Osmose {
                 optionFile = new FileInputStream(resolveFile(optionFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("option file doesn't exist: " + optionFileName);
-               System.exit(1);
+                System.exit(1);
             }
 
             Reader r = new BufferedReader(new InputStreamReader(optionFile));
@@ -1165,17 +1010,17 @@ public class Osmose {
             st.quoteChar(';');
 
             try {
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    eggSizeMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    eggSizeMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    eggWeightMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    eggWeightMatrix[i] = (new Float(st.sval)).floatValue();
                 }
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     st.nextToken();
-                    growthAgeThresholdMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                    growthAgeThresholdMatrix[i] = (new Float(st.sval)).floatValue();
                 }
 
                 optionFile.close();
@@ -1202,33 +1047,33 @@ public class Osmose {
         st.quoteChar(';');
 
         try {
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            for (int i = 0; i < nbSpeciesTab; i++) {
                 st.nextToken();
-                predationRateMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                predationRateMatrix[i] = (new Float(st.sval)).floatValue();
             }
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            for (int i = 0; i < nbSpeciesTab; i++) {
                 st.nextToken();
-                criticalPredSuccessMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                criticalPredSuccessMatrix[i] = (new Float(st.sval)).floatValue();
             }
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            for (int i = 0; i < nbSpeciesTab; i++) {
                 st.nextToken();
-                starvMaxRateMatrix[numSerie][i] = (new Float(st.sval)).floatValue();
+                starvMaxRateMatrix[i] = (new Float(st.sval)).floatValue();
             }
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            for (int i = 0; i < nbSpeciesTab; i++) {
                 st.nextToken();
-                nbStagesMatrix[numSerie][i] = (new Integer(st.sval)).intValue();
-                sizeFeedingMatrix[numSerie][i] = new float[nbStagesMatrix[numSerie][i] - 1];
-                predPreySizesMinMatrix[numSerie][i] = new float[nbStagesMatrix[numSerie][i]];
-                predPreySizesMaxMatrix[numSerie][i] = new float[nbStagesMatrix[numSerie][i]];
-                for (int s = 0; s < nbStagesMatrix[numSerie][i] - 1; s++) {
+                nbStagesMatrix[i] = (new Integer(st.sval)).intValue();
+                sizeFeedingMatrix[i] = new float[nbStagesMatrix[i] - 1];
+                predPreySizesMinMatrix[i] = new float[nbStagesMatrix[i]];
+                predPreySizesMaxMatrix[i] = new float[nbStagesMatrix[i]];
+                for (int s = 0; s < nbStagesMatrix[i] - 1; s++) {
                     st.nextToken();
-                    sizeFeedingMatrix[numSerie][i][s] = (new Float(st.sval)).floatValue();
+                    sizeFeedingMatrix[i][s] = (new Float(st.sval)).floatValue();
                 }
-                for (int s = 0; s < nbStagesMatrix[numSerie][i]; s++) {
+                for (int s = 0; s < nbStagesMatrix[i]; s++) {
                     st.nextToken();
-                    predPreySizesMinMatrix[numSerie][i][s] = (new Float(st.sval)).floatValue();
+                    predPreySizesMinMatrix[i][s] = (new Float(st.sval)).floatValue();
                     st.nextToken();
-                    predPreySizesMaxMatrix[numSerie][i][s] = (new Float(st.sval)).floatValue();
+                    predPreySizesMaxMatrix[i][s] = (new Float(st.sval)).floatValue();
                 }
             }
             predationFile.close();
@@ -1256,31 +1101,31 @@ public class Osmose {
         try {
 
             st.nextToken();
-            outputFileNameTab[numSerie] = st.sval;
+            outputFileNameTab = st.sval;
             String[] split = st.sval.split("/");
-            outputPrefix[numSerie] = split[split.length - 1];
+            outputPrefix = split[split.length - 1];
 
             st.nextToken();
-            calibrationMatrix[numSerie] = false;
+            calibrationMatrix = false;
             if (st.sval.equalsIgnoreCase("calibration")) {
-                calibrationMatrix[numSerie] = true;
+                calibrationMatrix = true;
             }
 
             st.nextToken();
-            TLoutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+            TLoutputMatrix = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            TLDistriboutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+            TLDistriboutputMatrix = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            dietsOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+            dietsOutputMatrix = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            dietsConfigFileName[numSerie] = st.sval;
+            dietsConfigFileName = st.sval;
             st.nextToken();
-            meanSizeOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+            meanSizeOutputMatrix = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            sizeSpectrumOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+            sizeSpectrumOutputMatrix = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            sizeSpectrumPerSpeOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
-            if (sizeSpectrumOutputMatrix[numSerie] || sizeSpectrumPerSpeOutputMatrix[numSerie]) {
+            sizeSpectrumPerSpeOutputMatrix = (Boolean.valueOf(st.sval)).booleanValue();
+            if (sizeSpectrumOutputMatrix || sizeSpectrumPerSpeOutputMatrix) {
                 st.nextToken();
                 spectrumMinSize = (new Float(st.sval)).floatValue();
                 st.nextToken();
@@ -1289,9 +1134,9 @@ public class Osmose {
                 classRange = (new Float(st.sval)).floatValue();
             }
             st.nextToken();
-            planktonMortalityOutputMatrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+            planktonMortalityOutputMatrix = (Boolean.valueOf(st.sval)).booleanValue();
             st.nextToken();
-            outputClass0Matrix[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+            outputClass0Matrix = (Boolean.valueOf(st.sval)).booleanValue();
             try {
                 /*
                  * phv 2011/06/30 Read additional parameters "spatialized
@@ -1299,9 +1144,9 @@ public class Osmose {
                  * catch any exception and set it as false by default.
                  */
                 st.nextToken();
-                spatializedOutputs[numSerie] = (Boolean.valueOf(st.sval)).booleanValue();
+                spatializedOutputs = (Boolean.valueOf(st.sval)).booleanValue();
             } catch (Exception ex) {
-                spatializedOutputs[numSerie] = false;
+                spatializedOutputs = false;
             }
             try {
                 /*
@@ -1312,12 +1157,12 @@ public class Osmose {
                  * to choose the format.
                  */
                 st.nextToken();
-                planktonBiomassOutputMatrix[numSerie] = st.sval;
+                planktonBiomassOutputMatrix = st.sval;
             } catch (Exception ex) {
-                planktonBiomassOutputMatrix[numSerie] = "";
+                planktonBiomassOutputMatrix = "";
             }
-            if (!planktonBiomassOutputMatrix[numSerie].matches("csv") & !planktonBiomassOutputMatrix[numSerie].matches("netcdf")) {
-                planktonBiomassOutputMatrix[numSerie] = "";
+            if (!planktonBiomassOutputMatrix.matches("csv") & !planktonBiomassOutputMatrix.matches("netcdf")) {
+                planktonBiomassOutputMatrix = "";
             }
 
             indicFile.close();
@@ -1329,8 +1174,8 @@ public class Osmose {
 
     public void initGrid() {
         try {
-            System.out.println("Initialize grid: " + gridClassNameTab[numSerie]);
-            grid = (IGrid) Class.forName(gridClassNameTab[numSerie]).newInstance();
+            System.out.println("Initialize grid: " + gridClassNameTab);
+            grid = (IGrid) Class.forName(gridClassNameTab).newInstance();
 
         } catch (InstantiationException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
@@ -1342,9 +1187,9 @@ public class Osmose {
         // Init the grid
         grid.init();
         // Apply mask
-        if (null != tabCoastiMatrix[numSerie]) {
-            for (int k = 0; k < tabCoastiMatrix[numSerie].length; k++) {
-                grid.getCell(tabCoastiMatrix[numSerie][k], tabCoastjMatrix[numSerie][k]).setLand(true);
+        if (null != tabCoastiMatrix) {
+            for (int k = 0; k < tabCoastiMatrix.length; k++) {
+                grid.getCell(tabCoastiMatrix[k], tabCoastjMatrix[k]).setLand(true);
             }
         }
     }
@@ -1364,21 +1209,21 @@ public class Osmose {
                     }
                 }
             }
-            nbCellsCoastTab[numSerie] = nbCells;
+            nbCellsCoastTab = nbCells;
 
             /*
              * Identify the coordinates
              */
             int indexCell = 0;
-            tabCoastiMatrix[numSerie] = new int[nbCells];
-            tabCoastjMatrix[numSerie] = new int[nbCells];
+            tabCoastiMatrix = new int[nbCells];
+            tabCoastjMatrix = new int[nbCells];
             for (int i = 0; i < lines.size(); i++) {
                 String[] line = lines.get(i);
                 for (int j = 0; j < line.length; j++) {
                     float val = Float.valueOf(line[j]);
                     if (val <= 0.f) {
-                        tabCoastiMatrix[numSerie][indexCell] = i;
-                        tabCoastjMatrix[numSerie][indexCell] = j;
+                        tabCoastiMatrix[indexCell] = i;
+                        tabCoastjMatrix[indexCell] = j;
                         indexCell++;
                     }
                 }
@@ -1409,26 +1254,26 @@ public class Osmose {
          */
         try {
             st.nextToken();
-            if (new Integer(st.sval).intValue() == gridLinesTab[numSerie]) {
+            if (new Integer(st.sval).intValue() == gridLinesTab) {
                 st.nextToken();
-                if (new Integer(st.sval).intValue() == gridColumnsTab[numSerie]) {
+                if (new Integer(st.sval).intValue() == gridColumnsTab) {
 
                     st.nextToken();
-                    tabCoastiMatrix[numSerie] = new int[new Integer(st.sval).intValue()];
-                    tabCoastjMatrix[numSerie] = new int[new Integer(st.sval).intValue()];
+                    tabCoastiMatrix = new int[new Integer(st.sval).intValue()];
+                    tabCoastjMatrix = new int[new Integer(st.sval).intValue()];
 
-                    nbCellsCoastTab[numSerie] = new Integer(st.sval).intValue();
+                    nbCellsCoastTab = new Integer(st.sval).intValue();
 
-                    for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
+                    for (int i = 0; i < tabCoastiMatrix.length; i++) {
 
                         st.nextToken();
-                        tabCoastiMatrix[numSerie][i] = (new Integer(st.sval).intValue());
+                        tabCoastiMatrix[i] = (new Integer(st.sval).intValue());
                     }
 
-                    for (int i = 0; i < tabCoastjMatrix[numSerie].length; i++) {
+                    for (int i = 0; i < tabCoastjMatrix.length; i++) {
 
                         st.nextToken();
-                        tabCoastjMatrix[numSerie][i] = (new Integer(st.sval).intValue());
+                        tabCoastjMatrix[i] = (new Integer(st.sval).intValue());
                     }
                 } else {
                     System.out.println("Error while reading coastFile for nb columns match");
@@ -1444,12 +1289,12 @@ public class Osmose {
     }
 
     public void readCoastFile() {
-        if (coastFileNameTab[numSerie].equalsIgnoreCase("default") || coastFileNameTab[numSerie].equalsIgnoreCase("none")) {
+        if (coastFileNameTab.equalsIgnoreCase("default") || coastFileNameTab.equalsIgnoreCase("none")) {
             System.out.println("No coast in the grid (default)");
-            nbCellsCoastTab[numSerie] = 0;
+            nbCellsCoastTab = 0;
         } else {
 
-            String filename = resolveFile(coastFileNameTab[numSerie]);
+            String filename = resolveFile(coastFileNameTab);
             if (filename.endsWith("csv")) {
                 /*
                  * load coast cell from CSV file
@@ -1466,18 +1311,18 @@ public class Osmose {
     }
 
     public void readMPAFile() {
-        if (mpaFileNameTab[numSerie].equalsIgnoreCase("default")) {
-            thereIsMPATab[numSerie] = false;
-            tabMPAiMatrix[numSerie] = new int[0];
-            tabMPAjMatrix[numSerie] = new int[0];
-            MPAtStartTab[numSerie] = 0;
-            MPAtEndTab[numSerie] = 0;
+        if (mpaFileNameTab.equalsIgnoreCase("default")) {
+            thereIsMPATab = false;
+            tabMPAiMatrix = new int[0];
+            tabMPAjMatrix = new int[0];
+            MPAtStartTab = 0;
+            MPAtEndTab = 0;
         } else {
             //read info in file mpa
             FileInputStream mpaFile = null;
             int[] tabi, tabj;
             try {
-                mpaFile = new FileInputStream(resolveFile(mpaFileNameTab[numSerie]));
+                mpaFile = new FileInputStream(resolveFile(mpaFileNameTab));
             } catch (FileNotFoundException ex) {
                 System.out.println("Error while opening mpaFile");
                 System.exit(1);
@@ -1495,16 +1340,16 @@ public class Osmose {
              */
             try {
                 st.nextToken();
-                if (new Integer(st.sval).intValue() == gridLinesTab[numSerie]) {
+                if (new Integer(st.sval).intValue() == gridLinesTab) {
                     st.nextToken();
-                    if (new Integer(st.sval).intValue() == gridColumnsTab[numSerie]) {
+                    if (new Integer(st.sval).intValue() == gridColumnsTab) {
                         st.nextToken();
                         tabi = new int[new Integer(st.sval).intValue()];
                         tabj = new int[new Integer(st.sval).intValue()];
                         st.nextToken();
-                        MPAtStartTab[numSerie] = new Integer(st.sval).intValue();
+                        MPAtStartTab = new Integer(st.sval).intValue();
                         st.nextToken();
-                        MPAtEndTab[numSerie] = new Integer(st.sval).intValue();
+                        MPAtEndTab = new Integer(st.sval).intValue();
                         st.nextToken();
                         /*
                          * Check whether the next value is an integer ==> MPA is
@@ -1535,11 +1380,11 @@ public class Osmose {
                                 st.nextToken();
                             }
 
-                            tabMPAiMatrix[numSerie] = new int[tabi.length];
-                            tabMPAjMatrix[numSerie] = new int[tabj.length];
+                            tabMPAiMatrix = new int[tabi.length];
+                            tabMPAjMatrix = new int[tabj.length];
                             for (int i = 0; i < tabi.length; i++) {
-                                tabMPAiMatrix[numSerie][i] = tabi[i];
-                                tabMPAjMatrix[numSerie][i] = tabj[i];
+                                tabMPAiMatrix[i] = tabi[i];
+                                tabMPAjMatrix[i] = tabj[i];
                             }
                         }
                         mpaFile.close();
@@ -1553,7 +1398,7 @@ public class Osmose {
                 System.out.println("Error while reading mpaFile");
                 System.exit(1);
             }
-            thereIsMPATab[numSerie] = true;
+            thereIsMPATab = true;
         }
     }
 
@@ -1588,7 +1433,7 @@ public class Osmose {
          */
         FileInputStream areasFile = null;
         try {
-            areasFile = new FileInputStream(resolveFile(areasFileNameTab[numSerie]));
+            areasFile = new FileInputStream(resolveFile(areasFileNameTab));
         } catch (FileNotFoundException ex) {
             System.out.println("Error while opening areasFile");
             System.exit(1);
@@ -1601,11 +1446,11 @@ public class Osmose {
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        spatialDistribution = new SpatialDistribution[nbSpeciesTab[numSerie]];
-        speciesAreasSizeTab[numSerie] = new int[nbSpeciesTab[numSerie]];
+        spatialDistribution = new SpatialDistribution[nbSpeciesTab];
+        speciesAreasSizeTab = new int[nbSpeciesTab];
         try {
 
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            for (int i = 0; i < nbSpeciesTab; i++) {
                 st.nextToken();
                 String areaDistribMethod = st.sval;
                 if (areaDistribMethod.equalsIgnoreCase("random")) {
@@ -1631,12 +1476,12 @@ public class Osmose {
             mapIndexNoTwin = new int[nbMaps];
             areasTempAge = new int[nbMaps][];
             areasTempDt = new int[nbMaps][];
-            numMap = new int[nbSpeciesTab[numSerie]][][];
-            for (int iSpec = 0; iSpec < nbSpeciesTab[numSerie]; iSpec++) {
-                int longevity = (int) Math.round((longevityMatrix[numSerie][iSpec]) * nbDtMatrix[numSerie]);
+            numMap = new int[nbSpeciesTab][][];
+            for (int iSpec = 0; iSpec < nbSpeciesTab; iSpec++) {
+                int longevity = (int) Math.round((longevityMatrix[iSpec]) * nbDtMatrix);
                 numMap[iSpec] = new int[longevity][];
                 for (int j = 0; j < longevity; j++) {
-                    numMap[iSpec][j] = new int[nbDtMatrix[numSerie]];
+                    numMap[iSpec][j] = new int[nbDtMatrix];
                 }
             }
 
@@ -1652,7 +1497,7 @@ public class Osmose {
                 switch (spatialDistribution[iSpec]) {
                     case RANDOM:
                         st.nextToken();
-                        speciesAreasSizeTab[numSerie][iSpec] = (new Integer(st.sval)).intValue();
+                        speciesAreasSizeTab[iSpec] = (new Integer(st.sval)).intValue();
                         //distribRandom(iSpec);
                         break;
                     case MAPS:
@@ -1757,7 +1602,7 @@ public class Osmose {
          */
         st.nextToken();
         if (!"null".equals(st.sval)) {
-            System.out.println("Reading connectivity matric for " + nameSpecMatrix[numSerie][iSpec] + " map " + indexMap);
+            System.out.println("Reading connectivity matric for " + nameSpecMatrix[iSpec] + " map " + indexMap);
             String csvFile = resolveFile(st.sval);
             connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
             System.out.println("Connectivity matrix loaded");
@@ -1826,15 +1671,15 @@ public class Osmose {
              * Identify the coordinates
              */
             int indexCell = 0;
-            tabMPAiMatrix[numSerie] = new int[nbCells];
-            tabMPAjMatrix[numSerie] = new int[nbCells];
+            tabMPAiMatrix = new int[nbCells];
+            tabMPAjMatrix = new int[nbCells];
             for (int i = 0; i < lines.size(); i++) {
                 String[] line = lines.get(i);
                 for (int j = 0; j < line.length; j++) {
                     float val = Float.valueOf(line[j]);
                     if (val > 0.f) {
-                        tabMPAiMatrix[numSerie][indexCell] = i;
-                        tabMPAjMatrix[numSerie][indexCell] = j;
+                        tabMPAiMatrix[indexCell] = i;
+                        tabMPAjMatrix[indexCell] = j;
                         indexCell++;
                     }
                 }
@@ -1875,15 +1720,15 @@ public class Osmose {
              */
             for (int m = 0; m < areasTempAge[indexMap].length; m++) {
                 for (int n = 0; n < areasTempDt[indexMap].length; n++) {
-                    for (int h = 0; h < nbDtMatrix[numSerie]; h++) {
-                        int longevity = (int) Math.round((longevityMatrix[numSerie][areasNumSpForMap[indexMap]]) * nbDtMatrix[numSerie]);
-                        if ((areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) < longevity) {
-                            numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h][areasTempDt[indexMap][n]] = indexMap;
-                            //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix[numSerie] + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
+                    for (int h = 0; h < nbDtMatrix; h++) {
+                        int longevity = (int) Math.round((longevityMatrix[areasNumSpForMap[indexMap]]) * nbDtMatrix);
+                        if ((areasTempAge[indexMap][m] * nbDtMatrix + h) < longevity) {
+                            numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix + h][areasTempDt[indexMap][n]] = indexMap;
+                            //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
                         }
 //                        if (nbCells == 0) {
-//                            if (!simulation.getSpecies(areasNumSpForMap[indexMap]).isOut((areasTempAge[indexMap][m] * nbDtMatrix[numSerie]) + h, areasTempDt[indexMap][n])) {
-//                                System.out.println("Match error between species areas and migration file for " + nameSpecMatrix[numSerie][areasNumSpForMap[indexMap]]);
+//                            if (!simulation.getSpecies(areasNumSpForMap[indexMap]).isOut((areasTempAge[indexMap][m] * nbDtMatrix) + h, areasTempDt[indexMap][n])) {
+//                                System.out.println("Match error between species areas and migration file for " + nameSpecMatrix[areasNumSpForMap[indexMap]]);
 //                            }
 //                        }
                     }
@@ -1960,7 +1805,7 @@ public class Osmose {
     }
 
     public void readMigrationFile() {
-        if (migrationFileNameTab[numSerie].equalsIgnoreCase("default")) {
+        if (migrationFileNameTab.equalsIgnoreCase("default")) {
             System.out.println("No migrations implemented (default)");
         } else {
             /*
@@ -1972,9 +1817,9 @@ public class Osmose {
 
             FileInputStream outOfZoneFile = null;
             try {
-                outOfZoneFile = new FileInputStream(resolveFile(migrationFileNameTab[numSerie]));
+                outOfZoneFile = new FileInputStream(resolveFile(migrationFileNameTab));
             } catch (FileNotFoundException ex) {
-                System.out.println("migration file doesn't exist: " + migrationFileNameTab[numSerie]);
+                System.out.println("migration file doesn't exist: " + migrationFileNameTab);
                 System.exit(1);
             }
 
@@ -1986,9 +1831,9 @@ public class Osmose {
 
             int nbSpOutOfZone, iSpec;
             int nbAgePerCase, nbDtPerCase;
-            migrationTempAge = new int[nbSpeciesTab[numSerie]][];
-            migrationTempDt = new int[nbSpeciesTab[numSerie]][];
-            migrationTempMortality = new float[nbSpeciesTab[numSerie]][];
+            migrationTempAge = new int[nbSpeciesTab][];
+            migrationTempDt = new int[nbSpeciesTab][];
+            migrationTempMortality = new float[nbSpeciesTab][];
 
             try {
                 st.nextToken();
@@ -2033,12 +1878,12 @@ public class Osmose {
     public void readAccessibilitiesFile(String accessFileName, int numSerie) {
         if (accessFileName.equalsIgnoreCase("default")) // if no accessiblity file is specified, all accessibilities are set to 1
         {
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            for (int i = 0; i < nbSpeciesTab; i++) {
                 nbAccessStage[i] = 1;
                 accessStageThreshold[i] = new float[nbAccessStage[i] - 1];
                 accessibilityMatrix[i] = new float[1][][];
-                accessibilityMatrix[i][0] = new float[nbSpeciesTab[numSerie]][];
-                for (int j = 0; j < nbSpeciesTab[numSerie]; j++) {
+                accessibilityMatrix[i][0] = new float[nbSpeciesTab][];
+                for (int j = 0; j < nbSpeciesTab; j++) {
                     accessibilityMatrix[i][0][j] = new float[1];
                     /*
                      * phv 2011/11/18 set default access matrix to 0.8 for being
@@ -2047,10 +1892,10 @@ public class Osmose {
                     accessibilityMatrix[i][0][j][0] = 0.8f;
                 }
             }
-            for (int i = nbSpeciesTab[numSerie]; i < nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]; i++) {
+            for (int i = nbSpeciesTab; i < nbSpeciesTab + nbPlanktonGroupsTab; i++) {
                 accessibilityMatrix[i] = new float[1][][];
-                accessibilityMatrix[i][0] = new float[nbSpeciesTab[numSerie]][];
-                for (int j = 0; j < nbSpeciesTab[numSerie]; j++) {
+                accessibilityMatrix[i][0] = new float[nbSpeciesTab][];
+                for (int j = 0; j < nbSpeciesTab; j++) {
                     accessibilityMatrix[i][0][j] = new float[1];
                     accessibilityMatrix[i][0][j][0] = 0.8f;
                 }
@@ -2072,14 +1917,14 @@ public class Osmose {
             st.quoteChar(';');
             try {
                 st.nextToken();
-                if (!((new Integer(st.sval)).intValue() == nbSpeciesTab[numSerie])) {
+                if (!((new Integer(st.sval)).intValue() == nbSpeciesTab)) {
                     System.out.println("nb of species in accessibilities file not valid");
                 } else {
                     st.nextToken();
-                    if (!((new Integer(st.sval)).intValue() == nbPlanktonGroupsTab[numSerie])) {
+                    if (!((new Integer(st.sval)).intValue() == nbPlanktonGroupsTab)) {
                         System.out.println("nb of other food groups in accessibilities file not valid");
                     } else {
-                        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                        for (int i = 0; i < nbSpeciesTab; i++) {
                             st.nextToken();
                             nbAccessStage[i] = (new Integer(st.sval)).intValue();
                             accessStageThreshold[i] = new float[nbAccessStage[i] - 1];
@@ -2088,11 +1933,11 @@ public class Osmose {
                                 accessStageThreshold[i][j] = (new Float(st.sval)).floatValue();
                             }
                         }
-                        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                        for (int i = 0; i < nbSpeciesTab; i++) {
                             accessibilityMatrix[i] = new float[nbAccessStage[i]][][];
                             for (int j = 0; j < nbAccessStage[i]; j++) {
-                                accessibilityMatrix[i][j] = new float[nbSpeciesTab[numSerie]][];
-                                for (int k = 0; k < nbSpeciesTab[numSerie]; k++) {
+                                accessibilityMatrix[i][j] = new float[nbSpeciesTab][];
+                                for (int k = 0; k < nbSpeciesTab; k++) {
                                     accessibilityMatrix[i][j][k] = new float[nbAccessStage[k]];
                                     for (int m = 0; m < nbAccessStage[k]; m++) {
                                         st.nextToken();
@@ -2101,10 +1946,10 @@ public class Osmose {
                                 }
                             }
                         }
-                        for (int i = nbSpeciesTab[numSerie]; i < nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]; i++) {
+                        for (int i = nbSpeciesTab; i < nbSpeciesTab + nbPlanktonGroupsTab; i++) {
                             accessibilityMatrix[i] = new float[1][][];
-                            accessibilityMatrix[i][0] = new float[nbSpeciesTab[numSerie]][];
-                            for (int k = 0; k < nbSpeciesTab[numSerie]; k++) {
+                            accessibilityMatrix[i][0] = new float[nbSpeciesTab][];
+                            for (int k = 0; k < nbSpeciesTab; k++) {
                                 accessibilityMatrix[i][0][k] = new float[nbAccessStage[k]];
                                 for (int m = 0; m < nbAccessStage[k]; m++) {
                                     st.nextToken();
@@ -2125,42 +1970,42 @@ public class Osmose {
 
     public void initializeOutputData() {
         //these param are function of the length of the temporal series saved
-        if (startingSavingTimeTab[numSerie] > simulationTimeTab[numSerie]) {
+        if (startingSavingTimeTab > simulationTimeTab) {
             System.out.println("Starting time for saving higher than simulation time -> set to 0");
-            startingSavingTimeTab[numSerie] = 0;
+            startingSavingTimeTab = 0;
         }
 
-        if (startingSavingTimeTab[numSerie] == 0) {
-            timeSeriesLength = simulationTimeTab[numSerie];
+        if (startingSavingTimeTab == 0) {
+            timeSeriesLength = simulationTimeTab;
             timeSeriesStart = 0;
             timeSeriesIsShortened = false;
         } else {
-            timeSeriesStart = startingSavingTimeTab[numSerie];
-            timeSeriesLength = simulationTimeTab[numSerie] - startingSavingTimeTab[numSerie];
+            timeSeriesStart = startingSavingTimeTab;
+            timeSeriesLength = simulationTimeTab - startingSavingTimeTab;
             timeSeriesIsShortened = true;
         }
 
-        if (calibrationMatrix[numSerie]) {
-            BIOMQuadri = new float[nbLoopTab[numSerie]][][][][];
+        if (calibrationMatrix) {
+            BIOMQuadri = new float[nbLoopTab][][][][];
         }
 
-        for (int xx = 0; xx < nbLoopTab[numSerie]; xx++) {
-            if (calibrationMatrix[numSerie]) {
-                BIOMQuadri[xx] = new float[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][][][];
+        for (int xx = 0; xx < nbLoopTab; xx++) {
+            if (calibrationMatrix) {
+                BIOMQuadri[xx] = new float[nbSpeciesTab + nbPlanktonGroupsTab][][][];
             }
 
             /*
-             * iniBiomass[xx] = new float[nbSpeciesTab[numSerie]]; for(int
-             * i=0;i<nbSpeciesTab[numSerie];i++) iniBiomass[xx][i] = 0; for(int
-             * i=0;i<nbSpeciesTab[numSerie];i++) for(int
+             * iniBiomass[xx] = new float[nbSpeciesTab]; for(int
+             * i=0;i<nbSpeciesTab;i++) iniBiomass[xx][i] = 0; for(int
+             * i=0;i<nbSpeciesTab;i++) for(int
              * j=simulation.getSpecies(i).indexAgeClass0;j<simulation.getSpecies(i).nbCohorts;j++)
              * iniBiomass[xx][i] += (float)
              * simulation.getSpecies(i).tabCohorts[j].biomass;
              */
-            int tempIndex = (int) nbDtMatrix[numSerie] / savingDtMatrix[numSerie];
+            int tempIndex = (int) nbDtMatrix / savingDtMatrix;
 
-            if (calibrationMatrix[numSerie]) {
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            if (calibrationMatrix) {
+                for (int i = 0; i < nbSpeciesTab; i++) {
                     BIOMQuadri[xx][i] = new float[2][][];
                     BIOMQuadri[xx][i][0] = new float[timeSeriesLength][];   //without age 0
                     BIOMQuadri[xx][i][1] = new float[timeSeriesLength][];   // with age 0
@@ -2171,7 +2016,7 @@ public class Osmose {
                     }
                 }
 
-                for (int i = nbSpeciesTab[numSerie]; i < nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]; i++) {
+                for (int i = nbSpeciesTab; i < nbSpeciesTab + nbPlanktonGroupsTab; i++) {
                     BIOMQuadri[xx][i] = new float[1][][];
                     BIOMQuadri[xx][i][0] = new float[timeSeriesLength][];   //without age 0
                     for (int tt = 0; tt < timeSeriesLength; tt++) {
@@ -2183,14 +2028,14 @@ public class Osmose {
     }
 
     public void readDietsOutputFile(String dietsConfigFileName, int numSerie) {
-        nbDietsStages[numSerie] = new int[nbSpeciesTab[numSerie]];
-        dietStageThreshold[numSerie] = new float[nbSpeciesTab[numSerie]][];
+        nbDietsStages = new int[nbSpeciesTab];
+        dietStageThreshold = new float[nbSpeciesTab][];
         if (dietsConfigFileName.equalsIgnoreCase("byDefault")) {
             System.out.println("Diets output by default");
-            dietOutputMetrics[numSerie] = "default";
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                nbDietsStages[numSerie][i] = 1;
-                dietStageThreshold[numSerie][i] = new float[0];
+            dietOutputMetrics = "default";
+            for (int i = 0; i < nbSpeciesTab; i++) {
+                nbDietsStages[i] = 1;
+                dietStageThreshold[i] = new float[0];
             }
         } else {
             FileInputStream dietConfigFile = null;
@@ -2209,19 +2054,19 @@ public class Osmose {
 
             try {
                 st.nextToken();
-                if ((new Integer(st.sval)).intValue() == nbSpeciesTab[numSerie]) {
+                if ((new Integer(st.sval)).intValue() == nbSpeciesTab) {
                     st.nextToken();
-                    if ((new Integer(st.sval)).intValue() == nbPlanktonGroupsTab[numSerie]) {
+                    if ((new Integer(st.sval)).intValue() == nbPlanktonGroupsTab) {
                         st.nextToken();
                         if (st.sval.equalsIgnoreCase("age") || st.sval.equalsIgnoreCase("size")) {
-                            dietOutputMetrics[numSerie] = st.sval;
-                            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+                            dietOutputMetrics = st.sval;
+                            for (int i = 0; i < nbSpeciesTab; i++) {
                                 st.nextToken();
-                                nbDietsStages[numSerie][i] = (new Integer(st.sval)).intValue();
-                                dietStageThreshold[numSerie][i] = new float[nbDietsStages[numSerie][i] - 1];
-                                for (int j = 0; j < nbDietsStages[numSerie][i] - 1; j++) {
+                                nbDietsStages[i] = (new Integer(st.sval)).intValue();
+                                dietStageThreshold[i] = new float[nbDietsStages[i] - 1];
+                                for (int j = 0; j < nbDietsStages[i] - 1; j++) {
                                     st.nextToken();
-                                    dietStageThreshold[numSerie][i][j] = (new Float(st.sval)).floatValue();
+                                    dietStageThreshold[i][j] = (new Float(st.sval)).floatValue();
                                 }
                             }
                         } else {
@@ -2242,9 +2087,9 @@ public class Osmose {
     public void saveSerieSimulations() {
         //save in output files
         File targetPath;
-        String inputFileName = outputPrefix[numSerie] + "_I";
-        String biomFileName = outputPrefix[numSerie] + "_B.csv";
-        targetPath = new File(outputPathName + outputFileNameTab[numSerie]);
+        String inputFileName = outputPrefix + "_I";
+        String biomFileName = outputPrefix + "_B.csv";
+        targetPath = new File(outputPathName + outputFileNameTab);
         targetPath.mkdirs();
         saveBIOMData(targetPath, inputFileName, biomFileName);
     }
@@ -2256,16 +2101,16 @@ public class Osmose {
         PrintWriter pw;
 
         float[][][] tabMean, tabCv;
-        tabMean = new float[nbSpeciesTab[numSerie] + 1 + nbPlanktonGroupsTab[numSerie]][][];
-        tabCv = new float[nbSpeciesTab[numSerie] + 1 + nbPlanktonGroupsTab[numSerie]][][];
+        tabMean = new float[nbSpeciesTab + 1 + nbPlanktonGroupsTab][][];
+        tabCv = new float[nbSpeciesTab + 1 + nbPlanktonGroupsTab][][];
 
-        for (int i = 0; i <= nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]; i++) {
+        for (int i = 0; i <= nbSpeciesTab + nbPlanktonGroupsTab; i++) {
             tabMean[i] = new float[2][];
-            tabMean[i][0] = new float[nbLoopTab[numSerie]];
-            tabMean[i][1] = new float[nbLoopTab[numSerie]];
+            tabMean[i][0] = new float[nbLoopTab];
+            tabMean[i][1] = new float[nbLoopTab];
             tabCv[i] = new float[2][];
-            tabCv[i][0] = new float[nbLoopTab[numSerie]];
-            tabCv[i][1] = new float[nbLoopTab[numSerie]];
+            tabCv[i][0] = new float[nbLoopTab];
+            tabCv[i][1] = new float[nbLoopTab];
         }
 
         float MEAN, STD, CV;//mean, std et cv des moyennes de chaque simu
@@ -2281,15 +2126,15 @@ public class Osmose {
         pw = new PrintWriter(biomFile, true);
         pw.println("//File containing the set of input parameters " + inputFileName);
         pw.println("//BIOMASS in tonnes");
-        for (int xx = 0; xx < nbLoopTab[numSerie]; xx++) {
+        for (int xx = 0; xx < nbLoopTab; xx++) {
             float std;
             float[][] sum = new float[timeSeriesLength][];
             pw.println("SIMULATION n " + xx);
             pw.println();
             //results for tot-0
             for (int t = 0; t < timeSeriesLength; t++) {
-                sum[t] = new float[nbDtSavePerYear[numSerie]];
-                for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
+                sum[t] = new float[nbDtSavePerYear];
+                for (int dt = 0; dt < nbDtSavePerYear; dt++) {
                     sum[t][dt] = 0;
                 }
             }
@@ -2298,19 +2143,19 @@ public class Osmose {
             pw.print("Time");
             pw.print(';');
 
-            for (int t = timeSeriesStart; t < simulationTimeTab[numSerie]; t++) {
-                for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
-                    pw.print((float) (t + dt / (float) nbDtSavePerYear[numSerie]));
+            for (int t = timeSeriesStart; t < simulationTimeTab; t++) {
+                for (int dt = 0; dt < nbDtSavePerYear; dt++) {
+                    pw.print((float) (t + dt / (float) nbDtSavePerYear));
                     pw.print(';');
                 }
             }
             pw.println();
 
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                pw.print(nameSpecMatrix[numSerie][i]);
+            for (int i = 0; i < nbSpeciesTab; i++) {
+                pw.print(nameSpecMatrix[i]);
                 pw.print(';');
                 for (int t = 0; t < timeSeriesLength; t++) {
-                    for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
+                    for (int dt = 0; dt < nbDtSavePerYear; dt++) {
                         sum[t][dt] += BIOMQuadri[xx][i][0][t][dt];
                         pw.print(BIOMQuadri[xx][i][0][t][dt]);
                         pw.print(';');
@@ -2335,12 +2180,12 @@ public class Osmose {
                 pw.println();
             }
             /*
-             * for(int i=nbSpeciesTab[numSerie];
-             * i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab[numSerie]; i++) {
+             * for(int i=nbSpeciesTab;
+             * i<nbSpeciesTab+nbPlanktonGroupsTab; i++) {
              * pw.print("Plankton
-             * Gr"+(i-nbSpeciesTab[numSerie]+1));pw.print(';'); for(int
+             * Gr"+(i-nbSpeciesTab+1));pw.print(';'); for(int
              * t=0;t<timeSeriesLength;t++) for(int
-             * dt=0;dt<nbDtSavePerYear[numSerie];dt++) { pw.print(
+             * dt=0;dt<nbDtSavePerYear;dt++) { pw.print(
              * BIOMQuadri[xx][i][0][t][dt] ); pw.print(';'); }
              * tabMean[i][0][xx]=mean2(BIOMQuadri[xx][i][0]);
              * std=std2(BIOMQuadri[xx][i][0]);
@@ -2355,18 +2200,18 @@ public class Osmose {
             pw.print("sys-0");
             pw.print(';');
             for (int t = 0; t < timeSeriesLength; t++) {
-                for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
+                for (int dt = 0; dt < nbDtSavePerYear; dt++) {
                     pw.print(sum[t][dt]);
                     pw.print(';');
                 }
             }
-            tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0][xx] = mean2(sum);
+            tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0][xx] = mean2(sum);
             std = std2(sum);
-            tabCv[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0][xx] = std / tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0][xx];
+            tabCv[nbSpeciesTab + nbPlanktonGroupsTab][0][xx] = std / tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0][xx];
             pw.print(';');
             pw.print("mean-0");
             pw.print(';');
-            pw.print(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0][xx]);
+            pw.print(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0][xx]);
             pw.print(';');
             pw.print("std-0");
             pw.print(';');
@@ -2374,16 +2219,16 @@ public class Osmose {
             pw.print(';');
             pw.print("cv-0");
             pw.print(';');
-            pw.print(tabCv[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0][xx]);
+            pw.print(tabCv[nbSpeciesTab + nbPlanktonGroupsTab][0][xx]);
             pw.print(';');
             pw.println();
             pw.println();
 
             //bloc resultats pour total = with age 0
-            if (outputClass0Matrix[numSerie]) {
+            if (outputClass0Matrix) {
                 for (int t = 0; t < timeSeriesLength; t++) {
-                    sum[t] = new float[nbDtSavePerYear[numSerie]];
-                    for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
+                    sum[t] = new float[nbDtSavePerYear];
+                    for (int dt = 0; dt < nbDtSavePerYear; dt++) {
                         sum[t][dt] = 0;
                     }
                 }
@@ -2391,19 +2236,19 @@ public class Osmose {
                 pw.println(';');
                 pw.print("Time");
                 pw.print(';');
-                for (int t = timeSeriesStart; t < simulationTimeTab[numSerie]; t++) {
-                    for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
-                        pw.print((float) (t + dt / (float) nbDtSavePerYear[numSerie]));
+                for (int t = timeSeriesStart; t < simulationTimeTab; t++) {
+                    for (int dt = 0; dt < nbDtSavePerYear; dt++) {
+                        pw.print((float) (t + dt / (float) nbDtSavePerYear));
                         pw.print(';');
                     }
                 }
                 pw.println();
 
-                for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                    pw.print(nameSpecMatrix[numSerie][i]);
+                for (int i = 0; i < nbSpeciesTab; i++) {
+                    pw.print(nameSpecMatrix[i]);
                     pw.print(';');
                     for (int t = 0; t < timeSeriesLength; t++) {
-                        for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
+                        for (int dt = 0; dt < nbDtSavePerYear; dt++) {
                             sum[t][dt] += BIOMQuadri[xx][i][1][t][dt];
                             pw.print(BIOMQuadri[xx][i][1][t][dt]);
                             pw.print(';');
@@ -2428,12 +2273,12 @@ public class Osmose {
                     pw.println();
                 }
                 /*
-                 * for(int i=nbSpeciesTab[numSerie];
-                 * i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab[numSerie]; i++)
+                 * for(int i=nbSpeciesTab;
+                 * i<nbSpeciesTab+nbPlanktonGroupsTab; i++)
                  * { pw.print("Plankton
-                 * Gr"+(i-nbSpeciesTab[numSerie]+1));pw.print(';'); for(int
+                 * Gr"+(i-nbSpeciesTab+1));pw.print(';'); for(int
                  * t=0;t<timeSeriesLength;t++) for(int
-                 * dt=0;dt<nbDtSavePerYear[numSerie];dt++) { pw.print(
+                 * dt=0;dt<nbDtSavePerYear;dt++) { pw.print(
                  * BIOMQuadri[xx][i][0][t][dt] ); pw.print(';'); }
                  * tabMean[i][0][xx]=mean2(BIOMQuadri[xx][i][0]);
                  * std=std2(BIOMQuadri[xx][i][0]);
@@ -2448,18 +2293,18 @@ public class Osmose {
                 pw.print("sys");
                 pw.print(';');
                 for (int t = 0; t < timeSeriesLength; t++) {
-                    for (int dt = 0; dt < nbDtSavePerYear[numSerie]; dt++) {
+                    for (int dt = 0; dt < nbDtSavePerYear; dt++) {
                         pw.print(sum[t][dt]);
                         pw.print(';');
                     }
                 }
-                tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1][xx] = mean2(sum);
+                tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1][xx] = mean2(sum);
                 std = std2(sum);
-                tabCv[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1][xx] = std / tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1][xx];
+                tabCv[nbSpeciesTab + nbPlanktonGroupsTab][1][xx] = std / tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1][xx];
                 pw.print(';');
                 pw.print("mean");
                 pw.print(';');
-                pw.print(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1][xx]);
+                pw.print(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1][xx]);
                 pw.print(';');
                 pw.print("std");
                 pw.print(';');
@@ -2467,7 +2312,7 @@ public class Osmose {
                 pw.print(';');
                 pw.print("cv");
                 pw.print(';');
-                pw.print(tabCv[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1][xx]);
+                pw.print(tabCv[nbSpeciesTab + nbPlanktonGroupsTab][1][xx]);
                 pw.print(';');
                 pw.println();
                 pw.println();
@@ -2485,11 +2330,11 @@ public class Osmose {
         pw.print(';');
         pw.print("MEAN(cv-0)");
         pw.println(';');
-        for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+        for (int i = 0; i < nbSpeciesTab; i++) {
             MEAN = mean(tabMean[i][0]);
             STD = std(tabMean[i][0]);
             CV = STD / MEAN;
-            pw.print(nameSpecMatrix[numSerie][i]);
+            pw.print(nameSpecMatrix[i]);
             pw.print(';');
             pw.print(MEAN);
             pw.print(';');
@@ -2502,17 +2347,17 @@ public class Osmose {
         }
         /*
          * for(int
-         * i=nbSpeciesTab[numSerie];i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab;i++)
+         * i=nbSpeciesTab;i<nbSpeciesTab+nbPlanktonGroupsTab;i++)
          * { MEAN = mean(tabMean[i][0]); STD = std(tabMean[i][0]); CV =
          * STD/MEAN; pw.print("Plankton group
-         * "+(i+1-nbSpeciesTab[numSerie]));pw.print(';');pw.print(MEAN);pw.print(';');
+         * "+(i+1-nbSpeciesTab));pw.print(';');pw.print(MEAN);pw.print(';');
          * pw.print(STD);pw.print(';');
          * pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
          * }
          *
          */
-        MEAN = mean(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0]);
-        STD = std(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0]);
+        MEAN = mean(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0]);
+        STD = std(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0]);
         CV = STD / MEAN;
         pw.print("SYS-0");
         pw.print(';');
@@ -2522,12 +2367,12 @@ public class Osmose {
         pw.print(';');
         pw.print(CV);
         pw.print(';');
-        pw.print(mean(tabCv[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][0]));
+        pw.print(mean(tabCv[nbSpeciesTab + nbPlanktonGroupsTab][0]));
         pw.println(';');
         pw.println();
 
         //bloc tot
-        if (outputClass0Matrix[numSerie]) {
+        if (outputClass0Matrix) {
             pw.print("TOT");
             pw.print(';');
             pw.print("MEAN(mean)");
@@ -2538,11 +2383,11 @@ public class Osmose {
             pw.print(';');
             pw.print("MEAN(cv)");
             pw.println(';');
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
+            for (int i = 0; i < nbSpeciesTab; i++) {
                 MEAN = mean(tabMean[i][1]);
                 STD = std(tabMean[i][1]);
                 CV = STD / MEAN;
-                pw.print(nameSpecMatrix[numSerie][i]);
+                pw.print(nameSpecMatrix[i]);
                 pw.print(';');
                 pw.print(MEAN);
                 pw.print(';');
@@ -2555,16 +2400,16 @@ public class Osmose {
             }
             /*
              * for(int
-             * i=nbSpeciesTab[numSerie];i<nbSpeciesTab[numSerie]+nbPlanktonGroupsTab;i++)
+             * i=nbSpeciesTab;i<nbSpeciesTab+nbPlanktonGroupsTab;i++)
              * { MEAN = mean(tabMean[i][0]); STD = std(tabMean[i][0]); CV =
              * STD/MEAN; pw.print("Plankton group
-             * "+(i+1-nbSpeciesTab[numSerie]));pw.print(';');pw.print(MEAN);pw.print(';');
+             * "+(i+1-nbSpeciesTab));pw.print(';');pw.print(MEAN);pw.print(';');
              * pw.print(STD);pw.print(';');
              * pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
              * }
              */
-            MEAN = mean(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1]);
-            STD = std(tabMean[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1]);
+            MEAN = mean(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1]);
+            STD = std(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1]);
             CV = STD / MEAN;
             pw.print("SYS");
             pw.print(';');
@@ -2574,7 +2419,7 @@ public class Osmose {
             pw.print(';');
             pw.print(CV);
             pw.print(';');
-            pw.print(mean(tabCv[nbSpeciesTab[numSerie] + nbPlanktonGroupsTab[numSerie]][1]));
+            pw.print(mean(tabCv[nbSpeciesTab + nbPlanktonGroupsTab][1]));
             pw.println(';');
 
         }
@@ -2699,7 +2544,7 @@ public class Osmose {
     }
 
     public String getLTLClassName() {
-        return lowTLClassNameTab[numSerie];
+        return lowTLClassNameTab;
     }
 
     /*
@@ -2778,47 +2623,47 @@ public class Osmose {
     }
 
     public int getRecordFrequency() {
-        return savingDtMatrix[numSerie];
+        return savingDtMatrix;
     }
 
     public boolean isCalibrationOutput() {
-        return calibrationMatrix[numSerie];
+        return calibrationMatrix;
     }
 
     public boolean isTLOutput() {
-        return TLoutputMatrix[numSerie];
+        return TLoutputMatrix;
     }
 
     public boolean isTLDistribOutput() {
-        return TLDistriboutputMatrix[numSerie];
+        return TLDistriboutputMatrix;
     }
 
     public boolean isDietOuput() {
-        return dietsOutputMatrix[numSerie];
+        return dietsOutputMatrix;
     }
 
     public boolean isMeanSizeOutput() {
-        return meanSizeOutputMatrix[numSerie];
+        return meanSizeOutputMatrix;
     }
 
     public boolean isSizeSpectrumOutput() {
-        return sizeSpectrumOutputMatrix[numSerie];
+        return sizeSpectrumOutputMatrix;
     }
 
     public boolean isSizeSpectrumSpeciesOutput() {
-        return sizeSpectrumPerSpeOutputMatrix[numSerie];
+        return sizeSpectrumPerSpeOutputMatrix;
     }
 
     public boolean isPlanktonMortalityOutput() {
-        return planktonMortalityOutputMatrix[numSerie];
+        return planktonMortalityOutputMatrix;
     }
 
     public boolean isIncludeClassZero() {
-        return outputClass0Matrix[numSerie];
+        return outputClass0Matrix;
     }
 
     public String getDietOutputMetric() {
-        return dietOutputMetrics[numSerie];
+        return dietOutputMetrics;
     }
 
     public enum SpatialDistribution {

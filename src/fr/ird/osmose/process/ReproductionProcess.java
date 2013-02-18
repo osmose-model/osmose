@@ -33,10 +33,9 @@ public class ReproductionProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getSimulation().getNumberSpecies();
-        int numSerie = getOsmose().numSerie;
         reproductionProcess = new AbstractProcess[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
-            if (getOsmose().reproduceLocallyTab[numSerie][i]) {
+            if (getOsmose().reproduceLocallyTab[i]) {
                 reproductionProcess[i] = new LocalReproductionProcess(getSpecies(i));
             } else {
                 reproductionProcess[i] = new IncomingFluxProcess(getSpecies(i));

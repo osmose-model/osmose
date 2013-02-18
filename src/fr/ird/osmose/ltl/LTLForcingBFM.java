@@ -15,8 +15,6 @@ import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import ucar.ma2.ArrayDouble;
-import ucar.ma2.ArrayDouble.D3;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -93,7 +91,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
 
         } catch (IOException ex) {
             System.out.println("Reading error of LTL file");
-            return;
+            System.exit(1);
         }
     }
 
@@ -108,7 +106,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             nc = NetcdfFile.open(getOsmose().resolveFile(bathyFile), null);
         } catch (IOException ex) {
             System.err.println("Failed to open BFM Temperature file " + bathyFile);
-            ex.printStackTrace();
+            Logger.getLogger(LTLForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         try {
@@ -159,7 +157,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             indexMapping();
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(LTLForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -179,10 +177,10 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         /*
          * Load the mask
          */
-        String gridFile = getOsmose().gridFileTab[getOsmose().numSerie];
-        String strMask = getOsmose().maskFieldTab[getOsmose().numSerie];
+        String gridFile = getOsmose().gridFileTab;
+        String strMask = getOsmose().maskFieldTab;
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
-        float[][][] mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();
+        float[][][] mask;
         mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();
         /*
          * Reads the BFM grid dimensions
@@ -268,8 +266,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
 
         } catch (InvalidRangeException ex) {
             Logger.getLogger(LTLForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            Logger.getLogger(LTLForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

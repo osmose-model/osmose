@@ -25,8 +25,8 @@ public class LTLForcingProcess extends AbstractProcess {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(LTLForcingProcess.class.getName()).log(Level.SEVERE, null, ex);
         }
-        getForcing().readLTLConfigFile1(getOsmose().planktonStructureFileNameTab[getOsmose().numSerie]);
-        getForcing().readLTLConfigFile2(getOsmose().planktonFileNameTab[getOsmose().numSerie]);
+        getForcing().readLTLConfigFile1(getOsmose().planktonStructureFileNameTab);
+        getForcing().readLTLConfigFile2(getOsmose().planktonFileNameTab);
         getForcing().initPlanktonMap();
     }
 

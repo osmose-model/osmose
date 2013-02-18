@@ -58,7 +58,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
          * Create the NetCDF file at first time step
          */
         if (getSimulation().getIndexTimeSimu() == 0) {
-            createNCFile(getOsmose().numSerie);
+            createNCFile(getOsmose().numSimu);
         }
     }
 
@@ -89,7 +89,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().spatializedOutputs[getOsmose().numSerie];
+        return getOsmose().spatializedOutputs;
     }
 
     @Override
@@ -177,13 +177,13 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
         }
     }
 
-    private void createNCFile(int nSerie) {
+    private void createNCFile(int nSimu) {
         /*
          * Create NetCDF file
          */
         try {
             nc = NetcdfFileWriteable.createNew("");
-            nc.setLocation(makeFileLocation(nSerie));
+            nc.setLocation(makeFileLocation(nSimu));
         } catch (IOException ex) {
             Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -293,15 +293,15 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
 
     }
 
-    private String makeFileLocation(int nSerie) throws IOException {
+    private String makeFileLocation(int iSimu) throws IOException {
 
         StringBuilder filename = new StringBuilder();
         filename.append(getOsmose().outputPathName);
-        filename.append(getOsmose().outputFileNameTab[nSerie]);
+        filename.append(getOsmose().outputFileNameTab);
         filename.append(getOsmose().fileSeparator);
-        filename.append(getOsmose().outputPrefix[nSerie]);
+        filename.append(getOsmose().outputPrefix);
         filename.append("_spatialized_Simu");
-        filename.append(nSerie);
+        filename.append(iSimu);
         filename.append(".nc");
         File file = new File(filename.toString());
         try {

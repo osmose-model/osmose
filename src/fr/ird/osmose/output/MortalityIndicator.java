@@ -122,12 +122,12 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
         String description;
         PrintWriter pr;
         FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
         
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             filename = new StringBuilder("Mortality");
             filename.append(File.separatorChar);
-            filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename.append(getOsmose().outputPrefix);
             filename.append("_mortalityRate_");
             filename.append(getSimulation().getSpecies(iSpecies).getName());
             filename.append("_Simu");
@@ -162,7 +162,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                     for (int iStage = 0; iStage < STAGES; iStage++) {
                         if (iDeath == NATURAL && iStage == EGG) {
                             // instantenous mortality rate for eggs natural mortality 
-                            pr.print(mortalityRates[iSpecies][iDeath][iStage] / getOsmose().savingDtMatrix[getOsmose().numSerie]);
+                            pr.print(mortalityRates[iSpecies][iDeath][iStage] / getOsmose().savingDtMatrix);
                         } else {
                             pr.print(mortalityRates[iSpecies][iDeath][iStage]);
                         }

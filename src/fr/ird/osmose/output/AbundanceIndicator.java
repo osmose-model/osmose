@@ -51,7 +51,7 @@ public class AbundanceIndicator extends SchoolBasedIndicator {
         StringBuilder filename;
         int nSpec = getSimulation().getNumberSpecies();
 
-        double nsteps = getOsmose().savingDtMatrix[getOsmose().numSerie];
+        double nsteps = getOsmose().savingDtMatrix;
         for (int i = 0; i < nSpec; i++) {
             if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
                 abundanceTot[i] /= nsteps;
@@ -59,14 +59,14 @@ public class AbundanceIndicator extends SchoolBasedIndicator {
             abundanceNoJuv[i] /= nsteps;
         }
 
-        filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename = new StringBuilder(getOsmose().outputPrefix);
         filename.append("_abundance_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
         Indicators.writeVariable(time, abundanceNoJuv, filename.toString(), "Mean abundance (number of fish), excluding first ages specified in input (typically in calibration file)");
 
         if (getOsmose().isIncludeClassZero()) {
-            filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename = new StringBuilder(getOsmose().outputPrefix);
             filename.append("_abundance-total_Simu");
             filename.append(getOsmose().numSimu);
             filename.append(".csv");

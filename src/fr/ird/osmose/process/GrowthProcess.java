@@ -18,7 +18,7 @@ public class GrowthProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getSimulation().getNumberSpecies();
-        criticalPredSuccess = getOsmose().criticalPredSuccessMatrix[getOsmose().numSerie];
+        criticalPredSuccess = getOsmose().criticalPredSuccessMatrix;
         minDelta = new float[nSpecies][];
         maxDelta = new float[nSpecies][];
         deltaMeanLength = new float[nSpecies][];

@@ -45,7 +45,7 @@ public class BiomassIndicator extends SchoolBasedIndicator {
         StringBuilder filename;
         int nSpec = getSimulation().getNumberSpecies();
 
-        double nsteps = getOsmose().savingDtMatrix[getOsmose().numSerie];
+        double nsteps = getOsmose().savingDtMatrix;
         for (int i = 0; i < nSpec; i++) {
             if (getOsmose().isIncludeClassZero() || getOsmose().isCalibrationOutput()) {
                 biomassTot[i] /= nsteps;
@@ -53,14 +53,14 @@ public class BiomassIndicator extends SchoolBasedIndicator {
             biomassNoJuv[i] /= nsteps;
         }
 
-        filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename = new StringBuilder(getOsmose().outputPrefix);
         filename.append("_biomass_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
         Indicators.writeVariable(time, biomassNoJuv, filename.toString(), "Mean biomass (tons), excluding first ages specified in input (typically in calibration file)");
 
         if (getOsmose().isIncludeClassZero()) {
-            filename = new StringBuilder(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename = new StringBuilder(getOsmose().outputPrefix);
             filename.append("_biomass-total_Simu");
             filename.append(getOsmose().numSimu);
             filename.append(".csv");

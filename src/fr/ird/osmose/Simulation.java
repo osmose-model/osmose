@@ -72,10 +72,6 @@ public class Simulation {
      */
     private LTLForcing forcing;
     /*
-     * The number of the current scenario
-     */
-    private int numSerie;
-    /*
      * Number of time-steps in one year
      */
     private int nTimeStepsPerYear;
@@ -119,12 +115,11 @@ public class Simulation {
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
-        numSerie = getOsmose().numSerie;
-        nTimeStepsPerYear = getOsmose().nbDtMatrix[numSerie];
-        nYear = getOsmose().simulationTimeTab[numSerie];
+        nTimeStepsPerYear = getOsmose().nbDtMatrix;
+        nYear = getOsmose().simulationTimeTab;
 
         // Create the species
-        species = new Species[getOsmose().nbSpeciesTab[numSerie]];
+        species = new Species[getOsmose().nbSpeciesTab];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
             // Initialize species
@@ -167,15 +162,15 @@ public class Simulation {
     }
 
     private void setupMPA() {
-        if ((getOsmose().thereIsMPATab[numSerie]) && (year == getOsmose().MPAtStartTab[numSerie])) {
-            //RS = (double) getOsmose().tabMPAiMatrix[numSerie].length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
-            for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
-                getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(true);
+        if ((getOsmose().thereIsMPATab) && (year == getOsmose().MPAtStartTab)) {
+            //RS = (double) getOsmose().tabMPAiMatrix.length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
+            for (int index = 0; index < getOsmose().tabMPAiMatrix.length; index++) {
+                getGrid().getCell(getOsmose().tabMPAiMatrix[index], getOsmose().tabMPAjMatrix[index]).setMPA(true);
             }
-        } else if ((!getOsmose().thereIsMPATab[numSerie]) || (year > getOsmose().MPAtEndTab[numSerie])) {
+        } else if ((!getOsmose().thereIsMPATab) || (year > getOsmose().MPAtEndTab)) {
             //RS = 0;
-            for (int index = 0; index < getOsmose().tabMPAiMatrix[numSerie].length; index++) {
-                getGrid().getCell(getOsmose().tabMPAiMatrix[numSerie][index], getOsmose().tabMPAjMatrix[numSerie][index]).setMPA(false);
+            for (int index = 0; index < getOsmose().tabMPAiMatrix.length; index++) {
+                getGrid().getCell(getOsmose().tabMPAiMatrix[index], getOsmose().tabMPAjMatrix[index]).setMPA(false);
             }
         }
     }
@@ -196,14 +191,14 @@ public class Simulation {
     public void saveBiomassBeforeMortality() {
 
         // update biomass
-        if (getOsmose().dietsOutputMatrix[getOsmose().numSerie] && (year >= getOsmose().timeSeriesStart)) {
+        if (getOsmose().dietsOutputMatrix && (year >= getOsmose().timeSeriesStart)) {
 
 //            for (School school : getPopulation().getPresentSchools()) {
 //                Indicators.biomPerStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
 //            }
 //            getForcing().saveForDiet();
         }
-        forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix[numSerie]);
+        forcing.savePlanktonBiomass(getOsmose().planktonBiomassOutputMatrix);
     }
 
     public void run() {

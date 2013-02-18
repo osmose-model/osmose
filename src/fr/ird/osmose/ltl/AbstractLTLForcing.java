@@ -43,7 +43,6 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      */
     public void readLTLConfigFile1(String planktonStructureFileName) {
 
-        int numSerie = getOsmose().numSerie;
         FileInputStream LTLFile;
          try {
             LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonStructureFileName)));
@@ -61,7 +60,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         try {
             st.nextToken();
             nbPlankton = (new Integer(st.sval)).intValue();
-            if (!(nbPlankton == getOsmose().nbPlanktonGroupsTab[numSerie])) {
+            if (!(nbPlankton == getOsmose().nbPlanktonGroupsTab)) {
                 System.out.println("The number of plankton group in plankton structure file does not match the one from config file");
             }
             st.nextToken();
@@ -83,7 +82,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
                 // filling tables
                 st.nextToken();
                 planktonNames[i] = st.sval;
-                getOsmose().planktonNamesTab[numSerie][i] = st.sval;
+                getOsmose().planktonNamesTab[i] = st.sval;
                 st.nextToken();
                 minSize[i] = (new Float(st.sval)).floatValue();
                 st.nextToken();
@@ -180,10 +179,9 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         File targetFile;
         PrintWriter pr;
 
-        int numSerie = getOsmose().numSerie;
-        String mortalityFile = getOsmose().outputPrefix[numSerie] + "_planktonBiomassMatrix_Simu" + getOsmose().numSimu + ".csv";
+        String mortalityFile = getOsmose().outputPrefix + "_planktonBiomassMatrix_Simu" + getOsmose().numSimu + ".csv";
 
-        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[numSerie] + getOsmose().fileSeparator + "planktonBiomass");
+        targetPath = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab + getOsmose().fileSeparator + "planktonBiomass");
         targetPath.mkdirs();
 
         FileOutputStream planktonTime;
@@ -214,12 +212,11 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 
     private void savePlanktonBiomassNetCDF() {
 
-        int numSerie = getOsmose().numSerie;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
         StringBuilder filename = new StringBuilder("planktonBiomass");
         filename.append(File.separatorChar);
         filename.append("Simu");
-        filename.append(numSerie);
+        filename.append(getOsmose().numSimu);
         filename.append(File.separatorChar);
         filename.append("osm_integrated_Y");
         filename.append((getSimulation().getYear() + 1));

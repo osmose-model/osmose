@@ -21,7 +21,6 @@ public class SpectrumPopulator extends AbstractPopulator {
     @Override
     public void populate() {
 
-        int numSerie = getOsmose().numSerie;
         int nbTimeStepsPerYear = getSimulation().getNumberTimeStepsPerYear();
 
         long[] tempSpectrumAbd = new long[20];
@@ -33,8 +32,8 @@ public class SpectrumPopulator extends AbstractPopulator {
             specInSizeClass10[i] = new ArrayList(getSimulation().getNumberSpecies());
         }
 
-        double a = getOsmose().SSslope[numSerie];
-        double b = getOsmose().SSintercept[numSerie];
+        double a = getOsmose().SSslope;
+        double b = getOsmose().SSintercept;
         //Calculation of abd lacking in each size class
         //calculation apart for first size class because minSize=0.05 (and not 0)
         tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));
@@ -88,7 +87,7 @@ public class SpectrumPopulator extends AbstractPopulator {
                 // Add schools to population
                 for (int age = 0; age < speciesj.getLongevity(); age++) {
                     if (abundanceIni[age] > 0.d) {
-                        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
+                        int nbSchools = getOsmose().nbSchools;
                         for (int k = 0; k < nbSchools; k++) {
                             getPopulation().add(new School(speciesj, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
                         }

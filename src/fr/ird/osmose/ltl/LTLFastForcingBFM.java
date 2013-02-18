@@ -7,7 +7,6 @@ package fr.ird.osmose.ltl;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import ucar.ma2.ArrayFloat;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -85,7 +84,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         } catch (IOException ex) {
             System.out.println("Reading error of LTL file");
-            return;
+            System.exit(1);
         }
     }
     
@@ -96,12 +95,13 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
         /*
          * Open BFM temperature file that contains bathymetry variable
          */
-        try {
+        try {        
             nc = NetcdfFile.open(getOsmose().resolveFile(bathyFile), null);
         } catch (IOException ex) {
             System.err.println("Failed to open BFM Temperature file " + bathyFile);
-            ex.printStackTrace();
+            Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
 
         try {
             /*
@@ -152,7 +152,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             loadData();
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -172,8 +172,8 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
         /*
          * Load the mask
          */
-        String gridFile = getOsmose().gridFileTab[getOsmose().numSerie];
-        String strMask = getOsmose().maskFieldTab[getOsmose().numSerie];
+        String gridFile = getOsmose().gridFileTab;
+        String strMask = getOsmose().maskFieldTab;
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][][] mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();
                 

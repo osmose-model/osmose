@@ -35,12 +35,11 @@ public class BFMGrid extends AbstractGrid {
 ////////////////////////////
     @Override
     public void readParameters() {
-        int numSerie = getOsmose().numSerie;
-        this.gridFile = getOsmose().gridFileTab[numSerie];
-        this.strLat = getOsmose().latFieldTab[numSerie];
-        this.strLon = getOsmose().lonFieldTab[numSerie];
-        this.strMask = getOsmose().maskFieldTab[numSerie];
-        this.stride = getOsmose().strideTab[numSerie];
+        this.gridFile = getOsmose().gridFileTab;
+        this.strLat = getOsmose().latFieldTab;
+        this.strLon = getOsmose().lonFieldTab;
+        this.strMask = getOsmose().maskFieldTab;
+        this.stride = getOsmose().strideTab;
     }
 
     /*

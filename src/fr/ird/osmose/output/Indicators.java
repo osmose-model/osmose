@@ -56,7 +56,7 @@ public class Indicators extends SimulationLinker {
         int year = getSimulation().getYear();
         int index = getSimulation().getIndexTimeYear();
         int nStepsYear = getSimulation().getNumberTimeStepsPerYear();
-        int nStepsRecord = getOsmose().savingDtMatrix[getOsmose().numSerie];
+        int nStepsRecord = getOsmose().savingDtMatrix;
         //
         // UPDATE
         if (year >= getOsmose().timeSeriesStart) {
@@ -76,7 +76,7 @@ public class Indicators extends SimulationLinker {
     public static void writeVariable(float time, double[] variable, String filename, String description) {
         PrintWriter pr;
         FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
         File file = new File(path, filename);
         file.getParentFile().mkdirs();
         boolean isNew = !file.exists();
@@ -117,7 +117,7 @@ public class Indicators extends SimulationLinker {
     public static void writeVariable(float time, double[][] variable, String filename, String[] headers, String description) {
         PrintWriter pr;
         FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
         File file = new File(path, filename);
         file.getParentFile().mkdirs();
         boolean isNew = !file.exists();

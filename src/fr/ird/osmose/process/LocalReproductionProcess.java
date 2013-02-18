@@ -27,10 +27,9 @@ public class LocalReproductionProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        int numSerie = getOsmose().numSerie;
         int index = species.getIndex();
-        sexRatio = getOsmose().sexRatioMatrix[numSerie][index];
-        alpha = getOsmose().alphaMatrix[numSerie][index];
+        sexRatio = getOsmose().sexRatioMatrix[index];
+        alpha = getOsmose().alphaMatrix[index];
     }
 
     @Override
@@ -60,7 +59,7 @@ public class LocalReproductionProcess extends AbstractProcess {
         }
 
         //UPDATE AGE CLASS 0
-        int nbSchools = getOsmose().nbSchools[getOsmose().numSerie];
+        int nbSchools = getOsmose().nbSchools;
         if (nbEggs == 0.d) {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {

@@ -195,7 +195,7 @@ public class Fish extends GridPoint {
 
     public void updateDietOutputStage(float[] thresholdTab, int nbStages) {
 
-        if (!getOsmose().dietsOutputMatrix[getOsmose().numSerie]) {
+        if (!getOsmose().dietsOutputMatrix) {
             return;
         }
 

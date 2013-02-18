@@ -40,7 +40,7 @@ public class BiomassCalibrationIndicator extends SchoolBasedIndicator {
     public void write(float time) {
         
         int nSpec = getSimulation().getNumberSpecies();
-        double nsteps = getOsmose().savingDtMatrix[getOsmose().numSerie];
+        double nsteps = getOsmose().savingDtMatrix;
         int year = getSimulation().getYear();
         int indexSaving = (int) (getSimulation().getIndexTimeYear() / nsteps);
         for (int i = 0; i < nSpec; i++) {

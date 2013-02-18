@@ -71,7 +71,7 @@ public class MeanSizeIndicator extends SchoolBasedIndicator {
 
         filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix);
         filename.append("_meanSize_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
@@ -80,7 +80,7 @@ public class MeanSizeIndicator extends SchoolBasedIndicator {
 
         filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix);
         filename.append("_meanSizeCatch_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");

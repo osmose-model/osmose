@@ -71,7 +71,7 @@ public class MeanTrophicLevelIndicator extends SchoolBasedIndicator {
         // Mean TL
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix);
         filename.append("_meanTL_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");
@@ -81,7 +81,7 @@ public class MeanTrophicLevelIndicator extends SchoolBasedIndicator {
         // Mean TL for catches
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix);
         filename.append("_meanTLCatch_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");

@@ -62,11 +62,11 @@ public class TrophicLevelSpectrumIndicator extends SchoolBasedIndicator {
         String description;
         PrintWriter pr;
         FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
 
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+        filename.append(getOsmose().outputPrefix);
         filename.append("_TLDistrib_Simu");
         filename.append(getOsmose().numSimu);
         filename.append(".csv");

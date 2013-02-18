@@ -58,12 +58,12 @@ public class SizeSpectrumIndicator extends SchoolBasedIndicator {
         String description;
         PrintWriter pr;
         FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab[getOsmose().numSerie]);
+        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
 
         if (getOsmose().isSizeSpectrumOutput()) {
             filename = new StringBuilder("SizeIndicators");
             filename.append(File.separatorChar);
-            filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename.append(getOsmose().outputPrefix);
             filename.append("_SizeSpectrum_Simu");
             filename.append(getOsmose().numSimu);
             filename.append(".csv");
@@ -122,7 +122,7 @@ public class SizeSpectrumIndicator extends SchoolBasedIndicator {
         if (getOsmose().isSizeSpectrumSpeciesOutput()) {
             filename = new StringBuilder("SizeIndicators");
             filename.append(File.separatorChar);
-            filename.append(getOsmose().outputPrefix[getOsmose().numSerie]);
+            filename.append(getOsmose().outputPrefix);
             filename.append("_SizeSpectrumSpecies_Simu");
             filename.append(getOsmose().numSimu);
             filename.append(".csv");
