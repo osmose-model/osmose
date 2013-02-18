@@ -209,7 +209,7 @@ public class Fish extends GridPoint {
             }
         } else if (getOsmose().getDietOutputMetric().equalsIgnoreCase("age")) {
             for (int i = 1; i < nbStages; i++) {
-                int tempAge = Math.round(thresholdTab[i - 1] * getSimulation().getNumberTimeStepsPerYear());
+                int tempAge = Math.round(thresholdTab[i - 1] * getOsmose().getNumberTimeStepsPerYear());
                 if (getLength() >= tempAge) {
                     dietOutputStage++;
                 }

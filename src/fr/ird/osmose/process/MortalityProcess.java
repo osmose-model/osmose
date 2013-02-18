@@ -107,7 +107,7 @@ public class MortalityProcess extends AbstractProcess {
                             } else {
                                 school.tmpTL += getForcing().getPlankton(ipr - ns).trophicLevel * nDeadMatrix[ipr][is] / preyedBiomass;
                                 if (getOsmose().isDietOuput()) {
-                                    school.diet[getSimulation().getNumberSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
+                                    school.diet[getOsmose().getNumberSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
                                 }
                             }
                             //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);

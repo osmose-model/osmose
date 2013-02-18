@@ -57,7 +57,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
         StringBuilder filename;
         String description;
 
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
             if (biomass[i] > 0.d) {
                 meanTL[i] = (float) (meanTL[i] / biomass[i]);
             } else {

@@ -32,7 +32,7 @@ public class IncomingFluxProcess extends AbstractProcess {
         int index = species.getIndex();
         biomassFluxIn = getOsmose().biomassFluxInTab[index];
         meanLengthIn = getOsmose().meanLengthFishInTab[index];
-        ageMeanIn = (int) Math.round(getOsmose().meanAgeFishInTab[index] * getSimulation().getNumberTimeStepsPerYear());
+        ageMeanIn = (int) Math.round(getOsmose().meanAgeFishInTab[index] * getOsmose().getNumberTimeStepsPerYear());
     }
 
     @Override

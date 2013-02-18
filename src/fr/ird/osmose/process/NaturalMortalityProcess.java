@@ -13,8 +13,8 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        larvalMortalityRates = new float[getSimulation().getNumberSpecies()][getSimulation().getNumberTimeStepsPerYear() * getSimulation().getNumberYears()];
-        for (int iSpec = 0; iSpec < getSimulation().getNumberSpecies(); iSpec++) {
+        larvalMortalityRates = new float[getOsmose().getNumberSpecies()][getOsmose().getNumberTimeStepsPerYear() * getOsmose().getNumberYears()];
+        for (int iSpec = 0; iSpec < getOsmose().getNumberSpecies(); iSpec++) {
             int t = 0;
             for (int iStep = 0; iStep < larvalMortalityRates[iSpec].length; iStep++) {
                 if (t > getOsmose().larvalMortalityRates[iSpec].length - 1) {
@@ -54,7 +54,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         if (school.getAgeDt() == 0) {
             D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + MovementProcess.getOutMortality(school)) / (float) subdt;
         } else {
-            D = (spec.D + MovementProcess.getOutMortality(school)) / (float) (getSimulation().getNumberTimeStepsPerYear() * subdt);
+            D = (spec.D + MovementProcess.getOutMortality(school)) / (float) (getOsmose().getNumberTimeStepsPerYear() * subdt);
         }
         return D;
     }

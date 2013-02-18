@@ -17,13 +17,13 @@ public class GrowthProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        int nSpecies = getSimulation().getNumberSpecies();
+        int nSpecies = getOsmose().getNumberSpecies();
         criticalPredSuccess = getOsmose().criticalPredSuccessMatrix;
         minDelta = new float[nSpecies][];
         maxDelta = new float[nSpecies][];
         deltaMeanLength = new float[nSpecies][];
 
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
             Species species = getSpecies(i);
             int longevity = species.getLongevity();
             minDelta[i] = new float[longevity];

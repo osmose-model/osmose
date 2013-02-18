@@ -246,7 +246,7 @@ public class SpatialIndicator extends AbstractIndicator {
         }
         nc.addGlobalAttribute("dimension_ltl", str.toString());
         str = new StringBuilder();
-        for (int ispec = 0; ispec < getSimulation().getNumberSpecies(); ispec++) {
+        for (int ispec = 0; ispec < getOsmose().getNumberSpecies(); ispec++) {
             str.append(ispec);
             str.append("=");
             str.append(getSpecies(ispec).getName());
@@ -321,7 +321,7 @@ public class SpatialIndicator extends AbstractIndicator {
      * @return true if current step is the last step of the simulation
      */
     private boolean isLastStep() {
-        int lastStep = getSimulation().getNumberYears() * getSimulation().getNumberTimeStepsPerYear() - 1;
+        int lastStep = getOsmose().getNumberYears() * getOsmose().getNumberTimeStepsPerYear() - 1;
         return getSimulation().getIndexTimeSimu() == lastStep;
     }
 }

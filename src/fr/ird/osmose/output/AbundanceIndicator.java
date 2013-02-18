@@ -50,7 +50,7 @@ public class AbundanceIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
         StringBuilder filename;
-        int nSpec = getSimulation().getNumberSpecies();
+        int nSpec = getOsmose().getNumberSpecies();
 
         double nsteps = getOsmose().savingDtMatrix;
         for (int i = 0; i < nSpec; i++) {

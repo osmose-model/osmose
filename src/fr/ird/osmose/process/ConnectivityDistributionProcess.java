@@ -63,7 +63,7 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
         if (age > 0 && i_step_simu > 0) {
             int oldTime;
             if (i_step_year == 0) {
-                oldTime = getSimulation().getNumberTimeStepsPerYear() - 1;
+                oldTime = getOsmose().getNumberTimeStepsPerYear() - 1;
             } else {
                 oldTime = i_step_year - 1;
             }

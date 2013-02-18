@@ -42,7 +42,7 @@ public class BiomassCalibrationIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        int nSpec = getSimulation().getNumberSpecies();
+        int nSpec = getOsmose().getNumberSpecies();
         double nsteps = getOsmose().savingDtMatrix;
         int year = getSimulation().getYear();
         int indexSaving = (int) (getSimulation().getIndexTimeYear() / nsteps);

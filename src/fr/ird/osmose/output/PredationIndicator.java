@@ -79,7 +79,7 @@ public class PredationIndicator extends AbstractIndicator {
             double sumDiet = computeSumDiet(school);
             int iSpec = school.getSpeciesIndex();
             nbStomachs[iSpec][school.dietOutputStage] += school.getAbundance();
-            for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+            for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     predatorPressure[iSpec][school.dietOutputStage][i][s] += school.diet[i][s];
                     if (sumDiet > 0) {
@@ -87,7 +87,7 @@ public class PredationIndicator extends AbstractIndicator {
                     }
                 }
             }
-            for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getForcing().getNbPlanktonGroups(); i++) {
+            for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getForcing().getNbPlanktonGroups(); i++) {
                 predatorPressure[iSpec][school.dietOutputStage][i][0] += school.diet[i][0];
                 if (sumDiet > 0) {
                     diet[iSpec][school.dietOutputStage][i][0] += school.getAbundance() * school.diet[i][0] / sumDiet;
@@ -98,12 +98,12 @@ public class PredationIndicator extends AbstractIndicator {
 
     private double computeSumDiet(School school) {
         double sumDiet = 0.d;
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
             for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                 sumDiet += school.diet[i][s];
             }
         }
-        for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getForcing().getNbPlanktonGroups(); i++) {
             sumDiet += school.diet[i][0];
         }
         return sumDiet;
@@ -126,7 +126,7 @@ public class PredationIndicator extends AbstractIndicator {
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
-        int nSpec = getSimulation().getNumberSpecies();
+        int nSpec = getOsmose().getNumberSpecies();
 
         filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
@@ -229,7 +229,7 @@ public class PredationIndicator extends AbstractIndicator {
         PrintWriter pr;
         FileOutputStream fos = null;
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
-        int nSpec = getSimulation().getNumberSpecies();
+        int nSpec = getOsmose().getNumberSpecies();
         int dtRecord = getOsmose().getRecordFrequency();
 
         filename = new StringBuilder("Trophic");

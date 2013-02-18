@@ -58,7 +58,7 @@ public class MeanSizeIndicator extends AbstractIndicator {
         StringBuilder filename;
         String description;
 
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
             if (abundance[i] > 0) {
                 meanSize[i] = (float) (meanSize[i] / abundance[i]);
             } else {

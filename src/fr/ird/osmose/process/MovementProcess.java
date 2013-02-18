@@ -61,16 +61,16 @@ public class MovementProcess extends AbstractProcess {
             readConfigurationFile();
         }
 
-        int nSpecies = getSimulation().getNumberSpecies();
+        int nSpecies = getOsmose().getNumberSpecies();
         // init migration
         outOfZoneMortality = new float[nSpecies][][];
         outOfZoneCohort = new boolean[nSpecies][][];
         for (int index = 0; index < nSpecies; index++) {
             int longevity = getSpecies(index).getLongevity();
-            outOfZoneMortality[index] = new float[longevity][getSimulation().getNumberTimeStepsPerYear()];
-            outOfZoneCohort[index] = new boolean[longevity][getSimulation().getNumberTimeStepsPerYear()];
+            outOfZoneMortality[index] = new float[longevity][getOsmose().getNumberTimeStepsPerYear()];
+            outOfZoneCohort[index] = new boolean[longevity][getOsmose().getNumberTimeStepsPerYear()];
             if (null != getOsmose().migrationTempAge[index]) {
-                int nbStepYear = getSimulation().getNumberTimeStepsPerYear();
+                int nbStepYear = getOsmose().getNumberTimeStepsPerYear();
                 for (int m = 0; m < getOsmose().migrationTempAge[index].length; m++) {
                     for (int n = 0; n < getOsmose().migrationTempDt[index].length; n++) {
                         for (int h = 0; h < nbStepYear; h++) {
@@ -200,7 +200,7 @@ public class MovementProcess extends AbstractProcess {
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        int nSpecies = getSimulation().getNumberSpecies();
+        int nSpecies = getOsmose().getNumberSpecies();
         spatialDistribution = new SpatialDistribution[nSpecies];
         sizeRandomMap = new int[nSpecies];
 
@@ -234,7 +234,7 @@ public class MovementProcess extends AbstractProcess {
                 int longevity = getSpecies(iSpec).getLongevity();
                 indexMaps[iSpec] = new int[longevity][];
                 for (int j = 0; j < longevity; j++) {
-                    indexMaps[iSpec][j] = new int[getSimulation().getNumberTimeStepsPerYear()];
+                    indexMaps[iSpec][j] = new int[getOsmose().getNumberTimeStepsPerYear()];
                 }
             }
 

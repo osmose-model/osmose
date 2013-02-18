@@ -20,9 +20,9 @@ public class BiomassPopulator extends AbstractPopulator {
 
         float correctingFactor;
         double abdIni;
-        float nbTimeStepsPerYear = getSimulation().getNumberTimeStepsPerYear();
+        float nbTimeStepsPerYear = getOsmose().getNumberTimeStepsPerYear();
 
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
             //We calculate abd & biom ini of cohorts, and in parallel biom of species
             Species species = getSpecies(i);
             double biomass = 0;

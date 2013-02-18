@@ -93,10 +93,10 @@ public class Species {
         this.sizeMat = getOsmose().sizeMatMatrix[index];
         this.nbFeedingStages = getOsmose().nbStagesMatrix[index];
         this.sizeFeeding = getOsmose().sizeFeedingMatrix[index];
-        this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[index] * getSimulation().getNumberTimeStepsPerYear());
+        this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[index] * getOsmose().getNumberTimeStepsPerYear());
         this.recruitSize = getOsmose().recruitSizeMatrix[index];
         this.seasonSpawning = getOsmose().seasonSpawningMatrix[index];
-        this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[index] * getSimulation().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
+        this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[index] * getOsmose().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
         this.eggSize = getOsmose().eggSizeMatrix[index];
         this.eggWeight = getOsmose().eggWeightMatrix[index];
         this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[index];
@@ -109,7 +109,7 @@ public class Species {
         }
 
         // START INITIALISATION of COHORTS
-        longevity = (int) Math.round((getOsmose().longevityMatrix[index]) * getSimulation().getNumberTimeStepsPerYear());
+        longevity = (int) Math.round((getOsmose().longevityMatrix[index]) * getOsmose().getNumberTimeStepsPerYear());
     }
 
     public float[] getMeanLength() {
@@ -121,7 +121,7 @@ public class Species {
         meanLength[0] = eggSize;
 
         for (int i = 1; i < getLongevity(); i++) {
-            decimalAge = i / (float) getSimulation().getNumberTimeStepsPerYear();
+            decimalAge = i / (float) getOsmose().getNumberTimeStepsPerYear();
             if (decimalAge < growthAgeThreshold) {
                 float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
                 if (lengthAtAgePart < eggSize) {

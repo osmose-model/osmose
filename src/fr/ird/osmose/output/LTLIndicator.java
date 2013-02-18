@@ -228,7 +228,7 @@ public class LTLIndicator extends AbstractIndicator {
      * @return true if current step is the last step of the simulation
      */
     private boolean isLastStep() {
-        int lastStep = getSimulation().getNumberYears() * getSimulation().getNumberTimeStepsPerYear() - 1;
+        int lastStep = getOsmose().getNumberYears() * getOsmose().getNumberTimeStepsPerYear() - 1;
         return getSimulation().getIndexTimeSimu() == lastStep;
     }
 }

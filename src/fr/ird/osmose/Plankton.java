@@ -58,7 +58,7 @@ public class Plankton extends SimulationLinker {
         iniBiomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
         for (int i = 0; i < getGrid().getNbLines(); i++) {
             for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                mortalityRate[i][j] = (accessibilityCoeff / 2f) * getSimulation().getNumberTimeStepsPerYear() / 365f; // default = median of the max mortality rate (in day-1)
+                mortalityRate[i][j] = (accessibilityCoeff / 2f) * getOsmose().getNumberTimeStepsPerYear() / 365f; // default = median of the max mortality rate (in day-1)
             }
         }
     }
@@ -105,7 +105,7 @@ public class Plankton extends SimulationLinker {
     }
 
     public float biomToProd(float biomass) {
-        return biomass * prodBiomFactor / (float) getSimulation().getNumberTimeStepsPerYear();
+        return biomass * prodBiomFactor / (float) getOsmose().getNumberTimeStepsPerYear();
     }
 
     /*

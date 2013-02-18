@@ -106,7 +106,7 @@ public class Osmose {
     public int strideTab;
     public int gridLinesTab, gridColumnsTab;
     public float upLeftLatTab, lowRightLatTab, upLeftLongTab, lowRightLongTab;
-    public int simulationTimeTab, nbDtMatrix, savingDtMatrix, nbDtSavePerYear;
+    public int nYears, nStepYear, savingDtMatrix, nbDtSavePerYear;
     /*
      * Parameters
      */
@@ -553,8 +553,8 @@ public class Osmose {
          * This case allows interannual variability for reproduction.
          */
         int nb_rows = lines.size() - 1;
-        if (nb_rows != nbDtMatrix & nb_rows != nbDtMatrix * simulationTimeTab) {
-            System.out.println("Reproduction seasonality file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nbDtMatrix + " or " + (nbDtMatrix * simulationTimeTab));
+        if (nb_rows != nStepYear & nb_rows != nStepYear * nYears) {
+            System.out.println("Reproduction seasonality file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nStepYear + " or " + (nStepYear * nYears));
             System.exit(1);
         }
         int nb_columns = lines.get(0).length - 1;
@@ -579,9 +579,9 @@ public class Osmose {
             double sum = 0;
             for (int iStep = 0; iStep < seasonSpawningMatrix[iSpec].length; iStep++) {
                 sum += seasonSpawningMatrix[iSpec][iStep];
-                if ((iStep + 1) % nbDtMatrix == 0) {
+                if ((iStep + 1) % nStepYear == 0) {
                     if (!((sum > 0.99f) && (sum < 1.01f))) {
-                        int year = (iStep + 1) / nbDtMatrix;
+                        int year = (iStep + 1) / nStepYear;
                         System.out.println("ERROR: sum of percents does not equal 100% in spawning seasonality file " + csvFile + " for species " + nameSpecMatrix[iSpec] + " in year " + year);
                         System.exit(1);
                     }
@@ -595,9 +595,9 @@ public class Osmose {
     public void readSeasonalityReproFile(String reproductionFileName, int numSerie) {
         if (reproductionFileName.equalsIgnoreCase("default")) {
             for (int i = 0; i < nbSpeciesTab; i++) {
-                seasonSpawningMatrix[i] = new float[nbDtMatrix];
-                for (int j = 0; j < nbDtMatrix; j++) {
-                    seasonSpawningMatrix[i][j] = (float) 1 / (float) nbDtMatrix;
+                seasonSpawningMatrix[i] = new float[nStepYear];
+                for (int j = 0; j < nStepYear; j++) {
+                    seasonSpawningMatrix[i][j] = (float) 1 / (float) nStepYear;
                 }
             }
             System.out.println("Reproduction is set constant over the year (default)");
@@ -626,11 +626,11 @@ public class Osmose {
 
             try {
                 st.nextToken();
-                if (new Integer(st.sval).intValue() == nbDtMatrix) {
+                if (new Integer(st.sval).intValue() == nStepYear) {
                     for (int i = 0; i < nbSpeciesTab; i++) {
                         tempSum = 0;
-                        seasonSpawningMatrix[i] = new float[nbDtMatrix];
-                        for (int j = 0; j < nbDtMatrix; j++) {
+                        seasonSpawningMatrix[i] = new float[nStepYear];
+                        for (int j = 0; j < nStepYear; j++) {
                             st.nextToken();
                             seasonSpawningMatrix[i][j] = (new Float(st.sval)).floatValue() / 100; //percentage
                             tempSum += (new Float(st.sval)).floatValue();
@@ -668,8 +668,8 @@ public class Osmose {
              * rate.
              */
             int nb_rows = lines.size() - 1;
-            if (nb_rows != nbDtMatrix & nb_rows != nbDtMatrix * simulationTimeTab) {
-                System.out.println("Fishing rate file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nbDtMatrix + " or " + (nbDtMatrix * simulationTimeTab));
+            if (nb_rows != nStepYear & nb_rows != nStepYear * nYears) {
+                System.out.println("Fishing rate file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nStepYear + " or " + (nStepYear * nYears));
                 System.exit(1);
             }
             int nb_columns = lines.get(0).length - 1;
@@ -760,8 +760,8 @@ public class Osmose {
          * This case allows interannual variability for larval mortality rate.
          */
         int nb_rows = lines.size() - 1;
-        if (nb_rows != 1 & nb_rows != nbDtMatrix & nb_rows != nbDtMatrix * simulationTimeTab) {
-            System.out.println("Larval mortality rates file " + csvFile + " contains " + nb_rows + " rows. Should be either 1 or " + nbDtMatrix + " or " + (nbDtMatrix * simulationTimeTab));
+        if (nb_rows != 1 & nb_rows != nStepYear & nb_rows != nStepYear * nYears) {
+            System.out.println("Larval mortality rates file " + csvFile + " contains " + nb_rows + " rows. Should be either 1 or " + nStepYear + " or " + (nStepYear * nYears));
             System.exit(1);
         }
         int nb_columns = lines.get(0).length - 1;
@@ -882,17 +882,17 @@ public class Osmose {
             st.nextToken();
             lowRightLongTab = new Float(st.sval).floatValue();
             st.nextToken();
-            simulationTimeTab = (new Integer(st.sval)).intValue();
+            nYears = (new Integer(st.sval)).intValue();
             st.nextToken();
-            nbDtMatrix = (new Integer(st.sval)).intValue();
+            nStepYear = (new Integer(st.sval)).intValue();
             st.nextToken();
             savingDtMatrix = (new Integer(st.sval)).intValue();
-            if (!((nbDtMatrix % savingDtMatrix) == 0)) {
+            if (!((nStepYear % savingDtMatrix) == 0)) {
                 System.out.println("The number of time steps per year is not a multiple of the number of time steps for saving");
                 System.out.println("Thus, saving is realized at each time step");
                 savingDtMatrix = 1;
             }
-            nbDtSavePerYear = (int) nbDtMatrix / savingDtMatrix;
+            nbDtSavePerYear = (int) nStepYear / savingDtMatrix;
             st.nextToken();
             startingSavingTimeTab = (new Integer(st.sval)).intValue();
             st.nextToken();
@@ -920,7 +920,7 @@ public class Osmose {
             lowTLClassNameTab = st.sval;
 
             st.nextToken();
-            nbSchools = 1 + Math.round(((new Integer(st.sval)).intValue()) / nbDtMatrix);
+            nbSchools = 1 + Math.round(((new Integer(st.sval)).intValue()) / nStepYear);
 
             /*
              * Additional parameters to read the grid from NetCDF file
@@ -1198,7 +1198,7 @@ public class Osmose {
             }
         }
     }
-    
+
     public void initForcing() {
         try {
             forcing = (LTLForcing) Class.forName(getLTLClassName()).newInstance();
@@ -1499,10 +1499,10 @@ public class Osmose {
             areasTempDt = new int[nbMaps][];
             numMap = new int[nbSpeciesTab][][];
             for (int iSpec = 0; iSpec < nbSpeciesTab; iSpec++) {
-                int longevity = (int) Math.round((longevityMatrix[iSpec]) * nbDtMatrix);
+                int longevity = (int) Math.round((longevityMatrix[iSpec]) * nStepYear);
                 numMap[iSpec] = new int[longevity][];
                 for (int j = 0; j < longevity; j++) {
-                    numMap[iSpec][j] = new int[nbDtMatrix];
+                    numMap[iSpec][j] = new int[nStepYear];
                 }
             }
 
@@ -1741,10 +1741,10 @@ public class Osmose {
              */
             for (int m = 0; m < areasTempAge[indexMap].length; m++) {
                 for (int n = 0; n < areasTempDt[indexMap].length; n++) {
-                    for (int h = 0; h < nbDtMatrix; h++) {
-                        int longevity = (int) Math.round((longevityMatrix[areasNumSpForMap[indexMap]]) * nbDtMatrix);
-                        if ((areasTempAge[indexMap][m] * nbDtMatrix + h) < longevity) {
-                            numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nbDtMatrix + h][areasTempDt[indexMap][n]] = indexMap;
+                    for (int h = 0; h < nStepYear; h++) {
+                        int longevity = (int) Math.round((longevityMatrix[areasNumSpForMap[indexMap]]) * nStepYear);
+                        if ((areasTempAge[indexMap][m] * nStepYear + h) < longevity) {
+                            numMap[areasNumSpForMap[indexMap]][areasTempAge[indexMap][m] * nStepYear + h][areasTempDt[indexMap][n]] = indexMap;
                             //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
                         }
 //                        if (nbCells == 0) {
@@ -1991,18 +1991,18 @@ public class Osmose {
 
     public void initializeOutputData() {
         //these param are function of the length of the temporal series saved
-        if (startingSavingTimeTab > simulationTimeTab) {
+        if (startingSavingTimeTab > nYears) {
             System.out.println("Starting time for saving higher than simulation time -> set to 0");
             startingSavingTimeTab = 0;
         }
 
         if (startingSavingTimeTab == 0) {
-            timeSeriesLength = simulationTimeTab;
+            timeSeriesLength = nYears;
             timeSeriesStart = 0;
             timeSeriesIsShortened = false;
         } else {
             timeSeriesStart = startingSavingTimeTab;
-            timeSeriesLength = simulationTimeTab - startingSavingTimeTab;
+            timeSeriesLength = nYears - startingSavingTimeTab;
             timeSeriesIsShortened = true;
         }
 
@@ -2023,7 +2023,7 @@ public class Osmose {
              * iniBiomass[xx][i] += (float)
              * simulation.getSpecies(i).tabCohorts[j].biomass;
              */
-            int tempIndex = (int) nbDtMatrix / savingDtMatrix;
+            int tempIndex = (int) nStepYear / savingDtMatrix;
 
             if (calibrationMatrix) {
                 for (int i = 0; i < nbSpeciesTab; i++) {
@@ -2164,7 +2164,7 @@ public class Osmose {
             pw.print("Time");
             pw.print(';');
 
-            for (int t = timeSeriesStart; t < simulationTimeTab; t++) {
+            for (int t = timeSeriesStart; t < nYears; t++) {
                 for (int dt = 0; dt < nbDtSavePerYear; dt++) {
                     pw.print((float) (t + dt / (float) nbDtSavePerYear));
                     pw.print(';');
@@ -2257,7 +2257,7 @@ public class Osmose {
                 pw.println(';');
                 pw.print("Time");
                 pw.print(';');
-                for (int t = timeSeriesStart; t < simulationTimeTab; t++) {
+                for (int t = timeSeriesStart; t < nYears; t++) {
                     for (int dt = 0; dt < nbDtSavePerYear; dt++) {
                         pw.print((float) (t + dt / (float) nbDtSavePerYear));
                         pw.print(';');
@@ -2620,7 +2620,7 @@ public class Osmose {
     public IGrid getGrid() {
         return grid;
     }
-    
+
     public LTLForcing getForcing() {
         return forcing;
     }
@@ -2689,6 +2689,18 @@ public class Osmose {
 
     public String getDietOutputMetric() {
         return dietOutputMetrics;
+    }
+
+    public int getNumberTimeStepsPerYear() {
+        return nStepYear;
+    }
+
+    public int getNumberYears() {
+        return nYears;
+    }
+
+    public int getNumberSpecies() {
+        return nbSpeciesTab;
     }
 
     public enum SpatialDistribution {

@@ -84,7 +84,7 @@ public class PredationProcess extends AbstractProcess {
         // 2. from plankton
         float[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getForcing().getNbPlanktonGroups(); i++) {
-            float tempAccess = getOsmose().accessibilityMatrix[getSimulation().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
+            float tempAccess = getOsmose().accessibilityMatrix[getOsmose().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
             biomAccessibleTot += percentPlankton[i] * tempAccess * getForcing().getPlankton(i).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
         }
 
@@ -120,7 +120,7 @@ public class PredationProcess extends AbstractProcess {
             // Assess the gain for the predator from plankton
             // Assess the loss for the plankton caused by the predator
             for (int i = 0; i < getForcing().getNbPlanktonGroups(); i++) {
-                float tempAccess = getOsmose().accessibilityMatrix[getSimulation().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
+                float tempAccess = getOsmose().accessibilityMatrix[getOsmose().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
                 double ratio = percentPlankton[i] * tempAccess * getForcing().getPlankton(i).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()] / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
             }
@@ -213,7 +213,7 @@ public class PredationProcess extends AbstractProcess {
     }
     
     public static double computeBiomassToPredate(School predator, int subdt) {
-        return predator.getInstantaneousBiomass() * predationRate[predator.getSpeciesIndex()] / (double) (getSimulation().getNumberTimeStepsPerYear() * subdt);
+        return predator.getInstantaneousBiomass() * predationRate[predator.getSpeciesIndex()] / (double) (getOsmose().getNumberTimeStepsPerYear() * subdt);
     }
     
     /*

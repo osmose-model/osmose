@@ -64,7 +64,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             }
             st.nextToken();
             nbForcingDt = (new Integer(st.sval)).intValue();
-            if (!(nbForcingDt == getOsmose().nbDtMatrix)) {
+            if (!(nbForcingDt == getOsmose().nStepYear)) {
                 System.out.println("In the current version, the time step of plankton biomass should match the time step of osmose config");
             }
 
@@ -196,7 +196,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         pr = new PrintWriter(planktonTime, true);
 
         for (int j = 0; j < getGrid().getNbLines(); j++) {
-            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getSimulation().getNumberTimeStepsPerYear());
+            pr.print(getSimulation().getYear() + getSimulation().getIndexTimeYear() / (float) getOsmose().getNumberTimeStepsPerYear());
             pr.print(';');
             for (int p = 0; p < nbPlankton; p++) {
                 for (int i = 0; i < getGrid().getNbColumns(); i++) {

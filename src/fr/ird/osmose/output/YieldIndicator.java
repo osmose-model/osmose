@@ -21,7 +21,7 @@ public class YieldIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        int nSpec = getSimulation().getNumberSpecies();
+        int nSpec = getOsmose().getNumberSpecies();
         yield = new double[getNSpecies()];
         yieldN = new double[getNSpecies()];
 

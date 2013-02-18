@@ -52,7 +52,7 @@ public class StarvationProcess extends AbstractProcess {
             mortalityRate = Math.max(starvMaxRate[iSpec] * (1 - school.predSuccessRate / criticalPredSuccess[iSpec]), 0.d);
         }
 
-        return mortalityRate / (getSimulation().getNumberTimeStepsPerYear() * subdt);
+        return mortalityRate / (getOsmose().getNumberTimeStepsPerYear() * subdt);
     }
     
 }

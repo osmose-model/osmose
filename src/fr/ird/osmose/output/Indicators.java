@@ -55,7 +55,7 @@ public class Indicators extends SimulationLinker {
 
         int year = getSimulation().getYear();
         int index = getSimulation().getIndexTimeYear();
-        int nStepsYear = getSimulation().getNumberTimeStepsPerYear();
+        int nStepsYear = getOsmose().getNumberTimeStepsPerYear();
         int nStepsRecord = getOsmose().savingDtMatrix;
         //
         // UPDATE
@@ -88,14 +88,14 @@ public class Indicators extends SimulationLinker {
                 pr.print(description);
                 pr.println("\"");
                 pr.print("Time");
-                for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+                for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
                     pr.print(";");
                     pr.print(getSimulation().getSpecies(i).getName());
                 }
                 pr.println();
             }
             pr.print(time);
-            for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+            for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
                 pr.print(";");
                 pr.print((float) variable[i]);
                 //pr.print((long) variable[i]);
@@ -131,7 +131,7 @@ public class Indicators extends SimulationLinker {
                     pr.println("\"");
                 }
                 pr.print("Time");
-                for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+                for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
                     for (int j = 0; j < variable[i].length; j++) {
                         pr.print(";");
                         pr.print(getSimulation().getSpecies(i).getName());
@@ -140,7 +140,7 @@ public class Indicators extends SimulationLinker {
                 pr.println();
                 if (null != headers) {
                     pr.print("Headers");
-                    for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+                    for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
                         for (int j = 0; j < headers.length; j++) {
                             pr.print(";");
                             pr.print(headers[j]);
@@ -150,7 +150,7 @@ public class Indicators extends SimulationLinker {
                 pr.println();
             }
             pr.print(time);
-            for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+            for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
                 for (int j = 0; j < variable[i].length; j++) {
                     pr.print(";");
                     pr.print((float) variable[i][j]);

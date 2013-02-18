@@ -21,7 +21,7 @@ public class SpectrumPopulator extends AbstractPopulator {
     @Override
     public void populate() {
 
-        int nbTimeStepsPerYear = getSimulation().getNumberTimeStepsPerYear();
+        int nbTimeStepsPerYear = getOsmose().getNumberTimeStepsPerYear();
 
         long[] tempSpectrumAbd = new long[20];
         /*
@@ -29,7 +29,7 @@ public class SpectrumPopulator extends AbstractPopulator {
          */
         List<Species>[] specInSizeClass10 = new ArrayList[20];    //20 classes size 0 a 200
         for (int i = 0; i < specInSizeClass10.length; i++) {
-            specInSizeClass10[i] = new ArrayList(getSimulation().getNumberSpecies());
+            specInSizeClass10[i] = new ArrayList(getOsmose().getNumberSpecies());
         }
 
         double a = getOsmose().SSslope;
@@ -42,7 +42,7 @@ public class SpectrumPopulator extends AbstractPopulator {
         }
         //tabSizes10[i]+5 is mean length of [tabSizes10[i],tabSizes10[i+1][
         //Sort the Lmax of each species in each size class
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
             int index1 = tempSpectrumAbd.length - 1;
             Species species = getSpecies(i);
             float[] meanLength = species.getMeanLength();

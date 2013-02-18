@@ -42,7 +42,7 @@ public class LocalReproductionProcess extends AbstractProcess {
             }
         }
 
-        double season = species.seasonSpawning.length > getSimulation().getNumberTimeStepsPerYear()
+        double season = species.seasonSpawning.length > getOsmose().getNumberTimeStepsPerYear()
                 ? species.seasonSpawning[getSimulation().getIndexTimeSimu()]
                 : species.seasonSpawning[getSimulation().getIndexTimeYear()];
         double nbEggs = sexRatio * alpha * season * SSB * 1000000;

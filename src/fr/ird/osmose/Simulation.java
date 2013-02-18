@@ -63,7 +63,7 @@ public class Simulation {
      */
     public static final Version VERSION = Version.CASE3;
     /*
-     * 
+     * The index of the replicate simulation
      */
     private final int replica;
 
@@ -77,14 +77,6 @@ public class Simulation {
 // Declaration of the variables
 ///////////////////////////////
     private Population population;
-    /*
-     * Number of time-steps in one year
-     */
-    private int nTimeStepsPerYear;
-    /*
-     * Number of years of simulation
-     */
-    private int nYear;
     /*
      * Time of the simulation in [year]
      */
@@ -121,8 +113,6 @@ public class Simulation {
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
-        nTimeStepsPerYear = getOsmose().nbDtMatrix;
-        nYear = getOsmose().simulationTimeTab;
 
         // Create the species
         species = new Species[getOsmose().nbSpeciesTab];
@@ -213,7 +203,7 @@ public class Simulation {
 
     public void run() {
 
-        while (year < nYear) {
+        while (year < getOsmose().getNumberYears()) {
 
             // Print progress in console
             progress();
@@ -222,7 +212,7 @@ public class Simulation {
             setupMPA();
 
             // Loop over the year
-            while (i_step_year < nTimeStepsPerYear) {
+            while (i_step_year < getOsmose().getNumberTimeStepsPerYear()) {
                 // Run a new step
                 step.step();
                 // Increment time step
@@ -240,10 +230,6 @@ public class Simulation {
         return population;
     }
 
-    public int getNumberSpecies() {
-        return species.length;
-    }
-
     /**
      * Get a species
      *
@@ -252,10 +238,6 @@ public class Simulation {
      */
     public Species getSpecies(int index) {
         return species[index];
-    }
-
-    public int getNumberTimeStepsPerYear() {
-        return nTimeStepsPerYear;
     }
 
     public int getYear() {
@@ -268,10 +250,6 @@ public class Simulation {
 
     public int getIndexTimeSimu() {
         return i_step_simu;
-    }
-
-    public int getNumberYears() {
-        return nYear;
     }
 
     private IGrid getGrid() {

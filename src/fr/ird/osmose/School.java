@@ -101,11 +101,11 @@ public class School extends Fish {
     }
 
     public void resetDietVariable() {
-        diet = new float[getSimulation().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups()][];
-        for (int i = 0; i < getSimulation().getNumberSpecies(); i++) {
+        diet = new float[getOsmose().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups()][];
+        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
             diet[i] = new float[getSimulation().getSpecies(i).nbDietStages];
         }
-        for (int i = getSimulation().getNumberSpecies(); i < getSimulation().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups(); i++) {
             diet[i] = new float[1];
         }
     }
@@ -160,7 +160,7 @@ public class School extends Fish {
         str.append("\n  Species: ");
         str.append(getSpecies().getName());
         str.append("\n  Cohort: ");
-        float ageInYear = getAgeDt() / (float) getSimulation().getNumberTimeStepsPerYear();
+        float ageInYear = getAgeDt() / (float) getOsmose().getNumberTimeStepsPerYear();
         str.append(ageInYear);
         str.append(" [year]");
         str.append("\n  Cell: ");
