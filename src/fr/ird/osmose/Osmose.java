@@ -138,7 +138,6 @@ public class Osmose {
     //4 dimensions : simu, species,val(total OR total-0), step t
     //for mortalities, 3 dim, the last is for the mean on the simulation period
     public float[][][][][] BIOMQuadri;   //[numSimu][species][with or without age 0][t][dt]
-    float[][] iniBiomass; //used for saving the biomass after initialization
     /*
      * INDICATORS OUTPUT
      */
@@ -178,13 +177,14 @@ public class Osmose {
     private int[] mapIndexNoTwin;
     public SpatialDistribution[] spatialDistribution;
 
-    public void initSimulation() {
+    public void init() {
 
         readInputFile();	// read the first file containing the file names of all other input files
         for (int x = 0; x < nbSeriesSimus; x++) {
             readAllInputFiles(x);
         }
         initializeSizeAndTLSpectrum();
+        simulation = new Simulation();
     }
 
     public void loadMPAs() {
@@ -223,107 +223,27 @@ public class Osmose {
         }
     }
 
-    public void runSeriesSimulations() {
-        Runtime r = Runtime.getRuntime();
-        long freeMem;
-        for (int x = 0; x < nbSeriesSimus; x++) {
-            numSerie = x;
+    public void run() {
+
+        numSerie = 0;
+        // Delete existing output directory
+        File targetPath = new File(outputPathName + outputFileNameTab[numSerie]);
+        if (targetPath.exists()) {
+            IOTools.deleteDirectory(targetPath);
+        }
+        // Loop over the number of replica
+        for (numSimu = 0; numSimu < nbLoopTab[numSerie]; numSimu++) {
+            long begin = System.currentTimeMillis();
             System.out.println();
-            System.out.println("SERIE " + x);
-            /*
-             * if(x==0)	// for the first serie : all input files are read and
-             * kept in memory readAllInputFiles(x); else	// for the following
-             * series, only the files that differ from the previous one are
-             * read, other input are already in memory { int previousSerie =
-             * x-1; checkInputFilesChange(x, previousSerie); }
-             */
-            for (int xx = 0; xx < nbLoopTab[x]; xx++) {
-                numSimu = xx;
-                r.gc();
-                freeMem = r.freeMemory();
-                System.out.println("Simulation " + xx + "        **** FREE MEMORY = " + freeMem);
-                /*
-                 * Delete older output directory and all its content
-                 */
-                File targetPath = new File(outputPathName + outputFileNameTab[numSerie]);
-                if ((numSimu == 0) && targetPath.exists()) {
-//                    if (targetPath.list() != null) {
-//                        System.out.println("Output folder " + targetPath + " already contains some files and/or folders.");
-//                        System.out.println("Should we delete them (y=yes, n=no, c=cancel) ?");
-//                        try {
-//                            char answer = (char) System.in.read();
-//                            switch (answer) {
-//                                case 'y':
-//                                    IOTools.deleteDirectory(targetPath);
-//                                    break;
-//                                case 'n':
-//                                    break;
-//                                default:
-//                                    System.exit(0);
-//
-//                            }
-//                        } catch (IOException ex) {
-//                            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-//                            System.exit(0);
-//                        }
-//                    }
-                    IOTools.deleteDirectory(targetPath);
-                }
-                if (numSimu == 0) {
-                    initializeOptions();
-                    System.out.println("options initialized");
-
-                    readMigrationFile();
-                    System.out.println("migration caracteristics initialized");
-
-                    if (!NEW_AREA_FILE) {
-                        readAreaFile();
-                    }
-                    System.out.println("areas initialized");
-
-                    simulation = new Simulation();
-                    simulation.init();
-                    System.out.println("simulation initialized");
-
-                    //in initialiserSpeciesareas, save in tabTemp the areas by cohort
-                    //do not distribute the species in simulation()
-                    initializeOutputData();
-                    System.out.println("output data initialized");
-
-                } else {
-                    try {
-                        grid = (IGrid) Class.forName(gridClassNameTab[numSerie]).newInstance();
-                        grid.init();
-                    } catch (InstantiationException ex) {
-                        Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IllegalAccessException ex) {
-                        Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (ClassNotFoundException ex) {
-                        Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                    if (!(coastFileNameTab[numSerie].equalsIgnoreCase("None") || coastFileNameTab[numSerie].equalsIgnoreCase("default"))) {
-                        updateCoastCells(numSerie);
-                    }
-
-                    readMigrationFile();
-                    if (!NEW_AREA_FILE) {
-                        readAreaFile();
-                    }
-
-                    simulation = new Simulation();
-                    simulation.init();
-                }
-
-                simulation.run();
-
-                System.out.print("simu " + numSimu + " end -> ");
-                System.out.println(new Date());
-            }
-
-            saveSerieSimulations(numSerie);
-            simulation = null;
-            grid = null;
+            System.out.println("Replicate " + numSimu + "...");
+            simulation.init();
+            simulation.run();
+            int time = (int) ((System.currentTimeMillis() - begin) / 1000);
+            System.out.println("Replicate " + numSimu + " [OK] (time ellapsed:  " + time + " seconds)");
+        }
+        // Save summary for calibration
+        if (calibrationMatrix[numSerie]) {
+            saveSerieSimulations();
         }
     }
 
@@ -333,58 +253,21 @@ public class Osmose {
         readPredationFile(predationFileNameTab[numSerie], numSerie);
         readFishingFile(fishingFileNameTab[numSerie], numSerie);
         readCalibrationFile(calibrationFileNameTab[numSerie], numSerie);
-
         readSeasonalityReproFile(reproductionFileNameTab[numSerie], numSerie);
-        //readSeasonalityFishingFile(fishingSeasonFileNameTab[numSerie], numSerie);
         readsize0File(size0FileNameTab[numSerie], numSerie);
         readOutputConfigurationFile(indicatorsFileNameTab[numSerie], numSerie);
         if (dietsOutputMatrix[numSerie]) {
             readDietsOutputFile(dietsConfigFileName[numSerie], numSerie);
         }
-
         readAccessibilitiesFile(accessibilitiesFileNameTab[numSerie], numSerie);
-    }
-
-    public void checkInputFilesChange(int newNumSerie, int previousNumSerie) {
-        if (!(configFileNameTab[newNumSerie].equals(configFileNameTab[previousNumSerie]))) {
-            readConfigurationFile(configFileNameTab[newNumSerie], newNumSerie);
+        readMigrationFile();
+        readCoastFile();
+        initGrid();
+        if (!NEW_AREA_FILE) {
+            readAreaFile();
         }
-        if (!(speciesFileNameTab[newNumSerie].equals(speciesFileNameTab[previousNumSerie]))) {
-            readSpeciesFile(speciesFileNameTab[newNumSerie], newNumSerie);
-        }
-        if (!(predationFileNameTab[newNumSerie].equals(predationFileNameTab[previousNumSerie]))) {
-            readPredationFile(predationFileNameTab[newNumSerie], newNumSerie);
-        }
-        if (!(fishingFileNameTab[newNumSerie].equals(fishingFileNameTab[previousNumSerie]))) {
-            readFishingFile(fishingFileNameTab[newNumSerie], newNumSerie);
-        }
-        if (!(calibrationFileNameTab[newNumSerie].equals(calibrationFileNameTab[previousNumSerie]))) {
-            readCalibrationFile(calibrationFileNameTab[newNumSerie], newNumSerie);
-        }
-
-        if (!(reproductionFileNameTab[newNumSerie].equals(reproductionFileNameTab[previousNumSerie]))) {
-            readSeasonalityReproFile(reproductionFileNameTab[newNumSerie], newNumSerie);
-        }
-//        if (!(fishingSeasonFileNameTab[newNumSerie].equals(fishingSeasonFileNameTab[previousNumSerie]))) {
-//            readSeasonalityFishingFile(fishingSeasonFileNameTab[newNumSerie], newNumSerie);
-//        }
-        if (!(accessibilitiesFileNameTab[newNumSerie].equals(accessibilitiesFileNameTab[previousNumSerie]))) {
-            readAccessibilitiesFile(accessibilitiesFileNameTab[newNumSerie], newNumSerie);
-        }
-        if (!(size0FileNameTab[newNumSerie].equals(size0FileNameTab[previousNumSerie]))) {
-            readsize0File(size0FileNameTab[newNumSerie], newNumSerie);
-        }
-        if (!(indicatorsFileNameTab[newNumSerie].equals(indicatorsFileNameTab[previousNumSerie]))) {
-            readOutputConfigurationFile(indicatorsFileNameTab[newNumSerie], newNumSerie);
-        }
-
-        if (dietsOutputMatrix[newNumSerie]) {
-            if (!(dietsConfigFileName[newNumSerie].equals(dietsConfigFileName[previousNumSerie]))) {
-                readDietsOutputFile(dietsConfigFileName[newNumSerie], newNumSerie);
-            }
-        }
-
-
+        readMPAFile();
+        initializeOutputData();
     }
 
     public String readPathFile() // read the file situated within the source code directory
@@ -416,12 +299,12 @@ public class Osmose {
     // read the first file, that should be named INPUT.txt, situated at the path given by filePath.txt
     public void readInputFile() {
         System.out.println("2. Reading file INPUT.txt");
-        FileInputStream inputFile;
+        FileInputStream inputFile = null;
         try {
             inputFile = new FileInputStream(resolveFile(inputTxtName));
         } catch (FileNotFoundException ex) {
             System.out.println("INPUT file doesn't exist");
-            return;
+            System.exit(1);
         }
 
         Reader r = new BufferedReader(new InputStreamReader(inputFile));
@@ -436,7 +319,7 @@ public class Osmose {
             System.out.println("  Number of series = " + nbSeriesSimus);
         } catch (IOException ex) {
             System.out.println("  Reading error of INPUT file");
-            return;
+            System.exit(1);
         }
 
         // give the right dimension to tables according to the number of series specified
@@ -536,7 +419,7 @@ public class Osmose {
             inputFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of INPUT file");
-            return;
+            System.exit(1);
         }
         System.out.println("EOF for step 2. Reading file INPUT.txt");
     }
@@ -671,12 +554,12 @@ public class Osmose {
     }
 
     public void readSpeciesFile(String speciesFileName, int numSerie) {
-        FileInputStream speciesFile;
+        FileInputStream speciesFile = null;
         try {
             speciesFile = new FileInputStream(resolveFile(speciesFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("Species file " + speciesFileName + " doesn't exist");
-            return;
+            System.exit(1);
         }
 
         Reader r = new BufferedReader(new InputStreamReader(speciesFile));
@@ -798,12 +681,12 @@ public class Osmose {
                 }
             } else {
                 System.out.println("Uncorrect number of species in species file");
-                return;
+                System.exit(1);
             }
             speciesFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of species file");
-            System.exit(0);
+            System.exit(1);
         }
     }
 
@@ -875,12 +758,12 @@ public class Osmose {
                 Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            FileInputStream reproductionFile;
+            FileInputStream reproductionFile = null;
             try {
                 reproductionFile = new FileInputStream(resolveFile(reproductionFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("reproduction file doesn't exist: " + reproductionFileName);
-                return;
+                System.exit(1);
             }
 
             Reader r = new BufferedReader(new InputStreamReader(reproductionFile));
@@ -911,7 +794,7 @@ public class Osmose {
                 }
             } catch (IOException ex) {
                 System.out.println("Reading error of reproduction seasonality file");
-                System.exit(0);
+                System.exit(1);
             }
         }
     }
@@ -1116,17 +999,17 @@ public class Osmose {
             calibFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of calibration file");
-            System.exit(0);
+            System.exit(1);
         }
     }
 
     public void readConfigurationFile(String configFileName, int numSerie) {
-        FileInputStream configFile;
+        FileInputStream configFile = null;
         try {
             configFile = new FileInputStream(resolveFile(configFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("configuration file doesn't exist: " + configFileName);
-            return;
+            System.exit(1);
         }
 
         Reader r = new BufferedReader(new InputStreamReader(configFile));
@@ -1213,7 +1096,7 @@ public class Osmose {
             configFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of configuration file");
-            return;
+            System.exit(1);
         }
         initializeNbLivingGroups(numSerie, nbSpeciesTab[numSerie], nbPlanktonGroupsTab[numSerie]);
     }
@@ -1267,12 +1150,12 @@ public class Osmose {
                 growthAgeThresholdMatrix[numSerie][i] = 1.0f;	// by default, von Bertalanffy model considered valid after 1 year old, linear growth from 0 to 1 year
             }
         } else {
-            FileInputStream optionFile;
+            FileInputStream optionFile = null;
             try {
                 optionFile = new FileInputStream(resolveFile(optionFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("option file doesn't exist: " + optionFileName);
-                return;
+               System.exit(1);
             }
 
             Reader r = new BufferedReader(new InputStreamReader(optionFile));
@@ -1298,18 +1181,18 @@ public class Osmose {
                 optionFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of option file");
-                System.exit(0);
+                System.exit(1);
             }
         }
     }
 
     public void readPredationFile(String predationFileName, int numSerie) {
-        FileInputStream predationFile;
+        FileInputStream predationFile = null;
         try {
             predationFile = new FileInputStream(resolveFile(predationFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("predation file doesn't exist: " + predationFileName);
-            return;
+            System.exit(1);
         }
 
         Reader r = new BufferedReader(new InputStreamReader(predationFile));
@@ -1351,17 +1234,17 @@ public class Osmose {
             predationFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of predation file");
-            System.exit(0);
+            System.exit(1);
         }
     }
 
     public void readOutputConfigurationFile(String indicatorsFileName, int numSerie) {
-        FileInputStream indicFile;
+        FileInputStream indicFile = null;
         try {
             indicFile = new FileInputStream(resolveFile(indicatorsFileName));
         } catch (FileNotFoundException ex) {
             System.out.println("output config file doesn't exist: " + indicatorsFileName);
-            return;
+            System.exit(1);
         }
 
         Reader r = new BufferedReader(new InputStreamReader(indicFile));
@@ -1440,27 +1323,29 @@ public class Osmose {
             indicFile.close();
         } catch (IOException ex) {
             System.out.println("Reading error of output config file");
-            System.exit(0);
+            System.exit(1);
         }
     }
 
-    public void initializeOptions() {
+    public void initGrid() {
         try {
             System.out.println("Initialize grid: " + gridClassNameTab[numSerie]);
             grid = (IGrid) Class.forName(gridClassNameTab[numSerie]).newInstance();
-            grid.init();
-            if (coastFileNameTab[numSerie].equalsIgnoreCase("None")) {
-                nbCellsCoastTab[numSerie] = 0;
-            } else {
-                initializeCoast();
-            }
-            initializeMPA();
+
         } catch (InstantiationException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        // Init the grid
+        grid.init();
+        // Apply mask
+        if (null != tabCoastiMatrix[numSerie]) {
+            for (int k = 0; k < tabCoastiMatrix[numSerie].length; k++) {
+                grid.getCell(tabCoastiMatrix[numSerie][k], tabCoastjMatrix[numSerie][k]).setLand(true);
+            }
         }
     }
 
@@ -1498,22 +1383,19 @@ public class Osmose {
                     }
                 }
             }
-            for (int k = 0; k < tabCoastiMatrix[numSerie].length; k++) {
-                grid.getCell(tabCoastiMatrix[numSerie][k], tabCoastjMatrix[numSerie][k]).setLand(true);
-            }
         } catch (IOException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private void readCoastCoordinates(String coastFilename) {
-        FileInputStream coastFile;
+        FileInputStream coastFile = null;
 
         try {
             coastFile = new FileInputStream(coastFilename);
         } catch (FileNotFoundException ex) {
             System.out.println("Error while opening coastFile");
-            return;
+            System.exit(1);
         }
         //read nb of cells and compare to options
         Reader r = new BufferedReader(new InputStreamReader(coastFile));
@@ -1548,9 +1430,6 @@ public class Osmose {
                         st.nextToken();
                         tabCoastjMatrix[numSerie][i] = (new Integer(st.sval).intValue());
                     }
-                    for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
-                        grid.getCell(tabCoastiMatrix[numSerie][i], tabCoastjMatrix[numSerie][i]).setLand(true);
-                    }
                 } else {
                     System.out.println("Error while reading coastFile for nb columns match");
                 }
@@ -1564,9 +1443,10 @@ public class Osmose {
         }
     }
 
-    public void initializeCoast() {
-        if (coastFileNameTab[numSerie].equalsIgnoreCase("default")) {
+    public void readCoastFile() {
+        if (coastFileNameTab[numSerie].equalsIgnoreCase("default") || coastFileNameTab[numSerie].equalsIgnoreCase("none")) {
             System.out.println("No coast in the grid (default)");
+            nbCellsCoastTab[numSerie] = 0;
         } else {
 
             String filename = resolveFile(coastFileNameTab[numSerie]);
@@ -1585,13 +1465,7 @@ public class Osmose {
         }
     }
 
-    public void updateCoastCells(int numSerie) {
-        for (int i = 0; i < tabCoastiMatrix[numSerie].length; i++) {
-            grid.getCell(tabCoastiMatrix[numSerie][i], tabCoastjMatrix[numSerie][i]).setLand(true);
-        }
-    }
-
-    public void initializeMPA() {
+    public void readMPAFile() {
         if (mpaFileNameTab[numSerie].equalsIgnoreCase("default")) {
             thereIsMPATab[numSerie] = false;
             tabMPAiMatrix[numSerie] = new int[0];
@@ -1600,13 +1474,13 @@ public class Osmose {
             MPAtEndTab[numSerie] = 0;
         } else {
             //read info in file mpa
-            FileInputStream mpaFile;
+            FileInputStream mpaFile = null;
             int[] tabi, tabj;
             try {
                 mpaFile = new FileInputStream(resolveFile(mpaFileNameTab[numSerie]));
             } catch (FileNotFoundException ex) {
                 System.out.println("Error while opening mpaFile");
-                return;
+                System.exit(1);
             }
             Reader r = new BufferedReader(new InputStreamReader(mpaFile));
             StreamTokenizer st = new StreamTokenizer(r);
@@ -1660,23 +1534,12 @@ public class Osmose {
                                 tabj[j] = new Integer(st.sval).intValue();
                                 st.nextToken();
                             }
-                            boolean okForCoast = true;
+
+                            tabMPAiMatrix[numSerie] = new int[tabi.length];
+                            tabMPAjMatrix[numSerie] = new int[tabj.length];
                             for (int i = 0; i < tabi.length; i++) {
-                                if (grid.getCell(tabi[i], tabj[i]).isLand()) {
-                                    okForCoast = false;
-                                    break;
-                                }
-                            }
-                            if (okForCoast) {
-                                tabMPAiMatrix[numSerie] = new int[tabi.length];
-                                tabMPAjMatrix[numSerie] = new int[tabj.length];
-                                for (int i = 0; i < tabi.length; i++) {
-                                    tabMPAiMatrix[numSerie][i] = tabi[i];
-                                    tabMPAjMatrix[numSerie][i] = tabj[i];
-                                }
-                            } else {
-                                System.out.println(
-                                        "Error while reading mpaFile for coast cells");
+                                tabMPAiMatrix[numSerie][i] = tabi[i];
+                                tabMPAjMatrix[numSerie][i] = tabj[i];
                             }
                         }
                         mpaFile.close();
@@ -1688,7 +1551,7 @@ public class Osmose {
                 }
             } catch (IOException ex) {
                 System.out.println("Error while reading mpaFile");
-                return;
+                System.exit(1);
             }
             thereIsMPATab[numSerie] = true;
         }
@@ -1723,12 +1586,12 @@ public class Osmose {
         /*
          * Open areas-maps configuration file
          */
-        FileInputStream areasFile;
+        FileInputStream areasFile = null;
         try {
             areasFile = new FileInputStream(resolveFile(areasFileNameTab[numSerie]));
         } catch (FileNotFoundException ex) {
             System.out.println("Error while opening areasFile");
-            return;
+            System.exit(1);
         }
         /*
          * Initialize the reader
@@ -2107,12 +1970,12 @@ public class Osmose {
              * migrating
              */
 
-            FileInputStream outOfZoneFile;
+            FileInputStream outOfZoneFile = null;
             try {
                 outOfZoneFile = new FileInputStream(resolveFile(migrationFileNameTab[numSerie]));
             } catch (FileNotFoundException ex) {
                 System.out.println("migration file doesn't exist: " + migrationFileNameTab[numSerie]);
-                return;
+                System.exit(1);
             }
 
             Reader r = new BufferedReader(new InputStreamReader(outOfZoneFile));
@@ -2162,7 +2025,7 @@ public class Osmose {
                 outOfZoneFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of out of zone species file");
-                System.exit(0);
+                System.exit(1);
             }
         }
     }
@@ -2194,12 +2057,12 @@ public class Osmose {
             }
         } else // in case of an accessibility file specified
         {
-            FileInputStream accessFile;
+            FileInputStream accessFile = null;
             try {
                 accessFile = new FileInputStream(resolveFile(accessFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("accessibility file doesn't exist: " + accessFileName);
-                return;
+                System.exit(1);
             }
 
             Reader r = new BufferedReader(new InputStreamReader(accessFile));
@@ -2255,7 +2118,7 @@ public class Osmose {
                 accessFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of accessibilities file");
-                System.exit(0);
+                System.exit(1);
             }
         }
     }
@@ -2280,21 +2143,6 @@ public class Osmose {
         if (calibrationMatrix[numSerie]) {
             BIOMQuadri = new float[nbLoopTab[numSerie]][][][][];
         }
-
-        iniBiomass = new float[nbSeriesSimus][];
-        for (int x = 0; x < nbSeriesSimus; x++) {
-            iniBiomass[x] = new float[nbSpeciesTab[numSerie]];
-            for (int i = 0; i < nbSpeciesTab[numSerie]; i++) {
-                iniBiomass[x][i] = 0;
-            }
-            for (School school : getSimulation().getPopulation()) {
-                int i = school.getSpeciesIndex();
-                if (school.getAgeDt() >= simulation.getSpecies(i).indexAgeClass0) {
-                    iniBiomass[x][i] += school.getBiomass();
-                }
-            }
-        }
-
 
         for (int xx = 0; xx < nbLoopTab[numSerie]; xx++) {
             if (calibrationMatrix[numSerie]) {
@@ -2345,12 +2193,12 @@ public class Osmose {
                 dietStageThreshold[numSerie][i] = new float[0];
             }
         } else {
-            FileInputStream dietConfigFile;
+            FileInputStream dietConfigFile = null;
             try {
                 dietConfigFile = new FileInputStream(resolveFile(dietsConfigFileName));
             } catch (FileNotFoundException ex) {
                 System.out.println("diet configuration file doesn't exist: " + dietsConfigFileName);
-                return;
+                System.exit(1);
             }
 
             Reader r = new BufferedReader(new InputStreamReader(dietConfigFile));
@@ -2385,34 +2233,25 @@ public class Osmose {
                 dietConfigFile.close();
             } catch (IOException ex) {
                 System.out.println("Reading error of diets config file");
-                return;
+                System.exit(1);
             }
             System.out.println("diets config file read");
         }
     }
 
-    public void saveSerieSimulations(int nSerie) // ************************** seuls les fichiers biomasses, abundances, yield,
-    //**************************size, mortalites et size spectrum per species sont OK � 100%
-    {
+    public void saveSerieSimulations() {
         //save in output files
         File targetPath;
-
-        String inputFileName = outputPrefix[nSerie] + "_I";
-        String biomFileName = outputPrefix[nSerie] + "_B.csv";
-
-        targetPath = new File(outputPathName + outputFileNameTab[nSerie]);
+        String inputFileName = outputPrefix[numSerie] + "_I";
+        String biomFileName = outputPrefix[numSerie] + "_B.csv";
+        targetPath = new File(outputPathName + outputFileNameTab[numSerie]);
         targetPath.mkdirs();
-
-        //saveInputParameters(targetPath, inputFileName, nSerie);
-        if (calibrationMatrix[nSerie]) {
-            saveBIOMData(targetPath, inputFileName, biomFileName);
-        }
-
+        saveBIOMData(targetPath, inputFileName, biomFileName);
     }
 
     public void saveBIOMData(File targetPath, String inputFileName, String biomFileName) {
 
-        FileOutputStream biomFile;
+        FileOutputStream biomFile = null;
         File targetFile;
         PrintWriter pw;
 
@@ -2437,7 +2276,7 @@ public class Osmose {
             biomFile = new FileOutputStream(targetFile);
         } catch (IOException e) {
             System.out.println("Error of biomass file creation");
-            return;
+            System.exit(1);
         }
         pw = new PrintWriter(biomFile, true);
         pw.println("//File containing the set of input parameters " + inputFileName);
@@ -2894,11 +2733,18 @@ public class Osmose {
      * Point d'entrée du programme
      */
     public static void main(String... args) {
+        System.out.println("*****************************************");
+        System.out.println("*   Osmose v3.0b - Copyright 2013 IRD   *");
+        System.out.println("*****************************************");
         System.out.println(new Date());
+        System.out.println();
         osmose.loadArgs(args);
-        osmose.initSimulation();
-        osmose.runSeriesSimulations();
+        osmose.init();
+        osmose.run();
+        System.out.println();
         System.out.println(new Date());
+        System.out.println("*   Osmose v3.0b - Exit");
+        System.out.println("*****************************************");
     }
 
     public static Osmose getInstance() {
@@ -2929,21 +2775,6 @@ public class Osmose {
         } catch (Exception e) {
             return filename;
         }
-    }
-
-    public void initAll(String args[]) {
-
-        loadArgs(args);
-        initSimulation();
-        initializeOptions();
-        loadMPAs();
-        initializeOptions();
-        simulation = new Simulation();
-        simulation.init();
-        readMigrationFile();
-        readAreaFile();
-        initializeOutputData();
-        readMigrationFile();
     }
 
     public int getRecordFrequency() {
