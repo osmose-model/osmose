@@ -416,7 +416,6 @@ public class SpatialMapUI extends JPanel {
         getOsmose().loadArgs(args);
         getOsmose().init();
         getOsmose().loadMPAs();
-        getOsmose().getSimulation().init();
         map = getOsmose().getMap(numMap);
 
         SpatialMapUI grid = new SpatialMapUI();

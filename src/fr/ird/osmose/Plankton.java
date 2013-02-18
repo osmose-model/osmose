@@ -1,5 +1,6 @@
 package fr.ird.osmose;
 
+import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 
 /********************************************************************************
@@ -15,7 +16,7 @@ import fr.ird.osmose.ltl.LTLForcing;
  * @version 2.1
  ******************************************************************************** 
  */
-public class Plankton extends SimulationLinker {
+public class Plankton {
 
     /*
      * ********
@@ -151,5 +152,17 @@ public class Plankton extends SimulationLinker {
      */
     public String getName() {
         return name;
+    }
+    
+     private static Osmose getOsmose() {
+        return Osmose.getInstance();
+    }
+    
+    private static IGrid getGrid() {
+        return Osmose.getInstance().getGrid();
+    }
+    
+    private static LTLForcing getForcing() {
+        return Osmose.getInstance().getForcing();
     }
 }

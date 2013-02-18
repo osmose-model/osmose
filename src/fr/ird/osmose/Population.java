@@ -107,8 +107,4 @@ public class Population extends FilteredSet<School> {
     private IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
-    
-    private static Simulation getSimulation() {
-        return Osmose.getInstance().getSimulation();
-    }
 }

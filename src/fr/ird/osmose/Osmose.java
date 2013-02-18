@@ -1811,7 +1811,7 @@ public class Osmose {
         str.append("Map: ");
         str.append(numMap);
         str.append(" - Species: ");
-        str.append(getSimulation().getSpecies(areasNumSpForMap[numMap]).getName());
+        str.append(nameSpecMatrix[areasNumSpForMap[numMap]]);
         str.append(" - Age class: ");
         for (int k = 0; k < areasTempAge[numMap].length; k++) {
             str.append(areasTempAge[numMap][k]);

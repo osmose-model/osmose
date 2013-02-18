@@ -94,11 +94,4 @@ public class GridPoint {
     public static Osmose getOsmose() {
         return Osmose.getInstance();
     }
-    
-    /*
-     * Get current Simulation
-     */
-    public static Simulation getSimulation() {
-        return getOsmose().getSimulation();
-    }
 }

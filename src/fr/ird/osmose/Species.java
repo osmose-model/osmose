@@ -156,10 +156,6 @@ public class Species {
         return Osmose.getInstance();
     }
 
-    private Simulation getSimulation() {
-        return getOsmose().getSimulation();
-    }
-
     public int getLongevity() {
         return longevity;
     }
