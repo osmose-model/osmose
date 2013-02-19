@@ -87,7 +87,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         Indicators.initStep();
 
         // Update plankton concentration
-        getForcing().updatePlankton(getSimulation().getIndexTimeSimu());
+        getForcing().update(getSimulation().getIndexTimeSimu());
 
         // Spatial distribution
         movementProcess.run();

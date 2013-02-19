@@ -123,7 +123,7 @@ public class Simulation {
         }
 
         // Init plankton groups
-        for (int iLTL = 0; iLTL < getOsmose().getForcing().getNbPlanktonGroups(); iLTL++) {
+        for (int iLTL = 0; iLTL < getOsmose().getForcing().getNumberPlanktonGroups(); iLTL++) {
             getOsmose().getForcing().getPlankton(iLTL).init();
         }
 

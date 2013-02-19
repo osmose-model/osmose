@@ -39,7 +39,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     float[][] latitude, longitude;
 
     @Override
-    public void readLTLConfigFile2(String planktonFileName) {
+    public void readLTLForcingFile(String planktonFileName) {
         FileInputStream LTLFile;
         try {
             LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
@@ -55,8 +55,8 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getNbPlanktonGroups()];
-            for (int i = 0; i < getNbPlanktonGroups(); i++) {
+            plktonNetcdfNames = new String[getNumberPlanktonGroups()];
+            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
@@ -89,7 +89,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     }
 
     @Override
-    public void initPlanktonMap() {
+    public void initLTLGrid() {
 
         NetcdfFile ncIn = null;
         String ncpathname = getOsmose().resolveFile(gridFileName);
@@ -113,8 +113,8 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
          * Read lon & lat
          */
         try {
-            int nx = getPlanktonDimX();
-            int ny = getPlanktonDimY();
+            int nx = get_nx();
+            int ny = get_ny();
             Array arrLon = ncIn.findVariable(strLon).read();
             Array arrLat = ncIn.findVariable(strLat).read();
             if (arrLon.getElementType() == float.class) {
@@ -155,8 +155,8 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         icoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
         jcoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
 
-        for (int i = 0; i < getPlanktonDimX(); i++) {
-            for (int j = 0; j < getPlanktonDimY(); j++) // consider only the LTL cells included within the Osmose grid
+        for (int i = 0; i < get_nx(); i++) {
+            for (int j = 0; j < get_ny(); j++) // consider only the LTL cells included within the Osmose grid
             {
                 if ((latitude[i][j] >= getGrid().getLatMin()) && (latitude[i][j] <= getGrid().getLatMax()) && (longitude[i][j] >= getGrid().getLongMin()) && (longitude[i][j] <= getGrid().getLongMax())) {
                     // equations giving the position of ROMS cells within the Osmose getGrid(), avoiding to read the whole matrix
@@ -236,7 +236,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         String name = getOsmose().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
         Variable tempVar;
         ArrayFloat.D3 tempArray;
-        float[][][] data3d = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
+        float[][][] data3d = new float[get_nx()][get_ny()][get_nz()];
 
         try {
             NetcdfFile nc = NetcdfFile.open(name);
@@ -245,9 +245,9 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
             tempArray = (ArrayFloat.D3) tempVar.read().reduce();
 
             // fill data
-            for (int i = 0; i < getPlanktonDimX(); i++) {
-                for (int j = 0; j < getPlanktonDimY(); j++) {
-                    for (int k = 0; k < getPlanktonDimZ(); k++) {
+            for (int i = 0; i < get_nx(); i++) {
+                for (int j = 0; j < get_ny(); j++) {
+                    for (int k = 0; k < get_nz(); k++) {
                         data3d[i][j][k] = tempArray.get(k, i, j);
                     }
                 }
@@ -271,9 +271,9 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
      */
     private float[][][] getCstSigLevels(NetcdfFile ncIn) throws IOException {
 
-        int nz = getPlanktonDimZ();
-        int nx = getPlanktonDimX();
-        int ny = getPlanktonDimY();
+        int nz = get_nz();
+        int nx = get_nx();
+        int ny = get_ny();
         double hc;
         double[] sc_r = new double[nz];
         double[] Cs_r;

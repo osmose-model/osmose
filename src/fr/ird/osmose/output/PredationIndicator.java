@@ -33,17 +33,17 @@ public class PredationIndicator extends AbstractIndicator {
             biomassStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
         }
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getForcing().getNbPlanktonGroups();
+        int nPrey = nSpec + getForcing().getNumberPlanktonGroups();
         for (int i = nSpec; i < nPrey; i++) {
             int iPlankton = i - nSpec;
-            biomassStage[i][0] += getForcing().getBiomass(iPlankton);
+            biomassStage[i][0] += getForcing().getPlankton(iPlankton).getBiomass();
         }
     }
 
     @Override
     public void reset() {
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getForcing().getNbPlanktonGroups();
+        int nPrey = nSpec + getForcing().getNumberPlanktonGroups();
         diet = new double[nSpec][][][];
         predatorPressure = new double[nSpec][][][];
         nbStomachs = new double[nSpec][];
@@ -87,7 +87,7 @@ public class PredationIndicator extends AbstractIndicator {
                     }
                 }
             }
-            for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getForcing().getNbPlanktonGroups(); i++) {
+            for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getForcing().getNumberPlanktonGroups(); i++) {
                 predatorPressure[iSpec][school.dietOutputStage][i][0] += school.diet[i][0];
                 if (sumDiet > 0) {
                     diet[iSpec][school.dietOutputStage][i][0] += school.getAbundance() * school.diet[i][0] / sumDiet;
@@ -103,7 +103,7 @@ public class PredationIndicator extends AbstractIndicator {
                 sumDiet += school.diet[i][s];
             }
         }
-        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getForcing().getNumberPlanktonGroups(); i++) {
             sumDiet += school.diet[i][0];
         }
         return sumDiet;
@@ -194,10 +194,10 @@ public class PredationIndicator extends AbstractIndicator {
                     pr.println();
                 }
             }
-            for (int j = nSpec; j < (nSpec + getForcing().getNbPlanktonGroups()); j++) {
+            for (int j = nSpec; j < (nSpec + getForcing().getNumberPlanktonGroups()); j++) {
                 pr.print(time);
                 pr.print(";");
-                pr.print(getForcing().getPlanktonName(j - nSpec));
+                pr.print(getForcing().getPlankton(j - nSpec));
                 pr.print(";");
                 for (int i = 0; i < nSpec; i++) {
                     for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
@@ -297,10 +297,10 @@ public class PredationIndicator extends AbstractIndicator {
                     pr.println();
                 }
             }
-            for (int j = nSpec; j < (nSpec + getForcing().getNbPlanktonGroups()); j++) {
+            for (int j = nSpec; j < (nSpec + getForcing().getNumberPlanktonGroups()); j++) {
                 pr.print(time);
                 pr.print(";");
-                pr.print(getForcing().getPlanktonName(j - nSpec));
+                pr.print(getForcing().getPlankton(j - nSpec));
                 pr.print(";");
                 for (int i = 0; i < nSpec; i++) {
                     for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {

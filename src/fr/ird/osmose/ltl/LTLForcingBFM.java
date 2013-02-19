@@ -38,7 +38,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     private int timeDim;
 
     @Override
-    public void readLTLConfigFile2(String planktonFileName) {
+    public void readLTLForcingFile(String planktonFileName) {
 
         FileInputStream LTLFile;
         try {
@@ -58,8 +58,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Read name of plankton variable in the BFM NetCDF file
              */
-            planktonNetcdfNames = new String[getNbPlanktonGroups()];
-            for (int i = 0; i < getNbPlanktonGroups(); i++) {
+            planktonNetcdfNames = new String[getNumberPlanktonGroups()];
+            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
                 st.nextToken();
                 planktonNetcdfNames[i] = st.sval;
             }
@@ -98,7 +98,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     }
 
     @Override
-    public void initPlanktonMap() {
+    public void initLTLGrid() {
 
         NetcdfFile nc = null;
         /*
@@ -132,10 +132,10 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Compute the depth of every cell in meter
              */
-            depthOfLayer = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
-            for (int i = 0; i < getPlanktonDimX(); i++) {
-                for (int j = 0; j < getPlanktonDimY(); j++) {
-                    for (int z = 0; z < getPlanktonDimZ(); z++) {
+            depthOfLayer = new float[get_nx()][get_ny()][get_nz()];
+            for (int i = 0; i < get_nx(); i++) {
+                for (int j = 0; j < get_ny(); j++) {
+                    for (int z = 0; z < get_nz(); z++) {
                         depthOfLayer[i][j][z] = bathy[j][i] * zlevel[z];
                     }
                 }
@@ -220,7 +220,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
 
         //System.out.println("Reading " + name + " time " + dt);
-        float[][][] data3d = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
+        float[][][] data3d = new float[get_nx()][get_ny()][get_nz()];
         try {
             /*
              * Open the BFM Plankton NetCDF file

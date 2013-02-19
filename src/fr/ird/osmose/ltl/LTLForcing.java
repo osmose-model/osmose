@@ -13,17 +13,25 @@ import fr.ird.osmose.Plankton;
  */
 public interface LTLForcing {
 
-    public void readLTLConfigFile1(String planktonStructureFileName);
-    public void readLTLConfigFile2(String planktonFileName);
-    public void initPlanktonMap();
+    /**
+     * Initializes the LTLForcing.
+     * Reads configuration files and creates plankton groups.
+     */
+    public void init();
     /**
      * Update plankton biomass for current time step
      * @param iStepSimu, the current time index of the simulation
      */
-    public void updatePlankton(int iStepSimu);
-    public double getBiomass(int iPlankton);
-    public int getNbPlanktonGroups();
-    public String getPlanktonName(int indexGroup);
-    public Plankton getPlankton(int indexGroup);
-    public void createPlanktonGroups();
+    public void update(int iStepSimu);
+    /**
+     * Gets the number of plankton groups
+     * @return the number of plankton groups
+     */
+    public int getNumberPlanktonGroups();
+    /**
+     * Gets the specified plankton group.
+     * @param iPlankton, the index of the plankton group.
+     * @return the plankton group number iPlankton.
+     */
+    public Plankton getPlankton(int iPlankton);
 }

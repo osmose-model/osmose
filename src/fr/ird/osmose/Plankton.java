@@ -57,6 +57,21 @@ public class Plankton {
         return accessibilityCoeff * getBiomass(cell);
     }
 
+    /**
+     * Computes the biomass of the specified plankton over the domain.
+     *
+     * @return the cumulated biomass over the domain in tons
+     */
+    public double getBiomass() {
+        double biomTot = 0.d;
+        for (Cell cell : getGrid().getCells()) {
+            if (!cell.isLand()) {
+                biomTot += getBiomass(cell);
+            }
+        }
+        return biomTot;
+    }
+
     /*
      * Converts plankton biomass (usually from mmolN/m2) to tons/km2
      */

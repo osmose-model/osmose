@@ -67,7 +67,7 @@ public class PredationProcess extends AbstractProcess {
         Cell cell = predator.getCell();
         List<School> schools = getPopulation().getSchools(predator.getCell());
         int nFish = schools.size();
-        double[] preyUpon = new double[schools.size() + getForcing().getNbPlanktonGroups()];
+        double[] preyUpon = new double[schools.size() + getForcing().getNumberPlanktonGroups()];
         // egg do not predate
         if (predator.getAgeDt() == 0) {
             return preyUpon;
@@ -83,7 +83,7 @@ public class PredationProcess extends AbstractProcess {
         }
         // 2. from plankton
         float[] percentPlankton = getPercentPlankton(predator);
-        for (int i = 0; i < getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = 0; i < getForcing().getNumberPlanktonGroups(); i++) {
             float tempAccess = getOsmose().accessibilityMatrix[getOsmose().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
             biomAccessibleTot += percentPlankton[i] * tempAccess * getForcing().getPlankton(i).getAccessibleBiomass(cell);
         }
@@ -119,7 +119,7 @@ public class PredationProcess extends AbstractProcess {
             }
             // Assess the gain for the predator from plankton
             // Assess the loss for the plankton caused by the predator
-            for (int i = 0; i < getForcing().getNbPlanktonGroups(); i++) {
+            for (int i = 0; i < getForcing().getNumberPlanktonGroups(); i++) {
                 float tempAccess = getOsmose().accessibilityMatrix[getOsmose().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
                 double ratio = percentPlankton[i] * tempAccess * getForcing().getPlankton(i).getAccessibleBiomass(cell) / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
@@ -143,7 +143,7 @@ public class PredationProcess extends AbstractProcess {
     public static double[][] computePredationMatrix(Cell cell, int subdt) {
 
         List<School> schools = getPopulation().getSchools(cell);
-        double[][] preyUpon = new double[schools.size() + getForcing().getNbPlanktonGroups()][schools.size() + getForcing().getNbPlanktonGroups()];
+        double[][] preyUpon = new double[schools.size() + getForcing().getNumberPlanktonGroups()][schools.size() + getForcing().getNumberPlanktonGroups()];
         // Loop over the schools of the cell
         for (School school : schools) {
             school.nDeadPredation = 0;
@@ -161,11 +161,11 @@ public class PredationProcess extends AbstractProcess {
     }
     
     private static float[] getPercentPlankton(School predator) {
-        float[] percentPlankton = new float[getForcing().getNbPlanktonGroups()];
+        float[] percentPlankton = new float[getForcing().getNumberPlanktonGroups()];
         int iPred = predator.getSpeciesIndex();
         float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getFeedingStage()];
         float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getFeedingStage()];
-        for (int i = 0; i < getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = 0; i < getForcing().getNumberPlanktonGroups(); i++) {
             if ((preySizeMin > getForcing().getPlankton(i).getSizeMax()) || (preySizeMax < getForcing().getPlankton(i).getSizeMin())) {
                 percentPlankton[i] = 0.0f;
             } else {

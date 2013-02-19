@@ -101,7 +101,7 @@ public class School extends Fish {
     }
 
     public void resetDietVariable() {
-        diet = new float[getOsmose().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups()][];
+        diet = new float[getOsmose().getNumberSpecies() + getOsmose().getForcing().getNumberPlanktonGroups()][];
         for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
             if (getOsmose().dietsOutputMatrix) {
                 diet[i] = new float[getOsmose().nbDietsStages[i]];
@@ -109,7 +109,7 @@ public class School extends Fish {
                 diet[i] = new float[0];
             }
         }
-        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups(); i++) {
+        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getForcing().getNumberPlanktonGroups(); i++) {
             diet[i] = new float[1];
         }
     }

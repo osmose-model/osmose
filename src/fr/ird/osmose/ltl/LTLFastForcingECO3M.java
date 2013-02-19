@@ -29,7 +29,7 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
     private float[][][][] data;
 
     @Override
-    public void readLTLConfigFile2(String planktonFileName) {
+    public void readLTLForcingFile(String planktonFileName) {
         FileInputStream LTLFile;
         try {
             LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
@@ -45,8 +45,8 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getNbPlanktonGroups()];
-            for (int i = 0; i < getNbPlanktonGroups(); i++) {
+            plktonNetcdfNames = new String[getNumberPlanktonGroups()];
+            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
@@ -67,7 +67,7 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    public void initPlanktonMap() {
+    public void initLTLGrid() {
 
         NetcdfFile ncGrid = null;
         String gridFilename = getOsmose().resolveFile(planktonFileListNetcdf[0]);
@@ -83,13 +83,13 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
         setDimY(shape[1]);
         setDimX(shape[2]);
 
-        depthOfLayer = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
+        depthOfLayer = new float[get_nx()][get_ny()][get_nz()];
 
         try {
             ArrayDouble.D3 arrDepth = (ArrayDouble.D3) ncGrid.findVariable(zlevelName).read().flip(1);
-            for (int i = 0; i < getPlanktonDimX(); i++) {
-                for (int j = 0; j < getPlanktonDimY(); j++) {
-                    for (int z = 0; z < getPlanktonDimZ(); z++) {
+            for (int i = 0; i < get_nx(); i++) {
+                for (int j = 0; j < get_ny(); j++) {
+                    for (int z = 0; z < get_nz(); z++) {
                         depthOfLayer[i][j][z] = (float) arrDepth.get(z, j, i);
                     }
                 }
@@ -127,7 +127,7 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getOsmose().nStepYear][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
+        data = new float[getOsmose().nStepYear][getNumberPlanktonGroups()][get_nx()][get_ny()];
         for (int t = 0; t < getOsmose().nStepYear; t++) {
             data[t] = getIntegratedData(getOsmose().resolveFile(planktonFileListNetcdf[t]));
         }
@@ -137,7 +137,7 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
 
     private float[][][] getIntegratedData(String nameOfFile) {
 
-        float[][][] integratedData = new float[getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
+        float[][][] integratedData = new float[getNumberPlanktonGroups()][get_nx()][get_ny()];
         float[][][] dataInit;
         NetcdfFile nc = null;
         String name = nameOfFile;
@@ -146,9 +146,9 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
         try {
             nc = NetcdfFile.open(name);
             // read data and put them in the local arrays
-            for (int p = 0; p < getNbPlanktonGroups(); p++) {
+            for (int p = 0; p < getNumberPlanktonGroups(); p++) {
                 tempArray = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[p]).read().flip(1);
-                dataInit = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
+                dataInit = new float[get_nx()][get_ny()][get_nz()];
                 int[] shape = tempArray.getShape();
 
                 // fill dataInit of plankton classes from local arrays

@@ -18,7 +18,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
     private int iStep;
 
     @Override
-    public void readLTLConfigFile2(String planktonFileName) {
+    public void readLTLForcingFile(String planktonFileName) {
 
         ncFile = getOsmose().resolveFile(planktonFileName);
         if (!new File(ncFile).exists()) {
@@ -30,7 +30,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
     }
 
     @Override
-    public void initPlanktonMap() {
+    public void initLTLGrid() {
 
         /*
          * set dimensions
@@ -42,10 +42,10 @@ public class LTLFastForcing extends AbstractLTLForcing {
     }
 
     @Override
-    public void updatePlankton(int iStepSimu) {
+    public void update(int iStepSimu) {
 
         // update biomass
-        for (int p = 0; p < getNbPlanktonGroups(); p++) {
+        for (int p = 0; p < getNumberPlanktonGroups(); p++) {
             float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
             int nl = getGrid().getNbLines() - 1;
             for (int i = 0; i < getGrid().getNbLines(); i++) {
@@ -55,7 +55,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
                     }
                 }
             }
-            getPlanktonGroup(p).updateBiomass(biomass);
+            getPlankton(p).updateBiomass(biomass);
         }
         // increment ltl time step
         iStep++;

@@ -34,7 +34,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     private String[] plktonNetcdfNames;
 
     @Override
-    public void readLTLConfigFile2(String planktonFileName) {
+    public void readLTLForcingFile(String planktonFileName) {
         FileInputStream LTLFile;
         try {
             LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
@@ -50,8 +50,8 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getNbPlanktonGroups()];
-            for (int i = 0; i < getNbPlanktonGroups(); i++) {
+            plktonNetcdfNames = new String[getNumberPlanktonGroups()];
+            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
@@ -72,7 +72,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    public void initPlanktonMap() {
+    public void initLTLGrid() {
 
         NetcdfFile ncGrid = null;
         String gridFilename = getOsmose().resolveFile(planktonFileListNetcdf[0]);
@@ -88,13 +88,13 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         setDimY(shape[1]);
         setDimX(shape[2]);
 
-        depthOfLayer = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
+        depthOfLayer = new float[get_nx()][get_ny()][get_nz()];
 
         try {
             ArrayDouble.D3 arrDepth = (D3) ncGrid.findVariable(zlevelName).read().flip(1);
-            for (int i = 0; i < getPlanktonDimX(); i++) {
-                for (int j = 0; j < getPlanktonDimY(); j++) {
-                    for (int z = 0; z < getPlanktonDimZ(); z++) {
+            for (int i = 0; i < get_nx(); i++) {
+                for (int j = 0; j < get_ny(); j++) {
+                    for (int z = 0; z < get_nz(); z++) {
                         depthOfLayer[i][j][z] = (float) arrDepth.get(z, j, i);
                     }
                 }
@@ -130,7 +130,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         String name = getOsmose().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
         int[] shape;
         ArrayDouble.D3 tempArray;
-        float[][][] data3d = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
+        float[][][] data3d = new float[get_nx()][get_ny()][get_nz()];
 
         try {
             NetcdfFile nc = NetcdfFile.open(name);

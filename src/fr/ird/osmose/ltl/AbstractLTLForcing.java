@@ -18,50 +18,76 @@ import java.util.List;
 public abstract class AbstractLTLForcing implements LTLForcing {
 
     private int nbPlankton, nbForcingDt;
-    private String[] planktonNames;		// list of names of plankton groups
-    private float[] trophicLevel;			// list of TL of plankton groups
-    private float[] minSize, maxSize;		// list of min and max sizes of plankton groups
-    private float[] conversionFactors;		// list of conversionFactors of plankton groups
-    private float[] prodBiomFactors;		// list of prod/biom ratios of plankton groups
     private Plankton[] planktonList;     // list of plankton groups (here 4)
-    private int planktonDimX;      // dimension of LTL model, here ROMS Plume (144 * 65 * 20)
-    private int planktonDimY;
-    private int planktonDimZ;	// vertical dimension (20)
+    private int nx;      // dimension of LTL model, here ROMS Plume (144 * 65 * 20)
+    private int ny;
+    private int nz;	// vertical dimension (20)
     private float integrationDepth;   // latitude and longitude of each cell of the LTL grid, used for interpolation
     List<Integer>[][] icoordLTLGrid;
     List<Integer>[][] jcoordLTLGrid;
-    
+
     /**
      * Get the biomass of the specified plankton group on the LTL grid and
-     * vertically integrated, for a given time step.
-     * The biomass is expressed in the same unit as it is in the forcing file
-     * except that it is vertically integrated (unit/m2).
+     * vertically integrated, for a given time step. The biomass is expressed in
+     * the same unit as it is in the forcing file except that it is vertically
+     * integrated (unit/m2).
+     *
      * @param plankton, a plankton group
      * @param iStepSimu, the current step of the simulation
      * @return an array of dimension of the LTL grid with biomass vertically
      * integrated.
      */
     abstract float[][] getRawBiomass(Plankton plankton, int iStepSimu);
+
     /**
      * Converts the current time step of the simulation into the corresponding
      * time step of the LTL data.
+     *
      * @param iStepSimu, the current step of the simulation.
      * @return the corresponding time step of the LTL data.
      */
-    abstract public int getIndexStepLTL(int iStepSimu);
-
+    abstract int getIndexStepLTL(int iStepSimu);
+    
+    /**
+     * Loads parameters about how the LTL biomass are provided.
+     * 
+     * @param ltlForcingFile, the pathname of the LTLForcing configuration
+     * file.
+     */
+    abstract void readLTLForcingFile(String ltlForcingFile);
+    
+    /**
+     * This function loads the LTL grid.
+     * It loads longitude, latitude and depth of vertical levels.
+     * It creates the index map between osmose cells and LTL grid cells
+     * (fills up variables icoordLTLGrid & jcoordLTLGrid)
+     */
+    abstract void initLTLGrid();
+    
     @Override
+    public void init() {
+        readLTLBasisFile(getOsmose().planktonStructureFileNameTab);
+        readLTLForcingFile(getOsmose().planktonFileNameTab);
+        initLTLGrid();
+    }
+
     /**
      * Read LTL basic file with name of plankton, sizes, format of files...
      */
-    public void readLTLConfigFile1(String planktonStructureFileName) {
+    private void readLTLBasisFile(String planktonStructureFileName) {
 
-        FileInputStream LTLFile;
+        String[] planktonNames = null;		// list of names of plankton groups
+        float[] trophicLevel = null;			// list of TL of plankton groups
+        float[] minSize = null, maxSize = null;		// list of min and max sizes of plankton groups
+        float[] conversionFactors = null;		// list of conversionFactors of plankton groups
+        float[] prodBiomFactors = null;
+
+        FileInputStream LTLFile = null;
         try {
             LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonStructureFileName)));
         } catch (FileNotFoundException ex) {
             System.out.println("LTL file " + planktonStructureFileName + " doesn't exist");
-            return;
+            System.exit(1);
         }
 
         Reader r = new BufferedReader(new InputStreamReader(LTLFile));
@@ -76,6 +102,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
             if (!(nbPlankton == getOsmose().nbPlanktonGroupsTab)) {
                 System.out.println("The number of plankton group in plankton structure file does not match the one from config file");
             }
+            
             st.nextToken();
             nbForcingDt = (new Integer(st.sval)).intValue();
             if (!(nbForcingDt == getOsmose().nStepYear)) {
@@ -114,12 +141,12 @@ public abstract class AbstractLTLForcing implements LTLForcing {
                 System.out.println("The dimension " + nbDimensionsGrid + " cannot be consider - should be 2 or 3");
             }
             st.nextToken();
-            planktonDimX = new Integer(st.sval).intValue();
+            nx = new Integer(st.sval).intValue();
             st.nextToken();
-            planktonDimY = new Integer(st.sval).intValue();
+            ny = new Integer(st.sval).intValue();
             if (nbDimensionsGrid == 3) {
                 st.nextToken();
-                planktonDimZ = new Integer(st.sval).intValue();
+                nz = new Integer(st.sval).intValue();
                 st.nextToken();
                 integrationDepth = new Float(st.sval).floatValue();
             }
@@ -127,29 +154,14 @@ public abstract class AbstractLTLForcing implements LTLForcing {
             System.out.println("Reading error of LTL structure file");
             System.exit(1);
         }
-    }
-
-    /**
-     * Computes the biomass of the specified plankton over the domain.
-     *
-     * @param iPlankton, the index of the plankton group
-     * @return the cumulated biomass over the domain in ton/km2
-     */
-    @Override
-    public double getBiomass(int iPlankton) {
-        double biomass = 0.d;
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                if (!getGrid().getCell(i, j).isLand()) {
-                    biomass += ((Plankton) planktonList[iPlankton]).getBiomass(i, j);
-                }
-            }
+        planktonList = new Plankton[getNumberPlanktonGroups()];
+        for (int i = 0; i < getNumberPlanktonGroups(); i++) {
+            planktonList[i] = new Plankton(i, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
         }
-        return biomass;
     }
 
     public float[][] verticalIntegration(float[][][] data3d, float[][][] depthLayer, float maxDepth) {
-        float[][] integratedData = new float[getPlanktonDimX()][getPlanktonDimY()];
+        float[][] integratedData = new float[get_nx()][get_ny()];
         float integr;
         for (int i = 0; i < depthLayer.length; i++) {
             for (int j = 0; j < depthLayer[i].length; j++) {
@@ -166,24 +178,19 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         }
         return integratedData;
     }
-    
+
     @Override
-    public void updatePlankton(int iStepSimu) {
+    public void update(int iStepSimu) {
 
         // clear & update biomass
-        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            getPlanktonGroup(p).updateBiomass(getBiomass(getPlanktonGroup(p), iStepSimu));
+        for (Plankton plankton : planktonList) {
+            plankton.updateBiomass(getBiomass(plankton, iStepSimu));
         }
     }
 
     @Override
-    public int getNbPlanktonGroups() {
+    public int getNumberPlanktonGroups() {
         return nbPlankton;
-    }
-
-    @Override
-    public String getPlanktonName(int indexGroup) {
-        return planktonNames[indexGroup];
     }
 
     @Override
@@ -191,16 +198,16 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         return planktonList[indexGroup];
     }
 
-    public int getPlanktonDimX() {
-        return planktonDimX;
+    public int get_nx() {
+        return nx;
     }
 
-    public int getPlanktonDimY() {
-        return planktonDimY;
+    public int get_ny() {
+        return ny;
     }
 
-    public int getPlanktonDimZ() {
-        return planktonDimZ;
+    public int get_nz() {
+        return nz;
     }
 
     public int getNbForcingDt() {
@@ -208,29 +215,21 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     }
 
     void setDimX(int nx) {
-        this.planktonDimX = nx;
+        this.nx = nx;
     }
 
     void setDimY(int ny) {
-        this.planktonDimY = ny;
+        this.ny = ny;
     }
 
     void setDimZ(int nz) {
-        this.planktonDimZ = nz;
-    }
-
-    @Override
-    public void createPlanktonGroups() {
-        planktonList = new Plankton[getNbPlanktonGroups()];
-        for (int i = 0; i < getNbPlanktonGroups(); i++) {
-            planktonList[i] = new Plankton(i, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
-        }
+        this.nz = nz;
     }
 
     private float[][] getBiomass(Plankton plankton, int iStepSimu) {
 
         float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
-        
+
         float[][] rawBiomass = getRawBiomass(plankton, iStepSimu);
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
@@ -246,10 +245,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
 
     Plankton[] getPlanktonList() {
         return planktonList;
-    }
-
-    Plankton getPlanktonGroup(int index) {
-        return planktonList[index];
     }
 
     float getIntegrationDepth() {

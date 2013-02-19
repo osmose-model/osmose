@@ -39,7 +39,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
     private float[][][][] data;
 
     @Override
-    public void readLTLConfigFile2(String planktonFileName) {
+    public void readLTLForcingFile(String planktonFileName) {
         FileInputStream LTLFile;
         try {
             LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
@@ -55,8 +55,8 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getNbPlanktonGroups()];
-            for (int i = 0; i < getNbPlanktonGroups(); i++) {
+            plktonNetcdfNames = new String[getNumberPlanktonGroups()];
+            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
@@ -89,7 +89,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
     }
 
     @Override
-    public void initPlanktonMap() {
+    public void initLTLGrid() {
 
         NetcdfFile ncIn = null;
         String ncpathname = getOsmose().resolveFile(gridFileName);
@@ -113,8 +113,8 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
          * Read lon & lat
          */
         try {
-            int nx = getPlanktonDimX();
-            int ny = getPlanktonDimY();
+            int nx = get_nx();
+            int ny = get_ny();
             Array arrLon = ncIn.findVariable(strLon).read();
             Array arrLat = ncIn.findVariable(strLat).read();
             if (arrLon.getElementType() == float.class) {
@@ -155,7 +155,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getOsmose().nStepYear][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
+        data = new float[getOsmose().nStepYear][getNumberPlanktonGroups()][get_nx()][get_ny()];
         for (int t = 0; t < getOsmose().nStepYear; t++) {
             data[t] = getIntegratedData(getOsmose().resolveFile(planktonFileListNetcdf[t]));
         }
@@ -165,7 +165,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
     private float[][][] getIntegratedData(String nameOfFile) {
 
-        float[][][] integratedData = new float[getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
+        float[][][] integratedData = new float[getNumberPlanktonGroups()][get_nx()][get_ny()];
         float[][][] dataInit;
 
         NetcdfFile nc = null;
@@ -175,15 +175,15 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         try {
             nc = NetcdfFile.open(name);
 
-            for (int p = 0; p < getNbPlanktonGroups(); p++) {
+            for (int p = 0; p < getNumberPlanktonGroups(); p++) {
                 // read data and put them in the local arrays
                 tempArray = (ArrayFloat.D3) nc.findVariable(plktonNetcdfNames[p]).read().reduce();
-                dataInit = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
+                dataInit = new float[get_nx()][get_ny()][get_nz()];
 
                 // fill dataInit of plankton classes from local arrays
-                for (int i = 0; i < getPlanktonDimX(); i++) {
-                    for (int j = 0; j < getPlanktonDimY(); j++) {
-                        for (int k = 0; k < getPlanktonDimZ(); k++) {
+                for (int i = 0; i < get_nx(); i++) {
+                    for (int j = 0; j < get_ny(); j++) {
+                        for (int k = 0; k < get_nz(); k++) {
                             dataInit[i][j][k] = tempArray.get(k, i, j);    // carreful, index not in the same order
                         }
                     }
@@ -226,8 +226,8 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         icoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
         jcoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
 
-        for (int i = 0; i < getPlanktonDimX(); i++) {
-            for (int j = 0; j < getPlanktonDimY(); j++) // consider only the LTL cells included within the Osmose grid
+        for (int i = 0; i < get_nx(); i++) {
+            for (int j = 0; j < get_ny(); j++) // consider only the LTL cells included within the Osmose grid
             {
                 if ((latitude[i][j] >= getGrid().getLatMin()) && (latitude[i][j] <= getGrid().getLatMax()) && (longitude[i][j] >= getGrid().getLongMin()) && (longitude[i][j] <= getGrid().getLongMax())) {
                     // equations giving the position of ROMS cells within the Osmose getGrid(), avoiding to read the whole matrix
@@ -317,9 +317,9 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
      */
     private float[][][] getCstSigLevels(NetcdfFile ncIn) throws IOException {
 
-        int nz = getPlanktonDimZ();
-        int nx = getPlanktonDimX();
-        int ny = getPlanktonDimY();
+        int nz = get_nz();
+        int nx = get_nx();
+        int ny = get_ny();
         double hc;
         double[] sc_r = new double[nz];
         double[] Cs_r;

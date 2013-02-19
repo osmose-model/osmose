@@ -1209,10 +1209,7 @@ public class Osmose {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
         }
-        getForcing().readLTLConfigFile1(planktonStructureFileNameTab);
-        getForcing().readLTLConfigFile2(planktonFileNameTab);
-        getForcing().initPlanktonMap();
-        getForcing().createPlanktonGroups();
+        getForcing().init();
     }
 
     private void readCoastAsCSV(String csvFile) {
