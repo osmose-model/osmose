@@ -217,55 +217,41 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     }
 
     @Override
-    public void updatePlankton(int iStepSimu) {
-        for (int i = 0; i < getNbPlanktonGroups(); i++) {
-            getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
-        }
-        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
-        readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[iStepYear / timeDim]), iStepYear);
-        mapInterpolation();
-    }
-
-    private void readNetCDFFile(String name, int dt) {
+    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
 
         //System.out.println("Reading " + name + " time " + dt);
-
+        float[][][] data3d = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
         try {
             /*
              * Open the BFM Plankton NetCDF file
              */
+            String name = getOsmose().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
             NetcdfFile nc = NetcdfFile.open(name);
             /*
              * Loop over the plankton groups
              */
-            int timestep = dt % 2;
-            for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                Plankton plankton = getPlanktonGroup(p);
-                /*
-                 * Read the concentration of plankton
-                 */
-                Variable ncvar = nc.findVariable(planktonNetcdfNames[p]);
-                int[] shape = ncvar.getShape();
-                float[] variable = (float[]) ncvar.read(new int[]{timestep, 0}, new int[]{1, shape[1]}).reduce().copyToNDJavaArray();
-                /*
-                 * Fill up the plankton.dataInit array with the concentrations
-                 */
-                for (int i = 0; i < im; i++) {
-                    for (int j = 0; j < jm; j++) {
-                        for (int k = 0; k < km; k++) {
-                            int oceanpoint = ijk2oceanpoint(i, j, k);
-                            if (oceanpoint >= 0) {
-                                plankton.dataInit[i][j][k] = variable[oceanpoint];
-                            } else {
-                                plankton.dataInit[i][j][k] = 0.f;
-                            }
+            int timestep = iStepSimu % timeDim;
+            System.out.println("iStepSimu " + iStepSimu + " " + name + " timestep " + timestep + " " + plankton.getName());
+            /*
+             * Read the concentration of plankton
+             */
+            Variable ncvar = nc.findVariable(planktonNetcdfNames[plankton.getIndex()]);
+            int[] shape = ncvar.getShape();
+            float[] variable = (float[]) ncvar.read(new int[]{timestep, 0}, new int[]{1, shape[1]}).reduce().copyToNDJavaArray();
+            /*
+             * Fill up the plankton.dataInit array with the concentrations
+             */
+            for (int i = 0; i < im; i++) {
+                for (int j = 0; j < jm; j++) {
+                    for (int k = 0; k < km; k++) {
+                        int oceanpoint = ijk2oceanpoint(i, j, k);
+                        if (oceanpoint >= 0) {
+                            data3d[i][j][k] = variable[oceanpoint];
+                        } else {
+                            data3d[i][j][k] = 0.f;
                         }
                     }
                 }
-                /*
-                 * Integrate plankton biomass on vertical dimension
-                 */
-                plankton.verticalIntegration(depthOfLayer, getIntegrationDepth());
             }
             /*
              * Closes NetCDF file
@@ -277,24 +263,15 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        /*
+         * Integrate plankton biomass on vertical dimension
+         */
+        return verticalIntegration(data3d, depthOfLayer, getIntegrationDepth());
     }
 
     @Override
-    public void mapInterpolation() {
-        int tempX, tempY;
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                Cell cell = getGrid().getCell(i, j);
-                if (!cell.isLand()) {
-                    for (int k = 0; k < getNbCellsLTLGrid(i, j); k++) {
-                        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                            tempX = get_iLTL(cell).get(k);
-                            tempY = get_jLTL(cell).get(k);
-                            getPlanktonGroup(p).addCell(i, j, tempX, tempY, getNbCellsLTLGrid(cell));
-                        }
-                    }
-                }
-            }
-        }
+    public int getIndexStepLTL(int iStepSimu) {
+        return iStepSimu / timeDim;
     }
 }

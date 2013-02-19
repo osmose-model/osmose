@@ -5,6 +5,7 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Plankton;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +15,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D3;
 import ucar.nc2.NetcdfFile;
@@ -122,62 +125,40 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    public void updatePlankton(int iStepSimu) {
-        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
-        for (int i = 0; i < getNbPlanktonGroups(); i++) {
-            getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
-        }
-        readNetCDFFile(getOsmose().resolveFile(planktonFileListNetcdf[iStepYear]));
-        mapInterpolation();
-    }
+    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
 
-    private void readNetCDFFile(String nameOfFile) {
-
-        //System.out.println("Reading " + nameOfFile);
-
-        NetcdfFile nc = null;
-        String name = nameOfFile;
-        Variable[] tempVar;
+        String name = getOsmose().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
         int[] shape;
-        ArrayDouble.D3[] tempArray;
-        tempArray = new ArrayDouble.D3[getNbPlanktonGroups()];
-        tempVar = new Variable[getNbPlanktonGroups()];
+        ArrayDouble.D3 tempArray;
+        float[][][] data3d = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
 
         try {
-            nc = NetcdfFile.open(name);
+            NetcdfFile nc = NetcdfFile.open(name);
             // read data and put them in the local arrays
-            for (int i = 0; i < getNbPlanktonGroups(); i++) {
-                tempVar[i] = nc.findVariable(plktonNetcdfNames[i]);
-                tempArray[i] = (ArrayDouble.D3) tempVar[i].read().flip(1);
-            }
-            shape = tempVar[0].getShape();
+
+            Variable tempVar = nc.findVariable(plktonNetcdfNames[plankton.getIndex()]);
+            tempArray = (ArrayDouble.D3) tempVar.read().flip(1);
+            shape = tempVar.getShape();
 
             // fill dataInit of plankton classes from local arrays
             for (int i = 0; i < shape[2]; i++) {
                 for (int j = 0; j < shape[1]; j++) {
                     for (int k = 0; k < shape[0]; k++) {
-                        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                            getPlanktonGroup(p).dataInit[i][j][k] = (float) tempArray[p].get(k, j, i);    // carreful, index not in the same order
-                        }
+                        data3d[i][j][k] = (float) tempArray.get(k, j, i);    // carreful, index not in the same order
                     }
                 }
             }
-            // integrates vertically plankton biomass, using depth files
-            for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                getPlanktonGroup(p).verticalIntegration(depthOfLayer, getIntegrationDepth());
-                //System.out.println(getPlanktonGroup(p).getName() + " " + getPlanktonGroup(p).integratedData[10][10]);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (nc != null) {
-                try {
-                    nc.close();
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                }
-            }
+            nc.close();
+        } catch (IOException ex) {
+            Logger.getLogger(LTLForcingECO3M.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        // vertical integration
+        return verticalIntegration(data3d, depthOfLayer, getIntegrationDepth());
+    }
+
+    @Override
+    public int getIndexStepLTL(int iStepSimu) {
+        return iStepSimu % getOsmose().getNumberTimeStepsPerYear();
     }
 }

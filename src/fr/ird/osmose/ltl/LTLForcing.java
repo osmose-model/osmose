@@ -21,15 +21,9 @@ public interface LTLForcing {
      * @param iStepSimu, the current time index of the simulation
      */
     public void updatePlankton(int iStepSimu);
-    public void mapInterpolation();
     public double getBiomass(int iPlankton);
     public int getNbPlanktonGroups();
     public String getPlanktonName(int indexGroup);
     public Plankton getPlankton(int indexGroup);
-    public int getPlanktonDimX();
-    public int getPlanktonDimY();
-    public int getPlanktonDimZ();
     public void createPlanktonGroups();
-
-
 }

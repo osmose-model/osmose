@@ -5,6 +5,7 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Plankton;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -150,24 +151,6 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         loadData();
     }
 
-    @Override
-    public void updatePlankton(int dt) {
-        
-        for (int i = 0; i < getNbPlanktonGroups(); i++) {
-            getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
-        }
-        updateData(dt);
-        mapInterpolation();
-    }
-
-    private void updateData(int iStepSimu) {
-
-        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
-        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            getPlankton(p).integratedData = data[iStepYear][p];
-        }
-    }
-
     private void loadData() {
 
         System.out.println("Loading all plankton data, it might take a while...");
@@ -191,12 +174,12 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
         try {
             nc = NetcdfFile.open(name);
-            
+
             for (int p = 0; p < getNbPlanktonGroups(); p++) {
                 // read data and put them in the local arrays
                 tempArray = (ArrayFloat.D3) nc.findVariable(plktonNetcdfNames[p]).read().reduce();
                 dataInit = new float[getPlanktonDimX()][getPlanktonDimY()][getPlanktonDimZ()];
-                
+
                 // fill dataInit of plankton classes from local arrays
                 for (int i = 0; i < getPlanktonDimX(); i++) {
                     for (int j = 0; j < getPlanktonDimY(); j++) {
@@ -271,11 +254,66 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
                 }
             }
         }
+
+        /*
+         * If no LTL cell is associated with an osmose cell (because of
+         * curvilinear grid of ROMS) then uses the neighbour cells to get the
+         * average plankton biomass.
+         */
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                if (!getGrid().getCell(i, j).isLand()) {
+                    if (getNbCellsLTLGrid(i, j) == 0) {
+                        icoordLTLGrid[i][j] = new ArrayList();
+                        jcoordLTLGrid[i][j] = new ArrayList();
+                        Cell cell;
+                        if (i > 0) {
+                            cell = getGrid().getCell(i - 1, j);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[i][j].addAll(get_iLTL(cell));
+                                jcoordLTLGrid[i][j].addAll(get_jLTL(cell));
+                            }
+                        }
+                        if (j > 0) {
+                            cell = getGrid().getCell(i, j - 1);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[i][j].addAll(get_iLTL(cell));
+                                jcoordLTLGrid[i][j].addAll(get_jLTL(cell));
+                            }
+                        }
+                        if (i < getGrid().getNbLines() - 1) {
+                            cell = getGrid().getCell(i + 1, j);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[i][j].addAll(get_iLTL(cell));
+                                jcoordLTLGrid[i][j].addAll(get_jLTL(cell));
+                            }
+                        }
+                        if (j < getGrid().getNbColumns() - 1) {
+                            cell = getGrid().getCell(i, j + 1);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[i][j].addAll(get_iLTL(cell));
+                                jcoordLTLGrid[i][j].addAll(get_jLTL(cell));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+     @Override
+    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
+        return data[getIndexStepLTL(iStepSimu)][plankton.getIndex()];
+    }
+
+    @Override
+    public int getIndexStepLTL(int iStepSimu) {
+        return iStepSimu % getOsmose().getNumberTimeStepsPerYear();
     }
 
     /**
-     * Computes the depth at sigma levels disregarding the free
-     * surface elevation.
+     * Computes the depth at sigma levels disregarding the free surface
+     * elevation.
      */
     private float[][][] getCstSigLevels(NetcdfFile ncIn) throws IOException {
 
@@ -419,94 +457,6 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
          * Nothing worked and eventually returned OLD type.
          */
         return VertCoordType.OLD;
-    }
-
-    @Override
-    public void mapInterpolation() {
-        int tempX, tempY;
-
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                Cell cell = getGrid().getCell(i, j);
-                if (!cell.isLand()) {
-                    if (getNbCellsLTLGrid(i, j) != 0) // if this osmose cell is composed of at least one LTL cell
-                    {
-                        for (int k = 0; k < getNbCellsLTLGrid(i, j); k++) {
-                            for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                                tempX = get_iLTL(cell).get(k);
-                                tempY = get_jLTL(cell).get(k);
-                                // interpolate the plankton concentrations from the LTL cells
-                                getPlankton(p).addCell(i, j, tempX, tempY, getNbCellsLTLGrid(cell));
-                            }
-                        }
-                    } else // if no LTL cell is associated with this osmose cell (because of curvilinear grid of ROMS)
-                    // -> then uses the neighbor cells to get the average plankton biomass
-                    {
-                        int nbCellsTemp = 0;
-                        if (i > 0) {
-                            if (!getGrid().getCell(i - 1, j).isLand()) {
-                                nbCellsTemp += getNbCellsLTLGrid(i - 1, j);
-                            }
-                        }
-                        if (i < getGrid().getNbLines() - 1) {
-                            if (!getGrid().getCell(i + 1, j).isLand()) {
-                                nbCellsTemp += getNbCellsLTLGrid(i + 1, j);
-                            }
-                        }
-                        if (j > 0) {
-                            if (!getGrid().getCell(i, j - 1).isLand()) {
-                                nbCellsTemp += getNbCellsLTLGrid(i, j - 1);
-                            }
-                        }
-                        if (j < getGrid().getNbColumns() - 1) {
-                            if (!getGrid().getCell(i, j + 1).isLand()) {
-                                nbCellsTemp += getNbCellsLTLGrid(i, j + 1);
-                            }
-                        }
-
-                        if (i > 0) {
-                            for (int k = 0; k < getNbCellsLTLGrid(i - 1, j); k++) {
-                                for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                                    tempX = get_iLTL(getGrid().getCell(i - 1, j)).get(k);
-                                    tempY = get_jLTL(getGrid().getCell(i - 1, j)).get(k);
-                                    getPlankton(p).addCell(i, j, tempX, tempY, nbCellsTemp);
-                                }
-                            }
-                        }
-
-                        if (i < getGrid().getNbLines() - 1) {
-                            for (int k = 0; k < getNbCellsLTLGrid(i + 1, j); k++) {
-                                for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                                    tempX = get_iLTL(getGrid().getCell(i + 1, j)).get(k);
-                                    tempY = get_jLTL(getGrid().getCell(i + 1, j)).get(k);
-                                    getPlankton(p).addCell(i, j, tempX, tempY, nbCellsTemp);
-                                }
-                            }
-                        }
-
-                        if (j > 0) {
-                            for (int k = 0; k < getNbCellsLTLGrid(i, j - 1); k++) {
-                                for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                                    tempX = get_iLTL(getGrid().getCell(i, j - 1)).get(k);
-                                    tempY = get_jLTL(getGrid().getCell(i, j - 1)).get(k);
-                                    getPlankton(p).addCell(i, j, tempX, tempY, nbCellsTemp);
-                                }
-                            }
-                        }
-
-                        if (j < getGrid().getNbColumns() - 1) {
-                            for (int k = 0; k < getNbCellsLTLGrid(i, j + 1); k++) {
-                                for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                                    tempX = get_iLTL(getGrid().getCell(i, j + 1)).get(k);
-                                    tempY = get_jLTL(getGrid().getCell(i, j + 1)).get(k);
-                                    getPlankton(p).addCell(i, j, tempX, tempY, nbCellsTemp);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private enum VertCoordType {

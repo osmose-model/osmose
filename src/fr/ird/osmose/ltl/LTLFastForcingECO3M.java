@@ -1,6 +1,7 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Plankton;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -191,20 +192,12 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    public void updatePlankton(int dt) {
-
-        for (int i = 0; i < getNbPlanktonGroups(); i++) {
-            getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
-        }
-        updateData(dt);
-        mapInterpolation();
+    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
+        return data[getIndexStepLTL(iStepSimu)][plankton.getIndex()];
     }
 
-    private void updateData(int iStepSimu) {
-
-        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
-        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            getPlankton(p).integratedData = data[iStepYear][p];
-        }
+    @Override
+    public int getIndexStepLTL(int iStepSimu) {
+        return iStepSimu % getOsmose().getNumberTimeStepsPerYear();
     }
 }

@@ -4,7 +4,7 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.Cell;
+import fr.ird.osmose.Plankton;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -215,30 +215,26 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getOsmose().nStepYear][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
-        for (int dt = 0; dt < getOsmose().nStepYear; dt++) {
-            data[dt] = getIntegratedData(getOsmose().resolveFile(planktonFileListNetcdf[dt / timeDim]), dt);
+        data = new float[getOsmose().getNumberTimeStepsPerYear()][getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
+        for (int iStep = 0; iStep < getOsmose().getNumberTimeStepsPerYear(); iStep++) {
+            String ncfile = getOsmose().resolveFile(planktonFileListNetcdf[iStep / timeDim]);
+            int timestep = iStep % timeDim;
+            data[iStep] = getIntegratedData(ncfile, timestep);
         }
 
         System.out.println("All plankton data loaded !");
     }
 
-    private float[][][] getIntegratedData(String nameOfFile, int dt) {
+    private float[][][] getIntegratedData(String ncfile, int timestep) {
 
         float[][][] integratedData = new float[getNbPlanktonGroups()][getPlanktonDimX()][getPlanktonDimY()];
         float[][][] dataInit;
 
-        NetcdfFile nc = null;
-        String name = nameOfFile;
-
         try {
-            nc = NetcdfFile.open(name);
-
+            NetcdfFile nc = NetcdfFile.open(ncfile);
             /*
              * Loop over the plankton groups
              */
-            int timestep = dt % 2;
-            //System.out.println("  ..loading file " + nameOfFile + " step " + timestep);
             for (int p = 0; p < getNbPlanktonGroups(); p++) {
                 /*
                  * Read the concentration of plankton
@@ -279,37 +275,23 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
                     }
                 }
             }
+            nc.close();
         } catch (InvalidRangeException ex) {
             Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException e) {
             Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, e);
-        } finally {
-            if (nc != null) {
-                try {
-                    nc.close();
-                } catch (IOException ioe) {
-                    Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, ioe);
-                }
-            }
         }
 
         return integratedData;
     }
 
     @Override
-    public void updatePlankton(int iStepSimu) {
-        for (int i = 0; i < getNbPlanktonGroups(); i++) {
-            getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
-        }
-        int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
-        updateData(iStepYear);
-        mapInterpolation();
+    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
+        return data[getIndexStepLTL(iStepSimu)][plankton.getIndex()];
     }
 
-    private void updateData(int iStepYear) {
-
-        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            getPlankton(p).integratedData = data[iStepYear][p];
-        }
+    @Override
+    public int getIndexStepLTL(int iStepSimu) {
+        return iStepSimu % getOsmose().getNumberTimeStepsPerYear();
     }
 }
