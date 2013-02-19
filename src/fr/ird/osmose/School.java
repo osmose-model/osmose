@@ -73,7 +73,7 @@ public class School extends Fish {
      * Initialize the school state variables
      */
     private void init() {
-        
+
         catchable = true;
         trophicLevel = Species.TL_EGG;
         //Initialisation of stage
@@ -103,7 +103,11 @@ public class School extends Fish {
     public void resetDietVariable() {
         diet = new float[getOsmose().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups()][];
         for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
-            diet[i] = new float[getOsmose().nbDietsStages[i]];
+            if (getOsmose().dietsOutputMatrix) {
+                diet[i] = new float[getOsmose().nbDietsStages[i]];
+            } else {
+                diet[i] = new float[0];
+            }
         }
         for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getForcing().getNbPlanktonGroups(); i++) {
             diet[i] = new float[1];

@@ -1,7 +1,6 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.SimulationLinker;
 import fr.ird.osmose.util.IOTools;
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +46,16 @@ public class LTLIndicator extends AbstractIndicator {
          * Create the NetCDF file at first time step
          */
         if (getSimulation().getIndexTimeSimu() == 0) {
-            createNCFile(getSimulation().getReplica());
+            String ncfile;
+            try {
+                ncfile = makeFileLocation(getSimulation().getReplica());
+                if (null == nc) {
+                    createNCFile(ncfile);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(LTLIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
     }
 
@@ -67,7 +75,7 @@ public class LTLIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 
     @Override
@@ -113,13 +121,13 @@ public class LTLIndicator extends AbstractIndicator {
         }
     }
 
-    private void createNCFile(int iSimu) {
+    private void createNCFile(String ncfile) {
         /*
          * Create NetCDF file
          */
         try {
             nc = NetcdfFileWriteable.createNew("");
-            nc.setLocation(makeFileLocation(iSimu));
+            nc.setLocation(ncfile);
         } catch (IOException ex) {
             Logger.getLogger(LTLIndicator.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -137,8 +145,8 @@ public class LTLIndicator extends AbstractIndicator {
         nc.addVariableAttribute("time", "units", "year");
         nc.addVariableAttribute("time", "description", "time ellapsed, in years, since the begining of the simulation");
         nc.addVariable("ltl_biomass", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, linesDim, columnsDim});
-        nc.addVariableAttribute("ltl_biomass", "units", "ton/km2");
-        nc.addVariableAttribute("ltl_biomass", "description", "plankton biomass, in tons per km2 integrated on water column, per group and per cell");
+        nc.addVariableAttribute("ltl_biomass", "units", "tons per cell");
+        nc.addVariableAttribute("ltl_biomass", "description", "plankton biomass in osmose cell, in tons integrated on water column, per group and per cell");
         nc.addVariableAttribute("ltl_biomass", "_FillValue", -99.f);
         nc.addVariable("latitude", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
         nc.addVariableAttribute("latitude", "units", "degree");
@@ -162,7 +170,6 @@ public class LTLIndicator extends AbstractIndicator {
              * Validates the structure of the NetCDF file.
              */
             nc.create();
-            System.out.println("Create " + nc.getLocation());
             /*
              * Writes variable longitude and latitude
              */
@@ -205,7 +212,8 @@ public class LTLIndicator extends AbstractIndicator {
         filename.append(File.separatorChar);
         filename.append("planktonBiomass");
         filename.append(File.separatorChar);
-        filename.append("osm_integrated_");
+        filename.append(getOsmose().outputPrefix);
+        filename.append("_ltlbiomass_integrated_");
         filename.append("Simu");
         filename.append(nSerie);
         filename.append(".nc");
