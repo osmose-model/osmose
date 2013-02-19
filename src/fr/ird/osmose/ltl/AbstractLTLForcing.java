@@ -141,7 +141,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         for (int i = 0; i < getGrid().getNbLines(); i++) {
             for (int j = 0; j < getGrid().getNbColumns(); j++) {
                 if (!getGrid().getCell(i, j).isLand()) {
-                    biomass += ((Plankton) planktonList[iPlankton]).biomass[i][j];
+                    biomass += ((Plankton) planktonList[iPlankton]).getBiomass(i, j);
                 }
             }
         }
@@ -172,7 +172,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
 
         // clear & update biomass
         for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            getPlanktonGroup(p).clearPlankton();
             getPlanktonGroup(p).updateBiomass(getBiomass(getPlanktonGroup(p), iStepSimu));
         }
     }
@@ -238,7 +237,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
                 float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
                 int nCells = getNbCellsLTLGrid(cell);
                 for (int k = 0; k < nCells; k++) {
-                    biomass[cell.get_igrid()][cell.get_jgrid()] += area * plankton.unitConversion(rawBiomass[get_iLTL(cell).get(k)][get_jLTL(cell).get(k)]) / (float) nCells;
+                    biomass[cell.get_igrid()][cell.get_jgrid()] += area * plankton.convertToTonPerKm2(rawBiomass[get_iLTL(cell).get(k)][get_jLTL(cell).get(k)]) / (float) nCells;
                 }
             }
         }

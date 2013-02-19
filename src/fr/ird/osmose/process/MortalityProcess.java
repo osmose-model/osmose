@@ -105,7 +105,7 @@ public class MortalityProcess extends AbstractProcess {
                                         : prey.trophicLevel;
                                 school.tmpTL += TLprey * biomPrey / preyedBiomass;
                             } else {
-                                school.tmpTL += getForcing().getPlankton(ipr - ns).trophicLevel * nDeadMatrix[ipr][is] / preyedBiomass;
+                                school.tmpTL += getForcing().getPlankton(ipr - ns).getTrophicLevel() * nDeadMatrix[ipr][is] / preyedBiomass;
                                 if (getOsmose().isDietOuput()) {
                                     school.diet[getOsmose().getNumberSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
                                 }
@@ -174,7 +174,7 @@ public class MortalityProcess extends AbstractProcess {
                     predationMortalityRate = Math.log(school.getAbundance() / (school.getAbundance() - nDeadMatrix[ipr][ipd]));
                 } else {
                     nDeadMatrix[ipr][ipd] = predationMatrix[ipd][ipr];
-                    double planktonAbundance = getForcing().getPlankton(ipr - ns).biomass[cell.get_igrid()][cell.get_jgrid()];
+                    double planktonAbundance = getForcing().getPlankton(ipr - ns).getBiomass(cell);
                     if (planktonAbundance > 0) {
                         predationMortalityRate = Math.log(planktonAbundance / (planktonAbundance - predationMatrix[ipd][ipr]));
                     } else {
@@ -224,7 +224,7 @@ public class MortalityProcess extends AbstractProcess {
                 if (ipr < ns) {
                     abundance = schools.get(ipr).getAbundance();
                 } else {
-                    abundance = getForcing().getPlankton(ipr - ns).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+                    abundance = getForcing().getPlankton(ipr - ns).getAccessibleBiomass(cell);
                 }
                 for (int imort = 0; imort < ns + 3; imort++) {
                     if (totalMortalityRate[ipr] > 0) {
@@ -325,7 +325,7 @@ public class MortalityProcess extends AbstractProcess {
                     school.nDeadPredation += nDeadMatrix[ipr][ipd];
                 } else {
                     nDeadMatrix[ipr][ipd] = preyUpon[ipr];
-                    double planktonAbundance = getForcing().getPlankton(ipr - ns).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+                    double planktonAbundance = getForcing().getPlankton(ipr - ns).getAccessibleBiomass(cell);
                     predationMortalityRate = Math.log(planktonAbundance / (planktonAbundance - preyUpon[ipr]));
                 }
                 mortalityRateMatrix[ipr][ipd] = predationMortalityRate;
@@ -367,7 +367,7 @@ public class MortalityProcess extends AbstractProcess {
             if (ipr < ns) {
                 abundance = schools.get(ipr).getAbundance();
             } else {
-                abundance = getForcing().getPlankton(ipr - ns).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+                abundance = getForcing().getPlankton(ipr - ns).getAccessibleBiomass(cell);
             }
             for (int imort = 0; imort < ns + 3; imort++) {
                 if (totalMortalityRate[ipr] > 0) {

@@ -44,11 +44,8 @@ public class LTLFastForcing extends AbstractLTLForcing {
     @Override
     public void updatePlankton(int iStepSimu) {
 
-        // clear & update biomass
+        // update biomass
         for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            // clear biomass
-            getPlanktonGroup(p).clearPlankton();
-            // update biomass
             float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
             int nl = getGrid().getNbLines() - 1;
             for (int i = 0; i < getGrid().getNbLines(); i++) {

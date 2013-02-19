@@ -85,7 +85,7 @@ public class PredationProcess extends AbstractProcess {
         float[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getForcing().getNbPlanktonGroups(); i++) {
             float tempAccess = getOsmose().accessibilityMatrix[getOsmose().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
-            biomAccessibleTot += percentPlankton[i] * tempAccess * getForcing().getPlankton(i).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()];
+            biomAccessibleTot += percentPlankton[i] * tempAccess * getForcing().getPlankton(i).getAccessibleBiomass(cell);
         }
 
         // Compute the potential biomass that predators could prey upon
@@ -121,7 +121,7 @@ public class PredationProcess extends AbstractProcess {
             // Assess the loss for the plankton caused by the predator
             for (int i = 0; i < getForcing().getNbPlanktonGroups(); i++) {
                 float tempAccess = getOsmose().accessibilityMatrix[getOsmose().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
-                double ratio = percentPlankton[i] * tempAccess * getForcing().getPlankton(i).accessibleBiomass[cell.get_igrid()][cell.get_jgrid()] / biomAccessibleTot;
+                double ratio = percentPlankton[i] * tempAccess * getForcing().getPlankton(i).getAccessibleBiomass(cell) / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
             }
 

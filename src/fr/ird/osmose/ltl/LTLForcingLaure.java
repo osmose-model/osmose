@@ -147,10 +147,8 @@ public class LTLForcingLaure extends AbstractLTLForcing {
     @Override
     public void updatePlankton(int iStepSimu) {
 
-        // clear & update biomass
+        // update biomass
         for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            // clear biomass
-            getPlanktonGroup(p).clearPlankton();
             // update biomass
             float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
             int nl = getGrid().getNbLines() - 1;
@@ -159,7 +157,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
                     Cell cell = getGrid().getCell(i, j);
                     if (!cell.isLand()) {
                         float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
-                        biomass[i][j] = area * getPlanktonGroup(p).unitConversion(data[getIndexStepLTL(iStepSimu)][p][i][j]);
+                        biomass[i][j] = area * getPlanktonGroup(p).convertToTonPerKm2(data[getIndexStepLTL(iStepSimu)][p][i][j]);
                     }
                 }
             }

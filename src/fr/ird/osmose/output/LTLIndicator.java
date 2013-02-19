@@ -64,10 +64,8 @@ public class LTLIndicator extends AbstractIndicator {
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
-                int i = cell.get_igrid();
-                int j = cell.get_jgrid();
                 for (int iltl = 0; iltl < getForcing().getNbPlanktonGroups(); iltl++) {
-                    ltlbiomass[iltl][i][j] = getForcing().getPlankton(iltl).iniBiomass[i][j];
+                    ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getForcing().getPlankton(iltl).getBiomass(cell);
                 }
             }
         }

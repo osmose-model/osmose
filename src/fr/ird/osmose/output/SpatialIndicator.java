@@ -2,7 +2,6 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.SimulationLinker;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.util.IOTools;
 import java.io.File;
@@ -33,7 +32,7 @@ public class SpatialIndicator extends AbstractIndicator {
     private float[][][] biomass;
     private float[][][] mean_size;
     private float[][][] tl;
-    private float[][][][] ltlbiomass;
+    private float[][][] ltlbiomass;
     private float[][][] abundance;
     private float[][][] yield;
 
@@ -50,7 +49,7 @@ public class SpatialIndicator extends AbstractIndicator {
         biomass = new float[nSpecies][ny][nx];
         mean_size = new float[nSpecies][ny][nx];
         tl = new float[nSpecies][ny][nx];
-        ltlbiomass = new float[getForcing().getNbPlanktonGroups()][2][ny][nx];
+        ltlbiomass = new float[getForcing().getNbPlanktonGroups()][ny][nx];
         abundance = new float[nSpecies][ny][nx];
         yield = new float[nSpecies][ny][nx];
 
@@ -80,8 +79,7 @@ public class SpatialIndicator extends AbstractIndicator {
                     }
                 }
                 for (int iltl = 0; iltl < getForcing().getNbPlanktonGroups(); iltl++) {
-                    ltlbiomass[iltl][0][i][j] = getForcing().getPlankton(iltl).biomass[i][j];
-                    ltlbiomass[iltl][1][i][j] = getForcing().getPlankton(iltl).iniBiomass[i][j];
+                    ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getForcing().getPlankton(iltl).getBiomass(cell);
                 }
             }
         }
@@ -109,8 +107,7 @@ public class SpatialIndicator extends AbstractIndicator {
                     yield[ispec][i][j] = FILLVALUE;
                 }
                 for (int iltl = 0; iltl < getForcing().getNbPlanktonGroups(); iltl++) {
-                    ltlbiomass[iltl][0][i][j] = FILLVALUE;
-                    ltlbiomass[iltl][1][i][j] = FILLVALUE;
+                    ltlbiomass[iltl][i][j] = FILLVALUE;
                 }
             } else {
                 // Weight mean size with abundance
@@ -131,7 +128,7 @@ public class SpatialIndicator extends AbstractIndicator {
         ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D5 arrLTL = new ArrayFloat.D5(1, getForcing().getNbPlanktonGroups(), 2, getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getForcing().getNbPlanktonGroups(), getGrid().getNbLines(), getGrid().getNbColumns());
         int nl = getGrid().getNbLines() - 1;
         for (int kspec = 0; kspec < nSpecies; kspec++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
@@ -147,8 +144,7 @@ public class SpatialIndicator extends AbstractIndicator {
         for (int kltl = 0; kltl < getForcing().getNbPlanktonGroups(); kltl++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrLTL.set(0, kltl, 0, nl - i, j, ltlbiomass[kltl][0][i][j]);
-                    arrLTL.set(0, kltl, 1, nl - i, j, ltlbiomass[kltl][1][i][j]);
+                    arrLTL.set(0, kltl,  nl - i, j, ltlbiomass[kltl][i][j]);
                 }
             }
         }
@@ -195,7 +191,6 @@ public class SpatialIndicator extends AbstractIndicator {
         Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
         Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
         Dimension timeDim = nc.addUnlimitedDimension("time");
-        Dimension stepDim = nc.addDimension("step", 2);
         /*
          * Add variables
          */
@@ -222,10 +217,9 @@ public class SpatialIndicator extends AbstractIndicator {
         nc.addVariableAttribute("trophic_level", "units", "scalar");
         nc.addVariableAttribute("trophic_level", "description", "trophic level per species and per cell");
         nc.addVariableAttribute("trophic_level", "_FillValue", -99.f);
-        nc.addVariable("ltl_biomass", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, stepDim, linesDim, columnsDim});
+        nc.addVariable("ltl_biomass", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, linesDim, columnsDim});
         nc.addVariableAttribute("ltl_biomass", "units", "ton/km2");
         nc.addVariableAttribute("ltl_biomass", "description", "plankton biomass, in tons per km2 integrated on water column, per group and per cell");
-        nc.addVariableAttribute("ltl_biomass", "step", "step=0 before predation, step=1 after predation");
         nc.addVariableAttribute("ltl_biomass", "_FillValue", -99.f);
         nc.addVariable("latitude", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
         nc.addVariableAttribute("latitude", "units", "degree");
