@@ -98,7 +98,7 @@ public class SequentialMortalityStep extends AbstractStep {
         naturalMortalityProcess.run();
 
         // Update plankton concentration
-        getForcing().updatePlankton(getSimulation().getIndexTimeYear());
+        getForcing().updatePlankton(getSimulation().getIndexTimeSimu());
 
         // Predation
         predationProcess.run();
