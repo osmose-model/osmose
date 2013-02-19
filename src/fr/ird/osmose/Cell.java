@@ -14,10 +14,6 @@ package fr.ird.osmose;
  ******************************************************************************* 
  */
 import fr.ird.osmose.grid.IGrid;
-import fr.ird.osmose.util.SchoolLengthComparator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Vector;
 
 public class Cell {
     
@@ -55,18 +51,6 @@ public class Cell {
      * Whether the cell belongs to a MPA
      */
     private boolean mpa;
-    /*
-     * Whether the cell is already used when randomly dealing the schools in
-     * the grid.
-     */
-    private boolean alreadyChosen;
-    /*
-     * For spatial interpolation with the grid of
-     * a LTL (low trophic levels) model.
-     * Positions of the cells of the LTL grid used to compute the LTL biomass
-     * (position within the LTL grid)
-     */
-    public Vector icoordLTLGrid, jcoordLTLGrid;
 
 //////////////
 // Constructor
@@ -92,8 +76,6 @@ public class Cell {
         this.lon = lon;
         this.land = land;
         mpa = false;
-        icoordLTLGrid = new Vector();
-        jcoordLTLGrid = new Vector();
     }
 
 ////////////////////////////
@@ -161,13 +143,6 @@ public class Cell {
      */
     public void setMPA(boolean mpa) {
         this.mpa = mpa;
-    }
-
-    /**
-     * @return the nbCellsLTLGrid
-     */
-    public int getNbCellsLTLGrid() {
-        return icoordLTLGrid.size();
     }
     
     public static IGrid getGrid() {

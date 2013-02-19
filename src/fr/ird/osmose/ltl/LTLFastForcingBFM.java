@@ -4,7 +4,9 @@
  */
 package fr.ird.osmose.ltl;
 
+import fr.ird.osmose.Cell;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.InvalidRangeException;
@@ -16,7 +18,7 @@ import ucar.nc2.Variable;
  * @author pverley
  */
 public class LTLFastForcingBFM extends AbstractLTLForcing {
-    
+
     private String[] planktonFileListNetcdf;
     private String zlevelName;
     private String bathyFile;
@@ -27,7 +29,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
     private int im, jm, km;
     private int timeDim;
     private float[][][][] data;
-    
+
     @Override
     public void readLTLConfigFile2(String planktonFileName) {
 
@@ -87,7 +89,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             System.exit(1);
         }
     }
-    
+
     @Override
     public void initPlanktonMap() {
 
@@ -95,13 +97,13 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
         /*
          * Open BFM temperature file that contains bathymetry variable
          */
-        try {        
+        try {
             nc = NetcdfFile.open(getOsmose().resolveFile(bathyFile), null);
         } catch (IOException ex) {
             System.err.println("Failed to open BFM Temperature file " + bathyFile);
             Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
 
         try {
             /*
@@ -135,13 +137,20 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             /*
              * Associate osmose cells to BFM cells
              */
+            icoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+            jcoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
             int stride = getGrid().getStride();
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     for (int ii = 0; ii < stride; ii++) {
                         for (int jj = 0; jj < stride; jj++) {
-                            getGrid().getCell(getGrid().getNbLines() - i - 1, j).icoordLTLGrid.addElement(j * stride + jj);
-                            getGrid().getCell(getGrid().getNbLines() - i - 1, j).jcoordLTLGrid.addElement(i * stride + ii);
+                            int posiTemp = getGrid().getNbLines() - i - 1;
+                            if (null == icoordLTLGrid[posiTemp][j]) {
+                                icoordLTLGrid[posiTemp][j] = new ArrayList();
+                                jcoordLTLGrid[posiTemp][j] = new ArrayList();
+                            }
+                            icoordLTLGrid[posiTemp][j].add(j * stride + jj);
+                            jcoordLTLGrid[posiTemp][j].add(i * stride + ii);
                         }
                     }
                 }
@@ -154,7 +163,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     /*
      * (i, j, k) ==> oceanpoint coordinate for BFM variables
      */
@@ -175,7 +184,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
         String strMask = getOsmose().maskFieldTab;
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][][] mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();
-                
+
         /*
          * Reads the BFM grid dimensions
          */
@@ -201,7 +210,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             }
         }
     }
-    
+
     private void loadData() {
 
         System.out.println("Loading all plankton data, it might take a while...");
@@ -224,7 +233,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         try {
             nc = NetcdfFile.open(name);
-            
+
             /*
              * Loop over the plankton groups
              */
@@ -270,7 +279,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
                     }
                 }
             }
-        }catch (InvalidRangeException ex) {
+        } catch (InvalidRangeException ex) {
             Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException e) {
             Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, e);
@@ -289,7 +298,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
     @Override
     public void updatePlankton(int iStepSimu) {
-       for (int i = 0; i < getNbPlanktonGroups(); i++) {
+        for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
         int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
@@ -297,34 +306,10 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
         mapInterpolation();
     }
 
-    @Override
-    public void mapInterpolation() {
-        int tempX, tempY;
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                if (!getGrid().getCell(i, j).isLand()) {
-                    for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
-                        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                            tempX = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
-                            tempY = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
-                            /*if (p == 0) {
-                            System.out.println("osmose cell (" + i + ", " + j + ") contains ECO3M cell (" + tempX + ", " + tempY + ")");
-                            }*/
-                            // interpolate the plankton concentrations from the LTL cells
-                            getPlanktonGroup(p).addCell(i, j, tempX, tempY, getGrid().getCell(i, j).getNbCellsLTLGrid());
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
     private void updateData(int iStepYear) {
 
         for (int p = 0; p < getNbPlanktonGroups(); p++) {
             getPlankton(p).integratedData = data[iStepYear][p];
         }
     }
-    
-    
 }

@@ -4,6 +4,7 @@
  */
 package fr.ird.osmose.ltl;
 
+import fr.ird.osmose.Cell;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StreamTokenizer;
+import java.util.ArrayList;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayDouble.D3;
 import ucar.nc2.NetcdfFile;
@@ -96,17 +98,23 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             }
             ncGrid.close();
 
+            icoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+            jcoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
             int stride = getGrid().getStride();
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     for (int ii = 0; ii < stride; ii++) {
                         for (int jj = 0; jj < stride; jj++) {
-                                getGrid().getCell(i, j).icoordLTLGrid.addElement(j * stride + jj);
-                                getGrid().getCell(i, j).jcoordLTLGrid.addElement(i * stride + ii);
+                            if (null == icoordLTLGrid[i][j]) {
+                                icoordLTLGrid[i][j] = new ArrayList();
+                                jcoordLTLGrid[i][j] = new ArrayList();
                             }
+                            icoordLTLGrid[i][j].add(j * stride + jj);
+                            jcoordLTLGrid[i][j].add(i * stride + ii);
                         }
                     }
                 }
+            }
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -168,31 +176,6 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
                     nc.close();
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
-                }
-            }
-        }
-    }
-
-    // CASE SPECIFIC - depends of the LTL grid
-    // from ECO3M (vertically integrated) towards OSMOSE
-    @Override
-    public void mapInterpolation() {
-
-        int tempX, tempY;
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                if (!getGrid().getCell(i, j).isLand()) {
-                    for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
-                        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                            tempX = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
-                            tempY = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
-                            /*if (p == 0) {
-                                System.out.println("osmose cell (" + i + ", " + j + ") contains ECO3M cell (" + tempX + ", " + tempY + ")");
-                            }*/
-                            // interpolate the plankton concentrations from the LTL cells
-                            getPlanktonGroup(p).addCell(i, j, tempX, tempY, getGrid().getCell(i, j).getNbCellsLTLGrid());
-                        }
-                    }
                 }
             }
         }

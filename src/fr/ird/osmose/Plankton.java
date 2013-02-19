@@ -82,6 +82,12 @@ public class Plankton {
             }
         }
     }
+    
+    public void setBiomass(int i, int j, float value) {
+        biomass[i][j] = value;
+        iniBiomass[i][j] = value;
+        accessibleBiomass[i][j] = getAccessibilityCoeff() * value;
+    }
 
     public void addCell(int i, int j, int x, int y, int nb) // i and j are for Osmose grid, x and y are for LTL grid
     // called during the spatial interpolation

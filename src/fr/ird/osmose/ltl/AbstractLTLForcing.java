@@ -4,11 +4,14 @@
  */
 package fr.ird.osmose.ltl;
 
+import fr.ird.osmose.Cell;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
+import fr.ird.osmose.School;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.SimulationLinker;
 import java.io.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
@@ -35,7 +38,9 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     private int planktonDimY;
     private int planktonDimZ;	// vertical dimension (20)
     private float integrationDepth;   // latitude and longitude of each cell of the LTL grid, used for interpolation
-
+    List<Integer>[][] icoordLTLGrid;
+    List<Integer>[][] jcoordLTLGrid;
+    
     @Override
     /**
      * Read LTL basic file with name of plankton, sizes, format of files...
@@ -187,6 +192,26 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             planktonList[i] = new Plankton(planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
         }
     }
+    
+    @Override
+    public void mapInterpolation() {
+
+        int tempX, tempY;
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                Cell cell = getGrid().getCell(i, j);
+                if (!cell.isLand()) {
+                    for (int k = 0; k < getNbCellsLTLGrid(cell); k++) {
+                        for (int p = 0; p < getNbPlanktonGroups(); p++) {
+                            tempX = get_iLTL(cell).get(k);
+                            tempY = get_jLTL(cell).get(k);
+                            getPlanktonGroup(p).addCell(i, j, tempX, tempY, getNbCellsLTLGrid(cell));
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     Plankton[] getPlanktonList() {
         return planktonList;
@@ -198,5 +223,23 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 
     float getIntegrationDepth() {
         return integrationDepth;
+    }
+    
+    int getNbCellsLTLGrid(int i, int j) {
+        return (null == icoordLTLGrid[i][j])
+                ? 0
+                : icoordLTLGrid[i][j].size();
+    }
+    
+    int getNbCellsLTLGrid(Cell cell) {
+        return getNbCellsLTLGrid(cell.get_igrid(), cell.get_jgrid());
+    }
+
+    List<Integer> get_iLTL(Cell cell) {
+        return icoordLTLGrid[cell.get_igrid()][cell.get_jgrid()];
+    }
+
+    List<Integer> get_jLTL(Cell cell) {
+        return jcoordLTLGrid[cell.get_igrid()][cell.get_jgrid()];
     }
 }

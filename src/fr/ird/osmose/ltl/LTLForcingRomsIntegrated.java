@@ -52,7 +52,7 @@ public class LTLForcingRomsIntegrated extends AbstractLTLForcing {
 
         } catch (IOException ex) {
             System.out.println("Reading error of LTL file");
-            return;
+            System.exit(1);
         }
     }
 
@@ -64,11 +64,6 @@ public class LTLForcingRomsIntegrated extends AbstractLTLForcing {
          */
         setDimX(getGrid().getNbLines());
         setDimY(getGrid().getNbColumns());
-        /*
-         * Link LTL cells to Osmose cells, which is straighforward here
-         */
-        //findValidMapIndex();
-        linkMapIndex();
 
         loadData();
     }
@@ -137,21 +132,6 @@ public class LTLForcingRomsIntegrated extends AbstractLTLForcing {
         }
 
         return integratedData;
-    }
-
-    private void linkMapIndex() {
-        for (int i = 0; i < getPlanktonDimX(); i++) {
-            for (int j = 0; j < getPlanktonDimY(); j++) // consider only the LTL cells included within the Osmose grid
-            {
-                // attach each LTL cells to the right Osmose cell (several LTL cells per Osmose cell is allowed)
-                if (!getGrid().getCell(i, j).isLand()) {
-                    //System.out.println("osmose cell " + posiTemp + " " + posjTemp + " contains roms cell " + i + " " + j);
-                    getGrid().getCell(i, j).icoordLTLGrid.addElement(new Integer(i));
-                    getGrid().getCell(i, j).jcoordLTLGrid.addElement(new Integer(j));
-
-                }
-            }
-        }
     }
 
     @Override

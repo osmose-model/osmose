@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StreamTokenizer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,13 +63,18 @@ public class LTLForcingManual extends AbstractLTLForcing {
 
     @Override
     public void initPlanktonMap() {
-        /*
-         * Associate osmose cells to BFM cells
-         */
+        
+        icoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+        jcoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+        
         for (int i = 0; i < getGrid().getNbLines(); i++) {
             for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                getGrid().getCell(i, j).icoordLTLGrid.addElement(i);
-                getGrid().getCell(i, j).jcoordLTLGrid.addElement(j);
+                if (null == icoordLTLGrid[i][j]) {
+                    icoordLTLGrid[i][j] = new ArrayList();
+                    jcoordLTLGrid[i][j] = new ArrayList();
+                }
+                icoordLTLGrid[i][j].add(i);
+                jcoordLTLGrid[i][j].add(j);
             }
         }
 
@@ -98,39 +104,17 @@ public class LTLForcingManual extends AbstractLTLForcing {
 
     @Override
     public void updatePlankton(int iStepSimu) {
-        
+
         int iStepYear = iStepSimu % getOsmose().getNumberTimeStepsPerYear();
         for (int i = 0; i < getNbPlanktonGroups(); i++) {
             getPlanktonGroup(i).clearPlankton();      // put the biomass tables of plankton to 0
         }
         /*for (int p = 0; p < getNbPlanktonGroups(); p++) {
-            String nameTemp = getOsmose().resolveFile(planktonFileList[p][dt]);
-            readCSVFile(nameTemp, p);
-        }*/
+         String nameTemp = getOsmose().resolveFile(planktonFileList[p][dt]);
+         readCSVFile(nameTemp, p);
+         }*/
         updateData(iStepYear);
         mapInterpolation();
-    }
-
-    @Override
-    public void mapInterpolation() {
-        int tempX, tempY;
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                if (!getGrid().getCell(i, j).isLand()) {
-                    for (int k = 0; k < getGrid().getCell(i, j).getNbCellsLTLGrid(); k++) {
-                        for (int p = 0; p < getNbPlanktonGroups(); p++) {
-                            tempY = ((Integer) getGrid().getCell(i, j).icoordLTLGrid.elementAt(k)).intValue();
-                            tempX = ((Integer) getGrid().getCell(i, j).jcoordLTLGrid.elementAt(k)).intValue();
-                            /*if (p == 0) {
-                            System.out.println("osmose cell (" + i + ", " + j + ") contains ECO3M cell (" + tempX + ", " + tempY + ")");
-                            }*/
-                            // interpolate the plankton concentrations from the LTL cells
-                            getPlanktonGroup(p).addCell(i, j, tempX, tempY, getGrid().getCell(i, j).getNbCellsLTLGrid());
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private float[][] getIntegratedData(String nameOfFile) {
