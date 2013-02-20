@@ -342,9 +342,7 @@ public class SpatialMapUI extends JPanel {
 
         private Color getColor(int i, int j) {
 
-            if (getGrid().getCell(i, j).isMPA()) {
-                return Color.GREEN;
-            } else if (isInMap(i, j)) {
+             if (isInMap(i, j)) {
                 return Color.MAGENTA;
             } else if (getGrid().getCell(i, j).isLand()) {
                 return Color.DARK_GRAY;
@@ -415,7 +413,6 @@ public class SpatialMapUI extends JPanel {
 
         getOsmose().loadArgs(args);
         getOsmose().init();
-        getOsmose().loadMPAs();
         map = getOsmose().getMap(numMap);
 
         SpatialMapUI grid = new SpatialMapUI();

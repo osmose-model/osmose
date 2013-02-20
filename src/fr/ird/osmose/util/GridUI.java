@@ -334,9 +334,7 @@ public class GridUI extends JPanel {
 
         private Color getColor(int i, int j) {
 
-            if (getGrid().getCell(i, j).isMPA()) {
-                return Color.GREEN;
-            } else if (getGrid().getCell(i, j).isLand()) {
+            if (getGrid().getCell(i, j).isLand()) {
                 return Color.DARK_GRAY;
             } else {
                 return Color.CYAN;
@@ -405,7 +403,6 @@ public class GridUI extends JPanel {
 
         getOsmose().loadArgs(args);
         getOsmose().init();
-        getOsmose().loadMPAs();
         //getCellSize(1, 1);
         //getCellSize(10, 10);
         writeGridCSV();

@@ -168,20 +168,6 @@ public class Simulation {
         }
     }
 
-    private void setupMPA() {
-        if ((getOsmose().thereIsMPATab) && (year == getOsmose().MPAtStartTab)) {
-            //RS = (double) getOsmose().tabMPAiMatrix.length / ((getGrid().getNbLines()) * getGrid().getNbColumns());
-            for (int index = 0; index < getOsmose().tabMPAiMatrix.length; index++) {
-                getGrid().getCell(getOsmose().tabMPAiMatrix[index], getOsmose().tabMPAjMatrix[index]).setMPA(true);
-            }
-        } else if ((!getOsmose().thereIsMPATab) || (year > getOsmose().MPAtEndTab)) {
-            //RS = 0;
-            for (int index = 0; index < getOsmose().tabMPAiMatrix.length; index++) {
-                getGrid().getCell(getOsmose().tabMPAiMatrix[index], getOsmose().tabMPAjMatrix[index]).setMPA(false);
-            }
-        }
-    }
-
     public void updateStages() {
         for (School school : population) {
             int i = school.getSpeciesIndex();
@@ -197,9 +183,6 @@ public class Simulation {
 
             // Print progress in console
             progress();
-
-            // Calculate relative size of MPA
-            setupMPA();
 
             // Loop over the year
             while (i_step_year < getOsmose().getNumberTimeStepsPerYear()) {

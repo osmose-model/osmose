@@ -129,15 +129,14 @@ public class Osmose {
      * COASTLINE
      */
     String coastFileNameTab;	              //choice between "None" or fileName
-    int[] tabCoastiMatrix, tabCoastjMatrix;   //coordinates of the cells representing land
+    public int[] tabCoastiMatrix, tabCoastjMatrix;   //coordinates of the cells representing land
     int nbCellsCoastTab;
     /*
      * MPAs coordinates
      */
     String mpaFileNameTab;
-    int[] tabMPAiMatrix, tabMPAjMatrix;     //coord i et j of the matrix delimiting a mpa
-    boolean thereIsMPATab;		      //signify that 1 mpa is implemented even if t<tStart
-    int MPAtStartTab, MPAtEndTab;	      //start and end of MPA in years
+    public int[] tabMPAiMatrix, tabMPAjMatrix;     //coord i et j of the matrix delimiting a mpa		      //signify that 1 mpa is implemented even if t<tStart
+    public int MPAtStartTab, MPAtEndTab;	      //start and end of MPA in years
     //tables for output storage by series of simulations
     //4 dimensions : simu, species,val(total OR total-0), step t
     //for mortalities, 3 dim, the last is for the mean on the simulation period
@@ -198,12 +197,6 @@ public class Osmose {
         readInputFile();	// read the first file containing the file names of all other input files
         readAllInputFiles(0);
         initializeSizeAndTLSpectrum();
-    }
-
-    public void loadMPAs() {
-        for (int index = 0; index < tabMPAiMatrix.length; index++) {
-            getGrid().getCell(tabMPAiMatrix[index], tabMPAjMatrix[index]).setMPA(true);
-        }
     }
 
     public void initializeSizeAndTLSpectrum() {
@@ -1284,12 +1277,6 @@ public class Osmose {
         }
         // Init the grid
         grid.init();
-        // Apply mask
-        if (null != tabCoastiMatrix) {
-            for (int k = 0; k < tabCoastiMatrix.length; k++) {
-                grid.getCell(tabCoastiMatrix[k], tabCoastjMatrix[k]).setLand(true);
-            }
-        }
     }
 
     public void initForcing() {
@@ -1423,7 +1410,6 @@ public class Osmose {
 
     public void readMPAFile() {
         if (mpaFileNameTab.equalsIgnoreCase("default")) {
-            thereIsMPATab = false;
             tabMPAiMatrix = new int[0];
             tabMPAjMatrix = new int[0];
             MPAtStartTab = 0;
@@ -1509,32 +1495,31 @@ public class Osmose {
                 System.out.println("Error while reading mpaFile");
                 System.exit(1);
             }
-            thereIsMPATab = true;
         }
     }
 
     public void writeMPAasCSV() {
 
         String fileName = "mpa.csv";
-        try {
-            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                String[] entries = new String[getGrid().getNbColumns()];
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    if (getGrid().getCell(i, j).isLand()) {
-                        entries[j] = String.valueOf(-99);
-                    } else if (getGrid().getCell(i, j).isMPA()) {
-                        entries[j] = String.valueOf(1);
-                    } else {
-                        entries[j] = String.valueOf(0);
-                    }
-                }
-                writer.writeNext(entries);
-            }
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        try {
+//            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(fileName)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+//            for (int i = 0; i < getGrid().getNbLines(); i++) {
+//                String[] entries = new String[getGrid().getNbColumns()];
+//                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+//                    if (getGrid().getCell(i, j).isLand()) {
+//                        entries[j] = String.valueOf(-99);
+//                    } else if (getGrid().getCell(i, j).isMPA()) {
+//                        entries[j] = String.valueOf(1);
+//                    } else {
+//                        entries[j] = String.valueOf(0);
+//                    }
+//                }
+//                writer.writeNext(entries);
+//            }
+//            writer.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
     public void readAreaFile() {

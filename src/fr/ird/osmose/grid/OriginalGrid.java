@@ -2,19 +2,20 @@ package fr.ird.osmose.grid;
 
 import fr.ird.osmose.Cell;
 
-/********************************************************************************
+/**
+ * ******************************************************************************
  * <p>Title : Grid class</p>
  *
- * <p>Description : grid of Osmose model, divided into cells (Cell) 
- * Include a function defining neighbors of each cell </p>
+ * <p>Description : grid of Osmose model, divided into cells (Cell) Include a
+ * function defining neighbors of each cell </p>
  *
  * <p>Copyright : Copyright (c) may 2009</p>
  *
  * <p>Society : IRD, France </p>
  *
  * @author Yunne Shin, Morgane Travers
- * @version 2.1 
- ******************************************************************************** 
+ * @version 2.1
+ * *******************************************************************************
  */
 public class OriginalGrid extends AbstractGrid {
 
@@ -45,7 +46,7 @@ public class OriginalGrid extends AbstractGrid {
      */
     @Override
     public void readParameters() {
-       
+
         /* grid dimension */
         setNbLines(getOsmose().gridLinesTab);
         setNbColumns(getOsmose().gridColumnsTab);
@@ -73,10 +74,21 @@ public class OriginalGrid extends AbstractGrid {
             latitude = getLatMax() - (float) (i + 0.5f) * dLat;
             for (int j = 0; j < getNbColumns(); j++) {
                 longitude = getLongMin() + (float) (j + 0.5) * dLong;
-                grid[i][j] = new Cell(i, j, latitude, longitude);
+                grid[i][j] = new Cell(i, j, latitude, longitude, isLand(i, j));
             }
         }
         return grid;
+    }
+
+    private boolean isLand(int i, int j) {
+        if (null != getOsmose().tabCoastiMatrix) {
+            for (int k = 0; k < getOsmose().tabCoastiMatrix.length; k++) {
+                if ((i == getOsmose().tabCoastiMatrix[k]) && (j == getOsmose().tabCoastjMatrix[k])) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -84,4 +96,3 @@ public class OriginalGrid extends AbstractGrid {
         return 1;
     }
 }
-
