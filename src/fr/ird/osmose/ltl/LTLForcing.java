@@ -24,15 +24,4 @@ public interface LTLForcing {
      * @param iStepSimu, the current time index of the simulation
      */
     public float[][] computeBiomass(Plankton plankton, int iStepSimu);
-    /**
-     * Gets the number of plankton groups
-     * @return the number of plankton groups
-     */
-    public int getNumberPlanktonGroups();
-    /**
-     * Gets the specified plankton group.
-     * @param iPlankton, the index of the plankton group.
-     * @return the plankton group number iPlankton.
-     */
-    public Plankton getPlankton(int iPlankton);
 }

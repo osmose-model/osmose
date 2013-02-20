@@ -8,7 +8,6 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.grid.IGrid;
-import java.io.*;
 import java.util.List;
 
 /**
@@ -17,8 +16,6 @@ import java.util.List;
  */
 public abstract class AbstractLTLForcing implements LTLForcing {
 
-    private int nbPlankton, nLTLSteps;
-    private Plankton[] planktonList;     // list of plankton groups (here 4)
     private int nx;      // dimension of LTL model, here ROMS Plume (144 * 65 * 20)
     private int ny;
     private int nz;	// vertical dimension (20)
@@ -61,105 +58,13 @@ public abstract class AbstractLTLForcing implements LTLForcing {
      * @return the corresponding time step of the LTL data.
      */
     public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % getNumberLTLSteps();
+        return iStepSimu % getOsmose().getNumberLTLSteps();
     }
     
     @Override
     public void init() {
-        readLTLBasisFile(getOsmose().planktonStructureFileNameTab);
         readLTLForcingFile(getOsmose().planktonFileNameTab);
         initLTLGrid();
-    }
-
-    /**
-     * Read LTL basic file with name of plankton, sizes, format of files...
-     */
-    private void readLTLBasisFile(String planktonStructureFileName) {
-
-        String[] planktonNames = null;		// list of names of plankton groups
-        float[] trophicLevel = null;			// list of TL of plankton groups
-        float[] minSize = null, maxSize = null;		// list of min and max sizes of plankton groups
-        float[] conversionFactors = null;		// list of conversionFactors of plankton groups
-        float[] prodBiomFactors = null;
-
-        FileInputStream LTLFile = null;
-        try {
-            LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonStructureFileName)));
-        } catch (FileNotFoundException ex) {
-            System.out.println("LTL file " + planktonStructureFileName + " doesn't exist");
-            System.exit(1);
-        }
-
-        Reader r = new BufferedReader(new InputStreamReader(LTLFile));
-        StreamTokenizer st = new StreamTokenizer(r);
-        st.slashSlashComments(true);
-        st.slashStarComments(true);
-        st.quoteChar(';');
-
-        try {
-            st.nextToken();
-            nbPlankton = (new Integer(st.sval)).intValue();
-            if (!(nbPlankton == getOsmose().nbPlanktonGroupsTab)) {
-                System.out.println("The number of plankton group in plankton structure file does not match the one from config file");
-                System.exit(1);
-            }
-
-            st.nextToken();
-            nLTLSteps = (new Integer(st.sval)).intValue();
-            if (nLTLSteps % getOsmose().getNumberTimeStepsPerYear() > 0) {
-                System.out.println("Number of LTL steps (found " + nLTLSteps + ") should be a multiple of osmose number of steps per year (" + getOsmose().getNumberTimeStepsPerYear() + ")");
-                System.exit(1);
-            }
-
-            // initializing tables
-            planktonNames = new String[nbPlankton];
-            trophicLevel = new float[nbPlankton];
-            minSize = new float[nbPlankton];
-            maxSize = new float[nbPlankton];
-            conversionFactors = new float[nbPlankton];
-            prodBiomFactors = new float[nbPlankton];
-
-
-            for (int i = 0; i < nbPlankton; i++) {
-                // filling tables
-                st.nextToken();
-                planktonNames[i] = st.sval;
-                getOsmose().planktonNamesTab[i] = st.sval;
-                st.nextToken();
-                minSize[i] = (new Float(st.sval)).floatValue();
-                st.nextToken();
-                maxSize[i] = (new Float(st.sval)).floatValue();
-                st.nextToken();
-                trophicLevel[i] = (new Float(st.sval)).floatValue();
-                st.nextToken();
-                conversionFactors[i] = (new Float(st.sval)).floatValue();
-                st.nextToken();
-                prodBiomFactors[i] = (new Float(st.sval)).floatValue();
-            }
-
-            st.nextToken();
-            int nbDimensionsGrid = new Integer(st.sval).intValue();
-            if ((nbDimensionsGrid > 3) || (nbDimensionsGrid < 2)) {
-                System.out.println("The dimension " + nbDimensionsGrid + " cannot be consider - should be 2 or 3");
-            }
-            st.nextToken();
-            nx = new Integer(st.sval).intValue();
-            st.nextToken();
-            ny = new Integer(st.sval).intValue();
-            if (nbDimensionsGrid == 3) {
-                st.nextToken();
-                nz = new Integer(st.sval).intValue();
-                st.nextToken();
-                integrationDepth = new Float(st.sval).floatValue();
-            }
-        } catch (IOException ex) {
-            System.out.println("Reading error of LTL structure file");
-            System.exit(1);
-        }
-        planktonList = new Plankton[getNumberPlanktonGroups()];
-        for (int i = 0; i < getNumberPlanktonGroups(); i++) {
-            planktonList[i] = new Plankton(i, planktonNames[i], minSize[i], maxSize[i], trophicLevel[i], conversionFactors[i], prodBiomFactors[i], getOsmose().planktonAccessCoeffMatrix[i]);
-        }
     }
 
     public float[][] verticalIntegration(float[][][] data3d, float[][][] depthLayer, float maxDepth) {
@@ -181,16 +86,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         return integratedData;
     }
 
-    @Override
-    public int getNumberPlanktonGroups() {
-        return nbPlankton;
-    }
-
-    @Override
-    public Plankton getPlankton(int indexGroup) {
-        return planktonList[indexGroup];
-    }
-
     public int get_nx() {
         return nx;
     }
@@ -201,10 +96,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
 
     public int get_nz() {
         return nz;
-    }
-
-    public int getNumberLTLSteps() {
-        return nLTLSteps;
     }
 
     void setDimX(int nx) {
@@ -235,10 +126,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
             }
         }
         return biomass;
-    }
-
-    Plankton[] getPlanktonList() {
-        return planktonList;
     }
 
     float getIntegrationDepth() {

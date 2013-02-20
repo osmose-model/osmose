@@ -51,8 +51,8 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             /*
              * Read name of plankton variable in the BFM NetCDF file
              */
-            planktonNetcdfNames = new String[getNumberPlanktonGroups()];
-            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
+            planktonNetcdfNames = new String[getOsmose().getNumberLTLGroups()];
+            for (int i = 0; i < getOsmose().getNumberLTLGroups(); i++) {
                 st.nextToken();
                 planktonNetcdfNames[i] = st.sval;
             }
@@ -215,7 +215,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getOsmose().getNumberTimeStepsPerYear()][getNumberPlanktonGroups()][get_nx()][get_ny()];
+        data = new float[getOsmose().getNumberTimeStepsPerYear()][getOsmose().getNumberLTLGroups()][get_nx()][get_ny()];
         for (int iStep = 0; iStep < getOsmose().getNumberTimeStepsPerYear(); iStep++) {
             String ncfile = getOsmose().resolveFile(planktonFileListNetcdf[iStep / timeDim]);
             int timestep = iStep % timeDim;
@@ -227,7 +227,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
     private float[][][] getIntegratedData(String ncfile, int timestep) {
 
-        float[][][] integratedData = new float[getNumberPlanktonGroups()][get_nx()][get_ny()];
+        float[][][] integratedData = new float[getOsmose().getNumberLTLGroups()][get_nx()][get_ny()];
         float[][][] dataInit;
 
         try {
@@ -235,7 +235,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             /*
              * Loop over the plankton groups
              */
-            for (int p = 0; p < getNumberPlanktonGroups(); p++) {
+            for (int p = 0; p < getOsmose().getNumberLTLGroups(); p++) {
                 /*
                  * Read the concentration of plankton
                  */

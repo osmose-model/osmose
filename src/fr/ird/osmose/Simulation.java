@@ -93,6 +93,10 @@ public class Simulation {
      * Array of the species of the simulation
      */
     private Species[] species;
+    /**
+     * Array of the LTL groups of the simulation
+     */
+    private Plankton[] ltlGroups;
     /*
      * What should be done within one time step
      */
@@ -115,7 +119,7 @@ public class Simulation {
         i_step_simu = 0;
 
         // Create the species
-        species = new Species[getOsmose().nbSpeciesTab];
+        species = new Species[getOsmose().getNumberSpecies()];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
             // Initialize species
@@ -123,8 +127,10 @@ public class Simulation {
         }
 
         // Init plankton groups
-        for (int iLTL = 0; iLTL < getOsmose().getForcing().getNumberPlanktonGroups(); iLTL++) {
-            getOsmose().getForcing().getPlankton(iLTL).init();
+        ltlGroups = new Plankton[getOsmose().getNumberLTLGroups()];
+        for (int p = 0; p < ltlGroups.length; p++) {
+            ltlGroups[p] = new Plankton(p, getOsmose().ltlNames[p], getOsmose().ltlMinSize[p], getOsmose().ltlMaxSize[p], getOsmose().ltlTrophicLevel[p], getOsmose().ltlConversionFactors[p], getOsmose().ltlProdBiomFactors[p], getOsmose().planktonAccessCoeffMatrix[p]);
+            ltlGroups[p].init();
         }
 
         // Instantiate the Step
@@ -222,6 +228,15 @@ public class Simulation {
      */
     public Species getSpecies(int index) {
         return species[index];
+    }
+    
+    /**
+     * Gets the specified plankton group.
+     * @param iPlankton, the index of the plankton group.
+     * @return the plankton group number iPlankton.
+     */
+    public Plankton getPlankton(int index) {
+        return ltlGroups[index];
     }
 
     public int getYear() {

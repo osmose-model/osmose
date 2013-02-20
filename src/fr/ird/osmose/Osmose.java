@@ -180,6 +180,18 @@ public class Osmose {
     private String[] mapFile;
     private int[] mapIndexNoTwin;
     public SpatialDistribution[] spatialDistribution;
+    /*
+     * LTL
+     */
+    String[] ltlNames;		// list of names of plankton groups
+    float[] ltlTrophicLevel;			// list of TL of plankton groups
+    float[] ltlMinSize , ltlMaxSize;		// list of min and max sizes of plankton groups
+    float[] ltlConversionFactors;		// list of conversionFactors of plankton groups
+    float[] ltlProdBiomFactors;
+    int nLTLGroups;
+    int nx, ny, nz;
+    int nLTLSteps;
+    float integrationDepth;
 
     public void init() {
 
@@ -251,6 +263,7 @@ public class Osmose {
     public void readAllInputFiles(int numSerie) {
         readConfigurationFile(configFileNameTab, numSerie);
         readSpeciesFile(speciesFileNameTab, numSerie);
+        readLTLBasisFile(planktonStructureFileNameTab);
         readPredationFile(predationFileNameTab, numSerie);
         readFishingFile(fishingFileNameTab, numSerie);
         readCalibrationFile(calibrationFileNameTab, numSerie);
@@ -401,6 +414,86 @@ public class Osmose {
             System.exit(1);
         }
         System.out.println("EOF for step 2. Reading file INPUT.txt");
+    }
+
+    /**
+     * Read LTL basic file with name of plankton, sizes, format of files...
+     */
+    private void readLTLBasisFile(String planktonStructureFileName) {
+
+        FileInputStream LTLFile = null;
+        try {
+            LTLFile = new FileInputStream(new File(resolveFile(planktonStructureFileName)));
+        } catch (FileNotFoundException ex) {
+            System.out.println("LTL file " + planktonStructureFileName + " doesn't exist");
+            System.exit(1);
+        }
+
+        Reader r = new BufferedReader(new InputStreamReader(LTLFile));
+        StreamTokenizer st = new StreamTokenizer(r);
+        st.slashSlashComments(true);
+        st.slashStarComments(true);
+        st.quoteChar(';');
+
+        try {
+            st.nextToken();
+            nLTLGroups = (new Integer(st.sval)).intValue();
+            if (!(nLTLGroups == nbPlanktonGroupsTab)) {
+                System.out.println("The number of plankton group in plankton structure file does not match the one from config file");
+                System.exit(1);
+            }
+
+            st.nextToken();
+            nLTLSteps = (new Integer(st.sval)).intValue();
+            if (nLTLSteps % getNumberTimeStepsPerYear() > 0) {
+                System.out.println("Number of LTL steps (found " + nLTLSteps + ") should be a multiple of osmose number of steps per year (" + getNumberTimeStepsPerYear() + ")");
+                System.exit(1);
+            }
+
+            // initializing tables
+            ltlNames = new String[nLTLGroups];
+            ltlTrophicLevel = new float[nLTLGroups];
+            ltlMinSize = new float[nLTLGroups];
+            ltlMaxSize = new float[nLTLGroups];
+            ltlConversionFactors = new float[nLTLGroups];
+            ltlProdBiomFactors = new float[nLTLGroups];
+
+            for (int i = 0; i < nLTLGroups; i++) {
+                // filling tables
+                st.nextToken();
+                ltlNames[i] = st.sval;
+                planktonNamesTab[i] = st.sval;
+                st.nextToken();
+                ltlMinSize[i] = (new Float(st.sval)).floatValue();
+                st.nextToken();
+                ltlMaxSize[i] = (new Float(st.sval)).floatValue();
+                st.nextToken();
+                ltlTrophicLevel[i] = (new Float(st.sval)).floatValue();
+                st.nextToken();
+                ltlConversionFactors[i] = (new Float(st.sval)).floatValue();
+                st.nextToken();
+                ltlProdBiomFactors[i] = (new Float(st.sval)).floatValue();
+            }
+
+            st.nextToken();
+            int nbDimensionsGrid = new Integer(st.sval).intValue();
+            if ((nbDimensionsGrid > 3) || (nbDimensionsGrid < 2)) {
+                System.out.println("The dimension " + nbDimensionsGrid + " cannot be consider - should be 2 or 3");
+            }
+            st.nextToken();
+            nx = new Integer(st.sval).intValue();
+            st.nextToken();
+            ny = new Integer(st.sval).intValue();
+            if (nbDimensionsGrid == 3) {
+                st.nextToken();
+                nz = new Integer(st.sval).intValue();
+                st.nextToken();
+                integrationDepth = new Float(st.sval).floatValue();
+            }
+        } catch (IOException ex) {
+            System.out.println("Reading error of LTL structure file");
+            System.exit(1);
+        }
     }
 
     public void readSpeciesFile(String speciesFileName, int numSerie) {
@@ -2698,6 +2791,14 @@ public class Osmose {
 
     public int getNumberSpecies() {
         return nbSpeciesTab;
+    }
+    
+    public int getNumberLTLGroups() {
+        return nLTLGroups;
+    }
+    
+    public int getNumberLTLSteps() {
+        return nLTLSteps;
     }
 
     public enum SpatialDistribution {

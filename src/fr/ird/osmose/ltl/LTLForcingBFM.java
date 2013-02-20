@@ -57,8 +57,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Read name of plankton variable in the BFM NetCDF file
              */
-            planktonNetcdfNames = new String[getNumberPlanktonGroups()];
-            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
+            planktonNetcdfNames = new String[getOsmose().getNumberLTLGroups()];
+            for (int i = 0; i < getOsmose().getNumberLTLGroups(); i++) {
                 st.nextToken();
                 planktonNetcdfNames[i] = st.sval;
             }

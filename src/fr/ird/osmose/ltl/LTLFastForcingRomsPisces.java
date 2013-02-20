@@ -55,14 +55,14 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getNumberPlanktonGroups()];
-            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
+            plktonNetcdfNames = new String[getOsmose().getNumberLTLGroups()];
+            for (int i = 0; i < getOsmose().getNumberLTLGroups(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
 
-            planktonFileListNetcdf = new String[getNumberLTLSteps()];
-            for (int step = 0; step < getNumberLTLSteps(); step++) {
+            planktonFileListNetcdf = new String[getOsmose().getNumberLTLSteps()];
+            for (int step = 0; step < getOsmose().getNumberLTLSteps(); step++) {
                 st.nextToken();
                 planktonFileListNetcdf[step] = st.sval;
             }
@@ -155,7 +155,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getOsmose().nStepYear][getNumberPlanktonGroups()][get_nx()][get_ny()];
+        data = new float[getOsmose().nStepYear][getOsmose().getNumberLTLGroups()][get_nx()][get_ny()];
         for (int t = 0; t < getOsmose().nStepYear; t++) {
             data[t] = getIntegratedData(getOsmose().resolveFile(planktonFileListNetcdf[t]));
         }
@@ -165,7 +165,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
     private float[][][] getIntegratedData(String nameOfFile) {
 
-        float[][][] integratedData = new float[getNumberPlanktonGroups()][get_nx()][get_ny()];
+        float[][][] integratedData = new float[getOsmose().getNumberLTLGroups()][get_nx()][get_ny()];
         float[][][] dataInit;
 
         NetcdfFile nc = null;
@@ -175,7 +175,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         try {
             nc = NetcdfFile.open(name);
 
-            for (int p = 0; p < getNumberPlanktonGroups(); p++) {
+            for (int p = 0; p < getOsmose().getNumberLTLGroups(); p++) {
                 // read data and put them in the local arrays
                 tempArray = (ArrayFloat.D3) nc.findVariable(plktonNetcdfNames[p]).read().reduce();
                 dataInit = new float[get_nx()][get_ny()][get_nz()];

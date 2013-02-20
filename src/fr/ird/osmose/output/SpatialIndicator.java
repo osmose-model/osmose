@@ -49,7 +49,7 @@ public class SpatialIndicator extends AbstractIndicator {
         biomass = new float[nSpecies][ny][nx];
         mean_size = new float[nSpecies][ny][nx];
         tl = new float[nSpecies][ny][nx];
-        ltlbiomass = new float[getForcing().getNumberPlanktonGroups()][ny][nx];
+        ltlbiomass = new float[getOsmose().getNumberLTLGroups()][ny][nx];
         abundance = new float[nSpecies][ny][nx];
         yield = new float[nSpecies][ny][nx];
 
@@ -78,8 +78,8 @@ public class SpatialIndicator extends AbstractIndicator {
                         yield[iSpec][i][j] += school.adb2biom(school.nDeadFishing);
                     }
                 }
-                for (int iltl = 0; iltl < getForcing().getNumberPlanktonGroups(); iltl++) {
-                    ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getForcing().getPlankton(iltl).getBiomass(cell);
+                for (int iltl = 0; iltl < getOsmose().getNumberLTLGroups(); iltl++) {
+                    ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
                 }
             }
         }
@@ -106,7 +106,7 @@ public class SpatialIndicator extends AbstractIndicator {
                     tl[ispec][i][j] = FILLVALUE;
                     yield[ispec][i][j] = FILLVALUE;
                 }
-                for (int iltl = 0; iltl < getForcing().getNumberPlanktonGroups(); iltl++) {
+                for (int iltl = 0; iltl < getOsmose().getNumberLTLGroups(); iltl++) {
                     ltlbiomass[iltl][i][j] = FILLVALUE;
                 }
             } else {
@@ -128,7 +128,7 @@ public class SpatialIndicator extends AbstractIndicator {
         ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getForcing().getNumberPlanktonGroups(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getOsmose().getNumberLTLGroups(), getGrid().getNbLines(), getGrid().getNbColumns());
         int nl = getGrid().getNbLines() - 1;
         for (int kspec = 0; kspec < nSpecies; kspec++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
@@ -141,7 +141,7 @@ public class SpatialIndicator extends AbstractIndicator {
                 }
             }
         }
-        for (int kltl = 0; kltl < getForcing().getNumberPlanktonGroups(); kltl++) {
+        for (int kltl = 0; kltl < getOsmose().getNumberLTLGroups(); kltl++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     arrLTL.set(0, kltl,  nl - i, j, ltlbiomass[kltl][i][j]);
@@ -187,7 +187,7 @@ public class SpatialIndicator extends AbstractIndicator {
          * Create dimensions
          */
         Dimension speciesDim = nc.addDimension("species", getNSpecies());
-        Dimension ltlDim = nc.addDimension("ltl", getForcing().getNumberPlanktonGroups());
+        Dimension ltlDim = nc.addDimension("ltl", getOsmose().getNumberLTLGroups());
         Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
         Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
         Dimension timeDim = nc.addUnlimitedDimension("time");
@@ -232,10 +232,10 @@ public class SpatialIndicator extends AbstractIndicator {
          */
         nc.addGlobalAttribute("dimension_step", "step=0 before predation, step=1 after predation");
         StringBuilder str = new StringBuilder();
-        for (int kltl = 0; kltl < getForcing().getNumberPlanktonGroups(); kltl++) {
+        for (int kltl = 0; kltl < getOsmose().getNumberLTLGroups(); kltl++) {
             str.append(kltl);
             str.append("=");
-            str.append(getForcing().getPlankton(kltl));
+            str.append(getSimulation().getPlankton(kltl));
             str.append(" ");
         }
         nc.addGlobalAttribute("dimension_ltl", str.toString());

@@ -55,14 +55,14 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getNumberPlanktonGroups()];
-            for (int i = 0; i < getNumberPlanktonGroups(); i++) {
+            plktonNetcdfNames = new String[getOsmose().getNumberLTLGroups()];
+            for (int i = 0; i < getOsmose().getNumberLTLGroups(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
 
-            planktonFileListNetcdf = new String[getNumberLTLSteps()];
-            for (int step = 0; step < getNumberLTLSteps(); step++) {
+            planktonFileListNetcdf = new String[getOsmose().getNumberLTLSteps()];
+            for (int step = 0; step < getOsmose().getNumberLTLSteps(); step++) {
                 st.nextToken();
                 planktonFileListNetcdf[step] = st.sval;
             }
