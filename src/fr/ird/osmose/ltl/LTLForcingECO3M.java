@@ -4,7 +4,6 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.Plankton;
 import java.io.BufferedReader;
 import java.io.File;
@@ -56,8 +55,8 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
                 plktonNetcdfNames[i] = st.sval;
             }
 
-            planktonFileListNetcdf = new String[getNbForcingDt()];
-            for (int step = 0; step < getNbForcingDt(); step++) {
+            planktonFileListNetcdf = new String[getNumberLTLSteps()];
+            for (int step = 0; step < getNumberLTLSteps(); step++) {
                 st.nextToken();
                 planktonFileListNetcdf[step] = st.sval;
             }
@@ -67,7 +66,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
 
         } catch (IOException ex) {
             System.out.println("Reading error of LTL file");
-            return;
+            System.exit(1);
         }
     }
 
@@ -80,7 +79,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             ncGrid = NetcdfFile.open(gridFilename, null);
         } catch (IOException ex) {
             System.err.println("Failed to open plankton grid file " + gridFilename);
-            ex.printStackTrace();
+            System.exit(1);
         }
 
         int[] shape = ncGrid.findVariable(zlevelName).getShape();
@@ -120,7 +119,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             }
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(LTLForcingECO3M.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -155,10 +154,5 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
 
         // vertical integration
         return verticalIntegration(data3d, depthOfLayer, getIntegrationDepth());
-    }
-
-    @Override
-    public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % getOsmose().getNumberTimeStepsPerYear();
     }
 }

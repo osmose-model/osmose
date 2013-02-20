@@ -86,7 +86,7 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Update some stages at the begining of the step
         getSimulation().updateStages();
-        
+
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
         Indicators.initStep();
@@ -98,7 +98,9 @@ public class SequentialMortalityStep extends AbstractStep {
         naturalMortalityProcess.run();
 
         // Update plankton concentration
-        getForcing().update(getSimulation().getIndexTimeSimu());
+        for (int p = 0; p < getForcing().getNumberPlanktonGroups(); p++) {
+            getForcing().getPlankton(p).update(getSimulation().getIndexTimeSimu());
+        }
 
         // Predation
         predationProcess.run();

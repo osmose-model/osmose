@@ -58,8 +58,8 @@ public class LTLForcingLaure extends AbstractLTLForcing {
                 plktonNetcdfNames[i] = st.sval;
             }
 
-            planktonFileListNetcdf = new String[getNbForcingDt()];
-            for (int step = 0; step < getNbForcingDt(); step++) {
+            planktonFileListNetcdf = new String[getNumberLTLSteps()];
+            for (int step = 0; step < getNumberLTLSteps(); step++) {
                 st.nextToken();
                 planktonFileListNetcdf[step] = st.sval;
             }
@@ -118,23 +118,19 @@ public class LTLForcingLaure extends AbstractLTLForcing {
     }
 
     @Override
-    public void update(int iStepSimu) {
+    public float[][] computeBiomass(Plankton plankton, int iStepSimu) {
 
-        // update biomass
-        for (int p = 0; p < getNumberPlanktonGroups(); p++) {
-            // update biomass
-            float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    Cell cell = getGrid().getCell(i, j);
-                    if (!cell.isLand()) {
-                        float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
-                        biomass[i][j] = area * getPlankton(p).convertToTonPerKm2(data[getIndexStepLTL(iStepSimu)][p][i][j]);
-                    }
+        float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                Cell cell = getGrid().getCell(i, j);
+                if (!cell.isLand()) {
+                    float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
+                    biomass[i][j] = area * plankton.convertToTonPerKm2(data[getIndexStepLTL(iStepSimu)][plankton.getIndex()][i][j]);
                 }
             }
-            getPlankton(p).updateBiomass(biomass);
         }
+        return biomass;
     }
 
     private void loadData() {
@@ -158,22 +154,17 @@ public class LTLForcingLaure extends AbstractLTLForcing {
         String ncfile = getOsmose().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
         try {
             NetcdfFile nc = NetcdfFile.open(ncfile);
-            dataInit = (float[][][]) nc.findVariable(plktonNetcdfNames[p]).read().permute(new int[] {1, 2, 0}).copyToNDJavaArray();
+            dataInit = (float[][][]) nc.findVariable(plktonNetcdfNames[p]).read().permute(new int[]{1, 2, 0}).copyToNDJavaArray();
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingLaure.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return verticalIntegration(dataInit, depthOfLayer, getIntegrationDepth());
     }
-    
+
     @Override
     float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
         return null;
-    }
-
-    @Override
-    public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % getOsmose().getNumberTimeStepsPerYear();
     }
 
     /**

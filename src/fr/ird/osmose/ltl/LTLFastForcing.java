@@ -15,7 +15,6 @@ public class LTLFastForcing extends AbstractLTLForcing {
 
     private String ncFile;
     private float[][][][] data;
-    private int iStep;
 
     @Override
     public void readLTLForcingFile(String planktonFileName) {
@@ -25,8 +24,6 @@ public class LTLFastForcing extends AbstractLTLForcing {
             System.out.println("LTL NetCDF file " + ncFile + " doesn't exist");
             System.exit(1);
         }
-
-        iStep = 0;
     }
 
     @Override
@@ -42,26 +39,18 @@ public class LTLFastForcing extends AbstractLTLForcing {
     }
 
     @Override
-    public void update(int iStepSimu) {
+    public float[][] computeBiomass(Plankton plankton, int iStepSimu) {
 
-        // update biomass
-        for (int p = 0; p < getNumberPlanktonGroups(); p++) {
-            float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
-            int nl = getGrid().getNbLines() - 1;
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    if (!getGrid().getCell(i, j).isLand()) {
-                        biomass[i][j] = data[getIndexStepLTL(iStepSimu)][p][nl - i][j];
-                    }
+        float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        int nl = getGrid().getNbLines() - 1;
+        for (int i = 0; i < getGrid().getNbLines(); i++) {
+            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                if (!getGrid().getCell(i, j).isLand()) {
+                    biomass[i][j] = data[getIndexStepLTL(iStepSimu)][plankton.getIndex()][nl - i][j];
                 }
             }
-            getPlankton(p).updateBiomass(biomass);
         }
-        // increment ltl time step
-        iStep++;
-        if (iStep >= data.length) {
-            iStep = 0;
-        }
+        return biomass;
     }
 
     private void loadData() {
@@ -81,10 +70,5 @@ public class LTLFastForcing extends AbstractLTLForcing {
     @Override
     float[][] getRawBiomass(Plankton plankton, int iStepYear) {
         return null;
-    }
-
-    @Override
-    public int getIndexStepLTL(int iStepSimu) {
-        return iStep;
     }
 }

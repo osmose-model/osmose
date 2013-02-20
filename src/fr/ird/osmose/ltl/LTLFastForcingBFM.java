@@ -289,9 +289,4 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
     float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
         return data[getIndexStepLTL(iStepSimu)][plankton.getIndex()];
     }
-
-    @Override
-    public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % getOsmose().getNumberTimeStepsPerYear();
-    }
 }

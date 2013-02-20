@@ -61,8 +61,8 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
                 plktonNetcdfNames[i] = st.sval;
             }
 
-            planktonFileListNetcdf = new String[getNbForcingDt()];
-            for (int step = 0; step < getNbForcingDt(); step++) {
+            planktonFileListNetcdf = new String[getNumberLTLSteps()];
+            for (int step = 0; step < getNumberLTLSteps(); step++) {
                 st.nextToken();
                 planktonFileListNetcdf[step] = st.sval;
             }
@@ -304,11 +304,6 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
      @Override
     float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
         return data[getIndexStepLTL(iStepSimu)][plankton.getIndex()];
-    }
-
-    @Override
-    public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % getOsmose().getNumberTimeStepsPerYear();
     }
 
     /**

@@ -1,6 +1,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.ltl.LTLForcing;
 
 /**
  * ******************************************************************************
@@ -41,8 +42,8 @@ public class Plankton {
         this.accessibilityCoeff = accessCoeff;
     }
 
-    public void updateBiomass(float[][] newBiomass) {
-        biomass = newBiomass;
+    public void update(int iStepSimu) {
+        biomass = getForcing().computeBiomass(this, iStepSimu);
     }
 
     public float getBiomass(int i, int j) {
@@ -147,5 +148,9 @@ public class Plankton {
 
     private static IGrid getGrid() {
         return Osmose.getInstance().getGrid();
+    }
+
+    private static LTLForcing getForcing() {
+        return Osmose.getInstance().getForcing();
     }
 }

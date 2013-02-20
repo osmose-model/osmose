@@ -19,10 +19,11 @@ public interface LTLForcing {
      */
     public void init();
     /**
-     * Update plankton biomass for current time step
+     * Compute plankton biomass for current time step
+     * @param plankton, a plankton group
      * @param iStepSimu, the current time index of the simulation
      */
-    public void update(int iStepSimu);
+    public float[][] computeBiomass(Plankton plankton, int iStepSimu);
     /**
      * Gets the number of plankton groups
      * @return the number of plankton groups

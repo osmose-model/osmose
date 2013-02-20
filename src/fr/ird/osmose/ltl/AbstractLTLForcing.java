@@ -17,7 +17,7 @@ import java.util.List;
  */
 public abstract class AbstractLTLForcing implements LTLForcing {
 
-    private int nbPlankton, nbForcingDt;
+    private int nbPlankton, nLTLSteps;
     private Plankton[] planktonList;     // list of plankton groups (here 4)
     private int nx;      // dimension of LTL model, here ROMS Plume (144 * 65 * 20)
     private int ny;
@@ -40,29 +40,29 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     abstract float[][] getRawBiomass(Plankton plankton, int iStepSimu);
 
     /**
+     * Loads parameters about how the LTL biomass are provided.
+     *
+     * @param ltlForcingFile, the pathname of the LTLForcing configuration file.
+     */
+    abstract void readLTLForcingFile(String ltlForcingFile);
+
+    /**
+     * This function loads the LTL grid. It loads longitude, latitude and depth
+     * of vertical levels. It creates the index map between osmose cells and LTL
+     * grid cells (fills up variables icoordLTLGrid & jcoordLTLGrid)
+     */
+    abstract void initLTLGrid();
+
+    /**
      * Converts the current time step of the simulation into the corresponding
      * time step of the LTL data.
      *
      * @param iStepSimu, the current step of the simulation.
      * @return the corresponding time step of the LTL data.
      */
-    abstract int getIndexStepLTL(int iStepSimu);
-    
-    /**
-     * Loads parameters about how the LTL biomass are provided.
-     * 
-     * @param ltlForcingFile, the pathname of the LTLForcing configuration
-     * file.
-     */
-    abstract void readLTLForcingFile(String ltlForcingFile);
-    
-    /**
-     * This function loads the LTL grid.
-     * It loads longitude, latitude and depth of vertical levels.
-     * It creates the index map between osmose cells and LTL grid cells
-     * (fills up variables icoordLTLGrid & jcoordLTLGrid)
-     */
-    abstract void initLTLGrid();
+    public int getIndexStepLTL(int iStepSimu) {
+        return iStepSimu % getNumberLTLSteps();
+    }
     
     @Override
     public void init() {
@@ -101,12 +101,14 @@ public abstract class AbstractLTLForcing implements LTLForcing {
             nbPlankton = (new Integer(st.sval)).intValue();
             if (!(nbPlankton == getOsmose().nbPlanktonGroupsTab)) {
                 System.out.println("The number of plankton group in plankton structure file does not match the one from config file");
+                System.exit(1);
             }
-            
+
             st.nextToken();
-            nbForcingDt = (new Integer(st.sval)).intValue();
-            if (!(nbForcingDt == getOsmose().nStepYear)) {
-                System.out.println("In the current version, the time step of plankton biomass should match the time step of osmose config");
+            nLTLSteps = (new Integer(st.sval)).intValue();
+            if (nLTLSteps % getOsmose().getNumberTimeStepsPerYear() > 0) {
+                System.out.println("Number of LTL steps (found " + nLTLSteps + ") should be a multiple of osmose number of steps per year (" + getOsmose().getNumberTimeStepsPerYear() + ")");
+                System.exit(1);
             }
 
             // initializing tables
@@ -180,15 +182,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     }
 
     @Override
-    public void update(int iStepSimu) {
-
-        // clear & update biomass
-        for (Plankton plankton : planktonList) {
-            plankton.updateBiomass(getBiomass(plankton, iStepSimu));
-        }
-    }
-
-    @Override
     public int getNumberPlanktonGroups() {
         return nbPlankton;
     }
@@ -210,8 +203,8 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         return nz;
     }
 
-    public int getNbForcingDt() {
-        return nbForcingDt;
+    public int getNumberLTLSteps() {
+        return nLTLSteps;
     }
 
     void setDimX(int nx) {
@@ -226,7 +219,8 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         this.nz = nz;
     }
 
-    private float[][] getBiomass(Plankton plankton, int iStepSimu) {
+    @Override
+    public float[][] computeBiomass(Plankton plankton, int iStepSimu) {
 
         float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
 

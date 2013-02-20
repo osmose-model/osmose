@@ -4,7 +4,6 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.Plankton;
 import java.io.BufferedReader;
 import java.io.File;
@@ -272,6 +271,6 @@ public class LTLForcingBFM extends AbstractLTLForcing {
 
     @Override
     public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu / timeDim;
+        return (iStepSimu % getOsmose().getNumberTimeStepsPerYear()) / timeDim;
     }
 }

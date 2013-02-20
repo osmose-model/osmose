@@ -61,8 +61,8 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 plktonNetcdfNames[i] = st.sval;
             }
 
-            planktonFileListNetcdf = new String[getNbForcingDt()];
-            for (int step = 0; step < getNbForcingDt(); step++) {
+            planktonFileListNetcdf = new String[getNumberLTLSteps()];
+            for (int step = 0; step < getNumberLTLSteps(); step++) {
                 st.nextToken();
                 planktonFileListNetcdf[step] = st.sval;
             }
