@@ -19,7 +19,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     private int nx;      // dimension of LTL model, here ROMS Plume (144 * 65 * 20)
     private int ny;
     private int nz;	// vertical dimension (20)
-    private float integrationDepth;   // latitude and longitude of each cell of the LTL grid, used for interpolation
     List<Integer>[][] icoordLTLGrid;
     List<Integer>[][] jcoordLTLGrid;
 
@@ -126,10 +125,6 @@ public abstract class AbstractLTLForcing implements LTLForcing {
             }
         }
         return biomass;
-    }
-
-    float getIntegrationDepth() {
-        return integrationDepth;
     }
 
     int getNbCellsLTLGrid(int i, int j) {

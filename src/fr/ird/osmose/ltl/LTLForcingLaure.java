@@ -159,7 +159,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
             Logger.getLogger(LTLForcingLaure.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return verticalIntegration(dataInit, depthOfLayer, getIntegrationDepth());
+        return verticalIntegration(dataInit, depthOfLayer, getOsmose().getIntegrationDepth());
     }
 
     @Override

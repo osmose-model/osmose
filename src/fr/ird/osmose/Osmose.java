@@ -190,7 +190,7 @@ public class Osmose {
     int nLTLGroups;
     int nx, ny, nz;
     int nLTLSteps;
-    float integrationDepth;
+    private float integrationDepth;
 
     public void init() {
 
@@ -2784,6 +2784,13 @@ public class Osmose {
     
     public int getNumberLTLSteps() {
         return nLTLSteps;
+    }
+
+    /**
+     * @return the integrationDepth
+     */
+    public float getIntegrationDepth() {
+        return integrationDepth;
     }
 
     public enum SpatialDistribution {

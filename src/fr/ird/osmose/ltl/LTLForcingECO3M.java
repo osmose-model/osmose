@@ -153,6 +153,6 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         }
 
         // vertical integration
-        return verticalIntegration(data3d, depthOfLayer, getIntegrationDepth());
+        return verticalIntegration(data3d, depthOfLayer, getOsmose().getIntegrationDepth());
     }
 }

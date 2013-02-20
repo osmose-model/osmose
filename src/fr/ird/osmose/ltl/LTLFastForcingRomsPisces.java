@@ -190,20 +190,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
                 }
 
                 // integrates vertically plankton biomass, using depth files
-                float integr;
-                for (int i = 0; i < depthOfLayer.length; i++) {
-                    for (int j = 0; j < depthOfLayer[i].length; j++) {
-                        integr = 0f;
-                        for (int k = 0; k < depthOfLayer[i][j].length - 1; k++) {
-                            if (depthOfLayer[i][j][k] > getIntegrationDepth()) {
-                                if (dataInit[i][j][k] >= 0 && dataInit[i][j][k + 1] >= 0) {
-                                    integr += (Math.abs(depthOfLayer[i][j][k] - depthOfLayer[i][j][k + 1])) * ((dataInit[i][j][k] + dataInit[i][j][k + 1]) / 2f);
-                                }
-                            }
-                        }
-                        integratedData[p][i][j] = integr;
-                    }
-                }
+                integratedData[p] = verticalIntegration(dataInit, depthOfLayer, getOsmose().getIntegrationDepth());
             }
         } catch (IOException e) {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, e);

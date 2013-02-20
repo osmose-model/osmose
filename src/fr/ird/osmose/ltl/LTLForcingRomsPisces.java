@@ -256,8 +256,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return verticalIntegration(data3d, depthOfLayer, getIntegrationDepth());
-
+        return verticalIntegration(data3d, depthOfLayer, getOsmose().getIntegrationDepth());
     }
 
     @Override
