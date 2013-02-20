@@ -98,9 +98,9 @@ public class BFMGrid extends AbstractGrid {
          * If averaged mask > 0.5 then stridden cell = ocean
          * else stridden cell = land
          */
-        float[][][] mask = null;
+        float[][] mask = null;
         try {
-            mask = (float[][][]) ncGrid.findVariable(strMask).read().copyToNDJavaArray();
+            mask = (float[][]) ncGrid.findVariable(strMask).read().copyToNDJavaArray();
         } catch (IOException ex) {
             Logger.getLogger(BFMGrid.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -112,7 +112,7 @@ public class BFMGrid extends AbstractGrid {
                 float fmask = 0.f;
                 for (int ii = 0; ii < stride; ii++) {
                     for (int jj = 0; jj < stride; jj++) {
-                        fmask += mask[0][j * stride + jj][i * stride + ii];
+                        fmask += mask[j * stride + jj][i * stride + ii];
                     }
                 }
                 fmask = fmask / (stride * stride);
