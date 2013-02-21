@@ -147,7 +147,7 @@ public class Osmose {
     public boolean TLoutputMatrix, TLDistriboutputMatrix, dietsOutputMatrix, meanSizeOutputMatrix,
             sizeSpectrumOutputMatrix, sizeSpectrumPerSpeOutputMatrix,
             planktonMortalityOutputMatrix, calibrationMatrix, outputClass0Matrix, spatializedOutputs;
-    public String planktonBiomassOutputMatrix;
+    public boolean planktonBiomassOutputMatrix;
     String dietsConfigFileName, dietOutputMetrics;
     int[] nbDietsStages;
     float[][] dietStageThreshold;
@@ -1248,12 +1248,9 @@ public class Osmose {
                  * to choose the format.
                  */
                 st.nextToken();
-                planktonBiomassOutputMatrix = st.sval;
+                planktonBiomassOutputMatrix = (Boolean.valueOf(st.sval)).booleanValue();
             } catch (Exception ex) {
-                planktonBiomassOutputMatrix = "";
-            }
-            if (!planktonBiomassOutputMatrix.matches("csv") & !planktonBiomassOutputMatrix.matches("netcdf")) {
-                planktonBiomassOutputMatrix = "";
+                planktonBiomassOutputMatrix = false;
             }
 
             indicFile.close();

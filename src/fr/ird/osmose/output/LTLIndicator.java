@@ -73,7 +73,7 @@ public class LTLIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return getOsmose().planktonBiomassOutputMatrix;
     }
 
     @Override
