@@ -7,6 +7,7 @@ package fr.ird.osmose.util;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.process.MPAProcess;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -54,8 +55,7 @@ public class GridUI extends JPanel {
      */
     private static double lonmax;
     /**
-     * BufferedImage in which the background (cost + bathymetry) has been
-     * drawn.
+     * BufferedImage in which the background (cost + bathymetry) has been drawn.
      */
     private static BufferedImage background;
     /**
@@ -65,13 +65,15 @@ public class GridUI extends JPanel {
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
     private int height = 800, width = 600;
     private boolean isGridVisible = false;
+    private static MPAProcess mpaProcess;
 
 ///////////////
 // Constructors
 ///////////////
     /**
-     * Constructs an empty <code>SimulationUI</code>, intializes the range of
-     * the domain and the {@code RenderingHints}.
+     * Constructs an empty
+     * <code>SimulationUI</code>, intializes the range of the domain and the
+     * {@code RenderingHints}.
      */
     public GridUI() {
 
@@ -96,7 +98,9 @@ public class GridUI extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHints(hints);
 
-        /** Clear the graphics */
+        /**
+         * Clear the graphics
+         */
         g2.clearRect(0, 0, w, h);
 
         /* Redraw the background when size changed */
@@ -206,6 +210,8 @@ public class GridUI extends JPanel {
         latmax = getGrid().getLatMax();
         lonmin = getGrid().getLongMin();
         lonmax = getGrid().getLongMax();
+        System.out.println("lines: " + getGrid().getNbLines());
+        System.out.println("columns: " + getGrid().getNbColumns());
 
         double avgLat = 0.5d * (latmin + latmax);
 
@@ -215,10 +221,10 @@ public class GridUI extends JPanel {
         double ratio = dlon / dlat;
         width = (int) (height * ratio);
         /*if (ratio > 1) {
-        width = (int) (height * ratio);
-        } else if (ratio != 0.d) {
-        height = (int) (width / ratio);
-        }*/
+         width = (int) (height * ratio);
+         } else if (ratio != 0.d) {
+         height = (int) (width / ratio);
+         }*/
         //setPreferredSize(new Dimension(width, height));
     }
 
@@ -233,8 +239,9 @@ public class GridUI extends JPanel {
     }
 
     /**
-     * Computes the geodesic distance between the two points
-     * (lat1, lon1) and (lat2, lon2)
+     * Computes the geodesic distance between the two points (lat1, lon1) and
+     * (lat2, lon2)
+     *
      * @param lat1 a double, the latitude of the first point
      * @param lon1 a double, the longitude of the first point
      * @param lat2 double, the latitude of the second point
@@ -287,8 +294,8 @@ public class GridUI extends JPanel {
         ///////////////////////////////
         /**
          * The (x-screen, y-screen) coordinates of the quadrilateral.
-         * point[0:3][0:1] first dimension refers to the number of points (4
-         * in this case) and the second dimension, the (x, y) coordinates.
+         * point[0:3][0:1] first dimension refers to the number of points (4 in
+         * this case) and the second dimension, the (x, y) coordinates.
          */
         private int[][] points;
 
@@ -296,7 +303,8 @@ public class GridUI extends JPanel {
         // Constructors
         ///////////////
         /**
-         * Constructs an empty <code>CellUI</code>
+         * Constructs an empty
+         * <code>CellUI</code>
          */
         public CellUI() {
 
@@ -336,6 +344,8 @@ public class GridUI extends JPanel {
 
             if (getGrid().getCell(i, j).isLand()) {
                 return Color.DARK_GRAY;
+            } else if (mpaProcess.isMPA(getGrid().getCell(i, j))) {
+                return Color.GREEN;
             } else {
                 return Color.CYAN;
             }
@@ -359,7 +369,7 @@ public class GridUI extends JPanel {
         lon2 = getGrid().getCell(i + 1, j).getLon();
         gd = geodesicDistance(lat1, lon1, lat2, lon2);
 
-        System.out.println("gd2: " + gd + " meters"); 
+        System.out.println("gd2: " + gd + " meters");
     }
 
     private static void writeGridCSV() {
@@ -395,7 +405,7 @@ public class GridUI extends JPanel {
             } catch (IOException ex) {
                 Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);
             }
-           
+
         }
     }
 
@@ -403,6 +413,8 @@ public class GridUI extends JPanel {
 
         getOsmose().loadArgs(args);
         getOsmose().init();
+        mpaProcess = new MPAProcess();
+        mpaProcess.init();
         //getCellSize(1, 1);
         //getCellSize(10, 10);
         writeGridCSV();

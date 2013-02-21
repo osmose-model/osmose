@@ -6,22 +6,30 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.GridMap;
+import fr.ird.osmose.School;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author pverley
  */
 public class MPAProcess extends AbstractProcess {
-    
-    private GridMap mpa;
+
+    private List<Cell> mpa;
     private int start, end;
-    private boolean active; 
 
     @Override
     public void init() {
-        mpa = new GridMap();
+        GridMap mpaMap = new GridMap();
         for (int index = 0; index < getOsmose().tabMPAiMatrix.length; index++) {
-            mpa.setValue(getOsmose().tabMPAiMatrix[index], getOsmose().tabMPAjMatrix[index], 1);
+            mpaMap.setValue(getOsmose().tabMPAiMatrix[index], getOsmose().tabMPAjMatrix[index], 1);
+        }
+        mpa = new ArrayList();
+        for (Cell cell : getGrid().getCells()) {
+            if (mpaMap.getValue(cell) > 0) {
+                mpa.add(cell);
+            }
         }
         start = getOsmose().MPAtStartTab;
         end = getOsmose().MPAtEndTab;
@@ -30,11 +38,17 @@ public class MPAProcess extends AbstractProcess {
     @Override
     public void run() {
         int year = getSimulation().getYear();
-        active = (year >= start) && (year <= end);
+        boolean active = (year >= start) && (year <= end);
+        if (active) {
+            for (Cell cell : mpa) {
+                for (School school : getPopulation().getSchools(cell)) {
+                    school.notCatchable();
+                }
+            }
+        }
     }
     
     public boolean isMPA(Cell cell) {
-        return active && (mpa.getValue(cell) > 0);
+        return mpa.contains(cell);
     }
-    
 }

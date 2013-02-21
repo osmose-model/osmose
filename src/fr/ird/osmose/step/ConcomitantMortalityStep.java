@@ -9,6 +9,7 @@ import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
+import fr.ird.osmose.process.MPAProcess;
 import fr.ird.osmose.process.MortalityProcess;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
@@ -38,6 +39,10 @@ public class ConcomitantMortalityStep extends AbstractStep {
      * Movement process
      */
     private AbstractProcess movementProcess;
+    /*
+     * MPA process
+     */
+    private AbstractProcess mpaProcess;
 
     @Override
     public void init() {
@@ -74,6 +79,10 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Movement of the schools
         movementProcess = new MovementProcess();
         movementProcess.init();
+        
+        // MPA
+        mpaProcess = new MPAProcess();
+        mpaProcess.init();
     }
 
     @Override
@@ -95,6 +104,9 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
         // Spatial distribution
         movementProcess.run();
+        
+        // Update MPA
+        mpaProcess.run();
 
         // Compute mortality
         // (predation + fishing + natural mortality + starvation)
