@@ -67,11 +67,13 @@ public class FishingProcess extends AbstractProcess {
     private static boolean isFishable(School school) {
         // Test whether fishing applies to this school
         // 1. School is recruited
-        // 2. School is catchable (no MPA and no out of zone)
+        // 2. School is catchable (no MPA)
+        // 3. School is not out of simulated domain
         return (school.getAgeDt() >= school.getSpecies().recruitAge)
-                && school.isCatchable();
+                && school.isCatchable()
+                && !school.isUnlocated();
     }
-    
+
     /*
      * F the annual mortality rate is calculated as the annual average
      * of the fishing rates over the years. 
@@ -82,7 +84,7 @@ public class FishingProcess extends AbstractProcess {
         for (int iStep = 0; iStep < fishingRates[iSpec].length; iStep++) {
             F += fishingRates[iSpec][iStep];
         }
-        
+
         if (isFishingInterannual) {
             F /= getOsmose().getNumberYears();
         }
