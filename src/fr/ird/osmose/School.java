@@ -1,5 +1,7 @@
 package fr.ird.osmose;
 
+import fr.ird.osmose.process.PredationProcess;
+
 /**
  * ******************************************************************************
  * <p>Titre : School class</p>
@@ -61,29 +63,45 @@ public class School extends Fish {
         this.length = length;
         this.weight = weight;
         this.age = age;
-
-        // initialize school variables
-        init();
+        
+        // Set initial trophic level to EGG
+        trophicLevel = Species.TL_EGG;
+        // Unlocated
+        setOffGrid();
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    /*
-     * Initialize the school state variables
-     */
-    private void init() {
 
-        catchable = true;
-        trophicLevel = Species.TL_EGG;
-        //Initialisation of stage
+    /*
+     * Reset school state variables
+     */
+    public void initStep() {
+        // Update the stage
         updateFeedingStage(species.sizeFeeding, species.nbFeedingStages);
         updateAccessStage(species.ageStagesTab, species.nbAccessStages);
         updateDietOutputStage(species.dietStagesTab, species.nbDietStages);
-        //
-        resetDietVariable();
-        // Unlocated
-        setOffGrid();
+        // Reset variables
+        nDeadFishing = 0;
+        nDeadNatural = 0;
+        nDeadPredation = 0;
+        nDeadStarvation = 0;
+        biomassToPredate = PredationProcess.computeBiomassToPredate(this, 1);
+        preyedBiomass = 0;
+        catchable = true;
+        // Reset diet variables
+        diet = new float[getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups()][];
+        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
+            if (getOsmose().dietsOutputMatrix) {
+                diet[i] = new float[getOsmose().nbDietsStages[i]];
+            } else {
+                diet[i] = new float[0];
+            }
+        }
+        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups(); i++) {
+            diet[i] = new float[1];
+        }
     }
 
     /**
@@ -98,20 +116,6 @@ public class School extends Fish {
      */
     public double adb2biom(double abundance) {
         return abundance * weight / 1.e6d;
-    }
-
-    public void resetDietVariable() {
-        diet = new float[getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups()][];
-        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
-            if (getOsmose().dietsOutputMatrix) {
-                diet[i] = new float[getOsmose().nbDietsStages[i]];
-            } else {
-                diet[i] = new float[0];
-            }
-        }
-        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups(); i++) {
-            diet[i] = new float[1];
-        }
     }
 
     /**

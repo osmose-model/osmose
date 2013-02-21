@@ -168,15 +168,6 @@ public class Simulation {
         }
     }
 
-    public void updateStages() {
-        for (School school : population) {
-            int i = school.getSpeciesIndex();
-            school.updateFeedingStage(species[i].sizeFeeding, species[i].nbFeedingStages);
-            school.updateAccessStage(getOsmose().accessStageThreshold[i], getOsmose().nbAccessStage[i]);
-            school.updateDietOutputStage(species[i].dietStagesTab, species[i].nbDietStages);
-        }
-    }
-
     public void run() {
 
         while (year < getOsmose().getNumberYears()) {

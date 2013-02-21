@@ -79,8 +79,10 @@ public class ConcomitantMortalityStep extends AbstractStep {
     @Override
     public void step() {
 
-        // Update some stages at the begining of the step
-        getSimulation().updateStages();
+        // Reset some school state variables 
+        for (School school : getPopulation()) {
+            school.initStep();
+        }
 
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
@@ -96,17 +98,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
         // Compute mortality
         // (predation + fishing + natural mortality + starvation)
-        for (School school : getPopulation()) {
-            school.resetDietVariable();
-            school.nDeadFishing = 0;
-            school.nDeadNatural = 0;
-            school.nDeadPredation = 0;
-            school.nDeadStarvation = 0;
-            school.biomassToPredate = PredationProcess.computeBiomassToPredate(school, 1);
-            school.preyedBiomass = 0;
-        }
         mortalityProcess.run();
-
 
         // Growth
         growthProcess.run();

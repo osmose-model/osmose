@@ -4,6 +4,7 @@
  */
 package fr.ird.osmose.step;
 
+import fr.ird.osmose.School;
 import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
@@ -84,8 +85,10 @@ public class SequentialMortalityStep extends AbstractStep {
     @Override
     public void step() {
 
-        // Update some stages at the begining of the step
-        getSimulation().updateStages();
+        // Reset some school state variables 
+        for (School school : getPopulation()) {
+            school.initStep();
+        }
 
         // Some indicators might need a snapshot of the population
         // at the beginning of the step

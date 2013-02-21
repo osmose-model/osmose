@@ -171,8 +171,8 @@ public class Fish extends GridPoint {
     /**
      * @param sets whether the school is catchable for fishing
      */
-    public void setCatchable(boolean catchable) {
-        this.catchable = catchable;
+    public void notCatchable() {
+        catchable = false;
     }
 
     public void updateAccessStage(float[] ageStages, int nbAccessStages) {
