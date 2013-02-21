@@ -69,7 +69,7 @@ public class SpatialIndicator extends AbstractIndicator {
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
                 for (School school : getPopulation().getSchools(cell)) {
-                    if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !MovementProcess.isOut(school)) {
+                    if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !school.isUnlocated()) {
                         int iSpec = school.getSpeciesIndex();
                         biomass[iSpec][i][j] += school.getBiomass();
                         abundance[iSpec][i][j] += school.getAbundance();

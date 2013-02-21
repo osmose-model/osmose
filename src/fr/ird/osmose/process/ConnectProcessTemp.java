@@ -11,7 +11,7 @@ import fr.ird.osmose.Species;
  */
 public class ConnectProcessTemp extends AbstractProcess {
 
-    private MovementProcess parent;
+    private MovementProcess movementProcess;
     private Species species;
     int[][] numMaps;
 
@@ -43,7 +43,7 @@ public class ConnectProcessTemp extends AbstractProcess {
          * Do not distribute cohorts that are presently out of
          * the simulated area.
          */
-        if (MovementProcess.isOut(school)) {
+        if (movementProcess.isOut(school)) {
             school.setOffGrid();
             return;
         }
@@ -90,7 +90,7 @@ public class ConnectProcessTemp extends AbstractProcess {
             school.moveToCell(getGrid().getCell(indexCell));
         } else if (sameMap) {
             // Random move in adjacent cells contained in the map.
-            school.moveToCell(parent.randomDeal(parent.getAccessibleCells(school, map)));
+            school.moveToCell(movementProcess.randomDeal(movementProcess.getAccessibleCells(school, map)));
             if (map.getValue(school.getCell()) <= 0) {
                 System.out.println("Thomas a vu juste !!");
             }

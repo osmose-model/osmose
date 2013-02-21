@@ -46,14 +46,14 @@ public class GrowthProcess extends AbstractProcess {
             school.predSuccessRate = PredationProcess.computePredSuccessRate(school.biomassToPredate, school.preyedBiomass);
             Species species = school.getSpecies();
             int i = species.getIndex();
-            int j = school.getAgeDt();
-            if ((j == 0) || MovementProcess.isOut(school)) {
+            int age = school.getAgeDt();
+            if ((age == 0) || school.isUnlocated()) {
                 // Linear growth for eggs and migrating schools
-                school.setLength(school.getLength() + deltaMeanLength[i][j]);
+                school.setLength(school.getLength() + deltaMeanLength[i][age]);
                 school.setWeight(species.computeWeight(school.getLength()));
             } else {
                 // Growth based on predation success
-                growth(school, minDelta[i][j], maxDelta[i][j]);
+                growth(school, minDelta[i][age], maxDelta[i][age]);
             }
         }
     }

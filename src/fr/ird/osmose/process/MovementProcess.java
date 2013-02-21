@@ -32,12 +32,12 @@ public class MovementProcess extends AbstractProcess {
     /*
      * Ranges of movement in cell during one Osmose time step
      */
-    private static int[] range;
+    private int[] range;
     /*
      * Migration
      */
     private static float[][][] outOfZoneMortality;
-    private static boolean[][][] outOfZoneCohort;
+    private boolean[][][] outOfZoneCohort;
     /*
      * Type of spatial distribution
      */
@@ -172,7 +172,7 @@ public class MovementProcess extends AbstractProcess {
         return accessibleCells;
     }
 
-    public static boolean isOut(School school) {
+    boolean isOut(School school) {
         return outOfZoneCohort[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
     }
 
