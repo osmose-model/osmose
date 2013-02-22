@@ -5,15 +5,13 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanSizeIndicator extends AbstractIndicator {
+public class AbundanceTotIndicator extends AbstractIndicator {
 
-    private double[] meanSize;
     private double[] abundance;
 
     @Override
@@ -23,46 +21,38 @@ public class MeanSizeIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-
-        meanSize = new double[getNSpecies()];
         abundance = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
+
         for (School school : getPopulation().getAliveSchools()) {
-            if (school.getAgeDt() > school.getSpecies().indexAgeClass0) {
-                int i = school.getSpeciesIndex();
-                meanSize[i] += school.getAbundance() * school.getLength();
-                abundance[i] += school.getAbundance();
+            if (getOsmose().isIncludeClassZero()) {
+                abundance[school.getSpeciesIndex()] += school.getAbundance();
             }
         }
     }
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isMeanSizeOutput();
+        return getOsmose().isIncludeClassZero() && !getOsmose().isCalibrationOutput();
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
-            if (abundance[i] > 0) {
-                meanSize[i] = (float) (meanSize[i] / abundance[i]);
-            } else {
-                meanSize[i] = Double.NaN;
-            }
+        double nsteps = getOsmose().savingDtMatrix;
+        for (int i = 0; i < abundance.length; i++) {
+            abundance[i] /= nsteps;
         }
-        writeVariable(time, meanSize);
+        writeVariable(time, abundance);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
-        filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix);
-        filename.append("_meanSize_Simu");
+        StringBuilder filename = new StringBuilder(getOsmose().outputPrefix);
+        filename.append("_abundance-total_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -70,7 +60,7 @@ public class MeanSizeIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean size of fish species in cm, weighted by fish numbers, and excluding first ages specified in input (in calibration file)";
+        return "Mean abundance (number of fish), including first ages specified in input (typically in calibration file)";
     }
     
     @Override

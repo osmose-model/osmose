@@ -10,9 +10,9 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class YieldIndicator extends AbstractIndicator {
+public class YieldNIndicator extends AbstractIndicator {
 
-    public double[] yield;
+    public double[] yieldN;
 
     @Override
     public void initStep() {
@@ -21,14 +21,14 @@ public class YieldIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        yield = new double[getNSpecies()];
+        yieldN = new double[getNSpecies()];
 
     }
 
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            yield[school.getSpeciesIndex()] += school.adb2biom(school.nDeadFishing);
+            yieldN[school.getSpeciesIndex()] += school.nDeadFishing;
         }
     }
 
@@ -40,13 +40,13 @@ public class YieldIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        writeVariable(time, yield);
+        writeVariable(time, yieldN);
     }
 
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder(getOsmose().outputPrefix);
-        filename.append("_yield_Simu");
+        filename.append("_yieldN_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -54,7 +54,7 @@ public class YieldIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
+        return "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved";
     }
 
     @Override

@@ -20,6 +20,9 @@ import java.util.logging.Logger;
  */
 public class MortalityIndicator extends SimulationLinker implements Indicator {
 
+    // IO
+    private FileOutputStream[] fos;
+    private PrintWriter[] prw;
     /*
      * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
      */
@@ -45,12 +48,12 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
     private double[][] abundanceStage;
 
     @Override
-    public void init() {
-        
+    public void initStep() {
+
         // Reset the nDead array used to compute the mortality rates of current
         // time step
         abundanceStage = new double[getNSpecies()][STAGES];
-        
+
         // save abundance at the beginning of the time step
         for (School school : getPopulation().getAliveSchools()) {
             int iStage;
@@ -70,7 +73,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void reset() {
-        
+
         // Reset mortality rates
         mortalityRates = new double[getNSpecies()][CAUSES][STAGES];
     }
@@ -118,14 +121,35 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void write(float time) {
-        StringBuilder filename;
-        String description;
-        PrintWriter pr;
-        FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
-        
+
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            filename = new StringBuilder("Mortality");
+            prw[iSpecies].print(time);
+            prw[iSpecies].print(";");
+            for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
+                for (int iStage = 0; iStage < STAGES; iStage++) {
+                    if (iDeath == NATURAL && iStage == EGG) {
+                        // instantenous mortality rate for eggs natural mortality 
+                        prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / getOsmose().savingDtMatrix);
+                    } else {
+                        prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage]);
+                    }
+                    prw[iSpecies].print(";");
+                }
+            }
+            prw[iSpecies].println();
+            prw[iSpecies].close();
+        }
+    }
+
+    @Override
+    public void init() {
+
+        fos = new FileOutputStream[getNSpecies()];
+        prw = new PrintWriter[getNSpecies()];
+        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+            // Create parent directory
+            File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
+            StringBuilder filename = new StringBuilder("Mortality");
             filename.append(File.separatorChar);
             filename.append(getOsmose().outputPrefix);
             filename.append("_mortalityRate_");
@@ -133,51 +157,44 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             filename.append("_Simu");
             filename.append(getSimulation().getReplica());
             filename.append(".csv");
-            description = "Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat) & Fishing (F) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. To get annual mortality rates, sum the mortality rates within one year.";
-            // Write the file
             File file = new File(path, filename.toString());
             file.getParentFile().mkdirs();
-            boolean isNew = !file.exists();
             try {
-                fos = new FileOutputStream(file, true);
-                pr = new PrintWriter(fos, true);
-                if (isNew) {
-                    pr.print("// ");
-                    pr.println(description);
-                    pr.print("Time");
-                    pr.print(';');
-                    pr.print("Mpred;Mpred;Mpred;");
-                    pr.print("Mstarv;Mstarv;Mstarv;");
-                    pr.print("Mnat;Mnat;Mnat;");
-                    pr.println("F;F;F");
-                    pr.print(";");
-                    for (int iDeath = 0; iDeath < 4; iDeath++) {
-                        pr.print("Eggs;Pre-recruits;Recruits;");
-                    }
-                    pr.println();
-                }
-                pr.print(time);
-                pr.print(";");
-                for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
-                    for (int iStage = 0; iStage < STAGES; iStage++) {
-                        if (iDeath == NATURAL && iStage == EGG) {
-                            // instantenous mortality rate for eggs natural mortality 
-                            pr.print(mortalityRates[iSpecies][iDeath][iStage] / getOsmose().savingDtMatrix);
-                        } else {
-                            pr.print(mortalityRates[iSpecies][iDeath][iStage]);
-                        }
-                        pr.print(";");
-                    }
-                }
-                pr.println();
-                pr.close();
+                // Init stream
+                fos[iSpecies] = new FileOutputStream(file, true);
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
+                Logger.getLogger(MortalityIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
+            // Write headers
+            prw[iSpecies].print("\"");
+            prw[iSpecies].print("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat) & Fishing (F) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. To get annual mortality rates, sum the mortality rates within one year.");
+            prw[iSpecies].println("\"");
+            prw[iSpecies].print("Time");
+            prw[iSpecies].print(';');
+            prw[iSpecies].print("Mpred;Mpred;Mpred;");
+            prw[iSpecies].print("Mstarv;Mstarv;Mstarv;");
+            prw[iSpecies].print("Mnat;Mnat;Mnat;");
+            prw[iSpecies].println("F;F;F");
+            prw[iSpecies].print(";");
+            for (int iDeath = 0; iDeath < 4; iDeath++) {
+                prw[iSpecies].print("Eggs;Pre-recruits;Recruits;");
+            }
+            prw[iSpecies].println();
+        }
+    }
+
+    @Override
+    public void close() {
+        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+            if (null != prw) {
+                prw[iSpecies].close();
+            }
+            if (null != fos) {
                 try {
-                    fos.close();
+                    fos[iSpecies].close();
                 } catch (IOException ex) {
-                    Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MortalityIndicator.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

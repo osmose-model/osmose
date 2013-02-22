@@ -2,7 +2,7 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.MovementProcess;
+import fr.ird.osmose.SimulationLinker;
 import fr.ird.osmose.util.IOTools;
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import ucar.nc2.NetcdfFileWriteable;
  *
  * @author pverley
  */
-public class SpatialIndicator extends AbstractIndicator {
+public class SpatialIndicator extends SimulationLinker implements Indicator {
 
     /**
      * _FillValue attribute for cells on land
@@ -38,148 +38,12 @@ public class SpatialIndicator extends AbstractIndicator {
 
     @Override
     public void init() {
-    }
-
-    @Override
-    public void reset() {
-
-        int nSpecies = getNSpecies();
-        int nx = getGrid().getNbColumns();
-        int ny = getGrid().getNbLines();
-        biomass = new float[nSpecies][ny][nx];
-        mean_size = new float[nSpecies][ny][nx];
-        tl = new float[nSpecies][ny][nx];
-        ltlbiomass = new float[getOsmose().getNumberLTLGroups()][ny][nx];
-        abundance = new float[nSpecies][ny][nx];
-        yield = new float[nSpecies][ny][nx];
-
-        /*
-         * Create the NetCDF file at first time step
-         */
-        if (getSimulation().getIndexTimeSimu() == 0) {
-            createNCFile(getSimulation().getReplica());
-        }
-    }
-
-    @Override
-    public void update() {
-        // Loop over the cells
-        for (Cell cell : getGrid().getCells()) {
-            if (!cell.isLand()) {
-                int i = cell.get_igrid();
-                int j = cell.get_jgrid();
-                for (School school : getPopulation().getSchools(cell)) {
-                    if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !school.isUnlocated()) {
-                        int iSpec = school.getSpeciesIndex();
-                        biomass[iSpec][i][j] += school.getBiomass();
-                        abundance[iSpec][i][j] += school.getAbundance();
-                        mean_size[iSpec][i][j] += school.getLength() * school.getAbundance();
-                        tl[iSpec][i][j] += school.trophicLevel * school.getBiomass();
-                        yield[iSpec][i][j] += school.adb2biom(school.nDeadFishing);
-                    }
-                }
-                for (int iltl = 0; iltl < getOsmose().getNumberLTLGroups(); iltl++) {
-                    ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
-                }
-            }
-        }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return getOsmose().spatializedOutputs;
-    }
-
-    @Override
-    public void write(float time) {
-
-        // Pre-writing
-        for (Cell cell : getGrid().getCells()) {
-            int i = cell.get_igrid();
-            int j = cell.get_jgrid();
-            // Set _FillValue on land cells
-            if (cell.isLand()) {
-                for (int ispec = 0; ispec < getNSpecies(); ispec++) {
-                    biomass[ispec][i][j] = FILLVALUE;
-                    abundance[ispec][i][j] = FILLVALUE;
-                    mean_size[ispec][i][j] = FILLVALUE;
-                    tl[ispec][i][j] = FILLVALUE;
-                    yield[ispec][i][j] = FILLVALUE;
-                }
-                for (int iltl = 0; iltl < getOsmose().getNumberLTLGroups(); iltl++) {
-                    ltlbiomass[iltl][i][j] = FILLVALUE;
-                }
-            } else {
-                // Weight mean size with abundance
-                // Weight mean size with biomass
-                for (int ispec = 0; ispec < getNSpecies(); ispec++) {
-                    if (abundance[ispec][i][j] > 0) {
-                        mean_size[ispec][i][j] /= abundance[ispec][i][j];
-                        tl[ispec][i][j] /= biomass[ispec][i][j];
-                    }
-                }
-            }
-        }
-
-        // Write into NetCDF file
-        int nSpecies = getNSpecies();
-        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrAbundance = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getOsmose().getNumberLTLGroups(), getGrid().getNbLines(), getGrid().getNbColumns());
-        int nl = getGrid().getNbLines() - 1;
-        for (int kspec = 0; kspec < nSpecies; kspec++) {
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrBiomass.set(0, kspec, nl - i, j, biomass[kspec][i][j]);
-                    arrAbundance.set(0, kspec, nl - i, j, abundance[kspec][i][j]);
-                    arrSize.set(0, kspec, nl - i, j, mean_size[kspec][i][j]);
-                    arrTL.set(0, kspec, nl - i, j, tl[kspec][i][j]);
-                    arrYield.set(0, kspec, nl - i, j, yield[kspec][i][j]);
-                }
-            }
-        }
-        for (int kltl = 0; kltl < getOsmose().getNumberLTLGroups(); kltl++) {
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrLTL.set(0, kltl,  nl - i, j, ltlbiomass[kltl][i][j]);
-                }
-            }
-        }
-
-        ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
-        arrTime.set(0, time);
-
-        int index = nc.getUnlimitedDimension().getLength();
-        //System.out.println("NetCDF saving time " + index + " - " + time);
-        try {
-            nc.write("time", new int[]{index}, arrTime);
-            nc.write("biomass", new int[]{index, 0, 0, 0}, arrBiomass);
-            nc.write("abundance", new int[]{index, 0, 0, 0}, arrAbundance);
-            nc.write("yield", new int[]{index, 0, 0, 0}, arrYield);
-            nc.write("mean_size", new int[]{index, 0, 0, 0}, arrSize);
-            nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
-            nc.write("ltl_biomass", new int[]{index, 0, 0, 0, 0}, arrLTL);
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if (isLastStep()) {
-            closeNCFile();
-        }
-    }
-
-    private void createNCFile(int nSimu) {
         /*
          * Create NetCDF file
          */
         try {
             nc = NetcdfFileWriteable.createNew("");
-            nc.setLocation(makeFileLocation(nSimu));
+            nc.setLocation(makeFileLocation(getSimulation().getReplica()));
         } catch (IOException ex) {
             Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -270,10 +134,8 @@ public class SpatialIndicator extends AbstractIndicator {
         }
     }
 
-    /**
-     * Closes the NetCDF file.
-     */
-    private void closeNCFile() {
+    @Override
+    public void close() {
         try {
             nc.close();
             String strFilePart = nc.getLocation();
@@ -284,7 +146,132 @@ public class SpatialIndicator extends AbstractIndicator {
         } catch (Exception ex) {
             Logger.getLogger(SpatialIndicator.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
+    }
 
+    @Override
+    public void initStep() {
+    }
+
+    @Override
+    public void reset() {
+
+        int nSpecies = getNSpecies();
+        int nx = getGrid().getNbColumns();
+        int ny = getGrid().getNbLines();
+        biomass = new float[nSpecies][ny][nx];
+        mean_size = new float[nSpecies][ny][nx];
+        tl = new float[nSpecies][ny][nx];
+        ltlbiomass = new float[getOsmose().getNumberLTLGroups()][ny][nx];
+        abundance = new float[nSpecies][ny][nx];
+        yield = new float[nSpecies][ny][nx];
+    }
+
+    @Override
+    public void update() {
+        // Loop over the cells
+        for (Cell cell : getGrid().getCells()) {
+            if (!cell.isLand()) {
+                int i = cell.get_igrid();
+                int j = cell.get_jgrid();
+                for (School school : getPopulation().getSchools(cell)) {
+                    if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !school.isUnlocated()) {
+                        int iSpec = school.getSpeciesIndex();
+                        biomass[iSpec][i][j] += school.getBiomass();
+                        abundance[iSpec][i][j] += school.getAbundance();
+                        mean_size[iSpec][i][j] += school.getLength() * school.getAbundance();
+                        tl[iSpec][i][j] += school.trophicLevel * school.getBiomass();
+                        yield[iSpec][i][j] += school.adb2biom(school.nDeadFishing);
+                    }
+                }
+                for (int iltl = 0; iltl < getOsmose().getNumberLTLGroups(); iltl++) {
+                    ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return getOsmose().spatializedOutputs;
+    }
+
+    @Override
+    public void write(float time) {
+
+        // Pre-writing
+        for (Cell cell : getGrid().getCells()) {
+            int i = cell.get_igrid();
+            int j = cell.get_jgrid();
+            // Set _FillValue on land cells
+            if (cell.isLand()) {
+                for (int ispec = 0; ispec < getNSpecies(); ispec++) {
+                    biomass[ispec][i][j] = FILLVALUE;
+                    abundance[ispec][i][j] = FILLVALUE;
+                    mean_size[ispec][i][j] = FILLVALUE;
+                    tl[ispec][i][j] = FILLVALUE;
+                    yield[ispec][i][j] = FILLVALUE;
+                }
+                for (int iltl = 0; iltl < getOsmose().getNumberLTLGroups(); iltl++) {
+                    ltlbiomass[iltl][i][j] = FILLVALUE;
+                }
+            } else {
+                // Weight mean size with abundance
+                // Weight mean size with biomass
+                for (int ispec = 0; ispec < getNSpecies(); ispec++) {
+                    if (abundance[ispec][i][j] > 0) {
+                        mean_size[ispec][i][j] /= abundance[ispec][i][j];
+                        tl[ispec][i][j] /= biomass[ispec][i][j];
+                    }
+                }
+            }
+        }
+
+        // Write into NetCDF file
+        int nSpecies = getNSpecies();
+        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrAbundance = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getOsmose().getNumberLTLGroups(), getGrid().getNbLines(), getGrid().getNbColumns());
+        int nl = getGrid().getNbLines() - 1;
+        for (int kspec = 0; kspec < nSpecies; kspec++) {
+            for (int i = 0; i < getGrid().getNbLines(); i++) {
+                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                    arrBiomass.set(0, kspec, nl - i, j, biomass[kspec][i][j]);
+                    arrAbundance.set(0, kspec, nl - i, j, abundance[kspec][i][j]);
+                    arrSize.set(0, kspec, nl - i, j, mean_size[kspec][i][j]);
+                    arrTL.set(0, kspec, nl - i, j, tl[kspec][i][j]);
+                    arrYield.set(0, kspec, nl - i, j, yield[kspec][i][j]);
+                }
+            }
+        }
+        for (int kltl = 0; kltl < getOsmose().getNumberLTLGroups(); kltl++) {
+            for (int i = 0; i < getGrid().getNbLines(); i++) {
+                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+                    arrLTL.set(0, kltl, nl - i, j, ltlbiomass[kltl][i][j]);
+                }
+            }
+        }
+
+        ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
+        arrTime.set(0, time);
+
+        int index = nc.getUnlimitedDimension().getLength();
+        //System.out.println("NetCDF saving time " + index + " - " + time);
+        try {
+            nc.write("time", new int[]{index}, arrTime);
+            nc.write("biomass", new int[]{index, 0, 0, 0}, arrBiomass);
+            nc.write("abundance", new int[]{index, 0, 0, 0}, arrAbundance);
+            nc.write("yield", new int[]{index, 0, 0, 0}, arrYield);
+            nc.write("mean_size", new int[]{index, 0, 0, 0}, arrSize);
+            nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
+            nc.write("ltl_biomass", new int[]{index, 0, 0, 0, 0}, arrLTL);
+        } catch (IOException ex) {
+            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private String makeFileLocation(int iSimu) throws IOException {
@@ -308,14 +295,5 @@ public class SpatialIndicator extends AbstractIndicator {
             throw ioex;
         }
         return filename + ".part";
-    }
-
-    /**
-     *
-     * @return true if current step is the last step of the simulation
-     */
-    private boolean isLastStep() {
-        int lastStep = getOsmose().getNumberYears() * getOsmose().getNumberTimeStepsPerYear() - 1;
-        return getSimulation().getIndexTimeSimu() == lastStep;
     }
 }

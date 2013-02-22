@@ -11,7 +11,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class SizeSpectrumIndicator extends AbstractIndicator {
+public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
 
     private double[][] sizeSpectrum;
 
@@ -51,23 +51,14 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        float[][] values = new float[getOsmose().nbSizeClass][4];
+        double[][] values = new double[getOsmose().nbSizeClass][getNSpecies() + 1];
         for (int iSize = 0; iSize < getOsmose().nbSizeClass; iSize++) {
-            // Size
             values[iSize][0] = getOsmose().tabSizes[iSize];
-            // Abundance
-            double sum = 0f;
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                sum += sizeSpectrum[iSpec][iSize] / getOsmose().getRecordFrequency();
+                values[iSize][iSpec] = sizeSpectrum[iSpec][iSize] / getOsmose().getRecordFrequency();
             }
-            values[iSize][1] = (float) sum;
-            // ln(Size)
-            values[iSize][0] = getOsmose().tabSizesLn[iSize];        
-            // ln(Abundance)
-            values[iSize][1] = (float) Math.log(sum);
         }
-        
-
+        writeVariable(time, values);
     }
 
     @Override
@@ -75,7 +66,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
-        filename.append("_SizeSpectrum_Simu");
+        filename.append("_SizeSpectrumSpecies_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -84,11 +75,16 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Distribution of fish abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported. In logarithm, we consider the median of the size class, ie Ln(size [i]) = Ln((size [i]+size[i+1])/2)";
+        return "Distribution of fish species abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
     }
 
     @Override
     String[] getHeaders() {
-        return new String[]{"Size", "Abundance", "ln(size)", "ln(Abd)"};
+        String[] headers = new String[getNSpecies() + 1];
+        headers[0] = "Size";
+        for (int i = 0; i < getNSpecies(); i++) {
+            headers[i + 1] = getSimulation().getSpecies(i).getName();
+        }
+        return headers;
     }
 }

@@ -23,30 +23,55 @@ public class Indicators extends SimulationLinker {
     public static void init() {
         indicators = new ArrayList();
 
-        indicators.add(new BiomassIndicator());
-        indicators.add(new AbundanceIndicator());
+        // Biomass
+        indicators.add(new BiomassNoJuvIndicator());
+        indicators.add(new BiomassTotIndicator());
+        // Abundance
+        indicators.add(new AbundanceNoJuvIndicator());
+        indicators.add(new AbundanceTotIndicator());
+        // Mortality
         indicators.add(new MortalityIndicator());
+        // Yield
         indicators.add(new YieldIndicator());
+        indicators.add(new YieldNIndicator());
+        // Size
         indicators.add(new MeanSizeIndicator());
+        indicators.add(new MeanSizeCatchIndicator());
         indicators.add(new SizeSpectrumIndicator());
+        indicators.add(new SizeSpectrumSpeciesIndicator());
+        // TL
         indicators.add(new MeanTrophicLevelIndicator());
+        indicators.add(new MeanTrophicLevelCatchIndicator());
         indicators.add(new TrophicLevelSpectrumIndicator());
-        indicators.add(new PredationIndicator());
+        // Predation
+        indicators.add(new DietIndicator());
+        indicators.add(new PredatorPressureIndicator());
+        // Spatialized
         indicators.add(new SpatialIndicator());
-        indicators.add(new BiomassCalibrationIndicator());
         indicators.add(new LTLIndicator());
+        // Temporary indicator for calib that will be deleted soon
+        indicators.add(new BiomassCalibrationIndicator());
 
         for (Indicator indicator : indicators) {
             if (indicator.isEnabled()) {
+                indicator.init();
                 indicator.reset();
             }
         }
     }
-    
+
+    public static void close() {
+        for (Indicator indicator : indicators) {
+            if (indicator.isEnabled()) {
+                indicator.close();
+            }
+        }
+    }
+
     public static void initStep() {
         for (Indicator indicator : indicators) {
             if (indicator.isEnabled()) {
-                indicator.init();
+                indicator.initStep();
             }
         }
     }

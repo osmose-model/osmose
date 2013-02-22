@@ -11,10 +11,10 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanTrophicLevelIndicator extends AbstractIndicator {
+public class MeanSizeCatchIndicator extends AbstractIndicator {
 
-    private double[] meanTL;
-    private double[] biomass;
+    private double[] meanSizeCatch;
+    private double[] yieldN;
 
     @Override
     public void initStep() {
@@ -23,45 +23,45 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        meanTL = new double[getNSpecies()];
-        biomass = new double[getNSpecies()];
+        meanSizeCatch = new double[getNSpecies()];
+        yieldN = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
+            if (school.getAgeDt() > school.getSpecies().indexAgeClass0) {
                 int i = school.getSpeciesIndex();
-                meanTL[i] += school.getBiomass() * school.trophicLevel;
-                biomass[i] += school.getBiomass();
+                meanSizeCatch[i] += school.nDeadFishing * school.getLength();
+                yieldN[i] += school.nDeadFishing;
             }
         }
     }
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isTLOutput();
+        return getOsmose().isMeanSizeOutput();
     }
 
     @Override
     public void write(float time) {
 
         for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
-            if (biomass[i] > 0.d) {
-                meanTL[i] = (float) (meanTL[i] / biomass[i]);
+            if (yieldN[i] > 0) {
+                meanSizeCatch[i] = meanSizeCatch[i] / yieldN[i];
             } else {
-                meanTL[i] = Double.NaN;
+                meanSizeCatch[i] = Double.NaN;
             }
         }
-        writeVariable(time, meanTL);
+        writeVariable(time, meanSizeCatch);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
+        StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
-        filename.append("_meanTL_Simu");
+        filename.append("_meanSizeCatch_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -69,7 +69,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean Trophic Level of fish species, weighted by fish biomass, and including/excluding first ages specified in input (in calibration file)";
+        return "Mean size of fish species in cm, weighted by fish numbers in the catches";
     }
     
     @Override

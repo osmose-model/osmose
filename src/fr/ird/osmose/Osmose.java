@@ -245,6 +245,7 @@ public class Osmose {
             simulation.init();
             simulation.run();
             int time = (int) ((System.currentTimeMillis() - begin) / 1000);
+            
             System.out.println("Replicate " + replica + " [OK] (time ellapsed:  " + time + " seconds)");
         }
         // Save summary for calibration

@@ -11,10 +11,10 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanTrophicLevelIndicator extends AbstractIndicator {
+public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
 
-    private double[] meanTL;
-    private double[] biomass;
+    private double[] meanTLCatch;
+    private double[] yield;
 
     @Override
     public void initStep() {
@@ -23,8 +23,8 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        meanTL = new double[getNSpecies()];
-        biomass = new double[getNSpecies()];
+        meanTLCatch = new double[getNSpecies()];
+        yield = new double[getNSpecies()];
     }
 
     @Override
@@ -32,8 +32,8 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
         for (School school : getPopulation().getAliveSchools()) {
             if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
                 int i = school.getSpeciesIndex();
-                meanTL[i] += school.getBiomass() * school.trophicLevel;
-                biomass[i] += school.getBiomass();
+                meanTLCatch[i] += school.trophicLevel * school.adb2biom(school.nDeadFishing);
+                yield[i] += school.adb2biom(school.nDeadFishing);
             }
         }
     }
@@ -47,13 +47,13 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
     public void write(float time) {
 
         for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
-            if (biomass[i] > 0.d) {
-                meanTL[i] = (float) (meanTL[i] / biomass[i]);
+            if (yield[i] > 0) {
+                meanTLCatch[i] = meanTLCatch[i] / yield[i];
             } else {
-                meanTL[i] = Double.NaN;
+                meanTLCatch[i] = Double.NaN;
             }
         }
-        writeVariable(time, meanTL);
+        writeVariable(time, meanTLCatch);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
-        filename.append("_meanTL_Simu");
+        filename.append("_meanTLCatch_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -69,7 +69,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean Trophic Level of fish species, weighted by fish biomass, and including/excluding first ages specified in input (in calibration file)";
+        return "Mean Trophic Level of fish species, weighted by fish catch";
     }
     
     @Override

@@ -1,7 +1,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.util.IOTools;
+import fr.ird.osmose.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -16,7 +16,7 @@ import ucar.nc2.NetcdfFileWriteable;
  *
  * @author pverley
  */
-public class LTLIndicator extends AbstractIndicator {
+public class LTLIndicator extends SimulationLinker implements  Indicator {
 
     /**
      * _FillValue attribute for cells on land
@@ -33,6 +33,25 @@ public class LTLIndicator extends AbstractIndicator {
 
     @Override
     public void init() {
+        createNCFile(getFilename());
+    }
+
+    @Override
+    public void close() {
+        try {
+            nc.close();
+            String strFilePart = nc.getLocation();
+            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
+            File filePart = new File(strFilePart);
+            File fileBase = new File(strFileBase);
+            filePart.renameTo(fileBase);
+        } catch (Exception ex) {
+            Logger.getLogger(LTLIndicator.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
+        }
+    }
+
+    @Override
+    public void initStep() {
         // nothing to do
     }
 
@@ -41,22 +60,6 @@ public class LTLIndicator extends AbstractIndicator {
         int nx = getGrid().getNbColumns();
         int ny = getGrid().getNbLines();
         ltlbiomass = new float[getOsmose().getNumberLTLGroups()][ny][nx];
-
-        /*
-         * Create the NetCDF file at first time step
-         */
-        if (getSimulation().getIndexTimeSimu() == 0) {
-            String ncfile;
-            try {
-                ncfile = makeFileLocation(getSimulation().getReplica());
-                if (null == nc) {
-                    createNCFile(ncfile);
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(LTLIndicator.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        }
     }
 
     @Override
@@ -112,10 +115,6 @@ public class LTLIndicator extends AbstractIndicator {
             Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
             Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if (isLastStep()) {
-            closeNCFile();
         }
     }
 
@@ -185,26 +184,8 @@ public class LTLIndicator extends AbstractIndicator {
             Logger.getLogger(LTLIndicator.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    /**
-     * Closes the NetCDF file.
-     */
-    private void closeNCFile() {
-        try {
-            nc.close();
-            String strFilePart = nc.getLocation();
-            String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
-            File filePart = new File(strFilePart);
-            File fileBase = new File(strFileBase);
-            filePart.renameTo(fileBase);
-        } catch (Exception ex) {
-            Logger.getLogger(LTLIndicator.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
-        }
-
-    }
-
-    private String makeFileLocation(int nSerie) throws IOException {
-
+    
+    private String getFilename() {
         File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
@@ -213,28 +194,8 @@ public class LTLIndicator extends AbstractIndicator {
         filename.append(getOsmose().outputPrefix);
         filename.append("_ltlbiomass_integrated_");
         filename.append("Simu");
-        filename.append(nSerie);
-        filename.append(".nc");
-        File file = new File(filename.toString());
-        try {
-            IOTools.makeDirectories(file.getAbsolutePath());
-            file.createNewFile();
-            file.delete();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("{Ouput} Failed to create NetCDF file " + filename + " ==> " + ex.getMessage());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        filename.append(".part");
+        filename.append(getSimulation().getReplica());
+        filename.append(".nc.part");
         return filename.toString();
-    }
-
-    /**
-     *
-     * @return true if current step is the last step of the simulation
-     */
-    private boolean isLastStep() {
-        int lastStep = getOsmose().getNumberYears() * getOsmose().getNumberTimeStepsPerYear() - 1;
-        return getSimulation().getIndexTimeSimu() == lastStep;
     }
 }

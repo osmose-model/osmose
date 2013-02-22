@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
@@ -10,9 +6,9 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class YieldIndicator extends AbstractIndicator {
+public class BiomassTotIndicator extends AbstractIndicator {
 
-    public double[] yield;
+    private double[] biomass;
 
     @Override
     public void initStep() {
@@ -21,32 +17,35 @@ public class YieldIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        yield = new double[getNSpecies()];
-
+        biomass = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            yield[school.getSpeciesIndex()] += school.adb2biom(school.nDeadFishing);
+            biomass[school.getSpeciesIndex()] += school.getBiomass();
         }
     }
 
     @Override
     public boolean isEnabled() {
-        return !getOsmose().isCalibrationOutput();
+        return !getOsmose().isCalibrationOutput() && getOsmose().isIncludeClassZero();
     }
 
     @Override
     public void write(float time) {
 
-        writeVariable(time, yield);
+        double nsteps = getOsmose().savingDtMatrix;
+        for (int i = 0; i < biomass.length; i++) {
+            biomass[i] /= nsteps;
+        }
+        writeVariable(time, biomass);
     }
 
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder(getOsmose().outputPrefix);
-        filename.append("_yield_Simu");
+        filename.append("_biomass-total_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -54,9 +53,9 @@ public class YieldIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
+        return "Mean biomass (tons), including first ages specified in input (typically in calibration file)";
     }
-
+    
     @Override
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];

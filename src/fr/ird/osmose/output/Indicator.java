@@ -13,7 +13,7 @@ public interface Indicator {
      * Indeed for some indicators it might be necessary to know the state of
      * the system just after the reproduction and before the following step.
      */
-    public void init();
+    public void initStep();
 
     /**
      * Reset the indicator after a saving step has been written in output file.
@@ -40,5 +40,9 @@ public interface Indicator {
      * @param time, expressed in year
      */
     public void write(float time);
+    
+    public void init();
+    
+    public void close();
     
 }

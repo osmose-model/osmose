@@ -1,18 +1,29 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.SimulationLinker;
 
 /**
  *
  * @author pverley
  */
-public class BiomassCalibrationIndicator extends AbstractIndicator {
+public class BiomassCalibrationIndicator extends SimulationLinker implements Indicator {
 
     private double[] biomassTot;
     private double[] biomassNoJuv;
-
+    
     @Override
     public void init() {
+        // do nothing
+    }
+    
+    @Override
+    public void close() {
+        // do nothing
+    }
+
+    @Override
+    public void initStep() {
         // Nothing to do
     }
 

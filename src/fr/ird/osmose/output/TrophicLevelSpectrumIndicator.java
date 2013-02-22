@@ -6,12 +6,6 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -25,7 +19,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     private double[][] trophicLevelSpectrum;
 
     @Override
-    public void init() {
+    public void initStep() {
         // Nothing to do
     }
 
@@ -60,60 +54,39 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public void write(float time) {
-        StringBuilder filename;
-        String description;
-        PrintWriter pr;
-        FileOutputStream fos = null;
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
 
-        filename = new StringBuilder("Trophic");
+        double[][] values = new double[getOsmose().nbTLClass][getNSpecies() + 1];
+        for (int iTL = 0; iTL < getOsmose().nbTLClass; iTL++) {
+            values[iTL][0] = getOsmose().tabTL[iTL];
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                values[iTL][iSpec] = (trophicLevelSpectrum[iSpec][iTL] / getOsmose().getRecordFrequency());
+            }
+        }
+    }
+
+    @Override
+    String getFilename() {
+        StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getOsmose().outputPrefix);
         filename.append("_TLDistrib_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
-        description = "Distribution of species biomass (tons) by 0.1 TL class, and excluding first ages specified in input (in calibration file)";
-        // Write the file
-        File file = new File(path, filename.toString());
-        file.getParentFile().mkdirs();
-        boolean isNew = !file.exists();
-        try {
-            fos = new FileOutputStream(file, true);
-            pr = new PrintWriter(fos, true);
-            if (isNew) {
-                pr.print("\"");
-                pr.print(description);
-                pr.println("\"");
-                pr.print("Time");
-                pr.print(';');
-                pr.print("TL");
-                pr.print(';');
-                for (int i = 0; i < getNSpecies(); i++) {
-                    pr.print(getSimulation().getSpecies(i).getName());
-                    pr.print(';');
-                }
-                pr.println();
-            }
-            for (int iTL = 0; iTL < getOsmose().nbTLClass; iTL++) {
-                pr.print(time);
-                pr.print(';');
-                pr.print((getOsmose().tabTL[iTL]));
-                pr.print(';');
-                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                    pr.print((float) (trophicLevelSpectrum[iSpec][iTL] / getOsmose().getRecordFrequency()));
-                    pr.print(';');
-                }
-                pr.println();
-            }
-            pr.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Indicators.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        return filename.toString();
+    }
+
+    @Override
+    String getDescription() {
+        return "Distribution of species biomass (tons) by 0.1 TL class, and excluding first ages specified in input (in calibration file)";
+    }
+
+    @Override
+    String[] getHeaders() {
+        String[] headers = new String[getNSpecies() + 1];
+        headers[0] = "TL";
+        for (int i = 0; i < getNSpecies(); i++) {
+            headers[i + 1] = getSimulation().getSpecies(i).getName();
         }
+        return headers;
     }
 }

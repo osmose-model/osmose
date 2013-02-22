@@ -5,16 +5,14 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanTrophicLevelIndicator extends AbstractIndicator {
+public class AbundanceNoJuvIndicator extends AbstractIndicator {
 
-    private double[] meanTL;
-    private double[] biomass;
+    private double[] abundance;
 
     @Override
     public void initStep() {
@@ -23,45 +21,38 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        meanTL = new double[getNSpecies()];
-        biomass = new double[getNSpecies()];
+        abundance = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
+
         for (School school : getPopulation().getAliveSchools()) {
             if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
-                int i = school.getSpeciesIndex();
-                meanTL[i] += school.getBiomass() * school.trophicLevel;
-                biomass[i] += school.getBiomass();
+                abundance[school.getSpeciesIndex()] += school.getAbundance();
             }
         }
     }
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isTLOutput();
+        return !getOsmose().isCalibrationOutput();
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
-            if (biomass[i] > 0.d) {
-                meanTL[i] = (float) (meanTL[i] / biomass[i]);
-            } else {
-                meanTL[i] = Double.NaN;
-            }
+        double nsteps = getOsmose().savingDtMatrix;
+        for (int i = 0; i < abundance.length; i++) {
+            abundance[i] /= nsteps;
         }
-        writeVariable(time, meanTL);
+        writeVariable(time, abundance);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix);
-        filename.append("_meanTL_Simu");
+        StringBuilder filename = new StringBuilder(getOsmose().outputPrefix);
+        filename.append("_abundance_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -69,9 +60,9 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean Trophic Level of fish species, weighted by fish biomass, and including/excluding first ages specified in input (in calibration file)";
+        return "Mean abundance (number of fish), excluding first ages specified in input (typically in calibration file)";
     }
-    
+
     @Override
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];
