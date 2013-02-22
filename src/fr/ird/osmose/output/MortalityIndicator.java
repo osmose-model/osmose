@@ -137,7 +137,6 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 }
             }
             prw[iSpecies].println();
-            prw[iSpecies].close();
         }
     }
 
