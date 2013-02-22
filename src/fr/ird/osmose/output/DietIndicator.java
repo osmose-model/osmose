@@ -35,7 +35,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     @Override
     public void initStep() {
         for (School school : getPopulation().getPresentSchools()) {
-            biomassStage[school.getSpeciesIndex()][school.dietOutputStage] += school.getBiomass();
+            biomassStage[school.getSpeciesIndex()][school.getDietOutputStage()] += school.getBiomass();
         }
         int nSpec = getNSpecies();
         int nPrey = nSpec + getOsmose().getNumberLTLGroups();
@@ -79,17 +79,17 @@ public class DietIndicator extends SimulationLinker implements Indicator {
         for (School school : getPopulation().getAliveSchools()) {
             double sumDiet = computeSumDiet(school);
             int iSpec = school.getSpeciesIndex();
-            nbStomachs[iSpec][school.dietOutputStage] += school.getAbundance();
+            nbStomachs[iSpec][school.getDietOutputStage()] += school.getAbundance();
             for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     if (sumDiet > 0) {
-                        diet[iSpec][school.dietOutputStage][i][s] += school.getAbundance() * school.diet[i][s] / sumDiet;
+                        diet[iSpec][school.getDietOutputStage()][i][s] += school.getAbundance() * school.diet[i][s] / sumDiet;
                     }
                 }
             }
             for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups(); i++) {
                 if (sumDiet > 0) {
-                    diet[iSpec][school.dietOutputStage][i][0] += school.getAbundance() * school.diet[i][0] / sumDiet;
+                    diet[iSpec][school.getDietOutputStage()][i][0] += school.getAbundance() * school.diet[i][0] / sumDiet;
                 }
             }
         }

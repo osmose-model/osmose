@@ -49,8 +49,7 @@ public class GrowthProcess extends AbstractProcess {
             int age = school.getAgeDt();
             if ((age == 0) || school.isUnlocated()) {
                 // Linear growth for eggs and migrating schools
-                school.setLength(school.getLength() + deltaMeanLength[i][age]);
-                school.setWeight(species.computeWeight(school.getLength()));
+                school.incrementLength(deltaMeanLength[i][age]);
             } else {
                 // Growth based on predation success
                 growth(school, minDelta[i][age], maxDelta[i][age]);
@@ -63,9 +62,8 @@ public class GrowthProcess extends AbstractProcess {
         int iSpec = school.getSpeciesIndex();
         //calculation of lengths according to predation efficiency
         if (school.predSuccessRate >= criticalPredSuccess[iSpec]) {
-            float length = (school.getLength() + minDelta + (maxDelta - minDelta) * ((school.predSuccessRate - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));
-            school.setLength(length);
-            school.setWeight(school.getSpecies().computeWeight(length));
+            float dlength = (minDelta + (maxDelta - minDelta) * ((school.predSuccessRate - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));
+            school.incrementLength(dlength);
         }
     }
 }

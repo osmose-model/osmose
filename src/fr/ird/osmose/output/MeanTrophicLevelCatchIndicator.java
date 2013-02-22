@@ -32,7 +32,7 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
         for (School school : getPopulation().getAliveSchools()) {
             if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
                 int i = school.getSpeciesIndex();
-                meanTLCatch[i] += school.trophicLevel * school.adb2biom(school.nDeadFishing);
+                meanTLCatch[i] += school.getTrophicLevel() * school.adb2biom(school.nDeadFishing);
                 yield[i] += school.adb2biom(school.nDeadFishing);
             }
         }

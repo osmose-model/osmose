@@ -32,20 +32,12 @@ public class GridPoint {
     public float getX() {
         return x;
     }
-    
-    public void setX(float x) {
-        this.x = x;
-    }
 
     /**
      * @return the y
      */
     public float getY() {
         return y;
-    }
-    
-    public void setY(float y) {
-        this.y = y;
     }
 
     /**
@@ -80,18 +72,11 @@ public class GridPoint {
     }
     
     public void moveToCell(Cell cell) {
-        setX(cell.get_igrid());
-        setY(cell.get_jgrid());
+        x = cell.get_igrid();
+        y = cell.get_jgrid();
     }
     
     public static IGrid getGrid() {
-        return getOsmose().getGrid();
-    }
-    
-    /*
-     * Get the current Osmose instance
-     */
-    public static Osmose getOsmose() {
-        return Osmose.getInstance();
+        return Osmose.getInstance().getGrid();
     }
 }

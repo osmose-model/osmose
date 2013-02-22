@@ -32,7 +32,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
         for (School school : getPopulation().getAliveSchools()) {
             if (school.getAgeDt() >= school.getSpecies().indexAgeClass0) {
                 int i = school.getSpeciesIndex();
-                meanTL[i] += school.getBiomass() * school.trophicLevel;
+                meanTL[i] += school.getBiomass() * school.getTrophicLevel();
                 biomass[i] += school.getBiomass();
             }
         }

@@ -41,7 +41,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     private static int getTLRank(School school) {
 
         int iTL = getOsmose().tabTL.length - 1;
-        while (school.trophicLevel <= getOsmose().tabTL[iTL] && (iTL > 0)) {
+        while (school.getTrophicLevel() <= getOsmose().tabTL[iTL] && (iTL > 0)) {
             iTL--;
         }
         return iTL;

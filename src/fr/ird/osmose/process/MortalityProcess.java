@@ -74,6 +74,7 @@ public class MortalityProcess extends AbstractProcess {
                 }
 
                 // Apply mortalities
+                float[] tmpTL = new float[ns];
                 for (int is = 0; is < ns; is++) {
                     School school = schools.get(is);
                     // 1. Predation
@@ -91,30 +92,30 @@ public class MortalityProcess extends AbstractProcess {
                     }
                     school.preyedBiomass += preyedBiomass;
                     // update TL
-                    school.tmpTL = 0;
+                    tmpTL[is] = 0;
                     if (preyedBiomass > 0.d) {
                         for (int ipr = 0; ipr < (ns + npl); ipr++) {
                             if (ipr < ns) {
                                 School prey = schools.get(ipr);
                                 double biomPrey = prey.adb2biom(nDeadMatrix[ipr][is]);
                                 if (getOsmose().isDietOuput()) {
-                                    school.diet[prey.getSpeciesIndex()][prey.dietOutputStage] += biomPrey;
+                                    school.diet[prey.getSpeciesIndex()][prey.getDietOutputStage()] += biomPrey;
                                 }
                                 float TLprey = (prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)
                                         ? Species.TL_EGG
-                                        : prey.trophicLevel;
-                                school.tmpTL += TLprey * biomPrey / preyedBiomass;
+                                        : prey.getTrophicLevel();
+                                tmpTL[is] += TLprey * biomPrey / preyedBiomass;
                             } else {
-                                school.tmpTL += getSimulation().getPlankton(ipr - ns).getTrophicLevel() * nDeadMatrix[ipr][is] / preyedBiomass;
+                                tmpTL[is] += getSimulation().getPlankton(ipr - ns).getTrophicLevel() * nDeadMatrix[ipr][is] / preyedBiomass;
                                 if (getOsmose().isDietOuput()) {
                                     school.diet[getOsmose().getNumberSpecies() + (ipr - ns)][0] += nDeadMatrix[ipr][is];
                                 }
                             }
                             //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);
                         }
-                        school.tmpTL += 1;
+                        tmpTL[is] += 1;
                     } else {
-                        school.tmpTL = school.trophicLevel;
+                        tmpTL[is] = school.getTrophicLevel();
                     }
 
                     // 2. Starvation
@@ -135,8 +136,9 @@ public class MortalityProcess extends AbstractProcess {
                         school.setAbundance(0.d);
                     }
                 }
-                for (School school : schools) {
-                    school.trophicLevel = school.tmpTL;
+                // Update TL
+                for (int is = 0; is < ns; is++) {
+                    schools.get(is).setTrophicLevel(tmpTL[is]);
                 }
             }
         }
