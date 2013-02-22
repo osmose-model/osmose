@@ -51,7 +51,7 @@ public class PredationProcess extends AbstractProcess {
                     for (int is = 0; is < ns; is++) {
                         School school = schools.get(is);
                         school.nDeadPredation = 0;
-                        school.predSuccessRate = computePredSuccessRate(school.biomassToPredate, school.preyedBiomass);
+                        school.predSuccessRate = computePredSuccessRate(school, school.preyedBiomass);
                         school.setAbundance(school.getAbundance() - nDeadPredation[is]);
                         if (school.getAbundance() < 1.d) {
                             school.setAbundance(0.d);
@@ -97,9 +97,10 @@ public class PredationProcess extends AbstractProcess {
          * Should check how it is done in version WS2009 and make sure that it
          * is equivalent to what is done here. It might have some consequences
          * for School.predSuccessRate which influences growth and starvation.
+         * phv 20130222 deleted variable school.biomassToPredate
          */
         if (Simulation.VERSION.equals(Simulation.Version.SCHOOL2012_BIOM) || Simulation.VERSION.equals(Simulation.Version.SCHOOL2012_PROD)) {
-            predator.biomassToPredate = biomassToPredate;
+            //predator.biomassToPredate = biomassToPredate;
         }
 
         // Distribute the predation over the preys
@@ -154,10 +155,23 @@ public class PredationProcess extends AbstractProcess {
         return preyUpon;
     }
     
+    /**
+     * Compute the rate of predation success.
+     * @param biomassToPredate, the max biomass [ton] that a school can prey.
+     * @param preyedBiomass, the biomass [ton] effectively preyed.
+     * @return 
+     */
     public static float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
 
         // Compute the predation success rate
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
+    }
+    
+    public static float computePredSuccessRate(School school, double preyedBiomass) {
+
+        // Compute the predation success rate
+        double biomassToPredate = computeBiomassToPredate(school, 1);
+        return computePredSuccessRate(biomassToPredate, preyedBiomass);
     }
     
     private static float[] getPercentPlankton(School predator) {

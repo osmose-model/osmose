@@ -48,69 +48,76 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.process.PredationProcess;
-
 public class School extends GridPoint {
 
-    /*
-     * Species of the school
+    /**
+     * Species of the school.
      */
     final private Species species;
-    /*
+    /**
      * Age of the fish expressed in number of time steps.
      */
     private int age;
-    /*
-     * length of the individuals in the school in centimeters
+    /**
+     * Length of the individuals in the school in centimeters.
      */
     private float length;
-    /*
-     * weight of individual of the school in grams
+    /**
+     * Weight of individual of the school in grams.
      */
     private float weight;
-    /*
-     * TL of this fish
+    /**
+     * Trophic level of this school.
      */
     private float trophicLevel;
-    /*
-     * Whether the school is catchable for fishing
+    /**
+     * Whether the school is catchable for fishing.
      */
     private boolean catchable;
-    /*
-     * Correspond to feeding length-stage
+    /**
+     * Correspond to feeding length-stage.
      */
     private int feedingStage;
-    /*
-     * Correspond to the age-stage used for accessibilities between species
+    /**
+     * Correspond to the age-stage used for accessibility between species
      */
     private int accessibilityStage;
-    /*
-     *
+    /**
+     * Diet stage.
      */
     private int dietOutputStage;
-    /*
-     * Number of individuals in the school
+    /**
+     * Number of individuals in the school.
      */
     private double abundance;
-    //
-    public float[][] diet;
-    //
-    public double nDeadFishing;
-    public double nDeadPredation;
-    public double nDeadStarvation;
-    public double nDeadNatural;
-    //
-    public double preyedBiomass;
-    /*
-     * Available biomass [ton] of the school for predation by other schools
+    /**
+     * Matrix of diets in a time step. diet[NSPECIES+NPLANKTON][NDIETSTAGES]
      */
-    public double biomassToPredate;
-    /*
-     * Predation success rate
+    public float[][] diet;
+    /**
+     * Number of dead individuals due to fishing.
+     */
+    public double nDeadFishing;
+    /**
+     * Number of dead individuals due to predation.
+     */
+    public double nDeadPredation;
+    /**
+     * Number of dead individuals due to starvation.
+     */
+    public double nDeadStarvation;
+    /**
+     * Number of dead individuals due to natural mortality.
+     */
+    public double nDeadNatural;
+    /**
+     * Preyed biomass [ton] in a time step.
+     */
+    public double preyedBiomass;
+    /**
+     * Predation success rate. (ratio of what is preyed on maximal ingestion).
      */
     public float predSuccessRate;
-    //
-    public boolean hasPredated;
 
 //////////////
 // Constructor
@@ -153,7 +160,6 @@ public class School extends GridPoint {
         nDeadNatural = 0;
         nDeadPredation = 0;
         nDeadStarvation = 0;
-        biomassToPredate = PredationProcess.computeBiomassToPredate(this, 1);
         preyedBiomass = 0;
         catchable = true;
         // Reset diet variables
@@ -185,12 +191,23 @@ public class School extends GridPoint {
     }
 
     /**
-     * @return the abundance
+     * Gets the abundance of the school at the beginning of the time step.
+     *
+     * @return the abundance of the school at the beginning of the time step
      */
     public double getAbundance() {
         return abundance;
     }
 
+    /**
+     * Evaluates the instantaneous abundance of the school.
+     *
+     * @return the instantaneous abundance of the school. instantaneous
+     * abundance = abundance at the beginning of the time step minus the dead
+     * individuals (due to either predation, starvation, natural or fishing) at
+     * the moment the function is called. It is a snapshot of the abundance of
+     * the school within the current time step.
+     */
     public double getInstantaneousAbundance() {
         double nDeadTotal = nDeadPredation
                 + nDeadStarvation
@@ -211,17 +228,31 @@ public class School extends GridPoint {
     }
 
     /**
-     * @return the biomass
+     * Gets the biomass of the school at the beginning of the time step.
+     *
+     * @return the biomass of the school at the beginning of the time step
+     * expressed in ton.
      */
     public double getBiomass() {
         return adb2biom(abundance);
     }
 
+    /**
+     * Evaluates the instantaneous biomass of the school.
+     *
+     * @return the instantaneous biomass of the school. instantaneous biomass =
+     * biomass at the beginning of the time step minus the dead biomass (due to
+     * either predation, starvation, natural or fishing) at the moment the
+     * function is called. It is a snapshot of the biomass of the school within
+     * the current time step.
+     */
     public double getInstantaneousBiomass() {
         return adb2biom(getInstantaneousAbundance());
     }
 
     /**
+     * Checks whether the school is alive
+     *
      * @return whether the school is alive or not
      */
     public boolean isAlive() {
@@ -288,7 +319,7 @@ public class School extends GridPoint {
     public int getAccessibilityStage() {
         return accessibilityStage;
     }
-    
+
     /**
      * @return the dietOutputStage
      */
