@@ -151,9 +151,6 @@ public class Simulation {
         AbstractProcess populatingProcess = new PopulatingProcess();
         populatingProcess.init();
         populatingProcess.run();
-
-        // Initialize the indicators
-        Indicators.init();
     }
 
     /**
@@ -188,9 +185,6 @@ public class Simulation {
             // Go to following year
             year++;
         }
-        
-        // Close the indicators
-        Indicators.close();
     }
 
     public Population getPopulation() {

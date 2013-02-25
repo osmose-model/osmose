@@ -54,6 +54,10 @@ public class SequentialMortalityStep extends AbstractStep {
      * MPA process
      */
     private AbstractProcess mpaProcess;
+    /*
+     * List of indicators
+     */
+    private Indicators indicators;
 
     @Override
     public void init() {
@@ -85,10 +89,14 @@ public class SequentialMortalityStep extends AbstractStep {
         // Movement of the schools
         movementProcess = new MovementProcess();
         movementProcess.init();
-        
+
         // MPA
         mpaProcess = new MPAProcess();
         mpaProcess.init();
+
+        // Indicators
+        indicators = new Indicators();
+        indicators.init();
     }
 
     @Override
@@ -101,11 +109,11 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
-        Indicators.initStep();
+        indicators.initStep();
 
         // Spatial distribution
         movementProcess.run();
-        
+
         // Update MPA
         mpaProcess.run();
 
@@ -130,12 +138,17 @@ public class SequentialMortalityStep extends AbstractStep {
         fishingProcess.run();
 
         // Save steps
-        Indicators.updateAndWriteIndicators();
+        indicators.update();
 
         // Reproduction
         reproductionProcess.run();
 
         // Remove dead school
         getPopulation().removeDeadSchools();
+
+        // close indicators on last step
+        if (isLastStep()) {
+            indicators.close();
+        }
     }
 }

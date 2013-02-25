@@ -43,6 +43,10 @@ public class ConcomitantMortalityStep extends AbstractStep {
      * MPA process
      */
     private AbstractProcess mpaProcess;
+    /*
+     * List of indicators
+     */
+    private Indicators indicators;
 
     @Override
     public void init() {
@@ -83,6 +87,10 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // MPA
         mpaProcess = new MPAProcess();
         mpaProcess.init();
+        
+        // Indicators
+        indicators = new Indicators();
+        indicators.init();
     }
 
     @Override
@@ -95,7 +103,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
-        Indicators.initStep();
+        indicators.initStep();
 
         // Update plankton concentration
         for (int p = 0; p < getOsmose().getNumberLTLGroups(); p++) {
@@ -116,12 +124,17 @@ public class ConcomitantMortalityStep extends AbstractStep {
         growthProcess.run();
 
         // Save steps
-        Indicators.updateAndWriteIndicators();
+        indicators.update();
 
         // Reproduction
         reproductionProcess.run();
 
         // Remove all dead schools
         getPopulation().removeDeadSchools();
+        
+        // close indicators on last step
+        if (isLastStep()) {
+            indicators.close();
+        }
     }
 }
