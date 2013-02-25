@@ -13,34 +13,33 @@ import fr.ird.osmose.ltl.LTLForcing;
  */
 public class SimulationLinker {
     
-    public static Osmose getOsmose() {
+    public Osmose getOsmose() {
         return Osmose.getInstance();
     }
     
-    public static IGrid getGrid() {
+    public IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
 
-    public static Simulation getSimulation() {
+    public Simulation getSimulation() {
         return Osmose.getInstance().getSimulation();
     }
 
-    public static Population getPopulation() {
+    public Population getPopulation() {
         return Osmose.getInstance().getSimulation().getPopulation();
     }
     
-    public static LTLForcing getForcing() {
+    public LTLForcing getForcing() {
         return Osmose.getInstance().getForcing();
     }
     
-    public static Species getSpecies(int index) {
+    public Species getSpecies(int index) {
         return Osmose.getInstance().getSimulation().getSpecies(index);
     }
     
-    public static String resolveFile(String filename) {
+    public String resolveFile(String filename) {
         return Osmose.getInstance().resolveFile(filename);
     }
-    
     /**
      * The number of simulated species
      *
