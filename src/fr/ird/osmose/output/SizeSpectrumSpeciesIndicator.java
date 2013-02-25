@@ -37,7 +37,7 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
         return getOsmose().isSizeSpectrumOutput() || getOsmose().isSizeSpectrumSpeciesOutput();
     }
 
-    private static int getSizeRank(School school) {
+    private int getSizeRank(School school) {
 
         int iSize = getOsmose().tabSizes.length - 1;
         if (school.getLength() <= getOsmose().spectrumMaxSize) {
