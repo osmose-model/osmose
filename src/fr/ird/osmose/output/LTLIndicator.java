@@ -2,6 +2,7 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.SimulationLinker;
+import fr.ird.osmose.util.IOTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -33,7 +34,9 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
 
     @Override
     public void init() {
-        createNCFile(getFilename());
+        String filename = getFilename();
+        IOTools.makeDirectories(filename);
+        createNCFile(filename);
     }
 
     @Override
