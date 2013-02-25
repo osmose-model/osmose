@@ -90,6 +90,10 @@ public class Simulation {
      */
     private int i_step_simu;
     /*
+     * Total number of time steps in one simulation
+     */
+    private int n_steps_simu;
+    /*
      * Array of the species of the simulation
      */
     private Species[] species;
@@ -114,6 +118,7 @@ public class Simulation {
         population = new Population();
 
         // Reset time variables
+        n_steps_simu = getOsmose().getNumberYears() * getOsmose().getNumberTimeStepsPerYear();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
@@ -158,32 +163,26 @@ public class Simulation {
      */
     private void progress() {
         // screen display to check the period already simulated
-        if (year % 5 == 0) {
-            System.out.println("year " + year + " | CPU time " + new Date());   // t is annual
-        } else {
+        if (i_step_simu % getOsmose().getNumberTimeStepsPerYear() == 0) {
             System.out.println("year " + year);
         }
+        //System.out.print(" " + i_step_year);
     }
 
     public void run() {
 
-        while (year < getOsmose().getNumberYears()) {
-
+        while (i_step_simu < n_steps_simu) {
+            year = i_step_simu / getOsmose().getNumberTimeStepsPerYear();
+            i_step_year = i_step_simu % getOsmose().getNumberTimeStepsPerYear();
+            
             // Print progress in console
             progress();
 
-            // Loop over the year
-            while (i_step_year < getOsmose().getNumberTimeStepsPerYear()) {
-                // Run a new step
-                step.step(i_step_simu);
-                // Increment time step
-                i_step_year++;
-                i_step_simu++;
-            }
-            // End of the year
-            i_step_year = 0;
-            // Go to following year
-            year++;
+            // Run a new step
+            step.step(i_step_simu);
+            
+            // Increment time step
+            i_step_simu++;
         }
     }
 
@@ -200,9 +199,10 @@ public class Simulation {
     public Species getSpecies(int index) {
         return species[index];
     }
-    
+
     /**
      * Gets the specified plankton group.
+     *
      * @param iPlankton, the index of the plankton group.
      * @return the plankton group number iPlankton.
      */
@@ -222,14 +222,10 @@ public class Simulation {
         return i_step_simu;
     }
 
-    private IGrid getGrid() {
-        return Osmose.getInstance().getGrid();
-    }
-
     private Osmose getOsmose() {
         return Osmose.getInstance();
     }
-    
+
     public final int getReplica() {
         return replica;
     }

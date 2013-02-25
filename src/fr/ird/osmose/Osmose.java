@@ -240,13 +240,13 @@ public class Osmose {
         for (int replica = 0; replica < nbLoopTab; replica++) {
             long begin = System.currentTimeMillis();
             System.out.println();
-            System.out.println("Replicate " + replica + "...");
+            System.out.println("Replica " + replica + "...");
             simulation = new Simulation(replica);
             simulation.init();
             simulation.run();
             int time = (int) ((System.currentTimeMillis() - begin) / 1000);
             
-            System.out.println("Replicate " + replica + " [OK] (time ellapsed:  " + time + " seconds)");
+            System.out.println("Replica " + replica + " [OK] (time ellapsed:  " + time + " seconds)");
         }
         // Save summary for calibration
         if (calibrationMatrix) {
