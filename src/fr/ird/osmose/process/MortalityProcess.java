@@ -90,7 +90,6 @@ public class MortalityProcess extends AbstractProcess {
                             preyedBiomass += nDeadMatrix[ipr][is];
                         }
                     }
-                    school.preyedBiomass += preyedBiomass;
                     // update TL
                     tmpTL[is] = 0;
                     if (preyedBiomass > 0.d) {

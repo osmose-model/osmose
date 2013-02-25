@@ -113,10 +113,6 @@ public class School extends GridPoint {
      */
     public double nDeadNatural;
     /**
-     * Preyed biomass [ton] in a time step.
-     */
-    public double preyedBiomass;
-    /**
      * Predation success rate. (ratio of what is preyed on maximal ingestion).
      */
     public float predSuccessRate;
@@ -162,7 +158,6 @@ public class School extends GridPoint {
         nDeadNatural = 0;
         nDeadPredation = 0;
         nDeadStarvation = 0;
-        preyedBiomass = 0;
         catchable = true;
         // Reset diet variables
         diet = new float[getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups()][];

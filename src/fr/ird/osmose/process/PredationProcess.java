@@ -33,26 +33,28 @@ public class PredationProcess extends AbstractProcess {
             List<School> schools = getPopulation().getSchools(cell);
             Collections.shuffle(schools);
             int ns = schools.size();
+            double[] preyedBiomass = new double[ns];
             if (!(cell.isLand() || schools.isEmpty())) {
                 double[] nDeadPredation = new double[ns];
                 // Compute predation
-                for (School predator : schools) {
+                for (int ipred = 0; ipred < ns; ipred++) {
+                    School predator = schools.get(ipred);
                     double[] preyUpon = computePredation(predator, School.INISTEP_BIOMASS, 1);
-                    for (int ipr = 0; ipr < ns; ipr++) {
-                        if (ipr < ns) {
-                            School prey = schools.get(ipr);
-                            nDeadPredation[ipr] += prey.biom2abd(preyUpon[ipr]);
-                            prey.nDeadPredation += prey.biom2abd(preyUpon[ipr]);
+                    for (int iprey = 0; iprey < ns; iprey++) {
+                        if (iprey < ns) {
+                            School prey = schools.get(iprey);
+                            nDeadPredation[iprey] += prey.biom2abd(preyUpon[iprey]);
+                            prey.nDeadPredation += prey.biom2abd(preyUpon[iprey]);
                         }
                     }
-                    predator.preyedBiomass = sum(preyUpon);
+                    preyedBiomass[ipred] = sum(preyUpon);
                 }
                 // Apply predation mortality
                 for (int is = 0; is < ns; is++) {
                     School school = schools.get(is);
                     school.nDeadPredation = 0;
                     double biomassToPredate = school.getBiomass() * getPredationRate(school, 1);
-                    school.predSuccessRate = computePredSuccessRate(biomassToPredate, school.preyedBiomass);
+                    school.predSuccessRate = computePredSuccessRate(biomassToPredate, preyedBiomass[is]);
                     school.setAbundance(school.getAbundance() - nDeadPredation[is]);
                     if (school.getAbundance() < 1.d) {
                         school.setAbundance(0.d);
