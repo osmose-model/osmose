@@ -28,10 +28,38 @@ public class MortalityProcess extends AbstractProcess {
      * mortality. Should only be 1 so far, still problems to fix.
      */
     private final int subdt = 1;
+    /*
+     * Private instance of the natural mortality process
+     */
+    private NaturalMortalityProcess naturalMortalityProcess;
+    /*
+     * Private instance of the fishing process
+     */
+    private FishingProcess fishingProcess;
+    /*
+     * Private instance of the starvation process
+     */
+    private StarvationProcess starvationProcess;
+    /*
+     * Private instance of the predation process
+     */
+    private PredationProcess predationProcess;
 
     @Override
     public void init() {
         random = new Random();
+        
+        naturalMortalityProcess = new NaturalMortalityProcess();
+        naturalMortalityProcess.init();
+        
+        fishingProcess = new FishingProcess();
+        fishingProcess.init();
+        
+        starvationProcess = new StarvationProcess();
+        starvationProcess.init();
+        
+        predationProcess = new PredationProcess();
+        predationProcess.init();
     }
 
     /**
@@ -165,7 +193,7 @@ public class MortalityProcess extends AbstractProcess {
 
         //
         // Initialize the number of deads and the mortality rates
-        double[][] predationMatrix = PredationProcess.computePredationMatrix(cell, School.INISTEP_BIOMASS, subdt);
+        double[][] predationMatrix = predationProcess.computePredationMatrix(cell, School.INISTEP_BIOMASS, subdt);
         for (int ipr = 0; ipr < (ns + npl); ipr++) {
             for (int ipd = 0; ipd < ns; ipd++) {
                 double predationMortalityRate;
@@ -193,15 +221,15 @@ public class MortalityProcess extends AbstractProcess {
             for (int ipr = 0; ipr < (ns + npl); ipr++) {
                 preyedBiomass += predationMatrix[is][ipr];
             }
-            double biomassToPredate = school.getBiomass() * PredationProcess.getPredationRate(school, subdt);
-            school.predSuccessRate = PredationProcess.computePredSuccessRate(biomassToPredate, preyedBiomass);
-            mortalityRateMatrix[is][ns] = StarvationProcess.getStarvationMortalityRate(school, subdt);
+            double biomassToPredate = school.getBiomass() * predationProcess.getPredationRate(school, subdt);
+            school.predSuccessRate = predationProcess.computePredSuccessRate(biomassToPredate, preyedBiomass);
+            mortalityRateMatrix[is][ns] = starvationProcess.getStarvationMortalityRate(school, subdt);
 
             // 3. Natural mortality
-            mortalityRateMatrix[is][ns + 1] = NaturalMortalityProcess.getNaturalMortalityRate(school, subdt);
+            mortalityRateMatrix[is][ns + 1] = naturalMortalityProcess.getNaturalMortalityRate(school, subdt);
 
             // 4. Fishing mortality
-            mortalityRateMatrix[is][ns + 2] = FishingProcess.getFishingMortalityRate(school, subdt);
+            mortalityRateMatrix[is][ns + 2] = fishingProcess.getFishingMortalityRate(school, subdt);
         }
 
         //
@@ -249,8 +277,8 @@ public class MortalityProcess extends AbstractProcess {
                     }
                     //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);
                 }
-                double biomassToPredate = predator.getBiomass() * PredationProcess.getPredationRate(predator, subdt);
-                predator.predSuccessRate = PredationProcess.computePredSuccessRate(biomassToPredate, preyedBiomass);
+                double biomassToPredate = predator.getBiomass() * predationProcess.getPredationRate(predator, subdt);
+                predator.predSuccessRate = predationProcess.computePredSuccessRate(biomassToPredate, preyedBiomass);
                 if (preyedBiomass > 0) {
                     correctionFactor[ipd] = Math.min(biomassToPredate / preyedBiomass, 1.d);
                 } else {
@@ -269,7 +297,7 @@ public class MortalityProcess extends AbstractProcess {
                 School school = schools.get(ipr);
                 // 2. Starvation
                 // computes preyed biomass by school ipr
-                mortalityRateMatrix[ipr][ns] = StarvationProcess.getStarvationMortalityRate(school, subdt);
+                mortalityRateMatrix[ipr][ns] = starvationProcess.getStarvationMortalityRate(school, subdt);
                 // 3. Natural mortality, unchanged
                 // 4. Fishing, unchanged
             }
@@ -317,7 +345,7 @@ public class MortalityProcess extends AbstractProcess {
         for (int ipd = 0; ipd < ns; ipd++) {
             // Predation mortality 
             School predator = schools.get(ipd);
-            double[] preyUpon = PredationProcess.computePredation(predator, School.INSTANTANEOUS_BIOMASS, subdt);
+            double[] preyUpon = predationProcess.computePredation(predator, School.INSTANTANEOUS_BIOMASS, subdt);
             for (int ipr = 0; ipr < (ns + npl); ipr++) {
                 double predationMortalityRate;
                 if (ipr < ns) {
@@ -333,24 +361,24 @@ public class MortalityProcess extends AbstractProcess {
                 mortalityRateMatrix[ipr][ipd] = predationMortalityRate;
 
             }
-            double biomassToPredate = predator.getInstantaneousBiomass() * PredationProcess.getPredationRate(predator, subdt);
-            predator.predSuccessRate = PredationProcess.computePredSuccessRate(biomassToPredate, sum(preyUpon));
+            double biomassToPredate = predator.getInstantaneousBiomass() * predationProcess.getPredationRate(predator, subdt);
+            predator.predSuccessRate = predationProcess.computePredSuccessRate(biomassToPredate, sum(preyUpon));
         }
 
         for (int is = 0; is < ns; is++) {
             School school = schools.get(is);
             school.nDeadPredation = 0.d;
             // 2. Starvation
-            nDeadMatrix[is][ns] = StarvationProcess.computeStarvationMortality(school, subdt);
-            mortalityRateMatrix[is][ns] = StarvationProcess.getStarvationMortalityRate(school, subdt);
+            nDeadMatrix[is][ns] = starvationProcess.computeStarvationMortality(school, subdt);
+            mortalityRateMatrix[is][ns] = starvationProcess.getStarvationMortalityRate(school, subdt);
 
             // 3. Natural mortality
-            nDeadMatrix[is][ns + 1] = NaturalMortalityProcess.computeNaturalMortality(school, subdt);
-            mortalityRateMatrix[is][ns + 1] = NaturalMortalityProcess.getNaturalMortalityRate(school, subdt);
+            nDeadMatrix[is][ns + 1] = naturalMortalityProcess.computeNaturalMortality(school, subdt);
+            mortalityRateMatrix[is][ns + 1] = naturalMortalityProcess.getNaturalMortalityRate(school, subdt);
 
             // 4. Fishing mortality
-            nDeadMatrix[is][ns + 2] = FishingProcess.computeFishingMortality(school, subdt);
-            mortalityRateMatrix[is][ns + 2] = FishingProcess.getFishingMortalityRate(school, subdt);
+            nDeadMatrix[is][ns + 2] = fishingProcess.computeFishingMortality(school, subdt);
+            mortalityRateMatrix[is][ns + 2] = fishingProcess.getFishingMortalityRate(school, subdt);
         }
 
         //
@@ -424,7 +452,7 @@ public class MortalityProcess extends AbstractProcess {
                     case 0:
                         // Predation mortality
                         predator = schools.get(seqPred[i]);
-                        double[] preyUpon = PredationProcess.computePredation(predator, School.INSTANTANEOUS_BIOMASS, subdt);
+                        double[] preyUpon = predationProcess.computePredation(predator, School.INSTANTANEOUS_BIOMASS, subdt);
                         for (int ipr = 0; ipr < (ns + npl); ipr++) {
                             if (ipr < ns) {
                                 School school = schools.get(ipr);
@@ -436,25 +464,25 @@ public class MortalityProcess extends AbstractProcess {
 
                         }
                         hasPredated[seqPred[i]] = true;
-                        double biomassToPredate = predator.getInstantaneousBiomass() * PredationProcess.getPredationRate(predator, subdt);
-                        predator.predSuccessRate = PredationProcess.computePredSuccessRate(biomassToPredate, sum(preyUpon));
+                        double biomassToPredate = predator.getInstantaneousBiomass() * predationProcess.getPredationRate(predator, subdt);
+                        predator.predSuccessRate = predationProcess.computePredSuccessRate(biomassToPredate, sum(preyUpon));
                         break;
                     case 1:
                         // Starvation mortality
                         predator = schools.get(seqStarv[i]);
                         if (hasPredated[seqStarv[i]]) {
-                            nDeadMatrix[seqStarv[i]][ns] = StarvationProcess.computeStarvationMortality(predator, subdt);
+                            nDeadMatrix[seqStarv[i]][ns] = starvationProcess.computeStarvationMortality(predator, subdt);
                             predator.nDeadStarvation = nDeadMatrix[seqStarv[i]][ns];
                         }
                         break;
                     case 2:
                         // Natural mortality
-                        nDeadMatrix[seqNat[i]][ns + 1] = NaturalMortalityProcess.computeNaturalMortality(schools.get(seqNat[i]), subdt);
+                        nDeadMatrix[seqNat[i]][ns + 1] = naturalMortalityProcess.computeNaturalMortality(schools.get(seqNat[i]), subdt);
                         schools.get(seqNat[i]).nDeadNatural = nDeadMatrix[seqNat[i]][ns + 1];
                         break;
                     case 3:
                         // Fishing Mortality
-                        nDeadMatrix[seqFish[i]][ns + 2] = FishingProcess.computeFishingMortality(schools.get(seqFish[i]), subdt);
+                        nDeadMatrix[seqFish[i]][ns + 2] = fishingProcess.computeFishingMortality(schools.get(seqFish[i]), subdt);
                         schools.get(seqFish[i]).nDeadFishing = nDeadMatrix[seqFish[i]][ns + 2];
                         break;
                 }

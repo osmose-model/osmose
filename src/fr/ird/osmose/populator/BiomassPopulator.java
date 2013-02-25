@@ -32,8 +32,13 @@ public class BiomassPopulator extends AbstractPopulator {
             float[] meanLength = species.getMeanLength();
             float[] meanWeight = species.getMeanWeight(meanLength);
 
-            double larvalSurvival = NaturalMortalityProcess.getLarvalMortalityRate(species);
-            double F = FishingProcess.getFishingMortalityRate(species);
+            NaturalMortalityProcess naturalMortalityProcess = new NaturalMortalityProcess();
+            naturalMortalityProcess.init();
+            double larvalSurvival = naturalMortalityProcess.getLarvalMortalityRate(species);
+            
+            FishingProcess fishingProcess = new FishingProcess();
+            fishingProcess.init();
+            double F = fishingProcess.getFishingMortalityRate(species);
 
             abdIni = getOsmose().spBiomIniTab[i] / (meanWeight[(int) Math.round(species.getLongevity() / 2)] / 1000000);
             for (int j = species.indexAgeClass0; j < species.getLongevity(); j++) {

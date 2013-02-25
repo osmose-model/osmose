@@ -13,11 +13,11 @@ public class FishingProcess extends AbstractProcess {
      * Whether fishing rates are the same every year or change throughout the
      * years of simulation
      */
-    static public boolean isFishingInterannual;
+    private boolean isFishingInterannual;
     /*
      * Fishing mortality rates
      */
-    static private float[][] fishingRates;
+    private float[][] fishingRates;
 
     @Override
     public void init() {
@@ -43,7 +43,7 @@ public class FishingProcess extends AbstractProcess {
         }
     }
 
-    public static double computeFishingMortality(School school, int subdt) {
+    public double computeFishingMortality(School school, int subdt) {
 
         double F = getFishingMortalityRate(school, subdt);
         double nDead = 0;
@@ -53,7 +53,7 @@ public class FishingProcess extends AbstractProcess {
         return nDead;
     }
 
-    public static double getFishingMortalityRate(School school, int subdt) {
+    public double getFishingMortalityRate(School school, int subdt) {
         if (isFishable(school)) {
             int iStep = isFishingInterannual
                     ? getSimulation().getIndexTimeSimu()
@@ -64,7 +64,7 @@ public class FishingProcess extends AbstractProcess {
         }
     }
 
-    private static boolean isFishable(School school) {
+    private boolean isFishable(School school) {
         // Test whether fishing applies to this school
         // 1. School is recruited
         // 2. School is catchable (no MPA)
@@ -78,7 +78,7 @@ public class FishingProcess extends AbstractProcess {
      * F the annual mortality rate is calculated as the annual average
      * of the fishing rates over the years. 
      */
-    public static double getFishingMortalityRate(Species species) {
+    public double getFishingMortalityRate(Species species) {
         double F = 0;
         int iSpec = species.getIndex();
         for (int iStep = 0; iStep < fishingRates[iSpec].length; iStep++) {

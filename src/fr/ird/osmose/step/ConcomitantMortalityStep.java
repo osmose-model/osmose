@@ -7,15 +7,11 @@ package fr.ird.osmose.step;
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
-import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.MPAProcess;
 import fr.ird.osmose.process.MortalityProcess;
 import fr.ird.osmose.process.MovementProcess;
-import fr.ird.osmose.process.NaturalMortalityProcess;
-import fr.ird.osmose.process.PredationProcess;
 import fr.ird.osmose.process.ReproductionProcess;
-import fr.ird.osmose.process.StarvationProcess;
 
 /**
  *
@@ -50,23 +46,6 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
     @Override
     public void init() {
-
-        /*
-         * We don't need to instantiate separately the four mortality processes
-         * but we do need to initialize them in order to load their parameters
-         * for they will be called by the other processes.
-         */
-        // initialize natural mortality process
-        new NaturalMortalityProcess().init();
-
-        // initialize starvation process
-        new PredationProcess().init();
-
-        // initialize starvation process
-        new StarvationProcess().init();
-
-        // initialize fishing process
-        new FishingProcess().init();
 
         // Initialize general mortality process
         mortalityProcess = new MortalityProcess();

@@ -17,8 +17,8 @@ import java.util.List;
  */
 public class PredationProcess extends AbstractProcess {
 
-    private static float[][] predPreySizesMax, predPreySizesMin;
-    private static float[] predationRate;
+    private float[][] predPreySizesMax, predPreySizesMin;
+    private float[] predationRate;
 
     @Override
     public void init() {
@@ -74,7 +74,7 @@ public class PredationProcess extends AbstractProcess {
      * @param subdt, one by default
      * @return the matrix of predation
      */
-    public static double[] computePredation(School predator, boolean instantaneous, int subdt) {
+    public double[] computePredation(School predator, boolean instantaneous, int subdt) {
 
         Cell cell = predator.getCell();
         List<School> schools = getPopulation().getSchools(predator.getCell());
@@ -151,7 +151,7 @@ public class PredationProcess extends AbstractProcess {
         return preyUpon;
     }
 
-    private static double sum(double[] array) {
+    private double sum(double[] array) {
         double sum = 0.d;
         for (int i = 0; i < array.length; i++) {
             sum += array[i];
@@ -166,7 +166,7 @@ public class PredationProcess extends AbstractProcess {
      * @param subdt
      * @return
      */
-    public static double[][] computePredationMatrix(Cell cell, boolean instantaneous, int subdt) {
+    public double[][] computePredationMatrix(Cell cell, boolean instantaneous, int subdt) {
 
         List<School> schools = getPopulation().getSchools(cell);
         double[][] preyUpon = new double[schools.size() + getOsmose().getNumberLTLGroups()][schools.size() + getOsmose().getNumberLTLGroups()];
@@ -187,13 +187,13 @@ public class PredationProcess extends AbstractProcess {
      * @param preyedBiomass, the biomass [ton] effectively preyed.
      * @return
      */
-    public static float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
+    public float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
 
         // Compute the predation success rate
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
     }
 
-    private static float[] getPercentPlankton(School predator) {
+    private float[] getPercentPlankton(School predator) {
         float[] percentPlankton = new float[getOsmose().getNumberLTLGroups()];
         int iPred = predator.getSpeciesIndex();
         float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getFeedingStage()];
@@ -214,7 +214,7 @@ public class PredationProcess extends AbstractProcess {
      * @param predator
      * @return the list of preys for this predator
      */
-    private static int[] findPreys(School predator) {
+    private int[] findPreys(School predator) {
 
         int iPred = predator.getSpeciesIndex();
         List<School> schoolsInCell = getPopulation().getSchools(predator.getCell());
@@ -245,14 +245,14 @@ public class PredationProcess extends AbstractProcess {
      * @param subdt
      * @return
      */
-    public static double getPredationRate(School predator, int subdt) {
+    public double getPredationRate(School predator, int subdt) {
         return predationRate[predator.getSpeciesIndex()] / (double) (getOsmose().getNumberTimeStepsPerYear() * subdt);
     }
 
     /*
      * Get the accessible biomass that predator can feed on prey
      */
-    private static double getAccessibility(School predator, School prey) {
+    private double getAccessibility(School predator, School prey) {
         return getOsmose().accessibilityMatrix[prey.getSpeciesIndex()][prey.getAccessibilityStage()][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
     }
 }

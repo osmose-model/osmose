@@ -9,7 +9,7 @@ import fr.ird.osmose.Species;
  */
 public class NaturalMortalityProcess extends AbstractProcess {
 
-    private static float[][] larvalMortalityRates;
+    private float[][] larvalMortalityRates;
 
     @Override
     public void init() {
@@ -48,7 +48,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
      * pronounced than for sup ages (rel to CC), predation by other species are
      * not explicit.
      */
-    static public double getNaturalMortalityRate(School school, int subdt) {
+    public double getNaturalMortalityRate(School school, int subdt) {
         double D;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
@@ -59,7 +59,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         return D;
     }
 
-    static public double computeNaturalMortality(School school, int subdt) {
+    public double computeNaturalMortality(School school, int subdt) {
 
         double D = getNaturalMortalityRate(school, subdt);
         return school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
@@ -69,7 +69,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
      * The annual mortality rate is calculated as the annual average of
      * the larval mortality rates over the years.
      */
-    static public double getLarvalMortalityRate(Species species) {
+    public double getLarvalMortalityRate(Species species) {
 
         double rate = 0.d;
         int iSpec = species.getIndex();
