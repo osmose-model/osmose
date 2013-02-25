@@ -73,7 +73,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
     }
 
     @Override
-    public void step() {
+    public void step(int iStepSimu) {
 
         // Reset some school state variables 
         for (School school : getPopulation()) {
@@ -86,7 +86,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
         // Update plankton concentration
         for (int p = 0; p < getOsmose().getNumberLTLGroups(); p++) {
-            getSimulation().getPlankton(p).update(getSimulation().getIndexTimeSimu());
+            getSimulation().getPlankton(p).update(iStepSimu);
         }
 
         // Spatial distribution
@@ -103,7 +103,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         growthProcess.run();
 
         // Save steps
-        indicators.update();
+        indicators.update(iStepSimu);
 
         // Reproduction
         reproductionProcess.run();
@@ -112,7 +112,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         getPopulation().removeDeadSchools();
         
         // close indicators on last step
-        if (isLastStep()) {
+        if (isLastStep(iStepSimu)) {
             indicators.close();
         }
     }

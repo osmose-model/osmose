@@ -75,10 +75,9 @@ public class Indicators extends SimulationLinker {
         }
     }
 
-    public void update() {
+    public void update(int iStepSimu) {
 
         int year = getSimulation().getYear();
-        int index = getSimulation().getIndexTimeYear();
         int nStepsYear = getOsmose().getNumberTimeStepsPerYear();
         int nStepsRecord = getOsmose().savingDtMatrix;
         //
@@ -87,7 +86,7 @@ public class Indicators extends SimulationLinker {
             for (Indicator indicator : indicators) {
                 if (indicator.isEnabled()) {
                     indicator.update();
-                    if (((index + 1) % nStepsRecord) == 0) {
+                    if (((iStepSimu + 1) % nStepsRecord) == 0) {
                         float time = getSimulation().getYear() + (getSimulation().getIndexTimeYear() + 1f) / (float) nStepsYear;
                         indicator.write(time);
                         indicator.reset();

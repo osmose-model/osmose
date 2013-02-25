@@ -20,9 +20,9 @@ abstract public class AbstractStep extends SimulationLinker {
 
     abstract public void init();
 
-    abstract public void step();
+    abstract public void step(int iStepSimu);
 
-    public boolean isLastStep() {
-        return getSimulation().getIndexTimeSimu() == NSTEPS - 1;
+    public boolean isLastStep(int iStepSimu) {
+        return iStepSimu == NSTEPS - 1;
     }
 }

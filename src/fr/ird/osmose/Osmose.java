@@ -974,11 +974,6 @@ public class Osmose {
             nStepYear = (new Integer(st.sval)).intValue();
             st.nextToken();
             savingDtMatrix = (new Integer(st.sval)).intValue();
-            if (!((nStepYear % savingDtMatrix) == 0)) {
-                System.out.println("The number of time steps per year is not a multiple of the number of time steps for saving");
-                System.out.println("Thus, saving is realized at each time step");
-                savingDtMatrix = 1;
-            }
             nbDtSavePerYear = (int) nStepYear / savingDtMatrix;
             st.nextToken();
             startingSavingTimeTab = (new Integer(st.sval)).intValue();

@@ -175,7 +175,7 @@ public class Simulation {
             // Loop over the year
             while (i_step_year < getOsmose().getNumberTimeStepsPerYear()) {
                 // Run a new step
-                step.step();
+                step.step(i_step_simu);
                 // Increment time step
                 i_step_year++;
                 i_step_simu++;

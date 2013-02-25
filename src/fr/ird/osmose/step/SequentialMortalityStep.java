@@ -100,7 +100,7 @@ public class SequentialMortalityStep extends AbstractStep {
     }
 
     @Override
-    public void step() {
+    public void step(int iStepSimu) {
 
         // Reset some school state variables 
         for (School school : getPopulation()) {
@@ -122,7 +122,7 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Update plankton concentration
         for (int p = 0; p < getOsmose().getNumberLTLGroups(); p++) {
-            getSimulation().getPlankton(p).update(getSimulation().getIndexTimeSimu());
+            getSimulation().getPlankton(p).update(iStepSimu);
         }
 
         // Predation
@@ -138,7 +138,7 @@ public class SequentialMortalityStep extends AbstractStep {
         fishingProcess.run();
 
         // Save steps
-        indicators.update();
+        indicators.update(iStepSimu);
 
         // Reproduction
         reproductionProcess.run();
@@ -147,7 +147,7 @@ public class SequentialMortalityStep extends AbstractStep {
         getPopulation().removeDeadSchools();
 
         // close indicators on last step
-        if (isLastStep()) {
+        if (isLastStep(iStepSimu)) {
             indicators.close();
         }
     }
