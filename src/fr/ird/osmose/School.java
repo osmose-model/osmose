@@ -49,7 +49,9 @@
 package fr.ird.osmose;
 
 public class School extends GridPoint {
-
+    
+    final public static boolean INSTANTANEOUS_BIOMASS = true;
+    final public static boolean INISTEP_BIOMASS = false;
     /**
      * Species of the school.
      */
