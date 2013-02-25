@@ -43,7 +43,6 @@ public class GrowthProcess extends AbstractProcess {
     @Override
     public void run() {
         for (School school : getPopulation().getPresentSchools()) {
-            school.predSuccessRate = PredationProcess.computePredSuccessRate(school, school.preyedBiomass);
             Species species = school.getSpecies();
             int i = species.getIndex();
             int age = school.getAgeDt();
