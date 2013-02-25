@@ -36,7 +36,6 @@ public class MovementProcess extends AbstractProcess {
     /*
      * Migration
      */
-    private static float[][][] outOfZoneMortality;
     private boolean[][][] outOfZoneCohort;
     /*
      * Type of spatial distribution
@@ -63,11 +62,9 @@ public class MovementProcess extends AbstractProcess {
 
         int nSpecies = getOsmose().getNumberSpecies();
         // init migration
-        outOfZoneMortality = new float[nSpecies][][];
         outOfZoneCohort = new boolean[nSpecies][][];
         for (int index = 0; index < nSpecies; index++) {
             int longevity = getSpecies(index).getLongevity();
-            outOfZoneMortality[index] = new float[longevity][getOsmose().getNumberTimeStepsPerYear()];
             outOfZoneCohort[index] = new boolean[longevity][getOsmose().getNumberTimeStepsPerYear()];
             if (null != getOsmose().migrationTempAge[index]) {
                 int nbStepYear = getOsmose().getNumberTimeStepsPerYear();
@@ -75,7 +72,6 @@ public class MovementProcess extends AbstractProcess {
                     for (int n = 0; n < getOsmose().migrationTempDt[index].length; n++) {
                         for (int h = 0; h < nbStepYear; h++) {
                             outOfZoneCohort[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = true;
-                            outOfZoneMortality[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = getOsmose().migrationTempMortality[index][m];
                         }
                     }
                 }
@@ -174,10 +170,6 @@ public class MovementProcess extends AbstractProcess {
 
     boolean isOut(School school) {
         return outOfZoneCohort[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
-    }
-
-    public static float getOutMortality(School school) {
-        return outOfZoneMortality[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
     }
 
     private void readConfigurationFile() {

@@ -10,10 +10,12 @@ import fr.ird.osmose.Species;
 public class NaturalMortalityProcess extends AbstractProcess {
 
     private float[][] larvalMortalityRates;
+    private static float[][][] outOfZoneMortality;
 
     @Override
     public void init() {
-        larvalMortalityRates = new float[getOsmose().getNumberSpecies()][getOsmose().getNumberTimeStepsPerYear() * getOsmose().getNumberYears()];
+        
+        larvalMortalityRates = new float[getNSpecies()][getOsmose().getNumberTimeStepsPerYear() * getOsmose().getNumberYears()];
         for (int iSpec = 0; iSpec < getOsmose().getNumberSpecies(); iSpec++) {
             int t = 0;
             for (int iStep = 0; iStep < larvalMortalityRates[iSpec].length; iStep++) {
@@ -22,6 +24,22 @@ public class NaturalMortalityProcess extends AbstractProcess {
                 }
                 larvalMortalityRates[iSpec][iStep] = getOsmose().larvalMortalityRates[iSpec][t];
                 t++;
+            }
+        }
+
+        outOfZoneMortality = new float[getNSpecies()][][];
+        for (int index = 0; index < getNSpecies(); index++) {
+            int longevity = getSpecies(index).getLongevity();
+            outOfZoneMortality[index] = new float[longevity][getOsmose().getNumberTimeStepsPerYear()];
+            if (null != getOsmose().migrationTempAge[index]) {
+                int nbStepYear = getOsmose().getNumberTimeStepsPerYear();
+                for (int m = 0; m < getOsmose().migrationTempAge[index].length; m++) {
+                    for (int n = 0; n < getOsmose().migrationTempDt[index].length; n++) {
+                        for (int h = 0; h < nbStepYear; h++) {
+                            outOfZoneMortality[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = getOsmose().migrationTempMortality[index][m];
+                        }
+                    }
+                }
             }
         }
     }
@@ -39,6 +57,10 @@ public class NaturalMortalityProcess extends AbstractProcess {
             //school.nDeadNatural = nDead;
         }
     }
+    
+    private float getOutMortality(School school) {
+        return outOfZoneMortality[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
+    }
 
     /**
      * For all species, D is due to other predators (seals, seabirds) for
@@ -52,9 +74,9 @@ public class NaturalMortalityProcess extends AbstractProcess {
         double D;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
-            D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + MovementProcess.getOutMortality(school)) / (float) subdt;
+            D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + getOutMortality(school)) / (float) subdt;
         } else {
-            D = (spec.D + MovementProcess.getOutMortality(school)) / (float) (getOsmose().getNumberTimeStepsPerYear() * subdt);
+            D = (spec.D + getOutMortality(school)) / (float) (getOsmose().getNumberTimeStepsPerYear() * subdt);
         }
         return D;
     }
