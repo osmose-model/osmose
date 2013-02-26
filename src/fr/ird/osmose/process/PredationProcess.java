@@ -48,7 +48,7 @@ public class PredationProcess extends AbstractProcess {
                         if (iprey < ns) {
                             School prey = schools.get(iprey);
                             nDeadPredation[iprey] += prey.biom2abd(preyUpon[iprey]);
-                            prey.nDeadPredation += prey.biom2abd(preyUpon[iprey]);
+                            prey.setNdeadPredation(prey.getNdeadPredation() + prey.biom2abd(preyUpon[iprey]));
                         }
                     }
                     preyedBiomass[ipred] = sum(preyUpon);
@@ -56,7 +56,7 @@ public class PredationProcess extends AbstractProcess {
                 // Apply predation mortality
                 for (int is = 0; is < ns; is++) {
                     School school = schools.get(is);
-                    school.nDeadPredation = 0;
+                    school.setNdeadPredation(0);
                     double biomassToPredate = school.getBiomass() * getPredationRate(school, 1);
                     school.predSuccessRate = computePredSuccessRate(biomassToPredate, preyedBiomass[is]);
                     school.setAbundance(school.getAbundance() - nDeadPredation[is]);
@@ -176,7 +176,7 @@ public class PredationProcess extends AbstractProcess {
         double[][] preyUpon = new double[schools.size() + getOsmose().getNumberLTLGroups()][schools.size() + getOsmose().getNumberLTLGroups()];
         // Loop over the schools of the cell
         for (School school : schools) {
-            school.nDeadPredation = 0;
+            school.setNdeadPredation(0);
         }
         for (int iPred = 0; iPred < schools.size(); iPred++) {
             preyUpon[iPred] = computePredation(schools.get(iPred), instantaneous, subdt);

@@ -99,19 +99,19 @@ public class School extends GridPoint {
     /**
      * Number of dead individuals due to fishing.
      */
-    public double nDeadFishing;
+    private double ndeadFishing;
     /**
      * Number of dead individuals due to predation.
      */
-    public double nDeadPredation;
+    private double ndeadPredation;
     /**
      * Number of dead individuals due to starvation.
      */
-    public double nDeadStarvation;
+    private double ndeadStarvation;
     /**
      * Number of dead individuals due to natural mortality.
      */
-    public double nDeadNatural;
+    private double ndeadNatural;
     /**
      * Predation success rate. (ratio of what is preyed on maximal ingestion).
      */
@@ -154,10 +154,10 @@ public class School extends GridPoint {
         updateAccessStage(species.ageStagesTab, species.nbAccessStages);
         updateDietOutputStage(species.dietStagesTab, species.nbDietStages);
         // Reset variables
-        nDeadFishing = 0;
-        nDeadNatural = 0;
-        nDeadPredation = 0;
-        nDeadStarvation = 0;
+        ndeadFishing = 0;
+        ndeadNatural = 0;
+        ndeadPredation = 0;
+        ndeadStarvation = 0;
         catchable = true;
         // Reset diet variables
         diet = new float[getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups()][];
@@ -206,10 +206,10 @@ public class School extends GridPoint {
      * the school within the current time step.
      */
     public double getInstantaneousAbundance() {
-        double nDeadTotal = nDeadPredation
-                + nDeadStarvation
-                + nDeadNatural
-                + nDeadFishing;
+        double nDeadTotal = ndeadPredation
+                + ndeadStarvation
+                + ndeadNatural
+                + ndeadFishing;
         double abundanceTmp = abundance - nDeadTotal;
         //if (nDeadTotal > 0) System.out.println("Abundance changed " + " " + school.nDeadPredation + " " +  school.nDeadStarvation + " " + school.nDeadNatural + " " + school.nDeadFishing);
         return (abundanceTmp < 1)
@@ -399,5 +399,61 @@ public class School extends GridPoint {
      */
     public void setTrophicLevel(float trophicLevel) {
         this.trophicLevel = trophicLevel;
+    }
+
+    /**
+     * @return the ndeadFishing
+     */
+    public double getNdeadFishing() {
+        return ndeadFishing;
+    }
+
+    /**
+     * @param ndeadFishing the nDeadFishing to set
+     */
+    public void setNdeadFishing(double ndeadFishing) {
+        this.ndeadFishing = ndeadFishing;
+    }
+
+    /**
+     * @return the ndeadPredation
+     */
+    public double getNdeadPredation() {
+        return ndeadPredation;
+    }
+
+    /**
+     * @param ndeadPredation the nDeadPredation to set
+     */
+    public void setNdeadPredation(double ndeadPredation) {
+        this.ndeadPredation = ndeadPredation;
+    }
+
+    /**
+     * @return the ndeadStarvation
+     */
+    public double getNdeadStarvation() {
+        return ndeadStarvation;
+    }
+
+    /**
+     * @param ndeadStarvation the nDeadStarvation to set
+     */
+    public void setNdeadStarvation(double ndeadStarvation) {
+        this.ndeadStarvation = ndeadStarvation;
+    }
+
+    /**
+     * @return the ndeadNatural
+     */
+    public double getNdeadNatural() {
+        return ndeadNatural;
+    }
+
+    /**
+     * @param ndeadNatural the nDeadNatural to set
+     */
+    public void setNdeadNatural(double ndeadNatural) {
+        this.ndeadNatural = ndeadNatural;
     }
 }

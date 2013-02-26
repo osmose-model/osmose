@@ -184,7 +184,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
                         abundance[iSpec][i][j] += school.getAbundance();
                         mean_size[iSpec][i][j] += school.getLength() * school.getAbundance();
                         tl[iSpec][i][j] += school.getTrophicLevel() * school.getBiomass();
-                        yield[iSpec][i][j] += school.adb2biom(school.nDeadFishing);
+                        yield[iSpec][i][j] += school.adb2biom(school.getNdeadFishing());
                     }
                 }
                 for (int iltl = 0; iltl < getOsmose().getNumberLTLGroups(); iltl++) {

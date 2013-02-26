@@ -98,10 +98,10 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             }
             int iSpecies = school.getSpeciesIndex();
             // Update number of deads
-            nDead[iSpecies][PREDATION][iStage] += school.nDeadPredation;
-            nDead[iSpecies][STARVATION][iStage] += school.nDeadStarvation;
-            nDead[iSpecies][NATURAL][iStage] += school.nDeadNatural;
-            nDead[iSpecies][FISHING][iStage] += school.nDeadFishing;
+            nDead[iSpecies][PREDATION][iStage] += school.getNdeadPredation();
+            nDead[iSpecies][STARVATION][iStage] += school.getNdeadStarvation();
+            nDead[iSpecies][NATURAL][iStage] += school.getNdeadNatural();
+            nDead[iSpecies][FISHING][iStage] += school.getNdeadFishing();
         }
         // Cumulate the mortality rates
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {

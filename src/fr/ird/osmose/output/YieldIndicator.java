@@ -32,7 +32,7 @@ public class YieldIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            yield[school.getSpeciesIndex()] += school.adb2biom(school.nDeadFishing);
+            yield[school.getSpeciesIndex()] += school.adb2biom(school.getNdeadFishing());
         }
     }
 

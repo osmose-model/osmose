@@ -36,8 +36,8 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
         for (School school : getPopulation().getAliveSchools()) {
             if (school.getAgeDt() > school.getSpecies().indexAgeClass0) {
                 int i = school.getSpeciesIndex();
-                meanSizeCatch[i] += school.nDeadFishing * school.getLength();
-                yieldN[i] += school.nDeadFishing;
+                meanSizeCatch[i] += school.getNdeadFishing() * school.getLength();
+                yieldN[i] += school.getNdeadFishing();
             }
         }
     }
