@@ -35,7 +35,7 @@ public class BiomassNoJuvIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return !getOsmose().isCalibrationOutput();
+        return true;
     }
 
     @Override

@@ -48,8 +48,6 @@ public class Indicators extends SimulationLinker {
         // Spatialized
         indicators.add(new SpatialIndicator(replica));
         indicators.add(new LTLIndicator(replica));
-        // Temporary indicator for calib that will be deleted soon
-        indicators.add(new BiomassCalibrationIndicator(replica));
     }
     
     public void init() {

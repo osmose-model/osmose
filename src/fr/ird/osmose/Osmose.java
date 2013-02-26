@@ -138,10 +138,6 @@ public class Osmose {
     String mpaFileNameTab;
     public int[] tabMPAiMatrix, tabMPAjMatrix;     //coord i et j of the matrix delimiting a mpa		      //signify that 1 mpa is implemented even if t<tStart
     public int MPAtStartTab, MPAtEndTab;	      //start and end of MPA in years
-    //tables for output storage by series of simulations
-    //4 dimensions : simu, species,val(total OR total-0), step t
-    //for mortalities, 3 dim, the last is for the mean on the simulation period
-    public float[][][][][] BIOMQuadri;   //[numSimu][species][with or without age 0][t][dt]
     /*
      * INDICATORS OUTPUT
      */
@@ -167,9 +163,7 @@ public class Osmose {
     float maxTL;
     public float[] tabTL;
     //param allowing to adapt the size of output tables depending on simulation time
-    public int timeSeriesLength, timeSeriesStart;
-    int startingSavingTimeTab;
-    boolean timeSeriesIsShortened;
+    public int timeSeriesStart;
     // migration
     public float[][] migrationTempMortality;
     public int[][] migrationTempAge, migrationTempDt;
@@ -236,14 +230,14 @@ public class Osmose {
         if (targetPath.exists()) {
             IOTools.deleteDirectory(targetPath);
         }
-        
+
         // Loop over the number of replica
         simulation = new Simulation[nbLoopTab];
         long begin = System.currentTimeMillis();
         System.out.println("\nSimulation started...");
         int nProcs = Runtime.getRuntime().availableProcessors();
         //int nProcs = 1;
-        int nBatch = (int) Math.ceil((float)nbLoopTab / nProcs);
+        int nBatch = (int) Math.ceil((float) nbLoopTab / nProcs);
         int replica = 0;
         for (int iBatch = 0; iBatch < nBatch; iBatch++) {
             int nworker = Math.min(nProcs, nbLoopTab - replica);
@@ -265,11 +259,6 @@ public class Osmose {
             for (int iworker = 0; iworker < nworker; iworker++) {
                 simulation[iBatch * nProcs + iworker] = null;
             }
-        }
-
-        // Save summary for calibration
-        if (calibrationMatrix) {
-            saveSerieSimulations();
         }
         int time = (int) ((System.currentTimeMillis() - begin) / 1000);
         System.out.println("End of simulation [OK] (time ellapsed:  " + time + " seconds)");
@@ -323,7 +312,6 @@ public class Osmose {
             readAreaFile();
         }
         readMPAFile();
-        initializeOutputData();
         initForcing();
     }
 
@@ -1028,7 +1016,12 @@ public class Osmose {
             savingDtMatrix = (new Integer(st.sval)).intValue();
             nbDtSavePerYear = (int) nStepYear / savingDtMatrix;
             st.nextToken();
-            startingSavingTimeTab = (new Integer(st.sval)).intValue();
+            timeSeriesStart = (new Integer(st.sval)).intValue();
+            //these param are function of the length of the temporal series saved
+            if (timeSeriesStart > nYears) {
+                System.out.println("Starting time for saving higher than simulation time -> set to 0");
+                timeSeriesStart = 0;
+            }
             st.nextToken();
             nbSpeciesTab = (new Integer(st.sval)).intValue();
             st.nextToken();
@@ -2109,65 +2102,6 @@ public class Osmose {
         }
     }
 
-    public void initializeOutputData() {
-        //these param are function of the length of the temporal series saved
-        if (startingSavingTimeTab > nYears) {
-            System.out.println("Starting time for saving higher than simulation time -> set to 0");
-            startingSavingTimeTab = 0;
-        }
-
-        if (startingSavingTimeTab == 0) {
-            timeSeriesLength = nYears;
-            timeSeriesStart = 0;
-            timeSeriesIsShortened = false;
-        } else {
-            timeSeriesStart = startingSavingTimeTab;
-            timeSeriesLength = nYears - startingSavingTimeTab;
-            timeSeriesIsShortened = true;
-        }
-
-        if (calibrationMatrix) {
-            BIOMQuadri = new float[nbLoopTab][][][][];
-        }
-
-        for (int xx = 0; xx < nbLoopTab; xx++) {
-            if (calibrationMatrix) {
-                BIOMQuadri[xx] = new float[nbSpeciesTab + nbPlanktonGroupsTab][][][];
-            }
-
-            /*
-             * iniBiomass[xx] = new float[nbSpeciesTab]; for(int
-             * i=0;i<nbSpeciesTab;i++) iniBiomass[xx][i] = 0; for(int
-             * i=0;i<nbSpeciesTab;i++) for(int
-             * j=simulation.getSpecies(i).indexAgeClass0;j<simulation.getSpecies(i).nbCohorts;j++)
-             * iniBiomass[xx][i] += (float)
-             * simulation.getSpecies(i).tabCohorts[j].biomass;
-             */
-            int tempIndex = (int) nStepYear / savingDtMatrix;
-
-            if (calibrationMatrix) {
-                for (int i = 0; i < nbSpeciesTab; i++) {
-                    BIOMQuadri[xx][i] = new float[2][][];
-                    BIOMQuadri[xx][i][0] = new float[timeSeriesLength][];   //without age 0
-                    BIOMQuadri[xx][i][1] = new float[timeSeriesLength][];   // with age 0
-
-                    for (int tt = 0; tt < timeSeriesLength; tt++) {
-                        BIOMQuadri[xx][i][0][tt] = new float[tempIndex];
-                        BIOMQuadri[xx][i][1][tt] = new float[tempIndex];
-                    }
-                }
-
-                for (int i = nbSpeciesTab; i < nbSpeciesTab + nbPlanktonGroupsTab; i++) {
-                    BIOMQuadri[xx][i] = new float[1][][];
-                    BIOMQuadri[xx][i][0] = new float[timeSeriesLength][];   //without age 0
-                    for (int tt = 0; tt < timeSeriesLength; tt++) {
-                        BIOMQuadri[xx][i][0][tt] = new float[tempIndex];
-                    }
-                }
-            }
-        }
-    }
-
     public void readDietsOutputFile(String dietsConfigFileName, int numSerie) {
         nbDietsStages = new int[nbSpeciesTab];
         dietStageThreshold = new float[nbSpeciesTab][];
@@ -2223,350 +2157,6 @@ public class Osmose {
             }
             System.out.println("diets config file read");
         }
-    }
-
-    public void saveSerieSimulations() {
-        //save in output files
-        File targetPath;
-        String inputFileName = outputPrefix + "_I";
-        String biomFileName = outputPrefix + "_B.csv";
-        targetPath = new File(outputPathName + outputFileNameTab);
-        targetPath.mkdirs();
-        saveBIOMData(targetPath, inputFileName, biomFileName);
-    }
-
-    public void saveBIOMData(File targetPath, String inputFileName, String biomFileName) {
-
-        FileOutputStream biomFile = null;
-        File targetFile;
-        PrintWriter pw;
-
-        float[][][] tabMean, tabCv;
-        tabMean = new float[nbSpeciesTab + 1 + nbPlanktonGroupsTab][][];
-        tabCv = new float[nbSpeciesTab + 1 + nbPlanktonGroupsTab][][];
-
-        for (int i = 0; i <= nbSpeciesTab + nbPlanktonGroupsTab; i++) {
-            tabMean[i] = new float[2][];
-            tabMean[i][0] = new float[nbLoopTab];
-            tabMean[i][1] = new float[nbLoopTab];
-            tabCv[i] = new float[2][];
-            tabCv[i][0] = new float[nbLoopTab];
-            tabCv[i][1] = new float[nbLoopTab];
-        }
-
-        float MEAN, STD, CV;//mean, std et cv des moyennes de chaque simu
-
-
-        try {
-            targetFile = new File(targetPath, biomFileName);
-            biomFile = new FileOutputStream(targetFile);
-        } catch (IOException e) {
-            System.out.println("Error of biomass file creation");
-            System.exit(1);
-        }
-        pw = new PrintWriter(biomFile, true);
-        pw.println("//File containing the set of input parameters " + inputFileName);
-        pw.println("//BIOMASS in tonnes");
-        for (int xx = 0; xx < nbLoopTab; xx++) {
-            float std;
-            float[][] sum = new float[timeSeriesLength][];
-            pw.println("SIMULATION n " + xx);
-            pw.println();
-            //results for tot-0
-            for (int t = 0; t < timeSeriesLength; t++) {
-                sum[t] = new float[nbDtSavePerYear];
-                for (int dt = 0; dt < nbDtSavePerYear; dt++) {
-                    sum[t][dt] = 0;
-                }
-            }
-            pw.print("TOTAL-0");
-            pw.println(';');
-            pw.print("Time");
-            pw.print(';');
-
-            for (int t = timeSeriesStart; t < nYears; t++) {
-                for (int dt = 0; dt < nbDtSavePerYear; dt++) {
-                    pw.print((float) (t + dt / (float) nbDtSavePerYear));
-                    pw.print(';');
-                }
-            }
-            pw.println();
-
-            for (int i = 0; i < nbSpeciesTab; i++) {
-                pw.print(nameSpecMatrix[i]);
-                pw.print(';');
-                for (int t = 0; t < timeSeriesLength; t++) {
-                    for (int dt = 0; dt < nbDtSavePerYear; dt++) {
-                        sum[t][dt] += BIOMQuadri[xx][i][0][t][dt];
-                        pw.print(BIOMQuadri[xx][i][0][t][dt]);
-                        pw.print(';');
-                    }
-                }
-                tabMean[i][0][xx] = mean2(BIOMQuadri[xx][i][0]);
-                std = std2(BIOMQuadri[xx][i][0]);
-                tabCv[i][0][xx] = std / tabMean[i][0][xx];
-                pw.print(';');
-                pw.print("mean-0");
-                pw.print(';');
-                pw.print(tabMean[i][0][xx]);
-                pw.print(';');
-                pw.print("std-0");
-                pw.print(';');
-                pw.print(std);
-                pw.print(';');
-                pw.print("cv-0");
-                pw.print(';');
-                pw.print(tabCv[i][0][xx]);
-                pw.print(';');
-                pw.println();
-            }
-            /*
-             * for(int i=nbSpeciesTab;
-             * i<nbSpeciesTab+nbPlanktonGroupsTab; i++) {
-             * pw.print("Plankton
-             * Gr"+(i-nbSpeciesTab+1));pw.print(';'); for(int
-             * t=0;t<timeSeriesLength;t++) for(int
-             * dt=0;dt<nbDtSavePerYear;dt++) { pw.print(
-             * BIOMQuadri[xx][i][0][t][dt] ); pw.print(';'); }
-             * tabMean[i][0][xx]=mean2(BIOMQuadri[xx][i][0]);
-             * std=std2(BIOMQuadri[xx][i][0]);
-             * tabCv[i][0][xx]=std/tabMean[i][0][xx];
-             * pw.print(';');pw.print("mean-0");pw.print(';');pw.print(tabMean[i][0][xx]);pw.print(';');
-             * pw.print("std-0");pw.print(';');pw.print(std);pw.print(';');
-             * pw.print("cv-0");pw.print(';');pw.print(tabCv[i][0][xx]);pw.print(';');
-             * pw.println();
-             *
-             * }
-             */
-            pw.print("sys-0");
-            pw.print(';');
-            for (int t = 0; t < timeSeriesLength; t++) {
-                for (int dt = 0; dt < nbDtSavePerYear; dt++) {
-                    pw.print(sum[t][dt]);
-                    pw.print(';');
-                }
-            }
-            tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0][xx] = mean2(sum);
-            std = std2(sum);
-            tabCv[nbSpeciesTab + nbPlanktonGroupsTab][0][xx] = std / tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0][xx];
-            pw.print(';');
-            pw.print("mean-0");
-            pw.print(';');
-            pw.print(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0][xx]);
-            pw.print(';');
-            pw.print("std-0");
-            pw.print(';');
-            pw.print(std);
-            pw.print(';');
-            pw.print("cv-0");
-            pw.print(';');
-            pw.print(tabCv[nbSpeciesTab + nbPlanktonGroupsTab][0][xx]);
-            pw.print(';');
-            pw.println();
-            pw.println();
-
-            //bloc resultats pour total = with age 0
-            if (outputClass0Matrix) {
-                for (int t = 0; t < timeSeriesLength; t++) {
-                    sum[t] = new float[nbDtSavePerYear];
-                    for (int dt = 0; dt < nbDtSavePerYear; dt++) {
-                        sum[t][dt] = 0;
-                    }
-                }
-                pw.print("TOTAL");
-                pw.println(';');
-                pw.print("Time");
-                pw.print(';');
-                for (int t = timeSeriesStart; t < nYears; t++) {
-                    for (int dt = 0; dt < nbDtSavePerYear; dt++) {
-                        pw.print((float) (t + dt / (float) nbDtSavePerYear));
-                        pw.print(';');
-                    }
-                }
-                pw.println();
-
-                for (int i = 0; i < nbSpeciesTab; i++) {
-                    pw.print(nameSpecMatrix[i]);
-                    pw.print(';');
-                    for (int t = 0; t < timeSeriesLength; t++) {
-                        for (int dt = 0; dt < nbDtSavePerYear; dt++) {
-                            sum[t][dt] += BIOMQuadri[xx][i][1][t][dt];
-                            pw.print(BIOMQuadri[xx][i][1][t][dt]);
-                            pw.print(';');
-                        }
-                    }
-                    tabMean[i][1][xx] = mean2(BIOMQuadri[xx][i][1]);
-                    std = std2(BIOMQuadri[xx][i][1]);
-                    tabCv[i][1][xx] = std / tabMean[i][1][xx];
-                    pw.print(';');
-                    pw.print("mean");
-                    pw.print(';');
-                    pw.print(tabMean[i][1][xx]);
-                    pw.print(';');
-                    pw.print("std");
-                    pw.print(';');
-                    pw.print(std);
-                    pw.print(';');
-                    pw.print("cv");
-                    pw.print(';');
-                    pw.print(tabCv[i][1][xx]);
-                    pw.print(';');
-                    pw.println();
-                }
-                /*
-                 * for(int i=nbSpeciesTab;
-                 * i<nbSpeciesTab+nbPlanktonGroupsTab; i++)
-                 * { pw.print("Plankton
-                 * Gr"+(i-nbSpeciesTab+1));pw.print(';'); for(int
-                 * t=0;t<timeSeriesLength;t++) for(int
-                 * dt=0;dt<nbDtSavePerYear;dt++) { pw.print(
-                 * BIOMQuadri[xx][i][0][t][dt] ); pw.print(';'); }
-                 * tabMean[i][0][xx]=mean2(BIOMQuadri[xx][i][0]);
-                 * std=std2(BIOMQuadri[xx][i][0]);
-                 * tabCv[i][0][xx]=std/tabMean[i][0][xx];
-                 * pw.print(';');pw.print("mean-0");pw.print(';');pw.print(tabMean[i][0][xx]);pw.print(';');
-                 * pw.print("std-0");pw.print(';');pw.print(std);pw.print(';');
-                 * pw.print("cv-0");pw.print(';');pw.print(tabCv[i][0][xx]);pw.print(';');
-                 * pw.println();
-                 *
-                 * }
-                 */
-                pw.print("sys");
-                pw.print(';');
-                for (int t = 0; t < timeSeriesLength; t++) {
-                    for (int dt = 0; dt < nbDtSavePerYear; dt++) {
-                        pw.print(sum[t][dt]);
-                        pw.print(';');
-                    }
-                }
-                tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1][xx] = mean2(sum);
-                std = std2(sum);
-                tabCv[nbSpeciesTab + nbPlanktonGroupsTab][1][xx] = std / tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1][xx];
-                pw.print(';');
-                pw.print("mean");
-                pw.print(';');
-                pw.print(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1][xx]);
-                pw.print(';');
-                pw.print("std");
-                pw.print(';');
-                pw.print(std);
-                pw.print(';');
-                pw.print("cv");
-                pw.print(';');
-                pw.print(tabCv[nbSpeciesTab + nbPlanktonGroupsTab][1][xx]);
-                pw.print(';');
-                pw.println();
-                pw.println();
-            }
-        }
-        pw.println("SYNTHESIS");
-        //tot-0
-        pw.print("TOT-0");
-        pw.print(';');
-        pw.print("MEAN(mean-0)");
-        pw.print(';');
-        pw.print("STD(mean-0)");
-        pw.print(';');
-        pw.print("CV(mean-0)");
-        pw.print(';');
-        pw.print("MEAN(cv-0)");
-        pw.println(';');
-        for (int i = 0; i < nbSpeciesTab; i++) {
-            MEAN = mean(tabMean[i][0]);
-            STD = std(tabMean[i][0]);
-            CV = STD / MEAN;
-            pw.print(nameSpecMatrix[i]);
-            pw.print(';');
-            pw.print(MEAN);
-            pw.print(';');
-            pw.print(STD);
-            pw.print(';');
-            pw.print(CV);
-            pw.print(';');
-            pw.print(mean(tabCv[i][0]));
-            pw.println(';');
-        }
-        /*
-         * for(int
-         * i=nbSpeciesTab;i<nbSpeciesTab+nbPlanktonGroupsTab;i++)
-         * { MEAN = mean(tabMean[i][0]); STD = std(tabMean[i][0]); CV =
-         * STD/MEAN; pw.print("Plankton group
-         * "+(i+1-nbSpeciesTab));pw.print(';');pw.print(MEAN);pw.print(';');
-         * pw.print(STD);pw.print(';');
-         * pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
-         * }
-         *
-         */
-        MEAN = mean(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0]);
-        STD = std(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][0]);
-        CV = STD / MEAN;
-        pw.print("SYS-0");
-        pw.print(';');
-        pw.print(MEAN);
-        pw.print(';');
-        pw.print(STD);
-        pw.print(';');
-        pw.print(CV);
-        pw.print(';');
-        pw.print(mean(tabCv[nbSpeciesTab + nbPlanktonGroupsTab][0]));
-        pw.println(';');
-        pw.println();
-
-        //bloc tot
-        if (outputClass0Matrix) {
-            pw.print("TOT");
-            pw.print(';');
-            pw.print("MEAN(mean)");
-            pw.print(';');
-            pw.print("STD(mean)");
-            pw.print(';');
-            pw.print("CV(mean)");
-            pw.print(';');
-            pw.print("MEAN(cv)");
-            pw.println(';');
-            for (int i = 0; i < nbSpeciesTab; i++) {
-                MEAN = mean(tabMean[i][1]);
-                STD = std(tabMean[i][1]);
-                CV = STD / MEAN;
-                pw.print(nameSpecMatrix[i]);
-                pw.print(';');
-                pw.print(MEAN);
-                pw.print(';');
-                pw.print(STD);
-                pw.print(';');
-                pw.print(CV);
-                pw.print(';');
-                pw.print(mean(tabCv[i][1]));
-                pw.println(';');
-            }
-            /*
-             * for(int
-             * i=nbSpeciesTab;i<nbSpeciesTab+nbPlanktonGroupsTab;i++)
-             * { MEAN = mean(tabMean[i][0]); STD = std(tabMean[i][0]); CV =
-             * STD/MEAN; pw.print("Plankton group
-             * "+(i+1-nbSpeciesTab));pw.print(';');pw.print(MEAN);pw.print(';');
-             * pw.print(STD);pw.print(';');
-             * pw.print(CV);pw.print(';');pw.print(mean(tabCv[i][0]));pw.println(';');
-             * }
-             */
-            MEAN = mean(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1]);
-            STD = std(tabMean[nbSpeciesTab + nbPlanktonGroupsTab][1]);
-            CV = STD / MEAN;
-            pw.print("SYS");
-            pw.print(';');
-            pw.print(MEAN);
-            pw.print(';');
-            pw.print(STD);
-            pw.print(';');
-            pw.print(CV);
-            pw.print(';');
-            pw.print(mean(tabCv[nbSpeciesTab + nbPlanktonGroupsTab][1]));
-            pw.println(';');
-
-        }
-        pw.close();
-
-        System.out.println("biom data saved");
     }
 
     public float mean(float[] val) {
