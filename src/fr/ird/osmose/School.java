@@ -89,9 +89,14 @@ public class School extends GridPoint {
      */
     private int dietOutputStage;
     /**
-     * Number of individuals in the school.
+     * Number of individuals in the school at beginning of the time step.
      */
     private double abundance;
+    /**
+     * Number of individuals in the school. instantaneousAbundance = abundance -
+     * ndeads
+     */
+    private double instantaneousAbundance;
     /**
      * Matrix of diets in a time step. diet[NSPECIES+NPLANKTON][NDIETSTAGES]
      */
@@ -116,6 +121,10 @@ public class School extends GridPoint {
      * Predation success rate. (ratio of what is preyed on maximal ingestion).
      */
     public float predSuccessRate;
+    /*
+     * Monitor whether the number of deads has changed
+     */
+    private boolean ndeadHasChanged;
 
 //////////////
 // Constructor
@@ -159,6 +168,8 @@ public class School extends GridPoint {
         ndeadPredation = 0;
         ndeadStarvation = 0;
         catchable = true;
+        ndeadHasChanged = false;
+        instantaneousAbundance = abundance;
         // Reset diet variables
         diet = new float[getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups()][];
         for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
@@ -206,15 +217,18 @@ public class School extends GridPoint {
      * the school within the current time step.
      */
     public double getInstantaneousAbundance() {
-        double nDeadTotal = ndeadPredation
-                + ndeadStarvation
-                + ndeadNatural
-                + ndeadFishing;
-        double abundanceTmp = abundance - nDeadTotal;
-        //if (nDeadTotal > 0) System.out.println("Abundance changed " + " " + school.nDeadPredation + " " +  school.nDeadStarvation + " " + school.nDeadNatural + " " + school.nDeadFishing);
-        return (abundanceTmp < 1)
-                ? 0.d
-                : abundanceTmp;
+        if (ndeadHasChanged) {
+            double nDeadTotal = ndeadPredation
+                    + ndeadStarvation
+                    + ndeadNatural
+                    + ndeadFishing;
+            instantaneousAbundance = abundance - nDeadTotal;
+            if (instantaneousAbundance < 1.d) {
+                instantaneousAbundance = 0.d;
+            }
+            ndeadHasChanged = false;
+        }
+        return instantaneousAbundance;
     }
 
     /**
@@ -413,6 +427,7 @@ public class School extends GridPoint {
      */
     public void setNdeadFishing(double ndeadFishing) {
         this.ndeadFishing = ndeadFishing;
+        ndeadHasChanged = true;
     }
 
     /**
@@ -427,6 +442,7 @@ public class School extends GridPoint {
      */
     public void setNdeadPredation(double ndeadPredation) {
         this.ndeadPredation = ndeadPredation;
+        ndeadHasChanged = true;
     }
 
     /**
@@ -441,6 +457,7 @@ public class School extends GridPoint {
      */
     public void setNdeadStarvation(double ndeadStarvation) {
         this.ndeadStarvation = ndeadStarvation;
+        ndeadHasChanged = true;
     }
 
     /**
@@ -455,5 +472,6 @@ public class School extends GridPoint {
      */
     public void setNdeadNatural(double ndeadNatural) {
         this.ndeadNatural = ndeadNatural;
+        ndeadHasChanged = true;
     }
 }
