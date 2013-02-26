@@ -52,7 +52,8 @@ public class NaturalMortalityProcess extends AbstractProcess {
     public void run() {
         // Natural mortality (due to other predators)
         for (School school : getPopulation()) {
-            double nDead = computeNaturalMortality(school, 1);
+            double D = getNaturalMortalityRate(school, 1);
+            double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
             school.setAbundance(school.getAbundance() - nDead);
             if (school.getAbundance() < 1.d) {
                 //nDead = school.getAbundance();
@@ -83,12 +84,6 @@ public class NaturalMortalityProcess extends AbstractProcess {
             D = (spec.D + getOutMortality(school)) / (float) (getOsmose().getNumberTimeStepsPerYear() * subdt);
         }
         return D;
-    }
-
-    public double computeNaturalMortality(School school, int subdt) {
-
-        double D = getNaturalMortalityRate(school, subdt);
-        return school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
     }
 
     /*

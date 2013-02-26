@@ -18,7 +18,7 @@ public class FishingProcess extends AbstractProcess {
      * Fishing mortality rates
      */
     private float[][] fishingRates;
-    
+
     public FishingProcess(int replica) {
         super(replica);
     }
@@ -34,7 +34,8 @@ public class FishingProcess extends AbstractProcess {
     public void run() {
         for (School school : getPopulation().getPresentSchools()) {
             if (school.getAbundance() != 0.d) {
-                double nDead = computeFishingMortality(school, 1);
+                double F = getFishingMortalityRate(school, 1);
+                double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
                 if (nDead != 0.d) {
                     school.setAbundance(school.getAbundance() - nDead);
                     if (school.getAbundance() < 1.d) {
@@ -45,16 +46,6 @@ public class FishingProcess extends AbstractProcess {
                 }
             }
         }
-    }
-
-    public double computeFishingMortality(School school, int subdt) {
-
-        double F = getFishingMortalityRate(school, subdt);
-        double nDead = 0;
-        if (F > 0) {
-            nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
-        }
-        return nDead;
     }
 
     public double getFishingMortalityRate(School school, int subdt) {
