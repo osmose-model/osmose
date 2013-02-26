@@ -9,6 +9,10 @@ import fr.ird.osmose.School;
 public class BiomassNoJuvIndicator extends AbstractIndicator {
 
     private double[] biomass;
+    
+     public BiomassNoJuvIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

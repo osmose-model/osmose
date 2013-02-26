@@ -22,8 +22,9 @@ public class IncomingFluxProcess extends AbstractProcess {
      * Mean weight of incoming fish
      */
     private int ageMeanIn;
-
-    public IncomingFluxProcess(Species species) {
+    
+    public IncomingFluxProcess(int replica, Species species) {
+        super(replica);
         this.species = species;
     }
 

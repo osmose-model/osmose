@@ -30,6 +30,10 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
      * Biomass per diet stages [SPECIES][DIET_STAGES]
      */
     private double[][] biomassStage;
+    
+     public PredatorPressureIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

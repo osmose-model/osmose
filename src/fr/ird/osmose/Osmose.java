@@ -24,6 +24,7 @@ import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.util.IOTools;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +46,7 @@ public class Osmose {
     /*
      *
      */
-    private Simulation simulation;
+    private Simulation[] simulation;
     private IGrid grid;
     /*
      * Forcing with Biogeochimical model.
@@ -184,7 +185,7 @@ public class Osmose {
      */
     String[] ltlNames;		// list of names of plankton groups
     float[] ltlTrophicLevel;			// list of TL of plankton groups
-    float[] ltlMinSize , ltlMaxSize;		// list of min and max sizes of plankton groups
+    float[] ltlMinSize, ltlMaxSize;		// list of min and max sizes of plankton groups
     float[] ltlConversionFactors;		// list of conversionFactors of plankton groups
     float[] ltlProdBiomFactors;
     int nLTLGroups;
@@ -230,27 +231,74 @@ public class Osmose {
     }
 
     public void run() {
-
         // Delete existing output directory
         File targetPath = new File(outputPathName + outputFileNameTab);
         if (targetPath.exists()) {
             IOTools.deleteDirectory(targetPath);
         }
+        
         // Loop over the number of replica
-        for (int replica = 0; replica < nbLoopTab; replica++) {
-            long begin = System.currentTimeMillis();
-            System.out.println();
-            System.out.println("Replica " + replica + "...");
-            simulation = new Simulation(replica);
-            simulation.init();
-            simulation.run();
-            int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-            
-            System.out.println("Replica " + replica + " [OK] (time ellapsed:  " + time + " seconds)");
+        simulation = new Simulation[nbLoopTab];
+        long begin = System.currentTimeMillis();
+        System.out.println("\nSimulation started...");
+        int nProcs = Runtime.getRuntime().availableProcessors();
+        //int nProcs = 1;
+        int nBatch = (int) Math.ceil((float)nbLoopTab / nProcs);
+        int replica = 0;
+        for (int iBatch = 0; iBatch < nBatch; iBatch++) {
+            int nworker = Math.min(nProcs, nbLoopTab - replica);
+            CountDownLatch doneSignal = new CountDownLatch(nworker);
+            Worker[] workers = new Worker[nworker];
+            for (int iworker = 0; iworker < nworker; iworker++) {
+                simulation[replica] = new Simulation(replica);
+                workers[iworker] = new Worker(simulation[replica], doneSignal);
+                replica++;
+            }
+            for (int iworker = 0; iworker < nworker; iworker++) {
+                new Thread(workers[iworker]).start();
+            }
+            try {
+                doneSignal.await();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            for (int iworker = 0; iworker < nworker; iworker++) {
+                simulation[iBatch * nProcs + iworker] = null;
+            }
         }
+
         // Save summary for calibration
         if (calibrationMatrix) {
             saveSerieSimulations();
+        }
+        int time = (int) ((System.currentTimeMillis() - begin) / 1000);
+        System.out.println("End of simulation [OK] (time ellapsed:  " + time + " seconds)");
+    }
+
+    private class Worker implements Runnable {
+
+        private final Simulation simulation;
+        private final int replica;
+        private final CountDownLatch doneSignal;
+
+        public Worker(Simulation simulation, CountDownLatch doneSignal) {
+            this.simulation = simulation;
+            this.doneSignal = doneSignal;
+            replica = simulation.getReplica();
+        }
+
+        @Override
+        public void run() {
+            long begin = System.currentTimeMillis();
+            try {
+                System.out.println("  Replica " + (replica + 1) + " started...");
+                simulation.init();
+                simulation.run();
+                int time = (int) ((System.currentTimeMillis() - begin) / 1000);
+                System.out.println("  Replica " + (replica + 1) + " [OK] (time ellapsed:  " + time + " seconds)");
+            } finally {
+                doneSignal.countDown();
+            }
         }
     }
 
@@ -277,6 +325,10 @@ public class Osmose {
         readMPAFile();
         initializeOutputData();
         initForcing();
+    }
+
+    public Logger getLogger() {
+        return Logger.getLogger(Osmose.class.getName());
     }
 
     public String readPathFile() // read the file situated within the source code directory
@@ -2693,8 +2745,8 @@ public class Osmose {
         return forcing;
     }
 
-    public Simulation getSimulation() {
-        return simulation;
+    public Simulation getSimulation(int replica) {
+        return simulation[replica];
     }
 
     public String resolvePath(String path) {
@@ -2770,11 +2822,11 @@ public class Osmose {
     public int getNumberSpecies() {
         return nbSpeciesTab;
     }
-    
+
     public int getNumberLTLGroups() {
         return nLTLGroups;
     }
-    
+
     public int getNumberLTLSteps() {
         return nLTLSteps;
     }

@@ -14,7 +14,8 @@ public class MapDistributionProcess extends AbstractProcess {
     private MovementProcess movement;
     private Species species;
     
-    public MapDistributionProcess(Species species, MovementProcess parent) {
+    public MapDistributionProcess(int replica, Species species, MovementProcess parent) {
+        super(replica);
         this.species = species;
         this.movement = parent;
     }

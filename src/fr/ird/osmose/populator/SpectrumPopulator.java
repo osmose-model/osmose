@@ -10,6 +10,10 @@ import java.util.List;
  * @author pverley
  */
 public class SpectrumPopulator extends AbstractPopulator {
+    
+    public SpectrumPopulator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void loadParameters() {

@@ -46,6 +46,10 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
      * Abundance per stages [SPECIES][STAGES]
      */
     private double[][] abundanceStage;
+    
+     public MortalityIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

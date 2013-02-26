@@ -18,6 +18,10 @@ public class FishingProcess extends AbstractProcess {
      * Fishing mortality rates
      */
     private float[][] fishingRates;
+    
+    public FishingProcess(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {

@@ -14,6 +14,10 @@ public class StarvationProcess extends AbstractProcess {
 
     private float[] starvMaxRate;
     private float[] criticalPredSuccess;
+    
+    public StarvationProcess(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {

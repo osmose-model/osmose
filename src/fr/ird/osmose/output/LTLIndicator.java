@@ -31,6 +31,10 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
      * LTL biomass array
      */
     private float[][][] ltlbiomass;
+    
+     public LTLIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {

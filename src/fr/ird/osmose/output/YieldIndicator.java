@@ -13,6 +13,10 @@ import fr.ird.osmose.School;
 public class YieldIndicator extends AbstractIndicator {
 
     public double[] yield;
+    
+     public YieldIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

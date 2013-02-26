@@ -14,6 +14,10 @@ import java.io.File;
 public class SizeSpectrumIndicator extends AbstractIndicator {
 
     private double[][] sizeSpectrum;
+    
+     public SizeSpectrumIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

@@ -15,6 +15,10 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
 
     private double[] meanTLCatch;
     private double[] yield;
+    
+     public MeanTrophicLevelCatchIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

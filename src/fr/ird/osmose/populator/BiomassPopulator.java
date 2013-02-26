@@ -10,6 +10,13 @@ import fr.ird.osmose.process.NaturalMortalityProcess;
  * @author pverley
  */
 public class BiomassPopulator extends AbstractPopulator {
+    
+    final private int replica;
+    
+    public BiomassPopulator(int replica) {
+        super(replica);
+        this.replica = replica;
+    }
 
     @Override
     public void loadParameters() {
@@ -32,11 +39,11 @@ public class BiomassPopulator extends AbstractPopulator {
             float[] meanLength = species.getMeanLength();
             float[] meanWeight = species.getMeanWeight(meanLength);
 
-            NaturalMortalityProcess naturalMortalityProcess = new NaturalMortalityProcess();
+            NaturalMortalityProcess naturalMortalityProcess = new NaturalMortalityProcess(replica);
             naturalMortalityProcess.init();
             double larvalSurvival = naturalMortalityProcess.getLarvalMortalityRate(species);
             
-            FishingProcess fishingProcess = new FishingProcess();
+            FishingProcess fishingProcess = new FishingProcess(replica);
             fishingProcess.init();
             double F = fishingProcess.getFishingMortalityRate(species);
 

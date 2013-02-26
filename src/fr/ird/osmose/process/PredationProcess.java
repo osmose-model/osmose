@@ -19,6 +19,10 @@ public class PredationProcess extends AbstractProcess {
 
     private float[][] predPreySizesMax, predPreySizesMin;
     private float[] predationRate;
+    
+    public PredationProcess(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {

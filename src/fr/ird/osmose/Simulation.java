@@ -1,13 +1,10 @@
 package fr.ird.osmose;
 
-import fr.ird.osmose.grid.IGrid;
-import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
 import fr.ird.osmose.step.SequentialMortalityStep;
-import java.util.*;
 
 public class Simulation {
 
@@ -142,18 +139,18 @@ public class Simulation {
         switch (VERSION) {
             case SCHOOL2012_PROD:
             case SCHOOL2012_BIOM:
-                step = new SequentialMortalityStep();
+                step = new SequentialMortalityStep(replica);
                 break;
             case CASE1:
             case CASE2:
             case CASE3:
-                step = new ConcomitantMortalityStep();
+                step = new ConcomitantMortalityStep(replica);
         }
         // Intialize the step
         step.init();
 
         // Initialize the population
-        AbstractProcess populatingProcess = new PopulatingProcess();
+        AbstractProcess populatingProcess = new PopulatingProcess(replica);
         populatingProcess.init();
         populatingProcess.run();
     }
@@ -176,7 +173,7 @@ public class Simulation {
             i_step_year = i_step_simu % getOsmose().getNumberTimeStepsPerYear();
             
             // Print progress in console
-            progress();
+            //progress();
 
             // Run a new step
             step.step(i_step_simu);

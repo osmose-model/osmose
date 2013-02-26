@@ -51,6 +51,10 @@ public class MovementProcess extends AbstractProcess {
     private ConnectivityMatrix[] connectivityMatrix;
     private String[] mapFile;
     private int[] mapIndexNoTwin;
+    
+    public MovementProcess(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {
@@ -83,13 +87,13 @@ public class MovementProcess extends AbstractProcess {
         for (int i = 0; i < nSpecies; i++) {
             switch (getSpatialDistribution(i)) {
                 case RANDOM:
-                    movements[i] = new RandomDistributionProcess(getSimulation().getSpecies(i), this);
+                    movements[i] = new RandomDistributionProcess(getReplica(), getSimulation().getSpecies(i), this);
                     break;
                 case MAPS:
-                    movements[i] = new MapDistributionProcess(getSimulation().getSpecies(i), this);
+                    movements[i] = new MapDistributionProcess(getReplica(), getSimulation().getSpecies(i), this);
                     break;
                 case CONNECTIVITY:
-                    movements[i] = new ConnectivityDistributionProcess(getSimulation().getSpecies(i), this);
+                    movements[i] = new ConnectivityDistributionProcess(getReplica(), getSimulation().getSpecies(i), this);
                     break;
             }
             movements[i].init();

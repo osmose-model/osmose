@@ -31,6 +31,10 @@ public class DietIndicator extends SimulationLinker implements Indicator {
      * Biomass per diet stages [SPECIES][DIET_STAGES]
      */
     private double[][] biomassStage;
+    
+     public DietIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

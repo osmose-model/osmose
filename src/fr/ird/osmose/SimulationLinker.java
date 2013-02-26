@@ -13,6 +13,16 @@ import fr.ird.osmose.ltl.LTLForcing;
  */
 public class SimulationLinker {
     
+    private final int replica;
+    
+    public SimulationLinker(int replica) {
+        this.replica = replica;
+    }
+    
+    final public int getReplica() {
+        return replica;
+    }
+    
     public Osmose getOsmose() {
         return Osmose.getInstance();
     }
@@ -22,11 +32,11 @@ public class SimulationLinker {
     }
 
     public Simulation getSimulation() {
-        return Osmose.getInstance().getSimulation();
+        return Osmose.getInstance().getSimulation(replica);
     }
 
     public Population getPopulation() {
-        return Osmose.getInstance().getSimulation().getPopulation();
+        return Osmose.getInstance().getSimulation(replica).getPopulation();
     }
     
     public LTLForcing getForcing() {
@@ -34,7 +44,7 @@ public class SimulationLinker {
     }
     
     public Species getSpecies(int index) {
-        return Osmose.getInstance().getSimulation().getSpecies(index);
+        return Osmose.getInstance().getSimulation(replica).getSpecies(index);
     }
     
     public String resolveFile(String filename) {

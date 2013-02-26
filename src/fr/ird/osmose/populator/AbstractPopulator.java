@@ -7,6 +7,10 @@ import fr.ird.osmose.SimulationLinker;
  * @author pverley
  */
 public abstract class AbstractPopulator extends SimulationLinker {
+    
+    AbstractPopulator(int replica) {
+        super(replica);
+    }
 
     abstract public void loadParameters();
     

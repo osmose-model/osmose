@@ -58,44 +58,48 @@ public class SequentialMortalityStep extends AbstractStep {
      * List of indicators
      */
     private Indicators indicators;
+    
+    public SequentialMortalityStep(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {
         // initialize natural mortality process
-        naturalMortalityProcess = new NaturalMortalityProcess();
+        naturalMortalityProcess = new NaturalMortalityProcess(getReplica());
         naturalMortalityProcess.init();
 
         // initialize starvation process
-        predationProcess = new PredationProcess();
+        predationProcess = new PredationProcess(getReplica());
         predationProcess.init();
 
         // initialize starvation process
-        starvationProcess = new StarvationProcess();
+        starvationProcess = new StarvationProcess(getReplica());
         starvationProcess.init();
 
 
         // initialize fishing process
-        fishingProcess = new FishingProcess();
+        fishingProcess = new FishingProcess(getReplica());
         fishingProcess.init();
 
         // initiliaza growth process
-        growthProcess = new GrowthProcess();
+        growthProcess = new GrowthProcess(getReplica());
         growthProcess.init();
 
         // Reproduction processes
-        reproductionProcess = new ReproductionProcess();
+        reproductionProcess = new ReproductionProcess(getReplica());
         reproductionProcess.init();
 
         // Movement of the schools
-        movementProcess = new MovementProcess();
+        movementProcess = new MovementProcess(getReplica());
         movementProcess.init();
 
         // MPA
-        mpaProcess = new MPAProcess();
+        mpaProcess = new MPAProcess(getReplica());
         mpaProcess.init();
 
         // Indicators
-        indicators = new Indicators();
+        indicators = new Indicators(getReplica());
         indicators.init();
     }
 

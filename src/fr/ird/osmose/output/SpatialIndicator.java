@@ -35,6 +35,10 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
     private float[][][] ltlbiomass;
     private float[][][] abundance;
     private float[][][] yield;
+    
+     public SpatialIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {

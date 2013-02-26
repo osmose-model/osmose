@@ -12,6 +12,10 @@ public class BiomassCalibrationIndicator extends SimulationLinker implements Ind
     private double[] biomassTot;
     private double[] biomassNoJuv;
     
+     public BiomassCalibrationIndicator(int replica) {
+        super(replica);
+    }
+    
     @Override
     public void init() {
         // do nothing

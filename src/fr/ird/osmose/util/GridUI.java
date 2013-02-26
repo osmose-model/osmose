@@ -250,13 +250,12 @@ public class GridUI extends JPanel {
      */
     public static double geodesicDistance(double lat1, double lon1, double lat2, double lon2) {
 
-        double d = 0.d;
         double lat1_rad = Math.PI * lat1 / 180.d;
         double lat2_rad = Math.PI * lat2 / 180.d;
         double lon1_rad = Math.PI * lon1 / 180.d;
         double lon2_rad = Math.PI * lon2 / 180.d;
 
-        d = 2 * 6367000.d
+        double d = 2 * 6367000.d
                 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2_rad - lat1_rad) / 2), 2)
                 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
 
@@ -413,7 +412,7 @@ public class GridUI extends JPanel {
 
         getOsmose().loadArgs(args);
         getOsmose().init();
-        mpaProcess = new MPAProcess();
+        mpaProcess = new MPAProcess(0);
         mpaProcess.init();
         //getCellSize(1, 1);
         //getCellSize(10, 10);

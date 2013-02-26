@@ -11,6 +11,10 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
     private float[][] larvalMortalityRates;
     private static float[][][] outOfZoneMortality;
+    
+    public NaturalMortalityProcess(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {

@@ -21,7 +21,8 @@ public class LocalReproductionProcess extends AbstractProcess {
      */
     private double alpha;
     
-    public LocalReproductionProcess(Species species) {
+    public LocalReproductionProcess(int replica, Species species) {
+        super(replica);
         this.species = species;
     }
 

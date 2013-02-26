@@ -44,21 +44,25 @@ public class MortalityProcess extends AbstractProcess {
      * Private instance of the predation process
      */
     private PredationProcess predationProcess;
+    
+    public MortalityProcess(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {
         random = new Random();
         
-        naturalMortalityProcess = new NaturalMortalityProcess();
+        naturalMortalityProcess = new NaturalMortalityProcess(getReplica());
         naturalMortalityProcess.init();
         
-        fishingProcess = new FishingProcess();
+        fishingProcess = new FishingProcess(getReplica());
         fishingProcess.init();
         
-        starvationProcess = new StarvationProcess();
+        starvationProcess = new StarvationProcess(getReplica());
         starvationProcess.init();
         
-        predationProcess = new PredationProcess();
+        predationProcess = new PredationProcess(getReplica());
         predationProcess.init();
     }
 

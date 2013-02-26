@@ -13,6 +13,10 @@ import fr.ird.osmose.School;
 public class AbundanceNoJuvIndicator extends AbstractIndicator {
 
     private double[] abundance;
+    
+    public AbundanceNoJuvIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

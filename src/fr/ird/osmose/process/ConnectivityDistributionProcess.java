@@ -15,7 +15,8 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
     private MovementProcess movement;
     private Species species;
     
-    public ConnectivityDistributionProcess(Species species, MovementProcess parent) {
+    public ConnectivityDistributionProcess(int replica, Species species, MovementProcess parent) {
+        super(replica);
         this.species = species;
         this.movement = parent;
     }

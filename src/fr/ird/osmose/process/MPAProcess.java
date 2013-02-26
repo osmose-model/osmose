@@ -18,6 +18,10 @@ public class MPAProcess extends AbstractProcess {
 
     private List<Cell> mpa;
     private int start, end;
+    
+    public MPAProcess(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {

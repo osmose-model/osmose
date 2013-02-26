@@ -17,37 +17,39 @@ public class Indicators extends SimulationLinker {
     // List of the indicators
     final private List<Indicator> indicators;
 
-    public Indicators() {
+    public Indicators(int replica) {
+        super(replica);
+        
         indicators = new ArrayList();
 
         // Biomass
-        indicators.add(new BiomassNoJuvIndicator());
-        indicators.add(new BiomassTotIndicator());
+        indicators.add(new BiomassNoJuvIndicator(replica));
+        indicators.add(new BiomassTotIndicator(replica));
         // Abundance
-        indicators.add(new AbundanceNoJuvIndicator());
-        indicators.add(new AbundanceTotIndicator());
+        indicators.add(new AbundanceNoJuvIndicator(replica));
+        indicators.add(new AbundanceTotIndicator(replica));
         // Mortality
-        indicators.add(new MortalityIndicator());
+        indicators.add(new MortalityIndicator(replica));
         // Yield
-        indicators.add(new YieldIndicator());
-        indicators.add(new YieldNIndicator());
+        indicators.add(new YieldIndicator(replica));
+        indicators.add(new YieldNIndicator(replica));
         // Size
-        indicators.add(new MeanSizeIndicator());
-        indicators.add(new MeanSizeCatchIndicator());
-        indicators.add(new SizeSpectrumIndicator());
-        indicators.add(new SizeSpectrumSpeciesIndicator());
+        indicators.add(new MeanSizeIndicator(replica));
+        indicators.add(new MeanSizeCatchIndicator(replica));
+        indicators.add(new SizeSpectrumIndicator(replica));
+        indicators.add(new SizeSpectrumSpeciesIndicator(replica));
         // TL
-        indicators.add(new MeanTrophicLevelIndicator());
-        indicators.add(new MeanTrophicLevelCatchIndicator());
-        indicators.add(new TrophicLevelSpectrumIndicator());
+        indicators.add(new MeanTrophicLevelIndicator(replica));
+        indicators.add(new MeanTrophicLevelCatchIndicator(replica));
+        indicators.add(new TrophicLevelSpectrumIndicator(replica));
         // Predation
-        indicators.add(new DietIndicator());
-        indicators.add(new PredatorPressureIndicator());
+        indicators.add(new DietIndicator(replica));
+        indicators.add(new PredatorPressureIndicator(replica));
         // Spatialized
-        indicators.add(new SpatialIndicator());
-        indicators.add(new LTLIndicator());
+        indicators.add(new SpatialIndicator(replica));
+        indicators.add(new LTLIndicator(replica));
         // Temporary indicator for calib that will be deleted soon
-        indicators.add(new BiomassCalibrationIndicator());
+        indicators.add(new BiomassCalibrationIndicator(replica));
     }
     
     public void init() {

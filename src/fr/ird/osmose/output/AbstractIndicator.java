@@ -23,6 +23,10 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
     abstract String getDescription();
 
     abstract String[] getHeaders();
+    
+    AbstractIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void init() {

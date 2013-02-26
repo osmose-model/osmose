@@ -17,6 +17,10 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
      * Trophic level distribution [SPECIES][TL_SPECTRUM]
      */
     private double[][] trophicLevelSpectrum;
+    
+     public TrophicLevelSpectrumIndicator(int replica) {
+        super(replica);
+    }
 
     @Override
     public void initStep() {

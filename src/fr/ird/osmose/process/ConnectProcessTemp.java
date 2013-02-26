@@ -15,7 +15,8 @@ public class ConnectProcessTemp extends AbstractProcess {
     private Species species;
     int[][] numMaps;
 
-    public ConnectProcessTemp(Species species) {
+    public ConnectProcessTemp(int replica, Species species) {
+        super(replica);
         this.species = species;
     }
 
