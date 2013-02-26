@@ -267,7 +267,7 @@ public class School extends GridPoint {
      * @return whether the school is alive or not
      */
     public boolean isAlive() {
-        return abundance > 0;
+        return (abundance > 0) && (age <= species.getLongevity() - 1);
     }
 
     @Override
