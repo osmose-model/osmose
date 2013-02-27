@@ -65,7 +65,9 @@ public class School extends GridPoint {
      */
     private float length;
     /**
-     * Weight of individual of the school in grams.
+     * Weight of individual of the school in tons.
+     * The unit has been set to tons just because it saves computation time for
+     * converting the biomass from grams to tons  
      */
     private float weight;
     /**
@@ -142,7 +144,7 @@ public class School extends GridPoint {
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.length = length;
-        this.weight = weight;
+        this.weight = weight * 1.e-6f;
         this.age = age;
 
         // Set initial trophic level to EGG
@@ -191,14 +193,14 @@ public class School extends GridPoint {
      * Converts the specified biomass [tons] into abundance [scalar]
      */
     public double biom2abd(double biomass) {
-        return 1.e6d * biomass / weight;
+        return biomass / weight;
     }
 
     /**
      * Converts the specified abundance [scalar] into biomass [tons]
      */
     public double adb2biom(double abundance) {
-        return abundance * weight / 1.e6d;
+        return abundance * weight;
     }
 
     /**
@@ -309,7 +311,7 @@ public class School extends GridPoint {
     public void incrementLength(float dlength) {
         if (dlength != 0.f) {
             length += dlength;
-            weight = species.computeWeight(length);
+            weight = species.computeWeight(length) * 1e-6f;
         }
     }
 
