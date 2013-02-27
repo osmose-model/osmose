@@ -440,8 +440,13 @@ public class School extends GridPoint {
     /**
      * @param ndeadPredation the nDeadPredation to set
      */
-    public void setNdeadPredation(double ndeadPredation) {
-        this.ndeadPredation = ndeadPredation;
+    public void resetNdeadPredation() {
+        ndeadPredation = 0;
+        ndeadHasChanged = true;
+    }
+    
+    public void incrementNdeadPredation(double ndead) {
+        ndeadPredation += ndead;
         ndeadHasChanged = true;
     }
 
