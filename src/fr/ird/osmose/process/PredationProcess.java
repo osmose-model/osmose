@@ -19,7 +19,7 @@ public class PredationProcess extends AbstractProcess {
 
     private float[][] predPreySizesMax, predPreySizesMin;
     private float[] predationRate;
-    
+
     public PredationProcess(int replica) {
         super(replica);
     }
@@ -35,10 +35,10 @@ public class PredationProcess extends AbstractProcess {
     public void run() {
         for (Cell cell : getGrid().getCells()) {
             List<School> schools = getPopulation().getSchools(cell);
-            Collections.shuffle(schools);
-            int ns = schools.size();
-            double[] preyedBiomass = new double[ns];
             if (!(cell.isLand() || schools.isEmpty())) {
+                Collections.shuffle(schools);
+                int ns = schools.size();
+                double[] preyedBiomass = new double[ns];
                 // Compute predation
                 for (int ipred = 0; ipred < ns; ipred++) {
                     School predator = schools.get(ipred);
@@ -105,18 +105,6 @@ public class PredationProcess extends AbstractProcess {
         double biomassToPredate = instantaneous
                 ? getPredationRate(predator, subdt) * predator.getInstantaneousBiomass()
                 : getPredationRate(predator, subdt) * predator.getBiomass();
-        /*
-         * phv 20121219 - this is just a way to stick to what is done in
-         * Osmose version SCHOOL2012 and previous version.
-         * Tbe biomassToPredate variable of the predator is update on the fly.
-         * Should check how it is done in version WS2009 and make sure that it
-         * is equivalent to what is done here. It might have some consequences
-         * for School.predSuccessRate which influences growth and starvation.
-         * phv 20130222 deleted variable school.biomassToPredate
-         */
-        if (Simulation.VERSION.equals(Simulation.Version.SCHOOL2012_BIOM) || Simulation.VERSION.equals(Simulation.Version.SCHOOL2012_PROD)) {
-            //predator.biomassToPredate = biomassToPredate;
-        }
 
         // Distribute the predation over the preys
         if (biomAccessibleTot != 0) {
