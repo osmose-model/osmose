@@ -162,19 +162,12 @@ public class School extends GridPoint {
      */
     public void initStep() {
         
-        // Update abundance
-        abundance = getInstantaneousAbundance();
         // Update the stage
         updateFeedingStage(species.sizeFeeding, species.nbFeedingStages);
         updateAccessStage(species.ageStagesTab, species.nbAccessStages);
         updateDietOutputStage(species.dietStagesTab, species.nbDietStages);
         // Reset variables
-        ndeadFishing = 0;
-        ndeadNatural = 0;
-        ndeadPredation = 0;
-        ndeadStarvation = 0;
         catchable = true;
-        ndeadHasChanged = false;
         // Reset diet variables
         diet = new float[getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups()][];
         for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
@@ -187,6 +180,15 @@ public class School extends GridPoint {
         for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups(); i++) {
             diet[i] = new float[1];
         }
+    }
+    
+    public void updateAbundance() {
+        abundance = getInstantaneousAbundance();
+        ndeadFishing = 0;
+        ndeadNatural = 0;
+        ndeadPredation = 0;
+        ndeadStarvation = 0;
+        ndeadHasChanged = false;
     }
 
     /**

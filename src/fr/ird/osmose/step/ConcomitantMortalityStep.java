@@ -105,6 +105,11 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
         // Growth
         growthProcess.run();
+        
+        // Update abundance of the schools
+        for (School school : getPopulation()) {
+            school.updateAbundance();
+        }
 
         // Save steps
         indicators.update(iStepSimu);
