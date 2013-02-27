@@ -155,7 +155,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             StringBuilder filename = new StringBuilder("Mortality");
             filename.append(File.separatorChar);
             filename.append(getOsmose().outputPrefix);
-            filename.append("_mortalityRate_");
+            filename.append("_mortalityRate-");
             filename.append(getSimulation().getSpecies(iSpecies).getName());
             filename.append("_Simu");
             filename.append(getSimulation().getReplica());
