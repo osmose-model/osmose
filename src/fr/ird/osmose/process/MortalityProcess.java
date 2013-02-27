@@ -240,7 +240,7 @@ public class MortalityProcess extends AbstractProcess {
                 if (iPrey < nSchool) {
                     abundance = schools.get(iPrey).getAbundance();
                 } else {
-                    abundance = getSimulation().getPlankton(iPrey - nSchool).getAccessibleBiomass(cell);
+                    abundance = getSimulation().getPlankton(iPrey - nSchool).getBiomass(cell);
                 }
                 for (int iMortality = 0; iMortality < nMortality; iMortality++) {
                     if (totalMortalityRate[iPrey] > 0) {
