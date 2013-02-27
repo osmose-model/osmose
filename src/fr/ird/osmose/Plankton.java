@@ -1,5 +1,6 @@
 package fr.ird.osmose;
 
+import fr.ird.osmose.Simulation.Version;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 
@@ -77,11 +78,12 @@ public class Plankton {
      * Converts plankton biomass (usually from mmolN/m2) to tons/km2
      */
     public float convertToTonPerKm2(float concentration) {
-        // @WS2009
-        //return biomToProd(concentration * conversionFactor);
-
-        // @SCHOOL2012
-        return concentration * conversionFactor;
+        
+        if (Simulation.VERSION == Version.SCHOOL2012_PROD) {
+            return biomToProd(concentration * conversionFactor);
+        } else {
+            return concentration * conversionFactor;
+        }
     }
 
     public float biomToProd(float biomass) {
