@@ -169,61 +169,62 @@ public class MortalityProcess extends AbstractProcess {
         double ERR_MAX = 1.e-5d;
 
         List<School> schools = getPopulation().getSchools(cell);
-        int ns = schools.size();
-        int npl = getOsmose().getNumberLTLGroups();
-        double[][] nDeadMatrix = new double[ns + npl][ns + 3];
-        double[][] mortalityRateMatrix = new double[ns + npl][ns + 3];
-        double[] totalMortalityRate = new double[ns + npl];
-        double[] correctionFactor = new double[ns];
+        int nSchool = schools.size();
+        int nPlankton = getOsmose().getNumberLTLGroups();
+        int nMortality = nSchool + 3;
+        double[][] nDeadMatrix = new double[nSchool + nPlankton][nMortality];
+        double[][] mortalityRateMatrix = new double[nSchool + nPlankton][nMortality];
+        double[] totalMortalityRate = new double[nSchool + nPlankton];
+        double[] correctionFactor = new double[nSchool];
 
         //
         // Initialize the number of deads and the mortality rates
         double[][] predationMatrix = predationProcess.computePredationMatrix(cell, School.INISTEP_BIOMASS, subdt);
-        for (int ipr = 0; ipr < (ns + npl); ipr++) {
-            for (int ipd = 0; ipd < ns; ipd++) {
+        for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
+            for (int iPredator = 0; iPredator < nSchool; iPredator++) {
                 double predationMortalityRate;
-                if (ipr < ns) {
-                    School school = schools.get(ipr);
-                    nDeadMatrix[ipr][ipd] = school.biom2abd(predationMatrix[ipd][ipr]);
-                    predationMortalityRate = Math.log(school.getAbundance() / (school.getAbundance() - nDeadMatrix[ipr][ipd]));
+                if (iPrey < nSchool) {
+                    School school = schools.get(iPrey);
+                    nDeadMatrix[iPrey][iPredator] = school.biom2abd(predationMatrix[iPredator][iPrey]);
+                    predationMortalityRate = Math.log(school.getAbundance() / (school.getAbundance() - nDeadMatrix[iPrey][iPredator]));
                 } else {
-                    nDeadMatrix[ipr][ipd] = predationMatrix[ipd][ipr];
-                    double planktonAbundance = getSimulation().getPlankton(ipr - ns).getBiomass(cell);
+                    nDeadMatrix[iPrey][iPredator] = predationMatrix[iPredator][iPrey];
+                    double planktonAbundance = getSimulation().getPlankton(iPrey - nSchool).getBiomass(cell);
                     if (planktonAbundance > 0) {
-                        predationMortalityRate = Math.log(planktonAbundance / (planktonAbundance - predationMatrix[ipd][ipr]));
+                        predationMortalityRate = Math.log(planktonAbundance / (planktonAbundance - predationMatrix[iPredator][iPrey]));
                     } else {
                         predationMortalityRate = 0;
                     }
                 }
-                mortalityRateMatrix[ipr][ipd] = predationMortalityRate;
+                mortalityRateMatrix[iPrey][iPredator] = predationMortalityRate;
             }
         }
-        for (int is = 0; is < ns; is++) {
+        for (int is = 0; is < nSchool; is++) {
             School school = schools.get(is);
             // 2. Starvation
             // computes preyed biomass by school ipr
             double preyedBiomass = 0;
-            for (int ipr = 0; ipr < (ns + npl); ipr++) {
-                preyedBiomass += predationMatrix[is][ipr];
+            for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
+                preyedBiomass += predationMatrix[is][iPrey];
             }
             double biomassToPredate = school.getBiomass() * predationProcess.getPredationRate(school, subdt);
             school.predSuccessRate = predationProcess.computePredSuccessRate(biomassToPredate, preyedBiomass);
-            mortalityRateMatrix[is][ns] = starvationProcess.getStarvationMortalityRate(school, subdt);
+            mortalityRateMatrix[is][nSchool] = starvationProcess.getStarvationMortalityRate(school, subdt);
 
             // 3. Natural mortality
-            mortalityRateMatrix[is][ns + 1] = naturalMortalityProcess.getNaturalMortalityRate(school, subdt);
+            mortalityRateMatrix[is][nSchool + 1] = naturalMortalityProcess.getNaturalMortalityRate(school, subdt);
 
             // 4. Fishing mortality
-            mortalityRateMatrix[is][ns + 2] = fishingProcess.getFishingMortalityRate(school, subdt);
+            mortalityRateMatrix[is][nSchool + 2] = fishingProcess.getFishingMortalityRate(school, subdt);
         }
 
         //
         // Compute total mortality rate for schools and plankton
         // Sum mortality rates from every source for every school and
         // every plankton group
-        for (int ipr = 0; ipr < (ns + npl); ipr++) {
-            for (int imort = 0; imort < (ns + 3); imort++) {
-                totalMortalityRate[ipr] += mortalityRateMatrix[ipr][imort];
+        for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
+            for (int iMortality = 0; iMortality < nMortality; iMortality++) {
+                totalMortalityRate[iPrey] += mortalityRateMatrix[iPrey][iMortality];
             }
         }
 
@@ -234,55 +235,55 @@ public class MortalityProcess extends AbstractProcess {
         while ((iteration < ITER_MAX) && error > ERR_MAX) {
 
             // Update number of deads
-            for (int ipr = 0; ipr < (ns + npl); ipr++) {
+            for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
                 double abundance;
-                if (ipr < ns) {
-                    abundance = schools.get(ipr).getAbundance();
+                if (iPrey < nSchool) {
+                    abundance = schools.get(iPrey).getAbundance();
                 } else {
-                    abundance = getSimulation().getPlankton(ipr - ns).getAccessibleBiomass(cell);
+                    abundance = getSimulation().getPlankton(iPrey - nSchool).getAccessibleBiomass(cell);
                 }
-                for (int imort = 0; imort < ns + 3; imort++) {
-                    if (totalMortalityRate[ipr] > 0) {
-                        nDeadMatrix[ipr][imort] = (mortalityRateMatrix[ipr][imort] / totalMortalityRate[ipr]) * (1 - Math.exp(-totalMortalityRate[ipr])) * abundance;
+                for (int iMortality = 0; iMortality < nMortality; iMortality++) {
+                    if (totalMortalityRate[iPrey] > 0) {
+                        nDeadMatrix[iPrey][iMortality] = (mortalityRateMatrix[iPrey][iMortality] / totalMortalityRate[iPrey]) * (1 - Math.exp(-totalMortalityRate[iPrey])) * abundance;
                     } else {
-                        nDeadMatrix[ipr][imort] = 0.d;
+                        nDeadMatrix[iPrey][iMortality] = 0.d;
                     }
                 }
             }
 
             // Compute correction factor
-            for (int ipd = 0; ipd < ns; ipd++) {
-                School predator = schools.get(ipd);
+            for (int iPredator = 0; iPredator < nSchool; iPredator++) {
+                School predator = schools.get(iPredator);
                 double preyedBiomass = 0;
-                for (int ipr = 0; ipr < (ns + npl); ipr++) {
-                    if (ipr < ns) {
-                        preyedBiomass += schools.get(ipr).adb2biom(nDeadMatrix[ipr][ipd]);
+                for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
+                    if (iPrey < nSchool) {
+                        preyedBiomass += schools.get(iPrey).adb2biom(nDeadMatrix[iPrey][iPredator]);
                     } else {
-                        preyedBiomass += nDeadMatrix[ipr][ipd];
+                        preyedBiomass += nDeadMatrix[iPrey][iPredator];
                     }
                     //System.out.println("pred" + ipd + " py:" + ipr + " " + nbDeadMatrix[ipr][ipd] + " " + mortalityRateMatrix[ipr][ipd] + " " + totalMortalityRate[ipr]);
                 }
                 double biomassToPredate = predator.getBiomass() * predationProcess.getPredationRate(predator, subdt);
                 predator.predSuccessRate = predationProcess.computePredSuccessRate(biomassToPredate, preyedBiomass);
                 if (preyedBiomass > 0) {
-                    correctionFactor[ipd] = Math.min(biomassToPredate / preyedBiomass, 1.d);
+                    correctionFactor[iPredator] = Math.min(biomassToPredate / preyedBiomass, 1.d);
                 } else {
-                    correctionFactor[ipd] = 1;
+                    correctionFactor[iPredator] = 1;
                 }
             }
 
             // Update mortality rates
-            for (int ipr = 0; ipr < (ns + npl); ipr++) {
+            for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
                 // 1. Predation
-                for (int ipd = 0; ipd < ns; ipd++) {
-                    mortalityRateMatrix[ipr][ipd] *= correctionFactor[ipd];
+                for (int iPredator = 0; iPredator < nSchool; iPredator++) {
+                    mortalityRateMatrix[iPrey][iPredator] *= correctionFactor[iPredator];
                 }
             }
-            for (int ipr = 0; ipr < ns; ipr++) {
-                School school = schools.get(ipr);
+            for (int iPrey = 0; iPrey < nSchool; iPrey++) {
+                School school = schools.get(iPrey);
                 // 2. Starvation
                 // computes preyed biomass by school ipr
-                mortalityRateMatrix[ipr][ns] = starvationProcess.getStarvationMortalityRate(school, subdt);
+                mortalityRateMatrix[iPrey][nSchool] = starvationProcess.getStarvationMortalityRate(school, subdt);
                 // 3. Natural mortality, unchanged
                 // 4. Fishing, unchanged
             }
@@ -290,12 +291,12 @@ public class MortalityProcess extends AbstractProcess {
             // Convergence test
             double[] oldTotalMortalityRate = Arrays.copyOf(totalMortalityRate, totalMortalityRate.length);
             error = 0.d;
-            for (int ipr = 0; ipr < (ns + npl); ipr++) {
-                totalMortalityRate[ipr] = 0.d;
-                for (int imort = 0; imort < (ns + 3); imort++) {
-                    totalMortalityRate[ipr] += mortalityRateMatrix[ipr][imort];
+            for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
+                totalMortalityRate[iPrey] = 0.d;
+                for (int iMortality = 0; iMortality < nMortality; iMortality++) {
+                    totalMortalityRate[iPrey] += mortalityRateMatrix[iPrey][iMortality];
                 }
-                error = Math.max(error, Math.abs(totalMortalityRate[ipr] - oldTotalMortalityRate[ipr]));
+                error = Math.max(error, Math.abs(totalMortalityRate[iPrey] - oldTotalMortalityRate[iPrey]));
             }
             iteration++;
         }
