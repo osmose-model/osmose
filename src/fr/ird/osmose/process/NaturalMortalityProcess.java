@@ -11,14 +11,14 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
     private float[][] larvalMortalityRates;
     private static float[][][] outOfZoneMortality;
-    
+
     public NaturalMortalityProcess(int replica) {
         super(replica);
     }
 
     @Override
     public void init() {
-        
+
         larvalMortalityRates = new float[getNSpecies()][getOsmose().getNumberTimeStepsPerYear() * getOsmose().getNumberYears()];
         for (int iSpec = 0; iSpec < getOsmose().getNumberSpecies(); iSpec++) {
             int t = 0;
@@ -54,12 +54,9 @@ public class NaturalMortalityProcess extends AbstractProcess {
         for (School school : getPopulation()) {
             double D = getNaturalMortalityRate(school, 1);
             double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
-            school.setAbundance(school.getAbundance() - nDead);
-            if (school.getAbundance() < 1.d) {
-                //nDead = school.getAbundance();
-                school.setAbundance(0.d);
+            if (nDead > 0.d) {
+                school.setNdeadNatural(nDead);
             }
-            //school.nDeadNatural = nDead;
         }
     }
     

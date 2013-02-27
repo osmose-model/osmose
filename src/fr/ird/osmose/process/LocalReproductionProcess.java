@@ -39,7 +39,7 @@ public class LocalReproductionProcess extends AbstractProcess {
         List<School> schools = getPopulation().getSchools(species);
         for (School school : schools) {
             if (school.getLength() >= species.sizeMat) {
-                SSB += school.getBiomass();
+                SSB += school.getInstantaneousBiomass();
             }
         }
 

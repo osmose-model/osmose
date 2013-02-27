@@ -140,6 +140,7 @@ public class School extends GridPoint {
     public School(Species species, double abundance, float length, float weight, int age) {
         this.species = species;
         this.abundance = abundance;
+        instantaneousAbundance = abundance;
         this.length = length;
         this.weight = weight;
         this.age = age;
@@ -158,6 +159,9 @@ public class School extends GridPoint {
      * Reset school state variables
      */
     public void initStep() {
+        
+        // Update abundance
+        abundance = getInstantaneousAbundance();
         // Update the stage
         updateFeedingStage(species.sizeFeeding, species.nbFeedingStages);
         updateAccessStage(species.ageStagesTab, species.nbAccessStages);
@@ -169,7 +173,6 @@ public class School extends GridPoint {
         ndeadStarvation = 0;
         catchable = true;
         ndeadHasChanged = false;
-        instantaneousAbundance = abundance;
         // Reset diet variables
         diet = new float[getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups()][];
         for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
@@ -232,13 +235,6 @@ public class School extends GridPoint {
     }
 
     /**
-     * @param abundance the abundance to set
-     */
-    public void setAbundance(double abundance) {
-        this.abundance = abundance;
-    }
-
-    /**
      * Gets the biomass of the school at the beginning of the time step.
      *
      * @return the biomass of the school at the beginning of the time step
@@ -267,7 +263,7 @@ public class School extends GridPoint {
      * @return whether the school is alive or not
      */
     public boolean isAlive() {
-        return (abundance > 0) && (age <= species.getLongevity() - 1);
+        return (getInstantaneousAbundance() > 0) && (age <= species.getLongevity() - 1);
     }
 
     @Override

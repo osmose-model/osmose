@@ -39,15 +39,13 @@ public class PredationProcess extends AbstractProcess {
             int ns = schools.size();
             double[] preyedBiomass = new double[ns];
             if (!(cell.isLand() || schools.isEmpty())) {
-                double[] nDeadPredation = new double[ns];
                 // Compute predation
                 for (int ipred = 0; ipred < ns; ipred++) {
                     School predator = schools.get(ipred);
-                    double[] preyUpon = computePredation(predator, School.INISTEP_BIOMASS, 1);
+                    double[] preyUpon = computePredation(predator, School.INSTANTANEOUS_BIOMASS, 1);
                     for (int iprey = 0; iprey < ns; iprey++) {
                         if (iprey < ns) {
                             School prey = schools.get(iprey);
-                            nDeadPredation[iprey] += prey.biom2abd(preyUpon[iprey]);
                             prey.setNdeadPredation(prey.getNdeadPredation() + prey.biom2abd(preyUpon[iprey]));
                         }
                     }
@@ -56,13 +54,8 @@ public class PredationProcess extends AbstractProcess {
                 // Apply predation mortality
                 for (int is = 0; is < ns; is++) {
                     School school = schools.get(is);
-                    school.setNdeadPredation(0);
                     double biomassToPredate = school.getBiomass() * getPredationRate(school, 1);
                     school.predSuccessRate = computePredSuccessRate(biomassToPredate, preyedBiomass[is]);
-                    school.setAbundance(school.getAbundance() - nDeadPredation[is]);
-                    if (school.getAbundance() < 1.d) {
-                        school.setAbundance(0.d);
-                    }
                 }
             }
         }

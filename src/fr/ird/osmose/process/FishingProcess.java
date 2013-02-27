@@ -36,13 +36,8 @@ public class FishingProcess extends AbstractProcess {
             if (school.getAbundance() != 0.d) {
                 double F = getFishingMortalityRate(school, 1);
                 double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
-                if (nDead != 0.d) {
-                    school.setAbundance(school.getAbundance() - nDead);
-                    if (school.getAbundance() < 1.d) {
-                        //nDead = school.getAbundance();
-                        school.setAbundance(0.d);
-                    }
-                    //school.nDeadFishing = nDead;
+                if (nDead > 0.d) {
+                    school.setNdeadFishing(nDead);
                 }
             }
         }
