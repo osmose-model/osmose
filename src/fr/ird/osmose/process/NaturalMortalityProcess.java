@@ -10,7 +10,8 @@ import fr.ird.osmose.Species;
 public class NaturalMortalityProcess extends AbstractProcess {
 
     private float[][] larvalMortalityRates;
-    private static float[][][] outOfZoneMortality;
+    // migration process
+    private MigrationProcess migration;
 
     public NaturalMortalityProcess(int replica) {
         super(replica);
@@ -30,22 +31,9 @@ public class NaturalMortalityProcess extends AbstractProcess {
                 t++;
             }
         }
-
-        outOfZoneMortality = new float[getNSpecies()][][];
-        for (int index = 0; index < getNSpecies(); index++) {
-            int longevity = getSpecies(index).getLongevity();
-            outOfZoneMortality[index] = new float[longevity][getOsmose().getNumberTimeStepsPerYear()];
-            if (null != getOsmose().migrationTempAge[index]) {
-                int nbStepYear = getOsmose().getNumberTimeStepsPerYear();
-                for (int m = 0; m < getOsmose().migrationTempAge[index].length; m++) {
-                    for (int n = 0; n < getOsmose().migrationTempDt[index].length; n++) {
-                        for (int h = 0; h < nbStepYear; h++) {
-                            outOfZoneMortality[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = getOsmose().migrationTempMortality[index][m];
-                        }
-                    }
-                }
-            }
-        }
+        
+        // Migration
+        migration = new MigrationProcess(getReplica());
     }
 
     @Override
@@ -58,10 +46,6 @@ public class NaturalMortalityProcess extends AbstractProcess {
                 school.setNdeadNatural(nDead);
             }
         }
-    }
-    
-    private float getOutMortality(School school) {
-        return outOfZoneMortality[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
     }
 
     /**
@@ -76,9 +60,9 @@ public class NaturalMortalityProcess extends AbstractProcess {
         double D;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
-            D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + getOutMortality(school)) / (float) subdt;
+            D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + migration.getOutMortality(school)) / (float) subdt;
         } else {
-            D = (spec.D + getOutMortality(school)) / (float) (getOsmose().getNumberTimeStepsPerYear() * subdt);
+            D = (spec.D + migration.getOutMortality(school)) / (float) (getOsmose().getNumberTimeStepsPerYear() * subdt);
         }
         return D;
     }

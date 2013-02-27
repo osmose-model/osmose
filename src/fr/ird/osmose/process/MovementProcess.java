@@ -33,10 +33,7 @@ public class MovementProcess extends AbstractProcess {
      * Ranges of movement in cell during one Osmose time step
      */
     private int[] range;
-    /*
-     * Migration
-     */
-    private boolean[][][] outOfZoneCohort;
+
     /*
      * Type of spatial distribution
      */
@@ -51,6 +48,8 @@ public class MovementProcess extends AbstractProcess {
     private ConnectivityMatrix[] connectivityMatrix;
     private String[] mapFile;
     private int[] mapIndexNoTwin;
+    // Migration
+    private MigrationProcess migration;
     
     public MovementProcess(int replica) {
         super(replica);
@@ -63,24 +62,12 @@ public class MovementProcess extends AbstractProcess {
         if (Osmose.NEW_AREA_FILE) {
             readConfigurationFile();
         }
+        
+        // Migration
+        migration = new MigrationProcess(getReplica());
+        migration.init();
 
         int nSpecies = getOsmose().getNumberSpecies();
-        // init migration
-        outOfZoneCohort = new boolean[nSpecies][][];
-        for (int index = 0; index < nSpecies; index++) {
-            int longevity = getSpecies(index).getLongevity();
-            outOfZoneCohort[index] = new boolean[longevity][getOsmose().getNumberTimeStepsPerYear()];
-            if (null != getOsmose().migrationTempAge[index]) {
-                int nbStepYear = getOsmose().getNumberTimeStepsPerYear();
-                for (int m = 0; m < getOsmose().migrationTempAge[index].length; m++) {
-                    for (int n = 0; n < getOsmose().migrationTempDt[index].length; n++) {
-                        for (int h = 0; h < nbStepYear; h++) {
-                            outOfZoneCohort[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = true;
-                        }
-                    }
-                }
-            }
-        }
         // init distribution
         range = getOsmose().range;
         movements = new AbstractProcess[nSpecies];
@@ -90,10 +77,10 @@ public class MovementProcess extends AbstractProcess {
                     movements[i] = new RandomDistributionProcess(getReplica(), getSimulation().getSpecies(i), this);
                     break;
                 case MAPS:
-                    movements[i] = new MapDistributionProcess(getReplica(), getSimulation().getSpecies(i), this);
+                    movements[i] = new MapDistributionProcess(getReplica(), getSimulation().getSpecies(i), this, migration);
                     break;
                 case CONNECTIVITY:
-                    movements[i] = new ConnectivityDistributionProcess(getReplica(), getSimulation().getSpecies(i), this);
+                    movements[i] = new ConnectivityDistributionProcess(getReplica(), getSimulation().getSpecies(i), this, migration);
                     break;
             }
             movements[i].init();
@@ -170,10 +157,6 @@ public class MovementProcess extends AbstractProcess {
             }
         }
         return accessibleCells;
-    }
-
-    boolean isOut(School school) {
-        return outOfZoneCohort[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
     }
 
     private void readConfigurationFile() {

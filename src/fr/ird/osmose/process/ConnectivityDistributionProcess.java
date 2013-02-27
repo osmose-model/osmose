@@ -14,11 +14,13 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
     
     private MovementProcess movement;
     private Species species;
+    private MigrationProcess migration;
     
-    public ConnectivityDistributionProcess(int replica, Species species, MovementProcess parent) {
+    public ConnectivityDistributionProcess(int replica, Species species, MovementProcess parent, MigrationProcess migration) {
         super(replica);
         this.species = species;
         this.movement = parent;
+        this.migration = migration;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
          * Do not distribute cohorts that are presently out of
          * the simulated area.
          */
-        if (movement.isOut(school)) {
+        if (migration.isOut(school)) {
             school.setOffGrid();
             return;
         }
@@ -163,3 +165,58 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
     }
     
 }
+
+//public void writeAreaFileAsProp() {
+//        fr.ird.osmose.util.Properties properties = new fr.ird.osmose.util.Properties();
+//        for (int indexMap = 0; indexMap < maps.length; indexMap++) {
+//            String map = "map[" + indexMap + "]";
+//            String value;
+//            StringBuilder key = new StringBuilder(map);
+//            key.append(".species");
+//            value = nameSpecMatrix[numSerie][areasNumSpForMap[indexMap]];
+//            properties.setProperty(key.toString(), value);
+//            key = new StringBuilder(map);
+//            key.append(".agemin");
+//            value = String.valueOf(areasTempAge[indexMap][0]);
+//            properties.setProperty(key.toString(), value);
+//            key = new StringBuilder(map);
+//            key.append(".agemax");
+//            value = String.valueOf(areasTempAge[indexMap][areasTempAge[indexMap].length - 1] + 1);
+//            properties.setProperty(key.toString(), value);
+//            key = new StringBuilder(map);
+//            key.append(".season");
+//            value = arrayIntToString(areasTempDt[indexMap]);
+//            properties.setProperty(key.toString(), value);
+//            key = new StringBuilder(map);
+//            key.append(".csv");
+//            value = mapFile[indexMap];
+//            properties.setProperty(key.toString(), value);
+//            if (spatialDistribution[areasNumSpForMap[indexMap]] == SpatialDistribution.CONNECTIVITY) {
+//                key = new StringBuilder(map);
+//                key.append(".connectivity");
+//                value = connectivityFile[indexMap];
+//                properties.setProperty(key.toString(), value);
+//            }
+//        }
+//        String fileName = "area.cfg";
+//        try {
+//            properties.store(new FileWriter(resolveFile(fileName)), fileSeparator);
+//        } catch (IOException ex) {
+//            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        System.exit(0);
+//    }
+//
+//    private String arrayIntToString(int[] array) {
+//        if (null == array) {
+//            return null;
+//        }
+//        StringBuilder str = new StringBuilder();
+//        str.append(array[0]);
+//        for (int i = 1; i < array.length; i++) {
+//            str.append(", ");
+//            str.append(array[i]);
+//        }
+//        return str.toString();
+//    }
+

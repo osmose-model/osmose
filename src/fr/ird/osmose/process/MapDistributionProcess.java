@@ -13,11 +13,13 @@ public class MapDistributionProcess extends AbstractProcess {
     
     private MovementProcess movement;
     private Species species;
+    private MigrationProcess migration;
     
-    public MapDistributionProcess(int replica, Species species, MovementProcess parent) {
+    public MapDistributionProcess(int replica, Species species, MovementProcess parent, MigrationProcess migration) {
         super(replica);
         this.species = species;
         this.movement = parent;
+        this.migration = migration;
     }
 
     @Override
@@ -39,7 +41,7 @@ public class MapDistributionProcess extends AbstractProcess {
          * Do not distribute cohorts that are presently out of
          * the simulated area.
          */
-        if (movement.isOut(school)) {
+        if (migration.isOut(school)) {
             school.setOffGrid();
             return;
         }
