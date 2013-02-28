@@ -35,8 +35,8 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
     private float[][][] ltlbiomass;
     private float[][][] abundance;
     private float[][][] yield;
-    
-     public SpatialIndicator(int replica) {
+
+    public SpatialIndicator(int replica) {
         super(replica);
     }
 
@@ -47,7 +47,9 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
          */
         try {
             nc = NetcdfFileWriteable.createNew("");
-            nc.setLocation(makeFileLocation(getSimulation().getReplica()));
+            String filename = getFilename();
+            IOTools.makeDirectories(filename);
+            nc.setLocation(filename);
         } catch (IOException ex) {
             Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -278,26 +280,14 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
         }
     }
 
-    private String makeFileLocation(int iSimu) throws IOException {
-
-        StringBuilder filename = new StringBuilder();
-        filename.append(getConfiguration().outputPathName);
-        filename.append(getConfiguration().outputFileNameTab);
-        filename.append(getConfiguration().fileSeparator);
+    private String getFilename() {
+        File path = new File(getConfiguration().outputPathName + getConfiguration().outputFileNameTab);
+        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
+        filename.append(File.separatorChar);
         filename.append(getConfiguration().outputPrefix);
         filename.append("_spatialized_Simu");
-        filename.append(iSimu);
-        filename.append(".nc");
-        File file = new File(filename.toString());
-        try {
-            IOTools.makeDirectories(file.getAbsolutePath());
-            file.createNewFile();
-            file.delete();
-        } catch (Exception ex) {
-            IOException ioex = new IOException("{Ouput} Failed to create NetCDF file " + filename + " ==> " + ex.getMessage());
-            ioex.setStackTrace(ex.getStackTrace());
-            throw ioex;
-        }
-        return filename + ".part";
+        filename.append(getSimulation().getReplica());
+        filename.append(".nc.part");
+        return filename.toString();
     }
 }
