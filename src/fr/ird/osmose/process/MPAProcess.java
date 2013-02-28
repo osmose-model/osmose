@@ -26,8 +26,8 @@ public class MPAProcess extends AbstractProcess {
     @Override
     public void init() {
         GridMap mpaMap = new GridMap();
-        for (int index = 0; index < getOsmose().tabMPAiMatrix.length; index++) {
-            mpaMap.setValue(getOsmose().tabMPAiMatrix[index], getOsmose().tabMPAjMatrix[index], 1);
+        for (int index = 0; index < getConfiguration().tabMPAiMatrix.length; index++) {
+            mpaMap.setValue(getConfiguration().tabMPAiMatrix[index], getConfiguration().tabMPAjMatrix[index], 1);
         }
         mpa = new ArrayList();
         for (Cell cell : getGrid().getCells()) {
@@ -35,8 +35,8 @@ public class MPAProcess extends AbstractProcess {
                 mpa.add(cell);
             }
         }
-        start = getOsmose().MPAtStartTab;
-        end = getOsmose().MPAtEndTab;
+        start = getConfiguration().MPAtStartTab;
+        end = getConfiguration().MPAtEndTab;
     }
 
     @Override

@@ -61,7 +61,7 @@ public class MapDistributionProcess extends AbstractProcess {
         if (age > 0 && getSimulation().getIndexTimeSimu() > 0) {
             int oldTime;
             if (i_step_year == 0) {
-                oldTime = getOsmose().getNumberTimeStepsPerYear() - 1;
+                oldTime = getConfiguration().getNumberTimeStepsPerYear() - 1;
             } else {
                 oldTime = i_step_year - 1;
             }

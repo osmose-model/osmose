@@ -48,10 +48,10 @@ public class NcGrid extends AbstractGrid {
 
     @Override
     void readParameters() {
-        this.gridFile = getOsmose().gridFileTab;
-        this.strLat = getOsmose().latFieldTab;
-        this.strLon = getOsmose().lonFieldTab;
-        this.strMask = getOsmose().maskFieldTab;
+        this.gridFile = getConfiguration().gridFileTab;
+        this.strLat = getConfiguration().latFieldTab;
+        this.strLon = getConfiguration().lonFieldTab;
+        this.strMask = getConfiguration().maskFieldTab;
     }
 
     @Override

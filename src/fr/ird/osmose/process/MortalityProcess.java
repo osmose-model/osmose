@@ -80,7 +80,7 @@ public class MortalityProcess extends AbstractProcess {
             List<School> schools = getPopulation().getSchools(cell);
             if (!(cell.isLand() || schools.isEmpty())) {
                 int ns = schools.size();
-                int npl = getOsmose().getNumberLTLGroups();
+                int npl = getConfiguration().getNumberLTLGroups();
 
                 double[][] nDeadMatrix = null;
                 switch (Simulation.VERSION) {
@@ -121,7 +121,7 @@ public class MortalityProcess extends AbstractProcess {
                             if (ipr < ns) {
                                 School prey = schools.get(ipr);
                                 double biomPrey = prey.adb2biom(nDeadMatrix[ipr][is]);
-                                if (getOsmose().isDietOuput()) {
+                                if (getConfiguration().isDietOuput()) {
                                     school.diet[ipr][prey.getDietOutputStage()] += biomPrey;
                                 }
                                 float TLprey = (prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)
@@ -130,7 +130,7 @@ public class MortalityProcess extends AbstractProcess {
                                 tmpTL[is] += TLprey * biomPrey / preyedBiomass;
                             } else {
                                 tmpTL[is] += getSimulation().getPlankton(ipr - ns).getTrophicLevel() * nDeadMatrix[ipr][is] / preyedBiomass;
-                                if (getOsmose().isDietOuput()) {
+                                if (getConfiguration().isDietOuput()) {
                                     school.diet[ipr][0] += nDeadMatrix[ipr][is];
                                 }
                             }
@@ -170,7 +170,7 @@ public class MortalityProcess extends AbstractProcess {
 
         List<School> schools = getPopulation().getSchools(cell);
         int nSchool = schools.size();
-        int nPlankton = getOsmose().getNumberLTLGroups();
+        int nPlankton = getConfiguration().getNumberLTLGroups();
         int nMortality = nSchool + 3;
         double[][] nDeadMatrix = new double[nSchool + nPlankton][nMortality];
         double[][] mortalityRateMatrix = new double[nSchool + nPlankton][nMortality];
@@ -319,7 +319,7 @@ public class MortalityProcess extends AbstractProcess {
 
         List<School> schools = getPopulation().getSchools(cell);
         int ns = schools.size();
-        int npl = getOsmose().getNumberLTLGroups();
+        int npl = getConfiguration().getNumberLTLGroups();
         double[][] mortalityRateMatrix = new double[ns + npl][ns + 3];
         double[][] nDeadMatrix = new double[ns + npl][ns + 3];
         double[] totalMortalityRate = new double[ns + npl];
@@ -413,7 +413,7 @@ public class MortalityProcess extends AbstractProcess {
 
         List<School> schools = getPopulation().getSchools(cell);
         int ns = schools.size();
-        int npl = getOsmose().getNumberLTLGroups();
+        int npl = getConfiguration().getNumberLTLGroups();
         double[][] nDeadMatrix = new double[ns + npl][ns + 3];
 
         int[] seqPred = new int[ns];

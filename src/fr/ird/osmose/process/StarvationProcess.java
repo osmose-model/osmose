@@ -21,8 +21,8 @@ public class StarvationProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        starvMaxRate = getOsmose().starvMaxRateMatrix;
-        criticalPredSuccess = getOsmose().criticalPredSuccessMatrix;
+        starvMaxRate = getConfiguration().starvMaxRateMatrix;
+        criticalPredSuccess = getConfiguration().criticalPredSuccessMatrix;
     }
 
     @Override
@@ -50,6 +50,6 @@ public class StarvationProcess extends AbstractProcess {
             mortalityRate = Math.max(starvMaxRate[iSpec] * (1 - school.predSuccessRate / criticalPredSuccess[iSpec]), 0.d);
         }
 
-        return mortalityRate / (getOsmose().getNumberTimeStepsPerYear() * subdt);
+        return mortalityRate / (getConfiguration().getNumberTimeStepsPerYear() * subdt);
     }
 }

@@ -26,7 +26,7 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        sizeSpectrum = new double[getNSpecies()][getOsmose().tabSizes.length];
+        sizeSpectrum = new double[getNSpecies()][getConfiguration().tabSizes.length];
     }
 
     @Override
@@ -38,14 +38,14 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isSizeSpectrumOutput() || getOsmose().isSizeSpectrumSpeciesOutput();
+        return getConfiguration().isSizeSpectrumOutput() || getConfiguration().isSizeSpectrumSpeciesOutput();
     }
 
     private int getSizeRank(School school) {
 
-        int iSize = getOsmose().tabSizes.length - 1;
-        if (school.getLength() <= getOsmose().spectrumMaxSize) {
-            while (school.getLength() < getOsmose().tabSizes[iSize]) {
+        int iSize = getConfiguration().tabSizes.length - 1;
+        if (school.getLength() <= getConfiguration().spectrumMaxSize) {
+            while (school.getLength() < getConfiguration().tabSizes[iSize]) {
                 iSize--;
             }
         }
@@ -55,11 +55,11 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        double[][] values = new double[getOsmose().nbSizeClass][getNSpecies() + 1];
-        for (int iSize = 0; iSize < getOsmose().nbSizeClass; iSize++) {
-            values[iSize][0] = getOsmose().tabSizes[iSize];
+        double[][] values = new double[getConfiguration().nbSizeClass][getNSpecies() + 1];
+        for (int iSize = 0; iSize < getConfiguration().nbSizeClass; iSize++) {
+            values[iSize][0] = getConfiguration().tabSizes[iSize];
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                values[iSize][iSpec] = sizeSpectrum[iSpec][iSize] / getOsmose().getRecordFrequency();
+                values[iSize][iSpec] = sizeSpectrum[iSpec][iSize] / getConfiguration().getRecordFrequency();
             }
         }
         writeVariable(time, values);
@@ -69,7 +69,7 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix);
+        filename.append(getConfiguration().outputPrefix);
         filename.append("_SizeSpectrumSpecies_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

@@ -32,7 +32,7 @@ public class AbundanceTotIndicator extends AbstractIndicator {
     public void update() {
 
         for (School school : getPopulation().getAliveSchools()) {
-            if (getOsmose().isIncludeClassZero()) {
+            if (getConfiguration().isIncludeClassZero()) {
                 abundance[school.getSpeciesIndex()] += school.getAbundance();
             }
         }
@@ -40,13 +40,13 @@ public class AbundanceTotIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isIncludeClassZero() && !getOsmose().isCalibrationOutput();
+        return getConfiguration().isIncludeClassZero() && !getConfiguration().isCalibrationOutput();
     }
 
     @Override
     public void write(float time) {
 
-        double nsteps = getOsmose().savingDtMatrix;
+        double nsteps = getConfiguration().savingDtMatrix;
         for (int i = 0; i < abundance.length; i++) {
             abundance[i] /= nsteps;
         }
@@ -55,7 +55,7 @@ public class AbundanceTotIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getOsmose().outputPrefix);
+        StringBuilder filename = new StringBuilder(getConfiguration().outputPrefix);
         filename.append("_abundance-total_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

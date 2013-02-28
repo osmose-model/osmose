@@ -125,7 +125,7 @@ public class SequentialMortalityStep extends AbstractStep {
         naturalMortalityProcess.run();
 
         // Update plankton concentration
-        for (int p = 0; p < getOsmose().getNumberLTLGroups(); p++) {
+        for (int p = 0; p < getConfiguration().getNumberLTLGroups(); p++) {
             getSimulation().getPlankton(p).update(iStepSimu);
         }
 

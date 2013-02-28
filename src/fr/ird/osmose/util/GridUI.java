@@ -410,8 +410,7 @@ public class GridUI extends JPanel {
 
     public static void main(String args[]) {
 
-        getOsmose().loadArgs(args);
-        getOsmose().init();
+        getOsmose().init(args);
         mpaProcess = new MPAProcess(0);
         mpaProcess.init();
         //getCellSize(1, 1);

@@ -23,11 +23,11 @@ public class PopulatingProcess extends AbstractProcess {
     @Override
     public void init() {
         
-        if (getOsmose().calibrationMethod.equalsIgnoreCase("biomass")) {
+        if (getConfiguration().calibrationMethod.equalsIgnoreCase("biomass")) {
             populator = new BiomassPopulator(getReplica());
-        } else if (getOsmose().calibrationMethod.equalsIgnoreCase("spectrum")) {
+        } else if (getConfiguration().calibrationMethod.equalsIgnoreCase("spectrum")) {
             populator = new SpectrumPopulator(getReplica());
-        } else if (getOsmose().calibrationMethod.equalsIgnoreCase("random")) {
+        } else if (getConfiguration().calibrationMethod.equalsIgnoreCase("random")) {
             throw new UnsupportedOperationException("Random initialization not supported yet.");
         }
     }

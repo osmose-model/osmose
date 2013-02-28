@@ -29,8 +29,8 @@ public class LocalReproductionProcess extends AbstractProcess {
     @Override
     public void init() {
         int index = species.getIndex();
-        sexRatio = getOsmose().sexRatioMatrix[index];
-        alpha = getOsmose().alphaMatrix[index];
+        sexRatio = getConfiguration().sexRatioMatrix[index];
+        alpha = getConfiguration().alphaMatrix[index];
     }
 
     @Override
@@ -43,7 +43,7 @@ public class LocalReproductionProcess extends AbstractProcess {
             }
         }
 
-        double season = species.seasonSpawning.length > getOsmose().getNumberTimeStepsPerYear()
+        double season = species.seasonSpawning.length > getConfiguration().getNumberTimeStepsPerYear()
                 ? species.seasonSpawning[getSimulation().getIndexTimeSimu()]
                 : species.seasonSpawning[getSimulation().getIndexTimeYear()];
         double nbEggs = sexRatio * alpha * season * SSB * 1000000;
@@ -57,7 +57,7 @@ public class LocalReproductionProcess extends AbstractProcess {
         }
 
         //UPDATE AGE CLASS 0
-        int nbSchools = getOsmose().nbSchools;
+        int nbSchools = getConfiguration().nbSchools;
         if (nbEggs == 0.d) {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {

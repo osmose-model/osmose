@@ -16,7 +16,7 @@ abstract public class AbstractStep extends SimulationLinker {
 
     AbstractStep(int replica) {
         super(replica);
-        NSTEPS = getOsmose().getNumberTimeStepsPerYear() * getOsmose().getNumberYears();
+        NSTEPS = getConfiguration().getNumberTimeStepsPerYear() * getConfiguration().getNumberYears();
     }
 
     abstract public void init();

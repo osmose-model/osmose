@@ -169,15 +169,15 @@ public class School extends GridPoint {
         // Reset variables
         catchable = true;
         // Reset diet variables
-        diet = new float[getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups()][];
-        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
-            if (getOsmose().dietsOutputMatrix) {
-                diet[i] = new float[getOsmose().nbDietsStages[i]];
+        diet = new float[getConfiguration().getNumberSpecies() + getConfiguration().getNumberLTLGroups()][];
+        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+            if (getConfiguration().dietsOutputMatrix) {
+                diet[i] = new float[getConfiguration().nbDietsStages[i]];
             } else {
                 diet[i] = new float[0];
             }
         }
-        for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups(); i++) {
+        for (int i = getConfiguration().getNumberSpecies(); i < getConfiguration().getNumberSpecies() + getConfiguration().getNumberLTLGroups(); i++) {
             diet[i] = new float[1];
         }
     }
@@ -276,7 +276,7 @@ public class School extends GridPoint {
         str.append("\n  Species: ");
         str.append(getSpecies().getName());
         str.append("\n  Cohort: ");
-        float ageInYear = getAgeDt() / (float) getOsmose().getNumberTimeStepsPerYear();
+        float ageInYear = getAgeDt() / (float) getConfiguration().getNumberTimeStepsPerYear();
         str.append(ageInYear);
         str.append(" [year]");
         str.append("\n  Cell: ");
@@ -372,21 +372,21 @@ public class School extends GridPoint {
 
     public void updateDietOutputStage(float[] thresholdTab, int nbStages) {
 
-        if (!getOsmose().dietsOutputMatrix) {
+        if (!getConfiguration().dietsOutputMatrix) {
             return;
         }
 
         dietOutputStage = 0;
 
-        if (getOsmose().getDietOutputMetric().equalsIgnoreCase("size")) {
+        if (getConfiguration().getDietOutputMetric().equalsIgnoreCase("size")) {
             for (int i = 1; i < nbStages; i++) {
                 if (getLength() >= thresholdTab[i - 1]) {
                     dietOutputStage++;
                 }
             }
-        } else if (getOsmose().getDietOutputMetric().equalsIgnoreCase("age")) {
+        } else if (getConfiguration().getDietOutputMetric().equalsIgnoreCase("age")) {
             for (int i = 1; i < nbStages; i++) {
-                int tempAge = Math.round(thresholdTab[i - 1] * getOsmose().getNumberTimeStepsPerYear());
+                int tempAge = Math.round(thresholdTab[i - 1] * getConfiguration().getNumberTimeStepsPerYear());
                 if (getLength() >= tempAge) {
                     dietOutputStage++;
                 }
@@ -397,8 +397,8 @@ public class School extends GridPoint {
     /*
      * Get the current Osmose instance
      */
-    public static Osmose getOsmose() {
-        return Osmose.getInstance();
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     /**

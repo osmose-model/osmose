@@ -41,7 +41,7 @@ public class BiomassNoJuvIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        double nsteps = getOsmose().savingDtMatrix;
+        double nsteps = getConfiguration().savingDtMatrix;
         for (int i = 0; i < biomass.length; i++) {
             biomass[i] /= nsteps;
         }
@@ -50,7 +50,7 @@ public class BiomassNoJuvIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getOsmose().outputPrefix);
+        StringBuilder filename = new StringBuilder(getConfiguration().outputPrefix);
         filename.append("_biomass_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

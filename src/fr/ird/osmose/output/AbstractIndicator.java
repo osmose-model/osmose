@@ -32,7 +32,7 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
     public void init() {
 
         // Create parent directory
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
+        File path = new File(getConfiguration().outputPathName + getConfiguration().outputFileNameTab);
         File file = new File(path, getFilename());
         file.getParentFile().mkdirs();
         try {

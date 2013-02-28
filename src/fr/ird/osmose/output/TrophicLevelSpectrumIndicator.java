@@ -29,7 +29,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        trophicLevelSpectrum = new double[getNSpecies()][getOsmose().tabTL.length];
+        trophicLevelSpectrum = new double[getNSpecies()][getConfiguration().tabTL.length];
     }
 
     @Override
@@ -44,8 +44,8 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     private int getTLRank(School school) {
 
-        int iTL = getOsmose().tabTL.length - 1;
-        while (school.getTrophicLevel() <= getOsmose().tabTL[iTL] && (iTL > 0)) {
+        int iTL = getConfiguration().tabTL.length - 1;
+        while (school.getTrophicLevel() <= getConfiguration().tabTL[iTL] && (iTL > 0)) {
             iTL--;
         }
         return iTL;
@@ -53,17 +53,17 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isTLOutput();
+        return getConfiguration().isTLOutput();
     }
 
     @Override
     public void write(float time) {
 
-        double[][] values = new double[getOsmose().nbTLClass][getNSpecies() + 1];
-        for (int iTL = 0; iTL < getOsmose().nbTLClass; iTL++) {
-            values[iTL][0] = getOsmose().tabTL[iTL];
+        double[][] values = new double[getConfiguration().nbTLClass][getNSpecies() + 1];
+        for (int iTL = 0; iTL < getConfiguration().nbTLClass; iTL++) {
+            values[iTL][0] = getConfiguration().tabTL[iTL];
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                values[iTL][iSpec] = (trophicLevelSpectrum[iSpec][iTL] / getOsmose().getRecordFrequency());
+                values[iTL][iSpec] = (trophicLevelSpectrum[iSpec][iTL] / getConfiguration().getRecordFrequency());
             }
         }
     }
@@ -72,7 +72,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix);
+        filename.append(getConfiguration().outputPrefix);
         filename.append("_TLDistrib_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

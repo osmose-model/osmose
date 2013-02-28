@@ -38,7 +38,7 @@ public class YieldNIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return !getOsmose().isCalibrationOutput();
+        return !getConfiguration().isCalibrationOutput();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class YieldNIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getOsmose().outputPrefix);
+        StringBuilder filename = new StringBuilder(getConfiguration().outputPrefix);
         filename.append("_yieldN_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

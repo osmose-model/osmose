@@ -44,13 +44,13 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isTLOutput();
+        return getConfiguration().isTLOutput();
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
             if (yield[i] > 0) {
                 meanTLCatch[i] = meanTLCatch[i] / yield[i];
             } else {
@@ -64,7 +64,7 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix);
+        filename.append(getConfiguration().outputPrefix);
         filename.append("_meanTLCatch_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

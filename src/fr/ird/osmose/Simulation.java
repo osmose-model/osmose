@@ -115,13 +115,13 @@ public class Simulation {
         population = new Population();
 
         // Reset time variables
-        n_steps_simu = getOsmose().getNumberYears() * getOsmose().getNumberTimeStepsPerYear();
+        n_steps_simu = getConfiguration().getNumberYears() * getConfiguration().getNumberTimeStepsPerYear();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
 
         // Create the species
-        species = new Species[getOsmose().getNumberSpecies()];
+        species = new Species[getConfiguration().getNumberSpecies()];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
             // Initialize species
@@ -129,9 +129,9 @@ public class Simulation {
         }
 
         // Init plankton groups
-        ltlGroups = new Plankton[getOsmose().getNumberLTLGroups()];
+        ltlGroups = new Plankton[getConfiguration().getNumberLTLGroups()];
         for (int p = 0; p < ltlGroups.length; p++) {
-            ltlGroups[p] = new Plankton(p, getOsmose().ltlNames[p], getOsmose().ltlMinSize[p], getOsmose().ltlMaxSize[p], getOsmose().ltlTrophicLevel[p], getOsmose().ltlConversionFactors[p], getOsmose().ltlProdBiomFactors[p], getOsmose().planktonAccessCoeffMatrix[p]);
+            ltlGroups[p] = new Plankton(p, getConfiguration().ltlNames[p], getConfiguration().ltlMinSize[p], getConfiguration().ltlMaxSize[p], getConfiguration().ltlTrophicLevel[p], getConfiguration().ltlConversionFactors[p], getConfiguration().ltlProdBiomFactors[p], getConfiguration().planktonAccessCoeffMatrix[p]);
             ltlGroups[p].init();
         }
 
@@ -160,7 +160,7 @@ public class Simulation {
      */
     private void progress() {
         // screen display to check the period already simulated
-        if (i_step_simu % getOsmose().getNumberTimeStepsPerYear() == 0) {
+        if (i_step_simu % getConfiguration().getNumberTimeStepsPerYear() == 0) {
             System.out.println("year " + year);
         }
         //System.out.print(" " + i_step_year);
@@ -169,8 +169,8 @@ public class Simulation {
     public void run() {
 
         while (i_step_simu < n_steps_simu) {
-            year = i_step_simu / getOsmose().getNumberTimeStepsPerYear();
-            i_step_year = i_step_simu % getOsmose().getNumberTimeStepsPerYear();
+            year = i_step_simu / getConfiguration().getNumberTimeStepsPerYear();
+            i_step_year = i_step_simu % getConfiguration().getNumberTimeStepsPerYear();
             
             // Print progress in console
             //progress();
@@ -219,8 +219,8 @@ public class Simulation {
         return i_step_simu;
     }
 
-    private Osmose getOsmose() {
-        return Osmose.getInstance();
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     public final int getReplica() {

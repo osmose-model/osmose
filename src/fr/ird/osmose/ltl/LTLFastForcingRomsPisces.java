@@ -42,7 +42,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
     public void readLTLForcingFile(String planktonFileName) {
         FileInputStream LTLFile;
         try {
-            LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
+            LTLFile = new FileInputStream(new File(getConfiguration().resolveFile(planktonFileName)));
         } catch (FileNotFoundException ex) {
             System.out.println("LTL file " + planktonFileName + " doesn't exist");
             return;
@@ -55,14 +55,14 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getOsmose().getNumberLTLGroups()];
-            for (int i = 0; i < getOsmose().getNumberLTLGroups(); i++) {
+            plktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
+            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
 
-            planktonFileListNetcdf = new String[getOsmose().getNumberLTLSteps()];
-            for (int step = 0; step < getOsmose().getNumberLTLSteps(); step++) {
+            planktonFileListNetcdf = new String[getConfiguration().getNumberLTLSteps()];
+            for (int step = 0; step < getConfiguration().getNumberLTLSteps(); step++) {
                 st.nextToken();
                 planktonFileListNetcdf[step] = st.sval;
             }
@@ -92,7 +92,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
     public void initLTLGrid() {
 
         NetcdfFile ncIn = null;
-        String ncpathname = getOsmose().resolveFile(gridFileName);
+        String ncpathname = getConfiguration().resolveFile(gridFileName);
         try {
             ncIn = NetcdfFile.open(ncpathname, null);
         } catch (IOException ex) {
@@ -155,9 +155,9 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getOsmose().nStepYear][getOsmose().getNumberLTLGroups()][get_nx()][get_ny()];
-        for (int t = 0; t < getOsmose().nStepYear; t++) {
-            data[t] = getIntegratedData(getOsmose().resolveFile(planktonFileListNetcdf[t]));
+        data = new float[getConfiguration().nStepYear][getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
+        for (int t = 0; t < getConfiguration().nStepYear; t++) {
+            data[t] = getIntegratedData(getConfiguration().resolveFile(planktonFileListNetcdf[t]));
         }
 
         System.out.println("All plankton data loaded !");
@@ -165,7 +165,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
     private float[][][] getIntegratedData(String nameOfFile) {
 
-        float[][][] integratedData = new float[getOsmose().getNumberLTLGroups()][get_nx()][get_ny()];
+        float[][][] integratedData = new float[getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
         float[][][] dataInit;
 
         NetcdfFile nc = null;
@@ -175,7 +175,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         try {
             nc = NetcdfFile.open(name);
 
-            for (int p = 0; p < getOsmose().getNumberLTLGroups(); p++) {
+            for (int p = 0; p < getConfiguration().getNumberLTLGroups(); p++) {
                 // read data and put them in the local arrays
                 tempArray = (ArrayFloat.D3) nc.findVariable(plktonNetcdfNames[p]).read().reduce();
                 dataInit = new float[get_nx()][get_ny()][get_nz()];
@@ -190,7 +190,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
                 }
 
                 // integrates vertically plankton biomass, using depth files
-                integratedData[p] = verticalIntegration(dataInit, depthOfLayer, getOsmose().getIntegrationDepth());
+                integratedData[p] = verticalIntegration(dataInit, depthOfLayer, getConfiguration().getIntegrationDepth());
             }
         } catch (IOException e) {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, e);

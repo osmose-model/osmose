@@ -87,7 +87,7 @@ public class Plankton {
     }
 
     public float biomToProd(float biomass) {
-        return biomass * prodBiomFactor / (float) getOsmose().getNumberTimeStepsPerYear();
+        return biomass * prodBiomFactor / (float) getConfiguration().getNumberTimeStepsPerYear();
     }
 
     /*
@@ -144,8 +144,8 @@ public class Plankton {
         return trophicLevel;
     }
 
-    private static Osmose getOsmose() {
-        return Osmose.getInstance();
+    private static Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     private static IGrid getGrid() {

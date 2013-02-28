@@ -58,21 +58,21 @@ public class MigrationProcess extends AbstractProcess {
     @Override
     public void init() {
         
-        int nSpecies = getOsmose().getNumberSpecies();
+        int nSpecies = getConfiguration().getNumberSpecies();
         // init migration
         outOfZoneCohort = new boolean[nSpecies][][];
         outOfZoneMortality = new float[getNSpecies()][][];
         for (int index = 0; index < nSpecies; index++) {
             int longevity = getSpecies(index).getLongevity();
-            outOfZoneMortality[index] = new float[longevity][getOsmose().getNumberTimeStepsPerYear()];
-            outOfZoneCohort[index] = new boolean[longevity][getOsmose().getNumberTimeStepsPerYear()];
-            if (null != getOsmose().migrationTempAge[index]) {
-                int nbStepYear = getOsmose().getNumberTimeStepsPerYear();
-                for (int m = 0; m < getOsmose().migrationTempAge[index].length; m++) {
-                    for (int n = 0; n < getOsmose().migrationTempDt[index].length; n++) {
+            outOfZoneMortality[index] = new float[longevity][getConfiguration().getNumberTimeStepsPerYear()];
+            outOfZoneCohort[index] = new boolean[longevity][getConfiguration().getNumberTimeStepsPerYear()];
+            if (null != getConfiguration().migrationTempAge[index]) {
+                int nbStepYear = getConfiguration().getNumberTimeStepsPerYear();
+                for (int m = 0; m < getConfiguration().migrationTempAge[index].length; m++) {
+                    for (int n = 0; n < getConfiguration().migrationTempDt[index].length; n++) {
                         for (int h = 0; h < nbStepYear; h++) {
-                            outOfZoneCohort[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = true;
-                            outOfZoneMortality[index][getOsmose().migrationTempAge[index][m] * nbStepYear + h][getOsmose().migrationTempDt[index][n]] = getOsmose().migrationTempMortality[index][m];
+                            outOfZoneCohort[index][getConfiguration().migrationTempAge[index][m] * nbStepYear + h][getConfiguration().migrationTempDt[index][n]] = true;
+                            outOfZoneMortality[index][getConfiguration().migrationTempAge[index][m] * nbStepYear + h][getConfiguration().migrationTempDt[index][n]] = getConfiguration().migrationTempMortality[index][m];
                         }
                     }
                 }

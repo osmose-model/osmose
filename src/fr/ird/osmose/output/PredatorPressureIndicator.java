@@ -41,7 +41,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
             biomassStage[school.getSpeciesIndex()][school.getDietOutputStage()] += school.getBiomass();
         }
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getOsmose().getNumberLTLGroups();
+        int nPrey = nSpec + getConfiguration().getNumberLTLGroups();
         for (int i = nSpec; i < nPrey; i++) {
             int iPlankton = i - nSpec;
             biomassStage[i][0] += getSimulation().getPlankton(iPlankton).getBiomass();
@@ -51,7 +51,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     @Override
     public void reset() {
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getOsmose().getNumberLTLGroups();
+        int nPrey = nSpec + getConfiguration().getNumberLTLGroups();
         predatorPressure = new double[nSpec][][][];
         biomassStage = new double[nPrey][];
         for (int i = 0; i < nSpec; i++) {
@@ -78,12 +78,12 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
             int iSpec = school.getSpeciesIndex();
-            for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
+            for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     predatorPressure[iSpec][school.getDietOutputStage()][i][s] += school.diet[i][s];
                 }
             }
-            for (int i = getOsmose().getNumberSpecies(); i < getOsmose().getNumberSpecies() + getOsmose().getNumberLTLGroups(); i++) {
+            for (int i = getConfiguration().getNumberSpecies(); i < getConfiguration().getNumberSpecies() + getConfiguration().getNumberLTLGroups(); i++) {
                 predatorPressure[iSpec][school.getDietOutputStage()][i][0] += school.diet[i][0];
             }
         }
@@ -91,14 +91,14 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isDietOuput();
+        return getConfiguration().isDietOuput();
     }
 
     @Override
     public void write(float time) {
 
         int nSpec = getNSpecies();
-        int dtRecord = getOsmose().getRecordFrequency();
+        int dtRecord = getConfiguration().getRecordFrequency();
         for (int j = 0; j < nSpec; j++) {
             Species species = getSimulation().getSpecies(j);
             for (int st = 0; st < species.nbDietStages; st++) {
@@ -124,7 +124,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
                 prw.println();
             }
         }
-        for (int j = nSpec; j < (nSpec + getOsmose().getNumberLTLGroups()); j++) {
+        for (int j = nSpec; j < (nSpec + getConfiguration().getNumberLTLGroups()); j++) {
             prw.print(time);
             prw.print(";");
             prw.print(getSimulation().getPlankton(j - nSpec));
@@ -143,10 +143,10 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     @Override
     public void init() {
         // Create parent directory
-        File path = new File(getOsmose().outputPathName + getOsmose().outputFileNameTab);
+        File path = new File(getConfiguration().outputPathName + getConfiguration().outputFileNameTab);
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix);
+        filename.append(getConfiguration().outputPrefix);
         filename.append("_predatorPressure_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

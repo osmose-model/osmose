@@ -36,7 +36,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     public void readLTLForcingFile(String planktonFileName) {
         FileInputStream LTLFile;
         try {
-            LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
+            LTLFile = new FileInputStream(new File(getConfiguration().resolveFile(planktonFileName)));
         } catch (FileNotFoundException ex) {
             System.out.println("LTL file " + planktonFileName + " doesn't exist");
             return;
@@ -49,14 +49,14 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getOsmose().getNumberLTLGroups()];
-            for (int i = 0; i < getOsmose().getNumberLTLGroups(); i++) {
+            plktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
+            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
 
-            planktonFileListNetcdf = new String[getOsmose().getNumberLTLSteps()];
-            for (int step = 0; step < getOsmose().getNumberLTLSteps(); step++) {
+            planktonFileListNetcdf = new String[getConfiguration().getNumberLTLSteps()];
+            for (int step = 0; step < getConfiguration().getNumberLTLSteps(); step++) {
                 st.nextToken();
                 planktonFileListNetcdf[step] = st.sval;
             }
@@ -74,7 +74,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     public void initLTLGrid() {
 
         NetcdfFile ncGrid = null;
-        String gridFilename = getOsmose().resolveFile(planktonFileListNetcdf[0]);
+        String gridFilename = getConfiguration().resolveFile(planktonFileListNetcdf[0]);
         try {
             ncGrid = NetcdfFile.open(gridFilename, null);
         } catch (IOException ex) {
@@ -126,7 +126,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     @Override
     float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
 
-        String name = getOsmose().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
+        String name = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
         int[] shape;
         ArrayDouble.D3 tempArray;
         float[][][] data3d = new float[get_nx()][get_ny()][get_nz()];
@@ -153,6 +153,6 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         }
 
         // vertical integration
-        return verticalIntegration(data3d, depthOfLayer, getOsmose().getIntegrationDepth());
+        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getIntegrationDepth());
     }
 }

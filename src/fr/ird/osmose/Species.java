@@ -83,33 +83,33 @@ public class Species {
     public void init() {
 
         // INITIALISATION of PARAM
-        this.name = getOsmose().nameSpecMatrix[index];
-        this.D = getOsmose().DMatrix[index];
-        this.lInf = getOsmose().lInfMatrix[index];
-        this.K = getOsmose().KMatrix[index];
-        this.t0 = getOsmose().t0Matrix[index];
-        this.c = getOsmose().cMatrix[index];
-        this.bPower = getOsmose().bPowerMatrix[index];
-        this.sizeMat = getOsmose().sizeMatMatrix[index];
-        this.nbFeedingStages = getOsmose().nbStagesMatrix[index];
-        this.sizeFeeding = getOsmose().sizeFeedingMatrix[index];
-        this.recruitAge = Math.round(getOsmose().recruitAgeMatrix[index] * getOsmose().getNumberTimeStepsPerYear());
-        this.recruitSize = getOsmose().recruitSizeMatrix[index];
-        this.seasonSpawning = getOsmose().seasonSpawningMatrix[index];
-        this.indexAgeClass0 = (int) Math.ceil(getOsmose().supAgeOfClass0Matrix[index] * getOsmose().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
-        this.eggSize = getOsmose().eggSizeMatrix[index];
-        this.eggWeight = getOsmose().eggWeightMatrix[index];
-        this.growthAgeThreshold = getOsmose().growthAgeThresholdMatrix[index];
+        this.name = getConfiguration().nameSpecMatrix[index];
+        this.D = getConfiguration().DMatrix[index];
+        this.lInf = getConfiguration().lInfMatrix[index];
+        this.K = getConfiguration().KMatrix[index];
+        this.t0 = getConfiguration().t0Matrix[index];
+        this.c = getConfiguration().cMatrix[index];
+        this.bPower = getConfiguration().bPowerMatrix[index];
+        this.sizeMat = getConfiguration().sizeMatMatrix[index];
+        this.nbFeedingStages = getConfiguration().nbStagesMatrix[index];
+        this.sizeFeeding = getConfiguration().sizeFeedingMatrix[index];
+        this.recruitAge = Math.round(getConfiguration().recruitAgeMatrix[index] * getConfiguration().getNumberTimeStepsPerYear());
+        this.recruitSize = getConfiguration().recruitSizeMatrix[index];
+        this.seasonSpawning = getConfiguration().seasonSpawningMatrix[index];
+        this.indexAgeClass0 = (int) Math.ceil(getConfiguration().supAgeOfClass0Matrix[index] * getConfiguration().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
+        this.eggSize = getConfiguration().eggSizeMatrix[index];
+        this.eggWeight = getConfiguration().eggWeightMatrix[index];
+        this.growthAgeThreshold = getConfiguration().growthAgeThresholdMatrix[index];
 
-        this.nbAccessStages = getOsmose().nbAccessStage[index];
-        this.ageStagesTab = getOsmose().accessStageThreshold[index];
-        if (getOsmose().dietsOutputMatrix) {
-            this.dietStagesTab = getOsmose().dietStageThreshold[index];
-            this.nbDietStages = getOsmose().nbDietsStages[index];
+        this.nbAccessStages = getConfiguration().nbAccessStage[index];
+        this.ageStagesTab = getConfiguration().accessStageThreshold[index];
+        if (getConfiguration().dietsOutputMatrix) {
+            this.dietStagesTab = getConfiguration().dietStageThreshold[index];
+            this.nbDietStages = getConfiguration().nbDietsStages[index];
         }
 
         // START INITIALISATION of COHORTS
-        longevity = (int) Math.round((getOsmose().longevityMatrix[index]) * getOsmose().getNumberTimeStepsPerYear());
+        longevity = (int) Math.round((getConfiguration().longevityMatrix[index]) * getConfiguration().getNumberTimeStepsPerYear());
     }
 
     public float[] getMeanLength() {
@@ -121,7 +121,7 @@ public class Species {
         meanLength[0] = eggSize;
 
         for (int i = 1; i < getLongevity(); i++) {
-            decimalAge = i / (float) getOsmose().getNumberTimeStepsPerYear();
+            decimalAge = i / (float) getConfiguration().getNumberTimeStepsPerYear();
             if (decimalAge < growthAgeThreshold) {
                 float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
                 if (lengthAtAgePart < eggSize) {
@@ -152,8 +152,8 @@ public class Species {
         return (float) (c * (Math.pow(length, bPower)));
     }
 
-    private Osmose getOsmose() {
-        return Osmose.getInstance();
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     public int getLongevity() {

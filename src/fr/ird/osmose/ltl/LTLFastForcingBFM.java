@@ -35,7 +35,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         FileInputStream LTLFile;
         try {
-            LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
+            LTLFile = new FileInputStream(new File(getConfiguration().resolveFile(planktonFileName)));
         } catch (FileNotFoundException ex) {
             System.out.println("LTL file " + planktonFileName + " doesn't exist");
             return;
@@ -51,8 +51,8 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             /*
              * Read name of plankton variable in the BFM NetCDF file
              */
-            planktonNetcdfNames = new String[getOsmose().getNumberLTLGroups()];
-            for (int i = 0; i < getOsmose().getNumberLTLGroups(); i++) {
+            planktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
+            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
                 st.nextToken();
                 planktonNetcdfNames[i] = st.sval;
             }
@@ -98,7 +98,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
          * Open BFM temperature file that contains bathymetry variable
          */
         try {
-            nc = NetcdfFile.open(getOsmose().resolveFile(bathyFile), null);
+            nc = NetcdfFile.open(getConfiguration().resolveFile(bathyFile), null);
         } catch (IOException ex) {
             System.err.println("Failed to open BFM Temperature file " + bathyFile);
             Logger.getLogger(LTLFastForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
@@ -180,8 +180,8 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
         /*
          * Load the mask
          */
-        String gridFile = getOsmose().gridFileTab;
-        String strMask = getOsmose().maskFieldTab;
+        String gridFile = getConfiguration().gridFileTab;
+        String strMask = getConfiguration().maskFieldTab;
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][][] mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();
 
@@ -215,9 +215,9 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getOsmose().getNumberTimeStepsPerYear()][getOsmose().getNumberLTLGroups()][get_nx()][get_ny()];
-        for (int iStep = 0; iStep < getOsmose().getNumberTimeStepsPerYear(); iStep++) {
-            String ncfile = getOsmose().resolveFile(planktonFileListNetcdf[iStep / timeDim]);
+        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
+        for (int iStep = 0; iStep < getConfiguration().getNumberTimeStepsPerYear(); iStep++) {
+            String ncfile = getConfiguration().resolveFile(planktonFileListNetcdf[iStep / timeDim]);
             int timestep = iStep % timeDim;
             data[iStep] = getIntegratedData(ncfile, timestep);
         }
@@ -227,7 +227,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
     private float[][][] getIntegratedData(String ncfile, int timestep) {
 
-        float[][][] integratedData = new float[getOsmose().getNumberLTLGroups()][get_nx()][get_ny()];
+        float[][][] integratedData = new float[getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
         float[][][] dataInit;
 
         try {
@@ -235,7 +235,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             /*
              * Loop over the plankton groups
              */
-            for (int p = 0; p < getOsmose().getNumberLTLGroups(); p++) {
+            for (int p = 0; p < getConfiguration().getNumberLTLGroups(); p++) {
                 /*
                  * Read the concentration of plankton
                  */
@@ -260,7 +260,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
                 }
 
                 // integrates vertically plankton biomass, using depth files
-                integratedData[p] = verticalIntegration(dataInit, depthOfLayer, getOsmose().getIntegrationDepth());
+                integratedData[p] = verticalIntegration(dataInit, depthOfLayer, getConfiguration().getIntegrationDepth());
             }
             nc.close();
         } catch (InvalidRangeException ex) {

@@ -2,10 +2,11 @@ package fr.ird.osmose.process;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Configuration.SpatialDistribution;
 import fr.ird.osmose.ConnectivityMatrix;
 import fr.ird.osmose.GridMap;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.Osmose.SpatialDistribution;
 import fr.ird.osmose.School;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -59,7 +60,7 @@ public class MovementProcess extends AbstractProcess {
     public void init() {
 
         // read new format of area file, with agemin and agemax
-        if (Osmose.NEW_AREA_FILE) {
+        if (Configuration.NEW_AREA_FILE) {
             readConfigurationFile();
         }
         
@@ -67,9 +68,9 @@ public class MovementProcess extends AbstractProcess {
         migration = new MigrationProcess(getReplica());
         migration.init();
 
-        int nSpecies = getOsmose().getNumberSpecies();
+        int nSpecies = getConfiguration().getNumberSpecies();
         // init distribution
-        range = getOsmose().range;
+        range = getConfiguration().range;
         movements = new AbstractProcess[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
             switch (getSpatialDistribution(i)) {
@@ -166,7 +167,7 @@ public class MovementProcess extends AbstractProcess {
          */
         FileInputStream areasFile = null;
         try {
-            areasFile = new FileInputStream(resolveFile(getOsmose().areasFileNameTab));
+            areasFile = new FileInputStream(resolveFile(getConfiguration().areasFileNameTab));
         } catch (FileNotFoundException ex) {
             System.out.println("Error while opening areasFile");
             System.exit(1);
@@ -179,7 +180,7 @@ public class MovementProcess extends AbstractProcess {
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        int nSpecies = getOsmose().getNumberSpecies();
+        int nSpecies = getConfiguration().getNumberSpecies();
         spatialDistribution = new SpatialDistribution[nSpecies];
         sizeRandomMap = new int[nSpecies];
 
@@ -213,7 +214,7 @@ public class MovementProcess extends AbstractProcess {
                 int longevity = getSpecies(iSpec).getLongevity();
                 indexMaps[iSpec] = new int[longevity][];
                 for (int j = 0; j < longevity; j++) {
-                    indexMaps[iSpec][j] = new int[getOsmose().getNumberTimeStepsPerYear()];
+                    indexMaps[iSpec][j] = new int[getConfiguration().getNumberTimeStepsPerYear()];
                 }
             }
 
@@ -366,7 +367,7 @@ public class MovementProcess extends AbstractProcess {
 
     GridMap getMap(int numMap) {
         return (null == maps)
-                ? getOsmose().maps[numMap]
+                ? getConfiguration().maps[numMap]
                 : maps[numMap];
     }
 
@@ -376,19 +377,19 @@ public class MovementProcess extends AbstractProcess {
 
     ConnectivityMatrix getMatrix(int numMap) {
         return (null == connectivityMatrix)
-                ? getOsmose().connectivityMatrix[numMap]
+                ? getConfiguration().connectivityMatrix[numMap]
                 : connectivityMatrix[numMap];
     }
 
     SpatialDistribution getSpatialDistribution(int iSpec) {
         return (null == spatialDistribution)
-                ? getOsmose().spatialDistribution[iSpec]
+                ? getConfiguration().spatialDistribution[iSpec]
                 : spatialDistribution[iSpec];
     }
 
     int getIndexMap(int iSpec, int iAge, int iStep) {
         return (null == indexMaps)
-                ? getOsmose().numMap[iSpec][iAge][iStep]
+                ? getConfiguration().numMap[iSpec][iAge][iStep]
                 : indexMaps[iSpec][iAge][iStep];
     }
 
@@ -398,13 +399,13 @@ public class MovementProcess extends AbstractProcess {
 
     float getMaxProbaPresence(int numMap) {
         return (null == maxProbaPresence)
-                ? getOsmose().maxProbaPresence[numMap]
+                ? getConfiguration().maxProbaPresence[numMap]
                 : maxProbaPresence[numMap];
     }
 
     int getSizeRandomMap(int iSpec) {
         return (null == sizeRandomMap)
-                ? getOsmose().speciesAreasSizeTab[iSpec]
+                ? getConfiguration().speciesAreasSizeTab[iSpec]
                 : sizeRandomMap[iSpec];
     }
 

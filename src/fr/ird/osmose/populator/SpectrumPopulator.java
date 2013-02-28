@@ -25,7 +25,7 @@ public class SpectrumPopulator extends AbstractPopulator {
     @Override
     public void populate() {
 
-        int nbTimeStepsPerYear = getOsmose().getNumberTimeStepsPerYear();
+        int nbTimeStepsPerYear = getConfiguration().getNumberTimeStepsPerYear();
 
         long[] tempSpectrumAbd = new long[20];
         /*
@@ -33,24 +33,24 @@ public class SpectrumPopulator extends AbstractPopulator {
          */
         List<Species>[] specInSizeClass10 = new ArrayList[20];    //20 classes size 0 a 200
         for (int i = 0; i < specInSizeClass10.length; i++) {
-            specInSizeClass10[i] = new ArrayList(getOsmose().getNumberSpecies());
+            specInSizeClass10[i] = new ArrayList(getConfiguration().getNumberSpecies());
         }
 
-        double a = getOsmose().SSslope;
-        double b = getOsmose().SSintercept;
+        double a = getConfiguration().SSslope;
+        double b = getConfiguration().SSintercept;
         //Calculation of abd lacking in each size class
         //calculation apart for first size class because minSize=0.05 (and not 0)
         tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));
         for (int i = 1; i < 20; i++) {
-            tempSpectrumAbd[i] = Math.round(Math.pow((i * getOsmose().classRange) + 5., a) * Math.exp(b));
+            tempSpectrumAbd[i] = Math.round(Math.pow((i * getConfiguration().classRange) + 5., a) * Math.exp(b));
         }
         //tabSizes10[i]+5 is mean length of [tabSizes10[i],tabSizes10[i+1][
         //Sort the Lmax of each species in each size class
-        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
             int index1 = tempSpectrumAbd.length - 1;
             Species species = getSpecies(i);
             float[] meanLength = species.getMeanLength();
-            while (meanLength[species.getLongevity() - 1] < (index1 * getOsmose().classRange)) {
+            while (meanLength[species.getLongevity() - 1] < (index1 * getConfiguration().classRange)) {
                 index1--;
             }
             specInSizeClass10[index1].add(species);
@@ -91,7 +91,7 @@ public class SpectrumPopulator extends AbstractPopulator {
                 // Add schools to population
                 for (int age = 0; age < speciesj.getLongevity(); age++) {
                     if (abundanceIni[age] > 0.d) {
-                        int nbSchools = getOsmose().nbSchools;
+                        int nbSchools = getConfiguration().nbSchools;
                         for (int k = 0; k < nbSchools; k++) {
                             getPopulation().add(new School(speciesj, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
                         }

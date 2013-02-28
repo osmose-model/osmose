@@ -5,6 +5,7 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.grid.IGrid;
@@ -57,12 +58,12 @@ public abstract class AbstractLTLForcing implements LTLForcing {
      * @return the corresponding time step of the LTL data.
      */
     public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % getOsmose().getNumberLTLSteps();
+        return iStepSimu % getConfiguration().getNumberLTLSteps();
     }
     
     @Override
     public void init() {
-        readLTLForcingFile(getOsmose().planktonFileNameTab);
+        readLTLForcingFile(getConfiguration().planktonFileNameTab);
         initLTLGrid();
     }
 
@@ -145,8 +146,8 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         return jcoordLTLGrid[cell.get_igrid()][cell.get_jgrid()];
     }
 
-    static Osmose getOsmose() {
-        return Osmose.getInstance();
+    static Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     static IGrid getGrid() {

@@ -44,13 +44,13 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isMeanSizeOutput();
+        return getConfiguration().isMeanSizeOutput();
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getOsmose().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
             if (yieldN[i] > 0) {
                 meanSizeCatch[i] = meanSizeCatch[i] / yieldN[i];
             } else {
@@ -64,7 +64,7 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix);
+        filename.append(getConfiguration().outputPrefix);
         filename.append("_meanSizeCatch_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

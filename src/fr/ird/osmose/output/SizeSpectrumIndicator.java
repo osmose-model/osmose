@@ -26,7 +26,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        sizeSpectrum = new double[getNSpecies()][getOsmose().tabSizes.length];
+        sizeSpectrum = new double[getNSpecies()][getConfiguration().tabSizes.length];
     }
 
     @Override
@@ -38,14 +38,14 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return getOsmose().isSizeSpectrumOutput() || getOsmose().isSizeSpectrumSpeciesOutput();
+        return getConfiguration().isSizeSpectrumOutput() || getConfiguration().isSizeSpectrumSpeciesOutput();
     }
 
     private int getSizeRank(School school) {
 
-        int iSize = getOsmose().tabSizes.length - 1;
-        if (school.getLength() <= getOsmose().spectrumMaxSize) {
-            while (school.getLength() < getOsmose().tabSizes[iSize]) {
+        int iSize = getConfiguration().tabSizes.length - 1;
+        if (school.getLength() <= getConfiguration().spectrumMaxSize) {
+            while (school.getLength() < getConfiguration().tabSizes[iSize]) {
                 iSize--;
             }
         }
@@ -55,18 +55,18 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        float[][] values = new float[getOsmose().nbSizeClass][4];
-        for (int iSize = 0; iSize < getOsmose().nbSizeClass; iSize++) {
+        float[][] values = new float[getConfiguration().nbSizeClass][4];
+        for (int iSize = 0; iSize < getConfiguration().nbSizeClass; iSize++) {
             // Size
-            values[iSize][0] = getOsmose().tabSizes[iSize];
+            values[iSize][0] = getConfiguration().tabSizes[iSize];
             // Abundance
             double sum = 0f;
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                sum += sizeSpectrum[iSpec][iSize] / getOsmose().getRecordFrequency();
+                sum += sizeSpectrum[iSpec][iSize] / getConfiguration().getRecordFrequency();
             }
             values[iSize][1] = (float) sum;
             // ln(Size)
-            values[iSize][0] = getOsmose().tabSizesLn[iSize];        
+            values[iSize][0] = getConfiguration().tabSizesLn[iSize];        
             // ln(Abundance)
             values[iSize][1] = (float) Math.log(sum);
         }
@@ -78,7 +78,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getOsmose().outputPrefix);
+        filename.append(getConfiguration().outputPrefix);
         filename.append("_SizeSpectrum_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

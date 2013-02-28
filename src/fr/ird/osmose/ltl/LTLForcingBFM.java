@@ -41,7 +41,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
 
         FileInputStream LTLFile;
         try {
-            LTLFile = new FileInputStream(new File(getOsmose().resolveFile(planktonFileName)));
+            LTLFile = new FileInputStream(new File(getConfiguration().resolveFile(planktonFileName)));
         } catch (FileNotFoundException ex) {
             System.out.println("LTL file " + planktonFileName + " doesn't exist");
             return;
@@ -57,8 +57,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Read name of plankton variable in the BFM NetCDF file
              */
-            planktonNetcdfNames = new String[getOsmose().getNumberLTLGroups()];
-            for (int i = 0; i < getOsmose().getNumberLTLGroups(); i++) {
+            planktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
+            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
                 st.nextToken();
                 planktonNetcdfNames[i] = st.sval;
             }
@@ -104,7 +104,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
          * Open BFM temperature file that contains bathymetry variable
          */
         try {
-            nc = NetcdfFile.open(getOsmose().resolveFile(bathyFile), null);
+            nc = NetcdfFile.open(getConfiguration().resolveFile(bathyFile), null);
         } catch (IOException ex) {
             System.err.println("Failed to open BFM Temperature file " + bathyFile);
             Logger.getLogger(LTLForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
@@ -184,8 +184,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         /*
          * Load the mask
          */
-        String gridFile = getOsmose().gridFileTab;
-        String strMask = getOsmose().maskFieldTab;
+        String gridFile = getConfiguration().gridFileTab;
+        String strMask = getConfiguration().maskFieldTab;
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][][] mask;
         mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();
@@ -224,7 +224,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Open the BFM Plankton NetCDF file
              */
-            String name = getOsmose().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
+            String name = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
             NetcdfFile nc = NetcdfFile.open(name);
             /*
              * Loop over the plankton groups
@@ -266,11 +266,11 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         /*
          * Integrate plankton biomass on vertical dimension
          */
-        return verticalIntegration(data3d, depthOfLayer, getOsmose().getIntegrationDepth());
+        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getIntegrationDepth());
     }
 
     @Override
     public int getIndexStepLTL(int iStepSimu) {
-        return (iStepSimu % getOsmose().getNumberTimeStepsPerYear()) / timeDim;
+        return (iStepSimu % getConfiguration().getNumberTimeStepsPerYear()) / timeDim;
     }
 }

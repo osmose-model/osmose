@@ -23,8 +23,8 @@ public class SimulationLinker {
         return replica;
     }
     
-    public Osmose getOsmose() {
-        return Osmose.getInstance();
+    public Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
     
     public IGrid getGrid() {
@@ -48,7 +48,7 @@ public class SimulationLinker {
     }
     
     public String resolveFile(String filename) {
-        return Osmose.getInstance().resolveFile(filename);
+        return Osmose.getInstance().getConfiguration().resolveFile(filename);
     }
     /**
      * The number of simulated species
@@ -56,6 +56,6 @@ public class SimulationLinker {
      * @return the number of simulated species
      */
     public int getNSpecies() {
-        return Osmose.getInstance().getNumberSpecies();
+        return Osmose.getInstance().getConfiguration().getNumberSpecies();
     }
 }
