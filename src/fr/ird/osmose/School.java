@@ -49,7 +49,7 @@
 package fr.ird.osmose;
 
 public class School extends GridPoint {
-    
+
     final public static boolean INSTANTANEOUS_BIOMASS = true;
     final public static boolean INISTEP_BIOMASS = false;
     /**
@@ -65,9 +65,9 @@ public class School extends GridPoint {
      */
     private float length;
     /**
-     * Weight of individual of the school in tons.
-     * The unit has been set to tons just because it saves computation time for
-     * converting the biomass from grams to tons  
+     * Weight of individual of the school in tons. The unit has been set to tons
+     * just because it saves computation time for converting the biomass from
+     * grams to tons
      */
     private float weight;
     /**
@@ -161,11 +161,11 @@ public class School extends GridPoint {
      * Reset school state variables
      */
     public void initStep() {
-        
+
         // Update the stage
-        updateFeedingStage(species.sizeFeeding, species.nbFeedingStages);
-        updateAccessStage(species.ageStagesTab, species.nbAccessStages);
-        updateDietOutputStage(species.dietStagesTab, species.nbDietStages);
+        feedingStage = computeFeedingStage();
+        accessibilityStage = computeAccessibilityStage();
+        dietOutputStage = computeDietOutputStage();
         // Reset variables
         catchable = true;
         // Reset diet variables
@@ -181,7 +181,7 @@ public class School extends GridPoint {
             diet[i] = new float[1];
         }
     }
-    
+
     public void updateAbundance() {
         abundance = getInstantaneousAbundance();
         ndeadFishing = 0;
@@ -352,46 +352,50 @@ public class School extends GridPoint {
         catchable = false;
     }
 
-    public void updateAccessStage(float[] ageStages, int nbAccessStages) {
-        accessibilityStage = 0;
-        for (int i = 1; i < nbAccessStages; i++) {
-            if (getAgeDt() >= ageStages[i - 1]) {
-                accessibilityStage++;
+    private int computeAccessibilityStage() {
+        int stage = 0;
+        for (int i = 1; i < species.nbAccessStages; i++) {
+            if (getAgeDt() >= species.ageStagesTab[i - 1]) {
+                stage++;
             }
         }
+        return stage;
     }
 
-    public void updateFeedingStage(float[] sizeStages, int nbStages) {
-        feedingStage = 0;
-        for (int i = 1; i < nbStages; i++) {
-            if (getLength() >= sizeStages[i - 1]) {
-                feedingStage++;
+    private int computeFeedingStage() {
+        int stage = 0;
+        for (int i = 1; i < species.nbFeedingStages; i++) {
+            if (getLength() >= species.sizeFeeding[i - 1]) {
+                stage++;
             }
         }
+        return stage;
     }
 
-    public void updateDietOutputStage(float[] thresholdTab, int nbStages) {
+    private int computeDietOutputStage() {
 
         if (!getConfiguration().outputDiet) {
-            return;
+            return 0;
         }
 
-        dietOutputStage = 0;
+        int stage = 0;
 
         if (getConfiguration().getDietOutputMetric().equalsIgnoreCase("size")) {
-            for (int i = 1; i < nbStages; i++) {
-                if (getLength() >= thresholdTab[i - 1]) {
-                    dietOutputStage++;
+            for (int i = 1; i < species.nbDietStages; i++) {
+                if (getLength() >= species.dietStagesTab[i - 1]) {
+                    stage++;
                 }
             }
         } else if (getConfiguration().getDietOutputMetric().equalsIgnoreCase("age")) {
-            for (int i = 1; i < nbStages; i++) {
-                int tempAge = Math.round(thresholdTab[i - 1] * getConfiguration().getNumberTimeStepsPerYear());
+            for (int i = 1; i < species.nbDietStages; i++) {
+                int tempAge = Math.round(species.dietStagesTab[i - 1] * getConfiguration().getNumberTimeStepsPerYear());
                 if (getLength() >= tempAge) {
-                    dietOutputStage++;
+                    stage++;
                 }
             }
         }
+
+        return stage;
     }
 
     /*
@@ -444,7 +448,7 @@ public class School extends GridPoint {
         ndeadPredation = 0;
         ndeadHasChanged = true;
     }
-    
+
     public void incrementNdeadPredation(double ndead) {
         ndeadPredation += ndead;
         ndeadHasChanged = true;
