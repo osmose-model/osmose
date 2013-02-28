@@ -63,7 +63,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     
     @Override
     public void init() {
-        readLTLForcingFile(getConfiguration().planktonFileNameTab);
+        readLTLForcingFile(getConfiguration().getLtlForcingFilename());
         initLTLGrid();
     }
 

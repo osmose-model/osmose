@@ -29,7 +29,7 @@ public class BiomassPopulator extends AbstractPopulator {
         double abdIni;
         float nbTimeStepsPerYear = getConfiguration().getNumberTimeStepsPerYear();
 
-        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             //We calculate abd & biom ini of cohorts, and in parallel biom of species
             Species species = getSpecies(i);
             double biomass = 0;
@@ -47,7 +47,7 @@ public class BiomassPopulator extends AbstractPopulator {
             fishingProcess.init();
             double F = fishingProcess.getFishingMortalityRate(species);
 
-            abdIni = getConfiguration().spBiomIniTab[i] / (meanWeight[(int) Math.round(species.getLongevity() / 2)] / 1000000);
+            abdIni = getConfiguration().targetBiomass[i] / (meanWeight[(int) Math.round(species.getLongevity() / 2)] / 1000000);
             for (int j = species.indexAgeClass0; j < species.getLongevity(); j++) {
                 sumExp += Math.exp(-(j * (species.D + F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
             }
@@ -70,7 +70,7 @@ public class BiomassPopulator extends AbstractPopulator {
                 }
             }
 
-            correctingFactor = (float) (getConfiguration().spBiomIniTab[i] / biomass);
+            correctingFactor = (float) (getConfiguration().targetBiomass[i] / biomass);
             // we make corrections on initial abundance to fit the input biomass
             abundanceIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
             biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
@@ -85,7 +85,7 @@ public class BiomassPopulator extends AbstractPopulator {
             // create the cohorts
             for (int age = 0; age < species.getLongevity(); age++) {
                 if (abundanceIni[age] > 0.d) {
-                    int nbSchools = getConfiguration().nbSchools;
+                    int nbSchools = getConfiguration().nSchool;
                     for (int k = 0; k < nbSchools; k++) {
                         getPopulation().add(new School(species, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
                     }

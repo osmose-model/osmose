@@ -31,9 +31,9 @@ public class IncomingFluxProcess extends AbstractProcess {
     @Override
     public void init() {
         int index = species.getIndex();
-        biomassFluxIn = getConfiguration().biomassFluxInTab[index];
-        meanLengthIn = getConfiguration().meanLengthFishInTab[index];
-        ageMeanIn = (int) Math.round(getConfiguration().meanAgeFishInTab[index] * getConfiguration().getNumberTimeStepsPerYear());
+        biomassFluxIn = getConfiguration().biomassFluxIn[index];
+        meanLengthIn = getConfiguration().meanLengthFishIn[index];
+        ageMeanIn = (int) Math.round(getConfiguration().meanAgeFishIn[index] * getConfiguration().getNumberTimeStepsPerYear());
     }
 
     @Override
@@ -52,7 +52,7 @@ public class IncomingFluxProcess extends AbstractProcess {
         double biomassIn = biomassFluxIn * species.seasonSpawning[getSimulation().getIndexTimeYear()];
         float meanWeigthIn = (float) species.computeWeight(meanLengthIn);
         long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
-        int nbSchools = getConfiguration().nbSchools;
+        int nbSchools = getConfiguration().nSchool;
         if (abundanceIn > 0 && abundanceIn < nbSchools) {
             getPopulation().add(new School(species, abundanceIn, meanLengthIn, meanWeigthIn, ageMeanIn));
         } else if (abundanceIn >= nbSchools) {

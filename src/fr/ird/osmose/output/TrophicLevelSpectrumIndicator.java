@@ -72,7 +72,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().outputPrefix);
+        filename.append(getConfiguration().getOutputPrefix());
         filename.append("_TLDistrib_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

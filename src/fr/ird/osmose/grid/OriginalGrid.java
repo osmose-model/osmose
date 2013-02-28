@@ -48,14 +48,14 @@ public class OriginalGrid extends AbstractGrid {
     public void readParameters() {
 
         /* grid dimension */
-        setNbLines(getConfiguration().gridLinesTab);
-        setNbColumns(getConfiguration().gridColumnsTab);
+        setNbLines(getConfiguration().nLine);
+        setNbColumns(getConfiguration().nColumn);
 
         /* geographical extension of the grid */
-        setLatMax(getConfiguration().upLeftLatTab);
-        setLatMin(getConfiguration().lowRightLatTab);
-        setLongMax(getConfiguration().lowRightLongTab);
-        setLongMin(getConfiguration().upLeftLongTab);
+        setLatMax(getConfiguration().upLeftLat);
+        setLatMin(getConfiguration().lowRightLat);
+        setLongMax(getConfiguration().lowRightLon);
+        setLongMin(getConfiguration().upLeftLon);
     }
 
     /*
@@ -81,9 +81,9 @@ public class OriginalGrid extends AbstractGrid {
     }
 
     private boolean isLand(int i, int j) {
-        if (null != getConfiguration().tabCoastiMatrix) {
-            for (int k = 0; k < getConfiguration().tabCoastiMatrix.length; k++) {
-                if ((i == getConfiguration().tabCoastiMatrix[k]) && (j == getConfiguration().tabCoastjMatrix[k])) {
+        if (null != getConfiguration().icoordLand) {
+            for (int k = 0; k < getConfiguration().icoordLand.length; k++) {
+                if ((i == getConfiguration().icoordLand[k]) && (j == getConfiguration().jcoordLand[k])) {
                     return true;
                 }
             }

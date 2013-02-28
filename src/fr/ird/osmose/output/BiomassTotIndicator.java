@@ -39,7 +39,7 @@ public class BiomassTotIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        double nsteps = getConfiguration().savingDtMatrix;
+        double nsteps = getConfiguration().getRecordFrequency();
         for (int i = 0; i < biomass.length; i++) {
             biomass[i] /= nsteps;
         }
@@ -48,7 +48,7 @@ public class BiomassTotIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().outputPrefix);
+        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPrefix());
         filename.append("_biomass-total_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

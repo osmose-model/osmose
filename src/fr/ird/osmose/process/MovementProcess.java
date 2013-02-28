@@ -68,7 +68,7 @@ public class MovementProcess extends AbstractProcess {
         migration = new MigrationProcess(getReplica());
         migration.init();
 
-        int nSpecies = getConfiguration().getNumberSpecies();
+        int nSpecies = getConfiguration().getNSpecies();
         // init distribution
         range = getConfiguration().range;
         movements = new AbstractProcess[nSpecies];
@@ -167,7 +167,7 @@ public class MovementProcess extends AbstractProcess {
          */
         FileInputStream areasFile = null;
         try {
-            areasFile = new FileInputStream(resolveFile(getConfiguration().areasFileNameTab));
+            areasFile = new FileInputStream(resolveFile(getConfiguration().getAreasFilename()));
         } catch (FileNotFoundException ex) {
             System.out.println("Error while opening areasFile");
             System.exit(1);
@@ -180,7 +180,7 @@ public class MovementProcess extends AbstractProcess {
         st.slashSlashComments(true);
         st.slashStarComments(true);
         st.quoteChar(';');
-        int nSpecies = getConfiguration().getNumberSpecies();
+        int nSpecies = getConfiguration().getNSpecies();
         spatialDistribution = new SpatialDistribution[nSpecies];
         sizeRandomMap = new int[nSpecies];
 
@@ -405,7 +405,7 @@ public class MovementProcess extends AbstractProcess {
 
     int getSizeRandomMap(int iSpec) {
         return (null == sizeRandomMap)
-                ? getConfiguration().speciesAreasSizeTab[iSpec]
+                ? getConfiguration().randomAreaSize[iSpec]
                 : sizeRandomMap[iSpec];
     }
 

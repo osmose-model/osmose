@@ -133,7 +133,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 for (int iStage = 0; iStage < STAGES; iStage++) {
                     if (iDeath == NATURAL && iStage == EGG) {
                         // instantenous mortality rate for eggs natural mortality 
-                        prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / getConfiguration().savingDtMatrix);
+                        prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / getConfiguration().getRecordFrequency());
                     } else {
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage]);
                     }
@@ -151,10 +151,10 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
         prw = new PrintWriter[getNSpecies()];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
-            File path = new File(getConfiguration().outputPathName + getConfiguration().outputFileNameTab);
+            File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
             StringBuilder filename = new StringBuilder("Mortality");
             filename.append(File.separatorChar);
-            filename.append(getConfiguration().outputPrefix);
+            filename.append(getConfiguration().getOutputPrefix());
             filename.append("_mortalityRate-");
             filename.append(getSimulation().getSpecies(iSpecies).getName());
             filename.append("_Simu");

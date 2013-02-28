@@ -53,7 +53,6 @@ public class Species {
      * Age from which the species biomass-0 is calculated, expressed in dt
      */
     public int indexAgeClass0;
-    float recruitSize;
     public float[] seasonSpawning; //according to nbDt
     public float eggSize, eggWeight, growthAgeThreshold;
     int nbFeedingStages;  // stage indirectly correponds to size classes:
@@ -83,33 +82,32 @@ public class Species {
     public void init() {
 
         // INITIALISATION of PARAM
-        this.name = getConfiguration().nameSpecMatrix[index];
-        this.D = getConfiguration().DMatrix[index];
-        this.lInf = getConfiguration().lInfMatrix[index];
-        this.K = getConfiguration().KMatrix[index];
-        this.t0 = getConfiguration().t0Matrix[index];
-        this.c = getConfiguration().cMatrix[index];
-        this.bPower = getConfiguration().bPowerMatrix[index];
-        this.sizeMat = getConfiguration().sizeMatMatrix[index];
-        this.nbFeedingStages = getConfiguration().nbStagesMatrix[index];
-        this.sizeFeeding = getConfiguration().sizeFeedingMatrix[index];
-        this.recruitAge = Math.round(getConfiguration().recruitAgeMatrix[index] * getConfiguration().getNumberTimeStepsPerYear());
-        this.recruitSize = getConfiguration().recruitSizeMatrix[index];
-        this.seasonSpawning = getConfiguration().seasonSpawningMatrix[index];
+        this.name = getConfiguration().speciesName[index];
+        this.D = getConfiguration().D[index];
+        this.lInf = getConfiguration().lInf[index];
+        this.K = getConfiguration().K[index];
+        this.t0 = getConfiguration().t0[index];
+        this.c = getConfiguration().c[index];
+        this.bPower = getConfiguration().bPower[index];
+        this.sizeMat = getConfiguration().sizeMaturity[index];
+        this.nbFeedingStages = getConfiguration().nFeedingStage[index];
+        this.sizeFeeding = getConfiguration().feedingStageThreshold[index];
+        this.recruitAge = Math.round(getConfiguration().recruitmentAge[index] * getConfiguration().getNumberTimeStepsPerYear());
+        this.seasonSpawning = getConfiguration().seasonSpawning[index];
         this.indexAgeClass0 = (int) Math.ceil(getConfiguration().supAgeOfClass0Matrix[index] * getConfiguration().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
-        this.eggSize = getConfiguration().eggSizeMatrix[index];
-        this.eggWeight = getConfiguration().eggWeightMatrix[index];
-        this.growthAgeThreshold = getConfiguration().growthAgeThresholdMatrix[index];
+        this.eggSize = getConfiguration().eggSize[index];
+        this.eggWeight = getConfiguration().eggWeight[index];
+        this.growthAgeThreshold = getConfiguration().growthAgeThreshold[index];
 
-        this.nbAccessStages = getConfiguration().nbAccessStage[index];
+        this.nbAccessStages = getConfiguration().nAccessStage[index];
         this.ageStagesTab = getConfiguration().accessStageThreshold[index];
-        if (getConfiguration().dietsOutputMatrix) {
+        if (getConfiguration().outputDiet) {
             this.dietStagesTab = getConfiguration().dietStageThreshold[index];
-            this.nbDietStages = getConfiguration().nbDietsStages[index];
+            this.nbDietStages = getConfiguration().nDietStage[index];
         }
 
         // START INITIALISATION of COHORTS
-        longevity = (int) Math.round((getConfiguration().longevityMatrix[index]) * getConfiguration().getNumberTimeStepsPerYear());
+        longevity = (int) Math.round((getConfiguration().speciesLongevity[index]) * getConfiguration().getNumberTimeStepsPerYear());
     }
 
     public float[] getMeanLength() {

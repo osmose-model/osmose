@@ -26,9 +26,9 @@ public class PredationProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        predPreySizesMax = getConfiguration().predPreySizesMaxMatrix;
-        predPreySizesMin = getConfiguration().predPreySizesMinMatrix;
-        predationRate = getConfiguration().predationRateMatrix;
+        predPreySizesMax = getConfiguration().predPreySizeRatioMax;
+        predPreySizesMin = getConfiguration().predPreySizeRatioMin;
+        predationRate = getConfiguration().maxPredationRate;
     }
 
     @Override
@@ -76,7 +76,7 @@ public class PredationProcess extends AbstractProcess {
         Cell cell = predator.getCell();
         List<School> schools = getPopulation().getSchools(predator.getCell());
         int nFish = schools.size();
-        double[] preyUpon = new double[schools.size() + getConfiguration().getNumberLTLGroups()];
+        double[] preyUpon = new double[schools.size() + getConfiguration().getNPlankton()];
         // egg do not predate
         if (predator.getAgeDt() == 0) {
             return preyUpon;
@@ -96,8 +96,8 @@ public class PredationProcess extends AbstractProcess {
         double biomAccessibleTot = sum(accessibleBiomass);
         // 2. from plankton
         float[] percentPlankton = getPercentPlankton(predator);
-        for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
-            float tempAccess = getConfiguration().accessibilityMatrix[getConfiguration().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
+        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+            float tempAccess = getConfiguration().accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
             biomAccessibleTot += percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell);
         }
 
@@ -123,8 +123,8 @@ public class PredationProcess extends AbstractProcess {
             }
             // Assess the gain for the predator from plankton
             // Assess the loss for the plankton caused by the predator
-            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
-                float tempAccess = getConfiguration().accessibilityMatrix[getConfiguration().getNumberSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
+            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+                float tempAccess = getConfiguration().accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
                 double ratio = percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell) / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
             }
@@ -154,7 +154,7 @@ public class PredationProcess extends AbstractProcess {
     public double[][] computePredationMatrix(Cell cell, boolean instantaneous, int subdt) {
 
         List<School> schools = getPopulation().getSchools(cell);
-        double[][] preyUpon = new double[schools.size() + getConfiguration().getNumberLTLGroups()][schools.size() + getConfiguration().getNumberLTLGroups()];
+        double[][] preyUpon = new double[schools.size() + getConfiguration().getNPlankton()][schools.size() + getConfiguration().getNPlankton()];
         // Loop over the schools of the cell
         for (int iPred = 0; iPred < schools.size(); iPred++) {
             preyUpon[iPred] = computePredation(schools.get(iPred), instantaneous, subdt);
@@ -176,11 +176,11 @@ public class PredationProcess extends AbstractProcess {
     }
 
     private float[] getPercentPlankton(School predator) {
-        float[] percentPlankton = new float[getConfiguration().getNumberLTLGroups()];
+        float[] percentPlankton = new float[getConfiguration().getNPlankton()];
         int iPred = predator.getSpeciesIndex();
         float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getFeedingStage()];
         float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getFeedingStage()];
-        for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
+        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             if ((preySizeMin > getSimulation().getPlankton(i).getSizeMax()) || (preySizeMax < getSimulation().getPlankton(i).getSizeMin())) {
                 percentPlankton[i] = 0.0f;
             } else {

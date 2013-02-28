@@ -51,8 +51,8 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             /*
              * Read name of plankton variable in the BFM NetCDF file
              */
-            planktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
-            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
+            planktonNetcdfNames = new String[getConfiguration().getNPlankton()];
+            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 st.nextToken();
                 planktonNetcdfNames[i] = st.sval;
             }
@@ -181,7 +181,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
          * Load the mask
          */
         String gridFile = getConfiguration().gridFileTab;
-        String strMask = getConfiguration().maskFieldTab;
+        String strMask = getConfiguration().maskField;
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][][] mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();
 
@@ -215,7 +215,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
+        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][get_nx()][get_ny()];
         for (int iStep = 0; iStep < getConfiguration().getNumberTimeStepsPerYear(); iStep++) {
             String ncfile = getConfiguration().resolveFile(planktonFileListNetcdf[iStep / timeDim]);
             int timestep = iStep % timeDim;
@@ -227,7 +227,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 
     private float[][][] getIntegratedData(String ncfile, int timestep) {
 
-        float[][][] integratedData = new float[getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
+        float[][][] integratedData = new float[getConfiguration().getNPlankton()][get_nx()][get_ny()];
         float[][][] dataInit;
 
         try {
@@ -235,7 +235,7 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
             /*
              * Loop over the plankton groups
              */
-            for (int p = 0; p < getConfiguration().getNumberLTLGroups(); p++) {
+            for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 /*
                  * Read the concentration of plankton
                  */

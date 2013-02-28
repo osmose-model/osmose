@@ -169,15 +169,15 @@ public class School extends GridPoint {
         // Reset variables
         catchable = true;
         // Reset diet variables
-        diet = new float[getConfiguration().getNumberSpecies() + getConfiguration().getNumberLTLGroups()][];
-        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
-            if (getConfiguration().dietsOutputMatrix) {
-                diet[i] = new float[getConfiguration().nbDietsStages[i]];
+        diet = new float[getConfiguration().getNSpecies() + getConfiguration().getNPlankton()][];
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            if (getConfiguration().outputDiet) {
+                diet[i] = new float[getConfiguration().nDietStage[i]];
             } else {
                 diet[i] = new float[0];
             }
         }
-        for (int i = getConfiguration().getNumberSpecies(); i < getConfiguration().getNumberSpecies() + getConfiguration().getNumberLTLGroups(); i++) {
+        for (int i = getConfiguration().getNSpecies(); i < getConfiguration().getNSpecies() + getConfiguration().getNPlankton(); i++) {
             diet[i] = new float[1];
         }
     }
@@ -372,7 +372,7 @@ public class School extends GridPoint {
 
     public void updateDietOutputStage(float[] thresholdTab, int nbStages) {
 
-        if (!getConfiguration().dietsOutputMatrix) {
+        if (!getConfiguration().outputDiet) {
             return;
         }
 

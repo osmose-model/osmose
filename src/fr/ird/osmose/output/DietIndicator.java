@@ -42,7 +42,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
             biomassStage[school.getSpeciesIndex()][school.getDietOutputStage()] += school.getBiomass();
         }
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNumberLTLGroups();
+        int nPrey = nSpec + getConfiguration().getNPlankton();
         for (int i = nSpec; i < nPrey; i++) {
             int iPlankton = i - nSpec;
             biomassStage[i][0] += getSimulation().getPlankton(iPlankton).getBiomass();
@@ -52,7 +52,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     @Override
     public void reset() {
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNumberLTLGroups();
+        int nPrey = nSpec + getConfiguration().getNPlankton();
         diet = new double[nSpec][][][];
         nbStomachs = new double[nSpec][];
         biomassStage = new double[nPrey][];
@@ -84,14 +84,14 @@ public class DietIndicator extends SimulationLinker implements Indicator {
             double sumDiet = computeSumDiet(school);
             int iSpec = school.getSpeciesIndex();
             nbStomachs[iSpec][school.getDietOutputStage()] += school.getAbundance();
-            for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+            for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
                 for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                     if (sumDiet > 0) {
                         diet[iSpec][school.getDietOutputStage()][i][s] += school.getAbundance() * school.diet[i][s] / sumDiet;
                     }
                 }
             }
-            for (int i = getConfiguration().getNumberSpecies(); i < getConfiguration().getNumberSpecies() + getConfiguration().getNumberLTLGroups(); i++) {
+            for (int i = getConfiguration().getNSpecies(); i < getConfiguration().getNSpecies() + getConfiguration().getNPlankton(); i++) {
                 if (sumDiet > 0) {
                     diet[iSpec][school.getDietOutputStage()][i][0] += school.getAbundance() * school.diet[i][0] / sumDiet;
                 }
@@ -101,12 +101,12 @@ public class DietIndicator extends SimulationLinker implements Indicator {
 
     private double computeSumDiet(School school) {
         double sumDiet = 0.d;
-        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
                 sumDiet += school.diet[i][s];
             }
         }
-        for (int i = getConfiguration().getNumberSpecies(); i < getConfiguration().getNumberSpecies() + getConfiguration().getNumberLTLGroups(); i++) {
+        for (int i = getConfiguration().getNSpecies(); i < getConfiguration().getNSpecies() + getConfiguration().getNPlankton(); i++) {
             sumDiet += school.diet[i][0];
         }
         return sumDiet;
@@ -120,7 +120,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     @Override
     public void write(float time) {
 
-        int nSpec = getConfiguration().getNumberSpecies();
+        int nSpec = getConfiguration().getNSpecies();
 
         // Write the step in the file
         for (int j = 0; j < nSpec; j++) {
@@ -151,7 +151,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
                 prw.println();
             }
         }
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNumberLTLGroups()); j++) {
+        for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
             prw.print(time);
             prw.print(";");
             prw.print(getSimulation().getPlankton(j - nSpec));
@@ -173,10 +173,10 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     @Override
     public void init() {
         // Create parent directory
-        File path = new File(getConfiguration().outputPathName + getConfiguration().outputFileNameTab);
+        File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().outputPrefix);
+        filename.append(getConfiguration().getOutputPrefix());
         filename.append("_dietMatrix_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

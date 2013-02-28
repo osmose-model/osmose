@@ -75,21 +75,21 @@ public class Osmose {
 
     public void run() {
         // Delete existing output directory
-        File targetPath = new File(configuration.outputPathName + configuration.outputFileNameTab);
+        File targetPath = new File(configuration.getOutputPathname() + configuration.getOutputFolder());
         if (targetPath.exists()) {
             IOTools.deleteDirectory(targetPath);
         }
 
         // Loop over the number of replica
-        simulation = new Simulation[configuration.nbLoopTab];
+        simulation = new Simulation[configuration.getNSimulation()];
         long begin = System.currentTimeMillis();
         System.out.println("\nSimulation started...");
         int nProcs = Runtime.getRuntime().availableProcessors();
         //int nProcs = 1;
-        int nBatch = (int) Math.ceil((float) configuration.nbLoopTab / nProcs);
+        int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
         int replica = 0;
         for (int iBatch = 0; iBatch < nBatch; iBatch++) {
-            int nworker = Math.min(nProcs, configuration.nbLoopTab - replica);
+            int nworker = Math.min(nProcs, configuration.getNSimulation() - replica);
             CountDownLatch doneSignal = new CountDownLatch(nworker);
             Worker[] workers = new Worker[nworker];
             for (int iworker = 0; iworker < nworker; iworker++) {

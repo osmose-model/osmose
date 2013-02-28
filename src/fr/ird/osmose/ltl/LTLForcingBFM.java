@@ -57,8 +57,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Read name of plankton variable in the BFM NetCDF file
              */
-            planktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
-            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
+            planktonNetcdfNames = new String[getConfiguration().getNPlankton()];
+            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 st.nextToken();
                 planktonNetcdfNames[i] = st.sval;
             }
@@ -185,7 +185,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
          * Load the mask
          */
         String gridFile = getConfiguration().gridFileTab;
-        String strMask = getConfiguration().maskFieldTab;
+        String strMask = getConfiguration().maskField;
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][][] mask;
         mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();

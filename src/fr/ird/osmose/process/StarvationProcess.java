@@ -21,8 +21,8 @@ public class StarvationProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        starvMaxRate = getConfiguration().starvMaxRateMatrix;
-        criticalPredSuccess = getConfiguration().criticalPredSuccessMatrix;
+        starvMaxRate = getConfiguration().starvMaxRate;
+        criticalPredSuccess = getConfiguration().criticalPredSuccess;
     }
 
     @Override

@@ -20,8 +20,8 @@ public class NaturalMortalityProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        larvalMortalityRates = new float[getNSpecies()][getConfiguration().getNumberTimeStepsPerYear() * getConfiguration().getNumberYears()];
-        for (int iSpec = 0; iSpec < getConfiguration().getNumberSpecies(); iSpec++) {
+        larvalMortalityRates = new float[getNSpecies()][getConfiguration().getNumberTimeStepsPerYear() * getConfiguration().getNYear()];
+        for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
             int t = 0;
             for (int iStep = 0; iStep < larvalMortalityRates[iSpec].length; iStep++) {
                 if (t > getConfiguration().larvalMortalityRates[iSpec].length - 1) {

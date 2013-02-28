@@ -39,10 +39,10 @@ public class ECO3MGrid extends AbstractGrid {
     @Override
     public void readParameters() {
         this.gridFile = getConfiguration().gridFileTab;
-        this.strLat = getConfiguration().latFieldTab;
-        this.strLon = getConfiguration().lonFieldTab;
-        this.strMask = getConfiguration().maskFieldTab;
-        this.stride = getConfiguration().strideTab;
+        this.strLat = getConfiguration().latField;
+        this.strLon = getConfiguration().lonField;
+        this.strMask = getConfiguration().maskField;
+        this.stride = getConfiguration().stride;
     }
 
     /*

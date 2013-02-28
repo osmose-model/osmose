@@ -58,7 +58,7 @@ public class MigrationProcess extends AbstractProcess {
     @Override
     public void init() {
         
-        int nSpecies = getConfiguration().getNumberSpecies();
+        int nSpecies = getConfiguration().getNSpecies();
         // init migration
         outOfZoneCohort = new boolean[nSpecies][][];
         outOfZoneMortality = new float[getNSpecies()][][];
@@ -66,13 +66,13 @@ public class MigrationProcess extends AbstractProcess {
             int longevity = getSpecies(index).getLongevity();
             outOfZoneMortality[index] = new float[longevity][getConfiguration().getNumberTimeStepsPerYear()];
             outOfZoneCohort[index] = new boolean[longevity][getConfiguration().getNumberTimeStepsPerYear()];
-            if (null != getConfiguration().migrationTempAge[index]) {
+            if (null != getConfiguration().ageMigration[index]) {
                 int nbStepYear = getConfiguration().getNumberTimeStepsPerYear();
-                for (int m = 0; m < getConfiguration().migrationTempAge[index].length; m++) {
-                    for (int n = 0; n < getConfiguration().migrationTempDt[index].length; n++) {
+                for (int m = 0; m < getConfiguration().ageMigration[index].length; m++) {
+                    for (int n = 0; n < getConfiguration().seasonMigration[index].length; n++) {
                         for (int h = 0; h < nbStepYear; h++) {
-                            outOfZoneCohort[index][getConfiguration().migrationTempAge[index][m] * nbStepYear + h][getConfiguration().migrationTempDt[index][n]] = true;
-                            outOfZoneMortality[index][getConfiguration().migrationTempAge[index][m] * nbStepYear + h][getConfiguration().migrationTempDt[index][n]] = getConfiguration().migrationTempMortality[index][m];
+                            outOfZoneCohort[index][getConfiguration().ageMigration[index][m] * nbStepYear + h][getConfiguration().seasonMigration[index][n]] = true;
+                            outOfZoneMortality[index][getConfiguration().ageMigration[index][m] * nbStepYear + h][getConfiguration().seasonMigration[index][n]] = getConfiguration().migrationTempMortality[index][m];
                         }
                     }
                 }

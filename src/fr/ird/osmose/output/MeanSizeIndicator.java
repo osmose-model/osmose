@@ -51,7 +51,7 @@ public class MeanSizeIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             if (abundance[i] > 0) {
                 meanSize[i] = (float) (meanSize[i] / abundance[i]);
             } else {
@@ -65,7 +65,7 @@ public class MeanSizeIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().outputPrefix);
+        filename.append(getConfiguration().getOutputPrefix());
         filename.append("_meanSize_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

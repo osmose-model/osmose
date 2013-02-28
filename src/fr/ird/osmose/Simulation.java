@@ -115,13 +115,13 @@ public class Simulation {
         population = new Population();
 
         // Reset time variables
-        n_steps_simu = getConfiguration().getNumberYears() * getConfiguration().getNumberTimeStepsPerYear();
+        n_steps_simu = getConfiguration().getNYear() * getConfiguration().getNumberTimeStepsPerYear();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
 
         // Create the species
-        species = new Species[getConfiguration().getNumberSpecies()];
+        species = new Species[getConfiguration().getNSpecies()];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
             // Initialize species
@@ -129,9 +129,9 @@ public class Simulation {
         }
 
         // Init plankton groups
-        ltlGroups = new Plankton[getConfiguration().getNumberLTLGroups()];
+        ltlGroups = new Plankton[getConfiguration().getNPlankton()];
         for (int p = 0; p < ltlGroups.length; p++) {
-            ltlGroups[p] = new Plankton(p, getConfiguration().ltlNames[p], getConfiguration().ltlMinSize[p], getConfiguration().ltlMaxSize[p], getConfiguration().ltlTrophicLevel[p], getConfiguration().ltlConversionFactors[p], getConfiguration().ltlProdBiomFactors[p], getConfiguration().planktonAccessCoeffMatrix[p]);
+            ltlGroups[p] = new Plankton(p, getConfiguration().planktonName[p], getConfiguration().ltlMinSize[p], getConfiguration().ltlMaxSize[p], getConfiguration().ltlTrophicLevel[p], getConfiguration().ltlConversionFactor[p], getConfiguration().ltlProdBiomFactor[p], getConfiguration().planktonAccessibility[p]);
             ltlGroups[p].init();
         }
 

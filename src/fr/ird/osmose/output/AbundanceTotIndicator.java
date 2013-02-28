@@ -46,7 +46,7 @@ public class AbundanceTotIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        double nsteps = getConfiguration().savingDtMatrix;
+        double nsteps = getConfiguration().getRecordFrequency();
         for (int i = 0; i < abundance.length; i++) {
             abundance[i] /= nsteps;
         }
@@ -55,7 +55,7 @@ public class AbundanceTotIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().outputPrefix);
+        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPrefix());
         filename.append("_abundance-total_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

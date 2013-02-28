@@ -61,6 +61,6 @@ public class SimulationLinker {
      * @return the number of simulated species
      */
     public int getNSpecies() {
-        return Osmose.getInstance().getConfiguration().getNumberSpecies();
+        return Osmose.getInstance().getConfiguration().getNSpecies();
     }
 }

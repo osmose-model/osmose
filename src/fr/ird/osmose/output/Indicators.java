@@ -78,10 +78,10 @@ public class Indicators extends SimulationLinker {
     public void update(int iStepSimu) {
 
         int year = getSimulation().getYear();
-        int nStepsRecord = getConfiguration().savingDtMatrix;
+        int nStepsRecord = getConfiguration().getRecordFrequency();
         //
         // UPDATE
-        if (year >= getConfiguration().timeSeriesStart) {
+        if (year >= getConfiguration().yearStartSaving) {
             for (Indicator indicator : indicators) {
                 if (indicator.isEnabled()) {
                     indicator.update();

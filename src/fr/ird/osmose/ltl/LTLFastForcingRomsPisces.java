@@ -55,8 +55,8 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
-            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
+            plktonNetcdfNames = new String[getConfiguration().getNPlankton()];
+            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
@@ -155,8 +155,8 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getConfiguration().nStepYear][getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
-        for (int t = 0; t < getConfiguration().nStepYear; t++) {
+        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][get_nx()][get_ny()];
+        for (int t = 0; t < getConfiguration().getNumberTimeStepsPerYear(); t++) {
             data[t] = getIntegratedData(getConfiguration().resolveFile(planktonFileListNetcdf[t]));
         }
 
@@ -165,7 +165,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
 
     private float[][][] getIntegratedData(String nameOfFile) {
 
-        float[][][] integratedData = new float[getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
+        float[][][] integratedData = new float[getConfiguration().getNPlankton()][get_nx()][get_ny()];
         float[][][] dataInit;
 
         NetcdfFile nc = null;
@@ -175,7 +175,7 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         try {
             nc = NetcdfFile.open(name);
 
-            for (int p = 0; p < getConfiguration().getNumberLTLGroups(); p++) {
+            for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 // read data and put them in the local arrays
                 tempArray = (ArrayFloat.D3) nc.findVariable(plktonNetcdfNames[p]).read().reduce();
                 dataInit = new float[get_nx()][get_ny()][get_nz()];

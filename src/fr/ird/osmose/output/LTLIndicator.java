@@ -66,7 +66,7 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
     public void reset() {
         int nx = getGrid().getNbColumns();
         int ny = getGrid().getNbLines();
-        ltlbiomass = new float[getConfiguration().getNumberLTLGroups()][ny][nx];
+        ltlbiomass = new float[getConfiguration().getNPlankton()][ny][nx];
     }
 
     @Override
@@ -74,7 +74,7 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
-                for (int iltl = 0; iltl < getConfiguration().getNumberLTLGroups(); iltl++) {
+                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
                     ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
                 }
             }
@@ -83,7 +83,7 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
 
     @Override
     public boolean isEnabled() {
-        return getConfiguration().planktonBiomassOutputMatrix;
+        return getConfiguration().outputPlanktonBiomass;
     }
 
     @Override
@@ -94,16 +94,16 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
             int j = cell.get_jgrid();
             // Set _FillValue on land cells
             if (cell.isLand()) {
-                for (int iltl = 0; iltl < getConfiguration().getNumberLTLGroups(); iltl++) {
+                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
                     ltlbiomass[iltl][i][j] = FILLVALUE;
                 }
             }
         }
 
         // Write into NetCDF file
-        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getConfiguration().getNumberLTLGroups(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().getNbLines(), getGrid().getNbColumns());
         int nl = getGrid().getNbLines() - 1;
-        for (int kltl = 0; kltl < getConfiguration().getNumberLTLGroups(); kltl++) {
+        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     arrLTL.set(0, kltl, nl - i, j, ltlbiomass[kltl][i][j]);
@@ -138,7 +138,7 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
         /*
          * Create dimensions
          */
-        Dimension ltlDim = nc.addDimension("ltl", getConfiguration().getNumberLTLGroups());
+        Dimension ltlDim = nc.addDimension("ltl", getConfiguration().getNPlankton());
         Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
         Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
         Dimension timeDim = nc.addUnlimitedDimension("time");
@@ -162,7 +162,7 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
          * Add global attributes
          */
         StringBuilder str = new StringBuilder();
-        for (int kltl = 0; kltl < getConfiguration().getNumberLTLGroups(); kltl++) {
+        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
             str.append(kltl);
             str.append("=");
             str.append(getSimulation().getPlankton(kltl));
@@ -193,12 +193,12 @@ public class LTLIndicator extends SimulationLinker implements  Indicator {
     }
     
     private String getFilename() {
-        File path = new File(getConfiguration().outputPathName + getConfiguration().outputFileNameTab);
+        File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append("planktonBiomass");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().outputPrefix);
+        filename.append(getConfiguration().getOutputPrefix());
         filename.append("_ltlbiomass_integrated_");
         filename.append("Simu");
         filename.append(getSimulation().getReplica());

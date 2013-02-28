@@ -35,8 +35,8 @@ public class MPAProcess extends AbstractProcess {
                 mpa.add(cell);
             }
         }
-        start = getConfiguration().MPAtStartTab;
-        end = getConfiguration().MPAtEndTab;
+        start = getConfiguration().yearStartMPA;
+        end = getConfiguration().yearEndMPA;
     }
 
     @Override

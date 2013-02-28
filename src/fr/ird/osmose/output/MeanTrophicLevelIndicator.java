@@ -50,7 +50,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             if (biomass[i] > 0.d) {
                 meanTL[i] = (float) (meanTL[i] / biomass[i]);
             } else {
@@ -64,7 +64,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().outputPrefix);
+        filename.append(getConfiguration().getOutputPrefix());
         filename.append("_meanTL_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

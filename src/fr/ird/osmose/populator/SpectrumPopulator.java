@@ -33,11 +33,11 @@ public class SpectrumPopulator extends AbstractPopulator {
          */
         List<Species>[] specInSizeClass10 = new ArrayList[20];    //20 classes size 0 a 200
         for (int i = 0; i < specInSizeClass10.length; i++) {
-            specInSizeClass10[i] = new ArrayList(getConfiguration().getNumberSpecies());
+            specInSizeClass10[i] = new ArrayList(getConfiguration().getNSpecies());
         }
 
-        double a = getConfiguration().SSslope;
-        double b = getConfiguration().SSintercept;
+        double a = getConfiguration().sizeSpectrumSlope;
+        double b = getConfiguration().sizeSpectrumIntercept;
         //Calculation of abd lacking in each size class
         //calculation apart for first size class because minSize=0.05 (and not 0)
         tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));
@@ -46,7 +46,7 @@ public class SpectrumPopulator extends AbstractPopulator {
         }
         //tabSizes10[i]+5 is mean length of [tabSizes10[i],tabSizes10[i+1][
         //Sort the Lmax of each species in each size class
-        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             int index1 = tempSpectrumAbd.length - 1;
             Species species = getSpecies(i);
             float[] meanLength = species.getMeanLength();
@@ -91,7 +91,7 @@ public class SpectrumPopulator extends AbstractPopulator {
                 // Add schools to population
                 for (int age = 0; age < speciesj.getLongevity(); age++) {
                     if (abundanceIni[age] > 0.d) {
-                        int nbSchools = getConfiguration().nbSchools;
+                        int nbSchools = getConfiguration().nSchool;
                         for (int k = 0; k < nbSchools; k++) {
                             getPopulation().add(new School(speciesj, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
                         }

@@ -49,7 +49,7 @@ public class YieldIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().outputPrefix);
+        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPrefix());
         filename.append("_yield_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

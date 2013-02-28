@@ -57,7 +57,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
          * Create dimensions
          */
         Dimension speciesDim = nc.addDimension("species", getNSpecies());
-        Dimension ltlDim = nc.addDimension("ltl", getConfiguration().getNumberLTLGroups());
+        Dimension ltlDim = nc.addDimension("ltl", getConfiguration().getNPlankton());
         Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
         Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
         Dimension timeDim = nc.addUnlimitedDimension("time");
@@ -102,7 +102,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
          */
         nc.addGlobalAttribute("dimension_step", "step=0 before predation, step=1 after predation");
         StringBuilder str = new StringBuilder();
-        for (int kltl = 0; kltl < getConfiguration().getNumberLTLGroups(); kltl++) {
+        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
             str.append(kltl);
             str.append("=");
             str.append(getSimulation().getPlankton(kltl));
@@ -110,7 +110,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
         }
         nc.addGlobalAttribute("dimension_ltl", str.toString());
         str = new StringBuilder();
-        for (int ispec = 0; ispec < getConfiguration().getNumberSpecies(); ispec++) {
+        for (int ispec = 0; ispec < getConfiguration().getNSpecies(); ispec++) {
             str.append(ispec);
             str.append("=");
             str.append(getSpecies(ispec).getName());
@@ -167,7 +167,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
         biomass = new float[nSpecies][ny][nx];
         mean_size = new float[nSpecies][ny][nx];
         tl = new float[nSpecies][ny][nx];
-        ltlbiomass = new float[getConfiguration().getNumberLTLGroups()][ny][nx];
+        ltlbiomass = new float[getConfiguration().getNPlankton()][ny][nx];
         abundance = new float[nSpecies][ny][nx];
         yield = new float[nSpecies][ny][nx];
     }
@@ -189,7 +189,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
                         yield[iSpec][i][j] += school.adb2biom(school.getNdeadFishing());
                     }
                 }
-                for (int iltl = 0; iltl < getConfiguration().getNumberLTLGroups(); iltl++) {
+                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
                     ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
                 }
             }
@@ -198,7 +198,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public boolean isEnabled() {
-        return getConfiguration().spatializedOutputs;
+        return getConfiguration().outputSpatialized;
     }
 
     @Override
@@ -217,7 +217,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
                     tl[ispec][i][j] = FILLVALUE;
                     yield[ispec][i][j] = FILLVALUE;
                 }
-                for (int iltl = 0; iltl < getConfiguration().getNumberLTLGroups(); iltl++) {
+                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
                     ltlbiomass[iltl][i][j] = FILLVALUE;
                 }
             } else {
@@ -239,7 +239,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
         ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
         ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getConfiguration().getNumberLTLGroups(), getGrid().getNbLines(), getGrid().getNbColumns());
+        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().getNbLines(), getGrid().getNbColumns());
         int nl = getGrid().getNbLines() - 1;
         for (int kspec = 0; kspec < nSpecies; kspec++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
@@ -252,7 +252,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
                 }
             }
         }
-        for (int kltl = 0; kltl < getConfiguration().getNumberLTLGroups(); kltl++) {
+        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
             for (int i = 0; i < getGrid().getNbLines(); i++) {
                 for (int j = 0; j < getGrid().getNbColumns(); j++) {
                     arrLTL.set(0, kltl, nl - i, j, ltlbiomass[kltl][i][j]);
@@ -281,10 +281,10 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
     }
 
     private String getFilename() {
-        File path = new File(getConfiguration().outputPathName + getConfiguration().outputFileNameTab);
+        File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().outputPrefix);
+        filename.append(getConfiguration().getOutputPrefix());
         filename.append("_spatialized_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".nc.part");

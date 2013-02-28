@@ -50,7 +50,7 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             if (yield[i] > 0) {
                 meanTLCatch[i] = meanTLCatch[i] / yield[i];
             } else {
@@ -64,7 +64,7 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().outputPrefix);
+        filename.append(getConfiguration().getOutputPrefix());
         filename.append("_meanTLCatch_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

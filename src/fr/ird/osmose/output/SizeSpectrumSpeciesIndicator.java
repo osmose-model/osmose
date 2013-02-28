@@ -69,7 +69,7 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().outputPrefix);
+        filename.append(getConfiguration().getOutputPrefix());
         filename.append("_SizeSpectrumSpecies_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

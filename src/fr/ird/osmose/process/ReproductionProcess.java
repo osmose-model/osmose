@@ -36,10 +36,10 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        int nSpecies = getConfiguration().getNumberSpecies();
+        int nSpecies = getConfiguration().getNSpecies();
         reproductionProcess = new AbstractProcess[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
-            if (getConfiguration().reproduceLocallyTab[i]) {
+            if (getConfiguration().reproduceLocally[i]) {
                 reproductionProcess[i] = new LocalReproductionProcess(getReplica(), getSpecies(i));
             } else {
                 reproductionProcess[i] = new IncomingFluxProcess(getReplica(), getSpecies(i));
@@ -50,7 +50,7 @@ public class ReproductionProcess extends AbstractProcess {
 
     @Override
     public void run() {
-        for (int i = 0; i < getConfiguration().getNumberSpecies(); i++) {
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             reproductionProcess[i].run();
         }
     }

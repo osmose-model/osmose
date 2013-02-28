@@ -52,8 +52,8 @@ public class LTLForcingLaure extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
-            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
+            plktonNetcdfNames = new String[getConfiguration().getNPlankton()];
+            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }
@@ -137,9 +137,9 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNumberLTLGroups()][get_nx()][get_ny()];
+        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][get_nx()][get_ny()];
         for (int t = 0; t < getConfiguration().getNumberTimeStepsPerYear(); t++) {
-            for (int p = 0; p < getConfiguration().getNumberLTLGroups(); p++) {
+            for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 data[t][p] = getIntegratedBiomass(p, t);
             }
         }

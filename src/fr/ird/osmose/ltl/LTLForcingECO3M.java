@@ -49,8 +49,8 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         st.quoteChar(';');
 
         try {
-            plktonNetcdfNames = new String[getConfiguration().getNumberLTLGroups()];
-            for (int i = 0; i < getConfiguration().getNumberLTLGroups(); i++) {
+            plktonNetcdfNames = new String[getConfiguration().getNPlankton()];
+            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 st.nextToken();
                 plktonNetcdfNames[i] = st.sval;
             }

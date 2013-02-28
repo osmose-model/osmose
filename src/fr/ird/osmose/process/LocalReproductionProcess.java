@@ -29,8 +29,8 @@ public class LocalReproductionProcess extends AbstractProcess {
     @Override
     public void init() {
         int index = species.getIndex();
-        sexRatio = getConfiguration().sexRatioMatrix[index];
-        alpha = getConfiguration().alphaMatrix[index];
+        sexRatio = getConfiguration().sexRatio[index];
+        alpha = getConfiguration().alpha[index];
     }
 
     @Override
@@ -57,7 +57,7 @@ public class LocalReproductionProcess extends AbstractProcess {
         }
 
         //UPDATE AGE CLASS 0
-        int nbSchools = getConfiguration().nbSchools;
+        int nbSchools = getConfiguration().nSchool;
         if (nbEggs == 0.d) {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {
