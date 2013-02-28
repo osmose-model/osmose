@@ -2,8 +2,8 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.SimulationLinker;
 import fr.ird.osmose.util.IOTools;
+import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;

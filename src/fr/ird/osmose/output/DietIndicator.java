@@ -5,8 +5,8 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.SimulationLinker;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

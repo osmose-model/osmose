@@ -1,6 +1,6 @@
 package fr.ird.osmose.populator;
 
-import fr.ird.osmose.SimulationLinker;
+import fr.ird.osmose.util.SimulationLinker;
 
 /**
  *

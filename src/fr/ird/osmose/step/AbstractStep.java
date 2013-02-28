@@ -4,7 +4,7 @@
  */
 package fr.ird.osmose.step;
 
-import fr.ird.osmose.SimulationLinker;
+import fr.ird.osmose.util.SimulationLinker;
 
 /**
  *

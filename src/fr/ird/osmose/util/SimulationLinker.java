@@ -2,8 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.osmose;
+package fr.ird.osmose.util;
 
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
+import fr.ird.osmose.Population;
+import fr.ird.osmose.Simulation;
+import fr.ird.osmose.Species;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 

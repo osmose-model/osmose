@@ -4,7 +4,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.SimulationLinker;
+import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
 import java.util.List;
 

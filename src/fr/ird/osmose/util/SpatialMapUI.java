@@ -5,7 +5,6 @@
 package fr.ird.osmose.util;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.GridMap;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.grid.IGrid;
 import java.awt.BorderLayout;

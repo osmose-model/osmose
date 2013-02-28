@@ -5,6 +5,8 @@ import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.grid.OriginalGrid;
 import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.util.ConnectivityMatrix;
+import fr.ird.osmose.util.GridMap;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

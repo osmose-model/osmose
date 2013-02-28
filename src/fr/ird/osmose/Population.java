@@ -1,12 +1,12 @@
 package fr.ird.osmose;
 
-import fr.ird.osmose.filter.FilteredSet;
-import fr.ird.osmose.filter.FilteredSets;
-import fr.ird.osmose.filter.AliveSchoolFilter;
-import fr.ird.osmose.filter.DeadSchoolFilter;
-import fr.ird.osmose.filter.IFilter;
-import fr.ird.osmose.filter.PresentSchoolFilter;
-import fr.ird.osmose.filter.SpeciesFilter;
+import fr.ird.osmose.util.filter.FilteredSet;
+import fr.ird.osmose.util.filter.FilteredSets;
+import fr.ird.osmose.util.filter.AliveSchoolFilter;
+import fr.ird.osmose.util.filter.DeadSchoolFilter;
+import fr.ird.osmose.util.filter.IFilter;
+import fr.ird.osmose.util.filter.PresentSchoolFilter;
+import fr.ird.osmose.util.filter.SpeciesFilter;
 import fr.ird.osmose.grid.IGrid;
 import java.util.ArrayList;
 import java.util.List;

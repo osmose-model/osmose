@@ -5,7 +5,7 @@
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.GridMap;
+import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
 import java.util.ArrayList;
 import java.util.List;

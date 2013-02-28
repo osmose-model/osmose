@@ -2,7 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.ird.osmose;
+package fr.ird.osmose.util;
+
+import fr.ird.osmose.Cell;
+import fr.ird.osmose.Osmose;
 
 /**
  *

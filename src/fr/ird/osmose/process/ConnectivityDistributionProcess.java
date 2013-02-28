@@ -1,8 +1,8 @@
 
 package fr.ird.osmose.process;
 
-import fr.ird.osmose.ConnectivityMatrix;
-import fr.ird.osmose.GridMap;
+import fr.ird.osmose.util.ConnectivityMatrix;
+import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 
