@@ -476,23 +476,15 @@ public class Configuration {
     /**
      * Minimal size (cm) of the size spectrum.
      */
-    public float spectrumMinSize;
+    private float spectrumMinSize;
     /**
      * Maximal size (cm) of the size spectrum.
      */
-    public float spectrumMaxSize;
+    private float spectrumMaxSize;
     /**
      * Range (cm) of size classes.
      */
-    public float classRange;
-    public float[] tabSizes;
-    public float[] tabSizesLn;
-    public int nbSizeClass;
-    // TL distrib
-    public int nbTLClass;
-    float minTL;
-    float maxTL;
-    public float[] tabTL;
+    private float spectrumClassRange;
     //
     //// POPULATION INITIALIZATION
     //
@@ -549,37 +541,6 @@ public class Configuration {
 
         readInputFile();	// read the first file containing the file names of all other input files
         readAllInputFiles();
-        initializeSizeAndTLSpectrum();
-    }
-
-    public void initializeSizeAndTLSpectrum() {
-        if (outputSizeSpectrum || outputSizeSpectrumSpecies) {
-            //initialisation of the size spectrum features
-            nbSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
-
-            tabSizes = new float[nbSizeClass];
-            tabSizes[0] = spectrumMinSize;
-            for (int i = 1; i < nbSizeClass; i++) {
-                tabSizes[i] = i * classRange;
-            }
-
-            tabSizesLn = new float[nbSizeClass];
-            tabSizesLn[0] = (float) (Math.log(classRange / 2f));
-
-            for (int i = 1; i < nbSizeClass; i++) {
-                tabSizesLn[i] = (float) (Math.log(tabSizes[i] + (classRange / 2f)));
-            }
-
-        }
-
-        minTL = 1.0f;
-        maxTL = 6.0f;
-        nbTLClass = (int) (1 + ((maxTL - minTL) / 0.1f));   // TL classes of 0.1, from 1 to 6
-        tabTL = new float[nbTLClass];
-        tabTL[0] = minTL;
-        for (int i = 1; i < nbTLClass; i++) {
-            tabTL[i] = minTL + i * 0.1f;
-        }
     }
 
     public void readAllInputFiles() {
@@ -1536,7 +1497,7 @@ public class Configuration {
                 st.nextToken();
                 spectrumMaxSize = (new Float(st.sval)).floatValue();
                 st.nextToken();
-                classRange = (new Float(st.sval)).floatValue();
+                spectrumClassRange = (new Float(st.sval)).floatValue();
             }
             st.nextToken();
             // plankton mortality output, not used anymore
@@ -2712,6 +2673,27 @@ public class Configuration {
      */
     public String getAreasFilename() {
         return areasFilename;
+    }
+
+    /**
+     * @return the spectrumMinSize
+     */
+    public float getSpectrumMinSize() {
+        return spectrumMinSize;
+    }
+
+    /**
+     * @return the spectrumMaxSize
+     */
+    public float getSpectrumMaxSize() {
+        return spectrumMaxSize;
+    }
+
+    /**
+     * @return the spectrumClassRange
+     */
+    public float getSpectrumClassRange() {
+        return spectrumClassRange;
     }
 
     public enum SpatialDistribution {

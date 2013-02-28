@@ -14,9 +14,44 @@ import java.io.File;
 public class SizeSpectrumIndicator extends AbstractIndicator {
 
     private double[][] sizeSpectrum;
-    
-     public SizeSpectrumIndicator(int replica) {
+    // Minimal size (cm) of the size spectrum.
+    public float spectrumMinSize;
+    // Maximal size (cm) of the size spectrum.
+    public float spectrumMaxSize;
+    // Range (cm) of size classes.
+    private float classRange;
+    // discrete size spectrum
+    private float[] tabSizes;
+    // log of the discrete size spectrum
+    private float[] tabSizesLn;
+    // Number of size classes in the discrete spectrum
+    private int nSizeClass;
+
+    public SizeSpectrumIndicator(int replica) {
         super(replica);
+        initializeSizeSpectrum();
+    }
+
+    private void initializeSizeSpectrum() {
+
+        spectrumMinSize = getConfiguration().getSpectrumMinSize();
+        spectrumMaxSize = getConfiguration().getSpectrumMaxSize();
+        classRange = getConfiguration().getSpectrumClassRange();
+        
+        //initialisation of the size spectrum features
+        nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
+
+        tabSizes = new float[nSizeClass];
+        tabSizes[0] = spectrumMinSize;
+        for (int i = 1; i < nSizeClass; i++) {
+            tabSizes[i] = i * classRange;
+        }
+
+        tabSizesLn = new float[nSizeClass];
+        tabSizesLn[0] = (float) (Math.log(classRange / 2f));
+        for (int i = 1; i < nSizeClass; i++) {
+            tabSizesLn[i] = (float) (Math.log(tabSizes[i] + (classRange / 2f)));
+        }
     }
 
     @Override
@@ -26,7 +61,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        sizeSpectrum = new double[getNSpecies()][getConfiguration().tabSizes.length];
+        sizeSpectrum = new double[getNSpecies()][tabSizes.length];
     }
 
     @Override
@@ -43,9 +78,9 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     private int getSizeRank(School school) {
 
-        int iSize = getConfiguration().tabSizes.length - 1;
-        if (school.getLength() <= getConfiguration().spectrumMaxSize) {
-            while (school.getLength() < getConfiguration().tabSizes[iSize]) {
+        int iSize = tabSizes.length - 1;
+        if (school.getLength() <= spectrumMaxSize) {
+            while (school.getLength() < tabSizes[iSize]) {
                 iSize--;
             }
         }
@@ -55,10 +90,10 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        float[][] values = new float[getConfiguration().nbSizeClass][4];
-        for (int iSize = 0; iSize < getConfiguration().nbSizeClass; iSize++) {
+        float[][] values = new float[nSizeClass][4];
+        for (int iSize = 0; iSize < nSizeClass; iSize++) {
             // Size
-            values[iSize][0] = getConfiguration().tabSizes[iSize];
+            values[iSize][0] = tabSizes[iSize];
             // Abundance
             double sum = 0f;
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
@@ -66,11 +101,11 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
             }
             values[iSize][1] = (float) sum;
             // ln(Size)
-            values[iSize][0] = getConfiguration().tabSizesLn[iSize];        
+            values[iSize][0] = tabSizesLn[iSize];
             // ln(Abundance)
             values[iSize][1] = (float) Math.log(sum);
         }
-        
+
 
     }
 

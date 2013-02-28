@@ -42,7 +42,7 @@ public class SpectrumPopulator extends AbstractPopulator {
         //calculation apart for first size class because minSize=0.05 (and not 0)
         tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));
         for (int i = 1; i < 20; i++) {
-            tempSpectrumAbd[i] = Math.round(Math.pow((i * getConfiguration().classRange) + 5., a) * Math.exp(b));
+            tempSpectrumAbd[i] = Math.round(Math.pow((i * getConfiguration().getSpectrumClassRange()) + 5., a) * Math.exp(b));
         }
         //tabSizes10[i]+5 is mean length of [tabSizes10[i],tabSizes10[i+1][
         //Sort the Lmax of each species in each size class
@@ -50,7 +50,7 @@ public class SpectrumPopulator extends AbstractPopulator {
             int index1 = tempSpectrumAbd.length - 1;
             Species species = getSpecies(i);
             float[] meanLength = species.getMeanLength();
-            while (meanLength[species.getLongevity() - 1] < (index1 * getConfiguration().classRange)) {
+            while (meanLength[species.getLongevity() - 1] < (index1 * getConfiguration().getSpectrumClassRange())) {
                 index1--;
             }
             specInSizeClass10[index1].add(species);

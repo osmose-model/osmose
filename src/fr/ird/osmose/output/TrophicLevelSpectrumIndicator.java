@@ -17,9 +17,25 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
      * Trophic level distribution [SPECIES][TL_SPECTRUM]
      */
     private double[][] trophicLevelSpectrum;
+    //
+    private float[] tabTL;
+    private int nTLClass;
     
      public TrophicLevelSpectrumIndicator(int replica) {
         super(replica);
+        initializeTLSpectrum();
+    }
+     
+     private void initializeTLSpectrum() {
+         
+        float minTL = 1.0f;
+        float maxTL = 6.0f;
+        nTLClass = (int) (1 + ((maxTL - minTL) / 0.1f));   // TL classes of 0.1, from 1 to 6
+        tabTL = new float[nTLClass];
+        tabTL[0] = minTL;
+        for (int i = 1; i < nTLClass; i++) {
+            tabTL[i] = minTL + i * 0.1f;
+        }
     }
 
     @Override
@@ -29,7 +45,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        trophicLevelSpectrum = new double[getNSpecies()][getConfiguration().tabTL.length];
+        trophicLevelSpectrum = new double[getNSpecies()][tabTL.length];
     }
 
     @Override
@@ -44,8 +60,8 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     private int getTLRank(School school) {
 
-        int iTL = getConfiguration().tabTL.length - 1;
-        while (school.getTrophicLevel() <= getConfiguration().tabTL[iTL] && (iTL > 0)) {
+        int iTL = tabTL.length - 1;
+        while (school.getTrophicLevel() <= tabTL[iTL] && (iTL > 0)) {
             iTL--;
         }
         return iTL;
@@ -59,9 +75,9 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        double[][] values = new double[getConfiguration().nbTLClass][getNSpecies() + 1];
-        for (int iTL = 0; iTL < getConfiguration().nbTLClass; iTL++) {
-            values[iTL][0] = getConfiguration().tabTL[iTL];
+        double[][] values = new double[nTLClass][getNSpecies() + 1];
+        for (int iTL = 0; iTL < nTLClass; iTL++) {
+            values[iTL][0] = tabTL[iTL];
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
                 values[iTL][iSpec] = (trophicLevelSpectrum[iSpec][iTL] / getConfiguration().getRecordFrequency());
             }
