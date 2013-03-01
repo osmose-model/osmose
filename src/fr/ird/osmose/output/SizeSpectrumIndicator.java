@@ -34,10 +34,14 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     private void initializeSizeSpectrum() {
 
+        if (!isEnabled()) {
+            return;
+        }
+
         spectrumMinSize = getConfiguration().getSpectrumMinSize();
         spectrumMaxSize = getConfiguration().getSpectrumMaxSize();
         classRange = getConfiguration().getSpectrumClassRange();
-        
+
         //initialisation of the size spectrum features
         nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
 

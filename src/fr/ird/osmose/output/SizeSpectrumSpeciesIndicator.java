@@ -33,6 +33,10 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
     }
 
     private void initializeSizeSpectrum() {
+        
+        if (!isEnabled()) {
+            return;
+        }
 
         spectrumMinSize = getConfiguration().getSpectrumMinSize();
         spectrumMaxSize = getConfiguration().getSpectrumMaxSize();

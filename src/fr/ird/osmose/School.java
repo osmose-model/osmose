@@ -89,7 +89,7 @@ public class School extends GridPoint {
     /**
      * Diet stage.
      */
-    private int dietOutputStage;
+    private int dietStage;
     /**
      * Number of individuals in the school at beginning of the time step.
      */
@@ -146,7 +146,11 @@ public class School extends GridPoint {
         this.length = length;
         this.weight = weight * 1.e-6f;
         this.age = age;
-
+        // stages
+        feedingStage = 0;
+        accessibilityStage = 0;
+        dietStage = 0;
+        
         // Set initial trophic level to EGG
         trophicLevel = Species.TL_EGG;
         // Unlocated
@@ -161,11 +165,7 @@ public class School extends GridPoint {
      * Reset school state variables
      */
     public void initStep() {
-
-        // Update the stage
-        feedingStage = computeFeedingStage();
-        accessibilityStage = computeAccessibilityStage();
-        dietOutputStage = computeDietOutputStage();
+        
         // Reset variables
         catchable = true;
         // Reset diet variables
@@ -323,6 +323,10 @@ public class School extends GridPoint {
     public int getFeedingStage() {
         return feedingStage;
     }
+    
+    public void icrementFeedingStage() {
+        feedingStage++;
+    }
 
     /**
      * @return the trophicLevel
@@ -330,12 +334,23 @@ public class School extends GridPoint {
     public int getAccessibilityStage() {
         return accessibilityStage;
     }
+    
+    /**
+     * Increment the accessibility stage
+     */
+    public void incrementAccessibilityStage() {
+        accessibilityStage++;
+    }
 
     /**
      * @return the dietOutputStage
      */
-    public int getDietOutputStage() {
-        return dietOutputStage;
+    public int getDietStage() {
+        return dietStage;
+    }
+    
+    public void incrementDietStage() {
+        dietStage++;
     }
 
     /**
@@ -350,52 +365,6 @@ public class School extends GridPoint {
      */
     public void notCatchable() {
         catchable = false;
-    }
-
-    private int computeAccessibilityStage() {
-        int stage = 0;
-        for (int i = 1; i < species.nbAccessStages; i++) {
-            if (getAgeDt() >= species.ageStagesTab[i - 1]) {
-                stage++;
-            }
-        }
-        return stage;
-    }
-
-    private int computeFeedingStage() {
-        int stage = 0;
-        for (int i = 1; i < species.nbFeedingStages; i++) {
-            if (getLength() >= species.sizeFeeding[i - 1]) {
-                stage++;
-            }
-        }
-        return stage;
-    }
-
-    private int computeDietOutputStage() {
-
-        if (!getConfiguration().outputDiet) {
-            return 0;
-        }
-
-        int stage = 0;
-
-        if (getConfiguration().getDietOutputMetric().equalsIgnoreCase("size")) {
-            for (int i = 1; i < species.nbDietStages; i++) {
-                if (getLength() >= species.dietStagesTab[i - 1]) {
-                    stage++;
-                }
-            }
-        } else if (getConfiguration().getDietOutputMetric().equalsIgnoreCase("age")) {
-            for (int i = 1; i < species.nbDietStages; i++) {
-                int tempAge = Math.round(species.dietStagesTab[i - 1] * getConfiguration().getNumberTimeStepsPerYear());
-                if (getLength() >= tempAge) {
-                    stage++;
-                }
-            }
-        }
-
-        return stage;
     }
 
     /*

@@ -44,7 +44,7 @@ public class MortalityProcess extends AbstractProcess {
      * Private instance of the predation process
      */
     private PredationProcess predationProcess;
-    
+
     public MortalityProcess(int replica) {
         super(replica);
     }
@@ -52,16 +52,16 @@ public class MortalityProcess extends AbstractProcess {
     @Override
     public void init() {
         random = new Random();
-        
+
         naturalMortalityProcess = new NaturalMortalityProcess(getReplica());
         naturalMortalityProcess.init();
-        
+
         fishingProcess = new FishingProcess(getReplica());
         fishingProcess.init();
-        
+
         starvationProcess = new StarvationProcess(getReplica());
         starvationProcess.init();
-        
+
         predationProcess = new PredationProcess(getReplica());
         predationProcess.init();
     }
@@ -81,6 +81,13 @@ public class MortalityProcess extends AbstractProcess {
             if (!(cell.isLand() || schools.isEmpty())) {
                 int ns = schools.size();
                 int npl = getConfiguration().getNPlankton();
+
+                // Update stages
+                for (School school : schools) {
+                    predationProcess.updateAccessibilityStage(school);
+                    predationProcess.updateFeedingStage(school);
+                    predationProcess.updateDietStage(school);
+                }
 
                 double[][] nDeadMatrix = null;
                 switch (Simulation.VERSION) {
@@ -122,7 +129,7 @@ public class MortalityProcess extends AbstractProcess {
                                 School prey = schools.get(ipr);
                                 double biomPrey = prey.adb2biom(nDeadMatrix[ipr][is]);
                                 if (getConfiguration().isDietOuput()) {
-                                    school.diet[prey.getSpeciesIndex()][prey.getDietOutputStage()] += biomPrey;
+                                    school.diet[prey.getSpeciesIndex()][prey.getDietStage()] += biomPrey;
                                 }
                                 float TLprey = (prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)
                                         ? Species.TL_EGG

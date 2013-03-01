@@ -31,6 +31,14 @@ public class DietIndicator extends SimulationLinker implements Indicator {
      * Biomass per diet stages [SPECIES][DIET_STAGES]
      */
     private double[][] biomassStage;
+    /**
+     * Number of diet stages.
+     */
+    private int[] nDietStage;
+    /**
+     * Threshold age (year) or size (cm) between the diet stages.
+     */
+    private float[][] dietStageThreshold;
     
      public DietIndicator(int replica) {
         super(replica);
@@ -39,7 +47,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     @Override
     public void initStep() {
         for (School school : getPopulation().getPresentSchools()) {
-            biomassStage[school.getSpeciesIndex()][school.getDietOutputStage()] += school.getBiomass();
+            biomassStage[school.getSpeciesIndex()][school.getDietStage()] += school.getBiomass();
         }
         int nSpec = getNSpecies();
         int nPrey = nSpec + getConfiguration().getNPlankton();
@@ -56,18 +64,18 @@ public class DietIndicator extends SimulationLinker implements Indicator {
         diet = new double[nSpec][][][];
         nbStomachs = new double[nSpec][];
         biomassStage = new double[nPrey][];
-        for (int i = 0; i < nSpec; i++) {
-            biomassStage[i] = new double[getSimulation().getSpecies(i).nbDietStages];
-            diet[i] = new double[getSimulation().getSpecies(i).nbDietStages][][];
-            nbStomachs[i] = new double[getSimulation().getSpecies(i).nbDietStages];
-            for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
-                diet[i][s] = new double[nPrey][];
+        for (int iSpec = 0; iSpec < nSpec; iSpec++) {
+            biomassStage[iSpec] = new double[nDietStage[iSpec]];
+            diet[iSpec] = new double[nDietStage[iSpec]][][];
+            nbStomachs[iSpec] = new double[nDietStage[iSpec]];
+            for (int iStage = 0; iStage < nDietStage[iSpec]; iStage++) {
+                diet[iSpec][iStage] = new double[nPrey][];
 
-                for (int ipr = 0; ipr < nPrey; ipr++) {
-                    if (ipr < nSpec) {
-                        diet[i][s][ipr] = new double[getSimulation().getSpecies(ipr).nbDietStages];
+                for (int iPrey = 0; iPrey < nPrey; iPrey++) {
+                    if (iPrey < nSpec) {
+                        diet[iSpec][iStage][iPrey] = new double[nDietStage[iPrey]];
                     } else {
-                        diet[i][s][ipr] = new double[1];
+                        diet[iSpec][iStage][iPrey] = new double[1];
                     }
                 }
             }
@@ -83,17 +91,17 @@ public class DietIndicator extends SimulationLinker implements Indicator {
         for (School school : getPopulation().getAliveSchools()) {
             double sumDiet = computeSumDiet(school);
             int iSpec = school.getSpeciesIndex();
-            nbStomachs[iSpec][school.getDietOutputStage()] += school.getAbundance();
+            nbStomachs[iSpec][school.getDietStage()] += school.getAbundance();
             for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-                for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+                for (int s = 0; s < nDietStage[i]; s++) {
                     if (sumDiet > 0) {
-                        diet[iSpec][school.getDietOutputStage()][i][s] += school.getAbundance() * school.diet[i][s] / sumDiet;
+                        diet[iSpec][school.getDietStage()][i][s] += school.getAbundance() * school.diet[i][s] / sumDiet;
                     }
                 }
             }
             for (int i = getConfiguration().getNSpecies(); i < getConfiguration().getNSpecies() + getConfiguration().getNPlankton(); i++) {
                 if (sumDiet > 0) {
-                    diet[iSpec][school.getDietOutputStage()][i][0] += school.getAbundance() * school.diet[i][0] / sumDiet;
+                    diet[iSpec][school.getDietStage()][i][0] += school.getAbundance() * school.diet[i][0] / sumDiet;
                 }
             }
         }
@@ -102,7 +110,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     private double computeSumDiet(School school) {
         double sumDiet = 0.d;
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+            for (int s = 0; s < nDietStage[i]; s++) {
                 sumDiet += school.diet[i][s];
             }
         }
@@ -123,25 +131,25 @@ public class DietIndicator extends SimulationLinker implements Indicator {
         int nSpec = getConfiguration().getNSpecies();
 
         // Write the step in the file
-        for (int j = 0; j < nSpec; j++) {
-            Species species = getSimulation().getSpecies(j);
-            for (int st = 0; st < species.nbDietStages; st++) {
+        for (int iSpec = 0; iSpec < nSpec; iSpec++) {
+            Species species = getSimulation().getSpecies(iSpec);
+            for (int st = 0; st < nDietStage[iSpec]; st++) {
                 prw.print(time);
                 prw.print(';');
-                if (species.nbDietStages == 1) {
+                if (nDietStage[iSpec] == 1) {
                     prw.print(species.getName());    // Name predators
                 } else {
                     if (st == 0) {
-                        prw.print(species.getName() + " < " + species.dietStagesTab[st]);    // Name predators
+                        prw.print(species.getName() + " < " + dietStageThreshold[iSpec][st]);    // Name predators
                     } else {
-                        prw.print(species.getName() + " >" + species.dietStagesTab[st - 1]);    // Name predators
+                        prw.print(species.getName() + " >" + dietStageThreshold[iSpec][st - 1]);    // Name predators
                     }
                 }
                 prw.print(";");
                 for (int i = 0; i < nSpec; i++) {
-                    for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+                    for (int s = 0; s < nDietStage[i]; s++) {
                         if (nbStomachs[i][s] >= 1) {
-                            prw.print((float) (diet[i][s][j][st] / nbStomachs[i][s]));
+                            prw.print((float) (diet[i][s][iSpec][st] / nbStomachs[i][s]));
                         } else {
                             prw.print("NaN");
                         }
@@ -157,7 +165,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
             prw.print(getSimulation().getPlankton(j - nSpec));
             prw.print(";");
             for (int i = 0; i < nSpec; i++) {
-                for (int s = 0; s < getSimulation().getSpecies(i).nbDietStages; s++) {
+                for (int s = 0; s < nDietStage[i]; s++) {
                     if (nbStomachs[i][s] >= 1) {
                         prw.print((float) (diet[i][s][j][0] / nbStomachs[i][s]));
                     } else {
@@ -172,6 +180,11 @@ public class DietIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void init() {
+        
+        // Read diet stages
+        nDietStage = getConfiguration().nDietStage;
+        dietStageThreshold = getConfiguration().dietStageThreshold;
+        
         // Create parent directory
         File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
         StringBuilder filename = new StringBuilder("Trophic");
@@ -195,17 +208,17 @@ public class DietIndicator extends SimulationLinker implements Indicator {
         prw.print("Time");
         prw.print(';');
         prw.print("Prey");
-        for (int i = 0; i < getNSpecies(); i++) {
-            Species species = getSimulation().getSpecies(i);
-            for (int s = 0; s < species.nbDietStages; s++) {
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            Species species = getSimulation().getSpecies(iSpec);
+            for (int iStage = 0; iStage < nDietStage[iSpec]; iStage++) {
                 prw.print(";");
-                if (species.nbDietStages == 1) {
+                if (nDietStage[iSpec] == 1) {
                     prw.print(species.getName());    // Name predators
                 } else {
-                    if (s == 0) {
-                        prw.print(species.getName() + " < " + species.dietStagesTab[s]);    // Name predators
+                    if (iStage == 0) {
+                        prw.print(species.getName() + " < " + dietStageThreshold[iSpec][iStage]);    // Name predators
                     } else {
-                        prw.print(species.getName() + " >" + species.dietStagesTab[s - 1]);    // Name predators
+                        prw.print(species.getName() + " >" + dietStageThreshold[iSpec][iStage - 1]);    // Name predators
                     }
                 }
             }

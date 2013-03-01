@@ -6,7 +6,6 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.Simulation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +18,35 @@ public class PredationProcess extends AbstractProcess {
 
     private float[][] predPreySizesMax, predPreySizesMin;
     private float[] predationRate;
+    /**
+     * Number of accessibility stages. Array[nSpecies]
+     */
+    private int[] nAccessStage;
+    /**
+     * Threshold age (year) between accessibility stages.
+     * Array[nSpecies][nAccessStage]
+     */
+    private float[][] accessStageThreshold;
+    /**
+     * Number of feeding stages. Array[nSpecies]
+     */
+    private int[] nFeedingStage;
+    /**
+     * Threshold size (cm) of feeding stages. Array[nSpecies][nFeedingStage-1]
+     */
+    private float[][] feedingStageThreshold;
+    /**
+     * Metrics used for splitting the stages (either age or size).
+     */
+    private String dietOutputMetrics;
+    /**
+     * Number of diet stages.
+     */
+    private int[] nDietStage;
+    /**
+     * Threshold age (year) or size (cm) between the diet stages.
+     */
+    private float[][] dietStageThreshold;
 
     public PredationProcess(int replica) {
         super(replica);
@@ -29,6 +57,16 @@ public class PredationProcess extends AbstractProcess {
         predPreySizesMax = getConfiguration().predPreySizeRatioMax;
         predPreySizesMin = getConfiguration().predPreySizeRatioMin;
         predationRate = getConfiguration().maxPredationRate;
+
+        nAccessStage = getConfiguration().nAccessStage;
+        accessStageThreshold = getConfiguration().accessStageThreshold;
+
+        nFeedingStage = getConfiguration().nFeedingStage;
+        feedingStageThreshold = getConfiguration().feedingStageThreshold;
+
+        dietOutputMetrics = getConfiguration().getDietOutputMetrics();
+        nDietStage = getConfiguration().nDietStage;
+        dietStageThreshold = getConfiguration().dietStageThreshold;
     }
 
     @Override
@@ -36,6 +74,11 @@ public class PredationProcess extends AbstractProcess {
         for (Cell cell : getGrid().getCells()) {
             List<School> schools = getPopulation().getSchools(cell);
             if (!(cell.isLand() || schools.isEmpty())) {
+                for (School school : schools) {
+                    updateAccessibilityStage(school);
+                    updateFeedingStage(school);
+                    updateDietStage(school);
+                }
                 Collections.shuffle(schools);
                 int ns = schools.size();
                 double[] preyedBiomass = new double[ns];
@@ -236,5 +279,56 @@ public class PredationProcess extends AbstractProcess {
      */
     private double getAccessibility(School predator, School prey) {
         return getConfiguration().accessibilityMatrix[prey.getSpeciesIndex()][prey.getAccessibilityStage()][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
+    }
+
+    void updateAccessibilityStage(School school) {
+
+        int iSpec = school.getSpeciesIndex();
+        for (int i = school.getAccessibilityStage(); i < nAccessStage[iSpec] - 1; i++) {
+            if (school.getAgeDt() >= accessStageThreshold[iSpec][i]) {
+                school.incrementAccessibilityStage();
+            } else {
+                return;
+            }
+        }
+    }
+
+    void updateFeedingStage(School school) {
+
+        int iSpec = school.getSpeciesIndex();
+        for (int i = school.getFeedingStage(); i < nFeedingStage[iSpec] - 1; i++) {
+            if (school.getLength() >= feedingStageThreshold[iSpec][i]) {
+                school.icrementFeedingStage();
+            } else {
+                return;
+            }
+        }
+    }
+
+    void updateDietStage(School school) {
+
+        if (!getConfiguration().outputDiet) {
+            return;
+        }
+
+        int iSpec = school.getSpeciesIndex();
+        if (dietOutputMetrics.equalsIgnoreCase("size")) {
+            for (int i = school.getDietStage(); i < nDietStage[iSpec] - 1; i++) {
+                if (school.getLength() >= dietStageThreshold[iSpec][i]) {
+                    school.incrementDietStage();
+                } else {
+                    return;
+                }
+            }
+        } else if (dietOutputMetrics.equalsIgnoreCase("age")) {
+            for (int i = school.getDietStage(); i < nDietStage[iSpec] - 1; i++) {
+                int tempAge = Math.round(dietStageThreshold[iSpec][i] * getConfiguration().getNumberTimeStepsPerYear());
+                if (school.getAgeDt() >= tempAge) {
+                    school.incrementDietStage();
+                } else {
+                    return;
+                }
+            }
+        }
     }
 }

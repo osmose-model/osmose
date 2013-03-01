@@ -32,7 +32,7 @@ public class ConfigurationConverter {
     }
     
     private void convert() {
-        prop.setProperty("key", "value");
+        prop.setProperty("", "");
     }
     
     private void write() {

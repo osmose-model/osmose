@@ -127,7 +127,7 @@ public class Configuration {
     /**
      * Number of feeding stages. Array[nSpecies]
      */
-    int[] nFeedingStage;
+    public int[] nFeedingStage;
     /**
      * Threshold size (cm) of feeding stages. Array[nSpecies][nFeedingStage-1]
      */
@@ -163,12 +163,12 @@ public class Configuration {
     /**
      * Number of accessibility stages. Array[nSpecies]
      */
-    int[] nAccessStage;
+    public int[] nAccessStage;
     /**
      * Threshold age (year) between accessibility stages.
      * Array[nSpecies][nAccessStage]
      */
-    float[][] accessStageThreshold;
+    public float[][] accessStageThreshold;
     /**
      * Accessibility matrix.
      * Array[nSpecies+nPlankton][nAccessStage][nSpecies][nAccessStage]
@@ -468,11 +468,11 @@ public class Configuration {
     /**
      * Number of diet stages.
      */
-    int[] nDietStage;
+    public int[] nDietStage;
     /**
      * Threshold age (year) or size (cm) between the diet stages.
      */
-    float[][] dietStageThreshold;
+    public float[][] dietStageThreshold;
     /**
      * Minimal size (cm) of the size spectrum.
      */
@@ -2594,7 +2594,7 @@ public class Configuration {
         return outputClass0;
     }
 
-    public String getDietOutputMetric() {
+    public String getDietOutputMetrics() {
         return dietOutputMetrics;
     }
 

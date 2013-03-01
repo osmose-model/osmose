@@ -55,12 +55,6 @@ public class Species {
     public int indexAgeClass0;
     public float[] seasonSpawning; //according to nbDt
     public float eggSize, eggWeight, growthAgeThreshold;
-    int nbFeedingStages;  // stage indirectly correponds to size classes:
-    float[] sizeFeeding;
-    int nbAccessStages;
-    float[] ageStagesTab;
-    public int nbDietStages;
-    public float[] dietStagesTab;
 
     /**
      * Create a new species
@@ -90,21 +84,12 @@ public class Species {
         this.c = getConfiguration().c[index];
         this.bPower = getConfiguration().bPower[index];
         this.sizeMat = getConfiguration().sizeMaturity[index];
-        this.nbFeedingStages = getConfiguration().nFeedingStage[index];
-        this.sizeFeeding = getConfiguration().feedingStageThreshold[index];
         this.recruitAge = Math.round(getConfiguration().recruitmentAge[index] * getConfiguration().getNumberTimeStepsPerYear());
         this.seasonSpawning = getConfiguration().seasonSpawning[index];
         this.indexAgeClass0 = (int) Math.ceil(getConfiguration().supAgeOfClass0Matrix[index] * getConfiguration().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
         this.eggSize = getConfiguration().eggSize[index];
         this.eggWeight = getConfiguration().eggWeight[index];
         this.growthAgeThreshold = getConfiguration().growthAgeThreshold[index];
-
-        this.nbAccessStages = getConfiguration().nAccessStage[index];
-        this.ageStagesTab = getConfiguration().accessStageThreshold[index];
-        if (getConfiguration().outputDiet) {
-            this.dietStagesTab = getConfiguration().dietStageThreshold[index];
-            this.nbDietStages = getConfiguration().nDietStage[index];
-        }
 
         // START INITIALISATION of COHORTS
         longevity = (int) Math.round((getConfiguration().speciesLongevity[index]) * getConfiguration().getNumberTimeStepsPerYear());
