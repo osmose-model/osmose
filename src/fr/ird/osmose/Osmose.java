@@ -40,14 +40,14 @@ public class Osmose {
      * Configuration
      */
     private Configuration configuration;
-    
+
     /*
      * Function for dealing with command line arguments From David K. for the GA
      */
     public void init(String[] args) {
-        
+
         String inputPathName, outputPathName, inputTxtName;
-        
+
         // Get command line arguments
         if (args.length > 0) {
             inputPathName = args[0];
@@ -59,6 +59,9 @@ public class Osmose {
 
         if (args.length > 1) {
             outputPathName = args[1];
+            if (!outputPathName.endsWith(fileSeparator)) {
+                outputPathName += fileSeparator;
+            }
         } else {
             outputPathName = inputPathName + fileSeparator + "output" + fileSeparator;
         }
@@ -68,7 +71,7 @@ public class Osmose {
         } else {
             inputTxtName = "INPUT.txt";
         }
-        
+
         configuration = new Configuration(inputPathName, outputPathName, inputTxtName);
         configuration.init();
     }
@@ -198,7 +201,7 @@ public class Osmose {
     public Simulation getSimulation(int replica) {
         return simulation[replica];
     }
-    
+
     public IGrid getGrid() {
         return configuration.getGrid();
     }

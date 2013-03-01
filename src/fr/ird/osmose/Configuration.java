@@ -43,7 +43,7 @@ public class Configuration {
      * Filename (absolute or relative to input pathname) to secondary
      * configuration files.
      */
-    private String configurationFilename,
+    public String configurationFilename,
             speciesFilename,
             predationFilename,
             fishingFilename,
@@ -105,18 +105,18 @@ public class Configuration {
     /**
      * Names of the species. Array[nSpecies]
      */
-    String[] speciesName;
+    public String[] speciesName;
     /**
      * Species longevity (year). Array[nSpecies]
      */
-    float[] speciesLongevity;
+    public float[] speciesLongevity;
     //
     //// GROWTH
     //
     /**
      * Von Bertalanffy growth parameters. Array[nSpecies]
      */
-    float[] lInf, K, t0, c, bPower;
+    public float[] lInf, K, t0, c, bPower;
     /**
      * Threshold age (year) for applying Von Bertalanffy growth model.
      */
@@ -240,7 +240,7 @@ public class Configuration {
     /**
      * Age of recruitment (year). Array[nSpecies]
      */
-    float[] recruitmentAge;
+    public float[] recruitmentAge;
     /**
      * Fishing mortality rates. Array[nSpecies][nStepYear|nStepSimu]
      */
@@ -259,23 +259,23 @@ public class Configuration {
     /**
      * Name of the plankton groups. Array[nPlankton]
      */
-    String[] planktonName;
+    public String[] planktonName;
     /**
      * Trophic level of plankton groups. Array[nPlankton]
      */
-    float[] ltlTrophicLevel;
+    public float[] ltlTrophicLevel;
     /**
      * Plankton minimal size (cm). Array[nPlankton]
      */
-    float[] ltlMinSize;
+    public float[] ltlMinSize;
     /**
      * Plankton maximal size (cm). Array[nPlankton]
      */
-    float[] ltlMaxSize;
+    public float[] ltlMaxSize;
     /**
      * Conversion factor from plankton concentration to ton.
      */
-    float[] ltlConversionFactor;
+    public float[] ltlConversionFactor;
     /**
      * Conversion factor from biomass to production.
      */
@@ -302,7 +302,7 @@ public class Configuration {
     /**
      * Name of the Java Class name implementing IGrid.java.
      */
-    private String gridClassName;
+    public String gridClassName;
     /**
      * IGrid implementation of the grid.
      */
@@ -396,20 +396,24 @@ public class Configuration {
      * Ages of species concerned by distribution maps.
      * Array[nMap][nYearConcerned]
      */
-    int[][] agesMap;
+    public int[][] agesMap;
     /**
      * Annual time step concerned by distribution maps.
      * Array[nMap][nStepConcerned]
      */
-    int[][] seasonMap;
+    public int[][] seasonMap;
     /**
      * Species indexes concerned by distribution maps. Array[nMap]
      */
-    int[] speciesMap;
+    public int[] speciesMap;
     /**
      * List of the filenames of the distribution maps.
      */
-    private String[] mapFile;
+    public String[] mapFile;
+    /**
+     * List of the filenames of the distribution maps.
+     */
+    public String[] connectivityFile;
     /**
      * Index of the maps without twins.
      */
@@ -497,7 +501,7 @@ public class Configuration {
      * biomass should be considered as eggs and larvae stages are generally not
      * considered. Array[nSpecies]
      */
-    float[] supAgeOfClass0Matrix;
+    public float[] supAgeOfClass0Matrix;
     /**
      * Initialization biomass (ton) per species. Array[nSpecies]
      */
@@ -1841,6 +1845,7 @@ public class Configuration {
             maxProbaPresence = new float[nbMaps];
             speciesMap = new int[nbMaps];
             mapFile = new String[nbMaps];
+            connectivityFile = new String[nbMaps];
             mapIndexNoTwin = new int[nbMaps];
             agesMap = new int[nbMaps][];
             seasonMap = new int[nbMaps][];
@@ -1961,6 +1966,8 @@ public class Configuration {
             mapFile[indexMap] = csvFile;
             readCSVMap(csvFile, indexMap);
             System.out.println("Loaded map " + indexMap + " " + csvFile);
+        } else {
+            mapFile[indexMap] = "null";
         }
         /*
          * Read the name of the connectivity file and load the matrix If
@@ -1972,8 +1979,11 @@ public class Configuration {
         if (!"null".equals(st.sval)) {
             System.out.println("Reading connectivity matric for " + speciesName[iSpec] + " map " + indexMap);
             String csvFile = resolveFile(st.sval);
+            connectivityFile[indexMap] = csvFile;
             connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
             System.out.println("Connectivity matrix loaded");
+        } else {
+            connectivityFile[indexMap] = "null";
         }
     }
 
@@ -2701,5 +2711,10 @@ public class Configuration {
         RANDOM,
         MAPS,
         CONNECTIVITY;
+        
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
     }
 }
