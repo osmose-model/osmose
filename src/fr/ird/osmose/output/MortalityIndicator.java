@@ -64,7 +64,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             if (school.getAgeDt() == 0) {
                 // Eggss
                 iStage = EGG;
-            } else if (school.getAgeDt() < school.getSpecies().recruitAge) {
+            } else if (school.getAgeDt() < school.getSpecies().getRecruitmentAge()) {
                 // Pre-recruits
                 iStage = PRE_RECRUIT;
             } else {
@@ -89,7 +89,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
         for (School school : getPopulation().getAliveSchools()) {
             if (school.getAgeDt() == 0) {
                 iStage = EGG;
-            } else if (school.getAgeDt() < school.getSpecies().recruitAge) {
+            } else if (school.getAgeDt() < school.getSpecies().getRecruitmentAge()) {
                 // Pre-recruits
                 iStage = PRE_RECRUIT;
             } else {

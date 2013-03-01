@@ -38,7 +38,7 @@ public class Species {
     /*
      * Natural mortality rates year-1
      */
-    public float D;
+    private float D;
     /*
      * Von bertalanffy growth parameters
      */
@@ -47,14 +47,15 @@ public class Species {
      * Allometric parameters
      */
     private float c, bPower;
-    public float sizeMat;
-    public int recruitAge;            //year
+    private float sizeMaturity;
+    private int recruitmentAge;
     /*
      * Age from which the species biomass-0 is calculated, expressed in dt
      */
-    public int indexAgeClass0;
-    public float[] seasonSpawning; //according to nbDt
-    public float eggSize, eggWeight, growthAgeThreshold;
+    private int indexAgeClass0;
+    private float eggSize;
+    private float eggWeight;
+    private float growthAgeThreshold;
 
     /**
      * Create a new species
@@ -83,9 +84,8 @@ public class Species {
         this.t0 = getConfiguration().t0[index];
         this.c = getConfiguration().c[index];
         this.bPower = getConfiguration().bPower[index];
-        this.sizeMat = getConfiguration().sizeMaturity[index];
-        this.recruitAge = Math.round(getConfiguration().recruitmentAge[index] * getConfiguration().getNumberTimeStepsPerYear());
-        this.seasonSpawning = getConfiguration().seasonSpawning[index];
+        this.sizeMaturity = getConfiguration().sizeMaturity[index];
+        this.recruitmentAge = Math.round(getConfiguration().recruitmentAge[index] * getConfiguration().getNumberTimeStepsPerYear());
         this.indexAgeClass0 = (int) Math.ceil(getConfiguration().supAgeOfClass0Matrix[index] * getConfiguration().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
         this.eggSize = getConfiguration().eggSize[index];
         this.eggWeight = getConfiguration().eggWeight[index];
@@ -149,5 +149,47 @@ public class Species {
 
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return the eggSize
+     */
+    public float getEggSize() {
+        return eggSize;
+    }
+
+    /**
+     * @return the eggWeight
+     */
+    public float getEggWeight() {
+        return eggWeight;
+    }
+
+    /**
+     * @return the indexAgeClass0
+     */
+    public int getIndexAgeClass0() {
+        return indexAgeClass0;
+    }
+
+    /**
+     * @return the sizeMaturity
+     */
+    public float getSizeMaturity() {
+        return sizeMaturity;
+    }
+
+    /**
+     * @return the recruitmentAge
+     */
+    public int getRecruitmentAge() {
+        return recruitmentAge;
+    }
+
+    /**
+     * @return the D
+     */
+    public float getD() {
+        return D;
     }
 }

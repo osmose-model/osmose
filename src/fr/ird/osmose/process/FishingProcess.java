@@ -59,7 +59,7 @@ public class FishingProcess extends AbstractProcess {
         // 1. School is recruited
         // 2. School is catchable (no MPA)
         // 3. School is not out of simulated domain
-        return (school.getAgeDt() >= school.getSpecies().recruitAge)
+        return (school.getAgeDt() >= school.getSpecies().getRecruitmentAge())
                 && school.isCatchable()
                 && !school.isUnlocated();
     }

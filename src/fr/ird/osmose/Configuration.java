@@ -200,7 +200,7 @@ public class Configuration {
     /**
      * Spawning seasonality. Array[nSpecies][nStepYear]
      */
-    float[][] seasonSpawning;
+    public float[][] seasonSpawning;
     /**
      * Size of eggs (cm). Set to one millimeter by default. Array[nSpecies]
      */

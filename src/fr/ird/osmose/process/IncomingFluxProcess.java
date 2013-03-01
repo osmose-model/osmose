@@ -22,9 +22,11 @@ public class IncomingFluxProcess extends AbstractProcess {
      * Mean weight of incoming fish
      */
     private int ageMeanIn;
-    
-    public IncomingFluxProcess(int replica, Species species) {
+    final private ReproductionProcess parent;
+
+    public IncomingFluxProcess(ReproductionProcess parent, int replica, Species species) {
         super(replica);
+        this.parent = parent;
         this.species = species;
     }
 
@@ -49,7 +51,8 @@ public class IncomingFluxProcess extends AbstractProcess {
         /*
          * Incoming flux
          */
-        double biomassIn = biomassFluxIn * species.seasonSpawning[getSimulation().getIndexTimeYear()];
+        double season = parent.getSeason(getSimulation().getIndexTimeSimu(), species);
+        double biomassIn = biomassFluxIn * season;
         float meanWeigthIn = (float) species.computeWeight(meanLengthIn);
         long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
         int nbSchools = getConfiguration().nSchool;

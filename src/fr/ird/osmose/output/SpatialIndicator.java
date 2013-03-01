@@ -180,7 +180,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
                 for (School school : getPopulation().getSchools(cell)) {
-                    if (school.getAgeDt() > school.getSpecies().indexAgeClass0 && !school.isUnlocated()) {
+                    if (school.getAgeDt() > school.getSpecies().getIndexAgeClass0() && !school.isUnlocated()) {
                         int iSpec = school.getSpeciesIndex();
                         biomass[iSpec][i][j] += school.getBiomass();
                         abundance[iSpec][i][j] += school.getAbundance();

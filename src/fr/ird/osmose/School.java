@@ -132,6 +132,16 @@ public class School extends GridPoint {
 // Constructor
 //////////////
     /**
+     * Create a new school at age 0, with egg size and weight.
+     *
+     * @param species
+     * @param abundance
+     */
+    public School(Species species, double abundance) {
+        this(species, abundance, species.getEggSize(), species.getEggWeight(), 0);
+    }
+
+    /**
      * Create a new school.
      *
      * @param cohort of the school
@@ -150,7 +160,7 @@ public class School extends GridPoint {
         feedingStage = 0;
         accessibilityStage = 0;
         dietStage = 0;
-        
+
         // Set initial trophic level to EGG
         trophicLevel = Species.TL_EGG;
         // Unlocated
@@ -165,7 +175,7 @@ public class School extends GridPoint {
      * Reset school state variables
      */
     public void initStep() {
-        
+
         // Reset variables
         catchable = true;
         // Reset diet variables
@@ -323,7 +333,7 @@ public class School extends GridPoint {
     public int getFeedingStage() {
         return feedingStage;
     }
-    
+
     public void icrementFeedingStage() {
         feedingStage++;
     }
@@ -334,7 +344,7 @@ public class School extends GridPoint {
     public int getAccessibilityStage() {
         return accessibilityStage;
     }
-    
+
     /**
      * Increment the accessibility stage
      */
@@ -348,7 +358,7 @@ public class School extends GridPoint {
     public int getDietStage() {
         return dietStage;
     }
-    
+
     public void incrementDietStage() {
         dietStage++;
     }

@@ -35,7 +35,7 @@ public class MeanSizeIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            if (school.getAgeDt() > school.getSpecies().indexAgeClass0) {
+            if (school.getAgeDt() > school.getSpecies().getIndexAgeClass0()) {
                 int i = school.getSpeciesIndex();
                 meanSize[i] += school.getAbundance() * school.getLength();
                 abundance[i] += school.getAbundance();

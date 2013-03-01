@@ -48,24 +48,24 @@ public class BiomassPopulator extends AbstractPopulator {
             double F = fishingProcess.getFishingMortalityRate(species);
 
             abdIni = getConfiguration().targetBiomass[i] / (meanWeight[(int) Math.round(species.getLongevity() / 2)] / 1000000);
-            for (int j = species.indexAgeClass0; j < species.getLongevity(); j++) {
-                sumExp += Math.exp(-(j * (species.D + F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
+            for (int j = species.getIndexAgeClass0(); j < species.getLongevity(); j++) {
+                sumExp += Math.exp(-(j * (species.getD() + F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
             }
 
             abundanceIni[0] = (long) ((abdIni) / (Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
             biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
-            if (species.indexAgeClass0 <= 0) {
+            if (species.getIndexAgeClass0() <= 0) {
                 biomass += biomassIni[0];
             }
             abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear));
             biomassIni[1] = ((double) abundanceIni[1]) * meanWeight[1] / 1000000.;
-            if (species.indexAgeClass0 <= 1) {
+            if (species.getIndexAgeClass0() <= 1) {
                 biomass += biomassIni[1];
             }
             for (int j = 2; j < species.getLongevity(); j++) {
-                abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.D + 0.5f + F) / (float) nbTimeStepsPerYear));
+                abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.getD() + 0.5f + F) / (float) nbTimeStepsPerYear));
                 biomassIni[j] = ((double) abundanceIni[j]) * meanWeight[j] / 1000000.;
-                if (species.indexAgeClass0 <= j) {
+                if (species.getIndexAgeClass0() <= j) {
                     biomass += biomassIni[j];
                 }
             }
@@ -77,7 +77,7 @@ public class BiomassPopulator extends AbstractPopulator {
             abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear));
             biomassIni[1] = ((double) abundanceIni[1]) * meanWeight[1] / 1000000.;
             for (int j = 2; j < species.getLongevity(); j++) {
-                abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.D + 0.5f + F) / (float) nbTimeStepsPerYear));
+                abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(species.getD() + 0.5f + F) / (float) nbTimeStepsPerYear));
                 biomassIni[j] = ((double) abundanceIni[j]) * meanWeight[j] / 1000000.;
             }
 

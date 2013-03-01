@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class LocalReproductionProcess extends AbstractProcess {
     
-    private Species species;
+    final private Species species;
     /*
      * Percentage of female in the population
      */
@@ -21,8 +21,11 @@ public class LocalReproductionProcess extends AbstractProcess {
      */
     private double alpha;
     
-    public LocalReproductionProcess(int replica, Species species) {
+    final private ReproductionProcess parent;
+    
+    public LocalReproductionProcess(ReproductionProcess parent, int replica, Species species) {
         super(replica);
+        this.parent = parent;
         this.species = species;
     }
 
@@ -38,14 +41,12 @@ public class LocalReproductionProcess extends AbstractProcess {
         double SSB = 0;
         List<School> schools = getPopulation().getSchools(species);
         for (School school : schools) {
-            if (school.getLength() >= species.sizeMat) {
+            if (school.getLength() >= species.getSizeMaturity()) {
                 SSB += school.getInstantaneousBiomass();
             }
         }
 
-        double season = species.seasonSpawning.length > getConfiguration().getNumberTimeStepsPerYear()
-                ? species.seasonSpawning[getSimulation().getIndexTimeSimu()]
-                : species.seasonSpawning[getSimulation().getIndexTimeYear()];
+        double season = parent.getSeason(getSimulation().getIndexTimeSimu(), species);
         double nbEggs = sexRatio * alpha * season * SSB * 1000000;
 
         /*
@@ -61,11 +62,11 @@ public class LocalReproductionProcess extends AbstractProcess {
         if (nbEggs == 0.d) {
             // do nothing, zero school
         } else if (nbEggs < nbSchools) {
-            School school0 = new School(species, nbEggs, species.eggSize, species.eggWeight, 0);
+            School school0 = new School(species, nbEggs);
             getPopulation().add(school0);
         } else if (nbEggs >= nbSchools) {
             for (int i = 0; i < nbSchools; i++) {
-                School school0 = new School(species, nbEggs / nbSchools, species.eggSize, species.eggWeight, 0);
+                School school0 = new School(species, nbEggs / nbSchools);
                 getPopulation().add(school0);
             }
         }

@@ -62,7 +62,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         if (school.getAgeDt() == 0) {
             D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + migration.getOutMortality(school)) / (float) subdt;
         } else {
-            D = (spec.D + migration.getOutMortality(school)) / (float) (getConfiguration().getNumberTimeStepsPerYear() * subdt);
+            D = (spec.getD() + migration.getOutMortality(school)) / (float) (getConfiguration().getNumberTimeStepsPerYear() * subdt);
         }
         return D;
     }
