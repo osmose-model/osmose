@@ -13,7 +13,7 @@ public class GrowthProcess extends AbstractProcess {
     private float[][] maxDelta;
     private float[][] deltaMeanLength;
     private float[] criticalPredSuccess;
-    
+
     public GrowthProcess(int replica) {
         super(replica);
     }
@@ -34,9 +34,11 @@ public class GrowthProcess extends AbstractProcess {
             maxDelta[i] = new float[longevity];
             deltaMeanLength[i] = new float[longevity];
 
-            float[] meanLength = species.getMeanLength();
+            float meanAge1 = species.computeMeanLength(0);
             for (int age = 0; age < longevity - 1; age++) {
-                deltaMeanLength[i][age] = meanLength[age + 1] - meanLength[age];
+                float meanAge0 = meanAge1;
+                meanAge1 = species.computeMeanLength(age + 1);
+                deltaMeanLength[i][age] = meanAge1 - meanAge0;
 
                 minDelta[i][age] = deltaMeanLength[i][age] - deltaMeanLength[i][age];
                 maxDelta[i][age] = deltaMeanLength[i][age] + deltaMeanLength[i][age];

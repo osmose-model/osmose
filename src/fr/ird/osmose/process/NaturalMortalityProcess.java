@@ -9,6 +9,13 @@ import fr.ird.osmose.Species;
  */
 public class NaturalMortalityProcess extends AbstractProcess {
 
+    /**
+     * Natural mortality rates year-1.
+     */
+    private float D[];
+    /**
+     * Larval mortality rates, timestep-1.
+     */
     private float[][] larvalMortalityRates;
     // migration process
     private MigrationProcess migration;
@@ -19,6 +26,8 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
     @Override
     public void init() {
+        
+        D = getConfiguration().D;
 
         larvalMortalityRates = new float[getNSpecies()][getConfiguration().getNumberTimeStepsPerYear() * getConfiguration().getNYear()];
         for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
@@ -31,7 +40,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
                 t++;
             }
         }
-        
+
         // Migration
         migration = new MigrationProcess(getReplica());
     }
@@ -57,14 +66,14 @@ public class NaturalMortalityProcess extends AbstractProcess {
      * not explicit.
      */
     public double getNaturalMortalityRate(School school, int subdt) {
-        double D;
+        double M;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
-            D = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + migration.getOutMortality(school)) / (float) subdt;
+            M = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + migration.getOutMortality(school)) / (float) subdt;
         } else {
-            D = (spec.getD() + migration.getOutMortality(school)) / (float) (getConfiguration().getNumberTimeStepsPerYear() * subdt);
+            M = (D[spec.getIndex()] + migration.getOutMortality(school)) / (float) (getConfiguration().getNumberTimeStepsPerYear() * subdt);
         }
-        return D;
+        return M;
     }
 
     /*
@@ -80,5 +89,9 @@ public class NaturalMortalityProcess extends AbstractProcess {
         }
         rate /= larvalMortalityRates[iSpec].length;
         return rate;
+    }
+    
+    public double getNaturalMortalityRate(Species species) {
+        return D[species.getIndex()];
     }
 }

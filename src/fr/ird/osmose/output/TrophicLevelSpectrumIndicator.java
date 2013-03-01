@@ -51,7 +51,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            int ageClass1 = (int) Math.max(1, school.getSpecies().getIndexAgeClass0());
+            int ageClass1 = (int) Math.max(1, school.getSpecies().getAgeClassZero());
             if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
                 trophicLevelSpectrum[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
             }

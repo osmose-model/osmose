@@ -27,7 +27,7 @@ public class BiomassNoJuvIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            if (school.getAgeDt() >= school.getSpecies().getIndexAgeClass0()) {
+            if (school.getAgeDt() >= school.getSpecies().getAgeClassZero()) {
                 biomass[school.getSpeciesIndex()] += school.getBiomass();
             }
         }

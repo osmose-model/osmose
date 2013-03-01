@@ -1,62 +1,64 @@
 package fr.ird.osmose;
 
-/**
- * ******************************************************************************
- * <p>Titre : Species class</p>
- *
- * <p>Description : groups species specificities - biological processes </p>
- *
- * <p>Copyright : Copyright (c) may 2009</p>
- *
- * <p>Society : IRD, France </p>
- *
- * @author Yunne Shin, Morgane Travers
- * @version 2.1
- * *******************************************************************************
- */
 public class Species {
 
+////////////
+// Variables
+////////////
+    /**
+     * Trophic level of eggs.
+     */
     final static public float TL_EGG = 3f;
-/////////////////////////////
-// Description of the species
-/////////////////////////////
-    /*
-     * Index of the species [0 : numberTotalSpecies - 1]
+    /**
+     * Index of the species. [0 : numberTotalSpecies - 1]
      */
-    private int index;
-    /*
-     * Name of the species
+    final private int index;
+    /**
+     * Name of the species.
      */
-    private String name;
-//////////////////////////
-// Life history parameters
-//////////////////////////
-    /*
-     * Longevity expressed in number of time steps
+    final private String name;
+    /**
+     * Longevity expressed in number of time steps.
      */
-    private int longevity;
-    /*
-     * Natural mortality rates year-1
+    final private int longevity;
+    /**
+     * Von bertalanffy growth parameters.
      */
-    private float D;
-    /*
-     * Von bertalanffy growth parameters
+    final private float lInf, K, t0;
+    /**
+     * Allometric parameters.
      */
-    private float lInf, K, t0;
-    /*
-     * Allometric parameters
+    final private float c, bPower;
+    /**
+     * Size (cm) at maturity.
      */
-    private float c, bPower;
-    private float sizeMaturity;
-    private int recruitmentAge;
-    /*
-     * Age from which the species biomass-0 is calculated, expressed in dt
+    final private float sizeMaturity;
+    /**
+     * Age of recruitment (year)
      */
-    private int indexAgeClass0;
-    private float eggSize;
-    private float eggWeight;
-    private float growthAgeThreshold;
+    final private int recruitmentAge;
+    /**
+     * Threshold age (year) for age class zero. It is the age from which target
+     * biomass should be considered as eggs and larvae stages are generally not
+     * considered.
+     */
+    final private int ageClassZero;
+    /**
+     * Size (cm) of eggs.
+     */
+    final private float eggSize;
+    /**
+     * Weight (gram) of eggs.
+     */
+    final private float eggWeight;
+    /**
+     * Threshold age (year) for applying Von Bertalanffy growth model.
+     */
+    final private float growthAgeThreshold;
 
+//////////////
+// Constructor
+//////////////
     /**
      * Create a new species
      *
@@ -64,21 +66,8 @@ public class Species {
      */
     public Species(int index) {
         this.index = index;
-    }
-
-    public Species(int index, String name) {
-        this.index = index;
-        this.name = name;
-    }
-
-    /*
-     * Initialize the parameters of the species
-     */
-    public void init() {
-
         // INITIALISATION of PARAM
         this.name = getConfiguration().speciesName[index];
-        this.D = getConfiguration().D[index];
         this.lInf = getConfiguration().lInf[index];
         this.K = getConfiguration().K[index];
         this.t0 = getConfiguration().t0[index];
@@ -86,110 +75,131 @@ public class Species {
         this.bPower = getConfiguration().bPower[index];
         this.sizeMaturity = getConfiguration().sizeMaturity[index];
         this.recruitmentAge = Math.round(getConfiguration().recruitmentAge[index] * getConfiguration().getNumberTimeStepsPerYear());
-        this.indexAgeClass0 = (int) Math.ceil(getConfiguration().supAgeOfClass0Matrix[index] * getConfiguration().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
+        this.ageClassZero = (int) Math.ceil(getConfiguration().supAgeOfClass0Matrix[index] * getConfiguration().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
         this.eggSize = getConfiguration().eggSize[index];
         this.eggWeight = getConfiguration().eggWeight[index];
         this.growthAgeThreshold = getConfiguration().growthAgeThreshold[index];
-
-        // START INITIALISATION of COHORTS
         longevity = (int) Math.round((getConfiguration().speciesLongevity[index]) * getConfiguration().getNumberTimeStepsPerYear());
     }
 
-    public float[] getMeanLength() {
+////////////
+// Functions
+////////////
+    /**
+     * Computes the mean length (cm) at a specific age.
+     *
+     * @param age, expressed in number of time steps.
+     * @return the mean length (cm)
+     */
+    public float computeMeanLength(int age) {
 
-        // INITIALISATION of TAB for LENGTH and MINMAX of DELTA LENGTH
-        float[] meanLength = new float[longevity];
-
-        float decimalAge;
-        meanLength[0] = eggSize;
-
-        for (int i = 1; i < getLongevity(); i++) {
-            decimalAge = i / (float) getConfiguration().getNumberTimeStepsPerYear();
+        float length;
+        if (age == 0) {
+            length = eggSize;
+        } else {
+            float decimalAge = age / (float) getConfiguration().getNumberTimeStepsPerYear();
             if (decimalAge < growthAgeThreshold) {
                 float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
                 if (lengthAtAgePart < eggSize) {
                     lengthAtAgePart = eggSize;
                 }
-                meanLength[i] = decimalAge * (float) (lengthAtAgePart - eggSize) + eggSize;    // linear growth for the 1st year as von Bertalanffy is not well adapted for the 1st year
+                length = decimalAge * (float) (lengthAtAgePart - eggSize) + eggSize;    // linear growth for the 1st year as von Bertalanffy is not well adapted for the 1st year
             } else {
-                meanLength[i] = (float) (lInf * (1 - Math.exp(-K * (decimalAge - t0))));   // von Bertalnffy growth after the first year
+                length = (float) (lInf * (1 - Math.exp(-K * (decimalAge - t0))));   // von Bertalnffy growth after the first year
             }
         }
-        return meanLength;
+
+        return length;
     }
 
-    public float[] getMeanWeight(float[] tabMeanLength) {
+    /**
+     * Computes the mean weight (gram) at a specific age.
+     *
+     * @param age, expressed in number of time steps.
+     * @return the mean weight (gram)
+     */
+    public float computeMeanWeight(int age) {
 
-        float[] meanWeight = new float[longevity];
-        meanWeight[0] = eggWeight;
-        for (int i = 1; i < longevity; i++) {
-            meanWeight[i] = (float) computeWeight(tabMeanLength[i]);
-            if (meanWeight[i] < eggWeight) {
-                meanWeight[i] = eggWeight;
+        float weight;
+        if (age == 0) {
+            weight = eggWeight;
+        } else {
+            weight = computeWeight(computeMeanLength(age));
+            if (weight < eggWeight) {
+                weight = eggWeight;
             }
         }
-        return meanWeight;
+        return weight;
     }
 
+    /**
+     * Computes the weight corresponding to the given length.
+     *
+     * @param length (cm)
+     * @return the weight (gram)
+     */
     public float computeWeight(float length) {
         return (float) (c * (Math.pow(length, bPower)));
     }
 
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
-    }
-
+    /**
+     * @return the longevity, expressed in number of time steps.
+     */
     public int getLongevity() {
         return longevity;
     }
 
+    /**
+     * @return the index of the species.
+     */
     public int getIndex() {
         return index;
     }
 
+    /**
+     * @return the name of the species.
+     */
     public String getName() {
         return name;
     }
 
     /**
-     * @return the eggSize
+     * @return the egg's size (cm)
      */
     public float getEggSize() {
         return eggSize;
     }
 
     /**
-     * @return the eggWeight
+     * @return the egg's weight (gram)
      */
     public float getEggWeight() {
         return eggWeight;
     }
 
     /**
-     * @return the indexAgeClass0
+     * @return the threshold age of class zero, expressed in number of time
+     * steps.
      */
-    public int getIndexAgeClass0() {
-        return indexAgeClass0;
+    public int getAgeClassZero() {
+        return ageClassZero;
     }
 
     /**
-     * @return the sizeMaturity
+     * @return the size of maturity (cm)
      */
     public float getSizeMaturity() {
         return sizeMaturity;
     }
 
     /**
-     * @return the recruitmentAge
+     * @return the age of recruitment, expressed in number of time steps.
      */
     public int getRecruitmentAge() {
         return recruitmentAge;
     }
 
-    /**
-     * @return the D
-     */
-    public float getD() {
-        return D;
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 }

@@ -34,7 +34,7 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            if (school.getAgeDt() >= school.getSpecies().getIndexAgeClass0()) {
+            if (school.getAgeDt() >= school.getSpecies().getAgeClassZero()) {
                 int i = school.getSpeciesIndex();
                 meanTL[i] += school.getBiomass() * school.getTrophicLevel();
                 biomass[i] += school.getBiomass();

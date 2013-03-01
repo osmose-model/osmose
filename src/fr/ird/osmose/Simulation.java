@@ -124,8 +124,6 @@ public class Simulation {
         species = new Species[getConfiguration().getNSpecies()];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
-            // Initialize species
-            species[i].init();
         }
 
         // Init plankton groups

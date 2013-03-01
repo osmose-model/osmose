@@ -180,7 +180,7 @@ public class Configuration {
     /**
      * Natural mortality rates. Array[nSpecies]
      */
-    float[] D;
+    public float[] D;
     /**
      * Larval mortality rates. Array[nSpecies]
      */
