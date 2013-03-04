@@ -1,10 +1,14 @@
 package fr.ird.osmose.util;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Configuration.SpatialDistribution;
 import fr.ird.osmose.Osmose;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +34,9 @@ public class ConfigurationConverter {
         // convert
         System.out.println("Converting old configuration file to new format...");
         convert();
-        write();
+        writeAsText();
+        writeAsCSV();
+        writeAsXML();
         System.out.println("Conversion completed successfully.");
     }
 
@@ -199,23 +205,114 @@ public class ConfigurationConverter {
                 }
             }
         }
-        
-        
-        
+
+        // PREDATION / STARVATION
+        for (int i = 0; i < nSpecies; i++) {
+            prop.setProperty("predation.feeding.stage.sp" + i, String.valueOf(toString(cfg.feedingStageThreshold[i])));
+            prop.setProperty("predation.predPreySizeRatio.min.sp" + i, String.valueOf(toString(cfg.predPreySizeRatioMin[i])));
+            prop.setProperty("predation.predPreySizeRatio.max.sp" + i, String.valueOf(toString(cfg.predPreySizeRatioMax[i])));
+            prop.setProperty("predation.ingestion.rate.max.sp" + i, String.valueOf(cfg.maxPredationRate[i]));
+            prop.setProperty("predation.efficiency.critical.sp" + i, String.valueOf(cfg.criticalPredSuccess[i]));
+            prop.setProperty("predation.starvation.rate.sp" + i, String.valueOf(cfg.starvMaxRate[i]));
+            prop.setProperty("predation.accessibility.stage.sp" + i, String.valueOf(toString(cfg.accessStageThreshold[i])));
+        }
+        String accessibilityFile = "predation-accessibility.csv";
+        prop.setProperty("predation.accessibility.file", accessibilityFile);
+        writeAccessibilityAsCSV(accessibilityFile);
+
+
+        // NATURAL MORTALITY
+        for (int i = 0; i < nSpecies; i++) {
+            prop.setProperty("mortality.natural.rate.sp" + i, String.valueOf(cfg.D[i]));
+            prop.setProperty("mortality.natural.larvae.rate.sp" + i, String.valueOf(toString(cfg.larvalMortalityRates[i])));
+        }
+
+        // FISHING
+        for (int i = 0; i < nSpecies; i++) {
+            prop.setProperty("fishing.rate.sp" + i, String.valueOf(toString(cfg.fishingRates[i])));
+        }
+
+        // MPA
+        if (cfg.mpaFilename.equalsIgnoreCase("default")) {
+            prop.setProperty("mpa.file.m0", "null");
+        } else {
+            prop.setProperty("mpa.file.m0", cfg.mpaFilename);
+        }
+        prop.setProperty("mpa.year.start.m0", String.valueOf(cfg.yearStartMPA));
+        prop.setProperty("mpa.year.end.m0", String.valueOf(cfg.yearEndMPA));
+
+        // MIGRATION
+        for (int i = 0; i < nSpecies; i++) {
+            if (cfg.ageMigration[i] != null) {
+//                prop.setProperty("migration.agemin.sp" + i, String.valueOf(cfg.ageMigration[i][0]));
+//                prop.setProperty("migration.agemax.sp" + i, String.valueOf(cfg.ageMigration[i][cfg.ageMigration[i].length - 1] + 1));
+                prop.setProperty("migration.year.sp" + i, String.valueOf(toString(cfg.ageMigration[i])));
+                prop.setProperty("migration.season.sp" + i, String.valueOf(toString(cfg.seasonMigration[i])));
+                prop.setProperty("migration.mortality.rate.sp" + i, String.valueOf(toString(cfg.migrationTempMortality[i])));
+            } else {
+                prop.setProperty("migration.year.sp" + i, "null");
+                prop.setProperty("migration.season.sp" + i, "null");
+                prop.setProperty("migration.mortality.rate.sp" + i, "null");
+            }
+        }
+
+        // BIOMASS INITIALIZATION
+        prop.setProperty("population.initialization.method", cfg.calibrationMethod);
+        if (cfg.calibrationMethod.equalsIgnoreCase("biomass")) {
+            for (int i = 0; i < nSpecies; i++) {
+                prop.setProperty("population.initalization.biomass.sp" + i, String.valueOf(cfg.targetBiomass[i]));
+            }
+        } else if (cfg.calibrationMethod.equalsIgnoreCase("spectrum")) {
+            prop.setProperty("population.initalization.spectrum.slope", String.valueOf(cfg.sizeSpectrumSlope));
+            prop.setProperty("population.initalization.biomass.intercept", String.valueOf(cfg.sizeSpectrumIntercept));
+        }
+
+
         //prop.setProperty("", String.valueOf());
     }
 
-    private void write() {
+    private void writeAsCSV() {
         try {
-            prop.store(new FileWriter(cfg.resolveFile(getFilename())), null);
+            FileOutputStream fos = new FileOutputStream(cfg.resolveFile(getFilename("csv")));
+            PrintWriter prw = new PrintWriter(fos, true);
+            Iterator it = prop.keySet().iterator();
+            while (it.hasNext()) {
+                String key = String.valueOf(it.next());
+                String[] values = prop.getProperties(key);
+                prw.print(key);
+                for (String value : values) {
+                    prw.print(";");
+                    prw.print(value);
+                }
+                prw.println();
+            }
+            prw.close();
+            fos.close();
         } catch (IOException ex) {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    String getFilename() {
+    private void writeAsXML() {
+        try {
+            prop.storeToXML(new FileOutputStream(cfg.resolveFile(getFilename("xml"))), null);
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void writeAsText() {
+        try {
+            prop.store(new FileWriter(cfg.resolveFile(getFilename("txt"))), null);
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    String getFilename(String ext) {
         StringBuilder filename = new StringBuilder(cfg.getOutputPrefix());
-        filename.append("_all-parameters.cfg");
+        filename.append("_all-parameters.");
+        filename.append(ext);
         return filename.toString();
     }
 
@@ -224,7 +321,7 @@ public class ConfigurationConverter {
             StringBuilder str = new StringBuilder();
             for (float f : array) {
                 str.append(f);
-                str.append(", ");
+                str.append("; ");
             }
             int l = str.length();
             str.delete(l - 2, l - 1);
@@ -232,7 +329,7 @@ public class ConfigurationConverter {
         }
         return "null";
     }
-    
+
     private String toString(int[] array) {
         if (null == array) {
             return null;
@@ -240,13 +337,86 @@ public class ConfigurationConverter {
         StringBuilder str = new StringBuilder();
         str.append(array[0]);
         for (int i = 1; i < array.length; i++) {
-            str.append(", ");
+            str.append("; ");
             str.append(array[i]);
         }
         return str.toString();
     }
 
+    private void writeAccessibilityAsCSV(String filename) {
+
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+            String[] header = new String[sum(cfg.nAccessStage) + 1];
+            int k = 0;
+            header[k] = "v Prey / Predator >";
+            for (int i = 0; i < cfg.getNSpecies(); i++) {
+                for (int s = 0; s < cfg.nAccessStage[i]; s++) {
+                    k++;
+                    if (cfg.nAccessStage[i] == 1) {
+                        header[k] = cfg.speciesName[i];    // Name predators
+                    } else {
+                        if (s == 0) {
+                            header[k] = cfg.speciesName[i] + " < " + cfg.accessStageThreshold[i][s] + " year";  // Name predators
+                        } else {
+                            header[k] = cfg.speciesName[i] + " > " + cfg.accessStageThreshold[i][s - 1] + " year";     // Name predators
+                        }
+                    }
+                }
+            }
+            writer.writeNext(header);
+
+            for (int i = 0; i < cfg.getNSpecies(); i++) {
+                for (int s = 0; s < cfg.nAccessStage[i]; s++) {
+                    k = 0;
+                    String[] entries = new String[header.length];
+                    if (cfg.nAccessStage[i] == 1) {
+                        entries[k] = cfg.speciesName[i];    // Name predators
+                    } else {
+                        if (s == 0) {
+                            entries[k] = cfg.speciesName[i] + " < " + cfg.accessStageThreshold[i][s] + " year";  // Name predators
+                        } else {
+                            entries[k] = cfg.speciesName[i] + " > " + cfg.accessStageThreshold[i][s - 1] + " year";     // Name predators
+                        }
+                    }
+                    k++;
+                    for (int ii = 0; ii < cfg.getNSpecies(); ii++) {
+                        for (int ss = 0; ss < cfg.nAccessStage[ii]; ss++) {
+                            entries[k] = String.valueOf(cfg.accessibilityMatrix[i][s][ii][ss]);
+                            k++;
+                        }
+                    }
+                    writer.writeNext(entries);
+                }
+            }
+            for (int i = 0; i < cfg.getNPlankton(); i++) {
+                k = 0;
+                String[] entries = new String[header.length];
+                entries[k] = cfg.planktonName[i];
+                k++;
+                for (int ii = 0; ii < cfg.getNSpecies(); ii++) {
+                    for (int ss = 0; ss < cfg.nAccessStage[ii]; ss++) {
+                        entries[k] = String.valueOf(cfg.accessibilityMatrix[cfg.getNSpecies() + i][0][ii][ss]);
+                        k++;
+                    }
+                }
+                writer.writeNext(entries);
+            }
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private int sum(int[] array) {
+        int sum = 0;
+        for (int i : array) {
+            sum += i;
+        }
+        return sum;
+    }
+
     public static void main(String[] args) {
-        new ConfigurationConverter(args).convert();
+        ConfigurationConverter configurationConverter = new ConfigurationConverter(args);
     }
 }
