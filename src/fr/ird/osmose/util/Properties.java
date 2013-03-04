@@ -34,7 +34,7 @@ public class Properties extends java.util.Properties {
     public String[] getProperties(String key) {
         String value = getProperty(key);
         if ((null != value)) {
-            return value.split(",");
+            return value.split(";");
         } else {
             return null;
         }
