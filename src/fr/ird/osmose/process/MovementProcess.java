@@ -2,8 +2,8 @@ package fr.ird.osmose.process;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Configuration.SpatialDistribution;
+import fr.ird.osmose.OldConfiguration;
+import fr.ird.osmose.OldConfiguration.SpatialDistribution;
 import fr.ird.osmose.util.ConnectivityMatrix;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.Osmose;
@@ -60,7 +60,7 @@ public class MovementProcess extends AbstractProcess {
     public void init() {
 
         // read new format of area file, with agemin and agemax
-        if (Configuration.NEW_AREA_FILE) {
+        if (OldConfiguration.NEW_AREA_FILE) {
             readConfigurationFile();
         }
         

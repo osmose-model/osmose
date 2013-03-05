@@ -31,15 +31,6 @@ public class Properties extends java.util.Properties {
         return value;
     }
 
-    public String[] getProperties(String key) {
-        String value = getProperty(key);
-        if ((null != value)) {
-            return value.split(";");
-        } else {
-            return null;
-        }
-    }
-
     /**
      * This key filter only uses shell meta-characters.
      * It accepts the following meta-character: "?" for any single character

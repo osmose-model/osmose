@@ -39,7 +39,7 @@ public class Osmose {
     /*
      * Configuration
      */
-    private Configuration configuration;
+    private OldConfiguration oldConfiguration;
 
     /*
      * Function for dealing with command line arguments From David K. for the GA
@@ -72,27 +72,27 @@ public class Osmose {
             inputTxtName = "INPUT.txt";
         }
 
-        configuration = new Configuration(inputPathName, outputPathName, inputTxtName);
-        configuration.init();
+        oldConfiguration = new OldConfiguration(inputPathName, outputPathName, inputTxtName);
+        oldConfiguration.init();
     }
 
     public void run() {
         // Delete existing output directory
-        File targetPath = new File(configuration.getOutputPathname() + configuration.getOutputFolder());
+        File targetPath = new File(oldConfiguration.getOutputPathname() + oldConfiguration.getOutputFolder());
         if (targetPath.exists()) {
             IOTools.deleteDirectory(targetPath);
         }
 
         // Loop over the number of replica
-        simulation = new Simulation[configuration.getNSimulation()];
+        simulation = new Simulation[oldConfiguration.getNSimulation()];
         long begin = System.currentTimeMillis();
         System.out.println("\nSimulation started...");
         int nProcs = Runtime.getRuntime().availableProcessors();
         //int nProcs = 1;
-        int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
+        int nBatch = (int) Math.ceil((float) oldConfiguration.getNSimulation() / nProcs);
         int replica = 0;
         for (int iBatch = 0; iBatch < nBatch; iBatch++) {
-            int nworker = Math.min(nProcs, configuration.getNSimulation() - replica);
+            int nworker = Math.min(nProcs, oldConfiguration.getNSimulation() - replica);
             CountDownLatch doneSignal = new CountDownLatch(nworker);
             Worker[] workers = new Worker[nworker];
             for (int iworker = 0; iworker < nworker; iworker++) {
@@ -194,8 +194,8 @@ public class Osmose {
         return osmose;
     }
 
-    public Configuration getConfiguration() {
-        return configuration;
+    public OldConfiguration getOldConfiguration() {
+        return oldConfiguration;
     }
 
     public Simulation getSimulation(int replica) {
@@ -203,10 +203,10 @@ public class Osmose {
     }
 
     public IGrid getGrid() {
-        return configuration.getGrid();
+        return oldConfiguration.getGrid();
     }
 
     public LTLForcing getForcing() {
-        return configuration.getForcing();
+        return oldConfiguration.getForcing();
     }
 }

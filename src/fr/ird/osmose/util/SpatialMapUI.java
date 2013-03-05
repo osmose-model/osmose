@@ -411,13 +411,13 @@ public class SpatialMapUI extends JPanel {
     public static void main(String args[]) {
 
         getOsmose().init(args);
-        map = getOsmose().getConfiguration().getMap(numMap);
+        map = getOsmose().getOldConfiguration().getMap(numMap);
 
         SpatialMapUI grid = new SpatialMapUI();
         grid.init();
         grid.setGridVisible(true);
         //1. Create the frame.
-        JFrame frame = new JFrame(getOsmose().getConfiguration().getMapDetails(numMap));
+        JFrame frame = new JFrame(getOsmose().getOldConfiguration().getMapDetails(numMap));
 
         //2. Optional: What happens when the frame closes?
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

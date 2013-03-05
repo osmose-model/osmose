@@ -217,8 +217,8 @@ public class Simulation {
         return i_step_simu;
     }
 
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
+    private OldConfiguration getConfiguration() {
+        return Osmose.getInstance().getOldConfiguration();
     }
 
     public final int getReplica() {

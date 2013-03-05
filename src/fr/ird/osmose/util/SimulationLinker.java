@@ -4,7 +4,7 @@
  */
 package fr.ird.osmose.util;
 
-import fr.ird.osmose.Configuration;
+import fr.ird.osmose.OldConfiguration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Population;
 import fr.ird.osmose.Simulation;
@@ -28,8 +28,8 @@ public class SimulationLinker {
         return replica;
     }
     
-    public Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
+    public OldConfiguration getConfiguration() {
+        return Osmose.getInstance().getOldConfiguration();
     }
     
     public IGrid getGrid() {
@@ -53,7 +53,7 @@ public class SimulationLinker {
     }
     
     public String resolveFile(String filename) {
-        return Osmose.getInstance().getConfiguration().resolveFile(filename);
+        return Osmose.getInstance().getOldConfiguration().resolveFile(filename);
     }
     /**
      * The number of simulated species
@@ -61,6 +61,6 @@ public class SimulationLinker {
      * @return the number of simulated species
      */
     public int getNSpecies() {
-        return Osmose.getInstance().getConfiguration().getNSpecies();
+        return Osmose.getInstance().getOldConfiguration().getNSpecies();
     }
 }

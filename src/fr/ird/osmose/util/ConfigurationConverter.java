@@ -1,8 +1,8 @@
 package fr.ird.osmose.util;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Configuration.SpatialDistribution;
+import fr.ird.osmose.OldConfiguration;
+import fr.ird.osmose.OldConfiguration.SpatialDistribution;
 import fr.ird.osmose.Osmose;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class ConfigurationConverter {
 
-    private Configuration cfg;
+    private OldConfiguration cfg;
     private Properties prop;
 
     ConfigurationConverter(String[] args) {
@@ -26,7 +26,7 @@ public class ConfigurationConverter {
         // Get old configuration
         Osmose osmose = Osmose.getInstance();
         osmose.init(args);
-        cfg = osmose.getConfiguration();
+        cfg = osmose.getOldConfiguration();
 
         // Create new Properties
         prop = new Properties();
@@ -278,13 +278,9 @@ public class ConfigurationConverter {
             Iterator it = prop.keySet().iterator();
             while (it.hasNext()) {
                 String key = String.valueOf(it.next());
-                String[] values = prop.getProperties(key);
                 prw.print(key);
-                for (String value : values) {
-                    prw.print(";");
-                    prw.print(value);
-                }
-                prw.println();
+                prw.print(";");
+                prw.println(prop.getProperty(key));
             }
             prw.close();
             fos.close();

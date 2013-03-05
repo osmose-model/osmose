@@ -144,8 +144,8 @@ public class Plankton {
         return trophicLevel;
     }
 
-    private static Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
+    private static OldConfiguration getConfiguration() {
+        return Osmose.getInstance().getOldConfiguration();
     }
 
     private static IGrid getGrid() {

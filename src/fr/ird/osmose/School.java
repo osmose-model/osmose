@@ -380,8 +380,8 @@ public class School extends GridPoint {
     /*
      * Get the current Osmose instance
      */
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
+    private OldConfiguration getConfiguration() {
+        return Osmose.getInstance().getOldConfiguration();
     }
 
     /**

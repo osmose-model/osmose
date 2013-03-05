@@ -5,7 +5,7 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Configuration;
+import fr.ird.osmose.OldConfiguration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.grid.IGrid;
@@ -146,8 +146,8 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         return jcoordLTLGrid[cell.get_igrid()][cell.get_jgrid()];
     }
 
-    static Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
+    static OldConfiguration getConfiguration() {
+        return Osmose.getInstance().getOldConfiguration();
     }
 
     static IGrid getGrid() {
