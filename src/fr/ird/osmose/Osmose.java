@@ -42,6 +42,7 @@ public class Osmose {
      * Configuration
      */
     private OldConfiguration oldConfiguration;
+    private Configuration configuration;
     /**
      * The application logger
      */
@@ -51,7 +52,7 @@ public class Osmose {
      * Function for dealing with command line arguments From David K. for the GA
      */
     public void init(String[] args) {
-        
+
         // setup the logger
         logger.setUseParentHandlers(false);
         OsmoseLogFormatter formatter = new OsmoseLogFormatter();
@@ -87,6 +88,13 @@ public class Osmose {
 
         oldConfiguration = new OldConfiguration(inputPathName, outputPathName, inputTxtName);
         oldConfiguration.init();
+
+        String mainFilename = inputPathName;
+        if (!mainFilename.endsWith(File.separator)) {
+            mainFilename += File.separator;
+        }
+        mainFilename += "INPUT.csv";
+        //configuration = new Configuration(mainFilename, (args.length > 1) ? outputPathName : null);
     }
 
     public void run() {
@@ -164,7 +172,8 @@ public class Osmose {
         try {
             pathFile = new FileInputStream(new File("filePath.txt"));
         } catch (FileNotFoundException ex) {
-            logger.log(Level.SEVERE, "Initial path file doesn't exist", ex);
+            String wd = new File("").getAbsolutePath();
+            logger.log(Level.SEVERE, "Did not find filePath.txt in current directory " + wd, ex);
         }
 
         Reader r = new BufferedReader(new InputStreamReader(pathFile));
@@ -173,13 +182,13 @@ public class Osmose {
         st.slashStarComments(true);
         st.quoteChar(';');
 
-        logger.info("1. Reading the filePath.txt");
+        logger.info("Reading filePath.txt");
         try {
             st.nextToken();
             File inputFile = new File(st.sval);
             return inputFile.getAbsolutePath();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Reading error of path file", ex);
+            logger.log(Level.SEVERE, "Error reading filePath.txt", ex);
             return null;
         }
     }
@@ -207,6 +216,10 @@ public class Osmose {
 
     public OldConfiguration getOldConfiguration() {
         return oldConfiguration;
+    }
+    
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     public Simulation getSimulation(int replica) {
