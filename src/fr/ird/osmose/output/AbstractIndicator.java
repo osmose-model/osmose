@@ -27,6 +27,10 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
     AbstractIndicator(int replica) {
         super(replica);
     }
+    
+    boolean includeClassZero() {
+        return getConfiguration().isIncludeClassZero();
+    }
 
     @Override
     public void init() {

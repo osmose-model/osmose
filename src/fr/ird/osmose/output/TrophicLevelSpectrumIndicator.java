@@ -20,14 +20,14 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     //
     private float[] tabTL;
     private int nTLClass;
-    
-     public TrophicLevelSpectrumIndicator(int replica) {
+
+    public TrophicLevelSpectrumIndicator(int replica) {
         super(replica);
         initializeTLSpectrum();
     }
-     
-     private void initializeTLSpectrum() {
-         
+
+    private void initializeTLSpectrum() {
+
         float minTL = 1.0f;
         float maxTL = 6.0f;
         nTLClass = (int) (1 + ((maxTL - minTL) / 0.1f));   // TL classes of 0.1, from 1 to 6
@@ -52,7 +52,10 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
             int ageClass1 = (int) Math.max(1, school.getSpecies().getAgeClassZero());
-            if ((school.getBiomass() > 0) && (school.getAgeDt() >= ageClass1)) {
+            if (!includeClassZero() && (school.getAgeDt() < ageClass1)) {
+                continue;
+            }
+            if (school.getBiomass() > 0) {
                 trophicLevelSpectrum[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
             }
         }
@@ -97,7 +100,14 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Distribution of species biomass (tons) by 0.1 TL class, and excluding first ages specified in input (in calibration file)";
+        StringBuilder str = new StringBuilder("Distribution of species biomass (tons) by 0.1 TL class, and ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
 
     @Override

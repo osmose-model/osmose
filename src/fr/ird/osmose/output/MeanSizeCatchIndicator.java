@@ -15,8 +15,8 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
 
     private double[] meanSizeCatch;
     private double[] yieldN;
-    
-     public MeanSizeCatchIndicator(int replica) {
+
+    public MeanSizeCatchIndicator(int replica) {
         super(replica);
     }
 
@@ -34,11 +34,12 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            if (school.getAgeDt() > school.getSpecies().getAgeClassZero()) {
-                int i = school.getSpeciesIndex();
-                meanSizeCatch[i] += school.getNdeadFishing() * school.getLength();
-                yieldN[i] += school.getNdeadFishing();
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
             }
+            int i = school.getSpeciesIndex();
+            meanSizeCatch[i] += school.getNdeadFishing() * school.getLength();
+            yieldN[i] += school.getNdeadFishing();
         }
     }
 
@@ -73,9 +74,16 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean size of fish species in cm, weighted by fish numbers in the catches";
+        StringBuilder str = new StringBuilder("Mean size of fish species in cm, weighted by fish numbers in the catches, and ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
-    
+
     @Override
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];

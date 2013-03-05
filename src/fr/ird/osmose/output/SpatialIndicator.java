@@ -117,6 +117,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
             str.append(" ");
         }
         nc.addGlobalAttribute("dimension_species", str.toString());
+        nc.addGlobalAttribute("include_age_class_zero", "false");
         try {
             /*
              * Validates the structure of the NetCDF file.

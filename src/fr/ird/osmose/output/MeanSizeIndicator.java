@@ -15,8 +15,8 @@ public class MeanSizeIndicator extends AbstractIndicator {
 
     private double[] meanSize;
     private double[] abundance;
-    
-     public MeanSizeIndicator(int replica) {
+
+    public MeanSizeIndicator(int replica) {
         super(replica);
     }
 
@@ -35,11 +35,12 @@ public class MeanSizeIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            if (school.getAgeDt() > school.getSpecies().getAgeClassZero()) {
-                int i = school.getSpeciesIndex();
-                meanSize[i] += school.getAbundance() * school.getLength();
-                abundance[i] += school.getAbundance();
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
             }
+            int i = school.getSpeciesIndex();
+            meanSize[i] += school.getAbundance() * school.getLength();
+            abundance[i] += school.getAbundance();
         }
     }
 
@@ -74,9 +75,16 @@ public class MeanSizeIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean size of fish species in cm, weighted by fish numbers, and excluding first ages specified in input (in calibration file)";
+        StringBuilder str = new StringBuilder("Mean size of fish species in cm, weighted by fish numbers, and ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
-    
+
     @Override
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];

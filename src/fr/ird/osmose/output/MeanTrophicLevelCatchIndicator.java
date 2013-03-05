@@ -15,8 +15,8 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
 
     private double[] meanTLCatch;
     private double[] yield;
-    
-     public MeanTrophicLevelCatchIndicator(int replica) {
+
+    public MeanTrophicLevelCatchIndicator(int replica) {
         super(replica);
     }
 
@@ -34,11 +34,12 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            if (school.getAgeDt() >= school.getSpecies().getAgeClassZero()) {
-                int i = school.getSpeciesIndex();
-                meanTLCatch[i] += school.getTrophicLevel() * school.adb2biom(school.getNdeadFishing());
-                yield[i] += school.adb2biom(school.getNdeadFishing());
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
             }
+            int i = school.getSpeciesIndex();
+            meanTLCatch[i] += school.getTrophicLevel() * school.adb2biom(school.getNdeadFishing());
+            yield[i] += school.adb2biom(school.getNdeadFishing());
         }
     }
 
@@ -73,9 +74,16 @@ public class MeanTrophicLevelCatchIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean Trophic Level of fish species, weighted by fish catch";
+        StringBuilder str = new StringBuilder("Mean Trophic Level of fish species, weighted by fish catch, and ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
-    
+
     @Override
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];

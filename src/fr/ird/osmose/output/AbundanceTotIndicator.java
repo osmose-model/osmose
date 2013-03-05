@@ -40,7 +40,7 @@ public class AbundanceTotIndicator extends AbstractIndicator {
 
     @Override
     public boolean isEnabled() {
-        return getConfiguration().isIncludeClassZero() && !getConfiguration().isCalibrationOutput();
+        return includeClassZero() && !getConfiguration().isCalibrationOutput();
     }
 
     @Override
