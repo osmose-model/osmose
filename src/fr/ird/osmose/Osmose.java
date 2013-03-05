@@ -19,9 +19,11 @@ package fr.ird.osmose;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.util.IOTools;
+import fr.ird.osmose.util.OsmoseLogFormatter;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,11 +42,22 @@ public class Osmose {
      * Configuration
      */
     private OldConfiguration oldConfiguration;
+    /**
+     * The application logger
+     */
+    final private static Logger logger = Logger.getLogger(Osmose.class.getName());
 
     /*
      * Function for dealing with command line arguments From David K. for the GA
      */
     public void init(String[] args) {
+        
+        // setup the logger
+        logger.setUseParentHandlers(false);
+        OsmoseLogFormatter formatter = new OsmoseLogFormatter();
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(formatter);
+        logger.addHandler(handler);
 
         String inputPathName, outputPathName, inputTxtName;
 
@@ -54,7 +67,7 @@ public class Osmose {
         } else {
             // This will not have trailing file separator - no idea if this is a problem
             inputPathName = readPathFile();
-            System.out.println("Input path ==> " + inputPathName);
+            logger.log(Level.INFO, "Input path: {0}", inputPathName);
         }
 
         if (args.length > 1) {
@@ -86,7 +99,7 @@ public class Osmose {
         // Loop over the number of replica
         simulation = new Simulation[oldConfiguration.getNSimulation()];
         long begin = System.currentTimeMillis();
-        System.out.println("\nSimulation started...");
+        logger.info("Simulation started...");
         int nProcs = Runtime.getRuntime().availableProcessors();
         //int nProcs = 1;
         int nBatch = (int) Math.ceil((float) oldConfiguration.getNSimulation() / nProcs);
@@ -113,30 +126,28 @@ public class Osmose {
             }
         }
         int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-        System.out.println("End of simulation [OK] (time ellapsed:  " + time + " seconds)");
+        logger.log(Level.INFO, "Simulation completed (time ellapsed:  {0} seconds)", time);
     }
 
     private class Worker implements Runnable {
 
         private final Simulation simulation;
-        private final int replica;
         private final CountDownLatch doneSignal;
 
         public Worker(Simulation simulation, CountDownLatch doneSignal) {
             this.simulation = simulation;
             this.doneSignal = doneSignal;
-            replica = simulation.getReplica();
         }
 
         @Override
         public void run() {
             long begin = System.currentTimeMillis();
             try {
-                System.out.println("  Simulation#" + (replica + 1) + " started...");
+                simulation.getLogger().info("Started...");
                 simulation.init();
                 simulation.run();
                 int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-                System.out.println("  Simulation#" + (replica + 1) + " [OK] (time ellapsed:  " + time + " seconds)");
+                simulation.getLogger().log(Level.INFO, "Completed (time ellapsed:  {0} seconds)", time);
             } finally {
                 doneSignal.countDown();
             }
@@ -144,7 +155,7 @@ public class Osmose {
     }
 
     public Logger getLogger() {
-        return Logger.getLogger(Osmose.class.getName());
+        return logger;
     }
 
     public String readPathFile() // read the file situated within the source code directory
@@ -153,7 +164,7 @@ public class Osmose {
         try {
             pathFile = new FileInputStream(new File("filePath.txt"));
         } catch (FileNotFoundException ex) {
-            System.err.println("initial path file doesn't exist");
+            logger.log(Level.SEVERE, "Initial path file doesn't exist", ex);
         }
 
         Reader r = new BufferedReader(new InputStreamReader(pathFile));
@@ -162,13 +173,13 @@ public class Osmose {
         st.slashStarComments(true);
         st.quoteChar(';');
 
-        System.out.println("1. Reading the filePath.txt");
+        logger.info("1. Reading the filePath.txt");
         try {
             st.nextToken();
             File inputFile = new File(st.sval);
             return inputFile.getAbsolutePath();
         } catch (IOException ex) {
-            System.err.println("Reading error of path file");
+            logger.log(Level.SEVERE, "Reading error of path file", ex);
             return null;
         }
     }
@@ -177,17 +188,17 @@ public class Osmose {
      * Point d'entrée du programme
      */
     public static void main(String... args) {
-        System.out.println("*****************************************");
-        System.out.println("*   Osmose v3.0b - Copyright 2013 IRD   *");
-        System.out.println("*****************************************");
-        System.out.println(new Date());
-        System.out.println();
+        System.err.println("*****************************************");
+        System.err.println("*   Osmose v3.0b - Copyright 2013 IRD   *");
+        System.err.println("*****************************************");
+        System.err.println(new Date());
+        System.err.println();
         osmose.init(args);
         osmose.run();
-        System.out.println();
-        System.out.println(new Date());
-        System.out.println("*   Osmose v3.0b - Exit");
-        System.out.println("*****************************************");
+        System.err.println();
+        System.err.println(new Date());
+        System.err.println("*   Osmose v3.0b - Exit");
+        System.err.println("*****************************************");
     }
 
     public static Osmose getInstance() {

@@ -5,6 +5,10 @@ import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
 import fr.ird.osmose.step.SequentialMortalityStep;
+import fr.ird.osmose.util.OsmoseLogFormatter;
+import fr.ird.osmose.util.SimulationLogFormatter;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 public class Simulation {
 
@@ -63,12 +67,22 @@ public class Simulation {
      * The index of the replicate simulation
      */
     private final int replica;
+    /**
+     * The application logger
+     */
+    final private Logger logger = Logger.getLogger(Simulation.class.getName());
 
 ///////////////////////////////
 // Constructor
 ///////////////////////////////    
     public Simulation(int replica) {
         this.replica = replica;
+        // setup the logger
+        logger.setUseParentHandlers(false);
+        SimulationLogFormatter formatter = new SimulationLogFormatter(replica);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(formatter);
+        logger.addHandler(handler);
     }
 ///////////////////////////////
 // Declaration of the variables
@@ -223,5 +237,9 @@ public class Simulation {
 
     public final int getReplica() {
         return replica;
+    }
+    
+    final public Logger getLogger() {
+        return logger;
     }
 }

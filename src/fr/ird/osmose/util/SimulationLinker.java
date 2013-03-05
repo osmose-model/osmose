@@ -11,6 +11,7 @@ import fr.ird.osmose.Simulation;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
+import java.util.logging.Logger;
 
 /**
  *
@@ -62,5 +63,9 @@ public class SimulationLinker {
      */
     public int getNSpecies() {
         return Osmose.getInstance().getOldConfiguration().getNSpecies();
+    }
+    
+    public Logger getLogger() {
+        return getSimulation().getLogger();
     }
 }
