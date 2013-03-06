@@ -33,7 +33,7 @@ public class AbundanceTotIndicator extends AbstractIndicator {
 
         for (School school : getPopulation().getAliveSchools()) {
             if (getConfiguration().isIncludeClassZero()) {
-                abundance[school.getSpeciesIndex()] += school.getAbundance();
+                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
             }
         }
     }

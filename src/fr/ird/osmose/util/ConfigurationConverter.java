@@ -413,6 +413,7 @@ public class ConfigurationConverter {
     }
 
     public static void main(String[] args) {
+        Osmose.getInstance().init(args);
         ConfigurationConverter configurationConverter = new ConfigurationConverter(args);
     }
 }

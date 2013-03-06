@@ -38,8 +38,8 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
                 continue;
             }
             int i = school.getSpeciesIndex();
-            meanTL[i] += school.getBiomass() * school.getTrophicLevel();
-            biomass[i] += school.getBiomass();
+            meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
+            biomass[i] += school.getInstantaneousBiomass();
         }
     }
 

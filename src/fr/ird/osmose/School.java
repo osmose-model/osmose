@@ -176,6 +176,8 @@ public class School extends GridPoint {
      */
     public void initStep() {
 
+        // Update abundance
+        updateAbundance();
         // Reset variables
         catchable = true;
         // Reset diet variables
@@ -192,7 +194,7 @@ public class School extends GridPoint {
         }
     }
 
-    public void updateAbundance() {
+    private void updateAbundance() {
         abundance = getInstantaneousAbundance();
         ndeadFishing = 0;
         ndeadNatural = 0;

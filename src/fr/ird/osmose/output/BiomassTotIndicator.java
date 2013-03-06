@@ -27,7 +27,7 @@ public class BiomassTotIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            biomass[school.getSpeciesIndex()] += school.getBiomass();
+            biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
         }
     }
 

@@ -39,8 +39,8 @@ public class MeanSizeIndicator extends AbstractIndicator {
                 continue;
             }
             int i = school.getSpeciesIndex();
-            meanSize[i] += school.getAbundance() * school.getLength();
-            abundance[i] += school.getAbundance();
+            meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
+            abundance[i] += school.getInstantaneousAbundance();
         }
     }
 

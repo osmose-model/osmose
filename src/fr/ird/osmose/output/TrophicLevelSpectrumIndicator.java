@@ -55,8 +55,9 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
             if (!includeClassZero() && (school.getAgeDt() < ageClass1)) {
                 continue;
             }
-            if (school.getBiomass() > 0) {
-                trophicLevelSpectrum[school.getSpeciesIndex()][getTLRank(school)] += school.getBiomass();
+            double biomass = school.getInstantaneousBiomass();
+            if (biomass > 0) {
+                trophicLevelSpectrum[school.getSpeciesIndex()][getTLRank(school)] += biomass;
             }
         }
     }

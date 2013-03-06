@@ -38,6 +38,7 @@ public class Indicators extends SimulationLinker {
         indicators.add(new MeanSizeCatchIndicator(replica));
         indicators.add(new SizeSpectrumIndicator(replica));
         indicators.add(new SizeSpectrumSpeciesIndicator(replica));
+        indicators.add(new MeanSizeSpeciesIndicator(replica));
         // TL
         indicators.add(new MeanTrophicLevelIndicator(replica));
         indicators.add(new MeanTrophicLevelCatchIndicator(replica));

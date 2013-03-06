@@ -140,11 +140,6 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Fishing
         fishingProcess.run();
-        
-        // Update abundance of the schools
-        for (School school : getPopulation()) {
-            school.updateAbundance();
-        }
 
         // Save steps
         indicators.update(iStepSimu);

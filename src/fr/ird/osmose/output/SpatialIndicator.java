@@ -183,10 +183,10 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
                 for (School school : getPopulation().getSchools(cell)) {
                     if (school.getAgeDt() > school.getSpecies().getAgeClassZero() && !school.isUnlocated()) {
                         int iSpec = school.getSpeciesIndex();
-                        biomass[iSpec][i][j] += school.getBiomass();
-                        abundance[iSpec][i][j] += school.getAbundance();
-                        mean_size[iSpec][i][j] += school.getLength() * school.getAbundance();
-                        tl[iSpec][i][j] += school.getTrophicLevel() * school.getBiomass();
+                        biomass[iSpec][i][j] += school.getInstantaneousBiomass();
+                        abundance[iSpec][i][j] += school.getInstantaneousAbundance();
+                        mean_size[iSpec][i][j] += school.getLength() * school.getInstantaneousAbundance();
+                        tl[iSpec][i][j] += school.getTrophicLevel() * school.getInstantaneousBiomass();
                         yield[iSpec][i][j] += school.adb2biom(school.getNdeadFishing());
                     }
                 }

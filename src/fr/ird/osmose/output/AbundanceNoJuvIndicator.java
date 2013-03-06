@@ -33,7 +33,7 @@ public class AbundanceNoJuvIndicator extends AbstractIndicator {
 
         for (School school : getPopulation().getAliveSchools()) {
             if (school.getAgeDt() >= school.getSpecies().getAgeClassZero()) {
-                abundance[school.getSpeciesIndex()] += school.getAbundance();
+                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
             }
         }
     }

@@ -71,7 +71,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
-            sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getAbundance();
+            sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getInstantaneousAbundance();
         }
     }
 
@@ -94,7 +94,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        float[][] values = new float[nSizeClass][4];
+        double[][] values = new double[nSizeClass][4];
         for (int iSize = 0; iSize < nSizeClass; iSize++) {
             // Size
             values[iSize][0] = tabSizes[iSize];
@@ -103,14 +103,14 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
                 sum += sizeSpectrum[iSpec][iSize] / getConfiguration().getRecordFrequency();
             }
-            values[iSize][1] = (float) sum;
+            values[iSize][1] = sum;
             // ln(Size)
-            values[iSize][0] = tabSizesLn[iSize];
+            values[iSize][2] = tabSizesLn[iSize];
             // ln(Abundance)
-            values[iSize][1] = (float) Math.log(sum);
+            values[iSize][3] = Math.log(sum);
         }
-
-
+        
+        writeVariable(time, values);
     }
 
     @Override
