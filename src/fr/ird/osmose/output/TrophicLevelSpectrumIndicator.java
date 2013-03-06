@@ -28,7 +28,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     private void initializeTLSpectrum() {
 
-        float minTL = 1.0f;
+        float minTL = 2.0f;
         float maxTL = 6.0f;
         nTLClass = (int) (1 + ((maxTL - minTL) / 0.1f));   // TL classes of 0.1, from 1 to 6
         tabTL = new float[nTLClass];
@@ -83,9 +83,11 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
         for (int iTL = 0; iTL < nTLClass; iTL++) {
             values[iTL][0] = tabTL[iTL];
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                values[iTL][iSpec] = (trophicLevelSpectrum[iSpec][iTL] / getConfiguration().getRecordFrequency());
+                values[iTL][iSpec + 1] = (trophicLevelSpectrum[iSpec][iTL] / getConfiguration().getRecordFrequency());
             }
         }
+        
+        writeVariable(time, values);
     }
 
     @Override
