@@ -65,8 +65,9 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
          * Add variables
          */
         nc.addVariable("time", DataType.FLOAT, new Dimension[]{timeDim});
-        nc.addVariableAttribute("time", "units", "year");
-        nc.addVariableAttribute("time", "description", "time ellapsed, in years, since the begining of the simulation");
+        nc.addVariableAttribute("time", "units", "days since 0-1-1 0:0:0");
+        nc.addVariableAttribute("time", "calendar", "360_day");
+        nc.addVariableAttribute("time", "description", "time ellapsed, in days, since the beginning of the simulation");
         nc.addVariable("biomass", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, linesDim, columnsDim});
         nc.addVariableAttribute("biomass", "units", "ton");
         nc.addVariableAttribute("biomass", "description", "biomass, in tons, per species and per cell");
@@ -262,7 +263,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
         }
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
-        arrTime.set(0, time);
+        arrTime.set(0, time * 360);
 
         int index = nc.getUnlimitedDimension().getLength();
         //System.out.println("NetCDF saving time " + index + " - " + time);
