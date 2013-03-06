@@ -95,6 +95,5 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
             }
             prw.println();
         }
-        prw.println();
     }
 }

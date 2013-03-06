@@ -43,6 +43,7 @@ public class Indicators extends SimulationLinker {
         indicators.add(new MeanTrophicLevelIndicator(replica));
         indicators.add(new MeanTrophicLevelCatchIndicator(replica));
         indicators.add(new TrophicLevelSpectrumIndicator(replica));
+        indicators.add(new MeanTrophicLevelSizeIndicator(replica));
         // Predation
         indicators.add(new DietIndicator(replica));
         indicators.add(new PredatorPressureIndicator(replica));
