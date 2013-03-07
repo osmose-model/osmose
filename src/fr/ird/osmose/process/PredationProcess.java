@@ -30,11 +30,11 @@ public class PredationProcess extends AbstractProcess {
     /**
      * Number of feeding stages. Array[nSpecies]
      */
-    private int[] nFeedingStage;
+    private int[] nPredPreyStage;
     /**
      * Threshold size (cm) of feeding stages. Array[nSpecies][nFeedingStage-1]
      */
-    private float[][] feedingStageThreshold;
+    private float[][] predPreyStageThreshold;
     /**
      * Metrics used for splitting the stages (either age or size).
      */
@@ -42,11 +42,11 @@ public class PredationProcess extends AbstractProcess {
     /**
      * Number of diet stages.
      */
-    private int[] nDietStage;
+    private int[] nDietOutputStage;
     /**
      * Threshold age (year) or size (cm) between the diet stages.
      */
-    private float[][] dietStageThreshold;
+    private float[][] dietOutputStageThreshold;
 
     public PredationProcess(int replica) {
         super(replica);
@@ -61,12 +61,12 @@ public class PredationProcess extends AbstractProcess {
         nAccessStage = getConfiguration().nAccessStage;
         accessStageThreshold = getConfiguration().accessStageThreshold;
 
-        nFeedingStage = getConfiguration().nFeedingStage;
-        feedingStageThreshold = getConfiguration().feedingStageThreshold;
+        nPredPreyStage = getConfiguration().nFeedingStage;
+        predPreyStageThreshold = getConfiguration().feedingStageThreshold;
 
         dietOutputMetrics = getConfiguration().getDietOutputMetrics();
-        nDietStage = getConfiguration().nDietStage;
-        dietStageThreshold = getConfiguration().dietStageThreshold;
+        nDietOutputStage = getConfiguration().nDietStage;
+        dietOutputStageThreshold = getConfiguration().dietStageThreshold;
     }
 
     @Override
@@ -76,8 +76,8 @@ public class PredationProcess extends AbstractProcess {
             if (!(cell.isLand() || schools.isEmpty())) {
                 for (School school : schools) {
                     updateAccessibilityStage(school);
-                    updateFeedingStage(school);
-                    updateDietStage(school);
+                    updatePredPreyStage(school);
+                    updateDietOutputStage(school);
                 }
                 Collections.shuffle(schools);
                 int ns = schools.size();
@@ -221,8 +221,8 @@ public class PredationProcess extends AbstractProcess {
     private float[] getPercentPlankton(School predator) {
         float[] percentPlankton = new float[getConfiguration().getNPlankton()];
         int iPred = predator.getSpeciesIndex();
-        float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getFeedingStage()];
-        float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getFeedingStage()];
+        float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getPredPreyStage()];
+        float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getPredPreyStage()];
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             if ((preySizeMin > getSimulation().getPlankton(i).getSizeMax()) || (preySizeMax < getSimulation().getPlankton(i).getSizeMin())) {
                 percentPlankton[i] = 0.0f;
@@ -244,8 +244,8 @@ public class PredationProcess extends AbstractProcess {
         int iPred = predator.getSpeciesIndex();
         List<School> schoolsInCell = getPopulation().getSchools(predator.getCell());
         //schoolsInCell.remove(predator);
-        float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getFeedingStage()];
-        float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getFeedingStage()];
+        float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getPredPreyStage()];
+        float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getPredPreyStage()];
         List<Integer> indexPreys = new ArrayList();
         for (int iPrey = 0; iPrey < schoolsInCell.size(); iPrey++) {
             School prey = schoolsInCell.get(iPrey);
@@ -293,19 +293,19 @@ public class PredationProcess extends AbstractProcess {
         }
     }
 
-    void updateFeedingStage(School school) {
+    void updatePredPreyStage(School school) {
 
         int iSpec = school.getSpeciesIndex();
-        for (int i = school.getFeedingStage(); i < nFeedingStage[iSpec] - 1; i++) {
-            if (school.getLength() >= feedingStageThreshold[iSpec][i]) {
-                school.icrementFeedingStage();
+        for (int i = school.getPredPreyStage(); i < nPredPreyStage[iSpec] - 1; i++) {
+            if (school.getLength() >= predPreyStageThreshold[iSpec][i]) {
+                school.icrementPredPreyStage();
             } else {
                 return;
             }
         }
     }
 
-    void updateDietStage(School school) {
+    void updateDietOutputStage(School school) {
 
         if (!getConfiguration().outputDiet) {
             return;
@@ -313,18 +313,18 @@ public class PredationProcess extends AbstractProcess {
 
         int iSpec = school.getSpeciesIndex();
         if (dietOutputMetrics.equalsIgnoreCase("size")) {
-            for (int i = school.getDietStage(); i < nDietStage[iSpec] - 1; i++) {
-                if (school.getLength() >= dietStageThreshold[iSpec][i]) {
-                    school.incrementDietStage();
+            for (int i = school.getDietOutputStage(); i < nDietOutputStage[iSpec] - 1; i++) {
+                if (school.getLength() >= dietOutputStageThreshold[iSpec][i]) {
+                    school.incrementDietOutputStage();
                 } else {
                     return;
                 }
             }
         } else if (dietOutputMetrics.equalsIgnoreCase("age")) {
-            for (int i = school.getDietStage(); i < nDietStage[iSpec] - 1; i++) {
-                int tempAge = Math.round(dietStageThreshold[iSpec][i] * getConfiguration().getNumberTimeStepsPerYear());
+            for (int i = school.getDietOutputStage(); i < nDietOutputStage[iSpec] - 1; i++) {
+                int tempAge = Math.round(dietOutputStageThreshold[iSpec][i] * getConfiguration().getNumberTimeStepsPerYear());
                 if (school.getAgeDt() >= tempAge) {
-                    school.incrementDietStage();
+                    school.incrementDietOutputStage();
                 } else {
                     return;
                 }

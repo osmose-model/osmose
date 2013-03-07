@@ -46,7 +46,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     @Override
     public void initStep() {
         for (School school : getPopulation().getPresentSchools()) {
-            biomassStage[school.getSpeciesIndex()][school.getDietStage()] += school.getBiomass();
+            biomassStage[school.getSpeciesIndex()][school.getDietOutputStage()] += school.getBiomass();
         }
         int nSpec = getNSpecies();
         int nPrey = nSpec + getConfiguration().getNPlankton();
@@ -88,11 +88,11 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
             int iSpec = school.getSpeciesIndex();
             for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
                 for (int s = 0; s < nDietStage[i]; s++) {
-                    predatorPressure[iSpec][school.getDietStage()][i][s] += school.diet[i][s];
+                    predatorPressure[iSpec][school.getDietOutputStage()][i][s] += school.diet[i][s];
                 }
             }
             for (int i = getConfiguration().getNSpecies(); i < getConfiguration().getNSpecies() + getConfiguration().getNPlankton(); i++) {
-                predatorPressure[iSpec][school.getDietStage()][i][0] += school.diet[i][0];
+                predatorPressure[iSpec][school.getDietOutputStage()][i][0] += school.diet[i][0];
             }
         }
     }

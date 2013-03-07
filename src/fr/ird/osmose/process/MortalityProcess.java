@@ -85,8 +85,8 @@ public class MortalityProcess extends AbstractProcess {
                 // Update stages
                 for (School school : schools) {
                     predationProcess.updateAccessibilityStage(school);
-                    predationProcess.updateFeedingStage(school);
-                    predationProcess.updateDietStage(school);
+                    predationProcess.updatePredPreyStage(school);
+                    predationProcess.updateDietOutputStage(school);
                 }
 
                 double[][] nDeadMatrix = null;
@@ -129,7 +129,7 @@ public class MortalityProcess extends AbstractProcess {
                                 School prey = schools.get(ipr);
                                 double biomPrey = prey.adb2biom(nDeadMatrix[ipr][is]);
                                 if (getConfiguration().isDietOuput()) {
-                                    school.diet[prey.getSpeciesIndex()][prey.getDietStage()] += biomPrey;
+                                    school.diet[prey.getSpeciesIndex()][prey.getDietOutputStage()] += biomPrey;
                                 }
                                 float TLprey = (prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)
                                         ? Species.TL_EGG

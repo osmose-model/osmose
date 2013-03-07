@@ -81,7 +81,7 @@ public class School extends GridPoint {
     /**
      * Correspond to feeding length-stage.
      */
-    private int feedingStage;
+    private int predPreyStage;
     /**
      * Correspond to the age-stage used for accessibility between species
      */
@@ -89,7 +89,7 @@ public class School extends GridPoint {
     /**
      * Diet stage.
      */
-    private int dietStage;
+    private int dietOutputStage;
     /**
      * Number of individuals in the school at beginning of the time step.
      */
@@ -157,9 +157,9 @@ public class School extends GridPoint {
         this.weight = weight * 1.e-6f;
         this.age = age;
         // stages
-        feedingStage = 0;
+        predPreyStage = 0;
         accessibilityStage = 0;
-        dietStage = 0;
+        dietOutputStage = 0;
 
         // Set initial trophic level to EGG
         trophicLevel = Species.TL_EGG;
@@ -332,12 +332,12 @@ public class School extends GridPoint {
     /**
      * @return the trophicLevel
      */
-    public int getFeedingStage() {
-        return feedingStage;
+    public int getPredPreyStage() {
+        return predPreyStage;
     }
 
-    public void icrementFeedingStage() {
-        feedingStage++;
+    public void icrementPredPreyStage() {
+        predPreyStage++;
     }
 
     /**
@@ -357,12 +357,12 @@ public class School extends GridPoint {
     /**
      * @return the dietOutputStage
      */
-    public int getDietStage() {
-        return dietStage;
+    public int getDietOutputStage() {
+        return dietOutputStage;
     }
 
-    public void incrementDietStage() {
-        dietStage++;
+    public void incrementDietOutputStage() {
+        dietOutputStage++;
     }
 
     /**
