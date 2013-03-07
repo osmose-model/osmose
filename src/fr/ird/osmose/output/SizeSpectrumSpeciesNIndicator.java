@@ -11,7 +11,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
+public class SizeSpectrumSpeciesNIndicator extends AbstractIndicator {
 
     private double[][] sizeSpectrum;
     // Minimal size (cm) of the size spectrum.
@@ -22,12 +22,10 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
     private float classRange;
     // discrete size spectrum
     private float[] tabSizes;
-    // log of the discrete size spectrum
-    private float[] tabSizesLn;
     // Number of size classes in the discrete spectrum
     private int nSizeClass;
 
-    public SizeSpectrumSpeciesIndicator(int replica) {
+    public SizeSpectrumSpeciesNIndicator(int replica) {
         super(replica);
         initializeSizeSpectrum();
     }
@@ -49,12 +47,6 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
         tabSizes[0] = spectrumMinSize;
         for (int i = 1; i < nSizeClass; i++) {
             tabSizes[i] = i * classRange;
-        }
-
-        tabSizesLn = new float[nSizeClass];
-        tabSizesLn[0] = (float) (Math.log(classRange / 2f));
-        for (int i = 1; i < nSizeClass; i++) {
-            tabSizesLn[i] = (float) (Math.log(tabSizes[i] + (classRange / 2f)));
         }
     }
 
@@ -109,7 +101,7 @@ public class SizeSpectrumSpeciesIndicator extends AbstractIndicator {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getOutputPrefix());
-        filename.append("_SizeSpectrumSpecies_Simu");
+        filename.append("_SizeSpectrumSpeciesN_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();

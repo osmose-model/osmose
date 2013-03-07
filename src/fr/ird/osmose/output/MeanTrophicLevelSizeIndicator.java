@@ -13,6 +13,8 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
     private double[][] biomass;
     // Maximal size (cm) of the size spectrum.
     public float spectrumMaxSize;
+    // Range (cm) of size classes.
+    private float classRange;
     // Number of size classes in the discrete spectrum
     private int nSizeClass;
     // discrete size spectrum
@@ -29,11 +31,11 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
             return;
         }
 
-         spectrumMaxSize = getConfiguration().getSpectrumMaxSize();
+        spectrumMaxSize = getConfiguration().getSpectrumMaxSize();
         // Minimal size (cm) of the size spectrum.
         float spectrumMinSize = getConfiguration().getSpectrumMinSize();
         // Range (cm) of size classes.
-        float classRange = getConfiguration().getSpectrumClassRange();
+        classRange = getConfiguration().getSpectrumClassRange();
 
         //initialisation of the size spectrum features
         nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
@@ -58,17 +60,15 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean Trophic Level of fish species by size class of 1 cm, and corresponding biomass in tons";
+        return "Mean Trophic Level of fish species by size class of " + classRange + " cm";
     }
 
     @Override
     String[] getHeaders() {
-        String[] headers = new String[2 * getNSpecies() + 1];
+        String[] headers = new String[getNSpecies() + 1];
         headers[0] = "size";
-        int i = 1;
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            headers[i++] = "TL " + getSimulation().getSpecies(iSpecies).getName();
-            headers[i++] = "biomass " + getSimulation().getSpecies(iSpecies).getName();
+            headers[iSpecies + 1] = getSpecies(iSpecies).getName();
         }
         return headers;
     }
@@ -114,11 +114,10 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        double[][] values = new double[nSizeClass][2 * getNSpecies() + 1];
+        double[][] values = new double[nSizeClass][getNSpecies() + 1];
         for (int iSize = 0; iSize < nSizeClass; iSize++) {
             // Size
             values[iSize][0] = tabSizes[iSize];
-            int i = 1;
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
                 // TL
                 if (biomass[iSpec][iSize] > 0.d) {
@@ -126,9 +125,7 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
                 } else {
                     meanTL[iSpec][iSize] = Double.NaN;
                 }
-                values[iSize][i++] = meanTL[iSpec][iSize];
-                // Biomass
-                values[iSize][i++] = biomass[iSpec][iSize];
+                values[iSize][iSpec + 1] = meanTL[iSpec][iSize];
             }
         }
 
