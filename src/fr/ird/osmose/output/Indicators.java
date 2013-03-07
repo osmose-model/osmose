@@ -23,11 +23,9 @@ public class Indicators extends SimulationLinker {
         indicators = new ArrayList();
 
         // Biomass
-        indicators.add(new BiomassNoJuvIndicator(replica));
-        indicators.add(new BiomassTotIndicator(replica));
+        indicators.add(new BiomassIndicator(replica));
         // Abundance
-        indicators.add(new AbundanceNoJuvIndicator(replica));
-        indicators.add(new AbundanceTotIndicator(replica));
+        indicators.add(new AbundanceIndicator(replica));
         // Mortality
         indicators.add(new MortalityIndicator(replica));
         // Yield

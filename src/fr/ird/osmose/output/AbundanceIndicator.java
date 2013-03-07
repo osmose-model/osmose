@@ -10,11 +10,11 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class AbundanceTotIndicator extends AbstractIndicator {
+public class AbundanceIndicator extends AbstractIndicator {
 
     private double[] abundance;
-    
-     public AbundanceTotIndicator(int replica) {
+
+    public AbundanceIndicator(int replica) {
         super(replica);
     }
 
@@ -32,15 +32,16 @@ public class AbundanceTotIndicator extends AbstractIndicator {
     public void update() {
 
         for (School school : getPopulation().getAliveSchools()) {
-            if (getConfiguration().isIncludeClassZero()) {
-                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
             }
+            abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
         }
     }
 
     @Override
     public boolean isEnabled() {
-        return includeClassZero() && !getConfiguration().isCalibrationOutput();
+        return !getConfiguration().isCalibrationOutput();
     }
 
     @Override
@@ -56,7 +57,7 @@ public class AbundanceTotIndicator extends AbstractIndicator {
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder(getConfiguration().getOutputPrefix());
-        filename.append("_abundance-total_Simu");
+        filename.append("_abundance_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -64,9 +65,16 @@ public class AbundanceTotIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean abundance (number of fish), including first ages specified in input (typically in calibration file)";
+        StringBuilder str = new StringBuilder("Mean abundance (number of fish), ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
-    
+
     @Override
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];

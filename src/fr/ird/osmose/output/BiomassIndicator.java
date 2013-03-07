@@ -6,11 +6,11 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class BiomassTotIndicator extends AbstractIndicator {
+public class BiomassIndicator extends AbstractIndicator {
 
     private double[] biomass;
-    
-     public BiomassTotIndicator(int replica) {
+
+    public BiomassIndicator(int replica) {
         super(replica);
     }
 
@@ -27,13 +27,16 @@ public class BiomassTotIndicator extends AbstractIndicator {
     @Override
     public void update() {
         for (School school : getPopulation().getAliveSchools()) {
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
+            }
             biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
         }
     }
 
     @Override
     public boolean isEnabled() {
-        return !getConfiguration().isCalibrationOutput() && getConfiguration().isIncludeClassZero();
+        return true;
     }
 
     @Override
@@ -49,7 +52,7 @@ public class BiomassTotIndicator extends AbstractIndicator {
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder(getConfiguration().getOutputPrefix());
-        filename.append("_biomass-total_Simu");
+        filename.append("_biomass_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         return filename.toString();
@@ -57,9 +60,16 @@ public class BiomassTotIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Mean biomass (tons), including first ages specified in input (typically in calibration file)";
+        StringBuilder str = new StringBuilder("Mean biomass (tons), ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
-    
+
     @Override
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];
