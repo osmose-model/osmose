@@ -11,12 +11,8 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
 
     private double[][] meanTL;
     private double[][] biomass;
-    // Minimal size (cm) of the size spectrum.
-    public float spectrumMinSize;
     // Maximal size (cm) of the size spectrum.
     public float spectrumMaxSize;
-    // Range (cm) of size classes.
-    private float classRange;
     // Number of size classes in the discrete spectrum
     private int nSizeClass;
     // discrete size spectrum
@@ -33,9 +29,11 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
             return;
         }
 
-        spectrumMinSize = getConfiguration().getSpectrumMinSize();
-        spectrumMaxSize = getConfiguration().getSpectrumMaxSize();
-        classRange = getConfiguration().getSpectrumClassRange();
+         spectrumMaxSize = getConfiguration().getSpectrumMaxSize();
+        // Minimal size (cm) of the size spectrum.
+        float spectrumMinSize = getConfiguration().getSpectrumMinSize();
+        // Range (cm) of size classes.
+        float classRange = getConfiguration().getSpectrumClassRange();
 
         //initialisation of the size spectrum features
         nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
