@@ -71,4 +71,14 @@ public class LTLFastForcing extends AbstractLTLForcing {
     float[][] getRawBiomass(Plankton plankton, int iStepYear) {
         return null;
     }
+
+    @Override
+    public String[] getPlanktonFieldName() {
+        return null;
+    }
+
+    @Override
+    public String[] getNetcdfFile() {
+        return new String[] {ncFile};
+    }
 }

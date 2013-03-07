@@ -185,6 +185,10 @@ public class OldConfiguration {
      * Larval mortality rates. Array[nSpecies]
      */
     public float[][] larvalMortalityRates;
+    /**
+     * Filename of the larval mortality rates CSV file.
+     */
+    public String larvalMortalityFile;
     //
     //// REPRODUCTION
     //
@@ -1207,7 +1211,7 @@ public class OldConfiguration {
                     st.nextToken();
                 }
             } catch (NumberFormatException ex) {
-                String larvalMortalityFile = st.sval;
+                larvalMortalityFile = st.sval;
                 readLarvalMortalityRates(resolveFile(larvalMortalityFile));
                 st.nextToken();
             }

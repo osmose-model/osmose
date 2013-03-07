@@ -22,6 +22,17 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     private int nz;	// vertical dimension (20)
     List<Integer>[][] icoordLTLGrid;
     List<Integer>[][] jcoordLTLGrid;
+    
+    /**
+     * Array of the NetCDF variable of the plankton fields.
+     * @return 
+     */
+    abstract public String[] getPlanktonFieldName();
+    /**
+     * List of the NetCDF files.
+     * @return 
+     */
+    abstract public String[] getNetcdfFile();
 
     /**
      * Get the biomass of the specified plankton group on the LTL grid and

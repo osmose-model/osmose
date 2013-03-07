@@ -441,6 +441,16 @@ public class LTLFastForcingRomsPisces extends AbstractLTLForcing {
         return VertCoordType.OLD;
     }
 
+    @Override
+    public String[] getPlanktonFieldName() {
+        return plktonNetcdfNames;
+    }
+
+    @Override
+    public String[] getNetcdfFile() {
+        return planktonFileListNetcdf;
+    }
+
     private enum VertCoordType {
 
         NEW,

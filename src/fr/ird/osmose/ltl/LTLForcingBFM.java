@@ -273,4 +273,14 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     public int getIndexStepLTL(int iStepSimu) {
         return (iStepSimu % getConfiguration().getNumberTimeStepsPerYear()) / timeDim;
     }
+
+    @Override
+    public String[] getPlanktonFieldName() {
+        return planktonNetcdfNames;
+    }
+
+    @Override
+    public String[] getNetcdfFile() {
+        return planktonFileListNetcdf;
+    }
 }

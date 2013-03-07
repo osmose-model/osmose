@@ -283,4 +283,14 @@ public class LTLFastForcingBFM extends AbstractLTLForcing {
 //        }
         return data[getIndexStepLTL(iStepSimu)][plankton.getIndex()];
     }
+
+    @Override
+    public String[] getPlanktonFieldName() {
+        return planktonNetcdfNames;
+    }
+
+    @Override
+    public String[] getNetcdfFile() {
+        return planktonFileListNetcdf;
+    }
 }

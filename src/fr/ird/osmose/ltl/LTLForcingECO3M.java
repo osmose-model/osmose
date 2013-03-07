@@ -155,4 +155,14 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         // vertical integration
         return verticalIntegration(data3d, depthOfLayer, getConfiguration().getIntegrationDepth());
     }
+    
+    @Override
+    public String[] getPlanktonFieldName() {
+        return plktonNetcdfNames;
+    }
+
+    @Override
+    public String[] getNetcdfFile() {
+        return planktonFileListNetcdf;
+    }
 }

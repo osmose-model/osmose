@@ -181,4 +181,14 @@ public class LTLFastForcingECO3M extends AbstractLTLForcing {
     float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
         return data[getIndexStepLTL(iStepSimu)][plankton.getIndex()];
     }
+
+    @Override
+    public String[] getPlanktonFieldName() {
+        return plktonNetcdfNames;
+    }
+
+    @Override
+    public String[] getNetcdfFile() {
+        return planktonFileListNetcdf;
+    }
 }
