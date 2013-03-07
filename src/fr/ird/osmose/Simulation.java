@@ -70,7 +70,7 @@ public class Simulation {
     /**
      * The application logger
      */
-    final private Logger logger = Logger.getLogger(Simulation.class.getName());
+    private final Logger logger;
 
 ///////////////////////////////
 // Constructor
@@ -78,6 +78,7 @@ public class Simulation {
     public Simulation(int replica) {
         this.replica = replica;
         // setup the logger
+        logger = Logger.getLogger(Simulation.class.getName() + "#" + replica);
         logger.setUseParentHandlers(false);
         SimulationLogFormatter formatter = new SimulationLogFormatter(replica);
         ConsoleHandler handler = new ConsoleHandler();
