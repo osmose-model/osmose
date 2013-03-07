@@ -79,7 +79,7 @@ public class Species {
         this.eggSize = getConfiguration().eggSize[index];
         this.eggWeight = getConfiguration().eggWeight[index];
         this.growthAgeThreshold = getConfiguration().growthAgeThreshold[index];
-        longevity = (int) Math.round((getConfiguration().speciesLongevity[index]) * getConfiguration().getNumberTimeStepsPerYear());
+        longevity = (int) Math.round((getConfiguration().speciesLongevity[index] + 1) * getConfiguration().getNumberTimeStepsPerYear());
     }
 
 ////////////

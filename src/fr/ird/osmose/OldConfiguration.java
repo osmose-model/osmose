@@ -1851,7 +1851,7 @@ public class OldConfiguration {
             seasonMap = new int[nbMaps][];
             numMap = new int[nSpecies][][];
             for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                int longevity = (int) Math.round((this.speciesLongevity[iSpec]) * nStepYear);
+                int longevity = (int) Math.round((this.speciesLongevity[iSpec] + 1) * nStepYear);
                 numMap[iSpec] = new int[longevity][];
                 for (int j = 0; j < longevity; j++) {
                     numMap[iSpec][j] = new int[nStepYear];
@@ -2099,7 +2099,7 @@ public class OldConfiguration {
             for (int m = 0; m < agesMap[indexMap].length; m++) {
                 for (int n = 0; n < seasonMap[indexMap].length; n++) {
                     for (int h = 0; h < nStepYear; h++) {
-                        int longevity = (int) Math.round((this.speciesLongevity[speciesMap[indexMap]]) * nStepYear);
+                        int longevity = (int) Math.round((this.speciesLongevity[speciesMap[indexMap]] + 1) * nStepYear);
                         if ((agesMap[indexMap][m] * nStepYear + h) < longevity) {
                             numMap[speciesMap[indexMap]][agesMap[indexMap][m] * nStepYear + h][seasonMap[indexMap][n]] = indexMap;
                             //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
