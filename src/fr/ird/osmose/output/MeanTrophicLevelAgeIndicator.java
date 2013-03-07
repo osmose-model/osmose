@@ -37,7 +37,7 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
 
         int classmax = 0;
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            classmax = (int) Math.max(Math.ceil(getConfiguration().speciesLongevity[iSpecies]) + 1, classmax);
+            classmax = (int) Math.max(Math.ceil(getConfiguration().speciesLifespan[iSpecies]), classmax);
         }
         String[] headers = new String[classmax + 1];
         headers[0] = "Species index";
@@ -57,8 +57,8 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
         meanTL = new double[getNSpecies()][];
         biomass = new double[getNSpecies()][];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            meanTL[iSpecies] = new double[(int) Math.ceil(getConfiguration().speciesLongevity[iSpecies]) + 1];
-            biomass[iSpecies] = new double[(int) Math.ceil(getConfiguration().speciesLongevity[iSpecies]) + 1];
+            meanTL[iSpecies] = new double[(int) Math.ceil(getConfiguration().speciesLifespan[iSpecies])];
+            biomass[iSpecies] = new double[(int) Math.ceil(getConfiguration().speciesLifespan[iSpecies])];
         }
     }
 

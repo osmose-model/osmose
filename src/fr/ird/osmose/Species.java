@@ -18,9 +18,9 @@ public class Species {
      */
     final private String name;
     /**
-     * Longevity expressed in number of time steps.
+     * Lifespan expressed in number of time steps.
      */
-    final private int longevity;
+    final private int lifespan;
     /**
      * Von bertalanffy growth parameters.
      */
@@ -79,7 +79,7 @@ public class Species {
         this.eggSize = getConfiguration().eggSize[index];
         this.eggWeight = getConfiguration().eggWeight[index];
         this.growthAgeThreshold = getConfiguration().growthAgeThreshold[index];
-        longevity = (int) Math.round((getConfiguration().speciesLongevity[index] + 1) * getConfiguration().getNumberTimeStepsPerYear());
+        lifespan = (int) Math.round(getConfiguration().speciesLifespan[index] * getConfiguration().getNumberTimeStepsPerYear());
     }
 
 ////////////
@@ -145,8 +145,8 @@ public class Species {
     /**
      * @return the longevity, expressed in number of time steps.
      */
-    public int getLongevity() {
-        return longevity;
+    public int getLifespanDt() {
+        return lifespan;
     }
 
     /**

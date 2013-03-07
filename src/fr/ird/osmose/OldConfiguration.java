@@ -107,9 +107,9 @@ public class OldConfiguration {
      */
     public String[] speciesName;
     /**
-     * Species longevity (year). Array[nSpecies]
+     * Species lifespan (number of years). Array[nSpecies]
      */
-    public float[] speciesLongevity;
+    public float[] speciesLifespan;
     //
     //// GROWTH
     //
@@ -805,7 +805,7 @@ public class OldConfiguration {
                 }
                 for (int i = 0; i < nSpecies; i++) {
                     st.nextToken();
-                    speciesLongevity[i] = (new Float(st.sval)).floatValue();
+                    speciesLifespan[i] = (new Float(st.sval)).floatValue();
                 }
                 for (int i = 0; i < nSpecies; i++) {
                     st.nextToken();
@@ -1103,14 +1103,14 @@ public class OldConfiguration {
                     if (recruitSizeMatrix[i] < lInf[i]) {
                         recruitmentAge[i] = (float) (-((Math.log(1 - (recruitSizeMatrix[i] / lInf[i]))) / K[i])) + t0[i];
                     } else {
-                        recruitmentAge[i] = speciesLongevity[i] + 1;
+                        recruitmentAge[i] = speciesLifespan[i];
                     }
                     if (recruitmentAge[i] < 0.6)//due to inverse von Bert transformation
                     {
                         recruitmentAge[i] = (float) 0.6; // >0.5 to avoid Math.round() problems
                     }
-                    if (recruitmentAge[i] > speciesLongevity[i]) {
-                        recruitmentAge[i] = speciesLongevity[i] + 1;
+                    if (recruitmentAge[i] > speciesLifespan[i]) {
+                        recruitmentAge[i] = speciesLifespan[i];
                     }
                 }
             }
@@ -1333,7 +1333,7 @@ public class OldConfiguration {
         //----SPECIES file------
         speciesName = new String[nSpecies];
         D = new float[nSpecies];
-        speciesLongevity = new float[nSpecies];
+        speciesLifespan = new float[nSpecies];
         lInf = new float[nSpecies];
         K = new float[nSpecies];
         t0 = new float[nSpecies];
@@ -1851,9 +1851,9 @@ public class OldConfiguration {
             seasonMap = new int[nbMaps][];
             numMap = new int[nSpecies][][];
             for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                int longevity = (int) Math.round((this.speciesLongevity[iSpec] + 1) * nStepYear);
-                numMap[iSpec] = new int[longevity][];
-                for (int j = 0; j < longevity; j++) {
+                int lifespan = (int) Math.round(speciesLifespan[iSpec] * nStepYear);
+                numMap[iSpec] = new int[lifespan][];
+                for (int j = 0; j < lifespan; j++) {
                     numMap[iSpec][j] = new int[nStepYear];
                 }
             }
@@ -2099,8 +2099,8 @@ public class OldConfiguration {
             for (int m = 0; m < agesMap[indexMap].length; m++) {
                 for (int n = 0; n < seasonMap[indexMap].length; n++) {
                     for (int h = 0; h < nStepYear; h++) {
-                        int longevity = (int) Math.round((this.speciesLongevity[speciesMap[indexMap]] + 1) * nStepYear);
-                        if ((agesMap[indexMap][m] * nStepYear + h) < longevity) {
+                        int lifespan = (int) Math.round(speciesLifespan[speciesMap[indexMap]] * nStepYear);
+                        if ((agesMap[indexMap][m] * nStepYear + h) < lifespan) {
                             numMap[speciesMap[indexMap]][agesMap[indexMap][m] * nStepYear + h][seasonMap[indexMap][n]] = indexMap;
                             //System.out.println("NumMap: " + areasNumSpForMap[indexMap] + " " + (areasTempAge[indexMap][m] * nbDtMatrix + h) + " " + (areasTempDt[indexMap][n]) + " " + indexMap);
                         }

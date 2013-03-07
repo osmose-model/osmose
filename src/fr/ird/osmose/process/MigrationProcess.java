@@ -63,9 +63,9 @@ public class MigrationProcess extends AbstractProcess {
         outOfZoneCohort = new boolean[nSpecies][][];
         outOfZoneMortality = new float[getNSpecies()][][];
         for (int index = 0; index < nSpecies; index++) {
-            int longevity = getSpecies(index).getLongevity();
-            outOfZoneMortality[index] = new float[longevity][getConfiguration().getNumberTimeStepsPerYear()];
-            outOfZoneCohort[index] = new boolean[longevity][getConfiguration().getNumberTimeStepsPerYear()];
+            int lifespan = getSpecies(index).getLifespanDt();
+            outOfZoneMortality[index] = new float[lifespan][getConfiguration().getNumberTimeStepsPerYear()];
+            outOfZoneCohort[index] = new boolean[lifespan][getConfiguration().getNumberTimeStepsPerYear()];
             if (null != getConfiguration().ageMigration[index]) {
                 int nbStepYear = getConfiguration().getNumberTimeStepsPerYear();
                 for (int m = 0; m < getConfiguration().ageMigration[index].length; m++) {

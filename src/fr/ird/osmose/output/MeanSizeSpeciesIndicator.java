@@ -37,8 +37,8 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
         meanSize = new double[nSpecies][];
         abundance = new double[nSpecies][];
         for (int i = 0; i < nSpecies; i++) {
-            meanSize[i] = new double[getSpecies(i).getLongevity()];
-            abundance[i] = new double[getSpecies(i).getLongevity()];
+            meanSize[i] = new double[getSpecies(i).getLifespanDt()];
+            abundance[i] = new double[getSpecies(i).getLifespanDt()];
         }
     }
 
@@ -61,7 +61,7 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             prw[iSpecies].print(time);
-            for (int iAge = 0; iAge < getSpecies(iSpecies).getLongevity(); iAge++) {
+            for (int iAge = 0; iAge < getSpecies(iSpecies).getLifespanDt(); iAge++) {
                 prw[iSpecies].print(";");
                 if (abundance[iSpecies][iAge] > 0) {
                     meanSize[iSpecies][iAge] = (float) (meanSize[iSpecies][iAge] / abundance[iSpecies][iAge]);
@@ -103,7 +103,7 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
             prw[iSpecies].print("Mean size of fish species by age class in cm, weighted by fish numbers");
             prw[iSpecies].println("\"");
             prw[iSpecies].print("Time");
-            for (int iAge = 0; iAge < getSpecies(iSpecies).getLongevity(); iAge++) {
+            for (int iAge = 0; iAge < getSpecies(iSpecies).getLifespanDt(); iAge++) {
                 prw[iSpecies].print(";Age class ");
                 prw[iSpecies].print(iAge);
             }

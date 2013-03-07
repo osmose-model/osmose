@@ -49,7 +49,7 @@ public class SpectrumPopulator extends AbstractPopulator {
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             int index1 = tempSpectrumAbd.length - 1;
             Species species = getSpecies(i);
-            float meanLength = species.computeMeanLength(species.getLongevity() - 1);
+            float meanLength = species.computeMeanLength(species.getLifespanDt() - 1);
             while (meanLength < (index1 * getConfiguration().getSpectrumClassRange())) {
                 index1--;
             }
@@ -65,17 +65,17 @@ public class SpectrumPopulator extends AbstractPopulator {
         for (int i = spectrumMaxIndex; i >= 0; i--) {
             for (int j = 0; j < specInSizeClass10[i].size(); j++) {
                 Species speciesj = ((Species) specInSizeClass10[i].get(j));
-                long[] abundanceIni = new long[speciesj.getLongevity()];
-                abundanceIni[speciesj.getLongevity() - 1] = Math.round(((double) tempSpectrumAbd[i]) / specInSizeClass10[i].size());
+                long[] abundanceIni = new long[speciesj.getLifespanDt()];
+                abundanceIni[speciesj.getLifespanDt() - 1] = Math.round(((double) tempSpectrumAbd[i]) / specInSizeClass10[i].size());
                 //we consider that D0->1 = 10 for the first age class (month or year, whatever nbDt), D0-1year->2 = 1 and D=0.4 otherwise
                 //we calculate abd & biom of coh, and in parallel abd & biom of species & we create cohorts
 
-                for (int k = speciesj.getLongevity() - 2; k >= (2 * nbTimeStepsPerYear); k--) {
+                for (int k = speciesj.getLifespanDt() - 2; k >= (2 * nbTimeStepsPerYear); k--) {
                     abundanceIni[k] = Math.round(abundanceIni[k + 1] * Math.exp((0.5 / (float) nbTimeStepsPerYear)));
                     }
                 int kTemp;
-                if (speciesj.getLongevity() <= nbTimeStepsPerYear) {
-                    kTemp = speciesj.getLongevity() - 2;
+                if (speciesj.getLifespanDt() <= nbTimeStepsPerYear) {
+                    kTemp = speciesj.getLifespanDt() - 2;
                 } else {
                     kTemp = (2 * nbTimeStepsPerYear) - 1;
                 }
@@ -87,7 +87,7 @@ public class SpectrumPopulator extends AbstractPopulator {
                 abundanceIni[0] = Math.round(abundanceIni[1] * Math.exp(10.));
 
                 // Add schools to population
-                for (int age = 0; age < speciesj.getLongevity(); age++) {
+                for (int age = 0; age < speciesj.getLifespanDt(); age++) {
                     if (abundanceIni[age] > 0.d) {
                         int nbSchools = getConfiguration().nSchool;
                         float length = speciesj.computeMeanLength(age);

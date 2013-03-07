@@ -211,9 +211,9 @@ public class MovementProcess extends AbstractProcess {
             mapIndexNoTwin = new int[nbMaps];
             indexMaps = new int[nSpecies][][];
             for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                int longevity = getSpecies(iSpec).getLongevity();
-                indexMaps[iSpec] = new int[longevity][];
-                for (int j = 0; j < longevity; j++) {
+                int lifespan = getSpecies(iSpec).getLifespanDt();
+                indexMaps[iSpec] = new int[lifespan][];
+                for (int j = 0; j < lifespan; j++) {
                     indexMaps[iSpec][j] = new int[getConfiguration().getNumberTimeStepsPerYear()];
                 }
             }

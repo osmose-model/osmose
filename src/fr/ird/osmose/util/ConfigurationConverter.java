@@ -49,12 +49,14 @@ public class ConfigurationConverter {
         prop.setProperty("output.prefix", cfg.getOutputPrefix());
         prop.setProperty("output.recordfrequency", String.valueOf(cfg.getRecordFrequency()));
         prop.setProperty("output.yearstart", String.valueOf(cfg.yearStartSaving));
+        prop.setProperty("output.cutoff.enabled", String.valueOf(cfg.outputClass0));
+        for (int i = 0; i < nSpecies; i++) {
+            prop.setProperty("output.cutoff.age.sp" + i, String.valueOf(cfg.supAgeOfClass0Matrix[i]));
+        }
 
         // INDICATORS
-        prop.setProperty("output.abundance.nojuv.enabled", String.valueOf(!cfg.outputCalibration));
-        prop.setProperty("output.abundance.tot.enabled", String.valueOf(cfg.outputClass0));
-        prop.setProperty("output.biomass.nojuv.enabled", String.valueOf(true));
-        prop.setProperty("output.biomass.tot.enabled", String.valueOf(cfg.outputClass0));
+        prop.setProperty("output.abundance.enabled", String.valueOf(!cfg.outputCalibration));
+        prop.setProperty("output.biomass.enabled", String.valueOf(true));
         prop.setProperty("output.yield.biomass.enabled", String.valueOf(!cfg.outputCalibration));
         prop.setProperty("output.yield.abundance.enabled", String.valueOf(!cfg.outputCalibration));
         prop.setProperty("output.mortality.enabled", String.valueOf(!cfg.outputCalibration));
@@ -63,18 +65,21 @@ public class ConfigurationConverter {
         prop.setProperty("output.trophic.pressure.enabled", String.valueOf(cfg.outputDiet));
         prop.setProperty("output.trophic.diet.metrics", String.valueOf(cfg.getDietOutputMetrics()));
         for (int i = 0; i < nSpecies; i++) {
-            String key = "output.trophic.diet.stage.sp" + i;
+            String key = "output.trophic.diet.stage.threshold.sp" + i;
             prop.setProperty(key, String.valueOf(toString(cfg.dietStageThreshold[i])));
         }
-        prop.setProperty("output.trophic.tl.catch.enabled", String.valueOf(cfg.outputTL));
-        prop.setProperty("output.trophic.tl.mean.enabled", String.valueOf(cfg.outputTL));
-        prop.setProperty("output.trophic.tl.spectrum.enabled", String.valueOf(cfg.outputTLSpectrum));
+        prop.setProperty("output.trophic.TL.catch.enabled", String.valueOf(cfg.outputTL));
+        prop.setProperty("output.trophic.TL.mean.enabled", String.valueOf(cfg.outputTL));
+        prop.setProperty("output.trophic.TL.spectrum.enabled", String.valueOf(cfg.outputTLSpectrum));
+        prop.setProperty("output.trophic.TL.mean.perSize.enabled", String.valueOf(cfg.outputTL));
+        prop.setProperty("output.trophic.TL.mean.perAge.enabled", String.valueOf(cfg.outputTL));
 
         prop.setProperty("output.spatial.ltl.enabled", String.valueOf(cfg.outputPlanktonBiomass));
         prop.setProperty("output.spatial.enabled", String.valueOf(cfg.outputSpatialized));
 
         prop.setProperty("output.size.catch.enabled", String.valueOf(cfg.outputMeanSize));
         prop.setProperty("output.size.mean.enabled", String.valueOf(cfg.outputMeanSize));
+        prop.setProperty("output.size.mean.perSpecies.enabled", String.valueOf(cfg.outputMeanSize));
         prop.setProperty("output.size.spectrum.mean.enabled", String.valueOf(cfg.outputSizeSpectrum));
         prop.setProperty("output.size.spectrum.species.enabled", String.valueOf(cfg.outputSizeSpectrumSpecies));
         prop.setProperty("output.size.spectrum.minsize", String.valueOf(cfg.getSpectrumMinSize()));
@@ -93,7 +98,7 @@ public class ConfigurationConverter {
         // SPECIES
         for (int i = 0; i < nSpecies; i++) {
             prop.setProperty("species.name.sp" + i, String.valueOf(cfg.speciesName[i]));
-            prop.setProperty("species.longevity.sp" + i, String.valueOf(cfg.speciesLongevity[i]));
+            prop.setProperty("species.lifespan.sp" + i, String.valueOf(cfg.speciesLifespan[i]));
             prop.setProperty("species.lInf.sp" + i, String.valueOf(cfg.lInf[i]));
             prop.setProperty("species.K.sp" + i, String.valueOf(cfg.K[i]));
             prop.setProperty("species.t0.sp" + i, String.valueOf(cfg.t0[i]));
@@ -103,7 +108,6 @@ public class ConfigurationConverter {
             prop.setProperty("species.size.maturity.sp" + i, String.valueOf(cfg.sizeMaturity[i]));
             prop.setProperty("species.weight.egg.sp" + i, String.valueOf(cfg.eggWeight[i]));
             prop.setProperty("species.age.recruitment.sp" + i, String.valueOf(cfg.recruitmentAge[i]));
-            prop.setProperty("species.age.class0.sp" + i, String.valueOf(cfg.supAgeOfClass0Matrix[i]));
         }
 
         // PLANKTON

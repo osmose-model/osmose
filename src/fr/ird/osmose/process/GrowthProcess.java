@@ -29,13 +29,13 @@ public class GrowthProcess extends AbstractProcess {
 
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             Species species = getSpecies(i);
-            int longevity = species.getLongevity();
-            minDelta[i] = new float[longevity];
-            maxDelta[i] = new float[longevity];
-            deltaMeanLength[i] = new float[longevity];
+            int lifespan = species.getLifespanDt();
+            minDelta[i] = new float[lifespan];
+            maxDelta[i] = new float[lifespan];
+            deltaMeanLength[i] = new float[lifespan];
 
             float meanAge1 = species.computeMeanLength(0);
-            for (int age = 0; age < longevity - 1; age++) {
+            for (int age = 0; age < lifespan - 1; age++) {
                 float meanAge0 = meanAge1;
                 meanAge1 = species.computeMeanLength(age + 1);
                 deltaMeanLength[i][age] = meanAge1 - meanAge0;
