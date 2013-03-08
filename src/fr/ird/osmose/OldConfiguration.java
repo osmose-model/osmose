@@ -202,6 +202,10 @@ public class OldConfiguration {
      */
     public float[] sizeMaturity;
     /**
+     * Age (year) at maturity. Array[nSpecies]
+     */
+    public float[]  ageMaturity;
+    /**
      * Spawning seasonality. Array[nSpecies][nStepYear]
      */
     public float[][] seasonSpawning;
@@ -844,10 +848,12 @@ public class OldConfiguration {
                     if (maturityMetric[i].equalsIgnoreCase("age")) //conversion from maturity age to maturity size through von Bertalanffy equation
                     {
                         st.nextToken();
+                        ageMaturity[i] = new Float(st.sval).floatValue();
                         sizeMaturity[i] = lInf[i] * (float) (1 - Math.exp(-K[i]
-                                * ((new Float(st.sval).floatValue()) - t0[i])));             //***** to checked if not too big fish (same test than for recruit age)
+                                * (ageMaturity[i] - t0[i])));             //***** to checked if not too big fish (same test than for recruit age)
                     } else {
                         st.nextToken();
+                        ageMaturity[i] = -1;
                         sizeMaturity[i] = (new Float(st.sval)).floatValue();
                     }
                 }
@@ -1345,6 +1351,7 @@ public class OldConfiguration {
         bPower = new float[nSpecies];
         alpha = new float[nSpecies];
         sizeMaturity = new float[nSpecies];
+        ageMaturity = new float[nSpecies];
         sexRatio = new float[nSpecies];
         feedingStageThreshold = new float[nSpecies][];
         nFeedingStage = new int[nSpecies];

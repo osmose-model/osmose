@@ -4,7 +4,6 @@ import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.OldConfiguration;
 import fr.ird.osmose.OldConfiguration.SpatialDistribution;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.Species;
 import fr.ird.osmose.ltl.AbstractLTLForcing;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,9 +47,9 @@ public class ConfigurationConverter {
         int nSpecies = cfg.getNSpecies();
         int nPlankton = cfg.getNPlankton();
         // OUTPUT
-        prop.setProperty("output.path", cfg.getOutputPathname() + cfg.getOutputFolder());
-        prop.setProperty("output.prefix", cfg.getOutputPrefix());
-        prop.setProperty("output.recordfrequency", String.valueOf(cfg.getRecordFrequency()));
+        prop.setProperty("output.dir.path", cfg.getOutputPathname() + cfg.getOutputFolder());
+        prop.setProperty("output.file.prefix", cfg.getOutputPrefix());
+        prop.setProperty("output.recordfrequency.ndt", String.valueOf(cfg.getRecordFrequency()));
         prop.setProperty("output.yearstart", String.valueOf(cfg.yearStartSaving));
         prop.setProperty("output.cutoff.enabled", String.valueOf(cfg.outputClass0));
         for (int i = 0; i < nSpecies; i++) {
@@ -64,26 +63,27 @@ public class ConfigurationConverter {
         prop.setProperty("output.yield.abundance.enabled", String.valueOf(!cfg.outputCalibration));
         prop.setProperty("output.mortality.enabled", String.valueOf(!cfg.outputCalibration));
 
-        prop.setProperty("output.trophic.diet.enabled", String.valueOf(cfg.outputDiet));
-        prop.setProperty("output.trophic.pressure.enabled", String.valueOf(cfg.outputDiet));
-        prop.setProperty("output.trophic.diet.metrics", String.valueOf(cfg.getDietOutputMetrics()));
+        prop.setProperty("output.diet.composition.enabled", String.valueOf(cfg.outputDiet));
+        prop.setProperty("output.diet.pressure.enabled", String.valueOf(cfg.outputDiet));
+        prop.setProperty("output.diet.stage.structure", String.valueOf(cfg.getDietOutputMetrics()));
         for (int i = 0; i < nSpecies; i++) {
-            String key = "output.trophic.diet.stage.threshold.sp" + i;
+            String key = "output.diet.stage.threshold.sp" + i;
             prop.setProperty(key, String.valueOf(toString(cfg.dietStageThreshold[i])));
         }
-        prop.setProperty("output.trophic.TL.catch.enabled", String.valueOf(cfg.outputTL));
-        prop.setProperty("output.trophic.TL.mean.enabled", String.valueOf(cfg.outputTL));
-        prop.setProperty("output.trophic.TL.spectrum.enabled", String.valueOf(cfg.outputTLSpectrum));
-        prop.setProperty("output.trophic.TL.mean.perSize.enabled", String.valueOf(cfg.outputTL));
-        prop.setProperty("output.trophic.TL.mean.perAge.enabled", String.valueOf(cfg.outputTL));
+        prop.setProperty("output.TL.catch.enabled", String.valueOf(cfg.outputTL));
+        prop.setProperty("output.TL.enabled", String.valueOf(cfg.outputTL));
+        prop.setProperty("output.TL.spectrum.enabled", String.valueOf(cfg.outputTLSpectrum));
+        prop.setProperty("output.TL.perSize.enabled", String.valueOf(cfg.outputTL));
+        prop.setProperty("output.TL.perAge.enabled", String.valueOf(cfg.outputTL));
 
         prop.setProperty("output.spatial.ltl.enabled", String.valueOf(cfg.outputPlanktonBiomass));
         prop.setProperty("output.spatial.enabled", String.valueOf(cfg.outputSpatialized));
 
         prop.setProperty("output.size.catch.enabled", String.valueOf(cfg.outputMeanSize));
-        prop.setProperty("output.size.mean.enabled", String.valueOf(cfg.outputMeanSize));
-        prop.setProperty("output.size.mean.perSpecies.enabled", String.valueOf(cfg.outputMeanSize));
-        prop.setProperty("output.size.spectrum.mean.enabled", String.valueOf(cfg.outputSizeSpectrum));
+        prop.setProperty("output.size.enabled", String.valueOf(cfg.outputMeanSize));
+        prop.setProperty("output.size.perSpecies.enabled", String.valueOf(cfg.outputMeanSize));
+        prop.setProperty("output.size.spectrum.unit", "cm");
+        prop.setProperty("output.size.spectrum.enabled", String.valueOf(cfg.outputSizeSpectrum));
         prop.setProperty("output.size.spectrum.species.N.enabled", String.valueOf(cfg.outputSizeSpectrumSpecies));
         prop.setProperty("output.size.spectrum.species.B.enabled", String.valueOf(cfg.outputSizeSpectrumSpecies));
         prop.setProperty("output.size.spectrum.minsize", String.valueOf(cfg.getSpectrumMinSize()));
@@ -91,7 +91,7 @@ public class ConfigurationConverter {
         prop.setProperty("output.size.spectrum.classrange", String.valueOf(cfg.getSpectrumClassRange()));
 
         // SIMULATION
-        prop.setProperty("simulation.time.nstepyear", String.valueOf(cfg.getNumberTimeStepsPerYear()));
+        prop.setProperty("simulation.time.ndtPerYear", String.valueOf(cfg.getNumberTimeStepsPerYear()));
         prop.setProperty("simulation.time.nyear", String.valueOf(cfg.getNYear()));
         prop.setProperty("simulation.nsimulation", String.valueOf(cfg.getNSimulation()));
         prop.setProperty("simulation.nschool", String.valueOf(cfg.nSchool));
@@ -106,30 +106,37 @@ public class ConfigurationConverter {
             prop.setProperty("species.lInf.sp" + i, String.valueOf(cfg.lInf[i]));
             prop.setProperty("species.K.sp" + i, String.valueOf(cfg.K[i]));
             prop.setProperty("species.t0.sp" + i, String.valueOf(cfg.t0[i]));
-            prop.setProperty("species.c.sp", String.valueOf(cfg.c[i]));
-            prop.setProperty("species.bPower.sp" + i, String.valueOf(cfg.bPower[i]));
-            prop.setProperty("species.size.egg.sp" + i, String.valueOf(cfg.eggSize[i]));
-            prop.setProperty("species.size.maturity.sp" + i, String.valueOf(cfg.sizeMaturity[i]));
-            prop.setProperty("species.weight.egg.sp" + i, String.valueOf(cfg.eggWeight[i]));
+            prop.setProperty("species.length2weight.condition.factor.sp", String.valueOf(cfg.c[i]));
+            prop.setProperty("species.length2weight.allometric.power.sp" + i, String.valueOf(cfg.bPower[i]));
+            prop.setProperty("species.egg.size.sp" + i, String.valueOf(cfg.eggSize[i]));
+            if (cfg.ageMaturity[i] >= 0) {
+                prop.setProperty("species.maturity.age.sp" + i, String.valueOf(cfg.ageMaturity[i]));
+            } else {
+                prop.setProperty("species.maturity.size.sp" + i, String.valueOf(cfg.sizeMaturity[i]));
+            }
+            prop.setProperty("species.egg.weight.sp" + i, String.valueOf(cfg.eggWeight[i]));
             prop.setProperty("species.age.recruitment.sp" + i, String.valueOf(cfg.recruitmentAge[i]));
+            prop.setProperty("species.sexratio.sp" + i, String.valueOf(cfg.sexRatio[i]));
+            prop.setProperty("species.relativefecundity.sp" + i, String.valueOf(cfg.alpha[i]));
         }
 
         // PLANKTON
         for (int i = 0; i < nPlankton; i++) {
             prop.setProperty("plankton.name.plk" + i, String.valueOf(cfg.planktonName[i]));
             prop.setProperty("plankton.TL.plk" + i, String.valueOf(cfg.ltlTrophicLevel[i]));
+            prop.setProperty("plankton.size.unit", "cm");
             prop.setProperty("plankton.size.min.plk" + i, String.valueOf(cfg.ltlMinSize[i]));
             prop.setProperty("plankton.size.max.plk" + i, String.valueOf(cfg.ltlMaxSize[i]));
             prop.setProperty("plankton.conversion2tons.plk" + i, String.valueOf(cfg.ltlConversionFactor[i]));
-            prop.setProperty("plankton.accessibility.plk" + i, String.valueOf(cfg.planktonAccessibility[i]));
+            prop.setProperty("plankton.accessibility2fish.plk" + i, String.valueOf(cfg.planktonAccessibility[i]));
         }
 
         // LTL MODEL
         String className = cfg.getLTLClassName();
-        prop.setProperty("ltl.classname", String.valueOf(className));
+        prop.setProperty("ltl.java.classname", String.valueOf(className));
         String[] files = ((AbstractLTLForcing) cfg.getForcing()).getNetcdfFile();
         for (int i = 0; i < files.length; i++) {
-            prop.setProperty("ltl.netcdf.file" + i, cfg.resolveFile(files[i]));
+            prop.setProperty("ltl.netcdf.file.t" + i, cfg.resolveFile(files[i]));
         }
         if (className.equals("fr.ird.osmose.ltl.LTLFastForcingRomsPisces")
                 || className.equals("fr.ird.osmose.ltl.LTLForcingRomsPisces")
@@ -137,31 +144,31 @@ public class ConfigurationConverter {
             prop.setProperty("ltl.integration.depth", String.valueOf(cfg.getIntegrationDepth()));
             String[] names = ((AbstractLTLForcing) cfg.getForcing()).getPlanktonFieldName();
             for (int i = 0; i < nPlankton; i++) {
-                prop.setProperty("ltl.netcdf.field.plankton.plk" + i, names[i]);
+                prop.setProperty("ltl.netcdf.var.plankton.plk" + i, names[i]);
             }
-            prop.setProperty("ltl.netcdf.grid.file", "null");
-            prop.setProperty("ltl.netcdf.field.lat", "lat_rho");
-            prop.setProperty("ltl.netcdf.field.lon", "lon_rho");
-            prop.setProperty("ltl.netcdf.field.bathy", "h");
-            prop.setProperty("ltl.netcdf.field.hc", "hc");
-            prop.setProperty("ltl.netcdf.field.csr", "Cs_r");
+            prop.setProperty("ltl.netcdf.grid.file", files[0]);
+            prop.setProperty("ltl.netcdf.var.lat", "lat_rho");
+            prop.setProperty("ltl.netcdf.var.lon", "lon_rho");
+            prop.setProperty("ltl.netcdf.var.bathy", "h");
+            prop.setProperty("ltl.netcdf.var.hc", "hc");
+            prop.setProperty("ltl.netcdf.var.csr", "Cs_r");
         } else if (className.equals("fr.ird.osmose.ltl.LTLFastForcingECO3M")
                 || className.equals("fr.ird.osmose.ltl.LTLForcingECO3M")) {
             prop.setProperty("ltl.integration.depth", String.valueOf(cfg.getIntegrationDepth()));
             String[] names = ((AbstractLTLForcing) cfg.getForcing()).getPlanktonFieldName();
             for (int i = 0; i < nPlankton; i++) {
-                prop.setProperty("ltl.netcdf.field.plankton.plk" + i, names[i]);
+                prop.setProperty("ltl.netcdf.var.plankton.plk" + i, names[i]);
             }
-            prop.setProperty("ltl.netcdf.field.zlevel", "levels_ZHL");
+            prop.setProperty("ltl.netcdf.var.zlevel", "levels_ZHL");
         } else if (className.equals("fr.ird.osmose.ltl.LTLFastForcingBFM")
                 || className.equals("fr.ird.osmose.ltl.LTLForcingBFM")) {
             prop.setProperty("ltl.integration.depth", String.valueOf(cfg.getIntegrationDepth()));
             String[] names = ((AbstractLTLForcing) cfg.getForcing()).getPlanktonFieldName();
             for (int i = 0; i < nPlankton; i++) {
-                prop.setProperty("ltl.netcdf.field.plankton.plk" + i, names[i]);
+                prop.setProperty("ltl.netcdf.var.plankton.plk" + i, names[i]);
             }
-            prop.setProperty("ltl.netcdf.field.bathy", "h");
-            prop.setProperty("ltl.netcdf.field.zlevel", "zz");
+            prop.setProperty("ltl.netcdf.var.bathy", "h");
+            prop.setProperty("ltl.netcdf.var.zlevel", "zz");
             prop.setProperty("ltl.netcdf.dim.ntime", "2");
         }
 
@@ -172,14 +179,14 @@ public class ConfigurationConverter {
             prop.setProperty("grid.upleft.lat", String.valueOf(cfg.upLeftLat));
             prop.setProperty("grid.upleft.lon", String.valueOf(cfg.upLeftLon));
             prop.setProperty("grid.lowright.lat", String.valueOf(cfg.lowRightLat));
-            prop.setProperty("grid.lowright.lat", String.valueOf(cfg.lowRightLon));
+            prop.setProperty("grid.lowright.lon", String.valueOf(cfg.lowRightLon));
             prop.setProperty("grid.nline", String.valueOf(cfg.nLine));
             prop.setProperty("grid.ncolumn", String.valueOf(cfg.nColumn));
         } else {
             prop.setProperty("grid.netcdf", String.valueOf(cfg.gridFileTab));
-            prop.setProperty("grid.field.lat", String.valueOf(cfg.latField));
-            prop.setProperty("grid.field.lon", String.valueOf(cfg.lonField));
-            prop.setProperty("grid.field.mask", String.valueOf(cfg.maskField));
+            prop.setProperty("grid.var.lat", String.valueOf(cfg.latField));
+            prop.setProperty("grid.var.lon", String.valueOf(cfg.lonField));
+            prop.setProperty("grid.var.mask", String.valueOf(cfg.maskField));
             prop.setProperty("grid.stride", String.valueOf(cfg.stride));
         }
 
@@ -211,7 +218,7 @@ public class ConfigurationConverter {
                     value = toString(cfg.seasonMap[iMap]);
                     prop.setProperty(key.toString(), value);
                     key = new StringBuilder(map);
-                    key.append(".area.file");
+                    key.append(".file");
                     value = cfg.mapFile[iMap];
                     prop.setProperty(key.toString(), value);
                     if (cfg.spatialDistribution[i].equals(SpatialDistribution.CONNECTIVITY)) {
@@ -225,13 +232,14 @@ public class ConfigurationConverter {
         }
 
         // PREDATION
+        prop.setProperty("predation.ingestion.rate.max.unit", "grams of food per gram of fish and per year");
         for (int i = 0; i < nSpecies; i++) {
             prop.setProperty("predation.predPrey.stage.threshold.sp" + i, String.valueOf(toString(cfg.feedingStageThreshold[i])));
             prop.setProperty("predation.predPrey.sizeRatio.min.sp" + i, String.valueOf(toString(cfg.predPreySizeRatioMin[i])));
             prop.setProperty("predation.predPrey.sizeRatio.max.sp" + i, String.valueOf(toString(cfg.predPreySizeRatioMax[i])));
             prop.setProperty("predation.ingestion.rate.max.sp" + i, String.valueOf(cfg.maxPredationRate[i]));
             prop.setProperty("predation.efficiency.critical.sp" + i, String.valueOf(cfg.criticalPredSuccess[i]));
-            prop.setProperty("predation.accessibility.stage.metrics", "age");
+            prop.setProperty("predation.accessibility.stage.structure", "age");
             prop.setProperty("predation.accessibility.stage.threshold.sp" + i, String.valueOf(toString(cfg.accessStageThreshold[i])));
         }
         String accessibilityFile = cfg.resolveFile("predation-accessibility.csv");
@@ -239,35 +247,48 @@ public class ConfigurationConverter {
         writeAccessibilityAsCSV(accessibilityFile);
 
         // STARVATION
+        prop.setProperty("mortality.starvation.rate.max.unit", "year^-1");
         for (int i = 0; i < nSpecies; i++) {
             prop.setProperty("mortality.starvation.rate.max.sp" + i, String.valueOf(cfg.starvMaxRate[i]));
         }
 
         // NATURAL MORTALITY
+        prop.setProperty("mortality.natural.larva.rate.unit", "dt^-1");
+        prop.setProperty("mortality.natural.rate.unit", "year^-1");
         if (null == cfg.larvalMortalityFile) {
             String larvalMortalityFile = cfg.resolveFile("larval-mortality-rates.csv");
-            prop.setProperty("mortality.natural.rate.larva.file", larvalMortalityFile);
+            prop.setProperty("mortality.natural.larva.rate.file", larvalMortalityFile);
             writeLarvalMortalityRateAsCSV(larvalMortalityFile);
         } else {
-            prop.setProperty("predation.accessibility.file", cfg.resolveFile(cfg.larvalMortalityFile));
+            prop.setProperty("mortality.natural.larva.rate.file", cfg.resolveFile(cfg.larvalMortalityFile));
         }
         String naturalMortalityFile = cfg.resolveFile("natural-mortality-rates.csv");
         prop.setProperty("mortality.natural.rate.file", naturalMortalityFile);
         writeNaturalMortalityRateAsCSV(naturalMortalityFile);
+        for (int i = 0; i < nSpecies; i++) {
+            prop.setProperty("mortality.natural.larva.rate.sp" + i, String.valueOf(cfg.larvalMortalityRates[i][0]));
+            prop.setProperty("mortality.natural.rate.sp" + i, String.valueOf(cfg.D[i]));
+        }
 
         // FISHING
         for (int i = 0; i < nSpecies; i++) {
             new File(cfg.resolveFile("fishing/")).mkdirs();
-            prop.setProperty("mortality.fishing.class.metrics.sp" + i, "age");
+            prop.setProperty("mortality.fishing.structure.sp" + i, "age");
             String filename = "fishing/fishing-seasonality-ageclass-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.seasonality.age.file.sp" + i, cfg.resolveFile(filename));
             filename = "fishing/fishing-seasonality-sizeclass-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.seasonality.size.file.sp" + i, cfg.resolveFile(filename));
+            filename = "fishing/fishing-seasonality-" + cfg.speciesName[i] + ".csv";
+            prop.setProperty("mortality.fishing.seasonality.file.sp" + i, cfg.resolveFile(filename));
             filename = "fishing/fishing-rate-ageclass-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.age.file.sp" + i, cfg.resolveFile(filename));
             filename = "fishing/fishing-rate-sizeclass-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.size.file.sp" + i, cfg.resolveFile(filename));
+            filename = "fishing/fishing-rate-" + cfg.speciesName[i] + ".csv";
+            prop.setProperty("mortality.fishing.rate.file.sp" + i, cfg.resolveFile(filename));
             writeFishingAsCSV(i);
+            float F = sum(cfg.fishingRates[i]);
+            prop.setProperty("mortality.fishing.rate.sp" + i, String.valueOf(F));
         }
 
         // MPA
@@ -296,15 +317,43 @@ public class ConfigurationConverter {
         prop.setProperty("population.initialization.method", cfg.calibrationMethod);
         if (cfg.calibrationMethod.equalsIgnoreCase("biomass")) {
             for (int i = 0; i < nSpecies; i++) {
-                prop.setProperty("population.initalization.biomass.sp" + i, String.valueOf(cfg.targetBiomass[i]));
+                prop.setProperty("population.initialization.biomass.sp" + i, String.valueOf(cfg.targetBiomass[i]));
             }
-            prop.setProperty("population.initalization.spectrum.slope", "null");
-            prop.setProperty("population.initalization.biomass.intercept", "null");
+            prop.setProperty("population.initialization.spectrum.slope", "null");
+            prop.setProperty("population.initialization.spectrum.intercept", "null");
         } else if (cfg.calibrationMethod.equalsIgnoreCase("spectrum")) {
-            prop.setProperty("population.initalization.spectrum.slope", String.valueOf(cfg.sizeSpectrumSlope));
-            prop.setProperty("population.initalization.biomass.intercept", String.valueOf(cfg.sizeSpectrumIntercept));
+            prop.setProperty("population.initialization.spectrum.slope", String.valueOf(cfg.sizeSpectrumSlope));
+            prop.setProperty("population.initialization.spectrum.intercept", String.valueOf(cfg.sizeSpectrumIntercept));
             for (int i = 0; i < nSpecies; i++) {
-                prop.setProperty("population.initalization.biomass.sp" + i, "null");
+                prop.setProperty("population.initialization.biomass.sp" + i, "null");
+            }
+        }
+
+        // REPRODUCTION
+        for (int i = 0; i < nSpecies; i++) {
+            //prop.setProperty("reproduction.enabled.sp" + i, String.valueOf(cfg.reproduceLocally[i]));
+            if (cfg.reproduceLocally[i]) {
+                prop.setProperty("reproduction.season.sp" + i, toString(cfg.seasonSpawning[i]));
+            } else {
+                prop.setProperty("reproduction.season.sp" + i, toString(new float[cfg.getNumberTimeStepsPerYear()]));
+            }
+        }
+
+        // INCOMING FLUX
+        prop.setProperty("flux.incoming.age.unit", "year");
+        prop.setProperty("flux.incoming.size.unit", "cm");
+        for (int i = 0; i < nSpecies; i++) {
+            //prop.setProperty("flux.incoming.enabled.sp" + i, String.valueOf(!cfg.reproduceLocally[i]));
+            if (!cfg.reproduceLocally[i]) {
+                prop.setProperty("flux.incoming.season.sp" + i, toString(cfg.seasonSpawning[i]));
+                prop.setProperty("flux.incoming.biomass.sp" + i, String.valueOf(cfg.biomassFluxIn[i]));
+                prop.setProperty("flux.incoming.age.sp" + i, String.valueOf(cfg.meanAgeFishIn[i]));
+                prop.setProperty("flux.incoming.size.sp" + i, String.valueOf(cfg.meanLengthFishIn[i]));
+            } else {
+                prop.setProperty("flux.incoming.season.sp" + i, toString(new float[cfg.getNumberTimeStepsPerYear()]));
+                prop.setProperty("flux.incoming.biomass.sp" + i, String.valueOf(0.f));
+                prop.setProperty("flux.incoming.age.sp" + i, "null");
+                prop.setProperty("flux.incoming.size.sp" + i, "null");
             }
         }
 
@@ -385,9 +434,7 @@ public class ConfigurationConverter {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[cfg.getNSpecies() + 1];
             header[0] = "Time (year)";
-            for (int i = 0; i < cfg.getNSpecies(); i++) {
-                header[i + 1] = cfg.speciesName[i];
-            }
+            System.arraycopy(cfg.speciesName, 0, header, 1, cfg.getNSpecies());
             writer.writeNext(header);
             for (int t = 0; t < cfg.larvalMortalityRates[0].length; t++) {
                 String[] entries = new String[header.length];
@@ -408,9 +455,7 @@ public class ConfigurationConverter {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[cfg.getNSpecies() + 1];
             header[0] = "Time (year)";
-            for (int i = 0; i < cfg.getNSpecies(); i++) {
-                header[i + 1] = cfg.speciesName[i];
-            }
+            System.arraycopy(cfg.speciesName, 0, header, 1, cfg.getNSpecies());
             writer.writeNext(header);
             String[] entries = new String[header.length];
             entries[0] = "0";
@@ -429,9 +474,42 @@ public class ConfigurationConverter {
         int stepsize = 10;
         float stepage = 0.5f;
 
-        // Fishing seasonality per age class
+        // Fishing rate
         float F = sum(cfg.fishingRates[ispec]);
-        String filename = "fishing/fishing-seasonality-ageclass-" + cfg.speciesName[ispec] + ".csv";
+        String filename = "fishing/fishing-rate-" + cfg.speciesName[ispec] + ".csv";
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+            writer.writeNext(new String[]{"Time", "Annual F"});
+            for (int iYear = 0; iYear < cfg.getNYear(); iYear++) {
+                writer.writeNext(new String[]{String.valueOf(iYear), String.valueOf(F)});
+            }
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Fishing seasonality
+        filename = "fishing/fishing-seasonality-" + cfg.speciesName[ispec] + ".csv";
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+            writer.writeNext(new String[]{"Time", "Season"});
+            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
+                String[] entries = new String[2];
+                entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
+                if (F > 0) {
+                    entries[1] = String.valueOf(cfg.fishingRates[ispec][t] / F);
+                } else {
+                    entries[1] = "0";
+                }
+                writer.writeNext(entries);
+            }
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Fishing seasonality per age class
+        filename = "fishing/fishing-seasonality-ageclass-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[(int) Math.ceil(Math.min(cfg.speciesLifespan[ispec], 10) / stepage) + 1];
@@ -481,7 +559,7 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        // Fishing seasonality per size class
+        // Fishing rate per size class
         filename = "fishing/fishing-rate-sizeclass-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
