@@ -32,7 +32,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
     private String[] plktonNetcdfNames;
     private String gridFileName;
     private String strCs_r, strHC;
-    private String strLon, strLat, strH;
+    private String strLon, strH;
     private float[][][][] data;
 
     @Override
@@ -70,7 +70,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
             st.nextToken();
             strLon = st.sval;
             st.nextToken();
-            strLat = st.sval;
+            //strLat = st.sval;
             st.nextToken();
             strH = st.sval;
             st.nextToken();
@@ -99,8 +99,8 @@ public class LTLForcingLaure extends AbstractLTLForcing {
          */
         try {
             int[] shape = ncIn.findVariable(strLon).getShape();
-            setDimX(shape[0]);
-            setDimY(shape[1]);
+            setDimX(shape[1]);
+            setDimY(shape[0]);
             setDimZ(getCs_r(ncIn).length);
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
@@ -120,13 +120,13 @@ public class LTLForcingLaure extends AbstractLTLForcing {
     @Override
     public float[][] computeBiomass(Plankton plankton, int iStepSimu) {
 
-        float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+        float[][] biomass = new float[getGrid().get_ny()][getGrid().get_nx()];
+        for (int j = 0; j < getGrid().get_ny(); j++) {
+            for (int i = 0; i < getGrid().get_nx(); i++) {
                 Cell cell = getGrid().getCell(i, j);
                 if (!cell.isLand()) {
                     float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
-                    biomass[i][j] = area * plankton.convertToTonPerKm2(data[getIndexStepLTL(iStepSimu)][plankton.getIndex()][i][j]);
+                    biomass[j][i] = area * plankton.convertToTonPerKm2(data[getIndexStepLTL(iStepSimu)][plankton.getIndex()][j][i]);
                 }
             }
         }
@@ -137,7 +137,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][get_nx()][get_ny()];
+        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][get_ny()][get_nx()];
         for (int t = 0; t < getConfiguration().getNumberTimeStepsPerYear(); t++) {
             for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 data[t][p] = getIntegratedBiomass(p, t);
@@ -149,12 +149,12 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
     private float[][] getIntegratedBiomass(int p, int iStepSimu) {
 
-        float[][][] dataInit = new float[get_nx()][get_ny()][get_nz()];
+        float[][][] dataInit = new float[get_nz()][get_ny()][get_nx()];
 
         String ncfile = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
         try {
             NetcdfFile nc = NetcdfFile.open(ncfile);
-            dataInit = (float[][][]) nc.findVariable(plktonNetcdfNames[p]).read().permute(new int[]{1, 2, 0}).copyToNDJavaArray();
+            dataInit = (float[][][]) nc.findVariable(plktonNetcdfNames[p]).read().flip(1).copyToNDJavaArray();
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingLaure.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -163,7 +163,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
     }
 
     @Override
-    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
+    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
         return null;
     }
 
@@ -183,15 +183,15 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
         //-----------------------------------------------------------
         // Read h in the NetCDF file.
-        Array arrH = ncIn.findVariable(strH).read();
+        Array arrH = ncIn.findVariable(strH).read().flip(0);
         if (arrH.getElementType() == double.class) {
             hRho = (double[][]) arrH.copyToNDJavaArray();
         } else {
-            hRho = new double[nx][ny];
+            hRho = new double[ny][nx];
             Index index = arrH.getIndex();
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    hRho[i][j] = arrH.getDouble(index.set(i, j));
+                    hRho[j][i] = arrH.getDouble(index.set(j, i));
                 }
             }
         }
@@ -210,7 +210,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
         //------------------------------------------------------------
         // Calculation of z_w , z_r
-        float[][][] z_r = new float[nx][ny][nz];
+        float[][][] z_r = new float[nz][ny][nx];
 
         /* 2010 June: Recent UCLA Roms version (but not AGRIF yet)
          * uses new formulation for computing the unperturbated depth.
@@ -226,7 +226,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
                 for (int i = nx; i-- > 0;) {
                     for (int j = ny; j-- > 0;) {
                         for (int k = nz; k-- > 0;) {
-                            z_r[i][j][k] = (float) (hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[i][j]);
+                            z_r[k][j][i] = (float) (hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i]);
                         }
                     }
                 }
@@ -236,7 +236,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
                 for (int i = nx; i-- > 0;) {
                     for (int j = ny; j-- > 0;) {
                         for (int k = nz; k-- > 0;) {
-                            z_r[i][j][k] = (float) (hRho[i][j] * (sc_r[k] * hc + Cs_r[k] * hRho[i][j]) / (hc + hRho[i][j]));
+                            z_r[k][j][i] = (float) (hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]));
                         }
                     }
                 }

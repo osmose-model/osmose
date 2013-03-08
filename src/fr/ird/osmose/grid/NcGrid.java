@@ -33,13 +33,13 @@ public class NcGrid extends AbstractGrid {
         double[][] lat = readVariable(ncGrid, strLat);
 
         double[][] mask = readVariable(ncGrid, strMask);
-        int im = lon.length;
-        int jm = lon[0].length;
-        Cell[][] grid = new Cell[im][jm];
-        for (int i = 0; i < im; i++) {
-            for (int j = 0; j < jm; j++) {
-                boolean land = (mask[i][j] > 0) ? false : true;
-                grid[i][j] = new Cell(i, j, (float) lat[i][j], (float) lon[i][j], land);
+        int ny = lon.length;
+        int nx = lon[0].length;
+        Cell[][] grid = new Cell[ny][nx];
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                boolean land = (mask[j][i] > 0) ? false : true;
+                grid[j][i] = new Cell(i, j, (float) lat[j][i], (float) lon[j][i], land);
             }
         }
 
@@ -79,7 +79,7 @@ public class NcGrid extends AbstractGrid {
      */
     private double[][] readVariable(NetcdfFile nc, String varname) {
         try {
-            return (double[][]) nc.findVariable(varname).read().flip(0).copyToNDJavaArray();
+            return (double[][]) nc.findVariable(varname).read().copyToNDJavaArray();
         } catch (IOException ex) {
             Logger.getLogger(ECO3MGrid.class.getName()).log(Level.SEVERE, null, ex);
             return null;

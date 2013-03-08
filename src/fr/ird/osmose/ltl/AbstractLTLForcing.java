@@ -10,6 +10,7 @@ import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.grid.IGrid;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  *
@@ -45,7 +46,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
      * @return an array of dimension of the LTL grid with biomass vertically
      * integrated.
      */
-    abstract float[][] getRawBiomass(Plankton plankton, int iStepSimu);
+    abstract float[][] getRawBiomass(int iPlankton, int iStepSimu);
 
     /**
      * Loads parameters about how the LTL biomass are provided.
@@ -79,19 +80,19 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     }
 
     public float[][] verticalIntegration(float[][][] data3d, float[][][] depthLayer, float maxDepth) {
-        float[][] integratedData = new float[get_nx()][get_ny()];
+        float[][] integratedData = new float[get_ny()][get_nx()];
         float integr;
-        for (int i = 0; i < depthLayer.length; i++) {
-            for (int j = 0; j < depthLayer[i].length; j++) {
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
                 integr = 0f;
-                for (int k = 0; k < depthLayer[i][j].length - 1; k++) {
-                    if (depthLayer[i][j][k] > maxDepth) {
-                        if (data3d[i][j][k] >= 0 && data3d[i][j][k + 1] >= 0) {
-                            integr += (Math.abs(depthLayer[i][j][k] - depthLayer[i][j][k + 1])) * ((data3d[i][j][k] + data3d[i][j][k + 1]) / 2f);
+                for (int k = 0; k < nz - 1; k++) {
+                    if (depthLayer[k][j][i] > maxDepth) {
+                        if (data3d[k][j][i] >= 0 && data3d[k + 1][j][i] >= 0) {
+                            integr += (Math.abs(depthLayer[k][j][i] - depthLayer[k + 1][j][i])) * ((data3d[k][j][i] + data3d[k + 1][j][i]) / 2f);
                         }
                     }
                 }
-                integratedData[i][j] = integr;
+                integratedData[j][i] = integr;
             }
         }
         return integratedData;
@@ -124,15 +125,15 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     @Override
     public float[][] computeBiomass(Plankton plankton, int iStepSimu) {
 
-        float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        float[][] biomass = new float[getGrid().get_ny()][getGrid().get_nx()];
 
-        float[][] rawBiomass = getRawBiomass(plankton, iStepSimu);
+        float[][] rawBiomass = getRawBiomass(plankton.getIndex(), iStepSimu);
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
                 float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
                 int nCells = getNbCellsLTLGrid(cell);
                 for (int k = 0; k < nCells; k++) {
-                    biomass[cell.get_igrid()][cell.get_jgrid()] += area * plankton.convertToTonPerKm2(rawBiomass[get_iLTL(cell).get(k)][get_jLTL(cell).get(k)]) / (float) nCells;
+                    biomass[cell.get_jgrid()][cell.get_igrid()] += area * plankton.convertToTonPerKm2(rawBiomass[get_jLTL(cell).get(k)][get_iLTL(cell).get(k)]) / (float) nCells;
                 }
             }
         }
@@ -140,9 +141,9 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     }
 
     int getNbCellsLTLGrid(int i, int j) {
-        return (null == icoordLTLGrid[i][j])
+        return (null == icoordLTLGrid[j][i])
                 ? 0
-                : icoordLTLGrid[i][j].size();
+                : icoordLTLGrid[j][i].size();
     }
 
     int getNbCellsLTLGrid(Cell cell) {
@@ -150,11 +151,11 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     }
 
     List<Integer> get_iLTL(Cell cell) {
-        return icoordLTLGrid[cell.get_igrid()][cell.get_jgrid()];
+        return icoordLTLGrid[cell.get_jgrid()][cell.get_igrid()];
     }
 
     List<Integer> get_jLTL(Cell cell) {
-        return jcoordLTLGrid[cell.get_igrid()][cell.get_jgrid()];
+        return jcoordLTLGrid[cell.get_jgrid()][cell.get_igrid()];
     }
 
     static OldConfiguration getConfiguration() {
@@ -163,5 +164,9 @@ public abstract class AbstractLTLForcing implements LTLForcing {
 
     static IGrid getGrid() {
         return Osmose.getInstance().getGrid();
+    }
+    
+    static Logger getLogger() {
+        return Osmose.getInstance().getLogger();
     }
 }

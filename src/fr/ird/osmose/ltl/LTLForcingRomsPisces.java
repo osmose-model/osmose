@@ -5,7 +5,6 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Plankton;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,11 +17,9 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.Array;
-import ucar.ma2.ArrayFloat;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *
@@ -30,9 +27,9 @@ import ucar.nc2.Variable;
  */
 public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
-    private String[] planktonFileListNetcdf;
-    private float[][][] depthOfLayer;       // table of height of layers of ROMS model used in vertical integration
-    private String[] plktonNetcdfNames;
+    String[] planktonFileListNetcdf;
+    float[][][] depthOfLayer;       // table of height of layers of ROMS model used in vertical integration
+    String[] plktonNetcdfNames;
     private String gridFileName;
     private String strCs_r, strHC;
     private String strLon, strLat, strH;
@@ -103,8 +100,8 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
          */
         try {
             int[] shape = ncIn.findVariable(strLon).getShape();
-            setDimX(shape[0]);
-            setDimY(shape[1]);
+            setDimX(shape[1]);
+            setDimY(shape[0]);
             setDimZ(getCs_r(ncIn).length);
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
@@ -121,14 +118,14 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 longitude = (float[][]) arrLon.copyToNDJavaArray();
                 latitude = (float[][]) arrLat.copyToNDJavaArray();
             } else {
-                longitude = new float[nx][ny];
-                latitude = new float[nx][ny];
+                longitude = new float[ny][nx];
+                latitude = new float[ny][nx];
                 Index index = arrLon.getIndex();
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
-                        index.set(i, j);
-                        longitude[i][j] = arrLon.getFloat(index);
-                        latitude[i][j] = arrLat.getFloat(index);
+                        index.set(j, i);
+                        longitude[j][i] = arrLon.getFloat(index);
+                        latitude[j][i] = arrLat.getFloat(index);
                     }
                 }
             }
@@ -150,15 +147,15 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     }
 
     // CASE SPECIFIC - uses easy relation between the grids Plume and Osmose
-    private void findValidMapIndex() {
-        int posiTemp, posjTemp;
-        icoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
-        jcoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+   private void findValidMapIndex() {
+        int jGrid, iGrid;
+        icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
+        jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
 
         for (int i = 0; i < get_nx(); i++) {
             for (int j = 0; j < get_ny(); j++) // consider only the LTL cells included within the Osmose grid
             {
-                if ((latitude[i][j] >= getGrid().getLatMin()) && (latitude[i][j] <= getGrid().getLatMax()) && (longitude[i][j] >= getGrid().getLongMin()) && (longitude[i][j] <= getGrid().getLongMax())) {
+                if ((latitude[j][i] >= getGrid().getLatMin()) && (latitude[j][i] <= getGrid().getLatMax()) && (longitude[j][i] >= getGrid().getLongMin()) && (longitude[j][i] <= getGrid().getLongMax())) {
                     // equations giving the position of ROMS cells within the Osmose getGrid(), avoiding to read the whole matrix
                     /*
                      * WARNING, phv, 2011/04/07
@@ -167,61 +164,61 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                      * 2011/08/04 phv, looks like the change in positemp led to
                      * different outputs... so I reverted the change.
                      */
-                    posiTemp = (int) Math.floor(-(latitude[i][j] - getGrid().getLatMax()) / getGrid().getdLat());    //************** Attention sign minus & latMax depend on the sign of lat and long
-                    posjTemp = (int) Math.floor((longitude[i][j] - getGrid().getLongMin()) / getGrid().getdLong());
+                    jGrid = (int) Math.floor((latitude[j][i] - getGrid().getLatMin()) / getGrid().getdLat());    //************** Attention sign minus & latMax depend on the sign of lat and long
+                    iGrid = (int) Math.floor((longitude[j][i] - getGrid().getLongMin()) / getGrid().getdLong());
 
                     // attach each LTL cells to the right Osmose cell (several LTL cells per Osmose cell is allowed)
-                    if (!getGrid().getCell(posiTemp, posjTemp).isLand()) {
+                    if (!getGrid().getCell(iGrid, jGrid).isLand()) {
                         //System.out.println("osmose cell " + posiTemp + " " + posjTemp + " contains roms cell " + i + " " + j);
-                        if (null == icoordLTLGrid[posiTemp][posjTemp]) {
-                            icoordLTLGrid[posiTemp][posjTemp] = new ArrayList();
-                            jcoordLTLGrid[posiTemp][posjTemp] = new ArrayList();
+                        if (null == icoordLTLGrid[jGrid][iGrid]) {
+                            icoordLTLGrid[jGrid][iGrid] = new ArrayList();
+                            jcoordLTLGrid[jGrid][iGrid] = new ArrayList();
                         }
-                        icoordLTLGrid[posiTemp][posjTemp].add(i);
-                        jcoordLTLGrid[posiTemp][posjTemp].add(j);
+                        icoordLTLGrid[jGrid][iGrid].add(i);
+                        jcoordLTLGrid[jGrid][iGrid].add(j);
                     }
                 }
             }
         }
-        
-         /*
+
+        /*
          * If no LTL cell is associated with an osmose cell (because of
          * curvilinear grid of ROMS) then uses the neighbour cells to get the
          * average plankton biomass.
          */
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+        for (int j = 0; j < getGrid().get_ny(); j++) {
+            for (int i = 0; i < getGrid().get_nx(); i++) {
                 if (!getGrid().getCell(i, j).isLand()) {
                     if (getNbCellsLTLGrid(i, j) == 0) {
-                        icoordLTLGrid[i][j] = new ArrayList();
-                        jcoordLTLGrid[i][j] = new ArrayList();
+                        icoordLTLGrid[j][i] = new ArrayList();
+                        jcoordLTLGrid[j][i] = new ArrayList();
                         Cell cell;
-                        if (i > 0) {
-                            cell = getGrid().getCell(i - 1, j);
-                            if (!cell.isLand()) {
-                                icoordLTLGrid[i][j].addAll(get_iLTL(cell));
-                                jcoordLTLGrid[i][j].addAll(get_jLTL(cell));
-                            }
-                        }
                         if (j > 0) {
                             cell = getGrid().getCell(i, j - 1);
                             if (!cell.isLand()) {
-                                icoordLTLGrid[i][j].addAll(get_iLTL(cell));
-                                jcoordLTLGrid[i][j].addAll(get_jLTL(cell));
+                                icoordLTLGrid[j][i].addAll(get_iLTL(cell));
+                                jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
                             }
                         }
-                        if (i < getGrid().getNbLines() - 1) {
-                            cell = getGrid().getCell(i + 1, j);
+                        if (i > 0) {
+                            cell = getGrid().getCell(i - 1,j);
                             if (!cell.isLand()) {
-                                icoordLTLGrid[i][j].addAll(get_iLTL(cell));
-                                jcoordLTLGrid[i][j].addAll(get_jLTL(cell));
+                                icoordLTLGrid[j][i].addAll(get_iLTL(cell));
+                                jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
                             }
                         }
-                        if (j < getGrid().getNbColumns() - 1) {
+                        if (j < getGrid().get_ny() - 1) {
                             cell = getGrid().getCell(i, j + 1);
                             if (!cell.isLand()) {
-                                icoordLTLGrid[i][j].addAll(get_iLTL(cell));
-                                jcoordLTLGrid[i][j].addAll(get_jLTL(cell));
+                                icoordLTLGrid[j][i].addAll(get_iLTL(cell));
+                                jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
+                            }
+                        }
+                        if (i < getGrid().get_nx() - 1) {
+                            cell = getGrid().getCell(i + 1, j);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[j][i].addAll(get_iLTL(cell));
+                                jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
                             }
                         }
                     }
@@ -231,27 +228,15 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     }
 
     @Override
-    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
+    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
         String name = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
-        Variable tempVar;
-        ArrayFloat.D3 tempArray;
-        float[][][] data3d = new float[get_nx()][get_ny()][get_nz()];
+        float[][][] data3d = null;
 
         try {
             NetcdfFile nc = NetcdfFile.open(name);
             // read data and put it local array
-            tempVar = nc.findVariable(plktonNetcdfNames[plankton.getIndex()]);
-            tempArray = (ArrayFloat.D3) tempVar.read().reduce();
-
-            // fill data
-            for (int i = 0; i < get_nx(); i++) {
-                for (int j = 0; j < get_ny(); j++) {
-                    for (int k = 0; k < get_nz(); k++) {
-                        data3d[i][j][k] = tempArray.get(k, i, j);
-                    }
-                }
-            }
+            data3d = (float[][][]) nc.findVariable(plktonNetcdfNames[iPlankton]).read().reduce().copyToNDJavaArray();  
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -284,11 +269,11 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         if (arrH.getElementType() == double.class) {
             hRho = (double[][]) arrH.copyToNDJavaArray();
         } else {
-            hRho = new double[nx][ny];
+            hRho = new double[ny][nx];
             Index index = arrH.getIndex();
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    hRho[i][j] = arrH.getDouble(index.set(i, j));
+                    hRho[j][i] = arrH.getDouble(index.set(j, i));
                 }
             }
         }
@@ -307,7 +292,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
         //------------------------------------------------------------
         // Calculation of z_w , z_r
-        float[][][] z_r = new float[nx][ny][nz];
+        float[][][] z_r = new float[nz][ny][nx];
 
         /* 2010 June: Recent UCLA Roms version (but not AGRIF yet)
          * uses new formulation for computing the unperturbated depth.
@@ -323,7 +308,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 for (int i = nx; i-- > 0;) {
                     for (int j = ny; j-- > 0;) {
                         for (int k = nz; k-- > 0;) {
-                            z_r[i][j][k] = (float) (hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[i][j]);
+                            z_r[k][j][i] = (float) (hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i]);
                         }
                     }
                 }
@@ -333,7 +318,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 for (int i = nx; i-- > 0;) {
                     for (int j = ny; j-- > 0;) {
                         for (int k = nz; k-- > 0;) {
-                            z_r[i][j][k] = (float) (hRho[i][j] * (sc_r[k] * hc + Cs_r[k] * hRho[i][j]) / (hc + hRho[i][j]));
+                            z_r[k][j][i] = (float) (hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]));
                         }
                     }
                 }

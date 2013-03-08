@@ -65,7 +65,7 @@ public class ECO3MGrid extends AbstractGrid {
      */
     private double[][] readVariable(NetcdfFile nc, String varname) {
         try {
-            return (double[][]) nc.findVariable(varname).read().flip(0).copyToNDJavaArray();
+            return (double[][]) nc.findVariable(varname).read().copyToNDJavaArray();
         } catch (IOException ex) {
             Logger.getLogger(ECO3MGrid.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -117,7 +117,7 @@ public class ECO3MGrid extends AbstractGrid {
                 fmask = fmask / (stride * stride);
                 boolean land = (fmask > 0.5) ? false : true;
                 //grid[i][j] = new Cell(i, j, (float) lat[j][i], (float) lon[j][i], land);
-                grid[j][i] = new Cell(j, i, (float) lat[j][i], (float) lon[j][i], land);
+                grid[j][i] = new Cell(i, j, (float) lat[j][i], (float) lon[j][i], land);
             }
         }
 

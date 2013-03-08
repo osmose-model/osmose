@@ -58,8 +58,8 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
          */
         Dimension speciesDim = nc.addDimension("species", getNSpecies());
         Dimension ltlDim = nc.addDimension("ltl", getConfiguration().getNPlankton());
-        Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
-        Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
+        Dimension columnsDim = nc.addDimension("nx", getGrid().get_nx());
+        Dimension linesDim = nc.addDimension("ny", getGrid().get_ny());
         Dimension timeDim = nc.addUnlimitedDimension("time");
         /*
          * Add variables
@@ -127,11 +127,11 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
             /*
              * Writes variable longitude and latitude
              */
-            ArrayFloat.D2 arrLon = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
-            ArrayFloat.D2 arrLat = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
+            ArrayFloat.D2 arrLon = new ArrayFloat.D2(getGrid().get_ny(), getGrid().get_nx());
+            ArrayFloat.D2 arrLat = new ArrayFloat.D2(getGrid().get_ny(), getGrid().get_nx());
             for (Cell cell : getGrid().getCells()) {
-                arrLon.set(getGrid().getNbLines() - cell.get_igrid() - 1, cell.get_jgrid(), cell.getLon());
-                arrLat.set(getGrid().getNbLines() - cell.get_igrid() - 1, cell.get_jgrid(), cell.getLat());
+                arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
+                arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
             nc.write("longitude", arrLon);
             nc.write("latitude", arrLat);
@@ -164,8 +164,8 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
     public void reset() {
 
         int nSpecies = getNSpecies();
-        int nx = getGrid().getNbColumns();
-        int ny = getGrid().getNbLines();
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
         biomass = new float[nSpecies][ny][nx];
         mean_size = new float[nSpecies][ny][nx];
         tl = new float[nSpecies][ny][nx];
@@ -184,15 +184,15 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
                 for (School school : getPopulation().getSchools(cell)) {
                     if (school.getAgeDt() > school.getSpecies().getAgeClassZero() && !school.isUnlocated()) {
                         int iSpec = school.getSpeciesIndex();
-                        biomass[iSpec][i][j] += school.getInstantaneousBiomass();
-                        abundance[iSpec][i][j] += school.getInstantaneousAbundance();
-                        mean_size[iSpec][i][j] += school.getLength() * school.getInstantaneousAbundance();
-                        tl[iSpec][i][j] += school.getTrophicLevel() * school.getInstantaneousBiomass();
-                        yield[iSpec][i][j] += school.adb2biom(school.getNdeadFishing());
+                        biomass[iSpec][j][i] += school.getInstantaneousBiomass();
+                        abundance[iSpec][j][i] += school.getInstantaneousAbundance();
+                        mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
+                        tl[iSpec][j][i] += school.getTrophicLevel() * school.getInstantaneousBiomass();
+                        yield[iSpec][j][i] += school.adb2biom(school.getNdeadFishing());
                     }
                 }
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass[iltl][cell.get_igrid()][cell.get_jgrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
+                    ltlbiomass[iltl][j][i] = getSimulation().getPlankton(iltl).getBiomass(cell);
                 }
             }
         }
@@ -213,22 +213,22 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
             // Set _FillValue on land cells
             if (cell.isLand()) {
                 for (int ispec = 0; ispec < getNSpecies(); ispec++) {
-                    biomass[ispec][i][j] = FILLVALUE;
-                    abundance[ispec][i][j] = FILLVALUE;
-                    mean_size[ispec][i][j] = FILLVALUE;
-                    tl[ispec][i][j] = FILLVALUE;
-                    yield[ispec][i][j] = FILLVALUE;
+                    biomass[ispec][j][i] = FILLVALUE;
+                    abundance[ispec][j][i] = FILLVALUE;
+                    mean_size[ispec][j][i] = FILLVALUE;
+                    tl[ispec][j][i] = FILLVALUE;
+                    yield[ispec][j][i] = FILLVALUE;
                 }
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass[iltl][i][j] = FILLVALUE;
+                    ltlbiomass[iltl][j][i] = FILLVALUE;
                 }
             } else {
                 // Weight mean size with abundance
                 // Weight mean size with biomass
                 for (int ispec = 0; ispec < getNSpecies(); ispec++) {
-                    if (abundance[ispec][i][j] > 0) {
-                        mean_size[ispec][i][j] /= abundance[ispec][i][j];
-                        tl[ispec][i][j] /= biomass[ispec][i][j];
+                    if (abundance[ispec][j][i] > 0) {
+                        mean_size[ispec][j][i] /= abundance[ispec][j][i];
+                        tl[ispec][j][i] /= biomass[ispec][j][i];
                     }
                 }
             }
@@ -236,28 +236,27 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
 
         // Write into NetCDF file
         int nSpecies = getNSpecies();
-        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrAbundance = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, nSpecies, getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().getNbLines(), getGrid().getNbColumns());
-        int nl = getGrid().getNbLines() - 1;
+        ArrayFloat.D4 arrBiomass = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrAbundance = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().get_ny(), getGrid().get_nx());
         for (int kspec = 0; kspec < nSpecies; kspec++) {
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrBiomass.set(0, kspec, nl - i, j, biomass[kspec][i][j]);
-                    arrAbundance.set(0, kspec, nl - i, j, abundance[kspec][i][j]);
-                    arrSize.set(0, kspec, nl - i, j, mean_size[kspec][i][j]);
-                    arrTL.set(0, kspec, nl - i, j, tl[kspec][i][j]);
-                    arrYield.set(0, kspec, nl - i, j, yield[kspec][i][j]);
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
+                    arrBiomass.set(0, kspec, j, i, biomass[kspec][j][i]);
+                    arrAbundance.set(0, kspec, j, i, abundance[kspec][j][i]);
+                    arrSize.set(0, kspec, j, i, mean_size[kspec][j][i]);
+                    arrTL.set(0, kspec, j, i, tl[kspec][j][i]);
+                    arrYield.set(0, kspec, j, i, yield[kspec][j][i]);
                 }
             }
         }
         for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrLTL.set(0, kltl, nl - i, j, ltlbiomass[kltl][i][j]);
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
+                    arrLTL.set(0, kltl, j, i, ltlbiomass[kltl][j][i]);
                 }
             }
         }

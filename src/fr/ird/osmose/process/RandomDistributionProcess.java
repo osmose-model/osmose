@@ -52,8 +52,8 @@ public class RandomDistributionProcess extends AbstractProcess {
             areaSize = nbCasesDispos;
 
             randomMap = new ArrayList(areaSize);
-            for (int l = 0; l < getGrid().getNbLines(); l++) {
-                for (int m = 0; m < getGrid().getNbColumns(); m++) {
+            for (int l = 0; l < getGrid().get_ny(); l++) {
+                for (int m = 0; m < getGrid().get_nx(); m++) {
                     if (!getGrid().getCell(l, m).isLand()) {
                         randomMap.add(getGrid().getCell(l, m));
                     }
@@ -65,14 +65,14 @@ public class RandomDistributionProcess extends AbstractProcess {
              */
             int nCells = areaSize;
             randomMap = new ArrayList(nCells);
-            boolean[][] alreadyChoosen = new boolean[getGrid().getNbLines()][getGrid().getNbColumns()];
+            boolean[][] alreadyChoosen = new boolean[getGrid().get_ny()][getGrid().get_nx()];
             //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpec]];
             int coordi, coordj;
-            coordi = (int) Math.round(Math.random() * (getGrid().getNbLines() - 1));
-            coordj = (int) Math.round(Math.random() * (getGrid().getNbColumns() - 1));
+            coordi = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+            coordj = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
             while (getGrid().getCell(coordi, coordj).isLand()) {
-                coordi = (int) Math.round(Math.random() * (getGrid().getNbLines() - 1));
-                coordj = (int) Math.round(Math.random() * (getGrid().getNbColumns() - 1));
+                coordi = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+                coordj = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
             }
             randomMap.add(getGrid().getCell(coordi, coordj));
             alreadyChoosen[coordi][coordj] = true;

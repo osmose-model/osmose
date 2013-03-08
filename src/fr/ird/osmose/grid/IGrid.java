@@ -69,12 +69,12 @@ public interface IGrid {
     /**
      * @return the number of lines
      */
-    public int getNbLines();
+    public int get_ny();
 
     /**
      * @return the number of columns
      */
-    public int getNbColumns();
+    public int get_nx();
 
     /**
      * @return the stride that has been used for creating the Osmose grid

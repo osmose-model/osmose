@@ -52,7 +52,7 @@ public class Plankton {
     }
 
     public float getBiomass(Cell cell) {
-        return biomass[cell.get_igrid()][cell.get_jgrid()];
+        return biomass[cell.get_jgrid()][cell.get_igrid()];
     }
 
     public float getAccessibleBiomass(Cell cell) {
@@ -94,7 +94,7 @@ public class Plankton {
      * Init biomass matrix
      */
     public void init() {
-        biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
+        biomass = new float[getGrid().get_ny()][getGrid().get_nx()];
     }
 
     public float calculPercent(float CritMin, float CritMax) // used during the predation process : compute the percentage of plankton size range available to a predator (according to its size)

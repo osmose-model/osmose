@@ -5,9 +5,9 @@ import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
 import fr.ird.osmose.step.SequentialMortalityStep;
-import fr.ird.osmose.util.OsmoseLogFormatter;
 import fr.ird.osmose.util.SimulationLogFormatter;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Simulation {
@@ -174,9 +174,8 @@ public class Simulation {
     private void progress() {
         // screen display to check the period already simulated
         if (i_step_simu % getConfiguration().getNumberTimeStepsPerYear() == 0) {
-            System.out.println("year " + year);
+            logger.log(Level.FINE, "year {0}", year);
         }
-        //System.out.print(" " + i_step_year);
     }
 
     public void run() {

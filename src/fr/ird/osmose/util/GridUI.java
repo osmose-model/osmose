@@ -121,8 +121,8 @@ public class GridUI extends JPanel {
         graphic.fillRect(0, 0, w, h);
 
         CellUI cell = new CellUI();
-        for (int i = getGrid().getNbLines() - 1; i-- > 0;) {
-            for (int j = getGrid().getNbColumns() - 1; j-- > 0;) {
+        for (int j = getGrid().get_ny() - 1; j-- > 0;) {
+            for (int i = getGrid().get_nx() - 1; i-- > 0;) {
                 cell.draw(i, j, w, h);
                 graphic.setColor(cell.getColor(i, j));
                 graphic.fillPolygon(cell);
@@ -210,8 +210,8 @@ public class GridUI extends JPanel {
         latmax = getGrid().getLatMax();
         lonmin = getGrid().getLongMin();
         lonmax = getGrid().getLongMax();
-        System.out.println("lines: " + getGrid().getNbLines());
-        System.out.println("columns: " + getGrid().getNbColumns());
+        System.out.println("ny: " + getGrid().get_ny());
+        System.out.println("nx: " + getGrid().get_nx());
 
         double avgLat = 0.5d * (latmin + latmax);
 
@@ -378,11 +378,11 @@ public class GridUI extends JPanel {
             fw = new FileWriter("grid_osmose_stride" + getOsmose().getGrid().getStride() + ".csv");
             PrintWriter pw = new PrintWriter(fw);
             pw.println("lat , lon, mask (land = 0 water = 1)");
-            int nbL = getOsmose().getGrid().getNbLines();
-            int nbC = getOsmose().getGrid().getNbColumns();
+            int nbL = getOsmose().getGrid().get_ny();
+            int nbC = getOsmose().getGrid().get_nx();
             for (int l = 0; l < nbL; l++) {
                 for (int c = 0; c < nbC; c++) {
-                    Cell cell = getOsmose().getGrid().getCell(l, c);
+                    Cell cell = getOsmose().getGrid().getCell(c, nbL - l - 1);
                     pw.print(cell.getLat());
                     pw.print(" , ");
                     pw.print(cell.getLon());
@@ -394,12 +394,11 @@ public class GridUI extends JPanel {
             pw.flush();
             //Close the Print Writer
             pw.close();
-            //Close the File Writer
-            fw.close();
         } catch (IOException ex) {
             Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
+                //Close the File Writer
                 fw.close();
             } catch (IOException ex) {
                 Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);

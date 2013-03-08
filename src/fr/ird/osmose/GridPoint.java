@@ -20,9 +20,9 @@ public class GridPoint {
     }
 
     public boolean isOnEdge() {
-        return ((x > (getGrid().getNbColumns() - 2.0f))
+        return ((x > (getGrid().get_nx() - 2.0f))
                 || (x < 1.0f)
-                || (y > (getGrid().getNbLines() - 2.0f))
+                || (y > (getGrid().get_ny() - 2.0f))
                 || (y < 1.0f));
     }
 

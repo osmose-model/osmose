@@ -84,7 +84,7 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
              * school was unlocated due to migration.
              */
             int indexCell;
-            int nCells = getGrid().getNbColumns() * getGrid().getNbLines();
+            int nCells = getGrid().get_nx() * getGrid().get_ny();
             double proba;
             do {
                 indexCell = (int) Math.round((nCells - 1) * Math.random());

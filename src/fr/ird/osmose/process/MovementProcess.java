@@ -412,8 +412,8 @@ public class MovementProcess extends AbstractProcess {
     private float computeMaxProbaPresence(int numMap) {
         float tempMaxProbaPresence = 0;
         GridMap map = getMap(numMap);
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+        for (int i = 0; i < getGrid().get_ny(); i++) {
+            for (int j = 0; j < getGrid().get_nx(); j++) {
                 tempMaxProbaPresence = Math.max(tempMaxProbaPresence, map.getValue(i, j));
             }
         }

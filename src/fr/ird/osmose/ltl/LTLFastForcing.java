@@ -32,8 +32,8 @@ public class LTLFastForcing extends AbstractLTLForcing {
         /*
          * set dimensions
          */
-        setDimX(getGrid().getNbLines());
-        setDimY(getGrid().getNbColumns());
+        setDimY(getGrid().get_ny());
+        setDimX(getGrid().get_nx());
 
         loadData();
     }
@@ -41,12 +41,11 @@ public class LTLFastForcing extends AbstractLTLForcing {
     @Override
     public float[][] computeBiomass(Plankton plankton, int iStepSimu) {
 
-        float[][] biomass = new float[getGrid().getNbLines()][getGrid().getNbColumns()];
-        int nl = getGrid().getNbLines() - 1;
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+        float[][] biomass = new float[getGrid().get_ny()][getGrid().get_nx()];
+        for (int j = 0; j < getGrid().get_ny(); j++) {
+            for (int i = 0; i < getGrid().get_nx(); i++) {
                 if (!getGrid().getCell(i, j).isLand()) {
-                    biomass[i][j] = data[getIndexStepLTL(iStepSimu)][plankton.getIndex()][nl - i][j];
+                    biomass[j][i] = data[getIndexStepLTL(iStepSimu)][plankton.getIndex()][j][i];
                 }
             }
         }
@@ -55,20 +54,19 @@ public class LTLFastForcing extends AbstractLTLForcing {
 
     private void loadData() {
         try {
-            System.out.println("Loading all plankton data, it might take a while...");
-            System.out.println("Forcing file " + getConfiguration().resolveFile(ncFile));
+            getLogger().info("Loading all plankton data, it might take a while...");
+            getLogger().log(Level.FINE, "Forcing file {0}", getConfiguration().resolveFile(ncFile));
 
             NetcdfFile nc = NetcdfFile.open(getConfiguration().resolveFile(ncFile));
             data = (float[][][][]) nc.findVariable("ltl_biomass").read().copyToNDJavaArray();
-
-            System.out.println("All plankton data loaded !");
+            getLogger().info("All plankton data loaded !");
         } catch (IOException ex) {
             Logger.getLogger(LTLFastForcing.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
-    float[][] getRawBiomass(Plankton plankton, int iStepYear) {
+    float[][] getRawBiomass(int iPlankton, int iStepYear) {
         return null;
     }
 
@@ -79,6 +77,6 @@ public class LTLFastForcing extends AbstractLTLForcing {
 
     @Override
     public String[] getNetcdfFile() {
-        return new String[] {ncFile};
+        return new String[]{ncFile};
     }
 }

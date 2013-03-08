@@ -4,7 +4,6 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.Plankton;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -87,32 +86,32 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         setDimY(shape[1]);
         setDimX(shape[2]);
 
-        depthOfLayer = new float[get_nx()][get_ny()][get_nz()];
+        depthOfLayer = new float[get_nz()][get_ny()][get_nx()];
 
         try {
-            ArrayDouble.D3 arrDepth = (D3) ncGrid.findVariable(zlevelName).read().flip(1);
+            ArrayDouble.D3 arrDepth = (ArrayDouble.D3) ncGrid.findVariable(zlevelName).read();
             for (int i = 0; i < get_nx(); i++) {
                 for (int j = 0; j < get_ny(); j++) {
                     for (int z = 0; z < get_nz(); z++) {
-                        depthOfLayer[i][j][z] = (float) arrDepth.get(z, j, i);
+                        depthOfLayer[z][j][i] = (float) arrDepth.get(z, j, i);
                     }
                 }
             }
             ncGrid.close();
 
-            icoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
-            jcoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+            icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
+            jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
             int stride = getGrid().getStride();
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
                     for (int ii = 0; ii < stride; ii++) {
                         for (int jj = 0; jj < stride; jj++) {
-                            if (null == icoordLTLGrid[i][j]) {
-                                icoordLTLGrid[i][j] = new ArrayList();
-                                jcoordLTLGrid[i][j] = new ArrayList();
+                            if (null == icoordLTLGrid[j][i]) {
+                                icoordLTLGrid[j][i] = new ArrayList();
+                                jcoordLTLGrid[j][i] = new ArrayList();
                             }
-                            icoordLTLGrid[i][j].add(j * stride + jj);
-                            jcoordLTLGrid[i][j].add(i * stride + ii);
+                            icoordLTLGrid[j][i].add(i * stride + jj);
+                            jcoordLTLGrid[j][i].add(j * stride + ii);
                         }
                     }
                 }
@@ -124,38 +123,43 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
+    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
+        float[][][] dataInit  = new float[get_nz()][get_ny()][get_nx()];
+        NetcdfFile nc = null;
         String name = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
-        int[] shape;
-        ArrayDouble.D3 tempArray;
-        float[][][] data3d = new float[get_nx()][get_ny()][get_nz()];
+        ArrayDouble.D3 tempArray = null;
 
         try {
-            NetcdfFile nc = NetcdfFile.open(name);
+            nc = NetcdfFile.open(name);
             // read data and put them in the local arrays
-
-            Variable tempVar = nc.findVariable(plktonNetcdfNames[plankton.getIndex()]);
-            tempArray = (ArrayDouble.D3) tempVar.read().flip(1);
-            shape = tempVar.getShape();
+            tempArray = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[iPlankton]).read();
+            int[] shape = tempArray.getShape();
 
             // fill dataInit of plankton classes from local arrays
             for (int i = 0; i < shape[2]; i++) {
                 for (int j = 0; j < shape[1]; j++) {
                     for (int k = 0; k < shape[0]; k++) {
-                        data3d[i][j][k] = (float) tempArray.get(k, j, i);    // carreful, index not in the same order
+                        dataInit[k][j][i] = (float) tempArray.get(k, j, i);
                     }
                 }
             }
-            nc.close();
-        } catch (IOException ex) {
-            Logger.getLogger(LTLForcingECO3M.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException e) {
+            Logger.getLogger(LTLForcingECO3M.class.getName()).log(Level.SEVERE, null, e);
+        } finally {
+            if (nc != null) {
+                try {
+                    nc.close();
+                } catch (IOException ioe) {
+                    Logger.getLogger(LTLForcingECO3M.class.getName()).log(Level.SEVERE, null, ioe);
+                }
+            }
         }
 
         // vertical integration
-        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getIntegrationDepth());
+        return verticalIntegration(dataInit, depthOfLayer, getConfiguration().getIntegrationDepth());
     }
-    
+
     @Override
     public String[] getPlanktonFieldName() {
         return plktonNetcdfNames;

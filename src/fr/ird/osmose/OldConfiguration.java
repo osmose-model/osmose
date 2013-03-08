@@ -2055,13 +2055,14 @@ public class OldConfiguration {
             int indexCell = 0;
             tabMPAiMatrix = new int[nbCells];
             tabMPAjMatrix = new int[nbCells];
-            for (int i = 0; i < lines.size(); i++) {
-                String[] line = lines.get(i);
-                for (int j = 0; j < line.length; j++) {
-                    float val = Float.valueOf(line[j]);
+            int ny = lines.size();
+            for (int j = ny; j-- > 0; ) {
+                String[] line = lines.get(j);
+                for (int i = 0; i < line.length; i++) {
+                    float val = Float.valueOf(line[i]);
                     if (val > 0.f) {
                         tabMPAiMatrix[indexCell] = i;
-                        tabMPAjMatrix[indexCell] = j;
+                        tabMPAjMatrix[indexCell] = ny - j - 1;
                         indexCell++;
                     }
                 }
@@ -2119,12 +2120,12 @@ public class OldConfiguration {
             /*
              * Identify the coordinates of the cells and set the probability
              */
-            int indexCell = 0;
             float invNbCells = 1.f / nbCells;
-            for (int i = 0; i < lines.size(); i++) {
-                String[] line = lines.get(i);
-                for (int j = 0; j < line.length; j++) {
-                    float val = Float.valueOf(line[j]);
+            for (int iline = 0; iline < lines.size(); iline++) {
+                String[] line = lines.get(iline);
+                int j = getGrid().get_ny() - iline - 1;
+                for (int i = 0; i < line.length; i++) {
+                    float val = Float.valueOf(line[i]);
                     if (val > 0.f) {
                         if (val < 1.f) {
                             /*
@@ -2142,7 +2143,6 @@ public class OldConfiguration {
                              * default value at initialization of the array
                              */
                         }
-                        indexCell++;
                     }
                 }
             }
@@ -2159,8 +2159,8 @@ public class OldConfiguration {
 
     private float getMaxProbaPresence(int numMap) {
         float tempMaxProbaPresence = 0;
-        for (int i = 0; i < grid.getNbLines(); i++) {
-            for (int j = 0; j < grid.getNbColumns(); j++) {
+        for (int j = 0; j < grid.get_ny(); j++) {
+            for (int i = 0; i < grid.get_nx(); i++) {
                 tempMaxProbaPresence = Math.max(tempMaxProbaPresence, maps[numMap].getValue(i, j));
             }
         }

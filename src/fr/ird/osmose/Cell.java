@@ -61,7 +61,7 @@ public class Cell {
         this.lon = lon;
         this.land = land;
         // calculates index
-        index = i * Osmose.getInstance().getGrid().getNbColumns() + j;
+        index = j * Osmose.getInstance().getGrid().get_nx() + i;
     }
 
 ////////////////////////////

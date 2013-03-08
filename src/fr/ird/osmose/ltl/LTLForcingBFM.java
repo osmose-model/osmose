@@ -96,7 +96,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         }
     }
 
-    @Override
+     @Override
     public void initLTLGrid() {
 
         NetcdfFile nc = null;
@@ -131,31 +131,30 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Compute the depth of every cell in meter
              */
-            depthOfLayer = new float[get_nx()][get_ny()][get_nz()];
-            for (int i = 0; i < get_nx(); i++) {
+            depthOfLayer = new float[get_nz()][get_ny()][get_nx()];
+            for (int z = 0; z < get_nz(); z++) {
                 for (int j = 0; j < get_ny(); j++) {
-                    for (int z = 0; z < get_nz(); z++) {
-                        depthOfLayer[i][j][z] = bathy[j][i] * zlevel[z];
+                    for (int i = 0; i < get_nx(); i++) {
+                        depthOfLayer[z][j][i] = bathy[j][i] * zlevel[z];
                     }
                 }
             }
             /*
              * Associate osmose cells to BFM cells
              */
-            icoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
-            jcoordLTLGrid = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+            icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
+            jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
             int stride = getGrid().getStride();
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
                     for (int ii = 0; ii < stride; ii++) {
                         for (int jj = 0; jj < stride; jj++) {
-                            int posiTemp = getGrid().getNbLines() - i - 1;
-                            if (null == icoordLTLGrid[posiTemp][j]) {
-                                icoordLTLGrid[posiTemp][j] = new ArrayList();
-                                jcoordLTLGrid[posiTemp][j] = new ArrayList();
+                            if (null == icoordLTLGrid[j][i]) {
+                                icoordLTLGrid[j][i] = new ArrayList();
+                                jcoordLTLGrid[j][i] = new ArrayList();
                             }
-                            icoordLTLGrid[posiTemp][j].add(j * stride + jj);
-                            jcoordLTLGrid[posiTemp][j].add(i * stride + ii);
+                            jcoordLTLGrid[j][i].add(j * stride + jj);
+                            icoordLTLGrid[j][i].add(i * stride + ii);
                         }
                     }
                 }
@@ -187,14 +186,14 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         String gridFile = getConfiguration().gridFileTab;
         String strMask = getConfiguration().maskField;
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
-        float[][][] mask;
-        mask = (float[][][]) nc.findVariable(strMask).read().copyToNDJavaArray();
+        float[][] mask = (float[][]) nc.findVariable(strMask).read().copyToNDJavaArray();
+
         /*
          * Reads the BFM grid dimensions
          */
-        km = nc.findDimension("z").getLength();
-        jm = nc.findDimension("y").getLength();
-        im = nc.findDimension("x").getLength();
+        km = nc.findDimension("zpos").getLength() - 1;
+        jm = nc.findDimension("ypos").getLength();
+        im = nc.findDimension("xpos").getLength();
         int cont = 0;
         /*
          * Compute the index that helps to convert oceanpoint coordinates to
@@ -204,7 +203,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         for (int k = 0; k < km; k++) {
             for (int j = 0; j < jm; j++) {
                 for (int i = 0; i < im; i++) {
-                    if (mask[k][j][i] > 0) {
+                    if (mask[j][i] > 0) {
                         indexOceanpoint[k][j][i] = cont;
                         cont++;
                     } else {
@@ -214,12 +213,12 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             }
         }
     }
-
+    
     @Override
-    float[][] getRawBiomass(Plankton plankton, int iStepSimu) {
+    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
         //System.out.println("Reading " + name + " time " + dt);
-        float[][][] data3d = new float[get_nx()][get_ny()][get_nz()];
+        float[][][] data3d = new float[get_nz()][get_ny()][get_nx()];
         try {
             /*
              * Open the BFM Plankton NetCDF file
@@ -230,11 +229,11 @@ public class LTLForcingBFM extends AbstractLTLForcing {
              * Loop over the plankton groups
              */
             int timestep = iStepSimu % timeDim;
-            System.out.println("iStepSimu " + iStepSimu + " " + name + " timestep " + timestep + " " + plankton.getName());
+            //System.out.println("iStepSimu " + iStepSimu + " " + name + " timestep " + timestep + " " + plankton.getName());
             /*
              * Read the concentration of plankton
              */
-            Variable ncvar = nc.findVariable(planktonNetcdfNames[plankton.getIndex()]);
+            Variable ncvar = nc.findVariable(planktonNetcdfNames[iPlankton]);
             int[] shape = ncvar.getShape();
             float[] variable = (float[]) ncvar.read(new int[]{timestep, 0}, new int[]{1, shape[1]}).reduce().copyToNDJavaArray();
             /*
@@ -245,9 +244,9 @@ public class LTLForcingBFM extends AbstractLTLForcing {
                     for (int k = 0; k < km; k++) {
                         int oceanpoint = ijk2oceanpoint(i, j, k);
                         if (oceanpoint >= 0) {
-                            data3d[i][j][k] = variable[oceanpoint];
+                            data3d[k][j][i] = variable[oceanpoint];
                         } else {
-                            data3d[i][j][k] = 0.f;
+                            data3d[k][j][i] = 0.f;
                         }
                     }
                 }

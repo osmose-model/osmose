@@ -69,8 +69,8 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void reset() {
-        int nx = getGrid().getNbColumns();
-        int ny = getGrid().getNbLines();
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
         ltlbiomass0 = new float[getConfiguration().getNPlankton()][ny][nx];
         ltlbiomass1 = new float[getConfiguration().getNPlankton()][ny][nx];
     }
@@ -81,8 +81,8 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass0[iltl][cell.get_igrid()][cell.get_jgrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
-                    ltlbiomass1[iltl][cell.get_igrid()][cell.get_jgrid()] = ltlbiomass0[iltl][cell.get_igrid()][cell.get_jgrid()];
+                    ltlbiomass0[iltl][cell.get_jgrid()][cell.get_igrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
+                    ltlbiomass1[iltl][cell.get_jgrid()][cell.get_igrid()] = ltlbiomass0[iltl][cell.get_jgrid()][cell.get_igrid()];
                 }
             }
         }
@@ -93,7 +93,7 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
             int i = (int) school.getX();
             int j = (int) school.getY();
             for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                ltlbiomass1[iltl][i][j] -= school.diet[nspec + iltl][0];
+                ltlbiomass1[iltl][j][i] -= school.diet[nspec + iltl][0];
             }
         }
     }
@@ -112,21 +112,21 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
             // Set _FillValue on land cells
             if (cell.isLand()) {
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass0[iltl][i][j] = FILLVALUE;
-                    ltlbiomass1[iltl][i][j] = FILLVALUE;
+                    ltlbiomass0[iltl][j][i] = FILLVALUE;
+                    ltlbiomass1[iltl][j][i] = FILLVALUE;
                 }
             }
         }
 
         // Write into NetCDF file
-        ArrayFloat.D4 arrLTL0 = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().getNbLines(), getGrid().getNbColumns());
-        ArrayFloat.D4 arrLTL1 = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().getNbLines(), getGrid().getNbColumns());
-        int nl = getGrid().getNbLines() - 1;
+        ArrayFloat.D4 arrLTL0 = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrLTL1 = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().get_ny(), getGrid().get_nx());
+        int nl = getGrid().get_ny() - 1;
         for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
-            for (int i = 0; i < getGrid().getNbLines(); i++) {
-                for (int j = 0; j < getGrid().getNbColumns(); j++) {
-                    arrLTL0.set(0, kltl, nl - i, j, ltlbiomass0[kltl][i][j]);
-                    arrLTL1.set(0, kltl, nl - i, j, ltlbiomass1[kltl][i][j]);
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
+                    arrLTL0.set(0, kltl, j, i, ltlbiomass0[kltl][j][i]);
+                    arrLTL1.set(0, kltl, j, i, ltlbiomass1[kltl][j][i]);
                 }
             }
         }
@@ -161,8 +161,8 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
          * Create dimensions
          */
         Dimension ltlDim = nc.addDimension("ltl", getConfiguration().getNPlankton());
-        Dimension columnsDim = nc.addDimension("columns", getGrid().getNbColumns());
-        Dimension linesDim = nc.addDimension("lines", getGrid().getNbLines());
+        Dimension nxDim = nc.addDimension("nx", getGrid().get_nx());
+        Dimension nyDim = nc.addDimension("ny", getGrid().get_ny());
         Dimension timeDim = nc.addUnlimitedDimension("time");
         /*
          * Add variables
@@ -171,18 +171,18 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
         nc.addVariableAttribute("time", "units", "days since 1-1-1 0:0:0");
         nc.addVariableAttribute("time", "calendar", "360_day");
         nc.addVariableAttribute("time", "description", "time ellapsed, in days, since the beginning of the simulation");
-        nc.addVariable("ltl_biomass", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, linesDim, columnsDim});
+        nc.addVariable("ltl_biomass", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, nyDim, nxDim});
         nc.addVariableAttribute("ltl_biomass", "units", "tons per cell");
         nc.addVariableAttribute("ltl_biomass", "description", "plankton biomass in osmose cell, in tons integrated on water column, per group and per cell");
         nc.addVariableAttribute("ltl_biomass", "_FillValue", -99.f);
-        nc.addVariable("ltl_biomass_pred", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, linesDim, columnsDim});
+        nc.addVariable("ltl_biomass_pred", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, nyDim, nxDim});
         nc.addVariableAttribute("ltl_biomass_pred", "units", "tons per cell");
         nc.addVariableAttribute("ltl_biomass_pred", "description", "plankton biomass after predation process in osmose cell, in tons integrated on water column, per group and per cell");
         nc.addVariableAttribute("ltl_biomass_pred", "_FillValue", -99.f);
-        nc.addVariable("latitude", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
+        nc.addVariable("latitude", DataType.FLOAT, new Dimension[]{nyDim, nxDim});
         nc.addVariableAttribute("latitude", "units", "degree");
         nc.addVariableAttribute("latitude", "description", "latitude of the center of the cell");
-        nc.addVariable("longitude", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
+        nc.addVariable("longitude", DataType.FLOAT, new Dimension[]{nyDim, nxDim});
         nc.addVariableAttribute("longitude", "units", "degree");
         nc.addVariableAttribute("longitude", "description", "longitude of the center of the cell");
         /*
@@ -204,11 +204,11 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
             /*
              * Writes variable longitude and latitude
              */
-            ArrayFloat.D2 arrLon = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
-            ArrayFloat.D2 arrLat = new ArrayFloat.D2(getGrid().getNbLines(), getGrid().getNbColumns());
+            ArrayFloat.D2 arrLon = new ArrayFloat.D2(getGrid().get_ny(), getGrid().get_nx());
+            ArrayFloat.D2 arrLat = new ArrayFloat.D2(getGrid().get_ny(), getGrid().get_nx());
             for (Cell cell : getGrid().getCells()) {
-                arrLon.set(getGrid().getNbLines() - cell.get_igrid() - 1, cell.get_jgrid(), cell.getLon());
-                arrLat.set(getGrid().getNbLines() - cell.get_igrid() - 1, cell.get_jgrid(), cell.getLat());
+                arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
+                arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
             nc.write("longitude", arrLon);
             nc.write("latitude", arrLat);

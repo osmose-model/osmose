@@ -27,11 +27,11 @@ public abstract class AbstractGrid implements IGrid {
     /*
      * Number of lines
      */
-    private int nbLines;
+    private int ny;
     /*
      * Number od columns
      */
-    private int nbColumns;
+    private int nx;
     /*
      * Latitude °N of upper left corner of the grid
      */
@@ -87,14 +87,14 @@ public abstract class AbstractGrid implements IGrid {
      */
     @Override
     public Cell getCell(int i, int j) {
-        return matrix[i][j];
+        return matrix[j][i];
     }
 
     @Override
     public Cell getCell(int index) {
-        int i = index / nbColumns;
-        int j = index - i * nbColumns;
-        return matrix[i][j];
+        int j = index / nx;
+        int i = index - j * nx;
+        return matrix[j][i];
     }
 
     /**
@@ -104,10 +104,10 @@ public abstract class AbstractGrid implements IGrid {
      */
     @Override
     public List<Cell> getCells() {
-        ArrayList<Cell> cells = new ArrayList(nbLines * nbColumns);
-        for (int i = nbLines; i-- > 0;) {
-            for (int j = nbColumns; j-- > 0;) {
-                cells.add(matrix[i][j]);
+        ArrayList<Cell> cells = new ArrayList(ny * nx);
+        for (int j = ny; j-- > 0;) {
+            for (int i = nx; i-- > 0;) {
+                cells.add(matrix[j][i]);
             }
         }
         return cells;
@@ -115,8 +115,7 @@ public abstract class AbstractGrid implements IGrid {
 
     /**
      * Get the adjacent cells of a given cell (cell included) within a given
-     * range of cells.
-     * Cells are randomly sorted.
+     * range of cells. Cells are randomly sorted.
      *
      * @see Collections.shuffle() For cell(i, j) returns 8 surrounding cells:
      * cell(i - 1, j - 1) cell(i - 1, j) cell(i - 1, j + 1) cell(i, j - 1)
@@ -124,22 +123,21 @@ public abstract class AbstractGrid implements IGrid {
      * cells at the edge of the grid, only returns 3 or 5 cells.
      * @param cell
      * @param range, and integer, the range of the neighbourhood
-     * @return an ArrayList of the cells surrounding
-     * <code>cell</code>
+     * @return an ArrayList of the cells surrounding <code>cell</code>
      */
     @Override
     public ArrayList<Cell> getNeighbourCells(Cell cell, int range) {
 
         int im1 = Math.max(cell.get_igrid() - range, 0);
-        int ip1 = Math.min(cell.get_igrid() + range, getNbLines() - 1);
+        int ip1 = Math.min(cell.get_igrid() + range, get_nx() - 1);
         int jm1 = Math.max(cell.get_jgrid() - range, 0);
-        int jp1 = Math.min(cell.get_jgrid() + range, getNbColumns() - 1);
+        int jp1 = Math.min(cell.get_jgrid() + range, get_ny() - 1);
 
         ArrayList<Cell> neighbours = new ArrayList();
 
         for (int i = im1; i <= ip1; i++) {
             for (int j = jm1; j <= jp1; j++) {
-                neighbours.add(matrix[i][j]);
+                neighbours.add(matrix[j][i]);
             }
         }
         //neighbors.remove(cell);
@@ -157,9 +155,9 @@ public abstract class AbstractGrid implements IGrid {
     public int getNumberAvailableCells() {
         int nbCells = 0;
 
-        for (int i = 0; i < nbLines; i++) {
-            for (int j = 0; j < nbColumns; j++) {
-                if (!matrix[i][j].isLand()) {
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                if (!matrix[j][i].isLand()) {
                     nbCells++;
                 }
             }
@@ -177,8 +175,8 @@ public abstract class AbstractGrid implements IGrid {
          * Set nbLines and nbColumns Useless for Osmose grid since it is a
          * parameter given by the user But has to be done for the Netcdf grids.
          */
-        nbLines = matrix.length;
-        setNbColumns(matrix[0].length);
+        ny = matrix.length;
+        nx = matrix[0].length;
 
         //--------------------------------------
         // Calculate the Physical Space extrema
@@ -187,27 +185,26 @@ public abstract class AbstractGrid implements IGrid {
         setLongMax(-longMin);
         setLatMin(Float.MAX_VALUE);
         setLatMax(-latMin);
-        int i = nbLines;
-        int j = 0;
+        int j = ny;
 
-        while (i-- > 0) {
-            j = nbColumns;
-            while (j-- > 0) {
-                if (matrix[i][j].getLon() >= longMax) {
-                    setLongMax(matrix[i][j].getLon());
+        while (j-- > 0) {
+            int i = nx;
+            while (i-- > 0) {
+                if (matrix[j][i].getLon() >= longMax) {
+                    setLongMax(matrix[j][i].getLon());
                 }
-                if (matrix[i][j].getLon() <= longMin) {
-                    setLongMin(matrix[i][j].getLon());
+                if (matrix[j][i].getLon() <= longMin) {
+                    setLongMin(matrix[j][i].getLon());
                 }
-                if (matrix[i][j].getLat() >= latMax) {
-                    setLatMax(matrix[i][j].getLat());
+                if (matrix[j][i].getLat() >= latMax) {
+                    setLatMax(matrix[j][i].getLat());
                 }
-                if (matrix[i][j].getLat() <= latMin) {
-                    setLatMin(matrix[i][j].getLat());
+                if (matrix[j][i].getLat() <= latMin) {
+                    setLatMin(matrix[j][i].getLat());
                 }
             }
         }
-        //System.out.println("lonmin " + lonMin + " lonmax " + lonMax + " latmin " + latMin + " latmax " + latMax);
+        //System.out.println("lonmin " + longMin + " lonmax " + longMax + " latmin " + latMin + " latmax " + latMax);
         //System.out.println("depth max " + depthMax);
 
         float float_tmp;
@@ -226,28 +223,28 @@ public abstract class AbstractGrid implements IGrid {
         /*
          * size of a cell
          */
-        dLat = (latMax - latMin) / (float) nbLines;
-        dLong = (longMax - longMin) / (float) nbColumns;
+        dLat = (latMax - latMin) / (float) ny;
+        dLong = (longMax - longMin) / (float) nx;
     }
 
     /**
      * @return the number of lines
      */
     @Override
-    public int getNbLines() {
-        return nbLines;
+    public int get_ny() {
+        return ny;
     }
 
-    void setNbLines(int nbLines) {
-        this.nbLines = nbLines;
+    void set_ny(int ny) {
+        this.ny = ny;
     }
 
     /**
      * @return the number of columns
      */
     @Override
-    public int getNbColumns() {
-        return nbColumns;
+    public int get_nx() {
+        return nx;
     }
 
     /**
@@ -303,10 +300,10 @@ public abstract class AbstractGrid implements IGrid {
     }
 
     /**
-     * @param nbColumns the nbColumns to set
+     * @param nx the nbColumns to set
      */
-    public void setNbColumns(int nbColumns) {
-        this.nbColumns = nbColumns;
+    public void set_nx(int nx) {
+        this.nx = nx;
     }
 
     /**

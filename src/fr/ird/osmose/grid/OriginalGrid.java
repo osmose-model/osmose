@@ -19,25 +19,6 @@ import fr.ird.osmose.Cell;
  */
 public class OriginalGrid extends AbstractGrid {
 
-    /*
-     * ********
-     * * Logs *
-     * ********
-     * 2011/04/18 phv
-     * Added a getCells() function
-     * 2011/04/11 phv
-     * Deprecated identifySpatialGroups since it looks Benguela specific
-     * function.
-     * ***
-     * 2011/04/07 phv
-     * Encapsulated all the variables and propagated the changes to the other
-     * classes.
-     * Deleted the identifyNeighbors function since neighbors variable has been
-     * deleted in Cell.java.
-     * Added function getNeighborCells(Cell cell) that is called by Osmose when
-     * doing the random sorting of the cells for the random spatial distribution
-     * ***
-     */
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
@@ -48,8 +29,8 @@ public class OriginalGrid extends AbstractGrid {
     public void readParameters() {
 
         /* grid dimension */
-        setNbLines(getConfiguration().nLine);
-        setNbColumns(getConfiguration().nColumn);
+        set_ny(getConfiguration().nLine);
+        set_nx(getConfiguration().nColumn);
 
         /* geographical extension of the grid */
         setLatMax(getConfiguration().upLeftLat);
@@ -65,25 +46,28 @@ public class OriginalGrid extends AbstractGrid {
     @Override
     public Cell[][] makeGrid() {
 
-        float dLat = (getLatMax() - getLatMin()) / (float) getNbLines();
-        float dLong = (getLongMax() - getLongMin()) / (float) getNbColumns();
+        float dLat = (getLatMax() - getLatMin()) / (float) get_ny();
+        float dLong = (getLongMax() - getLongMin()) / (float) get_nx();
 
-        Cell[][] grid = new Cell[getNbLines()][getNbColumns()];
+        Cell[][] grid = new Cell[get_ny()][get_nx()];
         float latitude, longitude;
-        for (int i = 0; i < getNbLines(); i++) {
-            latitude = getLatMax() - (float) (i + 0.5f) * dLat;
-            for (int j = 0; j < getNbColumns(); j++) {
-                longitude = getLongMin() + (float) (j + 0.5) * dLong;
-                grid[i][j] = new Cell(i, j, latitude, longitude, isLand(i, j));
+        for (int j = 0; j < get_ny(); j++) {
+            latitude = getLatMin() + (float) (j + 0.5f) * dLat;
+            for (int i = 0; i < get_nx(); i++) {
+                longitude = getLongMin() + (float) (i + 0.5) * dLong;
+                //System.out.print(isLand(i, j) ? "0 ":"1 ");
+                grid[j][i] = new Cell(i, j, latitude, longitude, isLand(i, j));
             }
+            //System.out.println();
         }
         return grid;
     }
 
     private boolean isLand(int i, int j) {
         if (null != getConfiguration().icoordLand) {
+            int nym1 = get_ny() - 1;
             for (int k = 0; k < getConfiguration().icoordLand.length; k++) {
-                if ((i == getConfiguration().icoordLand[k]) && (j == getConfiguration().jcoordLand[k])) {
+                if (((nym1 - j) == getConfiguration().icoordLand[k]) && (i == getConfiguration().jcoordLand[k])) {
                     return true;
                 }
             }

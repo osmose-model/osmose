@@ -49,7 +49,7 @@ public class Population extends FilteredSet<School> {
      * empty if it contains no school or null if the cell is on land.
      */
     public List<School> getSchools(Cell cell) {
-        return schoolMap[cell.get_igrid()][cell.get_jgrid()];
+        return schoolMap[cell.get_jgrid()][cell.get_igrid()];
     }
     
     /**
@@ -77,17 +77,17 @@ public class Population extends FilteredSet<School> {
     public void updateSchoolMap() {
 
         if (null == schoolMap) {
-            schoolMap = new ArrayList[getGrid().getNbLines()][getGrid().getNbColumns()];
+            schoolMap = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
         }
 
         // reset the map
-        for (int i = 0; i < getGrid().getNbLines(); i++) {
-            for (int j = 0; j < getGrid().getNbColumns(); j++) {
+        for (int j = 0; j < getGrid().get_ny(); j++) {
+            for (int i = 0; i < getGrid().get_nx(); i++) {
                 if (!getGrid().getCell(i, j).isLand()) {
-                    if (null == schoolMap[i][j]) {
-                        schoolMap[i][j] = new ArrayList();
+                    if (null == schoolMap[j][i]) {
+                        schoolMap[j][i] = new ArrayList();
                     } else {
-                        schoolMap[i][j].clear();
+                        schoolMap[j][i].clear();
                     }
                 }
             }
@@ -96,7 +96,7 @@ public class Population extends FilteredSet<School> {
         // fill up the map
         for (School school : this) {
             if (!school.isUnlocated()) {
-                schoolMap[school.getCell().get_igrid()][school.getCell().get_jgrid()].add(school);
+                schoolMap[school.getCell().get_jgrid()][school.getCell().get_igrid()].add(school);
             }
         }
     }

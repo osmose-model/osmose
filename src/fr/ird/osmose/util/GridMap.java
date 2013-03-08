@@ -16,20 +16,20 @@ public class GridMap {
     private float[][] matrix;
 
     public GridMap() {
-        matrix = new float[getOsmose().getGrid().getNbLines()][getOsmose().getGrid().getNbColumns()];
+        matrix = new float[getOsmose().getGrid().get_ny()][getOsmose().getGrid().get_nx()];
         for (Cell cell : getOsmose().getGrid().getCells()) {
             if (cell.isLand()) {
-                matrix[cell.get_igrid()][cell.get_jgrid()] = Cell.LAND_VALUE;
+                matrix[cell.get_jgrid()][cell.get_igrid()] = Cell.LAND_VALUE;
             }
         }
     }
 
     public void setValue(int i, int j, float value) {
-        matrix[i][j] = value;
+        matrix[j][i] = value;
     }
 
     public float getValue(int i, int j) {
-        return matrix[i][j];
+        return matrix[j][i];
     }
 
     public void setValue(Cell cell, float value) {

@@ -67,7 +67,7 @@ public class SpatialMapUI extends JPanel {
     private boolean isGridVisible = false;
     private static GridMap map;
 
-    private static int numMap = 5;
+    private static int numMap = 19;
 
 ///////////////
 // Constructors
@@ -120,8 +120,8 @@ public class SpatialMapUI extends JPanel {
         graphic.fillRect(0, 0, w, h);
 
         CellUI cell = new CellUI();
-        for (int i = getGrid().getNbLines() - 1; i-- > 0;) {
-            for (int j = getGrid().getNbColumns() - 1; j-- > 0;) {
+        for (int j = getGrid().get_ny() - 1; j-- > 0;) {
+            for (int i = getGrid().get_nx() - 1; i-- > 0;) {
                 cell.draw(i, j, w, h);
                 graphic.setColor(cell.getColor(i, j));
                 graphic.fillPolygon(cell);
@@ -378,8 +378,8 @@ public class SpatialMapUI extends JPanel {
             fw = new FileWriter("grid_osmose_stride" + getOsmose().getGrid().getStride() + ".csv");
             PrintWriter pw = new PrintWriter(fw);
             pw.println("lat , lon, mask (land = 0 water = 1)");
-            int nbL = getOsmose().getGrid().getNbLines();
-            int nbC = getOsmose().getGrid().getNbColumns();
+            int nbL = getOsmose().getGrid().get_ny();
+            int nbC = getOsmose().getGrid().get_nx();
             for (int l = 0; l < nbL; l++) {
                 for (int c = 0; c < nbC; c++) {
                     Cell cell = getOsmose().getGrid().getCell(l, c);
