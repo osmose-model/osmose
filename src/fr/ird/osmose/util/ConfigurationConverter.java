@@ -4,7 +4,9 @@ import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.OldConfiguration;
 import fr.ird.osmose.OldConfiguration.SpatialDistribution;
 import fr.ird.osmose.Osmose;
+import fr.ird.osmose.Species;
 import fr.ird.osmose.ltl.AbstractLTLForcing;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -255,7 +257,17 @@ public class ConfigurationConverter {
 
         // FISHING
         for (int i = 0; i < nSpecies; i++) {
-            prop.setProperty("fishing.rate.sp" + i, String.valueOf(toString(cfg.fishingRates[i])));
+            new File(cfg.resolveFile("fishing/")).mkdirs();
+            prop.setProperty("mortality.fishing.class.metrics.sp" + i, "age");
+            String filename = "fishing/fishing-seasonality-ageclass-" + cfg.speciesName[i] + ".csv";
+            prop.setProperty("mortality.fishing.seasonality.age.file.sp" + i, cfg.resolveFile(filename));
+            filename = "fishing/fishing-seasonality-sizeclass-" + cfg.speciesName[i] + ".csv";
+            prop.setProperty("mortality.fishing.seasonality.size.file.sp" + i, cfg.resolveFile(filename));
+            filename = "fishing/fishing-rate-ageclass-" + cfg.speciesName[i] + ".csv";
+            prop.setProperty("mortality.fishing.rate.age.file.sp" + i, cfg.resolveFile(filename));
+            filename = "fishing/fishing-rate-sizeclass-" + cfg.speciesName[i] + ".csv";
+            prop.setProperty("mortality.fishing.rate.size.file.sp" + i, cfg.resolveFile(filename));
+            writeFishingAsCSV(i);
         }
 
         // MPA
@@ -412,6 +424,114 @@ public class ConfigurationConverter {
         }
     }
 
+    private void writeFishingAsCSV(int ispec) {
+
+        int stepsize = 10;
+        float stepage = 0.5f;
+
+        // Fishing seasonality per age class
+        float F = sum(cfg.fishingRates[ispec]);
+        String filename = "fishing/fishing-seasonality-ageclass-" + cfg.speciesName[ispec] + ".csv";
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+            String[] header = new String[(int) Math.ceil(Math.min(cfg.speciesLifespan[ispec], 10) / stepage) + 1];
+            header[0] = "v Time / Age class >";
+            for (int i = 1; i < header.length; i++) {
+                header[i] = String.valueOf((i - 1) * stepage);
+            }
+            if ((header.length * stepage) < cfg.speciesLifespan[ispec]) {
+                header[header.length - 1] += "+";
+            }
+            writer.writeNext(header);
+            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
+                String[] entries = new String[header.length];
+                entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
+                for (int i = 1; i < header.length; i++) {
+                    if (F > 0) {
+                        entries[i] = String.valueOf(cfg.fishingRates[ispec][t] / F);
+                    } else {
+                        entries[i] = "0";
+                    }
+                }
+                writer.writeNext(entries);
+            }
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Fishing rate per age class
+        filename = "fishing/fishing-rate-ageclass-" + cfg.speciesName[ispec] + ".csv";
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+            String[] header = new String[(int) Math.ceil(cfg.speciesLifespan[ispec] / stepage) + 1];
+            header[0] = "v Time / Age class >";
+            for (int i = 1; i < header.length; i++) {
+                header[i] = String.valueOf((i - 1) * stepage);
+            }
+            writer.writeNext(header);
+            String[] entries = new String[header.length];
+            entries[0] = "0";
+            for (int i = 1; i < header.length; i++) {
+                entries[i] = String.valueOf(F);
+            }
+            writer.writeNext(entries);
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Fishing seasonality per size class
+        filename = "fishing/fishing-rate-sizeclass-" + cfg.speciesName[ispec] + ".csv";
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+            String[] header = new String[(int) Math.ceil(cfg.lInf[ispec] / stepsize) + 1];
+            header[0] = "v Time / Size class >";
+            for (int i = 1; i < header.length; i++) {
+                header[i] = String.valueOf((i - 1) * stepsize);
+            }
+            header[header.length - 1] += "+";
+            writer.writeNext(header);
+            String[] entries = new String[header.length];
+            entries[0] = "0";
+            for (int i = 1; i < header.length; i++) {
+                entries[i] = String.valueOf(F);
+            }
+            writer.writeNext(entries);
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Fishing seasonality per size class
+        filename = "fishing/fishing-seasonality-sizeclass-" + cfg.speciesName[ispec] + ".csv";
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+            String[] header = new String[(int) Math.ceil(cfg.lInf[ispec] / stepsize) + 1];
+            header[0] = "v Time / Size class >";
+            for (int i = 1; i < header.length; i++) {
+                header[i] = String.valueOf((i - 1) * stepsize);
+            }
+            header[header.length - 1] += "+";
+            writer.writeNext(header);
+            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
+                String[] entries = new String[header.length];
+                entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
+                for (int i = 1; i < header.length; i++) {
+                    if (F > 0) {
+                        entries[i] = String.valueOf(cfg.fishingRates[ispec][t] / F);
+                    } else {
+                        entries[i] = "0";
+                    }
+                }
+                writer.writeNext(entries);
+            }
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     private void writeAccessibilityAsCSV(String filename) {
 
         try {
@@ -481,6 +601,14 @@ public class ConfigurationConverter {
         int sum = 0;
         for (int i : array) {
             sum += i;
+        }
+        return sum;
+    }
+
+    private float sum(float[] array) {
+        float sum = 0;
+        for (float f : array) {
+            sum += f;
         }
         return sum;
     }
