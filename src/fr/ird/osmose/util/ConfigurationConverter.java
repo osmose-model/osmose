@@ -36,9 +36,9 @@ public class ConfigurationConverter {
         // convert
         System.out.println("Converting old configuration file to new format...");
         convert();
-        writeAsText();
+        //writeAsText();
         writeAsCSV();
-        writeAsXML();
+        //writeAsXML();
         System.out.println("Conversion completed successfully.");
     }
 
@@ -242,7 +242,7 @@ public class ConfigurationConverter {
             prop.setProperty("predation.accessibility.stage.structure", "age");
             prop.setProperty("predation.accessibility.stage.threshold.sp" + i, String.valueOf(toString(cfg.accessStageThreshold[i])));
         }
-        String accessibilityFile = cfg.resolveFile("predation-accessibility.csv");
+        String accessibilityFile = cfg.resolveFile("input-ov30b/predation-accessibility.csv");
         prop.setProperty("predation.accessibility.file", accessibilityFile);
         writeAccessibilityAsCSV(accessibilityFile);
 
@@ -256,13 +256,13 @@ public class ConfigurationConverter {
         prop.setProperty("mortality.natural.larva.rate.unit", "dt^-1");
         prop.setProperty("mortality.natural.rate.unit", "year^-1");
         if (null == cfg.larvalMortalityFile) {
-            String larvalMortalityFile = cfg.resolveFile("larval-mortality-rates.csv");
+            String larvalMortalityFile = cfg.resolveFile("input-ov30b/larval-mortality-rates.csv");
             prop.setProperty("mortality.natural.larva.rate.file", larvalMortalityFile);
             writeLarvalMortalityRateAsCSV(larvalMortalityFile);
         } else {
             prop.setProperty("mortality.natural.larva.rate.file", cfg.resolveFile(cfg.larvalMortalityFile));
         }
-        String naturalMortalityFile = cfg.resolveFile("natural-mortality-rates.csv");
+        String naturalMortalityFile = cfg.resolveFile("input-ov30b/natural-mortality-rates.csv");
         prop.setProperty("mortality.natural.rate.file", naturalMortalityFile);
         writeNaturalMortalityRateAsCSV(naturalMortalityFile);
         for (int i = 0; i < nSpecies; i++) {
@@ -272,19 +272,19 @@ public class ConfigurationConverter {
 
         // FISHING
         for (int i = 0; i < nSpecies; i++) {
-            new File(cfg.resolveFile("fishing/")).mkdirs();
+            new File(cfg.resolveFile("input-ov30b/fishing/")).mkdirs();
             prop.setProperty("mortality.fishing.structure.sp" + i, "age");
-            String filename = "fishing/fishing-seasonality-ageclass-" + cfg.speciesName[i] + ".csv";
+            String filename = "input-ov30b/fishing/fishing-seasonality-ageclass-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.seasonality.age.file.sp" + i, cfg.resolveFile(filename));
-            filename = "fishing/fishing-seasonality-sizeclass-" + cfg.speciesName[i] + ".csv";
+            filename = "input-ov30b/fishing/fishing-seasonality-sizeclass-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.seasonality.size.file.sp" + i, cfg.resolveFile(filename));
-            filename = "fishing/fishing-seasonality-" + cfg.speciesName[i] + ".csv";
+            filename = "input-ov30b/fishing/fishing-seasonality-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.seasonality.file.sp" + i, cfg.resolveFile(filename));
-            filename = "fishing/fishing-rate-ageclass-" + cfg.speciesName[i] + ".csv";
+            filename = "input-ov30b/fishing/fishing-rate-ageclass-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.age.file.sp" + i, cfg.resolveFile(filename));
-            filename = "fishing/fishing-rate-sizeclass-" + cfg.speciesName[i] + ".csv";
+            filename = "input-ov30b/fishing/fishing-rate-sizeclass-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.size.file.sp" + i, cfg.resolveFile(filename));
-            filename = "fishing/fishing-rate-" + cfg.speciesName[i] + ".csv";
+            filename = "input-ov30b/fishing/fishing-rate-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.file.sp" + i, cfg.resolveFile(filename));
             writeFishingAsCSV(i);
             float F = sum(cfg.fishingRates[i]);
@@ -396,7 +396,9 @@ public class ConfigurationConverter {
     }
 
     String getFilename(String ext) {
-        StringBuilder filename = new StringBuilder(cfg.getOutputPrefix());
+        StringBuilder filename = new StringBuilder("input-ov30b");
+        filename.append(File.separator);
+        filename.append(cfg.getOutputPrefix());
         filename.append("_all-parameters.");
         filename.append(ext);
         return filename.toString();
@@ -430,6 +432,8 @@ public class ConfigurationConverter {
     }
 
     private void writeLarvalMortalityRateAsCSV(String filename) {
+
+        new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[cfg.getNSpecies() + 1];
@@ -451,6 +455,8 @@ public class ConfigurationConverter {
     }
 
     private void writeNaturalMortalityRateAsCSV(String filename) {
+
+        new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[cfg.getNSpecies() + 1];
@@ -476,7 +482,7 @@ public class ConfigurationConverter {
 
         // Fishing rate
         float F = sum(cfg.fishingRates[ispec]);
-        String filename = "fishing/fishing-rate-" + cfg.speciesName[ispec] + ".csv";
+        String filename = "input-ov30b/fishing/fishing-rate-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
             writer.writeNext(new String[]{"Time", "Annual F"});
@@ -489,7 +495,7 @@ public class ConfigurationConverter {
         }
 
         // Fishing seasonality
-        filename = "fishing/fishing-seasonality-" + cfg.speciesName[ispec] + ".csv";
+        filename = "input-ov30b/fishing/fishing-seasonality-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
             writer.writeNext(new String[]{"Time", "Season"});
@@ -509,7 +515,7 @@ public class ConfigurationConverter {
         }
 
         // Fishing seasonality per age class
-        filename = "fishing/fishing-seasonality-ageclass-" + cfg.speciesName[ispec] + ".csv";
+        filename = "input-ov30b/fishing/fishing-seasonality-ageclass-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[(int) Math.ceil(Math.min(cfg.speciesLifespan[ispec], 10) / stepage) + 1];
@@ -539,7 +545,7 @@ public class ConfigurationConverter {
         }
 
         // Fishing rate per age class
-        filename = "fishing/fishing-rate-ageclass-" + cfg.speciesName[ispec] + ".csv";
+        filename = "input-ov30b/fishing/fishing-rate-ageclass-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[(int) Math.ceil(cfg.speciesLifespan[ispec] / stepage) + 1];
@@ -560,7 +566,7 @@ public class ConfigurationConverter {
         }
 
         // Fishing rate per size class
-        filename = "fishing/fishing-rate-sizeclass-" + cfg.speciesName[ispec] + ".csv";
+        filename = "input-ov30b/fishing/fishing-rate-sizeclass-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[(int) Math.ceil(cfg.lInf[ispec] / stepsize) + 1];
@@ -582,7 +588,7 @@ public class ConfigurationConverter {
         }
 
         // Fishing seasonality per size class
-        filename = "fishing/fishing-seasonality-sizeclass-" + cfg.speciesName[ispec] + ".csv";
+        filename = "input-ov30b/fishing/fishing-seasonality-sizeclass-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(cfg.resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[(int) Math.ceil(cfg.lInf[ispec] / stepsize) + 1];
@@ -612,6 +618,7 @@ public class ConfigurationConverter {
 
     private void writeAccessibilityAsCSV(String filename) {
 
+        new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
             String[] header = new String[sum(cfg.nAccessStage) + 1];
