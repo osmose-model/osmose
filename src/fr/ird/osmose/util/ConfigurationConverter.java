@@ -43,6 +43,8 @@ public class ConfigurationConverter {
     }
 
     private void convert() {
+        
+        new File(cfg.resolveFile(getFilename("csv"))).getParentFile().mkdirs();
 
         int nSpecies = cfg.getNSpecies();
         int nPlankton = cfg.getNPlankton();
@@ -396,8 +398,7 @@ public class ConfigurationConverter {
     }
 
     String getFilename(String ext) {
-        StringBuilder filename = new StringBuilder("input-ov30b");
-        filename.append(File.separator);
+        StringBuilder filename = new StringBuilder("input-ov30b/");
         filename.append(cfg.getOutputPrefix());
         filename.append("_all-parameters.");
         filename.append(ext);
