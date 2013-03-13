@@ -40,8 +40,8 @@ public class OriginalGrid extends AbstractGrid {
         set_nx(getConfiguration().getInt("grid.ncolumn"));
 
         /* geographical extension of the grid */
-        setLatMax(getConfiguration().getFloat("grid.lowright.lat"));
-        setLatMin(getConfiguration().getFloat("grid.upleft.lat"));
+        setLatMin(getConfiguration().getFloat("grid.lowright.lat"));
+        setLatMax(getConfiguration().getFloat("grid.upleft.lat"));
         setLongMax(getConfiguration().getFloat("grid.lowright.lon"));
         setLongMin(getConfiguration().getFloat("grid.upleft.lon"));
     }
