@@ -1,7 +1,14 @@
 package fr.ird.osmose.process;
 
+import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -25,9 +32,31 @@ public class FishingProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        isFishingInterannual = getConfiguration().fishingRates[0].length > getConfiguration().getNumberTimeStepsPerYear();
-        fishingRates = new float[getConfiguration().getNSpecies()][];
-        System.arraycopy(getConfiguration().fishingRates, 0, fishingRates, 0, getConfiguration().getNSpecies());
+        isFishingInterannual = false;
+        int nStepYear = getConfiguration().getNumberTimeStepsPerYear();
+        fishingRates = new float[getConfiguration().getNSpecies()][nStepYear];
+        for (int i = 0; i < getNSpecies(); i++) {
+            double F = getConfiguration().getFloat("mortality.fishing.rate.sp" + i);
+            String filename = getConfiguration().resolveFile(getConfiguration().getString("mortality.fishing.seasonality.file.sp" + i));
+            CSVReader reader;
+            try {
+                reader = new CSVReader(new FileReader(filename), ';');
+                List<String[]> lines = reader.readAll();
+                if ((lines.size() - 1) % nStepYear != 0) {
+                }
+                for (int t = 0; t < fishingRates[i].length; t++) {
+                    double season = Double.valueOf(lines.get(t + 1)[1]);
+                    fishingRates[i][t] = (float) (F * season / 100.d);
+                    //System.out.println("spec " + i + " f: " + fishingRates[i][t]);
+                }
+            } catch (IOException ex) {
+                getLogger().log(Level.SEVERE, null, ex);
+            }
+
+            for (int t = 0; t < fishingRates[i].length; t++) {
+                fishingRates[i][t] = getConfiguration().getFloat("mortality.fishing.rate.sp" + i) / nStepYear;
+            }
+        }
     }
 
     @Override

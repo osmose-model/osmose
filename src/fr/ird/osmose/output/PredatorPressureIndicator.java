@@ -38,9 +38,14 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
      * Threshold age (year) or size (cm) between the diet stages.
      */
     private float[][] dietStageThreshold;
+    /**
+     * Whether the indicator should be enabled or not.
+     */
+    private boolean enabled;
     
-     public PredatorPressureIndicator(int replica) {
+    public PredatorPressureIndicator(int replica, String keyEnabled) {
         super(replica);
+        enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
     @Override
@@ -99,14 +104,14 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
 
     @Override
     public boolean isEnabled() {
-        return getConfiguration().isDietOuput();
+        return enabled;
     }
 
     @Override
     public void write(float time) {
 
         int nSpec = getNSpecies();
-        int dtRecord = getConfiguration().getRecordFrequency();
+        int dtRecord = getConfiguration().getInt("output.recordfrequency.ndt");
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
             Species species = getSimulation().getSpecies(iSpec);
             for (int iStage = 0; iStage < nDietStage[iSpec]; iStage++) {
@@ -152,14 +157,22 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     public void init() {
         
         // Read diet stages
-        nDietStage = getConfiguration().nDietStage;
-        dietStageThreshold = getConfiguration().dietStageThreshold;
+        nDietStage = new int[getConfiguration().getNSpecies()];
+        dietStageThreshold = new float[getConfiguration().getNSpecies()][];
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            nDietStage[i] = getConfiguration().canFind("output.diet.stage.threshold.sp" + i)
+                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length
+                    : 1;
+            if (nDietStage[i] > 1) {
+                dietStageThreshold[i] = getConfiguration().getArrayFloat("output.diet.stage.threshold.sp" + i);
+            }
+        }
         
         // Create parent directory
-        File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
+        File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_predatorPressure_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

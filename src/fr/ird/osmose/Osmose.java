@@ -41,16 +41,13 @@ public class Osmose {
     /*
      * Configuration
      */
-    private OldConfiguration oldConfiguration;
     private Configuration configuration;
+    public String inputPathName, outputPathName, inputTxtName;
     /**
      * The application logger
      */
     final private static Logger logger = Logger.getLogger(Osmose.class.getName());
 
-    /*
-     * Function for dealing with command line arguments From David K. for the GA
-     */
     public void init(String[] args) {
 
         // setup the logger
@@ -59,8 +56,24 @@ public class Osmose {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
+        
+        readArgs(args);
 
-        String inputPathName, outputPathName, inputTxtName;
+        String mainFilename = inputPathName;
+        if (!mainFilename.endsWith(File.separator)) {
+            mainFilename += File.separator;
+        }
+        mainFilename += "input-ov30b/benguela_all-parameters.csv";
+        configuration = new Configuration(mainFilename, outputPathName);
+        configuration.init();
+        
+        simulation = new Simulation[configuration.getNSimulation()];
+        for (int i = 0; i < configuration.getNSimulation(); i++) {
+            simulation[i] = new Simulation(i);
+        }
+    }
+
+    public void readArgs(String[] args) {
 
         // Get command line arguments
         if (args.length > 0) {
@@ -85,39 +98,27 @@ public class Osmose {
         } else {
             inputTxtName = "INPUT.txt";
         }
-
-        oldConfiguration = new OldConfiguration(inputPathName, outputPathName, inputTxtName);
-        oldConfiguration.init();
-
-        String mainFilename = inputPathName;
-        if (!mainFilename.endsWith(File.separator)) {
-            mainFilename += File.separator;
-        }
-        mainFilename += "INPUT.csv";
-        //configuration = new Configuration(mainFilename, (args.length > 1) ? outputPathName : null);
     }
 
     public void run() {
         // Delete existing output directory
-        File targetPath = new File(oldConfiguration.getOutputPathname() + oldConfiguration.getOutputFolder());
+        File targetPath = new File(configuration.getOutputPathname());
         if (targetPath.exists()) {
             IOTools.deleteDirectory(targetPath);
         }
 
         // Loop over the number of replica
-        simulation = new Simulation[oldConfiguration.getNSimulation()];
         long begin = System.currentTimeMillis();
         logger.info("Simulation started...");
         int nProcs = Runtime.getRuntime().availableProcessors();
         //int nProcs = 1;
-        int nBatch = (int) Math.ceil((float) oldConfiguration.getNSimulation() / nProcs);
+        int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
         int replica = 0;
         for (int iBatch = 0; iBatch < nBatch; iBatch++) {
-            int nworker = Math.min(nProcs, oldConfiguration.getNSimulation() - replica);
+            int nworker = Math.min(nProcs, configuration.getNSimulation() - replica);
             CountDownLatch doneSignal = new CountDownLatch(nworker);
             Worker[] workers = new Worker[nworker];
             for (int iworker = 0; iworker < nworker; iworker++) {
-                simulation[replica] = new Simulation(replica);
                 workers[iworker] = new Worker(simulation[replica], doneSignal);
                 replica++;
             }
@@ -214,10 +215,6 @@ public class Osmose {
         return osmose;
     }
 
-    public OldConfiguration getOldConfiguration() {
-        return oldConfiguration;
-    }
-    
     public Configuration getConfiguration() {
         return configuration;
     }
@@ -227,10 +224,10 @@ public class Osmose {
     }
 
     public IGrid getGrid() {
-        return oldConfiguration.getGrid();
+        return configuration.getGrid();
     }
 
     public LTLForcing getForcing() {
-        return oldConfiguration.getForcing();
+        return configuration.getForcing();
     }
 }

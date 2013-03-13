@@ -48,10 +48,10 @@ public class NcGrid extends AbstractGrid {
 
     @Override
     void readParameters() {
-        this.gridFile = getConfiguration().gridFileTab;
-        this.strLat = getConfiguration().latField;
-        this.strLon = getConfiguration().lonField;
-        this.strMask = getConfiguration().maskField;
+        this.gridFile = getConfiguration().getString("grid.netcdf.file");
+        this.strLat = getConfiguration().getString("grid.var.lat");
+        this.strLon = getConfiguration().getString("grid.var.lon");
+        this.strMask = getConfiguration().getString("grid.var.stride");
     }
 
     @Override

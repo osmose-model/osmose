@@ -50,14 +50,14 @@ public class MigrationProcess extends AbstractProcess {
      */
     private boolean[][][] outOfZoneCohort;
     private static float[][][] outOfZoneMortality;
-    
+
     public MigrationProcess(int replica) {
         super(replica);
     }
 
     @Override
     public void init() {
-        
+
         int nSpecies = getConfiguration().getNSpecies();
         // init migration
         outOfZoneCohort = new boolean[nSpecies][][];
@@ -66,13 +66,17 @@ public class MigrationProcess extends AbstractProcess {
             int lifespan = getSpecies(index).getLifespanDt();
             outOfZoneMortality[index] = new float[lifespan][getConfiguration().getNumberTimeStepsPerYear()];
             outOfZoneCohort[index] = new boolean[lifespan][getConfiguration().getNumberTimeStepsPerYear()];
-            if (null != getConfiguration().ageMigration[index]) {
+
+            if (getConfiguration().canFind("migration.ageclass.sp" + index)) {
                 int nbStepYear = getConfiguration().getNumberTimeStepsPerYear();
-                for (int m = 0; m < getConfiguration().ageMigration[index].length; m++) {
-                    for (int n = 0; n < getConfiguration().seasonMigration[index].length; n++) {
+                int[] ageclass = getConfiguration().getArrayInt("migration.ageclass.sp" + index);
+                int[] season = getConfiguration().getArrayInt("migration.season.sp" + index);
+                float[] rate = getConfiguration().getArrayFloat("migration.mortality.rate.sp" + index);
+                for (int m = 0; m < ageclass.length; m++) {
+                    for (int n = 0; n < season.length; n++) {
                         for (int h = 0; h < nbStepYear; h++) {
-                            outOfZoneCohort[index][getConfiguration().ageMigration[index][m] * nbStepYear + h][getConfiguration().seasonMigration[index][n]] = true;
-                            outOfZoneMortality[index][getConfiguration().ageMigration[index][m] * nbStepYear + h][getConfiguration().seasonMigration[index][n]] = getConfiguration().migrationTempMortality[index][m];
+                            outOfZoneCohort[index][ageclass[m] * nbStepYear + h][season[n]] = true;
+                            outOfZoneMortality[index][ageclass[m] * nbStepYear + h][season[n]] = rate[m];
                         }
                     }
                 }
@@ -84,12 +88,12 @@ public class MigrationProcess extends AbstractProcess {
     public void run() {
         // nothing to do
     }
-    
+
     boolean isOut(School school) {
         return outOfZoneCohort[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
     }
-    
-     float getOutMortality(School school) {
+
+    float getOutMortality(School school) {
         return outOfZoneMortality[school.getSpeciesIndex()][school.getAgeDt()][getSimulation().getIndexTimeYear()];
     }
 }

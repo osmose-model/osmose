@@ -127,6 +127,7 @@ public class School extends GridPoint {
      * Monitor whether the number of deads has changed
      */
     private boolean ndeadHasChanged;
+    private int[] nDietStage;
 
 //////////////
 // Constructor
@@ -160,6 +161,12 @@ public class School extends GridPoint {
         predPreyStage = 0;
         accessibilityStage = 0;
         dietOutputStage = 0;
+        nDietStage = new int[getConfiguration().getNSpecies()];
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            nDietStage[i] = getConfiguration().canFind("output.diet.stage.threshold.sp" + i)
+                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length
+                    : 1;
+        }
 
         // Set initial trophic level to EGG
         trophicLevel = Species.TL_EGG;
@@ -183,14 +190,10 @@ public class School extends GridPoint {
         // Reset diet variables
         diet = new float[getConfiguration().getNSpecies() + getConfiguration().getNPlankton()][];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (getConfiguration().outputDiet) {
-                diet[i] = new float[getConfiguration().nDietStage[i]];
-            } else {
-                diet[i] = new float[0];
-            }
+            diet[i] = new float[nDietStage[i]];
         }
-        for (int i = getConfiguration().getNSpecies(); i < getConfiguration().getNSpecies() + getConfiguration().getNPlankton(); i++) {
-            diet[i] = new float[1];
+        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+            diet[i + getConfiguration().getNSpecies()] = new float[1];
         }
     }
 
@@ -382,8 +385,8 @@ public class School extends GridPoint {
     /*
      * Get the current Osmose instance
      */
-    private OldConfiguration getConfiguration() {
-        return Osmose.getInstance().getOldConfiguration();
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     /**

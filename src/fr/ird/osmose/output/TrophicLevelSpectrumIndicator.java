@@ -21,8 +21,8 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     private float[] tabTL;
     private int nTLClass;
 
-    public TrophicLevelSpectrumIndicator(int replica) {
-        super(replica);
+     public TrophicLevelSpectrumIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
         initializeTLSpectrum();
     }
 
@@ -72,18 +72,13 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     }
 
     @Override
-    public boolean isEnabled() {
-        return getConfiguration().isTLOutput();
-    }
-
-    @Override
     public void write(float time) {
 
         double[][] values = new double[nTLClass][getNSpecies() + 1];
         for (int iTL = 0; iTL < nTLClass; iTL++) {
             values[iTL][0] = tabTL[iTL];
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                values[iTL][iSpec + 1] = (trophicLevelSpectrum[iSpec][iTL] / getConfiguration().getRecordFrequency());
+                values[iTL][iSpec + 1] = (trophicLevelSpectrum[iSpec][iTL] / getRecordFrequency());
             }
         }
         
@@ -94,7 +89,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_TLDistrib_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

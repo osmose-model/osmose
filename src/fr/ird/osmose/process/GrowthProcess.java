@@ -22,12 +22,13 @@ public class GrowthProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getConfiguration().getNSpecies();
-        criticalPredSuccess = getConfiguration().criticalPredSuccess;
+        criticalPredSuccess = new float[nSpecies];
         minDelta = new float[nSpecies][];
         maxDelta = new float[nSpecies][];
         deltaMeanLength = new float[nSpecies][];
 
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+        for (int i = 0; i < nSpecies; i++) {
+            criticalPredSuccess[i] = getConfiguration().getFloat("predation.efficiency.critical.sp" + i);
             Species species = getSpecies(i);
             int lifespan = species.getLifespanDt();
             minDelta[i] = new float[lifespan];

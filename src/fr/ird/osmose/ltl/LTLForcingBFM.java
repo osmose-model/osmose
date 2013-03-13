@@ -4,7 +4,6 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.Plankton;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,66 +36,25 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     private int timeDim;
 
     @Override
-    public void readLTLForcingFile(String planktonFileName) {
+    public void readLTLForcingFile() {
 
-        FileInputStream LTLFile;
-        try {
-            LTLFile = new FileInputStream(new File(getConfiguration().resolveFile(planktonFileName)));
-        } catch (FileNotFoundException ex) {
-            System.out.println("LTL file " + planktonFileName + " doesn't exist");
-            return;
+        planktonNetcdfNames = new String[getConfiguration().getNPlankton()];
+        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+            planktonNetcdfNames[i] = getConfiguration().getString("ltl.netcdf.var.plankton.plk" + i);
         }
 
-        Reader r = new BufferedReader(new InputStreamReader(LTLFile));
-        StreamTokenizer st = new StreamTokenizer(r);
-        st.slashSlashComments(true);
-        st.slashStarComments(true);
-        st.quoteChar(';');
-
-        try {
-            /*
-             * Read name of plankton variable in the BFM NetCDF file
-             */
-            planktonNetcdfNames = new String[getConfiguration().getNPlankton()];
-            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-                st.nextToken();
-                planktonNetcdfNames[i] = st.sval;
-            }
-            /*
-             * Reads number of records in BFM NetCDF file
-             * Reads number of BFM NetCDF files
-             */
-            st.nextToken();
-            timeDim = Integer.valueOf(st.sval);
-            st.nextToken();
-            int nbFiles = Integer.valueOf(st.sval);
-            /*
-             * Read list of BFM NetCDF files
-             */
-            planktonFileListNetcdf = new String[nbFiles];
-            for (int step = 0; step < nbFiles; step++) {
-                st.nextToken();
-                planktonFileListNetcdf[step] = st.sval;
-            }
-            /*
-             * Read NetCDF filename with the bathymetry variable
-             * Read name of the zlevel variable in the NetCDF file
-             * Read name of the bathymetry variable in the NetCDF file
-             */
-            st.nextToken();
-            bathyFile = st.sval;
-            st.nextToken();
-            zlevelName = st.sval;
-            st.nextToken();
-            bathyName = st.sval;
-
-        } catch (IOException ex) {
-            System.out.println("Reading error of LTL file");
-            System.exit(1);
+        planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t").size()];
+        for (int i = 0; i < planktonFileListNetcdf.length; i++) {
+            planktonFileListNetcdf[i] = getConfiguration().getString("ltl.netcdf.file.t" + i);
         }
+
+        timeDim = getConfiguration().getInt("ltl.netcdf.dim.ntime");
+        bathyFile = getConfiguration().getString("grid.netcdf.file");
+        zlevelName = getConfiguration().getString("ltl.netcdf.var.zlevel");
+        bathyName = getConfiguration().getString("ltl.netcdf.var.bathy");
     }
 
-     @Override
+    @Override
     public void initLTLGrid() {
 
         NetcdfFile nc = null;
@@ -183,8 +141,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         /*
          * Load the mask
          */
-        String gridFile = getConfiguration().gridFileTab;
-        String strMask = getConfiguration().maskField;
+        String gridFile = getConfiguration().getString("grid.netcdf.file");
+        String strMask = getConfiguration().getString("grid.var.stride");
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][] mask = (float[][]) nc.findVariable(strMask).read().copyToNDJavaArray();
 
@@ -213,7 +171,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             }
         }
     }
-    
+
     @Override
     float[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
@@ -265,7 +223,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         /*
          * Integrate plankton biomass on vertical dimension
          */
-        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getIntegrationDepth());
+        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override

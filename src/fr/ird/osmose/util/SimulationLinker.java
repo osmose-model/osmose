@@ -4,7 +4,7 @@
  */
 package fr.ird.osmose.util;
 
-import fr.ird.osmose.OldConfiguration;
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Population;
 import fr.ird.osmose.Simulation;
@@ -18,21 +18,21 @@ import java.util.logging.Logger;
  * @author pverley
  */
 public class SimulationLinker {
-    
+
     private final int replica;
-    
+
     public SimulationLinker(int replica) {
         this.replica = replica;
     }
-    
+
     final public int getReplica() {
         return replica;
     }
-    
-    public OldConfiguration getConfiguration() {
-        return Osmose.getInstance().getOldConfiguration();
+
+    public Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
-    
+
     public IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
@@ -44,27 +44,37 @@ public class SimulationLinker {
     public Population getPopulation() {
         return Osmose.getInstance().getSimulation(replica).getPopulation();
     }
-    
+
     public LTLForcing getForcing() {
         return Osmose.getInstance().getForcing();
     }
-    
+
     public Species getSpecies(int index) {
         return Osmose.getInstance().getSimulation(replica).getSpecies(index);
     }
-    
-    public String resolveFile(String filename) {
-        return Osmose.getInstance().getOldConfiguration().resolveFile(filename);
+
+    public Species getSpecies(String name) {
+        for (int i = 0; i < getNSpecies(); i++) {
+            if (getSpecies(i).getName().equalsIgnoreCase(name)) {
+                return getSpecies(i);
+            }
+        }
+        return null;
     }
+
+    public String resolveFile(String filename) {
+        return Osmose.getInstance().getConfiguration().resolveFile(filename);
+    }
+
     /**
      * The number of simulated species
      *
      * @return the number of simulated species
      */
     public int getNSpecies() {
-        return Osmose.getInstance().getOldConfiguration().getNSpecies();
+        return Osmose.getInstance().getConfiguration().getNSpecies();
     }
-    
+
     public Logger getLogger() {
         return getSimulation().getLogger();
     }

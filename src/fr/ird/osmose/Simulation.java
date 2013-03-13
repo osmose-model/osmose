@@ -144,7 +144,14 @@ public class Simulation {
         // Init plankton groups
         ltlGroups = new Plankton[getConfiguration().getNPlankton()];
         for (int p = 0; p < ltlGroups.length; p++) {
-            ltlGroups[p] = new Plankton(p, getConfiguration().planktonName[p], getConfiguration().ltlMinSize[p], getConfiguration().ltlMaxSize[p], getConfiguration().ltlTrophicLevel[p], getConfiguration().ltlConversionFactor[p], getConfiguration().ltlProdBiomFactor[p], getConfiguration().planktonAccessibility[p]);
+            ltlGroups[p] = new Plankton(p,
+                    getConfiguration().getString("plankton.name.plk" + p),
+                    getConfiguration().getFloat("plankton.size.min.plk" + p),
+                    getConfiguration().getFloat("plankton.size.max.plk" + p),
+                    getConfiguration().getFloat("plankton.tl.plk" + p),
+                    getConfiguration().getFloat("plankton.conversion2tons.plk" + p),
+                    1, // prod2biom parameter that is not used anymore
+                    getConfiguration().getFloat("plankton.accessibility2fish.plk" + p));
             ltlGroups[p].init();
         }
 
@@ -174,7 +181,7 @@ public class Simulation {
     private void progress() {
         // screen display to check the period already simulated
         if (i_step_simu % getConfiguration().getNumberTimeStepsPerYear() == 0) {
-            logger.log(Level.FINE, "year {0}", year);
+            logger.log(Level.INFO, "year {0}", year);
         }
     }
 
@@ -183,13 +190,13 @@ public class Simulation {
         while (i_step_simu < n_steps_simu) {
             year = i_step_simu / getConfiguration().getNumberTimeStepsPerYear();
             i_step_year = i_step_simu % getConfiguration().getNumberTimeStepsPerYear();
-            
+
             // Print progress in console
-            //progress();
+            progress();
 
             // Run a new step
             step.step(i_step_simu);
-            
+
             // Increment time step
             i_step_simu++;
         }
@@ -231,14 +238,14 @@ public class Simulation {
         return i_step_simu;
     }
 
-    private OldConfiguration getConfiguration() {
-        return Osmose.getInstance().getOldConfiguration();
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     public final int getReplica() {
         return replica;
     }
-    
+
     final public Logger getLogger() {
         return logger;
     }

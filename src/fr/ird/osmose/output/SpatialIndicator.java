@@ -35,9 +35,14 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
     private float[][][] ltlbiomass;
     private float[][][] abundance;
     private float[][][] yield;
+    /**
+     * Whether the indicator should be enabled or not.
+     */
+    private boolean enabled;
 
-    public SpatialIndicator(int replica) {
+    public SpatialIndicator(int replica, String keyEnabled) {
         super(replica);
+        enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
     @Override
@@ -200,7 +205,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public boolean isEnabled() {
-        return getConfiguration().outputSpatialized;
+        return enabled;
     }
 
     @Override
@@ -282,10 +287,10 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
     }
 
     private String getFilename() {
-        File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
+        File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_spatialized_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".nc.part");

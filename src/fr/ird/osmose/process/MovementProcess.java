@@ -2,20 +2,12 @@ package fr.ird.osmose.process;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.OldConfiguration;
-import fr.ird.osmose.OldConfiguration.SpatialDistribution;
-import fr.ird.osmose.util.ConnectivityMatrix;
-import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import fr.ird.osmose.util.ConnectivityMatrix;
+import fr.ird.osmose.util.GridMap;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +43,7 @@ public class MovementProcess extends AbstractProcess {
     private int[] mapIndexNoTwin;
     // Migration
     private MigrationProcess migration;
-    
+
     public MovementProcess(int replica) {
         super(replica);
     }
@@ -59,20 +51,18 @@ public class MovementProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        // read new format of area file, with agemin and agemax
-        if (OldConfiguration.NEW_AREA_FILE) {
-            readConfigurationFile();
-        }
-        
+        loadParameters();
+
         // Migration
         migration = new MigrationProcess(getReplica());
         migration.init();
 
         int nSpecies = getConfiguration().getNSpecies();
         // init distribution
-        range = getConfiguration().range;
+        range = new int[nSpecies];
         movements = new AbstractProcess[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
+            range[i] = getConfiguration().getInt("movement.randomwalk.range.sp" + i);
             switch (getSpatialDistribution(i)) {
                 case RANDOM:
                     movements[i] = new RandomDistributionProcess(getReplica(), getSimulation().getSpecies(i), this);
@@ -160,143 +150,105 @@ public class MovementProcess extends AbstractProcess {
         return accessibleCells;
     }
 
-    private void readConfigurationFile() {
+    private void loadParameters() {
 
-        /*
-         * Open areas-maps configuration file
-         */
-        FileInputStream areasFile = null;
-        try {
-            areasFile = new FileInputStream(resolveFile(getConfiguration().getAreasFilename()));
-        } catch (FileNotFoundException ex) {
-            System.out.println("Error while opening areasFile");
-            System.exit(1);
-        }
-        /*
-         * Initialize the reader
-         */
-        Reader r = new BufferedReader(new InputStreamReader(areasFile));
-        StreamTokenizer st = new StreamTokenizer(r);
-        st.slashSlashComments(true);
-        st.slashStarComments(true);
-        st.quoteChar(';');
+
         int nSpecies = getConfiguration().getNSpecies();
         spatialDistribution = new SpatialDistribution[nSpecies];
         sizeRandomMap = new int[nSpecies];
 
-        try {
+        for (int i = 0; i < nSpecies; i++) {
+            String areaDistribMethod = getConfiguration().getString("movement.distribution.method.sp" + i);
+            if (areaDistribMethod.equalsIgnoreCase("random")) {
+                spatialDistribution[i] = SpatialDistribution.RANDOM;
+            } else if (areaDistribMethod.equalsIgnoreCase("maps")) {
+                spatialDistribution[i] = SpatialDistribution.MAPS;
+            } else if (areaDistribMethod.equalsIgnoreCase("connectivity")) {
+                spatialDistribution[i] = SpatialDistribution.CONNECTIVITY;
+            } else {
+                throw new UnsupportedOperationException("Distribution method is either 'random' | 'maps' | 'connectivity'");
+            }
+        }
+        /*
+         * get number of maps
+         */
 
-            for (int i = 0; i < nSpecies; i++) {
-                st.nextToken();
-                String areaDistribMethod = st.sval;
-                if (areaDistribMethod.equalsIgnoreCase("random")) {
-                    spatialDistribution[i] = SpatialDistribution.RANDOM;
-                } else if (areaDistribMethod.equalsIgnoreCase("maps")) {
-                    spatialDistribution[i] = SpatialDistribution.MAPS;
-                } else if (areaDistribMethod.equalsIgnoreCase("connectivity")) {
-                    spatialDistribution[i] = SpatialDistribution.CONNECTIVITY;
-                } else {
-                    throw new UnsupportedOperationException("Distribution method is either 'random' | 'maps' | 'connectivity'");
-                }
+        int nmap = getConfiguration().findKeys("movement.map*.species").size();
+        maps = new GridMap[nmap];
+        connectivityMatrix = new ConnectivityMatrix[nmap];
+        maxProbaPresence = new float[nmap];
+        mapFile = new String[nmap];
+        mapIndexNoTwin = new int[nmap];
+        indexMaps = new int[nSpecies][][];
+        for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+            int lifespan = getSpecies(iSpec).getLifespanDt();
+            indexMaps[iSpec] = new int[lifespan][];
+            for (int j = 0; j < lifespan; j++) {
+                indexMaps[iSpec][j] = new int[getConfiguration().getNumberTimeStepsPerYear()];
+            }
+        }
+
+        /**
+         * Loop over the maps
+         */
+        int imap = 0;
+        for (int indexMap = 0; indexMap < nmap; indexMap++) {
+            while (!getConfiguration().canFind("movement.map" + imap + ".species")) {
+                imap++;
             }
             /*
-             * get number of maps
+             * read species number
              */
-            st.nextToken();
-            int nbMaps = new Integer(st.sval).intValue();
-            maps = new GridMap[nbMaps];
-            connectivityMatrix = new ConnectivityMatrix[nbMaps];
-            maxProbaPresence = new float[nbMaps];
-            mapFile = new String[nbMaps];
-            mapIndexNoTwin = new int[nbMaps];
-            indexMaps = new int[nSpecies][][];
-            for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                int lifespan = getSpecies(iSpec).getLifespanDt();
-                indexMaps[iSpec] = new int[lifespan][];
-                for (int j = 0; j < lifespan; j++) {
-                    indexMaps[iSpec][j] = new int[getConfiguration().getNumberTimeStepsPerYear()];
-                }
-            }
+            int iSpec = getSpecies(getConfiguration().getString("movement.map" + imap + ".species")).getIndex();
 
-            /**
-             * Loop over the maps
-             */
-            for (int indexMap = 0; indexMap < nbMaps; indexMap++) {
+            if (spatialDistribution[iSpec] == SpatialDistribution.RANDOM) {
+                sizeRandomMap[iSpec] = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpec);
+            } else {
                 /*
-                 * read species number
+                 * read age min and age max concerned by this map
                  */
-                st.nextToken();
-                int iSpec = new Integer(st.sval).intValue() - 1;
-                if (spatialDistribution[iSpec] == SpatialDistribution.RANDOM) {
-                    st.nextToken();
-                    sizeRandomMap[iSpec] = (new Integer(st.sval)).intValue();
-                } else {
-                    /*
-                     * read age min and age max concerned by this map
-                     */
-                    st.nextToken();
-                    int ageMin = new Integer(st.sval).intValue() - 1;
-                    st.nextToken();
-                    int ageMax = new Integer(st.sval).intValue() - 1;
-                    /*
-                     * read number of time step over the year concerned by this map
-                     */
-                    st.nextToken();
-                    int nbDtPerMap = new Integer(st.sval).intValue();
-                    /*
-                     * read the time steps over the year concerned by this map
-                     */
-                    int[] mapSeason = new int[nbDtPerMap];
-                    for (int k = 0; k < nbDtPerMap; k++) {
-                        st.nextToken();
-                        mapSeason[k] = new Integer(st.sval).intValue() - 1;
+                int ageMin = (int) Math.round(getConfiguration().getFloat("movement.map" + imap + ".age.min") * getConfiguration().getNumberTimeStepsPerYear());
+                int ageMax = (int) Math.round(getConfiguration().getFloat("movement.map" + imap + ".age.max") * getConfiguration().getNumberTimeStepsPerYear());
+                ageMax = Math.min(ageMax, getSpecies(iSpec).getLifespanDt());
+
+                /*
+                 * read the time steps over the year concerned by this map
+                 */
+                int[] mapSeason = getConfiguration().getArrayInt("movement.map" + imap + ".season");
+                /*
+                 * Assign number of maps to numMap array
+                 */
+                for (int iAge = ageMin; iAge < ageMax; iAge++) {
+                    for (int iStep : mapSeason) {
+                        indexMaps[iSpec][iAge][iStep] = indexMap;
                     }
+                }
+                /*
+                 * read the name of the CSV file and load the map if name = "null"
+                 * it means the species is out of the simulated domain at these
+                 * age-class and time-step
+                 */
+                if (getConfiguration().canFind("movement.map" + imap + ".file")) {
+                    String csvFile = resolveFile(getConfiguration().getString("movement.map" + imap + ".file"));
+                    mapFile[indexMap] = csvFile;
+                    readCSVMap(csvFile, indexMap);
+                }
+                if (spatialDistribution[iSpec] == SpatialDistribution.CONNECTIVITY) {
                     /*
-                     * Assign number of maps to numMap array
+                     * Read the name of the connectivity file and load the matrix If
+                     * name = "null" it means the species is out of the simulated domain
+                     * at these age-class and time-step or the map is not connected to any
+                     * other one so there is no need for a connectivity matrix
                      */
-                    for (int iAge = ageMin; iAge <= ageMax; iAge++) {
-                        for (int iStep : mapSeason) {
-                            indexMaps[iSpec][iAge][iStep] = indexMap;
-                        }
-                    }
-                    /*
-                     * read the name of the CSV file and load the map if name = "null"
-                     * it means the species is out of the simulated domain at these
-                     * age-class and time-step
-                     */
-                    st.nextToken();
-                    if (!"null".equals(st.sval)) {
-                        String csvFile = resolveFile(st.sval);
-                        mapFile[indexMap] = st.sval;
-                        readCSVMap(csvFile, indexMap);
-                    }
-                    if (spatialDistribution[iSpec] == SpatialDistribution.CONNECTIVITY) {
-                        /*
-                         * Read the name of the connectivity file and load the matrix If
-                         * name = "null" it means the species is out of the simulated domain
-                         * at these age-class and time-step or the map is not connected to any
-                         * other one so there is no need for a connectivity matrix
-                         */
-                        st.nextToken();
-                        if (!"null".equals(st.sval)) {
-                            System.out.println("Reading connectivity matrix for " + getSpecies(iSpec).getName() + " map " + indexMap);
-                            String csvFile = resolveFile(st.sval);
-                            connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
-                            System.out.println("Connectivity matrix loaded");
-                        }
+                    if (getConfiguration().canFind("movement.map" + imap + ".connectivity.file")) {
+                        String csvFile = resolveFile(getConfiguration().getString("movement.map" + imap + ".connectivity.file"));
+                        System.out.println("Reading connectivity matrix for " + getSpecies(iSpec).getName() + " map " + indexMap);
+                        connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
+                        System.out.println("Connectivity matrix loaded");
                     }
                 }
             }
-
-
-        } catch (IOException ex) {
-            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                r.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            imap++;
         }
 
         eliminateTwinMap();
@@ -331,12 +283,13 @@ public class MovementProcess extends AbstractProcess {
             /*
              * Identify the coordinates of the cells and set the probability
              */
-            int indexCell = 0;
             float invNbCells = 1.f / nbCells;
-            for (int i = 0; i < lines.size(); i++) {
-                String[] line = lines.get(i);
-                for (int j = 0; j < line.length; j++) {
-                    float val = Float.valueOf(line[j]);
+            int ny = getGrid().get_ny();
+            for (int l = 0; l < lines.size(); l++) {
+                String[] line = lines.get(l);
+                int j = ny - l - 1;
+                for (int i = 0; i < line.length; i++) {
+                    float val = Float.valueOf(line[i]);
                     if (val > 0.f) {
                         if (val < 1.f) {
                             /*
@@ -354,7 +307,6 @@ public class MovementProcess extends AbstractProcess {
                              * default value at initialization of the array
                              */
                         }
-                        indexCell++;
                     }
                 }
             }
@@ -365,10 +317,8 @@ public class MovementProcess extends AbstractProcess {
         //System.out.println("Read CSV file " + csvFile + " [OK]");
     }
 
-    GridMap getMap(int numMap) {
-        return (null == maps)
-                ? getConfiguration().maps[numMap]
-                : maps[numMap];
+    public GridMap getMap(int numMap) {
+        return maps[numMap];
     }
 
     GridMap getMap(School school) {
@@ -376,21 +326,15 @@ public class MovementProcess extends AbstractProcess {
     }
 
     ConnectivityMatrix getMatrix(int numMap) {
-        return (null == connectivityMatrix)
-                ? getConfiguration().connectivityMatrix[numMap]
-                : connectivityMatrix[numMap];
+        return connectivityMatrix[numMap];
     }
 
     SpatialDistribution getSpatialDistribution(int iSpec) {
-        return (null == spatialDistribution)
-                ? getConfiguration().spatialDistribution[iSpec]
-                : spatialDistribution[iSpec];
+        return spatialDistribution[iSpec];
     }
 
     int getIndexMap(int iSpec, int iAge, int iStep) {
-        return (null == indexMaps)
-                ? getConfiguration().numMap[iSpec][iAge][iStep]
-                : indexMaps[iSpec][iAge][iStep];
+        return indexMaps[iSpec][iAge][iStep];
     }
 
     int getIndexMap(School school) {
@@ -398,22 +342,18 @@ public class MovementProcess extends AbstractProcess {
     }
 
     float getMaxProbaPresence(int numMap) {
-        return (null == maxProbaPresence)
-                ? getConfiguration().maxProbaPresence[numMap]
-                : maxProbaPresence[numMap];
+        return maxProbaPresence[numMap];
     }
 
     int getSizeRandomMap(int iSpec) {
-        return (null == sizeRandomMap)
-                ? getConfiguration().randomAreaSize[iSpec]
-                : sizeRandomMap[iSpec];
+        return sizeRandomMap[iSpec];
     }
 
     private float computeMaxProbaPresence(int numMap) {
         float tempMaxProbaPresence = 0;
         GridMap map = getMap(numMap);
-        for (int i = 0; i < getGrid().get_ny(); i++) {
-            for (int j = 0; j < getGrid().get_nx(); j++) {
+        for (int j = 0; j < getGrid().get_ny(); j++) {
+            for (int i = 0; i < getGrid().get_nx(); i++) {
                 tempMaxProbaPresence = Math.max(tempMaxProbaPresence, map.getValue(i, j));
             }
         }
@@ -450,6 +390,37 @@ public class MovementProcess extends AbstractProcess {
 //                    }
                 }
             }
+        }
+    }
+    
+    public String getMapDetails(int numMap) {
+        StringBuilder str = new StringBuilder();
+        str.append("Map: ");
+        str.append(numMap);
+//        str.append(" - Species: ");
+//        str.append(speciesName[speciesMap[numMap]]);
+//        str.append(" - Age class: ");
+//        for (int k = 0; k < agesMap[numMap].length; k++) {
+//            str.append(agesMap[numMap][k]);
+//            str.append(" ");
+//        }
+//        str.append("- Time step: ");
+//        for (int k = 0; k < seasonMap[numMap].length; k++) {
+//            str.append(seasonMap[numMap][k]);
+//            str.append(" ");
+//        }
+        return str.toString();
+    }
+    
+     public enum SpatialDistribution {
+
+        RANDOM,
+        MAPS,
+        CONNECTIVITY;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
         }
     }
 }

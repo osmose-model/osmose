@@ -46,9 +46,14 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
      * Abundance per stages [SPECIES][STAGES]
      */
     private double[][] abundanceStage;
+    /**
+     * Whether the indicator should be enabled or not.
+     */
+    private boolean enabled;
     
-     public MortalityIndicator(int replica) {
+    public MortalityIndicator(int replica, String keyEnabled) {
         super(replica);
+        enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
     @Override
@@ -120,11 +125,13 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public boolean isEnabled() {
-        return !getConfiguration().isCalibrationOutput();
+        return enabled;
     }
 
     @Override
     public void write(float time) {
+        
+        int recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             prw[iSpecies].print(time);
@@ -133,7 +140,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 for (int iStage = 0; iStage < STAGES; iStage++) {
                     if (iDeath == NATURAL && iStage == EGG) {
                         // instantenous mortality rate for eggs natural mortality 
-                        prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / getConfiguration().getRecordFrequency());
+                        prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / recordFrequency);
                     } else {
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage]);
                     }
@@ -151,10 +158,10 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
         prw = new PrintWriter[getNSpecies()];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
-            File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
+            File path = new File(getConfiguration().getOutputPathname());
             StringBuilder filename = new StringBuilder("Mortality");
             filename.append(File.separatorChar);
-            filename.append(getConfiguration().getOutputPrefix());
+            filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_mortalityRate-");
             filename.append(getSimulation().getSpecies(iSpecies).getName());
             filename.append("_Simu");

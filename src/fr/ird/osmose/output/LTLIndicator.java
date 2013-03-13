@@ -36,9 +36,14 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
      * LTL biomass array after predation process.
      */
     private float[][][] ltlbiomass1;
+    /**
+     * Whether the indicator should be enabled or not.
+     */
+    private boolean enabled;
 
-    public LTLIndicator(int replica) {
+    public LTLIndicator(int replica, String keyEnabled) {
         super(replica);
+        enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
     @Override
@@ -100,7 +105,7 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public boolean isEnabled() {
-        return getConfiguration().outputPlanktonBiomass;
+        return enabled;
     }
 
     @Override
@@ -220,12 +225,12 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
     }
 
     private String getFilename() {
-        File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
+        File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append("planktonBiomass");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_ltlbiomass_integrated_");
         filename.append("Simu");
         filename.append(getSimulation().getReplica());

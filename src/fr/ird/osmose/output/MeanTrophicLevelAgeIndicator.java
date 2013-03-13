@@ -12,15 +12,15 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
     private double[][] meanTL;
     private double[][] biomass;
 
-    public MeanTrophicLevelAgeIndicator(int replica) {
-        super(replica);
+     public MeanTrophicLevelAgeIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
     }
 
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_meanTLPerAge_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
@@ -37,7 +37,7 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
 
         int classmax = 0;
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            classmax = (int) Math.max(Math.ceil(getConfiguration().speciesLifespan[iSpecies]), classmax);
+            classmax = (int) Math.max(Math.ceil(getConfiguration().getFloat("species.lifespan.sp" + iSpecies)) , classmax);
         }
         String[] headers = new String[classmax + 1];
         headers[0] = "Species index";
@@ -57,8 +57,8 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
         meanTL = new double[getNSpecies()][];
         biomass = new double[getNSpecies()][];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            meanTL[iSpecies] = new double[(int) Math.ceil(getConfiguration().speciesLifespan[iSpecies])];
-            biomass[iSpecies] = new double[(int) Math.ceil(getConfiguration().speciesLifespan[iSpecies])];
+            meanTL[iSpecies] = new double[(int) Math.ceil(getConfiguration().getFloat("species.lifespan.sp" + iSpecies))];
+            biomass[iSpecies] = new double[(int) Math.ceil(getConfiguration().getFloat("species.lifespan.sp" + iSpecies))];
         }
     }
 
@@ -72,11 +72,6 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
             meanTL[i][ageClass] += biom * school.getTrophicLevel();
             biomass[i][ageClass] += biom;
         }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return getConfiguration().isTLOutput();
     }
 
     @Override

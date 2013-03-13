@@ -17,6 +17,10 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
 
     private FileOutputStream fos;
     private PrintWriter prw;
+    private boolean cutoff;
+    private int recordFrequency;
+    
+    final private boolean enabled;
 
     abstract String getFilename();
 
@@ -24,19 +28,28 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
 
     abstract String[] getHeaders();
     
-    AbstractIndicator(int replica) {
+    AbstractIndicator(int replica, String keyEnabled) {
         super(replica);
+        enabled = getConfiguration().getBoolean(keyEnabled);
+    }
+    
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
     
     boolean includeClassZero() {
-        return getConfiguration().isIncludeClassZero();
+        return !cutoff;
     }
 
     @Override
     public void init() {
+        
+        cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // Create parent directory
-        File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
+        File path = new File(getConfiguration().getOutputPathname());
         File file = new File(path, getFilename());
         file.getParentFile().mkdirs();
         try {
@@ -95,5 +108,12 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
             }
             prw.println();
         }
+    }
+
+    /**
+     * @return the recordFrequency
+     */
+    public int getRecordFrequency() {
+        return recordFrequency;
     }
 }

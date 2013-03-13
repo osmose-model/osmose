@@ -1,6 +1,13 @@
 package fr.ird.osmose.grid;
 
+import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Osmose;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * ******************************************************************************
@@ -29,14 +36,14 @@ public class OriginalGrid extends AbstractGrid {
     public void readParameters() {
 
         /* grid dimension */
-        set_ny(getConfiguration().nLine);
-        set_nx(getConfiguration().nColumn);
+        set_ny(getConfiguration().getInt("grid.nline"));
+        set_nx(getConfiguration().getInt("grid.ncolumn"));
 
         /* geographical extension of the grid */
-        setLatMax(getConfiguration().upLeftLat);
-        setLatMin(getConfiguration().lowRightLat);
-        setLongMax(getConfiguration().lowRightLon);
-        setLongMin(getConfiguration().upLeftLon);
+        setLatMax(getConfiguration().getFloat("grid.lowright.lat"));
+        setLatMin(getConfiguration().getFloat("grid.upleft.lat"));
+        setLongMax(getConfiguration().getFloat("grid.lowright.lon"));
+        setLongMin(getConfiguration().getFloat("grid.upleft.lon"));
     }
 
     /*
@@ -51,32 +58,50 @@ public class OriginalGrid extends AbstractGrid {
 
         Cell[][] grid = new Cell[get_ny()][get_nx()];
         float latitude, longitude;
+        String filename = getConfiguration().getString("grid.mask.file");
+        boolean[][] land = readMaskAsCSV(filename);
         for (int j = 0; j < get_ny(); j++) {
             latitude = getLatMin() + (float) (j + 0.5f) * dLat;
             for (int i = 0; i < get_nx(); i++) {
                 longitude = getLongMin() + (float) (i + 0.5) * dLong;
                 //System.out.print(isLand(i, j) ? "0 ":"1 ");
-                grid[j][i] = new Cell(i, j, latitude, longitude, isLand(i, j));
+                grid[j][i] = new Cell(i, j, latitude, longitude, land[j][i]);
             }
             //System.out.println();
         }
         return grid;
     }
 
-    private boolean isLand(int i, int j) {
-        if (null != getConfiguration().icoordLand) {
-            int nym1 = get_ny() - 1;
-            for (int k = 0; k < getConfiguration().icoordLand.length; k++) {
-                if (((nym1 - j) == getConfiguration().icoordLand[k]) && (i == getConfiguration().jcoordLand[k])) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     @Override
     public int getStride() {
         return 1;
+    }
+
+    private boolean[][] readMaskAsCSV(String csvFile) {
+        
+        boolean[][] land = null;
+        try {
+            /*
+             * Read the CSV file
+             */
+            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            List<String[]> lines = reader.readAll();
+            land = new boolean[lines.size()][];
+            int ny = lines.size();
+            for (int l = lines.size(); l-- > 0;) {
+                String[] line = lines.get(l);
+                int j = ny - l - 1;
+                land[j] = new boolean[line.length];
+                for (int i = 0; i < line.length; i++) {
+                    float val = Float.valueOf(line[i]);
+                    if (val < 0.f) {
+                        land[j][i] = true;
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return land;
     }
 }

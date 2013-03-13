@@ -10,8 +10,8 @@ public class BiomassIndicator extends AbstractIndicator {
 
     private double[] biomass;
 
-    public BiomassIndicator(int replica) {
-        super(replica);
+    public BiomassIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
     }
 
     @Override
@@ -35,14 +35,9 @@ public class BiomassIndicator extends AbstractIndicator {
     }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
     public void write(float time) {
 
-        double nsteps = getConfiguration().getRecordFrequency();
+        double nsteps = getRecordFrequency();
         for (int i = 0; i < biomass.length; i++) {
             biomass[i] /= nsteps;
         }
@@ -51,7 +46,7 @@ public class BiomassIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPrefix());
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
         filename.append("_biomass_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

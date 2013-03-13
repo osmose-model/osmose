@@ -26,18 +26,16 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        
-        D = getConfiguration().D;
+
+        D = new float[getNSpecies()];
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            D[iSpec] = getConfiguration().getFloat("mortality.natural.rate.sp" + iSpec);
+        }
 
         larvalMortalityRates = new float[getNSpecies()][getConfiguration().getNumberTimeStepsPerYear() * getConfiguration().getNYear()];
         for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
-            int t = 0;
             for (int iStep = 0; iStep < larvalMortalityRates[iSpec].length; iStep++) {
-                if (t > getConfiguration().larvalMortalityRates[iSpec].length - 1) {
-                    t = 0;
-                }
-                larvalMortalityRates[iSpec][iStep] = getConfiguration().larvalMortalityRates[iSpec][t];
-                t++;
+                larvalMortalityRates[iSpec][iStep] = getConfiguration().getFloat("mortality.natural.larva.rate.sp" + iSpec);
             }
         }
 
@@ -49,8 +47,8 @@ public class NaturalMortalityProcess extends AbstractProcess {
     public void run() {
         // Natural mortality (due to other predators)
         for (School school : getPopulation()) {
-            double D = getNaturalMortalityRate(school, 1);
-            double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
+            double M = getNaturalMortalityRate(school, 1);
+            double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
             if (nDead > 0.d) {
                 school.setNdeadNatural(nDead);
             }
@@ -90,7 +88,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         rate /= larvalMortalityRates[iSpec].length;
         return rate;
     }
-    
+
     public double getNaturalMortalityRate(Species species) {
         return D[species.getIndex()];
     }

@@ -13,21 +13,22 @@ import fr.ird.osmose.populator.SpectrumPopulator;
  * @author pverley
  */
 public class PopulatingProcess extends AbstractProcess {
-    
+
     private AbstractPopulator populator;
-    
+
     public PopulatingProcess(int replica) {
         super(replica);
     }
 
     @Override
     public void init() {
-        
-        if (getConfiguration().calibrationMethod.equalsIgnoreCase("biomass")) {
+
+        String method = getConfiguration().getString("population.initialization.method");
+        if (method.equalsIgnoreCase("biomass")) {
             populator = new BiomassPopulator(getReplica());
-        } else if (getConfiguration().calibrationMethod.equalsIgnoreCase("spectrum")) {
+        } else if (method.equalsIgnoreCase("spectrum")) {
             populator = new SpectrumPopulator(getReplica());
-        } else if (getConfiguration().calibrationMethod.equalsIgnoreCase("random")) {
+        } else if (method.equalsIgnoreCase("random")) {
             throw new UnsupportedOperationException("Random initialization not supported yet.");
         }
     }
@@ -36,5 +37,4 @@ public class PopulatingProcess extends AbstractProcess {
     public void run() {
         populator.populate();
     }
-    
 }

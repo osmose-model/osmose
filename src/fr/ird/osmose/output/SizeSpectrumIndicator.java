@@ -27,8 +27,8 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     // Number of size classes in the discrete spectrum
     private int nSizeClass;
 
-    public SizeSpectrumIndicator(int replica) {
-        super(replica);
+    public SizeSpectrumIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
         initializeSizeSpectrum();
     }
 
@@ -38,9 +38,9 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
             return;
         }
 
-        spectrumMinSize = getConfiguration().getSpectrumMinSize();
-        spectrumMaxSize = getConfiguration().getSpectrumMaxSize();
-        classRange = getConfiguration().getSpectrumClassRange();
+        spectrumMinSize = getConfiguration().getFloat("output.size.spectrum.size.min");
+        spectrumMaxSize = getConfiguration().getFloat("output.size.spectrum.size.max");
+        classRange = getConfiguration().getFloat("output.size.spectrum.size.range");
 
         //initialisation of the size spectrum features
         nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
@@ -74,12 +74,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
             sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getInstantaneousAbundance();
         }
     }
-
-    @Override
-    public boolean isEnabled() {
-        return getConfiguration().isSizeSpectrumOutput() || getConfiguration().isSizeSpectrumSpeciesOutput();
-    }
-
+    
     private int getSizeRank(School school) {
 
         int iSize = tabSizes.length - 1;
@@ -101,7 +96,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
             // Abundance
             double sum = 0f;
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                sum += sizeSpectrum[iSpec][iSize] / getConfiguration().getRecordFrequency();
+                sum += sizeSpectrum[iSpec][iSize] / getRecordFrequency();
             }
             values[iSize][1] = sum;
             // ln(Size)
@@ -117,7 +112,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_SizeSpectrum_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

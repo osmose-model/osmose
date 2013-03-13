@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.grid.OriginalGrid;
 import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.process.MovementProcess.SpatialDistribution;
 import fr.ird.osmose.util.ConnectivityMatrix;
 import fr.ird.osmose.util.GridMap;
 import java.io.BufferedReader;
@@ -204,7 +205,7 @@ public class OldConfiguration {
     /**
      * Age (year) at maturity. Array[nSpecies]
      */
-    public float[]  ageMaturity;
+    public float[] ageMaturity;
     /**
      * Spawning seasonality. Array[nSpecies][nStepYear]
      */
@@ -303,7 +304,16 @@ public class OldConfiguration {
     /**
      * Name of the Java Class name implementing LTLForcing.java.
      */
-    private String ltlForcingClassName;
+    public String ltlForcingClassName;
+    public String[] planktonFileListNetcdf;
+    public String zlevelName;
+    public String bathyFile;
+    public String bathyName;
+    public String[] planktonNetcdfNames;
+    public String gridFileName;
+    public String strCs_r, strHC;
+    public String strLon, strLat, strH;
+    public int timeDim;
     //
     //// GRID
     //
@@ -538,18 +548,14 @@ public class OldConfiguration {
      * Array[nSpecies][nStepConcerned]
      */
     public int[][] seasonMigration;
-    // phv 20130208
-    // Temporary flag to be able to read new format for HABITAT configuration
-    // file with agemin and agemax specified.
-    public final static boolean NEW_AREA_FILE = false;
 
-    OldConfiguration(String inputPathName, String outputPathName, String inputTxtName) {
+    public OldConfiguration(String inputPathName, String outputPathName, String inputTxtName) {
         this.inputPathName = inputPathName;
         this.outputPathName = outputPathName;
         this.inputTxtName = inputTxtName;
     }
 
-    public void init() {
+    public void readParameters() {
 
         readInputFile();	// read the first file containing the file names of all other input files
         readAllInputFiles();
@@ -559,6 +565,7 @@ public class OldConfiguration {
         readConfigurationFile(configurationFilename);
         readSpeciesFile(speciesFilename);
         readLTLBasisFile(ltlBasisFilename);
+        readLTLForcingFile(ltlForcingFilename);
         readPredationFile(predationFilename);
         readFishingFile(fishingFilename);
         readCalibrationFile(calibrationFilename);
@@ -571,12 +578,8 @@ public class OldConfiguration {
         readAccessibilitiesFile(accessibilityFilename);
         readMigrationFile();
         readCoastFile();
-        initGrid();
-        if (!NEW_AREA_FILE) {
-            readAreaFile();
-        }
+        readAreaFile();
         readMPAFile();
-        initForcing();
     }
 
     public String readPathFile() // read the file situated within the source code directory
@@ -781,6 +784,92 @@ public class OldConfiguration {
             }
         } catch (IOException ex) {
             System.out.println("Reading error of LTL structure file");
+            System.exit(1);
+        }
+    }
+
+    public void readLTLForcingFile(String planktonFileName) {
+        FileInputStream LTLFile = null;
+        try {
+            LTLFile = new FileInputStream(new File(resolveFile(planktonFileName)));
+        } catch (FileNotFoundException ex) {
+            System.out.println("LTL file " + planktonFileName + " doesn't exist");
+            System.exit(1);
+        }
+
+        Reader r = new BufferedReader(new InputStreamReader(LTLFile));
+        StreamTokenizer st = new StreamTokenizer(r);
+        st.slashSlashComments(true);
+        st.slashStarComments(true);
+        st.quoteChar(';');
+
+        try {
+            planktonNetcdfNames = new String[getNPlankton()];
+            for (int i = 0; i < getNPlankton(); i++) {
+                st.nextToken();
+                planktonNetcdfNames[i] = st.sval;
+            }
+
+            int nbFiles = getNumberLTLSteps();
+            if (ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLFastForcingBFM")
+                    || ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLForcingBFM")) {
+                /*
+                 * Reads number of records in BFM NetCDF file
+                 * Reads number of BFM NetCDF files
+                 */
+                st.nextToken();
+
+                timeDim = Integer.valueOf(st.sval);
+                st.nextToken();
+                nbFiles = Integer.valueOf(st.sval);
+            }
+
+            planktonFileListNetcdf = new String[nbFiles];
+            for (int step = 0; step < nbFiles; step++) {
+                st.nextToken();
+                planktonFileListNetcdf[step] = st.sval;
+            }
+
+            if (ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLFastForcingRomsPisces")
+                    || ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLForcingRomsPisces")
+                    || ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLForcingLaure")) {
+                st.nextToken();
+                gridFileName = st.sval;
+
+                st.nextToken();
+                strLon = st.sval;
+                st.nextToken();
+                strLat = st.sval;
+                st.nextToken();
+                strH = st.sval;
+                st.nextToken();
+                strCs_r = st.sval;
+                st.nextToken();
+                strHC = st.sval;
+            }
+
+            if (ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLFastForcingECO3M")
+                    || ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLForcingECO3M")) {
+                st.nextToken();
+                zlevelName = st.sval;
+            }
+
+            if (ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLFastForcingBFM")
+                    || ltlForcingClassName.equals("fr.ird.osmose.ltl.LTLForcingBFM")) {
+                /*
+                 * Read NetCDF filename with the bathymetry variable
+                 * Read name of the zlevel variable in the NetCDF file
+                 * Read name of the bathymetry variable in the NetCDF file
+                 */
+                st.nextToken();
+                bathyFile = st.sval;
+                st.nextToken();
+                zlevelName = st.sval;
+                st.nextToken();
+                bathyName = st.sval;
+            }
+        } catch (IOException ex) {
+            System.out.println("Reading error of LTL file");
             System.exit(1);
         }
     }
@@ -1903,8 +1992,6 @@ public class OldConfiguration {
                 Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
-        eliminateTwinMap();
     }
 
     /**
@@ -1935,6 +2022,25 @@ public class OldConfiguration {
                 }
             }
         }
+    }
+
+    public void loadMaps() {
+
+        for (int indexMap = 0; indexMap < mapFile.length; indexMap++) {
+            if (!mapFile[indexMap].equals("null")) {
+                readCSVMap(mapFile[indexMap], indexMap);
+                System.out.println("Loaded map " + indexMap + " " + mapFile[indexMap]);
+            }
+
+
+            if ((null != connectivityFile[indexMap]) && (!connectivityFile[indexMap].equals("null"))) {
+                System.out.println("Reading connectivity matric for " + speciesName[speciesMap[indexMap]] + " map " + indexMap);
+                connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, connectivityFile[indexMap]);
+                System.out.println("Connectivity matrix loaded");
+            }
+        }
+
+        eliminateTwinMap();
     }
 
     private void readConnectivity(StreamTokenizer st, int iSpec, int indexMap) throws IOException {
@@ -1975,8 +2081,6 @@ public class OldConfiguration {
         if (!"null".equals(st.sval)) {
             String csvFile = resolveFile(st.sval);
             mapFile[indexMap] = csvFile;
-            readCSVMap(csvFile, indexMap);
-            System.out.println("Loaded map " + indexMap + " " + csvFile);
         } else {
             mapFile[indexMap] = "null";
         }
@@ -1988,11 +2092,8 @@ public class OldConfiguration {
          */
         st.nextToken();
         if (!"null".equals(st.sval)) {
-            System.out.println("Reading connectivity matric for " + speciesName[iSpec] + " map " + indexMap);
             String csvFile = resolveFile(st.sval);
             connectivityFile[indexMap] = csvFile;
-            connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
-            System.out.println("Connectivity matrix loaded");
         } else {
             connectivityFile[indexMap] = "null";
         }
@@ -2035,8 +2136,7 @@ public class OldConfiguration {
         st.nextToken();
         if (!"null".equals(st.sval)) {
             String csvFile = resolveFile(st.sval);
-            mapFile[indexMap] = st.sval;
-            readCSVMap(csvFile, indexMap);
+            mapFile[indexMap] = csvFile;
         }
     }
 
@@ -2063,7 +2163,7 @@ public class OldConfiguration {
             tabMPAiMatrix = new int[nbCells];
             tabMPAjMatrix = new int[nbCells];
             int ny = lines.size();
-            for (int j = ny; j-- > 0; ) {
+            for (int j = ny; j-- > 0;) {
                 String[] line = lines.get(j);
                 for (int i = 0; i < line.length; i++) {
                     float val = Float.valueOf(line[i]);
@@ -2717,15 +2817,5 @@ public class OldConfiguration {
         return spectrumClassRange;
     }
 
-    public enum SpatialDistribution {
-
-        RANDOM,
-        MAPS,
-        CONNECTIVITY;
-        
-        @Override
-        public String toString() {
-            return name().toLowerCase();
-        }
-    }
+   
 }

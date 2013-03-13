@@ -7,6 +7,7 @@ package fr.ird.osmose.util;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.process.MovementProcess;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -67,7 +68,7 @@ public class SpatialMapUI extends JPanel {
     private boolean isGridVisible = false;
     private static GridMap map;
 
-    private static int numMap = 19;
+    private static int numMap = 1;
 
 ///////////////
 // Constructors
@@ -411,13 +412,16 @@ public class SpatialMapUI extends JPanel {
     public static void main(String args[]) {
 
         getOsmose().init(args);
-        map = getOsmose().getOldConfiguration().getMap(numMap);
+        getOsmose().getSimulation(0).init();
+        MovementProcess mov = new MovementProcess(0);
+        mov.init();
+        map = mov.getMap(numMap);
 
         SpatialMapUI grid = new SpatialMapUI();
         grid.init();
         grid.setGridVisible(true);
         //1. Create the frame.
-        JFrame frame = new JFrame(getOsmose().getOldConfiguration().getMapDetails(numMap));
+        JFrame frame = new JFrame(mov.getMapDetails(numMap));
 
         //2. Optional: What happens when the frame closes?
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

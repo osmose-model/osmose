@@ -11,7 +11,7 @@ import fr.ird.osmose.Species;
  * @author pverley
  */
 public class ReproductionProcess extends AbstractProcess {
-    
+
     private float[][] seasonSpawning;
 
     public enum ReproductionType {
@@ -32,7 +32,7 @@ public class ReproductionProcess extends AbstractProcess {
      * Reproduction processes for every Species
      */
     private AbstractProcess[] reproductionProcess;
-    
+
     public ReproductionProcess(int replica) {
         super(replica);
     }
@@ -40,15 +40,23 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        seasonSpawning = getConfiguration().seasonSpawning;
-        
         int nSpecies = getConfiguration().getNSpecies();
+        seasonSpawning = new float[nSpecies][];
         reproductionProcess = new AbstractProcess[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
-            if (getConfiguration().reproduceLocally[i]) {
+            seasonSpawning[i] = getConfiguration().getArrayFloat("reproduction.season.sp" + i);
+            float sum = 0;
+            for (float f : seasonSpawning[i]) {
+                sum += f;
+            }
+            if (sum > 0.f) {
                 reproductionProcess[i] = new LocalReproductionProcess(this, getReplica(), getSpecies(i));
             } else {
+                seasonSpawning[i] = getConfiguration().getArrayFloat("flux.incoming.season.sp" + i);
                 reproductionProcess[i] = new IncomingFluxProcess(this, getReplica(), getSpecies(i));
+            }
+            for (int t = 0; t < seasonSpawning[i].length; t++) {
+                seasonSpawning[i][t] = seasonSpawning[i][t] / 100.f;
             }
             reproductionProcess[i].init();
         }
@@ -60,7 +68,7 @@ public class ReproductionProcess extends AbstractProcess {
             reproductionProcess[i].run();
         }
     }
-    
+
     double getSeason(int iStepSimu, Species species) {
         int iSpec = species.getIndex();
         int iStep = seasonSpawning[iSpec].length > getConfiguration().getNumberTimeStepsPerYear()

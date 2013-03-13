@@ -39,9 +39,14 @@ public class DietIndicator extends SimulationLinker implements Indicator {
      * Threshold age (year) or size (cm) between the diet stages.
      */
     private float[][] dietStageThreshold;
-    
-     public DietIndicator(int replica) {
+    /**
+     * Whether the indicator should be enabled or not.
+     */
+    private boolean enabled;
+
+    public DietIndicator(int replica, String keyEnabled) {
         super(replica);
+        enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
     @Override
@@ -122,7 +127,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public boolean isEnabled() {
-        return getConfiguration().isDietOuput();
+        return enabled;
     }
 
     @Override
@@ -180,16 +185,24 @@ public class DietIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void init() {
-        
+
         // Read diet stages
-        nDietStage = getConfiguration().nDietStage;
-        dietStageThreshold = getConfiguration().dietStageThreshold;
-        
+        nDietStage = new int[getConfiguration().getNSpecies()];
+        dietStageThreshold = new float[getConfiguration().getNSpecies()][];
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            nDietStage[i] = getConfiguration().canFind("output.diet.stage.threshold.sp" + i)
+                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length
+                    : 1;
+            if (nDietStage[i] > 1) {
+                dietStageThreshold[i] = getConfiguration().getArrayFloat("output.diet.stage.threshold.sp" + i);
+            }
+        }
+
         // Create parent directory
-        File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
+        File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_dietMatrix_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

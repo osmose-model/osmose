@@ -47,10 +47,6 @@ public class Plankton {
         biomass = getForcing().computeBiomass(this, iStepSimu);
     }
 
-    public float getBiomass(int i, int j) {
-        return biomass[i][j];
-    }
-
     public float getBiomass(Cell cell) {
         return biomass[cell.get_jgrid()][cell.get_igrid()];
     }
@@ -94,7 +90,7 @@ public class Plankton {
      * Init biomass matrix
      */
     public void init() {
-        biomass = new float[getGrid().get_ny()][getGrid().get_nx()];
+        //biomass = new float[getGrid().get_ny()][getGrid().get_nx()];
     }
 
     public float calculPercent(float CritMin, float CritMax) // used during the predation process : compute the percentage of plankton size range available to a predator (according to its size)
@@ -144,8 +140,8 @@ public class Plankton {
         return trophicLevel;
     }
 
-    private static OldConfiguration getConfiguration() {
-        return Osmose.getInstance().getOldConfiguration();
+    private static Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     private static IGrid getGrid() {

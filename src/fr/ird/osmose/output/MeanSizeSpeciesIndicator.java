@@ -20,9 +20,14 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
     private PrintWriter[] prw;
     private double[][] meanSize;
     private double[][] abundance;
+    /**
+     * Whether the indicator should be enabled or not.
+     */
+    private boolean enabled;
 
-    public MeanSizeSpeciesIndicator(int replica) {
+    public MeanSizeSpeciesIndicator(int replica, String keyEnabled) {
         super(replica);
+        enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
     @Override
@@ -53,7 +58,7 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
 
     @Override
     public boolean isEnabled() {
-        return getConfiguration().isMeanSizeOutput();
+        return enabled;
     }
 
     @Override
@@ -80,10 +85,10 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
         prw = new PrintWriter[getNSpecies()];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
-            File path = new File(getConfiguration().getOutputPathname() + getConfiguration().getOutputFolder());
+            File path = new File(getConfiguration().getOutputPathname());
             StringBuilder filename = new StringBuilder("SizeIndicators");
             filename.append(File.separatorChar);
-            filename.append(getConfiguration().getOutputPrefix());
+            filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_meanSize-");
             filename.append(getSimulation().getSpecies(iSpecies).getName());
             filename.append("_Simu");

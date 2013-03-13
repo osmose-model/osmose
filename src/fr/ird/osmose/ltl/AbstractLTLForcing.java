@@ -5,7 +5,7 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.OldConfiguration;
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Plankton;
 import fr.ird.osmose.grid.IGrid;
@@ -53,7 +53,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
      *
      * @param ltlForcingFile, the pathname of the LTLForcing configuration file.
      */
-    abstract void readLTLForcingFile(String ltlForcingFile);
+    abstract void readLTLForcingFile();
 
     /**
      * This function loads the LTL grid. It loads longitude, latitude and depth
@@ -75,7 +75,7 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     
     @Override
     public void init() {
-        readLTLForcingFile(getConfiguration().getLtlForcingFilename());
+        readLTLForcingFile();
         initLTLGrid();
     }
 
@@ -158,8 +158,8 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         return jcoordLTLGrid[cell.get_jgrid()][cell.get_igrid()];
     }
 
-    static OldConfiguration getConfiguration() {
-        return Osmose.getInstance().getOldConfiguration();
+    static Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     static IGrid getGrid() {

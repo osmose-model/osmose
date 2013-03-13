@@ -5,14 +5,7 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,53 +29,24 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     float[][] latitude, longitude;
 
     @Override
-    public void readLTLForcingFile(String planktonFileName) {
-        FileInputStream LTLFile;
-        try {
-            LTLFile = new FileInputStream(new File(getConfiguration().resolveFile(planktonFileName)));
-        } catch (FileNotFoundException ex) {
-            System.out.println("LTL file " + planktonFileName + " doesn't exist");
-            return;
+    public void readLTLForcingFile() {
+
+        plktonNetcdfNames = new String[getConfiguration().getNPlankton()];
+        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+            plktonNetcdfNames[i] = getConfiguration().getString("ltl.netcdf.var.plankton.plk" + i);
         }
 
-        Reader r = new BufferedReader(new InputStreamReader(LTLFile));
-        StreamTokenizer st = new StreamTokenizer(r);
-        st.slashSlashComments(true);
-        st.slashStarComments(true);
-        st.quoteChar(';');
-
-        try {
-            plktonNetcdfNames = new String[getConfiguration().getNPlankton()];
-            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-                st.nextToken();
-                plktonNetcdfNames[i] = st.sval;
-            }
-
-            planktonFileListNetcdf = new String[getConfiguration().getNumberLTLSteps()];
-            for (int step = 0; step < getConfiguration().getNumberLTLSteps(); step++) {
-                st.nextToken();
-                planktonFileListNetcdf[step] = st.sval;
-            }
-
-            st.nextToken();
-            gridFileName = st.sval;
-
-            st.nextToken();
-            strLon = st.sval;
-            st.nextToken();
-            strLat = st.sval;
-            st.nextToken();
-            strH = st.sval;
-            st.nextToken();
-            strCs_r = st.sval;
-            st.nextToken();
-            strHC = st.sval;
-
-
-        } catch (IOException ex) {
-            System.out.println("Reading error of LTL file");
-            System.exit(1);
+        planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t*").size()];
+        for (int i = 0; i < planktonFileListNetcdf.length; i++) {
+            planktonFileListNetcdf[i] = getConfiguration().getString("ltl.netcdf.file.t" + i);
         }
+
+        gridFileName = getConfiguration().getString("ltl.netcdf.grid.file");
+        strLon = getConfiguration().getString("ltl.netcdf.var.lon");
+        strLat = getConfiguration().getString("ltl.netcdf.var.lat");
+        strH = getConfiguration().getString("ltl.netcdf.var.bathy");
+        strCs_r = getConfiguration().getString("ltl.netcdf.var.csr");
+        strHC = getConfiguration().getString("ltl.netcdf.var.hc");
     }
 
     @Override
@@ -147,24 +111,17 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     }
 
     // CASE SPECIFIC - uses easy relation between the grids Plume and Osmose
-   private void findValidMapIndex() {
+    private void findValidMapIndex() {
         int jGrid, iGrid;
         icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
         jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
 
+        // consider only the LTL cells included within the Osmose grid
         for (int i = 0; i < get_nx(); i++) {
-            for (int j = 0; j < get_ny(); j++) // consider only the LTL cells included within the Osmose grid
-            {
+            for (int j = 0; j < get_ny(); j++) {
                 if ((latitude[j][i] >= getGrid().getLatMin()) && (latitude[j][i] <= getGrid().getLatMax()) && (longitude[j][i] >= getGrid().getLongMin()) && (longitude[j][i] <= getGrid().getLongMax())) {
                     // equations giving the position of ROMS cells within the Osmose getGrid(), avoiding to read the whole matrix
-                    /*
-                     * WARNING, phv, 2011/04/07
-                     * I changed the calculation of posiTemp & posjTemp
-                     * but it should be double checked.
-                     * 2011/08/04 phv, looks like the change in positemp led to
-                     * different outputs... so I reverted the change.
-                     */
-                    jGrid = (int) Math.floor((latitude[j][i] - getGrid().getLatMin()) / getGrid().getdLat());    //************** Attention sign minus & latMax depend on the sign of lat and long
+                    jGrid = (int) Math.floor((latitude[j][i] - getGrid().getLatMin()) / getGrid().getdLat());
                     iGrid = (int) Math.floor((longitude[j][i] - getGrid().getLongMin()) / getGrid().getdLong());
 
                     // attach each LTL cells to the right Osmose cell (several LTL cells per Osmose cell is allowed)
@@ -201,7 +158,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                             }
                         }
                         if (i > 0) {
-                            cell = getGrid().getCell(i - 1,j);
+                            cell = getGrid().getCell(i - 1, j);
                             if (!cell.isLand()) {
                                 icoordLTLGrid[j][i].addAll(get_iLTL(cell));
                                 jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
@@ -236,12 +193,12 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         try {
             NetcdfFile nc = NetcdfFile.open(name);
             // read data and put it local array
-            data3d = (float[][][]) nc.findVariable(plktonNetcdfNames[iPlankton]).read().reduce().copyToNDJavaArray();  
+            data3d = (float[][][]) nc.findVariable(plktonNetcdfNames[iPlankton]).read().reduce().copyToNDJavaArray();
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getIntegrationDepth());
+        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override
@@ -396,7 +353,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
          */
         return VertCoordType.OLD;
     }
-    
+
     @Override
     public String[] getPlanktonFieldName() {
         return plktonNetcdfNames;

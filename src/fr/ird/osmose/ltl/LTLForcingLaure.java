@@ -6,14 +6,7 @@ package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Plankton;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StreamTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.Array;
@@ -36,52 +29,23 @@ public class LTLForcingLaure extends AbstractLTLForcing {
     private float[][][][] data;
 
     @Override
-    public void readLTLForcingFile(String planktonFileName) {
-        FileInputStream LTLFile;
-        try {
-            LTLFile = new FileInputStream(new File(getConfiguration().resolveFile(planktonFileName)));
-        } catch (FileNotFoundException ex) {
-            System.out.println("LTL file " + planktonFileName + " doesn't exist");
-            return;
+    public void readLTLForcingFile() {
+
+        plktonNetcdfNames = new String[getConfiguration().getNPlankton()];
+        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+            plktonNetcdfNames[i] = getConfiguration().getString("ltl.netcdf.var.plankton.plk" + i);
         }
 
-        Reader r = new BufferedReader(new InputStreamReader(LTLFile));
-        StreamTokenizer st = new StreamTokenizer(r);
-        st.slashSlashComments(true);
-        st.slashStarComments(true);
-        st.quoteChar(';');
-
-        try {
-            plktonNetcdfNames = new String[getConfiguration().getNPlankton()];
-            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-                st.nextToken();
-                plktonNetcdfNames[i] = st.sval;
-            }
-
-            planktonFileListNetcdf = new String[getConfiguration().getNumberLTLSteps()];
-            for (int step = 0; step < getConfiguration().getNumberLTLSteps(); step++) {
-                st.nextToken();
-                planktonFileListNetcdf[step] = st.sval;
-            }
-
-            st.nextToken();
-            gridFileName = st.sval;
-
-            st.nextToken();
-            strLon = st.sval;
-            st.nextToken();
-            //strLat = st.sval;
-            st.nextToken();
-            strH = st.sval;
-            st.nextToken();
-            strCs_r = st.sval;
-            st.nextToken();
-            strHC = st.sval;
-
-
-        } catch (IOException ex) {
-            System.out.println("Reading error of LTL file");
+        planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t").size()];
+        for (int i = 0; i < planktonFileListNetcdf.length; i++) {
+            planktonFileListNetcdf[i] = getConfiguration().getString("ltl.netcdf.file.t" + i);
         }
+        
+        gridFileName = getConfiguration().getString("ltl.netcdf.grid.file");
+        strLon = getConfiguration().getString("ltl.netcdf.var.lon");
+        strH = getConfiguration().getString("ltl.netcdf.var.bathy");
+        strCs_r = getConfiguration().getString("ltl.netcdf.var.csr");
+        strHC = getConfiguration().getString("ltl.netcdf.var.hc");
     }
 
     @Override
@@ -159,7 +123,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
             Logger.getLogger(LTLForcingLaure.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return verticalIntegration(dataInit, depthOfLayer, getConfiguration().getIntegrationDepth());
+        return verticalIntegration(dataInit, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override
@@ -314,7 +278,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
          */
         return VertCoordType.OLD;
     }
-    
+
     @Override
     public String[] getPlanktonFieldName() {
         return plktonNetcdfNames;

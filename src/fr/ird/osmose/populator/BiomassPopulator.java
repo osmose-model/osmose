@@ -54,7 +54,8 @@ public class BiomassPopulator extends AbstractPopulator {
             double F = fishingProcess.getFishingMortalityRate(species);
             
 
-            abdIni = getConfiguration().targetBiomass[i] / (meanWeight[(int) Math.round(species.getLifespanDt() / 2)] / 1000000);
+            float targetBiomass = getConfiguration().getFloat("population.initialization.biomass.sp" + i);
+            abdIni = targetBiomass / (meanWeight[(int) Math.round(species.getLifespanDt() / 2)] / 1000000);
             for (int j = species.getAgeClassZero(); j < species.getLifespanDt(); j++) {
                 sumExp += Math.exp(-(j * (D + F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
             }
@@ -77,7 +78,7 @@ public class BiomassPopulator extends AbstractPopulator {
                 }
             }
 
-            correctingFactor = (float) (getConfiguration().targetBiomass[i] / biomass);
+            correctingFactor = (float) (targetBiomass / biomass);
             // we make corrections on initial abundance to fit the input biomass
             abundanceIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
             biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
@@ -92,9 +93,9 @@ public class BiomassPopulator extends AbstractPopulator {
             // create the cohorts
             for (int age = 0; age < species.getLifespanDt(); age++) {
                 if (abundanceIni[age] > 0.d) {
-                    int nbSchools = getConfiguration().nSchool;
-                    for (int k = 0; k < nbSchools; k++) {
-                        getPopulation().add(new School(species, abundanceIni[age] / nbSchools, meanLength[age], meanWeight[age], age));
+                    int nSchool = getConfiguration().getSeed();
+                    for (int k = 0; k < nSchool; k++) {
+                        getPopulation().add(new School(species, abundanceIni[age] / nSchool, meanLength[age], meanWeight[age], age));
                     }
                 }
             }

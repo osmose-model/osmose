@@ -17,9 +17,9 @@ public class LTLFastForcing extends AbstractLTLForcing {
     private float[][][][] data;
 
     @Override
-    public void readLTLForcingFile(String planktonFileName) {
+    public void readLTLForcingFile() {
 
-        ncFile = getConfiguration().resolveFile(planktonFileName);
+        ncFile = getConfiguration().resolveFile(getConfiguration().getString("ltl.netcdf.file"));
         if (!new File(ncFile).exists()) {
             System.out.println("LTL NetCDF file " + ncFile + " doesn't exist");
             System.exit(1);
@@ -49,7 +49,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
                 }
             }
         }
-        return biomass;
+        return data[getIndexStepLTL(iStepSimu)][plankton.getIndex()];
     }
 
     private void loadData() {

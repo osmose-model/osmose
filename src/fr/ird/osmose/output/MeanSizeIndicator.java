@@ -16,8 +16,8 @@ public class MeanSizeIndicator extends AbstractIndicator {
     private double[] meanSize;
     private double[] abundance;
 
-    public MeanSizeIndicator(int replica) {
-        super(replica);
+    public MeanSizeIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
     }
 
     @Override
@@ -45,11 +45,6 @@ public class MeanSizeIndicator extends AbstractIndicator {
     }
 
     @Override
-    public boolean isEnabled() {
-        return getConfiguration().isMeanSizeOutput();
-    }
-
-    @Override
     public void write(float time) {
 
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
@@ -66,7 +61,7 @@ public class MeanSizeIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_meanSize_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

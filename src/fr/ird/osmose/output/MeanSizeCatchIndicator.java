@@ -16,8 +16,8 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
     private double[] meanSizeCatch;
     private double[] yieldN;
 
-    public MeanSizeCatchIndicator(int replica) {
-        super(replica);
+    public MeanSizeCatchIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
     }
 
     @Override
@@ -44,11 +44,6 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
     }
 
     @Override
-    public boolean isEnabled() {
-        return getConfiguration().isMeanSizeOutput();
-    }
-
-    @Override
     public void write(float time) {
 
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
@@ -65,7 +60,7 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_meanSizeCatch_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

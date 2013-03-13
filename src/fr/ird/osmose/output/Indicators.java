@@ -23,33 +23,33 @@ public class Indicators extends SimulationLinker {
         indicators = new ArrayList();
 
         // Biomass
-        indicators.add(new BiomassIndicator(replica));
+        indicators.add(new BiomassIndicator(replica, "output.biomass.enabled"));
         // Abundance
-        indicators.add(new AbundanceIndicator(replica));
+        indicators.add(new AbundanceIndicator(replica, "output.abundance.enabled"));
         // Mortality
-        indicators.add(new MortalityIndicator(replica));
+        indicators.add(new MortalityIndicator(replica, "output.mortality.enabled"));
         // Yield
-        indicators.add(new YieldIndicator(replica));
-        indicators.add(new YieldNIndicator(replica));
+        indicators.add(new YieldIndicator(replica, "output.yield.biomass.enabled"));
+        indicators.add(new YieldNIndicator(replica, "output.yield.abundance.enabled"));
         // Size
-        indicators.add(new MeanSizeIndicator(replica));
-        indicators.add(new MeanSizeCatchIndicator(replica));
-        indicators.add(new SizeSpectrumIndicator(replica));
-        indicators.add(new SizeSpectrumSpeciesNIndicator(replica));
-        indicators.add(new SizeSpectrumSpeciesBIndicator(replica));
-        indicators.add(new MeanSizeSpeciesIndicator(replica));
+        indicators.add(new MeanSizeIndicator(replica, "output.size.enabled"));
+        indicators.add(new MeanSizeCatchIndicator(replica, "output.size.catch.enabled"));
+        indicators.add(new SizeSpectrumIndicator(replica, "output.size.spectrum.enabled"));
+        indicators.add(new SizeSpectrumSpeciesNIndicator(replica, "output.size.spectrum.perSpecies.N.enabled"));
+        indicators.add(new SizeSpectrumSpeciesBIndicator(replica, "output.size.spectrum.perSpecies.B.enabled"));
+        indicators.add(new MeanSizeSpeciesIndicator(replica, "output.size.perSpecies.enabled"));
         // TL
-        indicators.add(new MeanTrophicLevelIndicator(replica));
-        indicators.add(new MeanTrophicLevelCatchIndicator(replica));
-        indicators.add(new TrophicLevelSpectrumIndicator(replica));
-        indicators.add(new MeanTrophicLevelSizeIndicator(replica));
-        indicators.add(new MeanTrophicLevelAgeIndicator(replica));
+        indicators.add(new MeanTrophicLevelIndicator(replica, "output.tl.enabled"));
+        indicators.add(new MeanTrophicLevelCatchIndicator(replica, "output.tl.catch.enabled"));
+        indicators.add(new TrophicLevelSpectrumIndicator(replica, "output.tl.spectrum.enabled"));
+        indicators.add(new MeanTrophicLevelSizeIndicator(replica, "output.tl.perSize.enabled"));
+        indicators.add(new MeanTrophicLevelAgeIndicator(replica, "output.tl.perAge.enabled"));
         // Predation
-        indicators.add(new DietIndicator(replica));
-        indicators.add(new PredatorPressureIndicator(replica));
+        indicators.add(new DietIndicator(replica, "output.diet.composition.enabled"));
+        indicators.add(new PredatorPressureIndicator(replica, "output.diet.pressure.enabled"));
         // Spatialized
-        indicators.add(new SpatialIndicator(replica));
-        indicators.add(new LTLIndicator(replica));
+        indicators.add(new SpatialIndicator(replica, "output.spatial.enabled"));
+        indicators.add(new LTLIndicator(replica, "output.spatial.ltl.enabled"));
     }
     
     public void init() {
@@ -80,10 +80,10 @@ public class Indicators extends SimulationLinker {
     public void update(int iStepSimu) {
 
         int year = getSimulation().getYear();
-        int nStepsRecord = getConfiguration().getRecordFrequency();
+        int nStepsRecord = getConfiguration().getInt("output.recordfrequency.ndt");
         //
         // UPDATE
-        if (year >= getConfiguration().yearStartSaving) {
+        if (year >= getConfiguration().getInt("output.start.year")) {
             for (Indicator indicator : indicators) {
                 if (indicator.isEnabled()) {
                     indicator.update();

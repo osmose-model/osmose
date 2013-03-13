@@ -13,9 +13,9 @@ import fr.ird.osmose.School;
 public class YieldIndicator extends AbstractIndicator {
 
     public double[] yield;
-    
-     public YieldIndicator(int replica) {
-        super(replica);
+
+    public YieldIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
     }
 
     @Override
@@ -37,11 +37,6 @@ public class YieldIndicator extends AbstractIndicator {
     }
 
     @Override
-    public boolean isEnabled() {
-        return !getConfiguration().isCalibrationOutput();
-    }
-
-    @Override
     public void write(float time) {
 
         writeVariable(time, yield);
@@ -49,7 +44,7 @@ public class YieldIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPrefix());
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
         filename.append("_yield_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

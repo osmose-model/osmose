@@ -44,6 +44,10 @@ public class MortalityProcess extends AbstractProcess {
      * Private instance of the predation process
      */
     private PredationProcess predationProcess;
+    /**
+     * Whether school diet should be recorded
+     */
+    private boolean recordDiet;
 
     public MortalityProcess(int replica) {
         super(replica);
@@ -64,6 +68,9 @@ public class MortalityProcess extends AbstractProcess {
 
         predationProcess = new PredationProcess(getReplica());
         predationProcess.init();
+        
+        recordDiet = getConfiguration().getBoolean("output.diet.composition.enabled")
+                || getConfiguration().getBoolean("output.diet.pressure.enabled");
     }
 
     /**
@@ -128,7 +135,7 @@ public class MortalityProcess extends AbstractProcess {
                             if (ipr < ns) {
                                 School prey = schools.get(ipr);
                                 double biomPrey = prey.adb2biom(nDeadMatrix[ipr][is]);
-                                if (getConfiguration().isDietOuput()) {
+                                if (recordDiet) {
                                     school.diet[prey.getSpeciesIndex()][prey.getDietOutputStage()] += biomPrey;
                                 }
                                 float TLprey = (prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)
@@ -137,7 +144,7 @@ public class MortalityProcess extends AbstractProcess {
                                 tmpTL[is] += TLprey * biomPrey / preyedBiomass;
                             } else {
                                 tmpTL[is] += getSimulation().getPlankton(ipr - ns).getTrophicLevel() * nDeadMatrix[ipr][is] / preyedBiomass;
-                                if (getConfiguration().isDietOuput()) {
+                                if (recordDiet) {
                                     int iltl = getNSpecies() + ipr - ns;
                                     school.diet[iltl][0] += nDeadMatrix[ipr][is];
                                 }

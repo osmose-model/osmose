@@ -5,7 +5,7 @@
 package fr.ird.osmose.grid;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.OldConfiguration;
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -295,8 +295,8 @@ public abstract class AbstractGrid implements IGrid {
         return dLong;
     }
 
-    OldConfiguration getConfiguration() {
-        return Osmose.getInstance().getOldConfiguration();
+    Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     /**

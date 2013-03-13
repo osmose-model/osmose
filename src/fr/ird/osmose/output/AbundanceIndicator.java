@@ -14,8 +14,8 @@ public class AbundanceIndicator extends AbstractIndicator {
 
     private double[] abundance;
 
-    public AbundanceIndicator(int replica) {
-        super(replica);
+    public AbundanceIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
     }
 
     @Override
@@ -40,14 +40,9 @@ public class AbundanceIndicator extends AbstractIndicator {
     }
 
     @Override
-    public boolean isEnabled() {
-        return !getConfiguration().isCalibrationOutput();
-    }
-
-    @Override
     public void write(float time) {
 
-        double nsteps = getConfiguration().getRecordFrequency();
+        double nsteps = getRecordFrequency();
         for (int i = 0; i < abundance.length; i++) {
             abundance[i] /= nsteps;
         }
@@ -56,7 +51,7 @@ public class AbundanceIndicator extends AbstractIndicator {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPrefix());
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
         filename.append("_abundance_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");

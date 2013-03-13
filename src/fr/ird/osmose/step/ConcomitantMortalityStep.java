@@ -83,15 +83,15 @@ public class ConcomitantMortalityStep extends AbstractStep {
         for (School school : getPopulation()) {
             school.initStep();
         }
-
-        // Some indicators might need a snapshot of the population
-        // at the beginning of the step
-        indicators.initStep();
-
+        
         // Update plankton concentration
         for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
             getSimulation().getPlankton(p).update(iStepSimu);
         }
+
+        // Some indicators might need a snapshot of the population
+        // at the beginning of the step
+        indicators.initStep();
 
         // Spatial distribution
         movementProcess.run();

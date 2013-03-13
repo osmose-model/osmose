@@ -36,13 +36,14 @@ public class SpectrumPopulator extends AbstractPopulator {
             specInSizeClass10[i] = new ArrayList(getConfiguration().getNSpecies());
         }
 
-        double a = getConfiguration().sizeSpectrumSlope;
-        double b = getConfiguration().sizeSpectrumIntercept;
+        double a = getConfiguration().getDouble("population.initialization.spectrum.slope");
+        double b = getConfiguration().getDouble("population.initialization.spectrum.intercept");
+        double range = getConfiguration().getDouble("population.initialization.spectrum.range");
         //Calculation of abd lacking in each size class
         //calculation apart for first size class because minSize=0.05 (and not 0)
         tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));
         for (int i = 1; i < 20; i++) {
-            tempSpectrumAbd[i] = Math.round(Math.pow((i * getConfiguration().getSpectrumClassRange()) + 5., a) * Math.exp(b));
+            tempSpectrumAbd[i] = Math.round(Math.pow((i * range) + 5., a) * Math.exp(b));
         }
         //tabSizes10[i]+5 is mean length of [tabSizes10[i],tabSizes10[i+1][
         //Sort the Lmax of each species in each size class
@@ -50,7 +51,7 @@ public class SpectrumPopulator extends AbstractPopulator {
             int index1 = tempSpectrumAbd.length - 1;
             Species species = getSpecies(i);
             float meanLength = species.computeMeanLength(species.getLifespanDt() - 1);
-            while (meanLength < (index1 * getConfiguration().getSpectrumClassRange())) {
+            while (meanLength < (index1 * range)) {
                 index1--;
             }
             specInSizeClass10[index1].add(species);
@@ -89,7 +90,7 @@ public class SpectrumPopulator extends AbstractPopulator {
                 // Add schools to population
                 for (int age = 0; age < speciesj.getLifespanDt(); age++) {
                     if (abundanceIni[age] > 0.d) {
-                        int nbSchools = getConfiguration().nSchool;
+                        int nbSchools = getConfiguration().getSeed();
                         float length = speciesj.computeMeanLength(age);
                         float weight = speciesj.computeMeanWeight(age);
                         for (int k = 0; k < nbSchools; k++) {

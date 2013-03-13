@@ -67,19 +67,67 @@ public class Species {
     public Species(int index) {
         this.index = index;
         // INITIALISATION of PARAM
-        this.name = getConfiguration().speciesName[index];
-        this.lInf = getConfiguration().lInf[index];
-        this.K = getConfiguration().K[index];
-        this.t0 = getConfiguration().t0[index];
-        this.c = getConfiguration().c[index];
-        this.bPower = getConfiguration().bPower[index];
-        this.sizeMaturity = getConfiguration().sizeMaturity[index];
-        this.recruitmentAge = Math.round(getConfiguration().recruitmentAge[index] * getConfiguration().getNumberTimeStepsPerYear());
-        this.ageClassZero = (int) Math.ceil(getConfiguration().supAgeOfClass0Matrix[index] * getConfiguration().getNumberTimeStepsPerYear());      // index of supAgeOfClass0 used in tabCohorts table
-        this.eggSize = getConfiguration().eggSize[index];
-        this.eggWeight = getConfiguration().eggWeight[index];
-        this.growthAgeThreshold = getConfiguration().growthAgeThreshold[index];
-        lifespan = (int) Math.round(getConfiguration().speciesLifespan[index] * getConfiguration().getNumberTimeStepsPerYear());
+        name = getConfiguration().getString("species.name.sp" + index);
+        lInf = getConfiguration().getFloat("species.linf.sp" + index);
+        K = getConfiguration().getFloat("species.k.sp" + index);
+        t0 = getConfiguration().getFloat("species.t0.sp" + index);
+        c = getConfiguration().getFloat("species.length2weight.condition.factor.sp" + index);
+        bPower = getConfiguration().getFloat("species.length2weight.allometric.power.sp" + index);
+        if (getConfiguration().canFind("species.maturity.size.sp" + index)) {
+            sizeMaturity = getConfiguration().getFloat("species.maturity.size.sp" + index);
+        } else {
+            float ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
+            sizeMaturity = lInf * (float) (1 - Math.exp(-K * (ageMaturity - t0)));
+        }
+        if (getConfiguration().canFind("species.recruitment.age.sp" + index)) {
+            float age = getConfiguration().getFloat("species.recruitment.age.sp" + index);
+            recruitmentAge = Math.round(age * getConfiguration().getNumberTimeStepsPerYear());
+        } else {
+            float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
+            float recruitmentSize = getConfiguration().getFloat("species.recruitment.age.sp" + index);
+            float age;
+            if (recruitmentSize < lInf) {
+                age = (float) (-((Math.log(1 - (recruitmentSize / lInf))) / K)) + t0;
+            } else {
+                age = agemax;
+            }
+            if (age < 0.6f) {
+                //due to inverse von Bert transformation
+                // >0.5 to avoid Math.round() problems
+                age = 0.6f;
+            }
+            if (age > agemax) {
+                age = agemax;
+            }
+            recruitmentAge = Math.round(age * getConfiguration().getNumberTimeStepsPerYear());
+        }
+        float age0 = getConfiguration().getFloat("output.cutoff.age.sp" + index);
+        ageClassZero = (int) Math.ceil(age0 * getConfiguration().getNumberTimeStepsPerYear());
+        eggSize = getConfiguration().getFloat("species.egg.size.sp" + index);
+        eggWeight = getConfiguration().getFloat("species.egg.weight.sp" + index);
+        if (getConfiguration().canFind("species.vonbertalanffy.threshold.age.sp" + index)) {
+            growthAgeThreshold = getConfiguration().getFloat("species.vonbertalanffy.threshold.age.sp" + index);
+        } else {
+            // by default, von Bertalanffy model considered valid after 1 year old, linear growth from 0 to 1 year
+            growthAgeThreshold = 1.f;
+        }
+        float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
+        lifespan = (int) Math.round(agemax * getConfiguration().getNumberTimeStepsPerYear());
+
+//        System.out.println("***********");
+//        System.out.println("name " + name);
+//        System.out.println("lInf " + lInf);
+//        System.out.println("K " + K);
+//        System.out.println("t0 " + t0);
+//        System.out.println("c " + c);
+//        System.out.println("bPower " + bPower);
+//        System.out.println("sizeMaturity " + sizeMaturity);
+//        System.out.println("recruitmentAge " + recruitmentAge);
+//        System.out.println("ageClassZero " + ageClassZero);
+//        System.out.println("eggSize " + eggSize);
+//        System.out.println("eggWeight " + eggWeight);
+//        System.out.println("growthAgeThreshold " + growthAgeThreshold);
+//        System.out.println("lifespan " + lifespan);
     }
 
 ////////////
@@ -199,7 +247,7 @@ public class Species {
         return recruitmentAge;
     }
 
-    private OldConfiguration getConfiguration() {
-        return Osmose.getInstance().getOldConfiguration();
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 }

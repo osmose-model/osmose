@@ -21,8 +21,13 @@ public class StarvationProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        starvMaxRate = getConfiguration().starvMaxRate;
-        criticalPredSuccess = getConfiguration().criticalPredSuccess;
+        int nspec = getNSpecies();
+        starvMaxRate = new float[nspec];
+        criticalPredSuccess = new float[nspec];
+        for (int i = 0; i < nspec; i++) {
+            starvMaxRate[i] = getConfiguration().getFloat("mortality.starvation.rate.max.sp" + i);
+            criticalPredSuccess[i] = getConfiguration().getFloat("predation.efficiency.critical.sp" + i);
+        }
     }
 
     @Override

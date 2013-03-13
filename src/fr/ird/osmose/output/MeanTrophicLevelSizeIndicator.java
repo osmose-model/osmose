@@ -20,8 +20,8 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
     // discrete size spectrum
     private float[] tabSizes;
 
-    public MeanTrophicLevelSizeIndicator(int replica) {
-        super(replica);
+    public MeanTrophicLevelSizeIndicator(int replica, String keyEnabled) {
+        super(replica, keyEnabled);
         initializeSizeSpectrum();
     }
 
@@ -31,11 +31,9 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
             return;
         }
 
-        spectrumMaxSize = getConfiguration().getSpectrumMaxSize();
-        // Minimal size (cm) of the size spectrum.
-        float spectrumMinSize = getConfiguration().getSpectrumMinSize();
-        // Range (cm) of size classes.
-        classRange = getConfiguration().getSpectrumClassRange();
+        float spectrumMinSize = getConfiguration().getFloat("output.size.spectrum.size.min");
+        spectrumMaxSize = getConfiguration().getFloat("output.size.spectrum.size.max");
+        classRange = getConfiguration().getFloat("output.size.spectrum.size.range");
 
         //initialisation of the size spectrum features
         nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
@@ -51,7 +49,7 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
     String getFilename() {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
-        filename.append(getConfiguration().getOutputPrefix());
+        filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_meanTLPerSize_Simu");
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
@@ -104,11 +102,6 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
             }
         }
         return iSize;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return getConfiguration().isTLOutput();
     }
 
     @Override
