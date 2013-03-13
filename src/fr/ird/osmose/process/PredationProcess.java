@@ -83,7 +83,7 @@ public class PredationProcess extends AbstractProcess {
 
             // accessibility stage
             int nAccessStage = getConfiguration().canFind("predation.accessibility.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("predation.accessibility.stage.threshold.sp" + i).length
+                    ? getConfiguration().getArrayString("predation.accessibility.stage.threshold.sp" + i).length + 1
                     : 1;
             if (nAccessStage > 1) {
                 accessStageThreshold[i] = getConfiguration().getArrayFloat("predation.accessibility.stage.threshold.sp" + i);
@@ -93,7 +93,7 @@ public class PredationProcess extends AbstractProcess {
 
             // predPrey stage
             int nPredPreyStage = getConfiguration().canFind("predation.predPrey.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("predation.predPrey.stage.threshold.sp" + i).length
+                    ? getConfiguration().getArrayString("predation.predPrey.stage.threshold.sp" + i).length + 1
                     : 1;
             if (nPredPreyStage > 1) {
                 predPreyStageThreshold[i] = getConfiguration().getArrayFloat("predation.predPrey.stage.threshold.sp" + i);
@@ -103,7 +103,7 @@ public class PredationProcess extends AbstractProcess {
 
             // diet output stage
             int nDietOutputStage = getConfiguration().canFind("output.diet.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length
+                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length + 1
                     : 1;
             if (nDietOutputStage > 1) {
                 dietOutputStageThreshold[i] = getConfiguration().getArrayFloat("output.diet.stage.threshold.sp" + i);
