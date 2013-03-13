@@ -369,7 +369,7 @@ public class MovementProcess extends AbstractProcess {
             String file = mapFile[k];
             mapIndexNoTwin[k] = k;
             for (int l = k - 1; l >= 0; l--) {
-                if (file.matches(mapFile[l])) {
+                if (file.equals(mapFile[l])) {
                     mapIndexNoTwin[k] = mapIndexNoTwin[l];
                     // Delete twin maps
                     maps[k] = null;

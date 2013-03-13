@@ -254,7 +254,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
          */
         if (null != ncIn.findGlobalAttribute("VertCoordType")) {
             String strCoordType = ncIn.findGlobalAttribute("VertCoordType").getStringValue();
-            if (strCoordType.toLowerCase().matches(VertCoordType.OLD.name().toLowerCase())) {
+            if (strCoordType.toLowerCase().equals(VertCoordType.OLD.name().toLowerCase())) {
                 return VertCoordType.NEW;
             }
         }

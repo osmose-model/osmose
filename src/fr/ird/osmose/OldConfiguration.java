@@ -970,7 +970,7 @@ public class OldConfiguration {
                         }
                     } else {
                         for (int i = 0; i < nSpecies; i++) {
-                            reproduceLocally[i] = st.sval.matches("in");
+                            reproduceLocally[i] = st.sval.equals("in");
                             if (!reproduceLocally[i]) {
                                 nbReproOut++;
                             }
@@ -2003,7 +2003,7 @@ public class OldConfiguration {
             String file = mapFile[k];
             mapIndexNoTwin[k] = k;
             for (int l = k - 1; l >= 0; l--) {
-                if (file.matches(mapFile[l])) {
+                if (file.equals(mapFile[l])) {
                     mapIndexNoTwin[k] = mapIndexNoTwin[l];
                     // Delete twin maps
                     maps[k] = null;
