@@ -41,12 +41,13 @@ public class Osmose {
      * Configuration
      */
     private Configuration configuration;
-    private String outputPathName, mainFilename;
+    private String outputPathName;
+    private List<String> configurationFiles;
     /**
      * The application logger
      */
     final private static Logger logger = Logger.getLogger(Osmose.class.getName());
-
+    
     public void init(String[] args) {
 
         // setup the logger
@@ -55,29 +56,23 @@ public class Osmose {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
-
-        readArgs(args);
         
-        configuration = new Configuration(mainFilename, outputPathName);
-        configuration.init();
-
-        simulation = new Simulation[configuration.getNSimulation()];
-        for (int i = 0; i < configuration.getNSimulation(); i++) {
-            simulation[i] = new Simulation(i);
-        }
+        readArgs(args);
     }
-
+    
     public void readArgs(String[] args) {
+        
+        configurationFiles = new ArrayList();
 
         // Get command line arguments
         if (args.length > 0) {
-            mainFilename = args[0];
+            configurationFiles.add(new File(args[0]).getAbsolutePath());
         } else {
             // This will not have trailing file separator - no idea if this is a problem
-            mainFilename = readPathFile();
-            logger.log(Level.INFO, "Main configuration file: {0}", mainFilename);
+            configurationFiles.addAll(readFilepath());
+            //logger.log(Level.INFO, "Main configuration file: {0}", mainFilename);
         }
-
+        
         if (args.length > 1) {
             outputPathName = args[1];
             if (!outputPathName.endsWith(fileSeparator)) {
@@ -85,8 +80,34 @@ public class Osmose {
             }
         }
     }
+    
+    public void preLoad() {
+        configuration = new Configuration(configurationFiles.get(0), outputPathName);
+        configuration.init();
+        
+        simulation = new Simulation[configuration.getNSimulation()];
+        for (int i = 0; i < configuration.getNSimulation(); i++) {
+            simulation[i] = new Simulation(i);
+        }
+    }
+    
+    private void run() {
+        for (String configurationFile : configurationFiles) {
+            logger.info("Running configuration " + configurationFile);
+            osmose.run(configurationFile);
+        }
+    }
+    
+    private void run(String configurationFile) {
 
-    public void run() {
+        // Initialize the configuration
+        configuration = new Configuration(configurationFile, outputPathName);
+        configuration.init();
+        
+        simulation = new Simulation[configuration.getNSimulation()];
+        for (int i = 0; i < configuration.getNSimulation(); i++) {
+            simulation[i] = new Simulation(i);
+        }
 
         // Loop over the number of replica
         long begin = System.currentTimeMillis();
@@ -118,17 +139,17 @@ public class Osmose {
         int time = (int) ((System.currentTimeMillis() - begin) / 1000);
         logger.log(Level.INFO, "Simulation completed (time ellapsed:  {0} seconds)", time);
     }
-
+    
     private class Worker implements Runnable {
-
+        
         private final Simulation simulation;
         private final CountDownLatch doneSignal;
-
+        
         public Worker(Simulation simulation, CountDownLatch doneSignal) {
             this.simulation = simulation;
             this.doneSignal = doneSignal;
         }
-
+        
         @Override
         public void run() {
             long begin = System.currentTimeMillis();
@@ -143,36 +164,52 @@ public class Osmose {
             }
         }
     }
-
+    
     public Logger getLogger() {
         return logger;
     }
+    
+    public List<String> readFilepath() {
 
-    public String readPathFile() // read the file situated within the source code directory
-    {
-        FileInputStream pathFile = null;
+        // Look for filepath.txt
+        String[] names = new String[]{"filePath.txt", "FilePath.txt", "Filepath.txt", "filepath.txt"};
+        String filename = null;
+        for (String name : names) {
+            if (new File(name).exists()) {
+                filename = name;
+                break;
+            }
+        }
+        
+        FileInputStream filepath = null;
         try {
-            pathFile = new FileInputStream(new File("filePath.txt"));
+            filepath = new FileInputStream(new File(filename));
         } catch (FileNotFoundException ex) {
             String wd = new File("").getAbsolutePath();
-            logger.log(Level.SEVERE, "Did not find filePath.txt in current directory " + wd, ex);
+            logger.log(Level.SEVERE, "Did not find either {filePath.txt|FilePath.txt|Filepath.txt|filepath.txt} in current directory " + wd, ex);
+            System.exit(1);
         }
-
-        Reader r = new BufferedReader(new InputStreamReader(pathFile));
-        StreamTokenizer st = new StreamTokenizer(r);
-        st.slashSlashComments(true);
-        st.slashStarComments(true);
-        st.quoteChar(';');
-
+        
         logger.info("Reading filePath.txt");
+        BufferedReader bfIn = new BufferedReader(new InputStreamReader(filepath));
+        String line;
+        List<String> cfgFiles = new ArrayList();
         try {
-            st.nextToken();
-            File inputFile = new File(st.sval);
-            return inputFile.getAbsolutePath();
+            while ((line = bfIn.readLine()) != null) {
+                line = line.trim();
+                if (!line.startsWith("#") & !line.startsWith("//") & !(line.length() < 1)) {
+                    String file = line;
+                    if (line.startsWith(";") & line.endsWith(";")) {
+                        file = line.substring(1, line.length() - 1);
+                    }
+                    cfgFiles.add(new File(file).getAbsolutePath());
+                }
+            }
+            bfIn.close();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Error reading filePath.txt", ex);
-            return null;
+            logger.log(Level.SEVERE, "Error reading " + filename, ex);
         }
+        return cfgFiles;
     }
 
     /*
@@ -191,23 +228,23 @@ public class Osmose {
         System.err.println("*   Osmose v3.0b - Exit");
         System.err.println("*****************************************");
     }
-
+    
     public static Osmose getInstance() {
         return osmose;
     }
-
+    
     public Configuration getConfiguration() {
         return configuration;
     }
-
+    
     public Simulation getSimulation(int replica) {
         return simulation[replica];
     }
-
+    
     public IGrid getGrid() {
         return configuration.getGrid();
     }
-
+    
     public LTLForcing getForcing() {
         return configuration.getForcing();
     }

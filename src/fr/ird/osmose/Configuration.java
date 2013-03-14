@@ -120,7 +120,7 @@ public class Configuration {
         try {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
-                if (!line.startsWith("#") & !(line.length() < 1)) {
+                if (!line.startsWith("#") & !line.startsWith("//") & !(line.length() < 1)) {
                     Entry entry = new Entry(line);
                     if (null != entry.key && null != entry.value) {
                         if (entry.key.startsWith("osmose.configuration")) {
