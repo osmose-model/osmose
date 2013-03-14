@@ -9,6 +9,7 @@ import fr.ird.osmose.output.Indicators;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
+import fr.ird.osmose.process.IncomingFluxProcess;
 import fr.ird.osmose.process.MPAProcess;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
@@ -30,6 +31,10 @@ public class SequentialMortalityStep extends AbstractStep {
      * Reproduction process
      */
     private AbstractProcess reproductionProcess;
+    /*
+     * Incoming flux of biomass
+     */
+    private AbstractProcess incomingFLuxProcess;
     /*
      * Fishing process
      */
@@ -58,7 +63,7 @@ public class SequentialMortalityStep extends AbstractStep {
      * List of indicators
      */
     private Indicators indicators;
-    
+
     public SequentialMortalityStep(int replica) {
         super(replica);
     }
@@ -89,6 +94,10 @@ public class SequentialMortalityStep extends AbstractStep {
         // Reproduction processes
         reproductionProcess = new ReproductionProcess(getReplica());
         reproductionProcess.init();
+        
+        // Incoming flux
+        incomingFLuxProcess = new IncomingFluxProcess(getReplica());
+        incomingFLuxProcess.init();
 
         // Movement of the schools
         movementProcess = new MovementProcess(getReplica());
@@ -105,12 +114,15 @@ public class SequentialMortalityStep extends AbstractStep {
 
     @Override
     public void step(int iStepSimu) {
+        
+        // Incoming flux
+        incomingFLuxProcess.run();
 
         // Reset some school state variables 
         for (School school : getPopulation()) {
             school.initStep();
         }
-        
+
         // Update plankton concentration
         for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
             getSimulation().getPlankton(p).update(iStepSimu);
@@ -143,7 +155,7 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Save steps
         indicators.update(iStepSimu);
-
+        
         // Reproduction
         reproductionProcess.run();
 

@@ -9,62 +9,83 @@ import fr.ird.osmose.Species;
  */
 public class IncomingFluxProcess extends AbstractProcess {
 
-    private Species species;
+    /**
+     * Distribution of the spawning throughout the year
+     */
+    private double[][] seasonSpawning;
     /*
      * Annual flux of incoming biomass in tons
      */
-    private float biomassFluxIn;
+    private double[] biomassFluxIn;
     /*
      * Mean length of incomimg fish
      */
-    private float meanLengthIn;
+    private float[] meanLengthIn;
     /*
      * Mean weight of incoming fish
      */
-    private int ageMeanIn;
-    final private ReproductionProcess parent;
+    private int[] ageMeanIn;
 
-    public IncomingFluxProcess(ReproductionProcess parent, int replica, Species species) {
+    public IncomingFluxProcess(int replica) {
         super(replica);
-        this.parent = parent;
-        this.species = species;
     }
 
     @Override
     public void init() {
-        int index = species.getIndex();
-        biomassFluxIn = getConfiguration().getFloat("flux.incoming.biomass.sp" + index);
-        meanLengthIn = getConfiguration().getFloat("flux.incoming.size.sp" + index);
-        ageMeanIn = (int) Math.round(getConfiguration().getFloat("flux.incoming.age.sp" + index) * getConfiguration().getNumberTimeStepsPerYear());
+
+        int nSpecies = getConfiguration().getNSpecies();
+        seasonSpawning = new double[nSpecies][];
+        biomassFluxIn = new double[nSpecies];
+        meanLengthIn = new float[nSpecies];
+        ageMeanIn = new int[nSpecies];
+
+        for (int i = 0; i < nSpecies; i++) {
+            seasonSpawning[i] = getConfiguration().getArrayDouble("flux.incoming.season.sp" + i);
+            float sum = 0;
+            for (double d : seasonSpawning[i]) {
+                sum += d;
+            }
+            if (sum > 0) {
+                biomassFluxIn[i] = getConfiguration().getFloat("flux.incoming.biomass.sp" + i);
+                meanLengthIn[i] = getConfiguration().getFloat("flux.incoming.size.sp" + i);
+                ageMeanIn[i] = (int) Math.round(getConfiguration().getFloat("flux.incoming.age.sp" + i) * getConfiguration().getNumberTimeStepsPerYear());
+            }
+        }
     }
 
     @Override
     public void run() {
-        /*
-         * Making cohorts going up to the upper age class
-         * Kill old schools
-         */
-        for (School school : getPopulation().getSchools(species)) {
-            school.incrementAge();
-        }
-
-        /*
-         * Incoming flux
-         */
-        double season = parent.getSeason(getSimulation().getIndexTimeSimu(), species);
-        double biomassIn = biomassFluxIn * season;
-        float meanWeigthIn = (float) species.computeWeight(meanLengthIn);
-        long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
-        int nSchool = getConfiguration().getSeed();
-        if (abundanceIn > 0 && abundanceIn < nSchool) {
-            getPopulation().add(new School(species, abundanceIn, meanLengthIn, meanWeigthIn, ageMeanIn));
-        } else if (abundanceIn >= nSchool) {
-            int mod = (int) (abundanceIn % nSchool);
-            int abdSchool = (int) (abundanceIn / nSchool);
-            for (int i = 0; i < nSchool; i++) {
-                abdSchool += (i < mod) ? 1 : 0;
-                getPopulation().add(new School(species, abdSchool, meanLengthIn, meanWeigthIn, ageMeanIn));
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            if (biomassFluxIn[i] == 0.d) {
+                continue;
+            }
+            Species species = getSpecies(i);
+            /*
+             * Incoming flux
+             */
+            double season = getSeason(getSimulation().getIndexTimeSimu(), species);
+            double biomassIn = biomassFluxIn[i] * season;
+            float meanWeigthIn = (float) species.computeWeight(meanLengthIn[i]);
+            long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
+            int nSchool = getConfiguration().getSeed();
+            if (abundanceIn > 0 && abundanceIn < nSchool) {
+                getPopulation().add(new School(species, abundanceIn, meanLengthIn[i], meanWeigthIn, ageMeanIn[i]));
+            } else if (abundanceIn >= nSchool) {
+                int mod = (int) (abundanceIn % nSchool);
+                int abdSchool = (int) (abundanceIn / nSchool);
+                for (int s = 0; s < nSchool; s++) {
+                    abdSchool += (s < mod) ? 1 : 0;
+                    getPopulation().add(new School(species, abdSchool, meanLengthIn[i], meanWeigthIn, ageMeanIn[i]));
+                }
             }
         }
+    }
+    
+    private double getSeason(int iStepSimu, Species species) {
+        int iSpec = species.getIndex();
+        int iStep = seasonSpawning[iSpec].length > getConfiguration().getNumberTimeStepsPerYear()
+                ? iStepSimu
+                : getSimulation().getIndexTimeYear();
+        return seasonSpawning[iSpec][iStep];
     }
 }
