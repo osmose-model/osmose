@@ -229,39 +229,43 @@ public class ConfigurationConverter {
             prop.setProperty("movement.randomwalk.range.sp" + i, String.valueOf(cfg.range[i]));
             if (cfg.spatialDistribution[i].equals(SpatialDistribution.RANDOM)) {
                 prop.setProperty("movement.distribution.ncell.sp" + i, String.valueOf(cfg.randomAreaSize[i]));
-            } else {
-                int nmap = cfg.maps.length;
-                for (int iMap = 0; iMap < nmap; iMap++) {
-                    String map = "movement.map" + iMap;
-                    String value;
-                    StringBuilder key = new StringBuilder(map);
-                    key.append(".species");
-                    value = cfg.speciesName[cfg.speciesMap[iMap]];
-                    prop.setProperty(key.toString(), value);
-                    key = new StringBuilder(map);
-                    key.append(".age.min");
-                    value = String.valueOf(cfg.agesMap[iMap][0]);
-                    prop.setProperty(key.toString(), value);
-                    key = new StringBuilder(map);
-                    key.append(".age.max");
-                    value = String.valueOf(cfg.agesMap[iMap][cfg.agesMap[iMap].length - 1] + 1);
-                    prop.setProperty(key.toString(), value);
-                    key = new StringBuilder(map);
-                    key.append(".season");
-                    value = toString(cfg.seasonMap[iMap]);
-                    prop.setProperty(key.toString(), value);
-                    key = new StringBuilder(map);
-                    key.append(".file");
-                    value = cfg.mapFile[iMap];
-                    prop.setProperty(key.toString(), value);
-                    if (cfg.spatialDistribution[i].equals(SpatialDistribution.CONNECTIVITY)) {
-                        key = new StringBuilder(map);
-                        key.append(".connectivity.file");
-                        value = cfg.connectivityFile[iMap];
-                        prop.setProperty(key.toString(), value);
-                    }
-                }
             }
+        }
+        int nmap = cfg.maps.length;
+        int indexMap = 0;
+        for (int iMap = 0; iMap < nmap; iMap++) {
+            if (null == cfg.mapFile[iMap] || cfg.mapFile[iMap].isEmpty()) {
+                continue;
+            }
+            String map = "movement.map" + indexMap;
+            String value;
+            StringBuilder key = new StringBuilder(map);
+            key.append(".species");
+            value = cfg.speciesName[cfg.speciesMap[iMap]];
+            prop.setProperty(key.toString(), value);
+            key = new StringBuilder(map);
+            key.append(".age.min");
+            value = String.valueOf(cfg.agesMap[iMap][0]);
+            prop.setProperty(key.toString(), value);
+            key = new StringBuilder(map);
+            key.append(".age.max");
+            value = String.valueOf(cfg.agesMap[iMap][cfg.agesMap[iMap].length - 1] + 1);
+            prop.setProperty(key.toString(), value);
+            key = new StringBuilder(map);
+            key.append(".season");
+            value = toString(cfg.seasonMap[iMap]);
+            prop.setProperty(key.toString(), value);
+            key = new StringBuilder(map);
+            key.append(".file");
+            value = cfg.mapFile[iMap];
+            prop.setProperty(key.toString(), value);
+            if (cfg.spatialDistribution[cfg.speciesMap[iMap]].equals(SpatialDistribution.CONNECTIVITY)) {
+                key = new StringBuilder(map);
+                key.append(".connectivity.file");
+                value = cfg.connectivityFile[iMap];
+                prop.setProperty(key.toString(), value);
+            }
+            indexMap++;
         }
 
         // PREDATION
@@ -411,7 +415,7 @@ public class ConfigurationConverter {
                 prop.setProperty("flux.incoming.size.sp" + i, "null");
             }
         }
-        
+
 
         //prop.setProperty("", String.valueOf());
     }
