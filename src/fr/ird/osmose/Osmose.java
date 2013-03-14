@@ -42,7 +42,7 @@ public class Osmose {
      * Configuration
      */
     private Configuration configuration;
-    public String inputPathName, outputPathName, inputTxtName;
+    private String outputPathName, mainFilename;
     /**
      * The application logger
      */
@@ -56,17 +56,12 @@ public class Osmose {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
-        
-        readArgs(args);
 
-        String mainFilename = inputPathName;
-        if (!mainFilename.endsWith(File.separator)) {
-            mainFilename += File.separator;
-        }
-        mainFilename += "input-ov30b/benguela_all-parameters.csv";
+        readArgs(args);
+        
         configuration = new Configuration(mainFilename, outputPathName);
         configuration.init();
-        
+
         simulation = new Simulation[configuration.getNSimulation()];
         for (int i = 0; i < configuration.getNSimulation(); i++) {
             simulation[i] = new Simulation(i);
@@ -77,11 +72,11 @@ public class Osmose {
 
         // Get command line arguments
         if (args.length > 0) {
-            inputPathName = args[0];
+            mainFilename = args[0];
         } else {
             // This will not have trailing file separator - no idea if this is a problem
-            inputPathName = readPathFile();
-            logger.log(Level.INFO, "Input path: {0}", inputPathName);
+            mainFilename = readPathFile();
+            logger.log(Level.INFO, "Main configuration file: {0}", mainFilename);
         }
 
         if (args.length > 1) {
@@ -89,14 +84,6 @@ public class Osmose {
             if (!outputPathName.endsWith(fileSeparator)) {
                 outputPathName += fileSeparator;
             }
-        } else {
-            outputPathName = inputPathName + fileSeparator + "output" + fileSeparator;
-        }
-
-        if (args.length > 2) {
-            inputTxtName = args[2];
-        } else {
-            inputTxtName = "INPUT.txt";
         }
     }
 

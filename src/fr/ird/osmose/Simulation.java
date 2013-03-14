@@ -192,7 +192,7 @@ public class Simulation {
             i_step_year = i_step_simu % getConfiguration().getNumberTimeStepsPerYear();
 
             // Print progress in console
-            progress();
+            //progress();
 
             // Run a new step
             step.step(i_step_simu);
