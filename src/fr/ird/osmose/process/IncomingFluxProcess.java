@@ -1,7 +1,12 @@
 package fr.ird.osmose.process;
 
+import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  *
@@ -12,7 +17,7 @@ public class IncomingFluxProcess extends AbstractProcess {
     /**
      * Distribution of the spawning throughout the year
      */
-    private double[][] seasonSpawning;
+    private double[][] seasonFlux;
     /*
      * Annual flux of incoming biomass in tons
      */
@@ -34,15 +39,14 @@ public class IncomingFluxProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getConfiguration().getNSpecies();
-        seasonSpawning = new double[nSpecies][];
         biomassFluxIn = new double[nSpecies];
         meanLengthIn = new float[nSpecies];
         ageMeanIn = new int[nSpecies];
+        readFluxSeason(getConfiguration().getString("flux.incoming.season.file"));
 
         for (int i = 0; i < nSpecies; i++) {
-            seasonSpawning[i] = getConfiguration().getArrayDouble("flux.incoming.season.sp" + i);
             float sum = 0;
-            for (double d : seasonSpawning[i]) {
+            for (double d : seasonFlux[i]) {
                 sum += d;
             }
             if (sum > 0) {
@@ -50,6 +54,29 @@ public class IncomingFluxProcess extends AbstractProcess {
                 meanLengthIn[i] = getConfiguration().getFloat("flux.incoming.size.sp" + i);
                 ageMeanIn[i] = (int) Math.round(getConfiguration().getFloat("flux.incoming.age.sp" + i) * getConfiguration().getNumberTimeStepsPerYear());
             }
+        }
+    }
+    
+    private void readFluxSeason(String filename) {
+
+        int nStepYear = getConfiguration().getNumberTimeStepsPerYear();
+        try {
+            CSVReader reader = new CSVReader(new FileReader(filename), ';');
+            List<String[]> lines = reader.readAll();
+            if ((lines.size() - 1) % nStepYear != 0) {
+                // @TODO throw error
+            }
+            int nstep = lines.size() - 1;
+            int nspecies = getNSpecies();
+            seasonFlux = new double[nspecies][nstep];
+            for (int t = 0; t < nstep; t++) {
+                String[] line = lines.get(t + 1);
+                for (int i = 0; i < nspecies; i++) {
+                    seasonFlux[i][t] = Double.valueOf(line[i + 1]) / 100.d;
+                }
+            }
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 
@@ -83,9 +110,9 @@ public class IncomingFluxProcess extends AbstractProcess {
     
     private double getSeason(int iStepSimu, Species species) {
         int iSpec = species.getIndex();
-        int iStep = seasonSpawning[iSpec].length > getConfiguration().getNumberTimeStepsPerYear()
+        int iStep = seasonFlux[iSpec].length > getConfiguration().getNumberTimeStepsPerYear()
                 ? iStepSimu
                 : getSimulation().getIndexTimeYear();
-        return seasonSpawning[iSpec][iStep];
+        return seasonFlux[iSpec][iStep];
     }
 }

@@ -88,11 +88,6 @@ public class Osmose {
     }
 
     public void run() {
-        // Delete existing output directory
-        File targetPath = new File(configuration.getOutputPathname());
-        if (targetPath.exists()) {
-            IOTools.deleteDirectory(targetPath);
-        }
 
         // Loop over the number of replica
         long begin = System.currentTimeMillis();

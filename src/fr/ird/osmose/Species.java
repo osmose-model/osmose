@@ -79,12 +79,12 @@ public class Species {
             float ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
             sizeMaturity = lInf * (float) (1 - Math.exp(-K * (ageMaturity - t0)));
         }
-        if (getConfiguration().canFind("species.recruitment.age.sp" + index)) {
-            float age = getConfiguration().getFloat("species.recruitment.age.sp" + index);
+        if (getConfiguration().canFind("mortality.fishing.recruitment.age.sp" + index)) {
+            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + index);
             recruitmentAge = Math.round(age * getConfiguration().getNumberTimeStepsPerYear());
         } else {
             float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
-            float recruitmentSize = getConfiguration().getFloat("species.recruitment.age.sp" + index);
+            float recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + index);
             float age;
             if (recruitmentSize < lInf) {
                 age = (float) (-((Math.log(1 - (recruitmentSize / lInf))) / K)) + t0;

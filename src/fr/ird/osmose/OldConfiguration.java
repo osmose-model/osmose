@@ -250,6 +250,7 @@ public class OldConfiguration {
      * Age of recruitment (year). Array[nSpecies]
      */
     public float[] recruitmentAge;
+    float[] recruitmentSize;
     /**
      * Fishing mortality rates. Array[nSpecies][nStepYear|nStepSimu]
      */
@@ -1195,12 +1196,12 @@ public class OldConfiguration {
                     recruitmentAge[i] = (new Float(st.sval)).floatValue();
                 }
             } else {
-                float[] recruitSizeMatrix = new float[nSpecies];
+                recruitmentSize = new float[nSpecies];
                 for (int i = 0; i < nSpecies; i++) {
                     st.nextToken();
-                    recruitSizeMatrix[i] = (new Float(st.sval)).floatValue();
-                    if (recruitSizeMatrix[i] < lInf[i]) {
-                        recruitmentAge[i] = (float) (-((Math.log(1 - (recruitSizeMatrix[i] / lInf[i]))) / K[i])) + t0[i];
+                    recruitmentSize[i] = (new Float(st.sval)).floatValue();
+                    if (recruitmentSize[i] < lInf[i]) {
+                        recruitmentAge[i] = (float) (-((Math.log(1 - (recruitmentSize[i] / lInf[i]))) / K[i])) + t0[i];
                     } else {
                         recruitmentAge[i] = speciesLifespan[i];
                     }

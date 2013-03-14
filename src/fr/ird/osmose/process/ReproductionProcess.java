@@ -4,9 +4,15 @@
  */
 package fr.ird.osmose.process;
 
+import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -34,13 +40,12 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        int nSpecies = getConfiguration().getNSpecies();
-        seasonSpawning = new double[nSpecies][];
+        int nSpecies = getNSpecies();
         sexRatio = new double[nSpecies];
         alpha = new double[nSpecies];
-
+        readSpawningSeason(getConfiguration().getString("reproduction.season.file"));
+        
         for (int i = 0; i < nSpecies; i++) {
-            seasonSpawning[i] = getConfiguration().getArrayDouble("reproduction.season.sp" + i);
             float sum = 0;
             for (double d : seasonSpawning[i]) {
                 sum += d;
@@ -48,10 +53,30 @@ public class ReproductionProcess extends AbstractProcess {
             if (sum > 0) {
                 sexRatio[i] = getConfiguration().getDouble("species.sexratio.sp" + i);
                 alpha[i] = getConfiguration().getDouble("species.relativefecundity.sp" + i);
-                for (int t = 0; t < seasonSpawning[i].length; t++) {
-                    seasonSpawning[i][t] = seasonSpawning[i][t] / 100.f;
+            }
+        }
+    }
+
+    private void readSpawningSeason(String filename) {
+
+        int nStepYear = getConfiguration().getNumberTimeStepsPerYear();
+        try {
+            CSVReader reader = new CSVReader(new FileReader(filename), ';');
+            List<String[]> lines = reader.readAll();
+            if ((lines.size() - 1) % nStepYear != 0) {
+                // @TODO throw error
+            }
+            int nstep = lines.size() - 1;
+            int nspecies = getNSpecies();
+            seasonSpawning = new double[nspecies][nstep];
+            for (int t = 0; t < nstep; t++) {
+                String[] line = lines.get(t + 1);
+                for (int i = 0; i < nspecies; i++) {
+                    seasonSpawning[i][t] = Double.valueOf(line[i + 1]) / 100.d;
                 }
             }
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, null, ex);
         }
     }
 

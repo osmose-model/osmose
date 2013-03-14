@@ -62,7 +62,7 @@ public class Simulation {
      * Choose the version of Osmose tu run.
      * @see enum Version for details.
      */
-    public static final Version VERSION = Version.CASE3;
+    public static final Version VERSION = Version.CASE1;
     /*
      * The index of the replicate simulation
      */

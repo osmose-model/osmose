@@ -37,12 +37,13 @@ public class FishingProcess extends AbstractProcess {
         fishingRates = new float[getConfiguration().getNSpecies()][nStepYear];
         for (int i = 0; i < getNSpecies(); i++) {
             double F = getConfiguration().getFloat("mortality.fishing.rate.sp" + i);
-            String filename = getConfiguration().resolveFile(getConfiguration().getString("mortality.fishing.seasonality.file.sp" + i));
+            String filename = getConfiguration().resolveFile(getConfiguration().getString("mortality.fishing.season.distrib.file.sp" + i));
             CSVReader reader;
             try {
                 reader = new CSVReader(new FileReader(filename), ';');
                 List<String[]> lines = reader.readAll();
                 if ((lines.size() - 1) % nStepYear != 0) {
+                    // @TODO throw error
                 }
                 for (int t = 0; t < fishingRates[i].length; t++) {
                     double season = Double.valueOf(lines.get(t + 1)[1]);
@@ -51,10 +52,6 @@ public class FishingProcess extends AbstractProcess {
                 }
             } catch (IOException ex) {
                 getLogger().log(Level.SEVERE, null, ex);
-            }
-
-            for (int t = 0; t < fishingRates[i].length; t++) {
-                fishingRates[i][t] = getConfiguration().getFloat("mortality.fishing.rate.sp" + i) / nStepYear;
             }
         }
     }
