@@ -83,7 +83,7 @@ public class Plankton {
     }
 
     public float biomToProd(float biomass) {
-        return biomass * prodBiomFactor / (float) getConfiguration().getNumberTimeStepsPerYear();
+        return biomass * prodBiomFactor / (float) getConfiguration().getNStepYear();
     }
 
     /*

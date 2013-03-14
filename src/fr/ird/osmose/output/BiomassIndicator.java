@@ -10,8 +10,8 @@ public class BiomassIndicator extends AbstractIndicator {
 
     private double[] biomass;
 
-    public BiomassIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+    public BiomassIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
     }
 
     @Override

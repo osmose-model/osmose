@@ -21,8 +21,8 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
     private float[] tabTL;
     private int nTLClass;
 
-     public TrophicLevelSpectrumIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+     public TrophicLevelSpectrumIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
         initializeTLSpectrum();
     }
 

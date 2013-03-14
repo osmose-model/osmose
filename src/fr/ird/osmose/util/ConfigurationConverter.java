@@ -2,7 +2,6 @@ package fr.ird.osmose.util;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.OldConfiguration;
 import fr.ird.osmose.process.MovementProcess.SpatialDistribution;
 import java.io.File;
 import java.io.FileOutputStream;

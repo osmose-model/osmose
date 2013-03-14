@@ -1,6 +1,7 @@
-package fr.ird.osmose;
+package fr.ird.osmose.util;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.Osmose;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.grid.OriginalGrid;
 import fr.ird.osmose.ltl.LTLForcing;

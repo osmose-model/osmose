@@ -64,51 +64,51 @@ public class SequentialMortalityStep extends AbstractStep {
      */
     private Indicators indicators;
 
-    public SequentialMortalityStep(int replica) {
-        super(replica);
+    public SequentialMortalityStep(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
     public void init() {
         // initialize natural mortality process
-        naturalMortalityProcess = new NaturalMortalityProcess(getReplica());
+        naturalMortalityProcess = new NaturalMortalityProcess(getIndexSimulation());
         naturalMortalityProcess.init();
 
         // initialize starvation process
-        predationProcess = new PredationProcess(getReplica());
+        predationProcess = new PredationProcess(getIndexSimulation());
         predationProcess.init();
 
         // initialize starvation process
-        starvationProcess = new StarvationProcess(getReplica());
+        starvationProcess = new StarvationProcess(getIndexSimulation());
         starvationProcess.init();
 
 
         // initialize fishing process
-        fishingProcess = new FishingProcess(getReplica());
+        fishingProcess = new FishingProcess(getIndexSimulation());
         fishingProcess.init();
 
         // initiliaza growth process
-        growthProcess = new GrowthProcess(getReplica());
+        growthProcess = new GrowthProcess(getIndexSimulation());
         growthProcess.init();
 
         // Reproduction processes
-        reproductionProcess = new ReproductionProcess(getReplica());
+        reproductionProcess = new ReproductionProcess(getIndexSimulation());
         reproductionProcess.init();
         
         // Incoming flux
-        incomingFLuxProcess = new IncomingFluxProcess(getReplica());
+        incomingFLuxProcess = new IncomingFluxProcess(getIndexSimulation());
         incomingFLuxProcess.init();
 
         // Movement of the schools
-        movementProcess = new MovementProcess(getReplica());
+        movementProcess = new MovementProcess(getIndexSimulation());
         movementProcess.init();
 
         // MPA
-        mpaProcess = new MPAProcess(getReplica());
+        mpaProcess = new MPAProcess(getIndexSimulation());
         mpaProcess.init();
 
         // Indicators
-        indicators = new Indicators(getReplica());
+        indicators = new Indicators(getIndexSimulation());
         indicators.init();
     }
 

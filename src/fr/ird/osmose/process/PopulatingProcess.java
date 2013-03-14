@@ -16,8 +16,8 @@ public class PopulatingProcess extends AbstractProcess {
 
     private AbstractPopulator populator;
 
-    public PopulatingProcess(int replica) {
-        super(replica);
+    public PopulatingProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
@@ -25,9 +25,9 @@ public class PopulatingProcess extends AbstractProcess {
 
         String method = getConfiguration().getString("population.initialization.method");
         if (method.equalsIgnoreCase("biomass")) {
-            populator = new BiomassPopulator(getReplica());
+            populator = new BiomassPopulator(getIndexSimulation());
         } else if (method.equalsIgnoreCase("spectrum")) {
-            populator = new SpectrumPopulator(getReplica());
+            populator = new SpectrumPopulator(getIndexSimulation());
         } else if (method.equalsIgnoreCase("random")) {
             throw new UnsupportedOperationException("Random initialization not supported yet.");
         }

@@ -291,7 +291,7 @@ public class School extends GridPoint {
         str.append("\n  Species: ");
         str.append(getSpecies().getName());
         str.append("\n  Cohort: ");
-        float ageInYear = getAgeDt() / (float) getConfiguration().getNumberTimeStepsPerYear();
+        float ageInYear = getAgeDt() / (float) getConfiguration().getNStepYear();
         str.append(ageInYear);
         str.append(" [year]");
         str.append("\n  Cell: ");

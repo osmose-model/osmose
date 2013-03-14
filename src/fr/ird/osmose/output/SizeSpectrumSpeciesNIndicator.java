@@ -25,8 +25,8 @@ public class SizeSpectrumSpeciesNIndicator extends AbstractIndicator {
     // Number of size classes in the discrete spectrum
     private int nSizeClass;
 
-    public SizeSpectrumSpeciesNIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+    public SizeSpectrumSpeciesNIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
         initializeSizeSpectrum();
     }
 

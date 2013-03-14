@@ -16,8 +16,8 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
     private double[] meanTL;
     private double[] biomass;
 
-    public MeanTrophicLevelIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+    public MeanTrophicLevelIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
     }
 
     @Override

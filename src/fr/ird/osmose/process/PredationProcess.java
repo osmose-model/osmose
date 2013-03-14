@@ -54,8 +54,8 @@ public class PredationProcess extends AbstractProcess {
      */
     private boolean recordDiet;
 
-    public PredationProcess(int replica) {
-        super(replica);
+    public PredationProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
@@ -363,7 +363,7 @@ public class PredationProcess extends AbstractProcess {
      * @return
      */
     public double getPredationRate(School predator, int subdt) {
-        return predationRate[predator.getSpeciesIndex()] / (double) (getConfiguration().getNumberTimeStepsPerYear() * subdt);
+        return predationRate[predator.getSpeciesIndex()] / (double) (getConfiguration().getNStepYear() * subdt);
     }
 
     /*
@@ -386,7 +386,7 @@ public class PredationProcess extends AbstractProcess {
             }
         } else if (accessStageMetrics.equalsIgnoreCase("age")) {
             for (int i = school.getAccessibilityStage(); i < accessStageThreshold[iSpec].length; i++) {
-                int tempAge = Math.round(accessStageThreshold[iSpec][i] * getConfiguration().getNumberTimeStepsPerYear());
+                int tempAge = Math.round(accessStageThreshold[iSpec][i] * getConfiguration().getNStepYear());
                 if (school.getAgeDt() >= tempAge) {
                     school.incrementAccessibilityStage();
                 } else {
@@ -425,7 +425,7 @@ public class PredationProcess extends AbstractProcess {
             }
         } else if (dietOutputMetrics.equalsIgnoreCase("age")) {
             for (int i = school.getDietOutputStage(); i < dietOutputStageThreshold[iSpec].length; i++) {
-                int tempAge = Math.round(dietOutputStageThreshold[iSpec][i] * getConfiguration().getNumberTimeStepsPerYear());
+                int tempAge = Math.round(dietOutputStageThreshold[iSpec][i] * getConfiguration().getNStepYear());
                 if (school.getAgeDt() >= tempAge) {
                     school.incrementDietOutputStage();
                 } else {

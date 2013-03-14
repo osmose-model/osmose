@@ -41,8 +41,8 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
      */
     private boolean enabled;
 
-    public LTLIndicator(int replica, String keyEnabled) {
-        super(replica);
+    public LTLIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 

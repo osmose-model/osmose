@@ -21,8 +21,8 @@ public class LTLFastForcingRomsPisces extends LTLForcingRomsPisces {
     private void loadData() {
 
         getLogger().info("Loading all plankton data...");
-        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][][];
-        for (int iStep = 0; iStep < getConfiguration().getNumberTimeStepsPerYear(); iStep++) {
+        data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
+        for (int iStep = 0; iStep < getConfiguration().getNStepYear(); iStep++) {
             for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 data[iStep][p] = super.getRawBiomass(p, iStep);
             }

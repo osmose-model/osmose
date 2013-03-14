@@ -14,8 +14,8 @@ public class GrowthProcess extends AbstractProcess {
     private float[][] deltaMeanLength;
     private float[] criticalPredSuccess;
 
-    public GrowthProcess(int replica) {
-        super(replica);
+    public GrowthProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override

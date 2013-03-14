@@ -14,8 +14,8 @@ public class AbundanceIndicator extends AbstractIndicator {
 
     private double[] abundance;
 
-    public AbundanceIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+    public AbundanceIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
     }
 
     @Override

@@ -15,8 +15,8 @@ public class StarvationProcess extends AbstractProcess {
     private float[] starvMaxRate;
     private float[] criticalPredSuccess;
 
-    public StarvationProcess(int replica) {
-        super(replica);
+    public StarvationProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
@@ -55,6 +55,6 @@ public class StarvationProcess extends AbstractProcess {
             mortalityRate = Math.max(starvMaxRate[iSpec] * (1 - school.predSuccessRate / criticalPredSuccess[iSpec]), 0.d);
         }
 
-        return mortalityRate / (getConfiguration().getNumberTimeStepsPerYear() * subdt);
+        return mortalityRate / (getConfiguration().getNStepYear() * subdt);
     }
 }

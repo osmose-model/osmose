@@ -6,7 +6,7 @@ package fr.ird.osmose.util;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.Population;
+import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.grid.IGrid;
@@ -19,14 +19,14 @@ import java.util.logging.Logger;
  */
 public class SimulationLinker {
 
-    private final int replica;
+    private final int indexSimulation;
 
-    public SimulationLinker(int replica) {
-        this.replica = replica;
+    public SimulationLinker(int indexSimulation) {
+        this.indexSimulation = indexSimulation;
     }
 
-    final public int getReplica() {
-        return replica;
+    final public int getIndexSimulation() {
+        return indexSimulation;
     }
 
     public Configuration getConfiguration() {
@@ -38,11 +38,11 @@ public class SimulationLinker {
     }
 
     public Simulation getSimulation() {
-        return Osmose.getInstance().getSimulation(replica);
+        return Osmose.getInstance().getSimulation(indexSimulation);
     }
 
-    public Population getPopulation() {
-        return Osmose.getInstance().getSimulation(replica).getPopulation();
+    public SchoolSet getPopulation() {
+        return Osmose.getInstance().getSimulation(indexSimulation).getSchoolSet();
     }
 
     public LTLForcing getForcing() {
@@ -50,7 +50,7 @@ public class SimulationLinker {
     }
 
     public Species getSpecies(int index) {
-        return Osmose.getInstance().getSimulation(replica).getSpecies(index);
+        return Osmose.getInstance().getSimulation(indexSimulation).getSpecies(index);
     }
 
     public Species getSpecies(String name) {

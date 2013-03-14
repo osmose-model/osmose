@@ -49,24 +49,24 @@ public class MortalityProcess extends AbstractProcess {
      */
     private boolean recordDiet;
 
-    public MortalityProcess(int replica) {
-        super(replica);
+    public MortalityProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
     public void init() {
         random = new Random();
 
-        naturalMortalityProcess = new NaturalMortalityProcess(getReplica());
+        naturalMortalityProcess = new NaturalMortalityProcess(getIndexSimulation());
         naturalMortalityProcess.init();
 
-        fishingProcess = new FishingProcess(getReplica());
+        fishingProcess = new FishingProcess(getIndexSimulation());
         fishingProcess.init();
 
-        starvationProcess = new StarvationProcess(getReplica());
+        starvationProcess = new StarvationProcess(getIndexSimulation());
         starvationProcess.init();
 
-        predationProcess = new PredationProcess(getReplica());
+        predationProcess = new PredationProcess(getIndexSimulation());
         predationProcess.init();
         
         recordDiet = getConfiguration().getBoolean("output.diet.composition.enabled")

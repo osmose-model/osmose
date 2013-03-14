@@ -40,8 +40,8 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
      */
     private boolean enabled;
 
-    public SpatialIndicator(int replica, String keyEnabled) {
-        super(replica);
+    public SpatialIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 

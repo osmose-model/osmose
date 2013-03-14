@@ -8,8 +8,8 @@ import fr.ird.osmose.util.SimulationLinker;
  */
 public abstract class AbstractProcess extends SimulationLinker {
     
-    AbstractProcess(int replica) {
-        super(replica);
+    AbstractProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     abstract public void init();

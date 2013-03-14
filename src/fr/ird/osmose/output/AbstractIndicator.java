@@ -28,8 +28,8 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
 
     abstract String[] getHeaders();
     
-    AbstractIndicator(int replica, String keyEnabled) {
-        super(replica);
+    AbstractIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
     

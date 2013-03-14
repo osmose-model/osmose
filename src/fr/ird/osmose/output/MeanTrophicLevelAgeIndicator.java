@@ -12,8 +12,8 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
     private double[][] meanTL;
     private double[][] biomass;
 
-     public MeanTrophicLevelAgeIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+     public MeanTrophicLevelAgeIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
 
     @Override
     public void update() {
-        int nstep = getConfiguration().getNumberTimeStepsPerYear();
+        int nstep = getConfiguration().getNStepYear();
         for (School school : getPopulation().getAliveSchools()) {
             int i = school.getSpeciesIndex();
             double biom = school.getInstantaneousBiomass();

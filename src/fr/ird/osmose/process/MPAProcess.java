@@ -25,8 +25,8 @@ public class MPAProcess extends AbstractProcess {
     private List<Cell> mpa;
     private int start, end;
 
-    public MPAProcess(int replica) {
-        super(replica);
+    public MPAProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override

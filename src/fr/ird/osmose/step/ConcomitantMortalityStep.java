@@ -49,39 +49,39 @@ public class ConcomitantMortalityStep extends AbstractStep {
      */
     private Indicators indicators;
     
-    public ConcomitantMortalityStep(int replica) {
-        super(replica);
+    public ConcomitantMortalityStep(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
     public void init() {
 
         // Initialize general mortality process
-        mortalityProcess = new MortalityProcess(getReplica());
+        mortalityProcess = new MortalityProcess(getIndexSimulation());
         mortalityProcess.init();
 
         // initiliaza growth process
-        growthProcess = new GrowthProcess(getReplica());
+        growthProcess = new GrowthProcess(getIndexSimulation());
         growthProcess.init();
 
         // Reproduction processes
-        reproductionProcess = new ReproductionProcess(getReplica());
+        reproductionProcess = new ReproductionProcess(getIndexSimulation());
         reproductionProcess.init();
         
         // Incoming flux
-        incomingFLuxProcess = new IncomingFluxProcess(getReplica());
+        incomingFLuxProcess = new IncomingFluxProcess(getIndexSimulation());
         incomingFLuxProcess.init();
 
         // Movement of the schools
-        movementProcess = new MovementProcess(getReplica());
+        movementProcess = new MovementProcess(getIndexSimulation());
         movementProcess.init();
         
         // MPA
-        mpaProcess = new MPAProcess(getReplica());
+        mpaProcess = new MPAProcess(getIndexSimulation());
         mpaProcess.init();
         
         // Indicators
-        indicators = new Indicators(getReplica());
+        indicators = new Indicators(getIndexSimulation());
         indicators.init();
     }
 

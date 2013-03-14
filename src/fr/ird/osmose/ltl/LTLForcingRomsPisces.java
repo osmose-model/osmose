@@ -203,7 +203,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
     @Override
     public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % getConfiguration().getNumberTimeStepsPerYear();
+        return iStepSimu % getConfiguration().getNStepYear();
     }
 
     /**

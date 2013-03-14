@@ -228,7 +228,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
 
     @Override
     public int getIndexStepLTL(int iStepSimu) {
-        return (iStepSimu % getConfiguration().getNumberTimeStepsPerYear()) / timeDim;
+        return (iStepSimu % getConfiguration().getNStepYear()) / timeDim;
     }
 
     @Override

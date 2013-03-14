@@ -26,14 +26,14 @@ public class FishingProcess extends AbstractProcess {
      */
     private float[][] fishingRates;
 
-    public FishingProcess(int replica) {
-        super(replica);
+    public FishingProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
     public void init() {
         isFishingInterannual = false;
-        int nStepYear = getConfiguration().getNumberTimeStepsPerYear();
+        int nStepYear = getConfiguration().getNStepYear();
         fishingRates = new float[getConfiguration().getNSpecies()][nStepYear];
         for (int i = 0; i < getNSpecies(); i++) {
             double F = getConfiguration().getFloat("mortality.fishing.rate.sp" + i);

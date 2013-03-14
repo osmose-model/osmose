@@ -44,8 +44,8 @@ public class DietIndicator extends SimulationLinker implements Indicator {
      */
     private boolean enabled;
 
-    public DietIndicator(int replica, String keyEnabled) {
-        super(replica);
+    public DietIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 

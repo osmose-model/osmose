@@ -14,8 +14,8 @@ public class YieldNIndicator extends AbstractIndicator {
 
     public double[] yieldN;
 
-    public YieldNIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+    public YieldNIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
     }
 
     @Override

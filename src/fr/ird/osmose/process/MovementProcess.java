@@ -44,8 +44,8 @@ public class MovementProcess extends AbstractProcess {
     // Migration
     private MigrationProcess migration;
 
-    public MovementProcess(int replica) {
-        super(replica);
+    public MovementProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class MovementProcess extends AbstractProcess {
         loadParameters();
 
         // Migration
-        migration = new MigrationProcess(getReplica());
+        migration = new MigrationProcess(getIndexSimulation());
         migration.init();
 
         int nSpecies = getConfiguration().getNSpecies();
@@ -65,13 +65,13 @@ public class MovementProcess extends AbstractProcess {
             range[i] = getConfiguration().getInt("movement.randomwalk.range.sp" + i);
             switch (getSpatialDistribution(i)) {
                 case RANDOM:
-                    movements[i] = new RandomDistributionProcess(getReplica(), getSimulation().getSpecies(i), this);
+                    movements[i] = new RandomDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this);
                     break;
                 case MAPS:
-                    movements[i] = new MapDistributionProcess(getReplica(), getSimulation().getSpecies(i), this, migration);
+                    movements[i] = new MapDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this, migration);
                     break;
                 case CONNECTIVITY:
-                    movements[i] = new ConnectivityDistributionProcess(getReplica(), getSimulation().getSpecies(i), this, migration);
+                    movements[i] = new ConnectivityDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this, migration);
                     break;
             }
             movements[i].init();
@@ -184,7 +184,7 @@ public class MovementProcess extends AbstractProcess {
             int lifespan = getSpecies(iSpec).getLifespanDt();
             indexMaps[iSpec] = new int[lifespan][];
             for (int j = 0; j < lifespan; j++) {
-                indexMaps[iSpec][j] = new int[getConfiguration().getNumberTimeStepsPerYear()];
+                indexMaps[iSpec][j] = new int[getConfiguration().getNStepYear()];
             }
         }
 
@@ -207,8 +207,8 @@ public class MovementProcess extends AbstractProcess {
                 /*
                  * read age min and age max concerned by this map
                  */
-                int ageMin = (int) Math.round(getConfiguration().getFloat("movement.map" + imap + ".age.min") * getConfiguration().getNumberTimeStepsPerYear());
-                int ageMax = (int) Math.round(getConfiguration().getFloat("movement.map" + imap + ".age.max") * getConfiguration().getNumberTimeStepsPerYear());
+                int ageMin = (int) Math.round(getConfiguration().getFloat("movement.map" + imap + ".age.min") * getConfiguration().getNStepYear());
+                int ageMax = (int) Math.round(getConfiguration().getFloat("movement.map" + imap + ".age.max") * getConfiguration().getNStepYear());
                 ageMax = Math.min(ageMax, getSpecies(iSpec).getLifespanDt());
 
                 /*

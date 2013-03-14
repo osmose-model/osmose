@@ -51,8 +51,8 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
      */
     private boolean enabled;
     
-    public MortalityIndicator(int replica, String keyEnabled) {
-        super(replica);
+    public MortalityIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 

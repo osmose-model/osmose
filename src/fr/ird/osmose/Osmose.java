@@ -18,7 +18,6 @@ package fr.ird.osmose;
  */
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
-import fr.ird.osmose.util.IOTools;
 import fr.ird.osmose.util.OsmoseLogFormatter;
 import java.io.*;
 import java.util.*;
@@ -95,14 +94,14 @@ public class Osmose {
         int nProcs = Runtime.getRuntime().availableProcessors();
         //int nProcs = 1;
         int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
-        int replica = 0;
+        int indexSimulation = 0;
         for (int iBatch = 0; iBatch < nBatch; iBatch++) {
-            int nworker = Math.min(nProcs, configuration.getNSimulation() - replica);
+            int nworker = Math.min(nProcs, configuration.getNSimulation() - indexSimulation);
             CountDownLatch doneSignal = new CountDownLatch(nworker);
             Worker[] workers = new Worker[nworker];
             for (int iworker = 0; iworker < nworker; iworker++) {
-                workers[iworker] = new Worker(simulation[replica], doneSignal);
-                replica++;
+                workers[iworker] = new Worker(simulation[indexSimulation], doneSignal);
+                indexSimulation++;
             }
             for (int iworker = 0; iworker < nworker; iworker++) {
                 new Thread(workers[iworker]).start();

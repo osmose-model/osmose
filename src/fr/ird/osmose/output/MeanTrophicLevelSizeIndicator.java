@@ -20,8 +20,8 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
     // discrete size spectrum
     private float[] tabSizes;
 
-    public MeanTrophicLevelSizeIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+    public MeanTrophicLevelSizeIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
         initializeSizeSpectrum();
     }
 

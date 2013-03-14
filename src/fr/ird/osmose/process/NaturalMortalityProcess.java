@@ -20,8 +20,8 @@ public class NaturalMortalityProcess extends AbstractProcess {
     // migration process
     private MigrationProcess migration;
 
-    public NaturalMortalityProcess(int replica) {
-        super(replica);
+    public NaturalMortalityProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
             D[iSpec] = getConfiguration().getFloat("mortality.natural.rate.sp" + iSpec);
         }
 
-        larvalMortalityRates = new float[getNSpecies()][getConfiguration().getNumberTimeStepsPerYear() * getConfiguration().getNYear()];
+        larvalMortalityRates = new float[getNSpecies()][getConfiguration().getNStepYear() * getConfiguration().getNYear()];
         for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
             for (int iStep = 0; iStep < larvalMortalityRates[iSpec].length; iStep++) {
                 larvalMortalityRates[iSpec][iStep] = getConfiguration().getFloat("mortality.natural.larva.rate.sp" + iSpec);
@@ -40,7 +40,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         }
 
         // Migration
-        migration = new MigrationProcess(getReplica());
+        migration = new MigrationProcess(getIndexSimulation());
     }
 
     @Override
@@ -69,7 +69,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         if (school.getAgeDt() == 0) {
             M = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + migration.getOutMortality(school)) / (float) subdt;
         } else {
-            M = (D[spec.getIndex()] + migration.getOutMortality(school)) / (float) (getConfiguration().getNumberTimeStepsPerYear() * subdt);
+            M = (D[spec.getIndex()] + migration.getOutMortality(school)) / (float) (getConfiguration().getNStepYear() * subdt);
         }
         return M;
     }

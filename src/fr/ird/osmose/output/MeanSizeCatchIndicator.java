@@ -16,8 +16,8 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
     private double[] meanSizeCatch;
     private double[] yieldN;
 
-    public MeanSizeCatchIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+    public MeanSizeCatchIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
     }
 
     @Override

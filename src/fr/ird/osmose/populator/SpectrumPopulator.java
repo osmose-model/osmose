@@ -11,8 +11,8 @@ import java.util.List;
  */
 public class SpectrumPopulator extends AbstractPopulator {
     
-    public SpectrumPopulator(int replica) {
-        super(replica);
+    public SpectrumPopulator(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class SpectrumPopulator extends AbstractPopulator {
     @Override
     public void populate() {
 
-        int nbTimeStepsPerYear = getConfiguration().getNumberTimeStepsPerYear();
+        int nbTimeStepsPerYear = getConfiguration().getNStepYear();
 
         long[] tempSpectrumAbd = new long[20];
         /*

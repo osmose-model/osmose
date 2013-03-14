@@ -7,12 +7,10 @@ package fr.ird.osmose.process;
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -33,8 +31,8 @@ public class ReproductionProcess extends AbstractProcess {
      */
     private double[] alpha;
 
-    public ReproductionProcess(int replica) {
-        super(replica);
+    public ReproductionProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
@@ -59,7 +57,7 @@ public class ReproductionProcess extends AbstractProcess {
 
     private void readSpawningSeason(String filename) {
 
-        int nStepYear = getConfiguration().getNumberTimeStepsPerYear();
+        int nStepYear = getConfiguration().getNStepYear();
         try {
             CSVReader reader = new CSVReader(new FileReader(filename), ';');
             List<String[]> lines = reader.readAll();
@@ -123,7 +121,7 @@ public class ReproductionProcess extends AbstractProcess {
 
     private double getSeason(int iStepSimu, Species species) {
         int iSpec = species.getIndex();
-        int iStep = seasonSpawning[iSpec].length > getConfiguration().getNumberTimeStepsPerYear()
+        int iStep = seasonSpawning[iSpec].length > getConfiguration().getNStepYear()
                 ? iStepSimu
                 : getSimulation().getIndexTimeYear();
         return seasonSpawning[iSpec][iStep];

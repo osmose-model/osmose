@@ -11,11 +11,11 @@ import fr.ird.osmose.process.NaturalMortalityProcess;
  */
 public class BiomassPopulator extends AbstractPopulator {
 
-    final private int replica;
+    final private int indexSimulation;
 
-    public BiomassPopulator(int replica) {
-        super(replica);
-        this.replica = replica;
+    public BiomassPopulator(int indexSimulation) {
+        super(indexSimulation);
+        this.indexSimulation = indexSimulation;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class BiomassPopulator extends AbstractPopulator {
 
         float correctingFactor;
         double abdIni;
-        float nbTimeStepsPerYear = getConfiguration().getNumberTimeStepsPerYear();
+        float nbTimeStepsPerYear = getConfiguration().getNStepYear();
 
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             //We calculate abd & biom ini of cohorts, and in parallel biom of species
@@ -44,12 +44,12 @@ public class BiomassPopulator extends AbstractPopulator {
             }
 
 
-            NaturalMortalityProcess naturalMortalityProcess = new NaturalMortalityProcess(replica);
+            NaturalMortalityProcess naturalMortalityProcess = new NaturalMortalityProcess(indexSimulation);
             naturalMortalityProcess.init();
             double larvalSurvival = naturalMortalityProcess.getLarvalMortalityRate(species);
             double D = naturalMortalityProcess.getNaturalMortalityRate(species);
 
-            FishingProcess fishingProcess = new FishingProcess(replica);
+            FishingProcess fishingProcess = new FishingProcess(indexSimulation);
             fishingProcess.init();
             double F = fishingProcess.getFishingMortalityRate(species);
             

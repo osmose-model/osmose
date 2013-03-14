@@ -21,8 +21,8 @@ public class LTLFastForcingBFM extends LTLForcingBFM {
     private void loadData() {
 
         getLogger().info("Loading all plankton data, it might take a while...");
-        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][get_nx()][get_ny()];
-        for (int iStep = 0; iStep < getConfiguration().getNumberTimeStepsPerYear(); iStep++) {
+        data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][get_nx()][get_ny()];
+        for (int iStep = 0; iStep < getConfiguration().getNStepYear(); iStep++) {
             for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 data[iStep][p] = super.getRawBiomass(p, iStep);
             }
@@ -32,6 +32,6 @@ public class LTLFastForcingBFM extends LTLForcingBFM {
 
     @Override
     float[][] getRawBiomass(int iPlankton, int iStepSimu) {
-        return data[iStepSimu % getConfiguration().getNumberTimeStepsPerYear()][iPlankton];
+        return data[iStepSimu % getConfiguration().getNStepYear()][iPlankton];
     }
 }

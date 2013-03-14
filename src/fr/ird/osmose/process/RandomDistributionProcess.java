@@ -18,8 +18,8 @@ public class RandomDistributionProcess extends AbstractProcess {
     private int areaSize;
     private List<Cell> randomMap;
 
-    public RandomDistributionProcess(int replica, Species species, MovementProcess parent) {
-        super(replica);
+    public RandomDistributionProcess(int indexSimulation, Species species, MovementProcess parent) {
+        super(indexSimulation);
         this.species = species;
         this.parent = parent;
     }

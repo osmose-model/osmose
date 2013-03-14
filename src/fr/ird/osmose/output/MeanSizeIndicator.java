@@ -16,8 +16,8 @@ public class MeanSizeIndicator extends AbstractIndicator {
     private double[] meanSize;
     private double[] abundance;
 
-    public MeanSizeIndicator(int replica, String keyEnabled) {
-        super(replica, keyEnabled);
+    public MeanSizeIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation, keyEnabled);
     }
 
     @Override

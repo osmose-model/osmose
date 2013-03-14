@@ -64,9 +64,9 @@ public class Simulation {
      */
     public static final Version VERSION = Version.CASE1;
     /*
-     * The index of the replicate simulation
+     * The index of the replicated simulation
      */
-    private final int replica;
+    private final int index;
     /**
      * The application logger
      */
@@ -75,12 +75,12 @@ public class Simulation {
 ///////////////////////////////
 // Constructor
 ///////////////////////////////    
-    public Simulation(int replica) {
-        this.replica = replica;
+    public Simulation(int index) {
+        this.index = index;
         // setup the logger
-        logger = Logger.getLogger(Simulation.class.getName() + "#" + replica);
+        logger = Logger.getLogger(Simulation.class.getName() + "#" + index);
         logger.setUseParentHandlers(false);
-        SimulationLogFormatter formatter = new SimulationLogFormatter(replica);
+        SimulationLogFormatter formatter = new SimulationLogFormatter(index);
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
@@ -88,7 +88,7 @@ public class Simulation {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    private Population population;
+    private SchoolSet schoolSet;
     /*
      * Time of the simulation in [year]
      */
@@ -127,10 +127,10 @@ public class Simulation {
     public void init() {
 
         // Create a new population, empty at the moment
-        population = new Population();
+        schoolSet = new SchoolSet();
 
         // Reset time variables
-        n_steps_simu = getConfiguration().getNYear() * getConfiguration().getNumberTimeStepsPerYear();
+        n_steps_simu = getConfiguration().getNYear() * getConfiguration().getNStepYear();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
@@ -159,18 +159,18 @@ public class Simulation {
         switch (VERSION) {
             case SCHOOL2012_PROD:
             case SCHOOL2012_BIOM:
-                step = new SequentialMortalityStep(replica);
+                step = new SequentialMortalityStep(index);
                 break;
             case CASE1:
             case CASE2:
             case CASE3:
-                step = new ConcomitantMortalityStep(replica);
+                step = new ConcomitantMortalityStep(index);
         }
         // Intialize the step
         step.init();
 
         // Initialize the population
-        AbstractProcess populatingProcess = new PopulatingProcess(replica);
+        AbstractProcess populatingProcess = new PopulatingProcess(index);
         populatingProcess.init();
         populatingProcess.run();
     }
@@ -180,7 +180,7 @@ public class Simulation {
      */
     private void progress() {
         // screen display to check the period already simulated
-        if (i_step_simu % getConfiguration().getNumberTimeStepsPerYear() == 0) {
+        if (i_step_simu % getConfiguration().getNStepYear() == 0) {
             logger.log(Level.INFO, "year {0}", year);
         }
     }
@@ -188,8 +188,8 @@ public class Simulation {
     public void run() {
 
         while (i_step_simu < n_steps_simu) {
-            year = i_step_simu / getConfiguration().getNumberTimeStepsPerYear();
-            i_step_year = i_step_simu % getConfiguration().getNumberTimeStepsPerYear();
+            year = i_step_simu / getConfiguration().getNStepYear();
+            i_step_year = i_step_simu % getConfiguration().getNStepYear();
 
             // Print progress in console
             //progress();
@@ -202,8 +202,8 @@ public class Simulation {
         }
     }
 
-    public Population getPopulation() {
-        return population;
+    public SchoolSet getSchoolSet() {
+        return schoolSet;
     }
 
     /**
@@ -243,7 +243,7 @@ public class Simulation {
     }
 
     public final int getReplica() {
-        return replica;
+        return index;
     }
 
     final public Logger getLogger() {

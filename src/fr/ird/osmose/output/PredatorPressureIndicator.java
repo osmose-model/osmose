@@ -43,8 +43,8 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
      */
     private boolean enabled;
     
-    public PredatorPressureIndicator(int replica, String keyEnabled) {
-        super(replica);
+    public PredatorPressureIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 

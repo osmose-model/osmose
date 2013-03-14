@@ -324,7 +324,7 @@ public class Configuration {
     /**
      * @return the nStepYear
      */
-    public int getNumberTimeStepsPerYear() {
+    public int getNStepYear() {
         return nStepYear;
     }
 
@@ -391,15 +391,4 @@ public class Configuration {
             }
         }
     }
-//    public static void main(String[] args) {
-//
-//        Osmose.getInstance().init(args);
-//        Configuration cfg = new Configuration("/home/pverley/osmose/dev/config/ben/ben_meso_trunk/benguela_all-parameters.csv", null);
-//        cfg.getLogger().info(cfg.getValue("predation.accessibility.file"));
-//        cfg.getLogger().info(cfg.getValue("grid.lowright.lat"));
-//        cfg.getLogger().info(cfg.getValue("fishing.rate.sp3"));
-//        cfg.getArrayFloat("fishing.rate.sp3");
-//        cfg.getLogger().log(Level.INFO, "{0}", cfg.getFloat("grid.lowright.lat"));
-//
-//    }
 }

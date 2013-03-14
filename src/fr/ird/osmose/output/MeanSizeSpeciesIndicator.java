@@ -25,8 +25,8 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
      */
     private boolean enabled;
 
-    public MeanSizeSpeciesIndicator(int replica, String keyEnabled) {
-        super(replica);
+    public MeanSizeSpeciesIndicator(int indexSimulation, String keyEnabled) {
+        super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 

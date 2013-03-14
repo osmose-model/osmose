@@ -18,8 +18,8 @@ public class LTLFastForcingECO3M extends LTLForcingECO3M {
     private void loadData() {
 
         getLogger().info("Loading all plankton data...");
-        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][][];
-        for (int iStep = 0; iStep < getConfiguration().getNumberTimeStepsPerYear(); iStep++) {
+        data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
+        for (int iStep = 0; iStep < getConfiguration().getNStepYear(); iStep++) {
             for (int iPlankton = 0; iPlankton < getConfiguration().getNPlankton(); iPlankton++) {
                 data[iStep][iPlankton] = super.getRawBiomass(iPlankton, iStep);
             }

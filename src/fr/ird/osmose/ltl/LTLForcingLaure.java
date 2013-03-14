@@ -101,8 +101,8 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
         System.out.println("Loading all plankton data, it might take a while...");
 
-        data = new float[getConfiguration().getNumberTimeStepsPerYear()][getConfiguration().getNPlankton()][get_ny()][get_nx()];
-        for (int t = 0; t < getConfiguration().getNumberTimeStepsPerYear(); t++) {
+        data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][get_ny()][get_nx()];
+        for (int t = 0; t < getConfiguration().getNStepYear(); t++) {
             for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 data[t][p] = getIntegratedBiomass(p, t);
             }

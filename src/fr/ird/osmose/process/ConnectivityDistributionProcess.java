@@ -16,8 +16,8 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
     private Species species;
     private MigrationProcess migration;
     
-    public ConnectivityDistributionProcess(int replica, Species species, MovementProcess parent, MigrationProcess migration) {
-        super(replica);
+    public ConnectivityDistributionProcess(int indexSimulation, Species species, MovementProcess parent, MigrationProcess migration) {
+        super(indexSimulation);
         this.species = species;
         this.movement = parent;
         this.migration = migration;
@@ -66,7 +66,7 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
         if (age > 0 && i_step_simu > 0) {
             int oldTime;
             if (i_step_year == 0) {
-                oldTime = getConfiguration().getNumberTimeStepsPerYear() - 1;
+                oldTime = getConfiguration().getNStepYear() - 1;
             } else {
                 oldTime = i_step_year - 1;
             }

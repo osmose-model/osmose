@@ -31,8 +31,8 @@ public class IncomingFluxProcess extends AbstractProcess {
      */
     private int[] ageMeanIn;
 
-    public IncomingFluxProcess(int replica) {
-        super(replica);
+    public IncomingFluxProcess(int indexSimulation) {
+        super(indexSimulation);
     }
 
     @Override
@@ -52,14 +52,14 @@ public class IncomingFluxProcess extends AbstractProcess {
             if (sum > 0) {
                 biomassFluxIn[i] = getConfiguration().getFloat("flux.incoming.biomass.sp" + i);
                 meanLengthIn[i] = getConfiguration().getFloat("flux.incoming.size.sp" + i);
-                ageMeanIn[i] = (int) Math.round(getConfiguration().getFloat("flux.incoming.age.sp" + i) * getConfiguration().getNumberTimeStepsPerYear());
+                ageMeanIn[i] = (int) Math.round(getConfiguration().getFloat("flux.incoming.age.sp" + i) * getConfiguration().getNStepYear());
             }
         }
     }
     
     private void readFluxSeason(String filename) {
 
-        int nStepYear = getConfiguration().getNumberTimeStepsPerYear();
+        int nStepYear = getConfiguration().getNStepYear();
         try {
             CSVReader reader = new CSVReader(new FileReader(filename), ';');
             List<String[]> lines = reader.readAll();
@@ -110,7 +110,7 @@ public class IncomingFluxProcess extends AbstractProcess {
     
     private double getSeason(int iStepSimu, Species species) {
         int iSpec = species.getIndex();
-        int iStep = seasonFlux[iSpec].length > getConfiguration().getNumberTimeStepsPerYear()
+        int iStep = seasonFlux[iSpec].length > getConfiguration().getNStepYear()
                 ? iStepSimu
                 : getSimulation().getIndexTimeYear();
         return seasonFlux[iSpec][iStep];

@@ -81,7 +81,7 @@ public class Species {
         }
         if (getConfiguration().canFind("mortality.fishing.recruitment.age.sp" + index)) {
             float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + index);
-            recruitmentAge = Math.round(age * getConfiguration().getNumberTimeStepsPerYear());
+            recruitmentAge = Math.round(age * getConfiguration().getNStepYear());
         } else {
             float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
             float recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + index);
@@ -99,10 +99,10 @@ public class Species {
             if (age > agemax) {
                 age = agemax;
             }
-            recruitmentAge = Math.round(age * getConfiguration().getNumberTimeStepsPerYear());
+            recruitmentAge = Math.round(age * getConfiguration().getNStepYear());
         }
         float age0 = getConfiguration().getFloat("output.cutoff.age.sp" + index);
-        ageClassZero = (int) Math.ceil(age0 * getConfiguration().getNumberTimeStepsPerYear());
+        ageClassZero = (int) Math.ceil(age0 * getConfiguration().getNStepYear());
         eggSize = getConfiguration().getFloat("species.egg.size.sp" + index);
         eggWeight = getConfiguration().getFloat("species.egg.weight.sp" + index);
         if (getConfiguration().canFind("species.vonbertalanffy.threshold.age.sp" + index)) {
@@ -112,7 +112,7 @@ public class Species {
             growthAgeThreshold = 1.f;
         }
         float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
-        lifespan = (int) Math.round(agemax * getConfiguration().getNumberTimeStepsPerYear());
+        lifespan = (int) Math.round(agemax * getConfiguration().getNStepYear());
 
 //        System.out.println("***********");
 //        System.out.println("name " + name);
@@ -145,7 +145,7 @@ public class Species {
         if (age == 0) {
             length = eggSize;
         } else {
-            float decimalAge = age / (float) getConfiguration().getNumberTimeStepsPerYear();
+            float decimalAge = age / (float) getConfiguration().getNStepYear();
             if (decimalAge < growthAgeThreshold) {
                 float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
                 if (lengthAtAgePart < eggSize) {
