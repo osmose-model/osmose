@@ -7,6 +7,7 @@ import fr.ird.osmose.step.ConcomitantMortalityStep;
 import fr.ird.osmose.step.SequentialMortalityStep;
 import fr.ird.osmose.util.SimulationLogFormatter;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,6 +80,10 @@ public class Simulation {
         this.index = index;
         // setup the logger
         logger = Logger.getLogger(Simulation.class.getName() + "#" + index);
+        Handler[] handlers = logger.getHandlers();
+        for (Handler handler : handlers) {
+            logger.removeHandler(handler);
+        }
         logger.setUseParentHandlers(false);
         SimulationLogFormatter formatter = new SimulationLogFormatter(index);
         ConsoleHandler handler = new ConsoleHandler();

@@ -48,7 +48,7 @@ public class Osmose {
      */
     final private static Logger logger = Logger.getLogger(Osmose.class.getName());
     
-    public void init(String[] args) {
+    private void setupLogger() {
 
         // setup the logger
         logger.setUseParentHandlers(false);
@@ -56,8 +56,6 @@ public class Osmose {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
-        
-        readArgs(args);
     }
     
     public void readArgs(String[] args) {
@@ -81,7 +79,7 @@ public class Osmose {
         }
     }
     
-    public void preLoad() {
+    public void init() {
         configuration = new Configuration(configurationFiles.get(0), outputPathName);
         configuration.init();
         
@@ -95,6 +93,7 @@ public class Osmose {
         for (String configurationFile : configurationFiles) {
             logger.info("Running configuration " + configurationFile);
             osmose.run(configurationFile);
+            logger.info("*****************************************");
         }
     }
     
@@ -216,17 +215,16 @@ public class Osmose {
      * Point d'entrée du programme
      */
     public static void main(String... args) {
-        System.err.println("*****************************************");
-        System.err.println("*   Osmose v3.0b - Copyright 2013 IRD   *");
-        System.err.println("*****************************************");
-        System.err.println(new Date());
-        System.err.println();
-        osmose.init(args);
+        osmose.setupLogger();
+        logger.info("*****************************************");
+        logger.info("*   Osmose v3.0b - Copyright 2013 IRD   *");
+        logger.info("*****************************************");
+        logger.info(new Date().toString());
+        osmose.readArgs(args);
         osmose.run();
-        System.err.println();
-        System.err.println(new Date());
-        System.err.println("*   Osmose v3.0b - Exit");
-        System.err.println("*****************************************");
+        logger.info(new Date().toString());
+        logger.info("*   Osmose v3.0b - Exit");
+        logger.info("*****************************************");
     }
     
     public static Osmose getInstance() {

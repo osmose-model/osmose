@@ -411,8 +411,8 @@ public class SpatialMapUI extends JPanel {
 
     public static void main(String args[]) {
 
-        getOsmose().init(args);
-        getOsmose().preLoad();
+        getOsmose().readArgs(args);
+        getOsmose().init();
         getOsmose().getSimulation(0).init();
         MovementProcess mov = new MovementProcess(0);
         mov.init();
