@@ -41,7 +41,7 @@ public class ReproductionProcess extends AbstractProcess {
         int nSpecies = getNSpecies();
         sexRatio = new double[nSpecies];
         alpha = new double[nSpecies];
-        readSpawningSeason(getConfiguration().getString("reproduction.season.file"));
+        readSpawningSeason(getConfiguration().getFile("reproduction.season.file"));
         
         for (int i = 0; i < nSpecies; i++) {
             float sum = 0;

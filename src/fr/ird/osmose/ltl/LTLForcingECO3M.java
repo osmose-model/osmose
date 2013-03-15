@@ -32,7 +32,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
 
         planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t").size()];
         for (int i = 0; i < planktonFileListNetcdf.length; i++) {
-            planktonFileListNetcdf[i] = getConfiguration().getString("ltl.netcdf.file.t" + i);
+            planktonFileListNetcdf[i] = getConfiguration().getFile("ltl.netcdf.file.t" + i);
         }
 
         zlevelName = getConfiguration().getString("ltl.netcdf.var.zlevel");
@@ -43,7 +43,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     public void initLTLGrid() {
 
         NetcdfFile ncGrid = null;
-        String gridFilename = getConfiguration().resolveFile(planktonFileListNetcdf[0]);
+        String gridFilename = planktonFileListNetcdf[0];
         try {
             ncGrid = NetcdfFile.open(gridFilename, null);
         } catch (IOException ex) {
@@ -97,7 +97,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
 
         float[][][] dataInit = new float[get_nz()][get_ny()][get_nx()];
         NetcdfFile nc = null;
-        String name = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
+        String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
         ArrayDouble.D3 tempArray = null;
 
         try {

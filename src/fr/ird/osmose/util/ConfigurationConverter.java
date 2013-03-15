@@ -24,14 +24,14 @@ public class ConfigurationConverter {
      * "/home/philippe/osmose/benguela/ben_v2/INPUT.txt" outputPath =
      * "C:/user/philippe/Mes documents/osmose/benguela/ben_v2/INPUT.txt"
      */
-    final public String inputFile = "/home/pverley/osmose/dev/config/ben/ben_meso_trunk/INPUT.txt";
+    final public String inputFile = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3\\osm_old_input\\INPUT.txt";
     /**
      * Path of the folder for saving the new format of input Use slash '/' as
      * separator char. Example: outputPath =
      * "/home/philippe/osmose/benguela/ben_v3" outputPath =
      * "C:/user/philippe/Mes documents/osmose/benguela/ben_v3"
      */
-    final public String outputPath = "/home/pverley/osmose/dev/config/ben/ben_meso_v3";
+    final public String outputPath = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3";
     //
     private OldConfiguration cfg;
     private Properties prop;

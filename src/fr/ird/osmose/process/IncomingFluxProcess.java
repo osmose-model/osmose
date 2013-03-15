@@ -42,7 +42,7 @@ public class IncomingFluxProcess extends AbstractProcess {
         biomassFluxIn = new double[nSpecies];
         meanLengthIn = new float[nSpecies];
         ageMeanIn = new int[nSpecies];
-        readFluxSeason(getConfiguration().getString("flux.incoming.season.file"));
+        readFluxSeason(getConfiguration().getFile("flux.incoming.season.file"));
 
         for (int i = 0; i < nSpecies; i++) {
             float sum = 0;

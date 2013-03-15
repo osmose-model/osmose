@@ -34,7 +34,7 @@ public class MPAProcess extends AbstractProcess {
 
         mpa = new ArrayList();
         if (getConfiguration().canFind("mpa.file.mpa0")) {
-            loadMPA(getConfiguration().resolveFile(getConfiguration().getString("mpa.file.mpa0")));
+            loadMPA(getConfiguration().getFile("mpa.file.mpa0"));
             start = getConfiguration().getInt("mpa.start.year.mpa0");
             end = getConfiguration().getInt("mpa.end.year.mpa0");
         } else {

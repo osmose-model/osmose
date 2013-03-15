@@ -19,7 +19,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
     @Override
     public void readLTLForcingFile() {
 
-        ncFile = getConfiguration().resolveFile(getConfiguration().getString("ltl.netcdf.file"));
+        ncFile = getConfiguration().getFile("ltl.netcdf.file");
         if (!new File(ncFile).exists()) {
             System.out.println("LTL NetCDF file " + ncFile + " doesn't exist");
             System.exit(1);
@@ -55,9 +55,9 @@ public class LTLFastForcing extends AbstractLTLForcing {
     private void loadData() {
         try {
             getLogger().info("Loading all plankton data, it might take a while...");
-            getLogger().log(Level.FINE, "Forcing file {0}", getConfiguration().resolveFile(ncFile));
+            getLogger().log(Level.FINE, "Forcing file {0}", ncFile);
 
-            NetcdfFile nc = NetcdfFile.open(getConfiguration().resolveFile(ncFile));
+            NetcdfFile nc = NetcdfFile.open(ncFile);
             data = (float[][][][]) nc.findVariable("ltl_biomass").read().copyToNDJavaArray();
             getLogger().info("All plankton data loaded !");
         } catch (IOException ex) {

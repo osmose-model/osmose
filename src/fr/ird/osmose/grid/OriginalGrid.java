@@ -58,7 +58,7 @@ public class OriginalGrid extends AbstractGrid {
 
         Cell[][] grid = new Cell[get_ny()][get_nx()];
         float latitude, longitude;
-        String filename = getConfiguration().getString("grid.mask.file");
+        String filename = getConfiguration().getFile("grid.mask.file");
         boolean[][] land = readMaskAsCSV(filename);
         for (int j = 0; j < get_ny(); j++) {
             latitude = getLatMin() + (float) (j + 0.5f) * dLat;

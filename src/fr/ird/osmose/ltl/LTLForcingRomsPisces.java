@@ -38,10 +38,10 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
         planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t*").size()];
         for (int i = 0; i < planktonFileListNetcdf.length; i++) {
-            planktonFileListNetcdf[i] = getConfiguration().getString("ltl.netcdf.file.t" + i);
+            planktonFileListNetcdf[i] = getConfiguration().getFile("ltl.netcdf.file.t" + i);
         }
 
-        gridFileName = getConfiguration().getString("ltl.netcdf.grid.file");
+        gridFileName = getConfiguration().getFile("ltl.netcdf.grid.file");
         strLon = getConfiguration().getString("ltl.netcdf.var.lon");
         strLat = getConfiguration().getString("ltl.netcdf.var.lat");
         strH = getConfiguration().getString("ltl.netcdf.var.bathy");
@@ -53,9 +53,8 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     public void initLTLGrid() {
 
         NetcdfFile ncIn = null;
-        String ncpathname = getConfiguration().resolveFile(gridFileName);
         try {
-            ncIn = NetcdfFile.open(ncpathname, null);
+            ncIn = NetcdfFile.open(gridFileName, null);
         } catch (IOException ex) {
             Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -187,7 +186,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     @Override
     float[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
-        String name = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
+        String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
         float[][][] data3d = null;
 
         try {

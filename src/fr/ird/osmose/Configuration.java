@@ -172,6 +172,10 @@ public class Configuration {
             throw new NullPointerException("Could not find parameter " + key);
         }
     }
+    
+    public String getFile(String key) {
+        return resolveFile(getString(key));
+    }
 
     public String[] getArrayString(String key) {
         String value = getString(key);
@@ -265,7 +269,7 @@ public class Configuration {
         return pathname;
     }
 
-    public String resolveFile(String filename) {
+    private String resolveFile(String filename) {
         try {
             File file = new File(inputPathname);
             String pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();

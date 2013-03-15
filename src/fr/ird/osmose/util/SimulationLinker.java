@@ -62,10 +62,6 @@ public class SimulationLinker {
         return null;
     }
 
-    public String resolveFile(String filename) {
-        return Osmose.getInstance().getConfiguration().resolveFile(filename);
-    }
-
     /**
      * The number of simulated species
      *

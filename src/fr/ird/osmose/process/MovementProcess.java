@@ -229,7 +229,7 @@ public class MovementProcess extends AbstractProcess {
                  * age-class and time-step
                  */
                 if (getConfiguration().canFind("movement.map" + imap + ".file")) {
-                    String csvFile = resolveFile(getConfiguration().getString("movement.map" + imap + ".file"));
+                    String csvFile = getConfiguration().getFile("movement.map" + imap + ".file");
                     mapFile[indexMap] = csvFile;
                     readCSVMap(csvFile, indexMap);
                 }
@@ -241,7 +241,7 @@ public class MovementProcess extends AbstractProcess {
                      * other one so there is no need for a connectivity matrix
                      */
                     if (getConfiguration().canFind("movement.map" + imap + ".connectivity.file")) {
-                        String csvFile = resolveFile(getConfiguration().getString("movement.map" + imap + ".connectivity.file"));
+                        String csvFile = getConfiguration().getFile("movement.map" + imap + ".connectivity.file");
                         System.out.println("Reading connectivity matrix for " + getSpecies(iSpec).getName() + " map " + indexMap);
                         connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
                         System.out.println("Connectivity matrix loaded");

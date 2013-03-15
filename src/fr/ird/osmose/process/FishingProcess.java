@@ -37,7 +37,7 @@ public class FishingProcess extends AbstractProcess {
         fishingRates = new float[getConfiguration().getNSpecies()][nStepYear];
         for (int i = 0; i < getNSpecies(); i++) {
             double F = getConfiguration().getFloat("mortality.fishing.rate.sp" + i);
-            String filename = getConfiguration().resolveFile(getConfiguration().getString("mortality.fishing.season.distrib.file.sp" + i));
+            String filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + i);
             CSVReader reader;
             try {
                 reader = new CSVReader(new FileReader(filename), ';');

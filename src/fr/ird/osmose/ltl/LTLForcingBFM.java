@@ -45,11 +45,11 @@ public class LTLForcingBFM extends AbstractLTLForcing {
 
         planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t").size()];
         for (int i = 0; i < planktonFileListNetcdf.length; i++) {
-            planktonFileListNetcdf[i] = getConfiguration().getString("ltl.netcdf.file.t" + i);
+            planktonFileListNetcdf[i] = getConfiguration().getFile("ltl.netcdf.file.t" + i);
         }
 
         timeDim = getConfiguration().getInt("ltl.netcdf.dim.ntime");
-        bathyFile = getConfiguration().getString("grid.netcdf.file");
+        bathyFile = getConfiguration().getFile("grid.netcdf.file");
         zlevelName = getConfiguration().getString("ltl.netcdf.var.zlevel");
         bathyName = getConfiguration().getString("ltl.netcdf.var.bathy");
     }
@@ -62,7 +62,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
          * Open BFM temperature file that contains bathymetry variable
          */
         try {
-            nc = NetcdfFile.open(getConfiguration().resolveFile(bathyFile), null);
+            nc = NetcdfFile.open(bathyFile, null);
         } catch (IOException ex) {
             System.err.println("Failed to open BFM Temperature file " + bathyFile);
             Logger.getLogger(LTLForcingBFM.class.getName()).log(Level.SEVERE, null, ex);
@@ -141,7 +141,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         /*
          * Load the mask
          */
-        String gridFile = getConfiguration().getString("grid.netcdf.file");
+        String gridFile = getConfiguration().getFile("grid.netcdf.file");
         String strMask = getConfiguration().getString("grid.var.stride");
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][] mask = (float[][]) nc.findVariable(strMask).read().copyToNDJavaArray();
@@ -181,7 +181,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Open the BFM Plankton NetCDF file
              */
-            String name = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
+            String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
             NetcdfFile nc = NetcdfFile.open(name);
             /*
              * Loop over the plankton groups

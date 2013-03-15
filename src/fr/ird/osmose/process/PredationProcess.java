@@ -117,7 +117,7 @@ public class PredationProcess extends AbstractProcess {
 
         // accessibility matrix
         if (getConfiguration().canFind("predation.accessibility.file")) {
-            String filename = getConfiguration().resolveFile(getConfiguration().getString("predation.accessibility.file"));
+            String filename = getConfiguration().getFile("predation.accessibility.file");
             try {
                 CSVReader reader = new CSVReader(new FileReader(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
                 List<String[]> lines = reader.readAll();

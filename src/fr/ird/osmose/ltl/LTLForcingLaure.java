@@ -38,10 +38,10 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
         planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t").size()];
         for (int i = 0; i < planktonFileListNetcdf.length; i++) {
-            planktonFileListNetcdf[i] = getConfiguration().getString("ltl.netcdf.file.t" + i);
+            planktonFileListNetcdf[i] = getConfiguration().getFile("ltl.netcdf.file.t" + i);
         }
         
-        gridFileName = getConfiguration().getString("ltl.netcdf.grid.file");
+        gridFileName = getConfiguration().getFile("ltl.netcdf.grid.file");
         strLon = getConfiguration().getString("ltl.netcdf.var.lon");
         strH = getConfiguration().getString("ltl.netcdf.var.bathy");
         strCs_r = getConfiguration().getString("ltl.netcdf.var.csr");
@@ -52,7 +52,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
     public void initLTLGrid() {
 
         NetcdfFile ncIn = null;
-        String ncpathname = getConfiguration().resolveFile(gridFileName);
+        String ncpathname = gridFileName;
         try {
             ncIn = NetcdfFile.open(ncpathname, null);
         } catch (IOException ex) {
@@ -115,7 +115,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
         float[][][] dataInit = new float[get_nz()][get_ny()][get_nx()];
 
-        String ncfile = getConfiguration().resolveFile(planktonFileListNetcdf[getIndexStepLTL(iStepSimu)]);
+        String ncfile = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
         try {
             NetcdfFile nc = NetcdfFile.open(ncfile);
             dataInit = (float[][][]) nc.findVariable(plktonNetcdfNames[p]).read().flip(1).copyToNDJavaArray();
