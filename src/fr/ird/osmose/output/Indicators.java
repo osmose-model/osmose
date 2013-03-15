@@ -4,7 +4,10 @@
  */
 package fr.ird.osmose.output;
 
+import fr.ird.osmose.util.IOTools;
+import fr.ird.osmose.util.MetaFilenameFilter;
 import fr.ird.osmose.util.SimulationLinker;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +22,7 @@ public class Indicators extends SimulationLinker {
 
     public Indicators(int indexSimulation) {
         super(indexSimulation);
-        
+
         indicators = new ArrayList();
 
         // Biomass
@@ -51,8 +54,12 @@ public class Indicators extends SimulationLinker {
         indicators.add(new SpatialIndicator(indexSimulation, "output.spatial.enabled"));
         indicators.add(new LTLIndicator(indexSimulation, "output.spatial.ltl.enabled"));
     }
-    
+
     public void init() {
+
+        String pattern = getConfiguration().getString("output.file.prefix") + "*";
+        IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
+
         for (Indicator indicator : indicators) {
             if (indicator.isEnabled()) {
                 indicator.init();

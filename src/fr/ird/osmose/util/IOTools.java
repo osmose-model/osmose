@@ -39,10 +39,10 @@ public class IOTools {
 
     public static String resolveFile(String filename) {
         try {
-        File file = new File(System.getProperty("user.dir"));
-        String pathname = new File(file.toURI().resolve(new File(filename).toURI())).getAbsolutePath();
-        return pathname;
-        } catch(Exception e) {
+            File file = new File(System.getProperty("user.dir"));
+            String pathname = new File(file.toURI().resolve(new File(filename).toURI())).getAbsolutePath();
+            return pathname;
+        } catch (Exception e) {
             return filename;
         }
     }
@@ -167,7 +167,7 @@ public class IOTools {
         }
         directory.deleteOnExit();
     }
-    
+
     public static void deleteDirectory(File directory) {
 
         for (File file : directory.listFiles()) {
@@ -177,6 +177,27 @@ public class IOTools {
             file.delete();
         }
         directory.delete();
+    }
+
+    public static void deleteRecursively(String pathname, String pattern) {
+
+        File path = new File(pathname);
+        //System.out.println("Delete recursively " + path);
+        if (path.isDirectory()) {
+            for (File file : path.listFiles(new MetaFilenameFilter(pattern))) {
+                //System.out.println("  Deleted file " + file);
+                file.delete();
+            }
+            for (File folder : path.listFiles()) {
+                if (folder.isDirectory()) {
+                    deleteRecursively(folder.getAbsolutePath(), pattern);
+                }
+            }
+            if (path.listFiles().length == 0) {
+                path.delete();
+                //System.out.println("Deleted folder " + path);
+            }
+        }
     }
 
     public static void browse(URI uri) throws IOException {
