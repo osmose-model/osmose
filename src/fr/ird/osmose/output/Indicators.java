@@ -57,9 +57,6 @@ public class Indicators extends SimulationLinker {
 
     public void init() {
 
-        String pattern = getConfiguration().getString("output.file.prefix") + "*";
-        IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
-
         for (Indicator indicator : indicators) {
             if (indicator.isEnabled()) {
                 indicator.init();

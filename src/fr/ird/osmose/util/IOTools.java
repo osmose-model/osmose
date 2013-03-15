@@ -188,9 +188,12 @@ public class IOTools {
                 //System.out.println("  Deleted file " + file);
                 file.delete();
             }
-            for (File folder : path.listFiles()) {
-                if (folder.isDirectory()) {
-                    deleteRecursively(folder.getAbsolutePath(), pattern);
+            File[] list = path.listFiles();
+            if (null != null) {
+                for (File folder : list) {
+                    if (folder.isDirectory()) {
+                        deleteRecursively(folder.getAbsolutePath(), pattern);
+                    }
                 }
             }
             if (path.listFiles().length == 0) {
