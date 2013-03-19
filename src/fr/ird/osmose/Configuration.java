@@ -57,7 +57,11 @@ public class Configuration {
 
     public void init() {
 
-        nCpu = getInt("simulation.ncpu");
+        if (canFind("simulation.ncpu")) {
+            nCpu = getInt("simulation.ncpu");
+        } else {
+            nCpu = Integer.MAX_VALUE;
+        }
         nSpecies = getInt("simulation.nspecies");
         nPlankton = getInt("simulation.nplankton");
         nSimulation = getInt("simulation.nsimulation");
@@ -172,7 +176,7 @@ public class Configuration {
             throw new NullPointerException("Could not find parameter " + key);
         }
     }
-    
+
     public String getFile(String key) {
         return resolveFile(getString(key));
     }

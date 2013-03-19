@@ -116,7 +116,7 @@ public class Osmose {
         // Loop over the number of replica
         long begin = System.currentTimeMillis();
         logger.info("Simulation started...");
-        int nProcs = Runtime.getRuntime().availableProcessors();
+        int nProcs = Math.min(configuration.getNCpu(), Runtime.getRuntime().availableProcessors());
         //int nProcs = 1;
         int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
         int indexSimulation = 0;
