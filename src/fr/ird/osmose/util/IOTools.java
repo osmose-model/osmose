@@ -189,7 +189,7 @@ public class IOTools {
                 file.delete();
             }
             File[] list = path.listFiles();
-            if (null != null) {
+            if (null != list) {
                 for (File folder : list) {
                     if (folder.isDirectory()) {
                         deleteRecursively(folder.getAbsolutePath(), pattern);
