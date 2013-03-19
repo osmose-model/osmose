@@ -26,11 +26,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     private PrintWriter prw;
     //
     private double[][][][] diet;
-    private double[][] nbStomachs;
-    /*
-     * Biomass per diet stages [SPECIES][DIET_STAGES]
-     */
-    private double[][] biomassStage;
+    private double[][] abundanceStage;
     /**
      * Number of diet stages.
      */
@@ -51,15 +47,6 @@ public class DietIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void initStep() {
-        for (School school : getSchoolSet().getPresentSchools()) {
-            biomassStage[school.getSpeciesIndex()][school.getDietOutputStage()] += school.getBiomass();
-        }
-        int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNPlankton();
-        for (int i = nSpec; i < nPrey; i++) {
-            int iPlankton = i - nSpec;
-            biomassStage[i][0] += getSimulation().getPlankton(iPlankton).getBiomass();
-        }
     }
 
     @Override
@@ -67,15 +54,12 @@ public class DietIndicator extends SimulationLinker implements Indicator {
         int nSpec = getNSpecies();
         int nPrey = nSpec + getConfiguration().getNPlankton();
         diet = new double[nSpec][][][];
-        nbStomachs = new double[nSpec][];
-        biomassStage = new double[nPrey][];
+        abundanceStage = new double[nSpec][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            biomassStage[iSpec] = new double[nDietStage[iSpec]];
             diet[iSpec] = new double[nDietStage[iSpec]][][];
-            nbStomachs[iSpec] = new double[nDietStage[iSpec]];
+            abundanceStage[iSpec] = new double[nDietStage[iSpec]];
             for (int iStage = 0; iStage < nDietStage[iSpec]; iStage++) {
                 diet[iSpec][iStage] = new double[nPrey][];
-
                 for (int iPrey = 0; iPrey < nPrey; iPrey++) {
                     if (iPrey < nSpec) {
                         diet[iSpec][iStage][iPrey] = new double[nDietStage[iPrey]];
@@ -85,18 +69,17 @@ public class DietIndicator extends SimulationLinker implements Indicator {
                 }
             }
         }
-        for (int i = nSpec; i < nPrey; i++) {
-            // we consider just 1 stage per plankton group
-            biomassStage[i] = new double[1];
-        }
     }
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+
+        for (School school : getSchoolSet().getPresentSchools()) {
             double sumDiet = computeSumDiet(school);
             int iSpec = school.getSpeciesIndex();
-            nbStomachs[iSpec][school.getDietOutputStage()] += school.getAbundance();
+            if (sumDiet > 0) {
+                abundanceStage[iSpec][school.getDietOutputStage()] += school.getAbundance();
+            }
             for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
                 for (int s = 0; s < nDietStage[i]; s++) {
                     if (sumDiet > 0) {
@@ -134,6 +117,10 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     public void write(float time) {
 
         int nSpec = getConfiguration().getNSpecies();
+//        double[][] sum = new double[getNSpecies()][];
+//        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+//            sum[iSpec] = new double[nDietStage[iSpec]];
+//        }
 
         // Write the step in the file
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
@@ -153,11 +140,12 @@ public class DietIndicator extends SimulationLinker implements Indicator {
                 prw.print(";");
                 for (int i = 0; i < nSpec; i++) {
                     for (int s = 0; s < nDietStage[i]; s++) {
-                        if (nbStomachs[i][s] >= 1) {
-                            prw.print((float) (diet[i][s][iSpec][st] / nbStomachs[i][s]));
+                        if (abundanceStage[i][s] > 0) {
+                            prw.print((float) (100.d * diet[i][s][iSpec][st] / abundanceStage[i][s]));
                         } else {
                             prw.print("NaN");
                         }
+                        //sum[i][s] += diet[i][s][iSpec][st];
                         prw.print(";");
                     }
                 }
@@ -171,16 +159,25 @@ public class DietIndicator extends SimulationLinker implements Indicator {
             prw.print(";");
             for (int i = 0; i < nSpec; i++) {
                 for (int s = 0; s < nDietStage[i]; s++) {
-                    if (nbStomachs[i][s] >= 1) {
-                        prw.print((float) (diet[i][s][j][0] / nbStomachs[i][s]));
+                    if (abundanceStage[i][s] > 0) {
+                        prw.print((float) (100.d * diet[i][s][j][0] / abundanceStage[i][s]));
                     } else {
                         prw.print("NaN");
                     }
+                    //sum[i][s] += diet[i][s][j][0];
                     prw.print(";");
                 }
             }
             prw.println();
         }
+//        prw.print(";sum;");
+//        for (int i = 0; i < nSpec; i++) {
+//            for (int s = 0; s < nDietStage[i]; s++) {
+//                prw.print((float) (100.d * sum[i][s] / abundanceStage[i][s]));
+//                prw.print(";");
+//            }
+//        }
+//        prw.println();
     }
 
     @Override

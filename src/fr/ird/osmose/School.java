@@ -102,7 +102,7 @@ public class School extends GridPoint {
     /**
      * Matrix of diets in a time step. diet[NSPECIES+NPLANKTON][NDIETSTAGES]
      */
-    public float[][] diet;
+    public double[][] diet;
     /**
      * Number of dead individuals due to fishing.
      */
@@ -188,12 +188,12 @@ public class School extends GridPoint {
         // Reset variables
         catchable = true;
         // Reset diet variables
-        diet = new float[getConfiguration().getNSpecies() + getConfiguration().getNPlankton()][];
+        diet = new double[getConfiguration().getNSpecies() + getConfiguration().getNPlankton()][];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            diet[i] = new float[nDietStage[i]];
+            diet[i] = new double[nDietStage[i]];
         }
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            diet[i + getConfiguration().getNSpecies()] = new float[1];
+            diet[i + getConfiguration().getNSpecies()] = new double[1];
         }
     }
 
