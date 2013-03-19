@@ -50,7 +50,7 @@ public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public void update() {
-        for (School school : getPopulation().getAliveSchools()) {
+        for (School school : getSchoolSet().getAliveSchools()) {
             int ageClass1 = (int) Math.max(1, school.getSpecies().getAgeClassZero());
             if (!includeClassZero() && (school.getAgeDt() < ageClass1)) {
                 continue;

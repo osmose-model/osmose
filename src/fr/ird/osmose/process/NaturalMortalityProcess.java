@@ -46,7 +46,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
     @Override
     public void run() {
         // Natural mortality (due to other predators)
-        for (School school : getPopulation()) {
+        for (School school : getSchoolSet()) {
             double M = getNaturalMortalityRate(school, 1);
             double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
             if (nDead > 0.d) {

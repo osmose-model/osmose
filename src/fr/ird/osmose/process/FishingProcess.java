@@ -58,7 +58,7 @@ public class FishingProcess extends AbstractProcess {
 
     @Override
     public void run() {
-        for (School school : getPopulation().getPresentSchools()) {
+        for (School school : getSchoolSet().getPresentSchools()) {
             if (school.getAbundance() != 0.d) {
                 double F = getFishingMortalityRate(school, 1);
                 double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));

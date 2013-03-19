@@ -86,7 +86,7 @@ public class ReproductionProcess extends AbstractProcess {
             }
             Species species = getSpecies(i);
             double SSB = 0;
-            List<School> schools = getPopulation().getSchools(species);
+            List<School> schools = getSchoolSet().getSchools(species);
             for (School school : schools) {
                 if (school.getLength() >= species.getSizeMaturity()) {
                     SSB += school.getInstantaneousBiomass();
@@ -109,11 +109,11 @@ public class ReproductionProcess extends AbstractProcess {
                 // do nothing, zero school
             } else if (nEgg < nSchool) {
                 School school0 = new School(species, nEgg);
-                getPopulation().add(school0);
+                getSchoolSet().add(school0);
             } else if (nEgg >= nSchool) {
                 for (int s = 0; s < nSchool; s++) {
                     School school0 = new School(species, nEgg / nSchool);
-                    getPopulation().add(school0);
+                    getSchoolSet().add(school0);
                 }
             }
         }

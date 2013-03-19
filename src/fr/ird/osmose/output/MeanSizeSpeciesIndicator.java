@@ -49,7 +49,7 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
 
     @Override
     public void update() {
-        for (School school : getPopulation().getAliveSchools()) {
+        for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
             meanSize[i][school.getAgeDt()] += school.getInstantaneousAbundance() * school.getLength();
             abundance[i][school.getAgeDt()] += school.getInstantaneousAbundance();

@@ -41,7 +41,7 @@ public class SimulationLinker {
         return Osmose.getInstance().getSimulation(indexSimulation);
     }
 
-    public SchoolSet getPopulation() {
+    public SchoolSet getSchoolSet() {
         return Osmose.getInstance().getSimulation(indexSimulation).getSchoolSet();
     }
 

@@ -119,7 +119,7 @@ public class SequentialMortalityStep extends AbstractStep {
         incomingFLuxProcess.run();
 
         // Reset some school state variables 
-        for (School school : getPopulation()) {
+        for (School school : getSchoolSet()) {
             school.initStep();
         }
 
@@ -160,7 +160,7 @@ public class SequentialMortalityStep extends AbstractStep {
         reproductionProcess.run();
 
         // Remove dead school
-        getPopulation().removeDeadSchools();
+        getSchoolSet().removeDeadSchools();
 
         // close indicators on last step
         if (isLastStep(iStepSimu)) {

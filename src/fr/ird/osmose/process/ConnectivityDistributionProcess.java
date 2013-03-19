@@ -29,7 +29,7 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
 
     @Override
     public void run() {
-        for (School school : getPopulation().getSchools(species)) {
+        for (School school : getSchoolSet().getSchools(species)) {
             connectivityDistribution(school);
         }
     }

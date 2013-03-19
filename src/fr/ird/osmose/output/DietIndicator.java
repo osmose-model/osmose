@@ -51,7 +51,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void initStep() {
-        for (School school : getPopulation().getPresentSchools()) {
+        for (School school : getSchoolSet().getPresentSchools()) {
             biomassStage[school.getSpeciesIndex()][school.getDietOutputStage()] += school.getBiomass();
         }
         int nSpec = getNSpecies();
@@ -93,7 +93,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void update() {
-        for (School school : getPopulation().getAliveSchools()) {
+        for (School school : getSchoolSet().getAliveSchools()) {
             double sumDiet = computeSumDiet(school);
             int iSpec = school.getSpeciesIndex();
             nbStomachs[iSpec][school.getDietOutputStage()] += school.getAbundance();

@@ -64,7 +64,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
         abundanceStage = new double[getNSpecies()][STAGES];
 
         // save abundance at the beginning of the time step
-        for (School school : getPopulation().getAliveSchools()) {
+        for (School school : getSchoolSet().getAliveSchools()) {
             int iStage;
             if (school.getAgeDt() == 0) {
                 // Eggss
@@ -91,7 +91,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
     public void update() {
         int iStage;
         double[][][] nDead = new double[getNSpecies()][CAUSES][STAGES];
-        for (School school : getPopulation().getAliveSchools()) {
+        for (School school : getSchoolSet().getAliveSchools()) {
             if (school.getAgeDt() == 0) {
                 iStage = EGG;
             } else if (school.getAgeDt() < school.getSpecies().getRecruitmentAge()) {

@@ -95,7 +95,7 @@ public class BiomassPopulator extends AbstractPopulator {
                 if (abundanceIni[age] > 0.d) {
                     int nSchool = getConfiguration().getSeed();
                     for (int k = 0; k < nSchool; k++) {
-                        getPopulation().add(new School(species, abundanceIni[age] / nSchool, meanLength[age], meanWeight[age], age));
+                        getSchoolSet().add(new School(species, abundanceIni[age] / nSchool, meanLength[age], meanWeight[age], age));
                     }
                 }
             }

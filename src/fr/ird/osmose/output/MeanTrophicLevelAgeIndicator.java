@@ -65,7 +65,7 @@ public class MeanTrophicLevelAgeIndicator extends AbstractIndicator {
     @Override
     public void update() {
         int nstep = getConfiguration().getNStepYear();
-        for (School school : getPopulation().getAliveSchools()) {
+        for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
             double biom = school.getInstantaneousBiomass();
             int ageClass = school.getAgeDt() / nstep;

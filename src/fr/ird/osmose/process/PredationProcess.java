@@ -164,7 +164,7 @@ public class PredationProcess extends AbstractProcess {
     @Override
     public void run() {
         for (Cell cell : getGrid().getCells()) {
-            List<School> schools = getPopulation().getSchools(cell);
+            List<School> schools = getSchoolSet().getSchools(cell);
             if (!(cell.isLand() || schools.isEmpty())) {
                 for (School school : schools) {
                     updateAccessibilityStage(school);
@@ -209,7 +209,7 @@ public class PredationProcess extends AbstractProcess {
     public double[] computePredation(School predator, boolean instantaneous, int subdt) {
 
         Cell cell = predator.getCell();
-        List<School> schools = getPopulation().getSchools(predator.getCell());
+        List<School> schools = getSchoolSet().getSchools(predator.getCell());
         int nFish = schools.size();
         double[] preyUpon = new double[schools.size() + getConfiguration().getNPlankton()];
         // egg do not predate
@@ -288,7 +288,7 @@ public class PredationProcess extends AbstractProcess {
      */
     public double[][] computePredationMatrix(Cell cell, boolean instantaneous, int subdt) {
 
-        List<School> schools = getPopulation().getSchools(cell);
+        List<School> schools = getSchoolSet().getSchools(cell);
         double[][] preyUpon = new double[schools.size() + getConfiguration().getNPlankton()][schools.size() + getConfiguration().getNPlankton()];
         // Loop over the schools of the cell
         for (int iPred = 0; iPred < schools.size(); iPred++) {
@@ -334,7 +334,7 @@ public class PredationProcess extends AbstractProcess {
     private int[] findPreys(School predator) {
 
         int iPred = predator.getSpeciesIndex();
-        List<School> schoolsInCell = getPopulation().getSchools(predator.getCell());
+        List<School> schoolsInCell = getSchoolSet().getSchools(predator.getCell());
         //schoolsInCell.remove(predator);
         float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getPredPreyStage()];
         float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getPredPreyStage()];

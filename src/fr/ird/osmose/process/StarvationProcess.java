@@ -32,7 +32,7 @@ public class StarvationProcess extends AbstractProcess {
 
     @Override
     public void run() {
-        for (School school : getPopulation().getPresentSchools()) {
+        for (School school : getSchoolSet().getPresentSchools()) {
             double M = getStarvationMortalityRate(school, 1);
             double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-M));
             if (nDead > 0.d) {

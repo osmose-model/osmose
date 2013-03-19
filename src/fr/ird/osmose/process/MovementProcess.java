@@ -83,7 +83,7 @@ public class MovementProcess extends AbstractProcess {
         for (AbstractProcess movement : movements) {
             movement.run();
         }
-        getPopulation().updateSchoolMap();
+        getSchoolSet().updateSchoolMap();
     }
 
     /**

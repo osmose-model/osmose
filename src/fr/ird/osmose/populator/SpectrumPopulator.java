@@ -94,7 +94,7 @@ public class SpectrumPopulator extends AbstractPopulator {
                         float length = speciesj.computeMeanLength(age);
                         float weight = speciesj.computeMeanWeight(age);
                         for (int k = 0; k < nbSchools; k++) {
-                            getPopulation().add(new School(speciesj, abundanceIni[age] / nbSchools, length, weight, age));
+                            getSchoolSet().add(new School(speciesj, abundanceIni[age] / nbSchools, length, weight, age));
                         }
                     }
                 }

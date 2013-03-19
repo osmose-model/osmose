@@ -70,7 +70,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     @Override
     public void update() {
-        for (School school : getPopulation().getAliveSchools()) {
+        for (School school : getSchoolSet().getAliveSchools()) {
             sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getInstantaneousAbundance();
         }
     }

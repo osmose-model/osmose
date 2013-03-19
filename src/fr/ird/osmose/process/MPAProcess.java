@@ -48,7 +48,7 @@ public class MPAProcess extends AbstractProcess {
         boolean active = (year >= start) && (year <= end);
         if (active) {
             for (Cell cell : mpa) {
-                for (School school : getPopulation().getSchools(cell)) {
+                for (School school : getSchoolSet().getSchools(cell)) {
                     school.notCatchable();
                 }
             }

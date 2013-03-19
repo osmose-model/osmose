@@ -94,7 +94,7 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
 
         //
         int nspec = getNSpecies();
-        for (School school : getPopulation().getPresentSchools()) {
+        for (School school : getSchoolSet().getPresentSchools()) {
             int i = (int) school.getX();
             int j = (int) school.getY();
             for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
