@@ -12,7 +12,7 @@ public abstract class AbstractPopulator extends SimulationLinker {
         super(indexSimulation);
     }
 
-    abstract public void loadParameters();
+    abstract public void init();
     
     abstract public void populate();
     

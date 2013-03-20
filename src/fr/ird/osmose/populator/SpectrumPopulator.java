@@ -11,12 +11,17 @@ import java.util.List;
  */
 public class SpectrumPopulator extends AbstractPopulator {
     
+    double a, b, range;
+    
     public SpectrumPopulator(int indexSimulation) {
         super(indexSimulation);
     }
 
     @Override
-    public void loadParameters() {
+    public void init() {
+        a = getConfiguration().getDouble("population.initialization.spectrum.slope");
+        b = getConfiguration().getDouble("population.initialization.spectrum.intercept");
+        range = getConfiguration().getDouble("population.initialization.spectrum.range");
     }
 
     /*
@@ -35,10 +40,7 @@ public class SpectrumPopulator extends AbstractPopulator {
         for (int i = 0; i < specInSizeClass10.length; i++) {
             specInSizeClass10[i] = new ArrayList(getConfiguration().getNSpecies());
         }
-
-        double a = getConfiguration().getDouble("population.initialization.spectrum.slope");
-        double b = getConfiguration().getDouble("population.initialization.spectrum.intercept");
-        double range = getConfiguration().getDouble("population.initialization.spectrum.range");
+        
         //Calculation of abd lacking in each size class
         //calculation apart for first size class because minSize=0.05 (and not 0)
         tempSpectrumAbd[0] = Math.round(Math.pow(5., a) * Math.exp(b));

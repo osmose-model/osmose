@@ -1,15 +1,19 @@
 package fr.ird.osmose;
 
+import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
 import fr.ird.osmose.step.SequentialMortalityStep;
 import fr.ird.osmose.util.SimulationLogFormatter;
+import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 
 public class Simulation {
 
@@ -122,6 +126,18 @@ public class Simulation {
      * What should be done within one time step
      */
     private AbstractStep step;
+    /*
+     * Object that is able to create NetCDF restart file
+     */
+    private SchoolSetSnapshot snapshot;
+    /*
+     * Record frequency of the restart file
+     */
+    private int restartFrequency;
+    /*
+     * 
+     */
+    private boolean restart;
 
 ///////////////////////////////
 // Definition of the functions
@@ -139,6 +155,20 @@ public class Simulation {
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
+        if (getConfiguration().canFind("simulation.restart.file")) {
+            String ncfile = getConfiguration().getFile("simulation.restart.file");
+            i_step_simu = 0;
+            try {
+                NetcdfFile nc = NetcdfFile.open(ncfile);
+                i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
+                int nStepYear = getConfiguration().getNStepYear();
+                year = i_step_simu / nStepYear - 1;
+                i_step_year = i_step_simu % nStepYear;
+                getLogger().log(Level.INFO, "Restarted simulation from year {0} step {1}", new Object[]{year, i_step_year});
+            } catch (IOException ex) {
+                getLogger().log(Level.WARNING, "Failed to open restart file " + ncfile, ex);
+            }
+        }
 
         // Create the species
         species = new Species[getConfiguration().getNSpecies()];
@@ -178,6 +208,13 @@ public class Simulation {
         AbstractProcess populatingProcess = new PopulatingProcess(index);
         populatingProcess.init();
         populatingProcess.run();
+
+        // Initialize the restart maker
+        snapshot = new SchoolSetSnapshot(index);
+        restartFrequency = Integer.MAX_VALUE;
+        if (getConfiguration().canFind("simulation.restart.recordfrequency.ndt")) {
+            restartFrequency = getConfiguration().getInt("simulation.restart.recordfrequency.ndt");
+        }
     }
 
     /**
@@ -188,6 +225,10 @@ public class Simulation {
         if (i_step_simu % getConfiguration().getNStepYear() == 0) {
             logger.log(Level.INFO, "year {0}", year);
         }
+    }
+
+    public boolean isRestart() {
+        return restart;
     }
 
     public void run() {
@@ -202,9 +243,16 @@ public class Simulation {
             // Run a new step
             step.step(i_step_simu);
 
+            // Create a restart file
+            if ((i_step_simu + 1) % restartFrequency == 0) {
+                snapshot.makeSnapshot(i_step_simu);
+            }
+
             // Increment time step
             i_step_simu++;
         }
+        // create a restart at the end of the simulation
+        snapshot.makeSnapshot(i_step_simu - 1);
     }
 
     public SchoolSet getSchoolSet() {

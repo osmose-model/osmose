@@ -12,6 +12,7 @@ import fr.ird.osmose.process.NaturalMortalityProcess;
 public class BiomassPopulator extends AbstractPopulator {
 
     final private int indexSimulation;
+    private float[] iniBiomass;
 
     public BiomassPopulator(int indexSimulation) {
         super(indexSimulation);
@@ -19,7 +20,11 @@ public class BiomassPopulator extends AbstractPopulator {
     }
 
     @Override
-    public void loadParameters() {
+    public void init() {
+        iniBiomass = new float[getNSpecies()];
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            iniBiomass[i] = getConfiguration().getFloat("population.initialization.biomass.sp" + i);
+        }
     }
 
     @Override
@@ -52,10 +57,8 @@ public class BiomassPopulator extends AbstractPopulator {
             FishingProcess fishingProcess = new FishingProcess(indexSimulation);
             fishingProcess.init();
             double F = fishingProcess.getFishingMortalityRate(species);
-            
 
-            float targetBiomass = getConfiguration().getFloat("population.initialization.biomass.sp" + i);
-            abdIni = targetBiomass / (meanWeight[(int) Math.round(species.getLifespanDt() / 2)] / 1000000);
+            abdIni = iniBiomass[i] / (meanWeight[(int) Math.round(species.getLifespanDt() / 2)] / 1000000);
             for (int j = species.getAgeClassZero(); j < species.getLifespanDt(); j++) {
                 sumExp += Math.exp(-(j * (D + F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
             }
@@ -78,7 +81,7 @@ public class BiomassPopulator extends AbstractPopulator {
                 }
             }
 
-            correctingFactor = (float) (targetBiomass / biomass);
+            correctingFactor = (float) (iniBiomass[i] / biomass);
             // we make corrections on initial abundance to fit the input biomass
             abundanceIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
             biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;

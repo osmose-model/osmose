@@ -6,6 +6,7 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.populator.AbstractPopulator;
 import fr.ird.osmose.populator.BiomassPopulator;
+import fr.ird.osmose.populator.RestartPopulator;
 import fr.ird.osmose.populator.SpectrumPopulator;
 
 /**
@@ -23,14 +24,19 @@ public class PopulatingProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        String method = getConfiguration().getString("population.initialization.method");
-        if (method.equalsIgnoreCase("biomass")) {
-            populator = new BiomassPopulator(getIndexSimulation());
-        } else if (method.equalsIgnoreCase("spectrum")) {
-            populator = new SpectrumPopulator(getIndexSimulation());
-        } else if (method.equalsIgnoreCase("random")) {
-            throw new UnsupportedOperationException("Random initialization not supported yet.");
+        if (getSimulation().isRestart()) {
+            populator = new RestartPopulator(getIndexSimulation());
+        } else {
+            String method = getConfiguration().getString("population.initialization.method");
+            if (method.equalsIgnoreCase("biomass")) {
+                populator = new BiomassPopulator(getIndexSimulation());
+            } else if (method.equalsIgnoreCase("spectrum")) {
+                populator = new SpectrumPopulator(getIndexSimulation());
+            } else if (method.equalsIgnoreCase("random")) {
+                throw new UnsupportedOperationException("Random initialization not supported yet.");
+            }
         }
+        populator.init();
     }
 
     @Override

@@ -116,6 +116,8 @@ public class ConfigurationConverter {
         prop.setProperty("simulation.ncpu", String.valueOf(Runtime.getRuntime().availableProcessors()));
         prop.setProperty("simulation.nspecies", String.valueOf(cfg.getNSpecies()));
         prop.setProperty("simulation.nplankton", String.valueOf(cfg.getNPlankton()));
+        prop.setProperty("simulation.restart.recordfrequency.ndt", "null");
+        prop.setProperty("simulation.restart.file", "null");
 
         // SPECIES
         for (int i = 0; i < nSpecies; i++) {

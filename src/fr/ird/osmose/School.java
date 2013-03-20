@@ -145,18 +145,42 @@ public class School extends GridPoint {
     /**
      * Create a new school.
      *
-     * @param cohort of the school
-     * @param abundance, number of individuals in the school
-     * @param length [cm] of the individual
-     * @param weight [g] of the individual
+     * @param species
+     * @param abundance
+     * @param length
+     * @param weight
+     * @param age
      */
     public School(Species species, double abundance, float length, float weight, int age) {
+        this(species, -1, -1, abundance, length, weight, age, Species.TL_EGG);
+    }
+
+    /**
+     * Create a new school.
+     *
+     * @param species
+     * @param x
+     * @param y
+     * @param abundance
+     * @param length
+     * @param weight
+     * @param age
+     * @param trophicLevel
+     */
+    public School(Species species, float x, float y, double abundance, float length, float weight, int age, float trophicLevel) {
         this.species = species;
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.length = length;
         this.weight = weight * 1.e-6f;
         this.age = age;
+        this.trophicLevel = trophicLevel;
+        if (x >= 0 && x < getGrid().get_nx() && y >= 0 && y < getGrid().get_ny()) {
+            moveToCell(getGrid().getCell(Math.round(x), Math.round(y)));
+        } else {
+            setOffGrid();
+        }
+
         // stages
         predPreyStage = 0;
         accessibilityStage = 0;
@@ -167,11 +191,6 @@ public class School extends GridPoint {
                     ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length
                     : 1;
         }
-
-        // Set initial trophic level to EGG
-        trophicLevel = Species.TL_EGG;
-        // Unlocated
-        setOffGrid();
     }
 
 ////////////////////////////
@@ -320,6 +339,10 @@ public class School extends GridPoint {
      */
     public float getLength() {
         return length;
+    }
+    
+    public float getWeight() {
+        return weight;
     }
 
     /**
