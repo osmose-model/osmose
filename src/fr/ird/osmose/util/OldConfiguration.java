@@ -1059,7 +1059,7 @@ public class OldConfiguration {
                     if (!((sum > 0.99f) && (sum < 1.01f))) {
                         int year = (iStep + 1) / nStepYear;
                         System.out.println("ERROR: sum of percents does not equal 100% in spawning seasonality file " + csvFile + " for species " + speciesName[iSpec] + " in year " + year);
-                        System.exit(1);
+                        //System.exit(1);
                     }
                     sum = 0;
                 }
@@ -1455,6 +1455,8 @@ public class OldConfiguration {
         nAccessStage = new int[nSpecies];
         accessStageThreshold = new float[nSpecies][];
         accessibilityMatrix = new float[nSpecies + nPlankton][][][];
+        
+        dietStageThreshold = new float[nSpecies][];
 
         planktonName = new String[nPlankton];
     }

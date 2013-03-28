@@ -466,7 +466,7 @@ public class ConfigurationConverter {
     }
 
     private String toString(float[] array) {
-        if (array.length > 0) {
+        if (array != null && array.length > 0) {
             StringBuilder str = new StringBuilder();
             for (float f : array) {
                 str.append(f);
@@ -481,7 +481,7 @@ public class ConfigurationConverter {
 
     private String toString(int[] array) {
         if (null == array) {
-            return null;
+            return "null";
         }
         StringBuilder str = new StringBuilder();
         str.append(array[0]);

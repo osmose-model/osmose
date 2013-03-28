@@ -70,7 +70,9 @@ public class PredationProcess extends AbstractProcess {
         accessStageThreshold = new float[nspec + nPlankton][];
         predPreyStageThreshold = new float[nspec][];
         dietOutputStageThreshold = new float[nspec][];
-        dietOutputMetrics = getConfiguration().getString("output.diet.stage.structure");
+        if (getConfiguration().canFind("output.diet.stage.structure")) {
+            dietOutputMetrics = getConfiguration().getString("output.diet.stage.structure");
+        }
         accessStageMetrics = getConfiguration().getString("predation.accessibility.stage.structure");
 
         recordDiet = getConfiguration().getBoolean("output.diet.composition.enabled")
