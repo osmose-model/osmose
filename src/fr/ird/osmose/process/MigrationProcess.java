@@ -49,7 +49,7 @@ public class MigrationProcess extends AbstractProcess {
      * Migration
      */
     private boolean[][][] outOfZoneCohort;
-    private static float[][][] outOfZoneMortality;
+    private float[][][] outOfZoneMortality;
 
     public MigrationProcess(int indexSimulation) {
         super(indexSimulation);

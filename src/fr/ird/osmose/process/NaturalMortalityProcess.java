@@ -41,6 +41,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
         // Migration
         migration = new MigrationProcess(getIndexSimulation());
+        migration.init();
     }
 
     @Override
