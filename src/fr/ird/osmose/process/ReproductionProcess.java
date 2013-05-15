@@ -104,7 +104,7 @@ public class ReproductionProcess extends AbstractProcess {
             }
 
             //UPDATE AGE CLASS 0
-            int nSchool = getConfiguration().getSeed();
+            int nSchool = getConfiguration().getSeed(i);
             if (nEgg == 0.d) {
                 // do nothing, zero school
             } else if (nEgg < nSchool) {

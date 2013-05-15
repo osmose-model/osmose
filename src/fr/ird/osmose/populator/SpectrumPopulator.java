@@ -92,7 +92,7 @@ public class SpectrumPopulator extends AbstractPopulator {
                 // Add schools to population
                 for (int age = 0; age < speciesj.getLifespanDt(); age++) {
                     if (abundanceIni[age] > 0.d) {
-                        int nbSchools = getConfiguration().getSeed();
+                        int nbSchools = getConfiguration().getSeed(i);
                         float length = speciesj.computeMeanLength(age);
                         float weight = speciesj.computeMeanWeight(age);
                         for (int k = 0; k < nbSchools; k++) {

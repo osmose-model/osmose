@@ -35,7 +35,7 @@ public class Configuration {
     private int nSimulation;
     private int nYear;
     private int nStepYear;
-    private int seed;
+    private int[] seed;
     private int nLTLStep;
     private boolean dietEnabled;
     private IGrid grid;
@@ -67,7 +67,22 @@ public class Configuration {
         nSimulation = getInt("simulation.nsimulation");
         nYear = getInt("simulation.time.nyear");
         nStepYear = getInt("simulation.time.ndtperyear");
-        seed = getInt("simulation.nschool") / nStepYear;
+        seed = new int[nSpecies];
+        if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
+            for (int i = 0; i < nSpecies; i++) {
+                seed[i] = getInt("simulation.nschool.sp" + i);;
+            }
+        } else if (canFind("simulation.nschool")) {
+            int n = getInt("simulation.nschool");
+            for (int i = 0; i < nSpecies; i++) {
+                seed[i] = n;
+            }
+        } else {
+            for (int i = 0; i < nSpecies; i++) {
+                seed[i] = 10;
+            }
+        }
+
         nLTLStep = getInt("ltl.nstep");
         dietEnabled = getBoolean("output.diet.pressure.enabled")
                 || getBoolean("output.diet.composition.enabled");
@@ -339,8 +354,8 @@ public class Configuration {
     /**
      * @return the seed
      */
-    public int getSeed() {
-        return seed;
+    public int getSeed(int iSpecies) {
+        return seed[iSpecies];
     }
 
     /**

@@ -94,7 +94,7 @@ public class IncomingFluxProcess extends AbstractProcess {
             double biomassIn = biomassFluxIn[i] * season;
             float meanWeigthIn = (float) species.computeWeight(meanLengthIn[i]);
             long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
-            int nSchool = getConfiguration().getSeed();
+            int nSchool = getConfiguration().getSeed(i);
             if (abundanceIn > 0 && abundanceIn < nSchool) {
                 getSchoolSet().add(new School(species, abundanceIn, meanLengthIn[i], meanWeigthIn, ageMeanIn[i]));
             } else if (abundanceIn >= nSchool) {
