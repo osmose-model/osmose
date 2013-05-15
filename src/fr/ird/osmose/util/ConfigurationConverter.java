@@ -35,7 +35,7 @@ public class ConfigurationConverter {
     //
     private OldConfiguration cfg;
     private Properties prop;
-
+    
     ConfigurationConverter(String[] args) {
 
         // Get old configuration
@@ -112,7 +112,7 @@ public class ConfigurationConverter {
         prop.setProperty("simulation.time.ndtPerYear", String.valueOf(cfg.getNumberTimeStepsPerYear()));
         prop.setProperty("simulation.time.nyear", String.valueOf(cfg.getNYear()));
         prop.setProperty("simulation.nsimulation", String.valueOf(cfg.getNSimulation()));
-        prop.setProperty("simulation.nschool", String.valueOf(cfg.nSchool * cfg.getNumberTimeStepsPerYear()));
+        prop.setProperty("simulation.nschool", String.valueOf(cfg.nSchool));
         prop.setProperty("simulation.ncpu", String.valueOf(Runtime.getRuntime().availableProcessors()));
         prop.setProperty("simulation.nspecies", String.valueOf(cfg.getNSpecies()));
         prop.setProperty("simulation.nplankton", String.valueOf(cfg.getNPlankton()));
