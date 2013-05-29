@@ -1,4 +1,3 @@
-
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.util.ConnectivityMatrix;
@@ -11,16 +10,14 @@ import fr.ird.osmose.Species;
  * @author pverley
  */
 public class ConnectivityDistributionProcess extends AbstractProcess {
-    
+
     private MovementProcess movement;
     private Species species;
-    private MigrationProcess migration;
-    
-    public ConnectivityDistributionProcess(int indexSimulation, Species species, MovementProcess parent, MigrationProcess migration) {
+
+    public ConnectivityDistributionProcess(int indexSimulation, Species species, MovementProcess parent) {
         super(indexSimulation);
         this.species = species;
         this.movement = parent;
-        this.migration = migration;
     }
 
     @Override
@@ -30,31 +27,24 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
     @Override
     public void run() {
         for (School school : getSchoolSet().getSchools(species)) {
-            connectivityDistribution(school);
+            if (!school.isOut()) {
+                connectivityDistribution(school);
+            }
         }
     }
-    
+
     private void connectivityDistribution(School school) {
 
         // loop over the schools of the species
         int age = school.getAgeDt();
         int i_step_year = getSimulation().getIndexTimeYear();
         int i_step_simu = getSimulation().getIndexTimeSimu();
-        
-        /*
-         * Do not distribute cohorts that are presently out of
-         * the simulated area.
-         */
-        if (migration.isOut(school)) {
-            school.setOffGrid();
-            return;
-        }
 
         // Get current map and max probability of presence
         int indexMap = movement.getIndexMap(school);
         GridMap map = movement.getMap(indexMap);
         float tempMaxProbaPresence = movement.getMaxProbaPresence(indexMap);
-        
+
         // init = true if either cohort zero or first time-step of the simulation
         boolean init = (age == 0) | (i_step_simu == 0);
         /*
@@ -163,9 +153,7 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
 
         return cumSum;
     }
-    
 }
-
 //public void writeAreaFileAsProp() {
 //        fr.ird.osmose.util.Properties properties = new fr.ird.osmose.util.Properties();
 //        for (int indexMap = 0; indexMap < maps.length; indexMap++) {

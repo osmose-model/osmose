@@ -1,7 +1,6 @@
 package fr.ird.osmose.process;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.GridMap;
@@ -9,7 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -29,8 +27,6 @@ public class NaturalMortalityProcess extends AbstractProcess {
      * Larval mortality rates, timestep-1.
      */
     private float[][] larvalMortalityRates;
-    // migration process
-    private MigrationProcess migration;
 
     public NaturalMortalityProcess(int indexSimulation) {
         super(indexSimulation);
@@ -60,10 +56,6 @@ public class NaturalMortalityProcess extends AbstractProcess {
                 }
             }
         }
-
-        // Migration
-        migration = new MigrationProcess(getIndexSimulation());
-        migration.init();
     }
 
     @Override
@@ -90,12 +82,12 @@ public class NaturalMortalityProcess extends AbstractProcess {
         double M;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
-            M = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()] + migration.getOutMortality(school)) / (float) subdt;
+            M = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()]) / (float) subdt;
         } else {
             if (null != spatialD[spec.getIndex()] && !school.isUnlocated()) {
-                M = (spatialD[spec.getIndex()].getValue(school.getCell()) + migration.getOutMortality(school)) / (float) (getConfiguration().getNStepYear() * subdt);
+                M = (spatialD[spec.getIndex()].getValue(school.getCell())) / (float) (getConfiguration().getNStepYear() * subdt);
             } else {
-                M = (D[spec.getIndex()] + migration.getOutMortality(school)) / (float) (getConfiguration().getNStepYear() * subdt);
+                M = (D[spec.getIndex()]) / (float) (getConfiguration().getNStepYear() * subdt);
             }
         }
         return M;

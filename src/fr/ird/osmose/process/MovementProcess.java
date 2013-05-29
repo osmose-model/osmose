@@ -41,8 +41,6 @@ public class MovementProcess extends AbstractProcess {
     private ConnectivityMatrix[] connectivityMatrix;
     private String[] mapFile;
     private int[] mapIndexNoTwin;
-    // Migration
-    private MigrationProcess migration;
 
     public MovementProcess(int indexSimulation) {
         super(indexSimulation);
@@ -52,10 +50,6 @@ public class MovementProcess extends AbstractProcess {
     public void init() {
 
         loadParameters();
-
-        // Migration
-        migration = new MigrationProcess(getIndexSimulation());
-        migration.init();
 
         int nSpecies = getConfiguration().getNSpecies();
         // init distribution
@@ -68,10 +62,10 @@ public class MovementProcess extends AbstractProcess {
                     movements[i] = new RandomDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this);
                     break;
                 case MAPS:
-                    movements[i] = new MapDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this, migration);
+                    movements[i] = new MapDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this);
                     break;
                 case CONNECTIVITY:
-                    movements[i] = new ConnectivityDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this, migration);
+                    movements[i] = new ConnectivityDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this);
                     break;
             }
             movements[i].init();

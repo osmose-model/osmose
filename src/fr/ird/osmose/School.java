@@ -119,6 +119,10 @@ public class School extends GridPoint {
      * Number of dead individuals due to natural mortality.
      */
     private double ndeadNatural;
+        /**
+     * Number of dead individuals out of simulated domain
+     */
+    private double ndeadOut;
     /**
      * Predation success rate. (ratio of what is preyed on maximal ingestion).
      */
@@ -128,6 +132,10 @@ public class School extends GridPoint {
      */
     private boolean ndeadHasChanged;
     private int[] nDietStage;
+        /*
+     * Out of the simulated domain at current time step
+     */
+    private boolean out;
 
 //////////////
 // Constructor
@@ -191,6 +199,7 @@ public class School extends GridPoint {
                     ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length
                     : 1;
         }
+        out = false;
     }
 
 ////////////////////////////
@@ -214,6 +223,9 @@ public class School extends GridPoint {
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             diet[i + getConfiguration().getNSpecies()] = new double[1];
         }
+        // by default the school is in the simulated area, and migration might
+        // change this state.
+        out = false;
     }
 
     private void updateAbundance() {
@@ -223,6 +235,15 @@ public class School extends GridPoint {
         ndeadPredation = 0;
         ndeadStarvation = 0;
         ndeadHasChanged = false;
+    }
+    
+    public void out() {
+        out = true;
+        setOffGrid();
+    }
+
+    public boolean isOut() {
+        return out;
     }
 
     /**
@@ -488,6 +509,21 @@ public class School extends GridPoint {
      */
     public void setNdeadNatural(double ndeadNatural) {
         this.ndeadNatural = ndeadNatural;
+        ndeadHasChanged = true;
+    }
+    
+    /**
+     * @return the ndeadOut
+     */
+    public double getNdeadOut() {
+        return ndeadOut;
+    }
+
+    /**
+     * @param ndeadOut the ndeadOut to set
+     */
+    public void setNdeadOut(double ndeadOut) {
+        this.ndeadOut = ndeadOut;
         ndeadHasChanged = true;
     }
 }

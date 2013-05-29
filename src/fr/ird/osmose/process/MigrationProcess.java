@@ -38,6 +38,7 @@
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 
 /**
  *
@@ -86,7 +87,25 @@ public class MigrationProcess extends AbstractProcess {
 
     @Override
     public void run() {
-        // nothing to do
+        for (int nSpec = 0; nSpec < getConfiguration().getNSpecies(); nSpec++) {
+            Species species = getSimulation().getSpecies(nSpec);
+            if (isMigrating(species)) {
+                for (School school : getSchoolSet().getSchools(species)) {
+                    if (isOut(school)) {
+                        school.out();
+                        double Z = getOutMortality(school);
+                        double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-Z));
+                        if (nDead > 0.d) {
+                            school.setNdeadOut(nDead);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private boolean isMigrating(Species species) {
+        return null != outOfZoneCohort[species.getIndex()];
     }
 
     boolean isOut(School school) {

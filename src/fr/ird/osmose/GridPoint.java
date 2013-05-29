@@ -58,7 +58,7 @@ public class GridPoint {
         return ((x < 0) || (y < 0));
     }
     
-    public void setOffGrid() {
+    void setOffGrid() {
         x = y = -1;
     }
     

@@ -33,11 +33,12 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
     /*
      * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
      */
-    final private int CAUSES = 4;
+    final private int CAUSES = 5;
     final private int PREDATION = 0;
     final private int STARVATION = 1;
     final private int NATURAL = 2;
     final private int FISHING = 3;
+    final private int OUT = 4;
     /*
      * Mortality rates array [SPECIES][CAUSES][STAGES]
      */
@@ -107,6 +108,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             nDead[iSpecies][STARVATION][iStage] += school.getNdeadStarvation();
             nDead[iSpecies][NATURAL][iStage] += school.getNdeadNatural();
             nDead[iSpecies][FISHING][iStage] += school.getNdeadFishing();
+            nDead[iSpecies][OUT][iStage] += school.getNdeadOut();
         }
         // Cumulate the mortality rates
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
@@ -178,16 +180,16 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
             // Write headers
             prw[iSpecies].print("\"");
-            prw[iSpecies].print("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat) & Fishing (F) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. To get annual mortality rates, sum the mortality rates within one year.");
-            prw[iSpecies].println("\"");
+            prw[iSpecies].print("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.");prw[iSpecies].println("\"");
             prw[iSpecies].print("Time");
             prw[iSpecies].print(';');
             prw[iSpecies].print("Mpred;Mpred;Mpred;");
             prw[iSpecies].print("Mstarv;Mstarv;Mstarv;");
             prw[iSpecies].print("Mnat;Mnat;Mnat;");
-            prw[iSpecies].println("F;F;F");
+            prw[iSpecies].print("F;F;F;");
+            prw[iSpecies].println("Z;Z;Z");
             prw[iSpecies].print(";");
-            for (int iDeath = 0; iDeath < 4; iDeath++) {
+            for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
                 prw[iSpecies].print("Eggs;Pre-recruits;Recruits;");
             }
             prw[iSpecies].println();

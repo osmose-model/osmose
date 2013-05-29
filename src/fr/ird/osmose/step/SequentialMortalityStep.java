@@ -11,6 +11,7 @@ import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
 import fr.ird.osmose.process.MPAProcess;
+import fr.ird.osmose.process.MigrationProcess;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
 import fr.ird.osmose.process.PredationProcess;
@@ -56,6 +57,10 @@ public class SequentialMortalityStep extends AbstractStep {
      */
     private AbstractProcess movementProcess;
     /*
+     * Migration process
+     */
+    private AbstractProcess migrationProcess;
+    /*
      * MPA process
      */
     private AbstractProcess mpaProcess;
@@ -94,7 +99,7 @@ public class SequentialMortalityStep extends AbstractStep {
         // Reproduction processes
         reproductionProcess = new ReproductionProcess(getIndexSimulation());
         reproductionProcess.init();
-        
+
         // Incoming flux
         incomingFLuxProcess = new IncomingFluxProcess(getIndexSimulation());
         incomingFLuxProcess.init();
@@ -102,6 +107,10 @@ public class SequentialMortalityStep extends AbstractStep {
         // Movement of the schools
         movementProcess = new MovementProcess(getIndexSimulation());
         movementProcess.init();
+        
+         // Migratrion process
+        migrationProcess = new MigrationProcess(getIndexSimulation());
+        migrationProcess.init();
 
         // MPA
         mpaProcess = new MPAProcess(getIndexSimulation());
@@ -114,7 +123,7 @@ public class SequentialMortalityStep extends AbstractStep {
 
     @Override
     public void step(int iStepSimu) {
-        
+
         // Incoming flux
         incomingFLuxProcess.run();
 
@@ -131,6 +140,9 @@ public class SequentialMortalityStep extends AbstractStep {
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
         indicators.initStep();
+        
+        // Migration
+        migrationProcess.run();
 
         // Spatial distribution
         movementProcess.run();
@@ -155,7 +167,7 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Save steps
         indicators.update(iStepSimu);
-        
+
         // Reproduction
         reproductionProcess.run();
 

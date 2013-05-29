@@ -13,13 +13,11 @@ public class MapDistributionProcess extends AbstractProcess {
     
     private MovementProcess movement;
     private Species species;
-    private MigrationProcess migration;
     
-    public MapDistributionProcess(int indexSimulation, Species species, MovementProcess parent, MigrationProcess migration) {
+    public MapDistributionProcess(int indexSimulation, Species species, MovementProcess parent) {
         super(indexSimulation);
         this.species = species;
         this.movement = parent;
-        this.migration = migration;
     }
 
     @Override
@@ -29,7 +27,9 @@ public class MapDistributionProcess extends AbstractProcess {
     @Override
     public void run() {
         for (School school : getSchoolSet().getSchools(species)) {
-            mapsDistribution(school);
+            if (!school.isOut()) {
+                mapsDistribution(school);
+            }
         }
     }
     
@@ -37,14 +37,6 @@ public class MapDistributionProcess extends AbstractProcess {
 
         int i_step_year = getSimulation().getIndexTimeYear();
         int age = school.getAgeDt();
-        /*
-         * Do not distribute cohorts that are presently out of
-         * the simulated area.
-         */
-        if (migration.isOut(school)) {
-            school.setOffGrid();
-            return;
-        }
 
         // Get current map and max probability of presence
         int indexMap = movement.getIndexMap(school);
