@@ -171,7 +171,7 @@ public class ConfigurationConverter {
             for (int i = 0; i < nPlankton; i++) {
                 prop.setProperty("ltl.netcdf.var.plankton.plk" + i, names[i]);
             }
-            prop.setProperty("ltl.netcdf.grid.file", files[0]);
+            prop.setProperty("ltl.netcdf.grid.file", cfg.resolveFile(files[0]));
             prop.setProperty("ltl.netcdf.var.lat", cfg.strLat);
             prop.setProperty("ltl.netcdf.var.lon", cfg.strLon);
             prop.setProperty("ltl.netcdf.var.bathy", cfg.strH);

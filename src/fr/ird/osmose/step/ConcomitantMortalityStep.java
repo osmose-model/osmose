@@ -52,7 +52,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
     /*
      * List of indicators
      */
-    private Indicators indicators;
+    Indicators indicators;
     
     public ConcomitantMortalityStep(int indexSimulation) {
         super(indexSimulation);

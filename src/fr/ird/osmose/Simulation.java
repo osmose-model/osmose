@@ -12,7 +12,6 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 
 public class Simulation {
@@ -265,6 +264,10 @@ public class Simulation {
         }
         // create a restart at the end of the simulation
         snapshot.makeSnapshot(i_step_simu - 1);
+    }
+    
+    public void makeSnapshot() {
+        snapshot.makeSnapshot(i_step_simu);
     }
     
     public SchoolSet getSchoolSet() {
