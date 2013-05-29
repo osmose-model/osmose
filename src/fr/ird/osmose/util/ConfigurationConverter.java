@@ -147,7 +147,11 @@ public class ConfigurationConverter {
 //            prop.setProperty("plankton.size.unit", "cm");
             prop.setProperty("plankton.size.min.plk" + i, String.valueOf(cfg.ltlMinSize[i]));
             prop.setProperty("plankton.size.max.plk" + i, String.valueOf(cfg.ltlMaxSize[i]));
-            prop.setProperty("plankton.conversion2tons.plk" + i, String.valueOf(cfg.ltlConversionFactor[i]));
+            if (cfg.ltlTotalBiomass[i] >= 0) {
+                prop.setProperty("plankton.biomass.total.plk" + i, String.valueOf(cfg.ltlTotalBiomass[i]));
+            } else {
+                prop.setProperty("plankton.conversion2tons.plk" + i, String.valueOf(cfg.ltlConversionFactor[i]));
+            }
             prop.setProperty("plankton.accessibility2fish.plk" + i, String.valueOf(cfg.planktonAccessibility[i]));
         }
 

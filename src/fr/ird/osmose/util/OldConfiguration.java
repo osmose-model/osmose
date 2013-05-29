@@ -292,6 +292,10 @@ public class OldConfiguration {
      */
     float[] ltlProdBiomFactor;
     /**
+     * 
+     */
+    double[] ltlTotalBiomass;
+    /**
      * Number of time steps in the LTL model.
      */
     private int nLTLStep;
@@ -751,6 +755,7 @@ public class OldConfiguration {
             ltlMaxSize = new float[nPlankton];
             ltlConversionFactor = new float[nPlankton];
             ltlProdBiomFactor = new float[nPlankton];
+            ltlTotalBiomass = new double[nPlankton];
 
             for (int i = 0; i < nPlankton; i++) {
                 // filling tables
@@ -764,9 +769,17 @@ public class OldConfiguration {
                 st.nextToken();
                 ltlTrophicLevel[i] = (new Float(st.sval)).floatValue();
                 st.nextToken();
-                ltlConversionFactor[i] = (new Float(st.sval)).floatValue();
-                st.nextToken();
-                ltlProdBiomFactor[i] = (new Float(st.sval)).floatValue();
+                try {
+                    // biomass provided in NetCDF file
+                    ltlConversionFactor[i] = (new Float(st.sval)).floatValue();
+                    st.nextToken();
+                    ltlProdBiomFactor[i] = (new Float(st.sval)).floatValue();
+                    ltlTotalBiomass[i] = -1.d;
+                } catch (NumberFormatException ex) {
+                    // Uniform biomass provided
+                    st.nextToken();
+                    ltlTotalBiomass[i] = Double.valueOf(st.sval);
+                }
             }
 
             st.nextToken();

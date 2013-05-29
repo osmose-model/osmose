@@ -144,7 +144,7 @@ public class Plankton {
         return Osmose.getInstance().getConfiguration();
     }
 
-    private static IGrid getGrid() {
+    static IGrid getGrid() {
         return Osmose.getInstance().getGrid();
     }
 

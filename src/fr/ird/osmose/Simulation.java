@@ -27,7 +27,7 @@ public class Simulation {
          * Similarily to WS2009 and conversely to SCHOOL2012_PROD, plankton
          * concentration are read like production.
          */
-
+        
         SCHOOL2012_PROD,
         /*
          * SCHOOL2012 stands for SCHOOLBASED processes, in sequential order
@@ -179,14 +179,24 @@ public class Simulation {
         // Init plankton groups
         ltlGroups = new Plankton[getConfiguration().getNPlankton()];
         for (int p = 0; p < ltlGroups.length; p++) {
-            ltlGroups[p] = new Plankton(p,
-                    getConfiguration().getString("plankton.name.plk" + p),
-                    getConfiguration().getFloat("plankton.size.min.plk" + p),
-                    getConfiguration().getFloat("plankton.size.max.plk" + p),
-                    getConfiguration().getFloat("plankton.tl.plk" + p),
-                    getConfiguration().getFloat("plankton.conversion2tons.plk" + p),
-                    1, // prod2biom parameter that is not used anymore
-                    getConfiguration().getFloat("plankton.accessibility2fish.plk" + p));
+            if (getConfiguration().canFind("plankton.biomass.total.plk" + p)) {
+                ltlGroups[p] = new UniformPlankton(p,
+                        getConfiguration().getString("plankton.name.plk" + p),
+                        getConfiguration().getFloat("plankton.size.min.plk" + p),
+                        getConfiguration().getFloat("plankton.size.max.plk" + p),
+                        getConfiguration().getFloat("plankton.tl.plk" + p),
+                        getConfiguration().getFloat("plankton.accessibility2fish.plk" + p),
+                        getConfiguration().getFloat("plankton.biomass.total.plk" + p));
+            } else {
+                 ltlGroups[p] = new Plankton(p,
+                        getConfiguration().getString("plankton.name.plk" + p),
+                        getConfiguration().getFloat("plankton.size.min.plk" + p),
+                        getConfiguration().getFloat("plankton.size.max.plk" + p),
+                        getConfiguration().getFloat("plankton.tl.plk" + p),
+                        getConfiguration().getFloat("plankton.conversion2tons.plk" + p),
+                        1, // prod2biom parameter that is not used anymore
+                        getConfiguration().getFloat("plankton.accessibility2fish.plk" + p));
+            }
             ltlGroups[p].init();
         }
 
@@ -226,13 +236,13 @@ public class Simulation {
             logger.log(Level.INFO, "year {0}", year);
         }
     }
-
+    
     public boolean isRestart() {
         return restart;
     }
-
+    
     public void run() {
-
+        
         while (i_step_simu < n_steps_simu) {
             year = i_step_simu / getConfiguration().getNStepYear();
             i_step_year = i_step_simu % getConfiguration().getNStepYear();
@@ -254,7 +264,7 @@ public class Simulation {
         // create a restart at the end of the simulation
         snapshot.makeSnapshot(i_step_simu - 1);
     }
-
+    
     public SchoolSet getSchoolSet() {
         return schoolSet;
     }
@@ -278,27 +288,27 @@ public class Simulation {
     public Plankton getPlankton(int index) {
         return ltlGroups[index];
     }
-
+    
     public int getYear() {
         return year;
     }
-
+    
     public int getIndexTimeYear() {
         return i_step_year;
     }
-
+    
     public int getIndexTimeSimu() {
         return i_step_simu;
     }
-
+    
     private Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
     }
-
+    
     public final int getReplica() {
         return index;
     }
-
+    
     final public Logger getLogger() {
         return logger;
     }
