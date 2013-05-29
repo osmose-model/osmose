@@ -155,6 +155,7 @@ public class Simulation {
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
+        restart = false;
         if (getConfiguration().canFind("simulation.restart.file")) {
             String ncfile = getConfiguration().getFile("simulation.restart.file");
             i_step_simu = 0;
@@ -162,9 +163,10 @@ public class Simulation {
                 NetcdfFile nc = NetcdfFile.open(ncfile);
                 i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
                 int nStepYear = getConfiguration().getNStepYear();
-                year = i_step_simu / nStepYear - 1;
+                year = i_step_simu / nStepYear;
                 i_step_year = i_step_simu % nStepYear;
-                getLogger().log(Level.INFO, "Restarted simulation from year {0} step {1}", new Object[]{year, i_step_year});
+                getLogger().log(Level.INFO, "Restarting simulation from year {0} step {1}", new Object[]{year, i_step_year});
+                restart = true;
             } catch (IOException ex) {
                 getLogger().log(Level.WARNING, "Failed to open restart file " + ncfile, ex);
             }

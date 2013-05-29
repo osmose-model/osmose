@@ -49,7 +49,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             abundance.set(s, school.getInstantaneousAbundance());
             age.set(s, (float) school.getAgeDt() / getConfiguration().getNStepYear());
             length.set(s, school.getLength());
-            weight.set(s, school.getWeight());
+            weight.set(s, school.getWeight() * 1e6f);
             trophiclevel.set(s, school.getTrophicLevel());
             s++;
         }

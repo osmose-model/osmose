@@ -42,7 +42,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
      * Whether the indicator should be enabled or not.
      */
     private boolean enabled;
-    
+
     public PredatorPressureIndicator(int indexSimulation, String keyEnabled) {
         super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
@@ -155,7 +155,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
 
     @Override
     public void init() {
-        
+
         // Read diet stages
         nDietStage = new int[getConfiguration().getNSpecies()];
         dietStageThreshold = new float[getConfiguration().getNSpecies()][];
@@ -167,7 +167,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
                 dietStageThreshold[i] = getConfiguration().getArrayFloat("output.diet.stage.threshold.sp" + i);
             }
         }
-        
+
         // Create parent directory
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder("Trophic");
@@ -177,6 +177,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         File file = new File(path, filename.toString());
+        boolean fileExists = file.exists();
         file.getParentFile().mkdirs();
         try {
             // Init stream
@@ -185,30 +186,32 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
             Logger.getLogger(DietIndicator.class.getName()).log(Level.SEVERE, null, ex);
         }
         prw = new PrintWriter(fos, true);
-        prw.print("\"");
-        prw.print("Biomass of prey species (in tons per time step of saving, in rows) eaten by a predator species (in col). The last column reports the biomass of prey at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)");
-        prw.println("\"");
-        prw.print("Time");
-        prw.print(';');
-        prw.print("Prey");
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            Species species = getSimulation().getSpecies(iSpec);
-            for (int s = 0; s < nDietStage[iSpec]; s++) {
-                prw.print(";");
-                if (nDietStage[iSpec] == 1) {
-                    prw.print(species.getName());    // Name predators
-                } else {
-                    if (s == 0) {
-                        prw.print(species.getName() + " < " + dietStageThreshold[iSpec][s]);    // Name predators
+        if (!fileExists) {
+            prw.print("\"");
+            prw.print("Biomass of prey species (in tons per time step of saving, in rows) eaten by a predator species (in col). The last column reports the biomass of prey at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)");
+            prw.println("\"");
+            prw.print("Time");
+            prw.print(';');
+            prw.print("Prey");
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                Species species = getSimulation().getSpecies(iSpec);
+                for (int s = 0; s < nDietStage[iSpec]; s++) {
+                    prw.print(";");
+                    if (nDietStage[iSpec] == 1) {
+                        prw.print(species.getName());    // Name predators
                     } else {
-                        prw.print(species.getName() + " >" + dietStageThreshold[iSpec][s - 1]);    // Name predators
+                        if (s == 0) {
+                            prw.print(species.getName() + " < " + dietStageThreshold[iSpec][s]);    // Name predators
+                        } else {
+                            prw.print(species.getName() + " >" + dietStageThreshold[iSpec][s - 1]);    // Name predators
+                        }
                     }
                 }
             }
+            prw.print(";");
+            prw.print("Biomass");
+            prw.println();
         }
-        prw.print(";");
-        prw.print("Biomass");
-        prw.println();
     }
 
     @Override

@@ -51,7 +51,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
      * Whether the indicator should be enabled or not.
      */
     private boolean enabled;
-    
+
     public MortalityIndicator(int indexSimulation, String keyEnabled) {
         super(indexSimulation);
         enabled = getConfiguration().getBoolean(keyEnabled);
@@ -132,7 +132,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void write(float time) {
-        
+
         int recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
@@ -170,6 +170,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             filename.append(getSimulation().getReplica());
             filename.append(".csv");
             File file = new File(path, filename.toString());
+            boolean fileExists = file.exists();
             file.getParentFile().mkdirs();
             try {
                 // Init stream
@@ -178,21 +179,24 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 Logger.getLogger(MortalityIndicator.class.getName()).log(Level.SEVERE, null, ex);
             }
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
-            // Write headers
-            prw[iSpecies].print("\"");
-            prw[iSpecies].print("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.");prw[iSpecies].println("\"");
-            prw[iSpecies].print("Time");
-            prw[iSpecies].print(';');
-            prw[iSpecies].print("Mpred;Mpred;Mpred;");
-            prw[iSpecies].print("Mstarv;Mstarv;Mstarv;");
-            prw[iSpecies].print("Mnat;Mnat;Mnat;");
-            prw[iSpecies].print("F;F;F;");
-            prw[iSpecies].println("Z;Z;Z");
-            prw[iSpecies].print(";");
-            for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
-                prw[iSpecies].print("Eggs;Pre-recruits;Recruits;");
+            if (!fileExists) {
+                // Write headers
+                prw[iSpecies].print("\"");
+                prw[iSpecies].print("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.");
+                prw[iSpecies].println("\"");
+                prw[iSpecies].print("Time");
+                prw[iSpecies].print(';');
+                prw[iSpecies].print("Mpred;Mpred;Mpred;");
+                prw[iSpecies].print("Mstarv;Mstarv;Mstarv;");
+                prw[iSpecies].print("Mnat;Mnat;Mnat;");
+                prw[iSpecies].print("F;F;F;");
+                prw[iSpecies].println("Z;Z;Z");
+                prw[iSpecies].print(";");
+                for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
+                    prw[iSpecies].print("Eggs;Pre-recruits;Recruits;");
+                }
+                prw[iSpecies].println();
             }
-            prw[iSpecies].println();
         }
     }
 

@@ -51,6 +51,7 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
         // Create parent directory
         File path = new File(getConfiguration().getOutputPathname());
         File file = new File(path, getFilename());
+        boolean fileExists = file.exists();
         file.getParentFile().mkdirs();
         try {
             // Init stream
@@ -60,16 +61,18 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
         }
         prw = new PrintWriter(fos, true);
 
-        prw.print("\"");
-        prw.print(getDescription());
-        prw.println("\"");
-        prw.print("Time");
-        String[] headers = getHeaders();
-        for (int i = 0; i < headers.length; i++) {
-            prw.print(";");
-            prw.print(headers[i]);
+        if (!fileExists) {
+            prw.print("\"");
+            prw.print(getDescription());
+            prw.println("\"");
+            prw.print("Time");
+            String[] headers = getHeaders();
+            for (int i = 0; i < headers.length; i++) {
+                prw.print(";");
+                prw.print(headers[i]);
+            }
+            prw.println();
         }
-        prw.println();
     }
 
     @Override

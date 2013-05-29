@@ -208,6 +208,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
         filename.append(getSimulation().getReplica());
         filename.append(".csv");
         File file = new File(path, filename.toString());
+        boolean fileExists = file.exists();
         file.getParentFile().mkdirs();
         try {
             // Init stream
@@ -216,28 +217,30 @@ public class DietIndicator extends SimulationLinker implements Indicator {
             Logger.getLogger(AbstractIndicator.class.getName()).log(Level.SEVERE, null, ex);
         }
         prw = new PrintWriter(fos, true);
-        prw.print("\"");
-        prw.print("% of prey species (in rows) in the diet of predator species (in col)");
-        prw.println("\"");
-        prw.print("Time");
-        prw.print(';');
-        prw.print("Prey");
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            Species species = getSimulation().getSpecies(iSpec);
-            for (int iStage = 0; iStage < nDietStage[iSpec]; iStage++) {
-                prw.print(";");
-                if (nDietStage[iSpec] == 1) {
-                    prw.print(species.getName());    // Name predators
-                } else {
-                    if (iStage == 0) {
-                        prw.print(species.getName() + " < " + dietStageThreshold[iSpec][iStage]);    // Name predators
+        if (!fileExists) {
+            prw.print("\"");
+            prw.print("% of prey species (in rows) in the diet of predator species (in col)");
+            prw.println("\"");
+            prw.print("Time");
+            prw.print(';');
+            prw.print("Prey");
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                Species species = getSimulation().getSpecies(iSpec);
+                for (int iStage = 0; iStage < nDietStage[iSpec]; iStage++) {
+                    prw.print(";");
+                    if (nDietStage[iSpec] == 1) {
+                        prw.print(species.getName());    // Name predators
                     } else {
-                        prw.print(species.getName() + " >" + dietStageThreshold[iSpec][iStage - 1]);    // Name predators
+                        if (iStage == 0) {
+                            prw.print(species.getName() + " < " + dietStageThreshold[iSpec][iStage]);    // Name predators
+                        } else {
+                            prw.print(species.getName() + " >" + dietStageThreshold[iSpec][iStage - 1]);    // Name predators
+                        }
                     }
                 }
             }
+            prw.println();
         }
-        prw.println();
     }
 
     @Override

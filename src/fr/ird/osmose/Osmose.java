@@ -18,7 +18,6 @@ package fr.ird.osmose;
  */
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
-import fr.ird.osmose.util.IOTools;
 import fr.ird.osmose.util.OsmoseLogFormatter;
 import java.io.*;
 import java.util.*;
@@ -92,7 +91,7 @@ public class Osmose {
     
     private void run() {
         for (String configurationFile : configurationFiles) {
-            logger.info("Running configuration " + configurationFile);
+            logger.log(Level.INFO, "Running configuration {0}", configurationFile);
             osmose.run(configurationFile);
             logger.info("*****************************************");
         }
@@ -103,10 +102,6 @@ public class Osmose {
         // Initialize the configuration
         configuration = new Configuration(configurationFile, outputPathName);
         configuration.init();
-        
-        // Delete previous simulation of the same name
-        String pattern = getConfiguration().getString("output.file.prefix") + "*";
-        IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         
         simulation = new Simulation[configuration.getNSimulation()];
         for (int i = 0; i < configuration.getNSimulation(); i++) {

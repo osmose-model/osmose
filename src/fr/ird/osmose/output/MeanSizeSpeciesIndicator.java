@@ -95,6 +95,7 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
             filename.append(getSimulation().getReplica());
             filename.append(".csv");
             File file = new File(path, filename.toString());
+            boolean fileExists = file.exists();
             file.getParentFile().mkdirs();
             try {
                 // Init stream
@@ -103,16 +104,18 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
                 getLogger().log(Level.SEVERE, "Failed to create indicator file " + file.getAbsolutePath(), ex);
             }
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
-            // Write headers
-            prw[iSpecies].print("\"");
-            prw[iSpecies].print("Mean size of fish species by age class in cm, weighted by fish numbers");
-            prw[iSpecies].println("\"");
-            prw[iSpecies].print("Time");
-            for (int iAge = 0; iAge < getSpecies(iSpecies).getLifespanDt(); iAge++) {
-                prw[iSpecies].print(";Age class ");
-                prw[iSpecies].print(iAge);
+            if (!fileExists) {
+                // Write headers
+                prw[iSpecies].print("\"");
+                prw[iSpecies].print("Mean size of fish species by age class in cm, weighted by fish numbers");
+                prw[iSpecies].println("\"");
+                prw[iSpecies].print("Time");
+                for (int iAge = 0; iAge < getSpecies(iSpecies).getLifespanDt(); iAge++) {
+                    prw[iSpecies].print(";Age class ");
+                    prw[iSpecies].print(iAge);
+                }
+                prw[iSpecies].println();
             }
-            prw[iSpecies].println();
         }
     }
 

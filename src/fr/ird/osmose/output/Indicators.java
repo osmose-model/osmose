@@ -5,9 +5,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.util.IOTools;
-import fr.ird.osmose.util.MetaFilenameFilter;
 import fr.ird.osmose.util.SimulationLinker;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +20,12 @@ public class Indicators extends SimulationLinker {
 
     public Indicators(int indexSimulation) {
         super(indexSimulation);
+        
+         if (!getSimulation().isRestart()) {
+            // Delete previous simulation of the same name
+            String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + indexSimulation + "*";
+            IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
+        }
 
         indicators = new ArrayList();
 
