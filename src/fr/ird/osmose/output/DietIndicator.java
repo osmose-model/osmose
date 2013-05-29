@@ -146,7 +146,9 @@ public class DietIndicator extends SimulationLinker implements Indicator {
                             prw.print("NaN");
                         }
                         //sum[i][s] += diet[i][s][iSpec][st];
-                        prw.print(";");
+                        if (i < nSpec - 1 || s < nDietStage[i] - 1) {
+                            prw.print(";");
+                        }
                     }
                 }
                 prw.println();
@@ -165,7 +167,9 @@ public class DietIndicator extends SimulationLinker implements Indicator {
                         prw.print("NaN");
                     }
                     //sum[i][s] += diet[i][s][j][0];
-                    prw.print(";");
+                    if (i < nSpec - 1 || s < nDietStage[i] - 1) {
+                        prw.print(";");
+                    }
                 }
             }
             prw.println();
