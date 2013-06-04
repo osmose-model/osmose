@@ -100,7 +100,7 @@ public class OriginalGrid extends AbstractGrid {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+            Osmose.getInstance().getLogger().log(Level.SEVERE, "Error reading grid mask from file " + csvFile, ex);
         }
         return land;
     }

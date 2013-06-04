@@ -8,7 +8,6 @@ import fr.ird.osmose.Cell;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
@@ -56,7 +55,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         try {
             ncIn = NetcdfFile.open(gridFileName, null);
         } catch (IOException ex) {
-            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error opening grid file " + gridFileName, ex);
         }
         /*
          * read dimensions
@@ -67,7 +66,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
             setDimY(shape[0]);
             setDimZ(getCs_r(ncIn).length);
         } catch (IOException ex) {
-            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error reading dimensions in file " + gridFileName, ex);
         }
         /*
          * Read lon & lat
@@ -93,7 +92,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error reading longitude, latitude variables from file " + gridFileName, ex);
         }
         /*
          * Compute vertical levels
@@ -101,7 +100,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         try {
             depthOfLayer = getCstSigLevels(ncIn);
         } catch (IOException ex) {
-            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error loading sigma levels", ex);
         }
         /*
          * Determine cell overlap for spatial integration
@@ -189,13 +188,22 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
         float[][][] data3d = null;
 
+        NetcdfFile nc = null;
         try {
-            NetcdfFile nc = NetcdfFile.open(name);
+             nc = NetcdfFile.open(name);
             // read data and put it local array
             data3d = (float[][][]) nc.findVariable(plktonNetcdfNames[iPlankton]).read().reduce().copyToNDJavaArray();
         } catch (IOException ex) {
-            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error loading plankton variable " + plktonNetcdfNames[iPlankton] + " from file " + name, ex);
+        } finally{
+            if (null != nc)
+                try {
+                nc.close();
+            } catch (IOException ex) {
+                // do nothing
+            }
         }
+                
 
         return verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
