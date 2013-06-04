@@ -195,10 +195,10 @@ public class IOTools {
                         deleteRecursively(folder.getAbsolutePath(), pattern);
                     }
                 }
-            }
-            if (path.listFiles().length == 0) {
-                path.delete();
-                //System.out.println("Deleted folder " + path);
+                if (list.length == 0) {
+                    path.delete();
+                    //System.out.println("Deleted folder " + path);
+                }
             }
         }
     }

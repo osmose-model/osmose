@@ -167,13 +167,13 @@ public class SchoolSetSnapshot extends SimulationLinker {
     }
 
     String getFilename(int iStepSimu) {
-        StringBuilder filename = new StringBuilder();
+        StringBuilder filename = new StringBuilder("restart");
+        filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_snapshot");
+        filename.append("_snapshot_step");
         filename.append(iStepSimu);
-        filename.append("_Simu");
+        filename.append(".nc.");
         filename.append(getSimulation().getReplica());
-        filename.append(".nc");
         return filename.toString();
     }
 }

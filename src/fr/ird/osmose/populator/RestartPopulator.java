@@ -25,7 +25,7 @@ public class RestartPopulator extends AbstractPopulator {
     @Override
     public void init() {
         try {
-            nc = NetcdfFile.open(getConfiguration().getFile("simulation.restart.file"));
+            nc = NetcdfFile.open(getConfiguration().getFile("simulation.restart.file") + "." + getIndexSimulation());
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, "Failed to open restart file " + nc.getLocation(), ex);
         }

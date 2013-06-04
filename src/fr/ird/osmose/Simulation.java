@@ -26,7 +26,7 @@ public class Simulation {
          * Similarily to WS2009 and conversely to SCHOOL2012_PROD, plankton
          * concentration are read like production.
          */
-        
+
         SCHOOL2012_PROD,
         /*
          * SCHOOL2012 stands for SCHOOLBASED processes, in sequential order
@@ -149,18 +149,29 @@ public class Simulation {
         // Create a new population, empty at the moment
         schoolSet = new SchoolSet();
 
+        // Trick to force the model into running only one time step
+        boolean oneStep = false;
+        if (getConfiguration().canFind("simulation.onestep")) {
+            oneStep = getConfiguration().getBoolean("simulation.onestep");
+        }
+
         // Reset time variables
-        n_steps_simu = getConfiguration().getNYear() * getConfiguration().getNStepYear();
+        n_steps_simu = oneStep
+                ? 1
+                : getConfiguration().getNYear() * getConfiguration().getNStepYear();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
         restart = false;
         if (getConfiguration().canFind("simulation.restart.file")) {
-            String ncfile = getConfiguration().getFile("simulation.restart.file");
+            String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + index;
             i_step_simu = 0;
             try {
                 NetcdfFile nc = NetcdfFile.open(ncfile);
                 i_step_simu = Integer.valueOf(nc.findGlobalAttribute("step").getStringValue()) + 1;
+                if (oneStep) {
+                    n_steps_simu = i_step_simu + 1;
+                }
                 int nStepYear = getConfiguration().getNStepYear();
                 year = i_step_simu / nStepYear;
                 i_step_year = i_step_simu % nStepYear;
@@ -189,7 +200,7 @@ public class Simulation {
                         getConfiguration().getFloat("plankton.accessibility2fish.plk" + p),
                         getConfiguration().getFloat("plankton.biomass.total.plk" + p));
             } else {
-                 ltlGroups[p] = new Plankton(p,
+                ltlGroups[p] = new Plankton(p,
                         getConfiguration().getString("plankton.name.plk" + p),
                         getConfiguration().getFloat("plankton.size.min.plk" + p),
                         getConfiguration().getFloat("plankton.size.max.plk" + p),
@@ -237,13 +248,13 @@ public class Simulation {
             logger.log(Level.INFO, "year {0}", year);
         }
     }
-    
+
     public boolean isRestart() {
         return restart;
     }
-    
+
     public void run() {
-        
+
         while (i_step_simu < n_steps_simu) {
             year = i_step_simu / getConfiguration().getNStepYear();
             i_step_year = i_step_simu % getConfiguration().getNStepYear();
@@ -262,14 +273,16 @@ public class Simulation {
             // Increment time step
             i_step_simu++;
         }
+        step.end();
+
         // create a restart at the end of the simulation
         snapshot.makeSnapshot(i_step_simu - 1);
     }
-    
+
     public void makeSnapshot() {
         snapshot.makeSnapshot(i_step_simu);
     }
-    
+
     public SchoolSet getSchoolSet() {
         return schoolSet;
     }
@@ -293,27 +306,27 @@ public class Simulation {
     public Plankton getPlankton(int index) {
         return ltlGroups[index];
     }
-    
+
     public int getYear() {
         return year;
     }
-    
+
     public int getIndexTimeYear() {
         return i_step_year;
     }
-    
+
     public int getIndexTimeSimu() {
         return i_step_simu;
     }
-    
+
     private Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
     }
-    
+
     public final int getReplica() {
         return index;
     }
-    
+
     final public Logger getLogger() {
         return logger;
     }

@@ -173,10 +173,11 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Remove dead school
         getSchoolSet().removeDeadSchools();
-
+    }
+    
+    @Override
+    public void end() {
         // close indicators on last step
-        if (isLastStep(iStepSimu)) {
-            indicators.close();
-        }
+        indicators.close();
     }
 }

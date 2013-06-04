@@ -138,10 +138,11 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
         // Remove all dead schools
         getSchoolSet().removeDeadSchools();
-        
+    }
+    
+    @Override
+    public void end() {
         // close indicators on last step
-        if (isLastStep(iStepSimu)) {
-            indicators.close();
-        }
+        indicators.close();
     }
 }
