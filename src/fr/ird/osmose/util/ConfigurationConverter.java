@@ -35,7 +35,7 @@ public class ConfigurationConverter {
     //
     private OldConfiguration cfg;
     private Properties prop;
-
+    
     ConfigurationConverter(String[] args) {
 
         // Get old configuration
@@ -57,11 +57,11 @@ public class ConfigurationConverter {
         //writeAsXML();
         System.out.println("Conversion completed successfully.");
     }
-
+    
     private void convert() {
-
+        
         new File(resolveFile(getFilename("csv"))).getParentFile().mkdirs();
-
+        
         int nSpecies = cfg.getNSpecies();
         int nPlankton = cfg.getNPlankton();
         // OUTPUT
@@ -80,7 +80,7 @@ public class ConfigurationConverter {
         prop.setProperty("output.yield.biomass.enabled", String.valueOf(!cfg.outputCalibration));
         prop.setProperty("output.yield.abundance.enabled", String.valueOf(!cfg.outputCalibration));
         prop.setProperty("output.mortality.enabled", String.valueOf(!cfg.outputCalibration));
-
+        
         prop.setProperty("output.diet.composition.enabled", String.valueOf(cfg.outputDiet));
         prop.setProperty("output.diet.pressure.enabled", String.valueOf(cfg.outputDiet));
         prop.setProperty("output.diet.stage.structure", String.valueOf(cfg.getDietOutputMetrics()));
@@ -93,10 +93,10 @@ public class ConfigurationConverter {
         prop.setProperty("output.TL.spectrum.enabled", String.valueOf(cfg.outputTLSpectrum));
         prop.setProperty("output.TL.perSize.enabled", String.valueOf(cfg.outputTL));
         prop.setProperty("output.TL.perAge.enabled", String.valueOf(cfg.outputTL));
-
+        
         prop.setProperty("output.spatial.ltl.enabled", String.valueOf(cfg.outputPlanktonBiomass));
         prop.setProperty("output.spatial.enabled", String.valueOf(cfg.outputSpatialized));
-
+        
         prop.setProperty("output.size.catch.enabled", String.valueOf(cfg.outputMeanSize));
         prop.setProperty("output.size.enabled", String.valueOf(cfg.outputMeanSize));
         prop.setProperty("output.size.perSpecies.enabled", String.valueOf(cfg.outputMeanSize));
@@ -354,35 +354,35 @@ public class ConfigurationConverter {
             new File(resolveFile("fishing/")).mkdirs();
             String filename = "fishing/fishing-seasonality-byAge-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.season.distrib.byAge.file.sp" + i, resolveFile(filename));
-
+            
             filename = "fishing/fishing-seasonality-bySize-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.season.distrib.bySize.file.sp" + i, resolveFile(filename));
-
+            
             filename = "fishing/fishing-seasonality-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.season.distrib.file.sp" + i, resolveFile(filename));
-
+            
             filename = "fishing/F-rate-byAge-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.byAge.file.sp" + i, resolveFile(filename));
             prop.setProperty("mortality.fishing.rate.byAge.byYear.file.sp" + i, "null");
-
+            
             filename = "fishing/F-rate-bySize-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.bySize.file.sp" + i, resolveFile(filename));
             prop.setProperty("mortality.fishing.rate.bySize.byYear.file.sp" + i, "null");
-
+            
             filename = "fishing/F-rate-byYear" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.byYear.file.sp" + i, resolveFile(filename));
-
+            
             filename = "fishing/F-rate-byDt" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.byDt.file.sp" + i, resolveFile(filename));
             prop.setProperty("mortality.fishing.rate.bySize.byDt.file.sp" + i, "null");
             prop.setProperty("mortality.fishing.rate.byAge.byDt.file.sp" + i, "null");
-
+            
             writeFishingAsCSV(i);
             float F = sum(cfg.fishingRates[i]);
             prop.setProperty("mortality.fishing.rate.sp" + i, String.valueOf(F));
             prop.setProperty("mortality.fishing.recruitment.age.sp" + i, String.valueOf(cfg.recruitmentAge[i]));
             prop.setProperty("mortality.fishing.recruitment.size.sp" + i, "null");
-
+            
             prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".file", "null");
             prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".species", cfg.speciesName[i]);
             prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".age.min", "0");
@@ -409,7 +409,11 @@ public class ConfigurationConverter {
         prop.setProperty("population.initialization.method", cfg.calibrationMethod);
         if (cfg.calibrationMethod.equalsIgnoreCase("biomass")) {
             for (int i = 0; i < nSpecies; i++) {
-                prop.setProperty("population.initialization.biomass.sp" + i, String.valueOf(cfg.targetBiomass[i]));
+                if (cfg.reproduceLocally[i]) {
+                    prop.setProperty("population.initialization.biomass.sp" + i, String.valueOf(cfg.targetBiomass[i]));
+                } else {
+                    prop.setProperty("population.initialization.biomass.sp" + i, String.valueOf(0.f));
+                }
             }
             prop.setProperty("population.initialization.spectrum.slope", "null");
             prop.setProperty("population.initialization.spectrum.intercept", "null");
@@ -435,11 +439,11 @@ public class ConfigurationConverter {
         for (int i = 0; i < nSpecies; i++) {
             //prop.setProperty("flux.incoming.enabled.sp" + i, String.valueOf(!cfg.reproduceLocally[i]));
             if (!cfg.reproduceLocally[i]) {
-                prop.setProperty("flux.incoming.biomass.sp" + i, String.valueOf(cfg.biomassFluxIn[i]));
+                prop.setProperty("flux.incoming.annual.biomass.sp" + i, String.valueOf(cfg.biomassFluxIn[i]));
                 prop.setProperty("flux.incoming.age.sp" + i, String.valueOf(cfg.meanAgeFishIn[i]));
                 prop.setProperty("flux.incoming.size.sp" + i, String.valueOf(cfg.meanLengthFishIn[i]));
             } else {
-                prop.setProperty("flux.incoming.biomass.sp" + i, String.valueOf(0.f));
+                prop.setProperty("flux.incoming.annual.biomass.sp" + i, String.valueOf(0.f));
                 prop.setProperty("flux.incoming.age.sp" + i, "null");
                 prop.setProperty("flux.incoming.size.sp" + i, "null");
             }
@@ -448,7 +452,7 @@ public class ConfigurationConverter {
 
         //prop.setProperty("", String.valueOf());
     }
-
+    
     private void writeAsCSV() {
         try {
             FileOutputStream fos = new FileOutputStream(resolveFile(getFilename("csv")));
@@ -466,7 +470,7 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private void writeAsXML() {
         try {
             prop.storeToXML(new FileOutputStream(resolveFile(getFilename("xml"))), null);
@@ -474,7 +478,7 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private void writeAsText() {
         try {
             prop.store(new FileWriter(resolveFile(getFilename("txt"))), null);
@@ -482,7 +486,7 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     String getFilename(String ext) {
         StringBuilder filename = new StringBuilder(outputPath);
         filename.append("/");
@@ -491,7 +495,7 @@ public class ConfigurationConverter {
         filename.append(ext);
         return filename.toString();
     }
-
+    
     private String toString(float[] array) {
         if (array != null && array.length > 0) {
             StringBuilder str = new StringBuilder();
@@ -505,7 +509,7 @@ public class ConfigurationConverter {
         }
         return "null";
     }
-
+    
     private String toString(int[] array) {
         if (null == array) {
             return "null";
@@ -518,9 +522,9 @@ public class ConfigurationConverter {
         }
         return str.toString();
     }
-
+    
     private void writeReproductionSeasonalityAsCSV(String filename) {
-
+        
         new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
@@ -545,9 +549,9 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private void writeFluxSeasonalityAsCSV(String filename) {
-
+        
         new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
@@ -572,9 +576,9 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private void writeLarvalMortalityRateAsCSV(String filename) {
-
+        
         new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
@@ -595,9 +599,9 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private void writeNaturalMortalityRateAsCSV(String filename) {
-
+        
         new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
@@ -616,12 +620,12 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private void writeFishingAsCSV(int ispec) {
-
+        
         int stepsize = 10;
         float stepage = 0.5f;
-
+        
         String filename = "fishing/F-rate-byDt-" + cfg.speciesName[ispec] + ".csv";
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
@@ -773,9 +777,9 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private void writeAccessibilityAsCSV(String filename) {
-
+        
         new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
@@ -797,7 +801,7 @@ public class ConfigurationConverter {
                 }
             }
             writer.writeNext(header);
-
+            
             for (int i = 0; i < cfg.getNSpecies(); i++) {
                 for (int s = 0; s < cfg.nAccessStage[i]; s++) {
                     k = 0;
@@ -839,7 +843,7 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private boolean isLand(int i, int j) {
         if (null != cfg.icoordLand) {
             for (int k = 0; k < cfg.icoordLand.length; k++) {
@@ -850,9 +854,9 @@ public class ConfigurationConverter {
         }
         return false;
     }
-
+    
     private void writeMaskAsCSV(String filename) {
-
+        
         new File(filename).getParentFile().mkdirs();
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);
@@ -870,7 +874,7 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private int sum(int[] array) {
         int sum = 0;
         for (int i : array) {
@@ -878,7 +882,7 @@ public class ConfigurationConverter {
         }
         return sum;
     }
-
+    
     private float sum(float[] array) {
         float sum = 0;
         for (float f : array) {
@@ -886,7 +890,7 @@ public class ConfigurationConverter {
         }
         return sum;
     }
-
+    
     public String resolveFile(String filename) {
         try {
             File file = new File(outputPath);
@@ -896,7 +900,7 @@ public class ConfigurationConverter {
             return filename;
         }
     }
-
+    
     public static void main(String[] args) {
         ConfigurationConverter configurationConverter = new ConfigurationConverter(args);
     }

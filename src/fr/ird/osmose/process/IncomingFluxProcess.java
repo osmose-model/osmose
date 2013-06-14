@@ -50,7 +50,7 @@ public class IncomingFluxProcess extends AbstractProcess {
                 sum += d;
             }
             if (sum > 0) {
-                biomassFluxIn[i] = getConfiguration().getFloat("flux.incoming.biomass.sp" + i);
+                biomassFluxIn[i] = getConfiguration().getFloat("flux.incoming.annual.biomass.sp" + i);
                 meanLengthIn[i] = getConfiguration().getFloat("flux.incoming.size.sp" + i);
                 ageMeanIn[i] = (int) Math.round(getConfiguration().getFloat("flux.incoming.age.sp" + i) * getConfiguration().getNStepYear());
             }
@@ -76,7 +76,7 @@ public class IncomingFluxProcess extends AbstractProcess {
                 }
             }
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error reading incoming flux seasonality file " + filename, ex);
         }
     }
 
