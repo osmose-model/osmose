@@ -225,7 +225,11 @@ public class MovementProcess extends AbstractProcess {
                 if (getConfiguration().canFind("movement.map" + imap + ".file")) {
                     String csvFile = getConfiguration().getFile("movement.map" + imap + ".file");
                     mapFile[indexMap] = csvFile;
-                    readCSVMap(csvFile, indexMap);
+                    if (null != csvFile) {
+                        readCSVMap(csvFile, indexMap);
+                    } else {
+                        maps[indexMap] = null;
+                    }
                 }
                 if (spatialDistribution[iSpec] == SpatialDistribution.CONNECTIVITY) {
                     /*
@@ -234,7 +238,7 @@ public class MovementProcess extends AbstractProcess {
                      * at these age-class and time-step or the map is not connected to any
                      * other one so there is no need for a connectivity matrix
                      */
-                    if (getConfiguration().canFind("movement.map" + imap + ".connectivity.file")) {
+                    if (!getConfiguration().isNull("movement.map" + imap + ".connectivity.file")) {
                         String csvFile = getConfiguration().getFile("movement.map" + imap + ".connectivity.file");
                         System.out.println("Reading connectivity matrix for " + getSpecies(iSpec).getName() + " map " + indexMap);
                         connectivityMatrix[indexMap] = new ConnectivityMatrix(indexMap, csvFile);
@@ -249,7 +253,7 @@ public class MovementProcess extends AbstractProcess {
     }
 
     private void readCSVMap(String csvFile, int indexMap) {
-
+        
         try {
             /*
              * Read the CSV file
@@ -306,9 +310,13 @@ public class MovementProcess extends AbstractProcess {
             }
             maxProbaPresence[indexMap] = computeMaxProbaPresence(indexMap);
         } catch (IOException ex) {
-            Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+           getLogger().log(Level.SEVERE, "Error reading map " + csvFile, ex);
         }
         //System.out.println("Read CSV file " + csvFile + " [OK]");
+    }
+    
+     boolean isOut(School school) {
+         return (null == getMap(school));
     }
 
     public GridMap getMap(int numMap) {
@@ -362,13 +370,15 @@ public class MovementProcess extends AbstractProcess {
         for (int k = 0; k < mapFile.length; k++) {
             String file = mapFile[k];
             mapIndexNoTwin[k] = k;
-            for (int l = k - 1; l >= 0; l--) {
-                if (file.equals(mapFile[l])) {
-                    mapIndexNoTwin[k] = mapIndexNoTwin[l];
-                    // Delete twin maps
-                    maps[k] = null;
-                    connectivityMatrix[k] = null;
-                    break;
+            if (null != file) {
+                for (int l = k - 1; l >= 0; l--) {
+                    if (file.equals(mapFile[l])) {
+                        mapIndexNoTwin[k] = mapIndexNoTwin[l];
+                        // Delete twin maps
+                        maps[k] = null;
+                        connectivityMatrix[k] = null;
+                        break;
+                    }
                 }
             }
             //System.out.println("Map " + k + " has index " + mapIndexNoTwin[k] + " " + mapFile[k]);

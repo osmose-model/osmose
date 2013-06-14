@@ -27,8 +27,10 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
     @Override
     public void run() {
         for (School school : getSchoolSet().getSchools(species)) {
-            if (!school.isOut()) {
+            if (!movement.isOut(school)) {
                 connectivityDistribution(school);
+            } else {
+                school.out();
             }
         }
     }

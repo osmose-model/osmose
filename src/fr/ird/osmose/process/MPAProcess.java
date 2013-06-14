@@ -30,7 +30,7 @@ public class MPAProcess extends AbstractProcess {
     public void init() {
 
         mpa = new ArrayList();
-        if (getConfiguration().canFind("mpa.file.mpa0")) {
+        if (!getConfiguration().isNull("mpa.file.mpa0")) {
             loadMPA(getConfiguration().getFile("mpa.file.mpa0"));
             start = getConfiguration().getInt("mpa.start.year.mpa0");
             end = getConfiguration().getInt("mpa.end.year.mpa0");
@@ -77,7 +77,7 @@ public class MPAProcess extends AbstractProcess {
                     }
                 }
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             getLogger().log(Level.SEVERE, "Error loading MPA " + csvFile, ex);
         }
     }

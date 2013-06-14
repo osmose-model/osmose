@@ -6,6 +6,7 @@ import fr.ird.osmose.util.filter.DeadSchoolFilter;
 import fr.ird.osmose.util.filter.FilteredSet;
 import fr.ird.osmose.util.filter.FilteredSets;
 import fr.ird.osmose.util.filter.IFilter;
+import fr.ird.osmose.util.filter.OutSchoolFilter;
 import fr.ird.osmose.util.filter.PresentSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
@@ -60,6 +61,16 @@ public class SchoolSet extends FilteredSet<School> {
      */
     public List<School> getPresentSchools() {
         return FilteredSets.subset(this, new PresentSchoolFilter());
+    }
+    
+    /**
+     * Get a list of the schools that are out of the simulated domain at
+     * current time step.
+     * @return a List of the schools out of the simulated domain at current
+     * time step.
+     */
+    public List<School> getOutSchools() {
+        return FilteredSets.subset(this, new OutSchoolFilter());
     }
     
     /**

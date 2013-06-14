@@ -51,7 +51,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         List<String> keys = getConfiguration().findKeys("mortality.natural.rate.file.sp*");
         if (keys != null && !keys.isEmpty()) {
             for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
-                if (getConfiguration().canFind("mortality.natural.rate.file.sp" + iSpec)) {
+                if (!getConfiguration().isNull("mortality.natural.rate.file.sp" + iSpec)) {
                     spatialD[iSpec] = readCSVMap(getConfiguration().getFile("mortality.natural.rate.file.sp" + iSpec));
                 }
             }

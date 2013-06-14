@@ -84,7 +84,7 @@ public class PredationProcess extends AbstractProcess {
             predationRate[i] = getConfiguration().getFloat("predation.ingestion.rate.max.sp" + i);
 
             // accessibility stage
-            int nAccessStage = getConfiguration().canFind("predation.accessibility.stage.threshold.sp" + i)
+            int nAccessStage = !getConfiguration().isNull("predation.accessibility.stage.threshold.sp" + i)
                     ? getConfiguration().getArrayString("predation.accessibility.stage.threshold.sp" + i).length + 1
                     : 1;
             if (nAccessStage > 1) {
@@ -94,7 +94,7 @@ public class PredationProcess extends AbstractProcess {
             }
 
             // predPrey stage
-            int nPredPreyStage = getConfiguration().canFind("predation.predPrey.stage.threshold.sp" + i)
+            int nPredPreyStage = !getConfiguration().isNull("predation.predPrey.stage.threshold.sp" + i)
                     ? getConfiguration().getArrayString("predation.predPrey.stage.threshold.sp" + i).length + 1
                     : 1;
             if (nPredPreyStage > 1) {
@@ -104,7 +104,7 @@ public class PredationProcess extends AbstractProcess {
             }
 
             // diet output stage
-            int nDietOutputStage = getConfiguration().canFind("output.diet.stage.threshold.sp" + i)
+            int nDietOutputStage = !getConfiguration().isNull("output.diet.stage.threshold.sp" + i)
                     ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length + 1
                     : 1;
             if (nDietOutputStage > 1) {
@@ -118,7 +118,7 @@ public class PredationProcess extends AbstractProcess {
         }
 
         // accessibility matrix
-        if (getConfiguration().canFind("predation.accessibility.file")) {
+        if (!getConfiguration().isNull("predation.accessibility.file")) {
             String filename = getConfiguration().getFile("predation.accessibility.file");
             try {
                 CSVReader reader = new CSVReader(new FileReader(filename), ';', CSVWriter.NO_QUOTE_CHARACTER);

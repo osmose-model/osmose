@@ -465,6 +465,10 @@ public class OldConfiguration {
      * Year the MPA is disabled.
      */
     public int yearEndMPA;
+    /**
+     * Name of the MPA CSV file
+     */
+    public String mpaCsvFile;
     //
     //// INDICATORS
     //
@@ -1200,8 +1204,20 @@ public class OldConfiguration {
 
         try {
             st.nextToken();
-            String fishingRateFile = st.sval;
-            readFishingRates(resolveFile(fishingRateFile));
+            // Check whether this is old/new format of FISHING file
+            // old format: ;global; + ;F annual values per species;
+            // new format: ;filename to csv file that gives fishing rates;
+            if (st.sval.equalsIgnoreCase("global")) {
+                fishingRates = new float[nSpecies][nStepYear];
+                for (int i = 0; i < nSpecies; i++) {
+                    st.nextToken();
+                    for (int iStep = 0; iStep < nStepYear; iStep++)
+                        fishingRates[i][iStep] = (new Float(st.sval)).floatValue();    //annual F mortality
+                }
+            } else {
+                String fishingRateFile = st.sval;
+                readFishingRates(resolveFile(fishingRateFile));
+            }
 
             st.nextToken();
             if (st.sval.equalsIgnoreCase("age")) {
@@ -1856,7 +1872,8 @@ public class OldConfiguration {
                             /*
                              * Case CSV
                              */
-                            readMPA(resolveFile(st.sval));
+                            mpaCsvFile = resolveFile(st.sval);
+                            readMPA(mpaCsvFile);
                         } else {
                             /*
                              * Case coordinates

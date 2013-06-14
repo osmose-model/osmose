@@ -163,7 +163,7 @@ public class Simulation {
         i_step_year = 0;
         i_step_simu = 0;
         restart = false;
-        if (getConfiguration().canFind("simulation.restart.file")) {
+        if (!getConfiguration().isNull("simulation.restart.file")) {
             String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + index;
             i_step_simu = 0;
             try {
@@ -234,7 +234,7 @@ public class Simulation {
         // Initialize the restart maker
         snapshot = new SchoolSetSnapshot(index);
         restartFrequency = Integer.MAX_VALUE;
-        if (getConfiguration().canFind("simulation.restart.recordfrequency.ndt")) {
+        if (!getConfiguration().isNull("simulation.restart.recordfrequency.ndt")) {
             restartFrequency = getConfiguration().getInt("simulation.restart.recordfrequency.ndt");
         }
     }

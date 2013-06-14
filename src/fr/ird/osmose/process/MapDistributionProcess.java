@@ -1,4 +1,3 @@
-
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.util.GridMap;
@@ -10,10 +9,10 @@ import fr.ird.osmose.Species;
  * @author pverley
  */
 public class MapDistributionProcess extends AbstractProcess {
-    
+
     private MovementProcess movement;
     private Species species;
-    
+
     public MapDistributionProcess(int indexSimulation, Species species, MovementProcess parent) {
         super(indexSimulation);
         this.species = species;
@@ -27,12 +26,14 @@ public class MapDistributionProcess extends AbstractProcess {
     @Override
     public void run() {
         for (School school : getSchoolSet().getSchools(species)) {
-            if (!school.isOut()) {
+            if (!movement.isOut(school)) {
                 mapsDistribution(school);
+            } else {
+                school.out();
             }
         }
     }
-    
+
     private void mapsDistribution(School school) {
 
         int i_step_year = getSimulation().getIndexTimeYear();

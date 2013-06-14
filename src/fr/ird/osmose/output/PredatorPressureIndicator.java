@@ -160,8 +160,8 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
         nDietStage = new int[getConfiguration().getNSpecies()];
         dietStageThreshold = new float[getConfiguration().getNSpecies()][];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            nDietStage[i] = getConfiguration().canFind("output.diet.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length
+            nDietStage[i] = !getConfiguration().isNull("output.diet.stage.threshold.sp" + i)
+                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length + 1
                     : 1;
             if (nDietStage[i] > 1) {
                 dietStageThreshold[i] = getConfiguration().getArrayFloat("output.diet.stage.threshold.sp" + i);

@@ -11,9 +11,9 @@ import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
 import fr.ird.osmose.process.MPAProcess;
-import fr.ird.osmose.process.MigrationProcess;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.NaturalMortalityProcess;
+import fr.ird.osmose.process.OutMortalityProcess;
 import fr.ird.osmose.process.PredationProcess;
 import fr.ird.osmose.process.ReproductionProcess;
 import fr.ird.osmose.process.StarvationProcess;
@@ -53,13 +53,13 @@ public class SequentialMortalityStep extends AbstractStep {
      */
     private AbstractProcess predationProcess;
     /*
+     * 
+     */
+    private AbstractProcess outMortalityProcess;
+    /*
      * Movement process
      */
     private AbstractProcess movementProcess;
-    /*
-     * Migration process
-     */
-    private AbstractProcess migrationProcess;
     /*
      * MPA process
      */
@@ -91,6 +91,9 @@ public class SequentialMortalityStep extends AbstractStep {
         // initialize fishing process
         fishingProcess = new FishingProcess(getIndexSimulation());
         fishingProcess.init();
+        
+        outMortalityProcess = new OutMortalityProcess(getIndexSimulation());
+        outMortalityProcess.init();
 
         // initiliaza growth process
         growthProcess = new GrowthProcess(getIndexSimulation());
@@ -107,10 +110,6 @@ public class SequentialMortalityStep extends AbstractStep {
         // Movement of the schools
         movementProcess = new MovementProcess(getIndexSimulation());
         movementProcess.init();
-        
-         // Migratrion process
-        migrationProcess = new MigrationProcess(getIndexSimulation());
-        migrationProcess.init();
 
         // MPA
         mpaProcess = new MPAProcess(getIndexSimulation());
@@ -140,15 +139,15 @@ public class SequentialMortalityStep extends AbstractStep {
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
         indicators.initStep();
-        
-        // Migration
-        migrationProcess.run();
 
         // Spatial distribution
         movementProcess.run();
 
         // Update MPA
         mpaProcess.run();
+        
+        // Total mortality for schools out of simulated domain
+        outMortalityProcess.run();
 
         // Natural mortality (due to other predators)
         naturalMortalityProcess.run();

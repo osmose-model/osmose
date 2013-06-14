@@ -154,6 +154,19 @@ public class Configuration {
             getLogger().log(Level.SEVERE, "Error loading parameters from file " + filename + " around line " + line, ex);
         }
     }
+    
+    /**
+     * Check if parameters 'key' has 'null' value.
+     * @param key
+     * @return true if parameter has 'null' value or does not exist
+     */
+    public boolean isNull(String key) {
+        try {
+            return (null == getString(key));
+        } catch (Exception ex) {
+            return true;
+        }
+    }
 
     public boolean canFind(String key) {
         try {
@@ -184,7 +197,8 @@ public class Configuration {
         if (cfg.containsKey(lkey)) {
             String value = clean(cfg.getProperty(lkey));
             if (value.equalsIgnoreCase("null")) {
-                throw new NullPointerException("Null value for parameter " + key);
+                return null;
+                //throw new NullPointerException("Null value for parameter " + key);
             }
             return value.trim();
         } else {

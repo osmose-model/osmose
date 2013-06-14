@@ -73,13 +73,13 @@ public class Species {
         t0 = getConfiguration().getFloat("species.t0.sp" + index);
         c = getConfiguration().getFloat("species.length2weight.condition.factor.sp" + index);
         bPower = getConfiguration().getFloat("species.length2weight.allometric.power.sp" + index);
-        if (getConfiguration().canFind("species.maturity.size.sp" + index)) {
+        if (!getConfiguration().isNull("species.maturity.size.sp" + index)) {
             sizeMaturity = getConfiguration().getFloat("species.maturity.size.sp" + index);
         } else {
             float ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
             sizeMaturity = lInf * (float) (1 - Math.exp(-K * (ageMaturity - t0)));
         }
-        if (getConfiguration().canFind("mortality.fishing.recruitment.age.sp" + index)) {
+        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + index)) {
             float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + index);
             recruitmentAge = Math.round(age * getConfiguration().getNStepYear());
         } else {
@@ -105,7 +105,7 @@ public class Species {
         ageClassZero = (int) Math.ceil(age0 * getConfiguration().getNStepYear());
         eggSize = getConfiguration().getFloat("species.egg.size.sp" + index);
         eggWeight = getConfiguration().getFloat("species.egg.weight.sp" + index);
-        if (getConfiguration().canFind("species.vonbertalanffy.threshold.age.sp" + index)) {
+        if (!getConfiguration().isNull("species.vonbertalanffy.threshold.age.sp" + index)) {
             growthAgeThreshold = getConfiguration().getFloat("species.vonbertalanffy.threshold.age.sp" + index);
         } else {
             // by default, von Bertalanffy model considered valid after 1 year old, linear growth from 0 to 1 year

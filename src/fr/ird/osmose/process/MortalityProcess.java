@@ -44,6 +44,10 @@ public class MortalityProcess extends AbstractProcess {
      * Private instance of the predation process
      */
     private PredationProcess predationProcess;
+    /*
+     * Private instance of the out of zone mortality process
+     */
+    private OutMortalityProcess outMortalityProcess;
     /**
      * Whether school diet should be recorded
      */
@@ -68,6 +72,9 @@ public class MortalityProcess extends AbstractProcess {
 
         predationProcess = new PredationProcess(getIndexSimulation());
         predationProcess.init();
+        
+        outMortalityProcess = new OutMortalityProcess(getIndexSimulation());
+        outMortalityProcess.init();
         
         recordDiet = getConfiguration().getBoolean("output.diet.composition.enabled")
                 || getConfiguration().getBoolean("output.diet.pressure.enabled");
@@ -168,6 +175,15 @@ public class MortalityProcess extends AbstractProcess {
                     schools.get(is).setTrophicLevel(tmpTL[is]);
                 }
             }
+        }
+        
+        // Apply Z mortality on schools out of the simulated domain
+        for (School school : getSchoolSet().getOutSchools()) {
+            double Z = outMortalityProcess.getZ(school);
+                double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-Z));
+                if (nDead > 0.d) {
+                    school.setNdeadOut(nDead);
+                }
         }
     }
 

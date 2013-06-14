@@ -10,7 +10,6 @@ import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
 import fr.ird.osmose.process.MPAProcess;
-import fr.ird.osmose.process.MigrationProcess;
 import fr.ird.osmose.process.MortalityProcess;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.ReproductionProcess;
@@ -41,10 +40,6 @@ public class ConcomitantMortalityStep extends AbstractStep {
      * Movement process
      */
     private AbstractProcess movementProcess;
-        /*
-     * Migration process
-     */
-    private AbstractProcess migrationProcess;
     /*
      * MPA process
      */
@@ -81,10 +76,6 @@ public class ConcomitantMortalityStep extends AbstractStep {
         movementProcess = new MovementProcess(getIndexSimulation());
         movementProcess.init();
         
-        // Migratrion process
-        migrationProcess = new MigrationProcess(getIndexSimulation());
-        migrationProcess.init();
-        
         // MPA
         mpaProcess = new MPAProcess(getIndexSimulation());
         mpaProcess.init();
@@ -113,9 +104,6 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
         indicators.initStep();
-        
-        // Migration
-        migrationProcess.run();
 
         // Spatial distribution
         movementProcess.run();

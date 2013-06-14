@@ -195,8 +195,8 @@ public class School extends GridPoint {
         dietOutputStage = 0;
         nDietStage = new int[getConfiguration().getNSpecies()];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            nDietStage[i] = getConfiguration().canFind("output.diet.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length
+            nDietStage[i] = !getConfiguration().isNull("output.diet.stage.threshold.sp" + i)
+                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length + 1
                     : 1;
         }
         out = false;

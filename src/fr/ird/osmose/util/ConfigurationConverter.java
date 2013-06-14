@@ -35,7 +35,7 @@ public class ConfigurationConverter {
     //
     private OldConfiguration cfg;
     private Properties prop;
-    
+
     ConfigurationConverter(String[] args) {
 
         // Get old configuration
@@ -274,6 +274,42 @@ public class ConfigurationConverter {
             indexMap++;
         }
 
+        // MIGRATION
+        // phv - 20130613, include migration in movement parameters, considering a null map
+        for (int i = 0; i < nSpecies; i++) {
+            if (cfg.ageMigration[i] != null) {
+                String map = "movement.map" + indexMap;
+                String value;
+                StringBuilder key = new StringBuilder(map);
+                key.append(".species");
+                value = cfg.speciesName[i];
+                prop.setProperty(key.toString(), value);
+                key = new StringBuilder(map);
+                key.append(".age.min");
+                value = String.valueOf(cfg.ageMigration[i][0]);
+                prop.setProperty(key.toString(), value);
+                key = new StringBuilder(map);
+                key.append(".age.max");
+                value = String.valueOf(cfg.ageMigration[i][cfg.ageMigration[i].length - 1] + 1);
+                prop.setProperty(key.toString(), value);
+                key = new StringBuilder(map);
+                key.append(".season");
+                value = toString(cfg.seasonMigration[i]);
+                prop.setProperty(key.toString(), value);
+                key = new StringBuilder(map);
+                key.append(".file");
+                prop.setProperty(key.toString(), "null");
+                indexMap++;
+            }
+            double Z = 0;
+            if (null != cfg.migrationTempMortality[i]) {
+                for (float zout : cfg.migrationTempMortality[i]) {
+                    Z += zout;
+                }
+            }
+            prop.setProperty("mortality.out.rate.sp" + i, String.valueOf(Z));
+        }
+
         // PREDATION
 //        prop.setProperty("predation.ingestion.rate.max.unit", "grams of food per gram of fish and per year");
         for (int i = 0; i < nSpecies; i++) {
@@ -364,23 +400,10 @@ public class ConfigurationConverter {
         if (cfg.mpaFilename.equalsIgnoreCase("default")) {
             prop.setProperty("mpa.file.mpa0", "null");
         } else {
-            prop.setProperty("mpa.file.mpa0", cfg.mpaFilename);
+            prop.setProperty("mpa.file.mpa0", cfg.mpaCsvFile);
         }
         prop.setProperty("mpa.start.year.mpa0", String.valueOf(cfg.yearStartMPA));
         prop.setProperty("mpa.end.year.mpa0", String.valueOf(cfg.yearEndMPA));
-
-        // MIGRATION
-        for (int i = 0; i < nSpecies; i++) {
-            if (cfg.ageMigration[i] != null) {
-                prop.setProperty("migration.ageclass.sp" + i, String.valueOf(toString(cfg.ageMigration[i])));
-                prop.setProperty("migration.season.sp" + i, String.valueOf(toString(cfg.seasonMigration[i])));
-                prop.setProperty("migration.mortality.rate.sp" + i, String.valueOf(toString(cfg.migrationTempMortality[i])));
-            } else {
-                prop.setProperty("migration.ageclass.sp" + i, "null");
-                prop.setProperty("migration.season.sp" + i, "null");
-                prop.setProperty("migration.mortality.rate.sp" + i, "null");
-            }
-        }
 
         // BIOMASS INITIALIZATION
         prop.setProperty("population.initialization.method", cfg.calibrationMethod);
