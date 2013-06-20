@@ -49,6 +49,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.stage.DietOutputStage;
+import java.util.UUID;
 
 public class School extends GridPoint {
 
@@ -125,6 +126,8 @@ public class School extends GridPoint {
      * Out of the simulated domain at current time step
      */
     private boolean out;
+    
+    final private UUID uuid = UUID.randomUUID();
 
 //////////////
 // Constructor
@@ -467,5 +470,27 @@ public class School extends GridPoint {
     public void setNdeadOut(double ndeadOut) {
         this.ndeadOut = ndeadOut;
         ndeadHasChanged = true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final School other = (School) obj;
+        if (!this.uuid.equals(other.uuid)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 23 * hash + uuid.hashCode();
+        return hash;
     }
 }
