@@ -5,7 +5,8 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
+import fr.ird.osmose.stage.AbstractStage;
+import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,18 +27,8 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     private PrintWriter prw;
     //
     private double[][][][] predatorPressure;
-    /*
-     * Biomass per diet stages [SPECIES][DIET_STAGES]
-     */
-    private double[][] biomassStage;
-    /**
-     * Number of diet stages.
-     */
-    private int[] nDietStage;
-    /**
-     * Threshold age (year) or size (cm) between the diet stages.
-     */
-    private float[][] dietStageThreshold;
+    // Diet output stage
+    private AbstractStage dietOutputStage;
     /**
      * Whether the indicator should be enabled or not.
      */
@@ -50,15 +41,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
 
     @Override
     public void initStep() {
-        for (School school : getSchoolSet().getPresentSchools()) {
-            biomassStage[school.getSpeciesIndex()][school.getDietOutputStage()] += school.getBiomass();
-        }
-        int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNPlankton();
-        for (int i = nSpec; i < nPrey; i++) {
-            int iPlankton = i - nSpec;
-            biomassStage[i][0] += getSimulation().getPlankton(iPlankton).getBiomass();
-        }
+        // nothing to do
     }
 
     @Override
@@ -66,24 +49,19 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
         int nSpec = getNSpecies();
         int nPrey = nSpec + getConfiguration().getNPlankton();
         predatorPressure = new double[nSpec][][][];
-        biomassStage = new double[nPrey][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            biomassStage[iSpec] = new double[nDietStage[iSpec]];
-            predatorPressure[iSpec] = new double[nDietStage[iSpec]][][];
-            for (int s = 0; s < nDietStage[iSpec]; s++) {
+            int nStage = dietOutputStage.getNStage(iSpec);
+            predatorPressure[iSpec] = new double[nStage][][];
+            for (int s = 0; s < nStage; s++) {
                 predatorPressure[iSpec][s] = new double[nPrey][];
-                for (int ipr = 0; ipr < nPrey; ipr++) {
-                    if (ipr < nSpec) {
-                        predatorPressure[iSpec][s][ipr] = new double[nDietStage[ipr]];
+                for (int iPrey = 0; iPrey < nPrey; iPrey++) {
+                    if (iPrey < nSpec) {
+                        predatorPressure[iSpec][s][iPrey] = new double[dietOutputStage.getNStage(iPrey)];
                     } else {
-                        predatorPressure[iSpec][s][ipr] = new double[1];
+                        predatorPressure[iSpec][s][iPrey] = new double[1];
                     }
                 }
             }
-        }
-        for (int i = nSpec; i < nPrey; i++) {
-            // we consider just 1 stage per plankton group
-            biomassStage[i] = new double[1];
         }
     }
 
@@ -92,12 +70,13 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
         for (School school : getSchoolSet().getAliveSchools()) {
             int iSpec = school.getSpeciesIndex();
             for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-                for (int s = 0; s < nDietStage[i]; s++) {
-                    predatorPressure[iSpec][school.getDietOutputStage()][i][s] += school.diet[i][s];
+                int nStage = dietOutputStage.getNStage(i);
+                for (int s = 0; s < nStage; s++) {
+                    predatorPressure[iSpec][dietOutputStage.getStage(school)][i][s] += school.diet[i][s];
                 }
             }
             for (int i = getConfiguration().getNSpecies(); i < getConfiguration().getNSpecies() + getConfiguration().getNPlankton(); i++) {
-                predatorPressure[iSpec][school.getDietOutputStage()][i][0] += school.diet[i][0];
+                predatorPressure[iSpec][dietOutputStage.getStage(school)][i][0] += school.diet[i][0];
             }
         }
     }
@@ -113,27 +92,31 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
         int nSpec = getNSpecies();
         int dtRecord = getConfiguration().getInt("output.recordfrequency.ndt");
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            Species species = getSimulation().getSpecies(iSpec);
-            for (int iStage = 0; iStage < nDietStage[iSpec]; iStage++) {
+            String name = getSimulation().getSpecies(iSpec).getName();
+            float[] threshold = dietOutputStage.getThresholds(iSpec);
+            int nStagePred = dietOutputStage.getNStage(iSpec);
+            for (int iStage = 0; iStage < nStagePred; iStage++) {
                 prw.print(time);
                 prw.print(';');
-                if (nDietStage[iSpec] == 1) {
-                    prw.print(species.getName());    // Name predators
+                if (nStagePred == 1) {
+                    prw.print(name);    // Name predators
                 } else {
                     if (iStage == 0) {
-                        prw.print(species.getName() + " < " + dietStageThreshold[iSpec][iStage]);    // Name predators
+                        prw.print(name + " < " + threshold[iStage]);    // Name predators
                     } else {
-                        prw.print(species.getName() + " >" + dietStageThreshold[iSpec][iStage - 1]);    // Name predators
+                        prw.print(name + " >=" + threshold[iStage - 1]);    // Name predators
                     }
                 }
                 prw.print(";");
                 for (int i = 0; i < nSpec; i++) {
-                    for (int s = 0; s < nDietStage[i]; s++) {
+                    int nStage = dietOutputStage.getNStage(i);
+                    for (int s = 0; s < nStage; s++) {
                         prw.print((float) (predatorPressure[i][s][iSpec][iStage] / dtRecord));
-                        prw.print(";");
+                        if (i < nSpec - 1 || s < nStage - 1) {
+                            prw.print(";");
+                        }
                     }
                 }
-                prw.print((float) (biomassStage[iSpec][iStage] / dtRecord));
                 prw.println();
             }
         }
@@ -143,12 +126,14 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
             prw.print(getSimulation().getPlankton(j - nSpec));
             prw.print(";");
             for (int i = 0; i < nSpec; i++) {
-                for (int s = 0; s < nDietStage[i]; s++) {
+                int nStage = dietOutputStage.getNStage(i);
+                for (int s = 0; s < nStage; s++) {
                     prw.print((float) (predatorPressure[i][s][j][0] / dtRecord));
-                    prw.print(";");
+                    if (i < nSpec - 1 || s < nStage - 1) {
+                            prw.print(";");
+                        }
                 }
             }
-            prw.print(biomassStage[j][0] / dtRecord);
             prw.println();
         }
     }
@@ -156,17 +141,10 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     @Override
     public void init() {
 
-        // Read diet stages
-        nDietStage = new int[getConfiguration().getNSpecies()];
-        dietStageThreshold = new float[getConfiguration().getNSpecies()][];
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            nDietStage[i] = !getConfiguration().isNull("output.diet.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length + 1
-                    : 1;
-            if (nDietStage[i] > 1) {
-                dietStageThreshold[i] = getConfiguration().getArrayFloat("output.diet.stage.threshold.sp" + i);
-            }
-        }
+        // Init diet output stage
+        dietOutputStage = new DietOutputStage();
+        dietOutputStage.init();
+        
 
         // Create parent directory
         File path = new File(getConfiguration().getOutputPathname());
@@ -194,22 +172,22 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
             prw.print(';');
             prw.print("Prey");
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                Species species = getSimulation().getSpecies(iSpec);
-                for (int s = 0; s < nDietStage[iSpec]; s++) {
+                String name = getSimulation().getSpecies(iSpec).getName();
+                float[] threshold = dietOutputStage.getThresholds(iSpec);
+                int nStage = dietOutputStage.getNStage(iSpec);
+                for (int iStage = 0; iStage < nStage; iStage++) {
                     prw.print(";");
-                    if (nDietStage[iSpec] == 1) {
-                        prw.print(species.getName());    // Name predators
+                    if (nStage == 1) {
+                        prw.print(name);    // Name predators
                     } else {
-                        if (s == 0) {
-                            prw.print(species.getName() + " < " + dietStageThreshold[iSpec][s]);    // Name predators
+                        if (iStage == 0) {
+                            prw.print(name + " < " + threshold[iStage]);    // Name predators
                         } else {
-                            prw.print(species.getName() + " >" + dietStageThreshold[iSpec][s - 1]);    // Name predators
+                            prw.print(name + " >=" + threshold[iStage - 1]);    // Name predators
                         }
                     }
                 }
             }
-            prw.print(";");
-            prw.print("Biomass");
             prw.println();
         }
     }
@@ -223,7 +201,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
             try {
                 fos.close();
             } catch (IOException ex) {
-                Logger.getLogger(DietIndicator.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger().log(Level.SEVERE, "Error closing output file PredatorPressure", ex);
             }
         }
     }

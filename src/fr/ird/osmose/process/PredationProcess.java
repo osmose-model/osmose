@@ -8,6 +8,9 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.stage.AbstractStage;
+import fr.ird.osmose.stage.AccessibilityStage;
+import fr.ird.osmose.stage.PredPreyStage;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,35 +27,18 @@ public class PredationProcess extends AbstractProcess {
     private float[][] predPreySizesMax, predPreySizesMin;
     private float[] predationRate;
     /**
-     * Threshold age (year) between accessibility stages.
-     * Array[nSpecies][nAccessStage]
-     */
-    private float[][] accessStageThreshold;
-    /**
-     * Threshold size (cm) of feeding stages. Array[nSpecies][nFeedingStage-1]
-     */
-    private float[][] predPreyStageThreshold;
-    /**
-     * Metrics used for splitting the stages (either age or size).
-     */
-    private String dietOutputMetrics;
-    /**
-     * Metrics used for splitting the stages (either age or size).
-     */
-    private String accessStageMetrics;
-    /**
-     * Threshold age (year) or size (cm) between the diet stages.
-     */
-    private float[][] dietOutputStageThreshold;
-    /**
      * Accessibility matrix.
      * Array[nSpecies+nPlankton][nAccessStage][nSpecies][nAccessStage]
      */
     private float[][][][] accessibilityMatrix;
-    /**
-     * Whether school diet should be recorded
+    /*
+     * Accessibility stages
      */
-    private boolean recordDiet;
+    private AbstractStage accessStage;
+    /*
+     * Feeding stages
+     */
+    private AbstractStage predPreyStage;
 
     public PredationProcess(int indexSimulation) {
         super(indexSimulation);
@@ -67,55 +53,19 @@ public class PredationProcess extends AbstractProcess {
         predPreySizesMin = new float[nspec][];
         predationRate = new float[nspec];
 
-        accessStageThreshold = new float[nspec + nPlankton][];
-        predPreyStageThreshold = new float[nspec][];
-        dietOutputStageThreshold = new float[nspec][];
-        if (getConfiguration().canFind("output.diet.stage.structure")) {
-            dietOutputMetrics = getConfiguration().getString("output.diet.stage.structure");
-        }
-        accessStageMetrics = getConfiguration().getString("predation.accessibility.stage.structure");
-
-        recordDiet = getConfiguration().getBoolean("output.diet.composition.enabled")
-                || getConfiguration().getBoolean("output.diet.pressure.enabled");
-
         for (int i = 0; i < nspec; i++) {
             predPreySizesMax[i] = getConfiguration().getArrayFloat("predation.predPrey.sizeRatio.max.sp" + i);
             predPreySizesMin[i] = getConfiguration().getArrayFloat("predation.predPrey.sizeRatio.min.sp" + i);
             predationRate[i] = getConfiguration().getFloat("predation.ingestion.rate.max.sp" + i);
-
-            // accessibility stage
-            int nAccessStage = !getConfiguration().isNull("predation.accessibility.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("predation.accessibility.stage.threshold.sp" + i).length + 1
-                    : 1;
-            if (nAccessStage > 1) {
-                accessStageThreshold[i] = getConfiguration().getArrayFloat("predation.accessibility.stage.threshold.sp" + i);
-            } else {
-                accessStageThreshold[i] = new float[0];
-            }
-
-            // predPrey stage
-            int nPredPreyStage = !getConfiguration().isNull("predation.predPrey.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("predation.predPrey.stage.threshold.sp" + i).length + 1
-                    : 1;
-            if (nPredPreyStage > 1) {
-                predPreyStageThreshold[i] = getConfiguration().getArrayFloat("predation.predPrey.stage.threshold.sp" + i);
-            } else {
-                predPreyStageThreshold[i] = new float[0];
-            }
-
-            // diet output stage
-            int nDietOutputStage = !getConfiguration().isNull("output.diet.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length + 1
-                    : 1;
-            if (nDietOutputStage > 1) {
-                dietOutputStageThreshold[i] = getConfiguration().getArrayFloat("output.diet.stage.threshold.sp" + i);
-            } else {
-                dietOutputStageThreshold[i] = new float[0];
-            }
         }
-        for (int i = 0; i < nPlankton; i++) {
-            accessStageThreshold[nspec + i] = new float[0];
-        }
+        
+        // Accessibility stages
+        accessStage = new AccessibilityStage();
+        accessStage.init();
+        
+        // Feeding stages
+        predPreyStage = new PredPreyStage();
+        predPreyStage.init();
 
         // accessibility matrix
         if (!getConfiguration().isNull("predation.accessibility.file")) {
@@ -126,14 +76,16 @@ public class PredationProcess extends AbstractProcess {
                 int l = 1;
                 accessibilityMatrix = new float[nspec + nPlankton][][][];
                 for (int i = 0; i < nspec + nPlankton; i++) {
-                    accessibilityMatrix[i] = new float[accessStageThreshold[i].length + 1][][];
-                    for (int j = 0; j < accessStageThreshold[i].length + 1; j++) {
+                    int nStagePrey = accessStage.getNStage(i);
+                    accessibilityMatrix[i] = new float[nStagePrey][][];
+                    for (int j = 0; j < nStagePrey; j++) {
                         String[] line = lines.get(l);
                         int ll = 1;
                         accessibilityMatrix[i][j] = new float[nspec][];
                         for (int k = 0; k < nspec; k++) {
-                            accessibilityMatrix[i][j][k] = new float[accessStageThreshold[k].length + 1];
-                            for (int m = 0; m < accessStageThreshold[k].length + 1; m++) {
+                            int nStagePred = accessStage.getNStage(k);
+                            accessibilityMatrix[i][j][k] = new float[nStagePred];
+                            for (int m = 0; m < nStagePred; m++) {
                                 accessibilityMatrix[i][j][k][m] = Float.valueOf(line[ll]);
                                 ll++;
                             }
@@ -168,11 +120,6 @@ public class PredationProcess extends AbstractProcess {
         for (Cell cell : getGrid().getCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
             if (!(cell.isLand() || schools.isEmpty())) {
-                for (School school : schools) {
-                    updateAccessibilityStage(school);
-                    updatePredPreyStage(school);
-                    updateDietOutputStage(school);
-                }
                 Collections.shuffle(schools);
                 int ns = schools.size();
                 double[] preyedBiomass = new double[ns];
@@ -234,7 +181,7 @@ public class PredationProcess extends AbstractProcess {
         // 2. from plankton
         float[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            float tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
+            float tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
             biomAccessibleTot += percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell);
         }
 
@@ -261,7 +208,7 @@ public class PredationProcess extends AbstractProcess {
             // Assess the gain for the predator from plankton
             // Assess the loss for the plankton caused by the predator
             for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-                float tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
+                float tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
                 double ratio = percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell) / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
             }
@@ -315,8 +262,9 @@ public class PredationProcess extends AbstractProcess {
     private float[] getPercentPlankton(School predator) {
         float[] percentPlankton = new float[getConfiguration().getNPlankton()];
         int iPred = predator.getSpeciesIndex();
-        float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getPredPreyStage()];
-        float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getPredPreyStage()];
+        int iStage = predPreyStage.getStage(predator);
+        float preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
+        float preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             if ((preySizeMin > getSimulation().getPlankton(i).getSizeMax()) || (preySizeMax < getSimulation().getPlankton(i).getSizeMin())) {
                 percentPlankton[i] = 0.0f;
@@ -337,9 +285,9 @@ public class PredationProcess extends AbstractProcess {
 
         int iPred = predator.getSpeciesIndex();
         List<School> schoolsInCell = getSchoolSet().getSchools(predator.getCell());
-        //schoolsInCell.remove(predator);
-        float preySizeMax = predator.getLength() / predPreySizesMax[iPred][predator.getPredPreyStage()];
-        float preySizeMin = predator.getLength() / predPreySizesMin[iPred][predator.getPredPreyStage()];
+        int iStage = predPreyStage.getStage(predator);
+        float preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
+        float preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
         List<Integer> indexPreys = new ArrayList();
         for (int iPrey = 0; iPrey < schoolsInCell.size(); iPrey++) {
             School prey = schoolsInCell.get(iPrey);
@@ -372,68 +320,6 @@ public class PredationProcess extends AbstractProcess {
      * Get the accessible biomass that predator can feed on prey
      */
     private double getAccessibility(School predator, School prey) {
-        return accessibilityMatrix[prey.getSpeciesIndex()][prey.getAccessibilityStage()][predator.getSpeciesIndex()][predator.getAccessibilityStage()];
-    }
-
-    void updateAccessibilityStage(School school) {
-
-        int iSpec = school.getSpeciesIndex();
-        if (accessStageMetrics.equalsIgnoreCase("size")) {
-            for (int i = school.getAccessibilityStage(); i < accessStageThreshold[iSpec].length; i++) {
-                if (school.getLength() >= accessStageThreshold[iSpec][i]) {
-                    school.incrementAccessibilityStage();
-                } else {
-                    return;
-                }
-            }
-        } else if (accessStageMetrics.equalsIgnoreCase("age")) {
-            for (int i = school.getAccessibilityStage(); i < accessStageThreshold[iSpec].length; i++) {
-                int tempAge = Math.round(accessStageThreshold[iSpec][i] * getConfiguration().getNStepYear());
-                if (school.getAgeDt() >= tempAge) {
-                    school.incrementAccessibilityStage();
-                } else {
-                    return;
-                }
-            }
-        }
-    }
-
-    void updatePredPreyStage(School school) {
-
-        int iSpec = school.getSpeciesIndex();
-        for (int i = school.getPredPreyStage(); i < predPreyStageThreshold[iSpec].length; i++) {
-            if (school.getLength() >= predPreyStageThreshold[iSpec][i]) {
-                school.icrementPredPreyStage();
-            } else {
-                return;
-            }
-        }
-    }
-
-    void updateDietOutputStage(School school) {
-
-        if (!recordDiet) {
-            return;
-        }
-
-        int iSpec = school.getSpeciesIndex();
-        if (dietOutputMetrics.equalsIgnoreCase("size")) {
-            for (int i = school.getDietOutputStage(); i < dietOutputStageThreshold[iSpec].length; i++) {
-                if (school.getLength() >= dietOutputStageThreshold[iSpec][i]) {
-                    school.incrementDietOutputStage();
-                } else {
-                    return;
-                }
-            }
-        } else if (dietOutputMetrics.equalsIgnoreCase("age")) {
-            for (int i = school.getDietOutputStage(); i < dietOutputStageThreshold[iSpec].length; i++) {
-                int tempAge = Math.round(dietOutputStageThreshold[iSpec][i] * getConfiguration().getNStepYear());
-                if (school.getAgeDt() >= tempAge) {
-                    school.incrementDietOutputStage();
-                } else {
-                    return;
-                }
-            }
-        }
+        return accessibilityMatrix[prey.getSpeciesIndex()][accessStage.getStage(prey)][predator.getSpeciesIndex()][accessStage.getStage(predator)];
     }
 }

@@ -54,6 +54,7 @@ public class Indicators extends SimulationLinker {
         // Predation
         indicators.add(new DietIndicator(indexSimulation, "output.diet.composition.enabled"));
         indicators.add(new PredatorPressureIndicator(indexSimulation, "output.diet.pressure.enabled"));
+        indicators.add(new BiomassDietStageIndicator(indexSimulation, "output.diet.pressure.enabled"));
         // Spatialized
         indicators.add(new SpatialIndicator(indexSimulation, "output.spatial.enabled"));
         indicators.add(new LTLIndicator(indexSimulation, "output.spatial.ltl.enabled"));

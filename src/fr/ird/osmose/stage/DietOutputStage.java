@@ -12,6 +12,7 @@ import fr.ird.osmose.School;
  */
 public class DietOutputStage extends AbstractStage {
 
+    final private static DietOutputStage dietOutputStage = new DietOutputStage();
     /**
      * Metrics used for splitting the stages (either age or size).
      */
@@ -23,11 +24,13 @@ public class DietOutputStage extends AbstractStage {
 
     @Override
     public void init() {
-        
+
         int nSpec = getConfiguration().getNSpecies();
         dietOutputStageThreshold = new float[nSpec][];
         if (getConfiguration().canFind("output.diet.stage.structure")) {
             dietOutputMetrics = getConfiguration().getString("output.diet.stage.structure");
+        } else {
+            dietOutputMetrics = "null";
         }
 
         for (int i = 0; i < nSpec; i++) {
@@ -46,9 +49,9 @@ public class DietOutputStage extends AbstractStage {
     @Override
     public int getStage(School school) {
 
-        int iSpec = school.getSpeciesIndex();
         int stage = 0;
         if (dietOutputMetrics.equalsIgnoreCase("size")) {
+            int iSpec = school.getSpeciesIndex();
             for (int i = 0; i < dietOutputStageThreshold[iSpec].length; i++) {
                 if (school.getLength() >= dietOutputStageThreshold[iSpec][i]) {
                     stage++;
@@ -57,6 +60,7 @@ public class DietOutputStage extends AbstractStage {
                 }
             }
         } else if (dietOutputMetrics.equalsIgnoreCase("age")) {
+            int iSpec = school.getSpeciesIndex();
             for (int i = 0; i < dietOutputStageThreshold[iSpec].length; i++) {
                 int tempAge = Math.round(dietOutputStageThreshold[iSpec][i] * getConfiguration().getNStepYear());
                 if (school.getAgeDt() >= tempAge) {
@@ -68,14 +72,21 @@ public class DietOutputStage extends AbstractStage {
         }
         return stage;
     }
-    
+
     @Override
     public int getNStage(int iSpecies) {
         return dietOutputStageThreshold[iSpecies].length + 1;
     }
-    
+
     @Override
     public float[] getThresholds(int iSpecies) {
         return dietOutputStageThreshold[iSpecies];
+    }
+
+    public static DietOutputStage getInstance() {
+        if (dietOutputStage.dietOutputStageThreshold == null) {
+            dietOutputStage.init();
+        }
+        return dietOutputStage;
     }
 }

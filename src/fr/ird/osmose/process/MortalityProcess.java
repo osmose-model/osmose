@@ -8,6 +8,8 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.stage.AbstractStage;
+import fr.ird.osmose.stage.DietOutputStage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -52,6 +54,10 @@ public class MortalityProcess extends AbstractProcess {
      * Whether school diet should be recorded
      */
     private boolean recordDiet;
+    /*
+     * Diet output stage
+     */
+    private AbstractStage dietOutputStage;
 
     public MortalityProcess(int indexSimulation) {
         super(indexSimulation);
@@ -78,6 +84,9 @@ public class MortalityProcess extends AbstractProcess {
         
         recordDiet = getConfiguration().getBoolean("output.diet.composition.enabled")
                 || getConfiguration().getBoolean("output.diet.pressure.enabled");
+        
+        dietOutputStage = new DietOutputStage();
+        dietOutputStage.init();
     }
 
     /**
@@ -95,13 +104,6 @@ public class MortalityProcess extends AbstractProcess {
             if (!(cell.isLand() || schools.isEmpty())) {
                 int ns = schools.size();
                 int npl = getConfiguration().getNPlankton();
-
-                // Update stages
-                for (School school : schools) {
-                    predationProcess.updateAccessibilityStage(school);
-                    predationProcess.updatePredPreyStage(school);
-                    predationProcess.updateDietOutputStage(school);
-                }
 
                 double[][] nDeadMatrix = null;
                 switch (Simulation.VERSION) {
@@ -143,7 +145,7 @@ public class MortalityProcess extends AbstractProcess {
                                 School prey = schools.get(ipr);
                                 double biomPrey = prey.adb2biom(nDeadMatrix[ipr][is]);
                                 if (recordDiet) {
-                                    school.diet[prey.getSpeciesIndex()][prey.getDietOutputStage()] += biomPrey;
+                                    school.diet[prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += biomPrey;
                                 }
                                 float TLprey = (prey.getAgeDt() == 0) || (prey.getAgeDt() == 1)
                                         ? Species.TL_EGG

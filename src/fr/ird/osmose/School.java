@@ -48,6 +48,8 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.stage.DietOutputStage;
+
 public class School extends GridPoint {
 
     final public static boolean INSTANTANEOUS_BIOMASS = true;
@@ -78,18 +80,6 @@ public class School extends GridPoint {
      * Whether the school is catchable for fishing.
      */
     private boolean catchable;
-    /**
-     * Correspond to feeding length-stage.
-     */
-    private int predPreyStage;
-    /**
-     * Correspond to the age-stage used for accessibility between species
-     */
-    private int accessibilityStage;
-    /**
-     * Diet stage.
-     */
-    private int dietOutputStage;
     /**
      * Number of individuals in the school at beginning of the time step.
      */
@@ -131,7 +121,6 @@ public class School extends GridPoint {
      * Monitor whether the number of deads has changed
      */
     private boolean ndeadHasChanged;
-    private int[] nDietStage;
         /*
      * Out of the simulated domain at current time step
      */
@@ -188,17 +177,6 @@ public class School extends GridPoint {
         } else {
             setOffGrid();
         }
-
-        // stages
-        predPreyStage = 0;
-        accessibilityStage = 0;
-        dietOutputStage = 0;
-        nDietStage = new int[getConfiguration().getNSpecies()];
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            nDietStage[i] = !getConfiguration().isNull("output.diet.stage.threshold.sp" + i)
-                    ? getConfiguration().getArrayString("output.diet.stage.threshold.sp" + i).length + 1
-                    : 1;
-        }
         out = false;
     }
 
@@ -218,7 +196,7 @@ public class School extends GridPoint {
         // Reset diet variables
         diet = new double[getConfiguration().getNSpecies() + getConfiguration().getNPlankton()][];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            diet[i] = new double[nDietStage[i]];
+            diet[i] = new double[DietOutputStage.getInstance().getNStage(i)];
         }
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             diet[i + getConfiguration().getNSpecies()] = new double[1];
@@ -374,42 +352,6 @@ public class School extends GridPoint {
             length += dlength;
             weight = species.computeWeight(length) * 1e-6f;
         }
-    }
-
-    /**
-     * @return the trophicLevel
-     */
-    public int getPredPreyStage() {
-        return predPreyStage;
-    }
-
-    public void icrementPredPreyStage() {
-        predPreyStage++;
-    }
-
-    /**
-     * @return the trophicLevel
-     */
-    public int getAccessibilityStage() {
-        return accessibilityStage;
-    }
-
-    /**
-     * Increment the accessibility stage
-     */
-    public void incrementAccessibilityStage() {
-        accessibilityStage++;
-    }
-
-    /**
-     * @return the dietOutputStage
-     */
-    public int getDietOutputStage() {
-        return dietOutputStage;
-    }
-
-    public void incrementDietOutputStage() {
-        dietOutputStage++;
     }
 
     /**
