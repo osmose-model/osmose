@@ -2,23 +2,23 @@
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
- * Copyright IRD (Institut de Recherche pour le Développement) 2013
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
  * 
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
  * Philippe VERLEY (philippe.verley@ird.fr)
- *
- * This software is a computer program whose purpose is to simulate trophic
- * interactions between fish species. This model assumes opportunistic
- * predation based on spatial co-occurrence and size adequacy between a
- * predator and its prey (size-based opportunistic predation).
- * It represents fish individuals grouped into schools, which are
- * characterized by their size, weight, age, taxonomy and geographical
- * location (2D model), and which undergo major processes of fish life cycl
- * (growth, explicit predation, natural and starvation mortalities,
- * reproduction and migration) and a fishing mortality distinct for each
- * species (Shin and Cury 2001, 2004).
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
  * 
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use, 
