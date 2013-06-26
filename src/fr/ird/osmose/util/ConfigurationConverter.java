@@ -369,10 +369,10 @@ public class ConfigurationConverter {
             prop.setProperty("mortality.fishing.rate.bySize.file.sp" + i, resolveFile(filename));
             prop.setProperty("mortality.fishing.rate.bySize.byYear.file.sp" + i, "null");
             
-            filename = "fishing/F-rate-byYear" + cfg.speciesName[i] + ".csv";
+            filename = "fishing/F-rate-byYear-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.byYear.file.sp" + i, resolveFile(filename));
             
-            filename = "fishing/F-rate-byDt" + cfg.speciesName[i] + ".csv";
+            filename = "fishing/F-rate-byDt-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.rate.byDt.file.sp" + i, resolveFile(filename));
             prop.setProperty("mortality.fishing.rate.bySize.byDt.file.sp" + i, "null");
             prop.setProperty("mortality.fishing.rate.byAge.byDt.file.sp" + i, "null");
