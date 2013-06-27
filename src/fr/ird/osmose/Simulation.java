@@ -302,7 +302,7 @@ public class Simulation {
     }
 
     public void run() {
-
+        
         while (i_step_simu < n_steps_simu) {
             year = i_step_simu / getConfiguration().getNStepYear();
             i_step_year = i_step_simu % getConfiguration().getNStepYear();
@@ -312,6 +312,7 @@ public class Simulation {
 
             // Run a new step
             step.step(i_step_simu);
+            fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
             // Create a restart file
             if ((i_step_simu + 1) % restartFrequency == 0) {
@@ -320,13 +321,13 @@ public class Simulation {
 
             // Increment time step
             i_step_simu++;
-        }
+            }
         step.end();
 
         // create a restart at the end of the simulation
         snapshot.makeSnapshot(i_step_simu - 1);
     }
-
+    
     public void makeSnapshot() {
         snapshot.makeSnapshot(i_step_simu);
     }
