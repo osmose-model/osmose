@@ -200,7 +200,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
                 String[] line = lines.get(l);
                 int j = ny - l - 1;
                 for (int i = 0; i < line.length; i++) {
-                    float val = Float.valueOf(line[i]) / 100.f;
+                    float val = Float.valueOf(line[i]);
                     if (val > 0.f) {
                         map.setValue(i, j, val);
                     }
