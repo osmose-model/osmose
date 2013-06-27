@@ -312,7 +312,7 @@ public class Simulation {
 
             // Run a new step
             step.step(i_step_simu);
-            fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
+            //fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
             // Create a restart file
             if ((i_step_simu + 1) % restartFrequency == 0) {
