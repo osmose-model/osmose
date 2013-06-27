@@ -22,8 +22,6 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     private float classRange;
     // discrete size spectrum
     private float[] tabSizes;
-    // log of the discrete size spectrum
-    private float[] tabSizesLn;
     // Number of size classes in the discrete spectrum
     private int nSizeClass;
 
@@ -49,12 +47,6 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
         tabSizes[0] = spectrumMinSize;
         for (int i = 1; i < nSizeClass; i++) {
             tabSizes[i] = i * classRange;
-        }
-
-        tabSizesLn = new float[nSizeClass];
-        tabSizesLn[0] = (float) (Math.log(classRange / 2f));
-        for (int i = 1; i < nSizeClass; i++) {
-            tabSizesLn[i] = (float) (Math.log(tabSizes[i] + (classRange / 2f)));
         }
     }
 
@@ -89,7 +81,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
     @Override
     public void write(float time) {
 
-        double[][] values = new double[nSizeClass][4];
+        double[][] values = new double[nSizeClass][2];
         for (int iSize = 0; iSize < nSizeClass; iSize++) {
             // Size
             values[iSize][0] = tabSizes[iSize];
@@ -99,10 +91,6 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
                 sum += sizeSpectrum[iSpec][iSize] / getRecordFrequency();
             }
             values[iSize][1] = sum;
-            // ln(Size)
-            values[iSize][2] = tabSizesLn[iSize];
-            // ln(Abundance)
-            values[iSize][3] = Math.log(sum);
         }
         
         writeVariable(time, values);
@@ -122,11 +110,11 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Distribution of fish abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported. In logarithm, we consider the median of the size class, ie Ln(size [i]) = Ln((size [i]+size[i+1])/2)";
+        return "Distribution of fish abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
     }
 
     @Override
     String[] getHeaders() {
-        return new String[]{"Size", "Abundance", "ln(size)", "ln(Abd)"};
+        return new String[]{"Size", "Abundance"};
     }
 }
