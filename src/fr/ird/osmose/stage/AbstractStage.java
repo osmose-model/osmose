@@ -7,6 +7,7 @@ package fr.ird.osmose.stage;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
+import java.util.logging.Logger;
 
 /**
  *
@@ -24,6 +25,10 @@ public abstract class AbstractStage {
     
     Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
+    }
+    
+    Logger getLogger() {
+        return Osmose.getInstance().getLogger();
     }
     
 }

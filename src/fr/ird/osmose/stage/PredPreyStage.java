@@ -21,7 +21,7 @@ public class PredPreyStage extends AbstractStage {
      * Array[nSpecies][nPredPreyStage]
      */
     private float[][] predPreyStageThreshold;
-
+    
     @Override
     public void init() {
 
@@ -31,7 +31,8 @@ public class PredPreyStage extends AbstractStage {
         if (getConfiguration().canFind("predation.predPrey.stage.structure")) {
             predPreyStageMetrics = getConfiguration().getString("predation.predPrey.stage.structure");
         } else {
-            predPreyStageMetrics = "null";
+            predPreyStageMetrics = "size";
+            getLogger().warning("Could not find parameter 'predation.predPrey.stage.structure'. Osmose assumes it is size-based threshold.");
         }
 
         for (int i = 0; i < nSpec; i++) {

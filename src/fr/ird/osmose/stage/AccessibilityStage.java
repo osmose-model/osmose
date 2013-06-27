@@ -31,7 +31,8 @@ public class AccessibilityStage extends AbstractStage {
         if (getConfiguration().canFind("predation.accessibility.stage.structure")) {
             accessStageMetrics = getConfiguration().getString("predation.accessibility.stage.structure");
         } else {
-            accessStageMetrics = "null";
+            accessStageMetrics = "age";
+            getLogger().warning("Could not find parameter 'predation.accessibility.stage.structure'. Osmose assumes it is age-based threshold.");
         }
 
         for (int i = 0; i < nSpec; i++) {

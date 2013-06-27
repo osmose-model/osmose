@@ -83,7 +83,11 @@ public class ConfigurationConverter {
         
         prop.setProperty("output.diet.composition.enabled", String.valueOf(cfg.outputDiet));
         prop.setProperty("output.diet.pressure.enabled", String.valueOf(cfg.outputDiet));
-        prop.setProperty("output.diet.stage.structure", String.valueOf(cfg.getDietOutputMetrics()));
+        String metrics = String.valueOf(cfg.getDietOutputMetrics());
+        if (!(metrics.equalsIgnoreCase("age") || metrics.equalsIgnoreCase("size"))) {
+            metrics = "age";
+        }
+        prop.setProperty("output.diet.stage.structure", String.valueOf(metrics));
         for (int i = 0; i < nSpecies; i++) {
             String key = "output.diet.stage.threshold.sp" + i;
             prop.setProperty(key, String.valueOf(toString(cfg.dietStageThreshold[i])));
@@ -312,13 +316,14 @@ public class ConfigurationConverter {
 
         // PREDATION
 //        prop.setProperty("predation.ingestion.rate.max.unit", "grams of food per gram of fish and per year");
+        prop.setProperty("predation.predPrey.stage.structure", "size");
+        prop.setProperty("predation.accessibility.stage.structure", "age");
         for (int i = 0; i < nSpecies; i++) {
             prop.setProperty("predation.predPrey.stage.threshold.sp" + i, String.valueOf(toString(cfg.feedingStageThreshold[i])));
             prop.setProperty("predation.predPrey.sizeRatio.min.sp" + i, String.valueOf(toString(cfg.predPreySizeRatioMin[i])));
             prop.setProperty("predation.predPrey.sizeRatio.max.sp" + i, String.valueOf(toString(cfg.predPreySizeRatioMax[i])));
             prop.setProperty("predation.ingestion.rate.max.sp" + i, String.valueOf(cfg.maxPredationRate[i]));
             prop.setProperty("predation.efficiency.critical.sp" + i, String.valueOf(cfg.criticalPredSuccess[i]));
-            prop.setProperty("predation.accessibility.stage.structure", "age");
             prop.setProperty("predation.accessibility.stage.threshold.sp" + i, String.valueOf(toString(cfg.accessStageThreshold[i])));
         }
         String accessibilityFile = resolveFile("predation-accessibility.csv");

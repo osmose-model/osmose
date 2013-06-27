@@ -30,7 +30,8 @@ public class DietOutputStage extends AbstractStage {
         if (getConfiguration().canFind("output.diet.stage.structure")) {
             dietOutputMetrics = getConfiguration().getString("output.diet.stage.structure");
         } else {
-            dietOutputMetrics = "null";
+            dietOutputMetrics = "age";
+            getLogger().warning("Could not find parameter 'output.diet.stage.structure'. Osmose assumes it is age-based threshold.");
         }
 
         for (int i = 0; i < nSpec; i++) {
