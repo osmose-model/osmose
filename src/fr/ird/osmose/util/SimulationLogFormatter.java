@@ -27,6 +27,10 @@ public class SimulationLogFormatter extends Formatter {
         builder.append(iSimulation);
         builder.append("[").append(record.getLevel().toString().toLowerCase()).append("] - ");
         builder.append(formatMessage(record));
+        if (null != record.getThrown()) {
+            builder.append(" | ");
+            builder.append(record.getThrown().getMessage());
+        }
         builder.append("\n");
         return builder.toString();
     }

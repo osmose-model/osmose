@@ -16,17 +16,17 @@ import java.util.logging.Level;
 public class NaturalMortalityProcess extends AbstractProcess {
 
     /**
-     * Natural mortality rates year-1.
+     * Natural mortality rates (time step)^-1.
      */
-    private float D[];
+    private float D[][];
     /**
-     *
+     * Spatial factor for natural mortality [0, 1]
      */
     private GridMap[] spatialD;
     /**
-     * Larval mortality rates, timestep-1.
+     * Larval mortality rates, (time step)^-1.
      */
-    private float[][] larvalMortalityRates;
+    private float[][] Dlarva;
 
     public NaturalMortalityProcess(int indexSimulation) {
         super(indexSimulation);
@@ -35,24 +35,41 @@ public class NaturalMortalityProcess extends AbstractProcess {
     @Override
     public void init() {
 
-        D = new float[getNSpecies()];
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            D[iSpec] = getConfiguration().getFloat("mortality.natural.rate.sp" + iSpec);
+        int nsteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
+
+        D = new float[getNSpecies()][nsteps];
+        if (getConfiguration().canFind("mortality.natural.rate.file")) {
+            // Seasonal or interannual natural mortality rates
+            D = readCSVRates(getConfiguration().getFile("mortality.natural.rate.file"));
+        } else {
+            // Annual mortality rates
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                float Ds = getConfiguration().getFloat("mortality.natural.rate.sp" + iSpec) / getConfiguration().getNStepYear();
+                for (int iStep = 0; iStep < nsteps; iStep++) {
+                    D[iSpec][iStep] = Ds;
+                }
+            }
         }
 
-        larvalMortalityRates = new float[getNSpecies()][getConfiguration().getNStepYear() * getConfiguration().getNYear()];
-        for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
-            for (int iStep = 0; iStep < larvalMortalityRates[iSpec].length; iStep++) {
-                larvalMortalityRates[iSpec][iStep] = getConfiguration().getFloat("mortality.natural.larva.rate.sp" + iSpec);
+        Dlarva = new float[getNSpecies()][nsteps];
+        if (getConfiguration().canFind("mortality.natural.larva.rate.file")) {
+            // Seasonal or interannual natural mortality rates
+            Dlarva = readCSVRates(getConfiguration().getFile("mortality.natural.larva.rate.file"));
+        } else {
+            for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
+                float Ds = getConfiguration().getFloat("mortality.natural.larva.rate.sp" + iSpec);
+                for (int iStep = 0; iStep < nsteps; iStep++) {
+                    Dlarva[iSpec][iStep] = Ds;
+                }
             }
         }
 
         spatialD = new GridMap[getNSpecies()];
-        List<String> keys = getConfiguration().findKeys("mortality.natural.rate.file.sp*");
+        List<String> keys = getConfiguration().findKeys("mortality.natural.spatial.distrib.file.sp*");
         if (keys != null && !keys.isEmpty()) {
             for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
-                if (!getConfiguration().isNull("mortality.natural.rate.file.sp" + iSpec)) {
-                    spatialD[iSpec] = readCSVMap(getConfiguration().getFile("mortality.natural.rate.file.sp" + iSpec));
+                if (!getConfiguration().isNull("mortality.natural.spatial.distrib.file.sp" + iSpec)) {
+                    spatialD[iSpec] = readCSVMap(getConfiguration().getFile("mortality.natural.spatial.distrib.file.sp" + iSpec));
                 }
             }
         }
@@ -82,12 +99,12 @@ public class NaturalMortalityProcess extends AbstractProcess {
         double M;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
-            M = (larvalMortalityRates[spec.getIndex()][getSimulation().getIndexTimeSimu()]) / (float) subdt;
+            M = (Dlarva[spec.getIndex()][getSimulation().getIndexTimeSimu()]) / (float) subdt;
         } else {
             if (null != spatialD[spec.getIndex()] && !school.isUnlocated()) {
-                M = (spatialD[spec.getIndex()].getValue(school.getCell())) / (float) (getConfiguration().getNStepYear() * subdt);
+                M = (spatialD[spec.getIndex()].getValue(school.getCell()) * D[spec.getIndex()][getSimulation().getIndexTimeSimu()]) / (float) subdt;
             } else {
-                M = (D[spec.getIndex()]) / (float) (getConfiguration().getNStepYear() * subdt);
+                M = (D[spec.getIndex()][getSimulation().getIndexTimeSimu()]) / (float) (subdt);
             }
         }
         return M;
@@ -101,15 +118,65 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
         double rate = 0.d;
         int iSpec = species.getIndex();
-        for (int iStep = 0; iStep < larvalMortalityRates[iSpec].length; iStep++) {
-            rate += larvalMortalityRates[iSpec][iStep];
+        for (int iStep = 0; iStep < Dlarva[iSpec].length; iStep++) {
+            rate += Dlarva[iSpec][iStep];
         }
-        rate /= larvalMortalityRates[iSpec].length;
+        rate /= Dlarva[iSpec].length;
         return rate;
     }
 
+    /*
+     * The annual mortality rate is calculated as the annual average of
+     * the natural mortality rates over the years.
+     */
     public double getNaturalMortalityRate(Species species) {
-        return D[species.getIndex()];
+        double rate = 0.d;
+        int iSpec = species.getIndex();
+        for (int iStep = 0; iStep < D[iSpec].length; iStep++) {
+            rate += D[iSpec][iStep];
+        }
+        rate /= D[iSpec].length;
+        return rate;
+    }
+
+    private float[][] readCSVRates(String filename) {
+
+        int nspecies = getNSpecies();
+        int nStepYear = getConfiguration().getNStepYear();
+        int nStepSimu = nStepYear * getConfiguration().getNYear();
+        float[][] rates = new float[nspecies][nStepSimu];
+        int nstep = 0;
+        try {
+            CSVReader reader = new CSVReader(new FileReader(filename), ';');
+            List<String[]> lines = reader.readAll();
+            if ((lines.size() - 1) % nStepYear != 0) {
+                throw new IOException("CSV file " + filename + " does not have a number of lines proportional to number of steps per year.");
+            }
+            nstep = lines.size() - 1;
+            for (int t = 0; t < nstep; t++) {
+                String[] line = lines.get(t + 1);
+                for (int i = 0; i < nspecies; i++) {
+                    rates[i][t] = Float.valueOf(line[i + 1]);
+                }
+            }
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Error reading natural mortality rates file " + filename, ex);
+            System.exit(1);
+        }
+
+        if (nstep < nStepSimu) {
+            for (int i = 0; i < nspecies; i++) {
+                int t = nstep;
+                while (t < rates[i].length) {
+                    for (int k = 0; k < nstep; k++) {
+                        rates[i][t] = rates[i][k];
+                        t++;
+                    }
+                }
+            }
+        }
+
+        return rates;
     }
 
     private GridMap readCSVMap(String csvFile) {
@@ -133,7 +200,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
                 String[] line = lines.get(l);
                 int j = ny - l - 1;
                 for (int i = 0; i < line.length; i++) {
-                    float val = Float.valueOf(line[i]);
+                    float val = Float.valueOf(line[i]) / 100.f;
                     if (val > 0.f) {
                         map.setValue(i, j, val);
                     }
