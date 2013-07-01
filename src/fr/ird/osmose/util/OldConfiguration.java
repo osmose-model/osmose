@@ -292,7 +292,7 @@ public class OldConfiguration {
      */
     float[] ltlProdBiomFactor;
     /**
-     * 
+     *
      */
     double[] ltlTotalBiomass;
     /**
@@ -1211,8 +1211,9 @@ public class OldConfiguration {
                 fishingRates = new float[nSpecies][nStepYear];
                 for (int i = 0; i < nSpecies; i++) {
                     st.nextToken();
-                    for (int iStep = 0; iStep < nStepYear; iStep++)
+                    for (int iStep = 0; iStep < nStepYear; iStep++) {
                         fishingRates[i][iStep] = (new Float(st.sval)).floatValue();    //annual F mortality
+                    }
                 }
             } else {
                 String fishingRateFile = st.sval;
@@ -1255,17 +1256,14 @@ public class OldConfiguration {
         List<String[]> lines = reader.readAll();
         /*
          * Check dimensions of the file
-         * We expect nb_columns = nb_species + 1 (1st column for time step)
-         * and nb_rows = 2 (1st row is the header) for one larval mortality
-         * rate per species.
-         * or nb_rows = nb_steps_per_year  + 1 (1st row is the header)
+         * We expect nb_rows = nb_steps_per_year  + 1 (1st row is the header)
          * This case allows annual variability for larval mortality rate.
          * or nb_rows = nb_steps_per_year * nb_years + 1 (1st row is the header)
          * This case allows interannual variability for larval mortality rate.
          */
         int nb_rows = lines.size() - 1;
-        if (nb_rows != 1 & nb_rows != nStepYear & nb_rows != nStepYear * nYear) {
-            System.out.println("Larval mortality rates file " + csvFile + " contains " + nb_rows + " rows. Should be either 1 or " + nStepYear + " or " + (nStepYear * nYear));
+        if (nb_rows != nStepYear & nb_rows != nStepYear * nYear) {
+            System.out.println("Larval mortality rates file " + csvFile + " contains " + nb_rows + " rows. Should be either " + nStepYear + " or " + (nStepYear * nYear));
             System.exit(1);
         }
         int nb_columns = lines.get(0).length - 1;
@@ -1331,10 +1329,13 @@ public class OldConfiguration {
              */
             try {
                 Float.valueOf(st.sval);
-                larvalMortalityRates = new float[nSpecies][1];
+                larvalMortalityRates = new float[nSpecies][nStepYear];
                 for (int i = 0; i < nSpecies; i++) {
                     larvalMortalityRates[i][0] = (new Float(st.sval)).floatValue();
                     st.nextToken();
+                    for (int iStep = 1; iStep < nStepYear; iStep++) {
+                        larvalMortalityRates[i][iStep] = larvalMortalityRates[i][0];
+                    }
                 }
             } catch (NumberFormatException ex) {
                 larvalMortalityFile = st.sval;
@@ -1484,7 +1485,7 @@ public class OldConfiguration {
         nAccessStage = new int[nSpecies];
         accessStageThreshold = new float[nSpecies][];
         accessibilityMatrix = new float[nSpecies + nPlankton][][][];
-        
+
         dietStageThreshold = new float[nSpecies][];
 
         planktonName = new String[nPlankton];
@@ -2850,6 +2851,4 @@ public class OldConfiguration {
     public float getSpectrumClassRange() {
         return spectrumClassRange;
     }
-
-   
 }
