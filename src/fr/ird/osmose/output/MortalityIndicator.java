@@ -51,6 +51,10 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
      * Whether the indicator should be enabled or not.
      */
     private boolean enabled;
+    /**
+     * Age of recruitment (expressed in number of time steps) [SPECIES]
+     */
+    private int[] recruitmentAge;
 
     public MortalityIndicator(int indexSimulation, String keyEnabled) {
         super(indexSimulation);
@@ -70,7 +74,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             if (school.getAgeDt() == 0) {
                 // Eggss
                 iStage = EGG;
-            } else if (school.getAgeDt() < school.getSpecies().getRecruitmentAge()) {
+            } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]) {
                 // Pre-recruits
                 iStage = PRE_RECRUIT;
             } else {
@@ -95,7 +99,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
         for (School school : getSchoolSet().getAliveSchools()) {
             if (school.getAgeDt() == 0) {
                 iStage = EGG;
-            } else if (school.getAgeDt() < school.getSpecies().getRecruitmentAge()) {
+            } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]) {
                 // Pre-recruits
                 iStage = PRE_RECRUIT;
             } else {
@@ -158,6 +162,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
 
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
+        recruitmentAge = new int[getNSpecies()];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
             File path = new File(getConfiguration().getOutputPathname());
@@ -196,6 +201,18 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                     prw[iSpecies].print("Eggs;Pre-recruits;Recruits;");
                 }
                 prw[iSpecies].println();
+            }
+
+            // Get the age of recruitment
+            if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpecies)) {
+                float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpecies);
+                recruitmentAge[iSpecies] = Math.round(age * getConfiguration().getNStepYear());
+            } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpecies)) {
+                float recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpecies);
+                recruitmentAge[iSpecies] = getSpecies(iSpecies).computeMeanAge(recruitmentSize);
+            } else {
+                getLogger().log(Level.WARNING, "Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
+                recruitmentAge[iSpecies] = getConfiguration().getNStepYear();
             }
         }
     }

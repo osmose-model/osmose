@@ -19,18 +19,18 @@ import java.util.logging.Level;
 public class ByDtByAgeSizeScenario extends AbstractFishingScenario {
 
     /**
-     * Fishing mortality rates by timestep and by age/size class.
+     * Fishing mortality rates by time step and by age/size class.
      */
     private float[][] f;
     /**
-     * Size thresholds in centimeter. Size stage k means thresold[k] <= age <
-     * threshold[k+1]
+     * Size thresholds in centimeter. Size stage k means
+     * {@code threshold[k] <= age < threshold[k+1]}
      */
     private float[] sizeThreshold;
     /**
      * Age thresholds in time steps. It is provided in year in the input file
-     * and converted in the init function in number of time steps. Age stage k
-     * means thresold[k] <= ageDt < threshold[k+1]
+     * and converted in the {@code init} function in number of time steps. Age stage k
+     * means {@code threshold[k] <= ageDt < threshold[k+1]}
      */
     private int[] ageThreshold;
 
@@ -41,12 +41,12 @@ public class ByDtByAgeSizeScenario extends AbstractFishingScenario {
     @Override
     public void init() {
         int iSpec = getIndexSpecies();
-        if (!getConfiguration().isNull("mortality.fishing.byDt.byAge.file.sp" + iSpec)) {
-            readCSVFile(getConfiguration().getFile("mortality.fishing.byDt.byAge.file.sp" + iSpec), "byAge");
-        } else if (!getConfiguration().isNull("mortality.fishing.byDt.bySize.file.sp" + iSpec)) {
-            readCSVFile(getConfiguration().getFile("mortality.fishing.byDt.bySize.file.sp" + iSpec), "bySize");
+        if (!getConfiguration().isNull("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec)) {
+            readCSVFile(getConfiguration().getFile("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec), "byAge");
+        } else if (!getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
+            readCSVFile(getConfiguration().getFile("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec), "bySize");
         } else {
-            getLogger().log(Level.SEVERE, "Could not found parameters mortality.fishing.byDt.byAge/bySize.file.sp{0}", iSpec);
+            getLogger().log(Level.SEVERE, "Could not found parameters mortality.fishing.rate.byDt.byAge/bySize.file.sp{0}", iSpec);
         }
     }
 
@@ -73,16 +73,39 @@ public class ByDtByAgeSizeScenario extends AbstractFishingScenario {
                 }
             }
             // 3. Read the mortality rates
-            f = new float[lines.size() - 1][];
-            for (int t = 0; t < lines.size() - 1; t++) {
+            int nTimeSerie = lines.size() - 1;
+            int nStepYear = getConfiguration().getNStepYear();
+            int nStepSimu = getConfiguration().getNYear() * nStepYear;
+            f = new float[nStepSimu][];
+            for (int t = 0; t < nTimeSerie; t++) {
                 f[t] = new float[threshold.length - 1];
                 String[] fval = lines.get(t + 1);
                 for (int k = 0; k < f[t].length; k++) {
                     f[t][k] = Float.valueOf(fval[k + 1]);
                 }
             }
+            // 4. Check the length of the time serie
+            if (nTimeSerie % nStepYear != 0) {
+                // Either the time serie is less than a year or it is not a 
+                // multiple of number of time step per year.
+                throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
+            } else if (nTimeSerie < nStepSimu) {
+                // There is less season in the file than number of years of the
+                // simulation.
+                int t = nTimeSerie;
+                while (t < nStepSimu) {
+                    for (int k = 0; k < nTimeSerie; k++) {
+                        f[t] = f[k];
+                        t++;
+                    }
+                }
+                getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
+            } else if (nTimeSerie >= nStepSimu) {
+                getLogger().log(Level.WARNING, "Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nStepSimu});
+            }
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, "Error reading CSV file " + filename, ex);
+            System.exit(1);
         }
     }
 
@@ -129,9 +152,9 @@ public class ByDtByAgeSizeScenario extends AbstractFishingScenario {
     @Override
     public float getAnnualRate() {
         double F = 0;
-        for (int k = 0; k < f.length; k++) {
-            for (int iStep = 0; iStep < f[k].length; iStep++) {
-                F += f[k][iStep];
+        for (int iStep = 0; iStep < f.length; iStep++) {
+            for (int k = 0; k < f[iStep].length; k++) {
+                F += f[iStep][k];
             }
         }
         F = F / (f.length * getConfiguration().getNYear());

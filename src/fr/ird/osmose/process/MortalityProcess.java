@@ -248,7 +248,7 @@ public class MortalityProcess extends AbstractProcess {
             mortalityRateMatrix[is][nSchool + 1] = naturalMortalityProcess.getInstantaneousRate(school, subdt);
 
             // 4. Fishing mortality
-            mortalityRateMatrix[is][nSchool + 2] = fishingProcess.getFishingMortalityRate(school, subdt);
+            mortalityRateMatrix[is][nSchool + 2] = fishingProcess.getInstantaneousRate(school, subdt);
         }
 
         //
@@ -399,7 +399,7 @@ public class MortalityProcess extends AbstractProcess {
             mortalityRateMatrix[is][ns + 1] = D;
 
             // 4. Fishing mortality
-            double F = fishingProcess.getFishingMortalityRate(school, subdt);
+            double F = fishingProcess.getInstantaneousRate(school, subdt);
             nDeadMatrix[is][ns + 2] = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
             mortalityRateMatrix[is][ns + 2] = F;
         }
@@ -509,7 +509,7 @@ public class MortalityProcess extends AbstractProcess {
                     case 3:
                         // Fishing Mortality
                         school = schools.get(seqFish[i]);
-                        double F = fishingProcess.getFishingMortalityRate(school, subdt);
+                        double F = fishingProcess.getInstantaneousRate(school, subdt);
                         nDeadMatrix[seqFish[i]][ns + 2] = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
                         school.setNdeadFishing(nDeadMatrix[seqFish[i]][ns + 2]);
                         break;

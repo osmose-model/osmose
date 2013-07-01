@@ -82,10 +82,6 @@ public class Species {
      */
     final private float sizeMaturity;
     /**
-     * Age of recruitment (year)
-     */
-    final private int recruitmentAge;
-    /**
      * Threshold age (year) for age class zero. It is the age from which target
      * biomass should be considered as eggs and larvae stages are generally not
      * considered.
@@ -126,28 +122,6 @@ public class Species {
         } else {
             float ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
             sizeMaturity = lInf * (float) (1 - Math.exp(-K * (ageMaturity - t0)));
-        }
-        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + index)) {
-            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + index);
-            recruitmentAge = Math.round(age * getConfiguration().getNStepYear());
-        } else {
-            float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
-            float recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + index);
-            float age;
-            if (recruitmentSize < lInf) {
-                age = (float) (-((Math.log(1 - (recruitmentSize / lInf))) / K)) + t0;
-            } else {
-                age = agemax;
-            }
-            if (age < 0.6f) {
-                //due to inverse von Bert transformation
-                // >0.5 to avoid Math.round() problems
-                age = 0.6f;
-            }
-            if (age > agemax) {
-                age = agemax;
-            }
-            recruitmentAge = Math.round(age * getConfiguration().getNStepYear());
         }
         float age0 = getConfiguration().getFloat("output.cutoff.age.sp" + index);
         ageClassZero = (int) Math.ceil(age0 * getConfiguration().getNStepYear());
@@ -206,6 +180,28 @@ public class Species {
         }
 
         return length;
+    }
+
+    /**
+     * Compute the mean age (number of time steps) at a specific length (cm).
+     * @param length (cm)
+     * @return the mean age expressed in number of time steps
+     */
+    public int computeMeanAge(float length) {
+
+        float age;
+        float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
+        if (length > lengthAtAgePart) {
+            if (length < lInf) {
+                age = (float) (-((Math.log(1 - (length / lInf))) / K)) + t0;
+            } else {
+                age = lifespan;
+            }
+        } else {
+            age = growthAgeThreshold * (length - eggSize) / (lengthAtAgePart - eggSize);
+        }
+        return Math.round(age * getConfiguration().getNStepYear());
+
     }
 
     /**
@@ -286,13 +282,6 @@ public class Species {
      */
     public float getSizeMaturity() {
         return sizeMaturity;
-    }
-
-    /**
-     * @return the age of recruitment, expressed in number of time steps.
-     */
-    public int getRecruitmentAge() {
-        return recruitmentAge;
     }
 
     private Configuration getConfiguration() {

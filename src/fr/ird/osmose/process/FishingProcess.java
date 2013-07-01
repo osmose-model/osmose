@@ -1,14 +1,11 @@
 package fr.ird.osmose.process;
 
-import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import fr.ird.osmose.process.fishing.AbstractFishingScenario;
+import fr.ird.osmose.process.fishing.AnnualFScenario;
+import fr.ird.osmose.process.fishing.AnnualFSeasonScenario;
+import fr.ird.osmose.process.fishing.ByDtByAgeSizeScenario;
 
 /**
  *
@@ -16,15 +13,7 @@ import java.util.logging.Logger;
  */
 public class FishingProcess extends AbstractProcess {
 
-    /*
-     * Whether fishing rates are the same every year or change throughout the
-     * years of simulation
-     */
-    private boolean isFishingInterannual;
-    /*
-     * Fishing mortality rates
-     */
-    private float[][] fishingRates;
+    private AbstractFishingScenario[] fishingScenario;
 
     public FishingProcess(int indexSimulation) {
         super(indexSimulation);
@@ -32,27 +21,27 @@ public class FishingProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        isFishingInterannual = false;
-        int nStepYear = getConfiguration().getNStepYear();
-        fishingRates = new float[getConfiguration().getNSpecies()][nStepYear];
-        for (int i = 0; i < getNSpecies(); i++) {
-            double F = getConfiguration().getFloat("mortality.fishing.rate.sp" + i);
-            String filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + i);
-            CSVReader reader;
-            try {
-                reader = new CSVReader(new FileReader(filename), ';');
-                List<String[]> lines = reader.readAll();
-                if ((lines.size() - 1) % nStepYear != 0) {
-                    // @TODO throw error
-                }
-                for (int t = 0; t < fishingRates[i].length; t++) {
-                    double season = Double.valueOf(lines.get(t + 1)[1]);
-                    fishingRates[i][t] = (float) (F * season / 100.d);
-                    //System.out.println("spec " + i + " f: " + fishingRates[i][t]);
-                }
-            } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, null, ex);
+        fishingScenario = new AbstractFishingScenario[getNSpecies()];
+        // Find fishing scenario
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            if (!getConfiguration().isNull("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec)
+                    || !getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
+                fishingScenario[iSpec] = new ByDtByAgeSizeScenario(getIndexSimulation(), getSpecies(iSpec));
+                continue;
             }
+            if (!getConfiguration().isNull("mortality.fishing.rate.sp" + iSpec)) {
+                if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
+                    fishingScenario[iSpec] = new AnnualFSeasonScenario(getIndexSimulation(), getSpecies(iSpec));
+                } else {
+                    fishingScenario[iSpec] = new AnnualFScenario(getIndexSimulation(), getSpecies(iSpec));
+                }
+                continue;
+            }
+        }
+        // Initialize fishing scenario
+        
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            fishingScenario[iSpec].init();
         }
     }
 
@@ -60,7 +49,7 @@ public class FishingProcess extends AbstractProcess {
     public void run() {
         for (School school : getSchoolSet().getPresentSchools()) {
             if (school.getAbundance() != 0.d) {
-                double F = getFishingMortalityRate(school, 1);
+                double F = getInstantaneousRate(school, 1);
                 double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
                 if (nDead > 0.d) {
                     school.setNdeadFishing(nDead);
@@ -69,12 +58,9 @@ public class FishingProcess extends AbstractProcess {
         }
     }
 
-    public double getFishingMortalityRate(School school, int subdt) {
+    public double getInstantaneousRate(School school, int subdt) {
         if (isFishable(school)) {
-            int iStep = isFishingInterannual
-                    ? getSimulation().getIndexTimeSimu()
-                    : getSimulation().getIndexTimeYear();
-            return fishingRates[school.getSpeciesIndex()][iStep] / subdt;
+            return fishingScenario[school.getSpeciesIndex()].getInstantaneousRate(school);
         } else {
             return 0.d;
         }
@@ -82,12 +68,9 @@ public class FishingProcess extends AbstractProcess {
 
     private boolean isFishable(School school) {
         // Test whether fishing applies to this school
-        // 1. School is recruited
-        // 2. School is catchable (no MPA)
-        // 3. School is not out of simulated domain
-        return (school.getAgeDt() >= school.getSpecies().getRecruitmentAge())
-                && school.isCatchable()
-                && !school.isUnlocated();
+        // 1. School is catchable (no MPA)
+        // 2. School is not out of simulated domain
+        return school.isCatchable() && !school.isUnlocated();
     }
 
     /*
@@ -95,15 +78,6 @@ public class FishingProcess extends AbstractProcess {
      * of the fishing rates over the years. 
      */
     public double getAnnualRate(Species species) {
-        double F = 0;
-        int iSpec = species.getIndex();
-        for (int iStep = 0; iStep < fishingRates[iSpec].length; iStep++) {
-            F += fishingRates[iSpec][iStep];
-        }
-
-        if (isFishingInterannual) {
-            F /= getConfiguration().getNYear();
-        }
-        return F;
+        return fishingScenario[species.getIndex()].getAnnualRate();
     }
 }

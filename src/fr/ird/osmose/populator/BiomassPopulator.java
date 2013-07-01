@@ -34,6 +34,10 @@ public class BiomassPopulator extends AbstractPopulator {
         double abdIni;
         float nbTimeStepsPerYear = getConfiguration().getNStepYear();
 
+        FishingProcess fishingProcess = new FishingProcess(indexSimulation);
+        fishingProcess.init();
+        NaturalMortalityProcess naturalMortalityProcess = new NaturalMortalityProcess(indexSimulation);
+        naturalMortalityProcess.init();
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             //We calculate abd & biom ini of cohorts, and in parallel biom of species
             Species species = getSpecies(i);
@@ -48,14 +52,9 @@ public class BiomassPopulator extends AbstractPopulator {
                 meanWeight[age] = species.computeMeanWeight(age);
             }
 
-
-            NaturalMortalityProcess naturalMortalityProcess = new NaturalMortalityProcess(indexSimulation);
-            naturalMortalityProcess.init();
             double larvalSurvival = naturalMortalityProcess.getLarvalAnnualRate(species);
             double D = naturalMortalityProcess.getAnnualRate(species);
 
-            FishingProcess fishingProcess = new FishingProcess(indexSimulation);
-            fishingProcess.init();
             double F = fishingProcess.getAnnualRate(species);
 
             abdIni = iniBiomass[i] / (meanWeight[(int) Math.round(species.getLifespanDt() / 2)] / 1000000);
