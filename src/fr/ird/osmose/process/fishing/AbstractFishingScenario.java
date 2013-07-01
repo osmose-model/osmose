@@ -94,7 +94,11 @@ public abstract class AbstractFishingScenario extends SimulationLinker {
      * @return the fishing mortality rate for the given school at current time
      * step of the simulation.
      */
-    abstract public float getFishingMortalityRate(School school);
+    abstract public float getInstantaneousRate(School school);
     
-    
+    /**
+     * Gets the annual fishing mortality for the species.
+     * @return the annual fishing mortality rate.
+     */
+    abstract public float getAnnualRate();  
 }

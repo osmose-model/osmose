@@ -66,9 +66,14 @@ public class AnnualFSeasonScenario extends AbstractFishingScenario {
     }
 
     @Override
-    public float getFishingMortalityRate(School school) {
+    public float getInstantaneousRate(School school) {
         return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
                 ? annualF * season[getSimulation().getIndexTimeYear()]
                 : 0.f;
+    }
+
+    @Override
+    public float getAnnualRate() {
+        return annualF;
     }
 }

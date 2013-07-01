@@ -79,7 +79,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
     public void run() {
         // Natural mortality (due to other predators)
         for (School school : getSchoolSet()) {
-            double M = getNaturalMortalityRate(school, 1);
+            double M = getInstantaneousRate(school, 1);
             double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
             if (nDead > 0.d) {
                 school.setNdeadNatural(nDead);
@@ -95,7 +95,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
      * pronounced than for sup ages (rel to CC), predation by other species are
      * not explicit.
      */
-    public double getNaturalMortalityRate(School school, int subdt) {
+    public double getInstantaneousRate(School school, int subdt) {
         double M;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
@@ -114,7 +114,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
      * The annual mortality rate is calculated as the annual average of
      * the larval mortality rates over the years.
      */
-    public double getLarvalMortalityRate(Species species) {
+    public double getLarvalAnnualRate(Species species) {
 
         double rate = 0.d;
         int iSpec = species.getIndex();
@@ -129,7 +129,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
      * The annual mortality rate is calculated as the annual average of
      * the natural mortality rates over the years.
      */
-    public double getNaturalMortalityRate(Species species) {
+    public double getAnnualRate(Species species) {
         double rate = 0.d;
         int iSpec = species.getIndex();
         for (int iStep = 0; iStep < D[iSpec].length; iStep++) {

@@ -51,12 +51,12 @@ public class BiomassPopulator extends AbstractPopulator {
 
             NaturalMortalityProcess naturalMortalityProcess = new NaturalMortalityProcess(indexSimulation);
             naturalMortalityProcess.init();
-            double larvalSurvival = naturalMortalityProcess.getLarvalMortalityRate(species);
-            double D = naturalMortalityProcess.getNaturalMortalityRate(species);
+            double larvalSurvival = naturalMortalityProcess.getLarvalAnnualRate(species);
+            double D = naturalMortalityProcess.getAnnualRate(species);
 
             FishingProcess fishingProcess = new FishingProcess(indexSimulation);
             fishingProcess.init();
-            double F = fishingProcess.getFishingMortalityRate(species);
+            double F = fishingProcess.getAnnualRate(species);
 
             abdIni = iniBiomass[i] / (meanWeight[(int) Math.round(species.getLifespanDt() / 2)] / 1000000);
             for (int j = species.getAgeClassZero(); j < species.getLifespanDt(); j++) {

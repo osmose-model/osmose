@@ -94,7 +94,7 @@ public class FishingProcess extends AbstractProcess {
      * F the annual mortality rate is calculated as the annual average
      * of the fishing rates over the years. 
      */
-    public double getFishingMortalityRate(Species species) {
+    public double getAnnualRate(Species species) {
         double F = 0;
         int iSpec = species.getIndex();
         for (int iStep = 0; iStep < fishingRates[iSpec].length; iStep++) {
