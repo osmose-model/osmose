@@ -38,7 +38,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         int nsteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
 
         D = new float[getNSpecies()][nsteps];
-        if (getConfiguration().canFind("mortality.natural.rate.file")) {
+        if (!getConfiguration().isNull("mortality.natural.rate.file")) {
             // Seasonal or interannual natural mortality rates
             D = readCSVRates(getConfiguration().getFile("mortality.natural.rate.file"));
         } else {
@@ -52,7 +52,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
         }
 
         Dlarva = new float[getNSpecies()][nsteps];
-        if (getConfiguration().canFind("mortality.natural.larva.rate.file")) {
+        if (!getConfiguration().isNull("mortality.natural.larva.rate.file")) {
             // Seasonal or interannual natural mortality rates
             Dlarva = readCSVRates(getConfiguration().getFile("mortality.natural.larva.rate.file"));
         } else {
