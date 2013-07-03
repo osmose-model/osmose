@@ -672,7 +672,7 @@ public class ConfigurationConverter {
                 String[] entries = new String[2];
                 entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
                 if (F > 0) {
-                    entries[1] = String.valueOf(100 * cfg.fishingRates[ispec][t] / F);
+                    entries[1] = String.valueOf(cfg.fishingRates[ispec][t] / F);
                 } else {
                     entries[1] = "0";
                 }
@@ -701,7 +701,7 @@ public class ConfigurationConverter {
                 entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
                 for (int i = 1; i < header.length; i++) {
                     if (F > 0) {
-                        entries[i] = String.valueOf(100 * cfg.fishingRates[ispec][t] / F);
+                        entries[i] = String.valueOf(cfg.fishingRates[ispec][t] / F);
                     } else {
                         entries[i] = "0";
                     }
@@ -772,7 +772,7 @@ public class ConfigurationConverter {
                 entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
                 for (int i = 1; i < header.length; i++) {
                     if (F > 0) {
-                        entries[i] = String.valueOf(100 * cfg.fishingRates[ispec][t] / F);
+                        entries[i] = String.valueOf(cfg.fishingRates[ispec][t] / F);
                     } else {
                         entries[i] = "0";
                     }

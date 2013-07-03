@@ -30,20 +30,24 @@ public class IncomingFluxProcess extends AbstractProcess {
      * Mean weight of incoming fish
      */
     private int[] ageMeanIn;
-
+    
     public IncomingFluxProcess(int indexSimulation) {
         super(indexSimulation);
     }
-
+    
     @Override
     public void init() {
-
+        
         int nSpecies = getConfiguration().getNSpecies();
         biomassFluxIn = new double[nSpecies];
         meanLengthIn = new float[nSpecies];
         ageMeanIn = new int[nSpecies];
-        readFluxSeason(getConfiguration().getFile("flux.incoming.season.file"));
-
+        if (!getConfiguration().isNull("flux.incoming.season.file")) {
+            readFluxSeason(getConfiguration().getFile("flux.incoming.season.file"));
+        } else {
+            seasonFlux = new double[nSpecies][0];
+        }
+        
         for (int i = 0; i < nSpecies; i++) {
             float sum = 0;
             for (double d : seasonFlux[i]) {
@@ -58,7 +62,7 @@ public class IncomingFluxProcess extends AbstractProcess {
     }
     
     private void readFluxSeason(String filename) {
-
+        
         int nStepYear = getConfiguration().getNStepYear();
         try {
             CSVReader reader = new CSVReader(new FileReader(filename), ';');
@@ -79,7 +83,7 @@ public class IncomingFluxProcess extends AbstractProcess {
             getLogger().log(Level.SEVERE, "Error reading incoming flux seasonality file " + filename, ex);
         }
     }
-
+    
     @Override
     public void run() {
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
