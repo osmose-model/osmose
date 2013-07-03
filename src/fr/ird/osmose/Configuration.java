@@ -70,7 +70,7 @@ public class Configuration {
         seed = new int[nSpecies];
         if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
             for (int i = 0; i < nSpecies; i++) {
-                seed[i] = getInt("simulation.nschool.sp" + i);;
+                seed[i] = getInt("simulation.nschool.sp" + i);
             }
         } else if (canFind("simulation.nschool")) {
             int n = getInt("simulation.nschool");
@@ -154,9 +154,10 @@ public class Configuration {
             getLogger().log(Level.SEVERE, "Error loading parameters from file " + filename + " around line " + line, ex);
         }
     }
-    
+
     /**
      * Check if parameters 'key' has 'null' value.
+     *
      * @param key
      * @return true if parameter has 'null' value or does not exist
      */
@@ -181,21 +182,11 @@ public class Configuration {
         return cfg.getKeys(filter);
     }
 
-    private String clean(String value) {
-        String cleanedValue = value.trim();
-        if (cleanedValue.endsWith(";")) {
-            cleanedValue = cleanedValue.substring(0, cleanedValue.lastIndexOf(";"));
-            return clean(cleanedValue);
-        } else {
-            return cleanedValue;
-        }
-    }
-
     final public String getString(String key) {
 
         String lkey = key.toLowerCase();
         if (cfg.containsKey(lkey)) {
-            String value = clean(cfg.getProperty(lkey));
+            String value = cfg.getProperty(lkey);
             if (value.equalsIgnoreCase("null")) {
                 return null;
                 //throw new NullPointerException("Null value for parameter " + key);
@@ -212,7 +203,7 @@ public class Configuration {
 
     public String[] getArrayString(String key) {
         String value = getString(key);
-        String[] values = value.split(";");
+        String[] values = value.split(guessSeparator(value, ";"));
         for (int i = 0; i < values.length; i++) {
             values[i] = values[i].trim();
         }
@@ -391,29 +382,75 @@ public class Configuration {
         return forcing;
     }
 
+    /**
+     * This function tries to guess what is the separator in the given string
+     * assuming that it is an array of at least two values. It will look for
+     * separators '=' '\t' ';' and ',' in this order. If none of this separator
+     * are found then it will return the fallback separator given as a
+     * parameter.
+     *
+     * @param string, the string you assume to be an array of values
+     * @param fallbackSeparator, the fallback separator if
+     * @return
+     */
+    private String guessSeparator(String string, String fallbackSeparator) {
+        if (string.split("=").length > 1) {
+            return "=";
+        } else if (string.split(";").length > 1) {
+            return ";";
+        } else if (string.split(",").length > 1) {
+            return ",";
+        } else if (string.split("\t").length > 1) {
+            return "\t";
+        } else if (string.split(" ").length > 1) {
+            return " ";
+        }
+        return fallbackSeparator;
+    }
+
     private class Entry {
 
         private String key;
         private String value;
+        private String keySeparator;
+        private String valueSeparator;
 
         Entry(String line) {
-            key = value = null;
-            parse(line);
+            process(line);
         }
+        
+        private void process(String line) {
+            key = value = null;
+            keySeparator = guessSeparator(line, "=");
+            parse(line);
+            valueSeparator =  guessSeparator(value, ";");
+            value = clean(value);
+            System.out.println(value);
+        }
+        
+        private String clean(String value) {
+        String cleanedValue = value.trim();
+        if (cleanedValue.endsWith(valueSeparator)) {
+            cleanedValue = cleanedValue.substring(0, cleanedValue.lastIndexOf(valueSeparator));
+            return clean(cleanedValue);
+        } else {
+            return cleanedValue;
+        }
+    }
 
         private void parse(String line) {
 
             // make sure the line contains at least one semi-colon (key;value)
-            if (!line.contains(";")) {
-                getLogger().log(Level.WARNING, "Failed to parse line {0} as key;value", line);
+            if (!line.contains(keySeparator)) {
+                getLogger().log(Level.WARNING, "Failed to parse line {0} as key{1}value", new Object[]{line, keySeparator});
                 // key = value = null by default
                 return;
             }
             // extract the key
-            key = line.substring(0, line.indexOf(';')).toLowerCase();
+            key = line.substring(0, line.indexOf(keySeparator)).toLowerCase();
             // extract the value
             try {
-                value = line.substring(line.indexOf(';') + 1);
+                value = line.substring(line.indexOf(keySeparator) + 1);
             } catch (StringIndexOutOfBoundsException ex) {
                 // set value to "null"
                 value = "null";
