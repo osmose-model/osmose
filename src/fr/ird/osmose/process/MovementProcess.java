@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * @author pverley
  */
 public class MovementProcess extends AbstractProcess {
-
+    
     private final static float ONE_DEG_LATITUDE_IN_METER = 111138.f;
     private AbstractProcess[] movements;
     /*
@@ -41,16 +41,16 @@ public class MovementProcess extends AbstractProcess {
     private ConnectivityMatrix[] connectivityMatrix;
     private String[] mapFile;
     private int[] mapIndexNoTwin;
-
+    
     public MovementProcess(int indexSimulation) {
         super(indexSimulation);
     }
-
+    
     @Override
     public void init() {
-
+        
         loadParameters();
-
+        
         int nSpecies = getConfiguration().getNSpecies();
         // init distribution
         range = new int[nSpecies];
@@ -71,7 +71,7 @@ public class MovementProcess extends AbstractProcess {
             movements[i].init();
         }
     }
-
+    
     @Override
     public void run() {
         for (AbstractProcess movement : movements) {
@@ -89,7 +89,7 @@ public class MovementProcess extends AbstractProcess {
      * @return
      */
     List<Cell> getAccessibleCells(School school, GridMap map) {
-
+        
         Cell cell = school.getCell();
         if (map.getValue(cell) <= 0) {
             StringBuilder str = new StringBuilder("Inconsistency in moving ");
@@ -131,7 +131,7 @@ public class MovementProcess extends AbstractProcess {
      * @return the list of cells accessible to the school
      */
     List<Cell> getAccessibleCells(School school) {
-
+        
         Cell cell = school.getCell();
         List<Cell> accessibleCells = new ArrayList();
         Iterator<Cell> neighbors = getGrid().getNeighbourCells(cell, range[school.getSpeciesIndex()]).iterator();
@@ -143,14 +143,14 @@ public class MovementProcess extends AbstractProcess {
         }
         return accessibleCells;
     }
-
+    
     private void loadParameters() {
-
-
+        
+        
         int nSpecies = getConfiguration().getNSpecies();
         spatialDistribution = new SpatialDistribution[nSpecies];
         sizeRandomMap = new int[nSpecies];
-
+        
         for (int i = 0; i < nSpecies; i++) {
             String areaDistribMethod = getConfiguration().getString("movement.distribution.method.sp" + i);
             if (areaDistribMethod.equalsIgnoreCase("random")) {
@@ -166,7 +166,7 @@ public class MovementProcess extends AbstractProcess {
         /*
          * get number of maps
          */
-
+        
         int nmap = getConfiguration().findKeys("movement.map*.species").size();
         maps = new GridMap[nmap];
         connectivityMatrix = new ConnectivityMatrix[nmap];
@@ -194,7 +194,7 @@ public class MovementProcess extends AbstractProcess {
              * read species number
              */
             int iSpec = getSpecies(getConfiguration().getString("movement.map" + imap + ".species")).getIndex();
-
+            
             if (spatialDistribution[iSpec] == SpatialDistribution.RANDOM) {
                 sizeRandomMap[iSpec] = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpec);
             } else {
@@ -248,10 +248,10 @@ public class MovementProcess extends AbstractProcess {
             }
             imap++;
         }
-
+        
         eliminateTwinMap();
     }
-
+    
     private void readCSVMap(String csvFile, int indexMap) {
         
         try {
@@ -283,12 +283,17 @@ public class MovementProcess extends AbstractProcess {
              */
             float invNbCells = 1.f / nbCells;
             int ny = getGrid().get_ny();
+            boolean error = false;
             for (int l = 0; l < lines.size(); l++) {
                 String[] line = lines.get(l);
                 int j = ny - l - 1;
                 for (int i = 0; i < line.length; i++) {
                     float val = Float.valueOf(line[i]);
                     if (val > 0.f) {
+                        if (getGrid().getCell(i, j).isLand()) {
+                            getLogger().log(Level.SEVERE, "Error loading map {0}. Found value > 0 in {1}", new Object[]{csvFile, getGrid().getCell(i, j).toString()});
+                            error = true;
+                        }
                         if (val < 1.f) {
                             /*
                              * value provided is directly a probability
@@ -308,49 +313,52 @@ public class MovementProcess extends AbstractProcess {
                     }
                 }
             }
+            if (error) {
+                System.exit(1);
+            }
             maxProbaPresence[indexMap] = computeMaxProbaPresence(indexMap);
         } catch (IOException ex) {
-           getLogger().log(Level.SEVERE, "Error reading map " + csvFile, ex);
+            getLogger().log(Level.SEVERE, "Error reading map " + csvFile, ex);
         }
         //System.out.println("Read CSV file " + csvFile + " [OK]");
     }
     
-     boolean isOut(School school) {
-         return (null == getMap(school));
+    boolean isOut(School school) {
+        return (null == getMap(school));
     }
-
+    
     public GridMap getMap(int numMap) {
         return maps[numMap];
     }
-
+    
     GridMap getMap(School school) {
         return getMap(getIndexMap(school));
     }
-
+    
     ConnectivityMatrix getMatrix(int numMap) {
         return connectivityMatrix[numMap];
     }
-
+    
     SpatialDistribution getSpatialDistribution(int iSpec) {
         return spatialDistribution[iSpec];
     }
-
+    
     int getIndexMap(int iSpec, int iAge, int iStep) {
         return indexMaps[iSpec][iAge][iStep];
     }
-
+    
     int getIndexMap(School school) {
         return getIndexMap(school.getSpeciesIndex(), school.getAgeDt(), getSimulation().getIndexTimeYear());
     }
-
+    
     float getMaxProbaPresence(int numMap) {
         return maxProbaPresence[numMap];
     }
-
+    
     int getSizeRandomMap(int iSpec) {
         return sizeRandomMap[iSpec];
     }
-
+    
     private float computeMaxProbaPresence(int numMap) {
         float tempMaxProbaPresence = 0;
         GridMap map = getMap(numMap);
@@ -383,7 +391,7 @@ public class MovementProcess extends AbstractProcess {
             }
             //System.out.println("Map " + k + " has index " + mapIndexNoTwin[k] + " " + mapFile[k]);
         }
-
+        
         for (int iSpec = 0; iSpec < indexMaps.length; iSpec++) {
             for (int iAge = 0; iAge < indexMaps[iSpec].length; iAge++) {
                 for (int iStep = 0; iStep < indexMaps[iSpec][iAge].length; iStep++) {
@@ -416,12 +424,12 @@ public class MovementProcess extends AbstractProcess {
         return str.toString();
     }
     
-     public enum SpatialDistribution {
-
+    public enum SpatialDistribution {
+        
         RANDOM,
         MAPS,
         CONNECTIVITY;
-
+        
         @Override
         public String toString() {
             return name().toLowerCase();

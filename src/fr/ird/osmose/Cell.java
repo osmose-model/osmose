@@ -113,15 +113,15 @@ public class Cell {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("Cell (i:");
+        str.append("Cell i:");
         str.append(i);
-        str.append(", j:");
+        str.append(" j:");
         str.append(j);
-        str.append(")\n  lat: ");
+        str.append(" lat:");
         str.append((float) lat);
-        str.append(" lon: ");
+        str.append(" lon:");
         str.append((float) lon);
-        str.append("\n land? ");
+        str.append(" land:");
         str.append(land);
         return str.toString();
     }
