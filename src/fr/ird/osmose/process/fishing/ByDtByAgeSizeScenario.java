@@ -124,7 +124,7 @@ public class ByDtByAgeSizeScenario extends AbstractFishingScenario {
             }
             // 2. Normal case thresold[k] <= length < threshold[k+1]
             for (int k = 0; k < sizeThreshold.length - 1; k++) {
-                if ((sizeThreshold[k] < length) && (length < sizeThreshold[k + 1])) {
+                if ((sizeThreshold[k] <= length) && (length < sizeThreshold[k + 1])) {
                     return f[getSimulation().getIndexTimeSimu()][k];
                 }
             }
@@ -140,7 +140,7 @@ public class ByDtByAgeSizeScenario extends AbstractFishingScenario {
             }
             // 2. Normal case thresold[k] <= age < threshold[k+1]
             for (int k = 0; k < ageThreshold.length - 1; k++) {
-                if ((ageThreshold[k] < age) && (age < ageThreshold[k + 1])) {
+                if ((ageThreshold[k] <= age) && (age < ageThreshold[k + 1])) {
                     return f[getSimulation().getIndexTimeSimu()][k];
                 }
             }
