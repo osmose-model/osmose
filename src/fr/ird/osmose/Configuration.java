@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -203,7 +204,7 @@ public class Configuration {
 
     public String[] getArrayString(String key) {
         String value = getString(key);
-        String[] values = value.split(guessSeparator(value, ";"));
+        String[] values = value.split(guessSeparator(value, Separator.SEMICOLON).toString());
         for (int i = 0; i < values.length; i++) {
             values[i] = values[i].trim();
         }
@@ -393,19 +394,33 @@ public class Configuration {
      * @param fallbackSeparator, the fallback separator if
      * @return
      */
-    private String guessSeparator(String string, String fallbackSeparator) {
-        if (string.split("=").length > 1) {
-            return "=";
-        } else if (string.split(";").length > 1) {
-            return ";";
-        } else if (string.split(",").length > 1) {
-            return ",";
-        } else if (string.split("\t").length > 1) {
-            return "\t";
-        } else if (string.split(" ").length > 1) {
-            return " ";
+    private Separator guessSeparator(String string, Separator fallback) {
+        
+        for (Separator separator : Separator.values()) {
+            if (string.split(separator.toString()).length > 1)
+                return separator;
         }
-        return fallbackSeparator;
+        return fallback;
+    }
+    
+    private enum Separator {
+        
+        EQUALS('='),
+        SEMICOLON(';'),
+        COMA(','),
+        COLON(':'),
+        TAB('\t'),
+        BLANK(' ');
+        
+        private String separator;
+        private Separator(char separator) {
+            this.separator = Character.toString(separator);
+        }
+        
+        @Override
+        public String toString() {
+            return separator;
+        }
     }
 
     private class Entry {
@@ -421,11 +436,10 @@ public class Configuration {
         
         private void process(String line) {
             key = value = null;
-            keySeparator = guessSeparator(line, "=");
+            keySeparator = guessSeparator(line, Separator.EQUALS).toString();
             parse(line);
-            valueSeparator =  guessSeparator(value, ";");
+            valueSeparator =  guessSeparator(value, Separator.SEMICOLON).toString();
             value = clean(value);
-            System.out.println(value);
         }
         
         private String clean(String value) {
