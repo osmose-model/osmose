@@ -13,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -397,7 +396,7 @@ public class Configuration {
     private Separator guessSeparator(String string, Separator fallback) {
         
         for (Separator separator : Separator.values()) {
-            if (string.split(separator.toString()).length > 1)
+            if (string.contains(separator.toString()) && string.split(separator.toString()).length >= 1)
                 return separator;
         }
         return fallback;
