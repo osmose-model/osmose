@@ -164,19 +164,20 @@ public class Species {
     public float computeMeanLength(int age) {
 
         float length;
+        float decimalAge = age / (float) getConfiguration().getNStepYear();
         if (age == 0) {
+            // Egg size for first time step
             length = eggSize;
-        } else {
-            float decimalAge = age / (float) getConfiguration().getNStepYear();
-            if (decimalAge < growthAgeThreshold) {
-                float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
-                if (lengthAtAgePart < eggSize) {
-                    lengthAtAgePart = eggSize;
-                }
-                length = decimalAge * (float) (lengthAtAgePart - eggSize) + eggSize;    // linear growth for the 1st year as von Bertalanffy is not well adapted for the 1st year
-            } else {
-                length = (float) (lInf * (1 - Math.exp(-K * (decimalAge - t0))));   // von Bertalnffy growth after the first year
+        } else if (decimalAge < growthAgeThreshold) {
+            // Linear growth
+            float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
+            if (lengthAtAgePart < eggSize) {
+                lengthAtAgePart = eggSize;
             }
+            length = (decimalAge / growthAgeThreshold) * (float) (lengthAtAgePart - eggSize) + eggSize;
+        } else {
+            // Von Bertalnffy growth
+            length = (float) (lInf * (1 - Math.exp(-K * (decimalAge - t0))));
         }
 
         return length;
@@ -184,6 +185,7 @@ public class Species {
 
     /**
      * Compute the mean age (number of time steps) at a specific length (cm).
+     *
      * @param length (cm)
      * @return the mean age expressed in number of time steps
      */
