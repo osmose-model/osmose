@@ -42,7 +42,7 @@ public class ReproductionProcess extends AbstractProcess {
         sexRatio = new double[nSpecies];
         alpha = new double[nSpecies];
         readSpawningSeason(getConfiguration().getFile("reproduction.season.file"));
-        
+
         for (int i = 0; i < nSpecies; i++) {
             float sum = 0;
             for (double d : seasonSpawning[i]) {
@@ -57,24 +57,52 @@ public class ReproductionProcess extends AbstractProcess {
 
     private void readSpawningSeason(String filename) {
 
-        int nStepYear = getConfiguration().getNStepYear();
         try {
+            // 1. Open the CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), ';');
             List<String[]> lines = reader.readAll();
-            if ((lines.size() - 1) % nStepYear != 0) {
-                // @TODO throw error
-            }
-            int nstep = lines.size() - 1;
+
+            // 2. Read the reproduction seasonality
+            int nTimeSerie = lines.size() - 1;
+            int nStepYear = getConfiguration().getNStepYear();
+            int nStepSimu = getConfiguration().getNYear() * nStepYear;
             int nspecies = getNSpecies();
-            seasonSpawning = new double[nspecies][nstep];
-            for (int t = 0; t < nstep; t++) {
+            seasonSpawning = new double[nspecies][nStepSimu];
+            for (int t = 0; t < nTimeSerie; t++) {
                 String[] line = lines.get(t + 1);
                 for (int i = 0; i < nspecies; i++) {
-                    seasonSpawning[i][t] = Double.valueOf(line[i + 1]) / 100.d;
+                    seasonSpawning[i][t] = Double.valueOf(line[i + 1]);
                 }
             }
+
+            // 3. Check the length of the time serie
+            if (nTimeSerie % nStepYear != 0) {
+                // Either the time serie is less than a year or it is not a 
+                // multiple of number of time step per year.
+                throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
+            } else if (nTimeSerie < nStepSimu) {
+                // There is less season in the file than number of years of the
+                // simulation.
+                int t = nTimeSerie;
+                while (t < nStepSimu) {
+                    for (int k = 0; k < nTimeSerie; k++) {
+                        for (int i = 0; i < nspecies; i++) {
+                            seasonSpawning[i][t] = seasonSpawning[i][k];
+                        }
+                        t++;
+                        if (t == nStepSimu) {
+                            break;
+                        }
+                    }
+                }
+                getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
+            } else if (nTimeSerie > nStepSimu) {
+                getLogger().log(Level.WARNING, "Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nStepSimu});
+            }
+
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error reading CSV file " + filename, ex);
+            System.exit(1);
         }
     }
 

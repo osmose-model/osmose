@@ -97,6 +97,9 @@ public class ByDtByAgeSizeScenario extends AbstractFishingScenario {
                     for (int k = 0; k < nTimeSerie; k++) {
                         f[t] = f[k];
                         t++;
+                        if (t == nStepSimu) {
+                            break;
+                        }
                     }
                 }
                 getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
