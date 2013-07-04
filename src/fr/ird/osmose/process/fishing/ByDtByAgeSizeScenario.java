@@ -100,7 +100,7 @@ public class ByDtByAgeSizeScenario extends AbstractFishingScenario {
                     }
                 }
                 getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
-            } else if (nTimeSerie >= nStepSimu) {
+            } else if (nTimeSerie > nStepSimu) {
                 getLogger().log(Level.WARNING, "Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nStepSimu});
             }
         } catch (IOException ex) {
