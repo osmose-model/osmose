@@ -145,35 +145,45 @@ public class NaturalMortalityProcess extends AbstractProcess {
         int nStepYear = getConfiguration().getNStepYear();
         int nStepSimu = nStepYear * getConfiguration().getNYear();
         float[][] rates = new float[nspecies][nStepSimu];
-        int nstep = 0;
         try {
+            // 1. Open CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), ';');
             List<String[]> lines = reader.readAll();
-            if ((lines.size() - 1) % nStepYear != 0) {
-                throw new IOException("CSV file " + filename + " does not have a number of lines proportional to number of steps per year.");
-            }
-            nstep = lines.size() - 1;
-            for (int t = 0; t < nstep; t++) {
+            // 2. Read natural mortality rates
+            int nTimeSerie = lines.size() - 1;
+            for (int t = 0; t < nTimeSerie; t++) {
                 String[] line = lines.get(t + 1);
                 for (int i = 0; i < nspecies; i++) {
                     rates[i][t] = Float.valueOf(line[i + 1]);
                 }
             }
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error reading natural mortality rates file " + filename, ex);
-            System.exit(1);
-        }
-
-        if (nstep < nStepSimu) {
-            for (int i = 0; i < nspecies; i++) {
-                int t = nstep;
-                while (t < rates[i].length) {
-                    for (int k = 0; k < nstep; k++) {
-                        rates[i][t] = rates[i][k];
+            // 3. Check the length of the time serie
+            if (nTimeSerie % nStepYear != 0) {
+                // Either the time serie is less than a year or it is not a 
+                // multiple of number of time step per year.
+                throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
+            } else if (nTimeSerie < nStepSimu) {
+                // There is less season in the file than number of years of the
+                // simulation.
+                int t = nTimeSerie;
+                while (t < nStepSimu) {
+                    for (int k = 0; k < nTimeSerie; k++) {
+                        for (int i = 0; i < nspecies; i++) {
+                            rates[i][t] = rates[i][k];
+                        }
                         t++;
+                        if (t == nStepSimu) {
+                            break;
+                        }
                     }
                 }
+                getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
+            } else if (nTimeSerie > nStepSimu) {
+                getLogger().log(Level.WARNING, "Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nStepSimu});
             }
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Error reading CSV file " + filename, ex);
+            System.exit(1);
         }
 
         return rates;
