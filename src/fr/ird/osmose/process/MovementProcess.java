@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * @author pverley
  */
 public class MovementProcess extends AbstractProcess {
-    
+
     private final static float ONE_DEG_LATITUDE_IN_METER = 111138.f;
     private AbstractProcess[] movements;
     /*
@@ -41,16 +41,16 @@ public class MovementProcess extends AbstractProcess {
     private ConnectivityMatrix[] connectivityMatrix;
     private String[] mapFile;
     private int[] mapIndexNoTwin;
-    
+
     public MovementProcess(int indexSimulation) {
         super(indexSimulation);
     }
-    
+
     @Override
     public void init() {
-        
+
         loadParameters();
-        
+
         int nSpecies = getConfiguration().getNSpecies();
         // init distribution
         range = new int[nSpecies];
@@ -71,7 +71,7 @@ public class MovementProcess extends AbstractProcess {
             movements[i].init();
         }
     }
-    
+
     @Override
     public void run() {
         for (AbstractProcess movement : movements) {
@@ -89,7 +89,7 @@ public class MovementProcess extends AbstractProcess {
      * @return
      */
     List<Cell> getAccessibleCells(School school, GridMap map) {
-        
+
         Cell cell = school.getCell();
         if (map.getValue(cell) <= 0) {
             StringBuilder str = new StringBuilder("Inconsistency in moving ");
@@ -131,7 +131,7 @@ public class MovementProcess extends AbstractProcess {
      * @return the list of cells accessible to the school
      */
     List<Cell> getAccessibleCells(School school) {
-        
+
         Cell cell = school.getCell();
         List<Cell> accessibleCells = new ArrayList();
         Iterator<Cell> neighbors = getGrid().getNeighbourCells(cell, range[school.getSpeciesIndex()]).iterator();
@@ -143,14 +143,14 @@ public class MovementProcess extends AbstractProcess {
         }
         return accessibleCells;
     }
-    
+
     private void loadParameters() {
-        
-        
+
+
         int nSpecies = getConfiguration().getNSpecies();
         spatialDistribution = new SpatialDistribution[nSpecies];
         sizeRandomMap = new int[nSpecies];
-        
+
         for (int i = 0; i < nSpecies; i++) {
             String areaDistribMethod = getConfiguration().getString("movement.distribution.method.sp" + i);
             if (areaDistribMethod.equalsIgnoreCase("random")) {
@@ -166,7 +166,7 @@ public class MovementProcess extends AbstractProcess {
         /*
          * get number of maps
          */
-        
+
         int nmap = getConfiguration().findKeys("movement.map*.species").size();
         maps = new GridMap[nmap];
         connectivityMatrix = new ConnectivityMatrix[nmap];
@@ -178,7 +178,7 @@ public class MovementProcess extends AbstractProcess {
             int lifespan = getSpecies(iSpec).getLifespanDt();
             indexMaps[iSpec] = new int[lifespan][];
             for (int j = 0; j < lifespan; j++) {
-                indexMaps[iSpec][j] = new int[getConfiguration().getNStepYear()];
+                indexMaps[iSpec][j] = new int[getConfiguration().getNStepYear() * getConfiguration().getNYear()];
             }
         }
 
@@ -194,7 +194,7 @@ public class MovementProcess extends AbstractProcess {
              * read species number
              */
             int iSpec = getSpecies(getConfiguration().getString("movement.map" + imap + ".species")).getIndex();
-            
+
             if (spatialDistribution[iSpec] == SpatialDistribution.RANDOM) {
                 sizeRandomMap[iSpec] = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpec);
             } else {
@@ -210,11 +210,27 @@ public class MovementProcess extends AbstractProcess {
                  */
                 int[] mapSeason = getConfiguration().getArrayInt("movement.map" + imap + ".season");
                 /*
+                 * Read year min and max concerned by this map
+                 */
+                int yearMin = 0;
+                int yearMax = getConfiguration().getNYear();
+                if (!getConfiguration().isNull("movement.map" + imap + ".year.min")) {
+                    yearMin = getConfiguration().getInt("movement.map" + imap + ".year.min");
+                    yearMin = Math.max(yearMin, 0);
+                }
+                if (!getConfiguration().isNull("movement.map" + imap + ".year.max")) {
+                    yearMax = getConfiguration().getInt("movement.map" + imap + ".year.max");
+                    yearMax = Math.min(yearMax, getConfiguration().getNYear());
+                }
+                /*
                  * Assign number of maps to numMap array
                  */
+                int nStepYear = getConfiguration().getNStepYear();
                 for (int iAge = ageMin; iAge < ageMax; iAge++) {
-                    for (int iStep : mapSeason) {
-                        indexMaps[iSpec][iAge][iStep] = indexMap;
+                    for (int iYear = yearMin; iYear < yearMax; iYear++) {
+                        for (int iStep : mapSeason) {
+                            indexMaps[iSpec][iAge][iYear * nStepYear + iStep] = indexMap;
+                        }
                     }
                 }
                 /*
@@ -248,12 +264,12 @@ public class MovementProcess extends AbstractProcess {
             }
             imap++;
         }
-        
+
         eliminateTwinMap();
     }
-    
+
     private void readCSVMap(String csvFile, int indexMap) {
-        
+
         try {
             /*
              * Read the CSV file
@@ -322,43 +338,43 @@ public class MovementProcess extends AbstractProcess {
         }
         //System.out.println("Read CSV file " + csvFile + " [OK]");
     }
-    
+
     boolean isOut(School school) {
         return (null == getMap(school));
     }
-    
+
     public GridMap getMap(int numMap) {
         return maps[numMap];
     }
-    
+
     GridMap getMap(School school) {
         return getMap(getIndexMap(school));
     }
-    
+
     ConnectivityMatrix getMatrix(int numMap) {
         return connectivityMatrix[numMap];
     }
-    
+
     SpatialDistribution getSpatialDistribution(int iSpec) {
         return spatialDistribution[iSpec];
     }
-    
+
     int getIndexMap(int iSpec, int iAge, int iStep) {
         return indexMaps[iSpec][iAge][iStep];
     }
-    
+
     int getIndexMap(School school) {
-        return getIndexMap(school.getSpeciesIndex(), school.getAgeDt(), getSimulation().getIndexTimeYear());
+        return getIndexMap(school.getSpeciesIndex(), school.getAgeDt(), getSimulation().getIndexTimeSimu());
     }
-    
+
     float getMaxProbaPresence(int numMap) {
         return maxProbaPresence[numMap];
     }
-    
+
     int getSizeRandomMap(int iSpec) {
         return sizeRandomMap[iSpec];
     }
-    
+
     private float computeMaxProbaPresence(int numMap) {
         float tempMaxProbaPresence = 0;
         GridMap map = getMap(numMap);
@@ -391,7 +407,7 @@ public class MovementProcess extends AbstractProcess {
             }
             //System.out.println("Map " + k + " has index " + mapIndexNoTwin[k] + " " + mapFile[k]);
         }
-        
+
         for (int iSpec = 0; iSpec < indexMaps.length; iSpec++) {
             for (int iAge = 0; iAge < indexMaps[iSpec].length; iAge++) {
                 for (int iStep = 0; iStep < indexMaps[iSpec][iAge].length; iStep++) {
@@ -404,7 +420,7 @@ public class MovementProcess extends AbstractProcess {
             }
         }
     }
-    
+
     public String getMapDetails(int numMap) {
         StringBuilder str = new StringBuilder();
         str.append("Map: ");
@@ -423,13 +439,13 @@ public class MovementProcess extends AbstractProcess {
 //        }
         return str.toString();
     }
-    
+
     public enum SpatialDistribution {
-        
+
         RANDOM,
         MAPS,
         CONNECTIVITY;
-        
+
         @Override
         public String toString() {
             return name().toLowerCase();
