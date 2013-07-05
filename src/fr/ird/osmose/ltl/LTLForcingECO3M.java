@@ -30,7 +30,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             plktonNetcdfNames[i] = getConfiguration().getString("ltl.netcdf.var.plankton.plk" + i);
         }
 
-        planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t").size()];
+        planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t*").size()];
         for (int i = 0; i < planktonFileListNetcdf.length; i++) {
             planktonFileListNetcdf[i] = getConfiguration().getFile("ltl.netcdf.file.t" + i);
         }
@@ -114,14 +114,14 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
                     }
                 }
             }
-        } catch (IOException e) {
-            Logger.getLogger(LTLForcingECO3M.class.getName()).log(Level.SEVERE, null, e);
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "Failed to read variable " + plktonNetcdfNames[iPlankton] + " from file " + name, e);
         } finally {
             if (nc != null) {
                 try {
                     nc.close();
                 } catch (IOException ioe) {
-                    Logger.getLogger(LTLForcingECO3M.class.getName()).log(Level.SEVERE, null, ioe);
+                    getLogger().log(Level.SEVERE, "Failed to close NetCDF file " + name, ioe);
                 }
             }
         }
