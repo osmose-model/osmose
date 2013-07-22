@@ -3,6 +3,7 @@ package fr.ird.osmose.process;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.fishing.AbstractFishingScenario;
+import fr.ird.osmose.process.fishing.AnnualFByYearSeasonScenario;
 import fr.ird.osmose.process.fishing.AnnualFScenario;
 import fr.ird.osmose.process.fishing.AnnualFSeasonScenario;
 import fr.ird.osmose.process.fishing.ByDtByAgeSizeScenario;
@@ -24,16 +25,25 @@ public class FishingProcess extends AbstractProcess {
         fishingScenario = new AbstractFishingScenario[getNSpecies()];
         // Find fishing scenario
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            int iSimu = getIndexSimulation();
+            Species species = getSpecies(iSpec);
+            // Fishing rate by Dt, by Age or Size
             if (!getConfiguration().isNull("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec)
                     || !getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
-                fishingScenario[iSpec] = new ByDtByAgeSizeScenario(getIndexSimulation(), getSpecies(iSpec));
+                fishingScenario[iSpec] = new ByDtByAgeSizeScenario(iSimu, species);
                 continue;
             }
+            // Annual fishing rate by Year
+            if (!getConfiguration().isNull("mortality.fishing.rate.byYear.file.sp" + iSpec)) {
+                fishingScenario[iSpec] = new AnnualFByYearSeasonScenario(iSimu, species);
+                continue;
+            }
+            // Annual fishing rate
             if (!getConfiguration().isNull("mortality.fishing.rate.sp" + iSpec)) {
                 if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
-                    fishingScenario[iSpec] = new AnnualFSeasonScenario(getIndexSimulation(), getSpecies(iSpec));
+                    fishingScenario[iSpec] = new AnnualFSeasonScenario(iSimu, species);
                 } else {
-                    fishingScenario[iSpec] = new AnnualFScenario(getIndexSimulation(), getSpecies(iSpec));
+                    fishingScenario[iSpec] = new AnnualFScenario(iSimu, species);
                 }
                 continue;
             }
