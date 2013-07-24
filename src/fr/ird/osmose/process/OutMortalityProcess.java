@@ -47,7 +47,7 @@ import fr.ird.osmose.School;
 public class OutMortalityProcess extends AbstractProcess {
 
     /*
-     * Out mortality rate [year-1]
+     * Out mortality rate [dt-1]
      */
     private float[] Z;
 
@@ -59,10 +59,11 @@ public class OutMortalityProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getConfiguration().getNSpecies();
+        int nStepYear = getConfiguration().getNStepYear();
         Z = new float[nSpecies];
         for (int i = 0; i < nSpecies; i++) {
             if (!getConfiguration().isNull("mortality.out.rate.sp" + i)) {
-                Z[i] = getConfiguration().getFloat("mortality.out.rate.sp" + i);
+                Z[i] = getConfiguration().getFloat("mortality.out.rate.sp" + i) / nStepYear;
             }
         }
     }
