@@ -51,7 +51,9 @@ public class Indicators extends SimulationLinker {
         indicators.add(new MeanSizeCatchIndicator(indexSimulation, "output.size.catch.enabled"));
         indicators.add(new SizeSpectrumIndicator(indexSimulation, "output.size.spectrum.enabled"));
         indicators.add(new SizeSpectrumSpeciesNIndicator(indexSimulation, "output.size.spectrum.perSpecies.N.enabled"));
+        indicators.add(new SizeSpectrumSpeciesYieldNIndicator(indexSimulation, "output.size.spectrum.perSpecies.N.enabled"));
         indicators.add(new SizeSpectrumSpeciesBIndicator(indexSimulation, "output.size.spectrum.perSpecies.B.enabled"));
+        indicators.add(new SizeSpectrumSpeciesYieldIndicator(indexSimulation, "output.size.spectrum.perSpecies.B.enabled"));
         indicators.add(new MeanSizeSpeciesIndicator(indexSimulation, "output.size.perSpecies.enabled"));
         // TL
         indicators.add(new MeanTrophicLevelIndicator(indexSimulation, "output.tl.enabled"));
