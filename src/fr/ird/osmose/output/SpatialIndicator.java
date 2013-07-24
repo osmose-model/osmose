@@ -296,4 +296,10 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
         filename.append(".nc.part");
         return filename.toString();
     }
+    
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        // Always true, every time step should be written in the NetCDF file.
+        return true;
+    }
 }

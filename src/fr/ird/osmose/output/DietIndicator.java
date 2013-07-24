@@ -25,6 +25,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     // IO
     private FileOutputStream fos;
     private PrintWriter prw;
+    private int recordFrequency;
     //
     private double[][][][] diet;
     private double[][] abundanceStage;
@@ -189,6 +190,9 @@ public class DietIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void init() {
+        
+        // Record frequency
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // Init diet output stage
         dietOutputStage = new DietOutputStage();
@@ -252,5 +256,10 @@ public class DietIndicator extends SimulationLinker implements Indicator {
                 Logger.getLogger(DietIndicator.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 }

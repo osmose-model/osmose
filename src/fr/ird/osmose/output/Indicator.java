@@ -41,8 +41,22 @@ public interface Indicator {
      */
     public void write(float time);
     
+    /**
+     * Whether the parameter should be written at specified time step.
+     * @param iStepSimu, the current step of the simulation.
+     * @return true if the parameter should be written in the file at the
+     * specified time step, false otherwise.
+     */
+    public boolean isTimeToWrite(int iStepSimu);
+    
+    /**
+     * Initializes the indicator. Load parameters and create the file.
+     */
     public void init();
     
+    /**
+     * Closes the file
+     */
     public void close();
     
 }

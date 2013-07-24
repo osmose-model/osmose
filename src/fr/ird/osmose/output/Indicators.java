@@ -20,15 +20,23 @@ public class Indicators extends SimulationLinker {
 
     public Indicators(int indexSimulation) {
         super(indexSimulation);
+        indicators = new ArrayList();
+    }
+
+    public void init() {
         
-         if (!getSimulation().isRestart()) {
+        int indexSimulation = getIndexSimulation();
+        /*
+         * Delete existing outputs from previous simulation
+         */
+        if (!getSimulation().isRestart()) {
             // Delete previous simulation of the same name
             String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + indexSimulation + "*";
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         }
-
-        indicators = new ArrayList();
-
+        /*
+         * Instantiate indicators
+         */
         // Biomass
         indicators.add(new BiomassIndicator(indexSimulation, "output.biomass.enabled"));
         // Abundance
@@ -58,10 +66,10 @@ public class Indicators extends SimulationLinker {
         // Spatialized
         indicators.add(new SpatialIndicator(indexSimulation, "output.spatial.enabled"));
         indicators.add(new LTLIndicator(indexSimulation, "output.spatial.ltl.enabled"));
-    }
 
-    public void init() {
-
+        /*
+         * Initialize indicators
+         */
         for (Indicator indicator : indicators) {
             if (indicator.isEnabled()) {
                 indicator.init();
@@ -88,15 +96,13 @@ public class Indicators extends SimulationLinker {
 
     public void update(int iStepSimu) {
 
-        int year = getSimulation().getYear();
-        int nStepsRecord = getConfiguration().getInt("output.recordfrequency.ndt");
-        //
         // UPDATE
-        if (year >= getConfiguration().getInt("output.start.year")) {
+        if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
             for (Indicator indicator : indicators) {
                 if (indicator.isEnabled()) {
                     indicator.update();
-                    if (((iStepSimu + 1) % nStepsRecord) == 0) {
+                    // WRITE
+                    if (indicator.isTimeToWrite(iStepSimu)) {
                         float time = (float) (iStepSimu + 1) / getConfiguration().getNStepYear();
                         indicator.write(time);
                         indicator.reset();

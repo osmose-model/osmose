@@ -23,6 +23,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
     // IO
     private FileOutputStream[] fos;
     private PrintWriter[] prw;
+    private int recordFrequency;
     /*
      * Mortality rates Stages: 1. eggs & larvae 2. Pre-recruits 3. Recruits
      */
@@ -159,6 +160,9 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void init() {
+        
+         // Record frequency
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
@@ -231,5 +235,10 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 }
             }
         }
+    }
+    
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 }

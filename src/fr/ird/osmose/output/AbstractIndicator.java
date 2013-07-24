@@ -119,4 +119,9 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
     public int getRecordFrequency() {
         return recordFrequency;
     }
+    
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        return (((iStepSimu + 1) % recordFrequency) == 0);
+    }
 }

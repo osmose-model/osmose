@@ -18,6 +18,8 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
     // IO
     private FileOutputStream[] fos;
     private PrintWriter[] prw;
+    private int recordFrequency;
+    //
     private double[][] meanSize;
     private double[][] abundance;
     /**
@@ -81,6 +83,10 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
 
     @Override
     public void init() {
+        
+         // Record frequency
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
+        
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
@@ -133,5 +139,10 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
                 }
             }
         }
+    }
+    
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 }

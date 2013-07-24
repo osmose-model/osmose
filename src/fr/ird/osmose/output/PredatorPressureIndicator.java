@@ -25,6 +25,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     // IO
     private FileOutputStream fos;
     private PrintWriter prw;
+    private int recordFrequency;
     //
     private double[][][][] predatorPressure;
     // Diet output stage
@@ -140,6 +141,9 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
 
     @Override
     public void init() {
+        
+         // Record frequency
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // Init diet output stage
         dietOutputStage = new DietOutputStage();
@@ -204,5 +208,10 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
                 getLogger().log(Level.SEVERE, "Error closing output file PredatorPressure", ex);
             }
         }
+    }
+    
+    @Override
+    public boolean isTimeToWrite(int iStepSimu) {
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
 }
