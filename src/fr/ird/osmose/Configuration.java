@@ -57,11 +57,12 @@ public class Configuration {
 
     public void init() {
 
-        if (canFind("simulation.ncpu")) {
+        if (!isNull("simulation.ncpu")) {
             nCpu = getInt("simulation.ncpu");
         } else {
             nCpu = Integer.MAX_VALUE;
         }
+        nCpu = Math.max(nCpu, 1);
         nSpecies = getInt("simulation.nspecies");
         nPlankton = getInt("simulation.nplankton");
         nSimulation = getInt("simulation.nsimulation");
