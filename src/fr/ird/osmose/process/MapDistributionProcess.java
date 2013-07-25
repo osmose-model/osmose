@@ -76,8 +76,8 @@ public class MapDistributionProcess extends AbstractProcess {
             double proba;
             do {
                 indexCell = (int) Math.round((nCells - 1) * Math.random());
-                proba = movement.getMap(school).getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0 || proba < Math.random() * tempMaxProbaPresence);
+                proba = map.getValue(getGrid().getCell(indexCell));
+            } while (proba <= 0.d || proba < Math.random() * tempMaxProbaPresence);
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.

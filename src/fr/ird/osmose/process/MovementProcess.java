@@ -2,7 +2,6 @@ package fr.ird.osmose.process;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
 import fr.ird.osmose.util.ConnectivityMatrix;
 import fr.ird.osmose.util.GridMap;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -91,12 +89,12 @@ public class MovementProcess extends AbstractProcess {
     List<Cell> getAccessibleCells(School school, GridMap map) {
 
         Cell cell = school.getCell();
-        if (map.getValue(cell) <= 0) {
+        if (map.getValue(cell) <= 0.d) {
             StringBuilder str = new StringBuilder("Inconsistency in moving ");
             str.append(school.toString());
             str.append("\n");
             str.append("It is not in the geographical area it is supposed to be...");
-            System.out.println(str.toString());
+            getLogger().warning(str.toString());
         }
         List<Cell> accessibleCells = new ArrayList();
         // 1. Get all surrounding cells
@@ -174,11 +172,15 @@ public class MovementProcess extends AbstractProcess {
         mapFile = new String[nmap];
         mapIndexNoTwin = new int[nmap];
         indexMaps = new int[nSpecies][][];
+        int nSteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
         for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
             int lifespan = getSpecies(iSpec).getLifespanDt();
             indexMaps[iSpec] = new int[lifespan][];
-            for (int j = 0; j < lifespan; j++) {
-                indexMaps[iSpec][j] = new int[getConfiguration().getNStepYear() * getConfiguration().getNYear()];
+            for (int iAge = 0; iAge < lifespan; iAge++) {
+                indexMaps[iSpec][iAge] = new int[nSteps];
+                for (int iStep = 0; iStep < nSteps; iStep++) {
+                    indexMaps[iSpec][iAge][iStep] = -1;
+                }
             }
         }
 
@@ -264,8 +266,28 @@ public class MovementProcess extends AbstractProcess {
             }
             imap++;
         }
+        checkMapIndexation();
 
         eliminateTwinMap();
+    }
+
+    private void checkMapIndexation() {
+
+        int nSteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
+        int nStepYear = getConfiguration().getNStepYear();
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            int lifespan = getSpecies(iSpec).getLifespanDt();
+            for (int iAge = 0; iAge < lifespan; iAge++) {
+                for (int iStep = 0; iStep < nSteps; iStep++) {
+                    if (indexMaps[iSpec][iAge][iStep] < 0) {
+                        float age = (float)iAge / nStepYear;
+                        int year = iStep / nStepYear;
+                        int step = iStep % nStepYear;
+                        getLogger().log(Level.WARNING, "No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpec).getName(), age, year, step});
+                    }
+                }
+            }
+        }
     }
 
     private void readCSVMap(String csvFile, int indexMap) {
