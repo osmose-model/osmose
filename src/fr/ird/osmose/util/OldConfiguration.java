@@ -6,8 +6,6 @@ import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.grid.OriginalGrid;
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.process.MovementProcess.SpatialDistribution;
-import fr.ird.osmose.util.ConnectivityMatrix;
-import fr.ird.osmose.util.GridMap;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,6 +55,7 @@ public class OldConfiguration {
             migrationFilename,
             accessibilityFilename,
             reproductionFilename,
+            fishingSeasonFilename,
             coastFilename,
             areasFilename,
             mpaFilename,
@@ -578,6 +577,9 @@ public class OldConfiguration {
         readLTLForcingFile(ltlForcingFilename);
         readPredationFile(predationFilename);
         readFishingFile(fishingFilename);
+        if (null != fishingSeasonFilename) {
+            readSeasonalityFishingFile(fishingSeasonFilename);
+        }
         readCalibrationFile(calibrationFilename);
         readSeasonalityReproFile(reproductionFilename);
         readsize0File(size0Filename);
@@ -696,7 +698,12 @@ public class OldConfiguration {
             System.out.println("  Reproduction file = " + reproductionFilename);
 
             st.nextToken();
-            // fishingSeasonFilename not used anymore
+            if (st.sval.isEmpty() || st.sval.equals("null")) {
+                fishingSeasonFilename = null;
+            } else {
+                fishingSeasonFilename = st.sval;
+                System.out.println("  Fishing seasonality file = " + reproductionFilename);
+            }
 
             st.nextToken();
             migrationFilename = st.sval;
@@ -1183,6 +1190,65 @@ public class OldConfiguration {
             reader.close();
         } catch (IOException ex) {
             Logger.getLogger(Osmose.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void readSeasonalityFishingFile(String fishingSeasonFileName) {
+
+        float[][] seasonFishing = new float[nSpecies][nStepYear];
+        if (fishingSeasonFileName.equalsIgnoreCase("default")) {
+            for (int i = 0; i < nSpecies; i++) {
+                for (int j = 0; j < nStepYear; j++) {
+                    seasonFishing[i][j] = (float) 1 / (float) nStepYear;
+                }
+            }
+            System.out.println("Fishing mortality is set constant over the year (default)");
+
+        } else {
+            FileInputStream fishingFile = null;
+            try {
+                fishingFile = new FileInputStream(resolveFile(fishingSeasonFileName));
+            } catch (FileNotFoundException ex) {
+                System.out.println("fishing file doesn't exist: " + fishingSeasonFileName);
+                System.exit(1);
+            }
+
+            Reader r = new BufferedReader(new InputStreamReader(fishingFile));
+            StreamTokenizer st = new StreamTokenizer(r);
+            st.slashSlashComments(true);
+            st.slashStarComments(true);
+            st.quoteChar(';');
+
+            float tempSum;
+
+            try {
+                st.nextToken();
+                if (new Integer(st.sval).intValue() == nStepYear) {
+                    for (int i = 0; i < nSpecies; i++) {
+                        tempSum = 0;
+                        for (int j = 0; j < nStepYear; j++) {
+                            st.nextToken();
+                            seasonFishing[i][j] = (new Float(st.sval)).floatValue() / 100;   //percentage
+                            tempSum += (new Float(st.sval)).floatValue();
+                        }
+                        if (!((tempSum > 99.f) && (tempSum < 101.f))) {
+                            System.out.println("ERROR: sum of percents does not equal 100% in fishing seasonality file");
+                        }
+                    }
+                } else {
+                    System.out.println("Error in nb time steps defined in the fishing seasonality file");
+                }
+            } catch (IOException ex) {
+                System.out.println("Reading error of fishing seasonality file");
+                System.exit(1);
+            }
+        }
+        
+        // Apply seasonality to fishing rates
+        for (int i = 0; i < nSpecies; i++) {
+            for (int iStep = 0; iStep < nStepYear; iStep++) {
+                fishingRates[i][iStep] *= seasonFishing[i][iStep];
+            }
         }
     }
 
