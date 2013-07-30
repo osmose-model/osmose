@@ -46,6 +46,9 @@ public class PredPreyStage extends AbstractStage {
                 predPreyStageThreshold[i] = new float[0];
             }
         }
+        for (int i = 0; i < nPlankton; i++) {
+            predPreyStageThreshold[nSpec + i] = new float[0];
+        }
     }
 
     @Override
