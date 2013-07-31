@@ -74,7 +74,7 @@ public class IncomingFluxProcess extends AbstractProcess {
             int nStepSimu = getConfiguration().getNYear() * nStepYear;
             int nspecies = getNSpecies();
             seasonFlux = new double[nspecies][nStepSimu];
-            for (int t = 0; t < nStepSimu; t++) {
+            for (int t = 0; t < nTimeSerie; t++) {
                 String[] line = lines.get(t + 1);
                 for (int i = 0; i < nspecies; i++) {
                     seasonFlux[i][t] = Double.valueOf(line[i + 1]);
