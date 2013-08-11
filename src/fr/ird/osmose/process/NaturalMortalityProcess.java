@@ -5,6 +5,7 @@ import fr.ird.osmose.Species;
 import fr.ird.osmose.process.naturalmortality.AnnualNaturalMortalityScenario;
 import fr.ird.osmose.process.naturalmortality.ByDtByAgeSizeNaturalMortalityScenario;
 import fr.ird.osmose.process.naturalmortality.ByDtLarvaMortalityScenario;
+import fr.ird.osmose.process.naturalmortality.ByDtNaturalMortalityScenario;
 import fr.ird.osmose.process.naturalmortality.ConstantLarvaMortalityScenario;
 import fr.ird.osmose.util.GridMap;
 import java.util.List;
@@ -62,6 +63,11 @@ public class NaturalMortalityProcess extends AbstractProcess {
             if (!getConfiguration().isNull("mortality.natural.rate.byDt.byAge.file.sp" + iSpec)
                     || !getConfiguration().isNull("mortality.natural.rate.byDt.bySize.file.sp" + iSpec)) {
                 naturalMortality[iSpec] = new ByDtByAgeSizeNaturalMortalityScenario(iSimu, species);
+                continue;
+            }
+            // Natural mortality by Dt
+            if (!getConfiguration().isNull("mortality.natural.rate.bytDt.file.sp" + iSpec)) {
+                larvaMortality[iSpec] = new ByDtNaturalMortalityScenario(iSimu, species);
                 continue;
             }
             // Annual natural mortality
