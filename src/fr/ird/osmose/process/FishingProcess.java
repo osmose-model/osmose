@@ -2,7 +2,6 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.fishing.AbstractFishingScenario;
 import fr.ird.osmose.process.fishing.AnnualFByYearSeasonScenario;
 import fr.ird.osmose.process.fishing.AnnualFScenario;
 import fr.ird.osmose.process.fishing.AnnualFSeasonScenario;
@@ -14,7 +13,7 @@ import fr.ird.osmose.process.fishing.ByDtByAgeSizeScenario;
  */
 public class FishingProcess extends AbstractProcess {
 
-    private AbstractFishingScenario[] fishingScenario;
+    private AbstractMortalityScenario[] fishingScenario;
 
     public FishingProcess(int indexSimulation) {
         super(indexSimulation);
@@ -22,7 +21,7 @@ public class FishingProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        fishingScenario = new AbstractFishingScenario[getNSpecies()];
+        fishingScenario = new AbstractMortalityScenario[getNSpecies()];
         // Find fishing scenario
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             int iSimu = getIndexSimulation();
@@ -48,8 +47,8 @@ public class FishingProcess extends AbstractProcess {
                 continue;
             }
         }
-        // Initialize fishing scenario
         
+        // Initialize fishing scenario
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             fishingScenario[iSpec].init();
         }

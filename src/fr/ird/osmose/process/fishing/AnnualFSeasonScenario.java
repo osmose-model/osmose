@@ -7,6 +7,7 @@ package fr.ird.osmose.process.fishing;
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.process.AbstractMortalityScenario;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.logging.Level;
  *
  * @author pverley
  */
-public class AnnualFSeasonScenario extends AbstractFishingScenario {
+public class AnnualFSeasonScenario extends AbstractMortalityScenario {
 
     private float annualF;
     private float[] season;

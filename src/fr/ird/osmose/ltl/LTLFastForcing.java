@@ -45,7 +45,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
         for (int j = 0; j < getGrid().get_ny(); j++) {
             for (int i = 0; i < getGrid().get_nx(); i++) {
                 if (!getGrid().getCell(i, j).isLand()) {
-                    biomass[j][i] = data[getIndexStepLTL(iStepSimu)][plankton.getIndex()][j][i];
+                    biomass[j][i] = 100 * data[getIndexStepLTL(iStepSimu)][plankton.getIndex()][j][i];
                 }
             }
         }

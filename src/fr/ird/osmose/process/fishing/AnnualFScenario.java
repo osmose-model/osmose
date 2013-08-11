@@ -6,13 +6,14 @@ package fr.ird.osmose.process.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.process.AbstractMortalityScenario;
 import java.util.logging.Level;
 
 /**
  *
  * @author pverley
  */
-public class AnnualFScenario extends AbstractFishingScenario {
+public class AnnualFScenario extends AbstractMortalityScenario {
 
     private float instantaneousF;
     private int recruitmentAge;

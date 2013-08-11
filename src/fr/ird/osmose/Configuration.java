@@ -4,8 +4,10 @@
  */
 package fr.ird.osmose;
 
+import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.Properties;
 import java.io.BufferedReader;
 import java.io.File;
@@ -383,6 +385,141 @@ public class Configuration {
         return forcing;
     }
 
+    public GridMap readCSVMap(String csvFile) {
+
+        GridMap map = null;
+        try {
+            /*
+             * Read the CSV file
+             */
+            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            List<String[]> lines = reader.readAll();
+            /*
+             * Initialize the map
+             */
+            map = new GridMap();
+            /*
+             * Read the map
+             */
+            int ny = getGrid().get_ny();
+            for (int l = 0; l < lines.size(); l++) {
+                String[] line = lines.get(l);
+                int j = ny - l - 1;
+                for (int i = 0; i < line.length; i++) {
+                    float val = Float.valueOf(line[i]);
+                    if (val > 0.f) {
+                        map.setValue(i, j, val);
+                    }
+                }
+            }
+            reader.close();
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Error reading CSV map " + csvFile, ex);
+        }
+        return map;
+    }
+
+    public float[][] readTimeSeriesSpecies(String filename) {
+
+        int nStepSimu = nStepYear * nYear;
+        float[][] rates = new float[nSpecies][nStepSimu];
+        try {
+            // 1. Open CSV file
+            CSVReader reader = new CSVReader(new FileReader(filename), ';');
+            List<String[]> lines = reader.readAll();
+            // 2. Read natural mortality rates
+            int nTimeSerie = lines.size() - 1;
+            for (int t = 0; t < nTimeSerie; t++) {
+                String[] line = lines.get(t + 1);
+                for (int i = 0; i < nSpecies; i++) {
+                    rates[i][t] = Float.valueOf(line[i + 1]);
+                }
+            }
+            // 3. Check the length of the time serie
+            if (nTimeSerie % nStepYear != 0) {
+                // Either the time serie is less than a year or it is not a 
+                // multiple of number of time step per year.
+                throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
+            } else if (nTimeSerie < nStepSimu) {
+                // There is less season in the file than number of years of the
+                // simulation.
+                int t = nTimeSerie;
+                while (t < nStepSimu) {
+                    for (int k = 0; k < nTimeSerie; k++) {
+                        for (int i = 0; i < nSpecies; i++) {
+                            rates[i][t] = rates[i][k];
+                        }
+                        t++;
+                        if (t == nStepSimu) {
+                            break;
+                        }
+                    }
+                }
+                getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
+            } else if (nTimeSerie > nStepSimu) {
+                getLogger().log(Level.WARNING, "Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nStepSimu});
+            }
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Error reading CSV file " + filename, ex);
+            System.exit(1);
+        }
+
+        return rates;
+    }
+    
+    public float[] readTimeSeries(String filename) {
+        return readTimeSeries(filename, nStepYear, nStepYear * nYear);
+    }
+
+    public float[] readTimeSeries(String filename, int nMin, int nMax) {
+
+        int nStepSimu = nStepYear * nYear;
+        float[] rates = new float[nStepSimu];
+        try {
+            // 1. Open CSV file
+            CSVReader reader = new CSVReader(new FileReader(filename), ';');
+            List<String[]> lines = reader.readAll();
+            // 2. Check the length of the time serie and inform the user about potential problems or inconsistencies
+            int nTimeSerie = lines.size() - 1;
+            if (nTimeSerie < nMin) {
+                throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must contain at least " + nMin + " time steps.");
+            }
+            if (nTimeSerie % nStepYear != 0) {
+                throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
+            }
+            if (nTimeSerie > nMax) {
+                getLogger().log(Level.WARNING, "Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
+            }
+            nTimeSerie = Math.min(nTimeSerie, nMax);
+            // 3. Read the time serie
+            for (int t = 0; t < nTimeSerie; t++) {
+                String[] line = lines.get(t + 1);
+                rates[t] = Float.valueOf(line[1]);
+            }
+            // 4. Fill up the time serie if necessary
+            if (nTimeSerie < nStepSimu) {
+                // There is less season in the file than number of years of the
+                // simulation.
+                int t = nTimeSerie;
+                while (t < nStepSimu) {
+                    for (int k = 0; k < nTimeSerie; k++) {
+                        rates[t] = rates[k];
+                        t++;
+                        if (t == nStepSimu) {
+                            break;
+                        }
+                    }
+                }
+                getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nMax});
+            }
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Error reading CSV file " + filename, ex);
+            System.exit(1);
+        }
+
+        return rates;
+    }
+
     /**
      * This function tries to guess what is the separator in the given string
      * assuming that it is an array of at least two values. It will look for
@@ -395,28 +532,29 @@ public class Configuration {
      * @return
      */
     private Separator guessSeparator(String string, Separator fallback) {
-        
+
         for (Separator separator : Separator.values()) {
-            if (string.contains(separator.toString()) && string.split(separator.toString()).length >= 1)
+            if (string.contains(separator.toString()) && string.split(separator.toString()).length >= 1) {
                 return separator;
+            }
         }
         return fallback;
     }
-    
+
     private enum Separator {
-        
+
         EQUALS('='),
         SEMICOLON(';'),
         COMA(','),
         COLON(':'),
         TAB('\t'),
         BLANK(' ');
-        
         private String separator;
+
         private Separator(char separator) {
             this.separator = Character.toString(separator);
         }
-        
+
         @Override
         public String toString() {
             return separator;
@@ -433,24 +571,24 @@ public class Configuration {
         Entry(String line) {
             process(line);
         }
-        
+
         private void process(String line) {
             key = value = null;
             keySeparator = guessSeparator(line, Separator.EQUALS).toString();
             parse(line);
-            valueSeparator =  guessSeparator(value, Separator.SEMICOLON).toString();
+            valueSeparator = guessSeparator(value, Separator.SEMICOLON).toString();
             value = clean(value);
         }
-        
+
         private String clean(String value) {
-        String cleanedValue = value.trim();
-        if (cleanedValue.endsWith(valueSeparator)) {
-            cleanedValue = cleanedValue.substring(0, cleanedValue.lastIndexOf(valueSeparator));
-            return clean(cleanedValue);
-        } else {
-            return cleanedValue;
+            String cleanedValue = value.trim();
+            if (cleanedValue.endsWith(valueSeparator)) {
+                cleanedValue = cleanedValue.substring(0, cleanedValue.lastIndexOf(valueSeparator));
+                return clean(cleanedValue);
+            } else {
+                return cleanedValue;
+            }
         }
-    }
 
         private void parse(String line) {
 

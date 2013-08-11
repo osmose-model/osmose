@@ -46,59 +46,41 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.fishing;
+package fr.ird.osmose.process.naturalmortality;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.process.AbstractMortalityScenario;
 
 /**
- * Abstract class that defines a template for any type of fishing scenario. By
- * fishing scenario it means It comprises an init() function that will load the
- * parameters from the configuration files and a getFishingMortalityRate()
- * function that is meant to return the absolute fishing mortality rate for a
- * given school at current time step of the simulation.
+ * Annual natural mortality rate.
  *
- * @author P. Verley
+ * @author pverley
  */
-public abstract class AbstractFishingScenario extends SimulationLinker {
+public class AnnualNaturalMortalityScenario extends AbstractMortalityScenario {
 
-    final private Species species;
-    final private int indexSpecies;
+    // Natural mortality rate expressed in [time_step^-1]
+    private float instantaneousD;
 
-    AbstractFishingScenario(int indexSimulation, Species species) {
-        super(indexSimulation);
-        this.species = species;
-        this.indexSpecies = species.getIndex();
+    public AnnualNaturalMortalityScenario(int iSimulation, Species species) {
+        super(iSimulation, species);
     }
 
-    public int getIndexSpecies() {
-        return indexSpecies;
-    }
-    
-    public Species getSpecies() {
-        return species;
+    @Override
+    public void init() {
+        int nStepYear = getConfiguration().getNStepYear();
+        int iSpec = getIndexSpecies();
+        instantaneousD = getConfiguration().getFloat("mortality.natural.rate.sp" + iSpec) / nStepYear;
+       
     }
 
-    /**
-     * Initialization of the fishing scenario. This function should loads the
-     * appropriate parameters from the configuration files.
-     */
-    abstract public void init();
+    @Override
+    public float getInstantaneousRate(School school) {
+        return instantaneousD;
+    }
 
-    /**
-     * Gets the absolute fishing mortality rate for a given school at current
-     * time step of the simulation.
-     *
-     * @param school, a given school
-     * @return the fishing mortality rate for the given school at current time
-     * step of the simulation.
-     */
-    abstract public float getInstantaneousRate(School school);
-    
-    /**
-     * Gets the annual fishing mortality for the species.
-     * @return the annual fishing mortality rate.
-     */
-    abstract public float getAnnualRate();  
+    @Override
+    public float getAnnualRate() {
+        return instantaneousD * getConfiguration().getNStepYear();
+    }
 }
