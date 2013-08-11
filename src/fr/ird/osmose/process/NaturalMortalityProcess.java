@@ -59,7 +59,8 @@ public class NaturalMortalityProcess extends AbstractProcess {
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             Species species = getSpecies(iSpec);
             // Natural mortality by Dt, by Age or Size
-            if (!getConfiguration().isNull("mortality.natural.rate.byDt.byAge.file.sp" + iSpec)) {
+            if (!getConfiguration().isNull("mortality.natural.rate.byDt.byAge.file.sp" + iSpec)
+                    || !getConfiguration().isNull("mortality.natural.rate.byDt.bySize.file.sp" + iSpec)) {
                 naturalMortality[iSpec] = new ByDtByAgeSizeNaturalMortalityScenario(iSimu, species);
                 continue;
             }
