@@ -76,7 +76,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
                 continue;
             }
             // Did not find any scenario for natural mortality. Throws error.
-            getLogger().log(Level.SEVERE, "Could not find any parameters for natural mortality (mortality.natural.rate.byDt.byAge.file.sp# or mortality.natural.rate.sp#) for species {0}", species.getName());
+            getLogger().log(Level.SEVERE, "Could not find any parameters for natural mortality (mortality.natural.rate.byDt.byAge.file.sp# or mortality.natural.rate.byDt.bySize.file.sp mortality.natural.rate.byDt.file.sp or mortality.natural.rate.sp#) for species {0}", species.getName());
             System.exit(1);
         }
 

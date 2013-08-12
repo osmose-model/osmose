@@ -83,10 +83,10 @@ public class ByClassTimeSeries extends SimulationLinker {
             List<String[]> lines = reader.readAll();
             
             // 2. Read the threshold values
-            String[] thresholds = lines.get(0);
-            threshold = new float[threshold.length - 1];
+            String[] lineThreshold = lines.get(0);
+            threshold = new float[lineThreshold.length - 1];
             for (int k = 0; k < threshold.length; k++) {
-                threshold[k] = Float.valueOf(thresholds[k + 1]);
+                threshold[k] = Float.valueOf(lineThreshold[k + 1]);
             }
             
             // 3. Check the length of the time serie and inform the user about potential problems or inconsistencies
@@ -105,7 +105,7 @@ public class ByClassTimeSeries extends SimulationLinker {
             // 3. Read the mortality rates
             values = new float[nStepSimu][];
             for (int t = 0; t < nTimeSerie; t++) {
-                values[t] = new float[thresholds.length - 1];
+                values[t] = new float[lineThreshold.length - 1];
                 String[] fval = lines.get(t + 1);
                 for (int k = 0; k < values[t].length; k++) {
                     values[t][k] = Float.valueOf(fval[k + 1]);
