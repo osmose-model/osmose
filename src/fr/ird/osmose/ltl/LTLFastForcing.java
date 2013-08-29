@@ -4,7 +4,6 @@ import fr.ird.osmose.Plankton;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -21,7 +20,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
 
         ncFile = getConfiguration().getFile("ltl.netcdf.file");
         if (!new File(ncFile).exists()) {
-            System.out.println("LTL NetCDF file " + ncFile + " doesn't exist");
+            getLogger().log(Level.SEVERE, "LTL NetCDF file {0} doesn''t exist", ncFile);
             System.exit(1);
         }
     }
@@ -54,14 +53,14 @@ public class LTLFastForcing extends AbstractLTLForcing {
 
     private void loadData() {
         try {
-            getLogger().info("Loading all plankton data, it might take a while...");
+            getLogger().info("Loading all plankton data...");
             getLogger().log(Level.FINE, "Forcing file {0}", ncFile);
 
             NetcdfFile nc = NetcdfFile.open(ncFile);
             data = (float[][][][]) nc.findVariable("ltl_biomass").read().copyToNDJavaArray();
-            getLogger().info("All plankton data loaded !");
+            getLogger().info("All plankton data loaded");
         } catch (IOException ex) {
-            Logger.getLogger(LTLFastForcing.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error while loading LTL biomass from file " + ncFile, ex);
         }
     }
 

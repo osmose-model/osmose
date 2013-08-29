@@ -36,7 +36,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
             plktonNetcdfNames[i] = getConfiguration().getString("ltl.netcdf.var.plankton.plk" + i);
         }
 
-        planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t").size()];
+        planktonFileListNetcdf = new String[getConfiguration().findKeys("ltl.netcdf.file.t*").size()];
         for (int i = 0; i < planktonFileListNetcdf.length; i++) {
             planktonFileListNetcdf[i] = getConfiguration().getFile("ltl.netcdf.file.t" + i);
         }
@@ -56,7 +56,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
         try {
             ncIn = NetcdfFile.open(ncpathname, null);
         } catch (IOException ex) {
-            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error opening grid file " + gridFileName, ex);
         }
         /*
          * read dimensions
@@ -67,7 +67,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
             setDimY(shape[0]);
             setDimZ(getCs_r(ncIn).length);
         } catch (IOException ex) {
-            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().log(Level.SEVERE, "Error reading dimensions in file " + gridFileName, ex);
         }
         /*
          * Compute vertical levels
@@ -75,7 +75,7 @@ public class LTLForcingLaure extends AbstractLTLForcing {
         try {
             depthOfLayer = getCstSigLevels(ncIn);
         } catch (IOException ex) {
-            Logger.getLogger(LTLForcingRomsPisces.class.getName()).log(Level.SEVERE, null, ex);
+           getLogger().log(Level.SEVERE, "Error loading sigma levels", ex);
         }
 
         loadData();
@@ -99,16 +99,14 @@ public class LTLForcingLaure extends AbstractLTLForcing {
 
     private void loadData() {
 
-        System.out.println("Loading all plankton data, it might take a while...");
-
+        getLogger().info("Loading all plankton data...");
         data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][get_ny()][get_nx()];
         for (int t = 0; t < getConfiguration().getNStepYear(); t++) {
             for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 data[t][p] = getIntegratedBiomass(p, t);
             }
         }
-
-        System.out.println("All plankton data loaded !");
+        getLogger().info("All plankton data loaded");
     }
 
     private float[][] getIntegratedBiomass(int p, int iStepSimu) {
