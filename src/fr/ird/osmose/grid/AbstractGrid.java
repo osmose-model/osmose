@@ -115,7 +115,7 @@ public abstract class AbstractGrid implements IGrid {
 
     /**
      * Get the adjacent cells of a given cell (cell included) within a given
-     * range of cells. Cells are randomly sorted.
+     * range of cells. Cells are not randomly sorted.
      *
      * @see Collections.shuffle() For cell(i, j) returns 8 surrounding cells:
      * cell(i - 1, j - 1) cell(i - 1, j) cell(i - 1, j + 1) cell(i, j - 1)
@@ -140,11 +140,7 @@ public abstract class AbstractGrid implements IGrid {
                 neighbours.add(matrix[j][i]);
             }
         }
-        //neighbors.remove(cell);
-        /*
-         * Random sorting of the adjacent cells
-         */
-        Collections.shuffle(neighbours);
+
         return neighbours;
     }
 

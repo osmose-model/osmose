@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 
 /**
@@ -118,6 +119,18 @@ public class MovementProcess extends AbstractProcess {
      */
     Cell randomDeal(List<Cell> cells) {
         int index = (int) Math.round((cells.size() - 1) * Math.random());
+        return cells.get(index);
+    }
+    
+    /**
+     * Randomly choose a cell among the given list of cells.
+     *
+     * @param cells, a list of cells
+     * @param rd, a random generator
+     * @return a cell from the list of cells.
+     */
+    Cell randomDeal(List<Cell> cells, Random rd) {
+        int index = (int) Math.round((cells.size() - 1) * rd.nextDouble());
         return cells.get(index);
     }
 

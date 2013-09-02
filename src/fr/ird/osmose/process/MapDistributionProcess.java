@@ -3,6 +3,7 @@ package fr.ird.osmose.process;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import java.util.Random;
 
 /**
  *
@@ -12,6 +13,7 @@ public class MapDistributionProcess extends AbstractProcess {
 
     private MovementProcess movement;
     private Species species;
+    private Random rd1, rd2, rd3;
 
     public MapDistributionProcess(int indexSimulation, Species species, MovementProcess parent) {
         super(indexSimulation);
@@ -21,6 +23,20 @@ public class MapDistributionProcess extends AbstractProcess {
 
     @Override
     public void init() {
+
+        boolean fixedSeed = false;
+        if (!getConfiguration().isNull("movement.randomseed.fixed")) {
+            fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
+        }
+        if (fixedSeed) {
+            rd1 = new Random(13L ^ species.getIndex());
+            rd2 = new Random(5L ^ species.getIndex());
+            rd3 = new Random(1982L ^ species.getIndex());
+        } else {
+            rd1 = new Random();
+            rd2 = new Random();
+            rd3 = new Random();
+        }
     }
 
     @Override
@@ -75,13 +91,13 @@ public class MapDistributionProcess extends AbstractProcess {
             int nCells = getGrid().get_nx() * getGrid().get_ny();
             double proba;
             do {
-                indexCell = (int) Math.round((nCells - 1) * Math.random());
+                indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
                 proba = map.getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0.d || proba < Math.random() * tempMaxProbaPresence);
+            } while (proba <= 0.d || proba < rd2.nextDouble() * tempMaxProbaPresence);
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.
-            school.moveToCell(movement.randomDeal(movement.getAccessibleCells(school, map)));
+            school.moveToCell(movement.randomDeal(movement.getAccessibleCells(school, map), rd3));
         }
     }
 }
