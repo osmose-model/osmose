@@ -255,6 +255,10 @@ public class OldConfiguration {
      * Fishing mortality rates. Array[nSpecies][nStepYear|nStepSimu]
      */
     public float[][] fishingRates;
+    /**
+     * Fishing seasonality.
+     */
+    float[][] seasonFishing;
     //
     //// PLANKTON
     //
@@ -576,10 +580,10 @@ public class OldConfiguration {
         readLTLBasisFile(ltlBasisFilename);
         readLTLForcingFile(ltlForcingFilename);
         readPredationFile(predationFilename);
-        readFishingFile(fishingFilename);
         if (null != fishingSeasonFilename) {
             readSeasonalityFishingFile(fishingSeasonFilename);
         }
+        readFishingFile(fishingFilename);
         readCalibrationFile(calibrationFilename);
         readSeasonalityReproFile(reproductionFilename);
         readsize0File(size0Filename);
@@ -1195,7 +1199,7 @@ public class OldConfiguration {
 
     public void readSeasonalityFishingFile(String fishingSeasonFileName) {
 
-        float[][] seasonFishing = new float[nSpecies][nStepYear];
+        seasonFishing = new float[nSpecies][nStepYear];
         if (fishingSeasonFileName.equalsIgnoreCase("default")) {
             for (int i = 0; i < nSpecies; i++) {
                 for (int j = 0; j < nStepYear; j++) {
@@ -1243,13 +1247,6 @@ public class OldConfiguration {
                 System.exit(1);
             }
         }
-        
-        // Apply seasonality to fishing rates
-        for (int i = 0; i < nSpecies; i++) {
-            for (int iStep = 0; iStep < nStepYear; iStep++) {
-                fishingRates[i][iStep] *= seasonFishing[i][iStep];
-            }
-        }
     }
 
     public void readFishingFile(String fishingFileName) {
@@ -1278,7 +1275,7 @@ public class OldConfiguration {
                 for (int i = 0; i < nSpecies; i++) {
                     st.nextToken();
                     for (int iStep = 0; iStep < nStepYear; iStep++) {
-                        fishingRates[i][iStep] = (new Float(st.sval)).floatValue();    //annual F mortality
+                        fishingRates[i][iStep] = (new Float(st.sval)).floatValue() * seasonFishing[i][iStep];    //annual F mortality
                     }
                 }
             } else {
