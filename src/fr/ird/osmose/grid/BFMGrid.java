@@ -38,8 +38,8 @@ public class BFMGrid extends AbstractGrid {
         this.gridFile = getConfiguration().getFile("grid.netcdf.file");
         this.strLat = getConfiguration().getString("grid.var.lat");
         this.strLon = getConfiguration().getString("grid.var.lon");
-        this.strMask = getConfiguration().getString("grid.var.stride");
-        this.stride = getConfiguration().getInt("grid.var.lat");
+        this.strMask = getConfiguration().getString("grid.var.mask");
+        this.stride = getConfiguration().getInt("grid.stride");
     }
 
     /*
