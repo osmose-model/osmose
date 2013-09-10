@@ -58,6 +58,9 @@ public class Configuration {
     }
 
     public void init() {
+        
+        // Check whether the configuration file is up-to-date
+        UpdateManager.getInstance().upgrade();
 
         if (!isNull("simulation.ncpu")) {
             nCpu = getInt("simulation.ncpu");
@@ -385,6 +388,20 @@ public class Configuration {
         return forcing;
     }
 
+    public Version getVersion() {
+        if (!isNull("osmose.version")) {
+            try {
+                String version = getString("osmose.version");
+                String number = version.split(" ")[0];
+                String date = version.split(" ")[1];
+                return new Version(number, date);
+            } catch (Exception ex) {
+                getLogger().log(Level.WARNING, "Could not identify version of the configuration, parameter osmose.version = {0}. Osmose assumes it is {1}", new Object[]{getString("osmose.version"), Version.v3_0_beta.toString()});
+            }
+        }
+        return Version.v3_0_beta;
+    }
+
     public GridMap readCSVMap(String csvFile) {
 
         GridMap map = null;
@@ -466,7 +483,7 @@ public class Configuration {
 
         return rates;
     }
-    
+
     public float[] readTimeSeries(String filename) {
         return readTimeSeries(filename, nStepYear, nStepYear * nYear);
     }
