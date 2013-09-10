@@ -49,6 +49,8 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.exception.InvalidVersionNumberException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -62,14 +64,22 @@ public class UpdateManager {
         return updateManager;
     }
 
+    public static Logger getLogger() {
+        return Osmose.getInstance().getLogger();
+    }
+
     /*
      * Upgrade the configuration file to the application version.
      */
     public void upgrade() {
 
-        // Validate configuration version number
-        validateVersion(getConfigurationVersion());
-        
+        // Check version
+        if (versionMismatch()) {
+            getLogger().log(Level.INFO, "Configuration version {0} does not match Osmose version. Your configuration file will be automatically updated.", getConfigurationVersion());
+        } else {
+            getLogger().log(Level.INFO, "Configuration version {0} matches Osmose version. Nothing to do.", getConfigurationVersion());
+        }
+
         // Nothing to upgrade so far as it is the first tagged version.
     }
 
@@ -79,6 +89,19 @@ public class UpdateManager {
 
     public Version getConfigurationVersion() {
         return Osmose.getInstance().getConfiguration().getVersion();
+    }
+
+    private boolean versionMismatch() {
+        Version appVersion = getApplicationVersion();
+        Version cfgVersion = getConfigurationVersion();
+        validateVersion(cfgVersion);
+        try {
+            return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
+                    || !(appVersion.getDate().equals(cfgVersion.getDate()));
+        } catch (Exception ex) {
+            getLogger().warning(ex.getMessage());
+            return true;
+        }
     }
 
     private void validateVersion(Version testedVersion) {

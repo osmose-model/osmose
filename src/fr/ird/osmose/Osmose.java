@@ -189,7 +189,7 @@ public class Osmose {
                 simulation.init();
                 simulation.run();
                 int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-                simulation.getLogger().log(Level.INFO, "Completed (time ellapsed:  {0} seconds)", time);
+                simulation.getLogger().log(Level.INFO, "Completed (time ellapsed: {0} seconds)", time);
             } finally {
                 doneSignal.countDown();
             }
@@ -249,13 +249,12 @@ public class Osmose {
     public static void main(String... args) {
         osmose.setupLogger();
         logger.info("*****************************************");
-        logger.info("*   Osmose v3.0b - Copyright 2013 IRD   *");
+        logger.info("*   Osmose model - Copyright 2013 IRD   *");
         logger.info("*****************************************");
-        logger.info(new Date().toString());
+        logger.log(Level.INFO, "Osmose version {0}", Version.CURRENT.toString());
         osmose.readArgs(args);
         osmose.run();
-        logger.info(new Date().toString());
-        logger.info("*   Osmose v3.0b - Exit");
+        logger.info("*   Osmose model - Exit");
         logger.info("*****************************************");
     }
 
