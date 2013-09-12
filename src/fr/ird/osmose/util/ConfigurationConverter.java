@@ -24,7 +24,8 @@ public class ConfigurationConverter {
      * "/home/philippe/osmose/benguela/ben_v2/INPUT.txt" outputPath =
      * "C:/user/philippe/Mes documents/osmose/benguela/ben_v2/INPUT.txt"
      */
-    final public String inputFile = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3\\osm_old_input\\INPUT.txt";
+    //final public String inputFile = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3\\osm_old_input\\INPUT.txt";
+    final public String inputFile = "/home/pverley/osmose/dev/config/bob/bob_v2_2013/INPUT.txt";
     
     /**
      * Path of the folder for saving the new format of input Use slash '/' as
@@ -32,7 +33,8 @@ public class ConfigurationConverter {
      * "/home/philippe/osmose/benguela/ben_v3" outputPath =
      * "C:/user/philippe/Mes documents/osmose/benguela/ben_v3"
      */
-    final public String outputPath = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3";
+    //final public String outputPath = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3";
+    final public String outputPath = "/home/pverley/osmose/dev/config/bob/bob_v3";
     
     private OldConfiguration cfg;
     private Properties prop;
@@ -571,7 +573,7 @@ public class ConfigurationConverter {
                 entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
                 for (int i = 0; i < cfg.getNSpecies(); i++) {
                     if (!cfg.reproduceLocally[i]) {
-                        entries[i + 1] = String.valueOf(cfg.seasonSpawning[i][t] * 100.f);
+                        entries[i + 1] = String.valueOf(cfg.seasonSpawning[i][t]);
                     } else {
                         entries[i + 1] = "0";
                     }
