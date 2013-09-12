@@ -129,10 +129,8 @@ public class IncomingFluxProcess extends AbstractProcess {
             if (abundanceIn > 0 && abundanceIn < nSchool) {
                 getSchoolSet().add(new School(species, abundanceIn, meanLengthIn[i], meanWeigthIn, ageMeanIn[i]));
             } else if (abundanceIn >= nSchool) {
-                int mod = (int) (abundanceIn % nSchool);
-                int abdSchool = (int) (abundanceIn / nSchool);
+                double abdSchool = abundanceIn / nSchool;
                 for (int s = 0; s < nSchool; s++) {
-                    abdSchool += (s < mod) ? 1 : 0;
                     getSchoolSet().add(new School(species, abdSchool, meanLengthIn[i], meanWeigthIn, ageMeanIn[i]));
                 }
             }
