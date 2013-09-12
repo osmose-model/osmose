@@ -2558,7 +2558,7 @@ public class OldConfiguration {
     public void readDietsOutputFile(String dietsConfigFileName) {
         nDietStage = new int[nSpecies];
         dietStageThreshold = new float[nSpecies][];
-        if (dietsConfigFileName.equalsIgnoreCase("byDefault")) {
+        if (dietsConfigFileName.equalsIgnoreCase("default")) {
             System.out.println("Diets output by default");
             dietOutputMetrics = "default";
             for (int i = 0; i < nSpecies; i++) {
