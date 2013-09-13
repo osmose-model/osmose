@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 /**
- *
+ * 
  * @author pverley
  */
 public class ReproductionProcess extends AbstractProcess {
@@ -109,20 +109,19 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void run() {
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (sexRatio[i] == 0.d || alpha[i] == 0.d) {
-                continue;
-            }
+            double nEgg = 0.d;
             Species species = getSpecies(i);
-            double SSB = 0;
             List<School> schools = getSchoolSet().getSchools(species);
-            for (School school : schools) {
-                if (school.getLength() >= species.getSizeMaturity()) {
-                    SSB += school.getInstantaneousBiomass();
+            if (sexRatio[i] > 0.d && alpha[i] > 0.d) {
+                double SSB = 0;
+                for (School school : schools) {
+                    if (school.getLength() >= species.getSizeMaturity()) {
+                        SSB += school.getInstantaneousBiomass();
+                    }
                 }
+                double season = getSeason(getSimulation().getIndexTimeSimu(), species);
+                nEgg = sexRatio[i] * alpha[i] * season * SSB * 1000000;
             }
-
-            double season = getSeason(getSimulation().getIndexTimeSimu(), species);
-            double nEgg = sexRatio[i] * alpha[i] * season * SSB * 1000000;
 
             /*
              * Making cohorts going up to the upper age class
