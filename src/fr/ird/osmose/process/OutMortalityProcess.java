@@ -49,7 +49,7 @@
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.School.MortalityCause;
+import fr.ird.osmose.Prey.MortalityCause;
 
 /**
  * This class controls mortality for schools that are temporarilly out of the

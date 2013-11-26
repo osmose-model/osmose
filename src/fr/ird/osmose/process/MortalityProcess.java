@@ -50,7 +50,7 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.School.MortalityCause;
+import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School.PreyRecord;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.stage.AbstractStage;
@@ -139,6 +139,7 @@ public class MortalityProcess extends AbstractProcess {
         // Update fishing process (for MPAs)
         fishingProcess.update();
 
+        int nspec = getConfiguration().getNSpecies();
         // Loop over cells
         for (Cell cell : getGrid().getCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
@@ -182,10 +183,11 @@ public class MortalityProcess extends AbstractProcess {
                             if (ipr < ns) {
                                 // Prey is School
                                 School prey = schools.get(ipr);
-                                school.addPreyRecord(prey, prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey));
+                                school.addPreyRecord(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey));
                             } else {
                                 // Prey is Plankton
-                                school.addPreyRecord(getSimulation().getPlankton(ipr - ns), nDeadMatrix[ipr][is], 0);
+                                int index = ipr - ns + nspec;
+                                school.addPreyRecord(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), nDeadMatrix[ipr][is], 0);
                             }
                         }
                     }

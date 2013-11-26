@@ -49,7 +49,7 @@
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.School.MortalityCause;
+import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.naturalmortality.AnnualNaturalMortalityScenario;
 import fr.ird.osmose.process.naturalmortality.ByDtByAgeSizeNaturalMortalityScenario;

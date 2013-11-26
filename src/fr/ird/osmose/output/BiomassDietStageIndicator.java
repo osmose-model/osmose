@@ -145,7 +145,7 @@ public class BiomassDietStageIndicator extends AbstractIndicator {
         int nPrey = nSpec + getConfiguration().getNPlankton();
         for (int i = nSpec; i < nPrey; i++) {
             int iPlankton = i - nSpec;
-            biomassStage[i][0] += getSimulation().getPlankton(iPlankton).getBiomass();
+            biomassStage[i][0] += getSimulation().getPlankton(iPlankton).getTotalBiomass();
         }
     }
 

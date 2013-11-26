@@ -70,7 +70,7 @@ import fr.ird.osmose.util.SimulationLinker;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Plankton extends SimulationLinker implements Prey {
+public class Plankton extends SimulationLinker {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -159,7 +159,7 @@ public class Plankton extends SimulationLinker implements Prey {
      *
      * @return the cumulated biomass over the domain in tonne
      */
-    public double getBiomass() {
+    public double getTotalBiomass() {
         double biomTot = 0.d;
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
@@ -247,8 +247,17 @@ public class Plankton extends SimulationLinker implements Prey {
      *
      * @return the averaged trophic level of the plankton group
      */
-    @Override
     public float getTrophicLevel() {
         return trophicLevel;
+    }
+
+    public Prey asPrey(Cell cell) {
+
+        return new Prey(getConfiguration().getNSpecies() + index, // index
+                cell.get_igrid(), // x
+                cell.get_jgrid(), // y
+                getBiomass(cell), // abundance (assumes that abundance == biomass)
+                1e6f, // weight set to 1 ton to have abundance == biomass
+                trophicLevel); // trophic level
     }
 }

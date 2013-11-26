@@ -48,22 +48,310 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.util.GridPoint;
+import static fr.ird.osmose.util.GridPoint.getGrid;
+
 /**
- * This interface provides an overlay for seeing both {@code School} and
- * {@code Plankton} as a prey. It is used to keep tracks of the predation events
- * at school level in {@link fr.ird.osmose.School.PreyRecord}.
+ * This classes gathers together the variables and the functions of an
+ * aggregation of preys. It manages the abundance, the biomass and the number of
+ * dead individuals in this aggregation of preys.
  *
- * @see fr.ird.osmose.School.PreyRecord
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public interface Prey {
+public class Prey extends GridPoint {
 
     /**
-     * Returns the trophic level of the prey.
-     *
-     * @return the trophic level of the prey
+     * The index of the species. From [0; nSpec-1] for fish and from [nSpec;
+     * nSpec+nLTL-1] for plankton.
      */
-    public float getTrophicLevel();
+    private final int index;
+    /**
+     * Weight of the fish in tonne. The unit has been set to tonne just because
+     * it saves computation time for converting the biomass from gram to tonne
+     */
+    private float weight;
+    /**
+     * Trophic level of the fish.
+     */
+    private float trophicLevel;
+    /**
+     * Number of fish in the school at the beginning of the time step.
+     */
+    private double abundance;
+    /**
+     * Number of fish in the school, estimated on the fly.
+     * {@code instantaneousAbundance = abundance - ndead}
+     */
+    private double instantaneousAbundance;
+    /**
+     * Number of dead fish in the current time step, for each mortality cause.
+     */
+    private final double[] nDead = new double[MortalityCause.values().length];
+    /**
+     * Monitor whether the number of dead has changed. It helps to prevent
+     * unnecessary recalculation of the instantaneous biomass.
+     */
+    private boolean ndeadHasChanged;
+
+    /**
+     * Create a new school, with given species, grid coordinates, abundance,
+     * length weight, age and trophic level.
+     *
+     * @param index, the index of the species
+     * @param x, x coordinate of the school on the grid
+     * @param y, y coordinate of the school on the grid
+     * @param abundance, the number of fish in the school
+     * @param weight, the weight of the fish in gram
+     * @param trophicLevel, the trophic level of the fish
+     */
+    public Prey(int index, float x, float y, double abundance, float weight, float trophicLevel) {
+        this.index = index;
+        this.abundance = abundance;
+        instantaneousAbundance = abundance;
+        this.weight = weight * 1.e-6f;
+        this.trophicLevel = trophicLevel;
+        if (x >= 0 && x < getGrid().get_nx() && y >= 0 && y < getGrid().get_ny()) {
+            moveToCell(getGrid().getCell(Math.round(x), Math.round(y)));
+        } else {
+            setOffGrid();
+        }
+    }
+
+    /**
+     * Gets the abundance of the school at the beginning of the time step.
+     *
+     * @return the abundance of the school at the beginning of the time step
+     */
+    public double getAbundance() {
+        return abundance;
+    }
+
+    /**
+     * Evaluates the instantaneous abundance of the school.
+     *
+     * @return the instantaneous abundance of the school. {@code instantaneous
+     * abundance = abundance at the beginning of the time step - ndead fish}
+     * (due to any source of mortality, {@link MortalityCause}) at the time the
+     * function is called. It is a snapshot of the abundance of the school
+     * within the current time step.
+     */
+    public double getInstantaneousAbundance() {
+        if (ndeadHasChanged) {
+            instantaneousAbundance = abundance - sum(nDead);
+            if (instantaneousAbundance < 1.d) {
+                instantaneousAbundance = 0.d;
+            }
+            ndeadHasChanged = false;
+        }
+        return instantaneousAbundance;
+    }
+
+    /**
+     *
+     */
+    public void updateAbundance() {
+
+        // Update abundance
+        abundance = getInstantaneousAbundance();
+        // Rest number of dead fish
+        for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
+            nDead[iDeath] = 0.d;
+        }
+        ndeadHasChanged = false;
+    }
+
+    /**
+     * Gets the biomass of the school, in tonne, at the beginning of the time
+     * step.
+     *
+     * @return the biomass of the school at the beginning of the time step in
+     * tonne
+     */
+    public double getBiomass() {
+        return adb2biom(abundance);
+    }
+
+    /**
+     * Evaluates the instantaneous biomass of the school.
+     *
+     * @return the instantaneous biomass of the school. {@code instantaneous
+     * biomass = biomass at the beginning of the time step - biomass dead fish}
+     * (due to any source of mortality, {@link MortalityCause}) at the time the
+     * function is called. It is a snapshot of the biomass of the school within
+     * the current time step.
+     */
+    public double getInstantaneousBiomass() {
+        return adb2biom(getInstantaneousAbundance());
+    }
+
+    /**
+     * Converts the specified biomass [tonne] into abundance [number of fish]
+     *
+     * @param biomass, the biomass of the school, in tonne
+     * @return the number of fish weighting {@code weight} corresponding to this
+     * level of biomass. {@code abundance = biomass / weight}
+     */
+    public double biom2abd(double biomass) {
+        return biomass / weight;
+    }
+
+    /**
+     * Converts the specified abundance [number of fish] into biomass [tonne]
+     *
+     * @param abundance, a number of fish
+     * @return the corresponding biomass of this number of fish weighting
+     * {@code weight}. {@code biomass = abundance * weight}
+     */
+    public double adb2biom(double abundance) {
+        return abundance * weight;
+    }
+
+    /**
+     * Returns the averaged trophic level of the plankton group. Parameter
+     * <i>plankton.TL.plk#</i>
+     *
+     * @return the averaged trophic level of the plankton group
+     */
+    public float getTrophicLevel() {
+        return trophicLevel;
+    }
+
+    /**
+     * Sets the trophic level of the fish.
+     *
+     * @param trophicLevel, the new trophic level of the fish
+     */
+    public void setTrophicLevel(float trophicLevel) {
+        this.trophicLevel = trophicLevel;
+    }
+
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    public int getSpeciesIndex() {
+        return index;
+    }
+
+    /**
+     * Returns the number of dead fish for a given mortality cause.
+     *
+     * @see MortalityCause
+     * @param cause, the mortality cause
+     * @return the number of dead fish for this mortality cause
+     */
+    public double getNdead(MortalityCause cause) {
+        return nDead[cause.index];
+    }
+
+    /**
+     * Sets the number of dead fish for a given mortality cause.
+     *
+     * @see MortalityCause
+     * @param cause, the mortality cause
+     * @param nDead, the number of dead fish for this mortality cause
+     */
+    public void setNdead(MortalityCause cause, double nDead) {
+        this.nDead[cause.index] = nDead;
+        ndeadHasChanged = true;
+    }
+
+    /**
+     * Increments the number of dead fish for a given mortality cause.
+     *
+     * @see MortalityCause
+     * @param cause, the mortality cause
+     * @param nDead, the number of dead fish to be incremented for this
+     * mortality cause
+     */
+    public void incrementNdead(MortalityCause cause, double nDead) {
+        this.nDead[cause.index] += nDead;
+        ndeadHasChanged = true;
+    }
+
+    /**
+     * Resets the number of dead fish for a given mortality cause.
+     *
+     * @see MortalityCause
+     * @param cause, the mortality cause
+     */
+    public void resetNdead(MortalityCause cause) {
+        nDead[cause.index] = 0;
+        ndeadHasChanged = true;
+    }
+    
+    public float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(float weight) {
+        this.weight = weight;
+    }
+
+    /**
+     * Computes the sum of a given double array.
+     *
+     * @param array, the double array to be summed
+     * @return the sum of the doubles of the array
+     */
+    private double sum(double[] array) {
+        double sum = 0.d;
+        for (double d : array) {
+            sum += d;
+        }
+        return sum;
+    }
+
+    /**
+     * A list of mortality causes.
+     */
+    public enum MortalityCause {
+
+        /**
+         * Predation mortality
+         *
+         * @see fr.ird.osmose.process.PredationProcess
+         */
+        PREDATION(0),
+        /**
+         * Starvation mortality
+         *
+         * @see fr.ird.osmose.process.StarvationProcess
+         */
+        STARVATION(1),
+        /**
+         * Natural mortality
+         *
+         * @see fr.ird.osmose.process.NaturalMortality
+         */
+        NATURAL(2),
+        /**
+         * Fishing mortality
+         *
+         * @see fr.ird.osmose.process.FishingProcess
+         */
+        FISHING(3),
+        /**
+         * Out of domain mortality
+         *
+         * @see fr.ird.osmose.process.OutMortalityProcess
+         */
+        OUT(4);
+        /**
+         * Index of the mortality cause
+         */
+        public final int index;
+
+        /**
+         * Initializes a mortality cause with a given index.
+         *
+         * @param index, the index of the mortality cause
+         */
+        private MortalityCause(int index) {
+            this.index = index;
+        }
+    }
 
 }
