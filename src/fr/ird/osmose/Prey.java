@@ -49,69 +49,21 @@
 package fr.ird.osmose;
 
 /**
+ * This interface provides an overlay for seeing both {@code School} and
+ * {@code Plankton} as a prey. It is used to keep tracks of the predation events
+ * at school level in {@link fr.ird.osmose.School.PreyRecord}.
  *
- * @author pverley
+ * @see fr.ird.osmose.School.PreyRecord
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0b 2013/09/01
  */
-public class Version {
+public interface Prey {
 
-    /*
-     * Careful with the dates. It should reflect the last change done in a
-     * given version.
-     * Osmose always expect that the date of older version is prior to a
-     * newer version.
-     */
-    final public static Version v3_0_beta = new Version("3.0b", "2013/09/01");
-    //final public static Version v3_1 = new Version("3.1", "201?/??/??");
-    //final public static Version v3_? = new Version("3.?", "201?/??/??");
     /**
-     * List of all the versions
+     * Returns the trophic level of the prey.
+     *
+     * @return the trophic level of the prey
      */
-    final public static Version[] values = new Version[]{v3_0_beta};
-    /*
-     * Current version is always the newest one.
-     */
-    final public static Version CURRENT = values[values.length - 1];
-    /*
-     * 
-     */
-    private String number;
-    private String date;
+    public float getTrophicLevel();
 
-    public Version(String number, String date) {
-        this.date = date;
-        this.number = number;
-    }
-
-    public boolean priorTo(Version version) {
-        if (null == date) {
-            /*
-             * I am an undated version so we can assume that I am older.
-             */
-            return true;
-        } else if (null == version.date) {
-            /*
-             * I am a dated version and I am compared to an undated version so
-             * we can assume that I am newer.
-             */
-            return false;
-        } else {
-            /*
-             * We both are dated versions so let's compare dates.
-             */
-            return (date.compareTo(version.date) < 0);
-        }
-    }
-
-    public String getNumber() {
-        return number;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    @Override
-    public String toString() {
-        return number + " (" + (date != null ? date : "undated") + ")";
-    }
 }

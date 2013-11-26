@@ -1,10 +1,55 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.School.MortalityCause;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,15 +77,6 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
     final private int PRE_RECRUIT = 1;
     final private int RECRUIT = 2;
     /*
-     * Mortality causes: 1. predation 2. starvation 3. natural 4. fishing
-     */
-    final private int CAUSES = 5;
-    final private int PREDATION = 0;
-    final private int STARVATION = 1;
-    final private int NATURAL = 2;
-    final private int FISHING = 3;
-    final private int OUT = 4;
-    /*
      * Mortality rates array [SPECIES][CAUSES][STAGES]
      */
     private double[][][] mortalityRates;
@@ -51,14 +87,14 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
     /**
      * Whether the indicator should be enabled or not.
      */
-    private boolean enabled;
+    private final boolean enabled;
     /**
      * Age of recruitment (expressed in number of time steps) [SPECIES]
      */
     private int[] recruitmentAge;
 
-    public MortalityIndicator(int indexSimulation, String keyEnabled) {
-        super(indexSimulation);
+    public MortalityIndicator(int rank, String keyEnabled) {
+        super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
@@ -90,13 +126,14 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
     public void reset() {
 
         // Reset mortality rates
-        mortalityRates = new double[getNSpecies()][CAUSES][STAGES];
+        mortalityRates = new double[getNSpecies()][MortalityCause.values().length][STAGES];
     }
 
     @Override
     public void update() {
         int iStage;
-        double[][][] nDead = new double[getNSpecies()][CAUSES][STAGES];
+        int nCause = MortalityCause.values().length;
+        double[][][] nDead = new double[getNSpecies()][nCause][STAGES];
         for (School school : getSchoolSet().getAliveSchools()) {
             if (school.getAgeDt() == 0) {
                 iStage = EGG;
@@ -109,21 +146,19 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             }
             int iSpecies = school.getSpeciesIndex();
             // Update number of deads
-            nDead[iSpecies][PREDATION][iStage] += school.getNdeadPredation();
-            nDead[iSpecies][STARVATION][iStage] += school.getNdeadStarvation();
-            nDead[iSpecies][NATURAL][iStage] += school.getNdeadNatural();
-            nDead[iSpecies][FISHING][iStage] += school.getNdeadFishing();
-            nDead[iSpecies][OUT][iStage] += school.getNdeadOut();
+            for (MortalityCause cause : MortalityCause.values()) {
+                nDead[iSpecies][cause.index][iStage] += school.getNdead(cause);
+            }
         }
         // Cumulate the mortality rates
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             for (iStage = 0; iStage < STAGES; iStage++) {
                 double nDeadTot = 0;
-                for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
+                for (int iDeath = 0; iDeath < nCause; iDeath++) {
                     nDeadTot += nDead[iSpecies][iDeath][iStage];
                 }
                 double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
-                for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
+                for (int iDeath = 0; iDeath < nCause; iDeath++) {
                     mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
                 }
             }
@@ -138,14 +173,12 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
     @Override
     public void write(float time) {
 
-        int recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
-
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             prw[iSpecies].print(time);
             prw[iSpecies].print(";");
-            for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
+            for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
                 for (int iStage = 0; iStage < STAGES; iStage++) {
-                    if (iDeath == NATURAL && iStage == EGG) {
+                    if (iDeath == MortalityCause.NATURAL.index && iStage == EGG) {
                         // instantenous mortality rate for eggs natural mortality 
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / recordFrequency);
                     } else {
@@ -160,8 +193,8 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
 
     @Override
     public void init() {
-        
-         // Record frequency
+
+        // Record frequency
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         fos = new FileOutputStream[getNSpecies()];
@@ -176,7 +209,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
             filename.append("_mortalityRate-");
             filename.append(getSimulation().getSpecies(iSpecies).getName());
             filename.append("_Simu");
-            filename.append(getSimulation().getReplica());
+            filename.append(getRank());
             filename.append(".csv");
             File file = new File(path, filename.toString());
             boolean fileExists = file.exists();
@@ -201,7 +234,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 prw[iSpecies].print("F;F;F;");
                 prw[iSpecies].println("Z;Z;Z");
                 prw[iSpecies].print(";");
-                for (int iDeath = 0; iDeath < CAUSES; iDeath++) {
+                for (MortalityCause cause : MortalityCause.values()) {
                     prw[iSpecies].print("Eggs;Pre-recruits;Recruits;");
                 }
                 prw[iSpecies].println();
@@ -215,7 +248,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 float recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpecies);
                 recruitmentAge[iSpecies] = getSpecies(iSpecies).computeMeanAge(recruitmentSize);
             } else {
-                getLogger().log(Level.WARNING, "Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
+                getSimulation().warning("Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
                 recruitmentAge[iSpecies] = getConfiguration().getNStepYear();
             }
         }
@@ -231,12 +264,12 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 try {
                     fos[iSpecies].close();
                 } catch (IOException ex) {
-                    Logger.getLogger(MortalityIndicator.class.getName()).log(Level.SEVERE, null, ex);
+                    // do nothing
                 }
             }
         }
     }
-    
+
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         return (((iStepSimu + 1) % recordFrequency) == 0);

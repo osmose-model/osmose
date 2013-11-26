@@ -1,12 +1,57 @@
+/*
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
+ */
 package fr.ird.osmose.process;
 
-import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
+import fr.ird.osmose.util.timeseries.SingleTimeSeries;
+import fr.ird.osmose.util.timeseries.SpeciesTimeSeries;
 
 /**
  *
@@ -17,7 +62,7 @@ public class IncomingFluxProcess extends AbstractProcess {
     /**
      * Distribution of the spawning throughout the year
      */
-    private double[][] seasonFlux;
+    private float[][] seasonFlux;
     /*
      * Annual flux of incoming biomass in tons
      */
@@ -31,8 +76,8 @@ public class IncomingFluxProcess extends AbstractProcess {
      */
     private int[] ageMeanIn;
 
-    public IncomingFluxProcess(int indexSimulation) {
-        super(indexSimulation);
+    public IncomingFluxProcess(int rank) {
+        super(rank);
     }
 
     @Override
@@ -43,9 +88,20 @@ public class IncomingFluxProcess extends AbstractProcess {
         meanLengthIn = new float[nSpecies];
         ageMeanIn = new int[nSpecies];
         if (!getConfiguration().isNull("flux.incoming.season.file")) {
-            readFluxSeason(getConfiguration().getFile("flux.incoming.season.file"));
+            SpeciesTimeSeries ts = new SpeciesTimeSeries(getRank());
+            ts.read(getConfiguration().getFile("flux.incoming.season.file"));
+            seasonFlux = ts.getValues();
         } else {
-            seasonFlux = new double[nSpecies][0];
+            seasonFlux = new float[nSpecies][];
+            for (int i = 0; i < nSpecies; i++) {
+                if (!getConfiguration().isNull("flux.incoming.season.file.sp" + i)) {
+                    SingleTimeSeries ts = new SingleTimeSeries(getRank());
+                    ts.read(getConfiguration().getFile("flux.incoming.season.file.sp" + i));
+                     seasonFlux[i] = ts.getValues();
+                } else {
+                    seasonFlux[i] = new float[0];
+                }
+            }
         }
 
         for (int i = 0; i < nSpecies; i++) {
@@ -58,56 +114,6 @@ public class IncomingFluxProcess extends AbstractProcess {
                 meanLengthIn[i] = getConfiguration().getFloat("flux.incoming.size.sp" + i);
                 ageMeanIn[i] = (int) Math.round(getConfiguration().getFloat("flux.incoming.age.sp" + i) * getConfiguration().getNStepYear());
             }
-        }
-    }
-
-    private void readFluxSeason(String filename) {
-
-        try {
-            // 1. Open the CSV file
-            CSVReader reader = new CSVReader(new FileReader(filename), ';');
-            List<String[]> lines = reader.readAll();
-
-            // 2. Read the seasonality
-            int nTimeSerie = lines.size() - 1;
-            int nStepYear = getConfiguration().getNStepYear();
-            int nStepSimu = getConfiguration().getNYear() * nStepYear;
-            int nspecies = getNSpecies();
-            seasonFlux = new double[nspecies][nStepSimu];
-            for (int t = 0; t < nTimeSerie; t++) {
-                String[] line = lines.get(t + 1);
-                for (int i = 0; i < nspecies; i++) {
-                    seasonFlux[i][t] = Double.valueOf(line[i + 1]);
-                }
-            }
-
-            // 3. Check the length of the time serie
-            if (nTimeSerie % nStepYear != 0) {
-                // Either the time serie is less than a year or it is not a 
-                // multiple of number of time step per year.
-                throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
-            } else if (nTimeSerie < nStepSimu) {
-                // There is less season in the file than number of years of the
-                // simulation.
-                int t = nTimeSerie;
-                while (t < nStepSimu) {
-                    for (int k = 0; k < nTimeSerie; k++) {
-                        for (int i = 0; i < nspecies; i++) {
-                            seasonFlux[i][t] = seasonFlux[i][k];
-                        }
-                        t++;
-                        if (t == nStepSimu) {
-                            break;
-                        }
-                    }
-                }
-                getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
-            } else if (nTimeSerie > nStepSimu) {
-                getLogger().log(Level.WARNING, "Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nStepSimu});
-            }
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error reading CSV file " + filename, ex);
-            System.exit(1);
         }
     }
 
@@ -125,7 +131,7 @@ public class IncomingFluxProcess extends AbstractProcess {
             double biomassIn = biomassFluxIn[i] * season;
             float meanWeigthIn = (float) species.computeWeight(meanLengthIn[i]);
             long abundanceIn = (long) Math.round(biomassIn * 1000000.d / meanWeigthIn);
-            int nSchool = getConfiguration().getSeed(i);
+            int nSchool = getConfiguration().getNSchool(i);
             if (abundanceIn > 0 && abundanceIn < nSchool) {
                 getSchoolSet().add(new School(species, abundanceIn, meanLengthIn[i], meanWeigthIn, ageMeanIn[i]));
             } else if (abundanceIn >= nSchool) {

@@ -46,16 +46,42 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.exception;
+package fr.ird.osmose.output;
+
+import fr.ird.osmose.School;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class InvalidVersionNumberException extends RuntimeException {
+public class AgeSpectrumSpeciesYieldNIndicator extends AbstractSpectrumIndicator {
 
-    public InvalidVersionNumberException(String message) {
-        super(message);
+    public AgeSpectrumSpeciesYieldNIndicator(int rank, String keyEnabled) {
+        super(rank, keyEnabled, Type.AGE);
     }
-    
+
+    @Override
+    public void update() {
+        for (School school : getSchoolSet().getAliveSchools()) {
+            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.FISHING);
+        }
+    }
+
+    @Override
+    String getFilename() {
+        StringBuilder filename = new StringBuilder("AgeIndicators");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_AgeSpectrumSpeciesYieldN_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
+
+    }
+
+    @Override
+    String getDescription() {
+        return "Distribution of cumulative catch (number of fish caught per time step of saving) in age classes (year). For age class i, the yield in [i,i+1[ is reported.";
+    }
 }

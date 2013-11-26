@@ -1,3 +1,51 @@
+/*
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
+ */
 package fr.ird.osmose.process;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -11,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
 
 /**
  *
@@ -41,8 +88,8 @@ public class MovementProcess extends AbstractProcess {
     private String[] mapFile;
     private int[] mapIndexNoTwin;
 
-    public MovementProcess(int indexSimulation) {
-        super(indexSimulation);
+    public MovementProcess(int rank) {
+        super(rank);
     }
 
     @Override
@@ -58,13 +105,13 @@ public class MovementProcess extends AbstractProcess {
             range[i] = getConfiguration().getInt("movement.randomwalk.range.sp" + i);
             switch (getSpatialDistribution(i)) {
                 case RANDOM:
-                    movements[i] = new RandomDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this);
+                    movements[i] = new RandomDistributionProcess(getRank(), getSimulation().getSpecies(i), this);
                     break;
                 case MAPS:
-                    movements[i] = new MapDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this);
+                    movements[i] = new MapDistributionProcess(getRank(), getSimulation().getSpecies(i), this);
                     break;
                 case CONNECTIVITY:
-                    movements[i] = new ConnectivityDistributionProcess(getIndexSimulation(), getSimulation().getSpecies(i), this);
+                    movements[i] = new ConnectivityDistributionProcess(getRank(), getSimulation().getSpecies(i), this);
                     break;
             }
             movements[i].init();
@@ -95,7 +142,7 @@ public class MovementProcess extends AbstractProcess {
             str.append(school.toString());
             str.append("\n");
             str.append("It is not in the geographical area it is supposed to be...");
-            getLogger().warning(str.toString());
+            getSimulation().warning(str.toString());
         }
         List<Cell> accessibleCells = new ArrayList();
         // 1. Get all surrounding cells
@@ -279,13 +326,16 @@ public class MovementProcess extends AbstractProcess {
             }
             imap++;
         }
-        checkMapIndexation();
+        if (!checkMapIndexation()) {
+            getSimulation().error("Error in maps indexation. Please refer to prior warning messages for details.", null);
+        }
 
         eliminateTwinMap();
     }
 
-    private void checkMapIndexation() {
+    private boolean checkMapIndexation() {
 
+        boolean isMapOK = true;
         int nSteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
         int nStepYear = getConfiguration().getNStepYear();
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
@@ -293,14 +343,17 @@ public class MovementProcess extends AbstractProcess {
             for (int iAge = 0; iAge < lifespan; iAge++) {
                 for (int iStep = 0; iStep < nSteps; iStep++) {
                     if (indexMaps[iSpec][iAge][iStep] < 0) {
+                        isMapOK = false;
                         float age = (float)iAge / nStepYear;
                         int year = iStep / nStepYear;
                         int step = iStep % nStepYear;
-                        getLogger().log(Level.WARNING, "No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpec).getName(), age, year, step});
+                        getSimulation().warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpec).getName(), age, year, step});
                     }
                 }
             }
         }
+        
+        return isMapOK;
     }
 
     private void readCSVMap(String csvFile, int indexMap) {
@@ -342,7 +395,7 @@ public class MovementProcess extends AbstractProcess {
                     float val = Float.valueOf(line[i]);
                     if (val > 0.f) {
                         if (getGrid().getCell(i, j).isLand()) {
-                            getLogger().log(Level.SEVERE, "Error loading map {0}. Found value > 0 in {1}", new Object[]{csvFile, getGrid().getCell(i, j).toString()});
+                            getSimulation().error("Error loading map " + csvFile + ". Found value > 0 in " + getGrid().getCell(i, j).toString(), null);
                             error = true;
                         }
                         if (val < 1.f) {
@@ -369,7 +422,7 @@ public class MovementProcess extends AbstractProcess {
             }
             maxProbaPresence[indexMap] = computeMaxProbaPresence(indexMap);
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error reading map " + csvFile, ex);
+            getSimulation().error("Error reading map " + csvFile, ex);
         }
         //System.out.println("Read CSV file " + csvFile + " [OK]");
     }

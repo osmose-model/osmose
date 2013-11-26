@@ -48,171 +48,193 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.util.logging.OLogger;
 import fr.ird.osmose.output.SchoolSetSnapshot;
-import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
 import fr.ird.osmose.step.SequentialMortalityStep;
-import fr.ird.osmose.util.SimulationLogFormatter;
 import java.io.IOException;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.lang.reflect.InvocationTargetException;
 import ucar.nc2.NetcdfFile;
 
-public class Simulation {
+/**
+ * This class is in charge of running one instance of the simulation. Let's
+ * clarify: a {@code Configuration} is a set of parameters. The parameter
+ * <i>simulation.nsimu</i> controls how many simulations with the same set of
+ * parameters are to be run. Every replicated simulation is an instance of this
+ * object {@code Simulation}.<br>
+ * The {@code Simulation} initializes all the required components for running
+ * the simulation such as
+ * {@link fr.ird.osmose.step.AbstractStep}, {@link fr.ird.osmose.ltl.LTLForcing}
+ * or {@link fr.ird.osmose.process.PopulatingProcess} and then controls the loop
+ * over time.
+ *
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0b 2013/09/01
+ */
+public class Simulation extends OLogger {
 
 ///////////////////////////////
 // Declaration of the constants
 ///////////////////////////////
-    public enum Version {
-        /*
-         * SCHOOL2012 stands for SCHOOLBASED processes, in sequential order
-         * (just like in WS2009).
-         * Similarily to WS2009 and conversely to SCHOOL2012_PROD, plankton
-         * concentration are read like production.
-         */
-
-        SCHOOL2012_PROD,
-        /*
-         * SCHOOL2012 stands for SCHOOLBASED processes, in sequential order
-         * (just like in WS2009).
-         * Difference from WS2009 comes from plankton concentration that is read
-         * directly as a biomass.
-         */
-        SCHOOL2012_BIOM,
-        /*
-         * CASE1
-         * > It is assumed that every cause is independant and concomitant.
-         * > No stochasticity neither competition within predation process: every
-         * predator sees preys as they are at the begining of the time-step.
-         * > Synchromous updating of school biomass.
-         */
-        CASE1,
-        /*
-         * CASE2
-         * > It is assumed that every cause is independant and concomitant.
-         * > Stochasticity and competition within predation process: prey and
-         * predator biomass are being updated on the fly virtually (indeed the
-         * update is not effective outside the predation process,
-         * it is just temporal).
-         * > Synchronous updating of school biomass.
-         */
-        CASE2,
-        /*
-         * CASE3
-         * > It is assumed that every cause compete with each other.
-         * > Stochasticity and competition within predation process.
-         * > Asynchronous updating of school biomass (it means biomass are updated
-         * on the fly).
-         */
-        CASE3;
-    }
-    /*
-     * Choose the version of Osmose tu run.
-     * @see enum Version for details.
-     */
-    public static final Version VERSION = Version.CASE1;
-    /*
-     * The index of the replicated simulation
-     */
-    private final int index;
     /**
-     * The application logger
+     * Several mortality algorithms have been implemented at the time of coding
+     * Osmose version 3.
      */
-    private final Logger logger;
+    public enum MortalityAlgorithm {
 
-///////////////////////////////
-// Constructor
-///////////////////////////////    
-    public Simulation(int index) {
-        this.index = index;
-        // setup the logger
-        logger = Logger.getLogger(Simulation.class.getName() + "#" + index);
-        Handler[] handlers = logger.getHandlers();
-        for (Handler handler : handlers) {
-            logger.removeHandler(handler);
-        }
-        logger.setUseParentHandlers(false);
-        SimulationLogFormatter formatter = new SimulationLogFormatter(index);
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setFormatter(formatter);
-        logger.addHandler(handler);
+        /**
+         * Mortality processes are run in sequential order (just like in Osmose
+         * version WS2009). Difference from WS2009: all the processes happen at
+         * school level (whereas it used to happen at cohort or species level)
+         * and plankton concentration is read directly as a biomass.
+         */
+        SEQUENTIAL,
+        /**
+         * Mortality rates are obtained through an iterative process.
+         * <ul>
+         * <li>It is assumed that every cause is independant and
+         * concomitant.</li>
+         * <li>No stochasticity neither competition within predation process:
+         * every predator sees preys as they are at the begining of the
+         * time-step.</li>
+         * <li>Synchromous updating of school biomass.</li>
+         * </ul>
+         */
+        ITERATIVE,
+        /**
+         * Mortality processes occur independently from each other.
+         * <ul>
+         * <li>It is assumed that every cause is independant and
+         * concomitant.</li>
+         * <li>Stochasticity and competition within predation process: prey and
+         * predator biomass are being updated on the fly virtually (indeed the
+         * update is not effective outside the predation process, it is just
+         * temporal).</li>
+         * <li>Synchronous updating of school biomass.</li>
+         * </ul>
+         */
+        INDEPENDANT,
+        /**
+         * Mortality processes compete stochastically.
+         * <ul>
+         * <li>It is assumed that every cause compete with each other.</li>
+         * <li>Stochasticity and competition within predation process.</li>
+         * <li>Asynchronous updating of school biomass (it means biomass are
+         * updated on the fly).</li>
+         * </ul>
+         */
+        FULLY_STOCHASTIC;
     }
+    /**
+     * Sets the mortality algorithm. Change carefully as it will affect the
+     * whole dynamics of the model.
+     *
+     * @see MortalityAlgorithm for details.
+     */
+    public static final MortalityAlgorithm mortalityAlgorithm = MortalityAlgorithm.ITERATIVE;
+
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
+    /**
+     * The rank of the simulation. (among replicated simulations)
+     */
+    private final int rank;
+    /**
+     * The set of schools.
+     */
     private SchoolSet schoolSet;
-    /*
-     * Time of the simulation in [year]
+    /**
+     * The low trophic level forcing class.
+     */
+    private LTLForcing forcing;
+    /**
+     * Current year of the simulation.
      */
     private int year;
-    /*
-     * Time step of the current year
+    /**
+     * Time step in the current year. {@code i_step_year = i_step_simu / nyear}
      */
     private int i_step_year;
-    /*
-     * Time step of the simulation
+    /**
+     * Time step of the simulation.
      */
     private int i_step_simu;
-    /*
-     * Total number of time steps in one simulation
+    /**
+     * Total number of time steps of the simulation.
      */
     private int n_steps_simu;
-    /*
-     * Array of the species of the simulation
+    /**
+     * Array of the species of the simulation.
      */
     private Species[] species;
     /**
-     * Array of the LTL groups of the simulation
+     * Array of the LTL groups of the simulation.
      */
     private Plankton[] ltlGroups;
-    /*
-     * What should be done within one time step
+    /**
+     * The object that controls what should be done during one time step.
      */
     private AbstractStep step;
-    /*
-     * Object that is able to create NetCDF restart file
+    /**
+     * Object that is able to take a snapshot of the set of schools and write it
+     * in a NetCDF file. Osmose will be able to restart on such a file.
      */
     private SchoolSetSnapshot snapshot;
-    /*
-     * Record frequency of the restart file
+    /**
+     * Record frequency for writing restart files, in number of time step.
      */
     private int restartFrequency;
-    /*
-     * 
+    /**
+     * Indicates whether the simulation starts from a restart file.
      */
     private boolean restart;
+
+//////////////
+// Constructor
+//////////////
+    /**
+     * Creates a new simulation with given rank.
+     *
+     * @param rank, the rank of the simulation
+     */
+    public Simulation(int rank) {
+        super(rank);
+        this.rank = rank;
+    }
 
 ///////////////////////////////
 // Definition of the functions
 ///////////////////////////////
     /**
-     * Initialize the simulation
+     * Initialize the simulation.
      */
     public void init() {
 
-        // Create a new population, empty at the moment
+        // Create a new school set, empty at the moment
         schoolSet = new SchoolSet();
 
-        // Trick to force the model into running only one time step
+        // Option for running only one time step and stops
         boolean oneStep = false;
         if (getConfiguration().canFind("simulation.onestep")) {
             oneStep = getConfiguration().getBoolean("simulation.onestep");
         }
 
-        // Reset time variables
+        // Initialize time variables
         n_steps_simu = oneStep
                 ? 1
                 : getConfiguration().getNYear() * getConfiguration().getNStepYear();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
+
+        // Look for restart file
         restart = false;
         if (!getConfiguration().isNull("simulation.restart.file")) {
-            String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + index;
+            String ncfile = getConfiguration().getFile("simulation.restart.file") + "." + rank;
             i_step_simu = 0;
             try {
                 NetcdfFile nc = NetcdfFile.open(ncfile);
@@ -223,10 +245,10 @@ public class Simulation {
                 int nStepYear = getConfiguration().getNStepYear();
                 year = i_step_simu / nStepYear;
                 i_step_year = i_step_simu % nStepYear;
-                getLogger().log(Level.INFO, "Restarting simulation from year {0} step {1}", new Object[]{year, i_step_year});
+                info("Restarting simulation from year {0} step {1}", new Object[]{year, i_step_year});
                 restart = true;
             } catch (IOException ex) {
-                getLogger().log(Level.WARNING, "Failed to open restart file " + ncfile, ex);
+                error("Failed to open restart file " + ncfile, ex);
             }
         }
 
@@ -240,47 +262,36 @@ public class Simulation {
         ltlGroups = new Plankton[getConfiguration().getNPlankton()];
         for (int p = 0; p < ltlGroups.length; p++) {
             if (getConfiguration().canFind("plankton.biomass.total.plk" + p)) {
-                ltlGroups[p] = new UniformPlankton(p,
-                        getConfiguration().getString("plankton.name.plk" + p),
-                        getConfiguration().getFloat("plankton.size.min.plk" + p),
-                        getConfiguration().getFloat("plankton.size.max.plk" + p),
-                        getConfiguration().getFloat("plankton.tl.plk" + p),
-                        getConfiguration().getFloat("plankton.accessibility2fish.plk" + p),
-                        getConfiguration().getFloat("plankton.biomass.total.plk" + p));
+                ltlGroups[p] = new UniformPlankton(rank, p);
             } else {
-                ltlGroups[p] = new Plankton(p,
-                        getConfiguration().getString("plankton.name.plk" + p),
-                        getConfiguration().getFloat("plankton.size.min.plk" + p),
-                        getConfiguration().getFloat("plankton.size.max.plk" + p),
-                        getConfiguration().getFloat("plankton.tl.plk" + p),
-                        getConfiguration().getFloat("plankton.conversion2tons.plk" + p),
-                        1, // prod2biom parameter that is not used anymore
-                        getConfiguration().getFloat("plankton.accessibility2fish.plk" + p));
+                ltlGroups[p] = new Plankton(rank, p);
             }
             ltlGroups[p].init();
         }
 
+        // Init LTL forcing
+        initForcing();
+
         // Instantiate the Step
-        switch (VERSION) {
-            case SCHOOL2012_PROD:
-            case SCHOOL2012_BIOM:
-                step = new SequentialMortalityStep(index);
+        switch (mortalityAlgorithm) {
+            case SEQUENTIAL:
+                step = new SequentialMortalityStep(rank);
                 break;
-            case CASE1:
-            case CASE2:
-            case CASE3:
-                step = new ConcomitantMortalityStep(index);
+            case ITERATIVE:
+            case INDEPENDANT:
+            case FULLY_STOCHASTIC:
+                step = new ConcomitantMortalityStep(rank);
         }
         // Intialize the step
         step.init();
 
         // Initialize the population
-        AbstractProcess populatingProcess = new PopulatingProcess(index);
+        PopulatingProcess populatingProcess = new PopulatingProcess(rank);
         populatingProcess.init();
         populatingProcess.run();
 
         // Initialize the restart maker
-        snapshot = new SchoolSetSnapshot(index);
+        snapshot = new SchoolSetSnapshot(rank);
         restartFrequency = Integer.MAX_VALUE;
         if (!getConfiguration().isNull("simulation.restart.recordfrequency.ndt")) {
             restartFrequency = getConfiguration().getInt("simulation.restart.recordfrequency.ndt");
@@ -288,27 +299,56 @@ public class Simulation {
     }
 
     /**
-     * Print the progress of the simulation in text console
+     * Creates a specific instance of {@link fr.ird.osmose.ltl.LTLForcing}.
      */
-    private void progress() {
-        // screen display to check the period already simulated
-        if (i_step_simu % getConfiguration().getNStepYear() == 0) {
-            logger.log(Level.INFO, "year {0}", year);
+    private void initForcing() {
+
+        String ltlClassName = getConfiguration().getString("ltl.java.classname");
+        String errMsg = "Failed to create new LTLForcing instance";
+        try {
+            info("LTLForcing: " + ltlClassName);
+            forcing = (LTLForcing) Class.forName(ltlClassName).getConstructor(Integer.TYPE).newInstance(rank);
+        } catch (ClassNotFoundException ex) {
+            error(errMsg, ex);
+        } catch (IllegalAccessException ex) {
+            error(errMsg, ex);
+        } catch (IllegalArgumentException ex) {
+            error(errMsg, ex);
+        } catch (InstantiationException ex) {
+            error(errMsg, ex);
+        } catch (NoSuchMethodException ex) {
+            error(errMsg, ex);
+        } catch (SecurityException ex) {
+            error(errMsg, ex);
+        } catch (InvocationTargetException ex) {
+            error(errMsg, ex);
         }
+
+        forcing.init();
     }
 
+    /**
+     * Checks whether the simulation started from a restart file.
+     *
+     * @return {@code true} if the simulation started from a restart file
+     */
     public boolean isRestart() {
         return restart;
     }
 
+    /**
+     * Runs the simulation. It controls the loop over time.
+     */
     public void run() {
-        
+
         while (i_step_simu < n_steps_simu) {
             year = i_step_simu / getConfiguration().getNStepYear();
             i_step_year = i_step_simu % getConfiguration().getNStepYear();
 
-            // Print progress in console
-            //progress();
+            // Print progress in console at the beginning of the year
+            if (i_step_simu % getConfiguration().getNStepYear() == 0) {
+                debug("year {0}", year);
+            }
 
             // Run a new step
             step.step(i_step_simu);
@@ -321,17 +361,18 @@ public class Simulation {
 
             // Increment time step
             i_step_simu++;
-            }
+        }
         step.end();
 
-        // create a restart at the end of the simulation
+        // Create systematically a restart file at the end of the simulation
         snapshot.makeSnapshot(i_step_simu - 1);
     }
-    
-    public void makeSnapshot() {
-        snapshot.makeSnapshot(i_step_simu);
-    }
 
+    /**
+     * Returns the {@code SchoolSet} associated to this simulation.
+     *
+     * @return the school set
+     */
     public SchoolSet getSchoolSet() {
         return schoolSet;
     }
@@ -340,7 +381,7 @@ public class Simulation {
      * Get a species
      *
      * @param index, the index of the species
-     * @return species[index]
+     * @return the species at index {@code index}
      */
     public Species getSpecies(int index) {
         return species[index];
@@ -349,34 +390,55 @@ public class Simulation {
     /**
      * Gets the specified plankton group.
      *
-     * @param iPlankton, the index of the plankton group.
+     * @param index, the index of the plankton group.
      * @return the plankton group number iPlankton.
      */
     public Plankton getPlankton(int index) {
         return ltlGroups[index];
     }
 
+    /**
+     * Returns the current year of the simulation.
+     *
+     * @return the current year of the simulation
+     */
     public int getYear() {
         return year;
     }
 
+    /**
+     * Returns the time step in the current year.
+     *
+     * @return the time step in the current year
+     */
     public int getIndexTimeYear() {
         return i_step_year;
     }
 
+    /**
+     * Returns the current time step of the simulation.
+     *
+     * @return the current time step of the simulation
+     */
     public int getIndexTimeSimu() {
         return i_step_simu;
     }
 
+    /**
+     * Returns an instance of the {@code Configuration}.
+     *
+     * @return the current {@code Configuration}.
+     */
     private Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
     }
 
-    public final int getReplica() {
-        return index;
-    }
-
-    final public Logger getLogger() {
-        return logger;
+    /**
+     * Returns the {@code LTLForcing} instance.
+     *
+     * @return the {@code LTLForcing} instance
+     */
+    public LTLForcing getForcing() {
+        return forcing;
     }
 }

@@ -1,10 +1,55 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.School.PreyRecord;
 import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.util.SimulationLinker;
@@ -33,10 +78,10 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     /**
      * Whether the indicator should be enabled or not.
      */
-    private boolean enabled;
+    private final boolean enabled;
 
-    public PredatorPressureIndicator(int indexSimulation, String keyEnabled) {
-        super(indexSimulation);
+    public PredatorPressureIndicator(int rank, String keyEnabled) {
+        super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
@@ -70,14 +115,9 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int iSpec = school.getSpeciesIndex();
-            for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-                int nStage = dietOutputStage.getNStage(i);
-                for (int s = 0; s < nStage; s++) {
-                    predatorPressure[iSpec][dietOutputStage.getStage(school)][i][s] += school.diet[i][s];
-                }
-            }
-            for (int i = getConfiguration().getNSpecies(); i < getConfiguration().getNSpecies() + getConfiguration().getNPlankton(); i++) {
-                predatorPressure[iSpec][dietOutputStage.getStage(school)][i][0] += school.diet[i][0];
+            int stage = dietOutputStage.getStage(school);
+            for (PreyRecord prey : school.getPreyRecords()) {
+                predatorPressure[iSpec][stage][prey.getIndex()][prey.getStage()] += prey.getBiomass();
             }
         }
     }
@@ -131,8 +171,8 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
                 for (int s = 0; s < nStage; s++) {
                     prw.print((float) (predatorPressure[i][s][j][0] / dtRecord));
                     if (i < nSpec - 1 || s < nStage - 1) {
-                            prw.print(";");
-                        }
+                        prw.print(";");
+                    }
                 }
             }
             prw.println();
@@ -141,14 +181,13 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
 
     @Override
     public void init() {
-        
-         // Record frequency
+
+        // Record frequency
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // Init diet output stage
         dietOutputStage = new DietOutputStage();
         dietOutputStage.init();
-        
 
         // Create parent directory
         File path = new File(getConfiguration().getOutputPathname());
@@ -156,7 +195,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_predatorPressure_Simu");
-        filename.append(getSimulation().getReplica());
+        filename.append(getRank());
         filename.append(".csv");
         File file = new File(path, filename.toString());
         boolean fileExists = file.exists();
@@ -205,11 +244,11 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
             try {
                 fos.close();
             } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, "Error closing output file PredatorPressure", ex);
+                // do nothing
             }
         }
     }
-    
+
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         return (((iStepSimu + 1) % recordFrequency) == 0);

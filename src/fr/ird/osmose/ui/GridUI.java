@@ -1,11 +1,56 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.util;
+package fr.ird.osmose.ui;
 
+import fr.ird.osmose.Cell;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.School;
+import fr.ird.osmose.grid.IGrid;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,38 +58,25 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.InvocationTargetException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
 /**
  *
  * @author pverley
  */
-public class SimulationUI extends SimulationLinker {
+public class GridUI extends JPanel {
 
-    /**
-     * Time in milliseconds for holding animation in between two steps
-     */
-    private final static int SLEEP = 1000;
-    /**
-     * Height of the Simulation panel
-     */
-    private final static int height = 1600;
-    
-///////////////////////////////
+    ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    /**
-     * Width of the Simulation panel
-     */
-    private int width;
     /**
      * Dimension of the component.
      */
@@ -74,60 +106,8 @@ public class SimulationUI extends SimulationLinker {
      */
     private static RenderingHints hints = null;
     private static final double ONE_DEG_LATITUDE_IN_METER = 111138.d;
+    private int height = 800, width = 600;
     private boolean isGridVisible = false;
-    // JPanel
-    private JPanel panel = new JPanel() {
-        @Override
-        public void paintComponent(Graphics g) {
-
-            int h = getHeight();
-            int w = getWidth();
-
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHints(hints);
-
-            /**
-             * Clear the graphics
-             */
-            g2.clearRect(0, 0, w, h);
-
-            /* Redraw the background when size changed */
-            if (hi != h || wi != w) {
-                drawBackground(g2, w, h);
-                hi = h;
-                wi = w;
-            }
-            /* Draw the background into the graphics */
-            g2.drawImage(background, 0, 0, this);
-
-            /* Draw the particles */
-            if (getSchoolSet() != null) {
-                SchoolUI schoolUI = new SchoolUI();
-                for (School school : SimulationUI.this.getSchoolSet().getPresentSchools()) {
-                    schoolUI.draw(school, w, h);
-                    g2.setColor(schoolUI.getColor(school.getSpeciesIndex()));
-                    g2.fill(schoolUI);
-                }
-            }
-        }
-
-        @Override
-        public int getWidth() {
-            return width;
-        }
-
-        @Override
-        public int getHeight() {
-            return height;
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            return new Dimension(width, height);
-        }
-    };
-    private static JFrame frameUI;
-    private static SimulationUI simulationUI;
 
 ///////////////
 // Constructors
@@ -137,8 +117,7 @@ public class SimulationUI extends SimulationLinker {
      * <code>SimulationUI</code>, intializes the range of the domain and the
      * {@code RenderingHints}.
      */
-    public SimulationUI() {
-        super(0);
+    public GridUI() {
 
         hi = -1;
         wi = -1;
@@ -149,76 +128,31 @@ public class SimulationUI extends SimulationLinker {
                 RenderingHints.VALUE_ANTIALIAS_ON);
         hints.put(RenderingHints.KEY_FRACTIONALMETRICS,
                 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        
-        init();
+
     }
 
-    private static void createUI() {
-        try {
+    @Override
+    public void paintComponent(Graphics g) {
 
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
+        int h = getHeight();
+        int w = getWidth();
 
-                    //1. Create the frame.
-                    frameUI = new JFrame("Osmose grid");
-                    simulationUI = new SimulationUI();
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHints(hints);
 
-                    //2. Optional: What happens when the frame closes?
-                    frameUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        /**
+         * Clear the graphics
+         */
+        g2.clearRect(0, 0, w, h);
 
-                    //3. Create components and put them in the frame.
-                    JScrollPane scrollPane = new JScrollPane();
-                    scrollPane.setViewportView(simulationUI.getPanel());
-                    frameUI.getContentPane().add(scrollPane, BorderLayout.CENTER);
-
-                    //4. Size the frame.
-                    frameUI.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                    scrollPane.setPreferredSize(simulationUI.getPanel().getSize());
-                    scrollPane.revalidate();
-                    frameUI.pack();
-                    frameUI.setLocationRelativeTo(null);
-
-                    //5. Show it.
-                    simulationUI.setGridVisible(true);
-                    frameUI.setVisible(true);
-                }
-            });
-        } catch (InterruptedException ex) {
-            Logger.getLogger(SimulationUI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(SimulationUI.class.getName()).log(Level.SEVERE, null, ex);
+        /* Redraw the background when size changed */
+        if (hi != h || wi != w) {
+            drawBackground(g2, w, h);
+            hi = h;
+            wi = w;
         }
-    }
-
-    public static void step(final int year, final int iStepYear) {
-
-        if (null == frameUI) {
-            createUI();
-        }
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    frameUI.setTitle("Year " + year + " Step " + iStepYear);
-                    simulationUI.getPanel().repaint();
-                }
-            });
-        } catch (InterruptedException ex) {
-            Logger.getLogger(SimulationUI.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(SimulationUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        try {
-            Thread.sleep(SLEEP);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(SimulationUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public JPanel getPanel() {
-        return panel;
+        /* Draw the background into the graphics */
+        g2.drawImage(background, 0, 0, this);
     }
 
     private void drawBackground(Graphics2D g2, int w, int h) {
@@ -235,7 +169,7 @@ public class SimulationUI extends SimulationLinker {
                 graphic.setColor(cell.getColor(i, j));
                 graphic.fillPolygon(cell);
                 if (isGridVisible) {
-                    graphic.setColor(Color.WHITE);
+                    graphic.setColor(Color.LIGHT_GRAY);
                     graphic.drawPolygon(cell);
                 }
             }
@@ -250,11 +184,11 @@ public class SimulationUI extends SimulationLinker {
     /**
      * Forces the background to repaint.
      */
-    private void repaintBackground() {
+    public void repaintBackground() {
 
         hi = -1;
         wi = -1;
-        panel.repaint();
+        repaint();
     }
 
     /**
@@ -312,14 +246,14 @@ public class SimulationUI extends SimulationLinker {
         return (point);
     }
 
-    private void init() {
+    public void init() {
 
         latmin = getGrid().getLatMin();
         latmax = getGrid().getLatMax();
         lonmin = getGrid().getLongMin();
         lonmax = getGrid().getLongMax();
-        //System.out.println("ny: " + getGrid().get_ny());
-        //System.out.println("nx: " + getGrid().get_nx());
+        System.out.println("ny: " + getGrid().get_ny());
+        System.out.println("nx: " + getGrid().get_nx());
 
         double avgLat = 0.5d * (latmin + latmax);
 
@@ -334,6 +268,16 @@ public class SimulationUI extends SimulationLinker {
          height = (int) (width / ratio);
          }*/
         //setPreferredSize(new Dimension(width, height));
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
     }
 
     /**
@@ -360,12 +304,32 @@ public class SimulationUI extends SimulationLinker {
         return d;
     }
 
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height);
+    }
+
+    public static IGrid getGrid() {
+        return Osmose.getInstance().getGrid();
+    }
+
     public static Osmose getOsmose() {
         return Osmose.getInstance();
     }
 
     private class CellUI extends Polygon {
 
+        ///////////////////////////////
+        // Declaration of the constants
+        ///////////////////////////////
+        /**
+         * Color at the bottom.
+         */
+        final private Color bottom = new Color(0, 0, 150);
+        /**
+         * Color at the surface.
+         */
+        final private Color surface = Color.CYAN;
         ///////////////////////////////
         // Declaration of the variables
         ///////////////////////////////
@@ -421,67 +385,99 @@ public class SimulationUI extends SimulationLinker {
 
             if (getGrid().getCell(i, j).isLand()) {
                 return Color.DARK_GRAY;
+//            } else if (mpaProcess.isMPA(getGrid().getCell(i, j))) {
+//                return Color.GREEN;
             } else {
-                return new Color(150, 150, 255);
+                return Color.CYAN;
             }
         }
         //---------- End of class CellUI
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-    /**
-     * This class is the graphical representation of a {@code School} object.
-     * The Particle is represented by an {@code Ellipse2D} with an associated
-     * color.
-     */
-    private class SchoolUI extends Ellipse2D.Double {
+    private static void getCellSize(int i, int j) {
 
-        private Color[] colors = {Color.BLUE,
-            Color.GRAY,
-            Color.MAGENTA,
-            Color.BLUE,
-            Color.PINK,
-            Color.ORANGE,
-            Color.RED,
-            Color.WHITE,
-            Color.YELLOW,
-            Color.GREEN,
-            Color.CYAN,
-            Color.BLACK
-        };
+        double lat1 = getGrid().getCell(i, j).getLat();
+        double lon1 = getGrid().getCell(i, j).getLon();
+        double lat2 = getGrid().getCell(i, j + 1).getLat();
+        double lon2 = getGrid().getCell(i, j + 1).getLon();
+        double gd = geodesicDistance(lat1, lon1, lat2, lon2);
 
-        ////////////////////////////
-        // Definition of the methods
-        ////////////////////////////
-        /**
-         * Draws the particle at specified grid point
-         *
-         * @param data a float[] (xgrid, ygrid) particle's coordinate.
-         * @param w the width of the component
-         * @param h the height of the component
-         */
-        private void draw(School school, int w, int h) {
+        System.out.println("gd1: " + gd + " meters");
 
-            double xs = school.getCell().get_igrid() + Math.random() - 0.5d;
-            xs = Math.min(xs, getGrid().get_nx() - 2);
-            double ys = school.getCell().get_jgrid() + Math.random() - 0.5d;
-            ys = Math.min(ys, getGrid().get_ny() - 2);
-            int[] corner = grid2Screen(xs, ys, w, h);
-            double length = school.getLength() / 4;
-            length = Math.min(Math.max(length, 1), 50);
-            setFrame(corner[0] - 0.5 * length, corner[1] - 1.5, length, Math.min(length, 3));
-            //setFrame(corner[0], corner[1], 1, 1);
+        lat1 = getGrid().getCell(i, j).getLat();
+        lon1 = getGrid().getCell(i, j).getLon();
+        lat2 = getGrid().getCell(i + 1, j).getLat();
+        lon2 = getGrid().getCell(i + 1, j).getLon();
+        gd = geodesicDistance(lat1, lon1, lat2, lon2);
+
+        System.out.println("gd2: " + gd + " meters");
+    }
+
+    private static void writeGridCSV() {
+        FileWriter fw = null;
+
+        try {
+            fw = new FileWriter("grid_osmose.csv");
+            PrintWriter pw = new PrintWriter(fw);
+            pw.println("lat , lon, mask (land = 0 water = 1)");
+            int nbL = getOsmose().getGrid().get_ny();
+            int nbC = getOsmose().getGrid().get_nx();
+            for (int l = 0; l < nbL; l++) {
+                for (int c = 0; c < nbC; c++) {
+                    Cell cell = getOsmose().getGrid().getCell(c, nbL - l - 1);
+                    pw.print(cell.getLat());
+                    pw.print(" , ");
+                    pw.print(cell.getLon());
+                    pw.print(" , ");
+                    pw.println(cell.isLand() ? 0 : 1);
+                }
+            }
+            //Flush the output to the file
+            pw.flush();
+            //Close the Print Writer
+            pw.close();
+        } catch (IOException ex) {
+            Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                //Close the File Writer
+                fw.close();
+            } catch (IOException ex) {
+                Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
+    }
 
-        /**
-         * Gets the color of the particle.
-         *
-         * @return the Color of the particle
-         */
-        private Color getColor(int iSpec) {
+    public static void main(String args[]) {
 
-            return colors[iSpec];
-        }
-        //---------- End of class SchoolUI
+        getOsmose().readArgs(args);
+        getOsmose().init();
+        //getCellSize(1, 1);
+        //getCellSize(10, 10);
+        writeGridCSV();
+        GridUI grid = new GridUI();
+        grid.init();
+        grid.setGridVisible(true);
+        //1. Create the frame.
+        JFrame frame = new JFrame("Osmose grid");
+
+        //2. Optional: What happens when the frame closes?
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //3. Create components and put them in the frame.
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(grid);
+        frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
+
+        //4. Size the frame.
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        scrollPane.setPreferredSize(grid.getSize());
+        scrollPane.revalidate();
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+
+        //5. Show it.
+        frame.setVisible(true);
     }
 }

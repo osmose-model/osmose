@@ -67,8 +67,8 @@ public abstract class AbstractMortalityScenario extends SimulationLinker {
     final private Species species;
     final private int indexSpecies;
 
-    public AbstractMortalityScenario(int indexSimulation, Species species) {
-        super(indexSimulation);
+    public AbstractMortalityScenario(int rank, Species species) {
+        super(rank);
         this.species = species;
         this.indexSpecies = species.getIndex();
     }

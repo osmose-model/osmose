@@ -46,26 +46,22 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose;
+package fr.ird.osmose.util;
 
-import fr.ird.osmose.exception.InvalidVersionNumberException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import fr.ird.osmose.Osmose;
+import fr.ird.osmose.util.logging.OLogger;
+import java.io.IOException;
 
 /**
  *
  * @author pverley
  */
-public class UpdateManager {
+public class UpdateManager extends OLogger {
 
-    private static UpdateManager updateManager = new UpdateManager();
+    private static final UpdateManager updateManager = new UpdateManager();
 
     public static UpdateManager getInstance() {
         return updateManager;
-    }
-
-    public static Logger getLogger() {
-        return Osmose.getInstance().getLogger();
     }
 
     /*
@@ -75,9 +71,9 @@ public class UpdateManager {
 
         // Check version
         if (versionMismatch()) {
-            getLogger().log(Level.INFO, "Configuration version {0} does not match Osmose version. Your configuration file will be automatically updated.", getConfigurationVersion());
+            info("Configuration version {0} does not match Osmose version. Your configuration file will be automatically updated.", getConfigurationVersion());
         } else {
-            getLogger().log(Level.INFO, "Configuration version {0} matches Osmose version. Nothing to do.", getConfigurationVersion());
+            info("Configuration version {0} matches Osmose version. Nothing to do.", getConfigurationVersion());
         }
 
         // Nothing to upgrade so far as it is the first tagged version.
@@ -94,23 +90,23 @@ public class UpdateManager {
     private boolean versionMismatch() {
         Version appVersion = getApplicationVersion();
         Version cfgVersion = getConfigurationVersion();
-        validateVersion(cfgVersion);
         try {
+            validateVersion(cfgVersion);
             return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
                     || !(appVersion.getDate().equals(cfgVersion.getDate()));
-        } catch (Exception ex) {
-            getLogger().warning(ex.getMessage());
+        } catch (IOException ex) {
+            warning(ex.getMessage());
             return true;
         }
     }
 
-    private void validateVersion(Version testedVersion) {
+    private void validateVersion(Version testedVersion) throws IOException {
 
         for (Version version : Version.values) {
             if (version.getNumber().equals(testedVersion.getNumber())) {
                 return;
             }
         }
-        throw new InvalidVersionNumberException("Version number " + testedVersion + " is not identified as a valid Osmose version number.");
+        throw new IOException("Version number " + testedVersion + " is not identified as a valid Osmose version number.");
     }
 }

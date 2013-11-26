@@ -1,13 +1,56 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
@@ -26,9 +69,25 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     private String strCs_r, strHC;
     private String strLon, strLat, strH;
     float[][] latitude, longitude;
+    /**
+     * Dimension of the LTL grid along the x-axis.
+     */
+    private int nx;
+    /**
+     * Dimension of the LTL grid along the y-axis.
+     */
+    private int ny;
+    /**
+     * Dimension of the LTL grid along the z-axis.
+     */
+    private int nz;
+
+    public LTLForcingRomsPisces(int rank) {
+        super(rank);
+    }
 
     @Override
-    public void readLTLForcingFile() {
+    public void readParameters() {
 
         plktonNetcdfNames = new String[getConfiguration().getNPlankton()];
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
@@ -50,30 +109,18 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
     @Override
     public void initLTLGrid() {
-
-        NetcdfFile ncIn = null;
         try {
-            ncIn = NetcdfFile.open(gridFileName, null);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error opening grid file " + gridFileName, ex);
-        }
-        /*
-         * read dimensions
-         */
-        try {
+            NetcdfFile ncIn = NetcdfFile.open(gridFileName, null);
+            /*
+             * read dimensions
+             */
             int[] shape = ncIn.findVariable(strLon).getShape();
-            setDimX(shape[1]);
-            setDimY(shape[0]);
-            setDimZ(getCs_r(ncIn).length);
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error reading dimensions in file " + gridFileName, ex);
-        }
-        /*
-         * Read lon & lat
-         */
-        try {
-            int nx = get_nx();
-            int ny = get_ny();
+            nx = (shape[1]);
+            ny = (shape[0]);
+            nz = (getCs_r(ncIn).length);
+            /*
+             * Read lon & lat
+             */
             Array arrLon = ncIn.findVariable(strLon).read();
             Array arrLat = ncIn.findVariable(strLat).read();
             if (arrLon.getElementType() == float.class) {
@@ -91,21 +138,17 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                     }
                 }
             }
-        } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error reading longitude, latitude variables from file " + gridFileName, ex);
-        }
-        /*
-         * Compute vertical levels
-         */
-        try {
+            /*
+             * Compute vertical levels
+             */
             depthOfLayer = getCstSigLevels(ncIn);
+            /*
+             * Determine cell overlap for spatial integration
+             */
+            findValidMapIndex();
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error loading sigma levels", ex);
+            error("Error while reading the LTL grid from file " + gridFileName, ex);
         }
-        /*
-         * Determine cell overlap for spatial integration
-         */
-        findValidMapIndex();
     }
 
     // CASE SPECIFIC - uses easy relation between the grids Plume and Osmose
@@ -115,12 +158,14 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
 
         // consider only the LTL cells included within the Osmose grid
-        for (int i = 0; i < get_nx(); i++) {
-            for (int j = 0; j < get_ny(); j++) {
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
                 if ((latitude[j][i] >= getGrid().getLatMin()) && (latitude[j][i] <= getGrid().getLatMax()) && (longitude[j][i] >= getGrid().getLongMin()) && (longitude[j][i] <= getGrid().getLongMax())) {
                     // equations giving the position of ROMS cells within the Osmose getGrid(), avoiding to read the whole matrix
                     jGrid = (int) Math.floor((latitude[j][i] - getGrid().getLatMin()) / getGrid().getdLat());
                     iGrid = (int) Math.floor((longitude[j][i] - getGrid().getLongMin()) / getGrid().getdLong());
+                    jGrid = Math.min(jGrid, getGrid().get_ny() - 1);
+                    iGrid = Math.min(iGrid, getGrid().get_nx() - 1);
 
                     // attach each LTL cells to the right Osmose cell (several LTL cells per Osmose cell is allowed)
                     if (!getGrid().getCell(iGrid, jGrid).isLand()) {
@@ -144,36 +189,36 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         for (int j = 0; j < getGrid().get_ny(); j++) {
             for (int i = 0; i < getGrid().get_nx(); i++) {
                 if (!getGrid().getCell(i, j).isLand()) {
-                    if (getNbCellsLTLGrid(i, j) == 0) {
+                    if (null == icoordLTLGrid[j][i] || icoordLTLGrid[j][i].isEmpty()) {
                         icoordLTLGrid[j][i] = new ArrayList();
                         jcoordLTLGrid[j][i] = new ArrayList();
                         Cell cell;
                         if (j > 0) {
                             cell = getGrid().getCell(i, j - 1);
                             if (!cell.isLand()) {
-                                icoordLTLGrid[j][i].addAll(get_iLTL(cell));
-                                jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
+                                icoordLTLGrid[j][i].addAll(icoordLTLGrid[j - 1][i]);
+                                jcoordLTLGrid[j][i].addAll(jcoordLTLGrid[j - 1][i]);
                             }
                         }
                         if (i > 0) {
                             cell = getGrid().getCell(i - 1, j);
                             if (!cell.isLand()) {
-                                icoordLTLGrid[j][i].addAll(get_iLTL(cell));
-                                jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
+                                icoordLTLGrid[j][i].addAll(icoordLTLGrid[j][i - 1]);
+                                jcoordLTLGrid[j][i].addAll(jcoordLTLGrid[j][i - 1]);
                             }
                         }
                         if (j < getGrid().get_ny() - 1) {
                             cell = getGrid().getCell(i, j + 1);
                             if (!cell.isLand()) {
-                                icoordLTLGrid[j][i].addAll(get_iLTL(cell));
-                                jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
+                                icoordLTLGrid[j][i].addAll(icoordLTLGrid[j + 1][i]);
+                                jcoordLTLGrid[j][i].addAll(jcoordLTLGrid[j + 1][i]);
                             }
                         }
                         if (i < getGrid().get_nx() - 1) {
                             cell = getGrid().getCell(i + 1, j);
                             if (!cell.isLand()) {
-                                icoordLTLGrid[j][i].addAll(get_iLTL(cell));
-                                jcoordLTLGrid[j][i].addAll(get_jLTL(cell));
+                                icoordLTLGrid[j][i].addAll(icoordLTLGrid[j][i + 1]);
+                                jcoordLTLGrid[j][i].addAll(jcoordLTLGrid[j][i + 1]);
                             }
                         }
                     }
@@ -190,20 +235,20 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
         NetcdfFile nc = null;
         try {
-             nc = NetcdfFile.open(name);
+            nc = NetcdfFile.open(name);
             // read data and put it local array
             data3d = (float[][][]) nc.findVariable(plktonNetcdfNames[iPlankton]).read().reduce().copyToNDJavaArray();
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error loading plankton variable " + plktonNetcdfNames[iPlankton] + " from file " + name, ex);
-        } finally{
-            if (null != nc)
+            error("Error loading plankton variable " + plktonNetcdfNames[iPlankton] + " from file " + name, ex);
+        } finally {
+            if (null != nc) {
                 try {
-                nc.close();
-            } catch (IOException ex) {
-                // do nothing
+                    nc.close();
+                } catch (IOException ex) {
+                    // do nothing
+                }
             }
         }
-                
 
         return verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
@@ -219,9 +264,6 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
      */
     private float[][][] getCstSigLevels(NetcdfFile ncIn) throws IOException {
 
-        int nz = get_nz();
-        int nx = get_nx();
-        int ny = get_ny();
         double hc;
         double[] sc_r = new double[nz];
         double[] Cs_r;
@@ -246,7 +288,6 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         // Read hc, Cs_r and Cs_w in the NetCDF file.
         hc = getHc(ncIn);
         Cs_r = getCs_r(ncIn);
-
 
         //-----------------------------------------------------------
         // Calculation of sc_r, the sigma levels
@@ -359,16 +400,6 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
          * Nothing worked and eventually returned OLD type.
          */
         return VertCoordType.OLD;
-    }
-
-    @Override
-    public String[] getPlanktonFieldName() {
-        return plktonNetcdfNames;
-    }
-
-    @Override
-    public String[] getNetcdfFile() {
-        return planktonFileListNetcdf;
     }
 
     private enum VertCoordType {

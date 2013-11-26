@@ -1,13 +1,58 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright IRD (Institut de Recherche pour le Développement) 2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ *
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.util;
+package fr.ird.osmose.ui;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.process.MovementProcess;
+import fr.ird.osmose.util.GridMap;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -370,43 +415,6 @@ public class SpatialMapUI extends JPanel {
         gd = geodesicDistance(lat1, lon1, lat2, lon2);
 
         System.out.println("gd2: " + gd + " meters");
-    }
-
-    private static void writeGridCSV() {
-        FileWriter fw = null;
-
-        try {
-            fw = new FileWriter("grid_osmose_stride" + getOsmose().getGrid().getStride() + ".csv");
-            PrintWriter pw = new PrintWriter(fw);
-            pw.println("lat , lon, mask (land = 0 water = 1)");
-            int nbL = getOsmose().getGrid().get_ny();
-            int nbC = getOsmose().getGrid().get_nx();
-            for (int l = 0; l < nbL; l++) {
-                for (int c = 0; c < nbC; c++) {
-                    Cell cell = getOsmose().getGrid().getCell(l, c);
-                    pw.print(cell.getLat());
-                    pw.print(" , ");
-                    pw.print(cell.getLon());
-                    pw.print(" , ");
-                    pw.println(cell.isLand() ? 0 : 1);
-                }
-            }
-            //Flush the output to the file
-            pw.flush();
-            //Close the Print Writer
-            pw.close();
-            //Close the File Writer
-            fw.close();
-        } catch (IOException ex) {
-            Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                fw.close();
-            } catch (IOException ex) {
-                Logger.getLogger(GridUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        }
     }
 
     public static void main(String args[]) {

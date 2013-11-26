@@ -1,4 +1,4 @@
-package fr.ird.osmose.util;
+package fr.ird.osmose.util.io;
 
 /** import java.util */
 import java.util.regex.Pattern;
@@ -17,7 +17,7 @@ import java.io.File;
  *
  * <p>Copyright: Copyright (c) 2007 - Free software under GNU GPL</p>
  *
- * @author P.Verley
+ * @author adiGuba (http://adiguba.developpez.com/)
  * @see java.io.FilenameFilter
  */
 public class MetaFilenameFilter implements java.io.FilenameFilter {

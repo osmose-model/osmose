@@ -1,6 +1,50 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.ird.osmose.process;
 
@@ -8,6 +52,7 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.School.MortalityCause;
 import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.AccessibilityStage;
 import fr.ird.osmose.stage.PredPreyStage;
@@ -16,8 +61,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-
 /**
  *
  * @author pverley
@@ -40,8 +83,8 @@ public class PredationProcess extends AbstractProcess {
      */
     private AbstractStage predPreyStage;
 
-    public PredationProcess(int indexSimulation) {
-        super(indexSimulation);
+    public PredationProcess(int rank) {
+        super(rank);
     }
 
     @Override
@@ -95,7 +138,7 @@ public class PredationProcess extends AbstractProcess {
                 }
                 reader.close();
             } catch (IOException ex) {
-                getLogger().log(Level.SEVERE, "Error loading accessibility matrix from file " + filename, ex);
+                getSimulation().error("Error loading accessibility matrix from file " + filename, ex);
             }
         } else {
             for (int i = 0; i < nspec; i++) {
@@ -126,11 +169,11 @@ public class PredationProcess extends AbstractProcess {
                 // Compute predation
                 for (int ipred = 0; ipred < ns; ipred++) {
                     School predator = schools.get(ipred);
-                    double[] preyUpon = computePredation(predator, School.INSTANTANEOUS_BIOMASS, 1);
+                    double[] preyUpon = computePredation(predator, true, 1);
                     for (int iprey = 0; iprey < ns; iprey++) {
                         if (iprey < ns) {
                             School prey = schools.get(iprey);
-                            prey.incrementNdeadPredation(prey.biom2abd(preyUpon[iprey]));
+                            prey.incrementNdead(MortalityCause.PREDATION, prey.biom2abd(preyUpon[iprey]));
                         }
                     }
                     preyedBiomass[ipred] = sum(preyUpon);
@@ -139,7 +182,7 @@ public class PredationProcess extends AbstractProcess {
                 for (int is = 0; is < ns; is++) {
                     School school = schools.get(is);
                     double biomassToPredate = school.getBiomass() * getPredationRate(school, 1);
-                    school.predSuccessRate = computePredSuccessRate(biomassToPredate, preyedBiomass[is]);
+                    school.setPredSuccessRate(computePredSuccessRate(biomassToPredate, preyedBiomass[is]));
                 }
             }
         }
@@ -269,7 +312,7 @@ public class PredationProcess extends AbstractProcess {
             if ((preySizeMin > getSimulation().getPlankton(i).getSizeMax()) || (preySizeMax < getSimulation().getPlankton(i).getSizeMin())) {
                 percentPlankton[i] = 0.0f;
             } else {
-                percentPlankton[i] = getSimulation().getPlankton(i).calculPercent(preySizeMin, preySizeMax);
+                percentPlankton[i] = getSimulation().getPlankton(i).computePercent(preySizeMin, preySizeMax);
             }
         }
         return percentPlankton;

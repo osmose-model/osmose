@@ -48,13 +48,30 @@
  */
 package fr.ird.osmose;
 
+/**
+ * This class represents a species. It is characterized by the following
+ * variables:
+ * <ul>
+ * <li>name</li>
+ * <li>lifespan</li>
+ * <li>Von Bertalanffy growth parameters</li>
+ * <li>Threshold age for applying Von Bertalanffy growth model</li>
+ * <li>Allometric parameters</li>
+ * <li>Egg weight and size</li>
+ * <li>Size at maturity</li>
+ * <li>Threshold age for age class zero</li>
+ * <ul>
+ *
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0b 2013/09/01
+ */
 public class Species {
 
-////////////
-// Variables
-////////////
+///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
     /**
-     * Trophic level of eggs.
+     * Trophic level of an egg.
      */
     final static public float TL_EGG = 3f;
     /**
@@ -62,41 +79,48 @@ public class Species {
      */
     final private int index;
     /**
-     * Name of the species.
+     * Name of the species. Parameter <i>species.name.sp#</i>
      */
     final private String name;
     /**
-     * Lifespan expressed in number of time steps.
+     * Lifespan expressed in number of time step. A lifespan of 5 years means
+     * that a fish will die as soon as it turns 5 years old. Parameter
+     * <i>species.lifespan.sp#</i>
      */
     final private int lifespan;
     /**
-     * Von bertalanffy growth parameters.
+     * Von Bertalanffy growth parameters. Parameters <i>species.linf.sp#</i>,
+     * <i>species.k.sp#</i> and
+     * <i>species.t0.sp#</i>
      */
     final private float lInf, K, t0;
     /**
-     * Allometric parameters.
+     * Allometric parameters. Parameters
+     * <i>species.length2weight.condition.factor.sp#</i> and
+     * <i>species.length2weight.allometric.power.sp#</i>
      */
     final private float c, bPower;
     /**
-     * Size (cm) at maturity.
+     * Size (cm) at maturity. Parameter <i>species.maturity.age.sp#</i>
      */
     final private float sizeMaturity;
     /**
      * Threshold age (year) for age class zero. It is the age from which target
      * biomass should be considered as eggs and larvae stages are generally not
-     * considered.
+     * considered. Parameter <i>output.cutoff.age.sp#</i>
      */
     final private int ageClassZero;
     /**
-     * Size (cm) of eggs.
+     * Size (cm) of eggs. Parameter <i>species.egg.size.sp#</i>
      */
     final private float eggSize;
     /**
-     * Weight (gram) of eggs.
+     * Weight (gram) of eggs. Parameter <i>species.egg.weight.sp#</i>
      */
     final private float eggWeight;
     /**
-     * Threshold age (year) for applying Von Bertalanffy growth model.
+     * Threshold age (year) for applying Von Bertalanffy growth model. Parameter
+     * <i>species.vonbertalanffy.threshold.age.sp#</i>
      */
     final private float growthAgeThreshold;
 
@@ -106,11 +130,13 @@ public class Species {
     /**
      * Create a new species
      *
-     * @param index, an integer, the index of the species {0 : nbTotSpecies - 1}
+     * @param index, an integer, the index of the species
+     * {@code [0, nbTotSpecies - 1]}
      */
     public Species(int index) {
+
         this.index = index;
-        // INITIALISATION of PARAM
+        // Initialization of parameters
         name = getConfiguration().getString("species.name.sp" + index);
         lInf = getConfiguration().getFloat("species.linf.sp" + index);
         K = getConfiguration().getFloat("species.k.sp" + index);
@@ -135,31 +161,16 @@ public class Species {
         }
         float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * getConfiguration().getNStepYear());
-
-//        System.out.println("***********");
-//        System.out.println("name " + name);
-//        System.out.println("lInf " + lInf);
-//        System.out.println("K " + K);
-//        System.out.println("t0 " + t0);
-//        System.out.println("c " + c);
-//        System.out.println("bPower " + bPower);
-//        System.out.println("sizeMaturity " + sizeMaturity);
-//        System.out.println("recruitmentAge " + recruitmentAge);
-//        System.out.println("ageClassZero " + ageClassZero);
-//        System.out.println("eggSize " + eggSize);
-//        System.out.println("eggWeight " + eggWeight);
-//        System.out.println("growthAgeThreshold " + growthAgeThreshold);
-//        System.out.println("lifespan " + lifespan);
     }
 
-////////////
-// Functions
-////////////
+//////////////////////////////
+// Definition of the functions
+//////////////////////////////
     /**
-     * Computes the mean length (cm) at a specific age.
+     * Computes the mean length, in centimeter, at a specific age.
      *
-     * @param age, expressed in number of time steps.
-     * @return the mean length (cm)
+     * @param age, an age in number of time step.
+     * @return the mean length, in centimeter, at this {@code age}
      */
     public float computeMeanLength(int age) {
 
@@ -184,10 +195,11 @@ public class Species {
     }
 
     /**
-     * Compute the mean age (number of time steps) at a specific length (cm).
+     * Compute the mean age, in number of time step, at a specific length, in
+     * centimeter.
      *
-     * @param length (cm)
-     * @return the mean age expressed in number of time steps
+     * @param length the length in centimeter
+     * @return the mean age in number of time step for this {@code length}
      */
     public int computeMeanAge(float length) {
 
@@ -207,10 +219,11 @@ public class Species {
     }
 
     /**
-     * Computes the mean weight (gram) at a specific age.
+     * Computes the mean weight, in gram, at a specific age, in number of time
+     * step.
      *
-     * @param age, expressed in number of time steps.
-     * @return the mean weight (gram)
+     * @param age, the age in number of time step
+     * @return the mean weight in gram at this {@code age}
      */
     public float computeMeanWeight(int age) {
 
@@ -227,65 +240,90 @@ public class Species {
     }
 
     /**
-     * Computes the weight corresponding to the given length.
+     * Computes the weight, in gram, corresponding to the given length, in
+     * centimeter.
      *
-     * @param length (cm)
-     * @return the weight (gram)
+     * @param length, the length in centimeter
+     * @return the weight in gram for this {@code length}
      */
     public float computeWeight(float length) {
         return (float) (c * (Math.pow(length, bPower)));
     }
 
     /**
-     * @return the longevity, expressed in number of time steps.
+     * Returns the lifespan of the species. Parameter
+     * <i>species.lifespan.sp#</i>
+     *
+     * @return the lifespa, in number of time step
      */
     public int getLifespanDt() {
         return lifespan;
     }
 
     /**
-     * @return the index of the species.
+     * Returns the index of the species.
+     *
+     * @return the index of the species
      */
     public int getIndex() {
         return index;
     }
 
     /**
-     * @return the name of the species.
+     * Returns the name of the species. Parameter <i>species.name.sp#</i>
+     *
+     * @return the name of the species
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @return the egg's size (cm)
+     * Returns the size of an egg. Parameter <i>species.egg.size.sp#</i>
+     *
+     * @return the size of an egg in centimeter
      */
     public float getEggSize() {
         return eggSize;
     }
 
     /**
-     * @return the egg's weight (gram)
+     * Returns the weight of an egg in gram. Parameter
+     * <i>species.egg.weight.sp#</i>
+     *
+     * @return the weight of an egg in gram
      */
     public float getEggWeight() {
         return eggWeight;
     }
 
     /**
-     * @return the threshold age of class zero, expressed in number of time
-     * steps.
+     * Returns the threshold of age class zero, in number of time step. This
+     * parameter allows to discard schools younger that this threshold in the
+     * calculation of the indicators when parameter <i>output.cutoff.enabled</i>
+     * is set to {@code true}. Parameter <i>output.cutoff.age.sp#</i>
+     *
+     * @return the threshold age of class zero, in number of time step
      */
     public int getAgeClassZero() {
         return ageClassZero;
     }
 
     /**
-     * @return the size of maturity (cm)
+     * Return the size, in centimeter, at (sexual) maturity. Parameter
+     * <i>species.maturity.age.sp#</i>
+     *
+     * @return the size at maturity in centimeter
      */
     public float getSizeMaturity() {
         return sizeMaturity;
     }
 
+    /**
+     * Returns an instance of the {@code Configuration}.
+     *
+     * @return an instance of the {@code Configuration}
+     */
     private Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
     }

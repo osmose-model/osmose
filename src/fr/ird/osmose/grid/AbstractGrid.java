@@ -1,76 +1,130 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.ird.osmose.grid;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
+import fr.ird.osmose.util.logging.OLogger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
+ * This abstract class implements the function listed in the interface
+ * {@code IGrid}. It limits the task of coding a new grid to reading the
+ * parameters ({@link AbstractGrid#readParameters()}) and making the grid
+ * ({@link AbstractGrid#makeGrid()}). Any new type of grid in Osmose should
+ * extends an {@code AbstractGrid}.
  *
- * @author pverley
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0b 2013/09/01
  */
-public abstract class AbstractGrid implements IGrid {
+public abstract class AbstractGrid extends OLogger implements IGrid  {
 
-    ///////////////////////////////
+///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
-    /*
-     * The array of cells
+    /**
+     * The array of cells constituting the grid.
      */
     private Cell[][] matrix;
-    /*
-     * Number of lines
+    /**
+     * Dimension of the grid along the y-axis. Number of lines.
      */
     private int ny;
-    /*
-     * Number od columns
+    /**
+     * Dimension of the grid along the x-axis. Number of columns.
      */
     private int nx;
-    /*
-     * Latitude °N of upper left corner of the grid
+    /**
+     * Latitude, in degree north, of the North West corner of the grid.
      */
     private float latMax;
-    /*
-     * Latitude °N of lower right corner of the grid
+    /**
+     * Latitude, in degree north, of the South East corner of the grid.
      */
     private float latMin;
-    /*
-     * Longitude °E of lower right corner of the grid
+    /**
+     * Longitude, in degree east, of the South East corner of the grid.
      */
     private float longMax;
-    /*
-     * Longitude °E of upper left corner of the grid
+    /**
+     * Longitude, in degree east, of the North West corner of the grid.
      */
     private float longMin;
-    /*
-     * Latitudinal dimension of one cell
+    /**
+     * Meridional size, in degree, of a cell (delta latitude).
      */
     private float dLat;
-    /*
-     * Longitudinal dimension of one cell
+    /**
+     * Zonal size, in degree, of a cell (delta longitude).
      */
     private float dLong;
 
 /////////////////////////////////////
 // Definition of the abstract methods
 /////////////////////////////////////
+    /**
+     * Creates an array of {@code Cell} that represents the grid.
+     *
+     * @return an array of {@code Cell} that represents the grid
+     */
     abstract Cell[][] makeGrid();
 
+    /**
+     * Read the parameters of the grid in the configuration file.
+     */
     abstract void readParameters();
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
-    /*
-     * Must be called after creating a new instance of grid.
-     */
     @Override
     public void init() {
         readParameters();
@@ -78,13 +132,6 @@ public abstract class AbstractGrid implements IGrid {
         getDimGeogArea();
     }
 
-    /**
-     * Get the grid cell at index (i, j)
-     *
-     * @param i, index i of the cell
-     * @param j, index j of the cell
-     * @return Cell(i, j)
-     */
     @Override
     public Cell getCell(int i, int j) {
         return matrix[j][i];
@@ -97,11 +144,6 @@ public abstract class AbstractGrid implements IGrid {
         return matrix[j][i];
     }
 
-    /**
-     * Get a list of the cells.
-     *
-     * @return a List<Cell> of the cells.
-     */
     @Override
     public List<Cell> getCells() {
         ArrayList<Cell> cells = new ArrayList(ny * nx);
@@ -113,18 +155,6 @@ public abstract class AbstractGrid implements IGrid {
         return cells;
     }
 
-    /**
-     * Get the adjacent cells of a given cell (cell included) within a given
-     * range of cells. Cells are not randomly sorted.
-     *
-     * @see Collections.shuffle() For cell(i, j) returns 8 surrounding cells:
-     * cell(i - 1, j - 1) cell(i - 1, j) cell(i - 1, j + 1) cell(i, j - 1)
-     * cell(i, j + 1) cell(i + 1, j - 1) cell(i + 1, j) cell(i + 1, j + 1) For
-     * cells at the edge of the grid, only returns 3 or 5 cells.
-     * @param cell
-     * @param range, and integer, the range of the neighbourhood
-     * @return an ArrayList of the cells surrounding <code>cell</code>
-     */
     @Override
     public ArrayList<Cell> getNeighbourCells(Cell cell, int range) {
 
@@ -144,11 +174,8 @@ public abstract class AbstractGrid implements IGrid {
         return neighbours;
     }
 
-    /*
-     * Returns the number of cells of the grid that are not inland.
-     */
     @Override
-    public int getNumberAvailableCells() {
+    public int getNOceanCell() {
         int nbCells = 0;
 
         for (int j = 0; j < ny; j++) {
@@ -162,41 +189,41 @@ public abstract class AbstractGrid implements IGrid {
     }
 
     /**
-     * Computes longMin, latMin, longMax, latMax. Computes the dimension of a
-     * cell, assuming that we work in a regular grid
+     * Computes longMin, latMin, longMax, latMax and computes the size of a cell
+     * assuming that we work in a regular grid.
      */
     private void getDimGeogArea() {
 
         /*
-         * Set nbLines and nbColumns Useless for Osmose grid since it is a
-         * parameter given by the user But has to be done for the Netcdf grids.
+         * Set nbLines and nbColumns. It is useless for OriginalGrid since it is
+         * a parameter given by the user. But it has to be done for the Netcdf
+         * grids.
          */
         ny = matrix.length;
         nx = matrix[0].length;
 
         //--------------------------------------
         // Calculate the Physical Space extrema
-
-        setLongMin(Float.MAX_VALUE);
-        setLongMax(-longMin);
-        setLatMin(Float.MAX_VALUE);
-        setLatMax(-latMin);
+        longMin = Float.MAX_VALUE;
+        longMax = -1.f * Float.MAX_VALUE;
+        latMin = Float.MAX_VALUE;
+        latMax = -1.f * Float.MAX_VALUE;
         int j = ny;
 
         while (j-- > 0) {
             int i = nx;
             while (i-- > 0) {
                 if (matrix[j][i].getLon() >= longMax) {
-                    setLongMax(matrix[j][i].getLon());
+                    longMax = matrix[j][i].getLon();
                 }
                 if (matrix[j][i].getLon() <= longMin) {
-                    setLongMin(matrix[j][i].getLon());
+                    longMin = matrix[j][i].getLon();
                 }
                 if (matrix[j][i].getLat() >= latMax) {
-                    setLatMax(matrix[j][i].getLat());
+                    latMax = matrix[j][i].getLat();
                 }
                 if (matrix[j][i].getLat() <= latMin) {
-                    setLatMin(matrix[j][i].getLat());
+                    latMin = matrix[j][i].getLat();
                 }
             }
         }
@@ -206,127 +233,69 @@ public abstract class AbstractGrid implements IGrid {
         float float_tmp;
         if (longMin > longMax) {
             float_tmp = longMin;
-            setLongMin(longMax);
-            setLongMax(float_tmp);
+            longMin = longMax;
+            longMax = float_tmp;
         }
 
         if (latMin > latMax) {
             float_tmp = latMin;
-            setLatMin(latMax);
-            setLatMax(float_tmp);
+            latMin = latMax;
+            latMax = float_tmp;
         }
 
         /*
-         * size of a cell
+         * Average size of a cell
          */
         dLat = (latMax - latMin) / (float) ny;
         dLong = (longMax - longMin) / (float) nx;
     }
 
-    /**
-     * @return the number of lines
-     */
     @Override
     public int get_ny() {
         return ny;
     }
 
-    void set_ny(int ny) {
-        this.ny = ny;
-    }
-
-    /**
-     * @return the number of columns
-     */
     @Override
     public int get_nx() {
         return nx;
     }
 
-    /**
-     * @return the latitude °N of the upper left corner of the grid
-     */
     @Override
     public float getLatMax() {
         return latMax;
     }
 
-    /**
-     * @return the latitude °N of the lower right corner of the grid
-     */
     @Override
     public float getLatMin() {
         return latMin;
     }
 
-    /**
-     * @return the longitude °E of the lower right corner of the grid
-     */
     @Override
     public float getLongMax() {
         return longMax;
     }
 
-    /**
-     * @return the longitude °E of the upper left corner of the grid
-     */
     @Override
     public float getLongMin() {
         return longMin;
     }
 
-    /**
-     * @return the dLat of one cell
-     */
     @Override
     public float getdLat() {
         return dLat;
     }
 
-    /**
-     * @return the dLong of one cell
-     */
     @Override
     public float getdLong() {
         return dLong;
     }
 
+    /**
+     * Returns an instance of the current {@code Configuration}.
+     *
+     * @return an instance of the current {@code Configuration}
+     */
     Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
-    }
-
-    /**
-     * @param nx the nbColumns to set
-     */
-    public void set_nx(int nx) {
-        this.nx = nx;
-    }
-
-    /**
-     * @param latMax the latMax to set
-     */
-    public void setLatMax(float latMax) {
-        this.latMax = latMax;
-    }
-
-    /**
-     * @param latMin the latMin to set
-     */
-    public void setLatMin(float latMin) {
-        this.latMin = latMin;
-    }
-
-    /**
-     * @param longMax the longMax to set
-     */
-    public void setLongMax(float longMax) {
-        this.longMax = longMax;
-    }
-
-    /**
-     * @param longMin the longMin to set
-     */
-    public void setLongMin(float longMin) {
-        this.longMin = longMin;
     }
 }

@@ -1,47 +1,129 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * 
+ * This software is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, natural and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use, 
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info". 
+ * 
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability. 
+ * 
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or 
+ * data to be ensured and,  more generally, to use and operate it in the 
+ * same conditions as regards security. 
+ * 
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
  */
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.Plankton;
-import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.util.SimulationLinker;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  *
- * @author pverley
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0b 2013/09/01
  */
-public abstract class AbstractLTLForcing implements LTLForcing {
+public abstract class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
 
-    private int nx;      // dimension of LTL model, here ROMS Plume (144 * 65 * 20)
-    private int ny;
-    private int nz;	// vertical dimension (20)
+///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
+    /**
+     * List of the i-coordinates of the LTL cells that overlap an Osmose cell.
+     * These are the LTL cells that are taken into account for interpolating the
+     * LTL biomass on an Osmose cell. It is an array of the size of the Osmose
+     * grid so that it provides of list of i-coordinates for every (ocean) cell
+     * of the Osmose grid.
+     *
+     */
     List<Integer>[][] icoordLTLGrid;
+    /**
+     * List of the j-coordinates of the LTL cells that overlap an Osmose cell.
+     * These are the LTL cells that are taken into account for interpolating the
+     * LTL biomass on an Osmose cell. It is an array of the size of the Osmose
+     * grid so that it provides of list of j-coordinates for every (ocean) cell
+     * of the Osmose grid.
+     *
+     */
     List<Integer>[][] jcoordLTLGrid;
-    
     /**
-     * Array of the NetCDF variable of the plankton fields.
-     * @return 
+     * Factor for converting biomass from plankton unit to wet weight in
+     * tonne/km2. (e.g. mmolN/m2 to tonne/km2)
      */
-    abstract public String[] getPlanktonFieldName();
+    float[] conversionFactor;
     /**
-     * List of the NetCDF files.
-     * @return 
+     * Number of time step in the LTL time series inputed to Osmose. This value
+     * must be a multiple of the number of time step per year in Osmose. It
+     * means the user can provide either one year, 5 years or 50 years of LTL
+     * data and Osmose will loop over it (if necessary) until the end of the
+     * simulation.
      */
-    abstract public String[] getNetcdfFile();
+    private int nLTLStep;
+    /**
+     * Array of float that stores the biomass, in tonne, of every LTL groups
+     * interpolated on the Osmose grid for the current time step of the
+     * simulation. {@code biomass[n_LTL_groups][nline_osmose][ncolumn_osmose]}.
+     * The array is updated every time step in the {@link #update(int)}
+     * function.
+     */
+    private float[][][] biomass;
 
+////////////////////////////
+// Definition of the methods
+////////////////////////////
+    /**
+     * Creates a new LTLForcing associated to a specified simulation.
+     *
+     * @param rank, the rank of the simulation
+     */
+    AbstractLTLForcing(int rank) {
+        super(rank);
+    }
+
+/////////////////////////////////////
+// Definition of the abstract methods
+/////////////////////////////////////
     /**
      * Get the biomass of the specified plankton group on the LTL grid and
      * vertically integrated, for a given time step. The biomass is expressed in
      * the same unit as it is in the forcing file except that it is vertically
-     * integrated (unit/m2).
+     * integrated (concentration of plankton per surface unit).
      *
-     * @param plankton, a plankton group
+     * @param iPlankton, the index of a plankton group
      * @param iStepSimu, the current step of the simulation
      * @return an array of dimension of the LTL grid with biomass vertically
      * integrated.
@@ -49,11 +131,9 @@ public abstract class AbstractLTLForcing implements LTLForcing {
     abstract float[][] getRawBiomass(int iPlankton, int iStepSimu);
 
     /**
-     * Loads parameters about how the LTL biomass are provided.
-     *
-     * @param ltlForcingFile, the pathname of the LTLForcing configuration file.
+     * Read LTL parameters in the Osmose configuration file.
      */
-    abstract void readLTLForcingFile();
+    abstract void readParameters();
 
     /**
      * This function loads the LTL grid. It loads longitude, latitude and depth
@@ -62,6 +142,9 @@ public abstract class AbstractLTLForcing implements LTLForcing {
      */
     abstract void initLTLGrid();
 
+////////////////////////////
+// Definition of the methods
+////////////////////////////
     /**
      * Converts the current time step of the simulation into the corresponding
      * time step of the LTL data.
@@ -70,17 +153,54 @@ public abstract class AbstractLTLForcing implements LTLForcing {
      * @return the corresponding time step of the LTL data.
      */
     public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % getConfiguration().getNumberLTLSteps();
-    }
-    
-    @Override
-    public void init() {
-        readLTLForcingFile();
-        initLTLGrid();
+        return iStepSimu % nLTLStep;
     }
 
+    @Override
+    public void init() {
+
+        // Read number of LTL steps
+        nLTLStep = getConfiguration().getInt("ltl.nstep");
+
+        // Read conversion factors
+        int nPlk = getConfiguration().getNPlankton();
+        conversionFactor = new float[nPlk];
+        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
+            if (!getConfiguration().isNull("plankton.conversion2tons.plk" + iPlk)) {
+                conversionFactor[iPlk] = getConfiguration().getFloat("plankton.conversion2tons.plk" + iPlk);
+            } else {
+                warning("Paramter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/km2 (or tonne/km3 for 3D dataset)", new Object[]{iPlk, getSimulation().getPlankton(iPlk).getName()});
+                conversionFactor[iPlk] = 1.f;
+            }
+        }
+
+        // Read LTL parameters
+        readParameters();
+
+        // Initializes LTL grid
+        initLTLGrid();
+
+        // Initializes biomass matrix
+        biomass = new float[nPlk][getGrid().get_ny()][getGrid().get_nx()];
+    }
+
+    /**
+     *
+     * @param data3d, the raw LTL data with a vertical dimension
+     * {@code data3d[nz][ny][nx]}
+     * @param depthLayer, an array of float that provides the depth of every
+     * cell of the LTL grid. {@code depthLayer[nz][ny][nx]}
+     * @param maxDepth, the maximum depth to be taken into account for the
+     * vertical integration. Make sure the sign of the depth is consistent
+     * between the depth of the LTL grid and the maximum depth.
+     * @return the raw LTL data vertically integrated, in concentration of
+     * plankton per surface unit.
+     */
     public float[][] verticalIntegration(float[][][] data3d, float[][][] depthLayer, float maxDepth) {
-        float[][] integratedData = new float[get_ny()][get_nx()];
+        int nx = data3d[0][0].length;
+        int ny = data3d[0].length;
+        int nz = data3d.length;
+        float[][] integratedData = new float[ny][nx];
         float integr;
         for (int i = 0; i < nx; i++) {
             for (int j = 0; j < ny; j++) {
@@ -98,75 +218,47 @@ public abstract class AbstractLTLForcing implements LTLForcing {
         return integratedData;
     }
 
-    public int get_nx() {
-        return nx;
-    }
-
-    public int get_ny() {
-        return ny;
-    }
-
-    public int get_nz() {
-        return nz;
-    }
-
-    void setDimX(int nx) {
-        this.nx = nx;
-    }
-
-    void setDimY(int ny) {
-        this.ny = ny;
-    }
-
-    void setDimZ(int nz) {
-        this.nz = nz;
-    }
-
+    /**
+     * Updates the biomass of the LTL groups at the current time step of the
+     * simulation. Get the "raw" biomass of the LTL groups on their original
+     * grid and with their original unit and interpolates it on the Osmose grid
+     * and converts it to tonne/km2.
+     *
+     * @param iStepSimu, the current step of the simulation
+     */
     @Override
-    public float[][] computeBiomass(Plankton plankton, int iStepSimu) {
+    public void update(int iStepSimu) {
 
-        float[][] biomass = new float[getGrid().get_ny()][getGrid().get_nx()];
-
-        float[][] rawBiomass = getRawBiomass(plankton.getIndex(), iStepSimu);
-        for (Cell cell : getGrid().getCells()) {
-            if (!cell.isLand()) {
-                float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
-                int nCells = getNbCellsLTLGrid(cell);
-                for (int k = 0; k < nCells; k++) {
-                    biomass[cell.get_jgrid()][cell.get_igrid()] += area * plankton.convertToTonPerKm2(rawBiomass[get_jLTL(cell).get(k)][get_iLTL(cell).get(k)]) / (float) nCells;
+        for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
+            float[][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
+            for (Cell cell : getGrid().getCells()) {
+                if (!cell.isLand()) {
+                    float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
+                    int i = cell.get_igrid();
+                    int j = cell.get_jgrid();
+                    int nCells = icoordLTLGrid[j][i].size();
+                    for (int k = 0; k < nCells; k++) {
+                        biomass[iPlk][j][i] += area * convertToTonnePerKm2(iPlk, rawBiomass[jcoordLTLGrid[j][i].get(k)][icoordLTLGrid[j][i].get(k)]) / (float) nCells;
+                    }
                 }
             }
         }
-        return biomass;
     }
 
-    int getNbCellsLTLGrid(int i, int j) {
-        return (null == icoordLTLGrid[j][i])
-                ? 0
-                : icoordLTLGrid[j][i].size();
+    @Override
+    public float getBiomass(int iPlankton, Cell cell) {
+        return biomass[iPlankton][cell.get_jgrid()][cell.get_igrid()];
     }
 
-    int getNbCellsLTLGrid(Cell cell) {
-        return getNbCellsLTLGrid(cell.get_igrid(), cell.get_jgrid());
-    }
-
-    List<Integer> get_iLTL(Cell cell) {
-        return icoordLTLGrid[cell.get_jgrid()][cell.get_igrid()];
-    }
-
-    List<Integer> get_jLTL(Cell cell) {
-        return jcoordLTLGrid[cell.get_jgrid()][cell.get_igrid()];
-    }
-
-    static Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
-    }
-
-    static IGrid getGrid() {
-        return Osmose.getInstance().getGrid();
-    }
-    
-    static Logger getLogger() {
-        return Osmose.getInstance().getLogger();
+    /**
+     * Converts plankton biomass (usually from mmolN/m2) to tonne/km2
+     *
+     * @param iPlankton, the index of the plankton group
+     * @param concentration of the plankton biomass in the same unit as in the
+     * LTL files
+     * @return concentration of plankton biomass in tonne/km2
+     */
+    private float convertToTonnePerKm2(int iPlankton, float concentration) {
+        return concentration * conversionFactor[iPlankton];
     }
 }

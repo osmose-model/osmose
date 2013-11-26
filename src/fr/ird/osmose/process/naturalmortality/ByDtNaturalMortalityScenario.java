@@ -2,13 +2,13 @@
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
- * Copyright IRD (Institut de Recherche pour le Développement) 2013
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
  * 
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
  * Philippe VERLEY (philippe.verley@ird.fr)
- *
+ * 
  * This software is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -51,6 +51,7 @@ package fr.ird.osmose.process.naturalmortality;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.AbstractMortalityScenario;
+import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
  * Natural mortality varies over time. Osmose can handle values for 1. one year
@@ -65,20 +66,21 @@ public class ByDtNaturalMortalityScenario extends AbstractMortalityScenario {
     // Natural mortality rate expressed in [time_step^-1]
     private float[] D;
 
-    public ByDtNaturalMortalityScenario(int iSimulation, Species species) {
-        super(iSimulation, species);
+    public ByDtNaturalMortalityScenario(int rank, Species species) {
+        super(rank, species);
     }
 
     @Override
     public void init() {
 
-        String csvfile = getConfiguration().getFile("mortality.natural.rate.bytDt.file.sp" + getIndexSpecies());
-        D = getConfiguration().readTimeSeries(csvfile);
+        SingleTimeSeries ts = new SingleTimeSeries(getRank());
+        ts.read(getConfiguration().getFile("mortality.natural.rate.bytDt.file.sp" + getIndexSpecies()));
+        D = ts.getValues();
     }
 
     @Override
     public float getInstantaneousRate(School school) {
-        return D[getIndexSimulation()];
+        return D[getRank()];
     }
 
     @Override

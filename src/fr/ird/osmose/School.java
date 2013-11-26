@@ -48,124 +48,157 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.stage.DietOutputStage;
+import fr.ird.osmose.util.GridPoint;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-public class School extends GridPoint {
+/**
+ * This class represents a school of fish, it is the individual of the
+ * Individual Based Model. A school is constituted by a pool of identical fish.
+ * This feature allows Osmose to attribute to the school a set of state
+ * variables characterizing the typical fish of the school:
+ * <ul>
+ * <li>species<li>
+ * <li>age</li>
+ * <li>length</li>
+ * <li>weight</li>
+ * <li>trophic level</li>
+ * </ul>
+ * The school also has proper state variables:
+ * <ul>
+ * <li>abundance</li>
+ * <li>biomass</li>
+ * </ul>
+ * Stricto sensus, the fish should be the individual of the IBM but it is
+ * unrealistic in terms of computational power to manage such large number of
+ * individuals. The concept of school made of fish with identical
+ * characteristics offers a good comprise between computational cost and
+ * biological relevancy. Later on, when the documentation refers to "fish" it
+ * must be understood as the typical fish constituting the school.<br>
+ * The {@code School} extends a {@code GridPoint}. It means the school is
+ * located with both grid coordinates and geographical coordinates.
+ *
+ * @see GridPoint
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0b 2013/09/01
+ */
+public class School extends GridPoint implements Prey {
 
-    final public static boolean INSTANTANEOUS_BIOMASS = true;
-    final public static boolean INISTEP_BIOMASS = false;
+///////////////////////////////
+// Declaration of the variables
+///////////////////////////////
     /**
-     * Species of the school.
+     * {@link Species} of the fish.
      */
     final private Species species;
     /**
-     * Age of the fish expressed in number of time steps.
+     * Age of the fish expressed in number of time step.
      */
     private int age;
     /**
-     * Length of the individuals in the school in centimeters.
+     * Length of the fish in centimeter.
      */
     private float length;
     /**
-     * Weight of individual of the school in tons. The unit has been set to tons
-     * just because it saves computation time for converting the biomass from
-     * grams to tons
+     * Weight of the fish in tonne. The unit has been set to tonne just because
+     * it saves computation time for converting the biomass from gram to tonne
      */
     private float weight;
     /**
-     * Trophic level of this school.
+     * Trophic level of the fish.
      */
     private float trophicLevel;
     /**
-     * Whether the school is catchable for fishing.
-     */
-    private boolean catchable;
-    /**
-     * Number of individuals in the school at beginning of the time step.
+     * Number of fish in the school at the beginning of the time step.
      */
     private double abundance;
     /**
-     * Number of individuals in the school. instantaneousAbundance = abundance -
-     * ndeads
+     * Number of fish in the school, estimated on the fly.
+     * {@code instantaneousAbundance = abundance - ndead}
      */
     private double instantaneousAbundance;
     /**
-     * Matrix of diets in a time step. diet[NSPECIES+NPLANKTON][NDIETSTAGES]
+     * List of {@code PreyRecord}. It keeps track of what the school has eaten
+     * during the time step.
      */
-    public double[][] diet;
+    final private List<PreyRecord> preyRecords;
     /**
-     * Number of dead individuals due to fishing.
+     * Biomass of prey, in tonne, ingested by the school at current time step.
      */
-    private double ndeadFishing;
+    private double preyedBiomass;
     /**
-     * Number of dead individuals due to predation.
+     * Number of dead fish in the current time step, for each mortality cause.
      */
-    private double ndeadPredation;
+    private final double[] nDead = new double[MortalityCause.values().length];
     /**
-     * Number of dead individuals due to starvation.
+     * Predation success rate, the ratio of what is preyed on maximal ingestion.
+     * {@code predation success rate = what has been preyed / maximal ingestion}
      */
-    private double ndeadStarvation;
+    private float predSuccessRate;
     /**
-     * Number of dead individuals due to natural mortality.
-     */
-    private double ndeadNatural;
-        /**
-     * Number of dead individuals out of simulated domain
-     */
-    private double ndeadOut;
-    /**
-     * Predation success rate. (ratio of what is preyed on maximal ingestion).
-     */
-    public float predSuccessRate;
-    /*
-     * Monitor whether the number of deads has changed
+     * Monitor whether the number of dead has changed. It helps to prevent
+     * unnecessary recalculation of the instantaneous biomass.
      */
     private boolean ndeadHasChanged;
-        /*
-     * Out of the simulated domain at current time step
+    /**
+     * Whether the school is out of the simulated domain at current time step.
      */
     private boolean out;
-    
+    /**
+     * A unique randomly generated {@link java.util.UUID} for identifying and
+     * comparing schools.
+     */
     final private UUID uuid = UUID.randomUUID();
 
-//////////////
-// Constructor
-//////////////
+///////////////
+// Constructors
+///////////////
     /**
-     * Create a new school at age 0, with egg size and weight.
+     * Create a new school at egg stage with a given number of eggs. State
+     * variables are preset:
+     * <ul>
+     * <li>age set to zero</li>
+     * <li>length set from parameter <i>species.egg.size.sp#</i></li>
+     * <li>weight set from parameter <i>species.egg.weight.sp#</i></li>
+     * <li>trophic level set from constant {@link Species#TL_EGG}</li>
+     * <li>the school is not yet located on the grid</li>
+     * </ul>
      *
-     * @param species
-     * @param abundance
+     * @param species, the {@link Species} of the fish
+     * @param abundance, the number of eggs in the school
      */
     public School(Species species, double abundance) {
         this(species, abundance, species.getEggSize(), species.getEggWeight(), 0);
     }
 
     /**
-     * Create a new school.
+     * Create a new school, with given species, abundance, length, weight and
+     * age. Trophic level is preset to {@link Species#TL_EGG} and the school is
+     * not located on the grid.
      *
-     * @param species
-     * @param abundance
-     * @param length
-     * @param weight
-     * @param age
+     * @param species, the {@link Species} of the fish
+     * @param abundance, the number of fish in the school
+     * @param length, the length of the fish in centimeter
+     * @param weight, the weight of the fish in gram
+     * @param age, the age of the fish in number of time step
      */
     public School(Species species, double abundance, float length, float weight, int age) {
         this(species, -1, -1, abundance, length, weight, age, Species.TL_EGG);
     }
 
     /**
-     * Create a new school.
+     * Create a new school, with given species, grid coordinates, abundance,
+     * length weight, age and trophic level.
      *
-     * @param species
-     * @param x
-     * @param y
-     * @param abundance
-     * @param length
-     * @param weight
-     * @param age
-     * @param trophicLevel
+     * @param species, the {@link Species} of the fish
+     * @param x, x coordinate of the school on the grid
+     * @param y, y coordinate of the school on the grid
+     * @param abundance, the number of fish in the school
+     * @param length, the length of the fish in centimeter
+     * @param weight, the weight of the fish in gram
+     * @param age, the age of the fish in number of time step
+     * @param trophicLevel, the trophic level of the fish
      */
     public School(Species species, float x, float y, double abundance, float length, float weight, int age, float trophicLevel) {
         this.species = species;
@@ -181,61 +214,90 @@ public class School extends GridPoint {
             setOffGrid();
         }
         out = false;
+        preyRecords = new ArrayList();
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
-    /*
-     * Reset school state variables
+    /**
+     * Initializes and reset some state variables
      */
-    public void initStep() {
+    public void init() {
 
         // Update abundance
-        updateAbundance();
-        // Reset variables
-        catchable = true;
+        abundance = getInstantaneousAbundance();
+        // Rest number of dead fish
+        for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
+            nDead[iDeath] = 0.d;
+        }
+        ndeadHasChanged = false;
         // Reset diet variables
-        diet = new double[getConfiguration().getNSpecies() + getConfiguration().getNPlankton()][];
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            diet[i] = new double[DietOutputStage.getInstance().getNStage(i)];
-        }
-        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            diet[i + getConfiguration().getNSpecies()] = new double[1];
-        }
+        preyRecords.clear();
+        preyedBiomass = 0.d;
+        predSuccessRate = 0.f;
         // by default the school is in the simulated area, and migration might
         // change this state.
         out = false;
     }
 
-    private void updateAbundance() {
-        abundance = getInstantaneousAbundance();
-        ndeadFishing = 0;
-        ndeadNatural = 0;
-        ndeadPredation = 0;
-        ndeadStarvation = 0;
-        ndeadHasChanged = false;
+    /**
+     * Add a new prey record.
+     *
+     * @param prey, the {@code Prey} that has been ingested by this school
+     * @param preyedBiomass, the biomass preyed on this prey.
+     * @param preyStage, the stage of the prey,
+     * {@link fr.ird.osmose.stage.DietOutputStage}
+     */
+    public void addPreyRecord(Prey prey, double preyedBiomass, int preyStage) {
+        preyRecords.add(new PreyRecord(prey, preyedBiomass, preyStage));
+        // Update school total preyed biomass
+        this.preyedBiomass += preyedBiomass;
     }
-    
+
+    /**
+     * Returns a list of the prey records at current time step.
+     *
+     * @return a list of the prey records at current time step.
+     */
+    public List<PreyRecord> getPreyRecords() {
+        return preyRecords;
+    }
+
+    /**
+     * Sets the school out of the simulated domain.
+     */
     public void out() {
         out = true;
         setOffGrid();
     }
 
+    /**
+     * Checks whether the school is out of the simulated domain.
+     *
+     * @return {@code true} if the school is out of the simulated domain.
+     */
     public boolean isOut() {
         return out;
     }
 
     /**
-     * Converts the specified biomass [tons] into abundance [scalar]
+     * Converts the specified biomass [tonne] into abundance [number of fish]
+     *
+     * @param biomass, the biomass of the school, in tonne
+     * @return the number of fish weighting {@code weight} corresponding to this
+     * level of biomass. {@code abundance = biomass / weight}
      */
     public double biom2abd(double biomass) {
         return biomass / weight;
     }
 
     /**
-     * Converts the specified abundance [scalar] into biomass [tons]
+     * Converts the specified abundance [number of fish] into biomass [tonne]
+     *
+     * @param abundance, a number of fish
+     * @return the corresponding biomass of this number of fish weighting
+     * {@code weight}. {@code biomass = abundance * weight}
      */
     public double adb2biom(double abundance) {
         return abundance * weight;
@@ -253,19 +315,15 @@ public class School extends GridPoint {
     /**
      * Evaluates the instantaneous abundance of the school.
      *
-     * @return the instantaneous abundance of the school. instantaneous
-     * abundance = abundance at the beginning of the time step minus the dead
-     * individuals (due to either predation, starvation, natural or fishing) at
-     * the moment the function is called. It is a snapshot of the abundance of
-     * the school within the current time step.
+     * @return the instantaneous abundance of the school. {@code instantaneous
+     * abundance = abundance at the beginning of the time step - ndead fish}
+     * (due to any source of mortality, {@link MortalityCause}) at the time the
+     * function is called. It is a snapshot of the abundance of the school
+     * within the current time step.
      */
     public double getInstantaneousAbundance() {
         if (ndeadHasChanged) {
-            double nDeadTotal = ndeadPredation
-                    + ndeadStarvation
-                    + ndeadNatural
-                    + ndeadFishing;
-            instantaneousAbundance = abundance - nDeadTotal;
+            instantaneousAbundance = abundance - sum(nDead);
             if (instantaneousAbundance < 1.d) {
                 instantaneousAbundance = 0.d;
             }
@@ -275,10 +333,11 @@ public class School extends GridPoint {
     }
 
     /**
-     * Gets the biomass of the school at the beginning of the time step.
+     * Gets the biomass of the school, in tonne, at the beginning of the time
+     * step.
      *
-     * @return the biomass of the school at the beginning of the time step
-     * expressed in ton.
+     * @return the biomass of the school at the beginning of the time step in
+     * tonne
      */
     public double getBiomass() {
         return adb2biom(abundance);
@@ -287,9 +346,9 @@ public class School extends GridPoint {
     /**
      * Evaluates the instantaneous biomass of the school.
      *
-     * @return the instantaneous biomass of the school. instantaneous biomass =
-     * biomass at the beginning of the time step minus the dead biomass (due to
-     * either predation, starvation, natural or fishing) at the moment the
+     * @return the instantaneous biomass of the school. {@code instantaneous
+     * biomass = biomass at the beginning of the time step - biomass dead fish}
+     * (due to any source of mortality, {@link MortalityCause}) at the time the
      * function is called. It is a snapshot of the biomass of the school within
      * the current time step.
      */
@@ -298,7 +357,9 @@ public class School extends GridPoint {
     }
 
     /**
-     * Checks whether the school is alive
+     * Checks whether the school is alive. A school is alive if it fulfills both
+     * conditions: {@code instantaneous abundance > 0} and
+     * {@code age <= lifespan - 1}
      *
      * @return whether the school is alive or not
      */
@@ -306,6 +367,12 @@ public class School extends GridPoint {
         return (getInstantaneousAbundance() > 0) && (age <= species.getLifespanDt() - 1);
     }
 
+    /**
+     * Returns a string representation of the school (species, cohort and
+     * location).
+     *
+     * @return a string representation of the school
+     */
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder("School");
@@ -320,35 +387,63 @@ public class School extends GridPoint {
         return str.toString();
     }
 
+    /**
+     * Returns the species of the school.
+     *
+     * @see Species
+     * @return the species of the school
+     */
     public Species getSpecies() {
         return species;
     }
 
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
     public int getSpeciesIndex() {
         return species.getIndex();
     }
 
+    /**
+     * Returns the age of the fish in number of time step.
+     *
+     * @return the age of the fish in number of time step
+     */
     public int getAgeDt() {
         return age;
     }
 
+    /**
+     * Increments the age of the fish of one time step.
+     */
     public void incrementAge() {
         age += 1;
     }
 
     /**
-     * @return the length
+     * Returns the length of the fish, in centimeter.
+     *
+     * @return the length of the fish, in centimeter
      */
     public float getLength() {
         return length;
     }
-    
+
+    /**
+     * Returns the weight of the fish, in tonne.
+     *
+     * @return the weight of the fish, in tonne
+     */
     public float getWeight() {
         return weight;
     }
 
     /**
-     * @param length the length to set
+     * Increments the length of the fish from given number of centimeter.
+     *
+     * @param dlength, the length increment in centimeter
      */
     public void incrementLength(float dlength) {
         if (dlength != 0.f) {
@@ -358,120 +453,89 @@ public class School extends GridPoint {
     }
 
     /**
-     * @return whether the school is catchable for fishing
+     * Returns the trophic level of the fish.
+     *
+     * @return the trophic level of the fish
      */
-    public boolean isCatchable() {
-        return catchable;
-    }
-
-    /**
-     * @param sets whether the school is catchable for fishing
-     */
-    public void notCatchable() {
-        catchable = false;
-    }
-
-    /*
-     * Get the current Osmose instance
-     */
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
-    }
-
-    /**
-     * @return the trophicLevel
-     */
+    @Override
     public float getTrophicLevel() {
-        return trophicLevel;
+        return (age <= 1)
+                ? Species.TL_EGG
+                : trophicLevel;
     }
 
     /**
-     * @param trophicLevel the trophicLevel to set
+     * Sets the trophic level of the fish.
+     *
+     * @param trophicLevel, the new trophic level of the fish
      */
     public void setTrophicLevel(float trophicLevel) {
         this.trophicLevel = trophicLevel;
     }
 
     /**
-     * @return the ndeadFishing
+     * Returns the number of dead fish for a given mortality cause.
+     *
+     * @see MortalityCause
+     * @param cause, the mortality cause
+     * @return the number of dead fish for this mortality cause
      */
-    public double getNdeadFishing() {
-        return ndeadFishing;
+    public double getNdead(MortalityCause cause) {
+        return nDead[cause.index];
     }
 
     /**
-     * @param ndeadFishing the nDeadFishing to set
+     * Sets the number of dead fish for a given mortality cause.
+     *
+     * @see MortalityCause
+     * @param cause, the mortality cause
+     * @param nDead, the number of dead fish for this mortality cause
      */
-    public void setNdeadFishing(double ndeadFishing) {
-        this.ndeadFishing = ndeadFishing;
+    public void setNdead(MortalityCause cause, double nDead) {
+        this.nDead[cause.index] = nDead;
         ndeadHasChanged = true;
     }
 
     /**
-     * @return the ndeadPredation
+     * Increments the number of dead fish for a given mortality cause.
+     *
+     * @see MortalityCause
+     * @param cause, the mortality cause
+     * @param nDead, the number of dead fish to be incremented for this
+     * mortality cause
      */
-    public double getNdeadPredation() {
-        return ndeadPredation;
-    }
-
-    /**
-     * @param ndeadPredation the nDeadPredation to set
-     */
-    public void resetNdeadPredation() {
-        ndeadPredation = 0;
-        ndeadHasChanged = true;
-    }
-
-    public void incrementNdeadPredation(double ndead) {
-        ndeadPredation += ndead;
+    public void incrementNdead(MortalityCause cause, double nDead) {
+        this.nDead[cause.index] += nDead;
         ndeadHasChanged = true;
     }
 
     /**
-     * @return the ndeadStarvation
+     * Resets the number of dead fish for a given mortality cause.
+     *
+     * @see MortalityCause
+     * @param cause, the mortality cause
      */
-    public double getNdeadStarvation() {
-        return ndeadStarvation;
-    }
-
-    /**
-     * @param ndeadStarvation the nDeadStarvation to set
-     */
-    public void setNdeadStarvation(double ndeadStarvation) {
-        this.ndeadStarvation = ndeadStarvation;
+    public void resetNdead(MortalityCause cause) {
+        nDead[cause.index] = 0;
         ndeadHasChanged = true;
     }
 
     /**
-     * @return the ndeadNatural
+     * Gets the {@link Configuration} instance.
+     *
+     * @return the {@code Configuration} instance
      */
-    public double getNdeadNatural() {
-        return ndeadNatural;
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     /**
-     * @param ndeadNatural the nDeadNatural to set
+     * Checks whether the object is equal to this school.
+     *
+     * @param obj, the object with which to compare to this school
+     * @return {@code true} is the object is a {@code School} and has the same
+     * {@code UUID}
      */
-    public void setNdeadNatural(double ndeadNatural) {
-        this.ndeadNatural = ndeadNatural;
-        ndeadHasChanged = true;
-    }
-    
-    /**
-     * @return the ndeadOut
-     */
-    public double getNdeadOut() {
-        return ndeadOut;
-    }
-
-    /**
-     * @param ndeadOut the ndeadOut to set
-     */
-    public void setNdeadOut(double ndeadOut) {
-        this.ndeadOut = ndeadOut;
-        ndeadHasChanged = true;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -481,16 +545,203 @@ public class School extends GridPoint {
             return false;
         }
         final School other = (School) obj;
-        if (!this.uuid.equals(other.uuid)) {
-            return false;
-        }
-        return true;
+        return this.uuid.equals(other.uuid);
     }
 
+    /**
+     * Returns a hash code value for the school
+     *
+     * @see Object#hashCode()
+     * @return a hash code value for the school
+     */
     @Override
     public int hashCode() {
         int hash = 5;
         hash = 23 * hash + uuid.hashCode();
         return hash;
+    }
+
+    /**
+     * Computes the sum of a given double array.
+     *
+     * @param array, the double array to be summed
+     * @return the sum of the doubles of the array
+     */
+    private double sum(double[] array) {
+        double sum = 0.d;
+        for (double d : array) {
+            sum += d;
+        }
+        return sum;
+    }
+
+    /**
+     * Returns the preyed biomass at current time step.
+     *
+     * @return the preyed biomass at current time step.
+     */
+    public double getPreyedBiomass() {
+        return preyedBiomass;
+    }
+
+    /**
+     * Returns the predation success rate.
+     *
+     * @return the predation success rate
+     */
+    public float getPredSuccessRate() {
+        return predSuccessRate;
+    }
+
+    /**
+     * Sets the predation success rate.
+     *
+     * @param rate the predSuccessRate to set
+     */
+    public void setPredSuccessRate(float rate) {
+        this.predSuccessRate = rate;
+    }
+
+    /**
+     * A list of mortality causes.
+     */
+    public enum MortalityCause {
+
+        /**
+         * Predation mortality
+         *
+         * @see fr.ird.osmose.process.PredationProcess
+         */
+        PREDATION(0),
+        /**
+         * Starvation mortality
+         *
+         * @see fr.ird.osmose.process.StarvationProcess
+         */
+        STARVATION(1),
+        /**
+         * Natural mortality
+         *
+         * @see fr.ird.osmose.process.NaturalMortality
+         */
+        NATURAL(2),
+        /**
+         * Fishing mortality
+         *
+         * @see fr.ird.osmose.process.FishingProcess
+         */
+        FISHING(3),
+        /**
+         * Out of domain mortality
+         *
+         * @see fr.ird.osmose.process.OutMortalityProcess
+         */
+        OUT(4);
+        /**
+         * Index of the mortality cause
+         */
+        public final int index;
+
+        /**
+         * Initializes a mortality cause with a given index.
+         *
+         * @param index, the index of the mortality cause
+         */
+        private MortalityCause(int index) {
+            this.index = index;
+        }
+    }
+
+    /**
+     * This class provides a record of a predation event by the school on a
+     * given prey. A prey can be either an other school or a plankton group. A
+     * record keep tracks of: the type of prey (which species or plankton
+     * group), the biomass preyed, the {@code DietOutputStage} of the prey and
+     * the trophic level of the prey.
+     *
+     * @see Prey
+     */
+    public class PreyRecord {
+
+        /**
+         * The preyed biomass, in tonne.
+         */
+        private final double biomass;
+        /**
+         * The {@link fr.ird.osmose.stage.DietOutputStage} of the prey.
+         */
+        private final int dietOutputStage;
+        /**
+         * The trophic level of the prey.
+         */
+        private final float trophicLevel;
+        /**
+         * The index of the species or / plankton group of the prey. In order to
+         * distinguish a school from a plankton, the index follows the following
+         * convention: index = index species if the prey is an instance of
+         * {@code School} and index = nSpecies + index plankton group if the
+         * prey is an instance of {@code Plankton}
+         */
+        private final int index;
+
+        /**
+         * Created a new prey record.
+         *
+         * @param prey, the prey, either a {@code School} or a {@code Plankton}
+         * group
+         * @param biomass, the preyed biomass, in tonne
+         * @param dietOutputStage, the {@code DietOutputStage} of the prey
+         */
+        PreyRecord(Prey prey, double biomass, int dietOutputStage) {
+            this.biomass = biomass;
+            this.dietOutputStage = dietOutputStage;
+            this.trophicLevel = prey.getTrophicLevel();
+            if (prey instanceof School) {
+                index = ((School) prey).getSpeciesIndex();
+            } else {
+                index = ((Plankton) prey).getIndex() + getConfiguration().getNSpecies();
+            }
+        }
+
+        /**
+         * Returns the preyed biomass, in tonne.
+         *
+         * @return the preyed biomass, in tonne
+         */
+        public double getBiomass() {
+            return biomass;
+        }
+
+        /**
+         * Returns the the {@code DietOutputStage} of the prey.
+         *
+         * @see fr.ird.osmose.stage.DietOutputStage
+         * @return the {@code DietOutputStage} of the prey
+         */
+        public int getStage() {
+            return dietOutputStage;
+        }
+
+        /**
+         * Returns the trophic level of the prey.
+         *
+         * @return the trophic level of the prey
+         */
+        public float getTrophicLevel() {
+            return trophicLevel;
+        }
+
+        /**
+         * Returns the index of the prey. In order to distinguish a school from
+         * a plankton, the index follows the following convention: index = index
+         * species if the prey is an instance of {@code School} and index =
+         * nSpecies + index plankton group if the prey is an instance of
+         * {@code Plankton}
+         *
+         * @return the index of the prey
+         */
+        public int getIndex() {
+            return index;
+        }
     }
 }

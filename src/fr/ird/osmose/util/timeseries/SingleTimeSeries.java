@@ -46,27 +46,27 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.util;
+package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  *
- * @author pverley
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0b 2013/09/01
  */
-public class ByClassTimeSeries extends SimulationLinker {
+public class SingleTimeSeries extends SimulationLinker {
 
-    private float[] threshold;
-    private float[][] values;
+    private float[] values;
 
-    public ByClassTimeSeries(int indexSimulation) {
-        super(indexSimulation);
+    public SingleTimeSeries(int rank) {
+        super(rank);
     }
-    
+
     public void read(String filename) {
         int nStepYear = getConfiguration().getNStepYear();
         int nStepSimu = nStepYear * getConfiguration().getNYear();
@@ -74,22 +74,15 @@ public class ByClassTimeSeries extends SimulationLinker {
     }
 
     public void read(String filename, int nMin, int nMax) {
-        
+
         int nStepYear = getConfiguration().getNStepYear();
         int nStepSimu = nStepYear * getConfiguration().getNYear();
         try {
             // 1. Open the CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), ';');
             List<String[]> lines = reader.readAll();
-            
-            // 2. Read the threshold values
-            String[] lineThreshold = lines.get(0);
-            threshold = new float[lineThreshold.length - 1];
-            for (int k = 0; k < threshold.length; k++) {
-                threshold[k] = Float.valueOf(lineThreshold[k + 1]);
-            }
-            
-            // 3. Check the length of the time serie and inform the user about potential problems or inconsistencies
+
+            // 2. Check the length of the time serie and inform the user about potential problems or inconsistencies
             int nTimeSerie = lines.size() - 1;
             if (nTimeSerie < nMin) {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must contain at least " + nMin + " time steps.");
@@ -98,18 +91,15 @@ public class ByClassTimeSeries extends SimulationLinker {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
             }
             if (nTimeSerie > nMax) {
-                getLogger().log(Level.WARNING, "Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
+                getSimulation().warning("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
-            
-            // 3. Read the mortality rates
-            values = new float[nStepSimu][];
+
+            // 3. Read the time serie
+            values = new float[nStepSimu];
             for (int t = 0; t < nTimeSerie; t++) {
-                values[t] = new float[lineThreshold.length - 1];
-                String[] fval = lines.get(t + 1);
-                for (int k = 0; k < values[t].length; k++) {
-                    values[t][k] = Float.valueOf(fval[k + 1]);
-                }
+                String[] line = lines.get(t + 1);
+                values[t] = Float.valueOf(line[1]);
             }
             // 4. Fill up the time serie if necessary
             if (nTimeSerie < nStepSimu) {
@@ -125,27 +115,14 @@ public class ByClassTimeSeries extends SimulationLinker {
                         }
                     }
                 }
-                getLogger().log(Level.WARNING, "Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
+                getSimulation().warning("Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
             }
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Error reading CSV file " + filename, ex);
-            System.exit(1);
+            getSimulation().error("Error reading CSV file " + filename, ex);
         }
     }
-    
-    public int getNClass() {
-        return threshold.length + 1;
-    }
-    
-    public float getThreshold(int k) {
-        return threshold[k];
-    }
-    
-    public float[] getThresholds() {
-        return threshold;
-    }
-    
-    public float[][] getValues() {
+
+    public float[] getValues() {
         return values;
     }
 }
