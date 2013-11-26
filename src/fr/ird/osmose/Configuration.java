@@ -565,11 +565,15 @@ public class Configuration extends OLogger {
      * @return the parameter as a boolean
      */
     public boolean getBoolean(String key) {
-        String s = getString(key);
         try {
-            return Boolean.valueOf(s);
-        } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to boolean " + s + " (from file " + getSource(key) + ")", ex);
+            String s = getString(key);
+            try {
+                return Boolean.valueOf(s);
+            } catch (NumberFormatException ex) {
+                error("Could not convert parameter " + key + " to boolean " + s + " (from file " + getSource(key) + ")", ex);
+            }
+        } catch (NullPointerException ex) {
+            warning("Could not find boolean parameter " + key + ". Osmose assumes it is false.");
         }
         return false;
     }
@@ -666,9 +670,7 @@ public class Configuration extends OLogger {
             File file = new File(inputPathname);
             String pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
             return pathname;
-        } catch (NullPointerException ex) {
-            return filename;
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             return filename;
         }
     }
