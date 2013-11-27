@@ -48,53 +48,44 @@
  */
 package fr.ird.osmose.process.fishing;
 
-import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.AbstractMortalityScenario;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
+import fr.ird.osmose.process.FishingProcess.FishingType;
+import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
  *
  * @author pverley
  */
-public class AnnualFByYearSeasonScenario extends AbstractMortalityScenario {
+public class BySeasonScenario extends AbstractFishingScenario {
 
-    private float[] annualF;
+    private float annualF;
+    private float annualCatches;
     private float[] season;
     private int recruitmentAge;
     private float recruitmentSize;
+    private final FishingType type;
 
-    public AnnualFByYearSeasonScenario(int rank, Species species) {
+    public BySeasonScenario(int rank, Species species, FishingType type) {
         super(rank, species);
+        this.type = type;
     }
 
     @Override
     public void init() {
         int nStepYear = getConfiguration().getNStepYear();
         int iSpec = getIndexSpecies();
-        int nYear = getConfiguration().getNYear();
-        
-        // Read annual F by year
-        annualF = new float[nYear];
-        String filename = getConfiguration().getFile("mortality.fishing.rate.byYear.file.sp" + iSpec);
-        CSVReader reader;
-        try {
-            reader = new CSVReader(new FileReader(filename), ';');
-            List<String[]> lines = reader.readAll();
-            if ((lines.size() - 1) != nYear) {
-                throw new IOException("Wrong number of years in file. Found " + (lines.size() - 1) + " and expected " + nYear);
-            }
-            for (int iYear = 0; iYear < nYear; iYear++) {
-                annualF[iYear] = Float.valueOf(lines.get(iYear + 1)[1]);
-            }
-        } catch (IOException ex) {
-            getSimulation().error("Error reading fishing rate file " + filename, ex);
+        switch (type) {
+            case RATE:
+                annualF = getConfiguration().getFloat("mortality.fishing.rate.sp" + iSpec);
+                annualCatches = 0.f;
+                break;
+            case CATCHES:
+                annualCatches = getConfiguration().getFloat("mortality.fishing.catches.sp" + iSpec);
+                annualF = 0.f;
+                break;
         }
-        
-        // Read recruitment size or age
+
         if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
             float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);
             recruitmentAge = Math.round(age * nStepYear);
@@ -109,36 +100,28 @@ public class AnnualFByYearSeasonScenario extends AbstractMortalityScenario {
         }
 
         // Read seasonality
-        season = new float[nStepYear];
-        filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
-        try {
-            reader = new CSVReader(new FileReader(filename), ';');
-            List<String[]> lines = reader.readAll();
-            if ((lines.size() - 1) != nStepYear) {
-                throw new IOException("Wrong number of time steps in file. Found " + (lines.size() - 1) + " and expected " + nStepYear);
-            }
-            for (int t = 0; t < nStepYear; t++) {
-                season[t] = Float.valueOf(lines.get(t + 1)[1]);
-            }
-        } catch (IOException ex) {
-            getSimulation().error("Error reading fishing seasonality file " + filename, ex);
-        }
+        SingleTimeSeries sts = new SingleTimeSeries(getRank());
+        String filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
+        sts.read(filename, nStepYear, nStepYear);
+        season = sts.getValues();
     }
 
     @Override
     public float getInstantaneousRate(School school) {
         return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
-                ? annualF[getSimulation().getYear()] * season[getSimulation().getIndexTimeYear()]
+                ? annualF * season[getSimulation().getIndexTimeYear()]
                 : 0.f;
     }
 
     @Override
     public float getAnnualRate() {
-        double F = 0;
-        for (int iYear = 0; iYear < annualF.length; iYear++) {
-                F += annualF[iYear];
-        }
-        F = F / getConfiguration().getNYear();
-        return (float) F;
+        return annualF;
+    }
+
+    @Override
+    public float getInstantaneousCatches(School school) {
+        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
+                ? annualCatches * season[getSimulation().getIndexTimeYear()]
+                : 0.f;
     }
 }

@@ -50,14 +50,13 @@ package fr.ird.osmose.process.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.AbstractMortalityScenario;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 
 /**
  *
  * @author pverley
  */
-public class ByDtByAgeSizeScenario extends AbstractMortalityScenario {
+public class RateByDtByAgeSizeScenario extends AbstractFishingScenario {
 
     /**
      * Fishing mortality rates by time step and by age/size class.
@@ -74,7 +73,7 @@ public class ByDtByAgeSizeScenario extends AbstractMortalityScenario {
      */
     private int[] ageThreshold;
 
-    public ByDtByAgeSizeScenario(int rank, Species species) {
+    public RateByDtByAgeSizeScenario(int rank, Species species) {
         super(rank, species);
     }
 
@@ -143,12 +142,17 @@ public class ByDtByAgeSizeScenario extends AbstractMortalityScenario {
     @Override
     public float getAnnualRate() {
         double F = 0;
-        for (int iStep = 0; iStep < f.length; iStep++) {
-            for (int k = 0; k < f[iStep].length; k++) {
-                F += f[iStep][k];
+        for (float[] f1 : f) {
+            for (int k = 0; k < f1.length; k++) {
+                F += f1[k];
             }
         }
         F = F / (f.length * getConfiguration().getNYear());
         return (float) F;
+    }
+    
+    @Override
+    public float getInstantaneousCatches(School school) {
+        throw new UnsupportedOperationException("No catches specified in this fishing scenario.");
     }
 }

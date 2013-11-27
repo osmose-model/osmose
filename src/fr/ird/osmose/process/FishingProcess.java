@@ -52,10 +52,12 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.fishing.AnnualFByYearSeasonScenario;
-import fr.ird.osmose.process.fishing.AnnualFScenario;
-import fr.ird.osmose.process.fishing.AnnualFSeasonScenario;
-import fr.ird.osmose.process.fishing.ByDtByAgeSizeScenario;
+import fr.ird.osmose.process.fishing.AbstractFishingScenario;
+import fr.ird.osmose.process.fishing.ByYearBySeasonScenario;
+import fr.ird.osmose.process.fishing.AnnualScenario;
+import fr.ird.osmose.process.fishing.BySeasonScenario;
+import fr.ird.osmose.process.fishing.CatchesByDtByAgeSizeScenario;
+import fr.ird.osmose.process.fishing.RateByDtByAgeSizeScenario;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.MPA;
 import java.util.ArrayList;
@@ -66,52 +68,95 @@ import java.util.List;
  * @author pverley
  */
 public class FishingProcess extends AbstractProcess {
-    
-    private AbstractMortalityScenario[] fishingScenario;
+
+    private AbstractFishingScenario[] fishingScenario;
     private List<MPA> mpas;
     private GridMap mpaFactor;
-    
+    private FishingType fishingType;
+
     public FishingProcess(int rank) {
         super(rank);
     }
-    
+
     @Override
     public void init() {
-        fishingScenario = new AbstractMortalityScenario[getNSpecies()];
+        fishingScenario = new AbstractFishingScenario[getNSpecies()];
+
+        // Find type of fishing scenario
+        try {
+            fishingType = FishingType.valueOf(getConfiguration().getString("mortality.fishing.type").toUpperCase());
+        } catch (Exception ex) {
+            // By default Osmose assumes it is fishing mortality rates
+            fishingType = FishingType.RATE;
+        }
+
         // Find fishing scenario
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            int rank = getRank();
-            Species species = getSpecies(iSpec);
-            // Fishing rate by Dt, by Age or Size
-            if (!getConfiguration().isNull("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec)
-                    || !getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
-                fishingScenario[iSpec] = new ByDtByAgeSizeScenario(rank, species);
-                continue;
-            }
-            // Annual fishing rate by Year
-            if (!getConfiguration().isNull("mortality.fishing.rate.byYear.file.sp" + iSpec)) {
-                fishingScenario[iSpec] = new AnnualFByYearSeasonScenario(rank, species);
-                continue;
-            }
-            // Annual fishing rate
-            if (!getConfiguration().isNull("mortality.fishing.rate.sp" + iSpec)) {
-                if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
-                    fishingScenario[iSpec] = new AnnualFSeasonScenario(rank, species);
-                } else {
-                    fishingScenario[iSpec] = new AnnualFScenario(rank, species);
+        switch (fishingType) {
+            case RATE:
+                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                    int rank = getRank();
+                    Species species = getSpecies(iSpec);
+                    // Fishing rate by Dt, by Age or Size
+                    if (!getConfiguration().isNull("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec)
+                            || !getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
+                        fishingScenario[iSpec] = new RateByDtByAgeSizeScenario(rank, species);
+                        continue;
+                    }
+                    // Annual fishing rate by Year
+                    if (!getConfiguration().isNull("mortality.fishing.rate.byYear.file.sp" + iSpec)) {
+                        fishingScenario[iSpec] = new ByYearBySeasonScenario(rank, species, FishingType.RATE);
+                        continue;
+                    }
+                    // Annual fishing rate
+                    if (!getConfiguration().isNull("mortality.fishing.rate.sp" + iSpec)) {
+                        if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
+                            fishingScenario[iSpec] = new BySeasonScenario(rank, species, FishingType.RATE);
+                        } else {
+                            fishingScenario[iSpec] = new AnnualScenario(rank, species, FishingType.RATE);
+                        }
+                    }
                 }
-            }
+                break;
+            case CATCHES:
+                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                    int rank = getRank();
+                    Species species = getSpecies(iSpec);
+                    // Fishing rate by Dt, by Age or Size
+                    if (!getConfiguration().isNull("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec)
+                            || !getConfiguration().isNull("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec)) {
+                        fishingScenario[iSpec] = new CatchesByDtByAgeSizeScenario(rank, species);
+                        continue;
+                    }
+                    // Annual fishing rate by Year
+                    if (!getConfiguration().isNull("mortality.fishing.catches.byYear.file.sp" + iSpec)) {
+                        fishingScenario[iSpec] = new ByYearBySeasonScenario(rank, species, FishingType.CATCHES);
+                        continue;
+                    }
+                    // Annual fishing rate
+                    if (!getConfiguration().isNull("mortality.fishing.catches.sp" + iSpec)) {
+                        if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
+                            fishingScenario[iSpec] = new BySeasonScenario(rank, species, FishingType.CATCHES);
+                        } else {
+                            fishingScenario[iSpec] = new AnnualScenario(rank, species, FishingType.CATCHES);
+                        }
+                    }
+                }
+                break;
         }
 
         // Initialize fishing scenario
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+        for (int iSpec = 0;
+                iSpec < getNSpecies();
+                iSpec++) {
             fishingScenario[iSpec].init();
         }
 
         // Loads the MPAs
         int nMPA = getConfiguration().findKeys("mpa.file.mpa*").size();
         mpas = new ArrayList(nMPA);
-        for (int iMPA = 0; iMPA < nMPA; iMPA++) {
+        for (int iMPA = 0;
+                iMPA < nMPA;
+                iMPA++) {
             mpas.add(new MPA(getRank(), iMPA));
         }
         for (MPA mpa : mpas) {
@@ -120,23 +165,31 @@ public class FishingProcess extends AbstractProcess {
         // Initialize MPA correction factor
         mpaFactor = new GridMap(1);
     }
-    
+
     @Override
     public void run() {
         update();
         for (School school : getSchoolSet().getPresentSchools()) {
             if (school.getAbundance() != 0.d) {
-                double F = getInstantaneousRate(school);
-                double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
+                double nDead = 0.d;
+                switch (fishingType) {
+                    case RATE:
+                        double F = getInstantaneousRate(school);
+                        nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
+                        break;
+                    case CATCHES:
+                        nDead = school.biom2abd(getInstantaneousCatches(school));
+                        break;
+                }
                 if (nDead > 0.d) {
                     school.setNdead(MortalityCause.FISHING, nDead);
                 }
             }
         }
     }
-    
+
     public void update() {
-        
+
         boolean isUpToDate = true;
         int iStep = getSimulation().getIndexTimeSimu();
         for (MPA mpa : mpas) {
@@ -162,7 +215,7 @@ public class FishingProcess extends AbstractProcess {
             }
         }
     }
-    
+
     public double getInstantaneousRate(School school) {
         if (!school.isUnlocated()) {
             return fishingScenario[school.getSpeciesIndex()].getInstantaneousRate(school) * mpaFactor.getValue(school.getCell());
@@ -171,11 +224,39 @@ public class FishingProcess extends AbstractProcess {
         }
     }
 
+    public double getInstantaneousCatches(School school) {
+        if (!school.isUnlocated()) {
+            return fishingScenario[school.getSpeciesIndex()].getInstantaneousCatches(school) * mpaFactor.getValue(school.getCell());
+        } else {
+            return 0.d;
+        }
+    }
+
+    public FishingType getType() {
+        return fishingType;
+    }
+
     /*
      * F the annual mortality rate is calculated as the annual average
      * of the fishing rates over the years. 
      */
     public double getAnnualRate(Species species) {
         return fishingScenario[species.getIndex()].getAnnualRate();
+
+    }
+
+    /**
+     * Type of fishing scenario. Fishing parameters are either rates or catches.
+     */
+    public enum FishingType {
+
+        /**
+         * Fishing mortality rates
+         */
+        RATE,
+        /**
+         * Catches
+         */
+        CATCHES;
     }
 }

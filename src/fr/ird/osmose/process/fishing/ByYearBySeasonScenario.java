@@ -50,27 +50,55 @@ package fr.ird.osmose.process.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.AbstractMortalityScenario;
+import fr.ird.osmose.process.FishingProcess.FishingType;
+import fr.ird.osmose.util.timeseries.ByYearTimeSeries;
+import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
  *
  * @author pverley
  */
-public class AnnualFScenario extends AbstractMortalityScenario {
+public class ByYearBySeasonScenario extends AbstractFishingScenario {
 
-    private float instantaneousF;
+    private float[] annualF;
+    private float[] annualCatches;
+    private float[] season;
     private int recruitmentAge;
     private float recruitmentSize;
+    private final FishingType type;
 
-    public AnnualFScenario(int rank, Species species) {
+    public ByYearBySeasonScenario(int rank, Species species, FishingType type) {
         super(rank, species);
+        this.type = type;
     }
 
     @Override
     public void init() {
         int nStepYear = getConfiguration().getNStepYear();
         int iSpec = getIndexSpecies();
-        instantaneousF = getConfiguration().getFloat("mortality.fishing.rate.sp" + iSpec) / nStepYear;
+
+        String filename;
+        ByYearTimeSeries yts;
+        switch (type) {
+            case RATE:
+                // Read annual F by year
+                filename = getConfiguration().getFile("mortality.fishing.rate.byYear.file.sp" + iSpec);
+                yts = new ByYearTimeSeries(getRank());
+                yts.read(filename);
+                annualF = yts.getValues();
+                annualCatches = new float[annualF.length];
+                break;
+            case CATCHES:
+                // Read annual F by year
+                filename = getConfiguration().getFile("mortality.fishing.catches.byYear.file.sp" + iSpec);
+                yts = new ByYearTimeSeries(getRank());
+                yts.read(filename);
+                annualCatches = yts.getValues();
+                annualF = new float[annualCatches.length];
+                break;
+        }
+
+        // Read recruitment size or age
         if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
             float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);
             recruitmentAge = Math.round(age * nStepYear);
@@ -83,17 +111,35 @@ public class AnnualFScenario extends AbstractMortalityScenario {
             recruitmentSize = 0.f;
             getSimulation().warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose assumes every school can be catched.", getSpecies().getName());
         }
+
+        // Read seasonality
+        SingleTimeSeries sts = new SingleTimeSeries(getRank());
+        filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
+        sts.read(filename, nStepYear, nStepYear);
+        season = sts.getValues();
     }
 
     @Override
     public float getInstantaneousRate(School school) {
         return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
-                ? instantaneousF
+                ? annualF[getSimulation().getYear()] * season[getSimulation().getIndexTimeYear()]
                 : 0.f;
     }
 
     @Override
     public float getAnnualRate() {
-        return instantaneousF * getConfiguration().getNStepYear();
+        double F = 0;
+        for (int iYear = 0; iYear < annualF.length; iYear++) {
+            F += annualF[iYear];
+        }
+        F = F / getConfiguration().getNYear();
+        return (float) F;
+    }
+
+    @Override
+    public float getInstantaneousCatches(School school) {
+        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
+                ? annualCatches[getSimulation().getYear()] * season[getSimulation().getIndexTimeYear()]
+                : 0.f;
     }
 }

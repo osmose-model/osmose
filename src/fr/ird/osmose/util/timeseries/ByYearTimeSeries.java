@@ -2,13 +2,13 @@
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright IRD (Institut de Recherche pour le Développement) 2013
  * 
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
  * Philippe VERLEY (philippe.verley@ird.fr)
- * 
+ *
  * This software is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -46,78 +46,78 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.fishing;
+package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
-import fr.ird.osmose.process.AbstractMortalityScenario;
+import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
 /**
- *
- * @author pverley
+ * 
+ * 
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0 2013/09/01
  */
-public class AnnualFSeasonScenario extends AbstractMortalityScenario {
+public class ByYearTimeSeries extends SimulationLinker {
 
-    private float annualF;
-    private float[] season;
-    private int recruitmentAge;
-    private float recruitmentSize;
+    private float[] values;
 
-    public AnnualFSeasonScenario(int rank, Species species) {
-        super(rank, species);
+    public ByYearTimeSeries(int rank) {
+        super(rank);
     }
 
-    @Override
-    public void init() {
-        int nStepYear = getConfiguration().getNStepYear();
-        int iSpec = getIndexSpecies();
-        annualF = getConfiguration().getFloat("mortality.fishing.rate.sp" + iSpec);
-        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
-            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);
-            recruitmentAge = Math.round(age * nStepYear);
-            recruitmentSize = 0.f;
-        } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpec)) {
-            recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpec);
-            recruitmentAge = 0;
-        } else {
-            recruitmentAge = 0;
-            recruitmentSize = 0.f;
-            getSimulation().warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose assumes every school can be catched.", getSpecies().getName());
-        }
+    public void read(String filename) {
+        read(filename, 1, getConfiguration().getNYear());
+    }
 
+    public void read(String filename, int nMin, int nMax) {
 
-        season = new float[nStepYear];
-        String filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
-        CSVReader reader;
+        int nYear = getConfiguration().getNYear();
         try {
-            reader = new CSVReader(new FileReader(filename), ';');
+            // 1. Open the CSV file
+            CSVReader reader = new CSVReader(new FileReader(filename), ';');
             List<String[]> lines = reader.readAll();
-            if ((lines.size() - 1) != nStepYear) {
-                throw new IOException("Wrong number of time steps in file. Found " + (lines.size() - 1) + " and expected " + nStepYear);
+
+            // 2. Check the length of the time serie and inform the user about potential problems or inconsistencies
+            int nTimeSerie = lines.size() - 1;
+            if (nTimeSerie < nMin) {
+                throw new IOException("Found " + nTimeSerie + " years in the time serie. It must contain at least " + nMin + " year(s).");
             }
-            for (int t = 0; t < nStepYear; t++) {
-                season[t] = Float.valueOf(lines.get(t + 1)[1]);
+            if (nTimeSerie > nMax) {
+                getSimulation().warning("Time serie in file {0} contains {1} years out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
+            }
+            nTimeSerie = Math.min(nTimeSerie, nMax);
+
+            // 3. Read the time serie
+            values = new float[nYear];
+            for (int t = 0; t < nTimeSerie; t++) {
+                String[] line = lines.get(t + 1);
+                values[t] = Float.valueOf(line[1]);
+            }
+            // 4. Fill up the time serie if necessary
+            if (nTimeSerie < nYear) {
+                // There is less season in the file than number of years of the
+                // simulation.
+                int t = nTimeSerie;
+                while (t < nYear) {
+                    for (int k = 0; k < nTimeSerie; k++) {
+                        values[t] = values[k];
+                        t++;
+                        if (t == nYear) {
+                            break;
+                        }
+                    }
+                }
+                getSimulation().warning("Time serie in file {0} only contains {1} years out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nYear});
             }
         } catch (IOException ex) {
-            getSimulation().error("Error reading fishing seasonality file " + filename, ex);
+            getSimulation().error("Error reading CSV file " + filename, ex);
         }
-
-
     }
 
-    @Override
-    public float getInstantaneousRate(School school) {
-        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
-                ? annualF * season[getSimulation().getIndexTimeYear()]
-                : 0.f;
-    }
-
-    @Override
-    public float getAnnualRate() {
-        return annualF;
+    public float[] getValues() {
+        return values;
     }
 }

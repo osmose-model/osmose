@@ -46,63 +46,34 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process;
+package fr.ird.osmose.process.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.process.AbstractMortalityScenario;
 
 /**
- * Abstract class that defines a template for any type of mortality scenario. It
- * comprises an init() function that will load the parameters from the
- * configuration files and a getInstantaneousRate() function that is meant to
- * return the absolute mortality rate for a given school at current time step of
- * the simulation.
+ * This class extends {@code AbstractMortalityScenario} for fishing as it gives
+ * the option to specify directly the catches (instead of a fishing mortality
+ * rate).
  *
- * @author P. Verley
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0 2013/09/01
  */
-public abstract class AbstractMortalityScenario extends SimulationLinker {
+public abstract class AbstractFishingScenario extends AbstractMortalityScenario {
 
-    final private Species species;
-    final private int indexSpecies;
-
-    public AbstractMortalityScenario(int rank, Species species) {
-        super(rank);
-        this.species = species;
-        this.indexSpecies = species.getIndex();
-    }
-
-    public int getIndexSpecies() {
-        return indexSpecies;
-    }
-
-    public Species getSpecies() {
-        return species;
+    public AbstractFishingScenario(int rank, Species species) {
+        super(rank, species);
     }
 
     /**
-     * Initialization of the mortality scenario. This function should loads the
-     * appropriate parameters from the configuration files.
-     */
-    abstract public void init();
-
-    /**
-     * Gets the absolute mortality rate for a given school at current time step
-     * of the simulation.
+     * Returns the instantaneous level of catches, in tonne, for a given school
+     * at current time step of the simulation.
      *
      * @param school, a given school
-     * @return the mortality rate for the given school at current time step of
-     * the simulation.
+     * @return the number of dead fish for the given school at current time step
+     * of the simulation
      */
-    abstract public float getInstantaneousRate(School school);
-
-    /**
-     * Gets the annual mortality for the species.
-     *
-     * @return the annual mortality rate.
-     */
-    abstract public float getAnnualRate();
-
-    
+    abstract public float getInstantaneousCatches(School school);
 
 }

@@ -2,13 +2,13 @@
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
- * Copyright IRD (Institut de Recherche pour le Développement) 2013
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
  * 
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
  * Philippe VERLEY (philippe.verley@ird.fr)
- *
+ * 
  * This software is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
@@ -46,63 +46,73 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process;
+package fr.ird.osmose.process.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.process.FishingProcess.FishingType;
 
 /**
- * Abstract class that defines a template for any type of mortality scenario. It
- * comprises an init() function that will load the parameters from the
- * configuration files and a getInstantaneousRate() function that is meant to
- * return the absolute mortality rate for a given school at current time step of
- * the simulation.
  *
- * @author P. Verley
+ * @author pverley
  */
-public abstract class AbstractMortalityScenario extends SimulationLinker {
+public class AnnualScenario extends AbstractFishingScenario {
 
-    final private Species species;
-    final private int indexSpecies;
+    private float instantaneousF;
+    private float instantaneousCatches;
+    private int recruitmentAge;
+    private float recruitmentSize;
+    private final FishingType type;
 
-    public AbstractMortalityScenario(int rank, Species species) {
-        super(rank);
-        this.species = species;
-        this.indexSpecies = species.getIndex();
+    public AnnualScenario(int rank, Species species, FishingType type) {
+        super(rank, species);
+        this.type = type;
     }
 
-    public int getIndexSpecies() {
-        return indexSpecies;
+    @Override
+    public void init() {
+        int nStepYear = getConfiguration().getNStepYear();
+        int iSpec = getIndexSpecies();
+        switch (type) {
+            case RATE:
+                instantaneousF = getConfiguration().getFloat("mortality.fishing.rate.sp" + iSpec) / nStepYear;
+                instantaneousCatches = 0.f;
+                break;
+            case CATCHES:
+                instantaneousCatches = getConfiguration().getFloat("mortality.fishing.catches.sp" + iSpec) / nStepYear;
+                instantaneousF = 0.f;
+                break;
+        }
+        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
+            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);
+            recruitmentAge = Math.round(age * nStepYear);
+            recruitmentSize = 0.f;
+        } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpec)) {
+            recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpec);
+            recruitmentAge = 0;
+        } else {
+            recruitmentAge = 0;
+            recruitmentSize = 0.f;
+            getSimulation().warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose assumes every school can be catched.", getSpecies().getName());
+        }
     }
 
-    public Species getSpecies() {
-        return species;
+    @Override
+    public float getInstantaneousRate(School school) {
+        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
+                ? instantaneousF
+                : 0.f;
     }
 
-    /**
-     * Initialization of the mortality scenario. This function should loads the
-     * appropriate parameters from the configuration files.
-     */
-    abstract public void init();
+    @Override
+    public float getAnnualRate() {
+        return instantaneousF * getConfiguration().getNStepYear();
+    }
 
-    /**
-     * Gets the absolute mortality rate for a given school at current time step
-     * of the simulation.
-     *
-     * @param school, a given school
-     * @return the mortality rate for the given school at current time step of
-     * the simulation.
-     */
-    abstract public float getInstantaneousRate(School school);
-
-    /**
-     * Gets the annual mortality for the species.
-     *
-     * @return the annual mortality rate.
-     */
-    abstract public float getAnnualRate();
-
-    
-
+    @Override
+    public float getInstantaneousCatches(School school) {
+        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
+                ? instantaneousCatches
+                : 0.f;
+    }
 }

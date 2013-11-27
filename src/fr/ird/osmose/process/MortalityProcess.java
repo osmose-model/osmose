@@ -54,6 +54,7 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School.PreyRecord;
 import fr.ird.osmose.Simulation;
+import fr.ird.osmose.process.FishingProcess.FishingType;
 import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.DietOutputStage;
 import java.util.ArrayList;
@@ -513,6 +514,7 @@ public class MortalityProcess extends AbstractProcess {
             accessibility[iPred] = predationProcess.getAccessibility(schools.get(iPred), preys);
         }
 
+        FishingType fishingType = fishingProcess.getType();
         // Loop over subdt
         for (int idt = 0; idt < subdt; idt++) {
             shuffleArray(seqPred);
@@ -551,8 +553,15 @@ public class MortalityProcess extends AbstractProcess {
                         case FISHING:
                             // Fishing Mortality
                             school = schools.get(seqFish[i]);
-                            double F = fishingProcess.getInstantaneousRate(school) / subdt;
-                            nDeadMatrix[seqFish[i]][ns + 2] += school.getInstantaneousAbundance() * (1 - Math.exp(-F));
+                            switch (fishingType) {
+                                case RATE:
+                                    double F = fishingProcess.getInstantaneousRate(school) / subdt;
+                                    nDeadMatrix[seqFish[i]][ns + 2] += school.getInstantaneousAbundance() * (1 - Math.exp(-F));
+                                    break;
+                                case CATCHES:
+                                    nDeadMatrix[seqFish[i]][ns + 2] += school.biom2abd(fishingProcess.getInstantaneousCatches(school) / subdt);
+                                    break;
+                            }
                             school.setNdead(MortalityCause.FISHING, nDeadMatrix[seqFish[i]][ns + 2]);
                             break;
                     }
