@@ -77,7 +77,7 @@ public class OLogger {
         // setup the logger
         logger.setUseParentHandlers(false);
         OsmoseLogFormatter formatter = new OsmoseLogFormatter();
-        ConsoleHandler handler = new ConsoleHandler();
+        SystemOutHandler handler = new SystemOutHandler();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
     }
