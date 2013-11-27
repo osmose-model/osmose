@@ -49,16 +49,18 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class AbundanceIndicator extends AbstractIndicator {
+public class MeanSizeOutput extends AbstractOutput {
 
+    private double[] meanSize;
     private double[] abundance;
 
-    public AbundanceIndicator(int rank, String keyEnabled) {
+    public MeanSizeOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);
     }
 
@@ -69,34 +71,42 @@ public class AbundanceIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
+
+        meanSize = new double[getNSpecies()];
         abundance = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
-
         for (School school : getSchoolSet().getAliveSchools()) {
             if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
                 continue;
             }
-            abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+            int i = school.getSpeciesIndex();
+            meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
+            abundance[i] += school.getInstantaneousAbundance();
         }
     }
 
     @Override
     public void write(float time) {
 
-        double nsteps = getRecordFrequency();
-        for (int i = 0; i < abundance.length; i++) {
-            abundance[i] /= nsteps;
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            if (abundance[i] > 0) {
+                meanSize[i] = (float) (meanSize[i] / abundance[i]);
+            } else {
+                meanSize[i] = Double.NaN;
+            }
         }
-        writeVariable(time, abundance);
+        writeVariable(time, meanSize);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_abundance_Simu");
+        StringBuilder filename = new StringBuilder("SizeIndicators");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_meanSize_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -104,7 +114,7 @@ public class AbundanceIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Mean abundance (number of fish), ");
+        StringBuilder str = new StringBuilder("Mean size of fish species in cm, weighted by fish numbers, and ");
         if (includeClassZero()) {
             str.append("including ");
         } else {

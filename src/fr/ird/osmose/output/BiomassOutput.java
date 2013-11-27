@@ -49,39 +49,76 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class SizeSpectrumSpeciesNIndicator extends AbstractSpectrumIndicator {
+public class BiomassOutput extends AbstractOutput {
 
-    public SizeSpectrumSpeciesNIndicator(int rank, String keyEnabled) {
-        super(rank, keyEnabled, Type.SIZE);
+    private double[] biomass;
+
+    public BiomassOutput(int rank, String keyEnabled) {
+        super(rank, keyEnabled);
+    }
+
+    @Override
+    public void initStep() {
+        // Nothing to do
+    }
+
+    @Override
+    public void reset() {
+        biomass = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getInstantaneousAbundance();
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
+            }
+            biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
         }
     }
 
     @Override
+    public void write(float time) {
+
+        double nsteps = getRecordFrequency();
+        for (int i = 0; i < biomass.length; i++) {
+            biomass[i] /= nsteps;
+        }
+        writeVariable(time, biomass);
+    }
+
+    @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeSpectrumSpeciesN_Simu");
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
+        filename.append("_biomass_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
-
     }
 
     @Override
     String getDescription() {
-        return "Distribution of fish species abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
+        StringBuilder str = new StringBuilder("Mean biomass (tons), ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
+    }
+
+    @Override
+    String[] getHeaders() {
+        String[] species = new String[getNSpecies()];
+        for (int i = 0; i < species.length; i++) {
+            species[i] = getSimulation().getSpecies(i).getName();
+        }
+        return species;
     }
 }

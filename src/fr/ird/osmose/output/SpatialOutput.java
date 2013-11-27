@@ -66,7 +66,7 @@ import ucar.nc2.NetcdfFileWriteable;
  *
  * @author pverley
  */
-public class SpatialIndicator extends SimulationLinker implements Indicator {
+public class SpatialOutput extends SimulationLinker implements IOutput {
 
     /**
      * _FillValue attribute for cells on land
@@ -88,7 +88,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
      */
     private final boolean enabled;
 
-    public SpatialIndicator(int rank, String keyEnabled) {
+    public SpatialOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
@@ -104,7 +104,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
             IOTools.makeDirectories(filename);
             nc.setLocation(filename);
         } catch (IOException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*
          * Create dimensions
@@ -189,9 +189,9 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
             nc.write("longitude", arrLon);
             nc.write("latitude", arrLat);
         } catch (IOException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -205,7 +205,7 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
             File fileBase = new File(strFileBase);
             filePart.renameTo(fileBase);
         } catch (Exception ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
+            Logger.getLogger(SpatialOutput.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
         }
     }
 
@@ -328,9 +328,9 @@ public class SpatialIndicator extends SimulationLinker implements Indicator {
             nc.write("trophic_level", new int[]{index, 0, 0, 0}, arrTL);
             nc.write("ltl_biomass", new int[]{index, 0, 0, 0, 0}, arrLTL);
         } catch (IOException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

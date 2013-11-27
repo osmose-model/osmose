@@ -13,9 +13,9 @@ import java.io.File;
  *
  * @author pverley
  */
-public class AgeSpectrumSpeciesBIndicator extends AbstractSpectrumIndicator {
+public class AgeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
 
-    public AgeSpectrumSpeciesBIndicator(int rank, String keyEnabled) {
+    public AgeSpectrumSpeciesBOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled, Type.AGE);
     }
 

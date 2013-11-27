@@ -55,89 +55,17 @@ import java.io.File;
  *
  * @author pverley
  */
-public class SizeSpectrumIndicator extends AbstractIndicator {
+public class SizeSpectrumSpeciesNOutput extends AbstractSpectrumOutput {
 
-    private double[][] sizeSpectrum;
-    // Minimal size (cm) of the size spectrum.
-    public float spectrumMinSize;
-    // Maximal size (cm) of the size spectrum.
-    public float spectrumMaxSize;
-    // Range (cm) of size classes.
-    private float classRange;
-    // discrete size spectrum
-    private float[] tabSizes;
-    // Number of size classes in the discrete spectrum
-    private int nSizeClass;
-
-    public SizeSpectrumIndicator(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
-        initializeSizeSpectrum();
-    }
-
-    private void initializeSizeSpectrum() {
-
-        if (!isEnabled()) {
-            return;
-        }
-
-        spectrumMinSize = getConfiguration().getFloat("output.size.spectrum.size.min");
-        spectrumMaxSize = getConfiguration().getFloat("output.size.spectrum.size.max");
-        classRange = getConfiguration().getFloat("output.size.spectrum.size.range");
-
-        //initialisation of the size spectrum features
-        nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
-
-        tabSizes = new float[nSizeClass];
-        tabSizes[0] = spectrumMinSize;
-        for (int i = 1; i < nSizeClass; i++) {
-            tabSizes[i] = i * classRange;
-        }
-    }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        sizeSpectrum = new double[getNSpecies()][tabSizes.length];
+    public SizeSpectrumSpeciesNOutput(int rank, String keyEnabled) {
+        super(rank, keyEnabled, Type.SIZE);
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getInstantaneousAbundance();
+            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getInstantaneousAbundance();
         }
-    }
-    
-    private int getSizeRank(School school) {
-
-        int iSize = tabSizes.length - 1;
-        if (school.getLength() <= spectrumMaxSize) {
-            while (school.getLength() < tabSizes[iSize]) {
-                iSize--;
-            }
-        }
-        return iSize;
-    }
-
-    @Override
-    public void write(float time) {
-
-        double[][] values = new double[nSizeClass][2];
-        for (int iSize = 0; iSize < nSizeClass; iSize++) {
-            // Size
-            values[iSize][0] = tabSizes[iSize];
-            // Abundance
-            double sum = 0f;
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                sum += sizeSpectrum[iSpec][iSize] / getRecordFrequency();
-            }
-            values[iSize][1] = sum;
-        }
-        
-        writeVariable(time, values);
     }
 
     @Override
@@ -145,7 +73,7 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeSpectrum_Simu");
+        filename.append("_SizeSpectrumSpeciesN_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -154,11 +82,6 @@ public class SizeSpectrumIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        return "Distribution of fish abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
-    }
-
-    @Override
-    String[] getHeaders() {
-        return new String[]{"Size", "Abundance"};
+        return "Distribution of fish species abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
     }
 }

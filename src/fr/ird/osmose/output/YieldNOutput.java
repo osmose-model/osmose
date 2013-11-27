@@ -49,19 +49,16 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.Prey.MortalityCause;
-import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanSizeCatchIndicator extends AbstractIndicator {
+public class YieldNOutput extends AbstractOutput {
 
-    private double[] meanSizeCatch;
-    private double[] yieldN;
+    public double[] yieldN;
 
-    public MeanSizeCatchIndicator(int rank, String keyEnabled) {
+    public YieldNOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);
     }
 
@@ -72,41 +69,27 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        meanSizeCatch = new double[getNSpecies()];
         yieldN = new double[getNSpecies()];
+
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                continue;
-            }
-            int i = school.getSpeciesIndex();
-            meanSizeCatch[i] += school.getNdead(MortalityCause.FISHING) * school.getLength();
-            yieldN[i] += school.getNdead(MortalityCause.FISHING);
+            yieldN[school.getSpeciesIndex()] += school.getNdead(School.MortalityCause.FISHING);
         }
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (yieldN[i] > 0) {
-                meanSizeCatch[i] = meanSizeCatch[i] / yieldN[i];
-            } else {
-                meanSizeCatch[i] = Double.NaN;
-            }
-        }
-        writeVariable(time, meanSizeCatch);
+        writeVariable(time, yieldN);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanSizeCatch_Simu");
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
+        filename.append("_yieldN_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -114,14 +97,7 @@ public class MeanSizeCatchIndicator extends AbstractIndicator {
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Mean size of fish species in cm, weighted by fish numbers in the catches, and ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
+        return "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved";
     }
 
     @Override

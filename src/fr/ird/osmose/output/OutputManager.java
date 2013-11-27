@@ -57,12 +57,12 @@ import java.util.List;
  *
  * @author pverley
  */
-public class Indicators extends SimulationLinker {
+public class OutputManager extends SimulationLinker {
 
     // List of the indicators
-    final private List<Indicator> indicators;
+    final private List<IOutput> indicators;
 
-    public Indicators(int rank) {
+    public OutputManager(int rank) {
         super(rank);
         indicators = new ArrayList();
     }
@@ -82,46 +82,46 @@ public class Indicators extends SimulationLinker {
          * Instantiate indicators
          */
         // Biomass
-        indicators.add(new BiomassIndicator(rank, "output.biomass.enabled"));
+        indicators.add(new BiomassOutput(rank, "output.biomass.enabled"));
         // Abundance
-        indicators.add(new AbundanceIndicator(rank, "output.abundance.enabled"));
+        indicators.add(new AbundanceOutput(rank, "output.abundance.enabled"));
         // Mortality
-        indicators.add(new MortalityIndicator(rank, "output.mortality.enabled"));
+        indicators.add(new MortalityOutput(rank, "output.mortality.enabled"));
         // Yield
-        indicators.add(new YieldIndicator(rank, "output.yield.biomass.enabled"));
-        indicators.add(new YieldNIndicator(rank, "output.yield.abundance.enabled"));
+        indicators.add(new YieldOutput(rank, "output.yield.biomass.enabled"));
+        indicators.add(new YieldNOutput(rank, "output.yield.abundance.enabled"));
         // Size
-        indicators.add(new MeanSizeIndicator(rank, "output.size.enabled"));
-        indicators.add(new MeanSizeCatchIndicator(rank, "output.size.catch.enabled"));
-        indicators.add(new SizeSpectrumIndicator(rank, "output.size.spectrum.enabled"));
-        indicators.add(new SizeSpectrumSpeciesNIndicator(rank, "output.size.spectrum.perSpecies.N.enabled"));
-        indicators.add(new SizeSpectrumSpeciesYieldNIndicator(rank, "output.size.spectrum.perSpecies.N.enabled"));
-        indicators.add(new SizeSpectrumSpeciesBIndicator(rank, "output.size.spectrum.perSpecies.B.enabled"));
-        indicators.add(new SizeSpectrumSpeciesYieldIndicator(rank, "output.size.spectrum.perSpecies.B.enabled"));
-        indicators.add(new MeanSizeSpeciesIndicator(rank, "output.size.perSpecies.enabled"));
+        indicators.add(new MeanSizeOutput(rank, "output.size.enabled"));
+        indicators.add(new MeanSizeCatchOutput(rank, "output.size.catch.enabled"));
+        indicators.add(new SizeSpectrumOutput(rank, "output.size.spectrum.enabled"));
+        indicators.add(new SizeSpectrumSpeciesNOutput(rank, "output.size.spectrum.perSpecies.N.enabled"));
+        indicators.add(new SizeSpectrumSpeciesYieldNOutput(rank, "output.size.spectrum.perSpecies.N.enabled"));
+        indicators.add(new SizeSpectrumSpeciesBOutput(rank, "output.size.spectrum.perSpecies.B.enabled"));
+        indicators.add(new SizeSpectrumSpeciesYieldOutput(rank, "output.size.spectrum.perSpecies.B.enabled"));
+        indicators.add(new MeanSizeSpeciesOutput(rank, "output.size.perSpecies.enabled"));
         // Age
-        indicators.add(new AgeSpectrumSpeciesNIndicator(rank, "output.age.spectrum.perSpecies.N.enabled"));
-        indicators.add(new AgeSpectrumSpeciesYieldNIndicator(rank, "output.age.spectrum.perSpecies.N.enabled"));
-        indicators.add(new AgeSpectrumSpeciesBIndicator(rank, "output.age.spectrum.perSpecies.B.enabled"));
-        indicators.add(new AgeSpectrumSpeciesYieldIndicator(rank, "output.age.spectrum.perSpecies.B.enabled"));
+        indicators.add(new AgeSpectrumSpeciesNOutput(rank, "output.age.spectrum.perSpecies.N.enabled"));
+        indicators.add(new AgeSpectrumSpeciesYieldNOutput(rank, "output.age.spectrum.perSpecies.N.enabled"));
+        indicators.add(new AgeSpectrumSpeciesBOutput(rank, "output.age.spectrum.perSpecies.B.enabled"));
+        indicators.add(new AgeSpectrumSpeciesYieldOutput(rank, "output.age.spectrum.perSpecies.B.enabled"));
         // TL
-        indicators.add(new MeanTrophicLevelIndicator(rank, "output.tl.enabled"));
-        indicators.add(new MeanTrophicLevelCatchIndicator(rank, "output.tl.catch.enabled"));
-        indicators.add(new TrophicLevelSpectrumIndicator(rank, "output.tl.spectrum.enabled"));
-        indicators.add(new MeanTrophicLevelSizeIndicator(rank, "output.tl.perSize.enabled"));
-        indicators.add(new MeanTrophicLevelAgeIndicator(rank, "output.tl.perAge.enabled"));
+        indicators.add(new MeanTrophicLevelOutput(rank, "output.tl.enabled"));
+        indicators.add(new MeanTrophicLevelCatchOutput(rank, "output.tl.catch.enabled"));
+        indicators.add(new TrophicLevelSpectrumOutput(rank, "output.tl.spectrum.enabled"));
+        indicators.add(new MeanTrophicLevelSizeOutput(rank, "output.tl.perSize.enabled"));
+        indicators.add(new MeanTrophicLevelAgeOutput(rank, "output.tl.perAge.enabled"));
         // Predation
-        indicators.add(new DietIndicator(rank, "output.diet.composition.enabled"));
-        indicators.add(new PredatorPressureIndicator(rank, "output.diet.pressure.enabled"));
-        indicators.add(new BiomassDietStageIndicator(rank, "output.diet.pressure.enabled"));
+        indicators.add(new DietOutput(rank, "output.diet.composition.enabled"));
+        indicators.add(new PredatorPressureOutput(rank, "output.diet.pressure.enabled"));
+        indicators.add(new BiomassDietStageOutput(rank, "output.diet.pressure.enabled"));
         // Spatialized
-        indicators.add(new SpatialIndicator(rank, "output.spatial.enabled"));
-        indicators.add(new LTLIndicator(rank, "output.spatial.ltl.enabled"));
+        indicators.add(new SpatialOutput(rank, "output.spatial.enabled"));
+        indicators.add(new LTLOutput(rank, "output.spatial.ltl.enabled"));
 
         /*
          * Initialize indicators
          */
-        for (Indicator indicator : indicators) {
+        for (IOutput indicator : indicators) {
             if (indicator.isEnabled()) {
                 indicator.init();
                 indicator.reset();
@@ -130,7 +130,7 @@ public class Indicators extends SimulationLinker {
     }
 
     public void close() {
-        for (Indicator indicator : indicators) {
+        for (IOutput indicator : indicators) {
             if (indicator.isEnabled()) {
                 indicator.close();
             }
@@ -138,7 +138,7 @@ public class Indicators extends SimulationLinker {
     }
 
     public void initStep() {
-        for (Indicator indicator : indicators) {
+        for (IOutput indicator : indicators) {
             if (indicator.isEnabled()) {
                 indicator.initStep();
             }
@@ -149,7 +149,7 @@ public class Indicators extends SimulationLinker {
 
         // UPDATE
         if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
-            for (Indicator indicator : indicators) {
+            for (IOutput indicator : indicators) {
                 if (indicator.isEnabled()) {
                     indicator.update();
                     // WRITE

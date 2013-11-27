@@ -49,7 +49,7 @@
 package fr.ird.osmose.step;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.Indicators;
+import fr.ird.osmose.output.OutputManager;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.FishingProcess;
 import fr.ird.osmose.process.GrowthProcess;
@@ -106,7 +106,7 @@ public class SequentialMortalityStep extends AbstractStep {
     /*
      * List of indicators
      */
-    private Indicators indicators;
+    private OutputManager indicators;
 
     public SequentialMortalityStep(int rank) {
         super(rank);
@@ -150,7 +150,7 @@ public class SequentialMortalityStep extends AbstractStep {
         movementProcess.init();
 
         // Indicators
-        indicators = new Indicators(getRank());
+        indicators = new OutputManager(getRank());
         indicators.init();
     }
 

@@ -55,7 +55,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
+public class MeanTrophicLevelSizeOutput extends AbstractOutput {
 
     private double[][] meanTL;
     private double[][] biomass;
@@ -68,7 +68,7 @@ public class MeanTrophicLevelSizeIndicator extends AbstractIndicator {
     // discrete size spectrum
     private float[] tabSizes;
 
-    public MeanTrophicLevelSizeIndicator(int rank, String keyEnabled) {
+    public MeanTrophicLevelSizeOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);
         initializeSizeSpectrum();
     }

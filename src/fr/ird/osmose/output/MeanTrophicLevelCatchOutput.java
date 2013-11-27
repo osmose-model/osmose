@@ -49,39 +49,87 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.Prey.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class SizeSpectrumSpeciesYieldIndicator extends AbstractSpectrumIndicator {
+public class MeanTrophicLevelCatchOutput extends AbstractOutput {
 
-    public SizeSpectrumSpeciesYieldIndicator(int rank, String keyEnabled) {
-        super(rank, keyEnabled, Type.SIZE);
+    private double[] meanTLCatch;
+    private double[] yield;
+
+    public MeanTrophicLevelCatchOutput(int rank, String keyEnabled) {
+        super(rank, keyEnabled);
+    }
+
+    @Override
+    public void initStep() {
+        // Nothing to do
+    }
+
+    @Override
+    public void reset() {
+        meanTLCatch = new double[getNSpecies()];
+        yield = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.adb2biom(school.getNdead(School.MortalityCause.FISHING));
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
+            }
+            int i = school.getSpeciesIndex();
+            meanTLCatch[i] += school.getTrophicLevel() * school.adb2biom(school.getNdead(MortalityCause.FISHING));
+            yield[i] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
         }
     }
 
     @Override
+    public void write(float time) {
+
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            if (yield[i] > 0) {
+                meanTLCatch[i] = meanTLCatch[i] / yield[i];
+            } else {
+                meanTLCatch[i] = Double.NaN;
+            }
+        }
+        writeVariable(time, meanTLCatch);
+    }
+
+    @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
+        StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeSpectrumSpeciesYield_Simu");
+        filename.append("_meanTLCatch_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
-
     }
 
     @Override
     String getDescription() {
-        return "Distribution of cumulative catch (tons per time step of saving) in size classes (cm). For size class i, the yield in [i,i+1[ is reported.";
+        StringBuilder str = new StringBuilder("Mean Trophic Level of fish species, weighted by fish catch, and ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
+    }
+
+    @Override
+    String[] getHeaders() {
+        String[] species = new String[getNSpecies()];
+        for (int i = 0; i < species.length; i++) {
+            species[i] = getSimulation().getSpecies(i).getName();
+        }
+        return species;
     }
 }

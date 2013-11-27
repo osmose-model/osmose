@@ -59,7 +59,7 @@ import java.io.PrintWriter;
  *
  * @author pverley
  */
-abstract public class AbstractIndicator extends SimulationLinker implements Indicator {
+abstract public class AbstractOutput extends SimulationLinker implements IOutput {
 
     private FileOutputStream fos;
     private PrintWriter prw;
@@ -74,7 +74,7 @@ abstract public class AbstractIndicator extends SimulationLinker implements Indi
 
     abstract String[] getHeaders();
     
-    AbstractIndicator(int rank, String keyEnabled) {
+    AbstractOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }

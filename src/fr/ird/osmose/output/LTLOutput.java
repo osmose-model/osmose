@@ -67,7 +67,7 @@ import ucar.nc2.NetcdfFileWriteable;
  *
  * @author pverley
  */
-public class LTLIndicator extends SimulationLinker implements Indicator {
+public class LTLOutput extends SimulationLinker implements IOutput {
 
     /**
      * _FillValue attribute for cells on land
@@ -90,7 +90,7 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
      */
     private final boolean enabled;
 
-    public LTLIndicator(int rank, String keyEnabled) {
+    public LTLOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
@@ -198,9 +198,9 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
             nc.write("ltl_biomass", new int[]{index, 0, 0, 0}, arrLTL0);
             nc.write("ltl_biomass_pred", new int[]{index, 0, 0, 0}, arrLTL1);
         } catch (IOException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -212,7 +212,7 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
             nc = NetcdfFileWriteable.createNew("");
             nc.setLocation(ncfile);
         } catch (IOException ex) {
-            Logger.getLogger(LTLIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*
          * Create dimensions
@@ -270,9 +270,9 @@ public class LTLIndicator extends SimulationLinker implements Indicator {
             nc.write("longitude", arrLon);
             nc.write("latitude", arrLat);
         } catch (IOException ex) {
-            Logger.getLogger(LTLIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(LTLIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

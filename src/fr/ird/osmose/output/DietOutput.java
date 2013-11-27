@@ -65,7 +65,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class DietIndicator extends SimulationLinker implements Indicator {
+public class DietOutput extends SimulationLinker implements IOutput {
 
     // IO
     private FileOutputStream fos;
@@ -81,7 +81,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
     // Diet output stage
     private AbstractStage dietOutputStage;
 
-    public DietIndicator(int rank, String keyEnabled) {
+    public DietOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
@@ -233,7 +233,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
             // Init stream
             fos = new FileOutputStream(file, true);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(AbstractIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AbstractOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         prw = new PrintWriter(fos, true);
         if (!fileExists) {
@@ -273,7 +273,7 @@ public class DietIndicator extends SimulationLinker implements Indicator {
             try {
                 fos.close();
             } catch (IOException ex) {
-                Logger.getLogger(DietIndicator.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(DietOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

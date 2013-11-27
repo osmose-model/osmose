@@ -46,7 +46,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
@@ -56,10 +55,10 @@ import java.io.File;
  *
  * @author pverley
  */
-public class AgeSpectrumSpeciesYieldIndicator extends AbstractSpectrumIndicator {
+public class SizeSpectrumSpeciesYieldOutput extends AbstractSpectrumOutput {
 
-    public AgeSpectrumSpeciesYieldIndicator(int rank, String keyEnabled) {
-        super(rank, keyEnabled, Type.AGE);
+    public SizeSpectrumSpeciesYieldOutput(int rank, String keyEnabled) {
+        super(rank, keyEnabled, Type.SIZE);
     }
 
     @Override
@@ -71,10 +70,10 @@ public class AgeSpectrumSpeciesYieldIndicator extends AbstractSpectrumIndicator 
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("AgeIndicators");
+        StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_AgeSpectrumSpeciesYield_Simu");
+        filename.append("_SizeSpectrumSpeciesYield_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -83,6 +82,6 @@ public class AgeSpectrumSpeciesYieldIndicator extends AbstractSpectrumIndicator 
 
     @Override
     String getDescription() {
-        return "Distribution of cumulative catch (tons per time step of saving) in age classes (year). For age class i, the yield in [i,i+1[ is reported.";
+        return "Distribution of cumulative catch (tons per time step of saving) in size classes (cm). For size class i, the yield in [i,i+1[ is reported.";
     }
 }

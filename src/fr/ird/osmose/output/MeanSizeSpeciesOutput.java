@@ -60,7 +60,7 @@ import java.io.PrintWriter;
  *
  * @author pverley
  */
-public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indicator {
+public class MeanSizeSpeciesOutput extends SimulationLinker implements IOutput {
 
     // IO
     private FileOutputStream[] fos;
@@ -74,7 +74,7 @@ public class MeanSizeSpeciesIndicator extends SimulationLinker implements Indica
      */
     private boolean enabled;
 
-    public MeanSizeSpeciesIndicator(int rank, String keyEnabled) {
+    public MeanSizeSpeciesOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }

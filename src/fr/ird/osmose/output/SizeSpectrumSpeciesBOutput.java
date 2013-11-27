@@ -55,25 +55,25 @@ import java.io.File;
  *
  * @author pverley
  */
-public class AgeSpectrumSpeciesYieldNIndicator extends AbstractSpectrumIndicator {
+public class SizeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
 
-    public AgeSpectrumSpeciesYieldNIndicator(int rank, String keyEnabled) {
-        super(rank, keyEnabled, Type.AGE);
+    public SizeSpectrumSpeciesBOutput(int rank, String keyEnabled) {
+        super(rank, keyEnabled, Type.SIZE);
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.FISHING);
+            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getInstantaneousBiomass();
         }
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("AgeIndicators");
+        StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_AgeSpectrumSpeciesYieldN_Simu");
+        filename.append("_SizeSpectrumSpeciesB_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -82,6 +82,6 @@ public class AgeSpectrumSpeciesYieldNIndicator extends AbstractSpectrumIndicator
 
     @Override
     String getDescription() {
-        return "Distribution of cumulative catch (number of fish caught per time step of saving) in age classes (year). For age class i, the yield in [i,i+1[ is reported.";
+        return "Distribution of fish species biomass in size classes (cm). For size class i, the biomass of fish in [i,i+1[ is reported.";
     }
 }

@@ -55,13 +55,43 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanTrophicLevelIndicator extends AbstractIndicator {
+public class SizeSpectrumOutput extends AbstractOutput {
 
-    private double[] meanTL;
-    private double[] biomass;
+    private double[][] sizeSpectrum;
+    // Minimal size (cm) of the size spectrum.
+    public float spectrumMinSize;
+    // Maximal size (cm) of the size spectrum.
+    public float spectrumMaxSize;
+    // Range (cm) of size classes.
+    private float classRange;
+    // discrete size spectrum
+    private float[] tabSizes;
+    // Number of size classes in the discrete spectrum
+    private int nSizeClass;
 
-    public MeanTrophicLevelIndicator(int rank, String keyEnabled) {
+    public SizeSpectrumOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);
+        initializeSizeSpectrum();
+    }
+
+    private void initializeSizeSpectrum() {
+
+        if (!isEnabled()) {
+            return;
+        }
+
+        spectrumMinSize = getConfiguration().getFloat("output.size.spectrum.size.min");
+        spectrumMaxSize = getConfiguration().getFloat("output.size.spectrum.size.max");
+        classRange = getConfiguration().getFloat("output.size.spectrum.size.range");
+
+        //initialisation of the size spectrum features
+        nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
+
+        tabSizes = new float[nSizeClass];
+        tabSizes[0] = spectrumMinSize;
+        for (int i = 1; i < nSizeClass; i++) {
+            tabSizes[i] = i * classRange;
+        }
     }
 
     @Override
@@ -71,64 +101,64 @@ public class MeanTrophicLevelIndicator extends AbstractIndicator {
 
     @Override
     public void reset() {
-        meanTL = new double[getNSpecies()];
-        biomass = new double[getNSpecies()];
+        sizeSpectrum = new double[getNSpecies()][tabSizes.length];
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                continue;
-            }
-            int i = school.getSpeciesIndex();
-            meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
-            biomass[i] += school.getInstantaneousBiomass();
+            sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getInstantaneousAbundance();
         }
+    }
+    
+    private int getSizeRank(School school) {
+
+        int iSize = tabSizes.length - 1;
+        if (school.getLength() <= spectrumMaxSize) {
+            while (school.getLength() < tabSizes[iSize]) {
+                iSize--;
+            }
+        }
+        return iSize;
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (biomass[i] > 0.d) {
-                meanTL[i] = (float) (meanTL[i] / biomass[i]);
-            } else {
-                meanTL[i] = Double.NaN;
+        double[][] values = new double[nSizeClass][2];
+        for (int iSize = 0; iSize < nSizeClass; iSize++) {
+            // Size
+            values[iSize][0] = tabSizes[iSize];
+            // Abundance
+            double sum = 0f;
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                sum += sizeSpectrum[iSpec][iSize] / getRecordFrequency();
             }
+            values[iSize][1] = sum;
         }
-        writeVariable(time, meanTL);
+        
+        writeVariable(time, values);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
+        StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTL_Simu");
+        filename.append("_SizeSpectrum_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
+
     }
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Mean Trophic Level of fish species, weighted by fish biomass, and ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
+        return "Distribution of fish abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
     }
 
     @Override
     String[] getHeaders() {
-        String[] species = new String[getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = getSimulation().getSpecies(i).getName();
-        }
-        return species;
+        return new String[]{"Size", "Abundance"};
     }
 }

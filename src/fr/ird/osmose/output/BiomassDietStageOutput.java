@@ -57,7 +57,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class BiomassDietStageIndicator extends AbstractIndicator {
+public class BiomassDietStageOutput extends AbstractOutput {
 
     private int nColumns;
     /*
@@ -67,7 +67,7 @@ public class BiomassDietStageIndicator extends AbstractIndicator {
     
     private AbstractStage dietOutputStage;
 
-    public BiomassDietStageIndicator(int rank, String keyEnabled) {
+    public BiomassDietStageOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);
     }
 

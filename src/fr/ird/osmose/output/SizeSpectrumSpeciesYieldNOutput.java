@@ -55,16 +55,16 @@ import java.io.File;
  *
  * @author pverley
  */
-public class SizeSpectrumSpeciesBIndicator extends AbstractSpectrumIndicator {
+public class SizeSpectrumSpeciesYieldNOutput extends AbstractSpectrumOutput {
 
-    public SizeSpectrumSpeciesBIndicator(int rank, String keyEnabled) {
+    public SizeSpectrumSpeciesYieldNOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled, Type.SIZE);
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getInstantaneousBiomass();
+            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.FISHING);
         }
     }
 
@@ -73,7 +73,7 @@ public class SizeSpectrumSpeciesBIndicator extends AbstractSpectrumIndicator {
         StringBuilder filename = new StringBuilder("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeSpectrumSpeciesB_Simu");
+        filename.append("_SizeSpectrumSpeciesYieldN_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -82,6 +82,6 @@ public class SizeSpectrumSpeciesBIndicator extends AbstractSpectrumIndicator {
 
     @Override
     String getDescription() {
-        return "Distribution of fish species biomass in size classes (cm). For size class i, the biomass of fish in [i,i+1[ is reported.";
+        return "Distribution of cumulative catch (number of fish caught per time step of saving) in size classes (cm). For size class i, the yield in [i,i+1[ is reported.";
     }
 }

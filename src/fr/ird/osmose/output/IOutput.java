@@ -48,77 +48,62 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-
 /**
  *
  * @author pverley
  */
-public class BiomassIndicator extends AbstractIndicator {
+public interface IOutput {
+    
+    /**
+     * This function will be called at the beginning of every time step, before
+     * any process occurred.
+     * Indeed for some indicators it might be necessary to know the state of
+     * the system just after the reproduction and before the following step.
+     */
+    public void initStep();
 
-    private double[] biomass;
+    /**
+     * Reset the indicator after a saving step has been written in output file.
+     * It will be automatically called after the write(time) function
+     */
+    public void reset();
 
-    public BiomassIndicator(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
-    }
+    /**
+     * The function is called every time step, at the end of the step,
+     * usually before the reproduction process.
+     */
+    public void update();
 
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
+    /**
+     * Whether or not the indicator is activated in the current simulation.
+     *
+     * @return true is the indicator should be saved
+     */
+    public boolean isEnabled();
 
-    @Override
-    public void reset() {
-        biomass = new double[getNSpecies()];
-    }
-
-    @Override
-    public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                continue;
-            }
-            biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
-        }
-    }
-
-    @Override
-    public void write(float time) {
-
-        double nsteps = getRecordFrequency();
-        for (int i = 0; i < biomass.length; i++) {
-            biomass[i] /= nsteps;
-        }
-        writeVariable(time, biomass);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_biomass_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
-    @Override
-    String getDescription() {
-        StringBuilder str = new StringBuilder("Mean biomass (tons), ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
-    }
-
-    @Override
-    String[] getHeaders() {
-        String[] species = new String[getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = getSimulation().getSpecies(i).getName();
-        }
-        return species;
-    }
+    /**
+     * Write the indicator in output file at specified time
+     *
+     * @param time, expressed in year
+     */
+    public void write(float time);
+    
+    /**
+     * Whether the parameter should be written at specified time step.
+     * @param iStepSimu, the current step of the simulation.
+     * @return true if the parameter should be written in the file at the
+     * specified time step, false otherwise.
+     */
+    public boolean isTimeToWrite(int iStepSimu);
+    
+    /**
+     * Initializes the indicator. Load parameters and create the file.
+     */
+    public void init();
+    
+    /**
+     * Closes the file
+     */
+    public void close();
+    
 }

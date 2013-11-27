@@ -49,39 +49,63 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class SizeSpectrumSpeciesYieldNIndicator extends AbstractSpectrumIndicator {
+public class YieldOutput extends AbstractOutput {
 
-    public SizeSpectrumSpeciesYieldNIndicator(int rank, String keyEnabled) {
-        super(rank, keyEnabled, Type.SIZE);
+    public double[] yield;
+
+    public YieldOutput(int rank, String keyEnabled) {
+        super(rank, keyEnabled);
+    }
+
+    @Override
+    public void initStep() {
+        // Nothing to do
+    }
+
+    @Override
+    public void reset() {
+        yield = new double[getNSpecies()];
+
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.FISHING);
+            yield[school.getSpeciesIndex()] += school.adb2biom(school.getNdead(School.MortalityCause.FISHING));
         }
     }
 
     @Override
+    public void write(float time) {
+
+        writeVariable(time, yield);
+    }
+
+    @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeSpectrumSpeciesYieldN_Simu");
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
+        filename.append("_yield_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
-
     }
 
     @Override
     String getDescription() {
-        return "Distribution of cumulative catch (number of fish caught per time step of saving) in size classes (cm). For size class i, the yield in [i,i+1[ is reported.";
+        return "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
+    }
+
+    @Override
+    String[] getHeaders() {
+        String[] species = new String[getNSpecies()];
+        for (int i = 0; i < species.length; i++) {
+            species[i] = getSimulation().getSpecies(i).getName();
+        }
+        return species;
     }
 }

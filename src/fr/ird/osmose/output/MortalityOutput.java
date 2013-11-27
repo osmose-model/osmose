@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class MortalityIndicator extends SimulationLinker implements Indicator {
+public class MortalityOutput extends SimulationLinker implements IOutput {
 
     // IO
     private FileOutputStream[] fos;
@@ -93,7 +93,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
      */
     private int[] recruitmentAge;
 
-    public MortalityIndicator(int rank, String keyEnabled) {
+    public MortalityOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
@@ -218,7 +218,7 @@ public class MortalityIndicator extends SimulationLinker implements Indicator {
                 // Init stream
                 fos[iSpecies] = new FileOutputStream(file, true);
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(MortalityIndicator.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MortalityOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
             if (!fileExists) {

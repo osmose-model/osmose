@@ -54,7 +54,7 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public abstract class AbstractSpectrumIndicator extends AbstractIndicator {
+public abstract class AbstractSpectrumOutput extends AbstractOutput {
 
     // Indicator distribution by species and by size classes
     double[][] spectrum;
@@ -71,7 +71,7 @@ public abstract class AbstractSpectrumIndicator extends AbstractIndicator {
     //
     private final Type type;
 
-    public AbstractSpectrumIndicator(int rank, String keyEnabled, Type type) {
+    public AbstractSpectrumOutput(int rank, String keyEnabled, Type type) {
         super(rank, keyEnabled);
         this.type = type;
         initializeSizeSpectrum(type);

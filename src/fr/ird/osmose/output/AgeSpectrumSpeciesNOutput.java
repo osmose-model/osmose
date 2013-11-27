@@ -46,6 +46,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
@@ -55,110 +56,33 @@ import java.io.File;
  *
  * @author pverley
  */
-public class TrophicLevelSpectrumIndicator extends AbstractIndicator {
+public class AgeSpectrumSpeciesNOutput extends AbstractSpectrumOutput {
 
-    /*
-     * Trophic level distribution [SPECIES][TL_SPECTRUM]
-     */
-    private double[][] trophicLevelSpectrum;
-    //
-    private float[] tabTL;
-    private int nTLClass;
-
-     public TrophicLevelSpectrumIndicator(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
-        initializeTLSpectrum();
-    }
-
-    private void initializeTLSpectrum() {
-
-        float minTL = 2.0f;
-        float maxTL = 6.0f;
-        nTLClass = (int) (1 + ((maxTL - minTL) / 0.1f));   // TL classes of 0.1, from 1 to 6
-        tabTL = new float[nTLClass];
-        tabTL[0] = minTL;
-        for (int i = 1; i < nTLClass; i++) {
-            tabTL[i] = minTL + i * 0.1f;
-        }
-    }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        trophicLevelSpectrum = new double[getNSpecies()][tabTL.length];
+    public AgeSpectrumSpeciesNOutput(int rank, String keyEnabled) {
+        super(rank, keyEnabled, Type.AGE);
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int ageClass1 = (int) Math.max(1, school.getSpecies().getAgeClassZero());
-            if (!includeClassZero() && (school.getAgeDt() < ageClass1)) {
-                continue;
-            }
-            double biomass = school.getInstantaneousBiomass();
-            if (biomass > 0) {
-                trophicLevelSpectrum[school.getSpeciesIndex()][getTLRank(school)] += biomass;
-            }
+            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getInstantaneousAbundance();
         }
-    }
-
-    private int getTLRank(School school) {
-
-        int iTL = tabTL.length - 1;
-        while (school.getTrophicLevel() <= tabTL[iTL] && (iTL > 0)) {
-            iTL--;
-        }
-        return iTL;
-    }
-
-    @Override
-    public void write(float time) {
-
-        double[][] values = new double[nTLClass][getNSpecies() + 1];
-        for (int iTL = 0; iTL < nTLClass; iTL++) {
-            values[iTL][0] = tabTL[iTL];
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                values[iTL][iSpec + 1] = (trophicLevelSpectrum[iSpec][iTL] / getRecordFrequency());
-            }
-        }
-        
-        writeVariable(time, values);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
+        StringBuilder filename = new StringBuilder("AgeIndicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_TLDistrib_Simu");
+        filename.append("_AgeSpectrumSpeciesN_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
+
     }
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Distribution of species biomass (tons) by 0.1 TL class, and ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
-    }
-
-    @Override
-    String[] getHeaders() {
-        String[] headers = new String[getNSpecies() + 1];
-        headers[0] = "TL";
-        for (int i = 0; i < getNSpecies(); i++) {
-            headers[i + 1] = getSimulation().getSpecies(i).getName();
-        }
-        return headers;
+        return "Distribution of fish species abundance in age classes (year). For age class i, the number of fish in [i,i+1[ is reported.";
     }
 }

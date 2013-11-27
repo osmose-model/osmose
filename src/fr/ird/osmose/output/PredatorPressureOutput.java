@@ -65,7 +65,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class PredatorPressureIndicator extends SimulationLinker implements Indicator {
+public class PredatorPressureOutput extends SimulationLinker implements IOutput {
 
     // IO
     private FileOutputStream fos;
@@ -80,7 +80,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
      */
     private final boolean enabled;
 
-    public PredatorPressureIndicator(int rank, String keyEnabled) {
+    public PredatorPressureOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
@@ -204,7 +204,7 @@ public class PredatorPressureIndicator extends SimulationLinker implements Indic
             // Init stream
             fos = new FileOutputStream(file, true);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(DietIndicator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DietOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         prw = new PrintWriter(fos, true);
         if (!fileExists) {
