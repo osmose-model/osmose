@@ -77,7 +77,7 @@ public class StarvationProcess extends AbstractProcess {
     @Override
     public void run() {
         for (School school : getSchoolSet().getPresentSchools()) {
-            double M = getStarvationMortalityRate(school, 1);
+            double M = getStarvationMortalityRate(school);
             double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-M));
             if (nDead > 0.d) {
                 school.setNdead(School.MortalityCause.STARVATION, nDead);
@@ -85,7 +85,7 @@ public class StarvationProcess extends AbstractProcess {
         }
     }
 
-    public double getStarvationMortalityRate(School school, int subdt) {
+    public double getStarvationMortalityRate(School school) {
 
         // no starvation for eggs
         if (school.getAgeDt() == 0) {
@@ -99,6 +99,6 @@ public class StarvationProcess extends AbstractProcess {
             mortalityRate = Math.max(starvMaxRate[iSpec] * (1 - school.getPredSuccessRate() / criticalPredSuccess[iSpec]), 0.d);
         }
 
-        return mortalityRate / (getConfiguration().getNStepYear() * subdt);
+        return mortalityRate / getConfiguration().getNStepYear();
     }
 }

@@ -151,7 +151,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
     public void run() {
         // Natural mortality (due to other predators)
         for (School school : getSchoolSet()) {
-            double M = getInstantaneousRate(school, 1);
+            double M = getInstantaneousRate(school);
             double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
             if (nDead > 0.d) {
                 school.setNdead(MortalityCause.NATURAL, nDead);
@@ -167,16 +167,16 @@ public class NaturalMortalityProcess extends AbstractProcess {
      * pronounced than for sup ages (rel to CC), predation by other species are
      * not explicit.
      */
-    public double getInstantaneousRate(School school, int subdt) {
+    public double getInstantaneousRate(School school) {
         double M;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
-            M = larvaMortality[school.getSpeciesIndex()].getInstantaneousRate(school) / (float) subdt;
+            M = larvaMortality[school.getSpeciesIndex()].getInstantaneousRate(school);
         } else {
             if (null != spatialD[spec.getIndex()] && !school.isUnlocated()) {
-                M = (spatialD[spec.getIndex()].getValue(school.getCell()) * naturalMortality[school.getSpeciesIndex()].getInstantaneousRate(school)) / (float) subdt;
+                M = (spatialD[spec.getIndex()].getValue(school.getCell()) * naturalMortality[school.getSpeciesIndex()].getInstantaneousRate(school));
             } else {
-                M = naturalMortality[school.getSpeciesIndex()].getInstantaneousRate(school) / (float) (subdt);
+                M = naturalMortality[school.getSpeciesIndex()].getInstantaneousRate(school);
             }
         }
         return M;

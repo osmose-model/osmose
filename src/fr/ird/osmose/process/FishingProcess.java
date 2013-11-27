@@ -126,7 +126,7 @@ public class FishingProcess extends AbstractProcess {
         update();
         for (School school : getSchoolSet().getPresentSchools()) {
             if (school.getAbundance() != 0.d) {
-                double F = getInstantaneousRate(school, 1);
+                double F = getInstantaneousRate(school);
                 double nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
                 if (nDead > 0.d) {
                     school.setNdead(MortalityCause.FISHING, nDead);
@@ -163,7 +163,7 @@ public class FishingProcess extends AbstractProcess {
         }
     }
     
-    public double getInstantaneousRate(School school, int subdt) {
+    public double getInstantaneousRate(School school) {
         if (!school.isUnlocated()) {
             return fishingScenario[school.getSpeciesIndex()].getInstantaneousRate(school) * mpaFactor.getValue(school.getCell());
         } else {

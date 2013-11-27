@@ -134,7 +134,7 @@ public class Simulation extends OLogger {
      *
      * @see MortalityAlgorithm for details.
      */
-    public static final MortalityAlgorithm mortalityAlgorithm = MortalityAlgorithm.ITERATIVE;
+    public static final MortalityAlgorithm mortalityAlgorithm = MortalityAlgorithm.FULLY_STOCHASTIC;
 
 ///////////////////////////////
 // Declaration of the variables

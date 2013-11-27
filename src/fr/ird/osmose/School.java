@@ -115,6 +115,10 @@ public class School extends Prey {
      */
     private float predSuccessRate;
     /**
+     * Starvation mortality rate.
+     */
+    private double starvationRate;
+    /**
      * Whether the school is out of the simulated domain at current time step.
      */
     private boolean out;
@@ -180,6 +184,7 @@ public class School extends Prey {
         this.age = age;
         out = false;
         preyRecords = new ArrayList();
+        starvationRate = 0.d;
     }
 
 ////////////////////////////
@@ -400,6 +405,20 @@ public class School extends Prey {
      */
     public void setPredSuccessRate(float rate) {
         this.predSuccessRate = rate;
+    }
+
+    /**
+     * @return the starvationRate
+     */
+    public double getStarvationRate() {
+        return starvationRate;
+    }
+
+    /**
+     * @param starvationRate the starvationRate to set
+     */
+    public void setStarvationRate(double starvationRate) {
+        this.starvationRate = starvationRate;
     }
 
     /**

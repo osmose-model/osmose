@@ -51,6 +51,7 @@ package fr.ird.osmose.process;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Prey;
 import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School;
 import fr.ird.osmose.stage.AbstractStage;
@@ -61,6 +62,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 /**
  *
  * @author pverley
@@ -101,11 +103,11 @@ public class PredationProcess extends AbstractProcess {
             predPreySizesMin[i] = getConfiguration().getArrayFloat("predation.predPrey.sizeRatio.min.sp" + i);
             predationRate[i] = getConfiguration().getFloat("predation.ingestion.rate.max.sp" + i);
         }
-        
+
         // Accessibility stages
         accessStage = new AccessibilityStage();
         accessStage.init();
-        
+
         // Feeding stages
         predPreyStage = new PredPreyStage();
         predPreyStage.init();
@@ -181,12 +183,62 @@ public class PredationProcess extends AbstractProcess {
                 // Apply predation mortality
                 for (int is = 0; is < ns; is++) {
                     School school = schools.get(is);
-                    double biomassToPredate = school.getBiomass() * getPredationRate(school, 1);
+                    double biomassToPredate = school.getBiomass() * getMaxPredationRate(school);
                     school.setPredSuccessRate(computePredSuccessRate(biomassToPredate, preyedBiomass[is]));
                 }
             }
         }
 
+    }
+
+    /**
+     * Computes the biomass preyed by predator upon the list of preys. The
+     * function considers instantaneous biomass for both preys and predator.
+     *
+     * @param predator
+     * @param preys
+     * @param accessibility
+     * @param subdt
+     * @return the array of biomass preyed by the predator upon the preys
+     */
+    public double[] computePredation(School predator, List<Prey> preys, double[] accessibility, int subdt) {
+
+        double[] preyUpon = new double[preys.size()];
+        // egg do not predate
+        if (predator.getAgeDt() > 0) {
+            // Compute accessible biomass
+            // 1. from preys
+            double[] accessibleBiomass = new double[preys.size()];
+            for (int i = 0; i < preys.size(); i++) {
+                accessibleBiomass[i] = accessibility[i] * preys.get(i).getInstantaneousBiomass();
+            }
+            double biomAccessibleTot = sum(accessibleBiomass);
+
+            // Compute the potential biomass that predators could prey upon
+            double biomassToPredate = getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt;
+
+            // Distribute the predation over the preys
+            if (biomAccessibleTot != 0) {
+                // There is less prey available than the predator can
+                // potentially prey upon. Predator will feed upon the total
+                // accessible biomass
+                if (biomAccessibleTot <= biomassToPredate) {
+                    biomassToPredate = biomAccessibleTot;
+                }
+
+                // Assess the loss for the preys caused by this predator
+                for (int i = 0; i < preys.size(); i++) {
+                    // ratio of prey i (among available preys) preyed upon by predator
+                    double ratio = accessibleBiomass[i] / biomAccessibleTot;
+                    preyUpon[i] = ratio * biomassToPredate;
+                }
+            } else {
+                // Case 2: there is no prey available
+                // preyUpon[i] = 0; no need to do it since initialization already set it to zero
+            }
+        }
+        // Return the array of biomass preyed by the predator
+        return preyUpon;
     }
 
     /**
@@ -230,8 +282,8 @@ public class PredationProcess extends AbstractProcess {
 
         // Compute the potential biomass that predators could prey upon
         double biomassToPredate = instantaneous
-                ? getPredationRate(predator, subdt) * predator.getInstantaneousBiomass()
-                : getPredationRate(predator, subdt) * predator.getBiomass();
+                ? getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt
+                : getMaxPredationRate(predator) * predator.getBiomass() / subdt;
 
         // Distribute the predation over the preys
         if (biomAccessibleTot != 0) {
@@ -352,11 +404,10 @@ public class PredationProcess extends AbstractProcess {
      * Gets the maximum predation rate of a predator per time step
      *
      * @param predator
-     * @param subdt
      * @return
      */
-    public double getPredationRate(School predator, int subdt) {
-        return predationRate[predator.getSpeciesIndex()] / (double) (getConfiguration().getNStepYear() * subdt);
+    public double getMaxPredationRate(School predator) {
+        return predationRate[predator.getSpeciesIndex()] / (double) (getConfiguration().getNStepYear());
     }
 
     /*
@@ -364,5 +415,49 @@ public class PredationProcess extends AbstractProcess {
      */
     private double getAccessibility(School predator, School prey) {
         return accessibilityMatrix[prey.getSpeciesIndex()][accessStage.getStage(prey)][predator.getSpeciesIndex()][accessStage.getStage(predator)];
+    }
+
+    /**
+     * Get the accessibility of a list of preys for a given predator. Zero means
+     * that the prey is not accessible to this predator. Accessibility ranges
+     * from zero to one.
+     *
+     * @param predator, the predator in a cell
+     * @param preys a list of preys that are in the same cell that the predator
+     * @return an array of accessibility of the preys to this predator.
+     */
+    public double[] getAccessibility(School predator, List<Prey> preys) {
+
+        double[] accessibility = new double[preys.size()];
+        int iSpecPred = predator.getSpeciesIndex();
+        int iPredPreyStage = predPreyStage.getStage(predator);
+        float preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
+        float preySizeMin = predator.getLength() / predPreySizesMin[iSpecPred][iPredPreyStage];
+        float[] percentPlankton = getPercentPlankton(predator);
+        int iStagePred = accessStage.getStage(predator);
+
+        for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
+            int iSpecPrey = preys.get(iPrey).getSpeciesIndex();
+            int iStagePrey;
+            // The prey is an other school
+            if (preys.get(iPrey) instanceof School) {
+                School prey = (School) preys.get(iPrey);
+                if (prey.equals(predator)) {
+                    continue;
+                }
+                if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
+                    iStagePrey = accessStage.getStage(prey);
+                    accessibility[iPrey] = accessibilityMatrix[iSpecPrey][iStagePrey][iSpecPred][iStagePred];
+                }
+                // else accessibility[iPrey] = 0.d; no need to do it since initialization already set it to zero
+            } else {
+                // The prey is a plankton group
+                iStagePrey = 0;
+                accessibility[iPrey] = accessibilityMatrix[iSpecPrey+getConfiguration().getNSpecies()][iStagePrey][iSpecPred][iStagePred]
+                        * getSimulation().getPlankton(iSpecPrey).getAccessibility()
+                        * percentPlankton[iSpecPrey];
+            }
+        }
+        return accessibility;
     }
 }
