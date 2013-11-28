@@ -89,7 +89,7 @@ public class OLogger {
         }
         logger.setUseParentHandlers(false);
         SimulationLogFormatter formatter = new SimulationLogFormatter(rank);
-        ConsoleHandler handler = new ConsoleHandler();
+        SystemOutHandler handler = new SystemOutHandler();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
     }

@@ -73,7 +73,11 @@ public class CatchesByDtByAgeSizeScenario extends AbstractFishingScenario {
      * and converted in the {@code init} function in number of time steps. Age
      * stage k means {@code threshold[k] <= ageDt < threshold[k+1]}
      */
-    private int[] ageThreshold;
+    private float[] ageThreshold;
+    /**
+     * Fishable biomass, in tonne, per age/size class.
+     */
+    private double[] fishableBiomass;
 
     public CatchesByDtByAgeSizeScenario(int rank, Species species) {
         super(rank, species);
@@ -86,10 +90,10 @@ public class CatchesByDtByAgeSizeScenario extends AbstractFishingScenario {
             ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
             timeSerieByAge.read(getConfiguration().getFile("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec));
             catches = timeSerieByAge.getValues();
-            ageThreshold = new int[timeSerieByAge.getNClass() - 1];
+            ageThreshold = new float[timeSerieByAge.getNClass() - 1];
             for (int k = 0; k < ageThreshold.length; k++) {
                 // Converts age in year into number of time steps
-                ageThreshold[k] = (int) Math.round(timeSerieByAge.getThreshold(k) * getConfiguration().getNStepYear());
+                ageThreshold[k] = Math.round(timeSerieByAge.getThreshold(k) * getConfiguration().getNStepYear());
             }
         } else if (!getConfiguration().isNull("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
@@ -113,41 +117,56 @@ public class CatchesByDtByAgeSizeScenario extends AbstractFishingScenario {
 
     @Override
     public float getInstantaneousCatches(School school) {
+        int k = -1;
         if (null != sizeThreshold) {
             // By size class
-            float length = school.getLength();
-            // 1. Length < value of the first size threshold, it means there is
-            // no value provided. Osmose assume it is zero.
-            if (length < sizeThreshold[0]) {
-                return 0.f;
-            }
-            // 2. Normal case thresold[k] <= length < threshold[k+1]
-            for (int k = 0; k < sizeThreshold.length - 1; k++) {
-                if ((sizeThreshold[k] <= length) && (length < sizeThreshold[k + 1])) {
-                    return catches[getSimulation().getIndexTimeSimu()][k];
-                }
-            }
-            // 3. length >= threshold[last]
-            return catches[getSimulation().getIndexTimeSimu()][sizeThreshold.length - 1];
+            k = indexOf(school.getLength(), sizeThreshold);
         } else if (null != ageThreshold) {
             // By age class
-            float age = school.getAgeDt();
-            // 1. age < threshold[0] it means there is no value provided.
-            // Osmose assume it is zero.
-            if (age < ageThreshold[0]) {
-                return 0.f;
-            }
-            // 2. Normal case thresold[k] <= age < threshold[k+1]
-            for (int k = 0; k < ageThreshold.length - 1; k++) {
-                if ((ageThreshold[k] <= age) && (age < ageThreshold[k + 1])) {
-                    return catches[getSimulation().getIndexTimeSimu()][k];
-                }
-            }
-            // 3. age >= threshold[last]
-            return catches[getSimulation().getIndexTimeSimu()][ageThreshold.length - 1];
+            k = indexOf(school.getAgeDt(), ageThreshold);
         }
-        // We should never reach that stage. If we do it is because there is
-        // something wrong in the thresholds and then we return a NaN value.
-        return Float.NaN;
+        if ((k >= 0) && (fishableBiomass[k] > 0.d)) {
+            return (float) (school.getInstantaneousBiomass() / fishableBiomass[k])
+                    * catches[getSimulation().getIndexTimeSimu()][k];
+        } else {
+            return 0.f;
+        }
+    }
+
+    private int indexOf(float value, float[] thresholds) {
+        // 1. value < first threshold, index does not exist
+        if (value < thresholds[0]) {
+            return -1;
+        }
+        // 2. Normal case thresold[k] <= value < threshold[k+1]
+        for (int k = 0; k < thresholds.length - 1; k++) {
+            if ((thresholds[k] <= value) && (value < thresholds[k + 1])) {
+                return k;
+            }
+        }
+        // 3. value >= threshold[last]
+        return thresholds.length;
+    }
+
+    @Override
+    public void assessFishableBiomass() {
+
+        // reset fishable biomass
+        for (int i = 0; i < fishableBiomass.length; i++) {
+            fishableBiomass[i] = 0.d;
+        }
+        int k = -1;
+        for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
+            if (null != sizeThreshold) {
+                // By size class
+                k = indexOf(school.getLength(), sizeThreshold);
+            } else if (null != ageThreshold) {
+                // By age class
+                k = indexOf(school.getAgeDt(), ageThreshold);
+            }
+            if (k >= 0) {
+                fishableBiomass[k] += school.getInstantaneousBiomass();
+            }
+        }
     }
 }

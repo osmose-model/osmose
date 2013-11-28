@@ -116,7 +116,7 @@ public class RateByDtByAgeSizeScenario extends AbstractFishingScenario {
                 }
             }
             // 3. length >= threshold[last]
-            return f[getSimulation().getIndexTimeSimu()][sizeThreshold.length - 1];
+            return f[getSimulation().getIndexTimeSimu()][sizeThreshold.length];
         } else if (null != ageThreshold) {
             // By age class
             float age = school.getAgeDt();
@@ -132,7 +132,7 @@ public class RateByDtByAgeSizeScenario extends AbstractFishingScenario {
                 }
             }
             // 3. age >= threshold[last]
-            return f[getSimulation().getIndexTimeSimu()][ageThreshold.length - 1];
+            return f[getSimulation().getIndexTimeSimu()][ageThreshold.length];
         }
         // We should never reach that stage. If we do it is because there is
         // something wrong in the thresholds and then we return a NaN value.
@@ -154,5 +154,10 @@ public class RateByDtByAgeSizeScenario extends AbstractFishingScenario {
     @Override
     public float getInstantaneousCatches(School school) {
         throw new UnsupportedOperationException("No catches specified in this fishing scenario.");
+    }
+
+    @Override
+    public void assessFishableBiomass() {
+        // Do not need it for this scenario
     }
 }

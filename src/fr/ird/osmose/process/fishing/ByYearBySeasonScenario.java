@@ -66,6 +66,7 @@ public class ByYearBySeasonScenario extends AbstractFishingScenario {
     private int recruitmentAge;
     private float recruitmentSize;
     private final FishingType type;
+    private double fishableBiomass;
 
     public ByYearBySeasonScenario(int rank, Species species, FishingType type) {
         super(rank, species);
@@ -138,8 +139,25 @@ public class ByYearBySeasonScenario extends AbstractFishingScenario {
 
     @Override
     public float getInstantaneousCatches(School school) {
-        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
-                ? annualCatches[getSimulation().getYear()] * season[getSimulation().getIndexTimeYear()]
-                : 0.f;
+        if (isFishable(school) && (fishableBiomass > 0.d)) {
+            return (float) (school.getInstantaneousBiomass() / fishableBiomass)
+                    * annualCatches[getSimulation().getYear()]
+                    * season[getSimulation().getIndexTimeYear()];
+        }
+        return 0.f;
+    }
+
+    @Override
+    public void assessFishableBiomass() {
+        fishableBiomass = 0.d;
+        for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
+            if (!school.isUnlocated() && isFishable(school)) {
+                fishableBiomass += school.getInstantaneousBiomass();
+            }
+        }
+    }
+
+    private boolean isFishable(School school) {
+        return ((school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize));
     }
 }

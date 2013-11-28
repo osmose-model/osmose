@@ -73,6 +73,7 @@ public class FishingProcess extends AbstractProcess {
     private List<MPA> mpas;
     private GridMap mpaFactor;
     private FishingType fishingType;
+    private List<School>[] arrSpecies;
 
     public FishingProcess(int rank) {
         super(rank);
@@ -164,11 +165,17 @@ public class FishingProcess extends AbstractProcess {
         }
         // Initialize MPA correction factor
         mpaFactor = new GridMap(1);
+
+        // Init array of species
+        arrSpecies = new ArrayList[getNSpecies()];
+        for (int i = 0; i < getNSpecies(); i++) {
+            arrSpecies[i] = new ArrayList();
+        }
     }
 
     @Override
     public void run() {
-        update();
+        setMPA();
         for (School school : getSchoolSet().getPresentSchools()) {
             if (school.getAbundance() != 0.d) {
                 double nDead = 0.d;
@@ -188,7 +195,7 @@ public class FishingProcess extends AbstractProcess {
         }
     }
 
-    public void update() {
+    public void setMPA() {
 
         boolean isUpToDate = true;
         int iStep = getSimulation().getIndexTimeSimu();
@@ -213,6 +220,13 @@ public class FishingProcess extends AbstractProcess {
                     mpaFactor.setValue(cell, correction);
                 }
             }
+        }
+    }
+
+    public void assessFishableBiomass() {
+
+        for (int i = 0; i < getNSpecies(); i++) {
+            fishingScenario[i].assessFishableBiomass();
         }
     }
 

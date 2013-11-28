@@ -76,9 +76,29 @@ public class SchoolSet extends FilteredSet<School> {
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Snapshot of the distribution of the schools on the grid
+     * Snapshot of the distribution of the schools on the grid.
      */
     private List<School>[][] schoolMap;
+    /**
+     * Snapshot of the distribution of the schools per species.
+     */
+    /**
+     * Array of list of schools gathered by species.
+     */
+    private final List<School>[] arrSpecies;
+    /**
+     * Array of boolean that indicates whether the list of schools per species
+     * should be has changed.
+     */
+    private final boolean[] hasSpeciesChanged;
+
+    SchoolSet() {
+        arrSpecies = new ArrayList[getConfiguration().getNSpecies()];
+        hasSpeciesChanged = new boolean[getConfiguration().getNSpecies()];
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            hasSpeciesChanged[i] = true;
+        }
+    }
 
 ///////////////////////////////
 // Definition of the functions
@@ -89,16 +109,35 @@ public class SchoolSet extends FilteredSet<School> {
     public void removeDeadSchools() {
         List<School> schoolsToRemove = FilteredSets.subset(this, new DeadSchoolFilter());
         removeAll(schoolsToRemove);
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            hasSpeciesChanged[i] = true;
+        }
     }
 
     /**
      * Returns a list of schools of the given species.
      *
      * @param species, the species to select
+     * @param update, if {@code false} returns the cached list of schools for
+     * this species
+     * @return a list of schools of this {@code species}
+     */
+    public List<School> getSchools(Species species, boolean update) {
+        if (update || hasSpeciesChanged[species.getIndex()]) {
+            arrSpecies[species.getIndex()] = FilteredSets.subset(this, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
+            hasSpeciesChanged[species.getIndex()] = false;
+        }
+        return arrSpecies[species.getIndex()];
+    }
+
+    /**
+     * Returns an up to date list of schools of the given species.
+     *
+     * @param species, the species to select
      * @return a list of schools of this {@code species}
      */
     public List<School> getSchools(Species species) {
-        return FilteredSets.subset(this, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
+        return getSchools(species, true);
     }
 
     /**
@@ -174,5 +213,9 @@ public class SchoolSet extends FilteredSet<School> {
                 schoolMap[school.getCell().get_jgrid()][school.getCell().get_igrid()].add(school);
             }
         }
+    }
+
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 }

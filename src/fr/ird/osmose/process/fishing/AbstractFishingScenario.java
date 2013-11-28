@@ -75,5 +75,10 @@ public abstract class AbstractFishingScenario extends AbstractMortalityScenario 
      * of the simulation
      */
     abstract public float getInstantaneousCatches(School school);
+    
+    /**
+     * Calculates the fishable biomass, in tonne, of the species.
+     */
+    abstract public void assessFishableBiomass();
 
 }

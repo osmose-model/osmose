@@ -63,6 +63,7 @@ public class AnnualScenario extends AbstractFishingScenario {
     private int recruitmentAge;
     private float recruitmentSize;
     private final FishingType type;
+    private double fishableBiomass;
 
     public AnnualScenario(int rank, Species species, FishingType type) {
         super(rank, species);
@@ -110,9 +111,25 @@ public class AnnualScenario extends AbstractFishingScenario {
     }
 
     @Override
+    public void assessFishableBiomass() {
+        fishableBiomass = 0.d;
+        for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
+            if (!school.isUnlocated() && isFishable(school)) {
+                fishableBiomass += school.getInstantaneousBiomass();
+            }
+        }
+    }
+
+    private boolean isFishable(School school) {
+        return ((school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize));
+    }
+
+    @Override
     public float getInstantaneousCatches(School school) {
-        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
-                ? instantaneousCatches
-                : 0.f;
+        if (isFishable(school) && (fishableBiomass > 0.d)) {
+            return (float) (school.getInstantaneousBiomass() / fishableBiomass)
+                    * instantaneousCatches;
+        }
+        return 0.f;
     }
 }
