@@ -65,32 +65,39 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     private PrintWriter prw;
     private boolean cutoff;
     private int recordFrequency;
-    
+
     private boolean enabled;
+
+    private final String separator;
 
     abstract String getFilename();
 
     abstract String getDescription();
 
     abstract String[] getHeaders();
-    
+
     AbstractOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
+        if (!getConfiguration().isNull("output.csv.separator")) {
+            separator = getConfiguration().getString("output.csv.separator");
+        } else {
+            separator = OutputManager.SEPARATOR;
+        }
     }
-    
+
     @Override
     public boolean isEnabled() {
         return enabled;
     }
-    
+
     boolean includeClassZero() {
         return !cutoff;
     }
 
     @Override
     public void init() {
-        
+
         cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
@@ -112,11 +119,11 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             prw.print("\"");
             prw.print(getDescription());
             prw.println("\"");
-            prw.print("Time");
+            prw.print(quote("Time"));
             String[] headers = getHeaders();
-            for (int i = 0; i < headers.length; i++) {
-                prw.print(";");
-                prw.print(headers[i]);
+            for (String header : headers) {
+                prw.print(separator);
+                prw.print(quote(header));
             }
             prw.println();
         }
@@ -140,7 +147,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
         prw.print(time);
         for (int i = 0; i < variable.length; i++) {
-            prw.print(";");
+            prw.print(separator);
             prw.print((float) variable[i]);
             //pr.print((long) variable[i]);
             //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
@@ -149,12 +156,11 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     }
 
     void writeVariable(float time, double[][] variable) {
-
-        for (int i = 0; i < variable.length; i++) {
+        for (double[] row : variable) {
             prw.print(time);
-            for (int j = 0; j < variable[i].length; j++) {
-                prw.print(";");
-                prw.print((float) variable[i][j]);
+            for (int j = 0; j < row.length; j++) {
+                prw.print(separator);
+                prw.print((float) row[j]);
             }
             prw.println();
         }
@@ -166,9 +172,21 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     public int getRecordFrequency() {
         return recordFrequency;
     }
-    
+
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         return (((iStepSimu + 1) % recordFrequency) == 0);
+    }
+
+    public String quote(String str) {
+        return "\"" + str + "\"";
+    }
+
+    public String[] quote(String[] str) {
+        String[] arr = new String[str.length];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = quote(str[i]);
+        }
+        return arr;
     }
 }

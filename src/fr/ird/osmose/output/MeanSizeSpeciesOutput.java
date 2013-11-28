@@ -73,10 +73,16 @@ public class MeanSizeSpeciesOutput extends SimulationLinker implements IOutput {
      * Whether the indicator should be enabled or not.
      */
     private boolean enabled;
+    private final String separator;
 
     public MeanSizeSpeciesOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
+        if (!getConfiguration().isNull("output.csv.separator")) {
+            separator = getConfiguration().getString("output.csv.separator");
+        } else {
+            separator = OutputManager.SEPARATOR;
+        }
     }
 
     @Override
@@ -116,7 +122,7 @@ public class MeanSizeSpeciesOutput extends SimulationLinker implements IOutput {
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             prw[iSpecies].print(time);
             for (int iAge = 0; iAge < getSpecies(iSpecies).getLifespanDt(); iAge++) {
-                prw[iSpecies].print(";");
+                prw[iSpecies].print(separator);
                 if (abundance[iSpecies][iAge] > 0) {
                     meanSize[iSpecies][iAge] = (float) (meanSize[iSpecies][iAge] / abundance[iSpecies][iAge]);
                 } else {
@@ -163,10 +169,10 @@ public class MeanSizeSpeciesOutput extends SimulationLinker implements IOutput {
                 prw[iSpecies].print("\"");
                 prw[iSpecies].print("Mean size of fish species by age class in cm, weighted by fish numbers");
                 prw[iSpecies].println("\"");
-                prw[iSpecies].print("Time");
+                prw[iSpecies].print("\"Time\"");
                 for (int iAge = 0; iAge < getSpecies(iSpecies).getLifespanDt(); iAge++) {
-                    prw[iSpecies].print(";Age class ");
-                    prw[iSpecies].print(iAge);
+                    String header = separator + ("\"Age class " + iAge + "\"");
+                    prw[iSpecies].print(header);
                 }
                 prw[iSpecies].println();
             }

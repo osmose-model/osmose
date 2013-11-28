@@ -62,13 +62,16 @@ public class OutputManager extends SimulationLinker {
     // List of the indicators
     final private List<IOutput> indicators;
 
+    // Default CSV separator
+    public final static String SEPARATOR = ",";
+
     public OutputManager(int rank) {
         super(rank);
         indicators = new ArrayList();
     }
 
     public void init() {
-        
+
         int rank = getRank();
         /*
          * Delete existing outputs from previous simulation
@@ -87,6 +90,9 @@ public class OutputManager extends SimulationLinker {
         indicators.add(new AbundanceOutput(rank, "output.abundance.enabled"));
         // Mortality
         indicators.add(new MortalityOutput(rank, "output.mortality.enabled"));
+        for (int i = 0; i < getNSpecies(); i++) {
+            indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.enabled", getSpecies(i)));
+        }
         // Yield
         indicators.add(new YieldOutput(rank, "output.yield.biomass.enabled"));
         indicators.add(new YieldNOutput(rank, "output.yield.abundance.enabled"));

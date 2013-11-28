@@ -81,9 +81,16 @@ public class DietOutput extends SimulationLinker implements IOutput {
     // Diet output stage
     private AbstractStage dietOutputStage;
 
+    private final String separator;
+
     public DietOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
+        if (!getConfiguration().isNull("output.csv.separator")) {
+            separator = getConfiguration().getString("output.csv.separator");
+        } else {
+            separator = OutputManager.SEPARATOR;
+        }
     }
 
     @Override
@@ -149,17 +156,17 @@ public class DietOutput extends SimulationLinker implements IOutput {
             int nStagePred = dietOutputStage.getNStage(iSpec);
             for (int st = 0; st < nStagePred; st++) {
                 prw.print(time);
-                prw.print(';');
+                prw.print(separator);
                 if (nStagePred == 1) {
                     prw.print(name);    // Name predators
                 } else {
                     if (st == 0) {
-                        prw.print(name + " < " + threshold[st]);    // Name predators
+                        prw.print(quote(name + " < " + threshold[st]));    // Name predators
                     } else {
-                        prw.print(name + " >=" + threshold[st - 1]);    // Name predators
+                        prw.print(quote(name + " >=" + threshold[st - 1]));    // Name predators
                     }
                 }
-                prw.print(";");
+                prw.print(separator);
                 for (int i = 0; i < nSpec; i++) {
                     int nStagePrey = dietOutputStage.getNStage(i);
                     for (int s = 0; s < nStagePrey; s++) {
@@ -170,7 +177,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
                         }
                         //sum[i][s] += diet[i][s][iSpec][st];
                         if (i < nSpec - 1 || s < nStagePrey - 1) {
-                            prw.print(";");
+                            prw.print(separator);
                         }
                     }
                 }
@@ -179,9 +186,9 @@ public class DietOutput extends SimulationLinker implements IOutput {
         }
         for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
             prw.print(time);
-            prw.print(";");
+            prw.print(separator);
             prw.print(getSimulation().getPlankton(j - nSpec));
-            prw.print(";");
+            prw.print(separator);
             for (int i = 0; i < nSpec; i++) {
                 int nStagePred = dietOutputStage.getNStage(i);
                 for (int s = 0; s < nStagePred; s++) {
@@ -192,7 +199,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
                     }
                     //sum[i][s] += diet[i][s][j][0];
                     if (i < nSpec - 1 || s < nStagePred - 1) {
-                        prw.print(";");
+                        prw.print(separator);
                     }
                 }
             }
@@ -202,7 +209,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
 //        for (int i = 0; i < nSpec; i++) {
 //            for (int s = 0; s < nDietStage[i]; s++) {
 //                prw.print((float) (100.d * sum[i][s] / abundanceStage[i][s]));
-//                prw.print(";");
+//                prw.print(separator);
 //            }
 //        }
 //        prw.println();
@@ -237,25 +244,23 @@ public class DietOutput extends SimulationLinker implements IOutput {
         }
         prw = new PrintWriter(fos, true);
         if (!fileExists) {
-            prw.print("\"");
-            prw.print("% of prey species (in rows) in the diet of predator species (in col)");
-            prw.println("\"");
-            prw.print("Time");
-            prw.print(';');
-            prw.print("Prey");
+            prw.print(quote("% of prey species (in rows) in the diet of predator species (in col)"));
+            prw.print(quote("Time"));
+            prw.print(separator);
+            prw.print(quote("Prey"));
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
                 String name = getSimulation().getSpecies(iSpec).getName();
                 float[] threshold = dietOutputStage.getThresholds(iSpec);
                 int nStage = dietOutputStage.getNStage(iSpec);
                 for (int iStage = 0; iStage < nStage; iStage++) {
-                    prw.print(";");
+                    prw.print(separator);
                     if (nStage == 1) {
                         prw.print(name);    // Name predators
                     } else {
                         if (iStage == 0) {
-                            prw.print(name + " < " + threshold[iStage]);    // Name predators
+                            prw.print(quote(name + " < " + threshold[iStage]));    // Name predators
                         } else {
-                            prw.print(name + " >=" + threshold[iStage - 1]);    // Name predators
+                            prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name predators
                         }
                     }
                 }
@@ -281,5 +286,9 @@ public class DietOutput extends SimulationLinker implements IOutput {
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         return (((iStepSimu + 1) % recordFrequency) == 0);
+    }
+
+    private String quote(String str) {
+        return "\"" + str + "\"";
     }
 }

@@ -92,10 +92,19 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
      * Age of recruitment (expressed in number of time steps) [SPECIES]
      */
     private int[] recruitmentAge;
+    /**
+     * CSV separator
+     */
+    private final String separator;
 
     public MortalityOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
+        if (!getConfiguration().isNull("output.csv.separator")) {
+            separator = getConfiguration().getString("output.csv.separator");
+        } else {
+            separator = OutputManager.SEPARATOR;
+        }
     }
 
     @Override
@@ -184,7 +193,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     } else {
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage]);
                     }
-                    prw[iSpecies].print(";");
+                    prw[iSpecies].print(separator);
                 }
             }
             prw[iSpecies].println();
@@ -223,19 +232,37 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
             if (!fileExists) {
                 // Write headers
-                prw[iSpecies].print("\"");
-                prw[iSpecies].print("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.");
-                prw[iSpecies].println("\"");
-                prw[iSpecies].print("Time");
-                prw[iSpecies].print(';');
-                prw[iSpecies].print("Mpred;Mpred;Mpred;");
-                prw[iSpecies].print("Mstarv;Mstarv;Mstarv;");
-                prw[iSpecies].print("Mnat;Mnat;Mnat;");
-                prw[iSpecies].print("F;F;F;");
-                prw[iSpecies].println("Z;Z;Z");
-                prw[iSpecies].print(";");
+                prw[iSpecies].print(quote("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year."));
+                prw[iSpecies].println();
+                prw[iSpecies].print(quote("Time"));
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Mpred"));
+                }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Mstarv"));
+                }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Mnat"));
+                }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("F"));
+                }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Z"));
+                }
+                prw[iSpecies].println();
                 for (MortalityCause cause : MortalityCause.values()) {
-                    prw[iSpecies].print("Eggs;Pre-recruits;Recruits;");
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print("Eggs");
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print("Pre-recruits");
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print("Recruits");
                 }
                 prw[iSpecies].println();
             }
@@ -252,6 +279,10 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                 recruitmentAge[iSpecies] = getConfiguration().getNStepYear();
             }
         }
+    }
+    
+    private String quote(String str) {
+        return "\"" + str + "\"";
     }
 
     @Override

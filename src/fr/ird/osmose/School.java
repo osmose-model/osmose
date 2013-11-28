@@ -101,6 +101,10 @@ public class School extends Prey {
      */
     private float length;
     /**
+     * Length of the fish in centimeter at the beginning of the time step.
+     */
+    private float lengthi;
+    /**
      * List of {@code PreyRecord}. It keeps track of what the school has eaten
      * during the time step.
      */
@@ -204,6 +208,8 @@ public class School extends Prey {
         // by default the school is in the simulated area, and migration might
         // change this state.
         out = false;
+        // Set length at the beginning of the time step
+        lengthi = length;
     }
 
     /**
@@ -419,6 +425,13 @@ public class School extends Prey {
      */
     public void setStarvationRate(double starvationRate) {
         this.starvationRate = starvationRate;
+    }
+
+    /**
+     * @return the lengthi
+     */
+    public float getLengthi() {
+        return lengthi;
     }
 
     /**

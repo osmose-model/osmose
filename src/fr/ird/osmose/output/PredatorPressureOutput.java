@@ -79,10 +79,17 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
      * Whether the indicator should be enabled or not.
      */
     private final boolean enabled;
+    
+    private final String separator;
 
     public PredatorPressureOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
+        if (!getConfiguration().isNull("output.csv.separator")) {
+            separator = getConfiguration().getString("output.csv.separator");
+        } else {
+            separator = OutputManager.SEPARATOR;
+        }
     }
 
     @Override
@@ -138,23 +145,23 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
             int nStagePred = dietOutputStage.getNStage(iSpec);
             for (int iStage = 0; iStage < nStagePred; iStage++) {
                 prw.print(time);
-                prw.print(';');
+                prw.print(separator);
                 if (nStagePred == 1) {
                     prw.print(name);    // Name predators
                 } else {
                     if (iStage == 0) {
-                        prw.print(name + " < " + threshold[iStage]);    // Name predators
+                        prw.print(quote(name + " < " + threshold[iStage]));    // Name predators
                     } else {
-                        prw.print(name + " >=" + threshold[iStage - 1]);    // Name predators
+                        prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name predators
                     }
                 }
-                prw.print(";");
+                prw.print(separator);
                 for (int i = 0; i < nSpec; i++) {
                     int nStage = dietOutputStage.getNStage(i);
                     for (int s = 0; s < nStage; s++) {
                         prw.print((float) (predatorPressure[i][s][iSpec][iStage] / dtRecord));
                         if (i < nSpec - 1 || s < nStage - 1) {
-                            prw.print(";");
+                            prw.print(separator);
                         }
                     }
                 }
@@ -163,15 +170,15 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         }
         for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
             prw.print(time);
-            prw.print(";");
+            prw.print(separator);
             prw.print(getSimulation().getPlankton(j - nSpec));
-            prw.print(";");
+            prw.print(separator);
             for (int i = 0; i < nSpec; i++) {
                 int nStage = dietOutputStage.getNStage(i);
                 for (int s = 0; s < nStage; s++) {
                     prw.print((float) (predatorPressure[i][s][j][0] / dtRecord));
                     if (i < nSpec - 1 || s < nStage - 1) {
-                        prw.print(";");
+                        prw.print(separator);
                     }
                 }
             }
@@ -208,25 +215,23 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         }
         prw = new PrintWriter(fos, true);
         if (!fileExists) {
-            prw.print("\"");
-            prw.print("Biomass of prey species (in tons per time step of saving, in rows) eaten by a predator species (in col). The last column reports the biomass of prey at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)");
-            prw.println("\"");
-            prw.print("Time");
-            prw.print(';');
-            prw.print("Prey");
+            prw.print(quote("Biomass of prey species (in tons per time step of saving, in rows) eaten by a predator species (in col). The last column reports the biomass of prey at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)"));
+            prw.print(quote("Time"));
+            prw.print(separator);
+            prw.print(quote("Prey"));
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
                 String name = getSimulation().getSpecies(iSpec).getName();
                 float[] threshold = dietOutputStage.getThresholds(iSpec);
                 int nStage = dietOutputStage.getNStage(iSpec);
                 for (int iStage = 0; iStage < nStage; iStage++) {
-                    prw.print(";");
+                    prw.print(separator);
                     if (nStage == 1) {
-                        prw.print(name);    // Name predators
+                        prw.print(quote(name));    // Name predators
                     } else {
                         if (iStage == 0) {
-                            prw.print(name + " < " + threshold[iStage]);    // Name predators
+                            prw.print(quote(name + " < " + threshold[iStage]));    // Name predators
                         } else {
-                            prw.print(name + " >=" + threshold[iStage - 1]);    // Name predators
+                            prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name predators
                         }
                     }
                 }
@@ -252,5 +257,9 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         return (((iStepSimu + 1) % recordFrequency) == 0);
+    }
+    
+    private String quote(String str) {
+        return "\"" + str + "\"";
     }
 }
