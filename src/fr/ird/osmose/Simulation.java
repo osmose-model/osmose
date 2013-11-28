@@ -105,19 +105,6 @@ public class Simulation extends OLogger {
          */
         ITERATIVE,
         /**
-         * Mortality processes occur independently from each other.
-         * <ul>
-         * <li>It is assumed that every cause is independant and
-         * concomitant.</li>
-         * <li>Stochasticity and competition within predation process: prey and
-         * predator biomass are being updated on the fly virtually (indeed the
-         * update is not effective outside the predation process, it is just
-         * temporal).</li>
-         * <li>Synchronous updating of school biomass.</li>
-         * </ul>
-         */
-        INDEPENDANT,
-        /**
          * Mortality processes compete stochastically.
          * <ul>
          * <li>It is assumed that every cause compete with each other.</li>
@@ -134,7 +121,7 @@ public class Simulation extends OLogger {
      *
      * @see MortalityAlgorithm for details.
      */
-    public static final MortalityAlgorithm mortalityAlgorithm = MortalityAlgorithm.FULLY_STOCHASTIC;
+    public static final MortalityAlgorithm mortalityAlgorithm = MortalityAlgorithm.ITERATIVE;
 
 ///////////////////////////////
 // Declaration of the variables
@@ -278,7 +265,6 @@ public class Simulation extends OLogger {
                 step = new SequentialMortalityStep(rank);
                 break;
             case ITERATIVE:
-            case INDEPENDANT:
             case FULLY_STOCHASTIC:
                 step = new ConcomitantMortalityStep(rank);
         }

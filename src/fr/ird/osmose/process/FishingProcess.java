@@ -231,19 +231,13 @@ public class FishingProcess extends AbstractProcess {
     }
 
     public double getInstantaneousRate(School school) {
-        if (!school.isUnlocated()) {
-            return fishingScenario[school.getSpeciesIndex()].getInstantaneousRate(school) * mpaFactor.getValue(school.getCell());
-        } else {
-            return 0.d;
-        }
+        return fishingScenario[school.getSpeciesIndex()].getInstantaneousRate(school) * mpaFactor.getValue(school.getCell());
     }
 
     public double getInstantaneousCatches(School school) {
-        if (!school.isUnlocated()) {
-            return fishingScenario[school.getSpeciesIndex()].getInstantaneousCatches(school) * mpaFactor.getValue(school.getCell());
-        } else {
-            return 0.d;
-        }
+        double catches = fishingScenario[school.getSpeciesIndex()].getInstantaneousCatches(school)
+                * mpaFactor.getValue(school.getCell());
+        return Math.min(catches, school.getInstantaneousBiomass());
     }
 
     public FishingType getType() {

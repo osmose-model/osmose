@@ -59,7 +59,6 @@ import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.DietOutputStage;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -102,6 +101,11 @@ public class MortalityProcess extends AbstractProcess {
      * Diet output stage
      */
     private AbstractStage dietOutputStage;
+    /**
+     * Epsilon constant for numerical purpose to avoid zeros at denominator when
+     * calculating mortality rates.
+     */
+    private final double epsilon = 0.01d;
 
     public MortalityProcess(int rank) {
         super(rank);
@@ -278,6 +282,7 @@ public class MortalityProcess extends AbstractProcess {
 
         //
         // Initialize the number of deads and the mortality rates
+        // 1. Predation
         double[][] predationMatrix = predationProcess.computePredationMatrix(cell, false, 1);
         for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
             for (int iPredator = 0; iPredator < nSchool; iPredator++) {
@@ -314,7 +319,23 @@ public class MortalityProcess extends AbstractProcess {
             mortalityRateMatrix[is][nSchool + 1] = naturalMortalityProcess.getInstantaneousRate(school);
 
             // 4. Fishing mortality
-            mortalityRateMatrix[is][nSchool + 2] = fishingProcess.getInstantaneousRate(school);
+            switch (fishingProcess.getType()) {
+                case RATE:
+                    mortalityRateMatrix[is][nSchool + 2] = fishingProcess.getInstantaneousRate(school);
+                    break;
+                case CATCHES:
+                    /* Even though we call instantenous catches, since ITERATIVE
+                     * case does not increment any ndead, it is equivalent to 
+                     * getting the catches at the beginning of the time step.
+                     */
+                    double catches = fishingProcess.getInstantaneousCatches(school);
+                    if (school.getBiomass() - catches < epsilon) {
+                        mortalityRateMatrix[is][nSchool + 2] = Math.log(school.getAbundance() / epsilon);
+                    } else {
+                        mortalityRateMatrix[is][nSchool + 2] = Math.log(school.getAbundance() / (school.getAbundance() - school.biom2abd(catches)));
+                    }
+                    break;
+            }
         }
 
         //
