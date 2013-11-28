@@ -49,6 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 
 /**
  *
@@ -85,14 +86,48 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
 
         switch (type) {
             case SIZE:
-                min = getConfiguration().getFloat("output.size.spectrum.size.min");
-                max = getConfiguration().getFloat("output.size.spectrum.size.max");
-                range = getConfiguration().getFloat("output.size.spectrum.size.range");
+                if (!getConfiguration().isNull("output.size.spectrum.size.min")) {
+                    min = getConfiguration().getFloat("output.size.spectrum.size.min");
+                } else {
+                    min = 0;
+                    warning("Did not find parameter 'output.size.spectrum.size.min'. Default value set to " + min + " cm");
+                }
+                if (!getConfiguration().isNull("output.size.spectrum.size.max")) {
+                    max = getConfiguration().getFloat("output.size.spectrum.size.max");
+                } else {
+                    max = 200.f;
+                    warning("Did not find parameter 'output.size.spectrum.size.max'. Default value set to " + max + " cm");
+                }
+                if (!getConfiguration().isNull("output.size.spectrum.size.range")) {
+                    range = getConfiguration().getFloat("output.size.spectrum.size.range");
+                } else {
+                    range = 5.f;
+                    warning("Did not find parameter 'output.size.spectrum.size.range'. Default value set to " + range + " cm");
+                }
                 break;
             case AGE:
-                min = getConfiguration().getFloat("output.age.spectrum.age.min");
-                max = getConfiguration().getFloat("output.age.spectrum.age.max");
-                range = getConfiguration().getFloat("output.age.spectrum.age.range");
+                if (!getConfiguration().isNull("output.age.spectrum.age.min")) {
+                    min = getConfiguration().getFloat("output.age.spectrum.age.min");
+                } else {
+                    min = 0;
+                    warning("Did not find parameter 'output.age.spectrum.age.min'. Default value set to " + min + " year");
+                }
+                if (!getConfiguration().isNull("output.age.spectrum.age.max")) {
+                    max = getConfiguration().getFloat("output.age.spectrum.age.max");
+                } else {
+                    max = 0.f;
+                    for (int i = 0; i < getNSpecies(); i++) {
+                        max = Math.max(max, getSpecies(i).getLifespanDt());
+                    }
+                    max = Math.round(max / getConfiguration().getNStepYear()) - 1.f;
+                    warning("Did not find parameter 'output.age.spectrum.age.max'. Default value set to " + max + " year");
+                }
+                if (!getConfiguration().isNull("output.age.spectrum.age.range")) {
+                    range = getConfiguration().getFloat("output.age.spectrum.age.range");
+                } else {
+                    range = 1.f;
+                    warning("Did not find parameter 'output.age.spectrum.age.range'. Default value set to " + range + " year");
+                }
                 break;
         }
 
@@ -121,6 +156,10 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
                 ? school.getLength()
                 : (float) school.getAgeDt() / getConfiguration().getNStepYear();
 
+        return getClass(value);
+    }
+
+    int getClass(float value) {
         int iClass = classes.length - 1;
         if (value <= max) {
             while (value < classes[iClass]) {
@@ -155,8 +194,25 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
         return headers;
     }
 
+    float getClassThreshold(int iClass) {
+        return classes[iClass];
+    }
+
+    int getNClass() {
+        return classes.length;
+    }
+
+    Type getType() {
+        return type;
+    }
+
     public enum Type {
 
         SIZE, AGE;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
     }
 }

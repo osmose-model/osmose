@@ -91,7 +91,8 @@ public class OutputManager extends SimulationLinker {
         // Mortality
         indicators.add(new MortalityOutput(rank, "output.mortality.enabled"));
         for (int i = 0; i < getNSpecies(); i++) {
-            indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.enabled", getSpecies(i)));
+            indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+            indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.enabled", getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
         }
         // Yield
         indicators.add(new YieldOutput(rank, "output.yield.biomass.enabled"));

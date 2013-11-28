@@ -58,50 +58,20 @@ import java.io.File;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0 2013/09/01
  */
-public class MortalitySpeciesOutput extends AbstractOutput {
+public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
 
     private final Species species;
     /*
      * Abundance per stages [STAGES]
      */
     private double[] abundanceStage;
+
     // mortality rates por souces and per stages
     private double[][] mortalityRates;
-    // Minimal size (cm) of the size spectrum.
-    public float spectrumMinSize;
-    // Maximal size (cm) of the size spectrum.
-    public float spectrumMaxSize;
-    // Range (cm) of size classes.
-    private float classRange;
-    // discrete size spectrum
-    private float[] tabSizes;
-    // Number of size classes in the discrete spectrum
-    private int nSizeClass;
 
-    public MortalitySpeciesOutput(int rank, String keyEnabled, Species species) {
-        super(rank, keyEnabled);
+    public MortalitySpeciesOutput(int rank, String keyEnabled, Species species, Type type) {
+        super(rank, keyEnabled, type);
         this.species = species;
-        initializeSizeSpectrum();
-    }
-
-    private void initializeSizeSpectrum() {
-
-        if (!isEnabled()) {
-            return;
-        }
-
-        spectrumMinSize = getConfiguration().getFloat("output.size.spectrum.size.min");
-        spectrumMaxSize = getConfiguration().getFloat("output.size.spectrum.size.max");
-        classRange = getConfiguration().getFloat("output.size.spectrum.size.range");
-
-        //initialisation of the size spectrum features
-        nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
-
-        tabSizes = new float[nSizeClass];
-        tabSizes[0] = spectrumMinSize;
-        for (int i = 1; i < nSizeClass; i++) {
-            tabSizes[i] = i * classRange;
-        }
     }
 
     @Override
@@ -109,7 +79,9 @@ public class MortalitySpeciesOutput extends AbstractOutput {
         StringBuilder filename = new StringBuilder("Mortality");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_mortalityRatePerSize-");
+        filename.append("_mortalityRatePer");
+        filename.append(getType().toString());
+        filename.append("-");
         filename.append(species.getName());
         filename.append("_Simu");
         filename.append(getRank());
@@ -124,58 +96,50 @@ public class MortalitySpeciesOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        mortalityRates = new double[MortalityCause.values().length][tabSizes.length];
+        mortalityRates = new double[MortalityCause.values().length][getNClass()];
     }
 
     @Override
     public void update() {
 
-        int iStage;
+        int iClass;
         int nCause = MortalityCause.values().length;
-        double[][] nDead = new double[nCause][nSizeClass];
+        double[][] nDead = new double[nCause][getNClass()];
         for (School school : getSchoolSet().getSchools(species, false)) {
-            iStage = getSizeRank(school);
+            float value = (getType() == Type.SIZE)
+                    ? school.getLengthi()
+                    : (float) school.getAgeDt() / getConfiguration().getNStepYear();
+            iClass = getClass(value);
             // Update number of deads
             for (MortalityCause cause : MortalityCause.values()) {
-                nDead[cause.index][iStage] += school.getNdead(cause);
+                nDead[cause.index][iClass] += school.getNdead(cause);
             }
         }
         // Cumulate the mortality rates
 
-        for (iStage = 0; iStage < nSizeClass; iStage++) {
+        for (iClass = 0; iClass < getNClass(); iClass++) {
             double nDeadTot = 0;
             for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                nDeadTot += nDead[iDeath][iStage];
+                nDeadTot += nDead[iDeath][iClass];
             }
-            double Ftot = Math.log(abundanceStage[iStage] / (abundanceStage[iStage] - nDeadTot));
+            double Ftot = Math.log(abundanceStage[iClass] / (abundanceStage[iClass] - nDeadTot));
             for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                mortalityRates[iDeath][iStage] += Ftot * nDead[iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iStage]);
+                mortalityRates[iDeath][iClass] += Ftot * nDead[iDeath][iClass] / ((1 - Math.exp(-Ftot)) * abundanceStage[iClass]);
             }
         }
-    }
-
-    private int getSizeRank(School school) {
-
-        int iSize = tabSizes.length - 1;
-        if (school.getLengthi() <= spectrumMaxSize) {
-            while (school.getLengthi() < tabSizes[iSize]) {
-                iSize--;
-            }
-        }
-        return iSize;
     }
 
     @Override
     public void write(float time) {
 
         int nCause = MortalityCause.values().length;
-        double[][] values = new double[nSizeClass][nCause + 1];
-        for (int iSize = 0; iSize < nSizeClass; iSize++) {
+        double[][] values = new double[getNClass()][nCause + 1];
+        for (int iClass = 0; iClass < getNClass(); iClass++) {
             // Size
-            values[iSize][0] = tabSizes[iSize];
+            values[iClass][0] = getClassThreshold(iClass);
             // Mortality rates
             for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                values[iSize][iDeath + 1] = mortalityRates[iDeath][iSize];
+                values[iClass][iDeath + 1] = mortalityRates[iDeath][iClass];
             }
         }
 
@@ -184,18 +148,18 @@ public class MortalitySpeciesOutput extends AbstractOutput {
 
     @Override
     String[] getHeaders() {
-        return new String[]{"Size", "Mpred", "Mstar", "Mnat", "F", "Z"};
+        return new String[]{getType().toString(), "Mpred", "Mstar", "Mnat", "F", "Z"};
     }
 
     @Override
     public void initStep() {
         // Reset abundance array 
-        abundanceStage = new double[tabSizes.length];
+        abundanceStage = new double[getNClass()];
 
         // save abundance at the beginning of the time step
         for (School school : getSchoolSet().getSchools(species, false)) {
-            int iStage = getSizeRank(school);
-            abundanceStage[iStage] += school.getAbundance();
+            int iClass = getClass(school);
+            abundanceStage[iClass] += school.getAbundance();
         }
     }
 }
