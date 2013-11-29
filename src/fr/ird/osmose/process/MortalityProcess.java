@@ -53,7 +53,6 @@ import fr.ird.osmose.Prey;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School.PreyRecord;
-import fr.ird.osmose.Simulation;
 import fr.ird.osmose.process.FishingProcess.FishingType;
 import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.DietOutputStage;
@@ -107,6 +106,43 @@ public class MortalityProcess extends AbstractProcess {
      */
     private final double epsilon = 0.01d;
 
+    /**
+     * Several mortality algorithms have been implemented at the time of coding
+     * Osmose version 3.
+     */
+    private enum MortalityAlgorithm {
+
+        /**
+         * Mortality rates are obtained through an iterative process.
+         * <ul>
+         * <li>It is assumed that every cause is independant and
+         * concomitant.</li>
+         * <li>No stochasticity neither competition within predation process:
+         * every predator sees preys as they are at the begining of the
+         * time-step.</li>
+         * <li>Synchromous updating of school biomass.</li>
+         * </ul>
+         */
+        ITERATIVE,
+        /**
+         * Mortality processes compete stochastically.
+         * <ul>
+         * <li>It is assumed that every cause compete with each other.</li>
+         * <li>Stochasticity and competition within predation process.</li>
+         * <li>Asynchronous updating of school biomass (it means biomass are
+         * updated on the fly).</li>
+         * </ul>
+         */
+        STOCHASTIC;
+    }
+    /**
+     * Sets the mortality algorithm. Change carefully as it will affect the
+     * whole dynamics of the model.
+     *
+     * @see MortalityAlgorithm for details.
+     */
+    private MortalityAlgorithm mortalityAlgorithm;
+
     public MortalityProcess(int rank) {
         super(rank);
     }
@@ -133,11 +169,22 @@ public class MortalityProcess extends AbstractProcess {
         dietOutputStage = new DietOutputStage();
         dietOutputStage.init();
 
+        // Sets the mortality algorithm
+        try {
+            mortalityAlgorithm = MortalityAlgorithm.valueOf(getConfiguration().getString("mortality.algorithm").toUpperCase());
+        } catch (Exception ex) {
+            mortalityAlgorithm = MortalityAlgorithm.STOCHASTIC;
+            warning("Default mortality algorithm set to " + mortalityAlgorithm.toString());
+        }
+
         // Subdt for case3 FULLY_STOCHASTIC
         if (!getConfiguration().isNull("mortality.subdt")) {
             subdt = getConfiguration().getInt("mortality.subdt");
         } else {
             subdt = 1;
+            if (mortalityAlgorithm.equals(MortalityAlgorithm.STOCHASTIC)) {
+                warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose assumes mortality.subdt = 1");
+            }
         }
     }
 
@@ -147,7 +194,7 @@ public class MortalityProcess extends AbstractProcess {
         // Update fishing process (for MPAs)
         fishingProcess.setMPA();
 
-        switch (Simulation.mortalityAlgorithm) {
+        switch (mortalityAlgorithm) {
             case ITERATIVE:
                 run_itarative();
                 break;
@@ -155,7 +202,7 @@ public class MortalityProcess extends AbstractProcess {
                 run_stochastic();
                 break;
             default:
-                throw new UnsupportedOperationException("Mortality algortithm '" + Simulation.mortalityAlgorithm + "' not supported in mortality process.");
+                throw new UnsupportedOperationException("Mortality algortithm '" + mortalityAlgorithm + "' not supported in mortality process.");
         }
 
         // Update predation success rate, starvation mortality rate and trophic level
@@ -465,6 +512,7 @@ public class MortalityProcess extends AbstractProcess {
         shuffleArray(seqFish);
         shuffleArray(seqNat);
         shuffleArray(seqStarv);
+        int nspec = getConfiguration().getNSpecies();
         for (int i = 0; i < ns; i++) {
             shuffleArray(mortalityCauses);
             for (MortalityCause cause : mortalityCauses) {
@@ -480,8 +528,10 @@ public class MortalityProcess extends AbstractProcess {
                             prey.incrementNdead(MortalityCause.PREDATION, nDeadMatrix[ipr][seqPred[i]]);
                             if (prey instanceof School) {
                                 predator.addPreyRecord((School) prey, preyUpon[ipr], dietOutputStage.getStage((School) prey));
-                            } else 
-                            predator.addPreyRecord(prey.getSpeciesIndex(), prey.getTrophicLevel(), preyUpon[ipr], 0);
+                            } else {
+                                int index = ipr - ns + nspec;
+                                predator.addPreyRecord(index, prey.getTrophicLevel(), preyUpon[ipr], 0);
+                            }
                         }
                         break;
                     case STARVATION:

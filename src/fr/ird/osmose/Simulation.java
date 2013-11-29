@@ -77,53 +77,6 @@ import ucar.nc2.NetcdfFile;
 public class Simulation extends OLogger {
 
 ///////////////////////////////
-// Declaration of the constants
-///////////////////////////////
-    /**
-     * Several mortality algorithms have been implemented at the time of coding
-     * Osmose version 3.
-     */
-    public enum MortalityAlgorithm {
-
-        /**
-         * Mortality processes are run in sequential order (just like in Osmose
-         * version WS2009). Difference from WS2009: all the processes happen at
-         * school level (whereas it used to happen at cohort or species level)
-         * and plankton concentration is read directly as a biomass.
-         */
-        SEQUENTIAL,
-        /**
-         * Mortality rates are obtained through an iterative process.
-         * <ul>
-         * <li>It is assumed that every cause is independant and
-         * concomitant.</li>
-         * <li>No stochasticity neither competition within predation process:
-         * every predator sees preys as they are at the begining of the
-         * time-step.</li>
-         * <li>Synchromous updating of school biomass.</li>
-         * </ul>
-         */
-        ITERATIVE,
-        /**
-         * Mortality processes compete stochastically.
-         * <ul>
-         * <li>It is assumed that every cause compete with each other.</li>
-         * <li>Stochasticity and competition within predation process.</li>
-         * <li>Asynchronous updating of school biomass (it means biomass are
-         * updated on the fly).</li>
-         * </ul>
-         */
-        FULLY_STOCHASTIC;
-    }
-    /**
-     * Sets the mortality algorithm. Change carefully as it will affect the
-     * whole dynamics of the model.
-     *
-     * @see MortalityAlgorithm for details.
-     */
-    public static final MortalityAlgorithm mortalityAlgorithm = MortalityAlgorithm.ITERATIVE;
-
-///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
@@ -260,14 +213,9 @@ public class Simulation extends OLogger {
         initForcing();
 
         // Instantiate the Step
-        switch (mortalityAlgorithm) {
-            case SEQUENTIAL:
-                step = new SequentialMortalityStep(rank);
-                break;
-            case ITERATIVE:
-            case FULLY_STOCHASTIC:
-                step = new ConcomitantMortalityStep(rank);
-        }
+        //step = new SequentialMortalityStep(rank);
+        step = new ConcomitantMortalityStep(rank);
+
         // Intialize the step
         step.init();
 
