@@ -84,4 +84,9 @@ public class SizeSpectrumSpeciesNOutput extends AbstractSpectrumOutput {
     String getDescription() {
         return "Distribution of fish species abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
     }
+    
+    @Override
+    public void initStep() {
+        // nothing to do
+    }
 }

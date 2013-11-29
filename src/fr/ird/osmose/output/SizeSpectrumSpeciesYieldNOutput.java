@@ -84,4 +84,9 @@ public class SizeSpectrumSpeciesYieldNOutput extends AbstractSpectrumOutput {
     String getDescription() {
         return "Distribution of cumulative catch (number of fish caught per time step of saving) in size classes (cm). For size class i, the yield in [i,i+1[ is reported.";
     }
+    
+    @Override
+    public void initStep() {
+        // nothing to do
+    }
 }

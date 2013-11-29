@@ -71,7 +71,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
      * Reproduction process
      */
     private AbstractProcess reproductionProcess;
-     /*
+    /*
      * Incoming flux of biomass
      */
     private AbstractProcess incomingFLuxProcess;
@@ -87,7 +87,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
      * List of indicators
      */
     OutputManager indicators;
-    
+
     public ConcomitantMortalityStep(int rank) {
         super(rank);
     }
@@ -106,7 +106,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Reproduction processes
         reproductionProcess = new ReproductionProcess(getRank());
         reproductionProcess.init();
-        
+
         // Incoming flux
         incomingFLuxProcess = new IncomingFluxProcess(getRank());
         incomingFLuxProcess.init();
@@ -114,7 +114,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Movement of the schools
         movementProcess = new MovementProcess(getRank());
         movementProcess.init();
-        
+
         // Indicators
         indicators = new OutputManager(getRank());
         indicators.init();
@@ -122,7 +122,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
     @Override
     public void step(int iStepSimu) {
-        
+
         // Incoming flux
         incomingFLuxProcess.run();
 
@@ -130,7 +130,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         for (School school : getSchoolSet()) {
             school.init();
         }
-        
+
         // Update LTL biomass
         getForcing().update(iStepSimu);
 
@@ -140,6 +140,11 @@ public class ConcomitantMortalityStep extends AbstractStep {
 
         // Spatial distribution
         movementProcess.run();
+
+        // Save 1st time step
+        if (iStepSimu == 0) {
+            indicators.update(-1);
+        }
 
         // Compute mortality
         // (predation + fishing + natural mortality + starvation)
@@ -157,7 +162,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Remove all dead schools
         getSchoolSet().removeDeadSchools();
     }
-    
+
     @Override
     public void end() {
         // close indicators on last step

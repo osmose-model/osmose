@@ -174,6 +174,11 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Spatial distribution
         movementProcess.run();
+        
+        // Save 1st time step
+        if (iStepSimu == 0) {
+            indicators.update(-1);
+        }
 
         // Total mortality for schools out of simulated domain
         outMortalityProcess.run();

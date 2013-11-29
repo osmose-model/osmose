@@ -151,7 +151,7 @@ public class MortalityProcess extends AbstractProcess {
             case ITERATIVE:
                 run_itarative();
                 break;
-            case FULLY_STOCHASTIC:
+            case STOCHASTIC:
                 run_stochastic();
                 break;
             default:
@@ -246,7 +246,7 @@ public class MortalityProcess extends AbstractProcess {
                             if (ipr < ns) {
                                 // Prey is School
                                 School prey = schools.get(ipr);
-                                school.addPreyRecord(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey));
+                                school.addPreyRecord(prey, prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey));
                             } else {
                                 // Prey is Plankton
                                 int index = ipr - ns + nspec;
@@ -478,8 +478,10 @@ public class MortalityProcess extends AbstractProcess {
                             Prey prey = preys.get(ipr);
                             nDeadMatrix[ipr][seqPred[i]] += prey.biom2abd(preyUpon[ipr]);
                             prey.incrementNdead(MortalityCause.PREDATION, nDeadMatrix[ipr][seqPred[i]]);
-                            int iStagePrey = (prey instanceof School) ? dietOutputStage.getStage((School) prey) : 0;
-                            predator.addPreyRecord(prey.getSpeciesIndex(), prey.getTrophicLevel(), preyUpon[ipr], iStagePrey);
+                            if (prey instanceof School) {
+                                predator.addPreyRecord((School) prey, preyUpon[ipr], dietOutputStage.getStage((School) prey));
+                            } else 
+                            predator.addPreyRecord(prey.getSpeciesIndex(), prey.getTrophicLevel(), preyUpon[ipr], 0);
                         }
                         break;
                     case STARVATION:

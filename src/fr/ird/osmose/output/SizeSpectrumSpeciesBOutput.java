@@ -84,4 +84,9 @@ public class SizeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
     String getDescription() {
         return "Distribution of fish species biomass in size classes (cm). For size class i, the biomass of fish in [i,i+1[ is reported.";
     }
+    
+    @Override
+    public void initStep() {
+        // nothing to do
+    }
 }

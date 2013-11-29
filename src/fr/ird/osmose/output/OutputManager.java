@@ -90,9 +90,15 @@ public class OutputManager extends SimulationLinker {
         indicators.add(new AbundanceOutput(rank, "output.abundance.enabled"));
         // Mortality
         indicators.add(new MortalityOutput(rank, "output.mortality.enabled"));
-        for (int i = 0; i < getNSpecies(); i++) {
-            indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
-            indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.enabled", getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
+        if (getConfiguration().getBoolean("output.mortality.perSpecies.perAge.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.perSpecies.perAge.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+            }
+        }
+        if (getConfiguration().getBoolean("output.mortality.perSpecies.perSize.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.perSpecies.perAge.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+            }
         }
         // Yield
         indicators.add(new YieldOutput(rank, "output.yield.biomass.enabled"));
@@ -107,10 +113,14 @@ public class OutputManager extends SimulationLinker {
         indicators.add(new SizeSpectrumSpeciesYieldOutput(rank, "output.size.spectrum.perSpecies.B.enabled"));
         indicators.add(new MeanSizeSpeciesOutput(rank, "output.size.perSpecies.enabled"));
         // Age
-        indicators.add(new AgeSpectrumSpeciesNOutput(rank, "output.age.spectrum.perSpecies.N.enabled"));
-        indicators.add(new AgeSpectrumSpeciesYieldNOutput(rank, "output.age.spectrum.perSpecies.N.enabled"));
-        indicators.add(new AgeSpectrumSpeciesBOutput(rank, "output.age.spectrum.perSpecies.B.enabled"));
-        indicators.add(new AgeSpectrumSpeciesYieldOutput(rank, "output.age.spectrum.perSpecies.B.enabled"));
+        if (getConfiguration().getBoolean("output.age.spectrum.perSpecies.N.enabled")) {
+            indicators.add(new AgeSpectrumSpeciesNOutput(rank, "output.age.spectrum.perSpecies.N.enabled"));
+            indicators.add(new AgeSpectrumSpeciesYieldNOutput(rank, "output.age.spectrum.perSpecies.N.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.age.spectrum.perSpecies.B.enabled")) {
+            indicators.add(new AgeSpectrumSpeciesBOutput(rank, "output.age.spectrum.perSpecies.B.enabled"));
+            indicators.add(new AgeSpectrumSpeciesYieldOutput(rank, "output.age.spectrum.perSpecies.B.enabled"));
+        }
         // TL
         indicators.add(new MeanTrophicLevelOutput(rank, "output.tl.enabled"));
         indicators.add(new MeanTrophicLevelCatchOutput(rank, "output.tl.catch.enabled"));
@@ -119,8 +129,28 @@ public class OutputManager extends SimulationLinker {
         indicators.add(new MeanTrophicLevelAgeOutput(rank, "output.tl.perAge.enabled"));
         // Predation
         indicators.add(new DietOutput(rank, "output.diet.composition.enabled"));
+        if (getConfiguration().getBoolean("output.diet.composition.perSpecies.perAge.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                indicators.add(new DietSpeciesOutput(rank, "output.diet.composition.perSpecies.perAge.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+            }
+        }
+        if (getConfiguration().getBoolean("output.diet.composition.perSpecies.perSize.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                indicators.add(new DietSpeciesOutput(rank, "output.diet.composition.perSpecies.perSize.enabled", getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
+            }
+        }
         indicators.add(new PredatorPressureOutput(rank, "output.diet.pressure.enabled"));
         indicators.add(new BiomassDietStageOutput(rank, "output.diet.pressure.enabled"));
+        if (getConfiguration().getBoolean("output.diet.pressure.perSpecies.perAge.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                indicators.add(new PredatorPressureSpeciesOutput(rank, "output.diet.pressure.perSpecies.perAge.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+            }
+        }
+        if (getConfiguration().getBoolean("output.diet.pressure.perSpecies.perSize.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                indicators.add(new PredatorPressureSpeciesOutput(rank, "output.diet.pressure.perSpecies.perSize.enabled", getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
+            }
+        }
         // Spatialized
         indicators.add(new SpatialOutput(rank, "output.spatial.enabled"));
         indicators.add(new LTLOutput(rank, "output.spatial.ltl.enabled"));

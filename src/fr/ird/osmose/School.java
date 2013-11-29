@@ -227,6 +227,12 @@ public class School extends Prey {
         this.preyedBiomass += preyedBiomass;
     }
 
+    public void addPreyRecord(School prey, double preyedBiomass, int preyStage) {
+        preyRecords.add(new PreyRecord(prey, preyedBiomass, preyStage));
+        // Update school total preyed biomass
+        this.preyedBiomass += preyedBiomass;
+    }
+
     /**
      * Returns a list of the prey records at current time step.
      *
@@ -466,6 +472,8 @@ public class School extends Prey {
          */
         private final int index;
 
+        private final School prey;
+
         /**
          * Creates a new prey record.
          *
@@ -477,6 +485,15 @@ public class School extends Prey {
         PreyRecord(int index, float trophicLevel, double biomass, int dietOutputStage) {
             this.index = index;
             this.trophicLevel = trophicLevel;
+            this.biomass = biomass;
+            this.dietOutputStage = dietOutputStage;
+            prey = null;
+        }
+
+        PreyRecord(School prey, double biomass, int dietOutputStage) {
+            this.prey = prey;
+            this.index = prey.getSpeciesIndex();
+            this.trophicLevel = prey.getTrophicLevel();
             this.biomass = biomass;
             this.dietOutputStage = dietOutputStage;
         }
@@ -520,6 +537,10 @@ public class School extends Prey {
          */
         public int getIndex() {
             return index;
+        }
+
+        public School getSchool() {
+            return prey;
         }
     }
 }

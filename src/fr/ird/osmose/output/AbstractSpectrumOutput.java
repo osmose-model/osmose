@@ -49,7 +49,6 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
 
 /**
  *
@@ -141,11 +140,6 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
     }
 
     @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
     public void reset() {
         spectrum = new double[getNSpecies()][classes.length];
     }
@@ -212,7 +206,7 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
 
         @Override
         public String toString() {
-            return name().toLowerCase();
+            return name().substring(0,1).toUpperCase() + name().substring(1).toLowerCase();
         }
     }
 }

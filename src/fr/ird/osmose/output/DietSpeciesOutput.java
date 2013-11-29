@@ -48,8 +48,8 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School;
+import fr.ird.osmose.School.PreyRecord;
 import fr.ird.osmose.Species;
 import java.io.File;
 
@@ -58,28 +58,25 @@ import java.io.File;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0 2013/09/01
  */
-public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
+public class DietSpeciesOutput extends AbstractSpectrumOutput {
 
     private final Species species;
-    /*
-     * Abundance per stages [STAGES]
+    /**
+     * Diet of a predator per stages and per prey [STAGES][SPECIES+PLANKTON+1]
      */
-    private double[] abundanceStage;
+    private double[][] diet;
 
-    // mortality rates por souces and per stages
-    private double[][] mortalityRates;
-
-    public MortalitySpeciesOutput(int rank, String keyEnabled, Species species, Type type) {
+    public DietSpeciesOutput(int rank, String keyEnabled, Species species, Type type) {
         super(rank, keyEnabled, type);
         this.species = species;
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Mortality");
+        StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_mortalityRatePer");
+        filename.append("_dietMatrixPer");
         filename.append(getType().toString());
         filename.append("-");
         filename.append(species.getName());
@@ -91,75 +88,52 @@ public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
 
     @Override
     String getDescription() {
-        return "Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving and per size class. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.";
+        return "Biomass, in tonne, of prey species (in rows) in the diet of predator species per age/size class(in col)";
     }
 
     @Override
     public void reset() {
-        mortalityRates = new double[MortalityCause.values().length][getNClass()];
-    }
-
-    @Override
-    public void update() {
-
-        int iClass;
-        int nCause = MortalityCause.values().length;
-        double[][] nDead = new double[nCause][getNClass()];
-        for (School school : getSchoolSet().getSchools(species, false)) {
-            float value = (getType() == Type.SIZE)
-                    ? school.getLengthi()
-                    : (float) school.getAgeDt() / getConfiguration().getNStepYear();
-            iClass = getClass(value);
-            // Update number of deads
-            for (MortalityCause cause : MortalityCause.values()) {
-                nDead[cause.index][iClass] += school.getNdead(cause);
-            }
-        }
-        // Cumulate the mortality rates
-
-        for (iClass = 0; iClass < getNClass(); iClass++) {
-            double nDeadTot = 0;
-            for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                nDeadTot += nDead[iDeath][iClass];
-            }
-            double Z = Math.log(abundanceStage[iClass] / (abundanceStage[iClass] - nDeadTot));
-            for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                mortalityRates[iDeath][iClass] += Z * nDead[iDeath][iClass] / nDeadTot;
-            }
+        diet = new double[getNClass()][getNSpecies() + getConfiguration().getNPlankton() + 1];
+        for (int iClass = 0; iClass < getNClass(); iClass++) {
+            diet[iClass][0] = getClassThreshold(iClass);
         }
     }
 
     @Override
     public void write(float time) {
 
-        int nCause = MortalityCause.values().length;
-        double[][] values = new double[getNClass()][nCause + 1];
-        for (int iClass = 0; iClass < getNClass(); iClass++) {
-            // Size
-            values[iClass][0] = getClassThreshold(iClass);
-            // Mortality rates
-            for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                values[iClass][iDeath + 1] = mortalityRates[iDeath][iClass];
-            }
-        }
-
-        writeVariable(time, values);
+        writeVariable(time, diet);
     }
 
     @Override
     String[] getHeaders() {
-        return new String[]{getType().toString(), "Mpred", "Mstar", "Mnat", "F", "Z"};
+        String[] headers = new String[getNSpecies() + getConfiguration().getNPlankton() + 1];
+        headers[0] = getType().toString();
+        for (int i = 0; i < getNSpecies(); i++) {
+            headers[i + 1] = getSimulation().getSpecies(i).getName();
+        }
+        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+            headers[i + getNSpecies() + 1] = getSimulation().getPlankton(i).getName();
+        }
+        return headers;
+    }
+
+    @Override
+    public void update() {
+
+        for (School predator : getSchoolSet().getSchools(species, false)) {
+            double preyedBiomass = predator.getPreyedBiomass();
+            if (preyedBiomass > 0) {
+                for (PreyRecord prey : predator.getPreyRecords()) {
+                    diet[getClass(predator)][prey.getIndex() + 1] += prey.getBiomass();
+                }
+            }
+        }
     }
 
     @Override
     public void initStep() {
-        // Reset abundance array 
-        abundanceStage = new double[getNClass()];
-
-        // save abundance at the beginning of the time step
-        for (School school : getSchoolSet().getSchools(species, false)) {
-            int iClass = getClass(school);
-            abundanceStage[iClass] += school.getAbundance();
-        }
+        // nothing to do
     }
+
 }

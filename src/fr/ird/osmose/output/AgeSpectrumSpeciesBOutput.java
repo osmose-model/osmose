@@ -42,4 +42,9 @@ public class AgeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
     String getDescription() {
         return "Distribution of fish species biomass in age classes (year). For age class i, the biomass of fish in [i,i+1[ is reported.";
     }
+
+    @Override
+    public void initStep() {
+        // nothing to do
+    }
 }

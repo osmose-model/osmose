@@ -85,4 +85,9 @@ public class AgeSpectrumSpeciesNOutput extends AbstractSpectrumOutput {
     String getDescription() {
         return "Distribution of fish species abundance in age classes (year). For age class i, the number of fish in [i,i+1[ is reported.";
     }
+    
+    @Override
+    public void initStep() {
+        // nothing to do
+    }
 }

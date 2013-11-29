@@ -116,9 +116,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         prw = new PrintWriter(fos, true);
 
         if (!fileExists) {
-            prw.print("\"");
-            prw.print(getDescription());
-            prw.println("\"");
+            prw.print(quote(getDescription()));
             prw.print(quote("Time"));
             String[] headers = getHeaders();
             for (String header : headers) {

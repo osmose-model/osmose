@@ -85,4 +85,9 @@ public class AgeSpectrumSpeciesYieldOutput extends AbstractSpectrumOutput {
     String getDescription() {
         return "Distribution of cumulative catch (tons per time step of saving) in age classes (year). For age class i, the yield in [i,i+1[ is reported.";
     }
+    
+    @Override
+    public void initStep() {
+        // nothing to do
+    }
 }
