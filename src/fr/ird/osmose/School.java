@@ -95,7 +95,11 @@ public class School extends Prey {
     /**
      * Age of the fish expressed in number of time step.
      */
-    private int age;
+    private int ageDt;
+    /**
+     * Age of the fish in year.
+     */
+    private float age;
     /**
      * Length of the fish in centimeter.
      */
@@ -185,7 +189,7 @@ public class School extends Prey {
         super(species.getIndex(), x, y, abundance, weight, trophicLevel);
         this.species = species;
         this.length = length;
-        this.age = age;
+        this.ageDt = age;
         out = false;
         preyRecords = new ArrayList();
         starvationRate = 0.d;
@@ -267,7 +271,7 @@ public class School extends Prey {
      * @return whether the school is alive or not
      */
     public boolean isAlive() {
-        return (getInstantaneousAbundance() > 0) && (age <= species.getLifespanDt() - 1);
+        return (getInstantaneousAbundance() > 0) && (ageDt <= species.getLifespanDt() - 1);
     }
 
     /**
@@ -282,8 +286,7 @@ public class School extends Prey {
         str.append("\n  Species: ");
         str.append(getSpecies().getName());
         str.append("\n  Cohort: ");
-        float ageInYear = getAgeDt() / (float) getConfiguration().getNStepYear();
-        str.append(ageInYear);
+        str.append(getAge());
         str.append(" [year]");
         str.append("\n  Cell: ");
         str.append(getCell().getIndex());
@@ -306,6 +309,10 @@ public class School extends Prey {
      * @return the age of the fish in number of time step
      */
     public int getAgeDt() {
+        return ageDt;
+    }
+    
+    public float getAge() {
         return age;
     }
 
@@ -313,7 +320,8 @@ public class School extends Prey {
      * Increments the age of the fish of one time step.
      */
     public void incrementAge() {
-        age += 1;
+        ageDt += 1;
+        age = ageDt / (float) getConfiguration().getNStepYear();
     }
 
     /**

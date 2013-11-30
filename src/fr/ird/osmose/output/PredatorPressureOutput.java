@@ -50,8 +50,8 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.School.PreyRecord;
-import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.DietOutputStage;
+import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -74,7 +74,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     //
     private double[][][][] predatorPressure;
     // Diet output stage
-    private AbstractStage dietOutputStage;
+    private IStage dietOutputStage;
     /**
      * Whether the indicator should be enabled or not.
      */

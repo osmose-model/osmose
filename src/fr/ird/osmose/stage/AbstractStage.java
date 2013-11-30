@@ -50,27 +50,64 @@ package fr.ird.osmose.stage;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
+import fr.ird.osmose.Prey;
 import fr.ird.osmose.School;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractStage {
+abstract class AbstractStage implements IStage {
 
-    abstract public void init();
+    private float[][] thresholds;
 
-    abstract public int getStage(School school);
+    private final String key;
 
-    abstract public int getNStage(int iSpecies);
+    AbstractStage(String key) {
+        this.key = key;
+    }
 
-    abstract public float[] getThresholds(int iSpecies);
+    @Override
+    public void init() {
+
+        int nSpec = getConfiguration().getNSpecies();
+        int nPlnk = getConfiguration().getNPlankton();
+        thresholds = new float[nSpec + nPlnk][];
+        for (int i = 0; i < nSpec; i++) {
+            int nStage = !getConfiguration().isNull(key + i)
+                    ? getConfiguration().getArrayString(key + i).length + 1
+                    : 1;
+            if (nStage > 1) {
+                thresholds[i] = getConfiguration().getArrayFloat(key + i);
+            } else {
+                thresholds[i] = new float[0];
+            }
+        }
+        for (int i = 0; i < nPlnk; i++) {
+            thresholds[nSpec + i] = new float[0];
+        }
+    }
+
+    @Override
+    public int getStage(Prey prey) {
+        if (prey instanceof School) {
+            return getStage((School) prey);
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public int getNStage(int iSpecies) {
+        return thresholds[iSpecies].length + 1;
+    }
+
+    @Override
+    public float[] getThresholds(int iSpecies) {
+        return thresholds[iSpecies];
+    }
 
     Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
-    }
-
-    Osmose getOsmose() {
-        return Osmose.getInstance();
     }
 }

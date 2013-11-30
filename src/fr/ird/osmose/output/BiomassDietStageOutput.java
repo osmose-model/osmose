@@ -49,8 +49,8 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.DietOutputStage;
+import fr.ird.osmose.stage.IStage;
 import java.io.File;
 
 /**
@@ -65,7 +65,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
      */
     private double[][] biomassStage;
     
-    private AbstractStage dietOutputStage;
+    private IStage dietOutputStage;
 
     public BiomassDietStageOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);

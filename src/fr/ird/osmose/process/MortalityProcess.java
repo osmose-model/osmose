@@ -54,8 +54,8 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School.PreyRecord;
 import fr.ird.osmose.process.FishingProcess.FishingType;
-import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.DietOutputStage;
+import fr.ird.osmose.stage.IStage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,7 +99,7 @@ public class MortalityProcess extends AbstractProcess {
     /*
      * Diet output stage
      */
-    private AbstractStage dietOutputStage;
+    private IStage dietOutputStage;
     /**
      * Epsilon constant for numerical purpose to avoid zeros at denominator when
      * calculating mortality rates.

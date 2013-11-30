@@ -54,8 +54,8 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.Prey;
 import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School;
-import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.AccessibilityStage;
+import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.stage.PredPreyStage;
 import java.io.FileReader;
 import java.io.IOException;
@@ -79,11 +79,11 @@ public class PredationProcess extends AbstractProcess {
     /*
      * Accessibility stages
      */
-    private AbstractStage accessStage;
+    private IStage accessStage;
     /*
      * Feeding stages
      */
-    private AbstractStage predPreyStage;
+    private IStage predPreyStage;
 
     public PredationProcess(int rank) {
         super(rank);

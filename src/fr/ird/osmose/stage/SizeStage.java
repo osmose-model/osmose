@@ -48,61 +48,30 @@
  */
 package fr.ird.osmose.stage;
 
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.Prey;
 import fr.ird.osmose.School;
 
 /**
  *
- * @author pverley
+ * @author P.Verley (philippe.verley@ird.fr)
+ * @version 3.0 2013/09/01
  */
-public class PredPreyStage implements IStage {
+public class SizeStage extends AbstractStage {
 
-    private AbstractStage stage;
-
-    @Override
-    public void init() {
-
-        String metrics = null;
-        try {
-            metrics = Osmose.getInstance().getConfiguration().getString("predation.predPrey.stage.structure");
-            if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
-                metrics = null;
-            }
-        } catch (NullPointerException ex) {
-        }
-
-        if (null != metrics) {
-            if (metrics.equalsIgnoreCase("size")) {
-                stage = new SizeStage("predation.predPrey.stage.threshold.sp");
-            } else if (metrics.equalsIgnoreCase("age")) {
-                stage = new AgeStage("predation.predPrey.stage.threshold.sp");
-            }
-        } else {
-            Osmose.getInstance().warning("Could not find parameter 'predation.predPrey.stage.structure' (or unsupported value, must be either 'age' or 'size'). Osmose assumes it is age-based threshold.");
-            stage = new AgeStage("predation.predPrey.stage.threshold.sp");
-        }
-
-        stage.init();
-    }
-
-    @Override
-    public int getNStage(int iSpecies) {
-        return stage.getNStage(iSpecies);
-    }
-
-    @Override
-    public float[] getThresholds(int iSpecies) {
-        return stage.getThresholds(iSpecies);
+    public SizeStage(String key) {
+        super(key);
     }
 
     @Override
     public int getStage(School school) {
-        return stage.getStage(school);
-    }
-
-    @Override
-    public int getStage(Prey prey) {
-        return stage.getStage(prey);
+        int stage = 0;
+        int iSpec = school.getSpeciesIndex();
+        for (float threshold : this.getThresholds(iSpec)) {
+            if (school.getLength() >= threshold) {
+                stage++;
+            } else {
+                break;
+            }
+        }
+        return stage;
     }
 }
