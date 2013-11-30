@@ -100,6 +100,8 @@ public class Plankton extends SimulationLinker {
      */
     private float accessibilityCoeff;
 
+    private Prey[][] preys;
+
 ///////////////
 // Constructors
 ///////////////
@@ -128,6 +130,7 @@ public class Plankton extends SimulationLinker {
         sizeMax = getConfiguration().getFloat("plankton.size.max.plk" + index);
         trophicLevel = getConfiguration().getFloat("plankton.tl.plk" + index);
         accessibilityCoeff = getConfiguration().getFloat("plankton.accessibility2fish.plk" + index);
+        resetPreys();
     }
 
     /**
@@ -153,7 +156,7 @@ public class Plankton extends SimulationLinker {
     public float getAccessibleBiomass(Cell cell) {
         return accessibilityCoeff * getBiomass(cell);
     }
-    
+
     public float getAccessibility() {
         return accessibilityCoeff;
     }
@@ -256,12 +259,18 @@ public class Plankton extends SimulationLinker {
     }
 
     public Prey asPrey(Cell cell) {
-
-        return new Prey(index, // index
-                cell.get_igrid(), // x
-                cell.get_jgrid(), // y
-                getBiomass(cell), // abundance (assumes that abundance <==> biomass for Plankton)
-                1e6f, // weight set to 1 ton to have abundance <==> biomass
-                trophicLevel); // trophic level
+        if (null == preys[cell.get_jgrid()][cell.get_igrid()]) {
+            preys[cell.get_jgrid()][cell.get_igrid()] = new Prey(index, // index
+                    cell.get_igrid(), // x
+                    cell.get_jgrid(), // y
+                    getBiomass(cell), // abundance (assumes that abundance <==> biomass for Plankton)
+                    1e6f, // weight set to 1 ton to have abundance <==> biomass
+                    trophicLevel); // trophic level
+        }
+        return preys[cell.get_jgrid()][cell.get_igrid()];
+    }
+    
+    public void resetPreys() {
+        preys = new Prey[getGrid().get_ny()][getGrid().get_nx()];
     }
 }
