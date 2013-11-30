@@ -318,6 +318,18 @@ public class Species {
     public float getSizeMaturity() {
         return sizeMaturity;
     }
+    
+    /**
+     * Just keep it as a reminder for a future vulnerability function
+     * 
+     * @param biomass
+     * @return 
+     */
+    private boolean isVulnerable(double biomass) {
+        double Bv = 0.d;
+        double Sv = 1.d;
+        return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
+    }
 
     /**
      * Returns an instance of the {@code Configuration}.
