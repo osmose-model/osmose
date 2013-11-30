@@ -117,7 +117,7 @@ public class NcGrid extends AbstractGrid {
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
                 boolean land = (mask[j][i] <= 0);
-                grid[j][i] = new Cell(i, j, (float) lat[j][i], (float) lon[j][i], land);
+                grid[j][i] = new Cell((j * nx + i), i, j, (float) lat[j][i], (float) lon[j][i], land);
             }
         }
 

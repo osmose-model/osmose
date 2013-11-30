@@ -50,6 +50,7 @@ package fr.ird.osmose.grid;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Osmose;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -142,7 +143,7 @@ public class OriginalGrid extends AbstractGrid {
             for (int i = 0; i < ncolumn; i++) {
                 longitude = lonmin + (float) (i + 0.5) * dLong;
                 //System.out.print(isLand(i, j) ? "0 ":"1 ");
-                grid[j][i] = new Cell(i, j, latitude, longitude, land[j][i]);
+                grid[j][i] = new Cell((j * ncolumn + i), i, j, latitude, longitude, land[j][i]);
             }
             //System.out.println();
         }

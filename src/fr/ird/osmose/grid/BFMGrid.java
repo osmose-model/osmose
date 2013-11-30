@@ -235,7 +235,7 @@ public class BFMGrid extends AbstractGrid {
                 }
                 fmask = fmask / (stride * stride);
                 boolean land = (fmask <= 0.5);
-                grid[j][i] = new Cell(i, j, (float) lat[j][i], (float) lon[j][i], land);
+                grid[j][i] = new Cell((j * imstr + i), i, j, (float) lat[j][i], (float) lon[j][i], land);
             }
         }
 

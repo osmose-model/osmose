@@ -101,19 +101,21 @@ public class Cell {
      * Create a new ocean cell at grid position (i, j) and geographical position
      * (lon, lat)
      *
+     * @param index, index of the cell {@code index = j * nx + i}
      * @param i an integer, the i-grid position
      * @param j an integer, the j-grid
      * @param lat a float, the latitude of the cell, North degree
      * @param lon a float, the longitude of the cell, East degree
      */
-    public Cell(int i, int j, float lat, float lon) {
-        this(i, j, lat, lon, false);
+    public Cell(int index, int i, int j, float lat, float lon) {
+        this(index, i, j, lat, lon, false);
     }
 
     /**
      * Create a new cell at grid position (i, j) and geographical position (lon,
      * lat)
      *
+     * @param index ,index of the cell {@code index = j * nx + i}
      * @param i an integer, the i-grid position
      * @param j an integer, the j-grid
      * @param lat a float, the latitude of the cell, North degree
@@ -121,14 +123,13 @@ public class Cell {
      * @param land a boolean, {@code true} if the cell is on land, {@code false}
      * if the cell is in ocean
      */
-    public Cell(int i, int j, float lat, float lon, boolean land) {
+    public Cell(int index, int i, int j, float lat, float lon, boolean land) {
+        this.index = index;
         this.i = i;
         this.j = j;
         this.lat = lat;
         this.lon = lon;
         this.land = land;
-        // calculates index
-        index = j * Osmose.getInstance().getGrid().get_nx() + i;
     }
 
 ////////////////////////////
@@ -230,8 +231,8 @@ public class Cell {
     }
 
     /**
-     * Generates a hash code value for this cell. Every cell has a unique
-     * hash code value, its index.
+     * Generates a hash code value for this cell. Every cell has a unique hash
+     * code value, its index.
      *
      * @return a hash code value for this cell.
      */
