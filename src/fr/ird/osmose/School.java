@@ -131,6 +131,10 @@ public class School extends Prey {
      */
     private boolean out;
     /**
+     * Array of temporary accessibilities of preys for this predator
+     */
+    private double[] accessibilities;
+    /**
      * A unique randomly generated {@link java.util.UUID} for identifying and
      * comparing schools.
      */
@@ -311,7 +315,7 @@ public class School extends Prey {
     public int getAgeDt() {
         return ageDt;
     }
-    
+
     public float getAge() {
         return age;
     }
@@ -446,6 +450,14 @@ public class School extends Prey {
      */
     public float getLengthi() {
         return lengthi;
+    }
+
+    public void setAccessibilities(double[] accessibilities) {
+        this.accessibilities = accessibilities;
+    }
+
+    public double[] getAccessibilities() {
+        return accessibilities;
     }
 
     /**

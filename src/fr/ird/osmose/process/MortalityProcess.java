@@ -56,6 +56,7 @@ import fr.ird.osmose.School.PreyRecord;
 import fr.ird.osmose.process.FishingProcess.FishingType;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
+import fr.ird.osmose.util.XSRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -149,7 +150,7 @@ public class MortalityProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        random = new Random();
+        random = new XSRandom(System.nanoTime());
 
         naturalMortalityProcess = new NaturalMortalityProcess(getRank());
         naturalMortalityProcess.init();
@@ -238,6 +239,24 @@ public class MortalityProcess extends AbstractProcess {
 
         // Update fishing process (for MPAs)
         fishingProcess.setMPA();
+
+        // Assess accessibility for this time step
+        for (Cell cell : getGrid().getCells()) {
+            List<School> schools = getSchoolSet().getSchools(cell);
+            if (cell.isLand() || schools.isEmpty()) {
+                continue;
+            }
+            // Create the list of preys by gathering the schools and the plankton group
+            List<Prey> preys = new ArrayList();
+            preys.addAll(schools);
+            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+                preys.add(getSimulation().getPlankton(i).asPrey(cell));
+            }
+            for (School school : schools) {
+                school.setAccessibilities(predationProcess.getAccessibility(school, preys));
+            }
+        }
+
         for (int idt = 0; idt < subdt; idt++) {
             fishingProcess.assessFishableBiomass();
             for (Cell cell : getGrid().getCells()) {
@@ -507,12 +526,6 @@ public class MortalityProcess extends AbstractProcess {
         Integer[] seqStarv = Arrays.copyOf(seqPred, ns);
         MortalityCause[] mortalityCauses = MortalityCause.values();
 
-        // Computes the accessibilities for every predator to every prey
-        double[][] accessibility = new double[ns][preys.size()];
-        for (int iPred = 0; iPred < ns; iPred++) {
-            accessibility[iPred] = predationProcess.getAccessibility(schools.get(iPred), preys);
-        }
-
         FishingType fishingType = fishingProcess.getType();
         shuffleArray(seqPred);
         shuffleArray(seqFish);
@@ -528,7 +541,7 @@ public class MortalityProcess extends AbstractProcess {
                     case PREDATION:
                         // Predation mortality
                         School predator = schools.get(seqPred[i]);
-                        double[] preyUpon = predationProcess.computePredation(predator, preys, accessibility[seqPred[i]], subdt);
+                        double[] preyUpon = predationProcess.computePredation(predator, preys, predator.getAccessibilities(), subdt);
                         for (int ipr = 0; ipr < preys.size(); ipr++) {
                             Prey prey = preys.get(ipr);
                             nDead = prey.biom2abd(preyUpon[ipr]);
@@ -574,15 +587,19 @@ public class MortalityProcess extends AbstractProcess {
         }
     }
 
-    private static void shuffleArray(Object[] a) {
+    private static <T> void shuffleArray(T[] a) {
         // Shuffle array
         for (int i = a.length; i > 1; i--) {
-            swap(a, i - 1, random.nextInt(i));
+            T tmp = a[i-1];
+            int j = random.nextInt(i);
+            a[i-1] = a[j];
+            a[j] = tmp;
+            //swap(a, i - 1, random.nextInt(i));
         }
     }
 
-    private static void swap(Object[] a, int i, int j) {
-        Object tmp = a[i];
+    private static <T> void swap(T[] a, int i, int j) {
+        T tmp = a[i];
         a[i] = a[j];
         a[j] = tmp;
     }
