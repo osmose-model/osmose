@@ -244,7 +244,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
         }
         prw = new PrintWriter(fos, true);
         if (!fileExists) {
-            prw.print(quote("% of prey species (in rows) in the diet of predator species (in col)"));
+            prw.println(quote("% of prey species (in rows) in the diet of predator species (in col)"));
             prw.print(quote("Time"));
             prw.print(separator);
             prw.print(quote("Prey"));

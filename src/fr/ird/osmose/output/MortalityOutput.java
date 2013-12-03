@@ -232,8 +232,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
             if (!fileExists) {
                 // Write headers
-                prw[iSpecies].print(quote("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year."));
-                prw[iSpecies].println();
+                prw[iSpecies].println(quote("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year."));
                 prw[iSpecies].print(quote("Time"));
                 for (int i = 0; i < STAGES; i++) {
                     prw[iSpecies].print(separator);

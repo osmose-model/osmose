@@ -215,7 +215,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         }
         prw = new PrintWriter(fos, true);
         if (!fileExists) {
-            prw.print(quote("Biomass of prey species (in tons per time step of saving, in rows) eaten by a predator species (in col). The last column reports the biomass of prey at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)"));
+            prw.println(quote("Biomass of prey species (in tons per time step of saving, in rows) eaten by a predator species (in col). The last column reports the biomass of prey at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)"));
             prw.print(quote("Time"));
             prw.print(separator);
             prw.print(quote("Prey"));
