@@ -67,13 +67,13 @@ public class CatchesByDtByAgeSizeScenario extends AbstractFishingScenario {
      * Size thresholds in centimeter. Size stage k means null
      * {@code threshold[k] <= age < threshold[k+1]}
      */
-    private float[] sizeThreshold;
+    private float[] sizeClasses;
     /**
      * Age thresholds in time steps. It is provided in year in the input file
      * and converted in the {@code init} function in number of time steps. Age
      * stage k means {@code threshold[k] <= ageDt < threshold[k+1]}
      */
-    private float[] ageThreshold;
+    private float[] ageClasses;
     /**
      * Fishable biomass, in tonne, per age/size class.
      */
@@ -90,16 +90,16 @@ public class CatchesByDtByAgeSizeScenario extends AbstractFishingScenario {
             ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
             timeSerieByAge.read(getConfiguration().getFile("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec));
             catches = timeSerieByAge.getValues();
-            ageThreshold = new float[timeSerieByAge.getNClass() - 1];
-            for (int k = 0; k < ageThreshold.length; k++) {
+            ageClasses = new float[timeSerieByAge.getNClass() - 1];
+            for (int k = 0; k < ageClasses.length; k++) {
                 // Converts age in year into number of time steps
-                ageThreshold[k] = Math.round(timeSerieByAge.getThreshold(k) * getConfiguration().getNStepYear());
+                ageClasses[k] = Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
         } else if (!getConfiguration().isNull("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
             timeSerieBySize.read(getConfiguration().getFile("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec));
             catches = timeSerieBySize.getValues();
-            sizeThreshold = timeSerieBySize.getThresholds();
+            sizeClasses = timeSerieBySize.getClasses();
         } else {
             getSimulation().error("Could not found parameters mortality.fishing.catches.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
@@ -118,12 +118,12 @@ public class CatchesByDtByAgeSizeScenario extends AbstractFishingScenario {
     @Override
     public float getInstantaneousCatches(School school) {
         int k = -1;
-        if (null != sizeThreshold) {
+        if (null != sizeClasses) {
             // By size class
-            k = indexOf(school.getLength(), sizeThreshold);
-        } else if (null != ageThreshold) {
+            k = indexOf(school.getLength(), sizeClasses);
+        } else if (null != ageClasses) {
             // By age class
-            k = indexOf(school.getAgeDt(), ageThreshold);
+            k = indexOf(school.getAgeDt(), ageClasses);
         }
         if ((k >= 0) && (fishableBiomass[k] > 0.d)) {
             return (float) (school.getInstantaneousBiomass() / fishableBiomass[k])
@@ -133,19 +133,19 @@ public class CatchesByDtByAgeSizeScenario extends AbstractFishingScenario {
         }
     }
 
-    private int indexOf(float value, float[] thresholds) {
+    private int indexOf(float value, float[] classes) {
         // 1. value < first threshold, index does not exist
-        if (value < thresholds[0]) {
+        if (value < classes[0]) {
             return -1;
         }
         // 2. Normal case thresold[k] <= value < threshold[k+1]
-        for (int k = 0; k < thresholds.length - 1; k++) {
-            if ((thresholds[k] <= value) && (value < thresholds[k + 1])) {
+        for (int k = 0; k < classes.length - 1; k++) {
+            if ((classes[k] <= value) && (value < classes[k + 1])) {
                 return k;
             }
         }
         // 3. value >= threshold[last]
-        return thresholds.length;
+        return classes.length - 1;
     }
 
     @Override
@@ -157,12 +157,12 @@ public class CatchesByDtByAgeSizeScenario extends AbstractFishingScenario {
         }
         int k = -1;
         for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
-            if (null != sizeThreshold) {
+            if (null != sizeClasses) {
                 // By size class
-                k = indexOf(school.getLength(), sizeThreshold);
-            } else if (null != ageThreshold) {
+                k = indexOf(school.getLength(), sizeClasses);
+            } else if (null != ageClasses) {
                 // By age class
-                k = indexOf(school.getAgeDt(), ageThreshold);
+                k = indexOf(school.getAgeDt(), ageClasses);
             }
             if (k >= 0) {
                 fishableBiomass[k] += school.getInstantaneousBiomass();

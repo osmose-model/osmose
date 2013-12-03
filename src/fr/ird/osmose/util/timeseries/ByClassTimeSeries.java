@@ -60,13 +60,13 @@ import java.util.List;
  */
 public class ByClassTimeSeries extends SimulationLinker {
 
-    private float[] threshold;
+    private float[] classes;
     private float[][] values;
 
     public ByClassTimeSeries(int rank) {
         super(rank);
     }
-    
+
     public void read(String filename) {
         int nStepYear = getConfiguration().getNStepYear();
         int nStepSimu = nStepYear * getConfiguration().getNYear();
@@ -74,21 +74,21 @@ public class ByClassTimeSeries extends SimulationLinker {
     }
 
     public void read(String filename, int nMin, int nMax) {
-        
+
         int nStepYear = getConfiguration().getNStepYear();
         int nStepSimu = nStepYear * getConfiguration().getNYear();
         try {
             // 1. Open the CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), ';');
             List<String[]> lines = reader.readAll();
-            
+
             // 2. Read the threshold values
             String[] lineThreshold = lines.get(0);
-            threshold = new float[lineThreshold.length - 1];
-            for (int k = 0; k < threshold.length; k++) {
-                threshold[k] = Float.valueOf(lineThreshold[k + 1]);
+            classes = new float[lineThreshold.length - 1];
+            for (int k = 0; k < classes.length; k++) {
+                classes[k] = Float.valueOf(lineThreshold[k + 1]);
             }
-            
+
             // 3. Check the length of the time serie and inform the user about potential problems or inconsistencies
             int nTimeSerie = lines.size() - 1;
             if (nTimeSerie < nMin) {
@@ -101,7 +101,7 @@ public class ByClassTimeSeries extends SimulationLinker {
                 getSimulation().warning("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
-            
+
             // 3. Read the mortality rates
             values = new float[nStepSimu][];
             for (int t = 0; t < nTimeSerie; t++) {
@@ -131,19 +131,38 @@ public class ByClassTimeSeries extends SimulationLinker {
             getSimulation().error("Error reading CSV file " + filename, ex);
         }
     }
-    
+
+    public int classOf(float school) {
+        // 1. value < first threshold, index does not exist
+        if (school < classes[0]) {
+            return -1;
+        }
+        // 2. Normal case thresold[k] <= value < threshold[k+1]
+        for (int k = 0; k < classes.length - 1; k++) {
+            if ((classes[k] <= school) && (school < classes[k + 1])) {
+                return k;
+            }
+        }
+        // 3. value >= threshold[last]
+        return classes.length - 1;
+    }
+
+    public float getValue(int step, float school) {
+        return values[step][classOf(school)];
+    }
+
     public int getNClass() {
-        return threshold.length + 1;
+        return classes.length;
     }
-    
-    public float getThreshold(int k) {
-        return threshold[k];
+
+    public float getClass(int k) {
+        return classes[k];
     }
-    
-    public float[] getThresholds() {
-        return threshold;
+
+    public float[] getClasses() {
+        return classes;
     }
-    
+
     public float[][] getValues() {
         return values;
     }

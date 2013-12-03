@@ -87,13 +87,13 @@ public class RateByDtByAgeSizeScenario extends AbstractFishingScenario {
             ageThreshold = new int[timeSerieByAge.getNClass() - 1];
             for (int k = 0; k < ageThreshold.length; k++) {
                 // Converts age in year into number of time steps
-                ageThreshold[k] = (int) Math.round(timeSerieByAge.getThreshold(k) * getConfiguration().getNStepYear());
+                ageThreshold[k] = (int) Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
         } else if (!getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
             timeSerieBySize.read(getConfiguration().getFile("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec));
             f = timeSerieBySize.getValues();
-            sizeThreshold = timeSerieBySize.getThresholds();
+            sizeThreshold = timeSerieBySize.getClasses();
         } else {
             getSimulation().error("Could not found parameters mortality.fishing.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
@@ -116,7 +116,7 @@ public class RateByDtByAgeSizeScenario extends AbstractFishingScenario {
                 }
             }
             // 3. length >= threshold[last]
-            return f[getSimulation().getIndexTimeSimu()][sizeThreshold.length];
+            return f[getSimulation().getIndexTimeSimu()][sizeThreshold.length - 1];
         } else if (null != ageThreshold) {
             // By age class
             float age = school.getAgeDt();
@@ -132,7 +132,7 @@ public class RateByDtByAgeSizeScenario extends AbstractFishingScenario {
                 }
             }
             // 3. age >= threshold[last]
-            return f[getSimulation().getIndexTimeSimu()][ageThreshold.length];
+            return f[getSimulation().getIndexTimeSimu()][ageThreshold.length - 1];
         }
         // We should never reach that stage. If we do it is because there is
         // something wrong in the thresholds and then we return a NaN value.

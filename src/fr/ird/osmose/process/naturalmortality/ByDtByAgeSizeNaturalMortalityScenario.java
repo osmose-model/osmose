@@ -66,13 +66,13 @@ public class ByDtByAgeSizeNaturalMortalityScenario extends AbstractMortalityScen
     /**
      * Size thresholds in centimeter. Size stage k means {@code threshold[k] <= age < threshold[k+1]}
      */
-    private float[] sizeThreshold;
+    private float[] sizeClasses;
     /**
      * Age thresholds in time steps. It is provided in year in the input file
      * and converted in the {@code init} function in number of time steps. Age
      * stage k means {@code threshold[k] <= ageDt < threshold[k+1]}
      */
-    private int[] ageThreshold;
+    private int[] ageClasses;
 
     public ByDtByAgeSizeNaturalMortalityScenario(int rank, Species species) {
         super(rank, species);
@@ -85,16 +85,16 @@ public class ByDtByAgeSizeNaturalMortalityScenario extends AbstractMortalityScen
             ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
             timeSerieByAge.read(getConfiguration().getFile("mortality.natural.rate.byDt.byAge.file.sp" + iSpec));
             m = timeSerieByAge.getValues();
-            ageThreshold = new int[timeSerieByAge.getNClass() - 1];
-            for (int k = 0; k < ageThreshold.length; k++) {
+            ageClasses = new int[timeSerieByAge.getNClass() - 1];
+            for (int k = 0; k < ageClasses.length; k++) {
                 // Converts age in year into number of time steps
-                ageThreshold[k] = (int) Math.round(timeSerieByAge.getThreshold(k) * getConfiguration().getNStepYear());
+                ageClasses[k] = (int) Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
         } else if (!getConfiguration().isNull("mortality.natural.rate.byDt.bySize.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
             timeSerieBySize.read(getConfiguration().getFile("mortality.natural.rate.byDt.bySize.file.sp" + iSpec));
             m = timeSerieBySize.getValues();
-            sizeThreshold = timeSerieBySize.getThresholds();
+            sizeClasses = timeSerieBySize.getClasses();
         } else {
             getSimulation().error("Could not found parameters mortality.natural.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
@@ -104,38 +104,38 @@ public class ByDtByAgeSizeNaturalMortalityScenario extends AbstractMortalityScen
     public float getInstantaneousRate(School school) {
         
         int iSimu = getSimulation().getIndexTimeSimu();
-        if (null != sizeThreshold) {
+        if (null != sizeClasses) {
             // By size class
             float length = school.getLength();
             // 1. Length < value of the first size threshold, it means there is
             // no value provided. Osmose assume it is zero.
-            if (length < sizeThreshold[0]) {
+            if (length < sizeClasses[0]) {
                 return 0.f;
             }
             // 2. Normal case thresold[k] <= length < threshold[k+1]
-            for (int k = 0; k < sizeThreshold.length - 1; k++) {
-                if ((sizeThreshold[k] <= length) && (length < sizeThreshold[k + 1])) {
+            for (int k = 0; k < sizeClasses.length - 1; k++) {
+                if ((sizeClasses[k] <= length) && (length < sizeClasses[k + 1])) {
                     return m[iSimu][k];
                 }
             }
             // 3. length >= threshold[last]
-            return m[iSimu][sizeThreshold.length - 1];
-        } else if (null != ageThreshold) {
+            return m[iSimu][sizeClasses.length - 1];
+        } else if (null != ageClasses) {
             // By age class
             float age = school.getAgeDt();
             // 1. age < threshold[0] it means there is no value provided.
             // Osmose assume it is zero.
-            if (age < ageThreshold[0]) {
+            if (age < ageClasses[0]) {
                 return 0.f;
             }
             // 2. Normal case thresold[k] <= age < threshold[k+1]
-            for (int k = 0; k < ageThreshold.length - 1; k++) {
-                if ((ageThreshold[k] <= age) && (age < ageThreshold[k + 1])) {
+            for (int k = 0; k < ageClasses.length - 1; k++) {
+                if ((ageClasses[k] <= age) && (age < ageClasses[k + 1])) {
                     return m[iSimu][k];
                 }
             }
             // 3. age >= threshold[last]
-            return m[iSimu][ageThreshold.length - 1];
+            return m[iSimu][ageClasses.length - 1];
         }
         // We should never reach that stage. If we do it is because there is
         // something wrong in the thresholds and then we return a NaN value.
