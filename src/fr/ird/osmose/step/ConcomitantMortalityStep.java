@@ -86,7 +86,11 @@ public class ConcomitantMortalityStep extends AbstractStep {
     /*
      * List of indicators
      */
-    OutputManager indicators;
+    private OutputManager indicators;
+    /*
+     * Record time step 0 (initial state) in the outputs 
+     */
+    private boolean recordStep0;
 
     public ConcomitantMortalityStep(int rank) {
         super(rank);
@@ -118,6 +122,9 @@ public class ConcomitantMortalityStep extends AbstractStep {
         // Indicators
         indicators = new OutputManager(getRank());
         indicators.init();
+        
+        // Record time step 0 in the output
+        recordStep0 = getConfiguration().getBoolean("output.step0.include");
     }
 
     @Override
@@ -142,7 +149,7 @@ public class ConcomitantMortalityStep extends AbstractStep {
         movementProcess.run();
 
         // Save 1st time step
-        if (iStepSimu == 0) {
+        if (recordStep0 && iStepSimu == 0) {
             indicators.update(-1);
         }
 
