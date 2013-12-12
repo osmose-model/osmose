@@ -132,6 +132,10 @@ public class Simulation extends OLogger {
      * Indicates whether the simulation starts from a restart file.
      */
     private boolean restart;
+    /**
+     * Number of years before writing restart files.
+     */
+    private int spinupRestart;
 
 //////////////
 // Constructor
@@ -230,6 +234,10 @@ public class Simulation extends OLogger {
         if (!getConfiguration().isNull("simulation.restart.recordfrequency.ndt")) {
             restartFrequency = getConfiguration().getInt("simulation.restart.recordfrequency.ndt");
         }
+        spinupRestart = 0;
+        if (!getConfiguration().isNull("simulation.restart.spinup")) {
+            spinupRestart = getConfiguration().getInt("simulation.restart.spinup") - 1;
+        }
     }
 
     /**
@@ -289,7 +297,7 @@ public class Simulation extends OLogger {
             //fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
             // Create a restart file
-            if ((i_step_simu + 1) % restartFrequency == 0) {
+            if ((year >= spinupRestart) && ((i_step_simu + 1) % restartFrequency == 0)) {
                 snapshot.makeSnapshot(i_step_simu);
             }
 
