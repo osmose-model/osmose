@@ -99,6 +99,11 @@ public class Plankton extends SimulationLinker {
      * Parameter <i>plankton.accessibility2fish.plk#</i>
      */
     private float accessibilityCoeff;
+    /**
+     * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
+     * for virtually increasing or decreasing plankton biomass.
+     */
+    private float multiplier;
 
     private Prey[][] preys;
 
@@ -130,6 +135,12 @@ public class Plankton extends SimulationLinker {
         sizeMax = getConfiguration().getFloat("plankton.size.max.plk" + index);
         trophicLevel = getConfiguration().getFloat("plankton.tl.plk" + index);
         accessibilityCoeff = getConfiguration().getFloat("plankton.accessibility2fish.plk" + index);
+        if (!getConfiguration().isNull("plankton.multiplier.plk" + index)) {
+            multiplier = getConfiguration().getFloat("plankton.multiplier.plk" + index);
+            warning("Plankton biomass for plankton group " + name + " will be multiplied by " + multiplier + " accordingly to parameter 'plankton.multiplier.plk'" + index + " from file " + getConfiguration().getSource("plankton.multiplier.plk" + index));
+        } else {
+            multiplier = 1.f;
+        }
         resetPreys();
     }
 
@@ -141,7 +152,7 @@ public class Plankton extends SimulationLinker {
      * {@code cell}
      */
     public float getBiomass(Cell cell) {
-        return getForcing().getBiomass(index, cell);
+        return multiplier * getForcing().getBiomass(index, cell);
     }
 
     /**
@@ -269,7 +280,7 @@ public class Plankton extends SimulationLinker {
         }
         return preys[cell.get_jgrid()][cell.get_igrid()];
     }
-    
+
     public void resetPreys() {
         preys = new Prey[getGrid().get_ny()][getGrid().get_nx()];
     }
