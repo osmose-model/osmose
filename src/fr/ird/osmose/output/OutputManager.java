@@ -175,9 +175,11 @@ public class OutputManager extends SimulationLinker {
     }
 
     public void initStep() {
-        for (IOutput indicator : indicators) {
-            if (indicator.isEnabled()) {
-                indicator.initStep();
+        if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
+            for (IOutput indicator : indicators) {
+                if (indicator.isEnabled()) {
+                    indicator.initStep();
+                }
             }
         }
     }
