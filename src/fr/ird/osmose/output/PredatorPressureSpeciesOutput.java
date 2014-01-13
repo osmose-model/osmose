@@ -122,7 +122,10 @@ public class PredatorPressureSpeciesOutput extends AbstractSpectrumOutput {
         for (School predator : getSchoolSet().getAliveSchools()) {
             for (PreyRecord prey : predator.getPreyRecords()) {
                 if (prey.getIndex() == species.getIndex()) {
-                    predatorPressure[getClass(prey.getSchool())][predator.getSpeciesIndex() + 1] += prey.getBiomass();
+                    int classPrey = getClass(prey.getSchool());
+                    if (classPrey >= 0) {
+                        predatorPressure[classPrey][predator.getSpeciesIndex() + 1] += prey.getBiomass();
+                    }
                 }
             }
         }

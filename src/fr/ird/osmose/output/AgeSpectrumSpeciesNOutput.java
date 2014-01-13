@@ -46,7 +46,6 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
@@ -65,7 +64,10 @@ public class AgeSpectrumSpeciesNOutput extends AbstractSpectrumOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getInstantaneousAbundance();
+            int classSchool = getClass(school);
+            if (classSchool >= 0) {
+                spectrum[school.getSpeciesIndex()][classSchool] += school.getInstantaneousAbundance();
+            }
         }
     }
 
@@ -85,7 +87,7 @@ public class AgeSpectrumSpeciesNOutput extends AbstractSpectrumOutput {
     String getDescription() {
         return "Distribution of fish species abundance in age classes (year). For age class i, the number of fish in [i,i+1[ is reported.";
     }
-    
+
     @Override
     public void initStep() {
         // nothing to do

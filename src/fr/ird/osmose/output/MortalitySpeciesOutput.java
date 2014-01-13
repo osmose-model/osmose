@@ -159,7 +159,9 @@ public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
         // save abundance at the beginning of the time step
         for (School school : getSchoolSet().getSchools(species, false)) {
             int iClass = getClass(school);
-            abundanceStage[iClass] += school.getAbundance();
+            if (iClass >= 0) {
+                abundanceStage[iClass] += school.getAbundance();
+            }
         }
     }
 }

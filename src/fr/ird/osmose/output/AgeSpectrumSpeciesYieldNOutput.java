@@ -64,7 +64,10 @@ public class AgeSpectrumSpeciesYieldNOutput extends AbstractSpectrumOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.FISHING);
+            int classSchool = getClass(school);
+            if (classSchool >= 0) {
+                spectrum[school.getSpeciesIndex()][classSchool] += school.getNdead(School.MortalityCause.FISHING);
+            }
         }
     }
 
@@ -84,7 +87,7 @@ public class AgeSpectrumSpeciesYieldNOutput extends AbstractSpectrumOutput {
     String getDescription() {
         return "Distribution of cumulative catch (number of fish caught per time step of saving) in age classes (year). For age class i, the yield in [i,i+1[ is reported.";
     }
-    
+
     @Override
     public void initStep() {
         // nothing to do

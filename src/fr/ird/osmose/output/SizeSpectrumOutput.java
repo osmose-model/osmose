@@ -55,43 +55,10 @@ import java.io.File;
  *
  * @author pverley
  */
-public class SizeSpectrumOutput extends AbstractOutput {
-
-    private double[][] sizeSpectrum;
-    // Minimal size (cm) of the size spectrum.
-    public float spectrumMinSize;
-    // Maximal size (cm) of the size spectrum.
-    public float spectrumMaxSize;
-    // Range (cm) of size classes.
-    private float classRange;
-    // discrete size spectrum
-    private float[] tabSizes;
-    // Number of size classes in the discrete spectrum
-    private int nSizeClass;
+public class SizeSpectrumOutput extends AbstractSpectrumOutput {
 
     public SizeSpectrumOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
-        initializeSizeSpectrum();
-    }
-
-    private void initializeSizeSpectrum() {
-
-        if (!isEnabled()) {
-            return;
-        }
-
-        spectrumMinSize = getConfiguration().getFloat("output.size.spectrum.size.min");
-        spectrumMaxSize = getConfiguration().getFloat("output.size.spectrum.size.max");
-        classRange = getConfiguration().getFloat("output.size.spectrum.size.range");
-
-        //initialisation of the size spectrum features
-        nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
-
-        tabSizes = new float[nSizeClass];
-        tabSizes[0] = spectrumMinSize;
-        for (int i = 1; i < nSizeClass; i++) {
-            tabSizes[i] = i * classRange;
-        }
+        super(rank, keyEnabled, Type.SIZE);
     }
 
     @Override
@@ -100,43 +67,30 @@ public class SizeSpectrumOutput extends AbstractOutput {
     }
 
     @Override
-    public void reset() {
-        sizeSpectrum = new double[getNSpecies()][tabSizes.length];
-    }
-
-    @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            sizeSpectrum[school.getSpeciesIndex()][getSizeRank(school)] += school.getInstantaneousAbundance();
-        }
-    }
-    
-    private int getSizeRank(School school) {
-
-        int iSize = tabSizes.length - 1;
-        if (school.getLength() <= spectrumMaxSize) {
-            while (school.getLength() < tabSizes[iSize]) {
-                iSize--;
+            int sizeClass = getClass(school);
+            if (sizeClass >= 0) {
+                spectrum[school.getSpeciesIndex()][sizeClass] += school.getInstantaneousAbundance();
             }
         }
-        return iSize;
     }
 
     @Override
     public void write(float time) {
 
-        double[][] values = new double[nSizeClass][2];
-        for (int iSize = 0; iSize < nSizeClass; iSize++) {
+        double[][] values = new double[getNClass()][2];
+        for (int iSize = 0; iSize < getNClass(); iSize++) {
             // Size
-            values[iSize][0] = tabSizes[iSize];
+            values[iSize][0] = getClassThreshold(iSize);
             // Abundance
             double sum = 0f;
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                sum += sizeSpectrum[iSpec][iSize] / getRecordFrequency();
+                sum += spectrum[iSpec][iSize] / getRecordFrequency();
             }
             values[iSize][1] = sum;
         }
-        
+
         writeVariable(time, values);
     }
 

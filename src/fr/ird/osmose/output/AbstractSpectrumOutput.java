@@ -130,12 +130,12 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
                 break;
         }
 
-        nClass = (int) Math.ceil(max / range);
+        nClass = (int) Math.ceil((max - min) / range);
 
         classes = new float[nClass];
         classes[0] = min;
         for (int i = 1; i < nClass; i++) {
-            classes[i] = i * range;
+            classes[i] = min + i * range;
         }
     }
 
@@ -156,7 +156,7 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
     int getClass(float value) {
         int iClass = classes.length - 1;
         if (value <= max) {
-            while (value < classes[iClass]) {
+            while ((iClass >= 0) && (value < classes[iClass])) {
                 iClass--;
             }
         }

@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
@@ -22,7 +21,10 @@ public class AgeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getInstantaneousBiomass();
+            int classSchool = getClass(school);
+            if (classSchool >= 0) {
+                spectrum[school.getSpeciesIndex()][classSchool] += school.getInstantaneousBiomass();
+            }
         }
     }
 

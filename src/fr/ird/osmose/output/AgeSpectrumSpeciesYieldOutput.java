@@ -65,7 +65,9 @@ public class AgeSpectrumSpeciesYieldOutput extends AbstractSpectrumOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.adb2biom(school.getNdead(School.MortalityCause.FISHING));
+            int classSchool = getClass(school);
+            if (classSchool >= 0)
+            spectrum[school.getSpeciesIndex()][classSchool] += school.adb2biom(school.getNdead(School.MortalityCause.FISHING));
         }
     }
 

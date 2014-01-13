@@ -125,7 +125,10 @@ public class DietSpeciesOutput extends AbstractSpectrumOutput {
             double preyedBiomass = predator.getPreyedBiomass();
             if (preyedBiomass > 0) {
                 for (PreyRecord prey : predator.getPreyRecords()) {
-                    diet[getClass(predator)][prey.getIndex() + 1] += prey.getBiomass();
+                    int classSchool = getClass(predator);
+                    if (classSchool >= 0) {
+                        diet[classSchool][prey.getIndex() + 1] += prey.getBiomass();
+                    }
                 }
             }
         }
