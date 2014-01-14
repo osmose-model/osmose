@@ -56,7 +56,7 @@ import ucar.nc2.NetcdfFile;
  * @author pverley
  */
 public class LTLForcingLaure extends LTLForcingRomsPisces {
-    
+
     private float[][][][] data;
 
     public LTLForcingLaure(int rank) {
@@ -98,6 +98,6 @@ public class LTLForcingLaure extends LTLForcingRomsPisces {
 
     @Override
     float[][] getRawBiomass(int iPlankton, int iStepSimu) {
-        return data[iPlankton][getIndexStepLTL(iStepSimu)];
+        return data[getIndexStepLTL(iStepSimu)][iPlankton];
     }
 }
