@@ -230,6 +230,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     public void update(int iStepSimu) {
 
         for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
+            biomass[iPlk] = new float[getGrid().get_ny()][getGrid().get_nx()];;
             float[][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
             for (Cell cell : getGrid().getCells()) {
                 if (!cell.isLand()) {
