@@ -2075,10 +2075,8 @@ public class OldConfiguration {
                     spatialDistribution[i] = SpatialDistribution.RANDOM;
                 } else if (areaDistribMethod.equalsIgnoreCase("maps")) {
                     spatialDistribution[i] = SpatialDistribution.MAPS;
-                } else if (areaDistribMethod.equalsIgnoreCase("connectivity")) {
-                    spatialDistribution[i] = SpatialDistribution.CONNECTIVITY;
                 } else {
-                    throw new UnsupportedOperationException("Distribution method is either 'random' | 'maps' | 'connectivity'");
+                    throw new UnsupportedOperationException("Distribution method is either 'random' or 'maps'");
                 }
             }
             /*
@@ -2122,9 +2120,9 @@ public class OldConfiguration {
                     case MAPS:
                         readAreaCSV(st, iSpec, indexMap);
                         break;
-                    case CONNECTIVITY:
-                        readConnectivity(st, iSpec, indexMap);
-                        break;
+//                    case CONNECTIVITY:
+//                        readConnectivity(st, iSpec, indexMap);
+//                        break;
                 }
             }
 

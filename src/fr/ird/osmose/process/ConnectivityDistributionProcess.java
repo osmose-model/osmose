@@ -52,6 +52,7 @@ import fr.ird.osmose.util.ConnectivityMatrix;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.util.MapSet;
 
 /**
  *
@@ -61,6 +62,8 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
 
     private final MovementProcess movement;
     private final Species species;
+    private MapSet maps;
+    private float[] maxProbaPresence;
 
     public ConnectivityDistributionProcess(int rank, Species species, MovementProcess parent) {
         super(rank);
@@ -75,12 +78,16 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
     @Override
     public void run() {
         for (School school : getSchoolSet().getSchools(species)) {
-            if (!movement.isOut(school)) {
+            if (!isOut(school)) {
                 connectivityDistribution(school);
             } else {
                 school.out();
             }
         }
+    }
+    
+    private boolean isOut(School school) {
+        return (null == maps.getMap(school));
     }
 
     private void connectivityDistribution(School school) {
@@ -91,9 +98,8 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
         int i_step_simu = getSimulation().getIndexTimeSimu();
 
         // Get current map and max probability of presence
-        int indexMap = movement.getIndexMap(school);
-        GridMap map = movement.getMap(indexMap);
-        float tempMaxProbaPresence = movement.getMaxProbaPresence(indexMap);
+        int indexMap = maps.getIndexMap(school);
+        GridMap map = maps.getMap(indexMap);
 
         // init = true if either cohort zero or first time-step of the simulation
         boolean init = (age == 0) | (i_step_simu == 0);
@@ -110,7 +116,7 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
             } else {
                 oldTime = i_step_year - 1;
             }
-            int previousIndexMap = movement.getIndexMap(school.getSpeciesIndex(), age - 1, oldTime);
+            int previousIndexMap = maps.getIndexMap(age - 1, oldTime);
             if (indexMap == previousIndexMap) {
                 sameMap = true;
             }
@@ -128,8 +134,8 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
             double proba;
             do {
                 indexCell = (int) Math.round((nCells - 1) * Math.random());
-                proba = movement.getMap(school).getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0 || proba < Math.random() * tempMaxProbaPresence);
+                proba = maps.getMap(school).getValue(getGrid().getCell(indexCell));
+            } while (proba <= 0 || proba < Math.random() * maxProbaPresence[indexMap]);
             school.moveToCell(getGrid().getCell(indexCell));
         } else if (sameMap) {
             // Random move in adjacent cells contained in the map.
@@ -142,7 +148,7 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
     private void connectivityMoveSchool(School school, int indexMap) {
         // get the connectivity matrix associated to object school
         // species i, cohort j and time step indexTime.
-        ConnectivityMatrix matrix = movement.getMatrix(indexMap);
+        ConnectivityMatrix matrix = getMatrix(indexMap);
         // get the connectivity of the cell where the school is
         // currently located
         int iCell = school.getCell().getIndex();
@@ -159,7 +165,6 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
         // Lines with only 0 come with length = 0
         // cumsum can't work with it
         // workaround: run cumsum only if length > 0 (otherwise keep initial 0 values)
-
         // computes the cumulative sum of this connectivity line   
         if (!school.getCell().isLand() && cline.connectivity.length > 0) { //++TD
 
@@ -202,6 +207,10 @@ public class ConnectivityDistributionProcess extends AbstractProcess {
         } // FIN TD ~~ 24.10.2012  --> normalisation cumSum
 
         return cumSum;
+    }
+
+    private ConnectivityMatrix getMatrix(int indexMap) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
 //public void writeAreaFileAsProp() {

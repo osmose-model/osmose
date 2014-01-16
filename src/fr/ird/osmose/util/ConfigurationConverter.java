@@ -320,12 +320,12 @@ public class ConfigurationConverter {
             key.append(".file");
             value = cfg.mapFile[iMap];
             prop.setProperty(key.toString(), value);
-            if (cfg.spatialDistribution[cfg.speciesMap[iMap]].equals(SpatialDistribution.CONNECTIVITY)) {
-                key = new StringBuilder(map);
-                key.append(".connectivity.file");
-                value = cfg.connectivityFile[iMap];
-                prop.setProperty(key.toString(), value);
-            }
+//            if (cfg.spatialDistribution[cfg.speciesMap[iMap]].equals(SpatialDistribution.CONNECTIVITY)) {
+//                key = new StringBuilder(map);
+//                key.append(".connectivity.file");
+//                value = cfg.connectivityFile[iMap];
+//                prop.setProperty(key.toString(), value);
+//            }
             indexMap++;
         }
 

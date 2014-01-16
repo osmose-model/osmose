@@ -51,6 +51,7 @@ package fr.ird.osmose.process;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.util.MapSet;
 import java.util.Random;
 
 /**
@@ -59,14 +60,16 @@ import java.util.Random;
  */
 public class MapDistributionProcess extends AbstractProcess {
 
-    private final MovementProcess movement;
+    private final MovementProcess parent;
     private final Species species;
     private Random rd1, rd2, rd3;
+    private MapSet maps;
+    private float[] maxProbaPresence;
 
     public MapDistributionProcess(int rank, Species species, MovementProcess parent) {
         super(rank);
         this.species = species;
-        this.movement = parent;
+        this.parent = parent;
     }
 
     @Override
@@ -80,22 +83,38 @@ public class MapDistributionProcess extends AbstractProcess {
             rd1 = new Random(13L ^ species.getIndex());
             rd2 = new Random(5L ^ species.getIndex());
             rd3 = new Random(1982L ^ species.getIndex());
+            warning("Parameter 'movement.randomseed.fixed' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
         } else {
             rd1 = new Random();
             rd2 = new Random();
             rd3 = new Random();
+        }
+
+        maps = new MapSet(getRank(), species.getIndex(), "movement");
+        maps.init();
+        maxProbaPresence = new float[maps.getNMap()];
+        for (int imap = 0; imap < maxProbaPresence.length; imap++) {
+            maxProbaPresence[imap] = computeMaxProbaPresence(imap);
+            // Just a trick for absence/presence maps (and not probability)
+            if (maxProbaPresence[imap] >= 1.f) {
+                maxProbaPresence[imap] = 0.f;
+            }
         }
     }
 
     @Override
     public void run() {
         for (School school : getSchoolSet().getSchools(species)) {
-            if (!movement.isOut(school)) {
+            if (!isOut(school)) {
                 mapsDistribution(school);
             } else {
                 school.out();
             }
         }
+    }
+    
+    private boolean isOut(School school) {
+        return (null == maps.getMap(school));
     }
 
     private void mapsDistribution(School school) {
@@ -104,9 +123,8 @@ public class MapDistributionProcess extends AbstractProcess {
         int age = school.getAgeDt();
 
         // Get current map and max probability of presence
-        int indexMap = movement.getIndexMap(school);
-        GridMap map = movement.getMap(indexMap);
-        float tempMaxProbaPresence = movement.getMaxProbaPresence(indexMap);
+        int indexMap = maps.getIndexMap(school);
+        GridMap map = maps.getMap(indexMap);
 
         /*
          * Check whether the map has changed from previous cohort
@@ -122,7 +140,7 @@ public class MapDistributionProcess extends AbstractProcess {
             } else {
                 oldTime = i_step_year - 1;
             }
-            int previousIndexMap = movement.getIndexMap(school.getSpeciesIndex(), age - 1, oldTime);
+            int previousIndexMap = maps.getIndexMap(age - 1, oldTime);
             if (indexMap == previousIndexMap) {
                 sameMap = true;
             }
@@ -141,11 +159,22 @@ public class MapDistributionProcess extends AbstractProcess {
             do {
                 indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
                 proba = map.getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0.d || proba < rd2.nextDouble() * tempMaxProbaPresence);
+            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap]);
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.
-            school.moveToCell(movement.randomDeal(movement.getAccessibleCells(school, map), rd3));
+            school.moveToCell(parent.randomDeal(parent.getAccessibleCells(school, map), rd3));
         }
+    }
+
+    private float computeMaxProbaPresence(int numMap) {
+        float tempMaxProbaPresence = 0;
+        GridMap map = maps.getMap(numMap);
+        for (int j = 0; j < getGrid().get_ny(); j++) {
+            for (int i = 0; i < getGrid().get_nx(); i++) {
+                tempMaxProbaPresence = Math.max(tempMaxProbaPresence, map.getValue(i, j));
+            }
+        }
+        return tempMaxProbaPresence;
     }
 }

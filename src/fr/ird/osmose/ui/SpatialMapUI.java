@@ -424,13 +424,13 @@ public class SpatialMapUI extends JPanel {
         getOsmose().getSimulation(0).init();
         MovementProcess mov = new MovementProcess(0);
         mov.init();
-        map = mov.getMap(numMap);
+        //map = mov.getMap(numMap);
 
         SpatialMapUI grid = new SpatialMapUI();
         grid.init();
         grid.setGridVisible(true);
         //1. Create the frame.
-        JFrame frame = new JFrame(mov.getMapDetails(numMap));
+        JFrame frame = new JFrame();
 
         //2. Optional: What happens when the frame closes?
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

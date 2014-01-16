@@ -74,7 +74,14 @@ public class RandomDistributionProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        areaSize = parent.getSizeRandomMap(species.getIndex());
+
+        int iSpec = species.getIndex();
+        if (!getConfiguration().isNull("movement.distribution.ncell.sp" + iSpec)) {
+            areaSize = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpec);
+        } else {
+            areaSize = getGrid().getNOceanCell();
+            warning("Could not find parameter movement.distribution.ncell.sp" + iSpec + ". Osmose assumes that schools of " + getSpecies(iSpec).getName() + " are distrubuted over the whole domain.");
+        }
         createRandomMap();
     }
 
@@ -93,7 +100,7 @@ public class RandomDistributionProcess extends AbstractProcess {
 
         int nbCasesDispos = getGrid().getNOceanCell();
 
-        if (areaSize >= nbCasesDispos) {
+        if (areaSize > nbCasesDispos) {
             /*
              * Whole grid
              */
