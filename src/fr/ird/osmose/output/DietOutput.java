@@ -91,6 +91,8 @@ public class DietOutput extends SimulationLinker implements IOutput {
         } else {
             separator = OutputManager.SEPARATOR;
         }
+        // Ensure that prey records will be made during the simulation
+        getSimulation().requestPreyRecord();
     }
 
     @Override

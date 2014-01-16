@@ -146,6 +146,8 @@ public class MortalityProcess extends AbstractProcess {
 
     public MortalityProcess(int rank) {
         super(rank);
+        // Ensure that prey records will be made during the simulation
+        getSimulation().requestPreyRecord();
     }
 
     @Override
@@ -311,16 +313,18 @@ public class MortalityProcess extends AbstractProcess {
                     school.setNdead(MortalityCause.FISHING, nDeadMatrix[is][ns + 2]);
 
                     // Prey record
-                    for (int ipr = 0; ipr < (ns + npl); ipr++) {
-                        if (nDeadMatrix[ipr][is] > 0) {
-                            if (ipr < ns) {
-                                // Prey is School
-                                School prey = schools.get(ipr);
-                                school.addPreyRecord(prey, prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey));
-                            } else {
-                                // Prey is Plankton
-                                int index = ipr - ns + nspec;
-                                school.addPreyRecord(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), nDeadMatrix[ipr][is], 0);
+                    if (getSimulation().isPreyRecord()) {
+                        for (int ipr = 0; ipr < (ns + npl); ipr++) {
+                            if (nDeadMatrix[ipr][is] > 0) {
+                                if (ipr < ns) {
+                                    // Prey is School
+                                    School prey = schools.get(ipr);
+                                    school.addPreyRecord(prey, prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey));
+                                } else {
+                                    // Prey is Plankton
+                                    int index = ipr - ns + nspec;
+                                    school.addPreyRecord(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), nDeadMatrix[ipr][is], 0);
+                                }
                             }
                         }
                     }
@@ -546,11 +550,13 @@ public class MortalityProcess extends AbstractProcess {
                             Prey prey = preys.get(ipr);
                             nDead = prey.biom2abd(preyUpon[ipr]);
                             prey.incrementNdead(MortalityCause.PREDATION, nDead);
-                            if (prey instanceof School) {
-                                predator.addPreyRecord((School) prey, preyUpon[ipr], dietOutputStage.getStage((School) prey));
-                            } else {
-                                int index = ipr - ns + nspec;
-                                predator.addPreyRecord(index, prey.getTrophicLevel(), preyUpon[ipr], 0);
+                            if (getSimulation().isPreyRecord()) {
+                                if (prey instanceof School) {
+                                    predator.addPreyRecord((School) prey, preyUpon[ipr], dietOutputStage.getStage((School) prey));
+                                } else {
+                                    int index = ipr - ns + nspec;
+                                    predator.addPreyRecord(index, prey.getTrophicLevel(), preyUpon[ipr], 0);
+                                }
                             }
                         }
                         break;
@@ -590,9 +596,9 @@ public class MortalityProcess extends AbstractProcess {
     private static <T> void shuffleArray(T[] a) {
         // Shuffle array
         for (int i = a.length; i > 1; i--) {
-            T tmp = a[i-1];
+            T tmp = a[i - 1];
             int j = random.nextInt(i);
-            a[i-1] = a[j];
+            a[i - 1] = a[j];
             a[j] = tmp;
             //swap(a, i - 1, random.nextInt(i));
         }

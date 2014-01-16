@@ -93,6 +93,8 @@ public class LTLOutput extends SimulationLinker implements IOutput {
     public LTLOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
+        // Ensure that prey records will be made during the simulation
+        getSimulation().requestPreyRecord();
     }
 
     @Override
