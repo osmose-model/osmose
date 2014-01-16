@@ -49,6 +49,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
  * This class represents a plankton group or any other low trophic level
@@ -98,7 +99,7 @@ public class Plankton extends SimulationLinker {
      * Fraction of plankton biomass available to the fish, ranging [0, 1].
      * Parameter <i>plankton.accessibility2fish.plk#</i>
      */
-    private float accessibilityCoeff;
+    private float[] accessibilityCoeff;
     /**
      * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
      * for virtually increasing or decreasing plankton biomass.
@@ -134,7 +135,17 @@ public class Plankton extends SimulationLinker {
         sizeMin = getConfiguration().getFloat("plankton.size.min.plk" + index);
         sizeMax = getConfiguration().getFloat("plankton.size.max.plk" + index);
         trophicLevel = getConfiguration().getFloat("plankton.tl.plk" + index);
-        accessibilityCoeff = getConfiguration().getFloat("plankton.accessibility2fish.plk" + index);
+        if (!getConfiguration().isNull("plankton.accessibility2fish.file.plk" + index)) {
+            SingleTimeSeries ts = new SingleTimeSeries(getRank());
+            ts.read(getConfiguration().getFile("plankton.accessibility2fish.file.plk" + index));
+            accessibilityCoeff = ts.getValues();
+        } else {
+            float accessibility = getConfiguration().getFloat("plankton.accessibility2fish.plk" + index);
+            accessibilityCoeff = new float[getConfiguration().getNStepYear() * getConfiguration().getNYear()];
+            for (int i = 0; i < accessibilityCoeff.length; i++) {
+                accessibilityCoeff[i] = accessibility;
+            }
+        }
         if (!getConfiguration().isNull("plankton.multiplier.plk" + index)) {
             multiplier = getConfiguration().getFloat("plankton.multiplier.plk" + index);
             warning("Plankton biomass for plankton group " + name + " will be multiplied by " + multiplier + " accordingly to parameter 'plankton.multiplier.plk'" + index + " from file " + getConfiguration().getSource("plankton.multiplier.plk" + index));
@@ -161,15 +172,16 @@ public class Plankton extends SimulationLinker {
      * {@code accessible biomass = biomass(cell) * accessibility coefficient}
      *
      * @param cell, a {@link Cell} of the grid
+     * @param iStepSimu, the current time step of the simulation
      * @return the accessible biomass of the plankton group, in tonne, in the
      * given {@code cell}
      */
-    public float getAccessibleBiomass(Cell cell) {
-        return accessibilityCoeff * getBiomass(cell);
+    public float getAccessibleBiomass(Cell cell, int iStepSimu) {
+        return accessibilityCoeff[iStepSimu] * getBiomass(cell);
     }
 
-    public float getAccessibility() {
-        return accessibilityCoeff;
+    public float getAccessibility(int iStepSimu) {
+        return accessibilityCoeff[iStepSimu];
     }
 
     /**

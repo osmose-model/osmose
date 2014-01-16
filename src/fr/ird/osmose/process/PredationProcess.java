@@ -255,6 +255,7 @@ public class PredationProcess extends AbstractProcess {
         Cell cell = predator.getCell();
         List<School> schools = getSchoolSet().getSchools(predator.getCell());
         int nFish = schools.size();
+        int iStepSimu = getSimulation().getIndexTimeSimu();
         double[] preyUpon = new double[schools.size() + getConfiguration().getNPlankton()];
         // egg do not predate
         if (predator.getAgeDt() == 0) {
@@ -277,7 +278,7 @@ public class PredationProcess extends AbstractProcess {
         float[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             float tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-            biomAccessibleTot += percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell);
+            biomAccessibleTot += percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell, iStepSimu);
         }
 
         // Compute the potential biomass that predators could prey upon
@@ -304,7 +305,7 @@ public class PredationProcess extends AbstractProcess {
             // Assess the loss for the plankton caused by the predator
             for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 float tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-                double ratio = percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell) / biomAccessibleTot;
+                double ratio = percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell, iStepSimu) / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
             }
 
@@ -454,7 +455,7 @@ public class PredationProcess extends AbstractProcess {
                 // The prey is a plankton group
                 iStagePrey = 0;
                 accessibility[iPrey] = accessibilityMatrix[iSpecPrey+getConfiguration().getNSpecies()][iStagePrey][iSpecPred][iStagePred]
-                        * getSimulation().getPlankton(iSpecPrey).getAccessibility()
+                        * getSimulation().getPlankton(iSpecPrey).getAccessibility(getSimulation().getIndexTimeSimu())
                         * percentPlankton[iSpecPrey];
             }
         }
