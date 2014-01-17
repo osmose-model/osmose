@@ -63,6 +63,8 @@ public class MeanTrophicLevelCatchOutput extends AbstractOutput {
 
     public MeanTrophicLevelCatchOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);
+        // Ensure that prey records will be made during the simulation
+        getSimulation().requestPreyRecord();
     }
 
     @Override

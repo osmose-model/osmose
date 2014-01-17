@@ -62,6 +62,8 @@ public class MeanTrophicLevelAgeOutput extends AbstractOutput {
 
      public MeanTrophicLevelAgeOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);
+        // Ensure that prey records will be made during the simulation
+        getSimulation().requestPreyRecord();
     }
 
     @Override

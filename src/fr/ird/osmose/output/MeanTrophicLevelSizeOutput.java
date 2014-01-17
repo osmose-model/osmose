@@ -71,6 +71,8 @@ public class MeanTrophicLevelSizeOutput extends AbstractOutput {
     public MeanTrophicLevelSizeOutput(int rank, String keyEnabled) {
         super(rank, keyEnabled);
         initializeSizeSpectrum();
+        // Ensure that prey records will be made during the simulation
+        getSimulation().requestPreyRecord();
     }
 
     private void initializeSizeSpectrum() {
