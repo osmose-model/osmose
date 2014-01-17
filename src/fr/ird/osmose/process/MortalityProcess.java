@@ -288,6 +288,7 @@ public class MortalityProcess extends AbstractProcess {
         fishingProcess.assessFishableBiomass();
 
         int nspec = getConfiguration().getNSpecies();
+        boolean keepRecord = getSimulation().isPreyRecord();
         // Loop over cells
         for (Cell cell : getGrid().getCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
@@ -313,21 +314,20 @@ public class MortalityProcess extends AbstractProcess {
                     school.setNdead(MortalityCause.FISHING, nDeadMatrix[is][ns + 2]);
 
                     // Prey record
-                    if (getSimulation().isPreyRecord()) {
-                        for (int ipr = 0; ipr < (ns + npl); ipr++) {
-                            if (nDeadMatrix[ipr][is] > 0) {
-                                if (ipr < ns) {
-                                    // Prey is School
-                                    School prey = schools.get(ipr);
-                                    school.addPreyRecord(prey, prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey));
-                                } else {
-                                    // Prey is Plankton
-                                    int index = ipr - ns + nspec;
-                                    school.addPreyRecord(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), nDeadMatrix[ipr][is], 0);
-                                }
+                    for (int ipr = 0; ipr < (ns + npl); ipr++) {
+                        if (nDeadMatrix[ipr][is] > 0) {
+                            if (ipr < ns) {
+                                // Prey is School
+                                School prey = schools.get(ipr);
+                                school.addPreyRecord(prey, prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey), keepRecord);
+                            } else {
+                                // Prey is Plankton
+                                int index = ipr - ns + nspec;
+                                school.addPreyRecord(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), nDeadMatrix[ipr][is], 0, keepRecord);
                             }
                         }
                     }
+
                 }
             }
         }
@@ -536,6 +536,7 @@ public class MortalityProcess extends AbstractProcess {
         shuffleArray(seqNat);
         shuffleArray(seqStarv);
         int nspec = getConfiguration().getNSpecies();
+        boolean keepRecord = getSimulation().isPreyRecord();
         for (int i = 0; i < ns; i++) {
             shuffleArray(mortalityCauses);
             for (MortalityCause cause : mortalityCauses) {
@@ -550,14 +551,14 @@ public class MortalityProcess extends AbstractProcess {
                             Prey prey = preys.get(ipr);
                             nDead = prey.biom2abd(preyUpon[ipr]);
                             prey.incrementNdead(MortalityCause.PREDATION, nDead);
-                            if (getSimulation().isPreyRecord()) {
-                                if (prey instanceof School) {
-                                    predator.addPreyRecord((School) prey, preyUpon[ipr], dietOutputStage.getStage((School) prey));
-                                } else {
-                                    int index = ipr - ns + nspec;
-                                    predator.addPreyRecord(index, prey.getTrophicLevel(), preyUpon[ipr], 0);
-                                }
+
+                            if (prey instanceof School) {
+                                predator.addPreyRecord((School) prey, preyUpon[ipr], dietOutputStage.getStage((School) prey), keepRecord);
+                            } else {
+                                int index = ipr - ns + nspec;
+                                predator.addPreyRecord(index, prey.getTrophicLevel(), preyUpon[ipr], 0, keepRecord);
                             }
+
                         }
                         break;
                     case STARVATION:

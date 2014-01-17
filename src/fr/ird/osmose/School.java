@@ -229,14 +229,18 @@ public class School extends Prey {
      * @param preyStage, the stage of the prey,
      * {@link fr.ird.osmose.stage.DietOutputStage}
      */
-    public void addPreyRecord(int indexPrey, float trophicLevel, double preyedBiomass, int preyStage) {
-        preyRecords.add(new PreyRecord(indexPrey, trophicLevel, preyedBiomass, preyStage));
+    public void addPreyRecord(int indexPrey, float trophicLevel, double preyedBiomass, int preyStage, boolean keepRecord) {
+        if (keepRecord) {
+            preyRecords.add(new PreyRecord(indexPrey, trophicLevel, preyedBiomass, preyStage));
+        }
         // Update school total preyed biomass
         this.preyedBiomass += preyedBiomass;
     }
 
-    public void addPreyRecord(School prey, double preyedBiomass, int preyStage) {
-        preyRecords.add(new PreyRecord(prey, preyedBiomass, preyStage));
+    public void addPreyRecord(School prey, double preyedBiomass, int preyStage, boolean keepRecord) {
+        if (keepRecord) {
+            preyRecords.add(new PreyRecord(prey, preyedBiomass, preyStage));
+        }
         // Update school total preyed biomass
         this.preyedBiomass += preyedBiomass;
     }
@@ -269,8 +273,7 @@ public class School extends Prey {
 
     /**
      * Checks whether the school is alive. A school is alive if it fulfills both
-     * conditions: {@code instantaneous abundance > 0} and
-     * {@code age <= lifespan - 1}
+     * conditions: {@code instantaneous abundance > 0} and null     {@code age <= lifespan - 1}
      *
      * @return whether the school is alive or not
      */
@@ -491,7 +494,6 @@ public class School extends Prey {
          * prey is an instance of {@code Plankton}
          */
         private final int index;
-
         private final School prey;
 
         /**
