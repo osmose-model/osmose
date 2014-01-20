@@ -50,6 +50,8 @@ package fr.ird.osmose.populator;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import ucar.nc2.NetcdfFile;
 
@@ -57,20 +59,41 @@ import ucar.nc2.NetcdfFile;
  *
  * @author pverley
  */
-public class RestartPopulator extends AbstractPopulator {
+public class NetcdfPopulator extends AbstractPopulator {
 
     private NetcdfFile nc;
+    private final String key;
 
-    public RestartPopulator(int rank) {
+    public NetcdfPopulator(int rank, String key) {
         super(rank);
+        this.key = key;
     }
 
     @Override
     public void init() {
+
+        String plainFilename = getConfiguration().getFile(key);
+        String rankedFilename = plainFilename + "." + getRank();
+        boolean plainFile = false, rankedFile = false;
+        if (new File(plainFilename).exists()) {
+            plainFile = true;
+        }
+        if (new File(rankedFilename).exists()) {
+            rankedFile = true;
+        };
+
+        if (!plainFile && !rankedFile) {
+            error("Could not find any NetCDF initialization file (check parameter " + key + ").", new FileNotFoundException("Neither file " + plainFilename + " nor " + rankedFilename + " exist."));
+        } else if (plainFile && rankedFile) {
+            warning("Found two suitable NetCDF initialization files: " + plainFilename + " and " + rankedFilename + ". Osmose will use the latest " + rankedFilename);
+        }
+
+        String ncfile = rankedFile ? rankedFilename : plainFilename;
         try {
-            nc = NetcdfFile.open(getConfiguration().getFile("simulation.restart.file") + "." + getRank());
+
+            nc = NetcdfFile.open(ncfile);
         } catch (IOException ex) {
-            getSimulation().error("Failed to open restart file " + nc.getLocation(), ex);
+            error("Failed to open restart file " + ncfile, ex);
         }
     }
 
@@ -102,7 +125,7 @@ public class RestartPopulator extends AbstractPopulator {
             }
             nc.close();
         } catch (IOException ex) {
-            getSimulation().error("Error reading restart file " + nc.getLocation(), ex);
+            error("Error reading restart file " + nc.getLocation(), ex);
         }
     }
 }

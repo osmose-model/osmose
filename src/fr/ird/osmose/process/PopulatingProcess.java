@@ -50,7 +50,7 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.populator.AbstractPopulator;
 import fr.ird.osmose.populator.BiomassPopulator;
-import fr.ird.osmose.populator.RestartPopulator;
+import fr.ird.osmose.populator.NetcdfPopulator;
 import fr.ird.osmose.populator.SpectrumPopulator;
 
 /**
@@ -69,13 +69,15 @@ public class PopulatingProcess extends AbstractProcess {
     public void init() {
 
         if (getSimulation().isRestart()) {
-            populator = new RestartPopulator(getRank());
+            populator = new NetcdfPopulator(getRank(), "simulation.restart.file");
         } else {
             String method = getConfiguration().getString("population.initialization.method");
             if (method.equalsIgnoreCase("biomass")) {
                 populator = new BiomassPopulator(getRank());
             } else if (method.equalsIgnoreCase("spectrum")) {
                 populator = new SpectrumPopulator(getRank());
+            } else if (method.equalsIgnoreCase("netcdf")) {
+                populator = new NetcdfPopulator(getRank(), "population.initialization.file");
             } else if (method.equalsIgnoreCase("random")) {
                 throw new UnsupportedOperationException("Random initialization not supported yet.");
             }
