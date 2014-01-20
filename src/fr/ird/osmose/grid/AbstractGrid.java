@@ -51,9 +51,20 @@ package fr.ird.osmose.grid;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
+import fr.ird.osmose.output.SpatialOutput;
+import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.logging.OLogger;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.ma2.ArrayDouble;
+import ucar.ma2.DataType;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFileWriteable;
 
 /**
  * This abstract class implements the function listed in the interface
@@ -65,7 +76,7 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public abstract class AbstractGrid extends OLogger implements IGrid  {
+public abstract class AbstractGrid extends OLogger implements IGrid {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -288,6 +299,71 @@ public abstract class AbstractGrid extends OLogger implements IGrid  {
     @Override
     public float getdLong() {
         return dLong;
+    }
+
+    @Override
+    public void toNetCDF(String filename) {
+
+        NetcdfFileWriteable nc = null;
+        /*
+         * Create NetCDF file
+         */
+        try {
+            nc = NetcdfFileWriteable.createNew("");
+            IOTools.makeDirectories(filename);
+            nc.setLocation(filename);
+        } catch (IOException ex) {
+            error("Failed to created NetCDF grid file " + filename, ex);
+        }
+        /*
+         * Create dimensions
+         */
+        Dimension nxDim = nc.addDimension("nx", nx);
+        Dimension nyDim = nc.addDimension("ny", ny);
+        /*
+         * Add variables
+         */
+        nc.addVariable("latitude", DataType.DOUBLE, new Dimension[]{nyDim, nxDim});
+        nc.addVariableAttribute("latitude", "units", "north degree");
+        nc.addVariableAttribute("latitude", "description", "latitude of the center of the cell");
+        nc.addVariable("longitude", DataType.DOUBLE, new Dimension[]{nyDim, nxDim});
+        nc.addVariableAttribute("longitude", "units", "south degree");
+        nc.addVariableAttribute("longitude", "description", "longitude of the center of the cell");
+        nc.addVariable("mask", DataType.DOUBLE, new Dimension[]{nyDim, nxDim});
+        nc.addVariableAttribute("mask", "units", "boolean");
+        nc.addVariableAttribute("mask", "description", "mask of the grid, one means ocean and zero means continent");
+        try {
+            /*
+             * Validates the structure of the NetCDF file.
+             */
+            nc.create();
+            /*
+             * Writes variable longitude and latitude
+             */
+            ArrayDouble.D2 arrLon = new ArrayDouble.D2(get_ny(), get_nx());
+            ArrayDouble.D2 arrLat = new ArrayDouble.D2(get_ny(), get_nx());
+            ArrayDouble.D2 arrMask = new ArrayDouble.D2(get_ny(), get_nx());
+            for (Cell cell : getCells()) {
+                arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
+                arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
+                arrMask.set(cell.get_jgrid(), cell.get_igrid(), cell.isLand() ? 0.d : 1.d);
+            }
+            nc.write("longitude", arrLon);
+            nc.write("latitude", arrLat);
+            nc.write("mask", arrMask);
+        } catch (IOException ex) {
+            error("Failed to write the NetCDF grid file", ex);
+        } catch (InvalidRangeException ex) {
+            error("Failed to write the NetCDF grid file", ex);
+        }
+        /*
+         * CLose the NetCDF file 
+         */
+        try {
+            nc.close();
+        } catch (IOException ex) {
+            // do nothing
+        }
     }
 
     /**

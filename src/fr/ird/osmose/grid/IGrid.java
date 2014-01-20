@@ -191,4 +191,14 @@ public interface IGrid {
      * @return the dLong of a cell, in degree
      */
     public float getdLong();
+
+    /**
+     * Writes the current Osmose grid as a NetCDF file. Creates a NetCDF file
+     * with three Double 2D arrays: longitude[ny][nx], latitude[ny][nx] and
+     * mask[ny][nx]
+     *
+     * @param filename, the absolute filename of the NetCDF grid file to be
+     * created
+     */
+    public void toNetCDF(String filename);
 }
