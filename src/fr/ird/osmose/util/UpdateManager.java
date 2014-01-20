@@ -48,9 +48,22 @@
  */
 package fr.ird.osmose.util;
 
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.logging.OLogger;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  *
@@ -68,45 +81,152 @@ public class UpdateManager extends OLogger {
      * Upgrade the configuration file to the application version.
      */
     public void upgrade() {
+        
+        Version appVersion = Version.CURRENT;
+        Version cfgVersion = getConfigurationVersion();
 
         // Check version
-        if (versionMismatch()) {
-            info("Configuration version {0} does not match Osmose version. Your configuration file will be automatically updated.", getConfigurationVersion());
+        if (cfgVersion.priorTo(appVersion)) {
+            info("Configuration version {0} does not match Osmose version {1}. Your configuration file will be automatically updated.", new Object[]{cfgVersion, appVersion});
         } else {
-            info("Configuration version {0} matches Osmose version. Nothing to do.", getConfigurationVersion());
+            info("Configuration version {0} matches Osmose version. Nothing to do.", cfgVersion);
+            return;
         }
 
-        // Nothing to upgrade so far as it is the first tagged version.
+        // Update version
+        String source = getConfiguration().getSource("osmose.version");
+        backupCfgFile(source);
+        ArrayList<String> cfgfile = getLines(source);
+        cfgfile = updateParam("osmose.version", "osmose.version;" + appVersion.toShortString(), cfgfile, "Version " + appVersion.toString() + " - Added version number");
+        writeCfgFile(source, cfgfile);
+
     }
 
-    public Version getApplicationVersion() {
-        return Version.CURRENT;
-    }
-
-    public Version getConfigurationVersion() {
+    private Version getConfigurationVersion() {
         return Osmose.getInstance().getConfiguration().getVersion();
     }
 
-    private boolean versionMismatch() {
-        Version appVersion = getApplicationVersion();
-        Version cfgVersion = getConfigurationVersion();
+    private ArrayList<String> deprecateParam(String key, ArrayList<String> parameters, String msg) {
+
+        ArrayList<String> newList = new ArrayList(parameters);
+        int iline = -1;
+        for (int i = 0; i < parameters.size(); i++) {
+            if (parameters.get(i).startsWith(key)) {
+                iline = i;
+                break;
+            }
+        }
+        String deprecated = "# " + parameters.get(iline);
+        newList.set(iline, deprecated);
+        newList.add(iline, "# " + msg);
+        return newList;
+    }
+
+    private ArrayList<String> renameParam(String key, String newKey, ArrayList<String> parameters, String msg) {
+
+        ArrayList<String> newList = new ArrayList(parameters);
+        int iline = -1;
+        for (int i = 0; i < parameters.size(); i++) {
+            if (parameters.get(i).startsWith(key)) {
+                iline = i;
+                break;
+            }
+        }
+        String newName = parameters.get(iline).replace(key, newKey);
+        newList.set(iline, newName);
+        newList.add(iline, "# " + msg);
+        return newList;
+    }
+
+    private ArrayList<String> updateParam(String key, String parameter, ArrayList<String> parameters, String msg) {
+
+        ArrayList<String> newList = new ArrayList(parameters);
+        int iline = -1;
+        for (int i = 0; i < parameters.size(); i++) {
+            if (parameters.get(i).startsWith(key)) {
+                iline = i;
+                break;
+            }
+        }
+
+        newList.set(iline, parameter);
+        newList.add(iline, "# " + msg);
+        return newList;
+    }
+
+    private void writeCfgFile(String file, ArrayList<String> lines) {
+        BufferedWriter bfr = null;
         try {
-            validateVersion(cfgVersion);
-            return !(appVersion.getNumber().equals(cfgVersion.getNumber()))
-                    || !(appVersion.getDate().equals(cfgVersion.getDate()));
+            bfr = new BufferedWriter(new FileWriter(file));
+            for (String line : lines) {
+                bfr.append(line);
+                bfr.newLine();
+            }
+            bfr.close();
         } catch (IOException ex) {
-            warning(ex.getMessage());
-            return true;
+            error("Error writing configuration file " + file, ex);
+        } finally {
+            try {
+                bfr.flush();
+            } catch (IOException ex) {
+                // do nothing
+            }
         }
     }
 
-    private void validateVersion(Version testedVersion) throws IOException {
-
-        for (Version version : Version.values) {
-            if (version.getNumber().equals(testedVersion.getNumber())) {
-                return;
+    private ArrayList<String> getLines(String file) {
+        ArrayList<String> lines = new ArrayList();
+        try {
+            BufferedReader bfr = new BufferedReader(new FileReader(file));
+            String line = null;
+            int iline = 1;
+            try {
+                while ((line = bfr.readLine()) != null) {
+                    lines.add(line.trim());
+                    iline++;
+                }
+            } catch (IOException ex) {
+                error("Error loading parameters from file " + file + " at line " + iline + " " + line, ex);
             }
+        } catch (FileNotFoundException ex) {
+            error("Could not fing Osmose configuration file: " + file, ex);
         }
-        throw new IOException("Version number " + testedVersion + " is not identified as a valid Osmose version number.");
+        return lines;
+    }
+
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
+    }
+
+    private String backupCfgFile(String src) {
+
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
+        formatter.setCalendar(calendar);
+        StringBuilder bak = new StringBuilder(src.toString());
+        bak.append(".bak");
+        bak.append(formatter.format(calendar.getTime()));
+        try {
+            copyFile(new File(src), new File(bak.toString()));
+            return bak.toString();
+        } catch (IOException ex) {
+            error("Failed to backup configuration file " + src, ex);
+        }
+        return null;
+    }
+
+    private void copyFile(File src, File dest) throws IOException {
+
+        FileInputStream fis = new FileInputStream(src);
+        FileOutputStream fos = new FileOutputStream(dest);
+
+        java.nio.channels.FileChannel channelSrc = fis.getChannel();
+        java.nio.channels.FileChannel channelDest = fos.getChannel();
+
+        channelSrc.transferTo(0, channelSrc.size(), channelDest);
+
+        fis.close();
+        fos.close();
     }
 }

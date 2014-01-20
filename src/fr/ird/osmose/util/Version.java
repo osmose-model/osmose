@@ -48,6 +48,8 @@
  */
 package fr.ird.osmose.util;
 
+import java.text.ParseException;
+
 /**
  *
  * @author pverley
@@ -57,38 +59,38 @@ public class Version {
     /*
      * Careful with the dates. It should reflect the last change done in a
      * given version.
-     * Osmose always expect that the date of older version is prior to a
-     * newer version.
+     * Osmose always expect that the dates of older version are always prior to
+     * newer versions.
      */
-    final public static Version v3_0_beta = new Version("3.0b", "2013/09/01");
+    final public static Version v3_0 = new Version("3.0", "2013/09/01");
     //final public static Version v3_1 = new Version("3.1", "201?/??/??");
     //final public static Version v3_? = new Version("3.?", "201?/??/??");
     /**
      * List of all the versions
      */
-    final public static Version[] values = new Version[]{v3_0_beta};
+    final public static Version[] VERSIONS = new Version[]{v3_0};
     /*
      * Current version is always the newest one.
      */
-    final public static Version CURRENT = values[values.length - 1];
+    final public static Version CURRENT = VERSIONS[VERSIONS.length - 1];
     /*
      * 
      */
-    private String number;
-    private String date;
+    private final String number;
+    private final String[] dates;
 
-    public Version(String number, String date) {
-        this.date = date;
+    public Version(String number, String... dates) {
+        this.dates = (dates.length == 0) ? null : dates;
         this.number = number;
     }
 
     public boolean priorTo(Version version) {
-        if (null == date) {
+        if (null == dates) {
             /*
              * I am an undated version so we can assume that I am older.
              */
             return true;
-        } else if (null == version.date) {
+        } else if (null == version.dates) {
             /*
              * I am a dated version and I am compared to an undated version so
              * we can assume that I am newer.
@@ -98,7 +100,7 @@ public class Version {
             /*
              * We both are dated versions so let's compare dates.
              */
-            return (date.compareTo(version.date) < 0);
+            return (dates[dates.length - 1].compareTo(version.dates[version.dates.length - 1]) < 0);
         }
     }
 
@@ -107,11 +109,69 @@ public class Version {
     }
 
     public String getDate() {
-        return date;
+        return dates[dates.length - 1];
+    }
+
+    public String getReleaseDate() {
+        return dates[0];
+    }
+
+    public static Version parse(String sversion) throws ParseException {
+        String[] split = sversion.split(" ");
+        boolean numberValidated = false;
+        Version version = null;
+        for (Version oversion : VERSIONS) {
+            if (oversion.number.equals(split[0])) {
+                numberValidated = true;
+                version = oversion;
+                break;
+            }
+        }
+        // Version number does not match any of the predefined version numbers
+        if (!numberValidated) {
+            throw new ParseException("Version number " + split[0] + " is not a valid Osmose version number.", 0);
+        }
+        // Version number is OK, let's check the date
+        String date = split.length > 1 ? split[1].trim() : null;
+        if (null != date) {
+            if (date.startsWith("(") && date.endsWith(")")) {
+                date = date.substring(1, date.length() - 1);
+            }
+            for (String odate : version.dates) {
+                if (date.equals(odate)) {
+                    return new Version(version.getNumber(), date);
+                }
+            }
+        }
+        throw new ParseException("Version date " + date + " is not a valid Osmose version date.", split[0].length());
+    }
+
+    public String toShortString() {
+        StringBuilder version = new StringBuilder();
+        version.append(number);
+        if (null != dates) {
+            version.append(" (");
+            version.append(dates[dates.length - 1]);
+            version.append(")");
+        }
+        return version.toString();
     }
 
     @Override
     public String toString() {
-        return number + " (" + (date != null ? date : "undated") + ")";
+        StringBuilder version = new StringBuilder();
+        version.append(number);
+        if (null != dates) {
+            if (dates.length > 1) {
+                version.append(" update ");
+                version.append(dates.length - 1);
+            }
+            version.append(" (");
+            version.append(dates[dates.length - 1]);
+            version.append(")");
+        } else {
+            version.append(" (undated)");
+        }
+        return version.toString();
     }
 }

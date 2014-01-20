@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -211,6 +212,10 @@ public class Configuration extends OLogger {
      * The spatial grid of the simulation, {@link fr.ird.osmose.grid.IGrid}.
      */
     private IGrid grid;
+    /**
+     * Version of the configuration
+     */
+    private Version version;
 
 ///////////////
 // Constructors
@@ -777,17 +782,19 @@ public class Configuration extends OLogger {
      * @return the version of the configuration file.
      */
     public Version getVersion() {
-        if (!isNull("osmose.version")) {
-            try {
-                String version = getString("osmose.version");
-                String number = version.split(" ")[0];
-                String date = version.split(" ")[1];
-                return new Version(number, date);
-            } catch (Exception ex) {
-                warning("Could not identify version of the configuration, parameter osmose.version = {0}. Osmose assumes it is {1}", new Object[]{getString("osmose.version"), Version.v3_0_beta.toString()});
+        if (null == version) {
+            Version fallback = new Version(Version.v3_0.getNumber(), Version.v3_0.getReleaseDate());
+            if (!isNull("osmose.version")) {
+                try {
+                    version = Version.parse(getString("osmose.version"));
+                } catch (Exception ex) {
+                    error("Could not identify version of the configuration, check parameter osmose.version = " + getString("osmose.version"), ex);
+                }
+            } else {
+                version = fallback;
             }
         }
-        return Version.v3_0_beta;
+        return version;
     }
 
     /**
@@ -812,6 +819,10 @@ public class Configuration extends OLogger {
             }
         }
         return fallback;
+    }
+
+    public String getMainFile() {
+        return mainFilename;
     }
 
     /**
