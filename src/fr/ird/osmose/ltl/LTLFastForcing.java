@@ -62,6 +62,18 @@ import ucar.nc2.NetcdfFile;
 public class LTLFastForcing extends SimulationLinker implements LTLForcing {
 
     private float[][][][] biomass;
+    /**
+     * Number of time step in the LTL time series inputed to Osmose. This value
+     * must be a multiple of the number of time step per year in Osmose. It
+     * means the user can provide either one year, 5 years or 50 years of LTL
+     * data and Osmose will loop over it (if necessary) until the end of the
+     * simulation.
+     */
+    private int nLTLStep;
+    /**
+     * Current LTL time step
+     */
+    private int iLTLStep;
 
     public LTLFastForcing(int rank) {
         super(rank);
@@ -75,6 +87,10 @@ public class LTLFastForcing extends SimulationLinker implements LTLForcing {
             error("Error reading LTLForcing parameters.", new FileNotFoundException("LTL NetCDF file " + ncFile + " does not exist."));
         }
         
+        // Read number of LTL steps
+        nLTLStep = getConfiguration().getInt("ltl.nstep");
+        iLTLStep = 0;
+
         loadData(ncFile);
     }
 
@@ -98,11 +114,13 @@ public class LTLFastForcing extends SimulationLinker implements LTLForcing {
      */
     @Override
     public float getBiomass(int iPlankton, Cell cell) {
-        return biomass[getSimulation().getIndexTimeYear()][iPlankton][cell.get_jgrid()][cell.get_igrid()];
+        return biomass[iLTLStep][iPlankton][cell.get_jgrid()][cell.get_igrid()];
     }
 
     @Override
     public void update(int iStepSimu) {
-        // Nothing to update
+        
+        // Update the LTL time step
+        iLTLStep = getSimulation().getIndexTimeSimu() % nLTLStep;
     }
 }
