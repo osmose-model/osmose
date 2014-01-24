@@ -224,6 +224,14 @@ public class Simulation extends OLogger {
         // Init LTL forcing
         initForcing();
 
+        // By default do not make prey records as it is memory expensive
+        /**
+         * @warning - phv 2014/01/25 this must be done before calling
+         * step.init() that will in turn call outputManager.init() which may
+         * request prey record.
+         */
+        preyRecord = false;
+
         // Instantiate the Step
         //step = new SequentialMortalityStep(rank);
         step = new ConcomitantMortalityStep(rank);
@@ -252,9 +260,6 @@ public class Simulation extends OLogger {
         } else {
             warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
         }
-
-        // By default do not make prey records as it is memory expensive
-        preyRecord = false;
     }
 
     /**
