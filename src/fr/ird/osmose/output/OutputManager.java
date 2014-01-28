@@ -97,7 +97,7 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.mortality.perSpecies.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.perSpecies.perAge.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+                indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.perSpecies.perSize.enabled", getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
             }
         }
         // Yield
