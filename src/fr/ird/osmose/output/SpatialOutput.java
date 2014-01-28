@@ -87,14 +87,22 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
      * Whether the indicator should be enabled or not.
      */
     private final boolean enabled;
+    private boolean cutoff;
 
     public SpatialOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
+    private boolean includeClassZero() {
+        return !cutoff;
+    }
+
     @Override
     public void init() {
+
+        cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
+
         /*
          * Create NetCDF file
          */
@@ -171,7 +179,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             str.append(" ");
         }
         nc.addGlobalAttribute("dimension_species", str.toString());
-        nc.addGlobalAttribute("include_age_class_zero", "false");
+        nc.addGlobalAttribute("include_age_class_zero", Boolean.toString(includeClassZero()));
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -235,7 +243,10 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
                 for (School school : getSchoolSet().getSchools(cell)) {
-                    if (school.getAgeDt() > school.getSpecies().getAgeClassZero() && !school.isUnlocated()) {
+                    if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                        continue;
+                    }
+                    if (!school.isUnlocated()) {
                         int iSpec = school.getSpeciesIndex();
                         biomass[iSpec][j][i] += school.getInstantaneousBiomass();
                         abundance[iSpec][j][i] += school.getInstantaneousAbundance();
@@ -344,7 +355,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         filename.append(".nc.part");
         return filename.toString();
     }
-    
+
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         // Always true, every time step should be written in the NetCDF file.

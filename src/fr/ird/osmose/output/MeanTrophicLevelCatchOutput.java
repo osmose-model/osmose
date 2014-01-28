@@ -81,9 +81,6 @@ public class MeanTrophicLevelCatchOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                continue;
-            }
             int i = school.getSpeciesIndex();
             meanTLCatch[i] += school.getTrophicLevel() * school.adb2biom(school.getNdead(MortalityCause.FISHING));
             yield[i] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
@@ -116,14 +113,7 @@ public class MeanTrophicLevelCatchOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Mean Trophic Level of fish species, weighted by fish catch, and ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
+        return "Mean Trophic Level of fish species, weighted by fish catch, and including first ages specified in input";
     }
 
     @Override

@@ -79,9 +79,6 @@ public class MeanSizeCatchOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                continue;
-            }
             int i = school.getSpeciesIndex();
             meanSizeCatch[i] += school.getNdead(MortalityCause.FISHING) * school.getLength();
             yieldN[i] += school.getNdead(MortalityCause.FISHING);
@@ -114,14 +111,7 @@ public class MeanSizeCatchOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Mean size of fish species in cm, weighted by fish numbers in the catches, and ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
+        return "Mean size of fish species in cm, weighted by fish numbers in the catches, and including first ages specified in input.";
     }
 
     @Override
