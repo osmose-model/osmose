@@ -184,7 +184,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             prw[iSpecies].print(time);
-            prw[iSpecies].print(";");
+            prw[iSpecies].print(separator);
             for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
                 for (int iStage = 0; iStage < STAGES; iStage++) {
                     if (iDeath == MortalityCause.NATURAL.index && iStage == EGG) {
