@@ -124,6 +124,8 @@ public class Species {
      */
     final private float growthAgeThreshold;
 
+    final private float conversionToTotalLength;
+
 //////////////
 // Constructor
 //////////////
@@ -161,6 +163,11 @@ public class Species {
         }
         float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * getConfiguration().getNStepYear());
+        if (!getConfiguration().isNull("species.conversion2totallength.sp" + index)) {
+            conversionToTotalLength = getConfiguration().getFloat("species.conversion2totallength.sp" + index);
+        } else {
+            conversionToTotalLength = 1.f;
+        }
     }
 
 //////////////////////////////
@@ -251,6 +258,21 @@ public class Species {
     }
 
     /**
+     * Converts physiological length into total length. Default length that
+     * characterizes the species should be the "physiological" length (e.g. the
+     * fork length or the cephalo-thorax length, the standard length, etc.).
+     * Whereas in the predation process Osmose must consider the total length as
+     * a proxy of the diameter of the prey. Conversion is done with a
+     * multiplying parameter.
+     *
+     * @param length, the physiological length of the fish
+     * @return the total length of the fish
+     */
+    public float toTotalLength(float length) {
+        return conversionToTotalLength * length;
+    }
+
+    /**
      * Returns the lifespan of the species. Parameter
      * <i>species.lifespan.sp#</i>
      *
@@ -318,12 +340,12 @@ public class Species {
     public float getSizeMaturity() {
         return sizeMaturity;
     }
-    
+
     /**
      * Just keep it as a reminder for a future vulnerability function
-     * 
+     *
      * @param biomass
-     * @return 
+     * @return
      */
     private boolean isVulnerable(double biomass) {
         double Bv = 0.d;

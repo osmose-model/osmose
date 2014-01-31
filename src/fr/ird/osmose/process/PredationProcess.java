@@ -390,7 +390,7 @@ public class PredationProcess extends AbstractProcess {
             if (prey.equals(predator)) {
                 continue;
             }
-            if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
+            if (prey.getTotalLength() >= preySizeMin && prey.getTotalLength() < preySizeMax) {
                 indexPreys.add(iPrey);
             }
         }
@@ -446,7 +446,7 @@ public class PredationProcess extends AbstractProcess {
                 if (prey.equals(predator)) {
                     continue;
                 }
-                if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
+                if (prey.getTotalLength() >= preySizeMin && prey.getTotalLength() < preySizeMax) {
                     iStagePrey = accessStage.getStage(prey);
                     accessibility[iPrey] = accessibilityMatrix[iSpecPrey][iStagePrey][iSpecPred][iStagePred];
                 }

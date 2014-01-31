@@ -105,6 +105,10 @@ public class School extends Prey {
      */
     private float length;
     /**
+     * Total length of the fish in centimeter.
+     */
+    private float totalLength;
+    /**
      * Length of the fish in centimeter at the beginning of the time step.
      */
     private float lengthi;
@@ -339,6 +343,10 @@ public class School extends Prey {
     public float getLength() {
         return length;
     }
+    
+    public float getTotalLength() {
+        return totalLength;
+    }
 
     /**
      * Increments the length of the fish from given number of centimeter.
@@ -348,6 +356,7 @@ public class School extends Prey {
     public void incrementLength(float dlength) {
         if (dlength != 0.f) {
             length += dlength;
+            totalLength = species.toTotalLength(length);
             setWeight(species.computeWeight(length) * 1e-6f);
         }
     }
