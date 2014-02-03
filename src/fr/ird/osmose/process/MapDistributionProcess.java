@@ -112,7 +112,7 @@ public class MapDistributionProcess extends AbstractProcess {
             }
         }
     }
-    
+
     private boolean isOut(School school) {
         return (null == maps.getMap(school));
     }
@@ -170,9 +170,11 @@ public class MapDistributionProcess extends AbstractProcess {
     private float computeMaxProbaPresence(int numMap) {
         float tempMaxProbaPresence = 0;
         GridMap map = maps.getMap(numMap);
-        for (int j = 0; j < getGrid().get_ny(); j++) {
-            for (int i = 0; i < getGrid().get_nx(); i++) {
-                tempMaxProbaPresence = Math.max(tempMaxProbaPresence, map.getValue(i, j));
+        if (null != map) {
+            for (int j = 0; j < getGrid().get_ny(); j++) {
+                for (int i = 0; i < getGrid().get_nx(); i++) {
+                    tempMaxProbaPresence = Math.max(tempMaxProbaPresence, map.getValue(i, j));
+                }
             }
         }
         return tempMaxProbaPresence;
