@@ -80,7 +80,7 @@ public class ByDtLarvaMortalityScenario extends AbstractMortalityScenario {
 
     @Override
     public float getInstantaneousRate(School school) {
-        return Dlarva[getRank()];
+        return Dlarva[getSimulation().getIndexTimeSimu()];
     }
 
     @Override
@@ -89,7 +89,7 @@ public class ByDtLarvaMortalityScenario extends AbstractMortalityScenario {
         for (int iStep = 0; iStep < Dlarva.length; iStep++) {
             M += Dlarva[iStep];
         }
-        M = M / (Dlarva.length * getConfiguration().getNYear());
+        M = M / getConfiguration().getNYear();
         return (float) M;
     }
 }

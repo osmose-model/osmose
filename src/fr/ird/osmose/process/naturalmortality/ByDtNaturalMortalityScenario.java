@@ -80,7 +80,7 @@ public class ByDtNaturalMortalityScenario extends AbstractMortalityScenario {
 
     @Override
     public float getInstantaneousRate(School school) {
-        return D[getRank()];
+        return D[getSimulation().getIndexTimeSimu()];
     }
 
     @Override
@@ -89,7 +89,7 @@ public class ByDtNaturalMortalityScenario extends AbstractMortalityScenario {
         for (int iStep = 0; iStep < D.length; iStep++) {
             M += D[iStep];
         }
-        M = M / (D.length * getConfiguration().getNYear());
+        M = M / getConfiguration().getNYear();
         return (float) M;
     }
 }
