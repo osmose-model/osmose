@@ -78,11 +78,7 @@ public class MeanSizeSpeciesOutput extends SimulationLinker implements IOutput {
     public MeanSizeSpeciesOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
-        if (!getConfiguration().isNull("output.csv.separator")) {
-            separator = getConfiguration().getString("output.csv.separator");
-        } else {
-            separator = OutputManager.SEPARATOR;
-        }
+        separator = getConfiguration().getOutputSeparator();
     }
 
     @Override

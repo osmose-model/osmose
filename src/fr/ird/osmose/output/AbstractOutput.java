@@ -79,11 +79,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     AbstractOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
-        if (!getConfiguration().isNull("output.csv.separator")) {
-            separator = getConfiguration().getString("output.csv.separator");
-        } else {
-            separator = OutputManager.SEPARATOR;
-        }
+        separator = getConfiguration().getOutputSeparator();
     }
 
     @Override

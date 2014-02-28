@@ -62,9 +62,6 @@ public class OutputManager extends SimulationLinker {
     // List of the indicators
     final private List<IOutput> indicators;
 
-    // Default CSV separator
-    public final static String SEPARATOR = ",";
-
     public OutputManager(int rank) {
         super(rank);
         indicators = new ArrayList();
@@ -165,7 +162,7 @@ public class OutputManager extends SimulationLinker {
             }
         }
     }
-
+    
     public void close() {
         for (IOutput indicator : indicators) {
             if (indicator.isEnabled()) {
@@ -201,4 +198,5 @@ public class OutputManager extends SimulationLinker {
             }
         }
     }
+
 }

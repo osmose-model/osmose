@@ -100,11 +100,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
     public MortalityOutput(int rank, String keyEnabled) {
         super(rank);
         enabled = getConfiguration().getBoolean(keyEnabled);
-        if (!getConfiguration().isNull("output.csv.separator")) {
-            separator = getConfiguration().getString("output.csv.separator");
-        } else {
-            separator = OutputManager.SEPARATOR;
-        }
+        separator = getConfiguration().getOutputSeparator();
     }
 
     @Override

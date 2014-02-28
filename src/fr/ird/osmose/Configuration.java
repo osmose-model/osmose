@@ -52,13 +52,13 @@ import fr.ird.osmose.util.Version;
 import fr.ird.osmose.util.UpdateManager;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.util.Properties;
+import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.logging.OLogger;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -167,6 +167,12 @@ public class Configuration extends OLogger {
      */
     private String outputPathname;
     /**
+     * Output CSV separator
+     *
+     * @see fr.ird.osmose.util.Separator
+     */
+    private String outputSeparator;
+    /**
      * Path of the directory of the main configuration file.
      */
     final private String inputPathname;
@@ -249,15 +255,29 @@ public class Configuration extends OLogger {
         // Load the parameters from the main configuration file
         loadProperties(mainFilename, 0);
 
+        // Check whether the configuration file is up-to-date
+        UpdateManager.getInstance().upgrade();
+
         // Check whether the path of the output folder is already set (by command line option)
         if (null == outputPathname) {
             // Output path read in the configuration file
             outputPathname = resolvePath(getString("output.dir.path"));
         }
 
-        // Check whether the configuration file is up-to-date
-        UpdateManager.getInstance().upgrade();
+        // Read Output CSV separator
+        if (!isNull("output.csv.separator")) {
+            Separator separator;
+            try {
+                separator = Separator.valueOf(getString("output.csv.separator").toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                warning("Failed to parse parameter output.csv.separator = " + getString("output.csv.separator") + ". It must be either " + Separator.asList());
+                separator = Separator.COMA;
+                info("Output default CSV separator set to " + separator.name());
+            }
+            outputSeparator = separator.toString();
+        }
 
+        // Number of CPUs allocated to this run
         if (!isNull("simulation.ncpu")) {
             nCpu = getInt("simulation.ncpu");
         } else {
@@ -690,6 +710,10 @@ public class Configuration extends OLogger {
         return outputPathname;
     }
 
+    public String getOutputSeparator() {
+        return outputSeparator;
+    }
+
     /**
      * Returns the number of CPUs allocated for running the simulations
      * concurrently. Parameter<i>simulation.ncpu</i>
@@ -823,37 +847,6 @@ public class Configuration extends OLogger {
 
     public String getMainFile() {
         return mainFilename;
-    }
-
-    /**
-     * List of accepted separators in a parameter <i>key separator value</i> and
-     * in an array of values <i>key separator1 value1 separator2 value2
-     * separator2 value3 separator2 value4</i>.
-     * <ul>
-     * <li>equals =</li>
-     * <li>semicolon ;</li>
-     * <li>coma ,</li>
-     * <li>colon :</li>
-     * <li>tab \t</li>
-     * <ul>
-     */
-    private enum Separator {
-
-        EQUALS('='),
-        SEMICOLON(';'),
-        COMA(','),
-        COLON(':'),
-        TAB('\t');
-        private final String separator;
-
-        private Separator(char separator) {
-            this.separator = Character.toString(separator);
-        }
-
-        @Override
-        public String toString() {
-            return separator;
-        }
     }
 
     /**
