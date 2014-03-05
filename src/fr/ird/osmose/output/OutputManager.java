@@ -82,11 +82,17 @@ public class OutputManager extends SimulationLinker {
          * Instantiate indicators
          */
         // Biomass
-        indicators.add(new BiomassOutput(rank, "output.biomass.enabled"));
+        if (getConfiguration().getBoolean("output.biomass.enabled")) {
+            indicators.add(new BiomassOutput(rank, "output.biomass.enabled"));
+        }
         // Abundance
-        indicators.add(new AbundanceOutput(rank, "output.abundance.enabled"));
+        if (getConfiguration().getBoolean("output.abundance.enabled")) {
+            indicators.add(new AbundanceOutput(rank, "output.abundance.enabled"));
+        }
         // Mortality
-        indicators.add(new MortalityOutput(rank, "output.mortality.enabled"));
+        if (getConfiguration().getBoolean("output.mortality.enabled")) {
+            indicators.add(new MortalityOutput(rank, "output.mortality.enabled"));
+        }
         if (getConfiguration().getBoolean("output.mortality.perSpecies.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 indicators.add(new MortalitySpeciesOutput(rank, "output.mortality.perSpecies.perAge.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
@@ -98,17 +104,37 @@ public class OutputManager extends SimulationLinker {
             }
         }
         // Yield
-        indicators.add(new YieldOutput(rank, "output.yield.biomass.enabled"));
-        indicators.add(new YieldNOutput(rank, "output.yield.abundance.enabled"));
+        if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
+            indicators.add(new YieldOutput(rank, "output.yield.biomass.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
+            indicators.add(new YieldNOutput(rank, "output.yield.abundance.enabled"));
+        }
         // Size
-        indicators.add(new MeanSizeOutput(rank, "output.size.enabled"));
-        indicators.add(new MeanSizeCatchOutput(rank, "output.size.catch.enabled"));
-        indicators.add(new SizeSpectrumOutput(rank, "output.size.spectrum.enabled"));
-        indicators.add(new SizeSpectrumSpeciesNOutput(rank, "output.size.spectrum.perSpecies.N.enabled"));
-        indicators.add(new SizeSpectrumSpeciesYieldNOutput(rank, "output.size.spectrum.perSpecies.N.enabled"));
-        indicators.add(new SizeSpectrumSpeciesBOutput(rank, "output.size.spectrum.perSpecies.B.enabled"));
-        indicators.add(new SizeSpectrumSpeciesYieldOutput(rank, "output.size.spectrum.perSpecies.B.enabled"));
-        indicators.add(new MeanSizeSpeciesOutput(rank, "output.size.perSpecies.enabled"));
+        if (getConfiguration().getBoolean("output.size.enabled")) {
+            indicators.add(new MeanSizeOutput(rank, "output.size.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.size.catch.enabled")) {
+            indicators.add(new MeanSizeCatchOutput(rank, "output.size.catch.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.size.spectrum.enabled")) {
+            indicators.add(new SizeSpectrumOutput(rank, "output.size.spectrum.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.N.enabled")) {
+            indicators.add(new SizeSpectrumSpeciesNOutput(rank, "output.size.spectrum.perSpecies.N.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.N.enabled")) {
+            indicators.add(new SizeSpectrumSpeciesYieldNOutput(rank, "output.size.spectrum.perSpecies.N.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.B.enabled")) {
+            indicators.add(new SizeSpectrumSpeciesBOutput(rank, "output.size.spectrum.perSpecies.B.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.B.enabled")) {
+            indicators.add(new SizeSpectrumSpeciesYieldOutput(rank, "output.size.spectrum.perSpecies.B.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.size.perSpecies.enabled")) {
+            indicators.add(new MeanSizeSpeciesOutput(rank, "output.size.perSpecies.enabled"));
+        }
         // Age
         if (getConfiguration().getBoolean("output.age.spectrum.perSpecies.N.enabled")) {
             indicators.add(new AgeSpectrumSpeciesNOutput(rank, "output.age.spectrum.perSpecies.N.enabled"));
@@ -119,13 +145,25 @@ public class OutputManager extends SimulationLinker {
             indicators.add(new AgeSpectrumSpeciesYieldOutput(rank, "output.age.spectrum.perSpecies.B.enabled"));
         }
         // TL
-        indicators.add(new MeanTrophicLevelOutput(rank, "output.tl.enabled"));
-        indicators.add(new MeanTrophicLevelCatchOutput(rank, "output.tl.catch.enabled"));
-        indicators.add(new TrophicLevelSpectrumOutput(rank, "output.tl.spectrum.enabled"));
-        indicators.add(new MeanTrophicLevelSizeOutput(rank, "output.tl.perSize.enabled"));
-        indicators.add(new MeanTrophicLevelAgeOutput(rank, "output.tl.perAge.enabled"));
+        if (getConfiguration().getBoolean("output.tl.enabled")) {
+            indicators.add(new MeanTrophicLevelOutput(rank, "output.tl.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.tl.catch.enabled")) {
+            indicators.add(new MeanTrophicLevelCatchOutput(rank, "output.tl.catch.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.tl.spectrum.enabled")) {
+            indicators.add(new TrophicLevelSpectrumOutput(rank, "output.tl.spectrum.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.tl.perSize.enabled")) {
+            indicators.add(new MeanTrophicLevelSizeOutput(rank, "output.tl.perSize.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.tl.perAge.enabled")) {
+            indicators.add(new MeanTrophicLevelAgeOutput(rank, "output.tl.perAge.enabled"));
+        }
         // Predation
-        indicators.add(new DietOutput(rank, "output.diet.composition.enabled"));
+        if (getConfiguration().getBoolean("output.diet.composition.enabled")) {
+            indicators.add(new DietOutput(rank, "output.diet.composition.enabled"));
+        }
         if (getConfiguration().getBoolean("output.diet.composition.perSpecies.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 indicators.add(new DietSpeciesOutput(rank, "output.diet.composition.perSpecies.perAge.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
@@ -136,8 +174,12 @@ public class OutputManager extends SimulationLinker {
                 indicators.add(new DietSpeciesOutput(rank, "output.diet.composition.perSpecies.perSize.enabled", getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
             }
         }
-        indicators.add(new PredatorPressureOutput(rank, "output.diet.pressure.enabled"));
-        indicators.add(new BiomassDietStageOutput(rank, "output.diet.pressure.enabled"));
+        if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
+            indicators.add(new PredatorPressureOutput(rank, "output.diet.pressure.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
+            indicators.add(new BiomassDietStageOutput(rank, "output.diet.pressure.enabled"));
+        }
         if (getConfiguration().getBoolean("output.diet.pressure.perSpecies.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 indicators.add(new PredatorPressureSpeciesOutput(rank, "output.diet.pressure.perSpecies.perAge.enabled", getSpecies(i), AbstractSpectrumOutput.Type.AGE));
@@ -149,8 +191,12 @@ public class OutputManager extends SimulationLinker {
             }
         }
         // Spatialized
-        indicators.add(new SpatialOutput(rank, "output.spatial.enabled"));
-        indicators.add(new LTLOutput(rank, "output.spatial.ltl.enabled"));
+        if (getConfiguration().getBoolean("output.spatial.enabled")) {
+            indicators.add(new SpatialOutput(rank, "output.spatial.enabled"));
+        }
+        if (getConfiguration().getBoolean("output.spatial.ltl.enabled")) {
+            indicators.add(new LTLOutput(rank, "output.spatial.ltl.enabled"));
+        }
 
         /*
          * Initialize indicators
@@ -162,7 +208,7 @@ public class OutputManager extends SimulationLinker {
             }
         }
     }
-    
+
     public void close() {
         for (IOutput indicator : indicators) {
             if (indicator.isEnabled()) {

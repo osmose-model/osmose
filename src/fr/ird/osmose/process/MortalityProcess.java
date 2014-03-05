@@ -146,8 +146,6 @@ public class MortalityProcess extends AbstractProcess {
 
     public MortalityProcess(int rank) {
         super(rank);
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override
