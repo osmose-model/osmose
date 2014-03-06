@@ -197,6 +197,7 @@ public class School extends Prey {
         super(species.getIndex(), x, y, abundance, weight, trophicLevel);
         this.species = species;
         this.length = length;
+        totalLength = species.toTotalLength(length);
         this.ageDt = age;
         out = false;
         preyRecords = new ArrayList();
@@ -232,6 +233,8 @@ public class School extends Prey {
      * @param preyedBiomass, the biomass preyed on this prey
      * @param preyStage, the stage of the prey,
      * {@link fr.ird.osmose.stage.DietOutputStage}
+     * @param keepRecord, whether or not Osmose should keep the prey record in
+     * memory.
      */
     public void addPreyRecord(int indexPrey, float trophicLevel, double preyedBiomass, int preyStage, boolean keepRecord) {
         if (keepRecord) {
@@ -277,7 +280,8 @@ public class School extends Prey {
 
     /**
      * Checks whether the school is alive. A school is alive if it fulfills both
-     * conditions: {@code instantaneous abundance > 0} and null     {@code age <= lifespan - 1}
+     * conditions: {@code instantaneous abundance > 0} and null
+     * {@code age <= lifespan - 1}
      *
      * @return whether the school is alive or not
      */
@@ -343,7 +347,7 @@ public class School extends Prey {
     public float getLength() {
         return length;
     }
-    
+
     public float getTotalLength() {
         return totalLength;
     }

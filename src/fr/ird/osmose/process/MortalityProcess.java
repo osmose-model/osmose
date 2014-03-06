@@ -215,12 +215,15 @@ public class MortalityProcess extends AbstractProcess {
                 // Calculate starvation mortality rate that will be apply at next time step
                 school.setStarvationRate(starvationProcess.getStarvationMortalityRate(school));
                 // Update trophic level
-                double trophicLevel = 0.d;
-                for (PreyRecord preyRecord : school.getPreyRecords()) {
-                    trophicLevel += preyRecord.getTrophicLevel() * preyRecord.getBiomass() / school.getPreyedBiomass();
+                List<PreyRecord> preys = school.getPreyRecords();
+                if (!preys.isEmpty()) {
+                    double trophicLevel = 0.d;
+                    for (PreyRecord preyRecord : school.getPreyRecords()) {
+                        trophicLevel += preyRecord.getTrophicLevel() * preyRecord.getBiomass() / school.getPreyedBiomass();
+                    }
+                    trophicLevel += 1;
+                    school.setTrophicLevel((float) trophicLevel);
                 }
-                trophicLevel += 1;
-                school.setTrophicLevel((float) trophicLevel);
             }
         }
 
