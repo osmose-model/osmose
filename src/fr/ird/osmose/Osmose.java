@@ -48,9 +48,9 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.util.Version;
 import fr.ird.osmose.util.logging.OLogger;
 import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.util.version.VersionManager;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -332,7 +332,7 @@ public class Osmose extends OLogger {
         osmose.info("*********************************");
         osmose.info("Osmose model - Copyright 2013 IRD");
         osmose.info("*********************************");
-        osmose.info("Osmose version {0}", Version.CURRENT.toString());
+        osmose.info("Osmose version {0}", VersionManager.getInstance().OSMOSE_VERSION.toString());
         osmose.readArgs(args);
         osmose.runAll();
         osmose.info("*   Osmose model - Exit");

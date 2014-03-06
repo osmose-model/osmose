@@ -48,8 +48,7 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.util.Version;
-import fr.ird.osmose.util.UpdateManager;
+import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.util.Properties;
 import fr.ird.osmose.util.Separator;
@@ -218,10 +217,6 @@ public class Configuration extends OLogger {
      * The spatial grid of the simulation, {@link fr.ird.osmose.grid.IGrid}.
      */
     private IGrid grid;
-    /**
-     * Version of the configuration
-     */
-    private Version version;
 
 ///////////////
 // Constructors
@@ -256,7 +251,7 @@ public class Configuration extends OLogger {
         loadProperties(mainFilename, 0);
 
         // Check whether the configuration file is up-to-date
-        UpdateManager.getInstance().upgrade();
+        VersionManager.getInstance().updateConfiguration();
 
         // Check whether the path of the output folder is already set (by command line option)
         if (null == outputPathname) {
@@ -794,31 +789,6 @@ public class Configuration extends OLogger {
      */
     public IGrid getGrid() {
         return grid;
-    }
-
-    /**
-     * Returns the version of the configuration file. Parameter
-     * <i>osmose.version</i>. If the parameter is not found or the value does
-     * not match any listed Osmose version, {@code Configuration} assumes it is
-     * version 3.0b {@link Version#v3_0_beta}
-     *
-     * @see fr.ird.osmose.util.Version
-     * @return the version of the configuration file.
-     */
-    public Version getVersion() {
-        if (null == version) {
-            Version fallback = new Version(Version.v3_0.getNumber(), Version.v3_0.getReleaseDate());
-            if (!isNull("osmose.version")) {
-                try {
-                    version = Version.parse(getString("osmose.version"));
-                } catch (Exception ex) {
-                    error("Could not identify version of the configuration, check parameter osmose.version = " + getString("osmose.version"), ex);
-                }
-            } else {
-                version = fallback;
-            }
-        }
-        return version;
     }
 
     /**
