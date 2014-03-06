@@ -83,15 +83,10 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
     private float[][][] ltlbiomass;
     private float[][][] abundance;
     private float[][][] yield;
-    /**
-     * Whether the indicator should be enabled or not.
-     */
-    private final boolean enabled;
     private boolean cutoff;
 
-    public SpatialOutput(int rank, String keyEnabled) {
+    public SpatialOutput(int rank) {
         super(rank);
-        enabled = getConfiguration().getBoolean(keyEnabled);
     }
 
     private boolean includeClassZero() {
@@ -212,8 +207,8 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
             filePart.renameTo(fileBase);
-        } catch (Exception ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.WARNING, "Problem closing the NetCDF output file ==> {0}", ex.toString());
+        } catch (IOException ex) {
+            warning("Problem closing the NetCDF spatial output file | {0}", ex.toString());
         }
     }
 
@@ -260,11 +255,6 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 }
             }
         }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override

@@ -58,8 +58,8 @@ public class AbundanceOutput extends AbstractOutput {
 
     private double[] abundance;
 
-    public AbundanceOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+    public AbundanceOutput(int rank) {
+        super(rank);
     }
 
     @Override

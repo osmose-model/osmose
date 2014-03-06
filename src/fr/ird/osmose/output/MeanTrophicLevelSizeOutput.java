@@ -68,18 +68,14 @@ public class MeanTrophicLevelSizeOutput extends AbstractOutput {
     // discrete size spectrum
     private float[] tabSizes;
 
-    public MeanTrophicLevelSizeOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+    public MeanTrophicLevelSizeOutput(int rank) {
+        super(rank);
         initializeSizeSpectrum();
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
     }
 
     private void initializeSizeSpectrum() {
-
-        if (!isEnabled()) {
-            return;
-        }
 
         float spectrumMinSize = getConfiguration().getFloat("output.size.spectrum.size.min");
         spectrumMaxSize = getConfiguration().getFloat("output.size.spectrum.size.max");

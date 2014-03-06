@@ -58,8 +58,8 @@ public class BiomassOutput extends AbstractOutput {
 
     private double[] biomass;
 
-    public BiomassOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+    public BiomassOutput(int rank) {
+        super(rank);
     }
 
     @Override

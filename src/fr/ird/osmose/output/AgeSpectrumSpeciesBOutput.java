@@ -14,8 +14,8 @@ import java.io.File;
  */
 public class AgeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
 
-    public AgeSpectrumSpeciesBOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled, Type.AGE);
+    public AgeSpectrumSpeciesBOutput(int rank) {
+        super(rank, Type.AGE);
     }
 
     @Override

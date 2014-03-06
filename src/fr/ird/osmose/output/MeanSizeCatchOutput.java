@@ -61,8 +61,8 @@ public class MeanSizeCatchOutput extends AbstractOutput {
     private double[] meanSizeCatch;
     private double[] yieldN;
 
-    public MeanSizeCatchOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+    public MeanSizeCatchOutput(int rank) {
+        super(rank);
     }
 
     @Override

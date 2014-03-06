@@ -75,13 +75,6 @@ public interface IOutput {
     public void update();
 
     /**
-     * Whether or not the indicator is activated in the current simulation.
-     *
-     * @return true is the indicator should be saved
-     */
-    public boolean isEnabled();
-
-    /**
      * Write the indicator in output file at specified time
      *
      * @param time, expressed in year

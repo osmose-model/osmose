@@ -67,8 +67,8 @@ public class PredatorPressureSpeciesOutput extends AbstractSpectrumOutput {
      */
     private double[][] predatorPressure;
 
-    public PredatorPressureSpeciesOutput(int rank, String keyEnabled, Species species, Type type) {
-        super(rank, keyEnabled, type);
+    public PredatorPressureSpeciesOutput(int rank, Species species, Type type) {
+        super(rank, type);
         this.species = species;
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();

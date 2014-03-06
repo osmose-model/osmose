@@ -69,15 +69,10 @@ public class MeanSizeSpeciesOutput extends SimulationLinker implements IOutput {
     //
     private double[][] meanSize;
     private double[][] abundance;
-    /**
-     * Whether the indicator should be enabled or not.
-     */
-    private boolean enabled;
     private final String separator;
 
-    public MeanSizeSpeciesOutput(int rank, String keyEnabled) {
+    public MeanSizeSpeciesOutput(int rank) {
         super(rank);
-        enabled = getConfiguration().getBoolean(keyEnabled);
         separator = getConfiguration().getOutputSeparator();
     }
 
@@ -105,11 +100,6 @@ public class MeanSizeSpeciesOutput extends SimulationLinker implements IOutput {
             meanSize[i][school.getAgeDt()] += school.getInstantaneousAbundance() * school.getLength();
             abundance[i][school.getAgeDt()] += school.getInstantaneousAbundance();
         }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override
@@ -156,8 +146,7 @@ public class MeanSizeSpeciesOutput extends SimulationLinker implements IOutput {
                 // Init stream
                 fos[iSpecies] = new FileOutputStream(file, true);
             } catch (FileNotFoundException ex) {
-                getSimulation().warning("Failed to create indicator file {0}. Osmose will not write it.", file.getAbsolutePath());
-                enabled = false;
+                getSimulation().warning("Failed to create output file {0}.", file.getAbsolutePath());
             }
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
             if (!fileExists) {

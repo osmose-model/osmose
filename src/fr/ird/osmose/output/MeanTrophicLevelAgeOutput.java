@@ -60,8 +60,8 @@ public class MeanTrophicLevelAgeOutput extends AbstractOutput {
     private double[][] meanTL;
     private double[][] biomass;
 
-     public MeanTrophicLevelAgeOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+     public MeanTrophicLevelAgeOutput(int rank) {
+        super(rank);
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
     }

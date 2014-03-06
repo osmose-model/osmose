@@ -58,8 +58,8 @@ public class YieldNOutput extends AbstractOutput {
 
     public double[] yieldN;
 
-    public YieldNOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+    public YieldNOutput(int rank) {
+        super(rank);
     }
 
     @Override

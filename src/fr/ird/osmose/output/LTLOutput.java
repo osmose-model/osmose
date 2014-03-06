@@ -85,14 +85,9 @@ public class LTLOutput extends SimulationLinker implements IOutput {
      * LTL biomass array after predation process.
      */
     private float[][][] ltlbiomass1;
-    /**
-     * Whether the indicator should be enabled or not.
-     */
-    private final boolean enabled;
 
-    public LTLOutput(int rank, String keyEnabled) {
+    public LTLOutput(int rank) {
         super(rank);
-        enabled = getConfiguration().getBoolean(keyEnabled);
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
     }
@@ -155,11 +150,6 @@ public class LTLOutput extends SimulationLinker implements IOutput {
                 }
             }
         }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override

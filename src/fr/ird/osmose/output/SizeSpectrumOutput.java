@@ -57,8 +57,8 @@ import java.io.File;
  */
 public class SizeSpectrumOutput extends AbstractSpectrumOutput {
 
-    public SizeSpectrumOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled, Type.SIZE);
+    public SizeSpectrumOutput(int rank) {
+        super(rank, Type.SIZE);
     }
 
     @Override

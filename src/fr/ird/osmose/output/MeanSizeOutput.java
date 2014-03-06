@@ -60,8 +60,8 @@ public class MeanSizeOutput extends AbstractOutput {
     private double[] meanSize;
     private double[] abundance;
 
-    public MeanSizeOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+    public MeanSizeOutput(int rank) {
+        super(rank);
     }
 
     @Override

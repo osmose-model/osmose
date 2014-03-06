@@ -69,8 +69,8 @@ public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
     // mortality rates por souces and per stages
     private double[][] mortalityRates;
 
-    public MortalitySpeciesOutput(int rank, String keyEnabled, Species species, Type type) {
-        super(rank, keyEnabled, type);
+    public MortalitySpeciesOutput(int rank, Species species, Type type) {
+        super(rank, type);
         this.species = species;
     }
 

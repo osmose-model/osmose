@@ -75,16 +75,11 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     private double[][][][] predatorPressure;
     // Diet output stage
     private IStage dietOutputStage;
-    /**
-     * Whether the indicator should be enabled or not.
-     */
-    private final boolean enabled;
     
     private final String separator;
 
-    public PredatorPressureOutput(int rank, String keyEnabled) {
+    public PredatorPressureOutput(int rank) {
         super(rank);
-        enabled = getConfiguration().getBoolean(keyEnabled);
         separator = getConfiguration().getOutputSeparator();
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
@@ -125,11 +120,6 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
                 predatorPressure[iSpec][stage][prey.getIndex()][prey.getStage()] += prey.getBiomass();
             }
         }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override

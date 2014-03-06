@@ -71,17 +71,13 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
     //
     private final Type type;
 
-    public AbstractSpectrumOutput(int rank, String keyEnabled, Type type) {
-        super(rank, keyEnabled);
+    public AbstractSpectrumOutput(int rank, Type type) {
+        super(rank);
         this.type = type;
         initializeSizeSpectrum(type);
     }
 
     private void initializeSizeSpectrum(Type type) {
-
-        if (!isEnabled()) {
-            return;
-        }
 
         switch (type) {
             case SIZE:

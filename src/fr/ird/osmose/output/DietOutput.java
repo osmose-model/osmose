@@ -74,18 +74,13 @@ public class DietOutput extends SimulationLinker implements IOutput {
     //
     private double[][][][] diet;
     private double[][] abundanceStage;
-    /**
-     * Whether the indicator should be enabled or not.
-     */
-    private final boolean enabled;
     // Diet output stage
     private IStage dietOutputStage;
 
     private final String separator;
 
-    public DietOutput(int rank, String keyEnabled) {
+    public DietOutput(int rank) {
         super(rank);
-        enabled = getConfiguration().getBoolean(keyEnabled);
         separator = getConfiguration().getOutputSeparator();
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
@@ -131,11 +126,6 @@ public class DietOutput extends SimulationLinker implements IOutput {
                 }
             }
         }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override

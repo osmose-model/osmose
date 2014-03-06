@@ -65,8 +65,8 @@ public class TrophicLevelSpectrumOutput extends AbstractOutput {
     private float[] tabTL;
     private int nTLClass;
 
-     public TrophicLevelSpectrumOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+     public TrophicLevelSpectrumOutput(int rank) {
+        super(rank);
         initializeTLSpectrum();
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();

@@ -67,8 +67,8 @@ public class BiomassDietStageOutput extends AbstractOutput {
     
     private IStage dietOutputStage;
 
-    public BiomassDietStageOutput(int rank, String keyEnabled) {
-        super(rank, keyEnabled);
+    public BiomassDietStageOutput(int rank) {
+        super(rank);
     }
 
     @Override

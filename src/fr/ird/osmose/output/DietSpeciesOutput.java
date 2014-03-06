@@ -66,8 +66,8 @@ public class DietSpeciesOutput extends AbstractSpectrumOutput {
      */
     private double[][] diet;
 
-    public DietSpeciesOutput(int rank, String keyEnabled, Species species, Type type) {
-        super(rank, keyEnabled, type);
+    public DietSpeciesOutput(int rank, Species species, Type type) {
+        super(rank, type);
         this.species = species;
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();

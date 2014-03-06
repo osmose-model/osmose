@@ -85,10 +85,6 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
      */
     private double[][] abundanceStage;
     /**
-     * Whether the indicator should be enabled or not.
-     */
-    private final boolean enabled;
-    /**
      * Age of recruitment (expressed in number of time steps) [SPECIES]
      */
     private int[] recruitmentAge;
@@ -97,9 +93,8 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
      */
     private final String separator;
 
-    public MortalityOutput(int rank, String keyEnabled) {
+    public MortalityOutput(int rank) {
         super(rank);
-        enabled = getConfiguration().getBoolean(keyEnabled);
         separator = getConfiguration().getOutputSeparator();
     }
 
@@ -168,11 +163,6 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                 }
             }
         }
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override

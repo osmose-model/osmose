@@ -66,8 +66,6 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     private boolean cutoff;
     private int recordFrequency;
 
-    private boolean enabled;
-
     private final String separator;
 
     abstract String getFilename();
@@ -76,15 +74,9 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
     abstract String[] getHeaders();
 
-    AbstractOutput(int rank, String keyEnabled) {
+    AbstractOutput(int rank) {
         super(rank);
-        enabled = getConfiguration().getBoolean(keyEnabled);
         separator = getConfiguration().getOutputSeparator();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     boolean includeClassZero() {
@@ -106,8 +98,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             // Init stream
             fos = new FileOutputStream(file, true);
         } catch (FileNotFoundException ex) {
-            getSimulation().warning("Failed to create indicator file {0}. Osmose will not write it.", file.getAbsolutePath());
-            enabled = false;
+            getSimulation().warning("Failed to create output file {0}.", file.getAbsolutePath());
         }
         prw = new PrintWriter(fos, true);
 
