@@ -265,17 +265,17 @@ public class Configuration extends OLogger {
         }
 
         // Read Output CSV separator
+        Separator separator = Separator.COMA;
         if (!isNull("output.csv.separator")) {
-            Separator separator;
             try {
                 separator = Separator.valueOf(getString("output.csv.separator").toUpperCase());
             } catch (IllegalArgumentException ex) {
                 warning("Failed to parse parameter output.csv.separator = " + getString("output.csv.separator") + ". It must be either " + Separator.asList());
                 separator = Separator.COMA;
-                info("Output default CSV separator set to " + separator.name());
             }
-            outputSeparator = separator.toString();
         }
+        outputSeparator = separator.toString();
+        info("Output CSV separator set to " + separator.name());
 
         // Number of CPUs allocated to this run
         if (!isNull("simulation.ncpu")) {
