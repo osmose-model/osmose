@@ -158,6 +158,23 @@ public class Simulation extends OLogger {
         this.rank = rank;
     }
 
+    /**
+     * Removes all the schools and delete forcing, species, ltlgroups, etc.
+     */
+    public void destroy() {
+
+        for (School school : schoolSet) {
+            school.setNdead(Prey.MortalityCause.OUT, Double.MAX_VALUE);
+        }
+        schoolSet.removeDeadSchools();
+        schoolSet = null;
+        species = null;
+        ltlGroups = null;
+        step = null;
+        forcing = null;
+        snapshot = null;
+    }
+
 ///////////////////////////////
 // Definition of the functions
 ///////////////////////////////

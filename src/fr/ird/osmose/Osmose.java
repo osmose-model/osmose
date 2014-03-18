@@ -194,7 +194,7 @@ public class Osmose extends OLogger {
             CountDownLatch doneSignal = new CountDownLatch(nworker);
             Worker[] workers = new Worker[nworker];
             for (int iworker = 0; iworker < nworker; iworker++) {
-                workers[iworker] = new Worker(simulation[rank], doneSignal);
+                workers[iworker] = new Worker(rank, doneSignal);
                 rank++;
             }
             for (int iworker = 0; iworker < nworker; iworker++) {
@@ -221,9 +221,9 @@ public class Osmose extends OLogger {
     private class Worker implements Runnable {
 
         /**
-         * The {@link Simulation} that will run in this dedicated thread.
+         * The rank of the simulation that will run in this dedicated thread.
          */
-        private final Simulation simulation;
+        private final int rank;
         /**
          * The {@link java.util.concurrent.CountDownLatch} that will wait for
          * this {@link Simulation} to complete before decrementing the count of
@@ -237,13 +237,13 @@ public class Osmose extends OLogger {
          * {@code CountDownLatch} given as an argument when the simulation has
          * completed.
          *
-         * @param simulation, the {@link Simulation} to run in this thread
+         * @param rank, the rank of the simulation to run in this thread
          * @param doneSignal, the {@link java.util.concurrent.CountDownLatch}
          * that will wait for {@code simulation} to complete before decrementing
          * the count of the latch.
          */
-        public Worker(Simulation simulation, CountDownLatch doneSignal) {
-            this.simulation = simulation;
+        public Worker(int rank, CountDownLatch doneSignal) {
+            this.rank = rank;
             this.doneSignal = doneSignal;
         }
 
@@ -255,11 +255,12 @@ public class Osmose extends OLogger {
         public void run() {
             long begin = System.currentTimeMillis();
             try {
-                simulation.info("Started...");
-                simulation.init();
-                simulation.run();
+                simulation[rank].info("Started...");
+                simulation[rank].init();
+                simulation[rank].run();
                 int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-                simulation.info("Completed (time ellapsed: {0} seconds)", time);
+                simulation[rank].info("Completed (time ellapsed: {0} seconds)", time);
+                simulation[rank].destroy();
             } finally {
                 doneSignal.countDown();
             }
