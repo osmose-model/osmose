@@ -106,7 +106,11 @@ public class MortalityProcess extends AbstractProcess {
      * calculating mortality rates.
      */
     private final double epsilon = 0.01d;
-
+    /**
+     * Variables to monitor the iterative algorithm and record how many
+     * iterations (min, max, average) are necessary to converge.
+     */
+    private int iterMin, iterMax, iterMean, nIterProcess;
     /**
      * Several mortality algorithms have been implemented at the time of coding
      * Osmose version 3.
@@ -175,8 +179,8 @@ public class MortalityProcess extends AbstractProcess {
             mortalityAlgorithm = MortalityAlgorithm.valueOf(getConfiguration().getString("mortality.algorithm").toUpperCase());
         } catch (Exception ex) {
             mortalityAlgorithm = MortalityAlgorithm.STOCHASTIC;
-            warning("Default mortality algorithm set to " + mortalityAlgorithm.toString());
         }
+        info("Mortality algorithm set to " + mortalityAlgorithm.toString());
 
         // Subdt for case3 FULLY_STOCHASTIC
         if (!getConfiguration().isNull("mortality.subdt")) {
@@ -184,9 +188,17 @@ public class MortalityProcess extends AbstractProcess {
         } else {
             subdt = 1;
             if (mortalityAlgorithm.equals(MortalityAlgorithm.STOCHASTIC)) {
-                warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose assumes mortality.subdt = 1");
+                warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm.");
             }
         }
+        if (mortalityAlgorithm.equals(MortalityAlgorithm.STOCHASTIC)) {
+            info("Mortality subdt set to " + subdt);
+        }
+
+        iterMin = Integer.MAX_VALUE;
+        iterMax = 0;
+        iterMean = 0;
+        nIterProcess = 0;
     }
 
     @Override
@@ -331,6 +343,7 @@ public class MortalityProcess extends AbstractProcess {
                 }
             }
         }
+        performanceIterative();
     }
     /*
      * CASE1
@@ -353,6 +366,10 @@ public class MortalityProcess extends AbstractProcess {
         double[][] mortalityRateMatrix = new double[nSchool + nPlankton][nMortality];
         double[] totalMortalityRate = new double[nSchool + nPlankton];
         double[] correctionFactor = new double[nSchool];
+        double[] planktonBiomass = new double[nPlankton];
+        for (int iPlk = 0; iPlk < nPlankton; iPlk++) {
+            planktonBiomass[iPlk] = getSimulation().getPlankton(iPlk).getBiomass(cell);
+        }
 
         //
         // Initialize the number of deads and the mortality rates
@@ -367,7 +384,7 @@ public class MortalityProcess extends AbstractProcess {
                     predationMortalityRate = Math.log(school.getAbundance() / (school.getAbundance() - nDeadMatrix[iPrey][iPredator]));
                 } else {
                     nDeadMatrix[iPrey][iPredator] = predationMatrix[iPredator][iPrey];
-                    double planktonAbundance = getSimulation().getPlankton(iPrey - nSchool).getBiomass(cell);
+                    double planktonAbundance = planktonBiomass[iPrey - nSchool];
                     if (planktonAbundance > 0) {
                         predationMortalityRate = Math.log(planktonAbundance / (planktonAbundance - predationMatrix[iPredator][iPrey]));
                     } else {
@@ -434,7 +451,7 @@ public class MortalityProcess extends AbstractProcess {
                 if (iPrey < nSchool) {
                     abundance = schools.get(iPrey).getAbundance();
                 } else {
-                    abundance = getSimulation().getPlankton(iPrey - nSchool).getBiomass(cell);
+                    abundance = planktonBiomass[iPrey - nSchool];
                 }
                 for (int iMortality = 0; iMortality < nMortality; iMortality++) {
                     if (totalMortalityRate[iPrey] > 0) {
@@ -494,10 +511,26 @@ public class MortalityProcess extends AbstractProcess {
             }
             iteration++;
         }
+        if (iteration < iterMin) {
+            iterMin = iteration;
+        }
+        if (iteration > iterMax) {
+            iterMax = iteration;
+        }
+        iterMean += iteration;
+        nIterProcess += 1;
 
         //
         // return the number of deads matrix
         return nDeadMatrix;
+    }
+
+    /**
+     * Send debugging info about the performance of the iterative algorithm.
+     */
+    private void performanceIterative() {
+        float mean = iterMean / (float) nIterProcess;
+        debug("Iterative mortality algorithm. Iteration min " + iterMin + " iteration max " + iterMax + " iteration mean " + mean);
     }
 
     /*
@@ -551,14 +584,12 @@ public class MortalityProcess extends AbstractProcess {
                             Prey prey = preys.get(ipr);
                             nDead = prey.biom2abd(preyUpon[ipr]);
                             prey.incrementNdead(MortalityCause.PREDATION, nDead);
-
                             if (prey instanceof School) {
                                 predator.addPreyRecord((School) prey, preyUpon[ipr], dietOutputStage.getStage((School) prey), keepRecord);
                             } else {
                                 int index = ipr - ns + nspec;
                                 predator.addPreyRecord(index, prey.getTrophicLevel(), preyUpon[ipr], 0, keepRecord);
                             }
-
                         }
                         break;
                     case STARVATION:
@@ -601,13 +632,6 @@ public class MortalityProcess extends AbstractProcess {
             int j = random.nextInt(i);
             a[i - 1] = a[j];
             a[j] = tmp;
-            //swap(a, i - 1, random.nextInt(i));
         }
-    }
-
-    private static <T> void swap(T[] a, int i, int j) {
-        T tmp = a[i];
-        a[i] = a[j];
-        a[j] = tmp;
     }
 }
