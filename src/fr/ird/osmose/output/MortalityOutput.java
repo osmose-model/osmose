@@ -153,13 +153,15 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         // Cumulate the mortality rates
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             for (iStage = 0; iStage < STAGES; iStage++) {
-                double nDeadTot = 0;
-                for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                    nDeadTot += nDead[iSpecies][iDeath][iStage];
-                }
-                double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
-                for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                    mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
+                if (abundanceStage[iSpecies][iStage] > 0) {
+                    double nDeadTot = 0;
+                    for (int iDeath = 0; iDeath < nCause; iDeath++) {
+                        nDeadTot += nDead[iSpecies][iDeath][iStage];
+                    }
+                    double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
+                    for (int iDeath = 0; iDeath < nCause; iDeath++) {
+                        mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
+                    }
                 }
             }
         }
@@ -265,7 +267,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             }
         }
     }
-    
+
     private String quote(String str) {
         return "\"" + str + "\"";
     }
