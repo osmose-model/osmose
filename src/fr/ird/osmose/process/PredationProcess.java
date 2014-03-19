@@ -214,8 +214,10 @@ public class PredationProcess extends AbstractProcess {
             }
             double biomAccessibleTot = sum(accessibleBiomass);
 
-            // Compute the potential biomass that predators could prey upon
-            double biomassToPredate = getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt;
+            // Compute the maximum biomass that the predator could prey upon
+            double maxBiomassToPredate = getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt;
+            // By default the predator will eat as much as it can
+            double biomassToPredate = maxBiomassToPredate;
 
             // Distribute the predation over the preys
             if (biomAccessibleTot != 0) {
@@ -232,9 +234,15 @@ public class PredationProcess extends AbstractProcess {
                     double ratio = accessibleBiomass[i] / biomAccessibleTot;
                     preyUpon[i] = ratio * biomassToPredate;
                 }
+                // Update predation success rate
+                // The predation success rate at the end of the time step is the
+                // average of the predation success rate for every subdt
+                float success = computePredSuccessRate(maxBiomassToPredate, sum(preyUpon));
+                predator.incrementPredSuccessRate(success / subdt);
             } else {
                 // Case 2: there is no prey available
                 // preyUpon[i] = 0; no need to do it since initialization already set it to zero
+                // Predation success rate is zero for this subdt
             }
         }
         // Return the array of biomass preyed by the predator
@@ -454,7 +462,7 @@ public class PredationProcess extends AbstractProcess {
             } else {
                 // The prey is a plankton group
                 iStagePrey = 0;
-                accessibility[iPrey] = accessibilityMatrix[iSpecPrey+getConfiguration().getNSpecies()][iStagePrey][iSpecPred][iStagePred]
+                accessibility[iPrey] = accessibilityMatrix[iSpecPrey + getConfiguration().getNSpecies()][iStagePrey][iSpecPred][iStagePred]
                         * getSimulation().getPlankton(iSpecPrey).getAccessibility(getSimulation().getIndexTimeSimu())
                         * percentPlankton[iSpecPrey];
             }

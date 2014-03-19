@@ -218,12 +218,9 @@ public class MortalityProcess extends AbstractProcess {
                 throw new UnsupportedOperationException("Mortality algortithm '" + mortalityAlgorithm + "' not supported in mortality process.");
         }
 
-        // Update predation success rate, starvation mortality rate and trophic level
+        // Update starvation mortality rate and trophic level
         for (School school : getSchoolSet()) {
             if (school.getPreyedBiomass() > 0) {
-                // Update predation success rate
-                double maxPreyedBiomass = school.getBiomass() * predationProcess.getMaxPredationRate(school);
-                school.setPredSuccessRate(predationProcess.computePredSuccessRate(maxPreyedBiomass, school.getPreyedBiomass()));
                 // Calculate starvation mortality rate that will be apply at next time step
                 school.setStarvationRate(starvationProcess.getStarvationMortalityRate(school));
                 // Update trophic level
@@ -269,6 +266,7 @@ public class MortalityProcess extends AbstractProcess {
             }
             for (School school : schools) {
                 school.setAccessibilities(predationProcess.getAccessibility(school, preys));
+                school.setPredSuccessRate(0);
             }
         }
 
@@ -340,6 +338,9 @@ public class MortalityProcess extends AbstractProcess {
                         }
                     }
 
+                    // Predation success rate
+                    double maxPreyedBiomass = school.getBiomass() * predationProcess.getMaxPredationRate(school);
+                    school.setPredSuccessRate(predationProcess.computePredSuccessRate(maxPreyedBiomass, school.getPreyedBiomass()));
                 }
             }
         }
@@ -596,7 +597,7 @@ public class MortalityProcess extends AbstractProcess {
                         // Starvation mortality
                         school = schools.get(seqStarv[i]);
                         double M = school.getStarvationRate() / subdt;
-                        nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-M));
+                        nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
                         school.incrementNdead(MortalityCause.STARVATION, nDead);
                         break;
                     case NATURAL:
@@ -612,7 +613,7 @@ public class MortalityProcess extends AbstractProcess {
                         switch (fishingType) {
                             case RATE:
                                 double F = fishingProcess.getInstantaneousRate(school) / subdt;
-                                nDead = school.getInstantaneousAbundance() * (1 - Math.exp(-F));
+                                nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
                                 break;
                             case CATCHES:
                                 nDead = school.biom2abd(fishingProcess.getInstantaneousCatches(school) / subdt);

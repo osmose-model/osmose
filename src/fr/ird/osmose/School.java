@@ -446,6 +446,10 @@ public class School extends Prey {
     public void setPredSuccessRate(float rate) {
         this.predSuccessRate = rate;
     }
+    
+    public void incrementPredSuccessRate(float drate) {
+        this.predSuccessRate += drate;
+    }
 
     /**
      * @return the starvationRate
