@@ -105,7 +105,11 @@ public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
         int iClass;
         int nCause = MortalityCause.values().length;
         double[][] nDead = new double[nCause][getNClass()];
-        for (School school : getSchoolSet().getSchools(species, false)) {
+        // Loop on all the schools to be sure we don't discard dead schools
+        for (School school : getSchoolSet()) {
+            if (school.getSpeciesIndex() != species.getIndex()) {
+                continue;
+            }
             float value = (getType() == Type.SIZE)
                     ? school.getLengthi()
                     : (float) school.getAgeDt() / getConfiguration().getNStepYear();
@@ -115,16 +119,18 @@ public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
                 nDead[cause.index][iClass] += school.getNdead(cause);
             }
         }
+        
         // Cumulate the mortality rates
-
         for (iClass = 0; iClass < getNClass(); iClass++) {
-            double nDeadTot = 0;
-            for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                nDeadTot += nDead[iDeath][iClass];
-            }
-            double Z = Math.log(abundanceStage[iClass] / (abundanceStage[iClass] - nDeadTot));
-            for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                mortalityRates[iDeath][iClass] += Z * nDead[iDeath][iClass] / nDeadTot;
+            if (abundanceStage[iClass] > 0) {
+                double nDeadTot = 0;
+                for (int iDeath = 0; iDeath < nCause; iDeath++) {
+                    nDeadTot += nDead[iDeath][iClass];
+                }
+                double Z = Math.log(abundanceStage[iClass] / (abundanceStage[iClass] - nDeadTot));
+                for (int iDeath = 0; iDeath < nCause; iDeath++) {
+                    mortalityRates[iDeath][iClass] += Z * nDead[iDeath][iClass] / nDeadTot;
+                }
             }
         }
     }
