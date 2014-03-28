@@ -85,6 +85,8 @@ public class PredationProcess extends AbstractProcess {
      */
     private IStage predPreyStage;
 
+    private final float accessMax = 0.99f;
+
     public PredationProcess(int rank) {
         super(rank);
     }
@@ -131,7 +133,8 @@ public class PredationProcess extends AbstractProcess {
                             int nStagePred = accessStage.getNStage(k);
                             accessibilityMatrix[i][j][k] = new float[nStagePred];
                             for (int m = 0; m < nStagePred; m++) {
-                                accessibilityMatrix[i][j][k][m] = Float.valueOf(line[ll]);
+                                float value = Float.valueOf(line[ll]);
+                                accessibilityMatrix[i][j][k][m] = (value >= 1) ? accessMax : value;
                                 ll++;
                             }
                         }
