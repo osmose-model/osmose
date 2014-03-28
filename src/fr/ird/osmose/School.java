@@ -190,15 +190,16 @@ public class School extends Prey {
      * @param abundance, the number of fish in the school
      * @param length, the length of the fish in centimeter
      * @param weight, the weight of the fish in gram
-     * @param age, the age of the fish in number of time step
+     * @param ageDt, the age of the fish in number of time step
      * @param trophicLevel, the trophic level of the fish
      */
-    public School(Species species, float x, float y, double abundance, float length, float weight, int age, float trophicLevel) {
+    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel) {
         super(species.getIndex(), x, y, abundance, weight, trophicLevel);
         this.species = species;
         this.length = length;
         totalLength = species.toTotalLength(length);
-        this.ageDt = age;
+        this.ageDt = ageDt;
+        this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
         preyRecords = new ArrayList();
         starvationRate = 0.d;
