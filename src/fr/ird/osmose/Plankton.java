@@ -180,10 +180,6 @@ public class Plankton extends SimulationLinker {
         return accessibilityCoeff[iStepSimu] * getBiomass(cell);
     }
 
-    public float getAccessibility(int iStepSimu) {
-        return accessibilityCoeff[iStepSimu];
-    }
-
     /**
      * Gets the total biomass of the plankton group over the grid.
      *
@@ -281,12 +277,12 @@ public class Plankton extends SimulationLinker {
         return trophicLevel;
     }
 
-    public Prey asPrey(Cell cell, int subdt) {
+    public Prey asPrey(Cell cell, int iStepSimu) {
         if (null == preys[cell.get_jgrid()][cell.get_igrid()]) {
             preys[cell.get_jgrid()][cell.get_igrid()] = new Prey(index, // index
                     cell.get_igrid(), // x
                     cell.get_jgrid(), // y
-                    getBiomass(cell) / subdt, // abundance (assumes that abundance <==> biomass for Plankton)
+                    getAccessibleBiomass(cell, iStepSimu), // abundance (assumes that abundance <==> biomass for Plankton)
                     1e6f, // weight set to 1 ton to have abundance <==> biomass
                     trophicLevel); // trophic level
         }

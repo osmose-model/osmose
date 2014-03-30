@@ -466,7 +466,6 @@ public class PredationProcess extends AbstractProcess {
                 // The prey is a plankton group
                 iStagePrey = 0;
                 accessibility[iPrey] = accessibilityMatrix[iSpecPrey + getConfiguration().getNSpecies()][iStagePrey][iSpecPred][iStagePred]
-                        * getSimulation().getPlankton(iSpecPrey).getAccessibility(getSimulation().getIndexTimeSimu())
                         * percentPlankton[iSpecPrey];
             }
         }

@@ -111,6 +111,7 @@ public class MortalityProcess extends AbstractProcess {
      * iterations (min, max, average) are necessary to converge.
      */
     private int iterMin, iterMax, iterMean, nIterProcess;
+
     /**
      * Several mortality algorithms have been implemented at the time of coding
      * Osmose version 3.
@@ -261,8 +262,9 @@ public class MortalityProcess extends AbstractProcess {
             // Create the list of preys by gathering the schools and the plankton group
             List<Prey> preys = new ArrayList();
             preys.addAll(schools);
+            int iStepSimu = getSimulation().getIndexTimeSimu();
             for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-                preys.add(getSimulation().getPlankton(i).asPrey(cell, subdt));
+                preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu));
             }
             for (School school : schools) {
                 school.setAccessibilities(predationProcess.getAccessibility(school, preys));
@@ -277,10 +279,11 @@ public class MortalityProcess extends AbstractProcess {
                     computeMortality_stochastic(subdt, cell);
                 }
             }
-            // Reset LTL preys
-            for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
-                getSimulation().getPlankton(iLTL).resetPreys();
-            }
+        }
+
+        // Reset LTL preys
+        for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
+            getSimulation().getPlankton(iLTL).resetPreys();
         }
     }
 
@@ -550,9 +553,10 @@ public class MortalityProcess extends AbstractProcess {
         }
         // Create the list of preys by gathering the schools and the plankton group
         List<Prey> preys = new ArrayList();
+        int iStepSimu = getSimulation().getIndexTimeSimu();
         preys.addAll(schools);
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            preys.add(getSimulation().getPlankton(i).asPrey(cell, subdt));
+            preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu));
         }
 
         Integer[] seqPred = new Integer[ns];
