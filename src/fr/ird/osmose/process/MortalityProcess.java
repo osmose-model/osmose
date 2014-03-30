@@ -269,6 +269,12 @@ public class MortalityProcess extends AbstractProcess {
             for (School school : schools) {
                 school.setAccessibilities(predationProcess.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
+                // Retain the eggs as we don't want them to be all accessible 
+                // at first subdt. They will be release progressively throughout
+                // the sub time steps.
+                if (school.getAgeDt() == 0) {
+                    school.retainEgg();
+                }
             }
         }
 
@@ -555,6 +561,12 @@ public class MortalityProcess extends AbstractProcess {
         List<Prey> preys = new ArrayList();
         int iStepSimu = getSimulation().getIndexTimeSimu();
         preys.addAll(schools);
+        for (School prey : schools) {
+            // Release some eggs for current subdt (initial abundance / subdt)
+            if (prey.getAgeDt() == 0) {
+                prey.releaseEgg(subdt);
+            }
+        }
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu));
         }

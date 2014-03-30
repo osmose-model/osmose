@@ -92,7 +92,18 @@ public class Prey extends GridPoint {
      * Monitor whether the number of dead has changed. It helps to prevent
      * unnecessary recalculation of the instantaneous biomass.
      */
-    private boolean ndeadHasChanged;
+    private boolean abundanceHasChanged;
+    /**
+     * A buffer variable that will temporarily retain some eggs inside a time
+     * step. The reproduction process makes all the eggs available at the
+     * beginning of the time step. The stochastic mortality algorithm uses a sub
+     * time step and we want the eggs to be made available progressively
+     * throughout the sub time step (instead of having them all accessible at
+     * the 1st sub time step). This variable represents the amount of eggs that
+     * must be subtracted to the abundance at the beginning of the time step for
+     * getting the instantaneous accessible abundance of eggs.
+     */
+    private double eggRetained;
 
     /**
      * Create a new school, with given species, grid coordinates, abundance,
@@ -116,6 +127,30 @@ public class Prey extends GridPoint {
         } else {
             setOffGrid();
         }
+        eggRetained = 0.d;
+    }
+
+    /**
+     * Make some more eggs accessible. This function assumes that the initial
+     * abundance of egg at the beginning of the time step is homogeneously
+     * released throughout every sub time step. Every sub time step, the amount
+     * of egg to be released is equal to abundance / subdt.
+     *
+     * @param subdt, the sub time step of the mortality algorithm
+     */
+    public void releaseEgg(int subdt) {
+        eggRetained = Math.max(0.d, eggRetained - abundance / subdt);
+        abundanceHasChanged = true;
+    }
+
+    /**
+     * Retain all the eggs. After calling this function the instantaneous
+     * abundance is zero. One must call the {@link #releaseEgg} function to
+     * release some eggs.
+     */
+    public void retainEgg() {
+        eggRetained = abundance;
+        abundanceHasChanged = true;
     }
 
     /**
@@ -137,12 +172,12 @@ public class Prey extends GridPoint {
      * within the current time step.
      */
     public double getInstantaneousAbundance() {
-        if (ndeadHasChanged) {
-            instantaneousAbundance = abundance - sum(nDead);
+        if (abundanceHasChanged) {
+            instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
             if (instantaneousAbundance < 1.d) {
                 instantaneousAbundance = 0.d;
             }
-            ndeadHasChanged = false;
+            abundanceHasChanged = false;
         }
         return instantaneousAbundance;
     }
@@ -158,7 +193,7 @@ public class Prey extends GridPoint {
         for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
             nDead[iDeath] = 0.d;
         }
-        ndeadHasChanged = false;
+        abundanceHasChanged = false;
     }
 
     /**
@@ -255,7 +290,7 @@ public class Prey extends GridPoint {
      */
     public void setNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] = nDead;
-        ndeadHasChanged = true;
+        abundanceHasChanged = true;
     }
 
     /**
@@ -268,7 +303,7 @@ public class Prey extends GridPoint {
      */
     public void incrementNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] += nDead;
-        ndeadHasChanged = true;
+        abundanceHasChanged = true;
     }
 
     /**
@@ -279,9 +314,9 @@ public class Prey extends GridPoint {
      */
     public void resetNdead(MortalityCause cause) {
         nDead[cause.index] = 0;
-        ndeadHasChanged = true;
+        abundanceHasChanged = true;
     }
-    
+
     public float getWeight() {
         return weight;
     }
