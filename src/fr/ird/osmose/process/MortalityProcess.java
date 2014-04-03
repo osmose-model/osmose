@@ -269,11 +269,11 @@ public class MortalityProcess extends AbstractProcess {
             for (School school : schools) {
                 school.setAccessibilities(predationProcess.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
-                // Retain the eggs as we don't want them to be all accessible 
-                // at first subdt. They will be release progressively throughout
-                // the sub time steps.
                 if (school.getAgeDt() == 0) {
-                    school.retainEgg();
+                    // Egg loss, not accessible to predation process
+                    double M = naturalMortalityProcess.getInstantaneousRate(school);
+                    double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
+                    school.incrementNdead(MortalityCause.NATURAL, nDead);
                 }
             }
         }
@@ -417,8 +417,10 @@ public class MortalityProcess extends AbstractProcess {
             mortalityRateMatrix[is][nSchool] = starvationProcess.getStarvationMortalityRate(school);
 
             // 3. Natural mortality
-            mortalityRateMatrix[is][nSchool + 1] = naturalMortalityProcess.getInstantaneousRate(school);
-
+            mortalityRateMatrix[is][nSchool + 1] = (school.getAgeDt()>0)
+                    ? naturalMortalityProcess.getInstantaneousRate(school)
+                    : naturalMortalityProcess.getEggInstantaneousRate(school);
+            
             // 4. Fishing mortality
             switch (fishingProcess.getType()) {
                 case RATE:
@@ -561,12 +563,6 @@ public class MortalityProcess extends AbstractProcess {
         List<Prey> preys = new ArrayList();
         int iStepSimu = getSimulation().getIndexTimeSimu();
         preys.addAll(schools);
-        for (School prey : schools) {
-            // Release some eggs for current subdt (initial abundance / subdt)
-            if (prey.getAgeDt() == 0) {
-                prey.releaseEgg(subdt);
-            }
-        }
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu));
         }

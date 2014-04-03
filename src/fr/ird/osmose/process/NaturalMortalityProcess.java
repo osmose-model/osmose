@@ -65,7 +65,7 @@ import java.util.List;
  */
 public class NaturalMortalityProcess extends AbstractProcess {
 
-    private AbstractMortalityScenario[] larvaMortality;
+    private AbstractMortalityScenario[] eggMortality;
     private AbstractMortalityScenario[] naturalMortality;
     /**
      * Spatial factor for natural mortality [0, 1]
@@ -81,25 +81,25 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
         int rank = getRank();
 
-        // Larva mortality
-        larvaMortality = new AbstractMortalityScenario[getNSpecies()];
+        // Egg mortality
+        eggMortality = new AbstractMortalityScenario[getNSpecies()];
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             Species species = getSpecies(iSpec);
-            // Larva mortality by Dt
+            // Egg mortality by Dt
             if (!getConfiguration().isNull("mortality.natural.larva.rate.bytDt.file.sp" + iSpec)) {
-                larvaMortality[iSpec] = new ByDtLarvaMortalityScenario(rank, species);
+                eggMortality[iSpec] = new ByDtLarvaMortalityScenario(rank, species);
                 continue;
             }
-            // Constant larva mortality
+            // Constant Egg mortality
             if (!getConfiguration().isNull("mortality.natural.larva.rate.sp" + iSpec)) {
-                larvaMortality[iSpec] = new ConstantLarvaMortalityScenario(rank, species);
+                eggMortality[iSpec] = new ConstantLarvaMortalityScenario(rank, species);
                 continue;
             }
-            // Did not find any scenario for larva mortality, Osmose assumes larva mortality = 0.
+            // Did not find any scenario for Egg mortality, Osmose assumes Egg mortality = 0.
             // Warning only because some species might not reproduce in the 
             // simulated area and therefore have no need to define larva mortality
-            larvaMortality[iSpec] = new ConstantLarvaMortalityScenario(rank, species, 0.f);
-            getSimulation().warning("Could not find any parameters for larva mortality (mortality.natural.larva.rate.bytDt.file.sp# or mortality.natural.larva.rate.sp#) for species {0}. Osmose assumes larva mortality = 0", species.getName());
+            eggMortality[iSpec] = new ConstantLarvaMortalityScenario(rank, species, 0.f);
+            getSimulation().warning("Could not find any parameters for egg mortality (mortality.natural.larva.rate.bytDt.file.sp# or mortality.natural.larva.rate.sp#) for species {0}. Osmose assumes egg mortality = 0", species.getName());
         }
 
         // Natural mortality
@@ -115,7 +115,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
             }
             // Natural mortality by Dt
             if (!getConfiguration().isNull("mortality.natural.rate.bytDt.file.sp" + iSpec)) {
-                larvaMortality[iSpec] = new ByDtNaturalMortalityScenario(rank, species);
+                eggMortality[iSpec] = new ByDtNaturalMortalityScenario(rank, species);
                 continue;
             }
             // Annual natural mortality
@@ -129,7 +129,7 @@ public class NaturalMortalityProcess extends AbstractProcess {
 
         // Initialize mortality scenarii
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            larvaMortality[iSpec].init();
+            eggMortality[iSpec].init();
             naturalMortality[iSpec].init();
         }
 
@@ -151,7 +151,9 @@ public class NaturalMortalityProcess extends AbstractProcess {
     public void run() {
         // Natural mortality (due to other predators)
         for (School school : getSchoolSet()) {
-            double M = getInstantaneousRate(school);
+            double M = (school.getAgeDt()>0)
+                    ? getInstantaneousRate(school)
+                    : getEggInstantaneousRate(school);
             double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
             if (nDead > 0.d) {
                 school.setNdead(MortalityCause.NATURAL, nDead);
@@ -160,34 +162,44 @@ public class NaturalMortalityProcess extends AbstractProcess {
     }
 
     /**
-     * For all species, D is due to other predators (seals, seabirds) for
-     * migrating species, we add mortality because absents during a time step so
-     * they don't undergo mortalities due to predation and starvation Additional
-     * mortalities for ages 0: no-fecundation of eggs, starvation more
-     * pronounced than for sup ages (rel to CC), predation by other species are
-     * not explicit.
+     * Natural mortality rate due to other predators (seals, sea birds, etc.) or
+     * disease. Natural mortality at egg stage is set to zero has it is handle
+     * separately.
+     * @param school, a school of the system
+     * @return the natural mortality rate for the current time step, zero for eggs
      */
     public double getInstantaneousRate(School school) {
-        double M;
+        double D;
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
-            M = larvaMortality[school.getSpeciesIndex()].getInstantaneousRate(school);
+            D = 0;
         } else {
             if (null != spatialD[spec.getIndex()] && !school.isUnlocated()) {
-                M = (spatialD[spec.getIndex()].getValue(school.getCell()) * naturalMortality[school.getSpeciesIndex()].getInstantaneousRate(school));
+                D = (spatialD[spec.getIndex()].getValue(school.getCell()) * naturalMortality[school.getSpeciesIndex()].getInstantaneousRate(school));
             } else {
-                M = naturalMortality[school.getSpeciesIndex()].getInstantaneousRate(school);
+                D = naturalMortality[school.getSpeciesIndex()].getInstantaneousRate(school);
             }
         }
-        return M;
+        return D;
+    }
+
+    /**
+     * Return the egg mortality rate at current time step
+     * @param egg, a school with age = 0
+     * @return the egg mortality rate at current time step, zero for older schools
+     */
+    public double getEggInstantaneousRate(School egg) {
+        return (egg.getAgeDt() > 0)
+                ? 0.d
+                : eggMortality[egg.getSpeciesIndex()].getInstantaneousRate(egg);
     }
 
     /*
      * The annual mortality rate is calculated as the annual average of
      * the larval mortality rates over the years.
      */
-    public double getLarvalAnnualRate(Species species) {
-        return larvaMortality[species.getIndex()].getAnnualRate();
+    public double getEggAnnualRate(Species species) {
+        return eggMortality[species.getIndex()].getAnnualRate();
     }
 
     /*
