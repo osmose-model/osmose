@@ -198,10 +198,30 @@ public class OutputManager extends SimulationLinker {
             indicators.add(new LTLOutput(rank));
         }
         
+        if (getConfiguration().getBoolean("output.nschool.enabled")) {
+            indicators.add(new NSchoolOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.nschool.distrib.byage.enabled")) {
+            indicators.add(new NSchoolAgeDistribOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.nschool.distrib.bysize.enabled")) {
+            indicators.add(new NSchoolSizeDistribOutput(rank));
+        }
+        
         if (getConfiguration().getBoolean("output.ndeadschool.enabled")) {
             indicators.add(new NDeadSchoolOutput(rank));
         }
-
+        
+        if (getConfiguration().getBoolean("output.ndeadschool.distrib.byage.enabled")) {
+            indicators.add(new NDeadSchoolAgeDistribOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.ndeadschool.distrib.bysize.enabled")) {
+            indicators.add(new NDeadSchoolSizeDistribOutput(rank));
+        }
+        
         /*
          * Initialize indicators
          */

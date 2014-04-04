@@ -13,7 +13,6 @@ import fr.ird.osmose.School;
 public class NDeadSchoolOutput extends AbstractOutput {
 
     private double[] nDeadSchool;
-    private double[] nSchool;
 
     public NDeadSchoolOutput(int rank) {
         super(rank);
@@ -27,7 +26,6 @@ public class NDeadSchoolOutput extends AbstractOutput {
     @Override
     public void reset() {
         nDeadSchool = new double[getNSpecies()];
-        nSchool = new double[getNSpecies()];
     }
 
     @Override
@@ -37,15 +35,11 @@ public class NDeadSchoolOutput extends AbstractOutput {
             if (!school.isAlive()) {
                 nDeadSchool[school.getSpeciesIndex()] += 1;
             }
-            nSchool[school.getSpeciesIndex()] += 1;
         }
     }
 
     @Override
     public void write(float time) {
-        for (int i = 0; i < getNSpecies(); i++) {
-            nDeadSchool[i] = 100.d * nDeadSchool[i] / nSchool[i];
-        }
         writeVariable(time, nDeadSchool);
     }
 
