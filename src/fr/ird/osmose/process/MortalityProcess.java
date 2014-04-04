@@ -118,9 +118,11 @@ public class MortalityProcess extends AbstractProcess {
      * predation process since the 1st sub time step. eggRetained = true means
      * that at the beginning of the mortality algorithm natural mortality is
      * applied on eggs and then the remaining eggs are progressively released
-     * over the sub time steps.
+     * over the sub time steps. Value can be modified here or by parameter
+     * 'mortality.stochastic.egg.retain'. The parameter overrides the value set
+     * here in the code.
      */
-    private final boolean eggRetained = true;
+    private boolean eggRetained = true;
 
     /**
      * Several mortality algorithms have been implemented at the time of coding
@@ -204,6 +206,10 @@ public class MortalityProcess extends AbstractProcess {
         }
         if (mortalityAlgorithm.equals(MortalityAlgorithm.STOCHASTIC)) {
             info("Mortality subdt set to " + subdt);
+        }
+
+        if (!getConfiguration().isNull("mortality.stochastic.egg.retain")) {
+            eggRetained = getConfiguration().getBoolean("mortality.stochastic.egg.retain");
         }
 
         iterMin = Integer.MAX_VALUE;
