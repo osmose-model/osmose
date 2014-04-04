@@ -61,14 +61,14 @@ public class OutputManager extends SimulationLinker {
 
     // List of the indicators
     final private List<IOutput> indicators;
-
+    
     public OutputManager(int rank) {
         super(rank);
         indicators = new ArrayList();
     }
-
+    
     public void init() {
-
+        
         int rank = getRank();
         /*
          * Delete existing outputs from previous simulation
@@ -197,6 +197,10 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.spatial.ltl.enabled")) {
             indicators.add(new LTLOutput(rank));
         }
+        
+        if (getConfiguration().getBoolean("output.ndeadschool.enabled")) {
+            indicators.add(new NDeadSchoolOutput(rank));
+        }
 
         /*
          * Initialize indicators
@@ -206,13 +210,13 @@ public class OutputManager extends SimulationLinker {
             indicator.reset();
         }
     }
-
+    
     public void close() {
         for (IOutput indicator : indicators) {
             indicator.close();
         }
     }
-
+    
     public void initStep() {
         if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
             for (IOutput indicator : indicators) {
@@ -220,7 +224,7 @@ public class OutputManager extends SimulationLinker {
             }
         }
     }
-
+    
     public void update(int iStepSimu) {
 
         // UPDATE
@@ -236,5 +240,5 @@ public class OutputManager extends SimulationLinker {
             }
         }
     }
-
+    
 }
