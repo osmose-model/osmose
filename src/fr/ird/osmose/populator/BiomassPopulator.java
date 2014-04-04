@@ -100,7 +100,7 @@ public class BiomassPopulator extends AbstractPopulator {
                 meanWeight[age] = species.computeMeanWeight(age);
             }
 
-            double larvalSurvival = naturalMortalityProcess.getLarvalAnnualRate(species);
+            double larvalSurvival = naturalMortalityProcess.getEggAnnualRate(species);
             double D = naturalMortalityProcess.getAnnualRate(species);
 
             double F = fishingProcess.getAnnualRate(species);

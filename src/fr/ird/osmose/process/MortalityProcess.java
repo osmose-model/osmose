@@ -111,6 +111,16 @@ public class MortalityProcess extends AbstractProcess {
      * iterations (min, max, average) are necessary to converge.
      */
     private int iterMin, iterMax, iterMean, nIterProcess;
+    /**
+     * Temporary flag for trying the mortality algorithm. eggRetained = false
+     * means that at the beginning of the mortality algorithm natural mortality
+     * is applied on eggs and then the remaining eggs are available to the
+     * predation process since the 1st sub time step. eggRetained = true means
+     * that at the beginning of the mortality algorithm natural mortality is
+     * applied on eggs and then the remaining eggs are progressively released
+     * over the sub time steps.
+     */
+    private final boolean eggRetained = true;
 
     /**
      * Several mortality algorithms have been implemented at the time of coding
@@ -271,9 +281,12 @@ public class MortalityProcess extends AbstractProcess {
                 school.setPredSuccessRate(0);
                 if (school.getAgeDt() == 0) {
                     // Egg loss, not accessible to predation process
-                    double M = naturalMortalityProcess.getInstantaneousRate(school);
-                    double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
+                    double D = naturalMortalityProcess.getEggInstantaneousRate(school);
+                    double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
                     school.incrementNdead(MortalityCause.NATURAL, nDead);
+                    if (eggRetained) {
+                        school.retainEgg();
+                    }
                 }
             }
         }
@@ -417,10 +430,10 @@ public class MortalityProcess extends AbstractProcess {
             mortalityRateMatrix[is][nSchool] = starvationProcess.getStarvationMortalityRate(school);
 
             // 3. Natural mortality
-            mortalityRateMatrix[is][nSchool + 1] = (school.getAgeDt()>0)
+            mortalityRateMatrix[is][nSchool + 1] = (school.getAgeDt() > 0)
                     ? naturalMortalityProcess.getInstantaneousRate(school)
                     : naturalMortalityProcess.getEggInstantaneousRate(school);
-            
+
             // 4. Fishing mortality
             switch (fishingProcess.getType()) {
                 case RATE:
@@ -563,6 +576,14 @@ public class MortalityProcess extends AbstractProcess {
         List<Prey> preys = new ArrayList();
         int iStepSimu = getSimulation().getIndexTimeSimu();
         preys.addAll(schools);
+        if (eggRetained) {
+            for (School prey : schools) {
+                // Release some eggs for current subdt (initial abundance / subdt)
+                if (prey.getAgeDt() == 0) {
+                    prey.releaseEgg(subdt);
+                }
+            }
+        }
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu));
         }

@@ -132,27 +132,29 @@ public class Prey extends GridPoint {
 
     /**
      * Make some more eggs accessible. This function assumes that the initial
-     * abundance of egg at the beginning of the time step is homogeneously
-     * released throughout every sub time step. Every sub time step, the amount
-     * of egg to be released is equal to abundance / subdt.
+     * abundance of egg at the beginning of the predation process (abundance -
+     * eggLoss) is homogeneously released throughout every sub time step. Every
+     * sub time step, the amount of egg to be released is equal to
+     * (abundance-eggLoss) / subdt.
      *
      * @param subdt, the sub time step of the mortality algorithm
      */
     public void releaseEgg(int subdt) {
-        eggRetained = Math.max(0.d, eggRetained - abundance / subdt);
+        eggRetained = Math.max(0.d, eggRetained - (abundance - nDead[MortalityCause.NATURAL.index]) / (double) subdt);
         abundanceHasChanged = true;
     }
 
     /**
-     * Retain all the eggs. After calling this function the instantaneous
-     * abundance is zero. One must call the {@link #releaseEgg} function to
-     * release some eggs.
+     * Retain all the eggs left available for predation process. The eggs
+     * available for predation means the initial abundance minus the egg loss.
+     * After calling this function the instantaneous abundance is zero. One must
+     * call the {@link #releaseEgg} function to release some eggs.
      */
     public void retainEgg() {
-        eggRetained = abundance;
+        eggRetained = abundance - nDead[MortalityCause.NATURAL.index];
         abundanceHasChanged = true;
     }
-
+    
     /**
      * Gets the abundance of the school at the beginning of the time step.
      *
