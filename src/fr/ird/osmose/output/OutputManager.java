@@ -53,6 +53,7 @@ import fr.ird.osmose.output.distribution.AgeDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
 import fr.ird.osmose.output.distribution.IniSizeDistribution;
 import fr.ird.osmose.output.distribution.SizeDistribution;
+import fr.ird.osmose.output.distribution.TLDistribution;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
@@ -160,8 +161,8 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.tl.catch.enabled")) {
             indicators.add(new MeanTrophicLevelCatchOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.tl.spectrum.enabled")) {
-            indicators.add(new TrophicLevelSpectrumOutput(rank));
+        if (getConfiguration().getBoolean("output.biomass.distrib.bytl.enabled")) {
+            indicators.add(new BiomassDistribOutput(rank, new TLDistribution()));
         }
         if (getConfiguration().getBoolean("output.tl.perSize.enabled")) {
             indicators.add(new MeanTrophicLevelSizeOutput(rank));
