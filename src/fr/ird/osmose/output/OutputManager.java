@@ -48,7 +48,11 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.output.AbstractSpectrumOutput.Type;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.AgeDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
+import fr.ird.osmose.output.distribution.IniSizeDistribution;
+import fr.ird.osmose.output.distribution.SizeDistribution;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
@@ -62,14 +66,14 @@ public class OutputManager extends SimulationLinker {
 
     // List of the indicators
     final private List<IOutput> indicators;
-    
+
     public OutputManager(int rank) {
         super(rank);
         indicators = new ArrayList();
     }
-    
+
     public void init() {
-        
+
         int rank = getRank();
         /*
          * Delete existing outputs from previous simulation
@@ -79,6 +83,9 @@ public class OutputManager extends SimulationLinker {
             String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + rank + "*";
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         }
+
+        AbstractDistribution sizeDistrib = new SizeDistribution();
+        AbstractDistribution ageDistrib = new AgeDistribution();
         /*
          * Instantiate indicators
          */
@@ -87,20 +94,20 @@ public class OutputManager extends SimulationLinker {
             indicators.add(new BiomassOutput(rank));
         }
         if (getConfiguration().getBoolean("output.biomass.distrib.bysize.enabled")) {
-            indicators.add(new BiomassDistribOutput(rank, Type.SIZE));
+            indicators.add(new BiomassDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.biomass.distrib.byage.enabled.enabled")) {
-            indicators.add(new BiomassDistribOutput(rank, Type.AGE));
+            indicators.add(new BiomassDistribOutput(rank, ageDistrib));
         }
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
             indicators.add(new AbundanceOutput(rank));
         }
         if (getConfiguration().getBoolean("output.abundance.distrib.bysize.enabled")) {
-            indicators.add(new AbundanceDistribOutput(rank, Type.SIZE));
+            indicators.add(new AbundanceDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.abundance.distrib.byage.enabled.enabled")) {
-            indicators.add(new AbundanceDistribOutput(rank, Type.AGE));
+            indicators.add(new AbundanceDistribOutput(rank, ageDistrib));
         }
         // Mortality
         if (getConfiguration().getBoolean("output.mortality.enabled")) {
@@ -108,12 +115,12 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.mortality.perSpecies.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new MortalitySpeciesOutput(rank, getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+                indicators.add(new MortalitySpeciesOutput(rank, getSpecies(i), ageDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.mortality.perSpecies.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new MortalitySpeciesOutput(rank, getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
+                indicators.add(new MortalitySpeciesOutput(rank, getSpecies(i), new IniSizeDistribution()));
             }
         }
         // Yield
@@ -129,7 +136,7 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
             indicators.add(new MeanSizeCatchOutput(rank));
-        } 
+        }
         if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.N.enabled")) {
             indicators.add(new SizeSpectrumSpeciesYieldNOutput(rank));
         }
@@ -168,12 +175,12 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.diet.composition.perSpecies.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new DietSpeciesOutput(rank, getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+                indicators.add(new DietSpeciesOutput(rank, getSpecies(i), ageDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.diet.composition.perSpecies.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new DietSpeciesOutput(rank, getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
+                indicators.add(new DietSpeciesOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
@@ -184,12 +191,12 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.diet.pressure.perSpecies.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new PredatorPressureSpeciesOutput(rank, getSpecies(i), AbstractSpectrumOutput.Type.AGE));
+                indicators.add(new PredatorPressureSpeciesOutput(rank, getSpecies(i), ageDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.diet.pressure.perSpecies.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new PredatorPressureSpeciesOutput(rank, getSpecies(i), AbstractSpectrumOutput.Type.SIZE));
+                indicators.add(new PredatorPressureSpeciesOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
         // Spatialized
@@ -199,31 +206,31 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.spatial.ltl.enabled")) {
             indicators.add(new LTLOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.nschool.enabled")) {
             indicators.add(new NSchoolOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.nschool.distrib.byage.enabled")) {
             indicators.add(new NSchoolAgeDistribOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.nschool.distrib.bysize.enabled")) {
             indicators.add(new NSchoolSizeDistribOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.ndeadschool.enabled")) {
             indicators.add(new NDeadSchoolOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.ndeadschool.distrib.byage.enabled")) {
             indicators.add(new NDeadSchoolAgeDistribOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.ndeadschool.distrib.bysize.enabled")) {
             indicators.add(new NDeadSchoolSizeDistribOutput(rank));
         }
-        
+
         /*
          * Initialize indicators
          */
@@ -232,13 +239,13 @@ public class OutputManager extends SimulationLinker {
             indicator.reset();
         }
     }
-    
+
     public void close() {
         for (IOutput indicator : indicators) {
             indicator.close();
         }
     }
-    
+
     public void initStep() {
         if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
             for (IOutput indicator : indicators) {
@@ -246,7 +253,7 @@ public class OutputManager extends SimulationLinker {
             }
         }
     }
-    
+
     public void update(int iStepSimu) {
 
         // UPDATE
@@ -262,5 +269,4 @@ public class OutputManager extends SimulationLinker {
             }
         }
     }
-    
 }

@@ -50,6 +50,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.SizeDistribution;
 
 /**
  *
@@ -58,7 +59,7 @@ import fr.ird.osmose.School;
 public class NSchoolSizeDistribOutput extends AbstractSpectrumOutput {
 
     public NSchoolSizeDistribOutput(int rank) {
-        super(rank, Type.SIZE);
+        super(rank, new SizeDistribution());
     }
 
     @Override
@@ -85,7 +86,7 @@ public class NSchoolSizeDistribOutput extends AbstractSpectrumOutput {
     @Override
     public void initStep() {
         for (School school : getSchoolSet()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += 1;
+            values[school.getSpeciesIndex()][getClass(school)] += 1;
         }
     }
 

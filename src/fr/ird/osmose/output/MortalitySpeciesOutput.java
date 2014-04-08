@@ -51,6 +51,8 @@ package fr.ird.osmose.output;
 import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
 import java.io.File;
 
 /**
@@ -69,8 +71,8 @@ public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
     // mortality rates por souces and per stages
     private double[][] mortalityRates;
 
-    public MortalitySpeciesOutput(int rank, Species species, Type type) {
-        super(rank, type);
+    public MortalitySpeciesOutput(int rank, Species species, AbstractDistribution distrib) {
+        super(rank, distrib);
         this.species = species;
     }
 
@@ -110,10 +112,7 @@ public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
             if (school.getSpeciesIndex() != species.getIndex()) {
                 continue;
             }
-            float value = (getType() == Type.SIZE)
-                    ? school.getLengthi()
-                    : (float) school.getAgeDt() / getConfiguration().getNStepYear();
-            iClass = getClass(value);
+            iClass = getClass(school);
             // Update number of deads
             for (MortalityCause cause : MortalityCause.values()) {
                 nDead[cause.index][iClass] += school.getNdead(cause);
@@ -139,17 +138,17 @@ public class MortalitySpeciesOutput extends AbstractSpectrumOutput {
     public void write(float time) {
 
         int nCause = MortalityCause.values().length;
-        double[][] values = new double[getNClass()][nCause + 1];
+        double[][] array = new double[getNClass()][nCause + 1];
         for (int iClass = 0; iClass < getNClass(); iClass++) {
             // Size
-            values[iClass][0] = getClassThreshold(iClass);
+            array[iClass][0] = getClassThreshold(iClass);
             // Mortality rates
             for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                values[iClass][iDeath + 1] = mortalityRates[iDeath][iClass];
+                array[iClass][iDeath + 1] = mortalityRates[iDeath][iClass];
             }
         }
 
-        writeVariable(time, values);
+        writeVariable(time, array);
     }
 
     @Override

@@ -49,6 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AgeDistribution;
 import java.io.File;
 
 /**
@@ -58,7 +59,7 @@ import java.io.File;
 public class AgeSpectrumSpeciesYieldNOutput extends AbstractSpectrumOutput {
 
     public AgeSpectrumSpeciesYieldNOutput(int rank) {
-        super(rank, Type.AGE);
+        super(rank, new AgeDistribution());
     }
 
     @Override
@@ -66,7 +67,7 @@ public class AgeSpectrumSpeciesYieldNOutput extends AbstractSpectrumOutput {
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                spectrum[school.getSpeciesIndex()][classSchool] += school.getNdead(School.MortalityCause.FISHING);
+                values[school.getSpeciesIndex()][classSchool] += school.getNdead(School.MortalityCause.FISHING);
             }
         }
     }

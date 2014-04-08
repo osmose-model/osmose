@@ -49,6 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AgeDistribution;
 
 /**
  *
@@ -57,7 +58,7 @@ import fr.ird.osmose.School;
 public class NSchoolAgeDistribOutput extends AbstractSpectrumOutput {
 
     public NSchoolAgeDistribOutput(int rank) {
-        super(rank, Type.AGE);
+        super(rank, new AgeDistribution());
     }
 
     @Override
@@ -84,7 +85,7 @@ public class NSchoolAgeDistribOutput extends AbstractSpectrumOutput {
     @Override
     public void initStep() {
         for (School school : getSchoolSet()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += 1;
+            values[school.getSpeciesIndex()][getClass(school)] += 1;
         }
     }
 

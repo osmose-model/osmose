@@ -49,6 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.SizeDistribution;
 import java.io.File;
 
 /**
@@ -58,14 +59,14 @@ import java.io.File;
 public class NDeadSchoolSizeDistribOutput extends AbstractSpectrumOutput {
 
     public NDeadSchoolSizeDistribOutput(int rank) {
-        super(rank, Type.SIZE);
+        super(rank, new SizeDistribution());
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet()) {
             if (!school.isAlive()) {
-                spectrum[school.getSpeciesIndex()][getClass(school)] += 1;
+                values[school.getSpeciesIndex()][getClass(school)] += 1;
             }
         }
     }

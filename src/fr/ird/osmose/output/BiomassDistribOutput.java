@@ -5,6 +5,8 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
 import java.io.File;
 
 /**
@@ -13,8 +15,8 @@ import java.io.File;
  */
 public class BiomassDistribOutput extends AbstractSpectrumOutput {
 
-    public BiomassDistribOutput(int rank, Type type) {
-        super(rank, type);
+    public BiomassDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
     
     @Override
@@ -22,7 +24,7 @@ public class BiomassDistribOutput extends AbstractSpectrumOutput {
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                spectrum[school.getSpeciesIndex()][classSchool] += school.getInstantaneousBiomass();
+                values[school.getSpeciesIndex()][classSchool] += school.getInstantaneousBiomass();
             }
         }
     }

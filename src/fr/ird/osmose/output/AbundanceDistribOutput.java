@@ -49,6 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 
 /**
@@ -57,8 +58,8 @@ import java.io.File;
  */
 public class AbundanceDistribOutput extends AbstractSpectrumOutput {
 
-    public AbundanceDistribOutput(int rank, Type type) {
-        super(rank, type);
+    public AbundanceDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
     
     @Override
@@ -66,7 +67,7 @@ public class AbundanceDistribOutput extends AbstractSpectrumOutput {
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                spectrum[school.getSpeciesIndex()][classSchool] += school.getInstantaneousAbundance();
+                values[school.getSpeciesIndex()][classSchool] += school.getInstantaneousAbundance();
             }
         }
     }

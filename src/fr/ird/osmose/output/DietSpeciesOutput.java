@@ -51,6 +51,7 @@ package fr.ird.osmose.output;
 import fr.ird.osmose.School;
 import fr.ird.osmose.School.PreyRecord;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 
 /**
@@ -66,8 +67,8 @@ public class DietSpeciesOutput extends AbstractSpectrumOutput {
      */
     private double[][] diet;
 
-    public DietSpeciesOutput(int rank, Species species, Type type) {
-        super(rank, type);
+    public DietSpeciesOutput(int rank, Species species, AbstractDistribution distrib) {
+        super(rank, distrib);
         this.species = species;
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();

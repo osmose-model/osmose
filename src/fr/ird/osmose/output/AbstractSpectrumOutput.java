@@ -49,6 +49,8 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
 
 /**
  *
@@ -56,128 +58,44 @@ import fr.ird.osmose.School;
  */
 public abstract class AbstractSpectrumOutput extends AbstractOutput {
 
-    // Indicator distribution by species and by size classes
-    double[][] spectrum;
-    // Minimal size (cm) of the size spectrum.
-    private float min;
-    // Maximal size (cm) of the size spectrum.
-    private float max;
-    // Range (cm) of size classes.
-    private float range;
-    // discrete size spectrum
-    private float[] classes;
-    // Number of size classes in the discrete spectrum
-    private int nClass;
-    //
-    private final Type type;
+    // Output values distributed by species and by class
+    double[][] values;
+    // Distribution 
+    private final AbstractDistribution distrib;
 
-    public AbstractSpectrumOutput(int rank, Type type) {
+    public AbstractSpectrumOutput(int rank, AbstractDistribution distrib) {
         super(rank);
-        this.type = type;
-        initializeSizeSpectrum(type);
-    }
-
-    private void initializeSizeSpectrum(Type type) {
-
-        switch (type) {
-            case SIZE:
-                if (!getConfiguration().isNull("output.size.spectrum.size.min")) {
-                    min = getConfiguration().getFloat("output.size.spectrum.size.min");
-                } else {
-                    min = 0;
-                    warning("Did not find parameter 'output.size.spectrum.size.min'. Default value set to " + min + " cm");
-                }
-                if (!getConfiguration().isNull("output.size.spectrum.size.max")) {
-                    max = getConfiguration().getFloat("output.size.spectrum.size.max");
-                } else {
-                    max = 200.f;
-                    warning("Did not find parameter 'output.size.spectrum.size.max'. Default value set to " + max + " cm");
-                }
-                if (!getConfiguration().isNull("output.size.spectrum.size.range")) {
-                    range = getConfiguration().getFloat("output.size.spectrum.size.range");
-                } else {
-                    range = 5.f;
-                    warning("Did not find parameter 'output.size.spectrum.size.range'. Default value set to " + range + " cm");
-                }
-                break;
-            case AGE:
-                if (!getConfiguration().isNull("output.age.spectrum.age.min")) {
-                    min = getConfiguration().getFloat("output.age.spectrum.age.min");
-                } else {
-                    min = 0;
-                    warning("Did not find parameter 'output.age.spectrum.age.min'. Default value set to " + min + " year");
-                }
-                if (!getConfiguration().isNull("output.age.spectrum.age.max")) {
-                    max = getConfiguration().getFloat("output.age.spectrum.age.max");
-                } else {
-                    max = 0.f;
-                    for (int i = 0; i < getNSpecies(); i++) {
-                        max = Math.max(max, getSpecies(i).getLifespanDt());
-                    }
-                    max = Math.round(max / getConfiguration().getNStepYear()) - 1.f;
-                    warning("Did not find parameter 'output.age.spectrum.age.max'. Default value set to " + max + " year");
-                }
-                if (!getConfiguration().isNull("output.age.spectrum.age.range")) {
-                    range = getConfiguration().getFloat("output.age.spectrum.age.range");
-                } else {
-                    range = 1.f;
-                    warning("Did not find parameter 'output.age.spectrum.age.range'. Default value set to " + range + " year");
-                }
-                break;
-        }
-
-        nClass = (int) Math.ceil((max - min) / range);
-
-        classes = new float[nClass];
-        classes[0] = min;
-        for (int i = 1; i < nClass; i++) {
-            classes[i] = min + i * range;
-        }
+        this.distrib = distrib;
+        distrib.init();
     }
 
     @Override
     public void reset() {
-        spectrum = new double[getNSpecies()][classes.length];
+        values = new double[getNSpecies()][distrib.getNClass()];
     }
 
     int getClass(School school) {
-
-        float value = (type == Type.SIZE)
-                ? school.getLength()
-                : (float) school.getAgeDt() / getConfiguration().getNStepYear();
-
-        return getClass(value);
-    }
-
-    int getClass(float value) {
-        int iClass = classes.length - 1;
-        if (value <= max) {
-            while ((iClass >= 0) && (value < classes[iClass])) {
-                iClass--;
-            }
-        }
-        return iClass;
+        return distrib.getClass(school);
     }
 
     @Override
     public void write(float time) {
 
-        double[][] values = new double[nClass][getNSpecies() + 1];
-        for (int iSize = 0; iSize < nClass; iSize++) {
-            values[iSize][0] = classes[iSize];
+        int nClass = distrib.getNClass();
+        double[][] array = new double[nClass][getNSpecies() + 1];
+        for (int iClass = 0; iClass < nClass; iClass++) {
+            array[iClass][0] = distrib.getThreshold(iClass);
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                values[iSize][iSpec + 1] = spectrum[iSpec][iSize] / getRecordFrequency();
+                array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
             }
         }
-        writeVariable(time, values);
+        writeVariable(time, array);
     }
 
     @Override
     String[] getHeaders() {
         String[] headers = new String[getNSpecies() + 1];
-        headers[0] = (type == Type.SIZE)
-                ? "Size"
-                : "Age";
+        headers[0] = distrib.getType().toString();
         for (int i = 0; i < getNSpecies(); i++) {
             headers[i + 1] = getSimulation().getSpecies(i).getName();
         }
@@ -185,33 +103,14 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
     }
 
     float getClassThreshold(int iClass) {
-        return classes[iClass];
+        return distrib.getThreshold(iClass);
     }
 
     int getNClass() {
-        return classes.length;
+        return distrib.getNClass();
     }
 
-    Type getType() {
-        return type;
-    }
-
-    public enum Type {
-
-        SIZE("Size class (cm)"), AGE("Age class (year)");
-        private final String description;
-
-        private Type(String description) {
-            this.description = description;
-        }
-
-        @Override
-        public String toString() {
-            return name().substring(0, 1).toUpperCase() + name().substring(1).toLowerCase();
-        }
-
-        public String getDescription() {
-            return description;
-        }
+    DistributionType getType() {
+        return distrib.getType();
     }
 }

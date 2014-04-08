@@ -49,6 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AgeDistribution;
 import java.io.File;
 
 /**
@@ -58,14 +59,14 @@ import java.io.File;
 public class NDeadSchoolAgeDistribOutput extends AbstractSpectrumOutput {
 
     public NDeadSchoolAgeDistribOutput(int rank) {
-        super(rank, Type.AGE);
+        super(rank, new AgeDistribution());
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet()) {
             if (!school.isAlive()) {
-                spectrum[school.getSpeciesIndex()][getClass(school)] += 1;
+                values[school.getSpeciesIndex()][getClass(school)] += 1;
             }
         }
     }
