@@ -1,6 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
+ * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package fr.ird.osmose.output;
@@ -12,12 +11,12 @@ import java.io.File;
  *
  * @author pverley
  */
-public class AgeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
+public class BiomassDistribOutput extends AbstractSpectrumOutput {
 
-    public AgeSpectrumSpeciesBOutput(int rank) {
-        super(rank, Type.AGE);
+    public BiomassDistribOutput(int rank, Type type) {
+        super(rank, type);
     }
-
+    
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
@@ -30,10 +29,13 @@ public class AgeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("AgeIndicators");
+        StringBuilder filename = new StringBuilder(getType().toString());
+        filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_AgeSpectrumSpeciesB_Simu");
+        filename.append("_biomass-distrib-by");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -42,11 +44,16 @@ public class AgeSpectrumSpeciesBOutput extends AbstractSpectrumOutput {
 
     @Override
     String getDescription() {
-        return "Distribution of fish species biomass in age classes (year). For age class i, the biomass of fish in [i,i+1[ is reported.";
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of fish species biomass (tonne) by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the biomass of fish in [i,i+1[ is reported.");
+        return description.toString();
     }
 
     @Override
     public void initStep() {
         // nothing to do
     }
+    
 }

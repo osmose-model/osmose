@@ -48,6 +48,7 @@
  */
 package fr.ird.osmose.output;
 
+import fr.ird.osmose.output.AbstractSpectrumOutput.Type;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
@@ -85,9 +86,21 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
             indicators.add(new BiomassOutput(rank));
         }
+        if (getConfiguration().getBoolean("output.biomass.distrib.bysize.enabled")) {
+            indicators.add(new BiomassDistribOutput(rank, Type.SIZE));
+        }
+        if (getConfiguration().getBoolean("output.biomass.distrib.byage.enabled.enabled")) {
+            indicators.add(new BiomassDistribOutput(rank, Type.AGE));
+        }
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
             indicators.add(new AbundanceOutput(rank));
+        }
+        if (getConfiguration().getBoolean("output.abundance.distrib.bysize.enabled")) {
+            indicators.add(new AbundanceDistribOutput(rank, Type.SIZE));
+        }
+        if (getConfiguration().getBoolean("output.abundance.distrib.byage.enabled.enabled")) {
+            indicators.add(new AbundanceDistribOutput(rank, Type.AGE));
         }
         // Mortality
         if (getConfiguration().getBoolean("output.mortality.enabled")) {
@@ -116,18 +129,9 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
             indicators.add(new MeanSizeCatchOutput(rank));
-        }
-        if (getConfiguration().getBoolean("output.size.spectrum.enabled")) {
-            indicators.add(new SizeSpectrumOutput(rank));
-        }
-        if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.N.enabled")) {
-            indicators.add(new SizeSpectrumSpeciesNOutput(rank));
-        }
+        } 
         if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.N.enabled")) {
             indicators.add(new SizeSpectrumSpeciesYieldNOutput(rank));
-        }
-        if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.B.enabled")) {
-            indicators.add(new SizeSpectrumSpeciesBOutput(rank));
         }
         if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.B.enabled")) {
             indicators.add(new SizeSpectrumSpeciesYieldOutput(rank));
@@ -137,11 +141,9 @@ public class OutputManager extends SimulationLinker {
         }
         // Age
         if (getConfiguration().getBoolean("output.age.spectrum.perSpecies.N.enabled")) {
-            indicators.add(new AgeSpectrumSpeciesNOutput(rank));
             indicators.add(new AgeSpectrumSpeciesYieldNOutput(rank));
         }
         if (getConfiguration().getBoolean("output.age.spectrum.perSpecies.B.enabled")) {
-            indicators.add(new AgeSpectrumSpeciesBOutput(rank));
             indicators.add(new AgeSpectrumSpeciesYieldOutput(rank));
         }
         // TL

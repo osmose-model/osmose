@@ -55,25 +55,31 @@ import java.io.File;
  *
  * @author pverley
  */
-public class SizeSpectrumSpeciesNOutput extends AbstractSpectrumOutput {
+public class AbundanceDistribOutput extends AbstractSpectrumOutput {
 
-    public SizeSpectrumSpeciesNOutput(int rank) {
-        super(rank, Type.SIZE);
+    public AbundanceDistribOutput(int rank, Type type) {
+        super(rank, type);
     }
-
+    
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            spectrum[school.getSpeciesIndex()][getClass(school)] += school.getInstantaneousAbundance();
+            int classSchool = getClass(school);
+            if (classSchool >= 0) {
+                spectrum[school.getSpeciesIndex()][classSchool] += school.getInstantaneousAbundance();
+            }
         }
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
+        StringBuilder filename = new StringBuilder(getType().toString());
+        filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeSpectrumSpeciesN_Simu");
+        filename.append("_abundance-distrib-by");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -82,11 +88,16 @@ public class SizeSpectrumSpeciesNOutput extends AbstractSpectrumOutput {
 
     @Override
     String getDescription() {
-        return "Distribution of fish species abundance in size classes (cm). For size class i, the number of fish in [i,i+1[ is reported.";
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of fish abundance (number of fish) by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the number of fish in [i,i+1[ is reported.");
+        return description.toString();
     }
-    
+
     @Override
     public void initStep() {
         // nothing to do
     }
+    
 }

@@ -198,11 +198,20 @@ public abstract class AbstractSpectrumOutput extends AbstractOutput {
 
     public enum Type {
 
-        SIZE, AGE;
+        SIZE("Size class (cm)"), AGE("Age class (year)");
+        private final String description;
+
+        private Type(String description) {
+            this.description = description;
+        }
 
         @Override
         public String toString() {
-            return name().substring(0,1).toUpperCase() + name().substring(1).toLowerCase();
+            return name().substring(0, 1).toUpperCase() + name().substring(1).toLowerCase();
+        }
+
+        public String getDescription() {
+            return description;
         }
     }
 }
