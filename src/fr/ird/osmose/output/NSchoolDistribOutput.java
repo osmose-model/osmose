@@ -50,16 +50,16 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.distribution.SizeDistribution;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 
 /**
  *
  * @author pverley
  */
-public class NSchoolSizeDistribOutput extends AbstractDistribOutput {
+public class NSchoolDistribOutput extends AbstractDistribOutput {
 
-    public NSchoolSizeDistribOutput(int rank) {
-        super(rank, new SizeDistribution());
+    public NSchoolDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
 
     @Override
@@ -70,18 +70,21 @@ public class NSchoolSizeDistribOutput extends AbstractDistribOutput {
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_nschoolSizeDistrib_Simu");
+        filename.append("nschool-distrib-by");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
-
     }
 
     @Override
     String getDescription() {
-        return "Distribution of the number of school in size classes (cm). For size class i, the number of schools in [i,i+1[ is reported.";
-    }
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of the number of school by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the number of school in [i,i+1[ is reported.");
+        return description.toString();}
 
     @Override
     public void initStep() {
@@ -89,5 +92,4 @@ public class NSchoolSizeDistribOutput extends AbstractDistribOutput {
             values[school.getSpeciesIndex()][getClass(school)] += 1;
         }
     }
-
 }

@@ -213,11 +213,11 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.nschool.distrib.byage.enabled")) {
-            indicators.add(new NSchoolAgeDistribOutput(rank));
+            indicators.add(new NSchoolDistribOutput(rank, ageDistrib));
         }
 
         if (getConfiguration().getBoolean("output.nschool.distrib.bysize.enabled")) {
-            indicators.add(new NSchoolSizeDistribOutput(rank));
+            indicators.add(new NSchoolDistribOutput(rank, sizeDistrib));
         }
 
         if (getConfiguration().getBoolean("output.ndeadschool.enabled")) {
@@ -225,11 +225,11 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.ndeadschool.distrib.byage.enabled")) {
-            indicators.add(new NDeadSchoolAgeDistribOutput(rank));
+            indicators.add(new NDeadSchoolDistribOutput(rank, ageDistrib));
         }
 
         if (getConfiguration().getBoolean("output.ndeadschool.distrib.bysize.enabled")) {
-            indicators.add(new NDeadSchoolSizeDistribOutput(rank));
+            indicators.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
         }
 
         /*

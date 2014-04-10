@@ -46,20 +46,20 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.distribution.AgeDistribution;
-import java.io.File;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 
 /**
  *
  * @author pverley
  */
-public class NDeadSchoolAgeDistribOutput extends AbstractDistribOutput {
+public class NDeadSchoolDistribOutput extends AbstractDistribOutput {
 
-    public NDeadSchoolAgeDistribOutput(int rank) {
-        super(rank, new AgeDistribution());
+    public NDeadSchoolDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
 
     @Override
@@ -73,24 +73,25 @@ public class NDeadSchoolAgeDistribOutput extends AbstractDistribOutput {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Mortality");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_ndeadSchoolAgeDistrib_Simu");
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
+        filename.append("ndeadschool-distrib-by");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
-
     }
 
     @Override
     String getDescription() {
-        return "Distribution of the number of dead school in age classes (year). For age class i, the number of dead schools in [i,i+1[ is reported.";
-    }
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of the number of dead school by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the number of dead school in [i,i+1[ is reported.");
+        return description.toString();}
 
     @Override
     public void initStep() {
         // nothing to do
     }
-
 }
