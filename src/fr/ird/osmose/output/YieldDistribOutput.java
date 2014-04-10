@@ -46,71 +46,60 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.output.distribution.DistributionType;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractSpectrumOutput extends AbstractOutput {
+public class YieldDistribOutput extends AbstractDistribOutput {
 
-    // Output values distributed by species and by class
-    double[][] values;
-    // Distribution 
-    private final AbstractDistribution distrib;
-
-    public AbstractSpectrumOutput(int rank, AbstractDistribution distrib) {
-        super(rank);
-        this.distrib = distrib;
-        distrib.init();
+    public YieldDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
-
+    
     @Override
-    public void reset() {
-        values = new double[getNSpecies()][distrib.getNClass()];
-    }
-
-    int getClass(School school) {
-        return distrib.getClass(school);
-    }
-
-    @Override
-    public void write(float time) {
-
-        int nClass = distrib.getNClass();
-        double[][] array = new double[nClass][getNSpecies() + 1];
-        for (int iClass = 0; iClass < nClass; iClass++) {
-            array[iClass][0] = distrib.getThreshold(iClass);
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
+    public void update() {
+        for (School school : getSchoolSet().getAliveSchools()) {
+            int classSchool = getClass(school);
+            if (classSchool >= 0) {
+                values[school.getSpeciesIndex()][getClass(school)] += school.adb2biom(school.getNdead(School.MortalityCause.FISHING));
             }
         }
-        writeVariable(time, array);
     }
 
     @Override
-    String[] getHeaders() {
-        String[] headers = new String[getNSpecies() + 1];
-        headers[0] = distrib.getType().toString();
-        for (int i = 0; i < getNSpecies(); i++) {
-            headers[i + 1] = getSimulation().getSpecies(i).getName();
-        }
-        return headers;
+    String getFilename() {
+        StringBuilder filename = new StringBuilder(getType().toString());
+        filename.append("Indicators");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("yield-distrib-by");
+        filename.append(getType().toString());
+        filename.append("_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
+
     }
 
-    float getClassThreshold(int iClass) {
-        return distrib.getThreshold(iClass);
+    @Override
+    String getDescription() {
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of cumulative catch (tonne per time step of saving) by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the yield in [i,i+1[ is reported.");
+        return description.toString();
     }
 
-    int getNClass() {
-        return distrib.getNClass();
+    @Override
+    public void initStep() {
+        // nothing to do
     }
-
-    DistributionType getType() {
-        return distrib.getType();
-    }
+    
 }

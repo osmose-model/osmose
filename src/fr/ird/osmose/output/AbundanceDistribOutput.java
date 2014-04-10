@@ -56,7 +56,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class AbundanceDistribOutput extends AbstractSpectrumOutput {
+public class AbundanceDistribOutput extends AbstractDistribOutput {
 
     public AbundanceDistribOutput(int rank, AbstractDistribution distrib) {
         super(rank, distrib);

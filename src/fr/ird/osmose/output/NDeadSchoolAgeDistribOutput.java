@@ -56,7 +56,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class NDeadSchoolAgeDistribOutput extends AbstractSpectrumOutput {
+public class NDeadSchoolAgeDistribOutput extends AbstractDistribOutput {
 
     public NDeadSchoolAgeDistribOutput(int rank) {
         super(rank, new AgeDistribution());

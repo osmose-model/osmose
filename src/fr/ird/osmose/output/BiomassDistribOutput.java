@@ -6,14 +6,13 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.output.distribution.DistributionType;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class BiomassDistribOutput extends AbstractSpectrumOutput {
+public class BiomassDistribOutput extends AbstractDistribOutput {
 
     public BiomassDistribOutput(int rank, AbstractDistribution distrib) {
         super(rank, distrib);

@@ -56,7 +56,7 @@ import fr.ird.osmose.output.distribution.SizeDistribution;
  *
  * @author pverley
  */
-public class NSchoolSizeDistribOutput extends AbstractSpectrumOutput {
+public class NSchoolSizeDistribOutput extends AbstractDistribOutput {
 
     public NSchoolSizeDistribOutput(int rank) {
         super(rank, new SizeDistribution());

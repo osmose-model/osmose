@@ -59,7 +59,7 @@ import java.io.File;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0 2013/09/01
  */
-public class DietSpeciesOutput extends AbstractSpectrumOutput {
+public class DietSpeciesOutput extends AbstractDistribOutput {
 
     private final Species species;
     /**

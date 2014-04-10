@@ -138,21 +138,21 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
             indicators.add(new MeanSizeCatchOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.N.enabled")) {
-            indicators.add(new SizeSpectrumSpeciesYieldNOutput(rank));
+        if (getConfiguration().getBoolean("output.yieldN.distrib.bySize.enabled")) {
+            indicators.add(new YieldNDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.size.spectrum.perSpecies.B.enabled")) {
-            indicators.add(new SizeSpectrumSpeciesYieldOutput(rank));
+        if (getConfiguration().getBoolean("output.yield.distrib.bySize.enabled")) {
+            indicators.add(new YieldDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.size.perSpecies.enabled")) {
             indicators.add(new MeanSizeSpeciesOutput(rank));
         }
         // Age
-        if (getConfiguration().getBoolean("output.age.spectrum.perSpecies.N.enabled")) {
-            indicators.add(new AgeSpectrumSpeciesYieldNOutput(rank));
+        if (getConfiguration().getBoolean("output.yieldN.distrib.byAge.enabled")) {
+            indicators.add(new YieldNDistribOutput(rank, ageDistrib));
         }
-        if (getConfiguration().getBoolean("output.age.spectrum.perSpecies.B.enabled")) {
-            indicators.add(new AgeSpectrumSpeciesYieldOutput(rank));
+        if (getConfiguration().getBoolean("output.yield.distrib.byAge.enabled")) {
+            indicators.add(new YieldDistribOutput(rank, ageDistrib));
         }
         // TL
         if (getConfiguration().getBoolean("output.tl.enabled")) {

@@ -49,45 +49,68 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.distribution.SizeDistribution;
-import java.io.File;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.DistributionType;
 
 /**
  *
  * @author pverley
  */
-public class SizeSpectrumSpeciesYieldNOutput extends AbstractSpectrumOutput {
+public abstract class AbstractDistribOutput extends AbstractOutput {
 
-    public SizeSpectrumSpeciesYieldNOutput(int rank) {
-        super(rank, new SizeDistribution());
+    // Output values distributed by species and by class
+    double[][] values;
+    // Distribution 
+    private final AbstractDistribution distrib;
+
+    public AbstractDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank);
+        this.distrib = distrib;
+        distrib.init();
     }
 
     @Override
-    public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.FISHING);
+    public void reset() {
+        values = new double[getNSpecies()][distrib.getNClass()];
+    }
+
+    int getClass(School school) {
+        return distrib.getClass(school);
+    }
+
+    @Override
+    public void write(float time) {
+
+        int nClass = distrib.getNClass();
+        double[][] array = new double[nClass][getNSpecies() + 1];
+        for (int iClass = 0; iClass < nClass; iClass++) {
+            array[iClass][0] = distrib.getThreshold(iClass);
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
+            }
         }
+        writeVariable(time, array);
     }
 
     @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeSpectrumSpeciesYieldN_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-
+    String[] getHeaders() {
+        String[] headers = new String[getNSpecies() + 1];
+        headers[0] = distrib.getType().toString();
+        for (int i = 0; i < getNSpecies(); i++) {
+            headers[i + 1] = getSimulation().getSpecies(i).getName();
+        }
+        return headers;
     }
 
-    @Override
-    String getDescription() {
-        return "Distribution of cumulative catch (number of fish caught per time step of saving) in size classes (cm). For size class i, the yield in [i,i+1[ is reported.";
+    float getClassThreshold(int iClass) {
+        return distrib.getThreshold(iClass);
     }
-    
-    @Override
-    public void initStep() {
-        // nothing to do
+
+    int getNClass() {
+        return distrib.getNClass();
+    }
+
+    DistributionType getType() {
+        return distrib.getType();
     }
 }

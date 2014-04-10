@@ -55,7 +55,7 @@ import fr.ird.osmose.output.distribution.AgeDistribution;
  *
  * @author pverley
  */
-public class NSchoolAgeDistribOutput extends AbstractSpectrumOutput {
+public class NSchoolAgeDistribOutput extends AbstractDistribOutput {
 
     public NSchoolAgeDistribOutput(int rank) {
         super(rank, new AgeDistribution());

@@ -56,7 +56,7 @@ import java.io.File;
  *
  * @author pverley
  */
-public class NDeadSchoolSizeDistribOutput extends AbstractSpectrumOutput {
+public class NDeadSchoolSizeDistribOutput extends AbstractDistribOutput {
 
     public NDeadSchoolSizeDistribOutput(int rank) {
         super(rank, new SizeDistribution());

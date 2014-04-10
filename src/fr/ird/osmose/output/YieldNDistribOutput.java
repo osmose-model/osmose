@@ -50,34 +50,38 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.distribution.AgeDistribution;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class AgeSpectrumSpeciesYieldOutput extends AbstractSpectrumOutput {
+public class YieldNDistribOutput extends AbstractDistribOutput {
 
-    public AgeSpectrumSpeciesYieldOutput(int rank) {
-        super(rank, new AgeDistribution());
+    public YieldNDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
-
+    
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
-            if (classSchool >= 0)
-            values[school.getSpeciesIndex()][classSchool] += school.adb2biom(school.getNdead(School.MortalityCause.FISHING));
+            if (classSchool >= 0) {
+                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.FISHING);
+            }
         }
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("AgeIndicators");
+        StringBuilder filename = new StringBuilder(getType().toString());
+        filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_AgeSpectrumSpeciesYield_Simu");
+        filename.append("yieldN-distrib-by");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -86,11 +90,16 @@ public class AgeSpectrumSpeciesYieldOutput extends AbstractSpectrumOutput {
 
     @Override
     String getDescription() {
-        return "Distribution of cumulative catch (tons per time step of saving) in age classes (year). For age class i, the yield in [i,i+1[ is reported.";
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of cumulative catch (number of fish caught per time step of saving) by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the number of fish caught in [i,i+1[ is reported.");
+        return description.toString();
     }
-    
+
     @Override
     public void initStep() {
         // nothing to do
     }
+    
 }
