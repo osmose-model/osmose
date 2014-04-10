@@ -49,19 +49,17 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanTrophicLevelAgeOutput extends AbstractOutput {
+public class MeanTrophicLevelDistribOutput extends AbstractMeanDistribOutput {
 
-    private double[][] meanTL;
-    private double[][] biomass;
-
-     public MeanTrophicLevelAgeOutput(int rank) {
-        super(rank);
+    public MeanTrophicLevelDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
     }
@@ -71,7 +69,9 @@ public class MeanTrophicLevelAgeOutput extends AbstractOutput {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTLPerAge_Simu");
+        filename.append("meanTL-distrib-by");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -79,22 +79,11 @@ public class MeanTrophicLevelAgeOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "Mean Trophic Level of fish species by age class.";
-    }
-
-    @Override
-    String[] getHeaders() {
-
-        int classmax = 0;
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            classmax = (int) Math.max(Math.ceil(getConfiguration().getFloat("species.lifespan.sp" + iSpecies)) , classmax);
-        }
-        String[] headers = new String[classmax + 1];
-        headers[0] = "Species index";
-        for (int i = 0; i < classmax; i++) {
-            headers[i + 1] = "Age class " + i;
-        }
-        return headers;
+        StringBuilder description = new StringBuilder();
+        description.append("Mean trophic level of fish species by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the mean trophic level in [i,i+1[ is reported.");
+        return description.toString();
     }
 
     @Override
@@ -103,44 +92,14 @@ public class MeanTrophicLevelAgeOutput extends AbstractOutput {
     }
 
     @Override
-    public void reset() {
-        meanTL = new double[getNSpecies()][];
-        biomass = new double[getNSpecies()][];
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            meanTL[iSpecies] = new double[(int) Math.ceil(getConfiguration().getFloat("species.lifespan.sp" + iSpecies))];
-            biomass[iSpecies] = new double[(int) Math.ceil(getConfiguration().getFloat("species.lifespan.sp" + iSpecies))];
-        }
-    }
-
-    @Override
     public void update() {
-        int nstep = getConfiguration().getNStepYear();
         for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getSpeciesIndex();
-            double biom = school.getInstantaneousBiomass();
-            int ageClass = school.getAgeDt() / nstep;
-            meanTL[i][ageClass] += biom * school.getTrophicLevel();
-            biomass[i][ageClass] += biom;
-        }
-    }
-
-    @Override
-    public void write(float time) {
-
-        double[][] values = new double[getNSpecies()][];
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            values[iSpecies] = new double[meanTL[iSpecies].length + 1];
-            values[iSpecies][0] = iSpecies;
-            for (int ageClass = 0; ageClass < meanTL[iSpecies].length; ageClass++) {
-                if (biomass[iSpecies][ageClass] > 0.d) {
-                    meanTL[iSpecies][ageClass] = (float) (meanTL[iSpecies][ageClass] / biomass[iSpecies][ageClass]);
-                } else {
-                    meanTL[iSpecies][ageClass] = Double.NaN;
-                }
-                values[iSpecies][ageClass + 1] = meanTL[iSpecies][ageClass];
+            int iSpec = school.getSpeciesIndex();
+            int iClass = getClass(school);
+            if (iClass >= 0) {
+                values[iSpec][iClass] += school.getInstantaneousBiomass() * school.getTrophicLevel();
+                denominator[iSpec][iClass] += school.getInstantaneousBiomass();
             }
         }
-        
-        writeVariable(time, values);
     }
 }

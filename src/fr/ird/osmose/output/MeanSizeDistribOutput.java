@@ -49,54 +49,28 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanTrophicLevelSizeOutput extends AbstractOutput {
+public class MeanSizeDistribOutput extends AbstractMeanDistribOutput {
 
-    private double[][] meanTL;
-    private double[][] biomass;
-    // Maximal size (cm) of the size spectrum.
-    public float spectrumMaxSize;
-    // Range (cm) of size classes.
-    private float classRange;
-    // Number of size classes in the discrete spectrum
-    private int nSizeClass;
-    // discrete size spectrum
-    private float[] tabSizes;
-
-    public MeanTrophicLevelSizeOutput(int rank) {
-        super(rank);
-        initializeSizeSpectrum();
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
-    }
-
-    private void initializeSizeSpectrum() {
-
-        float spectrumMinSize = getConfiguration().getFloat("output.size.spectrum.size.min");
-        spectrumMaxSize = getConfiguration().getFloat("output.size.spectrum.size.max");
-        classRange = getConfiguration().getFloat("output.size.spectrum.size.range");
-
-        //initialisation of the size spectrum features
-        nSizeClass = (int) Math.ceil(spectrumMaxSize / classRange);//size classes of 5 cm
-
-        tabSizes = new float[nSizeClass];
-        tabSizes[0] = spectrumMinSize;
-        for (int i = 1; i < nSizeClass; i++) {
-            tabSizes[i] = i * classRange;
-        }
+    public MeanSizeDistribOutput(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
+        StringBuilder filename = new StringBuilder(getType().toString());
+        filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTLPerSize_Simu");
+        filename.append("meanSize-distrib-by");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -104,17 +78,11 @@ public class MeanTrophicLevelSizeOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "Mean Trophic Level of fish species by size class of " + classRange + " cm";
-    }
-
-    @Override
-    String[] getHeaders() {
-        String[] headers = new String[getNSpecies() + 1];
-        headers[0] = "size";
-        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-            headers[iSpecies + 1] = getSpecies(iSpecies).getName();
-        }
-        return headers;
+        StringBuilder description = new StringBuilder();
+        description.append("Mean size of fish (centimeter) by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the mean size in [i,i+1[ is reported.");
+        return description.toString();
     }
 
     @Override
@@ -123,51 +91,14 @@ public class MeanTrophicLevelSizeOutput extends AbstractOutput {
     }
 
     @Override
-    public void reset() {
-        meanTL = new double[getNSpecies()][tabSizes.length];
-        biomass = new double[getNSpecies()][tabSizes.length];
-    }
-
-    @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getSpeciesIndex();
-            double biom = school.getInstantaneousBiomass();
-            int rank = getSizeRank(school);
-            meanTL[i][rank] += biom * school.getTrophicLevel();
-            biomass[i][rank] += biom;
-        }
-    }
-
-    private int getSizeRank(School school) {
-
-        int iSize = tabSizes.length - 1;
-        if (school.getLength() <= spectrumMaxSize) {
-            while (school.getLength() < tabSizes[iSize]) {
-                iSize--;
+            int iSpec = school.getSpeciesIndex();
+            int iClass = getClass(school);
+            if (iClass >= 0) {
+                values[iSpec][iClass] += school.getInstantaneousAbundance() * school.getLength();
+                denominator[iSpec][iClass] += school.getInstantaneousAbundance();
             }
         }
-        return iSize;
-    }
-
-    @Override
-    public void write(float time) {
-
-        double[][] values = new double[nSizeClass][getNSpecies() + 1];
-        for (int iSize = 0; iSize < nSizeClass; iSize++) {
-            // Size
-            values[iSize][0] = tabSizes[iSize];
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                // TL
-                if (biomass[iSpec][iSize] > 0.d) {
-                    meanTL[iSpec][iSize] = (float) (meanTL[iSpec][iSize] / biomass[iSpec][iSize]);
-                } else {
-                    meanTL[iSpec][iSize] = Double.NaN;
-                }
-                values[iSize][iSpec + 1] = meanTL[iSpec][iSize];
-            }
-        }
-
-        writeVariable(time, values);
     }
 }

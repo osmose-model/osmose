@@ -144,8 +144,8 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.distrib.bySize.enabled")) {
             indicators.add(new YieldDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.size.perSpecies.enabled")) {
-            indicators.add(new MeanSizeSpeciesOutput(rank));
+        if (getConfiguration().getBoolean("output.meanSize.distrib.byAge.enabled")) {
+            indicators.add(new MeanSizeDistribOutput(rank, ageDistrib));
         }
         // Age
         if (getConfiguration().getBoolean("output.yieldN.distrib.byAge.enabled")) {
@@ -164,11 +164,11 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.biomass.distrib.bytl.enabled")) {
             indicators.add(new BiomassDistribOutput(rank, new TLDistribution()));
         }
-        if (getConfiguration().getBoolean("output.tl.perSize.enabled")) {
-            indicators.add(new MeanTrophicLevelSizeOutput(rank));
+        if (getConfiguration().getBoolean("output.meanTL.distrib.bySize.enabled")) {
+            indicators.add(new MeanTrophicLevelDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.tl.perAge.enabled")) {
-            indicators.add(new MeanTrophicLevelAgeOutput(rank));
+        if (getConfiguration().getBoolean("output.meanTL.distrib.byAge.enabled")) {
+            indicators.add(new MeanTrophicLevelDistribOutput(rank, ageDistrib));
         }
         // Predation
         if (getConfiguration().getBoolean("output.diet.composition.enabled")) {
