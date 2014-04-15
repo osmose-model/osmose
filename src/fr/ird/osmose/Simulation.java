@@ -144,6 +144,10 @@ public class Simulation extends OLogger {
      * Whether to keep track of prey records during the simulation
      */
     private boolean preyRecord;
+    /**
+     * Year to start writing the outputs
+     */
+    private int yearOutput;
 
 //////////////
 // Constructor
@@ -277,6 +281,9 @@ public class Simulation extends OLogger {
         } else {
             warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
         }
+        
+        // Year to start writing the outputs
+        yearOutput = getConfiguration().getInt("output.start.year");
     }
 
     /**
@@ -417,7 +424,7 @@ public class Simulation extends OLogger {
      * @return true if prey records should be activated
      */
     public boolean isPreyRecord() {
-        return preyRecord;
+        return preyRecord && (year >= yearOutput);
     }
 
     public void requestPreyRecord() {
