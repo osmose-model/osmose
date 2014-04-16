@@ -49,7 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.School.PreyRecord;
+import fr.ird.osmose.PreyRecord;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
@@ -68,6 +68,11 @@ public class DietDistribOutput extends AbstractDistribOutput {
         this.species = species;
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
+    }
+    
+    @Override
+    public void reset() {
+        values = new double[getNSpecies() + getConfiguration().getNPlankton()][getNClass()];
     }
 
     @Override
@@ -116,7 +121,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
                 for (PreyRecord prey : predator.getPreyRecords()) {
                     int classSchool = getClass(predator);
                     if (classSchool >= 0) {
-                        values[classSchool][prey.getIndex()] += prey.getBiomass();
+                        values[prey.getSpeciesIndex()][classSchool] += prey.getBiomass();
                     }
                 }
             }

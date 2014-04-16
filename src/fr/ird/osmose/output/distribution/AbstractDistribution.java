@@ -51,7 +51,6 @@ package fr.ird.osmose.output.distribution;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.ISchool;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.School;
 
 /**
  *
@@ -113,7 +112,7 @@ public abstract class AbstractDistribution {
         }
     }
     
-    public int getClass(School school) {
+    public int getClass(ISchool school) {
         return getClass(getValue(school));
     }
 

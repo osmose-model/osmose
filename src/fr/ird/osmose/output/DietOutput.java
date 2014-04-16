@@ -49,7 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.School.PreyRecord;
+import fr.ird.osmose.PreyRecord;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.util.SimulationLinker;
@@ -122,7 +122,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
             if (preyedBiomass > 0) {
                 abundanceStage[iSpec][dietOutputStage.getStage(school)] += school.getAbundance();
                 for (PreyRecord prey : school.getPreyRecords()) {
-                    diet[iSpec][dietOutputStage.getStage(school)][prey.getIndex()][prey.getStage()] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
+                    diet[iSpec][dietOutputStage.getStage(school)][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
                 }
             }
         }

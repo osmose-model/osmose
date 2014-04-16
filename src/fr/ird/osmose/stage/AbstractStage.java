@@ -78,11 +78,11 @@ abstract class AbstractStage implements IStage {
             if (nStage > 1) {
                 thresholds[i] = getConfiguration().getArrayFloat(key + i);
             } else {
-                thresholds[i] = new float[] {Float.MAX_VALUE};
+                thresholds[i] = new float[0];
             }
         }
         for (int i = 0; i < nPlnk; i++) {
-            thresholds[nSpec + i] = new float[] {Float.MAX_VALUE};
+            thresholds[nSpec + i] = new float[0];
         }
     }
 

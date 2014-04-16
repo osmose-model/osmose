@@ -52,10 +52,8 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.Prey;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey.MortalityCause;
-import fr.ird.osmose.School.PreyRecord;
+import fr.ird.osmose.PreyRecord;
 import fr.ird.osmose.process.FishingProcess.FishingType;
-import fr.ird.osmose.stage.DietOutputStage;
-import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.util.XSRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,10 +95,6 @@ public class MortalityProcess extends AbstractProcess {
      * Private instance of the out of zone mortality process
      */
     private OutMortalityProcess outMortalityProcess;
-    /*
-     * Diet output stage
-     */
-    private IStage dietOutputStage;
     /**
      * Epsilon constant for numerical purpose to avoid zeros at denominator when
      * calculating mortality rates.
@@ -183,9 +177,6 @@ public class MortalityProcess extends AbstractProcess {
 
         outMortalityProcess = new OutMortalityProcess(getRank());
         outMortalityProcess.init();
-
-        dietOutputStage = new DietOutputStage();
-        dietOutputStage.init();
 
         // Sets the mortality algorithm
         try {
@@ -357,11 +348,11 @@ public class MortalityProcess extends AbstractProcess {
                             if (ipr < ns) {
                                 // Prey is School
                                 School prey = schools.get(ipr);
-                                school.addPreyRecord(prey, prey.adb2biom(nDeadMatrix[ipr][is]), dietOutputStage.getStage(prey), keepRecord);
+                                school.addPreyRecord(prey, prey.adb2biom(nDeadMatrix[ipr][is]), keepRecord);
                             } else {
                                 // Prey is Plankton
                                 int index = ipr - ns + nspec;
-                                school.addPreyRecord(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), nDeadMatrix[ipr][is], 0, keepRecord);
+                                school.addPreyRecord(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), nDeadMatrix[ipr][is], -1, -1, keepRecord);
                             }
                         }
                     }
@@ -625,10 +616,10 @@ public class MortalityProcess extends AbstractProcess {
                             nDead = prey.biom2abd(preyUpon[ipr]);
                             prey.incrementNdead(MortalityCause.PREDATION, nDead);
                             if (prey instanceof School) {
-                                predator.addPreyRecord((School) prey, preyUpon[ipr], dietOutputStage.getStage((School) prey), keepRecord);
+                                predator.addPreyRecord((School) prey, preyUpon[ipr], keepRecord);
                             } else {
                                 int index = ipr - ns + nspec;
-                                predator.addPreyRecord(index, prey.getTrophicLevel(), preyUpon[ipr], 0, keepRecord);
+                                predator.addPreyRecord(index, prey.getTrophicLevel(), preyUpon[ipr], -1, -1, keepRecord);
                             }
                         }
                         break;

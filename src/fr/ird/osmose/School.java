@@ -232,22 +232,22 @@ public class School extends Prey implements ISchool {
      * @param indexPrey, the index of the prey
      * @param trophicLevel, the trophic level of the prey
      * @param preyedBiomass, the biomass preyed on this prey
-     * @param preyStage, the stage of the prey,
-     * {@link fr.ird.osmose.stage.DietOutputStage}
+     * @param age, the age of the prey
+     * @param length, the length of the prey
      * @param keepRecord, whether or not Osmose should keep the prey record in
      * memory.
      */
-    public void addPreyRecord(int indexPrey, float trophicLevel, double preyedBiomass, int preyStage, boolean keepRecord) {
+    public void addPreyRecord(int indexPrey, float trophicLevel, double preyedBiomass, float age, float length, boolean keepRecord) {
         if (keepRecord) {
-            preyRecords.add(new PreyRecord(indexPrey, trophicLevel, preyedBiomass, preyStage));
+            preyRecords.add(new PreyRecord(indexPrey, trophicLevel, preyedBiomass, age, length));
         }
         // Update school total preyed biomass
         this.preyedBiomass += preyedBiomass;
     }
 
-    public void addPreyRecord(School prey, double preyedBiomass, int preyStage, boolean keepRecord) {
+    public void addPreyRecord(School prey, double preyedBiomass, boolean keepRecord) {
         if (keepRecord) {
-            preyRecords.add(new PreyRecord(prey, preyedBiomass, preyStage));
+            preyRecords.add(new PreyRecord(prey, preyedBiomass));
         }
         // Update school total preyed biomass
         this.preyedBiomass += preyedBiomass;
@@ -328,6 +328,7 @@ public class School extends Prey implements ISchool {
         return ageDt;
     }
 
+    @Override
     public float getAge() {
         return age;
     }
@@ -345,6 +346,7 @@ public class School extends Prey implements ISchool {
      *
      * @return the length of the fish, in centimeter
      */
+    @Override
     public float getLength() {
         return length;
     }
@@ -480,108 +482,5 @@ public class School extends Prey implements ISchool {
 
     public double[] getAccessibilities() {
         return accessibilities;
-    }
-
-    /**
-     * This class provides a record of a predation event by the school on a
-     * given prey. A prey can be either an other school or a plankton group. A
-     * record keep tracks of: the type of prey (which species or plankton
-     * group), the biomass preyed, the {@code DietOutputStage} of the prey and
-     * the trophic level of the prey.
-     *
-     * @see Prey
-     */
-    public class PreyRecord {
-
-        /**
-         * The preyed biomass, in tonne.
-         */
-        private final double biomass;
-        /**
-         * The {@link fr.ird.osmose.stage.DietOutputStage} of the prey.
-         */
-        private final int dietOutputStage;
-        /**
-         * The trophic level of the prey.
-         */
-        private final float trophicLevel;
-        /**
-         * The index of the species or / plankton group of the prey. In order to
-         * distinguish a school from a plankton, the index follows the following
-         * convention: index = index species if the prey is an instance of
-         * {@code School} and index = nSpecies + index plankton group if the
-         * prey is an instance of {@code Plankton}
-         */
-        private final int index;
-        private final School prey;
-
-        /**
-         * Creates a new prey record.
-         *
-         * @param index of the prey
-         * @param trophicLevel of the prey
-         * @param biomass, the preyed biomass, in tonne
-         * @param dietOutputStage, the {@code DietOutputStage} of the prey
-         */
-        PreyRecord(int index, float trophicLevel, double biomass, int dietOutputStage) {
-            this.index = index;
-            this.trophicLevel = trophicLevel;
-            this.biomass = biomass;
-            this.dietOutputStage = dietOutputStage;
-            prey = null;
-        }
-
-        PreyRecord(School prey, double biomass, int dietOutputStage) {
-            this.prey = prey;
-            this.index = prey.getSpeciesIndex();
-            this.trophicLevel = prey.getTrophicLevel();
-            this.biomass = biomass;
-            this.dietOutputStage = dietOutputStage;
-        }
-
-        /**
-         * Returns the preyed biomass, in tonne.
-         *
-         * @return the preyed biomass, in tonne
-         */
-        public double getBiomass() {
-            return biomass;
-        }
-
-        /**
-         * Returns the the {@code DietOutputStage} of the prey.
-         *
-         * @see fr.ird.osmose.stage.DietOutputStage
-         * @return the {@code DietOutputStage} of the prey
-         */
-        public int getStage() {
-            return dietOutputStage;
-        }
-
-        /**
-         * Returns the trophic level of the prey.
-         *
-         * @return the trophic level of the prey
-         */
-        public float getTrophicLevel() {
-            return trophicLevel;
-        }
-
-        /**
-         * Returns the index of the prey. In order to distinguish a school from
-         * a plankton, the index follows the following convention: index = index
-         * species if the prey is an instance of {@code School} and index =
-         * nSpecies + index plankton group if the prey is an instance of
-         * {@code Plankton}
-         *
-         * @return the index of the prey
-         */
-        public int getIndex() {
-            return index;
-        }
-
-        public School getSchool() {
-            return prey;
-        }
     }
 }

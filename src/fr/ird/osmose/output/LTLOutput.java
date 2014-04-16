@@ -50,7 +50,7 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.School.PreyRecord;
+import fr.ird.osmose.PreyRecord;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
@@ -144,7 +144,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
             int i = (int) school.getX();
             int j = (int) school.getY();
             for (PreyRecord prey : school.getPreyRecords()) {
-                int iltl = prey.getIndex() - nspec;
+                int iltl = prey.getSpeciesIndex() - nspec;
                 if (iltl >= 0) {
                     ltlbiomass1[iltl][j][i] -= prey.getBiomass();
                 }
