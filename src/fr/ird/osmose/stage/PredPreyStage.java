@@ -49,8 +49,7 @@
 package fr.ird.osmose.stage;
 
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.Prey;
-import fr.ird.osmose.School;
+import fr.ird.osmose.ISchool;
 
 /**
  *
@@ -97,12 +96,7 @@ public class PredPreyStage implements IStage {
     }
 
     @Override
-    public int getStage(School school) {
+    public int getStage(ISchool school) {
         return stage.getStage(school);
-    }
-
-    @Override
-    public int getStage(Prey prey) {
-        return stage.getStage(prey);
     }
 }

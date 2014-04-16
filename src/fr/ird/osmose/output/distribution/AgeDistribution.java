@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.output.distribution;
 
-import fr.ird.osmose.School;
+import fr.ird.osmose.ISchool;
 
 /**
  *
@@ -80,7 +80,7 @@ public class AgeDistribution extends AbstractDistribution {
     }
 
     @Override
-    float getValue(School school) {
+    float getValue(ISchool school) {
         return school.getAge();
     }
 }

@@ -50,8 +50,6 @@ package fr.ird.osmose.stage;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.Prey;
-import fr.ird.osmose.School;
 
 /**
  *
@@ -80,20 +78,11 @@ abstract class AbstractStage implements IStage {
             if (nStage > 1) {
                 thresholds[i] = getConfiguration().getArrayFloat(key + i);
             } else {
-                thresholds[i] = new float[0];
+                thresholds[i] = new float[] {Float.MAX_VALUE};
             }
         }
         for (int i = 0; i < nPlnk; i++) {
-            thresholds[nSpec + i] = new float[0];
-        }
-    }
-
-    @Override
-    public int getStage(Prey prey) {
-        if (prey instanceof School) {
-            return getStage((School) prey);
-        } else {
-            return 0;
+            thresholds[nSpec + i] = new float[] {Float.MAX_VALUE};
         }
     }
 

@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.output.distribution;
 
-import fr.ird.osmose.School;
+import fr.ird.osmose.ISchool;
 
 /**
  *
@@ -80,7 +80,7 @@ public class IniSizeDistribution extends AbstractDistribution {
     }
 
     @Override
-    float getValue(School school) {
-        return school.getLengthi();
+    float getValue(ISchool school) {
+        return school.getLengthIniStep();
     }
 }

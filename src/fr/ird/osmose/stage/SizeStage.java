@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.stage;
 
-import fr.ird.osmose.School;
+import fr.ird.osmose.ISchool;
 
 /**
  *
@@ -62,7 +62,7 @@ public class SizeStage extends AbstractStage {
     }
 
     @Override
-    public int getStage(School school) {
+    public int getStage(ISchool school) {
         int stage = 0;
         int iSpec = school.getSpeciesIndex();
         for (float threshold : this.getThresholds(iSpec)) {

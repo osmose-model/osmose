@@ -49,6 +49,7 @@
 package fr.ird.osmose.output.distribution;
 
 import fr.ird.osmose.Configuration;
+import fr.ird.osmose.ISchool;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
 
@@ -69,7 +70,7 @@ public abstract class AbstractDistribution {
 
     abstract float getDefaultIncr();
 
-    abstract float getValue(School school);
+    abstract float getValue(ISchool school);
 
     AbstractDistribution(DistributionType type, int indexSpecies) {
         this.type = type;

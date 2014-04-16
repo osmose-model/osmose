@@ -83,7 +83,7 @@ import java.util.UUID;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class School extends Prey {
+public class School extends Prey implements ISchool {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -469,7 +469,8 @@ public class School extends Prey {
     /**
      * @return the lengthi
      */
-    public float getLengthi() {
+    @Override
+    public float getLengthIniStep() {
         return lengthi;
     }
 

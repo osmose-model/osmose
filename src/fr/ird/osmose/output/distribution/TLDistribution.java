@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.output.distribution;
 
-import fr.ird.osmose.School;
+import fr.ird.osmose.ISchool;
 
 /**
  *
@@ -80,8 +80,8 @@ public class TLDistribution extends AbstractDistribution {
     }
 
     @Override
-    float getValue(School school) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    float getValue(ISchool school) {
+        return school.getTrophicLevel();
     }
     
 }
