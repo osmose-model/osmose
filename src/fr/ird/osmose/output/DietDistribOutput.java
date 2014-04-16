@@ -93,7 +93,9 @@ public class DietDistribOutput extends AbstractDistribOutput {
     @Override
     String getDescription() {
         StringBuilder description = new StringBuilder();
-        description.append("Distribution of the biomass of prey species (tonne, in rows) in the diet of predator species by ");
+        description.append("Distribution of the biomass (tonne) of prey species (in columns) in the diet of ");
+        description.append(species.getName());
+        description.append(" by ");
         description.append(getType().getDescription());
         description.append(". For class i, the preyed biomass in [i,i+1[ is reported.");
         return description.toString();
@@ -119,9 +121,9 @@ public class DietDistribOutput extends AbstractDistribOutput {
             double preyedBiomass = predator.getPreyedBiomass();
             if (preyedBiomass > 0) {
                 for (PreyRecord prey : predator.getPreyRecords()) {
-                    int classSchool = getClass(predator);
-                    if (classSchool >= 0) {
-                        values[prey.getSpeciesIndex()][classSchool] += prey.getBiomass();
+                    int classPredator = getClass(predator);
+                    if (classPredator >= 0) {
+                        values[prey.getSpeciesIndex()][classPredator] += prey.getBiomass();
                     }
                 }
             }

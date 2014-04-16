@@ -59,12 +59,8 @@ import java.io.File;
  * @author pverley
  */
 public class PredatorPressureDistribOutput extends AbstractDistribOutput {
+    
    private final Species species;
-    /**
-     * Biomass eaten on this prey per stages and per predator
-     * [STAGES][SPECIES+1]
-     */
-    private double[][] predatorPressure;
 
     public PredatorPressureDistribOutput(int rank, Species species, AbstractDistribution distrib) {
         super(rank, distrib);
@@ -91,7 +87,9 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
     @Override
     String getDescription() {
         StringBuilder description = new StringBuilder();
-        description.append("Distribution of the % of prey species (tonne, in rows) in the diet of predator species by ");
+        description.append("Distribution of the preyed biomass (tonne) of ");
+        description.append(species.getName());
+        description.append(" among the predator species (in column) by ");
         description.append(getType().getDescription());
         description.append(". For class i, the % of preyed biomass in [i,i+1[ is reported.");
         return description.toString();
