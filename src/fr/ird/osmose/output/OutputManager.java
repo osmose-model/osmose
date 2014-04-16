@@ -174,14 +174,14 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.diet.composition.enabled")) {
             indicators.add(new DietOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.diet.composition.perSpecies.perAge.enabled")) {
+        if (getConfiguration().getBoolean("output.dietcomposition.distrib.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new DietSpeciesOutput(rank, getSpecies(i), ageDistrib));
+                indicators.add(new DietDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
-        if (getConfiguration().getBoolean("output.diet.composition.perSpecies.perSize.enabled")) {
+        if (getConfiguration().getBoolean("output.dietcomposition.distrib.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new DietSpeciesOutput(rank, getSpecies(i), sizeDistrib));
+                indicators.add(new DietDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
@@ -190,14 +190,14 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
             indicators.add(new BiomassDietStageOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.diet.pressure.perSpecies.perAge.enabled")) {
+        if (getConfiguration().getBoolean("output.dietpressure.distrib.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new PredatorPressureSpeciesOutput(rank, getSpecies(i), ageDistrib));
+                indicators.add(new PredatorPressureDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
-        if (getConfiguration().getBoolean("output.diet.pressure.perSpecies.perSize.enabled")) {
+        if (getConfiguration().getBoolean("output.dietpressure.distrib.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new PredatorPressureSpeciesOutput(rank, getSpecies(i), sizeDistrib));
+                indicators.add(new PredatorPressureDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
         // Spatialized

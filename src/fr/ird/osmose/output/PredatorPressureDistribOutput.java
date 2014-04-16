@@ -49,26 +49,23 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.School.PreyRecord;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 
 /**
  *
- * @author P.Verley (philippe.verley@ird.fr)
- * @version 3.0 2013/09/01
+ * @author pverley
  */
-public class PredatorPressureSpeciesOutput extends AbstractDistribOutput {
-
-    private final Species species;
+public class PredatorPressureDistribOutput extends AbstractDistribOutput {
+   private final Species species;
     /**
      * Biomass eaten on this prey per stages and per predator
      * [STAGES][SPECIES+1]
      */
     private double[][] predatorPressure;
 
-    public PredatorPressureSpeciesOutput(int rank, Species species, AbstractDistribution distrib) {
+    public PredatorPressureDistribOutput(int rank, Species species, AbstractDistribution distrib) {
         super(rank, distrib);
         this.species = species;
         // Ensure that prey records will be made during the simulation
@@ -92,42 +89,22 @@ public class PredatorPressureSpeciesOutput extends AbstractDistribOutput {
 
     @Override
     String getDescription() {
-        return "Biomass, in tonne per time step of saving, of prey species (in rows) eaten by a predator species per age/size class(in col)";
-    }
-
-    @Override
-    public void reset() {
-        predatorPressure = new double[getNClass()][getNSpecies() + 1];
-        for (int iClass = 0; iClass < getNClass(); iClass++) {
-            predatorPressure[iClass][0] = getClassThreshold(iClass);
-        }
-    }
-
-    @Override
-    public void write(float time) {
-
-        writeVariable(time, predatorPressure);
-    }
-
-    @Override
-    String[] getHeaders() {
-        String[] headers = new String[getNSpecies() + 1];
-        headers[0] = getType().toString();
-        for (int i = 0; i < getNSpecies(); i++) {
-            headers[i + 1] = getSimulation().getSpecies(i).getName();
-        }
-        return headers;
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of the % of prey species (tonne, in rows) in the diet of predator species by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the % of preyed biomass in [i,i+1[ is reported.");
+        return description.toString();
     }
 
     @Override
     public void update() {
 
         for (School predator : getSchoolSet().getAliveSchools()) {
-            for (PreyRecord prey : predator.getPreyRecords()) {
+            for (School.PreyRecord prey : predator.getPreyRecords()) {
                 if (prey.getIndex() == species.getIndex()) {
                     int classPrey = getClass(prey.getSchool());
                     if (classPrey >= 0) {
-                        predatorPressure[classPrey][predator.getSpeciesIndex() + 1] += prey.getBiomass();
+                        values[classPrey][predator.getSpeciesIndex()] += prey.getBiomass();
                     }
                 }
             }

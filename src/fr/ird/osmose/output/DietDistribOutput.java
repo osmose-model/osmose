@@ -59,15 +59,11 @@ import java.io.File;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0 2013/09/01
  */
-public class DietSpeciesOutput extends AbstractDistribOutput {
+public class DietDistribOutput extends AbstractDistribOutput {
 
     private final Species species;
-    /**
-     * Diet of a predator per stages and per prey [STAGES][SPECIES+PLANKTON+1]
-     */
-    private double[][] diet;
 
-    public DietSpeciesOutput(int rank, Species species, AbstractDistribution distrib) {
+    public DietDistribOutput(int rank, Species species, AbstractDistribution distrib) {
         super(rank, distrib);
         this.species = species;
         // Ensure that prey records will be made during the simulation
@@ -79,7 +75,7 @@ public class DietSpeciesOutput extends AbstractDistribOutput {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_dietMatrixPer");
+        filename.append("_dietMatrixby");
         filename.append(getType().toString());
         filename.append("-");
         filename.append(species.getName());
@@ -91,21 +87,11 @@ public class DietSpeciesOutput extends AbstractDistribOutput {
 
     @Override
     String getDescription() {
-        return "Biomass, in tonne, of prey species (in rows) in the diet of predator species per age/size class(in col)";
-    }
-
-    @Override
-    public void reset() {
-        diet = new double[getNClass()][getNSpecies() + getConfiguration().getNPlankton() + 1];
-        for (int iClass = 0; iClass < getNClass(); iClass++) {
-            diet[iClass][0] = getClassThreshold(iClass);
-        }
-    }
-
-    @Override
-    public void write(float time) {
-
-        writeVariable(time, diet);
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of the biomass of prey species (tonne, in rows) in the diet of predator species by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the preyed biomass in [i,i+1[ is reported.");
+        return description.toString();
     }
 
     @Override
@@ -130,7 +116,7 @@ public class DietSpeciesOutput extends AbstractDistribOutput {
                 for (PreyRecord prey : predator.getPreyRecords()) {
                     int classSchool = getClass(predator);
                     if (classSchool >= 0) {
-                        diet[classSchool][prey.getIndex() + 1] += prey.getBiomass();
+                        values[classSchool][prey.getIndex()] += prey.getBiomass();
                     }
                 }
             }
@@ -141,5 +127,4 @@ public class DietSpeciesOutput extends AbstractDistribOutput {
     public void initStep() {
         // nothing to do
     }
-
 }
