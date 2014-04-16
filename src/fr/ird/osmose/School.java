@@ -49,8 +49,8 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.util.GridPoint;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -116,7 +116,7 @@ public class School extends Prey implements ISchool {
      * List of {@code PreyRecord}. It keeps track of what the school has eaten
      * during the time step.
      */
-    final private List<PreyRecord> preyRecords;
+    final private HashMap<Integer, PreyRecord> preyRecords;
     /**
      * Biomass of prey, in tonne, ingested by the school at current time step.
      */
@@ -201,7 +201,7 @@ public class School extends Prey implements ISchool {
         this.ageDt = ageDt;
         this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
-        preyRecords = new ArrayList();
+        preyRecords = new HashMap();
         starvationRate = 0.d;
     }
 
@@ -237,17 +237,15 @@ public class School extends Prey implements ISchool {
      * @param keepRecord, whether or not Osmose should keep the prey record in
      * memory.
      */
-    public void addPreyRecord(int indexPrey, float trophicLevel, double preyedBiomass, float age, float length, boolean keepRecord) {
+    public void addPreyRecord(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
         if (keepRecord) {
-            preyRecords.add(new PreyRecord(indexPrey, trophicLevel, preyedBiomass, age, length));
-        }
-        // Update school total preyed biomass
-        this.preyedBiomass += preyedBiomass;
-    }
-
-    public void addPreyRecord(School prey, double preyedBiomass, boolean keepRecord) {
-        if (keepRecord) {
-            preyRecords.add(new PreyRecord(prey, preyedBiomass));
+            PreyRecord newRecord = new PreyRecord(indexPrey, trophicLevel, age, length, preyedBiomass);
+            int hash = newRecord.hashCode();
+            if (preyRecords.containsKey(hash)) {
+                preyRecords.get(hash).incrementBiomass(newRecord.getBiomass());
+            } else {
+                preyRecords.put(newRecord.hashCode(), newRecord);
+            }
         }
         // Update school total preyed biomass
         this.preyedBiomass += preyedBiomass;
@@ -258,8 +256,8 @@ public class School extends Prey implements ISchool {
      *
      * @return a list of the prey records at current time step.
      */
-    public List<PreyRecord> getPreyRecords() {
-        return preyRecords;
+    public Collection<PreyRecord> getPreyRecords() {
+        return preyRecords.values();
     }
 
     /**
@@ -449,7 +447,7 @@ public class School extends Prey implements ISchool {
     public void setPredSuccessRate(float rate) {
         this.predSuccessRate = rate;
     }
-    
+
     public void incrementPredSuccessRate(float drate) {
         this.predSuccessRate += drate;
     }

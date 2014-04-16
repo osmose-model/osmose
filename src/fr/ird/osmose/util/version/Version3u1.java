@@ -62,7 +62,19 @@ public class Version3u1 extends AbstractVersion {
 
     @Override
     void update() {
+        
+        return;
 
-        // @TODO
+        // Rename simulation.restart.recordfrequency.ndt into output.restart.recordfrequency.ndt
+        
+        // Rename output.cutoff.enabled into output.earlystage.cutoff
+        
+        // Rename output.cutoff.age.sp# into output.earlystage.cutoff.age.sp#
+        
+        // Rename output.path.dir into output.path
+        
+        // Rename output.size.catch.enabled into output.size.catches.enabled
+        
+        // 
     }
 }

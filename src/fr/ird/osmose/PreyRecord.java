@@ -62,7 +62,7 @@ public class PreyRecord implements ISchool {
     /**
      * The preyed biomass, in tonne.
      */
-    private final double biomass;
+    private double biomass;
     /**
      * The trophic level of the prey.
      */
@@ -86,20 +86,12 @@ public class PreyRecord implements ISchool {
      * @param biomass, the preyed biomass, in tonne
      * @param dietOutputStage, the {@code DietOutputStage} of the prey
      */
-    PreyRecord(int index, float trophicLevel, double biomass, float age, float length) {
+    PreyRecord(int index, float trophicLevel, float age, float length, double biomass) {
         this.index = index;
         this.trophicLevel = trophicLevel;
         this.biomass = biomass;
         this.age = age;
         this.length = length;
-    }
-
-    PreyRecord(School prey, double biomass) {
-        this.index = prey.getSpeciesIndex();
-        this.trophicLevel = prey.getTrophicLevel();
-        this.biomass = biomass;
-        this.age = prey.getAge();
-        this.length = prey.getLength();
     }
 
     /**
@@ -110,6 +102,10 @@ public class PreyRecord implements ISchool {
     @Override
     public double getBiomass() {
         return biomass;
+    }
+    
+    public void incrementBiomass(double biomass) {
+        this.biomass += biomass;
     }
 
     /**
