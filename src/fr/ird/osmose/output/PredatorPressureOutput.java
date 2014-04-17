@@ -75,7 +75,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     private double[][][][] predatorPressure;
     // Diet output stage
     private IStage dietOutputStage;
-    
+
     private final String separator;
 
     public PredatorPressureOutput(int rank) {
@@ -147,7 +147,11 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
                 for (int i = 0; i < nSpec; i++) {
                     int nStage = dietOutputStage.getNStage(i);
                     for (int s = 0; s < nStage; s++) {
-                        prw.print((float) (predatorPressure[i][s][iSpec][iStage] / dtRecord));
+                        float val = (float) (predatorPressure[i][s][iSpec][iStage] / dtRecord);
+                        String sval = Float.isInfinite(val)
+                                ? "Inf"
+                                : Float.toString(val);
+                        prw.print(sval);
                         if (i < nSpec - 1 || s < nStage - 1) {
                             prw.print(separator);
                         }
@@ -246,7 +250,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     public boolean isTimeToWrite(int iStepSimu) {
         return (((iStepSimu + 1) % recordFrequency) == 0);
     }
-    
+
     private String quote(String str) {
         return "\"" + str + "\"";
     }

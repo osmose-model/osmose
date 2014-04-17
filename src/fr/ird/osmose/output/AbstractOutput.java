@@ -145,7 +145,10 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             prw.print(time);
             for (int j = 0; j < row.length; j++) {
                 prw.print(separator);
-                prw.print((float) row[j]);
+                String sval = Float.isInfinite((float) row[j])
+                        ? "Inf"
+                        : Float.toString((float) row[j]);
+                prw.print(sval);
             }
             prw.println();
         }

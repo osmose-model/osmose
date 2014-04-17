@@ -181,7 +181,11 @@ public class DietOutput extends SimulationLinker implements IOutput {
                 int nStagePred = dietOutputStage.getNStage(i);
                 for (int s = 0; s < nStagePred; s++) {
                     if (abundanceStage[i][s] > 0) {
-                        prw.print((float) (100.d * diet[i][s][j][0] / abundanceStage[i][s]));
+                        float val = (float) (100.d * diet[i][s][j][0] / abundanceStage[i][s]);
+                        String sval = Float.isInfinite(val)
+                                ? "Inf"
+                                : Float.toString(val);
+                        prw.print(sval);
                     } else {
                         prw.print("NaN");
                     }
@@ -228,7 +232,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
             // Init stream
             fos = new FileOutputStream(file, true);
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(AbstractOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DietOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         prw = new PrintWriter(fos, true);
         if (!fileExists) {
