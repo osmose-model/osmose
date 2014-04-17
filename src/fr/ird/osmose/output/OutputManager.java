@@ -50,7 +50,6 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.AgeDistribution;
-import fr.ird.osmose.output.distribution.DistributionType;
 import fr.ird.osmose.output.distribution.IniSizeDistribution;
 import fr.ird.osmose.output.distribution.SizeDistribution;
 import fr.ird.osmose.output.distribution.TLDistribution;
@@ -97,7 +96,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.biomass.distrib.bysize.enabled")) {
             indicators.add(new BiomassDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.biomass.distrib.byage.enabled.enabled")) {
+        if (getConfiguration().getBoolean("output.biomass.distrib.byage.enabled")) {
             indicators.add(new BiomassDistribOutput(rank, ageDistrib));
         }
         // Abundance
@@ -107,7 +106,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.abundance.distrib.bysize.enabled")) {
             indicators.add(new AbundanceDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.abundance.distrib.byage.enabled.enabled")) {
+        if (getConfiguration().getBoolean("output.abundance.distrib.byage.enabled")) {
             indicators.add(new AbundanceDistribOutput(rank, ageDistrib));
         }
         // Mortality
