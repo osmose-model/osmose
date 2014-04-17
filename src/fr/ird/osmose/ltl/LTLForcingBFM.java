@@ -178,7 +178,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
          * Load the mask
          */
         String gridFile = getConfiguration().getFile("grid.netcdf.file");
-        String strMask = getConfiguration().getString("grid.var.stride");
+        String strMask = getConfiguration().getString("grid.var.mask");
         NetcdfFile nc = NetcdfFile.open(gridFile, null);
         float[][] mask = (float[][]) nc.findVariable(strMask).read().copyToNDJavaArray();
 
