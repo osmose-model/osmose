@@ -272,7 +272,7 @@ public class MortalityProcess extends AbstractProcess {
             preys.addAll(schools);
             int iStepSimu = getSimulation().getIndexTimeSimu();
             for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-                preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu));
+                preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu, 1));
             }
             for (School school : schools) {
                 school.setAccessibilities(predationProcess.getAccessibility(school, preys));
@@ -296,11 +296,10 @@ public class MortalityProcess extends AbstractProcess {
                     computeMortality_stochastic(subdt, cell);
                 }
             }
-        }
-
-        // Reset LTL preys
-        for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
-            getSimulation().getPlankton(iLTL).resetPreys();
+            // Reset LTL preys
+            for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
+                getSimulation().getPlankton(iLTL).resetPreys();
+            }
         }
     }
 
@@ -583,7 +582,7 @@ public class MortalityProcess extends AbstractProcess {
             }
         }
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu));
+            preys.add(getSimulation().getPlankton(i).asPrey(cell, iStepSimu, subdt));
         }
 
         Integer[] seqPred = new Integer[ns];
