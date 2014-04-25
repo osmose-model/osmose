@@ -50,7 +50,6 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.util.logging.OLogger;
-import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.ConcomitantMortalityStep;
@@ -120,26 +119,9 @@ public class Simulation extends OLogger {
      */
     private AbstractStep step;
     /**
-     * Object that is able to take a snapshot of the set of schools and write it
-     * in a NetCDF file. Osmose will be able to restart on such a file.
-     */
-    private SchoolSetSnapshot snapshot;
-    /**
-     * Record frequency for writing restart files, in number of time step.
-     */
-    private int restartFrequency;
-    /**
      * Indicates whether the simulation starts from a restart file.
      */
     private boolean restart;
-    /**
-     * Number of years before writing restart files.
-     */
-    private int spinupRestart;
-    /**
-     * Whether the restart files should be written or not
-     */
-    private boolean writeRestart;
     /**
      * Whether to keep track of prey records during the simulation
      */
@@ -176,7 +158,6 @@ public class Simulation extends OLogger {
         ltlGroups = null;
         step = null;
         forcing = null;
-        snapshot = null;
     }
 
 ///////////////////////////////
@@ -265,23 +246,6 @@ public class Simulation extends OLogger {
         populatingProcess.init();
         populatingProcess.run();
 
-        // Initialize the restart maker
-        snapshot = new SchoolSetSnapshot(rank);
-        restartFrequency = Integer.MAX_VALUE;
-        if (!getConfiguration().isNull("simulation.restart.recordfrequency.ndt")) {
-            restartFrequency = getConfiguration().getInt("simulation.restart.recordfrequency.ndt");
-        }
-        spinupRestart = 0;
-        if (!getConfiguration().isNull("simulation.restart.spinup")) {
-            spinupRestart = getConfiguration().getInt("simulation.restart.spinup") - 1;
-        }
-        writeRestart = true;
-        if (!getConfiguration().isNull("output.restart.enabled")) {
-            writeRestart = getConfiguration().getBoolean("output.restart.enabled");
-        } else {
-            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
-        }
-
         // Year to start writing the outputs
         yearOutput = getConfiguration().getInt("output.start.year");
     }
@@ -346,20 +310,10 @@ public class Simulation extends OLogger {
             step.step(i_step_simu);
             //fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
-            // Create a restart file
-            if (writeRestart && (year >= spinupRestart) && ((i_step_simu + 1) % restartFrequency == 0)) {
-                snapshot.makeSnapshot(i_step_simu);
-            }
-
             // Increment time step
             i_step_simu++;
         }
         step.end();
-
-        // Create systematically a restart file at the end of the simulation
-        if (writeRestart) {
-            snapshot.makeSnapshot(i_step_simu - 1);
-        }
     }
 
     /**

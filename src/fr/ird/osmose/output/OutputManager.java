@@ -65,11 +65,29 @@ import java.util.List;
 public class OutputManager extends SimulationLinker {
 
     // List of the indicators
-    final private List<IOutput> indicators;
+    final private List<IOutput> outputs;
+    /**
+     * Object that is able to take a snapshot of the set of schools and write it
+     * in a NetCDF file. Osmose will be able to restart on such a file.
+     */
+    final private SchoolSetSnapshot snapshot;
+    /**
+     * Record frequency for writing restart files, in number of time step.
+     */
+    private int restartFrequency;
+    /**
+     * Whether the restart files should be written or not
+     */
+    private boolean writeRestart;
+    /**
+     * Number of years before writing restart files.
+     */
+    private int spinupRestart;
 
     public OutputManager(int rank) {
         super(rank);
-        indicators = new ArrayList();
+        outputs = new ArrayList();
+        snapshot = new SchoolSetSnapshot(rank);
     }
 
     public void init() {
@@ -91,164 +109,182 @@ public class OutputManager extends SimulationLinker {
          */
         // Biomass
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
-            indicators.add(new BiomassOutput(rank));
+            outputs.add(new BiomassOutput(rank));
         }
         if (getConfiguration().getBoolean("output.biomass.distrib.bysize.enabled")) {
-            indicators.add(new BiomassDistribOutput(rank, sizeDistrib));
+            outputs.add(new BiomassDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.biomass.distrib.byage.enabled")) {
-            indicators.add(new BiomassDistribOutput(rank, ageDistrib));
+            outputs.add(new BiomassDistribOutput(rank, ageDistrib));
         }
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
-            indicators.add(new AbundanceOutput(rank));
+            outputs.add(new AbundanceOutput(rank));
         }
         if (getConfiguration().getBoolean("output.abundance.distrib.bysize.enabled")) {
-            indicators.add(new AbundanceDistribOutput(rank, sizeDistrib));
+            outputs.add(new AbundanceDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.abundance.distrib.byage.enabled")) {
-            indicators.add(new AbundanceDistribOutput(rank, ageDistrib));
+            outputs.add(new AbundanceDistribOutput(rank, ageDistrib));
         }
         // Mortality
         if (getConfiguration().getBoolean("output.mortality.enabled")) {
-            indicators.add(new MortalityOutput(rank));
+            outputs.add(new MortalityOutput(rank));
         }
         if (getConfiguration().getBoolean("output.mortality.perSpecies.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new MortalitySpeciesOutput(rank, getSpecies(i), ageDistrib));
+                outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), ageDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.mortality.perSpecies.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new MortalitySpeciesOutput(rank, getSpecies(i), new IniSizeDistribution()));
+                outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), new IniSizeDistribution()));
             }
         }
         // Yield
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
-            indicators.add(new YieldOutput(rank));
+            outputs.add(new YieldOutput(rank));
         }
         if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
-            indicators.add(new YieldNOutput(rank));
+            outputs.add(new YieldNOutput(rank));
         }
         // Size
         if (getConfiguration().getBoolean("output.size.enabled")) {
-            indicators.add(new MeanSizeOutput(rank));
+            outputs.add(new MeanSizeOutput(rank));
         }
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
-            indicators.add(new MeanSizeCatchOutput(rank));
+            outputs.add(new MeanSizeCatchOutput(rank));
         }
         if (getConfiguration().getBoolean("output.yieldN.distrib.bySize.enabled")) {
-            indicators.add(new YieldNDistribOutput(rank, sizeDistrib));
+            outputs.add(new YieldNDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.yield.distrib.bySize.enabled")) {
-            indicators.add(new YieldDistribOutput(rank, sizeDistrib));
+            outputs.add(new YieldDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.meanSize.distrib.byAge.enabled")) {
-            indicators.add(new MeanSizeDistribOutput(rank, ageDistrib));
+            outputs.add(new MeanSizeDistribOutput(rank, ageDistrib));
         }
         // Age
         if (getConfiguration().getBoolean("output.yieldN.distrib.byAge.enabled")) {
-            indicators.add(new YieldNDistribOutput(rank, ageDistrib));
+            outputs.add(new YieldNDistribOutput(rank, ageDistrib));
         }
         if (getConfiguration().getBoolean("output.yield.distrib.byAge.enabled")) {
-            indicators.add(new YieldDistribOutput(rank, ageDistrib));
+            outputs.add(new YieldDistribOutput(rank, ageDistrib));
         }
         // TL
         if (getConfiguration().getBoolean("output.tl.enabled")) {
-            indicators.add(new MeanTrophicLevelOutput(rank));
+            outputs.add(new MeanTrophicLevelOutput(rank));
         }
         if (getConfiguration().getBoolean("output.tl.catch.enabled")) {
-            indicators.add(new MeanTrophicLevelCatchOutput(rank));
+            outputs.add(new MeanTrophicLevelCatchOutput(rank));
         }
         if (getConfiguration().getBoolean("output.biomass.distrib.bytl.enabled")) {
-            indicators.add(new BiomassDistribOutput(rank, new TLDistribution()));
+            outputs.add(new BiomassDistribOutput(rank, new TLDistribution()));
         }
         if (getConfiguration().getBoolean("output.meanTL.distrib.bySize.enabled")) {
-            indicators.add(new MeanTrophicLevelDistribOutput(rank, sizeDistrib));
+            outputs.add(new MeanTrophicLevelDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.meanTL.distrib.byAge.enabled")) {
-            indicators.add(new MeanTrophicLevelDistribOutput(rank, ageDistrib));
+            outputs.add(new MeanTrophicLevelDistribOutput(rank, ageDistrib));
         }
         // Predation
         if (getConfiguration().getBoolean("output.diet.composition.enabled")) {
-            indicators.add(new DietOutput(rank));
+            outputs.add(new DietOutput(rank));
         }
         if (getConfiguration().getBoolean("output.dietcomposition.distrib.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new DietDistribOutput(rank, getSpecies(i), ageDistrib));
+                outputs.add(new DietDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.dietcomposition.distrib.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new DietDistribOutput(rank, getSpecies(i), sizeDistrib));
+                outputs.add(new DietDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
-            indicators.add(new PredatorPressureOutput(rank));
+            outputs.add(new PredatorPressureOutput(rank));
         }
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
-            indicators.add(new BiomassDietStageOutput(rank));
+            outputs.add(new BiomassDietStageOutput(rank));
         }
         if (getConfiguration().getBoolean("output.dietpressure.distrib.perAge.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new PredatorPressureDistribOutput(rank, getSpecies(i), ageDistrib));
+                outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.dietpressure.distrib.perSize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                indicators.add(new PredatorPressureDistribOutput(rank, getSpecies(i), sizeDistrib));
+                outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
         // Spatialized
         if (getConfiguration().getBoolean("output.spatial.enabled")) {
-            indicators.add(new SpatialOutput(rank));
+            outputs.add(new SpatialOutput(rank));
         }
         if (getConfiguration().getBoolean("output.spatial.ltl.enabled")) {
-            indicators.add(new LTLOutput(rank));
+            outputs.add(new LTLOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.nschool.enabled")) {
-            indicators.add(new NSchoolOutput(rank));
+            outputs.add(new NSchoolOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.nschool.distrib.byage.enabled")) {
-            indicators.add(new NSchoolDistribOutput(rank, ageDistrib));
+            outputs.add(new NSchoolDistribOutput(rank, ageDistrib));
         }
 
         if (getConfiguration().getBoolean("output.nschool.distrib.bysize.enabled")) {
-            indicators.add(new NSchoolDistribOutput(rank, sizeDistrib));
+            outputs.add(new NSchoolDistribOutput(rank, sizeDistrib));
         }
 
         if (getConfiguration().getBoolean("output.ndeadschool.enabled")) {
-            indicators.add(new NDeadSchoolOutput(rank));
+            outputs.add(new NDeadSchoolOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.ndeadschool.distrib.byage.enabled")) {
-            indicators.add(new NDeadSchoolDistribOutput(rank, ageDistrib));
+            outputs.add(new NDeadSchoolDistribOutput(rank, ageDistrib));
         }
 
         if (getConfiguration().getBoolean("output.ndeadschool.distrib.bysize.enabled")) {
-            indicators.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
+            outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
         }
 
         /*
          * Initialize indicators
          */
-        for (IOutput indicator : indicators) {
+        for (IOutput indicator : outputs) {
             indicator.init();
             indicator.reset();
+        }
+
+        // Initialize the restart maker
+        restartFrequency = Integer.MAX_VALUE;
+        if (!getConfiguration().isNull("simulation.restart.recordfrequency.ndt")) {
+            restartFrequency = getConfiguration().getInt("simulation.restart.recordfrequency.ndt");
+        }
+
+        writeRestart = true;
+        if (!getConfiguration().isNull("output.restart.enabled")) {
+            writeRestart = getConfiguration().getBoolean("output.restart.enabled");
+        } else {
+            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
+        }
+        
+        spinupRestart = 0;
+        if (!getConfiguration().isNull("simulation.restart.spinup")) {
+            spinupRestart = getConfiguration().getInt("simulation.restart.spinup") - 1;
         }
     }
 
     public void close() {
-        for (IOutput indicator : indicators) {
+        for (IOutput indicator : outputs) {
             indicator.close();
         }
     }
 
     public void initStep() {
         if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
-            for (IOutput indicator : indicators) {
+            for (IOutput indicator : outputs) {
                 indicator.initStep();
             }
         }
@@ -258,7 +294,7 @@ public class OutputManager extends SimulationLinker {
 
         // UPDATE
         if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
-            for (IOutput indicator : indicators) {
+            for (IOutput indicator : outputs) {
                 indicator.update();
                 // WRITE
                 if (indicator.isTimeToWrite(iStepSimu)) {
@@ -267,6 +303,18 @@ public class OutputManager extends SimulationLinker {
                     indicator.reset();
                 }
             }
+        }
+    }
+
+    public void writeRestart(int iStepSimu) {
+        // Create a restart file
+        boolean isTimeToWrite = writeRestart;
+        isTimeToWrite &= (getSimulation().getYear() >= spinupRestart);
+        isTimeToWrite &= ((iStepSimu + 1) % restartFrequency == 0);
+        isTimeToWrite |= (iStepSimu >= (getConfiguration().getNYear() * getConfiguration().getNStepYear() - 1));
+        
+        if (isTimeToWrite) {
+            snapshot.makeSnapshot(iStepSimu);
         }
     }
 }

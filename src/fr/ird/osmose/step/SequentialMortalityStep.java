@@ -106,7 +106,7 @@ public class SequentialMortalityStep extends AbstractStep {
     /*
      * List of indicators
      */
-    private OutputManager indicators;
+    private OutputManager outputs;
     /*
      * Record time step 0 (initial state) in the outputs 
      */
@@ -154,8 +154,8 @@ public class SequentialMortalityStep extends AbstractStep {
         movementProcess.init();
 
         // Indicators
-        indicators = new OutputManager(getRank());
-        indicators.init();
+        outputs = new OutputManager(getRank());
+        outputs.init();
         
         // Record time step 0 in the output
         recordStep0 = getConfiguration().getBoolean("output.step0.include");
@@ -177,14 +177,14 @@ public class SequentialMortalityStep extends AbstractStep {
 
         // Some indicators might need a snapshot of the population
         // at the beginning of the step
-        indicators.initStep();
+        outputs.initStep();
 
         // Spatial distribution
         movementProcess.run();
         
         // Save 1st time step
         if (recordStep0 && iStepSimu == 0) {
-            indicators.update(-1);
+            outputs.update(-1);
         }
 
         // Total mortality for schools out of simulated domain
@@ -206,18 +206,21 @@ public class SequentialMortalityStep extends AbstractStep {
         fishingProcess.run();
 
         // Save steps
-        indicators.update(iStepSimu);
+        outputs.update(iStepSimu);
 
         // Reproduction
         reproductionProcess.run();
 
         // Remove dead school
         getSchoolSet().removeDeadSchools();
+        
+        // write restart
+        outputs.writeRestart(iStepSimu);
     }
 
     @Override
     public void end() {
         // close indicators on last step
-        indicators.close();
+        outputs.close();
     }
 }
