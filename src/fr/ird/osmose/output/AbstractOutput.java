@@ -133,9 +133,11 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         prw.print(time);
         for (int i = 0; i < variable.length; i++) {
             prw.print(separator);
+            String sval = Float.isInfinite((float) variable[i])
+                    ? "Inf"
+                    : Float.toString((float) variable[i]);
+            prw.print(sval);
             prw.print((float) variable[i]);
-            //pr.print((long) variable[i]);
-            //System.out.println(filename + " " + time + " spec" + i + " " + variable[i]);
         }
         prw.println();
     }
