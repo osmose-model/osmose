@@ -70,7 +70,7 @@ public class NSchoolDistribOutput extends AbstractDistribOutput {
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("nschool-distrib-by");
+        filename.append("nschoolDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());

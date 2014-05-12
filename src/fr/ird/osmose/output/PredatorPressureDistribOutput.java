@@ -74,7 +74,7 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_predatorPressurePer");
+        filename.append("_predatorPressureDistribBy");
         filename.append(getType().toString());
         filename.append("-");
         filename.append(species.getName());

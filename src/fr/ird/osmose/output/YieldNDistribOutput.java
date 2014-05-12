@@ -79,7 +79,7 @@ public class YieldNDistribOutput extends AbstractDistribOutput {
         filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("yieldN-distrib-by");
+        filename.append("yieldNDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());

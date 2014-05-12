@@ -78,7 +78,7 @@ public class AbundanceDistribOutput extends AbstractDistribOutput {
         filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_abundance-distrib-by");
+        filename.append("_abundanceDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());

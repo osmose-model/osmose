@@ -52,7 +52,6 @@ import fr.ird.osmose.Prey.MortalityCause;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.output.distribution.DistributionType;
 import java.io.File;
 
 /**
@@ -81,7 +80,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
         StringBuilder filename = new StringBuilder("Mortality");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_mortalityRatePer");
+        filename.append("_mortalityRateDistribBy");
         filename.append(getType().toString());
         filename.append("-");
         filename.append(species.getName());

@@ -34,7 +34,7 @@ public class BiomassDistribOutput extends AbstractDistribOutput {
         filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_biomass-distrib-by");
+        filename.append("_biomasDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());

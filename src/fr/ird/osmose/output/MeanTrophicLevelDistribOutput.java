@@ -69,7 +69,7 @@ public class MeanTrophicLevelDistribOutput extends AbstractMeanDistribOutput {
         StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTL-distrib-by");
+        filename.append("_meanTLDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());
