@@ -137,7 +137,6 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
                     ? "Inf"
                     : Float.toString((float) variable[i]);
             prw.print(sval);
-            prw.print((float) variable[i]);
         }
         prw.println();
     }
