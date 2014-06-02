@@ -191,7 +191,7 @@ public class MortalityProcess extends AbstractProcess {
         if (!getConfiguration().isNull("mortality.subdt")) {
             subdt = getConfiguration().getInt("mortality.subdt");
         } else {
-            subdt = 1;
+            subdt = 10;
             if (mortalityAlgorithm.equals(MortalityAlgorithm.STOCHASTIC)) {
                 warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm.");
             }
