@@ -259,8 +259,8 @@ public class OutputManager extends SimulationLinker {
 
         // Initialize the restart maker
         restartFrequency = Integer.MAX_VALUE;
-        if (!getConfiguration().isNull("simulation.restart.recordfrequency.ndt")) {
-            restartFrequency = getConfiguration().getInt("simulation.restart.recordfrequency.ndt");
+        if (!getConfiguration().isNull("output.restart.recordfrequency.ndt")) {
+            restartFrequency = getConfiguration().getInt("output.restart.recordfrequency.ndt");
         }
 
         writeRestart = true;
@@ -271,8 +271,8 @@ public class OutputManager extends SimulationLinker {
         }
         
         spinupRestart = 0;
-        if (!getConfiguration().isNull("simulation.restart.spinup")) {
-            spinupRestart = getConfiguration().getInt("simulation.restart.spinup") - 1;
+        if (!getConfiguration().isNull("output.restart.spinup")) {
+            spinupRestart = getConfiguration().getInt("output.restart.spinup") - 1;
         }
     }
 
