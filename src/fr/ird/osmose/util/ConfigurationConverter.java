@@ -68,24 +68,22 @@ public class ConfigurationConverter {
 
     /**
      * Filename of the INPUT.txt file from osmose v2. Use slash '/' as separator
-     * char. Example: outputPath =
-     * "/home/philippe/osmose/benguela/ben_v2/INPUT.txt" outputPath =
-     * "C:/user/philippe/Mes documents/osmose/benguela/ben_v2/INPUT.txt"
+     * char or double back slash '\\'. Example: inputFile =
+     * "/home/philippe/osmose/config/osm_v2_2013/INPUT.txt" inputFile =
+     * "C:/user/philippe/Mes documents/osmose/config/osm_v2_2013/INPUT.txt"
      */
-    //final public String inputFile = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3\\osm_old_input\\INPUT.txt";
-    final public String inputFile = "/home/pverley/osmose/dev/config/ben/ben_v2_2013_meece/INPUT.txt";
-    
+    final public String inputFile = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v2_2013\\INPUT.txt";
+
     /**
      * Path of the folder for saving the new format of input Use slash '/' as
-     * separator char. Example: outputPath =
-     * "/home/philippe/osmose/benguela/ben_v3" outputPath =
-     * "C:/user/philippe/Mes documents/osmose/benguela/ben_v3"
+     * separator char or double back slash '\\'. Example: outputPath =
+     * "/home/philippe/osmose/config/osm_v3" outputPath =
+     * "C:/user/philippe/Mes_documents/osmose/config/osm_v3"
      */
-    //final public String outputPath = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3";
-    final public String outputPath = "/home/pverley/osmose/dev/config/ben/ben_v3_meece";
-    
-    private OldConfiguration cfg;
-    private Properties prop;
+    final public String outputPath = "C:\\Users\\philippe\\Documents\\osmose\\dev\\config\\osm\\osm_v3";
+
+    private final OldConfiguration cfg;
+    private final Properties prop;
 
     ConfigurationConverter(String[] args) {
 
@@ -409,48 +407,48 @@ public class ConfigurationConverter {
         // FISHING
         for (int i = 0; i < nSpecies; i++) {
             new File(resolveFile("fishing/")).mkdirs();
-            String filename = "fishing/fishing-seasonality-byAge-" + cfg.speciesName[i] + ".csv";
-            prop.setProperty("mortality.fishing.season.distrib.byAge.file.sp" + i, resolveFile(filename));
-
-            filename = "fishing/fishing-seasonality-bySize-" + cfg.speciesName[i] + ".csv";
-            prop.setProperty("mortality.fishing.season.distrib.bySize.file.sp" + i, resolveFile(filename));
+            String filename;
+//            filename = "fishing/fishing-seasonality-byAge-" + cfg.speciesName[i] + ".csv";
+//            prop.setProperty("mortality.fishing.season.distrib.byAge.file.sp" + i, resolveFile(filename));
+//
+//            filename = "fishing/fishing-seasonality-bySize-" + cfg.speciesName[i] + ".csv";
+//            prop.setProperty("mortality.fishing.season.distrib.bySize.file.sp" + i, resolveFile(filename));
 
             filename = "fishing/fishing-seasonality-" + cfg.speciesName[i] + ".csv";
             prop.setProperty("mortality.fishing.season.distrib.file.sp" + i, resolveFile(filename));
 
-            filename = "fishing/F-rate-byAge-" + cfg.speciesName[i] + ".csv";
-            prop.setProperty("mortality.fishing.rate.byAge.file.sp" + i, resolveFile(filename));
-            prop.setProperty("mortality.fishing.rate.byYear.byAge.file.sp" + i, "null");
-
-            filename = "fishing/F-rate-bySize-" + cfg.speciesName[i] + ".csv";
-            prop.setProperty("mortality.fishing.rate.bySize.file.sp" + i, resolveFile(filename));
-            prop.setProperty("mortality.fishing.rate.byYear.bySize.file.sp" + i, "null");
-
-            filename = "fishing/F-rate-byYear-" + cfg.speciesName[i] + ".csv";
-            prop.setProperty("mortality.fishing.rate.byYear.file.sp" + i, resolveFile(filename));
-
-            filename = "fishing/F-rate-byDt-" + cfg.speciesName[i] + ".csv";
-            prop.setProperty("mortality.fishing.rate.byDt.file.sp" + i, resolveFile(filename));
-            prop.setProperty("mortality.fishing.rate.byDt.bySize.file.sp" + i, "null");
-            prop.setProperty("mortality.fishing.rate.byDt.byAge.file.sp" + i, "null");
-
+//            filename = "fishing/F-rate-byAge-" + cfg.speciesName[i] + ".csv";
+//            prop.setProperty("mortality.fishing.rate.byAge.file.sp" + i, resolveFile(filename));
+//            prop.setProperty("mortality.fishing.rate.byYear.byAge.file.sp" + i, "null");
+//
+//            filename = "fishing/F-rate-bySize-" + cfg.speciesName[i] + ".csv";
+//            prop.setProperty("mortality.fishing.rate.bySize.file.sp" + i, resolveFile(filename));
+//            prop.setProperty("mortality.fishing.rate.byYear.bySize.file.sp" + i, "null");
+//
+//            filename = "fishing/F-rate-byYear-" + cfg.speciesName[i] + ".csv";
+//            prop.setProperty("mortality.fishing.rate.byYear.file.sp" + i, resolveFile(filename));
+//
+//            filename = "fishing/F-rate-byDt-" + cfg.speciesName[i] + ".csv";
+//            prop.setProperty("mortality.fishing.rate.byDt.file.sp" + i, resolveFile(filename));
+//            prop.setProperty("mortality.fishing.rate.byDt.bySize.file.sp" + i, "null");
+//            prop.setProperty("mortality.fishing.rate.byDt.byAge.file.sp" + i, "null");
             writeFishingAsCSV(i);
             float F = sum(cfg.fishingRates[i]);
             prop.setProperty("mortality.fishing.rate.sp" + i, String.valueOf(F));
             prop.setProperty("mortality.fishing.recruitment.age.sp" + i, String.valueOf(cfg.recruitmentAge[i]));
             prop.setProperty("mortality.fishing.recruitment.size.sp" + i, "null");
 
-            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".file", "null");
-            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".species", cfg.speciesName[i]);
-            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".age.min", "0");
-            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".age.max", String.valueOf(cfg.speciesLifespan[i]));
-            float[] season = new float[cfg.getNumberTimeStepsPerYear()];
-            for (int t = 0; t < season.length; t++) {
-                season[t] = t;
-            }
-            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".season", toString(season));
-            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".year.min", "0");
-            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".year.max", String.valueOf(cfg.getNYear()));
+//            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".file", "null");
+//            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".species", cfg.speciesName[i]);
+//            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".age.min", "0");
+//            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".age.max", String.valueOf(cfg.speciesLifespan[i]));
+//            float[] season = new float[cfg.getNumberTimeStepsPerYear()];
+//            for (int t = 0; t < season.length; t++) {
+//                season[t] = t;
+//            }
+//            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".season", toString(season));
+//            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".year.min", "0");
+//            prop.setProperty("mortality.fishing.spatial.distrib.map" + i + ".year.max", String.valueOf(cfg.getNYear()));
         }
 
         // MPA
@@ -505,7 +503,6 @@ public class ConfigurationConverter {
                 prop.setProperty("flux.incoming.size.sp" + i, "null");
             }
         }
-
 
         //prop.setProperty("", String.valueOf());
     }
@@ -684,37 +681,37 @@ public class ConfigurationConverter {
 
         int stepsize = 10;
         float stepage = 0.5f;
-
-        String filename = "fishing/F-rate-byDt-" + cfg.speciesName[ispec] + ".csv";
-        try {
-            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-            String[] header = new String[]{"Time step", "F"};
-            writer.writeNext(header);
-            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
-                String[] entries = new String[2];
-                entries[0] = String.valueOf(t);
-                entries[1] = String.valueOf(cfg.fishingRates[ispec][t]);
-                writer.writeNext(entries);
-            }
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // Fishing rate interannual
+        String filename;
         float F = sum(cfg.fishingRates[ispec]);
-        filename = "fishing/F-rate-byYear-" + cfg.speciesName[ispec] + ".csv";
-        try {
-            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-            writer.writeNext(new String[]{"Time", "Annual F"});
-            for (int iYear = 0; iYear < cfg.getNYear(); iYear++) {
-                writer.writeNext(new String[]{String.valueOf(iYear), String.valueOf(F)});
-            }
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
+//        filename = "fishing/F-rate-byDt-" + cfg.speciesName[ispec] + ".csv";
+//        try {
+//            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+//            String[] header = new String[]{"Time step", "F"};
+//            writer.writeNext(header);
+//            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
+//                String[] entries = new String[2];
+//                entries[0] = String.valueOf(t);
+//                entries[1] = String.valueOf(cfg.fishingRates[ispec][t]);
+//                writer.writeNext(entries);
+//            }
+//            writer.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        // Fishing rate interannual
+//        filename = "fishing/F-rate-byYear-" + cfg.speciesName[ispec] + ".csv";
+//        try {
+//            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+//            writer.writeNext(new String[]{"Time", "Annual F"});
+//            for (int iYear = 0; iYear < cfg.getNYear(); iYear++) {
+//                writer.writeNext(new String[]{String.valueOf(iYear), String.valueOf(F)});
+//            }
+//            writer.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         // Fishing seasonality
         filename = "fishing/fishing-seasonality-" + cfg.speciesName[ispec] + ".csv";
         try {
@@ -735,106 +732,106 @@ public class ConfigurationConverter {
             Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        // Fishing seasonality per age class
-        filename = "fishing/fishing-seasonality-byAge-" + cfg.speciesName[ispec] + ".csv";
-        try {
-            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-            String[] header = new String[(int) Math.ceil(Math.min(cfg.speciesLifespan[ispec], 10) / stepage) + 1];
-            header[0] = "v Time / Age class >";
-            for (int i = 1; i < header.length; i++) {
-                header[i] = String.valueOf((i - 1) * stepage);
-            }
-            if ((header.length * stepage) < cfg.speciesLifespan[ispec]) {
-                header[header.length - 1] += "+";
-            }
-            writer.writeNext(header);
-            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
-                String[] entries = new String[header.length];
-                entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
-                for (int i = 1; i < header.length; i++) {
-                    if (F > 0) {
-                        entries[i] = String.valueOf(cfg.fishingRates[ispec][t] / F);
-                    } else {
-                        entries[i] = "0";
-                    }
-                }
-                writer.writeNext(entries);
-            }
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // Fishing rate per age class
-        filename = "fishing/F-rate-byAge-" + cfg.speciesName[ispec] + ".csv";
-        try {
-            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-            String[] header = new String[(int) Math.ceil(cfg.speciesLifespan[ispec] / stepage) + 1];
-            header[0] = "v Time / Age class >";
-            for (int i = 1; i < header.length; i++) {
-                header[i] = String.valueOf((i - 1) * stepage);
-            }
-            writer.writeNext(header);
-            String[] entries = new String[header.length];
-            entries[0] = "0";
-            for (int i = 1; i < header.length; i++) {
-                entries[i] = String.valueOf(F);
-            }
-            writer.writeNext(entries);
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // Fishing rate per size class
-        filename = "fishing/F-rate-bySize-" + cfg.speciesName[ispec] + ".csv";
-        try {
-            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-            String[] header = new String[(int) Math.ceil(cfg.lInf[ispec] / stepsize) + 1];
-            header[0] = "v Time / Size class >";
-            for (int i = 1; i < header.length; i++) {
-                header[i] = String.valueOf((i - 1) * stepsize);
-            }
-            header[header.length - 1] += "+";
-            writer.writeNext(header);
-            String[] entries = new String[header.length];
-            entries[0] = "0";
-            for (int i = 1; i < header.length; i++) {
-                entries[i] = String.valueOf(F);
-            }
-            writer.writeNext(entries);
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // Fishing seasonality per size class
-        filename = "fishing/fishing-seasonality-bySize-" + cfg.speciesName[ispec] + ".csv";
-        try {
-            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
-            String[] header = new String[(int) Math.ceil(cfg.lInf[ispec] / stepsize) + 1];
-            header[0] = "v Time / Size class >";
-            for (int i = 1; i < header.length; i++) {
-                header[i] = String.valueOf((i - 1) * stepsize);
-            }
-            header[header.length - 1] += "+";
-            writer.writeNext(header);
-            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
-                String[] entries = new String[header.length];
-                entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
-                for (int i = 1; i < header.length; i++) {
-                    if (F > 0) {
-                        entries[i] = String.valueOf(cfg.fishingRates[ispec][t] / F);
-                    } else {
-                        entries[i] = "0";
-                    }
-                }
-                writer.writeNext(entries);
-            }
-            writer.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        // Fishing seasonality per age class
+//        filename = "fishing/fishing-seasonality-byAge-" + cfg.speciesName[ispec] + ".csv";
+//        try {
+//            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+//            String[] header = new String[(int) Math.ceil(Math.min(cfg.speciesLifespan[ispec], 10) / stepage) + 1];
+//            header[0] = "v Time / Age class >";
+//            for (int i = 1; i < header.length; i++) {
+//                header[i] = String.valueOf((i - 1) * stepage);
+//            }
+//            if ((header.length * stepage) < cfg.speciesLifespan[ispec]) {
+//                header[header.length - 1] += "+";
+//            }
+//            writer.writeNext(header);
+//            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
+//                String[] entries = new String[header.length];
+//                entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
+//                for (int i = 1; i < header.length; i++) {
+//                    if (F > 0) {
+//                        entries[i] = String.valueOf(cfg.fishingRates[ispec][t] / F);
+//                    } else {
+//                        entries[i] = "0";
+//                    }
+//                }
+//                writer.writeNext(entries);
+//            }
+//            writer.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        // Fishing rate per age class
+//        filename = "fishing/F-rate-byAge-" + cfg.speciesName[ispec] + ".csv";
+//        try {
+//            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+//            String[] header = new String[(int) Math.ceil(cfg.speciesLifespan[ispec] / stepage) + 1];
+//            header[0] = "v Time / Age class >";
+//            for (int i = 1; i < header.length; i++) {
+//                header[i] = String.valueOf((i - 1) * stepage);
+//            }
+//            writer.writeNext(header);
+//            String[] entries = new String[header.length];
+//            entries[0] = "0";
+//            for (int i = 1; i < header.length; i++) {
+//                entries[i] = String.valueOf(F);
+//            }
+//            writer.writeNext(entries);
+//            writer.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        // Fishing rate per size class
+//        filename = "fishing/F-rate-bySize-" + cfg.speciesName[ispec] + ".csv";
+//        try {
+//            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+//            String[] header = new String[(int) Math.ceil(cfg.lInf[ispec] / stepsize) + 1];
+//            header[0] = "v Time / Size class >";
+//            for (int i = 1; i < header.length; i++) {
+//                header[i] = String.valueOf((i - 1) * stepsize);
+//            }
+//            header[header.length - 1] += "+";
+//            writer.writeNext(header);
+//            String[] entries = new String[header.length];
+//            entries[0] = "0";
+//            for (int i = 1; i < header.length; i++) {
+//                entries[i] = String.valueOf(F);
+//            }
+//            writer.writeNext(entries);
+//            writer.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        // Fishing seasonality per size class
+//        filename = "fishing/fishing-seasonality-bySize-" + cfg.speciesName[ispec] + ".csv";
+//        try {
+//            CSVWriter writer = new CSVWriter(new FileWriter(resolveFile(filename)), ';', CSVWriter.NO_QUOTE_CHARACTER);
+//            String[] header = new String[(int) Math.ceil(cfg.lInf[ispec] / stepsize) + 1];
+//            header[0] = "v Time / Size class >";
+//            for (int i = 1; i < header.length; i++) {
+//                header[i] = String.valueOf((i - 1) * stepsize);
+//            }
+//            header[header.length - 1] += "+";
+//            writer.writeNext(header);
+//            for (int t = 0; t < cfg.fishingRates[ispec].length; t++) {
+//                String[] entries = new String[header.length];
+//                entries[0] = String.valueOf((float) t / cfg.getNumberTimeStepsPerYear());
+//                for (int i = 1; i < header.length; i++) {
+//                    if (F > 0) {
+//                        entries[i] = String.valueOf(cfg.fishingRates[ispec][t] / F);
+//                    } else {
+//                        entries[i] = "0";
+//                    }
+//                }
+//                writer.writeNext(entries);
+//            }
+//            writer.close();
+//        } catch (IOException ex) {
+//            Logger.getLogger(ConfigurationConverter.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
     private void writeAccessibilityAsCSV(String filename) {

@@ -94,9 +94,9 @@ public abstract class AbstractDistribution {
             max = getConfiguration().getFloat(getKeyMaxSpecies());
             incr = getConfiguration().getFloat(getKeyIncrSpecies());
         } else if (distribExist()) {
-            min = getConfiguration().getFloat(getKeyMinSpecies());
-            max = getConfiguration().getFloat(getKeyMaxSpecies());
-            incr = getConfiguration().getFloat(getKeyIncrSpecies());
+            min = getConfiguration().getFloat(getKeyMin());
+            max = getConfiguration().getFloat(getKeyMax());
+            incr = getConfiguration().getFloat(getKeyIncr());
         } else {
             min = getDefaultMin();
             max = getDefaultMax();

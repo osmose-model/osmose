@@ -68,7 +68,7 @@ public class MeanSizeDistribOutput extends AbstractMeanDistribOutput {
         filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("meanSizeDistribBy");
+        filename.append("_meanSizeDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());

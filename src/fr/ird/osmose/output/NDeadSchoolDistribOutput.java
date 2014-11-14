@@ -74,7 +74,7 @@ public class NDeadSchoolDistribOutput extends AbstractDistribOutput {
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("ndeadschoolDistribBy");
+        filename.append("_ndeadschoolDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());

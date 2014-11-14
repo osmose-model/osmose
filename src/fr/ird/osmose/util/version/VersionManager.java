@@ -66,7 +66,7 @@ public class VersionManager extends OLogger {
     private final AbstractVersion[] VERSIONS = {v3, v3u1};
 
     // Current Osmose version
-    public final AbstractVersion OSMOSE_VERSION = v3;
+    public final AbstractVersion OSMOSE_VERSION = v3u1;
 
     // Version of the Osmose configuration
     private AbstractVersion cfgVersion;

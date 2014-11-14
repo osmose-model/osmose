@@ -489,7 +489,7 @@ public class Configuration extends OLogger {
     final public String getSource(String key) {
         String lkey = key.toLowerCase();
         if (source.containsKey(lkey)) {
-            return source.getProperty(key).trim();
+            return source.getProperty(lkey).trim();
         } else {
             return "null";
         }

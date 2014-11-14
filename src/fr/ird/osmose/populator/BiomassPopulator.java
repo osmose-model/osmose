@@ -60,7 +60,7 @@ import fr.ird.osmose.process.NaturalMortalityProcess;
 public class BiomassPopulator extends AbstractPopulator {
 
     final private int rank;
-    private float[] iniBiomass;
+    private double[] iniBiomass;
 
     public BiomassPopulator(int rank) {
         super(rank);
@@ -69,18 +69,17 @@ public class BiomassPopulator extends AbstractPopulator {
 
     @Override
     public void init() {
-        iniBiomass = new float[getNSpecies()];
+        iniBiomass = new double[getNSpecies()];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            iniBiomass[i] = getConfiguration().getFloat("population.initialization.biomass.sp" + i);
+            iniBiomass[i] = getConfiguration().getDouble("population.initialization.biomass.sp" + i);
         }
     }
 
     @Override
     public void populate() {
 
-        float correctingFactor;
-        double abdIni;
-        float nbTimeStepsPerYear = getConfiguration().getNStepYear();
+        double correctingFactor;
+        double nStepYear = getConfiguration().getNStepYear();
 
         FishingProcess fishingProcess = new FishingProcess(rank);
         fishingProcess.init();
@@ -91,12 +90,10 @@ public class BiomassPopulator extends AbstractPopulator {
             Species species = getSpecies(i);
             double biomass = 0;
             double sumExp = 0;
-            long[] abundanceIni = new long[species.getLifespanDt()];
+            double[] abundanceIni = new double[species.getLifespanDt()];
             double[] biomassIni = new double[species.getLifespanDt()];
-            float[] meanLength = new float[species.getLifespanDt()];
-            float[] meanWeight = new float[species.getLifespanDt()];
-            for (int age = 0; age < meanLength.length; age++) {
-                meanLength[age] = species.computeMeanLength(age);
+            double[] meanWeight = new double[species.getLifespanDt()];
+            for (int age = 0; age < meanWeight.length; age++) {
                 meanWeight[age] = species.computeMeanWeight(age);
             }
 
@@ -105,47 +102,48 @@ public class BiomassPopulator extends AbstractPopulator {
 
             double F = fishingProcess.getAnnualRate(species);
 
-            abdIni = iniBiomass[i] / (meanWeight[(int) Math.round(species.getLifespanDt() / 2)] / 1000000);
+            double iniAbundance = iniBiomass[i] / (meanWeight[species.getLifespanDt() / 2] / 1e6);
             for (int j = species.getAgeClassZero(); j < species.getLifespanDt(); j++) {
-                sumExp += Math.exp(-(j * (D + F + 0.5f) / (float) nbTimeStepsPerYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
+                sumExp += Math.exp(-(j * (D + F + 0.5d) / nStepYear)); //0.5 = approximation of average natural mortality (by predation, senecence...)
             }
 
-            abundanceIni[0] = (long) ((abdIni) / (Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
-            biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
+            abundanceIni[0] = iniAbundance / (Math.exp(-larvalSurvival / nStepYear) * (1 + sumExp));
+            biomassIni[0] = abundanceIni[0] * meanWeight[0] / 1e6;
             if (species.getAgeClassZero() <= 0) {
                 biomass += biomassIni[0];
             }
-            abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear));
-            biomassIni[1] = ((double) abundanceIni[1]) * meanWeight[1] / 1000000.;
+            abundanceIni[1] = abundanceIni[0] * Math.exp(-larvalSurvival / nStepYear);
+            biomassIni[1] = abundanceIni[1] * meanWeight[1] / 1e6;
             if (species.getAgeClassZero() <= 1) {
                 biomass += biomassIni[1];
             }
             for (int j = 2; j < species.getLifespanDt(); j++) {
-                abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(D + 0.5f + F) / (float) nbTimeStepsPerYear));
-                biomassIni[j] = ((double) abundanceIni[j]) * meanWeight[j] / 1000000.;
+                abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(D + 0.5d + F) / nStepYear));
+                biomassIni[j] = abundanceIni[j] * meanWeight[j] / 1e6;
                 if (species.getAgeClassZero() <= j) {
                     biomass += biomassIni[j];
                 }
             }
 
-            correctingFactor = (float) (iniBiomass[i] / biomass);
+            correctingFactor = iniBiomass[i] / biomass;
             // we make corrections on initial abundance to fit the input biomass
-            abundanceIni[0] = (long) ((abdIni * correctingFactor) / (Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear) * (1 + sumExp)));
-            biomassIni[0] = ((double) abundanceIni[0]) * meanWeight[0] / 1000000.;
-            abundanceIni[1] = Math.round(abundanceIni[0] * Math.exp(-larvalSurvival / (float) nbTimeStepsPerYear));
-            biomassIni[1] = ((double) abundanceIni[1]) * meanWeight[1] / 1000000.;
+            abundanceIni[0] = (iniAbundance * correctingFactor) / (Math.exp(-larvalSurvival / nStepYear) * (1 + sumExp));
+            biomassIni[0] = abundanceIni[0] * meanWeight[0] / 1e6;
+            abundanceIni[1] = abundanceIni[0] * Math.exp(-larvalSurvival / nStepYear);
+            biomassIni[1] = abundanceIni[1] * meanWeight[1] / 1000000.;
             for (int j = 2; j < species.getLifespanDt(); j++) {
-                abundanceIni[j] = Math.round(abundanceIni[j - 1] * Math.exp(-(D + 0.5f + F) / (float) nbTimeStepsPerYear));
-                biomassIni[j] = ((double) abundanceIni[j]) * meanWeight[j] / 1000000.;
+                abundanceIni[j] = abundanceIni[j - 1] * Math.exp(-(D + 0.5d + F) / nStepYear);
+                biomassIni[j] = abundanceIni[j] * meanWeight[j] / 1e6;
             }
 
 
             // create the cohorts
             for (int age = 0; age < species.getLifespanDt(); age++) {
                 if (abundanceIni[age] > 0.d) {
+                    float meanLength = species.computeMeanLength(age);
                     int nSchool = getConfiguration().getNSchool(i);
                     for (int k = 0; k < nSchool; k++) {
-                        getSchoolSet().add(new School(species, abundanceIni[age] / nSchool, meanLength[age], meanWeight[age], age));
+                        getSchoolSet().add(new School(species, abundanceIni[age] / nSchool, meanLength, (float) meanWeight[age], age));
                     }
                 }
             }

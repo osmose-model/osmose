@@ -111,32 +111,32 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
             outputs.add(new BiomassOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.biomass.distrib.bysize.enabled")) {
+        if (getConfiguration().getBoolean("output.biomass.bysize.enabled")) {
             outputs.add(new BiomassDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.biomass.distrib.byage.enabled")) {
+        if (getConfiguration().getBoolean("output.biomass.byage.enabled")) {
             outputs.add(new BiomassDistribOutput(rank, ageDistrib));
         }
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
             outputs.add(new AbundanceOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.abundance.distrib.bysize.enabled")) {
+        if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
             outputs.add(new AbundanceDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.abundance.distrib.byage.enabled")) {
+        if (getConfiguration().getBoolean("output.abundance.byage.enabled")) {
             outputs.add(new AbundanceDistribOutput(rank, ageDistrib));
         }
         // Mortality
         if (getConfiguration().getBoolean("output.mortality.enabled")) {
             outputs.add(new MortalityOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.mortality.perSpecies.perAge.enabled")) {
+        if (getConfiguration().getBoolean("output.mortality.perSpecies.byage.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), ageDistrib));
             }
         }
-        if (getConfiguration().getBoolean("output.mortality.perSpecies.perSize.enabled")) {
+        if (getConfiguration().getBoolean("output.mortality.perSpecies.bysize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), new IniSizeDistribution()));
             }
@@ -155,20 +155,20 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
             outputs.add(new MeanSizeCatchOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.yieldN.distrib.bySize.enabled")) {
+        if (getConfiguration().getBoolean("output.yieldN.bySize.enabled")) {
             outputs.add(new YieldNDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.yield.distrib.bySize.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.bySize.enabled")) {
             outputs.add(new YieldDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.meanSize.distrib.byAge.enabled")) {
+        if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
             outputs.add(new MeanSizeDistribOutput(rank, ageDistrib));
         }
         // Age
-        if (getConfiguration().getBoolean("output.yieldN.distrib.byAge.enabled")) {
+        if (getConfiguration().getBoolean("output.yieldN.byAge.enabled")) {
             outputs.add(new YieldNDistribOutput(rank, ageDistrib));
         }
-        if (getConfiguration().getBoolean("output.yield.distrib.byAge.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.byAge.enabled")) {
             outputs.add(new YieldDistribOutput(rank, ageDistrib));
         }
         // TL
@@ -178,25 +178,25 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.tl.catch.enabled")) {
             outputs.add(new MeanTrophicLevelCatchOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.biomass.distrib.bytl.enabled")) {
+        if (getConfiguration().getBoolean("output.biomass.bytl.enabled")) {
             outputs.add(new BiomassDistribOutput(rank, new TLDistribution()));
         }
-        if (getConfiguration().getBoolean("output.meanTL.distrib.bySize.enabled")) {
+        if (getConfiguration().getBoolean("output.meanTL.bySize.enabled")) {
             outputs.add(new MeanTrophicLevelDistribOutput(rank, sizeDistrib));
         }
-        if (getConfiguration().getBoolean("output.meanTL.distrib.byAge.enabled")) {
+        if (getConfiguration().getBoolean("output.meanTL.byAge.enabled")) {
             outputs.add(new MeanTrophicLevelDistribOutput(rank, ageDistrib));
         }
         // Predation
         if (getConfiguration().getBoolean("output.diet.composition.enabled")) {
             outputs.add(new DietOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.dietcomposition.distrib.perAge.enabled")) {
+        if (getConfiguration().getBoolean("output.diet.composition.byage.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
-        if (getConfiguration().getBoolean("output.dietcomposition.distrib.perSize.enabled")) {
+        if (getConfiguration().getBoolean("output.diet.composition.bysize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
@@ -207,12 +207,12 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.diet.pressure.enabled")) {
             outputs.add(new BiomassDietStageOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.dietpressure.distrib.perAge.enabled")) {
+        if (getConfiguration().getBoolean("output.diet.pressure.byage.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), ageDistrib));
             }
         }
-        if (getConfiguration().getBoolean("output.dietpressure.distrib.perSize.enabled")) {
+        if (getConfiguration().getBoolean("output.diet.pressure.bysize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new PredatorPressureDistribOutput(rank, getSpecies(i), sizeDistrib));
             }
@@ -225,29 +225,29 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new LTLOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.nschool.enabled")) {
-            outputs.add(new NSchoolOutput(rank));
-        }
-
-        if (getConfiguration().getBoolean("output.nschool.distrib.byage.enabled")) {
-            outputs.add(new NSchoolDistribOutput(rank, ageDistrib));
-        }
-
-        if (getConfiguration().getBoolean("output.nschool.distrib.bysize.enabled")) {
-            outputs.add(new NSchoolDistribOutput(rank, sizeDistrib));
-        }
-
-        if (getConfiguration().getBoolean("output.ndeadschool.enabled")) {
-            outputs.add(new NDeadSchoolOutput(rank));
-        }
-
-        if (getConfiguration().getBoolean("output.ndeadschool.distrib.byage.enabled")) {
-            outputs.add(new NDeadSchoolDistribOutput(rank, ageDistrib));
-        }
-
-        if (getConfiguration().getBoolean("output.ndeadschool.distrib.bysize.enabled")) {
-            outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
-        }
+//        if (getConfiguration().getBoolean("output.nschool.enabled")) {
+//            outputs.add(new NSchoolOutput(rank));
+//        }
+//
+//        if (getConfiguration().getBoolean("output.nschool.byage.enabled")) {
+//            outputs.add(new NSchoolDistribOutput(rank, ageDistrib));
+//        }
+//
+//        if (getConfiguration().getBoolean("output.nschool.bysize.enabled")) {
+//            outputs.add(new NSchoolDistribOutput(rank, sizeDistrib));
+//        }
+//
+//        if (getConfiguration().getBoolean("output.ndeadschool.enabled")) {
+//            outputs.add(new NDeadSchoolOutput(rank));
+//        }
+//
+//        if (getConfiguration().getBoolean("output.ndeadschool.byage.enabled")) {
+//            outputs.add(new NDeadSchoolDistribOutput(rank, ageDistrib));
+//        }
+//
+//        if (getConfiguration().getBoolean("output.ndeadschool.bysize.enabled")) {
+//            outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
+//        }
 
         /*
          * Initialize indicators

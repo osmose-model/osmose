@@ -62,8 +62,9 @@ public class Version3 extends AbstractVersion {
     }
 
     @Override
-    void update() {
+    boolean update() {
         // Nothing to do, as it is the 1st Osmose 3 release
+        return true;
     }
     
 }

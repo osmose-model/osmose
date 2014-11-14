@@ -36,7 +36,7 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
 
     final private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 
-    abstract void update();
+    abstract boolean update();
 
     AbstractVersion(int number, int update, int year, int month, int day) {
         this.number = number;
@@ -50,7 +50,9 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
     void updateConfiguration() {
 
         // Update parameters
-        update();
+        if (!update()) {
+            return;
+        }
 
         // Update version
         if (!getConfiguration().isNull("osmose.version")) {

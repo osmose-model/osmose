@@ -93,15 +93,14 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         try {
             String gridFilename = planktonFileListNetcdf[0];
             NetcdfFile ncGrid = NetcdfFile.open(gridFilename, null);
-            
-            
+
             int[] shape = ncGrid.findVariable(zlevelName).getShape();
             int nz = shape[0];
             int ny = shape[1];
             int nx = shape[2];
-            
+
             depthOfLayer = new float[nz][ny][nx];
-            
+
             ArrayDouble.D3 arrDepth = (ArrayDouble.D3) ncGrid.findVariable(zlevelName).read();
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny; j++) {
@@ -111,7 +110,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
                 }
             }
             ncGrid.close();
-            
+
             icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
             jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
             for (int j = 0; j < getGrid().get_ny(); j++) {
@@ -144,10 +143,14 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         try {
             nc = NetcdfFile.open(name);
             // read data and put them in the local arrays
+            if (null == nc.findVariable(plktonNetcdfNames[iPlankton])) {
+                warning("Osmose could not find LTL variable " + plktonNetcdfNames[iPlankton] + " in NetCDF file " + name + ". Unless this plankton group is of type uniform, Osmose might not work correctly.");
+                return new float[0][0];
+            }
             tempArray = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[iPlankton]).read();
             int[] shape = tempArray.getShape();
             dataInit = new float[shape[0]][shape[1]][shape[2]];
-                    
+
             // fill dataInit of plankton classes from local arrays
             for (int i = 0; i < shape[2]; i++) {
                 for (int j = 0; j < shape[1]; j++) {

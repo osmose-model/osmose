@@ -133,6 +133,9 @@ public class MPA extends SimulationLinker {
      * @return {@code true} if the MPA is active at the given time step.
      */
     public boolean isActive(int iStepSimu) {
+        if (iStepSimu < 0) {
+            return false;
+        }
         int year = iStepSimu / getConfiguration().getNStepYear();
         return (year >= start) && (year <= end);
     }

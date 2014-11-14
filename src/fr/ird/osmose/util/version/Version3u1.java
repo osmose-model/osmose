@@ -57,13 +57,15 @@ import java.util.Calendar;
 public class Version3u1 extends AbstractVersion {
 
     public Version3u1() {
-        super(3, 1, 2014, Calendar.APRIL, 1);
+        super(3, 1, 2014, Calendar.JUNE, 1);
     }
 
     @Override
-    void update() {
+    boolean update() {
         
-        return;
+        info("Update configuration file from Osmose 3 to Osmose 3 Update 1. Not implemented yet. Refer to the release note for updating your configuration file manually and whatch out for any warnings in the logs.");
+        
+        return false;
 
         // Rename simulation.restart.recordfrequency.ndt into output.restart.recordfrequency.ndt
         

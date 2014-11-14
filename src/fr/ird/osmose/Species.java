@@ -60,7 +60,7 @@ package fr.ird.osmose;
  * <li>Egg weight and size</li>
  * <li>Size at maturity</li>
  * <li>Threshold age for age class zero</li>
- * <ul>
+ * </ul>
  *
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
@@ -124,8 +124,6 @@ public class Species {
      */
     final private float growthAgeThreshold;
 
-    final private float conversionToTotalLength;
-
 //////////////
 // Constructor
 //////////////
@@ -163,11 +161,6 @@ public class Species {
         }
         float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * getConfiguration().getNStepYear());
-        if (!getConfiguration().isNull("species.conversion2totallength.sp" + index)) {
-            conversionToTotalLength = getConfiguration().getFloat("species.conversion2totallength.sp" + index);
-        } else {
-            conversionToTotalLength = 1.f;
-        }
     }
 
 //////////////////////////////
@@ -255,21 +248,6 @@ public class Species {
      */
     public float computeWeight(float length) {
         return (float) (c * (Math.pow(length, bPower)));
-    }
-
-    /**
-     * Converts physiological length into total length. Default length that
-     * characterizes the species should be the "physiological" length (e.g. the
-     * fork length or the cephalo-thorax length, the standard length, etc.).
-     * Whereas in the predation process Osmose must consider the total length as
-     * a proxy of the diameter of the prey. Conversion is done with a
-     * multiplying parameter.
-     *
-     * @param length, the physiological length of the fish
-     * @return the total length of the fish
-     */
-    public float toTotalLength(float length) {
-        return conversionToTotalLength * length;
     }
 
     /**

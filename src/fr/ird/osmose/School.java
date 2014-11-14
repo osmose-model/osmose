@@ -105,10 +105,6 @@ public class School extends Prey implements ISchool {
      */
     private float length;
     /**
-     * Total length of the fish in centimeter.
-     */
-    private float totalLength;
-    /**
      * Length of the fish in centimeter at the beginning of the time step.
      */
     private float lengthi;
@@ -197,7 +193,6 @@ public class School extends Prey implements ISchool {
         super(species.getIndex(), x, y, abundance, weight, trophicLevel);
         this.species = species;
         this.length = length;
-        totalLength = species.toTotalLength(length);
         this.ageDt = ageDt;
         this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
@@ -349,10 +344,6 @@ public class School extends Prey implements ISchool {
         return length;
     }
 
-    public float getTotalLength() {
-        return totalLength;
-    }
-
     /**
      * Increments the length of the fish from given number of centimeter.
      *
@@ -361,7 +352,6 @@ public class School extends Prey implements ISchool {
     public void incrementLength(float dlength) {
         if (dlength != 0.f) {
             length += dlength;
-            totalLength = species.toTotalLength(length);
             setWeight(species.computeWeight(length) * 1e-6f);
         }
     }
