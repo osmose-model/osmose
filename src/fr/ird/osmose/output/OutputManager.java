@@ -141,6 +141,18 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), new IniSizeDistribution()));
             }
         }
+        if (getConfiguration().getBoolean("output.mortality.natural.bySize.enabled")) {
+            outputs.add(new NaturalMortalityDistribOutput(rank, sizeDistrib));
+        }
+        if (getConfiguration().getBoolean("output.mortality.natural.byAge.enabled")) {
+            outputs.add(new NaturalMortalityDistribOutput(rank, ageDistrib));
+        }
+        if (getConfiguration().getBoolean("output.mortality.naturalN.bySize.enabled")) {
+            outputs.add(new NaturalMortalityNDistribOutput(rank, sizeDistrib));
+        }
+        if (getConfiguration().getBoolean("output.mortality.naturalN.byAge.enabled")) {
+            outputs.add(new NaturalMortalityNDistribOutput(rank, ageDistrib));
+        }        
         // Yield
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new YieldOutput(rank));
