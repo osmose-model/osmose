@@ -72,6 +72,14 @@ public class ReproductionProcess extends AbstractProcess {
      * Number of eggs per gram of mature female
      */
     private double[] alpha;
+    /*
+     * Seeding biomass in tonne
+     */
+    private double[] seedingBiomass;
+    /*
+     * Year max for seeding collapsed species, in number of time steps 
+     */
+    private int yearMaxSeeding;
 
     public ReproductionProcess(int rank) {
         super(rank);
@@ -110,6 +118,28 @@ public class ReproductionProcess extends AbstractProcess {
                 alpha[i] = getConfiguration().getDouble("species.relativefecundity.sp" + i);
             }
         }
+
+        // Seeding biomass
+        seedingBiomass = new double[getNSpecies()];
+        double biomass = getConfiguration().isNull("population.seeding.biomass")
+                ? 0.d
+                : getConfiguration().getDouble("population.seeding.biomass");
+        for (int i = 0; i < getNSpecies(); i++) {
+            if (!getConfiguration().isNull("population.seeding.biomass.sp" + i)) {
+                seedingBiomass[i] = getConfiguration().getDouble("population.seeding.biomass.sp" + i);
+            } else {
+                seedingBiomass[i] = biomass;
+            }
+        }
+        // Seeding duration (expressed in number of time steps)
+        yearMaxSeeding = 0;
+        if (!getConfiguration().isNull("population.seeding.year.max")) {
+            yearMaxSeeding = getConfiguration().getInt("population.seeding.year.max") * getConfiguration().getNStepYear();
+        } else {
+            for (int i = 0; i < getNSpecies(); i++) {
+                yearMaxSeeding = Math.max(yearMaxSeeding, getSpecies(i).getLifespanDt());
+            }
+        }
     }
 
     @Override
@@ -124,6 +154,10 @@ public class ReproductionProcess extends AbstractProcess {
                     if (school.getLength() >= species.getSizeMaturity()) {
                         SSB += school.getInstantaneousBiomass();
                     }
+                }
+                // Seeding for collapsed species
+                if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB == 0.) {
+                    SSB = seedingBiomass[i];
                 }
                 double season = getSeason(getSimulation().getIndexTimeSimu(), species);
                 nEgg = sexRatio[i] * alpha[i] * season * SSB * 1000000;
