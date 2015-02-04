@@ -277,12 +277,12 @@ public class Plankton extends SimulationLinker {
         return trophicLevel;
     }
 
-    public Prey asPrey(Cell cell, int iStepSimu, int subdt) {
+    public Prey asPrey(Cell cell, int iStepSimu) {
         if (null == preys[cell.get_jgrid()][cell.get_igrid()]) {
             preys[cell.get_jgrid()][cell.get_igrid()] = new Prey(index, // index
                     cell.get_igrid(), // x
                     cell.get_jgrid(), // y
-                    getAccessibleBiomass(cell, iStepSimu) / subdt, // abundance (assumes that abundance <==> biomass for Plankton)
+                    getAccessibleBiomass(cell, iStepSimu), // abundance (assumes that abundance <==> biomass for Plankton)
                     1e6f, // weight set to 1 ton to have abundance <==> biomass
                     trophicLevel); // trophic level
         }
