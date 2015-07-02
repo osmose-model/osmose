@@ -68,7 +68,7 @@ public class UniformPlankton extends Plankton {
     /**
      * The biomass, in tonne, in a cell of the model.
      */
-    private float biomass;
+    private double biomass;
 
 //////////////
 // Constructor
@@ -92,7 +92,7 @@ public class UniformPlankton extends Plankton {
     @Override
     public void init() {
         super.init();
-        biomass = (float) (getConfiguration().getFloat("plankton.biomass.total.plk" + getIndex()) / getGrid().getNOceanCell());
+        biomass = getConfiguration().getFloat("plankton.biomass.total.plk" + getIndex()) / getGrid().getNOceanCell();
     }
 
     /**
@@ -104,7 +104,7 @@ public class UniformPlankton extends Plankton {
      * @return the biomass of plankton in this {@code cell}
      */
     @Override
-    public float getBiomass(Cell cell) {
+    public double getBiomass(Cell cell) {
         return biomass;
     }
 }

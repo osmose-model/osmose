@@ -49,6 +49,7 @@
 package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
@@ -61,7 +62,7 @@ import java.util.List;
 public class ByClassTimeSeries extends SimulationLinker {
 
     private float[] classes;
-    private float[][] values;
+    private double[][] values;
 
     public ByClassTimeSeries(int rank) {
         super(rank);
@@ -79,7 +80,7 @@ public class ByClassTimeSeries extends SimulationLinker {
         int nStepSimu = nStepYear * getConfiguration().getNYear();
         try {
             // 1. Open the CSV file
-            CSVReader reader = new CSVReader(new FileReader(filename), ';');
+            CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
             List<String[]> lines = reader.readAll();
 
             // 2. Read the threshold values
@@ -103,12 +104,12 @@ public class ByClassTimeSeries extends SimulationLinker {
             nTimeSerie = Math.min(nTimeSerie, nMax);
 
             // 3. Read the mortality rates
-            values = new float[nStepSimu][];
+            values = new double[nStepSimu][];
             for (int t = 0; t < nTimeSerie; t++) {
-                values[t] = new float[lineThreshold.length - 1];
+                values[t] = new double[lineThreshold.length - 1];
                 String[] fval = lines.get(t + 1);
                 for (int k = 0; k < values[t].length; k++) {
-                    values[t][k] = Float.valueOf(fval[k + 1]);
+                    values[t][k] = Double.valueOf(fval[k + 1]);
                 }
             }
             // 4. Fill up the time serie if necessary
@@ -147,7 +148,7 @@ public class ByClassTimeSeries extends SimulationLinker {
         return classes.length - 1;
     }
 
-    public float getValue(int step, float school) {
+    public double getValue(int step, float school) {
         return values[step][classOf(school)];
     }
 
@@ -163,7 +164,7 @@ public class ByClassTimeSeries extends SimulationLinker {
         return classes;
     }
 
-    public float[][] getValues() {
+    public double[][] getValues() {
         return values;
     }
 }

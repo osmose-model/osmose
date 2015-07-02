@@ -50,6 +50,7 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
@@ -247,11 +248,11 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                         abundance[iSpec][j][i] += school.getInstantaneousAbundance();
                         mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
                         tl[iSpec][j][i] += school.getTrophicLevel() * school.getInstantaneousBiomass();
-                        yield[iSpec][j][i] += school.adb2biom(school.getNdead(School.MortalityCause.FISHING));
+                        yield[iSpec][j][i] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
                     }
                 }
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass[iltl][j][i] = getSimulation().getPlankton(iltl).getBiomass(cell);
+                    ltlbiomass[iltl][j][i] = (float) getSimulation().getPlankton(iltl).getBiomass(cell);
                 }
             }
         }

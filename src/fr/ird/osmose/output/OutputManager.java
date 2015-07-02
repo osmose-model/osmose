@@ -50,7 +50,6 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.AgeDistribution;
-import fr.ird.osmose.output.distribution.IniSizeDistribution;
 import fr.ird.osmose.output.distribution.SizeDistribution;
 import fr.ird.osmose.output.distribution.TLDistribution;
 import fr.ird.osmose.util.io.IOTools;
@@ -136,9 +135,11 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), ageDistrib));
             }
         }
+        // phv 20150413, it should be size distribution at the beginning of the
+        // time step. To be fixed
         if (getConfiguration().getBoolean("output.mortality.perSpecies.bysize.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), new IniSizeDistribution()));
+                outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
         if (getConfiguration().getBoolean("output.mortality.natural.bySize.enabled")) {
@@ -237,29 +238,33 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new LTLOutput(rank));
         }
 
-//        if (getConfiguration().getBoolean("output.nschool.enabled")) {
-//            outputs.add(new NSchoolOutput(rank));
-//        }
-//
-//        if (getConfiguration().getBoolean("output.nschool.byage.enabled")) {
-//            outputs.add(new NSchoolDistribOutput(rank, ageDistrib));
-//        }
-//
-//        if (getConfiguration().getBoolean("output.nschool.bysize.enabled")) {
-//            outputs.add(new NSchoolDistribOutput(rank, sizeDistrib));
-//        }
-//
-//        if (getConfiguration().getBoolean("output.ndeadschool.enabled")) {
-//            outputs.add(new NDeadSchoolOutput(rank));
-//        }
-//
-//        if (getConfiguration().getBoolean("output.ndeadschool.byage.enabled")) {
-//            outputs.add(new NDeadSchoolDistribOutput(rank, ageDistrib));
-//        }
-//
-//        if (getConfiguration().getBoolean("output.ndeadschool.bysize.enabled")) {
-//            outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
-//        }
+        // Debugging outputs
+        boolean NO_WARNING = false;
+        if (getConfiguration().getBoolean("output.ssb.enabled", NO_WARNING)) {
+            outputs.add(new SSBOutput(rank));
+        }
+        if (getConfiguration().getBoolean("output.nschool.enabled", NO_WARNING)) {
+            outputs.add(new NSchoolOutput(rank));
+        }
+        if (getConfiguration().getBoolean("output.nschool.byage.enabled", NO_WARNING)) {
+            outputs.add(new NSchoolDistribOutput(rank, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.nschool.bysize.enabled", NO_WARNING)) {
+            outputs.add(new NSchoolDistribOutput(rank, sizeDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.ndeadschool.enabled", NO_WARNING)) {
+            outputs.add(new NDeadSchoolOutput(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.ndeadschool.byage.enabled", NO_WARNING)) {
+            outputs.add(new NDeadSchoolDistribOutput(rank, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.ndeadschool.bysize.enabled", NO_WARNING)) {
+            outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
+        }
 
         /*
          * Initialize indicators
@@ -281,7 +286,7 @@ public class OutputManager extends SimulationLinker {
         } else {
             warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
         }
-        
+
         spinupRestart = 0;
         if (!getConfiguration().isNull("output.restart.spinup")) {
             spinupRestart = getConfiguration().getInt("output.restart.spinup") - 1;
@@ -324,7 +329,7 @@ public class OutputManager extends SimulationLinker {
         isTimeToWrite &= (getSimulation().getYear() >= spinupRestart);
         isTimeToWrite &= ((iStepSimu + 1) % restartFrequency == 0);
         isTimeToWrite |= (iStepSimu >= (getConfiguration().getNYear() * getConfiguration().getNStepYear() - 1));
-        
+
         if (isTimeToWrite) {
             snapshot.makeSnapshot(iStepSimu);
         }

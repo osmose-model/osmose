@@ -4,9 +4,9 @@
 # You can may use relative or absolute path.
 # Use / as a file separator as it works in Java for every environment.
 # Example:
-# config/osm/osm_v3u1/osm_all-parameters.csv
-# C:/user/philippe/osmose/config/osm/osm_v3u1/osm_all-parameters.csv
+# config/osm/osm_v3u2/osm_all-parameters.csv
+# C:/user/philippe/osmose/config/osm/osm_v3u2/osm_all-parameters.csv
 
-C:/user/philippe/osmose/config/osm/osm_v3u1/osm_all-parameters.csv
-#C:/user/philippe/osmose/config/osm/osm_v3u1/osm_all-parameters2.csv
-#C:/user/philippe/osmose/config/osm/osm_v3u1/osm_all-parameters3.csv
+C:/user/philippe/osmose/config/osm/osm_v3u2/osm_all-parameters.csv
+#C:/user/philippe/osmose/config/osm/osm_v3u2/osm_all-parameters2.csv
+#C:/user/philippe/osmose/config/osm/osm_v3u2/osm_all-parameters3.csv

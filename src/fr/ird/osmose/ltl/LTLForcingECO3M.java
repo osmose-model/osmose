@@ -133,7 +133,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
         float[][][] dataInit = null;
         NetcdfFile nc = null;
@@ -145,7 +145,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             // read data and put them in the local arrays
             if (null == nc.findVariable(plktonNetcdfNames[iPlankton])) {
                 warning("Osmose could not find LTL variable " + plktonNetcdfNames[iPlankton] + " in NetCDF file " + name + ". Unless this plankton group is of type uniform, Osmose might not work correctly.");
-                return new float[0][0];
+                return new double[0][0];
             }
             tempArray = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[iPlankton]).read();
             int[] shape = tempArray.getShape();

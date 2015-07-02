@@ -50,10 +50,11 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.util.logging.OLogger;
+import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.process.PopulatingProcess;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.step.AbstractStep;
-import fr.ird.osmose.step.ConcomitantMortalityStep;
-import fr.ird.osmose.step.SequentialMortalityStep;
+import fr.ird.osmose.step.DefaultStep;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import ucar.nc2.NetcdfFile;
@@ -119,9 +120,26 @@ public class Simulation extends OLogger {
      */
     private AbstractStep step;
     /**
+     * Object that is able to take a snapshot of the set of schools and write it
+     * in a NetCDF file. Osmose will be able to restart on such a file.
+     */
+    private SchoolSetSnapshot snapshot;
+    /**
+     * Record frequency for writing restart files, in number of time step.
+     */
+    private int restartFrequency;
+    /**
      * Indicates whether the simulation starts from a restart file.
      */
     private boolean restart;
+    /**
+     * Number of years before writing restart files.
+     */
+    private int spinupRestart;
+    /**
+     * Whether the restart files should be written or not
+     */
+    private boolean writeRestart;
     /**
      * Whether to keep track of prey records during the simulation
      */
@@ -150,7 +168,7 @@ public class Simulation extends OLogger {
     public void destroy() {
 
         for (School school : schoolSet) {
-            school.setNdead(Prey.MortalityCause.OUT, Double.MAX_VALUE);
+            school.setNdead(MortalityCause.OUT, Double.MAX_VALUE);
         }
         schoolSet.removeDeadSchools();
         schoolSet = null;
@@ -158,6 +176,7 @@ public class Simulation extends OLogger {
         ltlGroups = null;
         step = null;
         forcing = null;
+        snapshot = null;
     }
 
 ///////////////////////////////
@@ -210,6 +229,9 @@ public class Simulation extends OLogger {
         species = new Species[getConfiguration().getNSpecies()];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
+            if (!species[i].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Species name must contain alphanumeric characters only. Please rename " + species[i].getName(), null);
+            }
         }
 
         // Init plankton groups
@@ -221,6 +243,9 @@ public class Simulation extends OLogger {
                 ltlGroups[p] = new Plankton(rank, p);
             }
             ltlGroups[p].init();
+            if (!ltlGroups[p].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Plankton name must contain alphanumeric characters only. Please rename " + ltlGroups[p].getName(), null);
+            }
         }
 
         // Init LTL forcing
@@ -235,8 +260,7 @@ public class Simulation extends OLogger {
         preyRecord = false;
 
         // Instantiate the Step
-        //step = new SequentialMortalityStep(rank);
-        step = new ConcomitantMortalityStep(rank);
+        step = new DefaultStep(rank);
 
         // Intialize the step
         step.init();
@@ -245,6 +269,23 @@ public class Simulation extends OLogger {
         PopulatingProcess populatingProcess = new PopulatingProcess(rank);
         populatingProcess.init();
         populatingProcess.run();
+
+        // Initialize the restart maker
+        snapshot = new SchoolSetSnapshot(rank);
+        restartFrequency = Integer.MAX_VALUE;
+        if (!getConfiguration().isNull("output.restart.recordfrequency.ndt")) {
+            restartFrequency = getConfiguration().getInt("output.restart.recordfrequency.ndt");
+        }
+        spinupRestart = 0;
+        if (!getConfiguration().isNull("output.restart.spinup")) {
+            spinupRestart = getConfiguration().getInt("output.restart.spinup") - 1;
+        }
+        writeRestart = true;
+        if (!getConfiguration().isNull("output.restart.enabled")) {
+            writeRestart = getConfiguration().getBoolean("output.restart.enabled");
+        } else {
+            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
+        }
 
         // Year to start writing the outputs
         yearOutput = getConfiguration().getInt("output.start.year");
@@ -310,10 +351,20 @@ public class Simulation extends OLogger {
             step.step(i_step_simu);
             //fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
+            // Create a restart file
+            if (writeRestart && (year >= spinupRestart) && ((i_step_simu + 1) % restartFrequency == 0)) {
+                snapshot.makeSnapshot(i_step_simu);
+            }
+
             // Increment time step
             i_step_simu++;
-        }
+            }
         step.end();
+
+        // Create systematically a restart file at the end of the simulation
+        if (writeRestart) {
+            snapshot.makeSnapshot(i_step_simu - 1);
+        }
     }
 
     /**
@@ -373,10 +424,10 @@ public class Simulation extends OLogger {
     }
 
     /**
-     * Whether to keep track of prey records during the simulation.
-     * The prey records starts one year before the start year of saving. It is
-     * arbitrary and just to make sure that the trophic levels are fully
-     * stabilised before saving the outputs.
+     * Whether to keep track of prey records during the simulation. The prey
+     * records starts one year before the start year of saving. It is arbitrary
+     * and just to make sure that the trophic levels are fully stabilised before
+     * saving the outputs.
      *
      * @return true if prey records should be activated
      */

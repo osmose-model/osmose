@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.Prey.MortalityCause;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;

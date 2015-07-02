@@ -89,7 +89,7 @@ public class GridMap {
             /*
              * Read the CSV file
              */
-            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            CSVReader reader = new CSVReader(new FileReader(csvFile), Separator.guess(csvFile).getSeparator());
             List<String[]> lines = reader.readAll();
             /*
              * Read the map
@@ -99,9 +99,13 @@ public class GridMap {
                 String[] line = lines.get(l);
                 int j = ny - l - 1;
                 for (int i = 0; i < line.length; i++) {
-                    float value = Float.valueOf(line[i]);
-                    if (value > 0.f) {
-                        matrix[j][i] = value;
+                    try {
+                        float value = Float.valueOf(line[i]);
+                        if (value > 0.f) {
+                            matrix[j][i] = value;
+                        }
+                    } catch (NumberFormatException ex) {
+                        getOsmose().error("Error parsing CSV map " + csvFile + " row " + (l + 1) + " column " + (i + 1), ex);
                     }
                 }
             }

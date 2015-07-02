@@ -51,19 +51,27 @@ package fr.ird.osmose.process;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
-import fr.ird.osmose.util.timeseries.SpeciesTimeSeries;
 import java.util.List;
 
 /**
- *
- * @author pverley
+ * This class controls the reproduction process in the simulated domain. The
+ * user defines the spawning season (a CSV file per Species) either annual or
+ * interannual, the percentage of female in the population (sex ratio) and the
+ * number of eggs per gramme of mature female (alpha) for every species. Osmose
+ * estimates the spawning stock biomass (SSB) and calculates the number of eggs
+ * to be released in the system at every time steps.<br />
+ * During the spin-up of the simulation (duration of spin-up either set by the
+ * user or set by default to the lifespan of the longest-lived species) Osmose
+ * prevents species collapse by artificially setting the SSB to a predefined
+ * level (user defined, this parameter could/should be calibrated) in order to 
+ * guarantee egg release.
  */
 public class ReproductionProcess extends AbstractProcess {
 
     /**
      * Distribution of the spawning throughout the year
      */
-    private float[][] seasonSpawning;
+    private double[][] seasonSpawning;
     /*
      * Percentage of female in the population
      */
@@ -91,20 +99,15 @@ public class ReproductionProcess extends AbstractProcess {
         int nSpecies = getNSpecies();
         sexRatio = new double[nSpecies];
         alpha = new double[nSpecies];
-        if (!getConfiguration().isNull("reproduction.season.file")) {
-            SpeciesTimeSeries ts = new SpeciesTimeSeries(getRank());
-            ts.read(getConfiguration().getFile("reproduction.season.file"));
-            seasonSpawning = ts.getValues();
-        } else {
-            seasonSpawning = new float[nSpecies][];
-            for (int i = 0; i < nSpecies; i++) {
-                if (!getConfiguration().isNull("reproduction.season.file.sp" + i)) {
-                    SingleTimeSeries ts = new SingleTimeSeries(getRank());
-                    ts.read(getConfiguration().getFile("reproduction.season.file.sp" + i));
-                    seasonSpawning[i] = ts.getValues();
-                } else {
-                    seasonSpawning[i] = new float[0];
-                }
+        seasonSpawning = new double[nSpecies][];
+        for (int i = 0; i < nSpecies; i++) {
+            if (!getConfiguration().isNull("reproduction.season.file.sp" + i)) {
+                SingleTimeSeries ts = new SingleTimeSeries(getRank());
+                ts.read(getConfiguration().getFile("reproduction.season.file.sp" + i));
+                seasonSpawning[i] = ts.getValues();
+            } else {
+                // Even spawning season throughout the year
+                seasonSpawning[i] = new double[]{1.d / getConfiguration().getNStepYear()};
             }
         }
 
@@ -121,15 +124,8 @@ public class ReproductionProcess extends AbstractProcess {
 
         // Seeding biomass
         seedingBiomass = new double[getNSpecies()];
-        double biomass = getConfiguration().isNull("population.seeding.biomass")
-                ? 0.d
-                : getConfiguration().getDouble("population.seeding.biomass");
         for (int i = 0; i < getNSpecies(); i++) {
-            if (!getConfiguration().isNull("population.seeding.biomass.sp" + i)) {
-                seedingBiomass[i] = getConfiguration().getDouble("population.seeding.biomass.sp" + i);
-            } else {
-                seedingBiomass[i] = biomass;
-            }
+            seedingBiomass[i] = getConfiguration().getDouble("population.seeding.biomass.sp" + i);
         }
         // Seeding duration (expressed in number of time steps)
         yearMaxSeeding = 0;
@@ -139,6 +135,7 @@ public class ReproductionProcess extends AbstractProcess {
             for (int i = 0; i < getNSpecies(); i++) {
                 yearMaxSeeding = Math.max(yearMaxSeeding, getSpecies(i).getLifespanDt());
             }
+            warning("Did not find parameter population.seeding.year.max. Osmose set it to " + ((float) yearMaxSeeding/getConfiguration().getNStepYear()) + " years, the lifespan of the longest-lived species.");
         }
     }
 
@@ -187,10 +184,17 @@ public class ReproductionProcess extends AbstractProcess {
     }
 
     private double getSeason(int iStepSimu, Species species) {
+
         int iSpec = species.getIndex();
-        int iStep = seasonSpawning[iSpec].length > getConfiguration().getNStepYear()
-                ? iStepSimu
-                : getSimulation().getIndexTimeYear();
+        int length = seasonSpawning[iSpec].length;
+        int iStep;
+        if (length > getConfiguration().getNStepYear()) {
+            iStep = iStepSimu;
+        } else if (length == 1) {
+            iStep = 0;
+        } else {
+            iStep = getSimulation().getIndexTimeYear();
+        }
         return seasonSpawning[iSpec][iStep];
     }
 }

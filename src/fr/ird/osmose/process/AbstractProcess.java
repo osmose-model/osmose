@@ -56,7 +56,7 @@ import fr.ird.osmose.util.SimulationLinker;
  */
 public abstract class AbstractProcess extends SimulationLinker {
     
-    AbstractProcess(int rank) {
+    public AbstractProcess(int rank) {
         super(rank);
     }
 

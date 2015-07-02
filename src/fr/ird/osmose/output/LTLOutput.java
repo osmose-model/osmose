@@ -55,6 +55,7 @@ import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
@@ -80,11 +81,11 @@ public class LTLOutput extends SimulationLinker implements IOutput {
     /**
      * LTL biomass array at the beginning of the time step.
      */
-    private float[][][] ltlbiomass0;
+    private double[][][] ltlbiomass0;
     /**
      * LTL biomass array after predation process.
      */
-    private float[][][] ltlbiomass1;
+    private double[][][] ltlbiomass1;
 
     public LTLOutput(int rank) {
         super(rank);
@@ -122,31 +123,35 @@ public class LTLOutput extends SimulationLinker implements IOutput {
     public void reset() {
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
-        ltlbiomass0 = new float[getConfiguration().getNPlankton()][ny][nx];
-        ltlbiomass1 = new float[getConfiguration().getNPlankton()][ny][nx];
+        ltlbiomass0 = new double[getConfiguration().getNPlankton()][ny][nx];
+        ltlbiomass1 = new double[getConfiguration().getNPlankton()][ny][nx];
     }
 
     @Override
     public void update() {
+        
+        int nspec = getNSpecies();
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
-                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass0[iltl][cell.get_jgrid()][cell.get_igrid()] = getSimulation().getPlankton(iltl).getBiomass(cell);
-                    ltlbiomass1[iltl][cell.get_jgrid()][cell.get_igrid()] = ltlbiomass0[iltl][cell.get_jgrid()][cell.get_igrid()];
+                List<School> schools = getSchoolSet().getSchools(cell);
+                // Preyed biomass for every LTL group in current cell
+                double[] preyedLTL = new double[getConfiguration().getNPlankton()];
+                for (School school : schools) {
+                    for (PreyRecord prey : school.getPreyRecords()) {
+                        int iltl = prey.getSpeciesIndex() - nspec;
+                        if (iltl >= 0) {
+                            preyedLTL[iltl] += prey.getBiomass();
+                        }
+                    }
                 }
-            }
-        }
-
-        //
-        int nspec = getNSpecies();
-        for (School school : getSchoolSet().getPresentSchools()) {
-            int i = (int) school.getX();
-            int j = (int) school.getY();
-            for (PreyRecord prey : school.getPreyRecords()) {
-                int iltl = prey.getSpeciesIndex() - nspec;
-                if (iltl >= 0) {
-                    ltlbiomass1[iltl][j][i] -= prey.getBiomass();
+                int i = cell.get_igrid();
+                int j = cell.get_jgrid();
+                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
+                    // ltl_biomass is the plankton biomass at the beginning of the time step
+                    ltlbiomass0[iltl][j][i] = getSimulation().getPlankton(iltl).getBiomass(cell);
+                    // ltl_biomass_pred is the plankton biomass remaining in the water column after the predation process
+                    ltlbiomass1[iltl][j][i] = ltlbiomass0[iltl][j][i] - preyedLTL[iltl];
                 }
             }
         }
@@ -174,8 +179,8 @@ public class LTLOutput extends SimulationLinker implements IOutput {
         for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    arrLTL0.set(0, kltl, j, i, ltlbiomass0[kltl][j][i]);
-                    arrLTL1.set(0, kltl, j, i, ltlbiomass1[kltl][j][i]);
+                    arrLTL0.set(0, kltl, j, i, (float) ltlbiomass0[kltl][j][i]);
+                    arrLTL1.set(0, kltl, j, i, (float) ltlbiomass1[kltl][j][i]);
                 }
             }
         }

@@ -50,7 +50,7 @@ package fr.ird.osmose.grid;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Osmose;
+import fr.ird.osmose.util.Separator;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -166,7 +166,7 @@ public class OriginalGrid extends AbstractGrid {
             /*
              * Read the CSV file
              */
-            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            CSVReader reader = new CSVReader(new FileReader(csvFile), Separator.guess(csvFile).getSeparator());
             List<String[]> lines = reader.readAll();
             land = new boolean[lines.size()][];
             int ny = lines.size();

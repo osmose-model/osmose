@@ -49,6 +49,7 @@
 package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class SpeciesTimeSeries extends SimulationLinker {
         int nStepSimu = nStepYear * getConfiguration().getNYear();
         try {
             // 1. Open the CSV file
-            CSVReader reader = new CSVReader(new FileReader(filename), ';');
+            CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
             List<String[]> lines = reader.readAll();
 
             // 2. Check the length of the time serie and inform the user about potential problems or inconsistencies

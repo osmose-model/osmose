@@ -113,7 +113,7 @@ public class LTLFastForcing extends SimulationLinker implements LTLForcing {
      * @return
      */
     @Override
-    public float getBiomass(int iPlankton, Cell cell) {
+    public double getBiomass(int iPlankton, Cell cell) {
         return biomass[iLTLStep][iPlankton][cell.get_jgrid()][cell.get_igrid()];
     }
 

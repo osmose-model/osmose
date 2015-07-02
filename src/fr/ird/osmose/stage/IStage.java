@@ -6,7 +6,7 @@
 
 package fr.ird.osmose.stage;
 
-import fr.ird.osmose.ISchool;
+import fr.ird.osmose.IMarineOrganism;
 
 /**
  *
@@ -16,7 +16,7 @@ public interface IStage {
     
     public void init();
 
-    public int getStage(ISchool school);
+    public int getStage(IMarineOrganism school);
 
     public int getNStage(int iSpecies);
 

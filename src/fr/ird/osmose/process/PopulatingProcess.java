@@ -49,9 +49,7 @@
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.populator.AbstractPopulator;
-import fr.ird.osmose.populator.BiomassPopulator;
 import fr.ird.osmose.populator.NetcdfPopulator;
-import fr.ird.osmose.populator.SpectrumPopulator;
 
 /**
  *
@@ -68,25 +66,27 @@ public class PopulatingProcess extends AbstractProcess {
     @Override
     public void init() {
 
+        // Either restart mode or initialisation from NetCDF file
+        // Both options are similar except that in restart mode Osmose takes
+        // time into account whereas in NetCDF mode the simulation starts from
+        // year 0
         if (getSimulation().isRestart()) {
             populator = new NetcdfPopulator(getRank(), "simulation.restart.file");
-        } else {
-            String method = getConfiguration().getString("population.initialization.method");
-            if (method.equalsIgnoreCase("biomass")) {
-                populator = new BiomassPopulator(getRank());
-            } else if (method.equalsIgnoreCase("spectrum")) {
-                populator = new SpectrumPopulator(getRank());
-            } else if (method.equalsIgnoreCase("netcdf")) {
-                populator = new NetcdfPopulator(getRank(), "population.initialization.file");
-            } else if (method.equalsIgnoreCase("random")) {
-                throw new UnsupportedOperationException("Random initialization not supported yet.");
-            }
+        } else if (!getConfiguration().isNull("population.initialization.file")) {
+            populator = new NetcdfPopulator(getRank(), "population.initialization.file");
+            populator.init();
         }
-        populator.init();
+
+        if (null != populator) {
+            populator.init();
+        }
+
     }
 
     @Override
     public void run() {
-        populator.populate();
+        if (null != populator) {
+            populator.populate();
+        }
     }
 }

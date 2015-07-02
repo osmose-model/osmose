@@ -139,6 +139,10 @@ public class MapSet extends SimulationLinker {
     public GridMap getMap(School school) {
         return getMap(getIndexMap(school));
     }
+    
+    public String getMapFile(int numMap) {
+        return mapFile[numMap];
+    }
 
     public int getIndexMap(int iAge, int iStep) {
         return indexMaps[iAge][iStep];

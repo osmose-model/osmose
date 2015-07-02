@@ -48,11 +48,10 @@
  */
 package fr.ird.osmose.ui;
 
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.grid.IGrid;
-import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.util.GridMap;
+import fr.ird.osmose.util.MapSet;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -61,11 +60,6 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -100,8 +94,7 @@ public class SpatialMapUI extends JPanel {
      */
     private static double lonmax;
     /**
-     * BufferedImage in which the background (cost + bathymetry) has been
-     * drawn.
+     * BufferedImage in which the background (cost + bathymetry) has been drawn.
      */
     private static BufferedImage background;
     /**
@@ -113,7 +106,7 @@ public class SpatialMapUI extends JPanel {
     private boolean isGridVisible = false;
     private static GridMap map;
 
-    private static int numMap = 1;
+    private static final int species = 2;
 
 ///////////////
 // Constructors
@@ -145,7 +138,9 @@ public class SpatialMapUI extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHints(hints);
 
-        /** Clear the graphics */
+        /**
+         * Clear the graphics
+         */
         g2.clearRect(0, 0, w, h);
 
         /* Redraw the background when size changed */
@@ -264,10 +259,10 @@ public class SpatialMapUI extends JPanel {
         double ratio = dlon / dlat;
         width = (int) (height * ratio);
         /*if (ratio > 1) {
-        width = (int) (height * ratio);
-        } else if (ratio != 0.d) {
-        height = (int) (width / ratio);
-        }*/
+         width = (int) (height * ratio);
+         } else if (ratio != 0.d) {
+         height = (int) (width / ratio);
+         }*/
         //setPreferredSize(new Dimension(width, height));
     }
 
@@ -282,8 +277,9 @@ public class SpatialMapUI extends JPanel {
     }
 
     /**
-     * Computes the geodesic distance between the two points
-     * (lat1, lon1) and (lat2, lon2)
+     * Computes the geodesic distance between the two points (lat1, lon1) and
+     * (lat2, lon2)
+     *
      * @param lat1 a double, the latitude of the first point
      * @param lon1 a double, the longitude of the first point
      * @param lat2 double, the latitude of the second point
@@ -292,15 +288,14 @@ public class SpatialMapUI extends JPanel {
      */
     public static double geodesicDistance(double lat1, double lon1, double lat2, double lon2) {
 
-        double d = 0.d;
         double lat1_rad = Math.PI * lat1 / 180.d;
         double lat2_rad = Math.PI * lat2 / 180.d;
         double lon1_rad = Math.PI * lon1 / 180.d;
         double lon2_rad = Math.PI * lon2 / 180.d;
 
-        d = 2 * 6367000.d
+        double d = 2 * 6367000.d
                 * Math.asin(Math.sqrt(Math.pow(Math.sin((lat2_rad - lat1_rad) / 2), 2)
-                + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
+                                + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.pow(Math.sin((lon2_rad - lon1_rad) / 2), 2)));
 
         return d;
     }
@@ -340,10 +335,10 @@ public class SpatialMapUI extends JPanel {
         ///////////////////////////////
         /**
          * The (x-screen, y-screen) coordinates of the quadrilateral.
-         * point[0:3][0:1] first dimension refers to the number of points (4
-         * in this case) and the second dimension, the (x, y) coordinates.
+         * point[0:3][0:1] first dimension refers to the number of points (4 in
+         * this case) and the second dimension, the (x, y) coordinates.
          */
-        private int[][] points;
+        private final int[][] points;
 
         ///////////////
         // Constructors
@@ -387,7 +382,7 @@ public class SpatialMapUI extends JPanel {
 
         private Color getColor(int i, int j) {
 
-             if (isInMap(i, j)) {
+            if (isInMap(i, j)) {
                 return Color.MAGENTA;
             } else if (getGrid().getCell(i, j).isLand()) {
                 return Color.DARK_GRAY;
@@ -422,32 +417,39 @@ public class SpatialMapUI extends JPanel {
         getOsmose().readArgs(args);
         getOsmose().init();
         getOsmose().getSimulation(0).init();
-        MovementProcess mov = new MovementProcess(0);
-        mov.init();
-        //map = mov.getMap(numMap);
+        MapSet maps = new MapSet(0, species, "movement");
+        maps.init();
 
-        SpatialMapUI grid = new SpatialMapUI();
-        grid.init();
-        grid.setGridVisible(true);
-        //1. Create the frame.
-        JFrame frame = new JFrame();
+        for (int iMap = 0; iMap < maps.getNMap(); iMap++) {
+            map = maps.getMap(iMap);
 
-        //2. Optional: What happens when the frame closes?
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            SpatialMapUI grid = new SpatialMapUI();
+            grid.init();
+            grid.setGridVisible(true);
+            //1. Create the frame.
+            StringBuilder title = new StringBuilder();
+            title.append(getOsmose().getSimulation(0).getSpecies(species).getName());
+            title.append(" map ");
+            title.append(maps.getMapFile(iMap));
+            JFrame frame = new JFrame(title.toString());
 
-        //3. Create components and put them in the frame.
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setViewportView(grid);
-        frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
+            //2. Optional: What happens when the frame closes?
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        //4. Size the frame.
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        scrollPane.setPreferredSize(grid.getSize());
-        scrollPane.revalidate();
-        frame.pack();
-        frame.setLocationRelativeTo(null);
+            //3. Create components and put them in the frame.
+            JScrollPane scrollPane = new JScrollPane();
+            scrollPane.setViewportView(grid);
+            frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-        //5. Show it.
-        frame.setVisible(true);
+            //4. Size the frame.
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            scrollPane.setPreferredSize(grid.getSize());
+            scrollPane.revalidate();
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+
+            //5. Show it.
+            frame.setVisible(true);
+        }
     }
 }

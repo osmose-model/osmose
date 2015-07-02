@@ -49,7 +49,7 @@
 package fr.ird.osmose.stage;
 
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.ISchool;
+import fr.ird.osmose.IMarineOrganism;
 
 /**
  *
@@ -96,7 +96,7 @@ public class AccessibilityStage implements IStage {
     }
 
     @Override
-    public int getStage(ISchool school) {
+    public int getStage(IMarineOrganism school) {
         return stage.getStage(school);
     }
 }

@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  *
@@ -36,7 +37,7 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
 
     final private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 
-    abstract boolean update();
+    abstract void updateParameters();
 
     AbstractVersion(int number, int update, int year, int month, int day) {
         this.number = number;
@@ -49,24 +50,16 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
 
     void updateConfiguration() {
 
+        info("Updating configuration file to " + toString() + "...");
+
         // Update parameters
-        if (!update()) {
-            return;
-        }
+        updateParameters();
 
         // Update version
         if (!getConfiguration().isNull("osmose.version")) {
-            String source = getConfiguration().getSource("osmose.version");
-            backup(source);
-            ArrayList<String> cfgfile = getLines(source);
-            cfgfile = replace("osmose.version", "osmose.version;" + toString(), cfgfile, "Version " + toString() + " - Updated version number");
-            write(source, cfgfile);
+            updateValue("osmose.version", toString());
         } else {
-            String source = getConfiguration().getMainFile();
-            backup(source);
-            ArrayList<String> cfgfile = getLines(source);
-            cfgfile = add("osmose.version;" + toString(), cfgfile, "Version " + toString() + " - Added version number");
-            write(source, cfgfile);
+            addParameter("osmose.version", toString());
         }
     }
 
@@ -82,22 +75,26 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
         return date;
     }
 
+    /**
+     * Return Osmose version as a formatted String.
+     * <br />
+     * Osmose {version_number} Update {update-number} ({release_date})<br />
+     * Example: Osmose 3 Update 1 (2014/06/01)
+     *
+     * @return Osmose version as a String.
+     */
     @Override
     public String toString() {
-        StringBuilder version = new StringBuilder();
+        StringBuilder version = new StringBuilder("Osmose ");
         version.append(number);
         if (update > 0) {
-            version.append(" update ");
+            version.append(" Update ");
             version.append(update);
         }
         version.append(" (");
         version.append(date);
         version.append(")");
         return version.toString();
-    }
-
-    public boolean priorTo(AbstractVersion otherVersion) {
-        return compareTo(otherVersion) < 0;
     }
 
     @Override
@@ -117,16 +114,63 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
         return 0;
     }
 
-    protected ArrayList<String> add(String parameter, ArrayList<String> parameters, String msg) {
-        ArrayList<String> newList = new ArrayList(parameters);
-        newList.add("# " + msg);
-        newList.add(parameter);
-        return newList;
+    /**
+     * Add a new parameter (key + value) in the current configuration. The
+     * function tries to find the most appropriate configuration file by looking
+     * for similar parameters in the set of files. The main configuration file
+     * is used by default if the guess is unsuccessful. The function uses the
+     * default parameter separator between the key and the value.
+     * {@link fr.ird.osmose.Configuration#getDefaultSeparator()}
+     *
+     * @param key, the key of the parameter
+     * @param value, the value of the parameter
+     */
+    protected void addParameter(String key, String value) {
+
+        // Return if the parameter already exists
+        if (getConfiguration().canFind(key)) {
+            return;
+        }
+        // Find the best source file by looking for similar
+        // parameters in the set of configuration files
+        // Main configuration file by default
+        String pattern = key;
+        String source = getConfiguration().getMainFile();
+        while (pattern.contains(".")) {
+            pattern = pattern.substring(0, pattern.lastIndexOf(".")) + "*";
+            List<String> keys = getConfiguration().findKeys(pattern);
+            if (!keys.isEmpty()) {
+                source = getConfiguration().getSource(keys.get(0));
+                break;
+            }
+        }
+        // Backup the source
+        backup(source);
+        // Build the parameter as key + separator + value
+        StringBuilder parameter = new StringBuilder();
+        parameter.append(key);
+        parameter.append(getConfiguration().getDefaultSeparator());
+        parameter.append(value);
+        // Extract the list of parameters
+        ArrayList<String> parameters = getLines(source);
+        // Add comment 
+        StringBuilder msg = new StringBuilder();
+        msg.append(toString());
+        msg.append(" Added parameter ");
+        msg.append(parameter);
+        parameters.add("# " + msg.toString());
+        // Add parameter
+        parameters.add(parameter.toString());
+        // Print the change in the console
+        msg.append(" (");
+        msg.append(source);
+        msg.append(")");
+        info(" " + msg.substring(msg.indexOf(")") + 1));
+        // Write the updated configuration file
+        write(source, parameters);
     }
 
-    protected ArrayList<String> deprecate(String key, ArrayList<String> parameters, String msg) {
-
-        ArrayList<String> newList = new ArrayList(parameters);
+    private int findLine(String key, ArrayList<String> parameters) {
         int iline = -1;
         for (int i = 0; i < parameters.size(); i++) {
             if (parameters.get(i).startsWith(key)) {
@@ -134,42 +178,112 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
                 break;
             }
         }
+        return iline;
+    }
+
+    protected void deprecateParameter(String key) {
+        commentParameter(key, "Deprecated parameter " + key);
+    }
+
+    protected void commentParameter(String key, String comment) {
+
+        // Check whether the parameter exists in the current configuration
+        if (!getConfiguration().canFind(key)) {
+            return;
+        }
+        // Backup the source file
+        String source = getConfiguration().getSource(key);
+        backup(source);
+        // Extract the list of parameters
+        ArrayList<String> parameters = getLines(source);
+        // Find the line of parameter defined by the key
+        int iline = findLine(key, parameters);
+        // Comment the deprecated parameter
         String deprecated = "# " + parameters.get(iline);
-        newList.set(iline, deprecated);
-        newList.add(iline, "# " + msg);
-        return newList;
+        parameters.set(iline, deprecated);
+        // Add comment
+        StringBuilder msg = new StringBuilder();
+        msg.append(toString());
+        msg.append(" ");
+        msg.append(comment);
+        parameters.add(iline, "# " + msg);
+        // Print the change in the console
+        msg.insert(0, "  ");
+        msg.append(" (");
+        msg.append(source);
+        msg.append(")");
+        info(" " + msg.substring(msg.indexOf(")") + 1));
+        // Write the updated configuration file
+        write(source, parameters);
     }
 
-    protected ArrayList<String> rename(String key, String newKey, ArrayList<String> parameters, String msg) {
+    protected void updateKey(String key, String newKey) {
 
-        ArrayList<String> newList = new ArrayList(parameters);
-        int iline = -1;
-        for (int i = 0; i < parameters.size(); i++) {
-            if (parameters.get(i).startsWith(key)) {
-                iline = i;
-                break;
-            }
+        // Check whether the parameter exists in the current configuration
+        if (!getConfiguration().canFind(key)) {
+            return;
         }
-        String newName = parameters.get(iline).replace(key, newKey);
-        newList.set(iline, newName);
-        newList.add(iline, "# " + msg);
-        return newList;
+        // Backup the source file
+        String source = getConfiguration().getSource(key);
+        backup(source);
+        // Extract the list of parameters
+        ArrayList<String> parameters = getLines(source);
+        // Find the line of parameter defined by the key
+        int iline = findLine(key, parameters);
+        // Update the name of the key
+        String updatedParameter = parameters.get(iline).replace(key, newKey);
+        parameters.set(iline, updatedParameter);
+        // Add comment
+        StringBuilder msg = new StringBuilder();
+        msg.append(toString());
+        msg.append(" Renamed parameter ");
+        msg.append(key);
+        msg.append(" into ");
+        msg.append(newKey);
+        parameters.add(iline, "# " + msg);
+        // Print the change in the console
+        msg.insert(0, "  ");
+        msg.append(" (");
+        msg.append(source);
+        msg.append(")");
+        info(" " + msg.substring(msg.indexOf(")") + 1));
+        // Write the updated configuration file
+        write(source, parameters);
     }
 
-    protected ArrayList<String> replace(String key, String parameter, ArrayList<String> parameters, String msg) {
+    protected void updateValue(String key, String newValue) {
 
-        ArrayList<String> newList = new ArrayList(parameters);
-        int iline = -1;
-        for (int i = 0; i < parameters.size(); i++) {
-            if (parameters.get(i).startsWith(key)) {
-                iline = i;
-                break;
-            }
+        // Check whether the parameter exists in the current configuration
+        if (!getConfiguration().canFind(key)) {
+            return;
         }
-
-        newList.set(iline, parameter);
-        newList.add(iline, "# " + msg);
-        return newList;
+        // Backup the source file
+        String source = getConfiguration().getSource(key);
+        backup(source);
+        // Extract the list of parameters
+        ArrayList<String> parameters = getLines(source);
+        // Find the line of parameter defined by the key
+        int iline = findLine(key, parameters);
+        // Update the value of the parameter
+        String value = getConfiguration().getString(key);
+        String updatedParameter = parameters.get(iline).replace(value, newValue);
+        parameters.set(iline, updatedParameter);
+        // Add comment
+        StringBuilder msg = new StringBuilder();
+        msg.append(toString());
+        msg.append(" Updated parameter ");
+        msg.append(key);
+        msg.append(" to ");
+        msg.append(newValue);
+        parameters.add(iline, "# " + msg);
+        // Print the change in the console
+        msg.insert(0, "  ");
+        msg.append(" (");
+        msg.append(source);
+        msg.append(")");
+        info(" " + msg.substring(msg.indexOf(")") + 1));
+        // Write the updated configuration file
+        write(source, parameters);
     }
 
     protected void write(String file, ArrayList<String> lines) {
@@ -222,7 +336,7 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
         calendar.setTimeInMillis(System.currentTimeMillis());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
         formatter.setCalendar(calendar);
-        StringBuilder bak = new StringBuilder(src.toString());
+        StringBuilder bak = new StringBuilder(src);
         bak.append(".bak");
         bak.append(formatter.format(calendar.getTime()));
         // If the backup file already exist, no need to backup again

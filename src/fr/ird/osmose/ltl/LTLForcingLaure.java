@@ -57,7 +57,7 @@ import ucar.nc2.NetcdfFile;
  */
 public class LTLForcingLaure extends LTLForcingRomsPisces {
 
-    private float[][][][] data;
+    private double[][][][] data;
 
     public LTLForcingLaure(int rank) {
         super(rank);
@@ -72,7 +72,7 @@ public class LTLForcingLaure extends LTLForcingRomsPisces {
     private void loadData() {
 
         info("Loading all plankton data...");
-        data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
+        data = new double[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
         for (int t = 0; t < getConfiguration().getNStepYear(); t++) {
             for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 data[t][p] = getIntegratedBiomass(p, t);
@@ -81,7 +81,7 @@ public class LTLForcingLaure extends LTLForcingRomsPisces {
         info("All plankton data loaded");
     }
 
-    private float[][] getIntegratedBiomass(int p, int iStepSimu) {
+    private double[][] getIntegratedBiomass(int p, int iStepSimu) {
 
         float[][][] dataInit = null;
 
@@ -97,7 +97,7 @@ public class LTLForcingLaure extends LTLForcingRomsPisces {
     }
 
     @Override
-    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
         return data[getIndexStepLTL(iStepSimu)][iPlankton];
     }
 }

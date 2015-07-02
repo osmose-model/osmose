@@ -84,7 +84,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      * Factor for converting biomass from plankton unit to wet weight in
      * tonne/km2. (e.g. mmolN/m2 to tonne/km2)
      */
-    float[] conversionFactor;
+    double[] conversionFactor;
     /**
      * Number of time step in the LTL time series inputed to Osmose. This value
      * must be a multiple of the number of time step per year in Osmose. It
@@ -100,7 +100,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      * The array is updated every time step in the {@link #update(int)}
      * function.
      */
-    private float[][][] biomass;
+    private double[][][] biomass;
 
 ////////////////////////////
 // Definition of the methods
@@ -128,7 +128,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      * @return an array of dimension of the LTL grid with biomass vertically
      * integrated.
      */
-    abstract float[][] getRawBiomass(int iPlankton, int iStepSimu);
+    abstract double[][] getRawBiomass(int iPlankton, int iStepSimu);
 
     /**
      * Read LTL parameters in the Osmose configuration file.
@@ -164,13 +164,13 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 
         // Read conversion factors
         int nPlk = getConfiguration().getNPlankton();
-        conversionFactor = new float[nPlk];
+        conversionFactor = new double[nPlk];
         for (int iPlk = 0; iPlk < nPlk; iPlk++) {
             if (!getConfiguration().isNull("plankton.conversion2tons.plk" + iPlk)) {
-                conversionFactor[iPlk] = getConfiguration().getFloat("plankton.conversion2tons.plk" + iPlk);
+                conversionFactor[iPlk] = getConfiguration().getDouble("plankton.conversion2tons.plk" + iPlk);
             } else {
                 warning("Paramter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/km2 (or tonne/km3 for 3D dataset)", new Object[]{iPlk, getSimulation().getPlankton(iPlk).getName()});
-                conversionFactor[iPlk] = 1.f;
+                conversionFactor[iPlk] = 1.d;
             }
         }
 
@@ -181,7 +181,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         initLTLGrid();
 
         // Initializes biomass matrix
-        biomass = new float[nPlk][getGrid().get_ny()][getGrid().get_nx()];
+        biomass = new double[nPlk][getGrid().get_ny()][getGrid().get_nx()];
     }
 
     /**
@@ -196,19 +196,19 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      * @return the raw LTL data vertically integrated, in concentration of
      * plankton per surface unit.
      */
-    public float[][] verticalIntegration(float[][][] data3d, float[][][] depthLayer, float maxDepth) {
+    public double[][] verticalIntegration(float[][][] data3d, float[][][] depthLayer, float maxDepth) {
         int nx = data3d[0][0].length;
         int ny = data3d[0].length;
         int nz = data3d.length;
-        float[][] integratedData = new float[ny][nx];
-        float integr;
+        double[][] integratedData = new double[ny][nx];
+        double integr;
         for (int i = 0; i < nx; i++) {
             for (int j = 0; j < ny; j++) {
-                integr = 0f;
+                integr = 0.d;
                 for (int k = 0; k < nz - 1; k++) {
                     if (depthLayer[k][j][i] > maxDepth) {
                         if (data3d[k][j][i] >= 0 && data3d[k + 1][j][i] >= 0) {
-                            integr += (Math.abs(depthLayer[k][j][i] - depthLayer[k + 1][j][i])) * ((data3d[k][j][i] + data3d[k + 1][j][i]) / 2f);
+                            integr += (Math.abs(depthLayer[k][j][i] - depthLayer[k + 1][j][i])) * ((data3d[k][j][i] + data3d[k + 1][j][i]) / 2.d);
                         }
                     }
                 }
@@ -228,18 +228,21 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      */
     @Override
     public void update(int iStepSimu) {
+        
+        // Reset biomass matrix
+        biomass = new double[getConfiguration().getNPlankton()][getGrid().get_ny()][getGrid().get_nx()];
 
         for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
-            biomass[iPlk] = new float[getGrid().get_ny()][getGrid().get_nx()];;
-            float[][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
+            biomass[iPlk] = new double[getGrid().get_ny()][getGrid().get_nx()];
+            double[][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
             for (Cell cell : getGrid().getCells()) {
                 if (!cell.isLand()) {
-                    float area = 111.f * getGrid().getdLat() * 111.f * (float) Math.cos(cell.getLat() * Math.PI / (90f * 2f)) * getGrid().getdLong();
+                    double area = 111.d * getGrid().getdLat() * 111.d * Math.cos(cell.getLat() * Math.PI / (90.d * 2.d)) * getGrid().getdLong();
                     int i = cell.get_igrid();
                     int j = cell.get_jgrid();
                     int nCells = icoordLTLGrid[j][i].size();
                     for (int k = 0; k < nCells; k++) {
-                        biomass[iPlk][j][i] += area * convertToTonnePerKm2(iPlk, rawBiomass[jcoordLTLGrid[j][i].get(k)][icoordLTLGrid[j][i].get(k)]) / (float) nCells;
+                        biomass[iPlk][j][i] += area * convertToTonnePerKm2(iPlk, rawBiomass[jcoordLTLGrid[j][i].get(k)][icoordLTLGrid[j][i].get(k)]) / (double) nCells;
                     }
                 }
             }
@@ -247,7 +250,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     }
 
     @Override
-    public float getBiomass(int iPlankton, Cell cell) {
+    public double getBiomass(int iPlankton, Cell cell) {
         return biomass[iPlankton][cell.get_jgrid()][cell.get_igrid()];
     }
 
@@ -259,7 +262,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      * LTL files
      * @return concentration of plankton biomass in tonne/km2
      */
-    private float convertToTonnePerKm2(int iPlankton, float concentration) {
+    private double convertToTonnePerKm2(int iPlankton, double concentration) {
         return concentration * conversionFactor[iPlankton];
     }
 }

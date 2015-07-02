@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.ISchool;
+import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
 
@@ -74,7 +74,7 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
         values = new double[getNSpecies()][distrib.getNClass()];
     }
 
-    int getClass(ISchool school) {
+    int getClass(IMarineOrganism school) {
         return distrib.getClass(school);
     }
 

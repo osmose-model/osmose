@@ -61,12 +61,13 @@ public class VersionManager extends OLogger {
 
     // Declaration of the existing Osmose versions
     private final AbstractVersion v3 = new Version3();
-    private final AbstractVersion v3u1 = new Version3u1();
+    private final AbstractVersion v3u1 = new Version3Update1();
+    private final AbstractVersion v3u2 = new Version3Update2();
     // List of the existing Osmose versions
-    private final AbstractVersion[] VERSIONS = {v3, v3u1};
+    private final AbstractVersion[] VERSIONS = {v3, v3u1, v3u2};
 
     // Current Osmose version
-    public final AbstractVersion OSMOSE_VERSION = v3u1;
+    public final AbstractVersion OSMOSE_VERSION = v3u2;
 
     // Version of the Osmose configuration
     private AbstractVersion cfgVersion;
@@ -97,6 +98,7 @@ public class VersionManager extends OLogger {
             for (AbstractVersion version : VERSIONS) {
                 if ((version.compareTo(OSMOSE_VERSION) <= 0) && (cfgVersion.compareTo(version) < 0)) {
                     version.updateConfiguration();
+                    getConfiguration().refresh();
                 }
             }
         } else if (cfgVersion.compareTo(OSMOSE_VERSION) > 0) {
@@ -120,11 +122,15 @@ public class VersionManager extends OLogger {
         if (!getConfiguration().isNull("osmose.version")) {
             try {
                 String sversion = getConfiguration().getString("osmose.version");
+                // Clean the version parameter
+                sversion = sversion.replaceAll("[^0-9\\s]", "").replaceAll(" +", " ").trim();
                 String[] split = sversion.split(" ");
+                // Version number is the first figure
                 int number = Integer.valueOf(split[0].trim());
                 int update = 0;
-                if (split.length >= 3) {
-                    update = Integer.valueOf(split[2].trim());
+                // Update number is the second figure
+                if (split.length >= 1) {
+                    update = Integer.valueOf(split[1].trim());
                 }
                 for (AbstractVersion aversion : VERSIONS) {
                     if ((aversion.getNumber() == number) && (aversion.getUpdate() == update)) {
@@ -135,7 +141,7 @@ public class VersionManager extends OLogger {
                 error("Could not identify version of the configuration, check parameter osmose.version = " + getConfiguration().getString("osmose.version"), ex);
             }
         }
-
+        
         return v3;
     }
 

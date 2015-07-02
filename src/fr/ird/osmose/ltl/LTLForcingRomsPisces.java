@@ -228,7 +228,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     }
 
     @Override
-    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
         String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
         float[][][] data3d = null;

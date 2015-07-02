@@ -168,7 +168,7 @@ public class MPA extends SimulationLinker {
             /*
              * Read the CSV file
              */
-            CSVReader reader = new CSVReader(new FileReader(csvFile), ';');
+            CSVReader reader = new CSVReader(new FileReader(csvFile), Separator.guess(csvFile).getSeparator());
             List<String[]> lines = reader.readAll();
 
             int ny = getGrid().get_ny();

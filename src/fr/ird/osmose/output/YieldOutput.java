@@ -49,6 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.MortalityCause;
 
 /**
  *
@@ -76,7 +77,7 @@ public class YieldOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            yield[school.getSpeciesIndex()] += school.adb2biom(school.getNdead(School.MortalityCause.FISHING));
+            yield[school.getSpeciesIndex()] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
         }
     }
 

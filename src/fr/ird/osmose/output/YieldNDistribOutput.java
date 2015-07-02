@@ -51,6 +51,7 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
@@ -68,7 +69,7 @@ public class YieldNDistribOutput extends AbstractDistribOutput {
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.FISHING);
+                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(MortalityCause.FISHING);
             }
         }
     }

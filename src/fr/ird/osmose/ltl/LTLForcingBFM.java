@@ -203,7 +203,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     }
 
     @Override
-    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
         String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
 

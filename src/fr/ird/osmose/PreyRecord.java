@@ -57,7 +57,7 @@ package fr.ird.osmose;
  *
  * @see Prey
  */
-public class PreyRecord implements ISchool {
+public class PreyRecord implements IMarineOrganism {
 
     /**
      * The preyed biomass, in tonne.
@@ -99,7 +99,6 @@ public class PreyRecord implements ISchool {
      *
      * @return the preyed biomass, in tonne
      */
-    @Override
     public double getBiomass() {
         return biomass;
     }
@@ -142,11 +141,6 @@ public class PreyRecord implements ISchool {
     }
 
     @Override
-    public float getLengthIniStep() {
-        throw new UnsupportedOperationException("Not supported for class PreyRecord.");
-    }
-
-    @Override
     public int hashCode() {
         int hash = 3;
         hash = 97 * hash + Float.floatToIntBits(this.trophicLevel);
@@ -178,5 +172,10 @@ public class PreyRecord implements ISchool {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public float getWeight() {
+        return 0.f;
     }
 }

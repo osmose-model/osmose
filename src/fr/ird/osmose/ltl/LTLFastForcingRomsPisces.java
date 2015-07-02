@@ -54,7 +54,7 @@ package fr.ird.osmose.ltl;
  */
 public class LTLFastForcingRomsPisces extends LTLForcingRomsPisces {
 
-    private float[][][][] data;
+    private double[][][][] data;
 
     public LTLFastForcingRomsPisces(int rank) {
         super(rank);
@@ -69,7 +69,7 @@ public class LTLFastForcingRomsPisces extends LTLForcingRomsPisces {
     private void loadData() {
 
         info("Loading plankton data...");
-        data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
+        data = new double[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
         for (int iStep = 0; iStep < getConfiguration().getNStepYear(); iStep++) {
             for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
                 data[iStep][p] = super.getRawBiomass(p, iStep);
@@ -78,7 +78,7 @@ public class LTLFastForcingRomsPisces extends LTLForcingRomsPisces {
     }
 
     @Override
-    float[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
         return data[getIndexStepLTL(iStepSimu)][iPlankton];
     }
 }

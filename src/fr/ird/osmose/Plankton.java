@@ -50,6 +50,7 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.util.SimulationLinker;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
+import java.util.HashMap;
 
 /**
  * This class represents a plankton group or any other low trophic level
@@ -89,7 +90,7 @@ public class Plankton extends SimulationLinker {
      * <i>plankton.size.min.plk#</i> and
      * <i>plankton.size.max.plk#</i>
      */
-    private float sizeMin, sizeMax;
+    private double sizeMin, sizeMax;
     /**
      * Name of the plankton group. (e.g. phytoplankton, diatoms, copepods).
      * Parameter <i>plankton.name.plk#</i>
@@ -99,14 +100,20 @@ public class Plankton extends SimulationLinker {
      * Fraction of plankton biomass available to the fish, ranging [0, 1].
      * Parameter <i>plankton.accessibility2fish.plk#</i>
      */
-    private float[] accessibilityCoeff;
+    private double[] accessibilityCoeff;
     /**
      * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
      * for virtually increasing or decreasing plankton biomass.
      */
-    private float multiplier;
+    private double multiplier;
 
-    private Prey[][] preys;
+    private HashMap<Integer, Swarm> swarms;
+    /**
+     * Maximum value for plankton accessibility. It should never be one or
+     * exceed one to avoid any numerical problem when converting from float to
+     * double.
+     */
+    final private double accessMax = 0.99d;
 
 ///////////////
 // Constructors
@@ -132,18 +139,18 @@ public class Plankton extends SimulationLinker {
     public void init() {
 
         name = getConfiguration().getString("plankton.name.plk" + index);
-        sizeMin = getConfiguration().getFloat("plankton.size.min.plk" + index);
-        sizeMax = getConfiguration().getFloat("plankton.size.max.plk" + index);
+        sizeMin = getConfiguration().getDouble("plankton.size.min.plk" + index);
+        sizeMax = getConfiguration().getDouble("plankton.size.max.plk" + index);
         trophicLevel = getConfiguration().getFloat("plankton.tl.plk" + index);
         if (!getConfiguration().isNull("plankton.accessibility2fish.file.plk" + index)) {
             SingleTimeSeries ts = new SingleTimeSeries(getRank());
             ts.read(getConfiguration().getFile("plankton.accessibility2fish.file.plk" + index));
             accessibilityCoeff = ts.getValues();
         } else {
-            float accessibility = getConfiguration().getFloat("plankton.accessibility2fish.plk" + index);
-            accessibilityCoeff = new float[getConfiguration().getNStepYear() * getConfiguration().getNYear()];
+            double accessibility = getConfiguration().getDouble("plankton.accessibility2fish.plk" + index);
+            accessibilityCoeff = new double[getConfiguration().getNStepYear() * getConfiguration().getNYear()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
-                accessibilityCoeff[i] = accessibility;
+                accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;;
             }
         }
         if (!getConfiguration().isNull("plankton.multiplier.plk" + index)) {
@@ -152,7 +159,7 @@ public class Plankton extends SimulationLinker {
         } else {
             multiplier = 1.f;
         }
-        resetPreys();
+        swarms = new HashMap();
     }
 
     /**
@@ -162,7 +169,7 @@ public class Plankton extends SimulationLinker {
      * @return the biomass of the plankton group, in tonne, in the given
      * {@code cell}
      */
-    public float getBiomass(Cell cell) {
+    public double getBiomass(Cell cell) {
         return multiplier * getForcing().getBiomass(index, cell);
     }
 
@@ -176,7 +183,7 @@ public class Plankton extends SimulationLinker {
      * @return the accessible biomass of the plankton group, in tonne, in the
      * given {@code cell}
      */
-    public float getAccessibleBiomass(Cell cell, int iStepSimu) {
+    public double getAccessibleBiomass(Cell cell, int iStepSimu) {
         return accessibilityCoeff[iStepSimu] * getBiomass(cell);
     }
 
@@ -209,8 +216,8 @@ public class Plankton extends SimulationLinker {
      * @return the fraction of the plankton size range that matches the size
      * range given as parameter.
      */
-    public float computePercent(float accessibleSizeMin, float accessibleSizeMax) {
-        float tempPercent;
+    public double computePercent(double accessibleSizeMin, double accessibleSizeMax) {
+        double tempPercent;
         tempPercent = (Math.min(sizeMax, accessibleSizeMax) - Math.max(sizeMin, accessibleSizeMin)) / (sizeMax - sizeMin);
         return tempPercent;
     }
@@ -222,7 +229,7 @@ public class Plankton extends SimulationLinker {
      * @return the maximal size, in centimeter, of the organisms in the plankton
      * group
      */
-    public float getSizeMax() {
+    public double getSizeMax() {
         return sizeMax;
     }
 
@@ -233,7 +240,7 @@ public class Plankton extends SimulationLinker {
      * @return the minimal size, in centimeter, of the organisms in the plankton
      * group
      */
-    public float getSizeMin() {
+    public double getSizeMin() {
         return sizeMin;
     }
 
@@ -277,19 +284,16 @@ public class Plankton extends SimulationLinker {
         return trophicLevel;
     }
 
-    public Prey asPrey(Cell cell, int iStepSimu) {
-        if (null == preys[cell.get_jgrid()][cell.get_igrid()]) {
-            preys[cell.get_jgrid()][cell.get_igrid()] = new Prey(index, // index
-                    cell.get_igrid(), // x
-                    cell.get_jgrid(), // y
-                    getAccessibleBiomass(cell, iStepSimu), // abundance (assumes that abundance <==> biomass for Plankton)
-                    1e6f, // weight set to 1 ton to have abundance <==> biomass
-                    trophicLevel); // trophic level
+    public IAggregation getSwarm(Cell cell) {
+        if (!swarms.containsKey(cell.getIndex())) {
+            swarms.put(cell.getIndex(), new Swarm(this, cell));
         }
-        return preys[cell.get_jgrid()][cell.get_igrid()];
+        return swarms.get(cell.getIndex());
     }
 
-    public void resetPreys() {
-        preys = new Prey[getGrid().get_ny()][getGrid().get_nx()];
+    public void updateSwarms(int iStepSimu) {
+        for (Swarm swarm : swarms.values()) {
+            swarm.updateBiomass(iStepSimu);
+        }
     }
 }

@@ -86,5 +86,5 @@ public interface LTLForcing {
      * @return the biomass, in tonne, of the LTL group at index {@code iLTL} in
      * this {@code cell}}
      */
-    public float getBiomass(int iLTL, Cell cell);
+    public double getBiomass(int iLTL, Cell cell);
 }

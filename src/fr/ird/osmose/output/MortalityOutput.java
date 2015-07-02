@@ -49,7 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.Prey.MortalityCause;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -175,7 +175,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             prw[iSpecies].print(separator);
             for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
                 for (int iStage = 0; iStage < STAGES; iStage++) {
-                    if (iDeath == MortalityCause.NATURAL.index && iStage == EGG) {
+                    if (iDeath == MortalityCause.ADDITIONAL.index && iStage == EGG) {
                         // instantenous mortality rate for eggs natural mortality 
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / recordFrequency);
                     } else {

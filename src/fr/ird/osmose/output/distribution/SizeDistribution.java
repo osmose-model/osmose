@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.output.distribution;
 
-import fr.ird.osmose.ISchool;
+import fr.ird.osmose.IMarineOrganism;
 
 /**
  *
@@ -80,7 +80,7 @@ public class SizeDistribution extends AbstractDistribution {
     }
 
     @Override
-    float getValue(ISchool school) {
+    float getValue(IMarineOrganism school) {
         return school.getLength();
     }
 }

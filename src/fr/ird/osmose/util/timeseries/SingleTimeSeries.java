@@ -49,6 +49,7 @@
 package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
@@ -61,7 +62,7 @@ import java.util.List;
  */
 public class SingleTimeSeries extends SimulationLinker {
 
-    private float[] values;
+    private double[] values;
 
     public SingleTimeSeries(int rank) {
         super(rank);
@@ -79,7 +80,7 @@ public class SingleTimeSeries extends SimulationLinker {
         int nStepSimu = nStepYear * getConfiguration().getNYear();
         try {
             // 1. Open the CSV file
-            CSVReader reader = new CSVReader(new FileReader(filename), ';');
+            CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
             List<String[]> lines = reader.readAll();
 
             // 2. Check the length of the time serie and inform the user about potential problems or inconsistencies
@@ -96,10 +97,10 @@ public class SingleTimeSeries extends SimulationLinker {
             nTimeSerie = Math.min(nTimeSerie, nMax);
 
             // 3. Read the time serie
-            values = new float[nStepSimu];
+            values = new double[nStepSimu];
             for (int t = 0; t < nTimeSerie; t++) {
                 String[] line = lines.get(t + 1);
-                values[t] = Float.valueOf(line[1]);
+                values[t] = Double.valueOf(line[1]);
             }
             // 4. Fill up the time serie if necessary
             if (nTimeSerie < nStepSimu) {
@@ -122,7 +123,7 @@ public class SingleTimeSeries extends SimulationLinker {
         }
     }
 
-    public float[] getValues() {
+    public double[] getValues() {
         return values;
     }
 }

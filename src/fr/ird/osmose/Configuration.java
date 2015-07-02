@@ -58,6 +58,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -158,9 +160,17 @@ public class Configuration extends OLogger {
      */
     final private Properties source;
     /**
+     * List of all the parameters
+     */
+    private final List<Parameter> parameters;
+    /**
      * Name of the main configuration file.
      */
     final private String mainFilename;
+    /**
+     * Default parameter separator between key and value
+     */
+    private Separator defaultSeparator;
     /**
      * Path of the output directory.
      */
@@ -235,6 +245,7 @@ public class Configuration extends OLogger {
 
         cfg = new Properties();
         source = new Properties();
+        parameters = new ArrayList();
     }
 
 ////////////////////////////
@@ -248,7 +259,12 @@ public class Configuration extends OLogger {
     public void init() {
 
         // Load the parameters from the main configuration file
-        loadProperties(mainFilename, 0);
+        loadParameters(mainFilename, 0);
+
+        // Check what is the default separator
+        defaultSeparator = guessDefaultSeparator();
+        // Clear parameters list as it won't be needed anymore
+        parameters.clear();
 
         // Check whether the configuration file is up-to-date
         VersionManager.getInstance().updateConfiguration();
@@ -346,7 +362,7 @@ public class Configuration extends OLogger {
      * function. Zero for the main configuration file, one for a file loaded
      * from the main configuration file, etc.
      */
-    private void loadProperties(String filename, int depth) {
+    private void loadParameters(String filename, int depth) {
 
         BufferedReader bfIn = null;
         String path = resolveFile(filename);
@@ -373,9 +389,10 @@ public class Configuration extends OLogger {
                 if (!startsWithSymbol(line) & !(line.length() <= 1)) {
                     Parameter entry = new Parameter(line, iline, path);
                     if (null != entry.key && null != entry.value) {
+                        parameters.add(entry);
                         if (entry.key.startsWith("osmose.configuration")) {
                             source.setProperty(entry.key, path);
-                            loadProperties(entry.value, depth + 1);
+                            loadParameters(entry.value, depth + 1);
                         } else {
                             if (source.containsKey(entry.key)) {
                                 warning("Parameter {0} has already been defined in file {1} with value {2}", new Object[]{entry.key, source.getProperty(entry.key), cfg.getProperty(entry.key)});
@@ -392,6 +409,15 @@ public class Configuration extends OLogger {
         } catch (IOException ex) {
             error("Error loading parameters from file " + filename + " at line " + iline + " " + line, ex);
         }
+    }
+
+    public void refresh() {
+
+        info("Reloading parameters...");
+        parameters.clear();
+        cfg.clear();
+        source.clear();
+        loadParameters(mainFilename, 0);
     }
 
     /**
@@ -516,7 +542,7 @@ public class Configuration extends OLogger {
      */
     public String[] getArrayString(String key) {
         String value = getString(key);
-        String[] values = value.split(guessSeparator(value, Separator.SEMICOLON).toString());
+        String[] values = value.split(Separator.guess(value, Separator.SEMICOLON).toString());
         for (int i = 0; i < values.length; i++) {
             values[i] = values[i].trim();
         }
@@ -581,11 +607,12 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as a boolean.
      *
      * @param key, the key of the parameter
+     * @param warning, send a warning if the key cannot be found
      * @throws NumberFormatException if the value of the parameter cannot be
      * parsed as a boolean.
      * @return the parameter as a boolean
      */
-    public boolean getBoolean(String key) {
+    public boolean getBoolean(String key, boolean warning) {
         try {
             String s = getString(key);
             try {
@@ -594,9 +621,23 @@ public class Configuration extends OLogger {
                 error("Could not convert parameter " + key + " to boolean " + s + " (from file " + getSource(key) + ")", ex);
             }
         } catch (NullPointerException ex) {
-            warning("Could not find boolean parameter " + key + ". Osmose assumes it is false.");
+            if (warning) {
+                warning("Could not find boolean parameter " + key + ". Osmose assumes it is false.");
+            }
         }
         return false;
+    }
+
+    /**
+     * Returns the specified parameter as a boolean.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the value of the parameter cannot be
+     * parsed as a boolean.
+     * @return the parameter as a boolean
+     */
+    public boolean getBoolean(String key) {
+        return getBoolean(key, true);
     }
 
     /**
@@ -656,7 +697,7 @@ public class Configuration extends OLogger {
         try {
             double[] ad = new double[as.length];
             for (int i = 0; i < ad.length; i++) {
-                ad[i] = Float.valueOf(as[i]);
+                ad[i] = Double.valueOf(as[i]);
             }
             return ad;
         } catch (NumberFormatException ex) {
@@ -708,6 +749,10 @@ public class Configuration extends OLogger {
 
     public String getOutputSeparator() {
         return outputSeparator;
+    }
+
+    public String getDefaultSeparator() {
+        return defaultSeparator.toString();
     }
 
     /**
@@ -793,27 +838,33 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * This function tries to guess what is the separator in the given string
-     * assuming that it is an array of at least two values. It will look for
-     * separators {@code = ; : \t} in this order. If none of these separators
-     * are found then it will return the fallback separator given as a
-     * parameter.
+     * Guess the default parameter separator (between key and value) in the set
+     * of configuration files. Osmose takes as default separator the one that is
+     * the most widely used in the current configuration. The function scans all
+     * the parameters, counts the occurrences of every type of separator and
+     * returns the one that with the highest count.
      *
-     * @param string, the string you assume to be an array of strings separator
-     * by one of the accepted {@link Separator}.
-     * @param fallbackSeparator, the fallback separator returned by the function
-     * if the guess fails
-     * @see Separator
-     * @return the separator contained in the {@code string}
+     * @return the default parameter separator.
      */
-    private Separator guessSeparator(String string, Separator fallback) {
+    private Separator guessDefaultSeparator() {
 
+        StringBuilder sbSeparators = new StringBuilder();
+        for (Parameter parameter : parameters) {
+            sbSeparators.append(parameter.keySeparator);
+        }
+        String separators = sbSeparators.toString();
+
+        Separator defaultSep = Separator.EQUALS;
+        int nSep1 = 0;
         for (Separator separator : Separator.values()) {
-            if (string.contains(separator.toString()) && string.split(separator.toString()).length >= 1) {
-                return separator;
+            int nSep2 = separators.length() - separators.replaceAll(separator.toString(), "").length();
+            if (nSep2 > nSep1) {
+                nSep1 = nSep2;
+                defaultSep = separator;
             }
         }
-        return fallback;
+
+        return defaultSep;
     }
 
     public String getMainFile() {
@@ -824,7 +875,7 @@ public class Configuration extends OLogger {
      * Inner class that represents a parameter in the configuration file.
      * {@code Configuration} parses the configuration file line by line. When
      * the line is not discarded (refer to function
-     * {@link #loadProperties(java.lang.String, int)} for details about
+     * {@link #loadParameters(java.lang.String, int)} for details about
      * discarded lines), it assumes it is a parameter (formed as <i>key
      * separator value</i> or <i>key separator1 value1 separator2 value2
      * separator2 value3 separator2 value4</i>) and creates a new
@@ -882,9 +933,9 @@ public class Configuration extends OLogger {
          */
         private void parse(String line) {
             key = value = null;
-            keySeparator = guessSeparator(line, Separator.EQUALS).toString();
+            keySeparator = Separator.guess(line, Separator.EQUALS).toString();
             split(line);
-            valueSeparator = guessSeparator(value, Separator.SEMICOLON).toString();
+            valueSeparator = Separator.guess(value, Separator.SEMICOLON).toString();
             value = clean(value);
         }
 

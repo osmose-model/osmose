@@ -117,15 +117,15 @@ import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 public class IncomingFluxProcess extends AbstractProcess {
 
     /*
-     * Flux of incoming biomass in tons, by dt and by age/size class
+     * Flux of incoming biomass in tonne, by dt and by age/size class
      */
-    private float[][][] biomassIn;
+    private double[][][] biomassIn;
     /*
-     * Length of incomimg fish, in centimeter
+     * Length of incomimg fish, in centimeter, per species and by size/age class
      */
     private float[][] lengthIn;
     /*
-     * Age of incoming fish, in number of time steps
+     * Age of incoming fish, in number of time steps, per species and by size/age class
      */
     private int[][] ageIn;
 
@@ -137,7 +137,7 @@ public class IncomingFluxProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getConfiguration().getNSpecies();
-        biomassIn = new float[nSpecies][][];
+        biomassIn = new double[nSpecies][][];
         lengthIn = new float[nSpecies][];
         ageIn = new int[nSpecies][];
         for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
@@ -152,7 +152,7 @@ public class IncomingFluxProcess extends AbstractProcess {
                 }
                 // Last ageIn as the middle of interval between last class and lifespan
                 int lifespan = getSpecies(iSpec).getLifespanDt();
-                ageIn[iSpec][ageIn[iSpec].length - 1] = (int) (0.5 * (getConfiguration().getNStepYear() * timeSerieByAge.getClass(ageIn[iSpec].length - 1)) + lifespan);
+                ageIn[iSpec][ageIn[iSpec].length - 1] = (int) (0.5 * (getConfiguration().getNStepYear() * timeSerieByAge.getClass(ageIn[iSpec].length - 1) + lifespan));
                 // Compute corresponding length in with Von Bertallanfy
                 lengthIn[iSpec] = new float[timeSerieByAge.getNClass()];
                 for (int iAge = 0; iAge < ageIn[iSpec].length; iAge++) {
