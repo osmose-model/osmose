@@ -143,16 +143,16 @@ public class OutputManager extends SimulationLinker {
             }
         }
         if (getConfiguration().getBoolean("output.mortality.natural.bySize.enabled")) {
-            outputs.add(new NaturalMortalityDistribOutput(rank, sizeDistrib));
+            outputs.add(new AdditionalMortalityDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.mortality.natural.byAge.enabled")) {
-            outputs.add(new NaturalMortalityDistribOutput(rank, ageDistrib));
+            outputs.add(new AdditionalMortalityDistribOutput(rank, ageDistrib));
         }
         if (getConfiguration().getBoolean("output.mortality.naturalN.bySize.enabled")) {
-            outputs.add(new NaturalMortalityNDistribOutput(rank, sizeDistrib));
+            outputs.add(new AdditionalMortalityNDistribOutput(rank, sizeDistrib));
         }
         if (getConfiguration().getBoolean("output.mortality.naturalN.byAge.enabled")) {
-            outputs.add(new NaturalMortalityNDistribOutput(rank, ageDistrib));
+            outputs.add(new AdditionalMortalityNDistribOutput(rank, ageDistrib));
         }        
         // Yield
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {

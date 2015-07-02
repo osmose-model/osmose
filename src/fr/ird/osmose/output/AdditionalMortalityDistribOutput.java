@@ -51,15 +51,16 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class NaturalMortalityNDistribOutput extends AbstractDistribOutput {
+public class AdditionalMortalityDistribOutput extends AbstractDistribOutput {
 
-    public NaturalMortalityNDistribOutput(int rank, AbstractDistribution distrib) {
+    public AdditionalMortalityDistribOutput(int rank, AbstractDistribution distrib) {
         super(rank, distrib);
     }
     
@@ -68,7 +69,7 @@ public class NaturalMortalityNDistribOutput extends AbstractDistribOutput {
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(School.MortalityCause.NATURAL);
+                values[school.getSpeciesIndex()][getClass(school)] += school.adb2biom(school.getNdead(MortalityCause.ADDITIONAL));
             }
         }
     }
@@ -79,7 +80,7 @@ public class NaturalMortalityNDistribOutput extends AbstractDistribOutput {
         filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_naturalMortalityNDistribBy");
+        filename.append("_naturalMortalityDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());
@@ -91,9 +92,9 @@ public class NaturalMortalityNDistribOutput extends AbstractDistribOutput {
     @Override
     String getDescription() {
         StringBuilder description = new StringBuilder();
-        description.append("Distribution of natural mortality (number of fish dead from unexplicited cause per time step of saving) by ");
+        description.append("Distribution of natural mortality biomass (tonne of fish dead from unexplicited cause per time step of saving) by ");
         description.append(getType().getDescription());
-        description.append(". For class i, the number of dead fish in [i,i+1[ is reported.");
+        description.append(". For class i, the biomass of dead fish in [i,i+1[ is reported.");
         return description.toString();
     }
 
