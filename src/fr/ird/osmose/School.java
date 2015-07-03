@@ -613,9 +613,9 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
-     * Returns the length of the fish, in centimeter.
+     * Returns the length of the fish, in centimetre.
      *
-     * @return the length of the fish, in centimeter
+     * @return the length of the fish, in centimetre
      */
     @Override
     public float getLength() {
@@ -623,9 +623,9 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
-     * Increments the length of the fish from given number of centimeter.
+     * Increments the length of the fish from given number of centimetre.
      *
-     * @param dlength, the length increment in centimeter
+     * @param dlength, the length increment in centimetre
      */
     public void incrementLength(float dlength) {
         if (dlength != 0.f) {

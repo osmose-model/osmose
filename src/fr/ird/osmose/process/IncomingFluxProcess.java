@@ -50,6 +50,7 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.process.growth.GrowthProcess;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 
 /**
@@ -140,6 +141,9 @@ public class IncomingFluxProcess extends AbstractProcess {
         biomassIn = new double[nSpecies][][];
         lengthIn = new float[nSpecies][];
         ageIn = new int[nSpecies][];
+        // Call the growth process to be able to calculate meanAgeIn or meanLengthIn
+        GrowthProcess growthProcess = new GrowthProcess(getRank());
+        growthProcess.init();
         for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
             if (!getConfiguration().isNull("flux.incoming.byDt.byAge.file.sp" + iSpec)) {
                 ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
@@ -156,7 +160,8 @@ public class IncomingFluxProcess extends AbstractProcess {
                 // Compute corresponding length in with Von Bertallanfy
                 lengthIn[iSpec] = new float[timeSerieByAge.getNClass()];
                 for (int iAge = 0; iAge < ageIn[iSpec].length; iAge++) {
-                    lengthIn[iSpec][iAge] = getSpecies(iSpec).computeMeanLength(ageIn[iSpec][iAge]);
+                    double age = ageIn[iSpec][iAge] / (double) getConfiguration().getNStepYear();
+                    lengthIn[iSpec][iAge] = (float) growthProcess.getGrowth(iSpec).ageToLength(age);   
                 }
             } else if (!getConfiguration().isNull("flux.incoming.byDt.bySize.file.sp" + iSpec)) {
                 ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
@@ -173,7 +178,8 @@ public class IncomingFluxProcess extends AbstractProcess {
                 // Compute corresponding age in with Von Bertallanfy
                 ageIn[iSpec] = new int[timeSerieBySize.getNClass()];
                 for (int iLength = 0; iLength < ageIn[iSpec].length; iLength++) {
-                    ageIn[iSpec][iLength] = getSpecies(iSpec).computeMeanAge(lengthIn[iSpec][iLength]);
+                    double age = growthProcess.getGrowth(iSpec).lengthToAge(lengthIn[iSpec][iLength]);
+                    ageIn[iSpec][iLength] = (int) (age * getConfiguration().getNStepYear());
                 }
             } else {
                 // Nothing to do, means there is no incoming flux for this species

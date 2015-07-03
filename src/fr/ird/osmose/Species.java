@@ -89,21 +89,19 @@ public class Species {
      */
     final private int lifespan;
     /**
-     * Von Bertalanffy growth parameters. Parameters <i>species.linf.sp#</i>,
-     * <i>species.k.sp#</i> and
-     * <i>species.t0.sp#</i>
-     */
-    final private float lInf, K, t0;
-    /**
      * Allometric parameters. Parameters
      * <i>species.length2weight.condition.factor.sp#</i> and
      * <i>species.length2weight.allometric.power.sp#</i>
      */
     final private float c, bPower;
     /**
-     * Size (cm) at maturity. Parameter <i>species.maturity.age.sp#</i>
+     * Size (cm) at maturity. Parameter <i>species.maturity.size.sp#</i>
      */
     final private float sizeMaturity;
+    /**
+     * Age (year) at maturity. Parameter <i>species.maturity.age.sp#</i>
+     */
+    final private float ageMaturity;
     /**
      * Threshold age (year) for age class zero. It is the age from which target
      * biomass should be considered as eggs and larvae stages are generally not
@@ -118,11 +116,6 @@ public class Species {
      * Weight (gram) of eggs. Parameter <i>species.egg.weight.sp#</i>
      */
     final private float eggWeight;
-    /**
-     * Threshold age (year) for applying Von Bertalanffy growth model. Parameter
-     * <i>species.vonbertalanffy.threshold.age.sp#</i>
-     */
-    final private float growthAgeThreshold;
 
 //////////////
 // Constructor
@@ -138,27 +131,19 @@ public class Species {
         this.index = index;
         // Initialization of parameters
         name = getConfiguration().getString("species.name.sp" + index);
-        lInf = getConfiguration().getFloat("species.linf.sp" + index);
-        K = getConfiguration().getFloat("species.k.sp" + index);
-        t0 = getConfiguration().getFloat("species.t0.sp" + index);
         c = getConfiguration().getFloat("species.length2weight.condition.factor.sp" + index);
         bPower = getConfiguration().getFloat("species.length2weight.allometric.power.sp" + index);
         if (!getConfiguration().isNull("species.maturity.size.sp" + index)) {
             sizeMaturity = getConfiguration().getFloat("species.maturity.size.sp" + index);
+            ageMaturity = Float.MAX_VALUE;
         } else {
-            float ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
-            sizeMaturity = lInf * (float) (1 - Math.exp(-K * (ageMaturity - t0)));
+            ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
+            sizeMaturity = Float.MAX_VALUE;
         }
         float age0 = getConfiguration().getFloat("output.cutoff.age.sp" + index);
         ageClassZero = (int) Math.ceil(age0 * getConfiguration().getNStepYear());
         eggSize = getConfiguration().getFloat("species.egg.size.sp" + index);
         eggWeight = getConfiguration().getFloat("species.egg.weight.sp" + index);
-        if (!getConfiguration().isNull("species.vonbertalanffy.threshold.age.sp" + index)) {
-            growthAgeThreshold = getConfiguration().getFloat("species.vonbertalanffy.threshold.age.sp" + index);
-        } else {
-            // by default, von Bertalanffy model considered valid after 1 year old, linear growth from 0 to 1 year
-            growthAgeThreshold = 1.f;
-        }
         float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * getConfiguration().getNStepYear());
     }
@@ -167,83 +152,10 @@ public class Species {
 // Definition of the functions
 //////////////////////////////
     /**
-     * Computes the mean length, in centimeter, at a specific age.
-     *
-     * @param age, an age in number of time step.
-     * @return the mean length, in centimeter, at this {@code age}
-     */
-    public float computeMeanLength(int age) {
-
-        float length;
-        float decimalAge = age / (float) getConfiguration().getNStepYear();
-        if (age == 0) {
-            // Egg size for first time step
-            length = eggSize;
-        } else if (decimalAge < growthAgeThreshold) {
-            // Linear growth
-            float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
-            if (lengthAtAgePart < eggSize) {
-                lengthAtAgePart = eggSize;
-            }
-            length = (decimalAge / growthAgeThreshold) * (float) (lengthAtAgePart - eggSize) + eggSize;
-        } else {
-            // Von Bertalnffy growth
-            length = (float) (lInf * (1 - Math.exp(-K * (decimalAge - t0))));
-        }
-
-        return length;
-    }
-
-    /**
-     * Compute the mean age, in number of time step, at a specific length, in
-     * centimeter.
-     *
-     * @param length the length in centimeter
-     * @return the mean age in number of time step for this {@code length}
-     */
-    public int computeMeanAge(float length) {
-
-        float age;
-        float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
-        if (length > lengthAtAgePart) {
-            if (length < lInf) {
-                age = (float) (-((Math.log(1 - (length / lInf))) / K)) + t0;
-            } else {
-                age = lifespan;
-            }
-        } else {
-            age = growthAgeThreshold * (length - eggSize) / (lengthAtAgePart - eggSize);
-        }
-        return Math.round(age * getConfiguration().getNStepYear());
-
-    }
-
-    /**
-     * Computes the mean weight, in gram, at a specific age, in number of time
-     * step.
-     *
-     * @param age, the age in number of time step
-     * @return the mean weight in gram at this {@code age}
-     */
-    public float computeMeanWeight(int age) {
-
-        float weight;
-        if (age == 0) {
-            weight = eggWeight;
-        } else {
-            weight = computeWeight(computeMeanLength(age));
-            if (weight < eggWeight) {
-                weight = eggWeight;
-            }
-        }
-        return weight;
-    }
-
-    /**
      * Computes the weight, in gram, corresponding to the given length, in
-     * centimeter.
+     * centimetre.
      *
-     * @param length, the length in centimeter
+     * @param length, the length in centimetre
      * @return the weight in gram for this {@code length}
      */
     public float computeWeight(float length) {
@@ -254,7 +166,7 @@ public class Species {
      * Returns the lifespan of the species. Parameter
      * <i>species.lifespan.sp#</i>
      *
-     * @return the lifespa, in number of time step
+     * @return the lifespan, in number of time step
      */
     public int getLifespanDt() {
         return lifespan;
@@ -309,14 +221,8 @@ public class Species {
         return ageClassZero;
     }
 
-    /**
-     * Return the size, in centimeter, at (sexual) maturity. Parameter
-     * <i>species.maturity.age.sp#</i>
-     *
-     * @return the size at maturity in centimeter
-     */
-    public float getSizeMaturity() {
-        return sizeMaturity;
+    public boolean isSexuallyMature(School school) {
+        return (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
     }
 
     /**

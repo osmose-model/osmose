@@ -46,10 +46,12 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process;
+package fr.ird.osmose.process.growth;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.process.AbstractProcess;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  *
@@ -57,10 +59,11 @@ import fr.ird.osmose.Species;
  */
 public class GrowthProcess extends AbstractProcess {
 
-    private float[][] minDelta;
-    private float[][] maxDelta;
-    private float[][] deltaMeanLength;
-    private float[] criticalPredSuccess;
+    private AbstractGrowth[] growth;
+    private double[][] minDelta;
+    private double[][] maxDelta;
+    private double[][] deltaMeanLength;
+    private double[] criticalPredSuccess;
 
     public GrowthProcess(int rank) {
         super(rank);
@@ -70,27 +73,53 @@ public class GrowthProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getConfiguration().getNSpecies();
-        criticalPredSuccess = new float[nSpecies];
-        minDelta = new float[nSpecies][];
-        maxDelta = new float[nSpecies][];
-        deltaMeanLength = new float[nSpecies][];
+        growth = new AbstractGrowth[nSpecies];
+        criticalPredSuccess = new double[nSpecies];
+        minDelta = new double[nSpecies][];
+        maxDelta = new double[nSpecies][];
+        deltaMeanLength = new double[nSpecies][];
 
         for (int i = 0; i < nSpecies; i++) {
+            // Initialize growth function
+            String growthClassName = getConfiguration().isNull("")
+                    ? "fr.ird.osmose.process.growth.VonBertalanffyGrowth"
+                    : getConfiguration().getString("growth.java.classname.sp"+i);
+            String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(i).getName();
+            try {
+                growth[i] = (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(i));
+            } catch (InstantiationException ex) {
+                error(errMsg, ex);
+            } catch (IllegalAccessException ex) {
+                error(errMsg, ex);
+            } catch (IllegalArgumentException ex) {
+                error(errMsg, ex);
+            } catch (InvocationTargetException ex) {
+                error(errMsg, ex);
+            } catch (NoSuchMethodException ex) {
+                error(errMsg, ex);
+            } catch (SecurityException ex) {
+                error(errMsg, ex);
+            } catch (ClassNotFoundException ex) {
+                error(errMsg, ex);
+            }
+            // Initializes Growth function
+            growth[i].init();
+
             criticalPredSuccess[i] = getConfiguration().getFloat("predation.efficiency.critical.sp" + i);
             Species species = getSpecies(i);
             int lifespan = species.getLifespanDt();
-            minDelta[i] = new float[lifespan];
-            maxDelta[i] = new float[lifespan];
-            deltaMeanLength[i] = new float[lifespan];
+            minDelta[i] = new double[lifespan];
+            maxDelta[i] = new double[lifespan];
+            deltaMeanLength[i] = new double[lifespan];
 
-            float meanAge1 = species.computeMeanLength(0);
-            for (int age = 0; age < lifespan - 1; age++) {
-                float meanAge0 = meanAge1;
-                meanAge1 = species.computeMeanLength(age + 1);
-                deltaMeanLength[i][age] = meanAge1 - meanAge0;
+            double meanLength1 = growth[i].ageToLength(0);
+            for (int ageDt = 0; ageDt < lifespan - 1; ageDt++) {
+                double meanLength0 = meanLength1;
+                meanLength1 = growth[i].ageToLength((ageDt + 1) / (double) getConfiguration().getNStepYear());
+                deltaMeanLength[i][ageDt] = meanLength1 - meanLength0;
 
-                minDelta[i][age] = deltaMeanLength[i][age] - deltaMeanLength[i][age];
-                maxDelta[i][age] = deltaMeanLength[i][age] + deltaMeanLength[i][age];
+                minDelta[i][ageDt] = deltaMeanLength[i][ageDt] - deltaMeanLength[i][ageDt];
+                maxDelta[i][ageDt] = deltaMeanLength[i][ageDt] + deltaMeanLength[i][ageDt];
             }
         }
     }
@@ -103,21 +132,25 @@ public class GrowthProcess extends AbstractProcess {
             int age = school.getAgeDt();
             if ((age == 0) || school.isUnlocated()) {
                 // Linear growth for eggs and migrating schools
-                school.incrementLength(deltaMeanLength[i][age]);
+                school.incrementLength((float) deltaMeanLength[i][age]);
             } else {
                 // Growth based on predation success
-                growth(school, minDelta[i][age], maxDelta[i][age]);
+                grow(school, minDelta[i][age], maxDelta[i][age]);
             }
         }
     }
 
-    public void growth(School school, float minDelta, float maxDelta) {
+    private void grow(School school, double minDelta, double maxDelta) {
 
         int iSpec = school.getSpeciesIndex();
         //calculation of lengths according to predation efficiency
         if (school.getPredSuccessRate() >= criticalPredSuccess[iSpec]) {
-            float dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));
-            school.incrementLength(dlength);
+            double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));
+            school.incrementLength((float) dlength);
         }
+    }
+    
+    public AbstractGrowth getGrowth(int indexSpecies) {
+        return growth[indexSpecies];
     }
 }

@@ -148,7 +148,7 @@ public class ReproductionProcess extends AbstractProcess {
             if (sexRatio[i] > 0.d && alpha[i] > 0.d) {
                 double SSB = 0;
                 for (School school : schools) {
-                    if (school.getLength() >= species.getSizeMaturity()) {
+                    if (species.isSexuallyMature(school)) {
                         SSB += school.getInstantaneousBiomass();
                     }
                 }

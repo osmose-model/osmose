@@ -32,7 +32,7 @@ public class SSBOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (school.getLength() >= school.getSpecies().getSizeMaturity()) {
+            if (school.getSpecies().isSexuallyMature(school)) {
                 ssb[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
             }
         }
