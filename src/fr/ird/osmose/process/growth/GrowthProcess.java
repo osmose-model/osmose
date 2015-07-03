@@ -81,9 +81,9 @@ public class GrowthProcess extends AbstractProcess {
 
         for (int i = 0; i < nSpecies; i++) {
             // Initialize growth function
-            String growthClassName = getConfiguration().isNull("")
+            String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + i)
                     ? "fr.ird.osmose.process.growth.VonBertalanffyGrowth"
-                    : getConfiguration().getString("growth.java.classname.sp"+i);
+                    : getConfiguration().getString("growth.java.classname.sp" + i);
             String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(i).getName();
             try {
                 growth[i] = (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(i));
@@ -149,7 +149,7 @@ public class GrowthProcess extends AbstractProcess {
             school.incrementLength((float) dlength);
         }
     }
-    
+
     public AbstractGrowth getGrowth(int indexSpecies) {
         return growth[indexSpecies];
     }
