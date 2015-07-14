@@ -58,11 +58,12 @@ import fr.ird.osmose.Species;
  */
 public class GompertzGrowth extends AbstractGrowth {
 
-    private double m0;
-    private double g1;
-    private double mInf;
-    private double gamma;
-    private double growthAgeThreshold;
+    private double lStart;
+    private double Ke;
+    private double Kg;
+    private double lInf;
+    private double tg;
+    private double ageThrExp, ageThrGom;
 
     public GompertzGrowth(int rank, Species species) {
         super(rank, species);
@@ -72,52 +73,63 @@ public class GompertzGrowth extends AbstractGrowth {
     void init() {
 
         int iSpec = getIndexSpecies();
-        m0 = getConfiguration().getDouble("growth.gompertz.m0.sp" + iSpec);
-        g1 = getConfiguration().getDouble("growth.gompertz.g1.sp" + iSpec);
-        mInf = getConfiguration().getDouble("growth.gompertz.minf.sp" + iSpec);
-        gamma = getConfiguration().getDouble("growth.gompertz.gamma.sp" + iSpec);
-        growthAgeThreshold = getConfiguration().getDouble("growth.gompertz.threshold.age.sp" + iSpec);
+        lStart = getConfiguration().getDouble("growth.exponential.lstart.sp" + iSpec);
+        Ke = getConfiguration().getDouble("growth.exponential.ke.sp" + iSpec);
+        lInf = getConfiguration().getDouble("growth.gompertz.linf.sp" + iSpec);
+        Kg = getConfiguration().getDouble("growth.gompertz.kg.sp" + iSpec);
+        ageThrExp = getConfiguration().getDouble("growth.exponential.thr.age.sp" + iSpec);
+        ageThrGom = getConfiguration().getDouble("growth.gompertz.thr.age.sp" + iSpec);
     }
 
     @Override
     public double ageToLength(double age) {
 
-        double mantleLength;
+        double length;
         double eggSize = getSpecies().getEggSize();
-        double ageInDay = age * 365.d;
         if (age == 0) {
             // Egg size for first age class
-            mantleLength = eggSize;
-        } else if (age < growthAgeThreshold) {
-            // Exponential growth
-            mantleLength = m0 * Math.exp(g1 * ageInDay);
-            if (mantleLength < eggSize) {
-                mantleLength = eggSize;
+            length = eggSize;
+        } else if (age < ageThrExp) {
+            // Exponential growth for age < 80 days
+            length = lStart * Math.exp(Ke * age);
+            if (length < eggSize) {
+                length = eggSize;
             }
+        } else if (age < ageThrGom) {
+            // Linear growth between 80 and 120 days
+            double lExpMax = lStart * Math.exp(Ke * ageThrExp);
+            double lGomMin = lInf * Math.exp(-Math.exp(-Kg * (ageThrGom - tg)));
+            length = lExpMax + ((lGomMin - lExpMax) / (ageThrGom - ageThrExp)) * (age - ageThrExp);
         } else {
-            // Gompertz growth
-            mantleLength = mInf * Math.exp(-gamma * Math.exp(-g1 * ageInDay));
+            // Gompertz growth for age > 120 days
+            length = lInf * Math.exp(-Math.exp(-Kg * (age - tg)));
         }
 
-        return mantleLength;
+        return length;
     }
 
     @Override
     public double lengthToAge(double length) {
 
-        double ageInDay;
-        double lengthAtThreshold = mInf * Math.exp(-gamma * Math.exp(-g1 * (growthAgeThreshold * 365.d)));
-        if (length > lengthAtThreshold) {
-            if (length < mInf) {
-                ageInDay = -Math.log(-Math.log(length / mInf) / gamma) / g1;
+        double age;
+        double lExpMax = lStart * Math.exp(Ke * ageThrExp);
+        double lGomMin = lInf * Math.exp(-Math.exp(-Kg * (ageThrGom - tg)));
+        if (length > lGomMin) {
+            // Gompertz
+            if (length < lInf) {
+                age = tg - Math.log(-Math.log(length / lInf)) / Kg;
             } else {
-                // express lifespan in number of days
-                ageInDay = getSpecies().getLifespanDt() / getConfiguration().getNStepYear() * 365.d;
+                // express lifespan in years
+                age = getSpecies().getLifespanDt() / getConfiguration().getNStepYear();
             }
+        } else if (length > lExpMax) {
+            // Linear growth
+            age = ageThrExp + ((ageThrGom - ageThrExp) / (lGomMin - lExpMax)) * (length - lExpMax);
         } else {
-            ageInDay = Math.log(length / m0) / g1;
+            // Exponential growth
+            age = Math.log(length / lStart) / Ke;
         }
         // return age in year
-        return (ageInDay / 365.d);
+        return age;
     }
 }
