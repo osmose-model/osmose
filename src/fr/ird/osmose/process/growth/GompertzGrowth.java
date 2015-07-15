@@ -77,6 +77,7 @@ public class GompertzGrowth extends AbstractGrowth {
         Ke = getConfiguration().getDouble("growth.exponential.ke.sp" + iSpec);
         lInf = getConfiguration().getDouble("growth.gompertz.linf.sp" + iSpec);
         Kg = getConfiguration().getDouble("growth.gompertz.kg.sp" + iSpec);
+        tg = getConfiguration().getDouble("growth.gompertz.tg.sp" + iSpec);
         ageThrExp = getConfiguration().getDouble("growth.exponential.thr.age.sp" + iSpec);
         ageThrGom = getConfiguration().getDouble("growth.gompertz.thr.age.sp" + iSpec);
     }
