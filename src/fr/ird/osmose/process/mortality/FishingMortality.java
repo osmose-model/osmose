@@ -71,6 +71,7 @@ public class FishingMortality extends AbstractMortality {
     private AbstractFishingMortality[] fishingMortality;
     private List<MPA> mpas;
     private GridMap mpaFactor;
+    private GridMap[] spatialFactor;
     private Type fishingType;
     private List<School>[] arrSpecies;
 
@@ -170,6 +171,33 @@ public class FishingMortality extends AbstractMortality {
         for (int i = 0; i < getNSpecies(); i++) {
             arrSpecies[i] = new ArrayList();
         }
+
+        // Patch for Virginie to include space variability in fishing mortality
+        // Need to think of a better way to include it to Osmose
+        spatialFactor = new GridMap[getNSpecies()];
+        List<String> keys = getConfiguration().findKeys("mortality.fishing.spatial.distrib.file.sp*");
+        if (keys != null && !keys.isEmpty()) {
+            for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
+                if (!getConfiguration().isNull("mortality.fishing.spatial.distrib.file.sp" + iSpec)) {
+                    spatialFactor[iSpec] = new GridMap(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + iSpec));
+                    // Make sure the sum of the values in ocean cells is equal to one
+                    double sum = 0.d;
+                    for (Cell cell : getGrid().getCells()) {
+                        if (!cell.isLand()) {
+                            sum += spatialFactor[iSpec].getValue(cell);
+                        }
+                    }
+                    if (Math.abs(sum - 1.d)>1e-2) {
+                        StringBuilder msg = new StringBuilder();
+                        msg.append("The sum of the factors in spatial fishing distribution file ");
+                        msg.append(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + iSpec));
+                        msg.append(" must be equal to one.");
+                        error(msg.toString(), null);
+                    }
+                }
+            }
+        }
+
     }
 
     public void setMPA() {
@@ -217,7 +245,15 @@ public class FishingMortality extends AbstractMortality {
      */
     @Override
     public double getRate(School school) {
-        return fishingMortality[school.getSpeciesIndex()].getRate(school) * mpaFactor.getValue(school.getCell());
+        int iSpec = school.getSpeciesIndex();
+        if (null != spatialFactor[iSpec]) {
+            return fishingMortality[iSpec].getRate(school)
+                    * mpaFactor.getValue(school.getCell())
+                    * spatialFactor[iSpec].getValue(school.getCell());
+        } else {
+            return fishingMortality[iSpec].getRate(school)
+                    * mpaFactor.getValue(school.getCell());
+        }
     }
 
     /**
@@ -229,8 +265,16 @@ public class FishingMortality extends AbstractMortality {
      * current time step of the simulation
      */
     public double getCatches(School school) {
-        double catches = fishingMortality[school.getSpeciesIndex()].getCatches(school)
-                * mpaFactor.getValue(school.getCell());
+        int iSpec = school.getSpeciesIndex();
+        double catches;
+        if (null != spatialFactor[iSpec]) {
+            catches = fishingMortality[iSpec].getCatches(school)
+                    * mpaFactor.getValue(school.getCell())
+                    * spatialFactor[iSpec].getValue(school.getCell());;
+        } else {
+            catches = fishingMortality[iSpec].getCatches(school)
+                    * mpaFactor.getValue(school.getCell());
+        }
         return Math.min(catches, school.getInstantaneousBiomass());
     }
 
