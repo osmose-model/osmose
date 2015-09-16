@@ -376,7 +376,7 @@ public class Configuration extends OLogger {
         for (int i = 0; i < depth; i++) {
             msg.append("  ");
         }
-        msg.append("Loading parameters from file ");
+        msg.append("Loading parameters from ");
         msg.append(path);
         info(msg.toString());
 
@@ -388,24 +388,23 @@ public class Configuration extends OLogger {
                 line = line.trim();
                 if (!startsWithSymbol(line) & !(line.length() <= 1)) {
                     Parameter entry = new Parameter(line, iline, path);
-                    if (null != entry.key && null != entry.value) {
-                        parameters.add(entry);
-                        if (source.containsKey(entry.key)) {
-                            warning("Parameter {0} has already been defined in file {1} with value {2}", new Object[]{entry.key, source.getProperty(entry.key), cfg.getProperty(entry.key)});
-                            warning("Osmose will ignore parameter {0} in file {1} with value {2}", new Object[]{entry.key, path, entry.value});
-                        } else {
-                            cfg.setProperty(entry.key, entry.value);
-                            source.setProperty(entry.key, path);
-                            if (entry.key.startsWith("osmose.configuration")) {
-                                loadParameters(entry.value, GLOBAL_RESOLVE ? inputPathname : path, depth + 1);
-                            }
+                    entry.parse();
+                    parameters.add(entry);
+                    if (source.containsKey(entry.key)) {
+                        warning("Parameter {0} has already been defined with value {1} (from {2})", new Object[]{entry.key, cfg.getProperty(entry.key), source.getProperty(entry.key)});
+                        warning("Osmose will ignore parameter {0} with value {1} (from {2})", new Object[]{entry.key, entry.value, path});
+                    } else {
+                        cfg.setProperty(entry.key, entry.value);
+                        source.setProperty(entry.key, path);
+                        if (entry.key.startsWith("osmose.configuration")) {
+                            loadParameters(entry.value, GLOBAL_RESOLVE ? inputPathname : path, depth + 1);
                         }
                     }
                 }
                 iline++;
             }
         } catch (IOException ex) {
-            error("Error loading parameters from file " + path + " at line " + iline + " " + line, ex);
+            error("Error loading parameters from " + path + " at line " + iline + " " + line, ex);
         }
     }
 
@@ -557,7 +556,7 @@ public class Configuration extends OLogger {
         try {
             return Integer.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to integer " + s + " (from file " + getSource(key) + ")", ex);
+            error("Could not convert parameter " + key + " to integer " + s + " (from " + getSource(key) + ")", ex);
         }
         return Integer.MIN_VALUE;
     }
@@ -575,7 +574,7 @@ public class Configuration extends OLogger {
         try {
             return Float.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to float " + s + " (from file " + getSource(key) + ")", ex);
+            error("Could not convert parameter " + key + " to float " + s + " (from " + getSource(key) + ")", ex);
         }
         return Float.NaN;
     }
@@ -593,7 +592,7 @@ public class Configuration extends OLogger {
         try {
             return Double.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to double " + s + " (from file " + getSource(key) + ")", ex);
+            error("Could not convert parameter " + key + " to double " + s + " (from " + getSource(key) + ")", ex);
         }
         return Double.NaN;
     }
@@ -613,7 +612,7 @@ public class Configuration extends OLogger {
             try {
                 return Boolean.valueOf(s);
             } catch (NumberFormatException ex) {
-                error("Could not convert parameter " + key + " to boolean " + s + " (from file " + getSource(key) + ")", ex);
+                error("Could not convert parameter " + key + " to boolean " + s + " (from " + getSource(key) + ")", ex);
             }
         } catch (NullPointerException ex) {
             if (warning) {
@@ -652,7 +651,7 @@ public class Configuration extends OLogger {
             }
             return ai;
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to array of integer " + getString(key) + " (from file " + getSource(key) + ")", ex);
+            error("Could not convert parameter " + key + " to array of integer " + getString(key) + " (from " + getSource(key) + ")", ex);
         }
         return null;
     }
@@ -674,7 +673,7 @@ public class Configuration extends OLogger {
             }
             return af;
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to array of float " + getString(key) + " (from file " + getSource(key) + ")", ex);
+            error("Could not convert parameter " + key + " to array of float " + getString(key) + " (from " + getSource(key) + ")", ex);
         }
         return null;
     }
@@ -696,7 +695,7 @@ public class Configuration extends OLogger {
             }
             return ad;
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to array of double " + getString(key) + " (from file " + getSource(key) + ")", ex);
+            error("Could not convert parameter " + key + " to array of double " + getString(key) + " (from " + getSource(key) + ")", ex);
         }
         return null;
     }
@@ -874,6 +873,10 @@ public class Configuration extends OLogger {
          */
         private final String source;
         /**
+         * The line as a String to be parsed.
+         */
+        private final String line;
+        /**
          * The line of the parameter in the configuration file.
          */
         private final int iline;
@@ -903,10 +906,9 @@ public class Configuration extends OLogger {
          * @param source, the path of the configuration file
          */
         Parameter(String line, int iline, String source) {
+            this.line = line;
             this.iline = iline;
             this.source = source;
-            parse(line);
-            debug(key + "=" + value);
         }
 
         /**
@@ -917,12 +919,13 @@ public class Configuration extends OLogger {
          *
          * @param line, the line to be parsed as a parameter
          */
-        private void parse(String line) {
+        private void parse() {
             key = value = null;
             keySeparator = Separator.guess(line, Separator.EQUALS).toString();
             split(line);
             valueSeparator = Separator.guess(value, Separator.SEMICOLON).toString();
             value = clean(value);
+            debug(key + "=" + value);
         }
 
         /**
@@ -954,7 +957,7 @@ public class Configuration extends OLogger {
 
             // make sure the line contains at least one semi-colon (key;value)
             if (!line.contains(keySeparator)) {
-                error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from file " + source + ")", null);
+                error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
             }
             // extract the key
             key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim();

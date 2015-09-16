@@ -155,7 +155,7 @@ public class Plankton extends SimulationLinker {
         }
         if (!getConfiguration().isNull("plankton.multiplier.plk" + index)) {
             multiplier = getConfiguration().getFloat("plankton.multiplier.plk" + index);
-            warning("Plankton biomass for plankton group " + name + " will be multiplied by " + multiplier + " accordingly to parameter 'plankton.multiplier.plk'" + index + " from file " + getConfiguration().getSource("plankton.multiplier.plk" + index));
+            warning("Plankton biomass for plankton group " + name + " will be multiplied by " + multiplier + " accordingly to parameter 'plankton.multiplier.plk'" + index + " from " + getConfiguration().getSource("plankton.multiplier.plk" + index));
         } else {
             multiplier = 1.f;
         }
