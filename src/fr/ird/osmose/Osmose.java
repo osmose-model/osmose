@@ -54,6 +54,11 @@ import fr.ird.osmose.util.version.VersionManager;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import ml.options.OptionData;
+import ml.options.OptionSet;
+import ml.options.Options;
+import ml.options.Options.Multiplicity;
+import ml.options.Options.Separator;
 
 /**
  * This class is the entry point of the program. It contains the
@@ -69,10 +74,6 @@ public class Osmose extends OLogger {
      */
     private final static Osmose osmose = new Osmose();
     /**
-     * File path separator for local operating system.
-     */
-    private final String fileSeparator = System.getProperty("file.separator");
-    /**
      * Set of simulations with the same set of parameters (replicates).
      * Controlled by parameter <i>simulation.nsimu</i>
      */
@@ -81,10 +82,6 @@ public class Osmose extends OLogger {
      * {@link Configuration} object that stores the current set of parameters.
      */
     private Configuration configuration;
-    /**
-     * Path for writing the output files.
-     */
-    private String outputPathName;
     /**
      * List of configuration files.
      */
@@ -105,23 +102,57 @@ public class Osmose extends OLogger {
      */
     public void readArgs(String... args) {
 
+        // Sets of command line options
+        Options opt = new Options(args);
+        // Set 1: Osmose configuration files are listed from a file
+        opt.addSet("Usage1", 0).addOption("F", Separator.BLANK);
+        // Set 2: Osmose configuration files are given as arguments
+        opt.addSet("Usage2", 1, Integer.MAX_VALUE);
+        // For all sets, user can specify how to resolve pathnames
+        opt.addOptionAllSets("resolve", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
+        // For all sets, user can specify parameter values that will overwrite
+        // the values defined in the configuration files
+        opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
+
+        OptionSet set = opt.getMatchingSet(false, false);
+
+        if (set == null) {
+            StringBuilder usage = new StringBuilder();
+            usage.append("Command line usage:\n");
+            // Options not implemented yet [-resolve=global|local] [-P<key>=<value> [...]]
+            usage.append("\tUsage1: java -jar osmose.jar -F FILE \n");
+            usage.append("\tUsage2: java -jar osmose.jar FILE1 [FILE2] [...]\n");
+            usage.append("\tOptions summary:\n");
+            usage.append("\t -F \tpath of a text file that lists Osmose configuration files\n");
+            //usage.append("\t -resolve=global|local \tControls relative pathname/filename resolution in Osmose configuration files.\n");
+            //usage.append("\t   global, pathnames are resolved against the main configuration file ;\n");
+            //usage.append("\t   local, pathnames are resolved against the current configuration file (i.e. the file that contains the pathname parameter).");
+            info(usage.toString());
+            error("Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
+        }
+
         configurationFiles = new ArrayList();
 
-        // Get command line arguments
-        if (args.length > 0) {
-            configurationFiles.add(new File(args[0]).getAbsolutePath());
-        } else {
-            // This will not have trailing file separator - no idea if this is a problem
-            configurationFiles.addAll(readFilepath());
-            //logger.log(Level.INFO, "Main configuration file: {0}", mainFilename);
+        if (set.getSetName().equals("Usage1")) {
+            configurationFiles.addAll(readFilepath(set.getOption("F").getResultValue(0)));
         }
 
-        if (args.length > 1) {
-            outputPathName = args[1];
-            if (!outputPathName.endsWith(fileSeparator)) {
-                outputPathName += fileSeparator;
+        if (set.getSetName().equals("Usage2")) {
+            configurationFiles.addAll(set.getData());
+        }
+
+        if (set.isSet("resolve")) {
+            // do nothing yet
+        }
+
+        if (set.isSet("P")) {
+            OptionData optParam = set.getOption("P");
+            for (int i = 0; i < optParam.getResultCount(); i++) {
+                // do nothing yet
+                //System.out.println("  " + optParam.getResultDetail(i) + " = "+optParam.getResultValue(i));
             }
         }
+
     }
 
     /**
@@ -130,7 +161,7 @@ public class Osmose extends OLogger {
      * configuration.
      */
     public void init() {
-        configuration = new Configuration(configurationFiles.get(0), outputPathName);
+        configuration = new Configuration(configurationFiles.get(0), null);
         configuration.init();
 
         simulation = new Simulation[configuration.getNSimulation()];
@@ -174,7 +205,7 @@ public class Osmose extends OLogger {
     public void run(String configurationFile) {
 
         // Initialize the configuration
-        configuration = new Configuration(configurationFile, outputPathName);
+        configuration = new Configuration(configurationFile, null);
         configuration.init();
 
         simulation = new Simulation[configuration.getNSimulation()];
@@ -268,36 +299,27 @@ public class Osmose extends OLogger {
     }
 
     /**
-     * Read text file <i>filepath.txt</i> and return a list of configuration
-     * files. Lines starting with # or // or empty lines are ignored. The
-     * function does not check whether the paths to the configuration files are
-     * correct. It is handled in the constructor of the {@link Configuration}
-     * object.
+     * Returns a list of configuration files listed from a text file. Lines
+     * starting with # or // or empty lines are ignored. The function does not
+     * check whether the paths to the configuration files are correct. It is
+     * handled in the constructor of the {@link Configuration} object.
      *
+     * @param filename, the file that contains the list of Osmose configuration
+     * files
      * @return a list of configuration files.
      */
-    public List<String> readFilepath() {
-
-        // Look for filepath.txt
-        String[] names = new String[]{"filePath.txt", "FilePath.txt", "Filepath.txt", "filepath.txt"};
-        String filename = null;
-        for (String name : names) {
-            if (new File(name).exists()) {
-                filename = name;
-                break;
-            }
-        }
+    public List<String> readFilepath(String filename) {
 
         FileInputStream filepath = null;
         try {
             filepath = new FileInputStream(new File(filename));
         } catch (FileNotFoundException ex) {
             String wd = new File("").getAbsolutePath();
-            error("Did not find either {filePath.txt|FilePath.txt|Filepath.txt|filepath.txt} in current directory " + wd, ex);
+            error("Did not find file " + filename + " in current directory " + wd, ex);
         }
 
         // Read filepath.txt
-        info("Reading filePath.txt");
+        info("Listing configuration files from " + filename);
         BufferedReader bfIn = new BufferedReader(new InputStreamReader(filepath));
         String line;
         List<String> cfgFiles = new ArrayList();
@@ -315,7 +337,7 @@ public class Osmose extends OLogger {
             }
             bfIn.close();
         } catch (IOException ex) {
-            error("Error reading filepath file " + filename, ex);
+            error("Error reading file " + filename, ex);
         }
         // return the list of configuration files
         return cfgFiles;
@@ -330,14 +352,15 @@ public class Osmose extends OLogger {
      * arguments.
      */
     public static void main(String... args) {
-        osmose.info("*********************************");
-        osmose.info("Osmose model - Copyright 2013 IRD");
-        osmose.info("*********************************");
-        osmose.info("Osmose version {0}", VersionManager.getInstance().OSMOSE_VERSION.toString());
+        osmose.info("*********************************************");
+        osmose.info("OSMOSE - Modelling Marin Exploited Ecosystems");
+        osmose.info("http://www.osmose-model.org");
+        osmose.info("*********************************************");
+        osmose.info(VersionManager.getInstance().OSMOSE_VERSION.toString());
         osmose.readArgs(args);
         osmose.runAll();
-        osmose.info("*   Osmose model - Exit");
-        osmose.info("*********************************");
+        osmose.info("OSMOSE Model- © IRD");
+        osmose.info("*********************************************");
     }
 
     /**
@@ -370,6 +393,7 @@ public class Osmose extends OLogger {
 
     /**
      * Gets the grid ({@link IGrid}) of the current Osmose configuration.
+     *
      * @return the current grid of the configuration.
      */
     public IGrid getGrid() {
