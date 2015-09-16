@@ -58,7 +58,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -137,7 +136,7 @@ import java.util.regex.Pattern;
  * entries <i>movement.map0.season;0;1;2;3;4;5</i>
  * <i>movement.map0.season=0;1;2;3;4;5</i> <i>movement.map0.season = 0, 1, 2, 3,
  * 4, 5</i> <i>movement.map0.season : 0 ; 1 ; 2;3;4;5</i> and are equivalent for
- * {@code Configuration}. It can be summarize <i>key separator1 value1
+ * {@code Configuration}. It can be summarise <i>key separator1 value1
  * separator2 value2 separator2 value3 separator2 value4</i> with separator1
  * either equal or different from separator2. *
  *
@@ -191,7 +190,7 @@ public class Configuration extends OLogger {
      */
     private int nCpu;
     /**
-     * Number of species that are explicitly modeled. Parameter
+     * Number of species that are explicitly modelled. Parameter
      * <i>simulation.nspecies</i>
      */
     private int nSpecies;
@@ -227,6 +226,11 @@ public class Configuration extends OLogger {
      * The spatial grid of the simulation, {@link fr.ird.osmose.grid.IGrid}.
      */
     private IGrid grid;
+    /**
+     * Temporary flag that must be TRUE to ensure that all file paths are
+     * resolved against the main configuration file
+     */
+    final private boolean GLOBAL_RESOLVE = true;
 
 ///////////////
 // Constructors
@@ -252,14 +256,14 @@ public class Configuration extends OLogger {
 // Definition of the methods
 ////////////////////////////
     /**
-     * Initializes the current configuration. Loads the parameters from the
+     * Initialises the current configuration. Loads the parameters from the
      * configuration file, sets the values of the main variables and creates the
      * grid.
      */
     public void init() {
 
         // Load the parameters from the main configuration file
-        loadParameters(mainFilename, 0);
+        loadParameters(mainFilename, null, 0);
 
         // Check what is the default separator
         defaultSeparator = guessDefaultSeparator();
@@ -272,7 +276,7 @@ public class Configuration extends OLogger {
         // Check whether the path of the output folder is already set (by command line option)
         if (null == outputPathname) {
             // Output path read in the configuration file
-            outputPathname = resolvePath(getString("output.dir.path"));
+            outputPathname = resolve(getString("output.dir.path"), getSource("output.dir.path"));
         }
 
         // Read Output CSV separator
@@ -332,11 +336,7 @@ public class Configuration extends OLogger {
         try {
             info("Grid: " + gridClassName);
             grid = (IGrid) Class.forName(gridClassName).newInstance();
-        } catch (InstantiationException ex) {
-            error("Failed to create new grid instance. " + ex.getMessage(), ex);
-        } catch (IllegalAccessException ex) {
-            error("Failed to create new grid instance. " + ex.getMessage(), ex);
-        } catch (ClassNotFoundException ex) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             error("Failed to create new grid instance. " + ex.getMessage(), ex);
         }
         // Init the grid
@@ -362,10 +362,10 @@ public class Configuration extends OLogger {
      * function. Zero for the main configuration file, one for a file loaded
      * from the main configuration file, etc.
      */
-    private void loadParameters(String filename, int depth) {
+    private void loadParameters(String filename, String relativeTo, int depth) {
 
         BufferedReader bfIn = null;
-        String path = resolveFile(filename);
+        String path = resolve(filename, relativeTo);
         // Open the buffer
         try {
             bfIn = new BufferedReader(new FileReader(path));
@@ -390,16 +390,14 @@ public class Configuration extends OLogger {
                     Parameter entry = new Parameter(line, iline, path);
                     if (null != entry.key && null != entry.value) {
                         parameters.add(entry);
-                        if (entry.key.startsWith("osmose.configuration")) {
-                            source.setProperty(entry.key, path);
-                            loadParameters(entry.value, depth + 1);
+                        if (source.containsKey(entry.key)) {
+                            warning("Parameter {0} has already been defined in file {1} with value {2}", new Object[]{entry.key, source.getProperty(entry.key), cfg.getProperty(entry.key)});
+                            warning("Osmose will ignore parameter {0} in file {1} with value {2}", new Object[]{entry.key, path, entry.value});
                         } else {
-                            if (source.containsKey(entry.key)) {
-                                warning("Parameter {0} has already been defined in file {1} with value {2}", new Object[]{entry.key, source.getProperty(entry.key), cfg.getProperty(entry.key)});
-                                warning("Osmose will ignore parameter {0} in file {1} with value {2}", new Object[]{entry.key, path, entry.value});
-                            } else {
-                                cfg.setProperty(entry.key, entry.value);
-                                source.setProperty(entry.key, path);
+                            cfg.setProperty(entry.key, entry.value);
+                            source.setProperty(entry.key, path);
+                            if (entry.key.startsWith("osmose.configuration")) {
+                                loadParameters(entry.value, GLOBAL_RESOLVE ? inputPathname : path, depth + 1);
                             }
                         }
                     }
@@ -407,17 +405,18 @@ public class Configuration extends OLogger {
                 iline++;
             }
         } catch (IOException ex) {
-            error("Error loading parameters from file " + filename + " at line " + iline + " " + line, ex);
+            error("Error loading parameters from file " + path + " at line " + iline + " " + line, ex);
         }
     }
 
     public void refresh() {
 
         info("Reloading parameters...");
+        // Clear current lists of parameters
         parameters.clear();
         cfg.clear();
         source.clear();
-        loadParameters(mainFilename, 0);
+        loadParameters(mainFilename, null, 0);
     }
 
     /**
@@ -514,11 +513,7 @@ public class Configuration extends OLogger {
      */
     final public String getSource(String key) {
         String lkey = key.toLowerCase();
-        if (source.containsKey(lkey)) {
-            return source.getProperty(lkey).trim();
-        } else {
-            return "null";
-        }
+        return source.getProperty(lkey).trim();
     }
 
     /**
@@ -531,7 +526,7 @@ public class Configuration extends OLogger {
      * file.
      */
     public String getFile(String key) {
-        return resolveFile(getString(key));
+        return resolve(getString(key), GLOBAL_RESOLVE ? inputPathname : getSource(key));
     }
 
     /**
@@ -707,34 +702,25 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Resolves a directory path against the the input path. Adds a trailing
-     * file separator at the end of the resolved path.
+     * Resolves a file path against the the input path. If filename is a
+     * directory the function ensures the path ends with a separator.
      *
-     * @param path, the path to resolve
-     * @return the path resolved against the the input path.
+     * @param filename, the file path to resolve
+     * @param relativeTo, the path against the file must be resolved
+     * @return the resolved file path
      */
-    private String resolvePath(String path) {
-        String pathname = resolveFile(path);
-        if (!pathname.endsWith(File.separator)) {
+    private String resolve(String filename, String relativeTo) {
+        String pathname = filename;
+        try {
+            File file = new File(relativeTo);
+            pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
+        } catch (Exception ex) {
+            // do nothing, just return the argument
+        }
+        if (new File(pathname).isDirectory() && !pathname.endsWith(File.separator)) {
             pathname += File.separator;
         }
         return pathname;
-    }
-
-    /**
-     * Resolves a file path against the the input path.
-     *
-     * @param filename, the file path to resolve
-     * @return the file path resolved against the input path.
-     */
-    private String resolveFile(String filename) {
-        try {
-            File file = new File(inputPathname);
-            String pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
-            return pathname;
-        } catch (Exception ex) {
-            return filename;
-        }
     }
 
     /**
