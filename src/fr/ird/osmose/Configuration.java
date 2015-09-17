@@ -159,11 +159,6 @@ public class Configuration extends OLogger {
      */
     final private Properties source;
     /**
-     * A {@link fr.ird.osmose.util.Properties} object that stores the parameters
-     * provided as command line arguments.
-     */
-    final private Properties cmd;
-    /**
      * List of all the parameters
      */
     private final List<Parameter> parameters;
@@ -235,7 +230,7 @@ public class Configuration extends OLogger {
      * Temporary flag that must be TRUE to ensure that all file paths are
      * resolved against the main configuration file
      */
-    private boolean globalResolve;
+    private final boolean globalResolve;
 
 ///////////////
 // Constructors
@@ -250,11 +245,24 @@ public class Configuration extends OLogger {
 
         this.mainFilename = new File(mainFilename).getAbsolutePath();
         this.inputPathname = new File(mainFilename).getParentFile().getAbsolutePath();
-        this.cmd = cmd;
 
         cfg = new Properties();
         source = new Properties();
         parameters = new ArrayList();
+        
+        // Add the parameters from the command line
+        for (Object key : cmd.keySet()) {
+            String skey = (String) key;
+            cfg.setProperty(skey, cmd.getProperty(skey));
+            source.setProperty(skey, "command line");
+        }
+        
+        // Path resolution, global or local
+        // Option provided as command line argument
+        // global by default, for backward compatibility
+        if (canFind("resolve")) {
+            globalResolve = getString("resolve").equalsIgnoreCase("global");
+        } else globalResolve = true;
     }
 
 ////////////////////////////
@@ -266,22 +274,7 @@ public class Configuration extends OLogger {
      * grid.
      */
     public void init() {
-
-        // Add the parameters from the command line
-        for (Object key : cmd.keySet()) {
-            String skey = (String) key;
-            cfg.setProperty(skey, cmd.getProperty(skey));
-            source.setProperty(skey, "command line");
-        }
-
-        // Path resolution, global or local
-        // Option provided as command line argument
-        // global by default, for backward compatibility
-        globalResolve = true;
-        if (canFind("resolve")) {
-            globalResolve = getString("resolve").equalsIgnoreCase("global");
-        }
-
+        
         // Load the parameters from the main configuration file
         loadParameters(mainFilename, 0);
 
@@ -291,7 +284,9 @@ public class Configuration extends OLogger {
         parameters.clear();
 
         // Check whether the configuration file is up-to-date
-        VersionManager.getInstance().updateConfiguration();
+        if (!VersionManager.getInstance().checkConfiguration()) {
+            error("", null);
+        }
 
         // Check whether the path of the output folder is already set (by command line option)
         if (null == outputPathname) {
@@ -478,7 +473,7 @@ public class Configuration extends OLogger {
      * @param key, the key of the parameter
      * @return {@code true} if the parameter exists.
      */
-    public boolean canFind(String key) {
+    public final boolean canFind(String key) {
         try {
             getString(key);
         } catch (Exception ex) {
