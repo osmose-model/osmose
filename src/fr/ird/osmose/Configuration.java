@@ -159,6 +159,11 @@ public class Configuration extends OLogger {
      */
     final private Properties source;
     /**
+     * A {@link fr.ird.osmose.util.Properties} object that stores the parameters
+     * provided as command line arguments.
+     */
+    final private Properties cmd;
+    /**
      * List of all the parameters
      */
     private final List<Parameter> parameters;
@@ -230,7 +235,7 @@ public class Configuration extends OLogger {
      * Temporary flag that must be TRUE to ensure that all file paths are
      * resolved against the main configuration file
      */
-    final private boolean GLOBAL_RESOLVE = true;
+    private boolean globalResolve;
 
 ///////////////
 // Constructors
@@ -239,13 +244,13 @@ public class Configuration extends OLogger {
      * Creates a new {@code Configuration}.
      *
      * @param mainFilename, the main configuration file
-     * @param outputPathname, the path of the output directory
+     * @param cmd, the list of options/parameters set in command line
      */
-    Configuration(String mainFilename, String outputPathname) {
+    Configuration(String mainFilename, Properties cmd) {
 
-        this.mainFilename = mainFilename;
+        this.mainFilename = new File(mainFilename).getAbsolutePath();
         this.inputPathname = new File(mainFilename).getParentFile().getAbsolutePath();
-        this.outputPathname = outputPathname;
+        this.cmd = cmd;
 
         cfg = new Properties();
         source = new Properties();
@@ -262,8 +267,23 @@ public class Configuration extends OLogger {
      */
     public void init() {
 
+        // Add the parameters from the command line
+        for (Object key : cmd.keySet()) {
+            String skey = (String) key;
+            cfg.setProperty(skey, cmd.getProperty(skey));
+            source.setProperty(skey, "command line");
+        }
+
+        // Path resolution, global or local
+        // Option provided as command line argument
+        // global by default, for backward compatibility
+        globalResolve = true;
+        if (canFind("resolve")) {
+            globalResolve = getString("resolve").equalsIgnoreCase("global");
+        }
+
         // Load the parameters from the main configuration file
-        loadParameters(mainFilename, null, 0);
+        loadParameters(mainFilename, 0);
 
         // Check what is the default separator
         defaultSeparator = guessDefaultSeparator();
@@ -362,22 +382,21 @@ public class Configuration extends OLogger {
      * function. Zero for the main configuration file, one for a file loaded
      * from the main configuration file, etc.
      */
-    private void loadParameters(String filename, String relativeTo, int depth) {
+    private void loadParameters(String filename, int depth) {
 
         BufferedReader bfIn = null;
-        String path = resolve(filename, relativeTo);
         // Open the buffer
         try {
-            bfIn = new BufferedReader(new FileReader(path));
+            bfIn = new BufferedReader(new FileReader(filename));
         } catch (FileNotFoundException ex) {
-            error("Could not fing Osmose configuration file: " + path, ex);
+            error("Could not fing Osmose configuration file: " + filename, ex);
         }
         StringBuilder msg = new StringBuilder();
         for (int i = 0; i < depth; i++) {
             msg.append("  ");
         }
         msg.append("Loading parameters from ");
-        msg.append(path);
+        msg.append(filename);
         info(msg.toString());
 
         // Read it
@@ -387,24 +406,24 @@ public class Configuration extends OLogger {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
                 if (!startsWithSymbol(line) & !(line.length() <= 1)) {
-                    Parameter entry = new Parameter(line, iline, path);
+                    Parameter entry = new Parameter(line, iline, filename);
                     entry.parse();
                     parameters.add(entry);
                     if (source.containsKey(entry.key)) {
                         warning("Parameter {0} has already been defined with value {1} (from {2})", new Object[]{entry.key, cfg.getProperty(entry.key), source.getProperty(entry.key)});
-                        warning("Osmose will ignore parameter {0} with value {1} (from {2})", new Object[]{entry.key, entry.value, path});
+                        warning("Osmose will ignore parameter {0} with value {1} (from {2})", new Object[]{entry.key, entry.value, filename});
                     } else {
                         cfg.setProperty(entry.key, entry.value);
-                        source.setProperty(entry.key, path);
+                        source.setProperty(entry.key, filename);
                         if (entry.key.startsWith("osmose.configuration")) {
-                            loadParameters(entry.value, GLOBAL_RESOLVE ? inputPathname : path, depth + 1);
+                            loadParameters(getFile(entry.key), depth + 1);
                         }
                     }
                 }
                 iline++;
             }
         } catch (IOException ex) {
-            error("Error loading parameters from " + path + " at line " + iline + " " + line, ex);
+            error("Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
         }
     }
 
@@ -415,7 +434,7 @@ public class Configuration extends OLogger {
         parameters.clear();
         cfg.clear();
         source.clear();
-        loadParameters(mainFilename, null, 0);
+        loadParameters(mainFilename, 0);
     }
 
     /**
@@ -525,7 +544,7 @@ public class Configuration extends OLogger {
      * file.
      */
     public String getFile(String key) {
-        return resolve(getString(key), GLOBAL_RESOLVE ? inputPathname : getSource(key));
+        return resolve(getString(key), globalResolve ? inputPathname : getSource(key));
     }
 
     /**

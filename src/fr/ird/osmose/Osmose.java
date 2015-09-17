@@ -87,6 +87,8 @@ public class Osmose extends OLogger {
      */
     private List<String> configurationFiles;
 
+    private fr.ird.osmose.util.Properties cmd;
+
     /**
      * Read input arguments. If no argument are provided, Osmose assumes that it
      * will find in the current directory a file called <i>filepath.txt</i> that
@@ -116,17 +118,17 @@ public class Osmose extends OLogger {
 
         OptionSet set = opt.getMatchingSet(false, false);
 
+        StringBuilder usage = new StringBuilder();
+        usage.append("Command line usage:\n");
+        // Option not implemented yet  [-P<key>=<value> [...]]
+        usage.append("\tUsage1: java -jar osmose.jar -F FILE [-resolve=global|local]\n");
+        usage.append("\tUsage2: java -jar osmose.jar [-resolve=global|local] FILE1 [FILE2] [...]\n");
+        usage.append("\tOptions summary:\n");
+        usage.append("\t -F \tpath of a text file that lists Osmose configuration files\n");
+        usage.append("\t -resolve=global|local \tControls relative pathname/filename resolution in Osmose configuration files.\n");
+        usage.append("\t   global, pathnames are resolved against the main configuration file ;\n");
+        usage.append("\t   local, pathnames are resolved against the current configuration file (i.e. the file that contains the pathname parameter).");
         if (set == null) {
-            StringBuilder usage = new StringBuilder();
-            usage.append("Command line usage:\n");
-            // Options not implemented yet [-resolve=global|local] [-P<key>=<value> [...]]
-            usage.append("\tUsage1: java -jar osmose.jar -F FILE \n");
-            usage.append("\tUsage2: java -jar osmose.jar FILE1 [FILE2] [...]\n");
-            usage.append("\tOptions summary:\n");
-            usage.append("\t -F \tpath of a text file that lists Osmose configuration files\n");
-            //usage.append("\t -resolve=global|local \tControls relative pathname/filename resolution in Osmose configuration files.\n");
-            //usage.append("\t   global, pathnames are resolved against the main configuration file ;\n");
-            //usage.append("\t   local, pathnames are resolved against the current configuration file (i.e. the file that contains the pathname parameter).");
             info(usage.toString());
             error("Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
         }
@@ -141,8 +143,17 @@ public class Osmose extends OLogger {
             configurationFiles.addAll(set.getData());
         }
 
+        // Initialises the set of command line properties
+        cmd = new fr.ird.osmose.util.Properties();
+        
         if (set.isSet("resolve")) {
-            // do nothing yet
+            String resolve = set.getOption("resolve").getResultValue(0);
+            if (resolve.matches("^.*?(local|global).*$")) {
+                cmd.setProperty("resolve", resolve);
+            } else {
+                info(usage.toString());
+                error("Invalid command line option.", new IllegalArgumentException("-resolve=global or -resolve=local only"));
+            }
         }
 
         if (set.isSet("P")) {
@@ -161,7 +172,7 @@ public class Osmose extends OLogger {
      * configuration.
      */
     public void init() {
-        configuration = new Configuration(configurationFiles.get(0), null);
+        configuration = new Configuration(configurationFiles.get(0), cmd);
         configuration.init();
 
         simulation = new Simulation[configuration.getNSimulation()];
@@ -205,7 +216,7 @@ public class Osmose extends OLogger {
     public void run(String configurationFile) {
 
         // Initialize the configuration
-        configuration = new Configuration(configurationFile, null);
+        configuration = new Configuration(configurationFile, cmd);
         configuration.init();
 
         simulation = new Simulation[configuration.getNSimulation()];
