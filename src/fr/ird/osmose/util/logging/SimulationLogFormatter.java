@@ -48,6 +48,8 @@
  */
 package fr.ird.osmose.util.logging;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
@@ -57,13 +59,13 @@ import java.util.logging.LogRecord;
  * @author pverley
  */
 public class SimulationLogFormatter extends Formatter {
-    
+
     private final int rank;
-    
+
     public SimulationLogFormatter(int rank) {
         this.rank = rank;
     }
- 
+
     @Override
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder(1000);
@@ -72,24 +74,27 @@ public class SimulationLogFormatter extends Formatter {
         builder.append("[").append(record.getLevel().toString().toLowerCase()).append("] - ");
         builder.append(formatMessage(record));
         if (null != record.getThrown()) {
-            builder.append(" | ");
-            if (null != record.getThrown()) {
-                builder.append(record.getThrown().getClass().getName());
-                builder.append(" ");
-            }
-            builder.append(record.getThrown().getMessage());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            pw.println();
+            record.getThrown().printStackTrace(pw);
+            pw.close();
+            builder.append(sw);
+        } else {
+            builder.append("\n");
         }
-        builder.append("\n");
         return builder.toString();
     }
- 
+
     @Override
-    public String getHead(Handler h) {
+    public String getHead(Handler h
+    ) {
         return super.getHead(h);
     }
- 
+
     @Override
-    public String getTail(Handler h) {
+    public String getTail(Handler h
+    ) {
         return super.getTail(h);
     }
 }

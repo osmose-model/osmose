@@ -48,20 +48,27 @@
  */
 package fr.ird.osmose.util.logging;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.*;
 
 public class OsmoseLogFormatter extends Formatter {
-
+    
     @Override
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder(1000);
         builder.append("osmose[").append(record.getLevel().toString().toLowerCase()).append("] - ");
         builder.append(formatMessage(record));
         if (null != record.getThrown()) {
-            builder.append(" | ");
-            builder.append(record.getThrown().toString());
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                pw.println();
+                record.getThrown().printStackTrace(pw);
+                pw.close();
+                builder.append(sw);
+        } else {
+          builder.append("\n");  
         }
-        builder.append("\n");
         return builder.toString();
     }
 
