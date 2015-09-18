@@ -120,7 +120,7 @@ public class VersionManager extends OLogger {
      * @see fr.ird.osmose.util.version.Version3
      * @return the version of the configuration file
      */
-    private AbstractVersion getConfigurationVersion() {
+    AbstractVersion getConfigurationVersion() {
 
         if (!getConfiguration().isNull("osmose.version")) {
             try {

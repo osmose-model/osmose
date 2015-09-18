@@ -97,6 +97,22 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
         return version.toString();
     }
 
+    /**
+     * Return Osmose version as a condensed String.
+     * <br />
+     * o{version_number}u{update-number}<br />
+     * Example: o3u1, for Osmose 3 Update 1
+     *
+     * @return Osmose condensed version as a String.
+     */
+    public String toShortString() {
+        StringBuilder version = new StringBuilder("o");
+        version.append(number);
+        version.append("u");
+        version.append(update);
+        return version.toString();
+    }
+
     @Override
     public int compareTo(AbstractVersion otherVersion) {
 
@@ -145,7 +161,7 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
             }
         }
         // Backup the source
-        backup(source);
+        backup(source, VersionManager.getInstance().getConfigurationVersion());
         // Build the parameter as key + separator + value
         StringBuilder parameter = new StringBuilder();
         parameter.append(key);
@@ -193,7 +209,7 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
         }
         // Backup the source file
         String source = getConfiguration().getSource(key);
-        backup(source);
+        backup(source, VersionManager.getInstance().getConfigurationVersion());
         // Extract the list of parameters
         ArrayList<String> parameters = getLines(source);
         // Find the line of parameter defined by the key
@@ -225,7 +241,7 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
         }
         // Backup the source file
         String source = getConfiguration().getSource(key);
-        backup(source);
+        backup(source, VersionManager.getInstance().getConfigurationVersion());
         // Extract the list of parameters
         ArrayList<String> parameters = getLines(source);
         // Find the line of parameter defined by the key
@@ -259,7 +275,7 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
         }
         // Backup the source file
         String source = getConfiguration().getSource(key);
-        backup(source);
+        backup(source, VersionManager.getInstance().getConfigurationVersion());
         // Extract the list of parameters
         ArrayList<String> parameters = getLines(source);
         // Find the line of parameter defined by the key
@@ -330,14 +346,16 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
         return Osmose.getInstance().getConfiguration();
     }
 
-    protected String backup(String src) {
+    protected String backup(String src, AbstractVersion srcVersion) {
 
         Calendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(System.currentTimeMillis());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
         formatter.setCalendar(calendar);
         StringBuilder bak = new StringBuilder(src);
-        bak.append(".bak");
+        bak.append(".backup-");
+        bak.append(srcVersion.toShortString());
+        bak.append('-');
         bak.append(formatter.format(calendar.getTime()));
         // If the backup file already exist, no need to backup again
         // It means it has been saved withing the last minute
