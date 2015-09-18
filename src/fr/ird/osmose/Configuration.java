@@ -439,11 +439,10 @@ public class Configuration extends OLogger {
      * exist
      */
     public boolean isNull(String key) {
-        try {
-            return (null == getString(key));
-        } catch (Exception ex) {
-            return true;
-        }
+        Parameter param = parameters.get(key.toLowerCase());
+        return (null == param)
+                || param.value.isEmpty()
+                || param.value.equalsIgnoreCase("null");
     }
 
     /**
@@ -453,12 +452,7 @@ public class Configuration extends OLogger {
      * @return {@code true} if the parameter exists.
      */
     public final boolean canFind(String key) {
-        try {
-            getString(key);
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
+        return parameters.containsKey(key.toLowerCase());
     }
 
     /**
@@ -491,6 +485,23 @@ public class Configuration extends OLogger {
     }
 
     /**
+     * Returns the parameter designated by its key.
+     *
+     * @param key, the key of the parameter
+     * @throws NullPointerException if the parameter is not found.
+     * @return the parameter as a {@link Parameter}
+     */
+    private Parameter getParameter(String key) {
+        String lkey = key.toLowerCase();
+        if (parameters.containsKey(lkey)) {
+            return parameters.get(lkey);
+        } else {
+            error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
+        }
+        return null;
+    }
+
+    /**
      * Returns the value of the specified parameter as a {@code String}
      *
      * @param key, the key of the parameter
@@ -498,17 +509,7 @@ public class Configuration extends OLogger {
      * @return the value of the parameter as a {@code String}
      */
     final public String getString(String key) {
-
-        String lkey = key.toLowerCase();
-        if (parameters.containsKey(lkey)) {
-            String value = parameters.get(lkey).value;
-            if (value.equalsIgnoreCase("null")) {
-                return null;
-            }
-            return value;
-        } else {
-            throw new NullPointerException("Could not find parameter " + key);
-        }
+        return getParameter(key).value;
     }
 
     /**
@@ -563,7 +564,7 @@ public class Configuration extends OLogger {
         try {
             return Integer.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to integer " + s + " (from " + getSource(key) + ")", ex);
+            error("Could not convert to Integer parameter " + getParameter(key), ex);
         }
         return Integer.MIN_VALUE;
     }
@@ -581,7 +582,7 @@ public class Configuration extends OLogger {
         try {
             return Float.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to float " + s + " (from " + getSource(key) + ")", ex);
+            error("Could not convert to Float parameter " + getParameter(key), ex);
         }
         return Float.NaN;
     }
@@ -599,7 +600,7 @@ public class Configuration extends OLogger {
         try {
             return Double.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to double " + s + " (from " + getSource(key) + ")", ex);
+            error("Could not convert to Double parameter " + getParameter(key), ex);
         }
         return Double.NaN;
     }
@@ -614,18 +615,16 @@ public class Configuration extends OLogger {
      * @return the parameter as a boolean
      */
     public boolean getBoolean(String key, boolean warning) {
-        try {
-            String s = getString(key);
+        if (canFind(key)) {
             try {
-                return Boolean.valueOf(s);
+                return Boolean.valueOf(getString(key));
             } catch (NumberFormatException ex) {
-                error("Could not convert parameter " + key + " to boolean " + s + " (from " + getSource(key) + ")", ex);
+                error("Could not convert to Boolean parameter " + getParameter(key), ex);
             }
-        } catch (NullPointerException ex) {
-            if (warning) {
-                warning("Could not find boolean parameter " + key + ". Osmose assumes it is false.");
-            }
+        } else if (warning) {
+            warning("Could not find Boolean parameter " + key + ". Osmose assumes it is false.");
         }
+
         return false;
     }
 
@@ -658,7 +657,7 @@ public class Configuration extends OLogger {
             }
             return ai;
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to array of integer " + getString(key) + " (from " + getSource(key) + ")", ex);
+            error("Could not convert to array of Integer parameter " + getParameter(key), ex);
         }
         return null;
     }
@@ -680,7 +679,7 @@ public class Configuration extends OLogger {
             }
             return af;
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to array of float " + getString(key) + " (from " + getSource(key) + ")", ex);
+            error("Could not convert to array of Float parameter " + getParameter(key), ex);
         }
         return null;
     }
@@ -702,7 +701,7 @@ public class Configuration extends OLogger {
             }
             return ad;
         } catch (NumberFormatException ex) {
-            error("Could not convert parameter " + key + " to array of double " + getString(key) + " (from " + getSource(key) + ")", ex);
+            error("Could not convert to array of Double parameter " + getParameter(key), ex);
         }
         return null;
     }
@@ -914,7 +913,7 @@ public class Configuration extends OLogger {
 
         /**
          * Create a new parameter from the command line
-         * 
+         *
          * @param key, the key of the parameter
          * @param value, the value of the parameter
          */
@@ -986,10 +985,26 @@ public class Configuration extends OLogger {
             if (value.isEmpty()) {
                 value = "null";
             }
-            // send a warning if the value is null
+            // Mention when he value is null for debugging purpose
             if (value.equalsIgnoreCase("null")) {
                 debug("No value found for parameter {0}", key);
             }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder str = new StringBuilder();
+            str.append(key);
+            str.append(" = ");
+            str.append(value);
+            str.append(" (from ");
+            str.append(source);
+            if (iline >= 0) {
+                str.append(" line ");
+                str.append(iline);
+            }
+            str.append(")");
+            return str.toString();
         }
     }
 }
