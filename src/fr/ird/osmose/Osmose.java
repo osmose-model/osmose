@@ -114,20 +114,23 @@ public class Osmose extends OLogger {
         opt.addOptionAllSets("resolve", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
         // For all sets, user can specify parameter values that will overwrite
         // the values defined in the configuration files
-        opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
+        //opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
+        // For all sets, add the update option
+        opt.addOptionAllSets("update", Multiplicity.ZERO_OR_ONE);
 
         OptionSet set = opt.getMatchingSet(false, false);
 
         StringBuilder usage = new StringBuilder();
         usage.append("Command line usage:\n");
         // Option not implemented yet  [-P<key>=<value> [...]]
-        usage.append("\tUsage1: java -jar osmose.jar -F FILE [-resolve=global|local]\n");
-        usage.append("\tUsage2: java -jar osmose.jar [-resolve=global|local] FILE1 [FILE2] [...]\n");
+        usage.append("\tUsage1: java -jar osmose.jar -F FILE [-resolve=global|local] [-update]\n");
+        usage.append("\tUsage2: java -jar osmose.jar [-resolve=global|local] [-update] FILE1 [FILE2] [...]\n");
         usage.append("\tOptions summary:\n");
         usage.append("\t -F \tpath of a text file that lists Osmose configuration files\n");
         usage.append("\t -resolve=global|local \tControls relative pathname/filename resolution in Osmose configuration files.\n");
         usage.append("\t   global, pathnames are resolved against the main configuration file ;\n");
-        usage.append("\t   local, pathnames are resolved against the current configuration file (i.e. the file that contains the pathname parameter).");
+        usage.append("\t   local, pathnames are resolved against the current configuration file (i.e. the file that contains the pathname parameter).\n");
+        usage.append("\t -update \tUpdate the configuration file(s).");
         if (set == null) {
             info(usage.toString());
             error("Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
@@ -156,14 +159,20 @@ public class Osmose extends OLogger {
             }
         }
 
-        if (set.isSet("P")) {
-            OptionData optParam = set.getOption("P");
-            for (int i = 0; i < optParam.getResultCount(); i++) {
-                // do nothing yet
-                //System.out.println("  " + optParam.getResultDetail(i) + " = "+optParam.getResultValue(i));
-            }
+        // Option for updating configuration file
+        if (set.isSet("update")) {
+            cmd.put("update", "true");
+        } else {
+            cmd.put("update", "false");
         }
 
+//        if (set.isSet("P")) {
+//            OptionData optParam = set.getOption("P");
+//            for (int i = 0; i < optParam.getResultCount(); i++) {
+//                // do nothing yet
+//                //System.out.println("  " + optParam.getResultDetail(i) + " = "+optParam.getResultValue(i));
+//            }
+//        }
     }
 
     /**
@@ -187,19 +196,41 @@ public class Osmose extends OLogger {
      * run the configurations in sequential order.
      */
     public void runAll() {
-        for (String configurationFile : configurationFiles) {
-            info("Running configuration {0}", configurationFile);
-            osmose.run(configurationFile);
-            info("*********************************");
+        
+        if (cmd.get("update").equalsIgnoreCase("true")) {
+            for (String configurationFile : configurationFiles) {
+                info("Updating configuration {0}", configurationFile);
+                osmose.update(configurationFile);
+                info("*********************************************");
+            }
+        } else {
+            for (String configurationFile : configurationFiles) {
+                info("Running configuration {0}", configurationFile);
+                osmose.run(configurationFile);
+                info("*********************************************");
+            }
+        }
+    }
+    
+    /**
+     * Loads a configuration file and updates it if necessary.
+     * 
+     * @param configurationFile, the path of the configuration file.
+     */
+    public void update(String configurationFile) {
+        // Initialize the configuration
+        configuration = new Configuration(configurationFile, cmd);
+        if (!configuration.load()) {
+            VersionManager.getInstance().updateConfiguration();
         }
     }
 
     /**
-     * Run a specified configuration in multi-threads mode. It initializes a new
+     * Run a specified configuration in multi-threads mode. It initialises a new
      * {@link Configuration} and launches concurrently batches of simulations.
      * The number of simulations is controlled by parameter
      * <i>simulation.nsimu</i>. The user can control how many CPUs are allocated
-     * to running the simulations with paramter <i>simulation.ncpu</i>. If this
+     * to running the simulations with parameter <i>simulation.ncpu</i>. If this
      * parameter is not provided in the configuration file or the value exceed
      * the number of available processors in the system, Osmose will set it
      * automatically to the number of available processors
@@ -217,6 +248,12 @@ public class Osmose extends OLogger {
 
         // Initialize the configuration
         configuration = new Configuration(configurationFile, cmd);
+        if (!configuration.load()) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("Your configuration file must be updated. Please run osmose with the -update option.\n");
+            msg.append("Example: java -jar osmose.jar -update config.csv");
+            error(msg.toString(), null);
+        }
         configuration.init();
 
         simulation = new Simulation[configuration.getNSimulation()];

@@ -259,20 +259,26 @@ public class Configuration extends OLogger {
 // Definition of the methods
 ////////////////////////////
     /**
-     * Initialises the current configuration. Loads the parameters from the
-     * configuration file, sets the values of the main variables and creates the
-     * grid.
+     * Load the parameters from the main configuration file and check whether
+     * the configuration is up to date.
+     * 
+     * @return {@code TRUE} if the configuration is up to date.
      */
-    public void init() {
-
+    public boolean load() {
         // Load the parameters from the main configuration file
         loadParameters(mainFilename, 0);
 
         // Check what is the default separator
         defaultSeparator = guessDefaultSeparator();
 
-        // Check whether the configuration file is up-to-date
-        VersionManager.getInstance().updateConfiguration();
+        return VersionManager.getInstance().checkConfiguration();
+    }
+
+    /**
+     * Initialises the current configuration. Sets the values of the main
+     * variables and creates the grid.
+     */
+    public void init() {
 
         // Output path
         outputPathname = getFile("output.dir.path");
@@ -404,10 +410,10 @@ public class Configuration extends OLogger {
     }
 
     public void refresh() {
-
         info("Reloading parameters...");
         // Clear current lists of parameters
         parameters.clear();
+        // Reload parameters
         loadParameters(mainFilename, 0);
     }
 
@@ -482,6 +488,10 @@ public class Configuration extends OLogger {
             }
         }
         return filteredKeys;
+    }
+
+    public String printParameter(String key) {
+        return getParameter(key).toString();
     }
 
     /**

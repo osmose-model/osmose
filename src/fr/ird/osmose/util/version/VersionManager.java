@@ -82,30 +82,33 @@ public class VersionManager extends OLogger {
         Arrays.sort(VERSIONS);
     }
 
-    /*
-     * Upgrade the configuration file to the application version.
-     */
-    public void updateConfiguration() {
-
+    public boolean checkConfiguration() {
+        
         // Retrieve version of the Osmose configuration 
         cfgVersion = getConfigurationVersion();
 
         // Check version
         if (cfgVersion.compareTo(OSMOSE_VERSION) < 0) {
-            info("Configuration version {0} is older than Osmose version {1}. Your configuration file will be automatically updated.", new Object[]{cfgVersion, OSMOSE_VERSION});
+            warning("Configuration version {0} is older than software version {1}.", new Object[]{cfgVersion, OSMOSE_VERSION});
+            return false;
+        } else {
+            info("Configuration version {0} matches software version {1}. Nothing to do.", new Object[]{cfgVersion, OSMOSE_VERSION});
+        }
+        return true;
+    }
 
-            // Update the configuration file
+    /*
+     * Upgrade the configuration file to the application version.
+     */
+    public void updateConfiguration() {
+
+        // Update the configuration file
             for (AbstractVersion version : VERSIONS) {
                 if ((version.compareTo(OSMOSE_VERSION) <= 0) && (cfgVersion.compareTo(version) < 0)) {
                     version.updateConfiguration();
                     getConfiguration().refresh();
                 }
             }
-        } else if (cfgVersion.compareTo(OSMOSE_VERSION) > 0) {
-            info("Configuration version {0} is more recent than Osmose version {1}. Your configuration might not run correctly, you should get the latest Osmose version.", new Object[]{cfgVersion, OSMOSE_VERSION});
-        } else {
-            info("Configuration version {0} matches Osmose version {1}. Nothing to do.", new Object[]{cfgVersion, OSMOSE_VERSION});
-        }
     }
 
     /**
@@ -138,10 +141,12 @@ public class VersionManager extends OLogger {
                     }
                 }
             } catch (Exception ex) {
-                error("Could not identify version of the configuration, check parameter osmose.version = " + getConfiguration().getString("osmose.version"), ex);
             }
+            StringBuilder msg = new StringBuilder();
+            msg.append("Could not identify version of the configuration. Check parameter ");
+            msg.append(getConfiguration().printParameter("osmose.version"));
+            error(msg.toString(), new IllegalArgumentException("Supported versions are " + Arrays.toString(VERSIONS)));
         }
-        
         return v3;
     }
 
