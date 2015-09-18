@@ -50,7 +50,6 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.IGrid;
-import fr.ird.osmose.util.Properties;
 import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.logging.OLogger;
 import java.io.BufferedReader;
@@ -59,7 +58,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -149,19 +150,9 @@ public class Configuration extends OLogger {
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * A {@link fr.ird.osmose.util.Properties} object that stores the
-     * parameters.
-     */
-    final private Properties cfg;
-    /**
-     * A {@link fr.ird.osmose.util.Properties} object that stores the file of
-     * origin of each parameter.
-     */
-    final private Properties source;
-    /**
      * List of all the parameters
      */
-    private final List<Parameter> parameters;
+    private final HashMap<String, Parameter> parameters;
     /**
      * Name of the main configuration file.
      */
@@ -241,28 +232,27 @@ public class Configuration extends OLogger {
      * @param mainFilename, the main configuration file
      * @param cmd, the list of options/parameters set in command line
      */
-    Configuration(String mainFilename, Properties cmd) {
+    Configuration(String mainFilename, HashMap<String, String> cmd) {
 
         this.mainFilename = new File(mainFilename).getAbsolutePath();
         this.inputPathname = new File(mainFilename).getParentFile().getAbsolutePath();
 
-        cfg = new Properties();
-        source = new Properties();
-        parameters = new ArrayList();
-        
+        parameters = new HashMap();
+
         // Add the parameters from the command line
-        for (Object key : cmd.keySet()) {
-            String skey = (String) key;
-            cfg.setProperty(skey, cmd.getProperty(skey));
-            source.setProperty(skey, "command line");
+        for (Entry<String, String> argument : cmd.entrySet()) {
+            Parameter parameter = new Parameter(argument.getKey(), argument.getValue());
+            parameters.put(argument.getKey(), parameter);
         }
-        
+
         // Path resolution, global or local
         // Option provided as command line argument
         // global by default, for backward compatibility
-        if (canFind("resolve")) {
-            globalResolve = getString("resolve").equalsIgnoreCase("global");
-        } else globalResolve = true;
+        if (cmd.containsKey("resolve")) {
+            globalResolve = cmd.get("resolve").equalsIgnoreCase("global");
+        } else {
+            globalResolve = true;
+        }
     }
 
 ////////////////////////////
@@ -274,25 +264,18 @@ public class Configuration extends OLogger {
      * grid.
      */
     public void init() {
-        
+
         // Load the parameters from the main configuration file
         loadParameters(mainFilename, 0);
 
         // Check what is the default separator
         defaultSeparator = guessDefaultSeparator();
-        // Clear parameters list as it won't be needed anymore
-        parameters.clear();
 
         // Check whether the configuration file is up-to-date
-        if (!VersionManager.getInstance().checkConfiguration()) {
-            error("", null);
-        }
+        VersionManager.getInstance().updateConfiguration();
 
-        // Check whether the path of the output folder is already set (by command line option)
-        if (null == outputPathname) {
-            // Output path read in the configuration file
-            outputPathname = resolve(getString("output.dir.path"), getSource("output.dir.path"));
-        }
+        // Output path
+        outputPathname = getFile("output.dir.path");
 
         // Read Output CSV separator
         Separator separator = Separator.COMA;
@@ -401,15 +384,13 @@ public class Configuration extends OLogger {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
                 if (!startsWithSymbol(line) & !(line.length() <= 1)) {
-                    Parameter entry = new Parameter(line, iline, filename);
-                    entry.parse();
-                    parameters.add(entry);
-                    if (source.containsKey(entry.key)) {
-                        warning("Parameter {0} has already been defined with value {1} (from {2})", new Object[]{entry.key, cfg.getProperty(entry.key), source.getProperty(entry.key)});
+                    Parameter entry = new Parameter(iline, filename);
+                    entry.parse(line);
+                    if (parameters.containsKey(entry.key)) {
+                        warning("Parameter {0} has already been defined with value {1} (from {2})", new Object[]{entry.key, parameters.get(entry.key).value, parameters.get(entry.key).source});
                         warning("Osmose will ignore parameter {0} with value {1} (from {2})", new Object[]{entry.key, entry.value, filename});
                     } else {
-                        cfg.setProperty(entry.key, entry.value);
-                        source.setProperty(entry.key, filename);
+                        parameters.put(entry.key, entry);
                         if (entry.key.startsWith("osmose.configuration")) {
                             loadParameters(getFile(entry.key), depth + 1);
                         }
@@ -427,8 +408,6 @@ public class Configuration extends OLogger {
         info("Reloading parameters...");
         // Clear current lists of parameters
         parameters.clear();
-        cfg.clear();
-        source.clear();
         loadParameters(mainFilename, 0);
     }
 
@@ -493,7 +472,22 @@ public class Configuration extends OLogger {
      * @return
      */
     public List<String> findKeys(String filter) {
-        return cfg.getKeys(filter);
+
+        // Add \Q \E around substrings of fileMask that are not meta-characters
+        String regexpPattern = filter.replaceAll("[^\\*\\?]+", "\\\\Q$0\\\\E");
+        // Replace all "*" by the corresponding java regex meta-characters
+        regexpPattern = regexpPattern.replaceAll("\\*", ".*");
+        // Replace all "?" by the corresponding java regex meta-characters
+        regexpPattern = regexpPattern.replaceAll("\\?", ".");
+
+        // List the keys and select the ones that match the filter
+        List<String> filteredKeys = new ArrayList();
+        for (String key : parameters.keySet()) {
+            if (key.matches(regexpPattern)) {
+                filteredKeys.add(key);
+            }
+        }
+        return filteredKeys;
     }
 
     /**
@@ -506,12 +500,12 @@ public class Configuration extends OLogger {
     final public String getString(String key) {
 
         String lkey = key.toLowerCase();
-        if (cfg.containsKey(lkey)) {
-            String value = cfg.getProperty(lkey);
+        if (parameters.containsKey(lkey)) {
+            String value = parameters.get(lkey).value;
             if (value.equalsIgnoreCase("null")) {
                 return null;
             }
-            return value.trim();
+            return value;
         } else {
             throw new NullPointerException("Could not find parameter " + key);
         }
@@ -525,8 +519,7 @@ public class Configuration extends OLogger {
      * @return the path of the configuration file that contains the parameter.
      */
     final public String getSource(String key) {
-        String lkey = key.toLowerCase();
-        return source.getProperty(lkey).trim();
+        return parameters.get(key.toLowerCase()).source;
     }
 
     /**
@@ -848,7 +841,7 @@ public class Configuration extends OLogger {
     private Separator guessDefaultSeparator() {
 
         StringBuilder sbSeparators = new StringBuilder();
-        for (Parameter parameter : parameters) {
+        for (Parameter parameter : parameters.values()) {
             sbSeparators.append(parameter.keySeparator);
         }
         String separators = sbSeparators.toString();
@@ -887,10 +880,6 @@ public class Configuration extends OLogger {
          */
         private final String source;
         /**
-         * The line as a String to be parsed.
-         */
-        private final String line;
-        /**
          * The line of the parameter in the configuration file.
          */
         private final int iline;
@@ -913,16 +902,27 @@ public class Configuration extends OLogger {
         private String valueSeparator;
 
         /**
-         * Created a new parameter out of the given line.
+         * Create a new parameter out of the given line.
          *
-         * @param line, the {@code String} to be parsed as a parameter
          * @param iline, the line of the parameter in the configuration file
          * @param source, the path of the configuration file
          */
-        Parameter(String line, int iline, String source) {
-            this.line = line;
+        Parameter(int iline, String source) {
             this.iline = iline;
             this.source = source;
+        }
+
+        /**
+         * Create a new parameter from the command line
+         * 
+         * @param key, the key of the parameter
+         * @param value, the value of the parameter
+         */
+        Parameter(String key, String value) {
+            this.key = key;
+            this.value = value;
+            this.source = "command line";
+            this.iline = -1;
         }
 
         /**
@@ -933,7 +933,7 @@ public class Configuration extends OLogger {
          *
          * @param line, the line to be parsed as a parameter
          */
-        private void parse() {
+        private void parse(String line) {
             key = value = null;
             keySeparator = Separator.guess(line, Separator.EQUALS).toString();
             split(line);

@@ -87,7 +87,7 @@ public class Osmose extends OLogger {
      */
     private List<String> configurationFiles;
 
-    private fr.ird.osmose.util.Properties cmd;
+    private HashMap<String, String> cmd;
 
     /**
      * Read input arguments. If no argument are provided, Osmose assumes that it
@@ -143,13 +143,13 @@ public class Osmose extends OLogger {
             configurationFiles.addAll(set.getData());
         }
 
-        // Initialises the set of command line properties
-        cmd = new fr.ird.osmose.util.Properties();
-        
+        // Initialises the set of command line
+        cmd = new HashMap();
+
         if (set.isSet("resolve")) {
             String resolve = set.getOption("resolve").getResultValue(0);
             if (resolve.matches("^.*?(local|global).*$")) {
-                cmd.setProperty("resolve", resolve);
+                cmd.put("resolve", resolve);
             } else {
                 info(usage.toString());
                 error("Invalid command line option.", new IllegalArgumentException("-resolve=global or -resolve=local only"));
@@ -367,7 +367,7 @@ public class Osmose extends OLogger {
         osmose.info("OSMOSE - Modelling Marin Exploited Ecosystems");
         osmose.info("http://www.osmose-model.org");
         osmose.info("*********************************************");
-        osmose.info(VersionManager.getInstance().OSMOSE_VERSION.toString());
+        osmose.info("Software version: " + VersionManager.getInstance().OSMOSE_VERSION.toString());
         osmose.readArgs(args);
         osmose.runAll();
         osmose.info("OSMOSE Model- © IRD");
