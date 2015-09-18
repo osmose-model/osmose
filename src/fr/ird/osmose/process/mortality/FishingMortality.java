@@ -60,6 +60,7 @@ import fr.ird.osmose.process.mortality.fishing.RateByDtByClassFishingMortality;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.MPA;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -84,12 +85,22 @@ public class FishingMortality extends AbstractMortality {
         fishingMortality = new AbstractFishingMortality[getNSpecies()];
 
         // Find type of fishing scenario
-        try {
-            fishingType = Type.valueOf(getConfiguration().getString("mortality.fishing.type").toUpperCase());
-        } catch (Exception ex) {
-            // By default Osmose assumes it is fishing mortality rates
-            fishingType = Type.RATE;
+        // By default Osmose assumes it is fishing mortality rates
+        fishingType = Type.RATE;
+        if (!getConfiguration().isNull("mortality.fishing.type")) {
+        //if (!getConfiguration().isNull("mortality.fishing.type")) {
+            try {
+                fishingType = Type.valueOf(getConfiguration().getString("mortality.fishing.type").toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                StringBuilder msg = new StringBuilder();
+                msg.append("Unrecognised value for parameter mortality.fishing.type = ");
+                msg.append(getConfiguration().getString("mortality.fishing.type"));
+                msg.append(". It should be either ");
+                msg.append(Arrays.toString(Type.values()));
+                warning(msg.toString());
+            }
         }
+        info("Mortality fishing type set to " + fishingType);
 
         // Find fishing scenario
         switch (fishingType) {
@@ -187,7 +198,7 @@ public class FishingMortality extends AbstractMortality {
                             sum += spatialFactor[iSpec].getValue(cell);
                         }
                     }
-                    if (Math.abs(sum - 1.d)>1e-2) {
+                    if (Math.abs(sum - 1.d) > 1e-2) {
                         StringBuilder msg = new StringBuilder();
                         msg.append("The sum of the factors in spatial fishing distribution file ");
                         msg.append(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + iSpec));

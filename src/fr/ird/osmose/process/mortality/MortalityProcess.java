@@ -51,6 +51,7 @@ package fr.ird.osmose.process.mortality;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.School;
 import fr.ird.osmose.PreyRecord;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -101,22 +102,30 @@ public class MortalityProcess extends AbstractProcess {
          */
         STOCHASTIC;
     }
-
+    
     public MortalityProcess(int rank) {
         super(rank);
     }
-
+    
     @Override
     public void init() {
 
         // Chooses the mortality algorithm for schools inside the simulated domain
-        MortalityAlgorithm mortalityAlgorithm;
-        try {
-            mortalityAlgorithm = MortalityAlgorithm.valueOf(getConfiguration().getString("mortality.algorithm").toUpperCase());
-        } catch (Exception ex) {
-            mortalityAlgorithm = MortalityAlgorithm.STOCHASTIC;
+        MortalityAlgorithm mortalityAlgorithm = MortalityAlgorithm.STOCHASTIC;
+        if (!getConfiguration().isNull("mortality.algorithm")) {
+            try {
+                mortalityAlgorithm = MortalityAlgorithm.valueOf(getConfiguration().getString("mortality.algorithm").toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                StringBuilder msg = new StringBuilder();
+                msg.append("Unrecognised value for parameter mortality.algorithm = ");
+                msg.append(getConfiguration().getString("mortality.algorithm"));
+                msg.append(". It should be either ");
+                msg.append(Arrays.toString(MortalityAlgorithm.values()));
+                warning(msg.toString());
+            }
         }
-        info("Mortality algorithm set to " + mortalityAlgorithm.toString());
+        info("Mortality algorithm set to " + mortalityAlgorithm);
+        
         switch (mortalityAlgorithm) {
             case ITERATIVE:
                 insideMortalityProcess = new IterativeMortalityProcess(getRank());
@@ -137,7 +146,7 @@ public class MortalityProcess extends AbstractProcess {
         starvationMortality = new StarvationMortality(getRank());
         starvationMortality.init();
     }
-
+    
     @Override
     public void run() {
 
