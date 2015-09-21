@@ -86,8 +86,14 @@ public class Osmose extends OLogger {
      * List of configuration files.
      */
     private List<String> configurationFiles;
-
+    /**
+     * Set of command line options 
+     */
     private HashMap<String, String> cmd;
+    /**
+     * Whether to update the configuration files
+     */
+    private boolean updateConfiguration = false;
 
     /**
      * Read input arguments. If no argument are provided, Osmose assumes that it
@@ -114,7 +120,7 @@ public class Osmose extends OLogger {
         opt.addOptionAllSets("resolve", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
         // For all sets, user can specify parameter values that will overwrite
         // the values defined in the configuration files
-        //opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
+        opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
         // For all sets, add the update option
         opt.addOptionAllSets("update", Multiplicity.ZERO_OR_ONE);
 
@@ -149,22 +155,28 @@ public class Osmose extends OLogger {
 
         // Option for updating configuration file
         if (set.isSet("update")) {
-            cmd.put("update", "true");
-        } else {
-            cmd.put("update", "false");
+            if (!set.isSet("P")) {
+                updateConfiguration = true;
+            } else {
+                info(getCmdUsage());
+                error("Invalid command line options.", new IllegalArgumentException("-update and -P options are mutually exclusive."));
+            }
         }
 
-//        if (set.isSet("P")) {
-//            OptionData optParam = set.getOption("P");
-//            for (int i = 0; i < optParam.getResultCount(); i++) {
-//                // do nothing yet
-//                //System.out.println("  " + optParam.getResultDetail(i) + " = "+optParam.getResultValue(i));
-//            }
-//        }
+        if (set.isSet("P")) {
+            OptionData optParam = set.getOption("P");
+            for (int i = 0; i < optParam.getResultCount(); i++) {
+                String key = optParam.getResultDetail(i);
+                // Remove leading and trailing double quotes
+                String value = optParam.getResultValue(i).replaceAll("^\"|\"$", "");
+                cmd.put(key, value);
+            }
+        }
     }
-    
+
     /**
      * Reads the command line usage from resource file resources/cmd-usage.txt
+     *
      * @return the command line usage as a String
      */
     private String getCmdUsage() {
@@ -205,7 +217,7 @@ public class Osmose extends OLogger {
      */
     public void runAll() {
 
-        if (cmd.get("update").equalsIgnoreCase("true")) {
+        if (updateConfiguration) {
             for (String configurationFile : configurationFiles) {
                 info("Updating configuration {0}", configurationFile);
                 osmose.update(configurationFile);

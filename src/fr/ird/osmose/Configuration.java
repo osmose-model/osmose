@@ -243,14 +243,15 @@ public class Configuration extends OLogger {
         for (Entry<String, String> argument : cmd.entrySet()) {
             Parameter parameter = new Parameter(argument.getKey(), argument.getValue());
             parameters.put(argument.getKey(), parameter);
+            debug(parameter.toString());
         }
 
         // Path resolution, global or local
         // Option provided as command line argument
-        // global by default, for backward compatibility
         if (cmd.containsKey("resolve")) {
             globalResolve = cmd.get("resolve").equalsIgnoreCase("global");
         } else {
+            // global by default, for backward compatibility
             globalResolve = true;
         }
     }
@@ -397,6 +398,7 @@ public class Configuration extends OLogger {
                         warning("Osmose will ignore parameter {0} with value {1} (from {2})", new Object[]{entry.key, entry.value, filename});
                     } else {
                         parameters.put(entry.key, entry);
+                        debug(entry.toString());
                         if (entry.key.startsWith("osmose.configuration")) {
                             loadParameters(getFile(entry.key), depth + 1);
                         }
@@ -948,7 +950,6 @@ public class Configuration extends OLogger {
             split(line);
             valueSeparator = Separator.guess(value, Separator.SEMICOLON).toString();
             value = clean(value);
-            debug(key + "=" + value);
         }
 
         /**
