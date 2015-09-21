@@ -119,20 +119,8 @@ public class Osmose extends OLogger {
         opt.addOptionAllSets("update", Multiplicity.ZERO_OR_ONE);
 
         OptionSet set = opt.getMatchingSet(false, false);
-
-        StringBuilder usage = new StringBuilder();
-        usage.append("Command line usage:\n");
-        // Option not implemented yet  [-P<key>=<value> [...]]
-        usage.append("\tUsage1: java -jar osmose.jar -F FILE [-resolve=global|local] [-update]\n");
-        usage.append("\tUsage2: java -jar osmose.jar [-resolve=global|local] [-update] FILE1 [FILE2] [...]\n");
-        usage.append("\tOptions summary:\n");
-        usage.append("\t -F \tpath of a text file that lists Osmose configuration files\n");
-        usage.append("\t -resolve=global|local \tControls relative pathname/filename resolution in Osmose configuration files.\n");
-        usage.append("\t   global, pathnames are resolved against the main configuration file ;\n");
-        usage.append("\t   local, pathnames are resolved against the current configuration file (i.e. the file that contains the pathname parameter).\n");
-        usage.append("\t -update \tUpdate the configuration file(s).");
         if (set == null) {
-            info(usage.toString());
+            info(getCmdUsage());
             error("Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
         }
 
@@ -154,8 +142,8 @@ public class Osmose extends OLogger {
             if (resolve.matches("^.*?(local|global).*$")) {
                 cmd.put("resolve", resolve);
             } else {
-                info(usage.toString());
-                error("Invalid command line option.", new IllegalArgumentException("-resolve=global or -resolve=local only"));
+                info(getCmdUsage());
+                error("Invalid command line option -resolve=" + resolve, new IllegalArgumentException("-resolve=global or -resolve=local only"));
             }
         }
 
@@ -173,6 +161,26 @@ public class Osmose extends OLogger {
 //                //System.out.println("  " + optParam.getResultDetail(i) + " = "+optParam.getResultValue(i));
 //            }
 //        }
+    }
+    
+    /**
+     * Reads the command line usage from resource file resources/cmd-usage.txt
+     * @return the command line usage as a String
+     */
+    private String getCmdUsage() {
+        // Read usage from ressources/cmd-usage.txt
+        StringBuilder usage = new StringBuilder();
+        try {
+            BufferedReader bfIn = new BufferedReader(new InputStreamReader(Osmose.class.getResourceAsStream("resources/cmd-usage.txt")));
+            String line;
+            while ((line = bfIn.readLine()) != null) {
+                usage.append(line);
+                usage.append("\n\t");
+            }
+        } catch (IOException ex) {
+            warning("Failed to print command line usage.");
+        }
+        return usage.toString();
     }
 
     /**
@@ -196,7 +204,7 @@ public class Osmose extends OLogger {
      * run the configurations in sequential order.
      */
     public void runAll() {
-        
+
         if (cmd.get("update").equalsIgnoreCase("true")) {
             for (String configurationFile : configurationFiles) {
                 info("Updating configuration {0}", configurationFile);
@@ -211,10 +219,10 @@ public class Osmose extends OLogger {
             }
         }
     }
-    
+
     /**
      * Loads a configuration file and updates it if necessary.
-     * 
+     *
      * @param configurationFile, the path of the configuration file.
      */
     public void update(String configurationFile) {

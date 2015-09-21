@@ -1,0 +1,10 @@
+Command line usage:
+Usage1: java -jar osmose.jar -F FILE [-resolve=global|local] [-update]
+Usage2: java -jar osmose.jar [-resolve=global|local] [-update] FILE1 [FILE2] [...]
+# Not implemented yet: [-P<key>=<value> [...]]
+Options summary:
+ -F     Path of a text file that lists Osmose configuration files.
+ -resolve=global|local  Controls relative pathname/filename resolution in Osmose configuration files.
+   global, pathnames are resolved against the main configuration file ;
+   local, pathnames are resolved against the current configuration file (i.e. the file that contains the pathname parameter).
+ -update    Update the configuration file(s).
