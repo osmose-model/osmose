@@ -87,13 +87,15 @@ public class Osmose extends OLogger {
      */
     private List<String> configurationFiles;
     /**
-     * Set of command line options 
+     * Set of command line options
      */
     private HashMap<String, String> cmd;
     /**
      * Whether to update the configuration files
      */
     private boolean updateConfiguration = false;
+
+    private boolean flagIndiseas = false;
 
     /**
      * Read input arguments. If no argument are provided, Osmose assumes that it
@@ -113,17 +115,22 @@ public class Osmose extends OLogger {
         // Sets of command line options
         Options opt = new Options(args);
         // Set 1: Osmose configuration files are listed from a file
-        opt.addSet("Usage1", 0).addOption("F", Separator.BLANK);
+        opt.addSet("Usage1", 0)
+                .addOption("F", Separator.BLANK)
+                .addOption("update", Multiplicity.ZERO_OR_ONE);
         // Set 2: Osmose configuration files are given as arguments
-        opt.addSet("Usage2", 1, Integer.MAX_VALUE);
+        opt.addSet("Usage2", 1, Integer.MAX_VALUE)
+                .addOption("update", Multiplicity.ZERO_OR_ONE);
+        // Set 3: Set up Indiseas simulations
+        opt.addSet("Usage3", 0)
+                .addOption("indiseas", Separator.BLANK);
         // For all sets, user can specify how to resolve pathnames
         opt.addOptionAllSets("resolve", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
         // For all sets, user can specify parameter values that will overwrite
         // the values defined in the configuration files
         opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
-        // For all sets, add the update option
-        opt.addOptionAllSets("update", Multiplicity.ZERO_OR_ONE);
 
+        // Get the matching set and throw error if none found
         OptionSet set = opt.getMatchingSet(false, false);
         if (set == null) {
             info(getCmdUsage());
@@ -132,6 +139,7 @@ public class Osmose extends OLogger {
 
         configurationFiles = new ArrayList();
 
+        // Usage1 & Usage2, OSMOSE
         if (set.getSetName().equals("Usage1")) {
             configurationFiles.addAll(readFilepath(set.getOption("F").getResultValue(0)));
         }
@@ -140,9 +148,28 @@ public class Osmose extends OLogger {
             configurationFiles.addAll(set.getData());
         }
 
-        // Initialises the set of command line
+        // Option for updating configuration file, only Usage1 & Usage2
+        if (set.getSetName().matches("Usage[12]")) {
+            if (set.isSet("update")) {
+                if (!set.isSet("P")) {
+                    updateConfiguration = true;
+                } else {
+                    info(getCmdUsage());
+                    error("Invalid command line options.", new IllegalArgumentException("-update and -P options are mutually exclusive."));
+                }
+            }
+        }
+
+        // Usage3, INDISEAS
+        if (set.getSetName().equals("Usage3")) {
+            configurationFiles.add(set.getOption("indiseas").getResultValue(0));
+            flagIndiseas = true;
+        }
+
+        // Initialises the set of command line options
         cmd = new HashMap();
 
+        // Resolve option -resolve=global|local
         if (set.isSet("resolve")) {
             String resolve = set.getOption("resolve").getResultValue(0);
             if (resolve.matches("^.*?(local|global).*$")) {
@@ -153,16 +180,7 @@ public class Osmose extends OLogger {
             }
         }
 
-        // Option for updating configuration file
-        if (set.isSet("update")) {
-            if (!set.isSet("P")) {
-                updateConfiguration = true;
-            } else {
-                info(getCmdUsage());
-                error("Invalid command line options.", new IllegalArgumentException("-update and -P options are mutually exclusive."));
-            }
-        }
-
+        // Parameters option -Pkey=value
         if (set.isSet("P")) {
             OptionData optParam = set.getOption("P");
             for (int i = 0; i < optParam.getResultCount(); i++) {
@@ -217,7 +235,11 @@ public class Osmose extends OLogger {
      */
     public void runAll() {
 
-        if (updateConfiguration) {
+        if (flagIndiseas) {
+            info("Creating Indiseas simulation batch from {0}", configurationFiles.get(0));
+            osmose.indiseas();
+            info("*********************************************");
+        } else if (updateConfiguration) {
             for (String configurationFile : configurationFiles) {
                 info("Updating configuration {0}", configurationFile);
                 osmose.update(configurationFile);
@@ -230,6 +252,14 @@ public class Osmose extends OLogger {
                 info("*********************************************");
             }
         }
+    }
+
+    public void indiseas() {
+        configuration = new Configuration(configurationFiles.get(0), cmd);
+        configuration.load();
+        Indiseas indiseas = new Indiseas();
+        indiseas.init();
+        indiseas.run();
     }
 
     /**
