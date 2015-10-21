@@ -12,13 +12,14 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.math3.distribution.LogNormalDistribution;
 
 /**
  *
  * @author pverley
  */
 public class Indiseas extends OLogger {
-    
+
     private final String[] scenarii = new String[]{"ltl", "htl", "all"};
     private int[][] species;
     // Fmsy, maximum sustainable yield
@@ -40,24 +41,24 @@ public class Indiseas extends OLogger {
     // General indiseas parameters
     private String osmoseMainCfg;
     private String outputPath;
-    
+
     public void init() {
-        
+
         osmoseMainCfg = getConfiguration().getString("osmose.configuration.main");
-        
+
         species = new int[scenarii.length][];
         for (int is = 0; is < scenarii.length; is++) {
             species[is] = getConfiguration().getArrayInt("indiseas.species." + scenarii[is]);
         }
-        
+
         int nspecies = getConfiguration().getInt("simulation.nspecies");
         fmsy = new float[nspecies];
         for (int ispec = 0; ispec < nspecies; ispec++) {
             fmsy[ispec] = getConfiguration().getFloat("indiseas.fmsy.sp" + ispec);
         }
-        
+
         outputPath = getConfiguration().getFile("indiseas.output.path");
-        
+
         try (FileWriter fw = new FileWriter(getConfiguration().getFile("indiseas.simulation.file"), false)) {
             fw.write("# ");
             fw.write(Calendar.getInstance().getTime().toString());
@@ -66,16 +67,16 @@ public class Indiseas extends OLogger {
             error("Failed to append command", ex);
         }
     }
-    
+
     public void run() {
-        sensitivity();
+        //sensitivity();
         specificity();
     }
-    
+
     private void sensitivity() {
-        
+
         svFx = getConfiguration().getArrayFloat("indiseas.sensitivy.fmsy.multiplier");
-        
+
         for (int is = 0; is < scenarii.length; is++) {
             for (int iF = 0; iF < svFx.length; iF++) {
                 HashMap<String, String> options = new HashMap();
@@ -94,18 +95,23 @@ public class Indiseas extends OLogger {
                     float F = svFx[iF] * fmsy[ispecies];
                     options.put("mortality.fishing.rate.sp" + ispecies, String.valueOf(F));
                 }
+                // Annual output
+                int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear") * 10;
+                options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
+                // General options
                 addGeneralOptions(options);
+                // Create java command
                 appendSimulation(options, destination.toString());
             }
         }
     }
-    
+
     private void specificity() {
 
         // Directional
         spFx = getConfiguration().getArrayFloat("indiseas.specificity.fmsy.multiplier");
         spPx = getConfiguration().getArrayFloat("indiseas.specificity.plankton.multiplier");
-        
+
         for (int is = 0; is < scenarii.length; is++) {
             for (int iF = 0; iF < spFx.length; iF++) {
                 for (int iP = 0; iP < spPx.length; iP++) {
@@ -131,28 +137,75 @@ public class Indiseas extends OLogger {
                     for (int ipl = 0; ipl < getConfiguration().getInt("simulation.nplankton"); ipl++) {
                         options.put("plankton.multiplier.plk" + ipl, String.valueOf(spPx[iP]));
                     }
+                    // Annual output
+                    int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear") * 10;
+                    options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
+                    // Add general options
                     addGeneralOptions(options);
+                    // Create java command
                     appendSimulation(options, destination.toString());
                 }
             }
         }
-        
+
         // Random
-        phytoBiomass = getConfiguration().getDouble("indiseas.specificity.phytoplankton.biomass");
+        double bm = getConfiguration().getDouble("indiseas.specificity.phytoplankton.biomass");
         sd = getConfiguration().getArrayDouble("indiseas.specificity.random.sd");
         ndraw = getConfiguration().getInt("indiseas.specificity.random.ndraw");
-        
-        
+        for (int is = 0; is < scenarii.length; is++) {
+            for (int iF = 0; iF < spFx.length; iF++) {
+                for (int isd = 0; isd < sd.length; isd++) {
+                    double scale = Math.log(Math.pow(bm, 2) / Math.sqrt(Math.pow(sd[isd] * bm, 2) + Math.pow(bm, 2)));
+                    double shape = Math.sqrt(Math.log(Math.pow(sd[isd], 2) + 1));
+                    LogNormalDistribution lnd = new LogNormalDistribution(scale, shape);
+                    for (int id = 0; id < ndraw; id++) {
+                        HashMap<String, String> options = new HashMap();
+                        // Output folder
+                        StringBuilder destination = new StringBuilder();
+                        destination.append(outputPath);
+                        destination.append(File.separator);
+                        destination.append("sp_");
+                        destination.append(scenarii[is]);
+                        destination.append("_fx");
+                        destination.append(spFx[iF]);
+                        destination.append("_sd");
+                        destination.append(sd[isd]);
+                        destination.append("_");
+                        destination.append(id);
+                        options.put("output.dir.path", destination.toString());
+                        // Fishing mortality rates
+                        for (int ispec = 0; ispec < species[is].length; ispec++) {
+                            int ispecies = species[is][ispec];
+                            float F = spFx[iF] * fmsy[ispecies];
+                            options.put("mortality.fishing.rate.sp" + ispecies, String.valueOf(F));
+                        }
+                        double nbm = lnd.inverseCumulativeProbability(Math.random());
+                        double plx = nbm / bm;
+                        // Plankton multplier
+                        for (int ipl = 0; ipl < getConfiguration().getInt("simulation.nplankton"); ipl++) {
+                            options.put("plankton.multiplier.plk" + ipl, String.valueOf((float) plx));
+                        }
+                        // Annual output
+                        int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear") * 10;
+                        options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
+                        // General options
+                        addGeneralOptions(options);
+                        // Create java command
+                        appendSimulation(options, destination.toString());
+                    }
+                }
+            }
+        }
     }
-    
+
     private void addGeneralOptions(HashMap<String, String> options) {
 
         // Number of replicated simulations
         options.put("simulation.nsimulation", getConfiguration().getString("simulation.nsimulation"));
     }
-    
+
     private void appendSimulation(HashMap<String, String> options, String destination) {
-        
+
         String cmd = createCommand(options);
 
         // Append the new simulation command in the indiseas simulation file
@@ -178,7 +231,7 @@ public class Indiseas extends OLogger {
             error("Failed to write summary file", ex);
         }
     }
-    
+
     private String optionsToString(HashMap<String, String> options) {
         StringBuilder txt = new StringBuilder();
         txt.append("Overriden parameters:\n");
@@ -190,9 +243,9 @@ public class Indiseas extends OLogger {
         }
         return txt.toString();
     }
-    
+
     private String createCommand(HashMap<String, String> options) {
-        
+
         StringBuilder cmd = new StringBuilder();
         cmd.append(getConfiguration().getString("java.command"));
         cmd.append(" -jar ");
@@ -218,9 +271,9 @@ public class Indiseas extends OLogger {
         cmd.append("osmose.log");
         return cmd.toString();
     }
-    
+
     private Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
     }
-    
+
 }
