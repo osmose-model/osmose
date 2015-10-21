@@ -239,21 +239,32 @@ public class Configuration extends OLogger {
 
         parameters = new HashMap();
 
-        // Add the parameters from the command line
-        for (Entry<String, String> argument : cmd.entrySet()) {
-            Parameter parameter = new Parameter(argument.getKey(), argument.getValue());
-            parameters.put(argument.getKey(), parameter);
-            debug(parameter.toString());
+        if (null != cmd) {
+            // Add the parameters from the command line
+            for (Entry<String, String> argument : cmd.entrySet()) {
+                Parameter parameter = new Parameter(argument.getKey(), argument.getValue());
+                parameters.put(argument.getKey(), parameter);
+                debug(parameter.toString());
+            }
         }
 
         // Path resolution, global or local
         // Option provided as command line argument
-        if (cmd.containsKey("resolve")) {
+        if (null != cmd && cmd.containsKey("resolve")) {
             globalResolve = cmd.get("resolve").equalsIgnoreCase("global");
         } else {
             // global by default, for backward compatibility
             globalResolve = true;
         }
+    }
+
+    /**
+     * Creates a new {@code Configuration}.
+     *
+     * @param mainFilename, the main configuration file
+     */
+    Configuration(String mainFilename) {
+        this(mainFilename, null);
     }
 
 ////////////////////////////
@@ -262,7 +273,7 @@ public class Configuration extends OLogger {
     /**
      * Load the parameters from the main configuration file and check whether
      * the configuration is up to date.
-     * 
+     *
      * @return {@code TRUE} if the configuration is up to date.
      */
     public boolean load() {
