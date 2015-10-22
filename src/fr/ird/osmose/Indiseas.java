@@ -98,6 +98,7 @@ public class Indiseas extends OLogger {
         }
 
         wdPath = getConfiguration().getFile("indiseas.output.path");
+        if (!wdPath.endsWith(File.separator)) wdPath += File.separator;
 
         try (FileWriter fw = new FileWriter(getConfiguration().getFile("indiseas.simulation.file"), false)) {
             fw.write("# ");
@@ -135,7 +136,6 @@ public class Indiseas extends OLogger {
                 // Output folder
                 StringBuilder destination = new StringBuilder();
                 destination.append(wdPath);
-                destination.append(File.separator);
                 destination.append("sv_");
                 destination.append(scenarii[is]);
                 destination.append("_fx");
@@ -148,7 +148,7 @@ public class Indiseas extends OLogger {
                     options.put("mortality.fishing.rate.sp" + ispecies, String.valueOf(F));
                 }
                 // Annual output
-                int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear") * 10;
+                int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear");
                 options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
                 // General options
                 addGeneralOptions(options);
@@ -180,7 +180,6 @@ public class Indiseas extends OLogger {
                     // Output folder
                     StringBuilder destination = new StringBuilder();
                     destination.append(wdPath);
-                    destination.append(File.separator);
                     destination.append("sp_");
                     destination.append(scenarii[is]);
                     destination.append("_fx");
@@ -199,7 +198,7 @@ public class Indiseas extends OLogger {
                         options.put("plankton.multiplier.plk" + ipl, String.valueOf(spPx[iP]));
                     }
                     // Annual output
-                    int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear") * 10;
+                    int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear");
                     options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
                     // Add general options
                     addGeneralOptions(options);
@@ -227,7 +226,6 @@ public class Indiseas extends OLogger {
                         // Output folder
                         StringBuilder destination = new StringBuilder();
                         destination.append(wdPath);
-                        destination.append(File.separator);
                         destination.append("sp_");
                         destination.append(scenarii[is]);
                         destination.append("_fx");
@@ -250,7 +248,7 @@ public class Indiseas extends OLogger {
                             options.put("plankton.multiplier.plk" + ipl, String.valueOf((float) plx));
                         }
                         // Annual output
-                        int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear") * 10;
+                        int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear");
                         options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
                         // General options
                         addGeneralOptions(options);
@@ -285,7 +283,6 @@ public class Indiseas extends OLogger {
                 // Output folder
                 StringBuilder destination = new StringBuilder();
                 destination.append(wdPath);
-                destination.append(File.separator);
                 destination.append("rv_");
                 destination.append(scenarii[is]);
                 destination.append("_fx");
@@ -350,7 +347,7 @@ public class Indiseas extends OLogger {
 
         // Write summary text file in output folder
         File summaryFile = new File(output, output.getName() + ".txt");
-        try (FileWriter fw = new FileWriter(summaryFile, true)) {
+        try (FileWriter fw = new FileWriter(summaryFile)) {
             fw.write(optionsToString(options));
             fw.write('\n');
             fw.write("Java command:\n");
