@@ -65,30 +65,20 @@ public class OLogger {
     private final Logger logger = Logger.getAnonymousLogger();
 
     public OLogger() {
-        setupOsmoseLogger();
+        setup(-1);
     }
 
     public OLogger(int rank) {
-        setupSimulationLogger(rank);
+        setup(rank);
     }
 
-    private void setupOsmoseLogger() {
-
-        // setup the logger
-        logger.setUseParentHandlers(false);
-        OsmoseLogFormatter formatter = new OsmoseLogFormatter();
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setFormatter(formatter);
-        logger.addHandler(handler);
-    }
-
-    private void setupSimulationLogger(int rank) {
+    private void setup(int rank) {
         Handler[] handlers = logger.getHandlers();
         for (Handler handler : handlers) {
             logger.removeHandler(handler);
         }
         logger.setUseParentHandlers(false);
-        SimulationLogFormatter formatter = new SimulationLogFormatter(rank);
+        OsmoseLogFormatter formatter = new OsmoseLogFormatter(rank);
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
