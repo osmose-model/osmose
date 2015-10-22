@@ -139,7 +139,7 @@ public class MapSet extends SimulationLinker {
     public GridMap getMap(School school) {
         return getMap(getIndexMap(school));
     }
-    
+
     public String getMapFile(int numMap) {
         return mapFile[numMap];
     }
@@ -229,14 +229,12 @@ public class MapSet extends SimulationLinker {
              * read the name of the CSV file and load the map. If name = "null"
              * it means there is no map defined at these age-class and time-step
              */
-            if (getConfiguration().canFind(prefix + ".map" + imap + ".file")) {
+            if (!getConfiguration().isNull(prefix + ".map" + imap + ".file")) {
                 String csvFile = getConfiguration().getFile(prefix + ".map" + imap + ".file");
                 mapFile[n] = csvFile;
-                if (null != csvFile) {
-                    maps[n] = new GridMap(csvFile);
-                } else {
-                    maps[n] = null;
-                }
+                maps[n] = new GridMap(csvFile);
+            } else {
+                maps[n] = null;
             }
         }
     }
