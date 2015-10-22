@@ -55,6 +55,7 @@ import fr.ird.osmose.util.logging.OLogger;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class Indiseas extends OLogger {
     private String wdPath;
 
     /**
-     * 
+     *
      */
     public void init() {
 
@@ -98,7 +99,9 @@ public class Indiseas extends OLogger {
         }
 
         wdPath = getConfiguration().getFile("indiseas.output.path");
-        if (!wdPath.endsWith(File.separator)) wdPath += File.separator;
+        if (!wdPath.endsWith(File.separator)) {
+            wdPath += File.separator;
+        }
 
         try (FileWriter fw = new FileWriter(getConfiguration().getFile("indiseas.simulation.file"), false)) {
             fw.write("# ");
@@ -114,9 +117,12 @@ public class Indiseas extends OLogger {
      * specificity and responsiveness of the indicators.
      */
     public void run() {
+        info("Running Indiseas simulation generator");
         sensitivity();
         specificity();
         responsiveness();
+        info("Indiseas simulation launchers listed in file " + getConfiguration().getFile("indiseas.simulation.file"));
+        info("Indiseas file tree generated in folder " + wdPath);
     }
 
     /**
@@ -124,6 +130,8 @@ public class Indiseas extends OLogger {
      * pressure.
      */
     private void sensitivity() {
+
+        info("Indiseas SENSITIVITY");
 
         // Sensitivity Fmsy multiplier
         float[] svFx = getConfiguration().getArrayFloat("indiseas.sensitivy.fmsy.multiplier");
@@ -141,6 +149,7 @@ public class Indiseas extends OLogger {
                 destination.append("_fx");
                 destination.append(svFx[iF]);
                 options.put("output.dir.path", destination.toString());
+                info(new File(destination.toString()).getName());
                 // Fishing mortality rates
                 for (int ispec = 0; ispec < species[is].length; ispec++) {
                     int ispecies = species[is][ispec];
@@ -168,6 +177,7 @@ public class Indiseas extends OLogger {
     private void specificity() {
 
         //// Directional
+        info("Indiseas SPECIFICITY directional");
         // Specificity Fmsy multiplier
         float[] spFx = getConfiguration().getArrayFloat("indiseas.specificity.fmsy.multiplier");
         // Specificity directional plankton multiplier
@@ -187,6 +197,7 @@ public class Indiseas extends OLogger {
                     destination.append("_plx");
                     destination.append(spPx[iP]);
                     options.put("output.dir.path", destination.toString());
+                    info(new File(destination.toString()).getName());
                     // Fishing mortality rates
                     for (int ispec = 0; ispec < species[is].length; ispec++) {
                         int ispecies = species[is][ispec];
@@ -209,12 +220,15 @@ public class Indiseas extends OLogger {
         }
 
         //// Random
+        info("Indiseas SPECIFICITY random");
         // Phytoplankton biomass
         double bm = getConfiguration().getDouble("indiseas.specificity.phytoplankton.biomass");
         // Standard deviation
         double[] sd = getConfiguration().getArrayDouble("indiseas.specificity.random.sd");
         // Number of draws for a given standard deviation
         int ndraw = getConfiguration().getInt("indiseas.specificity.random.ndraw");
+        NumberFormat fmt = NumberFormat.getIntegerInstance();
+        fmt.setMinimumIntegerDigits(String.valueOf(ndraw).length());
         for (int is = 0; is < scenarii.length; is++) {
             for (int iF = 0; iF < spFx.length; iF++) {
                 for (int isd = 0; isd < sd.length; isd++) {
@@ -233,8 +247,9 @@ public class Indiseas extends OLogger {
                         destination.append("_sd");
                         destination.append(sd[isd]);
                         destination.append("_");
-                        destination.append(id);
+                        destination.append(fmt.format(id));
                         options.put("output.dir.path", destination.toString());
+                        info(new File(destination.toString()).getName());
                         // Fishing mortality rates
                         for (int ispec = 0; ispec < species[is].length; ispec++) {
                             int ispecies = species[is][ispec];
@@ -265,6 +280,7 @@ public class Indiseas extends OLogger {
      */
     private void responsiveness() {
 
+        info("Indiseas RESPONSIVENESS");
         // Fmsy multiplier
         float[] rvFx = getConfiguration().getArrayFloat("indiseas.responsiveness.fmsy.multiplier");
         // Number of years of spinup with F = Fcurrent
@@ -288,6 +304,7 @@ public class Indiseas extends OLogger {
                 destination.append("_fx");
                 destination.append(rvFx[iF]);
                 options.put("output.dir.path", destination.toString());
+                info(new File(destination.toString()).getName());
                 new File(destination.toString()).mkdirs();
                 for (int ispec = 0; ispec < species[is].length; ispec++) {
                     int ispecies = species[is][ispec];
@@ -305,7 +322,6 @@ public class Indiseas extends OLogger {
                             String[] newline = new String[]{String.valueOf(iy), String.valueOf(F)};
                             writer.writeNext(newline);
                         }
-                        info("Created fishing mortality file by year for species " + ispecies + " " + csvfile);
                     } catch (IOException ex) {
                         error("Error writing CSV file " + csvfile, ex);
                     }
