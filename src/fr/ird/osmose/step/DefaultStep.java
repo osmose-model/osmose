@@ -124,7 +124,7 @@ public class DefaultStep extends AbstractStep {
         indicators.init();
         
         // Record time step 0 in the output
-        recordStep0 = getConfiguration().getBoolean("output.step0.include");
+        recordStep0 = getConfiguration().getBoolean("output.step0.include", false);
     }
 
     @Override

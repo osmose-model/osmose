@@ -87,7 +87,7 @@ public class ByYearTimeSeries extends SimulationLinker {
                 throw new IOException("Found " + nTimeSerie + " years in the time serie. It must contain at least " + nMin + " year(s).");
             }
             if (nTimeSerie > nMax) {
-                getSimulation().warning("Time serie in file {0} contains {1} years out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
+                debug("Time serie in file {0} contains {1} years out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
 
@@ -111,10 +111,10 @@ public class ByYearTimeSeries extends SimulationLinker {
                         }
                     }
                 }
-                getSimulation().warning("Time serie in file {0} only contains {1} years out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nYear});
+                debug("Time serie in file {0} only contains {1} years out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nYear});
             }
         } catch (IOException ex) {
-            getSimulation().error("Error reading CSV file " + filename, ex);
+            error("Error reading CSV file " + filename, ex);
         }
     }
 

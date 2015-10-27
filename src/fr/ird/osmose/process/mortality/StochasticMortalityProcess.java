@@ -70,11 +70,8 @@ public class StochasticMortalityProcess extends AbstractProcess {
             subdt = getConfiguration().getInt("mortality.subdt");
         } else {
             subdt = 10;
-            warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm.");
+            warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose set it to {0}.", subdt);
         }
-
-        info("Mortality subdt set to " + subdt);
-
     }
 
     @Override

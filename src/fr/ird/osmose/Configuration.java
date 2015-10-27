@@ -241,10 +241,11 @@ public class Configuration extends OLogger {
 
         if (null != cmd) {
             // Add the parameters from the command line
+            debug("Loading parameters from command line");
             for (Entry<String, String> argument : cmd.entrySet()) {
                 Parameter parameter = new Parameter(argument.getKey(), argument.getValue());
                 parameters.put(argument.getKey(), parameter);
-                debug(parameter.toString());
+                debug(". " + parameter.toString());
             }
         }
 
@@ -388,12 +389,15 @@ public class Configuration extends OLogger {
             error("Could not fing Osmose configuration file: " + filename, ex);
         }
         StringBuilder msg = new StringBuilder();
+        StringBuilder space = new StringBuilder();
         for (int i = 0; i < depth; i++) {
-            msg.append("  ");
+            space.append(". ");
         }
+        msg.append(space);
         msg.append("Loading parameters from ");
         msg.append(filename);
         info(msg.toString());
+        space.append(". ");
 
         // Read it
         String line = null;
@@ -405,11 +409,12 @@ public class Configuration extends OLogger {
                     Parameter entry = new Parameter(iline, filename);
                     entry.parse(line);
                     if (parameters.containsKey(entry.key)) {
-                        warning("Parameter {0} has already been defined with value {1} (from {2})", new Object[]{entry.key, parameters.get(entry.key).value, parameters.get(entry.key).source});
-                        warning("Osmose will ignore parameter {0} with value {1} (from {2})", new Object[]{entry.key, entry.value, filename});
+                        warning("{0}Osmose will ignore parameter {1}", new Object[]{space, entry});
+                        warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
+                        
                     } else {
                         parameters.put(entry.key, entry);
-                        debug(entry.toString());
+                        debug(space + entry.toString());
                         if (entry.key.startsWith("osmose.configuration")) {
                             loadParameters(getFile(entry.key), depth + 1);
                         }
@@ -1006,10 +1011,6 @@ public class Configuration extends OLogger {
             // set empty value to "null"
             if (value.isEmpty()) {
                 value = "null";
-            }
-            // Mention when he value is null for debugging purpose
-            if (value.equalsIgnoreCase("null")) {
-                debug("No value found for parameter {0}", key);
             }
         }
 

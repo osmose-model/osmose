@@ -92,7 +92,7 @@ public class SingleTimeSeries extends SimulationLinker {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
             }
             if (nTimeSerie > nMax) {
-                getSimulation().warning("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
+                debug("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
 
@@ -116,10 +116,10 @@ public class SingleTimeSeries extends SimulationLinker {
                         }
                     }
                 }
-                getSimulation().warning("Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
+                debug("Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
             }
         } catch (IOException ex) {
-            getSimulation().error("Error reading CSV file " + filename, ex);
+            error("Error reading CSV file " + filename, ex);
         }
     }
 

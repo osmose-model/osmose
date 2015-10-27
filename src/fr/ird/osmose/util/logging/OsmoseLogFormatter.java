@@ -64,7 +64,7 @@ public class OsmoseLogFormatter extends Formatter {
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder(1000);
         builder.append("osmose");
-        builder.append("[").append(record.getLevel().toString().toLowerCase()).append("] ");
+        builder.append("[").append(record.getLevel().toString().substring(0, 4).toLowerCase()).append("] ");
         builder.append(formatMessage(record));
         if (null != record.getThrown()) {
             StringWriter sw = new StringWriter();

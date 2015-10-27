@@ -339,11 +339,7 @@ public class Simulation extends OLogger {
 
             // Print progress in console at the beginning of the year
             if (i_step_simu % getConfiguration().getNStepYear() == 0) {
-                if (getConfiguration().getNCpu() > 1) {
-                    debug("year {0}", year);
-                } else {
-                    info("year {0}", year);
-                }
+                info("year {0}", year);
             }
 
             // Run a new step
@@ -357,7 +353,7 @@ public class Simulation extends OLogger {
 
             // Increment time step
             i_step_simu++;
-            }
+        }
         step.end();
 
         // Create systematically a restart file at the end of the simulation

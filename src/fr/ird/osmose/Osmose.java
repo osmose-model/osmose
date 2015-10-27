@@ -57,6 +57,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import ml.options.OptionData;
 import ml.options.OptionSet;
 import ml.options.Options;
@@ -203,8 +204,10 @@ public class Osmose extends OLogger {
         getLogger().setUseParentHandlers(false);
         OsmoseLogFormatter formatter = new OsmoseLogFormatter();
         ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.ALL);
         handler.setFormatter(formatter);
         getLogger().addHandler(handler);
+        getLogger().setLevel(Level.INFO);
     }
 
     /**
@@ -467,15 +470,15 @@ public class Osmose extends OLogger {
      * arguments.
      */
     public static void main(String... args) {
+        osmose.readArgs(args);
+        osmose.setupLogger();
         osmose.info("*********************************************");
         osmose.info("OSMOSE - Modelling Marin Exploited Ecosystems");
         osmose.info("http://www.osmose-model.org");
         osmose.info("*********************************************");
         osmose.info("Software version: " + VersionManager.getInstance().OSMOSE_VERSION.toString());
-        osmose.readArgs(args);
-        osmose.setupLogger();
         osmose.runAll();
-        osmose.info("OSMOSE Model- © IRD");
+        osmose.info("OSMOSE Model copyright © IRD");
         osmose.info("*********************************************");
     }
 
