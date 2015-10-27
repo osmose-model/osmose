@@ -48,8 +48,6 @@
  */
 package fr.ird.osmose.util.logging;
 
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,27 +60,7 @@ public class OLogger {
     /**
      * The application logger
      */
-    private final Logger logger = Logger.getAnonymousLogger();
-
-    public OLogger() {
-        setup(-1);
-    }
-
-    public OLogger(int rank) {
-        setup(rank);
-    }
-
-    private void setup(int rank) {
-        Handler[] handlers = logger.getHandlers();
-        for (Handler handler : handlers) {
-            logger.removeHandler(handler);
-        }
-        logger.setUseParentHandlers(false);
-        OsmoseLogFormatter formatter = new OsmoseLogFormatter(rank);
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setFormatter(formatter);
-        logger.addHandler(handler);
-    }
+    private final static Logger logger = Logger.getAnonymousLogger();
 
     public void error(String msg, Exception ex) {
         logger.log(Level.SEVERE, msg, ex);
@@ -123,5 +101,9 @@ public class OLogger {
 
     public void debug(String msg, Object params[]) {
         logger.log(Level.FINE, msg, params);
+    }
+    
+    public Logger getLogger() {
+        return logger;
     }
 }

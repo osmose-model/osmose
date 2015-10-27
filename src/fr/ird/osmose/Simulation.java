@@ -158,7 +158,6 @@ public class Simulation extends OLogger {
      * @param rank, the rank of the simulation
      */
     public Simulation(int rank) {
-        super(rank);
         this.rank = rank;
     }
 

@@ -66,7 +66,6 @@ public class SimulationLinker extends OLogger {
     private final int rank;
 
     public SimulationLinker(int rank) {
-        super(rank);
         this.rank = rank;
     }
 

@@ -60,22 +60,11 @@ import java.util.logging.LogRecord;
  */
 public class OsmoseLogFormatter extends Formatter {
 
-    private final int rank;
-
-    public OsmoseLogFormatter(int rank) {
-        this.rank = rank;
-    }
-
     @Override
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder(1000);
         builder.append("osmose");
-        builder.append("[").append(record.getLevel().toString().toLowerCase()).append("]");
-        if (rank>=0) {
-            builder.append("#simu");
-            builder.append(rank);
-        }
-        builder.append(" - ");
+        builder.append("[").append(record.getLevel().toString().toLowerCase()).append("] ");
         builder.append(formatMessage(record));
         if (null != record.getThrown()) {
             StringWriter sw = new StringWriter();

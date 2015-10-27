@@ -50,10 +50,13 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.util.logging.OLogger;
 import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.util.logging.OsmoseLogFormatter;
 import fr.ird.osmose.util.version.VersionManager;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import ml.options.OptionData;
 import ml.options.OptionSet;
 import ml.options.Options;
@@ -192,6 +195,18 @@ public class Osmose extends OLogger {
         }
     }
 
+    private void setupLogger() {
+        Handler[] handlers = getLogger().getHandlers();
+        for (Handler handler : handlers) {
+            getLogger().removeHandler(handler);
+        }
+        getLogger().setUseParentHandlers(false);
+        OsmoseLogFormatter formatter = new OsmoseLogFormatter();
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(formatter);
+        getLogger().addHandler(handler);
+    }
+
     /**
      * Reads the command line usage from resource file resources/cmd-usage.txt
      *
@@ -313,7 +328,6 @@ public class Osmose extends OLogger {
 
         // Loop over the number of replica
         long begin = System.currentTimeMillis();
-        info("Simulation started...");
         int nProcs = Math.min(configuration.getNCpu(), Runtime.getRuntime().availableProcessors());
         //int nProcs = 1;
         int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
@@ -338,8 +352,10 @@ public class Osmose extends OLogger {
                 simulation[iBatch * nProcs + iworker] = null;
             }
         }
-        int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-        info("Simulation completed (time ellapsed:  {0} seconds)", time);
+        if (configuration.getNSimulation() > 1) {
+            int time = (int) ((System.currentTimeMillis() - begin) / 1000);
+            info("All simulations completed (time ellapsed:  {0} seconds)", time);
+        }
     }
 
     /**
@@ -384,11 +400,12 @@ public class Osmose extends OLogger {
         public void run() {
             long begin = System.currentTimeMillis();
             try {
-                simulation[rank].info("Started...");
+                info("***********************");
+                info("Simulation {0} started...", rank);
                 simulation[rank].init();
                 simulation[rank].run();
                 int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-                simulation[rank].info("Completed (time ellapsed: {0} seconds)", time);
+                info("Simulation {0} completed (time ellapsed: {1} seconds)", new Object[]{rank, time});
                 simulation[rank].destroy();
             } finally {
                 doneSignal.countDown();
@@ -456,6 +473,7 @@ public class Osmose extends OLogger {
         osmose.info("*********************************************");
         osmose.info("Software version: " + VersionManager.getInstance().OSMOSE_VERSION.toString());
         osmose.readArgs(args);
+        osmose.setupLogger();
         osmose.runAll();
         osmose.info("OSMOSE Model- © IRD");
         osmose.info("*********************************************");
