@@ -324,6 +324,13 @@ public class Osmose extends OLogger {
         }
         configuration.init();
 
+        // Disable logging in multithread environment
+        Level lvl = getLogger().getLevel();
+        if (configuration.getNCpu() > 1 && configuration.getNSimulation() > 1) {
+            info("Logging is disabled in multithreading mode. Set ncpu or nsimulation to 1 for full logging.");
+            getLogger().setLevel(Level.SEVERE);
+        }
+
         simulation = new Simulation[configuration.getNSimulation()];
         for (int i = 0; i < configuration.getNSimulation(); i++) {
             simulation[i] = new Simulation(i);
@@ -355,6 +362,7 @@ public class Osmose extends OLogger {
                 simulation[iBatch * nProcs + iworker] = null;
             }
         }
+        getLogger().setLevel(lvl);
         if (configuration.getNSimulation() > 1) {
             int time = (int) ((System.currentTimeMillis() - begin) / 1000);
             info("All simulations completed (time ellapsed:  {0} seconds)", time);
@@ -403,7 +411,6 @@ public class Osmose extends OLogger {
         public void run() {
             long begin = System.currentTimeMillis();
             try {
-                info("***********************");
                 info("Simulation {0} started...", rank);
                 simulation[rank].init();
                 simulation[rank].run();
