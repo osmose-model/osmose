@@ -50,12 +50,11 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.util.logging.OLogger;
 import fr.ird.osmose.grid.IGrid;
-import fr.ird.osmose.util.logging.OsmoseLogFormatter;
+import fr.ird.osmose.util.logging.StdoutHandler;
 import fr.ird.osmose.util.version.VersionManager;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import ml.options.OptionData;
@@ -200,16 +199,18 @@ public class Osmose extends OLogger {
                 cmd.put(key, value);
             }
         }
-        
+
         // Verbose and quiet options are exclusive
         if (set.isSet("verbose") && set.isSet("quiet")) {
             info(getCmdUsage());
             error("Invalid command usage, -verbose and -quiet options are exclusive", new IllegalArgumentException("Osmose logging cannot be both verbose and quiet."));
         }
-        if (set.isSet("verbose"))
+        if (set.isSet("verbose")) {
             getLogger().setLevel(Level.FINE);
-        if (set.isSet("quiet"))
+        }
+        if (set.isSet("quiet")) {
             getLogger().setLevel(Level.SEVERE);
+        }
     }
 
     private void setupLogger() {
@@ -218,11 +219,7 @@ public class Osmose extends OLogger {
             getLogger().removeHandler(handler);
         }
         getLogger().setUseParentHandlers(false);
-        OsmoseLogFormatter formatter = new OsmoseLogFormatter();
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.ALL);
-        handler.setFormatter(formatter);
-        getLogger().addHandler(handler);
+        getLogger().addHandler(new StdoutHandler());
         getLogger().setLevel(Level.INFO);
     }
 
