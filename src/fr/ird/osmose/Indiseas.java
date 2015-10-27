@@ -310,7 +310,7 @@ public class Indiseas extends OLogger {
                     csvfile.append(destination);
                     csvfile.append(File.separator);
                     csvfile.append("fishing-rate-by-year-sp");
-                    csvfile.append(ispec);
+                    csvfile.append(ispecies);
                     csvfile.append(".csv");
                     try (CSVWriter writer = new CSVWriter(new FileWriter(csvfile.toString()), ';')) {
                         for (int iy = 0; iy < nyearTot; iy++) {
