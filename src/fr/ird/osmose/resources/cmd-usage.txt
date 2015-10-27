@@ -17,3 +17,5 @@ Options summary:
      java -jar osmose.jar -Pspecies.K.sp1=1.6 -Pspecies.name.sp4=sardine my_config.csv
     Parameters osmose.configuration.* will not be interpreted as configuration files. 
    -P and -update options are mutually exclusive.
+   -verbose     Enable verbose output
+   -quiet     Only print error message

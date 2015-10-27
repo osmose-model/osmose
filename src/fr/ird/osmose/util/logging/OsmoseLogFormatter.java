@@ -52,6 +52,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
@@ -64,7 +65,11 @@ public class OsmoseLogFormatter extends Formatter {
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder(1000);
         builder.append("osmose");
-        builder.append("[").append(record.getLevel().toString().substring(0, 4).toLowerCase()).append("] ");
+        // level printed as fine/info/warn (4 letters) or severe
+        String level = record.getLevel().intValue() < Level.SEVERE.intValue()
+                ? record.getLevel().toString().substring(0, 4)
+                : record.getLevel().toString();
+        builder.append("[").append(level.toLowerCase()).append("] ");
         builder.append(formatMessage(record));
         if (null != record.getThrown()) {
             StringWriter sw = new StringWriter();

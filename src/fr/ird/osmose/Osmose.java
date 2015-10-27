@@ -98,7 +98,9 @@ public class Osmose extends OLogger {
      * Whether to update the configuration files
      */
     private boolean updateConfiguration = false;
-
+    /**
+     * Run Indiseas simulation generator
+     */
     private boolean flagIndiseas = false;
 
     /**
@@ -133,6 +135,10 @@ public class Osmose extends OLogger {
         // For all sets, user can specify parameter values that will overwrite
         // the values defined in the configuration files
         opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
+        // For all sets, enable verbose output
+        opt.addOptionAllSets("verbose", Multiplicity.ZERO_OR_ONE);
+        // For all sets, enable quiet output (only error)
+        opt.addOptionAllSets("quiet", Multiplicity.ZERO_OR_ONE);
 
         // Get the matching set and throw error if none found
         OptionSet set = opt.getMatchingSet(false, false);
@@ -194,6 +200,16 @@ public class Osmose extends OLogger {
                 cmd.put(key, value);
             }
         }
+        
+        // Verbose and quiet options are exclusive
+        if (set.isSet("verbose") && set.isSet("quiet")) {
+            info(getCmdUsage());
+            error("Invalid command usage, -verbose and -quiet options are exclusive", new IllegalArgumentException("Osmose logging cannot be both verbose and quiet."));
+        }
+        if (set.isSet("verbose"))
+            getLogger().setLevel(Level.FINE);
+        if (set.isSet("quiet"))
+            getLogger().setLevel(Level.SEVERE);
     }
 
     private void setupLogger() {
@@ -223,7 +239,7 @@ public class Osmose extends OLogger {
             String line;
             while ((line = bfIn.readLine()) != null) {
                 usage.append(line);
-                usage.append("\n\t");
+                usage.append("\n");
             }
         } catch (IOException ex) {
             warning("Failed to print command line usage.");
@@ -477,8 +493,8 @@ public class Osmose extends OLogger {
      * arguments.
      */
     public static void main(String... args) {
-        osmose.readArgs(args);
         osmose.setupLogger();
+        osmose.readArgs(args);
         osmose.info("*********************************************");
         osmose.info("OSMOSE - Modelling Marin Exploited Ecosystems");
         osmose.info("http://www.osmose-model.org");
