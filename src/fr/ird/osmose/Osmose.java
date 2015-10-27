@@ -184,7 +184,7 @@ public class Osmose extends OLogger {
         if (set.isSet("P")) {
             OptionData optParam = set.getOption("P");
             for (int i = 0; i < optParam.getResultCount(); i++) {
-                String key = optParam.getResultDetail(i);
+                String key = optParam.getResultDetail(i).toLowerCase();
                 // Remove leading and trailing double quotes
                 String value = optParam.getResultValue(i).replaceAll("^\"|\"$", "");
                 cmd.put(key, value);
