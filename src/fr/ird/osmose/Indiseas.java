@@ -75,8 +75,6 @@ public class Indiseas extends OLogger {
     private int[][] species;
     // Fmsy, maximum sustainable yield
     private float[] fmsy;
-    // Osmose main configuration file
-    private String osmoseMainCfg;
     // Indiseas working directory
     private String wdPath;
 
@@ -84,8 +82,6 @@ public class Indiseas extends OLogger {
      *
      */
     public void init() {
-
-        osmoseMainCfg = getConfiguration().getFile("osmose.configuration.main");
 
         species = new int[scenarii.length][];
         for (int is = 0; is < scenarii.length; is++) {
@@ -190,7 +186,7 @@ public class Indiseas extends OLogger {
                     // Output folder
                     StringBuilder destination = new StringBuilder();
                     destination.append(wdPath);
-                    destination.append("sp_");
+                    destination.append("spd_");
                     destination.append(scenarii[is]);
                     destination.append("_fx");
                     destination.append(spFx[iF]);
@@ -240,7 +236,7 @@ public class Indiseas extends OLogger {
                         // Output folder
                         StringBuilder destination = new StringBuilder();
                         destination.append(wdPath);
-                        destination.append("sp_");
+                        destination.append("spr_");
                         destination.append(scenarii[is]);
                         destination.append("_fx");
                         destination.append(spFx[iF]);
@@ -341,8 +337,22 @@ public class Indiseas extends OLogger {
 
     private void addGeneralOptions(HashMap<String, String> options) {
 
-        // Number of replicated simulations
-        options.put("simulation.nsimulation", getConfiguration().getString("simulation.nsimulation"));
+        // Start year for output set to zero
+        options.put("output.start.year", String.valueOf(0));
+        // Abundance output
+        options.put("output.abundance.enabled", String.valueOf(true));
+        // Biomass output
+        options.put("output.biomass.enabled", String.valueOf(true));
+        // Yield output
+        options.put("output.yield.biomass.enabled", String.valueOf(true));
+        // Trophic level output
+        options.put("output.TL.enabled", String.valueOf(true));
+        // Mean size output
+        options.put("output.size.enabled", String.valueOf(true));
+        // Biomass size distribution output
+        options.put("output.biomass.bysize.enabled", String.valueOf(true));
+        // Ncpu must be set to 1
+        options.put("simulation.ncpu", String.valueOf(1));
     }
 
     private void appendSimulation(HashMap<String, String> options, String destination) {
@@ -405,7 +415,7 @@ public class Indiseas extends OLogger {
             cmd.append(" ");
         }
         // main Osmose configuration file
-        cmd.append(osmoseMainCfg);
+        cmd.append(getConfiguration().getMainFile());
         // Send the log to the output folder
         cmd.append(" &> ");
         cmd.append(options.get("output.dir.path"));
