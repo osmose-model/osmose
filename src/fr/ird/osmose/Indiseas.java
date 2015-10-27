@@ -405,7 +405,8 @@ public class Indiseas extends OLogger {
         // Resolve option
         cmd.append(" -resolve=");
         cmd.append(getConfiguration().getString("osmose.path.resolve"));
-        cmd.append(" ");
+        // Quiet option (only print error message in log file
+        cmd.append(" -quiet ");
         // Osmose parameters 
         for (Map.Entry<String, String> argument : options.entrySet()) {
             cmd.append("-P");
@@ -417,7 +418,7 @@ public class Indiseas extends OLogger {
         // main Osmose configuration file
         cmd.append(getConfiguration().getMainFile());
         // Send the log to the output folder
-        cmd.append(" &> ");
+        cmd.append(" > ");
         cmd.append(options.get("output.dir.path"));
         cmd.append(File.separator);
         cmd.append("osmose.log");
