@@ -50,7 +50,6 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.util.SimulationLinker;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
-import java.util.HashMap;
 
 /**
  * This class represents a plankton group or any other low trophic level
@@ -102,11 +101,6 @@ public class Plankton extends SimulationLinker {
      */
     private double[] accessibilityCoeff;
     /**
-     * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
-     * for virtually increasing or decreasing plankton biomass.
-     */
-    private double multiplier;
-    /**
      * Maximum value for plankton accessibility. It should never be one or
      * exceed one to avoid any numerical problem when converting from float to
      * double.
@@ -117,7 +111,7 @@ public class Plankton extends SimulationLinker {
 // Constructors
 ///////////////
     /**
-     * Initializes a new plankton group with characteristics given as
+     * Initialises a new plankton group with characteristics given as
      * parameters.
      *
      * @param rank, the simulation rank
@@ -132,7 +126,7 @@ public class Plankton extends SimulationLinker {
 // Definition of the methods
 ////////////////////////////
     /**
-     * Intializes the parameters of the plankton group
+     * Initialises the parameters of the plankton group
      */
     public void init() {
 
@@ -151,52 +145,10 @@ public class Plankton extends SimulationLinker {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;;
             }
         }
-        if (!getConfiguration().isNull("plankton.multiplier.plk" + index)) {
-            multiplier = getConfiguration().getFloat("plankton.multiplier.plk" + index);
-            warning("Plankton biomass for plankton group " + name + " will be multiplied by " + multiplier + " accordingly to parameter 'plankton.multiplier.plk'" + index + " from " + getConfiguration().getSource("plankton.multiplier.plk" + index));
-        } else {
-            multiplier = 1.f;
-        }
     }
-
-    /**
-     * Gets the biomass of the plankton group in a specific cell of the grid.
-     *
-     * @param cell, a {@link Cell} of the grid
-     * @return the biomass of the plankton group, in tonne, in the given
-     * {@code cell}
-     */
-    public double getBiomass(Cell cell) {
-        return multiplier * getForcing().getBiomass(index, cell);
-    }
-
-    /**
-     * Gets the accessible biomass of the plankton group by the fish in a
-     * specific cell of the grid.
-     * {@code accessible biomass = biomass(cell) * accessibility coefficient}
-     *
-     * @param cell, a {@link Cell} of the grid
-     * @param iStepSimu, the current time step of the simulation
-     * @return the accessible biomass of the plankton group, in tonne, in the
-     * given {@code cell}
-     */
-    public double getAccessibleBiomass(Cell cell, int iStepSimu) {
-        return accessibilityCoeff[iStepSimu] * getBiomass(cell);
-    }
-
-    /**
-     * Gets the total biomass of the plankton group over the grid.
-     *
-     * @return the cumulated biomass over the domain in tonne
-     */
-    public double getTotalBiomass() {
-        double biomTot = 0.d;
-        for (Cell cell : getGrid().getCells()) {
-            if (!cell.isLand()) {
-                biomTot += getBiomass(cell);
-            }
-        }
-        return biomTot;
+    
+    public double getAccessibility(int iStepSimu) {
+        return accessibilityCoeff[iStepSimu];
     }
 
     /**

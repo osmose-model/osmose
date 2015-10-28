@@ -48,6 +48,7 @@
  */
 package fr.ird.osmose.output;
 
+import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
@@ -145,7 +146,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         int nPrey = nSpec + getConfiguration().getNPlankton();
         for (int i = nSpec; i < nPrey; i++) {
             int iPlankton = i - nSpec;
-            biomassStage[i][0] += getSimulation().getPlankton(iPlankton).getTotalBiomass();
+            biomassStage[i][0] += getTotalBiomass(iPlankton);
         }
     }
 
@@ -185,5 +186,20 @@ public class BiomassDietStageOutput extends AbstractOutput {
             k++;
         }
         writeVariable(time, biomass);
+    }
+    
+    /**
+     * Gets the total biomass of the plankton group over the grid.
+     *
+     * @return the cumulated biomass over the domain in tonne
+     */
+    private double getTotalBiomass(int iPlankton) {
+        double biomTot = 0.d;
+        for (Cell cell : getGrid().getCells()) {
+            if (!cell.isLand()) {
+                biomTot += getSimulation().getForcing().getBiomass(iPlankton, cell);
+            }
+        }
+        return biomTot;
     }
 }

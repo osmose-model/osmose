@@ -149,7 +149,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
                 int j = cell.get_jgrid();
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
                     // ltl_biomass is the plankton biomass at the beginning of the time step
-                    ltlbiomass0[iltl][j][i] = getSimulation().getPlankton(iltl).getBiomass(cell);
+                    ltlbiomass0[iltl][j][i] = getSimulation().getForcing().getBiomass(iltl, cell);
                     // ltl_biomass_pred is the plankton biomass remaining in the water column after the predation process
                     ltlbiomass1[iltl][j][i] = ltlbiomass0[iltl][j][i] - preyedLTL[iltl];
                 }

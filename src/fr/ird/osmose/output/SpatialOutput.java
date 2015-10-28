@@ -252,7 +252,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                     }
                 }
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass[iltl][j][i] = (float) getSimulation().getPlankton(iltl).getBiomass(cell);
+                    ltlbiomass[iltl][j][i] = (float) getSimulation().getForcing().getBiomass(iltl, cell);
                 }
             }
         }

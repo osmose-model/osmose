@@ -101,6 +101,24 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      * function.
      */
     private double[][][] biomass;
+    /**
+     * The constant biomass, in tonne, in a cell of the model. Parameter
+     * 'plankton.biomass.total.plk#' provides the total biomass of a given
+     * plankton group in the system for every time step. This feature allows to
+     * consider a plankton group with a constant biomass uniformly distributed
+     * over the grid of the model and over time. This feature has been added as
+     * a quick patch for a configuration that seems to lack a food compartment
+     * and as a result cannot reach any biomass equilibrium. It provides to the
+     * system a constant pool of biomass throughout time. It should only be used
+     * for "debugging" a configuration.
+     */
+    private double[] uBiomass;
+
+    /**
+     * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
+     * for virtually increasing or decreasing plankton biomass.
+     */
+    private double[] multiplier;
 
 ////////////////////////////
 // Definition of the methods
@@ -182,40 +200,26 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 
         // Initializes biomass matrix
         biomass = new double[nPlk][getGrid().get_ny()][getGrid().get_nx()];
-    }
 
-    /**
-     *
-     * @param data3d, the raw LTL data with a vertical dimension
-     * {@code data3d[nz][ny][nx]}
-     * @param depthLayer, an array of float that provides the depth of every
-     * cell of the LTL grid. {@code depthLayer[nz][ny][nx]}
-     * @param maxDepth, the maximum depth to be taken into account for the
-     * vertical integration. Make sure the sign of the depth is consistent
-     * between the depth of the LTL grid and the maximum depth.
-     * @return the raw LTL data vertically integrated, in concentration of
-     * plankton per surface unit.
-     */
-    public double[][] verticalIntegration(float[][][] data3d, float[][][] depthLayer, float maxDepth) {
-        int nx = data3d[0][0].length;
-        int ny = data3d[0].length;
-        int nz = data3d.length;
-        double[][] integratedData = new double[ny][nx];
-        double integr;
-        for (int i = 0; i < nx; i++) {
-            for (int j = 0; j < ny; j++) {
-                integr = 0.d;
-                for (int k = 0; k < nz - 1; k++) {
-                    if (depthLayer[k][j][i] > maxDepth) {
-                        if (data3d[k][j][i] >= 0 && data3d[k + 1][j][i] >= 0) {
-                            integr += (Math.abs(depthLayer[k][j][i] - depthLayer[k + 1][j][i])) * ((data3d[k][j][i] + data3d[k + 1][j][i]) / 2.d);
-                        }
-                    }
-                }
-                integratedData[j][i] = integr;
+        multiplier = new double[nPlk];
+        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
+            if (!getConfiguration().isNull("plankton.multiplier.plk" + iPlk)) {
+                multiplier[iPlk] = getConfiguration().getFloat("plankton.multiplier.plk" + iPlk);
+                warning("Plankton biomass for plankton group " + iPlk + " will be multiplied by " + multiplier[iPlk] + " accordingly to parameter " + getConfiguration().printParameter("plankton.multiplier.plk" + iPlk));
+            } else {
+                multiplier[iPlk] = 1.d;
             }
         }
-        return integratedData;
+
+        // Uniform biomass
+        uBiomass = new double[nPlk];
+        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
+            if (!getConfiguration().isNull("plankton.biomass.total.plk" + iPlk)) {
+                uBiomass[iPlk] = getConfiguration().getDouble("plankton.biomass.total.plk" + iPlk) / getGrid().getNOceanCell();
+            } else {
+                uBiomass[iPlk] = -1.d;
+            }
+        }
     }
 
     /**
@@ -228,21 +232,32 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      */
     @Override
     public void update(int iStepSimu) {
-        
+
         // Reset biomass matrix
         biomass = new double[getConfiguration().getNPlankton()][getGrid().get_ny()][getGrid().get_nx()];
 
         for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
             biomass[iPlk] = new double[getGrid().get_ny()][getGrid().get_nx()];
-            double[][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
-            for (Cell cell : getGrid().getCells()) {
-                if (!cell.isLand()) {
-                    double area = 111.d * getGrid().getdLat() * 111.d * Math.cos(cell.getLat() * Math.PI / (90.d * 2.d)) * getGrid().getdLong();
-                    int i = cell.get_igrid();
-                    int j = cell.get_jgrid();
-                    int nCells = icoordLTLGrid[j][i].size();
-                    for (int k = 0; k < nCells; k++) {
-                        biomass[iPlk][j][i] += area * convertToTonnePerKm2(iPlk, rawBiomass[jcoordLTLGrid[j][i].get(k)][icoordLTLGrid[j][i].get(k)]) / (double) nCells;
+            // Check whether the biomass is read from NetCDF file or uniform
+            if (uBiomass[iPlk] < 0) {
+                // From NetCDF
+                double[][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
+                for (Cell cell : getGrid().getCells()) {
+                    if (!cell.isLand()) {
+                        double area = 111.d * getGrid().getdLat() * 111.d * Math.cos(cell.getLat() * Math.PI / (90.d * 2.d)) * getGrid().getdLong();
+                        int i = cell.get_igrid();
+                        int j = cell.get_jgrid();
+                        int nCells = icoordLTLGrid[j][i].size();
+                        for (int k = 0; k < nCells; k++) {
+                            biomass[iPlk][j][i] += area * convertToTonnePerKm2(iPlk, rawBiomass[jcoordLTLGrid[j][i].get(k)][icoordLTLGrid[j][i].get(k)]) / (double) nCells;
+                        }
+                    }
+                }
+            } else {
+                // Uniform plankton biomass
+                for (Cell cell : getGrid().getCells()) {
+                    if (!cell.isLand()) {
+                        biomass[iPlk][cell.get_jgrid()][cell.get_igrid()] = uBiomass[iPlk];
                     }
                 }
             }
@@ -251,7 +266,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 
     @Override
     public double getBiomass(int iPlankton, Cell cell) {
-        return biomass[iPlankton][cell.get_jgrid()][cell.get_igrid()];
+        return multiplier[iPlankton] * biomass[iPlankton][cell.get_jgrid()][cell.get_igrid()];
     }
 
     /**

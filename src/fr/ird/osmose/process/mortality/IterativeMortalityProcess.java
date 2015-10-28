@@ -153,7 +153,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
         double[] correctionFactor = new double[nSchool];
         double[] planktonBiomass = new double[nPlankton];
         for (int iPlk = 0; iPlk < nPlankton; iPlk++) {
-            planktonBiomass[iPlk] = getSimulation().getPlankton(iPlk).getBiomass(cell);
+            planktonBiomass[iPlk] = getSimulation().getForcing().getBiomass(iPlk, cell);
         }
 
         //

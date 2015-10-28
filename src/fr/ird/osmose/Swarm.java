@@ -68,16 +68,12 @@ public class Swarm implements IAggregation {
     public double getInstantaneousAbundance() {
         return Math.max(0.d, abundance - nDead);
     }
-
-    /**
-     *
-     * @param iStepSimu
-     */
-    public void updateBiomass(int iStepSimu) {
+  
+    public void setBiomass(double biomass) {
 
         // Update abundance
         // (for plankton Osmose makes no difference between abundance and biomass)
-        abundance = plankton.getAccessibleBiomass(cell, iStepSimu);
+        abundance = biomass;
         // Rest number of dead fish
         nDead = 0.d;
     }
@@ -152,6 +148,14 @@ public class Swarm implements IAggregation {
     @Override
     public float getWeight() {
         return 1.f;
+    }
+    
+    public Cell getCell() {
+        return cell;
+    }
+    
+    public int getLTLIndex() {
+        return plankton.getIndex();
     }
 
 }

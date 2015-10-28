@@ -260,7 +260,8 @@ public class PredationMortality extends AbstractMortality {
         double[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-            biomAccessibleTot += percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell, iStepSimu);
+            double biomAccessible = getForcing().getBiomass(i, cell) * getSimulation().getPlankton(i).getAccessibility(iStepSimu);
+            biomAccessibleTot += percentPlankton[i] * tempAccess * biomAccessible;
         }
 
         // Compute the potential biomass that predators could prey upon
@@ -287,7 +288,8 @@ public class PredationMortality extends AbstractMortality {
             // Assess the loss for the plankton caused by the predator
             for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-                double ratio = percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell, iStepSimu) / biomAccessibleTot;
+                double biomAccessible = getForcing().getBiomass(i, cell) * getSimulation().getPlankton(i).getAccessibility(iStepSimu);
+                double ratio = percentPlankton[i] * tempAccess * biomAccessible / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
             }
 

@@ -233,11 +233,7 @@ public class Simulation extends OLogger {
         // Init plankton groups
         ltlGroups = new Plankton[getConfiguration().getNPlankton()];
         for (int p = 0; p < ltlGroups.length; p++) {
-            if (getConfiguration().canFind("plankton.biomass.total.plk" + p)) {
-                ltlGroups[p] = new UniformPlankton(rank, p);
-            } else {
-                ltlGroups[p] = new Plankton(rank, p);
-            }
+            ltlGroups[p] = new Plankton(rank, p);
             ltlGroups[p].init();
             if (!ltlGroups[p].getName().matches("^[a-zA-Z0-9]*$")) {
                 error("Plankton name must contain alphanumeric characters only. Please rename " + ltlGroups[p].getName(), null);
@@ -382,7 +378,10 @@ public class Simulation extends OLogger {
     public void updateSwarms() {
         for (List<Swarm> swarms : swarmSet.values()) {
             for (Swarm swarm : swarms) {
-                swarm.updateBiomass(i_step_simu);
+                int iltl = swarm.getLTLIndex();
+                double accessibleBiom = getPlankton(iltl).getAccessibility(i_step_simu)
+                        * forcing.getBiomass(iltl, swarm.getCell());
+                swarm.setBiomass(accessibleBiom);
             }
         }
     }
