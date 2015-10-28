@@ -196,7 +196,7 @@ public class MapDistribution extends AbstractDistribution {
             str.append(school.toString());
             str.append("\n");
             str.append("It is not in the geographical area it is supposed to be...");
-            getSimulation().warning(str.toString());
+            warning(str.toString());
         }
         List<Cell> accessibleCells = new ArrayList();
         // 1. Get all surrounding cells

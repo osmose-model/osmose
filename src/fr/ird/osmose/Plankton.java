@@ -141,7 +141,7 @@ public class Plankton extends SimulationLinker {
         sizeMax = getConfiguration().getDouble("plankton.size.max.plk" + index);
         trophicLevel = getConfiguration().getFloat("plankton.tl.plk" + index);
         if (!getConfiguration().isNull("plankton.accessibility2fish.file.plk" + index)) {
-            SingleTimeSeries ts = new SingleTimeSeries(getRank());
+            SingleTimeSeries ts = new SingleTimeSeries();
             ts.read(getConfiguration().getFile("plankton.accessibility2fish.file.plk" + index));
             accessibilityCoeff = ts.getValues();
         } else {

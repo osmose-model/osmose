@@ -405,10 +405,6 @@ public class SimulationUI extends SimulationLinker {
         return d;
     }
 
-    public static Osmose getOsmose() {
-        return Osmose.getInstance();
-    }
-
     private class CellUI extends Polygon {
 
         ///////////////////////////////

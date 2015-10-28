@@ -102,7 +102,7 @@ public class ReproductionProcess extends AbstractProcess {
         seasonSpawning = new double[nSpecies][];
         for (int i = 0; i < nSpecies; i++) {
             if (!getConfiguration().isNull("reproduction.season.file.sp" + i)) {
-                SingleTimeSeries ts = new SingleTimeSeries(getRank());
+                SingleTimeSeries ts = new SingleTimeSeries();
                 ts.read(getConfiguration().getFile("reproduction.season.file.sp" + i));
                 seasonSpawning[i] = ts.getValues();
             } else {

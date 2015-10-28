@@ -101,7 +101,7 @@ public class BySeasonFishingMortality extends AbstractFishingMortality {
         }
 
         // Read seasonality
-        SingleTimeSeries sts = new SingleTimeSeries(getRank());
+        SingleTimeSeries sts = new SingleTimeSeries();
         String filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
         sts.read(filename, nStepYear, nStepYear);
         season = sts.getValues();

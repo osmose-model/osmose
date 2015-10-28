@@ -50,7 +50,7 @@ package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.util.Separator;
-import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.OsmoseLinker;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -60,13 +60,9 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class SingleTimeSeries extends SimulationLinker {
+public class SingleTimeSeries extends OsmoseLinker {
 
     private double[] values;
-
-    public SingleTimeSeries(int rank) {
-        super(rank);
-    }
 
     public void read(String filename) {
         int nStepYear = getConfiguration().getNStepYear();

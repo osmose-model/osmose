@@ -84,7 +84,7 @@ public class ByYearBySeasonFishingMortality extends AbstractFishingMortality {
             case RATE:
                 // Read annual F by year
                 filename = getConfiguration().getFile("mortality.fishing.rate.byYear.file.sp" + iSpec);
-                yts = new ByYearTimeSeries(getRank());
+                yts = new ByYearTimeSeries();
                 yts.read(filename);
                 annualF = yts.getValues();
                 annualCatches = new double[annualF.length];
@@ -92,7 +92,7 @@ public class ByYearBySeasonFishingMortality extends AbstractFishingMortality {
             case CATCHES:
                 // Read annual F by year
                 filename = getConfiguration().getFile("mortality.fishing.catches.byYear.file.sp" + iSpec);
-                yts = new ByYearTimeSeries(getRank());
+                yts = new ByYearTimeSeries();
                 yts.read(filename);
                 annualCatches = yts.getValues();
                 annualF = new double[annualCatches.length];
@@ -114,7 +114,7 @@ public class ByYearBySeasonFishingMortality extends AbstractFishingMortality {
         }
 
         // Read seasonality
-        SingleTimeSeries sts = new SingleTimeSeries(getRank());
+        SingleTimeSeries sts = new SingleTimeSeries();
         filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
         sts.read(filename, nStepYear, nStepYear);
         season = sts.getValues();

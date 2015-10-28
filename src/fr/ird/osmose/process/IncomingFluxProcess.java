@@ -146,7 +146,7 @@ public class IncomingFluxProcess extends AbstractProcess {
         growthProcess.init();
         for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
             if (!getConfiguration().isNull("flux.incoming.byDt.byAge.file.sp" + iSpec)) {
-                ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
+                ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
                 timeSerieByAge.read(getConfiguration().getFile("flux.incoming.byDt.byAge.file.sp" + iSpec));
                 biomassIn[iSpec] = timeSerieByAge.getValues();
                 // Read age from file, and set ageIn as the middle of the age classes
@@ -164,7 +164,7 @@ public class IncomingFluxProcess extends AbstractProcess {
                     lengthIn[iSpec][iAge] = (float) growthProcess.getGrowth(iSpec).ageToLength(age);   
                 }
             } else if (!getConfiguration().isNull("flux.incoming.byDt.bySize.file.sp" + iSpec)) {
-                ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
+                ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
                 timeSerieBySize.read(getConfiguration().getFile("flux.incoming.byDt.bySize.file.sp" + iSpec));
                 biomassIn[iSpec] = timeSerieBySize.getValues();
                 // Read length from file and set lengthIn as middle of the length classes

@@ -49,8 +49,8 @@
 package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.Separator;
-import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -59,14 +59,10 @@ import java.util.List;
  *
  * @author pverley
  */
-public class ByClassTimeSeries extends SimulationLinker {
+public class ByClassTimeSeries extends OsmoseLinker {
 
     private float[] classes;
     private double[][] values;
-
-    public ByClassTimeSeries(int rank) {
-        super(rank);
-    }
 
     public void read(String filename) {
         int nStepYear = getConfiguration().getNStepYear();

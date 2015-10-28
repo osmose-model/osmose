@@ -121,7 +121,7 @@ public class MapSet extends SimulationLinker {
 
         // Check the map indexation
         if (!checkMapIndexation()) {
-            getSimulation().error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+            error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
         }
 
         // Get rid of redundant map definitions
@@ -252,7 +252,7 @@ public class MapSet extends SimulationLinker {
                     float age = (float) iAge / nStepYear;
                     int year = iStep / nStepYear;
                     int step = iStep % nStepYear;
-                    getSimulation().warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), age, year, step});
+                    warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), age, year, step});
                 }
             }
         }

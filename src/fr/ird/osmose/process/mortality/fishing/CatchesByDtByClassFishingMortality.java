@@ -87,7 +87,7 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
     public void init() {
         int iSpec = getIndexSpecies();
         if (!getConfiguration().isNull("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec)) {
-            ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
+            ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
             timeSerieByAge.read(getConfiguration().getFile("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec));
             catches = timeSerieByAge.getValues();
             ageClasses = new float[timeSerieByAge.getNClass() - 1];
@@ -96,7 +96,7 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
                 ageClasses[k] = Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
         } else if (!getConfiguration().isNull("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec)) {
-            ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
+            ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
             timeSerieBySize.read(getConfiguration().getFile("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec));
             catches = timeSerieBySize.getValues();
             sizeClasses = timeSerieBySize.getClasses();

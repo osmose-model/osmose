@@ -81,7 +81,7 @@ public class RateByDtByClassFishingMortality extends AbstractFishingMortality {
     public void init() {
         int iSpec = getIndexSpecies();
         if (!getConfiguration().isNull("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec)) {
-            ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
+            ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
             timeSerieByAge.read(getConfiguration().getFile("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec));
             f = timeSerieByAge.getValues();
             ageThreshold = new int[timeSerieByAge.getNClass() - 1];
@@ -90,7 +90,7 @@ public class RateByDtByClassFishingMortality extends AbstractFishingMortality {
                 ageThreshold[k] = (int) Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
         } else if (!getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
-            ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
+            ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
             timeSerieBySize.read(getConfiguration().getFile("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec));
             f = timeSerieBySize.getValues();
             sizeThreshold = timeSerieBySize.getClasses();
