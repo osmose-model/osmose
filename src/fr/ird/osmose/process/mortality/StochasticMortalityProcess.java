@@ -89,9 +89,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
             // Create the list of preys by gathering the schools and the plankton group
             List<IAggregation> preys = new ArrayList();
             preys.addAll(schools);
-            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-                preys.add(getSimulation().getPlankton(i).getSwarm(cell));
-            }
+            preys.addAll(getSimulation().getSwarms(cell));
             for (School school : schools) {
                 school.setAccessibilities(predationMortality.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
@@ -106,10 +104,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         }
 
         // Update biomass of the swarms
-        int iStepSimu = getSimulation().getIndexTimeSimu();
-        for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
-            getSimulation().getPlankton(iLTL).updateSwarms(iStepSimu);
-        }
+        getSimulation().updateSwarms();
 
         for (int idt = 0; idt < subdt; idt++) {
             fishingMortality.assessFishableBiomass();
@@ -144,9 +139,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                 prey.releaseEgg(subdt);
             }
         }
-        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            preys.add(getSimulation().getPlankton(i).getSwarm(cell));
-        }
+        preys.addAll(getSimulation().getSwarms(cell));
 
         Integer[] seqPred = new Integer[ns];
         for (int i = 0; i < ns; i++) {

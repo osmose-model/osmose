@@ -106,8 +106,6 @@ public class Plankton extends SimulationLinker {
      * for virtually increasing or decreasing plankton biomass.
      */
     private double multiplier;
-
-    private HashMap<Integer, Swarm> swarms;
     /**
      * Maximum value for plankton accessibility. It should never be one or
      * exceed one to avoid any numerical problem when converting from float to
@@ -159,7 +157,6 @@ public class Plankton extends SimulationLinker {
         } else {
             multiplier = 1.f;
         }
-        swarms = new HashMap();
     }
 
     /**
@@ -282,18 +279,5 @@ public class Plankton extends SimulationLinker {
      */
     public float getTrophicLevel() {
         return trophicLevel;
-    }
-
-    public IAggregation getSwarm(Cell cell) {
-        if (!swarms.containsKey(cell.getIndex())) {
-            swarms.put(cell.getIndex(), new Swarm(this, cell));
-        }
-        return swarms.get(cell.getIndex());
-    }
-
-    public void updateSwarms(int iStepSimu) {
-        for (Swarm swarm : swarms.values()) {
-            swarm.updateBiomass(iStepSimu);
-        }
     }
 }

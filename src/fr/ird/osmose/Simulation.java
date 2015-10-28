@@ -57,6 +57,9 @@ import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.DefaultStep;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -87,6 +90,10 @@ public class Simulation extends OLogger {
      * The set of schools.
      */
     private SchoolSet schoolSet;
+    /**
+     * The set of plankton swarms
+     */
+    private HashMap<Integer, List<Swarm>> swarmSet;
     /**
      * The low trophic level forcing class.
      */
@@ -166,7 +173,8 @@ public class Simulation extends OLogger {
             school.setNdead(MortalityCause.OUT, Double.MAX_VALUE);
         }
         schoolSet.removeDeadSchools();
-        schoolSet = null;
+        schoolSet.clear();
+        swarmSet.clear();
         ltlGroups = null;
         step = null;
         forcing = null;
@@ -183,6 +191,9 @@ public class Simulation extends OLogger {
 
         // Create a new school set, empty at the moment
         schoolSet = new SchoolSet();
+
+        // Create a new swarm set, empty at the moment
+        swarmSet = new HashMap();
 
         // Option for running only one time step and stops
         boolean oneStep = false;
@@ -355,6 +366,25 @@ public class Simulation extends OLogger {
      */
     public SchoolSet getSchoolSet() {
         return schoolSet;
+    }
+
+    public List<Swarm> getSwarms(Cell cell) {
+        if (!swarmSet.containsKey(cell.getIndex())) {
+            List<Swarm> swarms = new ArrayList();
+            for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
+                swarms.add(new Swarm(getPlankton(iLTL), cell));
+            }
+            swarmSet.put(cell.getIndex(), swarms);
+        }
+        return swarmSet.get(cell.getIndex());
+    }
+
+    public void updateSwarms() {
+        for (List<Swarm> swarms : swarmSet.values()) {
+            for (Swarm swarm : swarms) {
+                swarm.updateBiomass(i_step_simu);
+            }
+        }
     }
 
     /**
