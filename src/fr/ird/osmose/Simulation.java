@@ -108,10 +108,6 @@ public class Simulation extends OLogger {
      */
     private int n_steps_simu;
     /**
-     * Array of the species of the simulation.
-     */
-    private Species[] species;
-    /**
      * Array of the LTL groups of the simulation.
      */
     private Plankton[] ltlGroups;
@@ -171,7 +167,6 @@ public class Simulation extends OLogger {
         }
         schoolSet.removeDeadSchools();
         schoolSet = null;
-        species = null;
         ltlGroups = null;
         step = null;
         forcing = null;
@@ -221,15 +216,6 @@ public class Simulation extends OLogger {
                 restart = true;
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
-            }
-        }
-
-        // Create the species
-        species = new Species[getConfiguration().getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = new Species(i);
-            if (!species[i].getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Species name must contain alphanumeric characters only. Please rename " + species[i].getName(), null);
             }
         }
 
@@ -369,16 +355,6 @@ public class Simulation extends OLogger {
      */
     public SchoolSet getSchoolSet() {
         return schoolSet;
-    }
-
-    /**
-     * Get a species
-     *
-     * @param index, the index of the species
-     * @return the species at index {@code index}
-     */
-    public Species getSpecies(int index) {
-        return species[index];
     }
 
     /**

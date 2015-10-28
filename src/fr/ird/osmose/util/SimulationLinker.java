@@ -94,7 +94,7 @@ public class SimulationLinker extends OLogger {
     }
 
     public Species getSpecies(int index) {
-        return Osmose.getInstance().getSimulation(rank).getSpecies(index);
+        return Osmose.getInstance().getConfiguration().getSpecies(index);
     }
 
     public Species getSpecies(String name) {

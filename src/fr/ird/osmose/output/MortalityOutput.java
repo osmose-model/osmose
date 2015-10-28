@@ -190,7 +190,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             filename.append(File.separatorChar);
             filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_mortalityRate-");
-            filename.append(getSimulation().getSpecies(iSpecies).getName());
+            filename.append(getSpecies(iSpecies).getName());
             filename.append("_Simu");
             filename.append(getRank());
             filename.append(".csv");

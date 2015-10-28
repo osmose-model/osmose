@@ -111,9 +111,8 @@ public class NetcdfPopulator extends AbstractPopulator {
             float[] age = (float[]) nc.findVariable("age").read().copyTo1DJavaArray();
             float[] trophiclevel = (float[]) nc.findVariable("trophiclevel").read().copyTo1DJavaArray();
             for (int s = 0; s < nSchool; s++) {
-                Species species = getSimulation().getSpecies(ispecies[s]);
                 School school = new School(
-                        species,
+                        getSpecies(ispecies[s]),
                         x[s],
                         y[s],
                         abundance[s],

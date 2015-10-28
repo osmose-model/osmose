@@ -97,7 +97,7 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
         String[] headers = new String[getNSpecies() + 1];
         headers[0] = distrib.getType().toString();
         for (int i = 0; i < getNSpecies(); i++) {
-            headers[i + 1] = getSimulation().getSpecies(i).getName();
+            headers[i + 1] = getSpecies(i).getName();
         }
         return headers;
     }

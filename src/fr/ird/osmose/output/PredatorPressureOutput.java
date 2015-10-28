@@ -128,7 +128,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         int nSpec = getNSpecies();
         int dtRecord = getConfiguration().getInt("output.recordfrequency.ndt");
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSimulation().getSpecies(iSpec).getName();
+            String name = getSpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStagePred = dietOutputStage.getNStage(iSpec);
             for (int iStage = 0; iStage < nStagePred; iStage++) {
@@ -212,7 +212,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
             prw.print(separator);
             prw.print(quote("Prey"));
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                String name = getSimulation().getSpecies(iSpec).getName();
+                String name = getSpecies(iSpec).getName();
                 float[] threshold = dietOutputStage.getThresholds(iSpec);
                 int nStage = dietOutputStage.getNStage(iSpec);
                 for (int iStage = 0; iStage < nStage; iStage++) {

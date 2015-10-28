@@ -112,7 +112,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         String[] headers = new String[nColumns];
         int k = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSimulation().getSpecies(iSpec).getName();
+            String name = getSpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             for (int s = 0; s < nStage; s++) {

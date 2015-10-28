@@ -222,6 +222,10 @@ public class Configuration extends OLogger {
      * resolved against the main configuration file
      */
     private final boolean globalResolve;
+    /**
+     * Array of the species of the simulation.
+     */
+    private Species[] species;
 
 ///////////////
 // Constructors
@@ -340,6 +344,25 @@ public class Configuration extends OLogger {
 
         // Create the grid
         initGrid();
+
+        // Create the species
+        species = new Species[nSpecies];
+        for (int i = 0; i < species.length; i++) {
+            species[i] = new Species(i);
+            if (!species[i].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Species name must contain alphanumeric characters only. Please rename " + species[i].getName(), null);
+            }
+        }
+    }
+
+    /**
+     * Get a species
+     *
+     * @param index, the index of the species
+     * @return the species at index {@code index}
+     */
+    public Species getSpecies(int index) {
+        return species[index];
     }
 
     /**
@@ -411,7 +434,7 @@ public class Configuration extends OLogger {
                     if (parameters.containsKey(entry.key)) {
                         warning("{0}Osmose will ignore parameter {1}", new Object[]{space, entry});
                         warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
-                        
+
                     } else {
                         parameters.put(entry.key, entry);
                         debug(space + entry.toString());

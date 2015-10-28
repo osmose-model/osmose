@@ -176,7 +176,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             str.append(i);
             str.append("=");
-            str.append(getSimulation().getSpecies(i).getName());
+            str.append(getSpecies(i).getName());
             str.append(" ");
         }
         nc.addGlobalAttribute("species", str.toString());

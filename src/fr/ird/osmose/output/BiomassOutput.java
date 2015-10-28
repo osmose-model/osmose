@@ -117,7 +117,7 @@ public class BiomassOutput extends AbstractOutput {
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
-            species[i] = getSimulation().getSpecies(i).getName();
+            species[i] = getSpecies(i).getName();
         }
         return species;
     }

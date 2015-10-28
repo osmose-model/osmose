@@ -428,7 +428,7 @@ public class SpatialMapUI extends JPanel {
             grid.setGridVisible(true);
             //1. Create the frame.
             StringBuilder title = new StringBuilder();
-            title.append(getOsmose().getSimulation(0).getSpecies(species).getName());
+            title.append(getOsmose().getConfiguration().getSpecies(species).getName());
             title.append(" map ");
             title.append(maps.getMapFile(iMap));
             JFrame frame = new JFrame(title.toString());
