@@ -82,7 +82,7 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0 2013/09/01
  */
-public class MapSet extends SimulationLinker {
+public class MapSet extends OsmoseLinker {
 
     /**
      * Prefix of the series of maps in the configuration file. Parameter names
@@ -108,8 +108,7 @@ public class MapSet extends SimulationLinker {
      */
     private String[] mapFile;
 
-    public MapSet(int rank, int iSpecies, String prefix) {
-        super(rank);
+    public MapSet(int iSpecies, String prefix) {
         this.iSpecies = iSpecies;
         this.prefix = prefix;
     }
@@ -136,20 +135,16 @@ public class MapSet extends SimulationLinker {
         return maps[numMap];
     }
 
-    public GridMap getMap(School school) {
-        return getMap(getIndexMap(school));
+    public GridMap getMap(School school, int iStepSimu) {
+        return getMap(getIndexMap(school.getAgeDt(), iStepSimu));
     }
 
     public String getMapFile(int numMap) {
         return mapFile[numMap];
     }
 
-    public int getIndexMap(int iAge, int iStep) {
-        return indexMaps[iAge][iStep];
-    }
-
-    public int getIndexMap(School school) {
-        return getIndexMap(school.getAgeDt(), getSimulation().getIndexTimeSimu());
+    public int getIndexMap(int iAge, int iStepSimu) {
+        return indexMaps[iAge][iStepSimu];
     }
 
     public void loadMaps() {

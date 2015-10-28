@@ -73,8 +73,7 @@ public class MapDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public MapDistribution(int rank, Species species) {
-        super(rank);
+    public MapDistribution(Species species) {
         this.species = species;
     }
 
@@ -98,7 +97,7 @@ public class MapDistribution extends AbstractDistribution {
             rd3 = new Random();
         }
 
-        maps = new MapSet(getRank(), iSpec, "movement");
+        maps = new MapSet(iSpec, "movement");
         maps.init();
         maxProbaPresence = new float[maps.getNMap()];
         for (int imap = 0; imap < maxProbaPresence.length; imap++) {
@@ -118,25 +117,25 @@ public class MapDistribution extends AbstractDistribution {
     }
 
     @Override
-    public void move(School school) {
-        if (!isOut(school)) {
-            mapsDistribution(school);
+    public void move(School school, int iStepSimu) {
+        if (!isOut(school, iStepSimu)) {
+            mapsDistribution(school, iStepSimu);
         } else {
             school.out();
         }
     }
 
-    private boolean isOut(School school) {
-        return (null == maps.getMap(school));
+    private boolean isOut(School school, int iStepSimu) {
+        return (null == maps.getMap(school, iStepSimu));
     }
 
-    private void mapsDistribution(School school) {
+    private void mapsDistribution(School school, int iStepSimu) {
 
-        int i_step_year = getSimulation().getIndexTimeYear();
+        int i_step_year = iStepSimu % getConfiguration().getNStepYear();
         int age = school.getAgeDt();
 
         // Get current map and max probability of presence
-        int indexMap = maps.getIndexMap(school);
+        int indexMap = maps.getIndexMap(school.getAgeDt(), iStepSimu);
         GridMap map = maps.getMap(indexMap);
 
         /*
@@ -146,7 +145,7 @@ public class MapDistribution extends AbstractDistribution {
          * assert sameMap = false;
          */
         boolean sameMap = false;
-        if (age > 0 && getSimulation().getIndexTimeSimu() > 0) {
+        if (age > 0 && iStepSimu > 0) {
             int oldTime;
             if (i_step_year == 0) {
                 oldTime = getConfiguration().getNStepYear() - 1;

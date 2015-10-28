@@ -417,7 +417,7 @@ public class SpatialMapUI extends JPanel {
         getOsmose().readArgs(args);
         getOsmose().init();
         getOsmose().getSimulation(0).init();
-        MapSet maps = new MapSet(0, species, "movement");
+        MapSet maps = new MapSet(species, "movement");
         maps.init();
 
         for (int iMap = 0; iMap < maps.getNMap(); iMap++) {

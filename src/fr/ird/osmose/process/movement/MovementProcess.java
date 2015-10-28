@@ -72,9 +72,9 @@ public class MovementProcess extends AbstractProcess {
         for (int i = 0; i < nSpecies; i++) {
             String distributionMethod = getConfiguration().getString("movement.distribution.method.sp" + i);
             if (distributionMethod.equalsIgnoreCase("random")) {
-                spatialDistribution[i] = new RandomDistribution(getRank(), getSpecies(i));
+                spatialDistribution[i] = new RandomDistribution(getSpecies(i));
             } else if (distributionMethod.equalsIgnoreCase("maps")) {
-                spatialDistribution[i] = new MapDistribution(getRank(), getSpecies(i));
+                spatialDistribution[i] = new MapDistribution(getSpecies(i));
             } else {
                 throw new UnsupportedOperationException("Distribution method is either 'random' or 'maps'");
             }
@@ -85,7 +85,7 @@ public class MovementProcess extends AbstractProcess {
     @Override
     public void run() {
         for (School school : getSchoolSet()) {
-            spatialDistribution[school.getSpeciesIndex()].move(school);
+            spatialDistribution[school.getSpeciesIndex()].move(school, getSimulation().getIndexTimeSimu());
         }
         
         getSchoolSet().updateSchoolMap();

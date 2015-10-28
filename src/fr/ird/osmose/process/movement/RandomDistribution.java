@@ -69,8 +69,7 @@ public class RandomDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public RandomDistribution(int rank, Species species) {
-        super(rank);
+    public RandomDistribution(Species species) {
         this.species = species;
     }
 
@@ -94,7 +93,7 @@ public class RandomDistribution extends AbstractDistribution {
     }
 
     @Override
-    public void move(School school) {
+    public void move(School school, int iStepSimu) {
         if (school.isUnlocated()) {
             school.moveToCell(randomDeal(randomMap));
         } else {
