@@ -255,7 +255,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
         /*
          * Integrate plankton biomass on vertical dimension
          */
-        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
+        return LTLUtil.verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override

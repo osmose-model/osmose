@@ -250,7 +250,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
             }
         }
 
-        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
+        return LTLUtil.verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override

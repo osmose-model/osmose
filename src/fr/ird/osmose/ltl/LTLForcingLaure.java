@@ -93,7 +93,7 @@ public class LTLForcingLaure extends LTLForcingRomsPisces {
             error("Error loading LTL variable " + plktonNetcdfNames[p] + " from file " + ncfile, ex);
         }
 
-        return verticalIntegration(dataInit, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
+        return LTLUtil.verticalIntegration(dataInit, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override
