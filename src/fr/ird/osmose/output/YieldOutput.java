@@ -77,7 +77,7 @@ public class YieldOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            yield[school.getSpeciesIndex()] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
+            yield[school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
         }
     }
 

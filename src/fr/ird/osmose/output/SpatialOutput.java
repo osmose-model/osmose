@@ -249,7 +249,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                             abundance[iSpec][j][i] += school.getInstantaneousAbundance();
                             mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
                             tl[iSpec][j][i] += school.getTrophicLevel() * school.getInstantaneousBiomass();
-                            yield[iSpec][j][i] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
+                            yield[iSpec][j][i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
                         }
                     }
                 }

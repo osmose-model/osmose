@@ -58,7 +58,7 @@ import java.util.UUID;
  * This class represents a school of fish, it is the individual of the
  * Individual Based Model. A school is constituted by a pool of identical fish.
  * This feature allows Osmose to attribute to the school a set of state
- * variables characterizing the typical fish of the school:
+ * variables characterising the typical fish of the school:
  * <ul>
  * <li>species<li>
  * <li>age</li>
@@ -100,7 +100,7 @@ public class School extends GridPoint implements IAggregation {
     private final int index;
     /**
      * Weight of the fish in tonne. The unit has been set to tonne just because
-     * it saves computation time for converting the biomass from gram to tonne
+     * it saves computation time for converting the biomass from gramme to tonne
      */
     private float weight;
     /**
@@ -116,6 +116,14 @@ public class School extends GridPoint implements IAggregation {
      * {@code instantaneousAbundance = abundance - ndead}
      */
     private double instantaneousAbundance;
+    /**
+     * Biomass, in tonne, of the school at the beginning of the time step.
+     */
+    private double biomass;
+    /**
+     * Biomass, in tonne, of the school, estimated on the fly.
+     */
+    private double instantaneousBiomass;
     /**
      * Number of dead fish in the current time step, for each mortality cause.
      */
@@ -145,11 +153,11 @@ public class School extends GridPoint implements IAggregation {
      */
     private float age;
     /**
-     * Length of the fish in centimeter.
+     * Length of the fish in centimetre.
      */
     private float length;
     /**
-     * Length of the fish in centimeter at the beginning of the time step.
+     * Length of the fish in centimetre at the beginning of the time step.
      */
     private float lengthi;
     /**
@@ -228,8 +236,8 @@ public class School extends GridPoint implements IAggregation {
      * @param x, x coordinate of the school on the grid
      * @param y, y coordinate of the school on the grid
      * @param abundance, the number of fish in the school
-     * @param length, the length of the fish in centimeter
-     * @param weight, the weight of the fish in gram
+     * @param length, the length of the fish in centimetre
+     * @param weight, the weight of the fish in gramme
      * @param ageDt, the age of the fish in number of time step
      * @param trophicLevel, the trophic level of the fish
      */
@@ -238,6 +246,8 @@ public class School extends GridPoint implements IAggregation {
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
+        biomass = instantaneousBiomass = abundance * this.weight;
+        abundanceHasChanged = false;
         this.trophicLevel = trophicLevel;
         if (x >= 0 && x < getGrid().get_nx() && y >= 0 && y < getGrid().get_ny()) {
             moveToCell(getGrid().getCell(Math.round(x), Math.round(y)));
@@ -258,12 +268,16 @@ public class School extends GridPoint implements IAggregation {
 // Definition of the methods
 ////////////////////////////
     /**
-     * Initializes and reset some state variables
+     * Initialises and reset some state variables
      */
     public void init() {
 
-        // Update abundance and reset number of dead
-        updateAbundance();
+        // Update abundance
+        abundance = getInstantaneousAbundance();
+        // Update biomass
+        biomass = abundance * weight;
+        // Rest number of dead fish
+        reset(nDead);
         // Reset diet variables
         preyRecords.clear();
         preyedBiomass = 0.d;
@@ -322,24 +336,17 @@ public class School extends GridPoint implements IAggregation {
     @Override
     public double getInstantaneousAbundance() {
         if (abundanceHasChanged) {
-            instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
-            if (instantaneousAbundance < 1.d) {
-                instantaneousAbundance = 0.d;
-            }
-            abundanceHasChanged = false;
+            updateBiomAndAbd();
         }
         return instantaneousAbundance;
     }
 
-    /**
-     *
-     */
-    public void updateAbundance() {
-
-        // Update abundance
-        abundance = getInstantaneousAbundance();
-        // Rest number of dead fish
-        reset(nDead);
+    private void updateBiomAndAbd() {
+        instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
+        if (instantaneousAbundance < 1.d) {
+            instantaneousAbundance = 0.d;
+        }
+        instantaneousBiomass = instantaneousAbundance * weight;
         abundanceHasChanged = false;
     }
 
@@ -352,7 +359,7 @@ public class School extends GridPoint implements IAggregation {
      */
     @Override
     public double getBiomass() {
-        return adb2biom(abundance);
+        return biomass;
     }
 
     /**
@@ -366,7 +373,10 @@ public class School extends GridPoint implements IAggregation {
      */
     @Override
     public double getInstantaneousBiomass() {
-        return adb2biom(getInstantaneousAbundance());
+        if (abundanceHasChanged) {
+            updateBiomAndAbd();
+        }
+        return instantaneousBiomass;
     }
 
     /**
@@ -388,7 +398,7 @@ public class School extends GridPoint implements IAggregation {
      * @return the corresponding biomass of this number of fish weighting
      * {@code weight}. {@code biomass = abundance * weight}
      */
-    public double adb2biom(double abundance) {
+    public double abd2biom(double abundance) {
         return abundance * weight;
     }
 
@@ -492,7 +502,7 @@ public class School extends GridPoint implements IAggregation {
         }
         return sum;
     }
-    
+
     private void reset(double[] array) {
         for (int i = 0; i < array.length; i++) {
             array[i] = 0.d;

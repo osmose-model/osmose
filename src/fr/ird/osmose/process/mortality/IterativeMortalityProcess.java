@@ -113,7 +113,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
                             if (ipr < ns) {
                                 // Prey is School
                                 School prey = schools.get(ipr);
-                                school.addPreyRecord(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), prey.adb2biom(nDeadMatrix[ipr][is]), keepRecord);
+                                school.addPreyRecord(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), prey.abd2biom(nDeadMatrix[ipr][is]), keepRecord);
                             } else {
                                 // Prey is Plankton
                                 int index = ipr - ns + nspec;
@@ -253,7 +253,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
                 double preyedBiomass = 0;
                 for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
                     if (iPrey < nSchool) {
-                        preyedBiomass += schools.get(iPrey).adb2biom(nDeadMatrix[iPrey][iPredator]);
+                        preyedBiomass += schools.get(iPrey).abd2biom(nDeadMatrix[iPrey][iPredator]);
                     } else {
                         preyedBiomass += nDeadMatrix[iPrey][iPredator];
                     }

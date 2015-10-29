@@ -82,8 +82,8 @@ public class MeanTrophicLevelCatchOutput extends AbstractOutput {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
-            meanTLCatch[i] += school.getTrophicLevel() * school.adb2biom(school.getNdead(MortalityCause.FISHING));
-            yield[i] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
+            meanTLCatch[i] += school.getTrophicLevel() * school.abd2biom(school.getNdead(MortalityCause.FISHING));
+            yield[i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
         }
     }
 
