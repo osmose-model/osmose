@@ -95,4 +95,26 @@ public class FilteredSet<E> extends ArrayList<E> {
     public int getLevel() {
         return level;
     }
+    
+    void refresh() {
+        if (null != parent) {
+            clear();
+            for (E member : parent) {
+                boolean accept = true;
+                if (filters != null) {
+                    for (IFilter<? super E> filter : filters) {
+                        accept = accept && filter.accept(member);
+                        if (!accept) {
+                            break;
+                        }
+                    }
+                    if (accept) {
+                        add(member);
+                    }
+                }
+            }
+        } else {
+            //throw new NullPointerException("Community's parent is null");
+        }
+    }
 }

@@ -228,11 +228,14 @@ public class IOTools {
         File path = new File(pathname);
         //System.out.println("Delete recursively " + path);
         if (path.isDirectory()) {
-            for (File file : path.listFiles(new MetaFilenameFilter(pattern))) {
-                //System.out.println("  Deleted file " + file);
-                file.delete();
+            File[] list = path.listFiles(new MetaFilenameFilter(pattern));
+            if (null != list) {
+                for (File file : list) {
+                    file.delete();
+                    //System.out.println("Deleted previous output file "+file);
+                }
             }
-            File[] list = path.listFiles();
+            list = path.listFiles();
             if (null != list) {
                 for (File folder : list) {
                     if (folder.isDirectory()) {
@@ -241,7 +244,7 @@ public class IOTools {
                 }
                 if (list.length == 0) {
                     path.delete();
-                    //System.out.println("Deleted folder " + path);
+                    //System.out.println("Deleted previous output folder " + path);
                 }
             }
         }

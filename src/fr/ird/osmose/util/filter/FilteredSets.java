@@ -69,35 +69,12 @@ public class FilteredSets {
     public static <T> FilteredSet<T> subset(FilteredSet<T> set, IFilter<? super T>[] filters) {
 
         FilteredSet<T> subset = new FilteredSet(set, filters);
-        refresh(subset);
+        subset.refresh();
         return subset;
     }
 
     public static <T> FilteredSet<T> subset(FilteredSet<T> set, IFilter<? super T> filter) {
         return subset(set, new IFilter[]{filter});
-    }
-
-    public static <T> void refresh(FilteredSet<T> set) {
-        if (null != set.getParent()) {
-            set.clear();
-            IFilter<? super T>[] filters = set.getFilters();
-            for (T member : set.getParent()) {
-                boolean accept = true;
-                if (filters != null) {
-                    for (IFilter<? super T> filter : filters) {
-                        accept = accept && filter.accept(member);
-                        if (!accept) {
-                            break;
-                        }
-                    }
-                    if (accept) {
-                        set.add(member);
-                    }
-                }
-            }
-        } else {
-            //throw new NullPointerException("Community's parent is null");
-        }
     }
 
     public static <T> FilteredSet<T> intersect(FilteredSet<T> subset1, FilteredSet<T> subset2) {
