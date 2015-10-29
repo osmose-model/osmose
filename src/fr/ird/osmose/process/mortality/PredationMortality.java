@@ -145,7 +145,7 @@ public class PredationMortality extends AbstractMortality {
                 }
                 reader.close();
             } catch (IOException ex) {
-                getSimulation().error("Error loading accessibility matrix from file " + filename, ex);
+                error("Error loading accessibility matrix from file " + filename, ex);
             }
         } else {
             for (int i = 0; i < nspec; i++) {

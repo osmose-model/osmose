@@ -95,7 +95,7 @@ public class RateByDtByClassFishingMortality extends AbstractFishingMortality {
             f = timeSerieBySize.getValues();
             sizeThreshold = timeSerieBySize.getClasses();
         } else {
-            getSimulation().error("Could not found parameters mortality.fishing.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
+            error("Could not found parameters mortality.fishing.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
     }
 

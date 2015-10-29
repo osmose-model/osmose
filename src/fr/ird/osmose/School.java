@@ -635,15 +635,6 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
-     * Gets the {@link Configuration} instance.
-     *
-     * @return the {@code Configuration} instance
-     */
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
-    }
-
-    /**
      * Checks whether the object is equal to this school.
      *
      * @param obj, the object with which to compare to this school

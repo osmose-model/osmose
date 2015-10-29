@@ -98,7 +98,7 @@ public class AdditionalMortality extends AbstractMortality {
             // Warning only because some species might not reproduce in the 
             // simulated area and therefore have no need to define larva mortality
             eggMortality[iSpec] = new ConstantLarvaMortality(rank, species, 0.f);
-            getSimulation().warning("Could not find any parameters for egg mortality (mortality.natural.larva.rate.bytDt.file.sp# or mortality.natural.larva.rate.sp#) for species {0}. Osmose assumes egg mortality = 0", species.getName());
+            warning("Could not find any parameters for egg mortality (mortality.natural.larva.rate.bytDt.file.sp# or mortality.natural.larva.rate.sp#) for species {0}. Osmose assumes egg mortality = 0", species.getName());
         }
 
         // Additional mortality

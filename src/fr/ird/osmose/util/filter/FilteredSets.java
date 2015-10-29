@@ -48,7 +48,6 @@
  */
 package fr.ird.osmose.util.filter;
 
-import fr.ird.osmose.Osmose;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -64,7 +63,7 @@ public class FilteredSets {
      * 
      * @param <T>
      * @param set
-     * @param filter
+     * @param filters
      * @return
      */
     public static <T> FilteredSet<T> subset(FilteredSet<T> set, IFilter<? super T>[] filters) {
@@ -115,9 +114,5 @@ public class FilteredSets {
         filters.addAll(Arrays.asList(subset2.getFilters()));
 
         return FilteredSets.subset(merged, filters.toArray(new IFilter[filters.size()]));
-    }
-
-    public static Osmose getOsmose() {
-        return Osmose.getInstance();
     }
 }

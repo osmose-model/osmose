@@ -5,9 +5,7 @@
  */
 package fr.ird.osmose.util.version;
 
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.util.logging.OLogger;
+import fr.ird.osmose.util.OsmoseLinker;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -27,7 +25,7 @@ import java.util.List;
  *
  * @author pverley
  */
-public abstract class AbstractVersion extends OLogger implements Comparable<AbstractVersion> {
+public abstract class AbstractVersion extends OsmoseLinker implements Comparable<AbstractVersion> {
 
     final private int number;
 
@@ -340,10 +338,6 @@ public abstract class AbstractVersion extends OLogger implements Comparable<Abst
             error("Could not fing Osmose configuration file: " + file, ex);
         }
         return lines;
-    }
-
-    protected Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
     }
 
     protected String backup(String src, AbstractVersion srcVersion) {

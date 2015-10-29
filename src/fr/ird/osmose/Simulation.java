@@ -55,6 +55,7 @@ import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.DefaultStep;
+import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import ucar.nc2.NetcdfFile;
@@ -74,7 +75,7 @@ import ucar.nc2.NetcdfFile;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Simulation extends OLogger {
+public class Simulation extends OsmoseLinker {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -265,7 +266,7 @@ public class Simulation extends OLogger {
         String ltlClassName = getConfiguration().getString("ltl.java.classname");
         String errMsg = "Failed to create new LTLForcing instance";
         try {
-            info("LTLForcing: " + ltlClassName);
+            debug("LTLForcing: " + ltlClassName);
             forcing = (LTLForcing) Class.forName(ltlClassName).getConstructor(Integer.TYPE).newInstance(rank);
         } catch (ClassNotFoundException ex) {
             error(errMsg, ex);
@@ -379,15 +380,6 @@ public class Simulation extends OLogger {
 
     public void requestPreyRecord() {
         preyRecord = true;
-    }
-
-    /**
-     * Returns an instance of the {@code Configuration}.
-     *
-     * @return the current {@code Configuration}.
-     */
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
     }
 
     /**

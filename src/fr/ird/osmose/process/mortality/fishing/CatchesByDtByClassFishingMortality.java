@@ -101,7 +101,7 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
             catches = timeSerieBySize.getValues();
             sizeClasses = timeSerieBySize.getClasses();
         } else {
-            getSimulation().error("Could not found parameters mortality.fishing.catches.byDt.byAge/bySize.file.sp" + iSpec, null);
+            error("Could not found parameters mortality.fishing.catches.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
     }
 

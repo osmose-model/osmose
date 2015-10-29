@@ -108,9 +108,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.close();
             //close(nc);
         } catch (IOException ex) {
-            getSimulation().error("Error writing snapshot " + nc.getLocation(), ex);
+            error("Error writing snapshot " + nc.getLocation(), ex);
         } catch (InvalidRangeException ex) {
-            getSimulation().error("Error writing snapshot " + nc.getLocation(), ex);
+            error("Error writing snapshot " + nc.getLocation(), ex);
         }
     }
 
@@ -128,7 +128,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             file.getParentFile().mkdirs();
             nc.setLocation(file.getAbsolutePath());
         } catch (IOException ex) {
-            getSimulation().error("Could not create snapshot file " + nc.getLocation(), ex);
+            error("Could not create snapshot file " + nc.getLocation(), ex);
         }
         /*
          * Create dimensions
@@ -187,7 +187,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.create();
 
         } catch (IOException ex) {
-            getSimulation().error("Could not create snapshot file " + nc.getLocation(), ex);
+            error("Could not create snapshot file " + nc.getLocation(), ex);
         }
         return nc;
     }

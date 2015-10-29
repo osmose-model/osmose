@@ -48,16 +48,14 @@
  */
 package fr.ird.osmose.util.version;
 
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.util.logging.OLogger;
+import fr.ird.osmose.util.OsmoseLinker;
 import java.util.Arrays;
 
 /**
  *
  * @author pverley
  */
-public class VersionManager extends OLogger {
+public class VersionManager extends OsmoseLinker {
 
     // Declaration of the existing Osmose versions
     private final AbstractVersion v3 = new Version3();
@@ -148,9 +146,5 @@ public class VersionManager extends OLogger {
             error(msg.toString(), new IllegalArgumentException("Supported versions are " + Arrays.toString(VERSIONS)));
         }
         return v3;
-    }
-
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
     }
 }

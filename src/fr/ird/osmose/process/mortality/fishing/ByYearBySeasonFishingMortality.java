@@ -110,7 +110,7 @@ public class ByYearBySeasonFishingMortality extends AbstractFishingMortality {
         } else {
             recruitmentAge = 0;
             recruitmentSize = 0.f;
-            getSimulation().warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose assumes every school can be catched.", getSpecies().getName());
+            warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose assumes every school can be catched.", getSpecies().getName());
         }
 
         // Read seasonality

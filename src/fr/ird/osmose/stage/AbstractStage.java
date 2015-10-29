@@ -48,14 +48,13 @@
  */
 package fr.ird.osmose.stage;
 
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Osmose;
+import fr.ird.osmose.util.OsmoseLinker;
 
 /**
  *
  * @author pverley
  */
-abstract class AbstractStage implements IStage {
+abstract class AbstractStage extends OsmoseLinker implements IStage {
 
     private float[][] thresholds;
 
@@ -68,7 +67,7 @@ abstract class AbstractStage implements IStage {
     @Override
     public void init() {
 
-        int nSpec = getConfiguration().getNSpecies();
+        int nSpec = getNSpecies();
         int nPlnk = getConfiguration().getNPlankton();
         thresholds = new float[nSpec + nPlnk][];
         for (int i = 0; i < nSpec; i++) {
@@ -94,9 +93,5 @@ abstract class AbstractStage implements IStage {
     @Override
     public float[] getThresholds(int iSpecies) {
         return thresholds[iSpecies];
-    }
-
-    Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
     }
 }

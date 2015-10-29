@@ -96,7 +96,7 @@ public class ByDtByClassAdditionalMortality extends AbstractMortalitySpecies {
             m = timeSerieBySize.getValues();
             sizeClasses = timeSerieBySize.getClasses();
         } else {
-            getSimulation().error("Could not found parameters mortality.natural.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
+            error("Could not found parameters mortality.natural.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
     }
 

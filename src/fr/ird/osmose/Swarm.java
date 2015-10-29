@@ -6,6 +6,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.process.mortality.MortalityCause;
+import fr.ird.osmose.util.OsmoseLinker;
 
 /**
  * The Swarm is the equivalent of the School in Osmose for the plankton group.
@@ -16,7 +17,7 @@ import fr.ird.osmose.process.mortality.MortalityCause;
  * 
  * @author P. Verley
  */
-public class Swarm implements IAggregation {
+public class Swarm extends OsmoseLinker implements IAggregation {
 
     /**
      * Pointer to the plankton group
@@ -42,7 +43,7 @@ public class Swarm implements IAggregation {
     public Swarm(Plankton plankton, Cell cell) {
         this.plankton = plankton;
         this.cell = cell;
-        this.index = plankton.getIndex() + Osmose.getInstance().getConfiguration().getNSpecies();
+        this.index = plankton.getIndex() + getNSpecies();
     }
 
     /**

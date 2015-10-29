@@ -49,17 +49,11 @@
 package fr.ird.osmose.grid;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.output.SpatialOutput;
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.io.IOTools;
-import fr.ird.osmose.util.logging.OLogger;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -76,7 +70,7 @@ import ucar.nc2.NetcdfFileWriteable;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public abstract class AbstractGrid extends OLogger implements IGrid {
+public abstract class AbstractGrid extends OsmoseLinker implements IGrid {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -364,14 +358,5 @@ public abstract class AbstractGrid extends OLogger implements IGrid {
         } catch (IOException ex) {
             // do nothing
         }
-    }
-
-    /**
-     * Returns an instance of the current {@code Configuration}.
-     *
-     * @return an instance of the current {@code Configuration}
-     */
-    Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
     }
 }

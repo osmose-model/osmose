@@ -249,7 +249,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                 recruitmentSize[iSpecies] = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpecies);
                 recruitmentAge[iSpecies] = -1;
             } else {
-                getSimulation().warning("Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
+                warning("Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
                 recruitmentAge[iSpecies] = getConfiguration().getNStepYear();
                 recruitmentSize[iSpecies] = -1.f;
                 

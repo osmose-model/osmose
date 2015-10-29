@@ -49,14 +49,12 @@
 package fr.ird.osmose.util;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.grid.IGrid;
 
 /**
  * 
  * @author pverley
  */
-public class GridPoint {
+public class GridPoint extends OsmoseLinker {
 
     private float x, y;
     private float lon, lat;
@@ -120,9 +118,5 @@ public class GridPoint {
     public void moveToCell(Cell cell) {
         x = cell.get_igrid();
         y = cell.get_jgrid();
-    }
-    
-    public static IGrid getGrid() {
-        return Osmose.getInstance().getGrid();
     }
 }

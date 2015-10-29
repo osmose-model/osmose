@@ -98,7 +98,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             // Init stream
             fos = new FileOutputStream(file, true);
         } catch (FileNotFoundException ex) {
-            getSimulation().warning("Failed to create output file {0}.", file.getAbsolutePath());
+            warning("Failed to create output file {0}.", file.getAbsolutePath());
         }
         prw = new PrintWriter(fos, true);
 

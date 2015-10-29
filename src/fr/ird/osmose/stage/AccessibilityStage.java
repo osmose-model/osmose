@@ -48,14 +48,14 @@
  */
 package fr.ird.osmose.stage;
 
-import fr.ird.osmose.Osmose;
 import fr.ird.osmose.IMarineOrganism;
+import fr.ird.osmose.util.OsmoseLinker;
 
 /**
  *
  * @author pverley
  */
-public class AccessibilityStage implements IStage {
+public class AccessibilityStage extends OsmoseLinker implements IStage {
 
     private AbstractStage stage;
 
@@ -64,7 +64,7 @@ public class AccessibilityStage implements IStage {
 
         String metrics = null;
         try {
-            metrics = Osmose.getInstance().getConfiguration().getString("predation.accessibility.stage.structure");
+            metrics = getConfiguration().getString("predation.accessibility.stage.structure");
             if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
                 metrics = null;
             }
@@ -78,7 +78,7 @@ public class AccessibilityStage implements IStage {
                 stage = new AgeStage("predation.accessibility.stage.threshold.sp");
             }
         } else {
-            Osmose.getInstance().warning("Could not find parameter 'predation.accessibility.stage.structure' (or unsupported value, must be either 'age' or 'size'). Osmose assumes it is age-based threshold.");
+            warning("Could not find parameter 'predation.accessibility.stage.structure' (or unsupported value, must be either 'age' or 'size'). Osmose assumes it is age-based threshold.");
             stage = new AgeStage("predation.accessibility.stage.threshold.sp");
         }
         

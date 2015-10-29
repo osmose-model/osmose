@@ -51,7 +51,7 @@
 package fr.ird.osmose;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import fr.ird.osmose.util.logging.OLogger;
+import fr.ird.osmose.util.OsmoseLinker;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -67,7 +67,7 @@ import org.apache.commons.math3.distribution.LogNormalDistribution;
  *
  * @author pverley
  */
-public class Indiseas extends OLogger {
+public class Indiseas extends OsmoseLinker {
 
     // Name of the scenarii
     private final String[] scenarii = new String[]{"ltl", "htl", "all"};
@@ -423,10 +423,6 @@ public class Indiseas extends OLogger {
         cmd.append(File.separator);
         cmd.append("osmose.log");
         return cmd.toString();
-    }
-
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
     }
 
 }
