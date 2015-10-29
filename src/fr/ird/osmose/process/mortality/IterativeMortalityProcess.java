@@ -86,7 +86,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
         // Loop over cells
         for (Cell cell : getGrid().getCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
-            if (!(cell.isLand() || schools.isEmpty())) {
+            if (!(cell.isLand() || (null == schools))) {
                 int ns = schools.size();
                 int npl = getConfiguration().getNPlankton();
 

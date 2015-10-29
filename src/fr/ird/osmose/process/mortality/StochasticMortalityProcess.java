@@ -92,7 +92,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         // Assess accessibility for this time step
         for (Cell cell : getGrid().getCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
-            if (cell.isLand() || schools.isEmpty()) {
+            if (cell.isLand() || (null == schools)) {
                 continue;
             }
             // Create the list of preys by gathering the schools and the plankton group
@@ -143,10 +143,11 @@ public class StochasticMortalityProcess extends AbstractProcess {
     public void computeMortality_stochastic(int subdt, Cell cell) {
 
         List<School> schools = getSchoolSet().getSchools(cell);
-        int ns = schools.size();
-        if (ns == 0) {
+        if (null == schools) {
             return;
         }
+        int ns = schools.size();
+
         // Create the list of preys by gathering the schools and the plankton group
         List<IAggregation> preys = new ArrayList();
         preys.addAll(schools);

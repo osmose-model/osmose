@@ -48,7 +48,6 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.filter.AliveSchoolFilter;
 import fr.ird.osmose.util.filter.DeadSchoolFilter;
@@ -59,6 +58,8 @@ import fr.ird.osmose.util.filter.OutSchoolFilter;
 import fr.ird.osmose.util.filter.PresentSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -83,14 +84,14 @@ public class SchoolSet extends OsmoseLinker {
     /**
      * Snapshot of the distribution of the schools on the grid.
      */
-    private List<School>[][] schoolMap;
+    private final HashMap<Integer, List<School>> schoolByCell;
     /**
      * Snapshot of the distribution of the schools per species.
      */
     /**
      * Array of list of schools gathered by species.
      */
-    private final List<School>[] arrSpecies;
+    private final HashMap<Integer, List<School>> schoolBySpecies;
     /**
      * Array of boolean that indicates whether the list of schools per species
      * has changed.
@@ -99,7 +100,8 @@ public class SchoolSet extends OsmoseLinker {
 
     SchoolSet() {
         schoolset = new FilteredSet();
-        arrSpecies = new ArrayList[getConfiguration().getNSpecies()];
+        schoolBySpecies = new HashMap();
+        schoolByCell = new HashMap();
         hasSpeciesChanged = new boolean[getConfiguration().getNSpecies()];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             hasSpeciesChanged[i] = true;
@@ -117,13 +119,14 @@ public class SchoolSet extends OsmoseLinker {
     public void add(School school) {
         schoolset.add(school);
     }
-    
+
     /**
      * Remove all the schools.
      */
     public void clear() {
         schoolset.clear();
-        schoolMap = null;
+        schoolByCell.clear();
+        schoolBySpecies.clear();
     }
 
     /**
@@ -156,10 +159,10 @@ public class SchoolSet extends OsmoseLinker {
      */
     public List<School> getSchools(Species species, boolean update) {
         if (update || hasSpeciesChanged[species.getIndex()]) {
-            arrSpecies[species.getIndex()] = FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
+            schoolBySpecies.put(species.getIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()}));
             hasSpeciesChanged[species.getIndex()] = false;
         }
-        return arrSpecies[species.getIndex()];
+        return schoolBySpecies.get(species.getIndex());
     }
 
     /**
@@ -181,7 +184,7 @@ public class SchoolSet extends OsmoseLinker {
      * empty if it contains no school or null if the cell is on land.
      */
     public List<School> getSchools(Cell cell) {
-        return schoolMap[cell.get_jgrid()][cell.get_igrid()];
+        return schoolByCell.get(cell.getIndex());
     }
 
     /**
@@ -220,29 +223,28 @@ public class SchoolSet extends OsmoseLinker {
      */
     public void updateSchoolMap() {
 
-        IGrid grid = Osmose.getInstance().getGrid();
-
-        if (null == schoolMap) {
-            schoolMap = new ArrayList[grid.get_ny()][grid.get_nx()];
+        // Clear the map
+        for (List<School> schools : schoolByCell.values()) {
+            schools.clear();
         }
 
-        // reset the map
-        for (int j = 0; j < grid.get_ny(); j++) {
-            for (int i = 0; i < grid.get_nx(); i++) {
-                if (!grid.getCell(i, j).isLand()) {
-                    if (null == schoolMap[j][i]) {
-                        schoolMap[j][i] = new ArrayList();
-                    } else {
-                        schoolMap[j][i].clear();
-                    }
+        // Fill up the map
+        for (School school : schoolset) {
+            if (!school.isUnlocated()) {
+                int iCell = school.getCell().getIndex();
+                if (!schoolByCell.containsKey(iCell)) {
+                    schoolByCell.put(iCell, new ArrayList());
                 }
+                schoolByCell.get(iCell).add(school);
             }
         }
 
-        // fill up the map
-        for (School school : schoolset) {
-            if (!school.isUnlocated()) {
-                schoolMap[school.getCell().get_jgrid()][school.getCell().get_igrid()].add(school);
+        // Remove empty cells from the map
+        Iterator<Integer> it = schoolByCell.keySet().iterator();
+        while (it.hasNext()) {
+            int iCell = it.next();
+            if (schoolByCell.get(iCell).isEmpty()) {
+                it.remove();
             }
         }
     }

@@ -85,18 +85,18 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
     private float[][][] abundance;
     private float[][][] yield;
     private boolean cutoff;
-
+    
     public SpatialOutput(int rank) {
         super(rank);
     }
-
+    
     private boolean includeClassZero() {
         return !cutoff;
     }
-
+    
     @Override
     public void init() {
-
+        
         cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
 
         /*
@@ -198,7 +198,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     @Override
     public void close() {
         try {
@@ -212,14 +212,14 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             warning("Problem closing the NetCDF spatial output file | {0}", ex.toString());
         }
     }
-
+    
     @Override
     public void initStep() {
     }
-
+    
     @Override
     public void reset() {
-
+        
         int nSpecies = getNSpecies();
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
@@ -230,7 +230,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         abundance = new float[nSpecies][ny][nx];
         yield = new float[nSpecies][ny][nx];
     }
-
+    
     @Override
     public void update() {
         // Loop over the cells
@@ -238,17 +238,19 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             if (!cell.isLand()) {
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                for (School school : getSchoolSet().getSchools(cell)) {
-                    if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                        continue;
-                    }
-                    if (!school.isUnlocated()) {
-                        int iSpec = school.getSpeciesIndex();
-                        biomass[iSpec][j][i] += school.getInstantaneousBiomass();
-                        abundance[iSpec][j][i] += school.getInstantaneousAbundance();
-                        mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
-                        tl[iSpec][j][i] += school.getTrophicLevel() * school.getInstantaneousBiomass();
-                        yield[iSpec][j][i] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
+                if (null != getSchoolSet().getSchools(cell)) {
+                    for (School school : getSchoolSet().getSchools(cell)) {
+                        if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                            continue;
+                        }
+                        if (!school.isUnlocated()) {
+                            int iSpec = school.getSpeciesIndex();
+                            biomass[iSpec][j][i] += school.getInstantaneousBiomass();
+                            abundance[iSpec][j][i] += school.getInstantaneousAbundance();
+                            mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
+                            tl[iSpec][j][i] += school.getTrophicLevel() * school.getInstantaneousBiomass();
+                            yield[iSpec][j][i] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
+                        }
                     }
                 }
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
@@ -257,7 +259,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             }
         }
     }
-
+    
     @Override
     public void write(float time) {
 
@@ -315,10 +317,10 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 }
             }
         }
-
+        
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, time * 360);
-
+        
         int index = nc.getUnlimitedDimension().getLength();
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
@@ -335,7 +337,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
     private String getFilename() {
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
@@ -346,7 +348,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         filename.append(".nc.part");
         return filename.toString();
     }
-
+    
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         // Always true, every time step should be written in the NetCDF file.
