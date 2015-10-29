@@ -50,7 +50,6 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.filter.AliveSchoolFilter;
-import fr.ird.osmose.util.filter.DeadSchoolFilter;
 import fr.ird.osmose.util.filter.FilteredSet;
 import fr.ird.osmose.util.filter.FilteredSets;
 import fr.ird.osmose.util.filter.IFilter;
@@ -133,8 +132,13 @@ public class SchoolSet extends OsmoseLinker {
      * Remove dead schools from the set
      */
     public void removeDeadSchools() {
-        List<School> schoolsToRemove = FilteredSets.subset(schoolset, new DeadSchoolFilter());
-        schoolset.removeAll(schoolsToRemove);
+        
+        Iterator<School> it = schoolset.iterator();
+        while (it.hasNext()) {
+            if (!it.next().isAlive()) {
+                it.remove();
+            }
+        }
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             hasSpeciesChanged[i] = true;
         }
