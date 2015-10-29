@@ -73,7 +73,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
     public void makeSnapshot(int iStepSimu) {
 
         NetcdfFileWriteable nc = createNCFile(iStepSimu);
-        int nSchool = getSchoolSet().size();
+        int nSchool = getSchoolSet().getSchools().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
         ArrayFloat.D1 x = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 y = new ArrayFloat.D1(nSchool);
@@ -84,7 +84,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 trophiclevel = new ArrayFloat.D1(nSchool);
         int s = 0;
         // fill up the arrays
-        for (School school : getSchoolSet()) {
+        for (School school : getSchoolSet().getSchools()) {
             species.set(s, school.getSpeciesIndex());
             x.set(s, school.getX());
             y.set(s, school.getY());
@@ -133,7 +133,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         /*
          * Create dimensions
          */
-        Dimension nSchool = nc.addDimension("nschool", getSchoolSet().size());
+        Dimension nSchool = nc.addDimension("nschool", getSchoolSet().getSchools().size());
         /*
          * Add variables
          */

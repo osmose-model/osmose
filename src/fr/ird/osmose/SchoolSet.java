@@ -49,6 +49,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.filter.AliveSchoolFilter;
 import fr.ird.osmose.util.filter.DeadSchoolFilter;
 import fr.ird.osmose.util.filter.FilteredSet;
@@ -70,11 +71,15 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class SchoolSet extends FilteredSet<School> {
+public class SchoolSet extends OsmoseLinker {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
+    /**
+     * Set of all the schools
+     */
+    private final FilteredSet<School> schoolset;
     /**
      * Snapshot of the distribution of the schools on the grid.
      */
@@ -88,11 +93,12 @@ public class SchoolSet extends FilteredSet<School> {
     private final List<School>[] arrSpecies;
     /**
      * Array of boolean that indicates whether the list of schools per species
-     * should be has changed.
+     * has changed.
      */
     private final boolean[] hasSpeciesChanged;
 
     SchoolSet() {
+        schoolset = new FilteredSet();
         arrSpecies = new ArrayList[getConfiguration().getNSpecies()];
         hasSpeciesChanged = new boolean[getConfiguration().getNSpecies()];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
@@ -104,14 +110,40 @@ public class SchoolSet extends FilteredSet<School> {
 // Definition of the functions
 ///////////////////////////////
     /**
+     * Add a school to the school set.
+     *
+     * @param school, the school to add to the set.
+     */
+    public void add(School school) {
+        schoolset.add(school);
+    }
+    
+    /**
+     * Remove all the schools.
+     */
+    public void clear() {
+        schoolset.clear();
+        schoolMap = null;
+    }
+
+    /**
      * Remove dead schools from the set
      */
     public void removeDeadSchools() {
-        List<School> schoolsToRemove = FilteredSets.subset(this, new DeadSchoolFilter());
-        removeAll(schoolsToRemove);
+        List<School> schoolsToRemove = FilteredSets.subset(schoolset, new DeadSchoolFilter());
+        schoolset.removeAll(schoolsToRemove);
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             hasSpeciesChanged[i] = true;
         }
+    }
+
+    /**
+     * Returns all the schools.
+     *
+     * @return a list of all the schools
+     */
+    public List<School> getSchools() {
+        return schoolset;
     }
 
     /**
@@ -124,7 +156,7 @@ public class SchoolSet extends FilteredSet<School> {
      */
     public List<School> getSchools(Species species, boolean update) {
         if (update || hasSpeciesChanged[species.getIndex()]) {
-            arrSpecies[species.getIndex()] = FilteredSets.subset(this, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
+            arrSpecies[species.getIndex()] = FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()});
             hasSpeciesChanged[species.getIndex()] = false;
         }
         return arrSpecies[species.getIndex()];
@@ -159,7 +191,7 @@ public class SchoolSet extends FilteredSet<School> {
      * @return a List of the schools present on the grid at current time step
      */
     public List<School> getPresentSchools() {
-        return FilteredSets.subset(this, new PresentSchoolFilter());
+        return FilteredSets.subset(schoolset, new PresentSchoolFilter());
     }
 
     /**
@@ -170,7 +202,7 @@ public class SchoolSet extends FilteredSet<School> {
      * step.
      */
     public List<School> getOutSchools() {
-        return FilteredSets.subset(this, new OutSchoolFilter());
+        return FilteredSets.subset(schoolset, new OutSchoolFilter());
     }
 
     /**
@@ -179,7 +211,7 @@ public class SchoolSet extends FilteredSet<School> {
      * @return a list of the alive schools
      */
     public List<School> getAliveSchools() {
-        return FilteredSets.subset(this, new AliveSchoolFilter());
+        return FilteredSets.subset(schoolset, new AliveSchoolFilter());
     }
 
     /**
@@ -208,14 +240,10 @@ public class SchoolSet extends FilteredSet<School> {
         }
 
         // fill up the map
-        for (School school : this) {
+        for (School school : schoolset) {
             if (!school.isUnlocated()) {
                 schoolMap[school.getCell().get_jgrid()][school.getCell().get_igrid()].add(school);
             }
         }
-    }
-
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
     }
 }

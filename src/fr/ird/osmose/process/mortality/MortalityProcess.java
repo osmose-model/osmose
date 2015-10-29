@@ -156,7 +156,7 @@ public class MortalityProcess extends AbstractProcess {
         insideMortalityProcess.run();
 
         // Update starvation mortality rate and trophic level
-        for (School school : getSchoolSet()) {
+        for (School school : getSchoolSet().getSchools()) {
             // Calculate starvation mortality rate that will be apply at next time step
             school.setStarvationRate(starvationMortality.getRate(school));
             // Update trophic level

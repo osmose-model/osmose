@@ -110,7 +110,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         abundanceStage = new double[getNSpecies()][STAGES];
 
         // save abundance at the beginning of the time step
-        for (School school : getSchoolSet()) {
+        for (School school : getSchoolSet().getSchools()) {
             abundanceStage[school.getSpeciesIndex()][getStage(school)] += school.getAbundance();
         }
     }
@@ -127,7 +127,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         int iStage;
         int nCause = MortalityCause.values().length;
         double[][][] nDead = new double[getNSpecies()][nCause][STAGES];
-        for (School school : getSchoolSet()) {
+        for (School school : getSchoolSet().getSchools()) {
             iStage = getStage(school);
             int iSpecies = school.getSpeciesIndex();
             // Update number of deads

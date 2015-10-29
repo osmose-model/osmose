@@ -49,7 +49,6 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.ltl.LTLForcing;
-import fr.ird.osmose.util.logging.OLogger;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.process.mortality.MortalityCause;
@@ -159,10 +158,6 @@ public class Simulation extends OsmoseLinker {
      */
     public void destroy() {
 
-        for (School school : schoolSet) {
-            school.setNdead(MortalityCause.OUT, Double.MAX_VALUE);
-        }
-        schoolSet.removeDeadSchools();
         schoolSet.clear();
         step = null;
         forcing = null;

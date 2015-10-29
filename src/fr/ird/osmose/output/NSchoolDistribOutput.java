@@ -88,7 +88,7 @@ public class NSchoolDistribOutput extends AbstractDistribOutput {
 
     @Override
     public void initStep() {
-        for (School school : getSchoolSet()) {
+        for (School school : getSchoolSet().getSchools()) {
             values[school.getSpeciesIndex()][getClass(school)] += 1;
         }
     }

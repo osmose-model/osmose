@@ -134,7 +134,7 @@ public class DefaultStep extends AbstractStep {
         incomingFLuxProcess.run();
 
         // Reset some school state variables 
-        for (School school : getSchoolSet()) {
+        for (School school : getSchoolSet().getSchools()) {
             school.init();
         }
 

@@ -84,7 +84,7 @@ public class MovementProcess extends AbstractProcess {
 
     @Override
     public void run() {
-        for (School school : getSchoolSet()) {
+        for (School school : getSchoolSet().getSchools()) {
             spatialDistribution[school.getSpeciesIndex()].move(school, getSimulation().getIndexTimeSimu());
         }
         
