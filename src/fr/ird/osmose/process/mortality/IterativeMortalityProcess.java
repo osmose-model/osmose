@@ -117,7 +117,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
                             } else {
                                 // Prey is Plankton
                                 int index = ipr - ns + nspec;
-                                school.addPreyRecord(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), -1, -1, nDeadMatrix[ipr][is], keepRecord);
+                                school.addPreyRecord(index, getConfiguration().getPlankton(ipr - ns).getTrophicLevel(), -1, -1, nDeadMatrix[ipr][is], keepRecord);
                             }
                         }
                     }

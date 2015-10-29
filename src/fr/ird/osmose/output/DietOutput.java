@@ -175,7 +175,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
         for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
             prw.print(time);
             prw.print(separator);
-            prw.print(getSimulation().getPlankton(j - nSpec));
+            prw.print(getConfiguration().getPlankton(j - nSpec));
             prw.print(separator);
             for (int i = 0; i < nSpec; i++) {
                 int nStagePred = dietOutputStage.getNStage(i);

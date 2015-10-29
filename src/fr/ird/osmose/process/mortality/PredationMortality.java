@@ -260,7 +260,7 @@ public class PredationMortality extends AbstractMortality {
         double[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-            double biomAccessible = getForcing().getBiomass(i, cell) * getSimulation().getPlankton(i).getAccessibility(iStepSimu);
+            double biomAccessible = getForcing().getBiomass(i, cell) * getConfiguration().getPlankton(i).getAccessibility(iStepSimu);
             biomAccessibleTot += percentPlankton[i] * tempAccess * biomAccessible;
         }
 
@@ -288,7 +288,7 @@ public class PredationMortality extends AbstractMortality {
             // Assess the loss for the plankton caused by the predator
             for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-                double biomAccessible = getForcing().getBiomass(i, cell) * getSimulation().getPlankton(i).getAccessibility(iStepSimu);
+                double biomAccessible = getForcing().getBiomass(i, cell) * getConfiguration().getPlankton(i).getAccessibility(iStepSimu);
                 double ratio = percentPlankton[i] * tempAccess * biomAccessible / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
             }
@@ -346,10 +346,10 @@ public class PredationMortality extends AbstractMortality {
         double preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            if ((preySizeMin > getSimulation().getPlankton(i).getSizeMax()) || (preySizeMax < getSimulation().getPlankton(i).getSizeMin())) {
+            if ((preySizeMin > getConfiguration().getPlankton(i).getSizeMax()) || (preySizeMax < getConfiguration().getPlankton(i).getSizeMin())) {
                 percentPlankton[i] = 0.0d;
             } else {
-                percentPlankton[i] = getSimulation().getPlankton(i).computePercent(preySizeMin, preySizeMax);
+                percentPlankton[i] = getConfiguration().getPlankton(i).computePercent(preySizeMin, preySizeMax);
             }
         }
         return percentPlankton;

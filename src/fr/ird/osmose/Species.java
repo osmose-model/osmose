@@ -48,6 +48,8 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.util.OsmoseLinker;
+
 /**
  * This class represents a species. It is characterized by the following
  * variables:
@@ -65,7 +67,7 @@ package fr.ird.osmose;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Species {
+public class Species extends OsmoseLinker {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -73,49 +75,49 @@ public class Species {
     /**
      * Trophic level of an egg.
      */
-    final static public float TL_EGG = 3f;
+    public static final float TL_EGG = 3f;
     /**
      * Index of the species. [0 : numberTotalSpecies - 1]
      */
-    final private int index;
+    private final int index;
     /**
      * Name of the species. Parameter <i>species.name.sp#</i>
      */
-    final private String name;
+    private final String name;
     /**
      * Lifespan expressed in number of time step. A lifespan of 5 years means
      * that a fish will die as soon as it turns 5 years old. Parameter
      * <i>species.lifespan.sp#</i>
      */
-    final private int lifespan;
+    private final int lifespan;
     /**
      * Allometric parameters. Parameters
      * <i>species.length2weight.condition.factor.sp#</i> and
      * <i>species.length2weight.allometric.power.sp#</i>
      */
-    final private float c, bPower;
+    private final float c, bPower;
     /**
      * Size (cm) at maturity. Parameter <i>species.maturity.size.sp#</i>
      */
-    final private float sizeMaturity;
+    private final float sizeMaturity;
     /**
      * Age (year) at maturity. Parameter <i>species.maturity.age.sp#</i>
      */
-    final private float ageMaturity;
+    private final float ageMaturity;
     /**
      * Threshold age (year) for age class zero. It is the age from which target
      * biomass should be considered as eggs and larvae stages are generally not
      * considered. Parameter <i>output.cutoff.age.sp#</i>
      */
-    final private int ageClassZero;
+    private final int ageClassZero;
     /**
      * Size (cm) of eggs. Parameter <i>species.egg.size.sp#</i>
      */
-    final private float eggSize;
+    private final float eggSize;
     /**
      * Weight (gram) of eggs. Parameter <i>species.egg.weight.sp#</i>
      */
-    final private float eggWeight;
+    private final float eggWeight;
 
 //////////////
 // Constructor
@@ -131,6 +133,9 @@ public class Species {
         this.index = index;
         // Initialization of parameters
         name = getConfiguration().getString("species.name.sp" + index);
+        if (!name.matches("^[a-zA-Z0-9]*$")) {
+                error("Species name must contain alphanumeric characters only. Please rename " + name, null);
+            }
         c = getConfiguration().getFloat("species.length2weight.condition.factor.sp" + index);
         bPower = getConfiguration().getFloat("species.length2weight.allometric.power.sp" + index);
         if (!getConfiguration().isNull("species.maturity.size.sp" + index)) {
@@ -235,14 +240,5 @@ public class Species {
         double Bv = 0.d;
         double Sv = 1.d;
         return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
-    }
-
-    /**
-     * Returns an instance of the {@code Configuration}.
-     *
-     * @return an instance of the {@code Configuration}
-     */
-    private Configuration getConfiguration() {
-        return Osmose.getInstance().getConfiguration();
     }
 }

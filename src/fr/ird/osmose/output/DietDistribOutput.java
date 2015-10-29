@@ -109,7 +109,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
             headers[i + 1] = getSpecies(i).getName();
         }
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            headers[i + getNSpecies() + 1] = getSimulation().getPlankton(i).getName();
+            headers[i + getNSpecies() + 1] = getConfiguration().getPlankton(i).getName();
         }
         return headers;
     }

@@ -226,6 +226,10 @@ public class Configuration extends OLogger {
      * Array of the species of the simulation.
      */
     private Species[] species;
+    /**
+     * Array of the LTL groups of the simulation.
+     */
+    private Plankton[] ltlGroups;
 
 ///////////////
 // Constructors
@@ -349,9 +353,13 @@ public class Configuration extends OLogger {
         species = new Species[nSpecies];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
-            if (!species[i].getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Species name must contain alphanumeric characters only. Please rename " + species[i].getName(), null);
-            }
+            
+        }
+        
+        // Init plankton groups
+        ltlGroups = new Plankton[nPlankton];
+        for (int p = 0; p < ltlGroups.length; p++) {
+            ltlGroups[p] = new Plankton(p);
         }
     }
 
@@ -363,6 +371,16 @@ public class Configuration extends OLogger {
      */
     public Species getSpecies(int index) {
         return species[index];
+    }
+    
+    /**
+     * Gets the specified plankton group.
+     *
+     * @param index, the index of the plankton group.
+     * @return the plankton group number iPlankton.
+     */
+    public Plankton getPlankton(int index) {
+        return ltlGroups[index];
     }
 
     /**

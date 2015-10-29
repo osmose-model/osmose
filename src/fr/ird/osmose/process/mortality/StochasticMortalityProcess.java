@@ -117,7 +117,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         for (List<Swarm> swarms : swarmSet.values()) {
             for (Swarm swarm : swarms) {
                 int iltl = swarm.getLTLIndex();
-                double accessibleBiom = getSimulation().getPlankton(iltl).getAccessibility(iStepSimu)
+                double accessibleBiom = getConfiguration().getPlankton(iltl).getAccessibility(iStepSimu)
                         * getForcing().getBiomass(iltl, swarm.getCell());
                 swarm.setBiomass(accessibleBiom);
             }
@@ -235,7 +235,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         if (!swarmSet.containsKey(cell.getIndex())) {
             List<Swarm> swarms = new ArrayList();
             for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
-                swarms.add(new Swarm(getSimulation().getPlankton(iLTL), cell));
+                swarms.add(new Swarm(getConfiguration().getPlankton(iLTL), cell));
             }
             swarmSet.put(cell.getIndex(), swarms);
         }

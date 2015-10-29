@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
@@ -71,7 +71,7 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Plankton extends SimulationLinker {
+public class Plankton extends OsmoseLinker {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -79,33 +79,33 @@ public class Plankton extends SimulationLinker {
     /**
      * Index of the plankton group
      */
-    final private int index;
+    private final int index;
     /**
      * Trophic level of the plankton group. Parameter <i>plankton.TL.plk#</i>
      */
-    private float trophicLevel;
+    private final float trophicLevel;
     /**
      * Size range, in centimeter, of the plankton group. Parameters
      * <i>plankton.size.min.plk#</i> and
      * <i>plankton.size.max.plk#</i>
      */
-    private double sizeMin, sizeMax;
+    private final double sizeMin, sizeMax;
     /**
      * Name of the plankton group. (e.g. phytoplankton, diatoms, copepods).
      * Parameter <i>plankton.name.plk#</i>
      */
-    private String name;
+    private final String name;
     /**
      * Fraction of plankton biomass available to the fish, ranging [0, 1].
      * Parameter <i>plankton.accessibility2fish.plk#</i>
      */
-    private double[] accessibilityCoeff;
+    private final double[] accessibilityCoeff;
     /**
      * Maximum value for plankton accessibility. It should never be one or
      * exceed one to avoid any numerical problem when converting from float to
      * double.
      */
-    final private double accessMax = 0.99d;
+    private final double accessMax = 0.99d;
 
 ///////////////
 // Constructors
@@ -114,23 +114,15 @@ public class Plankton extends SimulationLinker {
      * Initialises a new plankton group with characteristics given as
      * parameters.
      *
-     * @param rank, the simulation rank
      * @param index, index of the plankton group
      */
-    public Plankton(int rank, int index) {
-        super(rank);
+    public Plankton(int index) {
         this.index = index;
-    }
-
-////////////////////////////
-// Definition of the methods
-////////////////////////////
-    /**
-     * Initialises the parameters of the plankton group
-     */
-    public void init() {
-
+        // Initialisation of parameters
         name = getConfiguration().getString("plankton.name.plk" + index);
+        if (!name.matches("^[a-zA-Z0-9]*$")) {
+            error("Plankton name must contain alphanumeric characters only. Please rename " + name, null);
+        }
         sizeMin = getConfiguration().getDouble("plankton.size.min.plk" + index);
         sizeMax = getConfiguration().getDouble("plankton.size.max.plk" + index);
         trophicLevel = getConfiguration().getFloat("plankton.tl.plk" + index);
@@ -142,11 +134,14 @@ public class Plankton extends SimulationLinker {
             double accessibility = getConfiguration().getDouble("plankton.accessibility2fish.plk" + index);
             accessibilityCoeff = new double[getConfiguration().getNStepYear() * getConfiguration().getNYear()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
-                accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;;
+                accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
             }
         }
     }
-    
+
+////////////////////////////
+// Definition of the methods
+////////////////////////////
     public double getAccessibility(int iStepSimu) {
         return accessibilityCoeff[iStepSimu];
     }

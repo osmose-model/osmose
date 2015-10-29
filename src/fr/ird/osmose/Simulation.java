@@ -108,10 +108,6 @@ public class Simulation extends OLogger {
      */
     private int n_steps_simu;
     /**
-     * Array of the LTL groups of the simulation.
-     */
-    private Plankton[] ltlGroups;
-    /**
      * The object that controls what should be done during one time step.
      */
     private AbstractStep step;
@@ -167,7 +163,6 @@ public class Simulation extends OLogger {
         }
         schoolSet.removeDeadSchools();
         schoolSet.clear();
-        ltlGroups = null;
         step = null;
         forcing = null;
         snapshot = null;
@@ -216,16 +211,6 @@ public class Simulation extends OLogger {
                 restart = true;
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
-            }
-        }
-
-        // Init plankton groups
-        ltlGroups = new Plankton[getConfiguration().getNPlankton()];
-        for (int p = 0; p < ltlGroups.length; p++) {
-            ltlGroups[p] = new Plankton(rank, p);
-            ltlGroups[p].init();
-            if (!ltlGroups[p].getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Plankton name must contain alphanumeric characters only. Please rename " + ltlGroups[p].getName(), null);
             }
         }
 
@@ -351,16 +336,6 @@ public class Simulation extends OLogger {
      */
     public SchoolSet getSchoolSet() {
         return schoolSet;
-    }
-
-    /**
-     * Gets the specified plankton group.
-     *
-     * @param index, the index of the plankton group.
-     * @return the plankton group number iPlankton.
-     */
-    public Plankton getPlankton(int index) {
-        return ltlGroups[index];
     }
 
     /**

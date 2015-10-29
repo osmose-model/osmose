@@ -246,7 +246,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
         for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
             str.append(kltl);
             str.append("=");
-            str.append(getSimulation().getPlankton(kltl));
+            str.append(getConfiguration().getPlankton(kltl));
             str.append(" ");
         }
         nc.addGlobalAttribute("dimension_ltl", str.toString());

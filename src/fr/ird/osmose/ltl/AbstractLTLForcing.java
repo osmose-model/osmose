@@ -187,7 +187,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             if (!getConfiguration().isNull("plankton.conversion2tons.plk" + iPlk)) {
                 conversionFactor[iPlk] = getConfiguration().getDouble("plankton.conversion2tons.plk" + iPlk);
             } else {
-                warning("Paramter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/km2 (or tonne/km3 for 3D dataset)", new Object[]{iPlk, getSimulation().getPlankton(iPlk).getName()});
+                warning("Paramter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/km2 (or tonne/km3 for 3D dataset)", new Object[]{iPlk, getConfiguration().getPlankton(iPlk).getName()});
                 conversionFactor[iPlk] = 1.d;
             }
         }

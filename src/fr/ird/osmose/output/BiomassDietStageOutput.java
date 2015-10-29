@@ -131,7 +131,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         }
 
         for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
-            headers[k] = getSimulation().getPlankton(j - nSpec).getName();
+            headers[k] = getConfiguration().getPlankton(j - nSpec).getName();
             k++;
         }
         return headers;
