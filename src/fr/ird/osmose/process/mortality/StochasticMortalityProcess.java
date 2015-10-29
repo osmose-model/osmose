@@ -9,9 +9,11 @@ import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
+import fr.ird.osmose.Swarm;
 import fr.ird.osmose.util.XSRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -47,6 +49,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
      * Private instance of the predation mortality
      */
     private PredationMortality predationMortality;
+    /**
+     * The set of plankton swarms
+     */
+    private HashMap<Integer, List<Swarm>> swarmSet;
 
     public StochasticMortalityProcess(int rank) {
         super(rank);
@@ -72,6 +78,9 @@ public class StochasticMortalityProcess extends AbstractProcess {
             subdt = 10;
             warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose set it to {0}.", subdt);
         }
+
+        // Create a new swarm set, empty at the moment
+        swarmSet = new HashMap();
     }
 
     @Override
@@ -89,7 +98,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
             // Create the list of preys by gathering the schools and the plankton group
             List<IAggregation> preys = new ArrayList();
             preys.addAll(schools);
-            preys.addAll(getSimulation().getSwarms(cell));
+            preys.addAll(getSwarms(cell));
             for (School school : schools) {
                 school.setAccessibilities(predationMortality.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
@@ -103,8 +112,16 @@ public class StochasticMortalityProcess extends AbstractProcess {
             }
         }
 
-        // Update biomass of the swarms
-        getSimulation().updateSwarms();
+        // Update swarms biomass
+        int iStepSimu = getSimulation().getIndexTimeSimu();
+        for (List<Swarm> swarms : swarmSet.values()) {
+            for (Swarm swarm : swarms) {
+                int iltl = swarm.getLTLIndex();
+                double accessibleBiom = getSimulation().getPlankton(iltl).getAccessibility(iStepSimu)
+                        * getForcing().getBiomass(iltl, swarm.getCell());
+                swarm.setBiomass(accessibleBiom);
+            }
+        }
 
         for (int idt = 0; idt < subdt; idt++) {
             fishingMortality.assessFishableBiomass();
@@ -139,7 +156,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                 prey.releaseEgg(subdt);
             }
         }
-        preys.addAll(getSimulation().getSwarms(cell));
+        preys.addAll(getSwarms(cell));
 
         Integer[] seqPred = new Integer[ns];
         for (int i = 0; i < ns; i++) {
@@ -212,6 +229,17 @@ public class StochasticMortalityProcess extends AbstractProcess {
                 }
             }
         }
+    }
+
+    private List<Swarm> getSwarms(Cell cell) {
+        if (!swarmSet.containsKey(cell.getIndex())) {
+            List<Swarm> swarms = new ArrayList();
+            for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
+                swarms.add(new Swarm(getSimulation().getPlankton(iLTL), cell));
+            }
+            swarmSet.put(cell.getIndex(), swarms);
+        }
+        return swarmSet.get(cell.getIndex());
     }
 
     private static <T> void shuffleArray(T[] a) {

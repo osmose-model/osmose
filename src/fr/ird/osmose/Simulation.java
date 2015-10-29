@@ -57,9 +57,6 @@ import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.DefaultStep;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -68,7 +65,7 @@ import ucar.nc2.NetcdfFile;
  * <i>simulation.nsimu</i> controls how many simulations with the same set of
  * parameters are to be run. Every replicated simulation is an instance of this
  * object {@code Simulation}.<br>
- * The {@code Simulation} initializes all the required components for running
+ * The {@code Simulation} initialises all the required components for running
  * the simulation such as
  * {@link fr.ird.osmose.step.AbstractStep}, {@link fr.ird.osmose.ltl.LTLForcing}
  * or {@link fr.ird.osmose.process.PopulatingProcess} and then controls the loop
@@ -90,10 +87,6 @@ public class Simulation extends OLogger {
      * The set of schools.
      */
     private SchoolSet schoolSet;
-    /**
-     * The set of plankton swarms
-     */
-    private HashMap<Integer, List<Swarm>> swarmSet;
     /**
      * The low trophic level forcing class.
      */
@@ -174,7 +167,6 @@ public class Simulation extends OLogger {
         }
         schoolSet.removeDeadSchools();
         schoolSet.clear();
-        swarmSet.clear();
         ltlGroups = null;
         step = null;
         forcing = null;
@@ -191,9 +183,6 @@ public class Simulation extends OLogger {
 
         // Create a new school set, empty at the moment
         schoolSet = new SchoolSet();
-
-        // Create a new swarm set, empty at the moment
-        swarmSet = new HashMap();
 
         // Option for running only one time step and stops
         boolean oneStep = false;
@@ -362,28 +351,6 @@ public class Simulation extends OLogger {
      */
     public SchoolSet getSchoolSet() {
         return schoolSet;
-    }
-
-    public List<Swarm> getSwarms(Cell cell) {
-        if (!swarmSet.containsKey(cell.getIndex())) {
-            List<Swarm> swarms = new ArrayList();
-            for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
-                swarms.add(new Swarm(getPlankton(iLTL), cell));
-            }
-            swarmSet.put(cell.getIndex(), swarms);
-        }
-        return swarmSet.get(cell.getIndex());
-    }
-
-    public void updateSwarms() {
-        for (List<Swarm> swarms : swarmSet.values()) {
-            for (Swarm swarm : swarms) {
-                int iltl = swarm.getLTLIndex();
-                double accessibleBiom = getPlankton(iltl).getAccessibility(i_step_simu)
-                        * forcing.getBiomass(iltl, swarm.getCell());
-                swarm.setBiomass(accessibleBiom);
-            }
-        }
     }
 
     /**
