@@ -1,6 +1,7 @@
 Command line usage:
 Usage1: java -jar osmose.jar -F FILE [-resolve=global|local] [-update] [-P<key>=<value> [...]]
 Usage2: java -jar osmose.jar [-resolve=global|local] [-update] [-P<key>=<value> [...]] FILE1 [FILE2] [...]
+Usage3: java -jar osmose.jar [-resolve=global|local] -indiseas FILE
 Options summary:
  -F     Path of a text file that lists Osmose configuration files.
  -resolve=global|local  Controls relative pathname/filename resolution in Osmose configuration files.
@@ -19,3 +20,4 @@ Options summary:
    -P and -update options are mutually exclusive.
    -verbose     Enable verbose output
    -quiet     Only print error message
+   -indiseas    (beta) Generates folder tree and java command line instructions for launching batches of Indiseas simulations.
