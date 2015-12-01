@@ -50,7 +50,7 @@ package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.School;
-import fr.ird.osmose.PreyRecord;
+import fr.ird.osmose.Prey;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -161,11 +161,11 @@ public class MortalityProcess extends AbstractProcess {
             school.setStarvationRate(starvationMortality.getRate(school));
             // Update trophic level
             if (school.getPreyedBiomass() > 0) {
-                Collection<PreyRecord> preys = school.getPreyRecords();
+                Collection<Prey> preys = school.getPreys();
                 if (!preys.isEmpty()) {
                     double trophicLevel = 0.d;
-                    for (PreyRecord preyRecord : preys) {
-                        trophicLevel += preyRecord.getTrophicLevel() * preyRecord.getBiomass() / school.getPreyedBiomass();
+                    for (Prey prey : preys) {
+                        trophicLevel += prey.getTrophicLevel() * prey.getBiomass() / school.getPreyedBiomass();
                     }
                     trophicLevel += 1;
                     school.setTrophicLevel((float) trophicLevel);

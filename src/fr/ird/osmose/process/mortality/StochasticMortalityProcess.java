@@ -53,7 +53,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
      * The set of plankton swarms
      */
     private HashMap<Integer, List<Swarm>> swarmSet;
-
+    
     public StochasticMortalityProcess(int rank) {
         super(rank);
     }
@@ -100,7 +100,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
             preys.addAll(schools);
             preys.addAll(getSwarms(cell));
             for (School school : schools) {
-                school.setAccessibilities(predationMortality.getAccessibility(school, preys));
+                school.setAccessibility(predationMortality.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
                 if (school.getAgeDt() == 0) {
                     // Egg loss, not accessible to predation process
@@ -184,13 +184,13 @@ public class StochasticMortalityProcess extends AbstractProcess {
                     case PREDATION:
                         // Predation mortality
                         School predator = schools.get(seqPred[i]);
-                        double[] preyUpon = predationMortality.computePredation(predator, preys, predator.getAccessibilities(), subdt);
+                        double[] preyUpon = predationMortality.computePredation(predator, preys, predator.getAccessibility(), subdt);
                         for (int ipr = 0; ipr < preys.size(); ipr++) {
                             if (preyUpon[ipr] > 0) {
                                 IAggregation prey = preys.get(ipr);
                                 nDead = prey.biom2abd(preyUpon[ipr]);
                                 prey.incrementNdead(MortalityCause.PREDATION, nDead);
-                                predator.addPreyRecord(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
+                                predator.preyedUpon(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
                             }
                         }
                         break;

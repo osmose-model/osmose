@@ -50,7 +50,7 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.PreyRecord;
+import fr.ird.osmose.Prey;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
@@ -137,7 +137,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
                 // Preyed biomass for every LTL group in current cell
                 double[] preyedLTL = new double[getConfiguration().getNPlankton()];
                 for (School school : getSchoolSet().getSchools(cell)) {
-                    for (PreyRecord prey : school.getPreyRecords()) {
+                    for (Prey prey : school.getPreys()) {
                         int iltl = prey.getSpeciesIndex() - nspec;
                         if (iltl >= 0) {
                             preyedLTL[iltl] += prey.getBiomass();

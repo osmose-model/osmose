@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.PreyRecord;
+import fr.ird.osmose.Prey;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
@@ -99,7 +99,7 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
     public void update() {
 
         for (School predator : getSchoolSet().getAliveSchools()) {
-            for (PreyRecord prey : predator.getPreyRecords()) {
+            for (Prey prey : predator.getPreys()) {
                 if (prey.getSpeciesIndex() == species.getIndex()) {
                     int classPrey = getClass(prey);
                     if (classPrey >= 0) {

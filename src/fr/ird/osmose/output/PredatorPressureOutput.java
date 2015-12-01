@@ -49,7 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.PreyRecord;
+import fr.ird.osmose.Prey;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.util.SimulationLinker;
@@ -116,7 +116,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         for (School school : getSchoolSet().getAliveSchools()) {
             int iSpec = school.getSpeciesIndex();
             int stage = dietOutputStage.getStage(school);
-            for (PreyRecord prey : school.getPreyRecords()) {
+            for (Prey prey : school.getPreys()) {
                 predatorPressure[iSpec][stage][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += prey.getBiomass();
             }
         }

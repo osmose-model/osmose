@@ -78,11 +78,15 @@ import java.util.UUID;
  * biological relevancy. Later on, when the documentation refers to "fish" it
  * must be understood as the typical fish constituting the school.<br>
  * The {@code School} extends a {@code GridPoint}. It means the school is
- * located with both grid coordinates and geographical coordinates.
+ * located with both grid coordinates and geographical coordinates. The way
+ * Osmose presently handles spatial movements, it is unnecessarily "fancy" for a
+ * school to extends a GridPoint. Indeed Osmose locates the schools in grid
+ * cells and does not need more precise coordinates. A mere Cell attribute in
+ * the School object would be enough at the moment. The GridPoint opens avenue
+ * for future improvement or refinement in the spatial movements of the schools.
  *
  * @see GridPoint
  * @author P.Verley (philippe.verley@ird.fr)
- * @version 3.0b 2013/09/01
  */
 public class School extends GridPoint implements IAggregation {
 
@@ -164,7 +168,7 @@ public class School extends GridPoint implements IAggregation {
      * List of {@code PreyRecord}. It keeps track of what the school has eaten
      * during the time step.
      */
-    final private HashMap<Integer, PreyRecord> preyRecords;
+    final private HashMap<Integer, Prey> preys;
     /**
      * Biomass of prey, in tonne, ingested by the school at current time step.
      */
@@ -183,9 +187,9 @@ public class School extends GridPoint implements IAggregation {
      */
     private boolean out;
     /**
-     * Array of temporary accessibilities of preys for this predator
+     * Array of temporary accessibility of preys for this predator
      */
-    private double[] accessibilities;
+    private double[] accessibility;
     /**
      * A unique randomly generated {@link java.util.UUID} for identifying and
      * comparing schools.
@@ -260,7 +264,7 @@ public class School extends GridPoint implements IAggregation {
         this.ageDt = ageDt;
         this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
-        preyRecords = new HashMap();
+        preys = new HashMap();
         starvationRate = 0.d;
     }
 
@@ -279,7 +283,7 @@ public class School extends GridPoint implements IAggregation {
         // Rest number of dead fish
         reset(nDead);
         // Reset diet variables
-        preyRecords.clear();
+        preys.clear();
         preyedBiomass = 0.d;
         predSuccessRate = 0.f;
         // by default the school is in the simulated area, and migration might
@@ -480,6 +484,11 @@ public class School extends GridPoint implements IAggregation {
         abundanceHasChanged = true;
     }
 
+    /**
+     * The weight of the fish (not the whole school), in tonne.
+     *
+     * @return the weight on the fish, in tonne.
+     */
     @Override
     public float getWeight() {
         return weight;
@@ -503,6 +512,11 @@ public class School extends GridPoint implements IAggregation {
         return sum;
     }
 
+    /**
+     * Reset a double array to zero.
+     *
+     * @param array to be reseted.
+     */
     private void reset(double[] array) {
         for (int i = 0; i < array.length; i++) {
             array[i] = 0.d;
@@ -510,7 +524,9 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
-     * Add a new prey record.
+     * Record a new predation event. If keepRecord is TRUE, Osmose keeps the
+     * characteristics of the predation event (prey species index, TL, age and
+     * length) otherwise it only increments the preyed biomass.
      *
      * @param indexPrey, the index of the prey
      * @param trophicLevel, the trophic level of the prey
@@ -520,14 +536,14 @@ public class School extends GridPoint implements IAggregation {
      * @param keepRecord, whether or not Osmose should keep the prey record in
      * memory.
      */
-    public void addPreyRecord(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
+    public void preyedUpon(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
         if (keepRecord) {
-            PreyRecord newRecord = new PreyRecord(indexPrey, trophicLevel, age, length, preyedBiomass);
-            int hash = newRecord.hashCode();
-            if (preyRecords.containsKey(hash)) {
-                preyRecords.get(hash).incrementBiomass(newRecord.getBiomass());
+            Prey prey = new Prey(indexPrey, trophicLevel, age, length, preyedBiomass);
+            int hash = prey.hashCode();
+            if (preys.containsKey(hash)) {
+                preys.get(hash).incrementBiomass(prey.getBiomass());
             } else {
-                preyRecords.put(newRecord.hashCode(), newRecord);
+                preys.put(prey.hashCode(), prey);
             }
         }
         // Update school total preyed biomass
@@ -539,8 +555,8 @@ public class School extends GridPoint implements IAggregation {
      *
      * @return a list of the prey records at current time step.
      */
-    public Collection<PreyRecord> getPreyRecords() {
-        return preyRecords.values();
+    public Collection<Prey> getPreys() {
+        return preys.values();
     }
 
     /**
@@ -703,12 +719,19 @@ public class School extends GridPoint implements IAggregation {
         this.predSuccessRate = rate;
     }
 
+    /**
+     * Increment the predation success rate.
+     *
+     * @param drate, the increment of the predation success rate.
+     */
     public void incrementPredSuccessRate(float drate) {
         this.predSuccessRate += drate;
     }
 
     /**
-     * @return the starvationRate
+     * Get the starvation rate at current time step.
+     *
+     * @return the starvation rate
      */
     public double getStarvationRate() {
         return starvationRate;
@@ -722,17 +745,33 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
-     * @return the lengthi
+     * Length of the fish at the beginning of the time step, in centimetre.
+     *
+     * @return the length at the beginning of the time step, in centimetre.
      */
     public float getLengthIniStep() {
         return lengthi;
     }
 
-    public void setAccessibilities(double[] accessibilities) {
-        this.accessibilities = accessibilities;
+    /**
+     * Set prey accessibility for this school (from a predator perspective) in
+     * current cell at current time step. Prey accessibility is only used in the
+     * MortalityProcess and could be temporarily stored in that class but it
+     * felt just easier and quicker to set it directly in the school object.
+     *
+     * @param accessibility, the prey accessibility of this school as a predator
+     */
+    public void setAccessibility(double[] accessibility) {
+        this.accessibility = accessibility;
     }
 
-    public double[] getAccessibilities() {
-        return accessibilities;
+    /**
+     * Get the prey accessibility for this school (from a predator perspective)
+     * in current cell at current time step.
+     *
+     * @return the prey accessibility of this school as a predator.
+     */
+    public double[] getAccessibility() {
+        return accessibility;
     }
 }

@@ -50,7 +50,7 @@ package fr.ird.osmose;
 
 /**
  * This class defines a cell of the spatial grid of the model. A cell is defined
- * by a unique index, some (i, j) coordinates in the Cartesian coordinate
+ * by a unique cell index, some (i, j) coordinates in the Cartesian coordinate
  * system, a longitude and a latitude and whether it is on land or ocean.
  *
  * @author P.Verley (philippe.verley@ird.fr)
@@ -70,7 +70,10 @@ public class Cell {
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Cell index such as index = j * nColumns + i
+     * Cell index. Suggested index = j * nColumns + i. The index is set in the
+     * constructor though and will be defined in the Grid object. Different
+     * index calculation could be used. Just make sure that it is unique for
+     * every cell.
      */
     final private int index;
     /**
@@ -98,20 +101,6 @@ public class Cell {
 // Constructors
 ///////////////
     /**
-     * Create a new ocean cell at grid position (i, j) and geographical position
-     * (lon, lat)
-     *
-     * @param index, index of the cell {@code index = j * nx + i}
-     * @param i an integer, the i-grid position
-     * @param j an integer, the j-grid
-     * @param lat a float, the latitude of the cell, North degree
-     * @param lon a float, the longitude of the cell, East degree
-     */
-    public Cell(int index, int i, int j, float lat, float lon) {
-        this(index, i, j, lat, lon, false);
-    }
-
-    /**
      * Create a new cell at grid position (i, j) and geographical position (lon,
      * lat)
      *
@@ -136,9 +125,12 @@ public class Cell {
 // Definition of the methods
 ////////////////////////////
     /**
-     * Gets the index of the cell. The index is calculated as
-     * {@code index = j * nx + i} with {@code nx} the dimension of the grid
-     * along the x-axis (i.e. the number of columns).
+     * Gets the index of the cell. We recommend for the index to be calculated
+     * as {@code index = j * nx + i} with {@code nx} the dimension of the grid
+     * along the x-axis (i.e. the number of columns). As it is only a
+     * recommendation, the index should not be used to deduce either i or j
+     * coordinates. Some Grid objects may use other indexation than the
+     * suggested one.
      *
      * @return the index of the cell
      */

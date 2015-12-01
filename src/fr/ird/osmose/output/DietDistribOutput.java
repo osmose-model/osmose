@@ -49,7 +49,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.PreyRecord;
+import fr.ird.osmose.Prey;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
@@ -120,7 +120,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
         for (School predator : getSchoolSet().getSchools(species, false)) {
             double preyedBiomass = predator.getPreyedBiomass();
             if (preyedBiomass > 0) {
-                for (PreyRecord prey : predator.getPreyRecords()) {
+                for (Prey prey : predator.getPreys()) {
                     int classPredator = getClass(predator);
                     if (classPredator >= 0) {
                         values[prey.getSpeciesIndex()][classPredator] += prey.getBiomass();
