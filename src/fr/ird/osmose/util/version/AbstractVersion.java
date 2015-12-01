@@ -54,11 +54,7 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         updateParameters();
 
         // Update version
-        if (!getConfiguration().isNull("osmose.version")) {
-            updateValue("osmose.version", toString());
-        } else {
-            addParameter("osmose.version", toString());
-        }
+        updateValue("osmose.version", toString());
     }
 
     public int getNumber() {
@@ -143,6 +139,12 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
 
         // Return if the parameter already exists
         if (getConfiguration().canFind(key)) {
+            StringBuilder warning = new StringBuilder();
+            warning.append("  Did not add parameter ");
+            warning.append(key);
+            warning.append(" as it is already defined in file ");
+            warning.append(getConfiguration().getSource(key));
+            info(warning.toString());
             return;
         }
         // Find the best source file by looking for similar
@@ -233,10 +235,33 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
 
     protected void updateKey(String key, String newKey) {
 
-        // Check whether the parameter exists in the current configuration
-        if (!getConfiguration().canFind(key)) {
+        // Check whether the parameter newKey exists already
+        if (getConfiguration().canFind(newKey)) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("  Did not rename ");
+            msg.append(key);
+            msg.append(" into ");
+            msg.append(newKey);
+            msg.append(" as it is already defined in file");
+            msg.append(getConfiguration().getSource(newKey));
+            info(msg.toString());
+            commentParameter(key, msg.toString());
             return;
         }
+        
+        // Check whether the parameter exists in the current configuration
+        if (!getConfiguration().canFind(key)) {
+            StringBuilder warning = new StringBuilder();
+            warning.append("  Did not rename ");
+            warning.append(key);
+            warning.append(" into ");
+            warning.append(newKey);
+            warning.append(" as it is not defined in your configuration.");
+            info(warning.toString());
+            return;
+        }
+        
+        // Parameter exists and can be renamed safely
         // Backup the source file
         String source = getConfiguration().getSource(key);
         backup(source, VersionManager.getInstance().getConfigurationVersion());
@@ -268,7 +293,18 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
     protected void updateValue(String key, String newValue) {
 
         // Check whether the parameter exists in the current configuration
+        // If not add it
         if (!getConfiguration().canFind(key)) {
+            addParameter(key, newValue);
+            return;
+        }
+        // Check whether the new value is similar to the current value
+        if (getConfiguration().getString(key).matches(newValue)) {
+            StringBuilder warning = new StringBuilder();
+            warning.append("  Did not update ");
+            warning.append(key);
+            warning.append(" value as it is already up-to-date.");
+            info(warning.toString());
             return;
         }
         // Backup the source file
@@ -339,7 +375,7 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         }
         return lines;
     }
-
+    
     protected String backup(String src, AbstractVersion srcVersion) {
 
         Calendar calendar = new GregorianCalendar();

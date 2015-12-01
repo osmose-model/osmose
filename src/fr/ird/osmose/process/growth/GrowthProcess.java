@@ -64,6 +64,11 @@ public class GrowthProcess extends AbstractProcess {
     private double[][] maxDelta;
     private double[][] deltaMeanLength;
     private double[] criticalPredSuccess;
+    /**
+     * Maximum length for every species. Infinity by default. Parameter
+     * species.lmax.sp#
+     */
+    private float[] lmax;
 
     public GrowthProcess(int rank) {
         super(rank);
@@ -78,6 +83,7 @@ public class GrowthProcess extends AbstractProcess {
         minDelta = new double[nSpecies][];
         maxDelta = new double[nSpecies][];
         deltaMeanLength = new double[nSpecies][];
+        lmax = new float[nSpecies];
 
         for (int i = 0; i < nSpecies; i++) {
             // Initialize growth function
@@ -121,6 +127,12 @@ public class GrowthProcess extends AbstractProcess {
                 minDelta[i][ageDt] = deltaMeanLength[i][ageDt] - deltaMeanLength[i][ageDt];
                 maxDelta[i][ageDt] = deltaMeanLength[i][ageDt] + deltaMeanLength[i][ageDt];
             }
+            // Read maximal length
+            if (!getConfiguration().isNull("species.lmax.sp" + i)) {
+                lmax[i] = getConfiguration().getFloat("species.lmax.sp" + i);
+            } else {
+                lmax[i] = Float.POSITIVE_INFINITY;
+            }
         }
     }
 
@@ -135,7 +147,9 @@ public class GrowthProcess extends AbstractProcess {
                 school.incrementLength((float) deltaMeanLength[i][age]);
             } else {
                 // Growth based on predation success
-                grow(school, minDelta[i][age], maxDelta[i][age]);
+                if (school.getLength() < lmax[i]) {
+                    grow(school, minDelta[i][age], maxDelta[i][age]);
+                }
             }
         }
     }
