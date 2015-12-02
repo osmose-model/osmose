@@ -243,7 +243,7 @@ public class Configuration extends OLogger {
     Configuration(String mainFilename, HashMap<String, String> cmd) {
 
         this.mainFilename = new File(mainFilename).getAbsolutePath();
-        this.inputPathname = new File(mainFilename).getParentFile().getAbsolutePath();
+        this.inputPathname = new File(mainFilename).getAbsoluteFile().getParentFile().getAbsolutePath();
 
         parameters = new HashMap();
 
