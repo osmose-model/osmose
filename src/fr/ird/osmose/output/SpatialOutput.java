@@ -84,20 +84,34 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
     private float[][][] ltlbiomass;
     private float[][][] abundance;
     private float[][][] yield;
-    private boolean cutoff;
-    
+    private boolean cutoffEnabled;
+    /**
+     * Threshold age (year) for age class zero. This parameter allows to discard
+     * schools younger that this threshold in the calculation of the indicators
+     * when parameter <i>output.cutoff.enabled</i> is set to {@code true}.
+     * Parameter <i>output.cutoff.age.sp#</i>
+     */
+    private float[] cutoffAge;
+
     public SpatialOutput(int rank) {
         super(rank);
     }
-    
+
     private boolean includeClassZero() {
-        return !cutoff;
+        return !cutoffEnabled;
     }
-    
+
     @Override
     public void init() {
-        
-        cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
+
+        // cutoff for egg, larvae and juveniles
+        cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
+        cutoffAge = new float[getNSpecies()];
+        if (cutoffEnabled) {
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+            }
+        }
 
         /*
          * Create NetCDF file
@@ -198,7 +212,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @Override
     public void close() {
         try {
@@ -212,14 +226,14 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             warning("Problem closing the NetCDF spatial output file | {0}", ex.toString());
         }
     }
-    
+
     @Override
     public void initStep() {
     }
-    
+
     @Override
     public void reset() {
-        
+
         int nSpecies = getNSpecies();
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
@@ -230,7 +244,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         abundance = new float[nSpecies][ny][nx];
         yield = new float[nSpecies][ny][nx];
     }
-    
+
     @Override
     public void update() {
         // Loop over the cells
@@ -240,7 +254,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
@@ -259,7 +273,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             }
         }
     }
-    
+
     @Override
     public void write(float time) {
 
@@ -317,10 +331,10 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 }
             }
         }
-        
+
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, time * 360);
-        
+
         int index = nc.getUnlimitedDimension().getLength();
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
@@ -337,7 +351,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private String getFilename() {
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
@@ -348,7 +362,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         filename.append(".nc.part");
         return filename.toString();
     }
-    
+
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         // Always true, every time step should be written in the NetCDF file.

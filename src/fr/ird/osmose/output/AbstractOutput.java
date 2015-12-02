@@ -48,6 +48,7 @@
  */
 package fr.ird.osmose.output;
 
+import fr.ird.osmose.School;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -63,9 +64,15 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
     private FileOutputStream fos;
     private PrintWriter prw;
-    private boolean cutoff;
+    private boolean cutoffEnabled;
     private int recordFrequency;
-
+    /**
+     * Threshold age (year) for age class zero. This parameter allows to discard
+     * schools younger that this threshold in the calculation of the indicators
+     * when parameter <i>output.cutoff.enabled</i> is set to {@code true}.
+     * Parameter <i>output.cutoff.age.sp#</i>
+     */
+    private float[] cutoffAge;
     private final String separator;
 
     abstract String getFilename();
@@ -79,14 +86,17 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         separator = getConfiguration().getOutputSeparator();
     }
 
-    boolean includeClassZero() {
-        return !cutoff;
-    }
-
     @Override
     public void init() {
 
-        cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
+        // Cutoff
+        cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
+        cutoffAge = new float[getNSpecies()];
+        if (cutoffEnabled) {
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+            }
+        }
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // Create parent directory
@@ -112,6 +122,14 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             }
             prw.println();
         }
+    }
+
+    boolean includeClassZero() {
+        return !cutoffEnabled;
+    }
+
+    boolean include(School school) {
+        return !cutoffEnabled || school.getAge() >= cutoffAge[school.getSpeciesIndex()];
     }
 
     @Override

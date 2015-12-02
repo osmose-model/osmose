@@ -79,12 +79,11 @@ public class MeanSizeOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                continue;
+            if (include(school)) {
+                int i = school.getSpeciesIndex();
+                meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
+                abundance[i] += school.getInstantaneousAbundance();
             }
-            int i = school.getSpeciesIndex();
-            meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
-            abundance[i] += school.getInstantaneousAbundance();
         }
     }
 

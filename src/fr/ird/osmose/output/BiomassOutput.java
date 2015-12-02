@@ -75,10 +75,9 @@ public class BiomassOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                continue;
+            if (include(school)) {
+                biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
             }
-            biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
         }
     }
 

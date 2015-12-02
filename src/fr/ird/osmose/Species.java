@@ -51,17 +51,14 @@ package fr.ird.osmose;
 import fr.ird.osmose.util.OsmoseLinker;
 
 /**
- * This class represents a species. It is characterized by the following
+ * This class represents a species. It is characterised by the following
  * variables:
  * <ul>
  * <li>name</li>
  * <li>lifespan</li>
- * <li>Von Bertalanffy growth parameters</li>
- * <li>Threshold age for applying Von Bertalanffy growth model</li>
  * <li>Allometric parameters</li>
  * <li>Egg weight and size</li>
  * <li>Size at maturity</li>
- * <li>Threshold age for age class zero</li>
  * </ul>
  *
  * @author P.Verley (philippe.verley@ird.fr)
@@ -105,12 +102,6 @@ public class Species extends OsmoseLinker {
      */
     private final float ageMaturity;
     /**
-     * Threshold age (year) for age class zero. It is the age from which target
-     * biomass should be considered as eggs and larvae stages are generally not
-     * considered. Parameter <i>output.cutoff.age.sp#</i>
-     */
-    private final int ageClassZero;
-    /**
      * Size (cm) of eggs. Parameter <i>species.egg.size.sp#</i>
      */
     private final float eggSize;
@@ -145,8 +136,6 @@ public class Species extends OsmoseLinker {
             ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
             sizeMaturity = Float.MAX_VALUE;
         }
-        float age0 = getConfiguration().getFloat("output.cutoff.age.sp" + index);
-        ageClassZero = (int) Math.ceil(age0 * getConfiguration().getNStepYear());
         eggSize = getConfiguration().getFloat("species.egg.size.sp" + index);
         eggWeight = getConfiguration().getFloat("species.egg.weight.sp" + index);
         float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
@@ -212,18 +201,6 @@ public class Species extends OsmoseLinker {
      */
     public float getEggWeight() {
         return eggWeight;
-    }
-
-    /**
-     * Returns the threshold of age class zero, in number of time step. This
-     * parameter allows to discard schools younger that this threshold in the
-     * calculation of the indicators when parameter <i>output.cutoff.enabled</i>
-     * is set to {@code true}. Parameter <i>output.cutoff.age.sp#</i>
-     *
-     * @return the threshold age of class zero, in number of time step
-     */
-    public int getAgeClassZero() {
-        return ageClassZero;
     }
 
     public boolean isSexuallyMature(School school) {

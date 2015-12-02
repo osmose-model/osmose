@@ -76,10 +76,9 @@ public class AbundanceOutput extends AbstractOutput {
     public void update() {
 
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
-                continue;
+            if (include(school)) {
+                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
             }
-            abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
         }
     }
 
