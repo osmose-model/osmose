@@ -303,6 +303,7 @@ public class Configuration extends OLogger {
 
         // Output path
         outputPathname = getFile("output.dir.path");
+        info("Output folder set to "+outputPathname);
 
         // Read Output CSV separator
         Separator separator = Separator.COMA;

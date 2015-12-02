@@ -411,9 +411,10 @@ public class Indiseas extends OsmoseLinker {
         for (Map.Entry<String, String> argument : options.entrySet()) {
             cmd.append("-P");
             cmd.append(argument.getKey());
-            cmd.append("=");
+            boolean hasBlank = argument.getValue().contains(" ");
+            cmd.append(hasBlank?"=\"" : "=");
             cmd.append(argument.getValue());
-            cmd.append(" ");
+            cmd.append(hasBlank?"\" " : " ");
         }
         // main Osmose configuration file
         cmd.append(getConfiguration().getMainFile());
