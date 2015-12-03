@@ -417,10 +417,10 @@ public class Indiseas extends OsmoseLinker {
             cmd.append(hasBlank?"\" " : " ");
         }
         // main Osmose configuration file
-        cmd.append(getConfiguration().getMainFile());
+        cmd.append(getConfiguration().getMainFile().replaceAll("\\s", "\\\\ "));
         // Send the log to the output folder
         cmd.append(" > ");
-        cmd.append(options.get("output.dir.path"));
+        cmd.append(options.get("output.dir.path").replaceAll("\\s", "\\\\ "));
         cmd.append(File.separator);
         cmd.append("osmose.log");
         return cmd.toString();
