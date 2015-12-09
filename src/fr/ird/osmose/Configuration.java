@@ -428,7 +428,7 @@ public class Configuration extends OLogger {
         try {
             bfIn = new BufferedReader(new FileReader(filename));
         } catch (FileNotFoundException ex) {
-            error("Could not fing Osmose configuration file: " + filename, ex);
+            error("Could not find Osmose configuration file: " + filename, ex);
         }
         StringBuilder msg = new StringBuilder();
         StringBuilder space = new StringBuilder();
