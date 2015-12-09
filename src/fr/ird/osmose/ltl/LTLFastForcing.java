@@ -74,6 +74,24 @@ public class LTLFastForcing extends SimulationLinker implements LTLForcing {
      * Current LTL time step
      */
     private int iLTLStep;
+    /**
+     * The constant biomass, in tonne, in a cell of the model. Parameter
+     * 'plankton.biomass.total.plk#' provides the total biomass of a given
+     * plankton group in the system for every time step. This feature allows to
+     * consider a plankton group with a constant biomass uniformly distributed
+     * over the grid of the model and over time. This feature has been added as
+     * a quick patch for a configuration that seems to lack a food compartment
+     * and as a result cannot reach any biomass equilibrium. It provides to the
+     * system a constant pool of biomass throughout time. It should only be used
+     * for "debugging" a configuration.
+     */
+    private double[] uBiomass;
+
+    /**
+     * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
+     * for virtually increasing or decreasing plankton biomass.
+     */
+    private double[] multiplier;
 
     public LTLFastForcing(int rank) {
         super(rank);
@@ -86,12 +104,35 @@ public class LTLFastForcing extends SimulationLinker implements LTLForcing {
         if (!new File(ncFile).exists()) {
             error("Error reading LTLForcing parameters.", new FileNotFoundException("LTL NetCDF file " + ncFile + " does not exist."));
         }
-        
+
         // Read number of LTL steps
         nLTLStep = getConfiguration().getInt("ltl.nstep");
         iLTLStep = 0;
 
+        // Read LTL data from NetCDF
         loadData(ncFile);
+
+        int nPlk = getConfiguration().getNPlankton();
+        // Biomass multiplier
+        multiplier = new double[nPlk];
+        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
+            if (!getConfiguration().isNull("plankton.multiplier.plk" + iPlk)) {
+                multiplier[iPlk] = getConfiguration().getFloat("plankton.multiplier.plk" + iPlk);
+                warning("Plankton biomass for plankton group " + iPlk + " will be multiplied by " + multiplier[iPlk] + " accordingly to parameter " + getConfiguration().printParameter("plankton.multiplier.plk" + iPlk));
+            } else {
+                multiplier[iPlk] = 1.d;
+            }
+        }
+
+        // Uniform biomass
+        uBiomass = new double[nPlk];
+        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
+            if (!getConfiguration().isNull("plankton.biomass.total.plk" + iPlk)) {
+                uBiomass[iPlk] = getConfiguration().getDouble("plankton.biomass.total.plk" + iPlk) / getGrid().getNOceanCell();
+            } else {
+                uBiomass[iPlk] = -1.d;
+            }
+        }
     }
 
     private void loadData(String ncFile) {
@@ -114,12 +155,16 @@ public class LTLFastForcing extends SimulationLinker implements LTLForcing {
      */
     @Override
     public double getBiomass(int iPlankton, Cell cell) {
-        return biomass[iLTLStep][iPlankton][cell.get_jgrid()][cell.get_igrid()];
+        if (uBiomass[iPlankton] < 0) {
+            return multiplier[iPlankton] * biomass[iLTLStep][iPlankton][cell.get_jgrid()][cell.get_igrid()];
+        } else {
+            return multiplier[iPlankton] * uBiomass[iPlankton];
+        }
     }
 
     @Override
     public void update(int iStepSimu) {
-        
+
         // Update the LTL time step
         iLTLStep = getSimulation().getIndexTimeSimu() % nLTLStep;
     }
