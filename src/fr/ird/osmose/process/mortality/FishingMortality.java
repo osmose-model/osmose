@@ -242,10 +242,15 @@ public class FishingMortality extends AbstractMortality {
         }
     }
 
-    public void assessFishableBiomass() {
+    /**
+     * Assess fishable biomass for fishing scenarios based on catches
+     */
+    void assessFishableBiomass() {
 
         for (int i = 0; i < getNSpecies(); i++) {
-            fishingMortality[i].assessFishableBiomass();
+            if (Type.CATCHES == fishingMortality[i].getType()) {
+                fishingMortality[i].assessFishableBiomass();
+            }
         }
     }
 

@@ -50,6 +50,7 @@ package fr.ird.osmose.process.mortality.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.process.mortality.FishingMortality;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
@@ -60,33 +61,17 @@ public class CatchesBySeasonFishingMortality extends AbstractFishingMortality {
 
     private double annualCatches;
     private double[] season;
-    private int recruitmentAge;
-    private float recruitmentSize;
-    private double fishableBiomass;
 
     public CatchesBySeasonFishingMortality(int rank, Species species) {
-        super(rank, species);
+        super(rank, species, FishingMortality.Type.CATCHES);
     }
 
     @Override
-    public void init() {
+    public void readParameters() {
         int nStepYear = getConfiguration().getNStepYear();
         int iSpec = getIndexSpecies();
         annualCatches = getConfiguration().getDouble("mortality.fishing.catches.sp" + iSpec);
-
-        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
-            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);
-            recruitmentAge = Math.round(age * nStepYear);
-            recruitmentSize = 0.f;
-        } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpec)) {
-            recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpec);
-            recruitmentAge = 0;
-        } else {
-            recruitmentAge = 0;
-            recruitmentSize = 0.f;
-            warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose assumes every school can be catched.", getSpecies().getName());
-        }
-
+        
         // Read seasonality
         SingleTimeSeries sts = new SingleTimeSeries();
         String filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
@@ -100,23 +85,9 @@ public class CatchesBySeasonFishingMortality extends AbstractFishingMortality {
     }
 
     @Override
-    public void assessFishableBiomass() {
-        fishableBiomass = 0.d;
-        for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
-            if (!school.isUnlocated() && isFishable(school)) {
-                fishableBiomass += school.getInstantaneousBiomass();
-            }
-        }
-    }
-
-    private boolean isFishable(School school) {
-        return ((school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize));
-    }
-
-    @Override
     public double getCatches(School school) {
-        if (isFishable(school) && (fishableBiomass > 0.d)) {
-            return (float) (school.getInstantaneousBiomass() / fishableBiomass)
+        if (isFishable(school) && (getFishableBiomass() > 0.d)) {
+            return (float) (school.getInstantaneousBiomass() / getFishableBiomass())
                     * annualCatches
                     * season[getSimulation().getIndexTimeYear()];
         }

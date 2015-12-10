@@ -50,6 +50,7 @@ package fr.ird.osmose.process.mortality.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.process.mortality.FishingMortality;
 
 /**
  *
@@ -58,45 +59,22 @@ import fr.ird.osmose.Species;
 public class RateAnnualFishingMortality extends AbstractFishingMortality {
 
     private double instantaneousF;
-    private int recruitmentAge;
-    private float recruitmentSize;
 
     public RateAnnualFishingMortality(int rank, Species species) {
-        super(rank, species);
+        super(rank, species, FishingMortality.Type.RATE);
     }
 
     @Override
-    public void init() {
-        int nStepYear = getConfiguration().getNStepYear();
-        int iSpec = getIndexSpecies();
-        instantaneousF = getConfiguration().getDouble("mortality.fishing.rate.sp" + iSpec) / nStepYear;
-
-        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
-            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);
-            recruitmentAge = Math.round(age * nStepYear);
-            recruitmentSize = 0.f;
-        } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpec)) {
-            recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpec);
-            recruitmentAge = 0;
-        } else {
-            recruitmentAge = 0;
-            recruitmentSize = 0.f;
-            warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose assumes every school can be catched.", getSpecies().getName());
-        }
+    public void readParameters() {
+        instantaneousF = getConfiguration().getDouble("mortality.fishing.rate.sp" + getIndexSpecies())
+                / getConfiguration().getNStepYear();
     }
 
     @Override
     public double getRate(School school) {
-        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize)
-                ? instantaneousF
-                : 0.d;
+        return isFishable(school) ? instantaneousF : 0.d;
     }
-
-    @Override
-    public void assessFishableBiomass() {
-        // Do not need to assess fishable biomass for this scenario based on fishing mortality rate
-    }
-
+    
     @Override
     public double getCatches(School school) {
         throw new UnsupportedOperationException("No catches specified in this fishing scenario.");

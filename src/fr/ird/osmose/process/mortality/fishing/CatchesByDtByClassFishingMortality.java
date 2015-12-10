@@ -50,6 +50,7 @@ package fr.ird.osmose.process.mortality.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.process.mortality.FishingMortality;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 
 /**
@@ -64,7 +65,7 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
      */
     private double[][] catches;
     /**
-     * Size thresholds in centimeter. Size stage k means null
+     * Size thresholds in centimetre. Size stage k means null
      * {@code threshold[k] <= age < threshold[k+1]}
      */
     private float[] sizeClasses;
@@ -80,11 +81,11 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
     private double[] fishableBiomass;
 
     public CatchesByDtByClassFishingMortality(int rank, Species species) {
-        super(rank, species);
+        super(rank, species, FishingMortality.Type.CATCHES);
     }
 
     @Override
-    public void init() {
+    public void readParameters() {
         int iSpec = getIndexSpecies();
         if (!getConfiguration().isNull("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();

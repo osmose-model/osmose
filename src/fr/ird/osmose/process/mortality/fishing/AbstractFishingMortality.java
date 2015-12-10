@@ -51,6 +51,7 @@ package fr.ird.osmose.process.mortality.fishing;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.mortality.AbstractMortalitySpecies;
+import fr.ird.osmose.process.mortality.FishingMortality;
 
 /**
  * This class extends {@code AbstractMortalityScenario} for fishing as it gives
@@ -62,8 +63,14 @@ import fr.ird.osmose.process.mortality.AbstractMortalitySpecies;
  */
 public abstract class AbstractFishingMortality extends AbstractMortalitySpecies {
 
-    public AbstractFishingMortality(int rank, Species species) {
+    private int recruitmentAge;
+    private float recruitmentSize;
+    private double fishableBiomass;
+    private final FishingMortality.Type fishingType;
+
+    public AbstractFishingMortality(int rank, Species species, FishingMortality.Type fishingType) {
         super(rank, species);
+        this.fishingType = fishingType;
     }
 
     /**
@@ -76,9 +83,51 @@ public abstract class AbstractFishingMortality extends AbstractMortalitySpecies 
      */
     abstract public double getCatches(School school);
 
+    abstract void readParameters();
+
+    @Override
+    public void init() {
+
+        readParameters();
+
+        int nStepYear = getConfiguration().getNStepYear();
+        int iSpec = getIndexSpecies();
+
+        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
+            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);
+            recruitmentAge = Math.round(age * nStepYear);
+            recruitmentSize = 0.f;
+        } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpec)) {
+            recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpec);
+            recruitmentAge = 0;
+        } else {
+            recruitmentAge = 0;
+            recruitmentSize = 0.f;
+            warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose sets recruitment age and size to zero.", getSpecies().getName());
+        }
+    }
+
+    boolean isFishable(School school) {
+        return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize);
+    }
+
     /**
      * Calculates the fishable biomass, in tonne, of the species.
      */
-    abstract public void assessFishableBiomass();
+    public void assessFishableBiomass() {
+            fishableBiomass = 0.d;
+            for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
+                if (!school.isUnlocated() && isFishable(school)) {
+                    fishableBiomass += school.getInstantaneousBiomass();
+                }
+            }
+    }
 
+    double getFishableBiomass() {
+        return fishableBiomass;
+    }
+    
+    public FishingMortality.Type getType() {
+        return fishingType;
+    }
 }

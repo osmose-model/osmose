@@ -62,16 +62,13 @@ public class CatchesByYearBySeasonFishingMortality extends AbstractFishingMortal
 
     private double[] annualCatches;
     private double[] season;
-    private int recruitmentAge;
-    private float recruitmentSize;
-    private double fishableBiomass;
 
     public CatchesByYearBySeasonFishingMortality(int rank, Species species) {
-        super(rank, species);
+        super(rank, species, FishingMortality.Type.CATCHES);
     }
 
     @Override
-    public void init() {
+    public void readParameters() {
         int nStepYear = getConfiguration().getNStepYear();
         int iSpec = getIndexSpecies();
 
@@ -82,21 +79,7 @@ public class CatchesByYearBySeasonFishingMortality extends AbstractFishingMortal
         yts = new ByYearTimeSeries();
         yts.read(filename);
         annualCatches = yts.getValues();
-
-        // Read recruitment size or age
-        if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
-            float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);
-            recruitmentAge = Math.round(age * nStepYear);
-            recruitmentSize = 0.f;
-        } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpec)) {
-            recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpec);
-            recruitmentAge = 0;
-        } else {
-            recruitmentAge = 0;
-            recruitmentSize = 0.f;
-            warning("Could not find any fishing recruitment threshold (neither age nor size) for species {0}. Osmose assumes every school can be catched.", getSpecies().getName());
-        }
-
+        
         // Read seasonality
         SingleTimeSeries sts = new SingleTimeSeries();
         filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
@@ -111,25 +94,11 @@ public class CatchesByYearBySeasonFishingMortality extends AbstractFishingMortal
 
     @Override
     public double getCatches(School school) {
-        if (isFishable(school) && (fishableBiomass > 0.d)) {
-            return (school.getInstantaneousBiomass() / fishableBiomass)
+        if (isFishable(school) && (getFishableBiomass() > 0.d)) {
+            return (school.getInstantaneousBiomass() / getFishableBiomass())
                     * annualCatches[getSimulation().getYear()]
                     * season[getSimulation().getIndexTimeYear()];
         }
         return 0.d;
-    }
-
-    @Override
-    public void assessFishableBiomass() {
-        fishableBiomass = 0.d;
-        for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
-            if (!school.isUnlocated() && isFishable(school)) {
-                fishableBiomass += school.getInstantaneousBiomass();
-            }
-        }
-    }
-
-    private boolean isFishable(School school) {
-        return ((school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize));
     }
 }
