@@ -146,6 +146,6 @@ public class RateByDtByClassFishingMortality extends AbstractFishingMortality {
 
     @Override
     public void assessFishableBiomass() {
-        // Do not need it for this scenario
+        // Do not need to assess fishable biomass for this scenario based on fishing mortality rate
     }
 }
