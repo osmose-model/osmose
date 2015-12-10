@@ -49,7 +49,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.util.logging.OLogger;
-import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.logging.StdoutHandler;
 import fr.ird.osmose.util.version.VersionManager;
 import java.io.*;
@@ -528,14 +528,5 @@ public class Osmose extends OLogger {
      */
     public Simulation getSimulation(int rank) {
         return simulation[rank];
-    }
-
-    /**
-     * Gets the grid ({@link IGrid}) of the current Osmose configuration.
-     *
-     * @return the current grid of the configuration.
-     */
-    public IGrid getGrid() {
-        return configuration.getGrid();
     }
 }

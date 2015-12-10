@@ -49,7 +49,7 @@
 package fr.ird.osmose.ui;
 
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.MapSet;
 import java.awt.BorderLayout;
@@ -305,8 +305,8 @@ public class SpatialMapUI extends JPanel {
         return new Dimension(width, height);
     }
 
-    public static IGrid getGrid() {
-        return Osmose.getInstance().getGrid();
+    public static AbstractGrid getGrid() {
+        return Osmose.getInstance().getConfiguration().getGrid();
     }
 
     public static Osmose getOsmose() {

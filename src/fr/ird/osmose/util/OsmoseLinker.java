@@ -8,7 +8,7 @@ package fr.ird.osmose.util;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.logging.OLogger;
 
 /**
@@ -47,8 +47,8 @@ public class OsmoseLinker extends OLogger {
         return getConfiguration().getNSpecies();
     }
 
-    final public IGrid getGrid() {
-        return getOsmose().getGrid();
+    final public AbstractGrid getGrid() {
+        return getOsmose().getConfiguration().getGrid();
     }
 
 }

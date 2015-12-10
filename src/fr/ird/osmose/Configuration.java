@@ -49,7 +49,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.util.version.VersionManager;
-import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.logging.OLogger;
 import java.io.BufferedReader;
@@ -214,9 +214,10 @@ public class Configuration extends OLogger {
      */
     private int[] nSchool;
     /**
-     * The spatial grid of the simulation, {@link fr.ird.osmose.grid.IGrid}.
+     * The spatial grid of the simulation,
+     * {@link fr.ird.osmose.grid.AbstractGrid}.
      */
-    private IGrid grid;
+    private AbstractGrid grid;
     /**
      * Temporary flag that must be TRUE to ensure that all file paths are
      * resolved against the main configuration file
@@ -303,7 +304,7 @@ public class Configuration extends OLogger {
 
         // Output path
         outputPathname = getFile("output.dir.path");
-        info("Output folder set to "+outputPathname);
+        info("Output folder set to " + outputPathname);
 
         // Read Output CSV separator
         Separator separator = Separator.COMA;
@@ -354,9 +355,9 @@ public class Configuration extends OLogger {
         species = new Species[nSpecies];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
-            
+
         }
-        
+
         // Init plankton groups
         ltlGroups = new Plankton[nPlankton];
         for (int p = 0; p < ltlGroups.length; p++) {
@@ -373,7 +374,7 @@ public class Configuration extends OLogger {
     public Species getSpecies(int index) {
         return species[index];
     }
-    
+
     /**
      * Gets the specified plankton group.
      *
@@ -394,7 +395,7 @@ public class Configuration extends OLogger {
         String gridClassName = getString("grid.java.classname");
         try {
             info("Grid: " + gridClassName);
-            grid = (IGrid) Class.forName(gridClassName).newInstance();
+            grid = (AbstractGrid) Class.forName(gridClassName).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
             error("Failed to create new grid instance. " + ex.getMessage(), ex);
         }
@@ -890,11 +891,11 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the grid ({@link IGrid) of the model.
+     * Returns the grid of the model.
      *
      * @return the grid of the model.
      */
-    public IGrid getGrid() {
+    public AbstractGrid getGrid() {
         return grid;
     }
 

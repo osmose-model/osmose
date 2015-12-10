@@ -50,7 +50,7 @@ package fr.ird.osmose.ui;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.grid.AbstractGrid;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -309,8 +309,8 @@ public class GridUI extends JPanel {
         return new Dimension(width, height);
     }
 
-    public static IGrid getGrid() {
-        return Osmose.getInstance().getGrid();
+    public static AbstractGrid getGrid() {
+        return Osmose.getInstance().getConfiguration().getGrid();
     }
 
     public static Osmose getOsmose() {
@@ -420,11 +420,11 @@ public class GridUI extends JPanel {
             fw = new FileWriter("grid_osmose.csv");
             PrintWriter pw = new PrintWriter(fw);
             pw.println("lat , lon, mask (land = 0 water = 1)");
-            int nbL = getOsmose().getGrid().get_ny();
-            int nbC = getOsmose().getGrid().get_nx();
+            int nbL = getGrid().get_ny();
+            int nbC = getGrid().get_nx();
             for (int l = 0; l < nbL; l++) {
                 for (int c = 0; c < nbC; c++) {
-                    Cell cell = getOsmose().getGrid().getCell(c, nbL - l - 1);
+                    Cell cell = getGrid().getCell(c, nbL - l - 1);
                     pw.print(cell.getLat());
                     pw.print(" , ");
                     pw.print(cell.getLon());
