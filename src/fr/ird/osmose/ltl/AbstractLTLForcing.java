@@ -2,7 +2,7 @@
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2015
  * 
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
@@ -53,11 +53,15 @@ import fr.ird.osmose.util.SimulationLinker;
 import java.util.List;
 
 /**
+ * This abstract class indicates how Osmose manages and retrieves the biomass of
+ * the low trophic levels compartments of the ecosystem. The LTL groups are an
+ * input of the model, they are forcing the model biomass as they provide food
+ * to the higher trophic levels.
  *
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public abstract class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
+public abstract class AbstractLTLForcing extends SimulationLinker {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -174,7 +178,12 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         return iStepSimu % nLTLStep;
     }
 
-    @Override
+    /**
+     * Initialises the LTLForcing. Read configuration files; load the LTL grid
+     * (as it may be different from the Osmose grid); ensure that the LTL
+     * forcing files matches the description of the plankton groups; etc. Such
+     * are the actions to be undertaken in this function.
+     */
     public void init() {
 
         // Read number of LTL steps
@@ -187,7 +196,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             if (!getConfiguration().isNull("plankton.conversion2tons.plk" + iPlk)) {
                 conversionFactor[iPlk] = getConfiguration().getDouble("plankton.conversion2tons.plk" + iPlk);
             } else {
-                warning("Paramter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/km2 (or tonne/km3 for 3D dataset)", new Object[]{iPlk, getConfiguration().getPlankton(iPlk).getName()});
+                warning("Parameter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/km2 (or tonne/km3 for 3D dataset)", new Object[]{iPlk, getConfiguration().getPlankton(iPlk).getName()});
                 conversionFactor[iPlk] = 1.d;
             }
         }
@@ -198,9 +207,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         // Initializes LTL grid
         initLTLGrid();
 
-        // Initializes biomass matrix
-        biomass = new double[nPlk][getGrid().get_ny()][getGrid().get_nx()];
-
+        // Plankton multplier
         multiplier = new double[nPlk];
         for (int iPlk = 0; iPlk < nPlk; iPlk++) {
             if (!getConfiguration().isNull("plankton.multiplier.plk" + iPlk)) {
@@ -230,7 +237,6 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      *
      * @param iStepSimu, the current step of the simulation
      */
-    @Override
     public void update(int iStepSimu) {
 
         // Reset biomass matrix
@@ -264,9 +270,17 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         }
     }
 
-    @Override
-    public double getBiomass(int iPlankton, Cell cell) {
-        return multiplier[iPlankton] * biomass[iPlankton][cell.get_jgrid()][cell.get_igrid()];
+    /**
+     * Returns the biomass, in tonne, of a specified LTL group in a specified
+     * cell at current time step of the simulation.
+     *
+     * @param iLTL, the index of the LTL group
+     * @param cell, a {@code Cell} of the grid
+     * @return the biomass, in tonne, of the LTL group at index {@code iLTL} in
+     * this {@code cell}}
+     */
+    public double getBiomass(int iLTL, Cell cell) {
+        return multiplier[iLTL] * biomass[iLTL][cell.get_jgrid()][cell.get_igrid()];
     }
 
     /**

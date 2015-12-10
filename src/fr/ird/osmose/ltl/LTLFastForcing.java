@@ -49,49 +49,37 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
 
 /**
+ * This class loads in memory all LTL data from a NetCDF file at the beginning
+ * of the simulation, conversely to other LTL plug-ins that load the data at
+ * each time step. It was coded in order to speed up configurations that loop
+ * over the same year of LTL data during all the simulation. The class reads the
+ * data from a NetCDF file with the following characteristics: (i) the LTL grid
+ * is the same than the Osmose grid ; (ii) the biomass is provided in a variable
+ * called ltl_biomass(time, ltl, ny, nx), with time the number of time steps
+ * (this value must be a multiple of the number of time step per year in Osmose.
+ * It means the user can provide either one year, 5 years or 50 years of LTL
+ * data and Osmose will loop over it until the end of the simulation), ltl the
+ * number of plankton groups ordered the same way as in the configuration (e.g.
+ * plankton.name.plk0, plankton.name.plk1, etc.), ny the number of lines, nx the
+ * number of columns. The biomass is provided in tonnes. The NetCDF file is
+ * designated by parameter 'ltl.netcdf.file'.
  *
- * @author pverley
+ * @author P.Verley (philippe.verley@ird.fr)
  */
-public class LTLFastForcing extends SimulationLinker implements LTLForcing {
-
-    private float[][][][] biomass;
-    /**
-     * Number of time step in the LTL time series inputed to Osmose. This value
-     * must be a multiple of the number of time step per year in Osmose. It
-     * means the user can provide either one year, 5 years or 50 years of LTL
-     * data and Osmose will loop over it (if necessary) until the end of the
-     * simulation.
-     */
-    private int nLTLStep;
-    /**
-     * Current LTL time step
-     */
-    private int iLTLStep;
-    /**
-     * The constant biomass, in tonne, in a cell of the model. Parameter
-     * 'plankton.biomass.total.plk#' provides the total biomass of a given
-     * plankton group in the system for every time step. This feature allows to
-     * consider a plankton group with a constant biomass uniformly distributed
-     * over the grid of the model and over time. This feature has been added as
-     * a quick patch for a configuration that seems to lack a food compartment
-     * and as a result cannot reach any biomass equilibrium. It provides to the
-     * system a constant pool of biomass throughout time. It should only be used
-     * for "debugging" a configuration.
-     */
-    private double[] uBiomass;
+public class LTLFastForcing extends AbstractLTLForcing {
 
     /**
-     * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
-     * for virtually increasing or decreasing plankton biomass.
+     * The LTL biomass [TIME][PLANKTON][NY][NX]
      */
-    private double[] multiplier;
+    private double[][][][] biomass;
 
     public LTLFastForcing(int rank) {
         super(rank);
@@ -106,66 +94,116 @@ public class LTLFastForcing extends SimulationLinker implements LTLForcing {
         }
 
         // Read number of LTL steps
-        nLTLStep = getConfiguration().getInt("ltl.nstep");
-        iLTLStep = 0;
+        int nLTLStep = getConfiguration().getInt("ltl.nstep");
+        int nPlk = getConfiguration().getNPlankton();
+
+        // Initialises biomass variable
+        biomass = new double[nLTLStep][nPlk][getGrid().get_ny()][getGrid().get_nx()];
 
         // Read LTL data from NetCDF
         loadData(ncFile);
 
-        int nPlk = getConfiguration().getNPlankton();
-        // Biomass multiplier
-        multiplier = new double[nPlk];
+        // Uniform biomass. Check AbstractLTLForcing Javadoc for details.
+        // In LTLFastForcing the constant LTL groups must be defined last, after
+        // the other LTL groups whose biomass is provided in the NetCDF file.
         for (int iPlk = 0; iPlk < nPlk; iPlk++) {
-            if (!getConfiguration().isNull("plankton.multiplier.plk" + iPlk)) {
-                multiplier[iPlk] = getConfiguration().getFloat("plankton.multiplier.plk" + iPlk);
-                warning("Plankton biomass for plankton group " + iPlk + " will be multiplied by " + multiplier[iPlk] + " accordingly to parameter " + getConfiguration().printParameter("plankton.multiplier.plk" + iPlk));
-            } else {
-                multiplier[iPlk] = 1.d;
+            if (!getConfiguration().isNull("plankton.biomass.total.plk" + iPlk)) {
+                double uBiomass = getConfiguration().getDouble("plankton.biomass.total.plk" + iPlk) / getGrid().getNOceanCell();
+                for (int iTime = 0; iTime < nLTLStep; iTime++) {
+                    for (Cell cell : getGrid().getCells()) {
+                        if (!cell.isLand()) {
+                            biomass[iTime][iPlk][cell.get_jgrid()][cell.get_igrid()] = uBiomass;
+                        }
+                    }
+                }
             }
         }
 
-        // Uniform biomass
-        uBiomass = new double[nPlk];
+        // Biomass multiplier. Check Javadoc of AbstractLTLForcing for details.
         for (int iPlk = 0; iPlk < nPlk; iPlk++) {
-            if (!getConfiguration().isNull("plankton.biomass.total.plk" + iPlk)) {
-                uBiomass[iPlk] = getConfiguration().getDouble("plankton.biomass.total.plk" + iPlk) / getGrid().getNOceanCell();
-            } else {
-                uBiomass[iPlk] = -1.d;
+            if (!getConfiguration().isNull("plankton.multiplier.plk" + iPlk)) {
+                double multiplier = getConfiguration().getFloat("plankton.multiplier.plk" + iPlk);
+                if (multiplier != 1.) {
+                    for (int iTime = 0; iTime < nLTLStep; iTime++) {
+                        for (Cell cell : getGrid().getCells()) {
+                            if (!cell.isLand()) {
+                                biomass[iTime][iPlk][cell.get_jgrid()][cell.get_igrid()] *= multiplier;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
+    /**
+     * Read the LTL biomass for every LTL groups from a NetCDF file. Refer to
+     * the class Javadoc for details about the NetCDF file format.
+     *
+     * @param ncFile, the path of the NetCDF file
+     */
     private void loadData(String ncFile) {
         try {
             info("Loading plankton data...");
             debug("Forcing file {0}", ncFile);
-
             NetcdfFile nc = NetcdfFile.open(ncFile);
-            biomass = (float[][][][]) nc.findVariable("ltl_biomass").read().copyToNDJavaArray();
+            // We do not load directly ltlbiomass[][][][] variable in
+            // biomass[][][][] variable because there might be more LTL groups
+            // defined in the Osmose configuration with uniform biomass
+            // (ltl.biomass.total.plk#).
+            Array ltlbiomass = nc.findVariable("ltl_biomass").read();
+            // nLTL the number of LTL groups in the NetCDF file <= nLTL groups
+            // of the Osmose configuration
+            int nLTL = ltlbiomass.getShape()[1];
+            int nTime = ltlbiomass.getShape()[0];
+            Index index = ltlbiomass.getIndex();
+            for (int iLTL = 0; iLTL < nLTL; iLTL++) {
+                for (int iTime = 0; iTime < nTime; iTime++) {
+                    for (Cell cell : getGrid().getCells()) {
+                        if (!cell.isLand()) {
+                            int i = cell.get_igrid();
+                            int j = cell.get_jgrid();
+                            index.set(iTime, iLTL, j, i);
+                            biomass[iTime][iLTL][j][i] = ltlbiomass.getDouble(index);
+                        }
+                    }
+                }
+            }
         } catch (IOException ex) {
             error("Error while loading LTL biomass from file " + ncFile, ex);
         }
     }
 
+    @Override
+    public double getBiomass(int iLTL, Cell cell) {
+        int iLTLStep = getSimulation().getIndexTimeSimu() % biomass.length;
+        return biomass[iLTLStep][iLTL][cell.get_jgrid()][cell.get_igrid()];
+    }
+
     /**
+     * In the case of LTLFastForcing, and conversely to other classes extending
+     * AbstractLTLForcing, there is no LTL data to update as it is already
+     * loaded in memory since the beginning of the simulation.
      *
-     * @param iPlankton
-     * @param cell
-     * @return
+     * @param iStepSimu, the current time step of the simulation
      */
     @Override
-    public double getBiomass(int iPlankton, Cell cell) {
-        if (uBiomass[iPlankton] < 0) {
-            return multiplier[iPlankton] * biomass[iLTLStep][iPlankton][cell.get_jgrid()][cell.get_igrid()];
-        } else {
-            return multiplier[iPlankton] * uBiomass[iPlankton];
-        }
+    public void update(int iStepSimu) {
+        // Do nothing
     }
 
     @Override
-    public void update(int iStepSimu) {
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
+        throw new UnsupportedOperationException("LTLFastForcing assumes that LTL biomass is already provided in tonne in each cell.");
+    }
 
-        // Update the LTL time step
-        iLTLStep = getSimulation().getIndexTimeSimu() % nLTLStep;
+    @Override
+    void readParameters() {
+        // Do nothing. Done directly in init() function for LTLFastForcing
+    }
+
+    @Override
+    void initLTLGrid() {
+        throw new UnsupportedOperationException("LTLFastForcing assumes that LTL data is provided on Osmose grid.");
     }
 }

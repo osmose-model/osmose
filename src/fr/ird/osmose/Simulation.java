@@ -48,10 +48,9 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.ltl.AbstractLTLForcing;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.process.PopulatingProcess;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.DefaultStep;
 import fr.ird.osmose.util.OsmoseLinker;
@@ -90,7 +89,7 @@ public class Simulation extends OsmoseLinker {
     /**
      * The low trophic level forcing class.
      */
-    private LTLForcing forcing;
+    private AbstractLTLForcing forcing;
     /**
      * Current year of the simulation.
      */
@@ -262,7 +261,7 @@ public class Simulation extends OsmoseLinker {
         String errMsg = "Failed to create new LTLForcing instance";
         try {
             debug("LTLForcing: " + ltlClassName);
-            forcing = (LTLForcing) Class.forName(ltlClassName).getConstructor(Integer.TYPE).newInstance(rank);
+            forcing = (AbstractLTLForcing) Class.forName(ltlClassName).getConstructor(Integer.TYPE).newInstance(rank);
         } catch (ClassNotFoundException ex) {
             error(errMsg, ex);
         } catch (IllegalAccessException ex) {
@@ -382,7 +381,7 @@ public class Simulation extends OsmoseLinker {
      *
      * @return the {@code LTLForcing} instance
      */
-    public LTLForcing getForcing() {
+    public AbstractLTLForcing getForcing() {
         return forcing;
     }
 }
