@@ -52,9 +52,7 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.mortality.fishing.AbstractFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.CatchesAnnualFishingMortality;
 import fr.ird.osmose.process.mortality.fishing.RateByYearBySeasonFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.RateAnnualFishingMortality;
 import fr.ird.osmose.process.mortality.fishing.RateBySeasonFishingMortality;
 import fr.ird.osmose.process.mortality.fishing.CatchesByDtByClassFishingMortality;
 import fr.ird.osmose.process.mortality.fishing.CatchesBySeasonFishingMortality;
@@ -117,18 +115,14 @@ public class FishingMortality extends AbstractMortality {
                         fishingMortality[iSpec] = new RateByDtByClassFishingMortality(rank, species);
                         continue;
                     }
-                    // Annual fishing rate by Year
+                    // Annual fishing rate by Year (with or without seasonality)
                     if (!getConfiguration().isNull("mortality.fishing.rate.byYear.file.sp" + iSpec)) {
                         fishingMortality[iSpec] = new RateByYearBySeasonFishingMortality(rank, species);
                         continue;
                     }
-                    // Annual fishing rate
+                    // Annual fishing rate (with or without seasonality)
                     if (!getConfiguration().isNull("mortality.fishing.rate.sp" + iSpec)) {
-                        if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
-                            fishingMortality[iSpec] = new RateBySeasonFishingMortality(rank, species);
-                        } else {
-                            fishingMortality[iSpec] = new RateAnnualFishingMortality(rank, species);
-                        }
+                        fishingMortality[iSpec] = new RateBySeasonFishingMortality(rank, species);
                     }
                 }
                 break;
@@ -136,24 +130,20 @@ public class FishingMortality extends AbstractMortality {
                 for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
                     int rank = getRank();
                     Species species = getSpecies(iSpec);
-                    // Fishing rate by Dt, by Age or Size
+                    // Catches by Dt, by Age or Size
                     if (!getConfiguration().isNull("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec)
                             || !getConfiguration().isNull("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec)) {
                         fishingMortality[iSpec] = new CatchesByDtByClassFishingMortality(rank, species);
                         continue;
                     }
-                    // Annual fishing rate by Year
+                    // Annual Catches by Year (with or without seasonality)
                     if (!getConfiguration().isNull("mortality.fishing.catches.byYear.file.sp" + iSpec)) {
                         fishingMortality[iSpec] = new CatchesByYearBySeasonFishingMortality(rank, species);
                         continue;
                     }
-                    // Annual fishing rate
+                    // Annual Catches (with or without seasonality)
                     if (!getConfiguration().isNull("mortality.fishing.catches.sp" + iSpec)) {
-                        if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
-                            fishingMortality[iSpec] = new CatchesBySeasonFishingMortality(rank, species);
-                        } else {
-                            fishingMortality[iSpec] = new CatchesAnnualFishingMortality(rank, species);
-                        }
+                        fishingMortality[iSpec] = new CatchesBySeasonFishingMortality(rank, species);
                     }
                 }
                 break;

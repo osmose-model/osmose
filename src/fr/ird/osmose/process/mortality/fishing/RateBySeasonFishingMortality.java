@@ -72,11 +72,21 @@ public class RateBySeasonFishingMortality extends AbstractFishingMortality {
         int iSpec = getIndexSpecies();
         annualF = getConfiguration().getDouble("mortality.fishing.rate.sp" + iSpec);
 
-        // Read seasonality
-        SingleTimeSeries sts = new SingleTimeSeries();
-        String filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
-        sts.read(filename, nStepYear, nStepYear);
-        season = sts.getValues();
+        // Fishing seasonality
+        if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
+            // Read seasonality from CSV file
+            SingleTimeSeries sts = new SingleTimeSeries();
+            String filename = getConfiguration().getFile("mortality.fishing.season.distrib.file.sp" + iSpec);
+            // Seasonality must be at least one year, and at max the length of the simulation
+            sts.read(filename, nStepYear, getConfiguration().getNYear() * nStepYear);
+            season = sts.getValues();
+        } else {
+            // Uniform fishing throughout the year
+            season = new double[nStepYear];
+            for (int iTime = 0; iTime < season.length; iTime++) {
+                season[iTime] = 1.d / nStepYear;
+            }
+        }
     }
 
     @Override
