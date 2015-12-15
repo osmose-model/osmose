@@ -155,7 +155,10 @@ public class LTLFastForcing extends AbstractLTLForcing {
             // nLTL the number of LTL groups in the NetCDF file <= nLTL groups
             // of the Osmose configuration
             int nLTL = ltlbiomass.getShape()[1];
-            int nTime = ltlbiomass.getShape()[0];
+            // NetCDF file may contain more time steps than number of time steps
+            // to be considered, as defined by 'ltl.nstep'
+            int nTime = biomass.length;
+            System.out.println("ICI "  + nLTL + " " + nTime);
             Index index = ltlbiomass.getIndex();
             for (int iLTL = 0; iLTL < nLTL; iLTL++) {
                 for (int iTime = 0; iTime < nTime; iTime++) {
