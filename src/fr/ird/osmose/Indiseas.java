@@ -225,12 +225,34 @@ public class Indiseas extends OsmoseLinker {
         int ndraw = getConfiguration().getInt("indiseas.specificity.random.ndraw");
         NumberFormat fmt = NumberFormat.getIntegerInstance();
         fmt.setMinimumIntegerDigits(String.valueOf(ndraw).length());
-        for (int is = 0; is < scenarii.length; is++) {
+        // Phytoplankton biomass
+        double[][][] pbm = new double[spFx.length][sd.length][ndraw];
+        // Create CSV file for saving phytoplankton biomass
+        StringBuilder csvfile = new StringBuilder();
+        csvfile.append(wdPath);
+        csvfile.append(File.separator);
+        csvfile.append("specificity-phytoplankton-biomass.csv");
+        try (CSVWriter writer = new CSVWriter(new FileWriter(csvfile.toString()), ',')) {
+            writer.writeNext(new String[]{"Fmsy multiplier", "Standard deviation multiplier", "Input phytoplankton biomass"});
             for (int iF = 0; iF < spFx.length; iF++) {
                 for (int isd = 0; isd < sd.length; isd++) {
                     double scale = Math.log(Math.pow(bm, 2) / Math.sqrt(Math.pow(sd[isd] * bm, 2) + Math.pow(bm, 2)));
                     double shape = Math.sqrt(Math.log(Math.pow(sd[isd], 2) + 1));
                     LogNormalDistribution lnd = new LogNormalDistribution(scale, shape);
+                    for (int id = 0; id < ndraw; id++) {
+                        pbm[iF][isd][id] = lnd.inverseCumulativeProbability(Math.random());
+                        // Add new phytoplankton biomass to CSV file
+                        String[] newline = new String[]{String.valueOf(spFx[iF]), String.valueOf(sd[isd]), String.valueOf(Math.round(pbm[iF][isd][id]))};
+                        writer.writeNext(newline);
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            error("Error writing phytoplankton biomass CSV file " + csvfile.toString(), ex);
+        }
+        for (int is = 0; is < scenarii.length; is++) {
+            for (int iF = 0; iF < spFx.length; iF++) {
+                for (int isd = 0; isd < sd.length; isd++) {
                     for (int id = 0; id < ndraw; id++) {
                         HashMap<String, String> options = new HashMap();
                         // Output folder
@@ -252,8 +274,7 @@ public class Indiseas extends OsmoseLinker {
                             float F = spFx[iF] * fmsy[ispecies];
                             options.put("mortality.fishing.rate.sp" + ispecies, String.valueOf(F));
                         }
-                        double nbm = lnd.inverseCumulativeProbability(Math.random());
-                        double plx = nbm / bm;
+                        double plx = pbm[iF][isd][id] / bm;
                         // Plankton multplier
                         for (int ipl = 0; ipl < getConfiguration().getInt("simulation.nplankton"); ipl++) {
                             options.put("plankton.multiplier.plk" + ipl, String.valueOf((float) plx));
@@ -412,9 +433,9 @@ public class Indiseas extends OsmoseLinker {
             cmd.append("-P");
             cmd.append(argument.getKey());
             boolean hasBlank = argument.getValue().contains(" ");
-            cmd.append(hasBlank?"=\"" : "=");
+            cmd.append(hasBlank ? "=\"" : "=");
             cmd.append(argument.getValue());
-            cmd.append(hasBlank?"\" " : " ");
+            cmd.append(hasBlank ? "\" " : " ");
         }
         // main Osmose configuration file
         cmd.append(getConfiguration().getMainFile().replaceAll("\\s", "\\\\ "));
