@@ -158,7 +158,6 @@ public class LTLFastForcing extends AbstractLTLForcing {
             // NetCDF file may contain more time steps than number of time steps
             // to be considered, as defined by 'ltl.nstep'
             int nTime = biomass.length;
-            System.out.println("ICI "  + nLTL + " " + nTime);
             Index index = ltlbiomass.getIndex();
             for (int iLTL = 0; iLTL < nLTL; iLTL++) {
                 for (int iTime = 0; iTime < nTime; iTime++) {
