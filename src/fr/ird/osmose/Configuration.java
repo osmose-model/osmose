@@ -355,6 +355,10 @@ public class Configuration extends OLogger {
         species = new Species[nSpecies];
         for (int i = 0; i < species.length; i++) {
             species[i] = new Species(i);
+            // Name must contain only alphanumerical characters
+            if (!species[i].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Species name must contain alphanumeric characters only. Please rename " + species[i].getName(), null);
+            }
 
         }
 
@@ -362,6 +366,10 @@ public class Configuration extends OLogger {
         ltlGroups = new Plankton[nPlankton];
         for (int p = 0; p < ltlGroups.length; p++) {
             ltlGroups[p] = new Plankton(p);
+            // Name must contain only alphanumerical characters
+            if (!ltlGroups[p].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Plankton name must contain alphanumeric characters only. Please rename " + ltlGroups[p].getName(), null);
+            }
         }
     }
 

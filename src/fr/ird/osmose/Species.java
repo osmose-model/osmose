@@ -48,8 +48,6 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.util.OsmoseLinker;
-
 /**
  * This class represents a species. It is characterised by the following
  * variables:
@@ -64,7 +62,7 @@ import fr.ird.osmose.util.OsmoseLinker;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Species extends OsmoseLinker {
+public class Species {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -121,25 +119,23 @@ public class Species extends OsmoseLinker {
      */
     public Species(int index) {
 
+        Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
         // Initialization of parameters
-        name = getConfiguration().getString("species.name.sp" + index);
-        if (!name.matches("^[a-zA-Z0-9]*$")) {
-                error("Species name must contain alphanumeric characters only. Please rename " + name, null);
-            }
-        c = getConfiguration().getFloat("species.length2weight.condition.factor.sp" + index);
-        bPower = getConfiguration().getFloat("species.length2weight.allometric.power.sp" + index);
-        if (!getConfiguration().isNull("species.maturity.size.sp" + index)) {
-            sizeMaturity = getConfiguration().getFloat("species.maturity.size.sp" + index);
+        name = cfg.getString("species.name.sp" + index);
+        c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
+        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
+        if (!cfg.isNull("species.maturity.size.sp" + index)) {
+            sizeMaturity = cfg.getFloat("species.maturity.size.sp" + index);
             ageMaturity = Float.MAX_VALUE;
         } else {
-            ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
+            ageMaturity = cfg.getFloat("species.maturity.age.sp" + index);
             sizeMaturity = Float.MAX_VALUE;
         }
-        eggSize = getConfiguration().getFloat("species.egg.size.sp" + index);
-        eggWeight = getConfiguration().getFloat("species.egg.weight.sp" + index);
-        float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
-        lifespan = (int) Math.round(agemax * getConfiguration().getNStepYear());
+        eggSize = cfg.getFloat("species.egg.size.sp" + index);
+        eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
+        float agemax = cfg.getFloat("species.lifespan.sp" + index);
+        lifespan = (int) Math.round(agemax * cfg.getNStepYear());
     }
 
 //////////////////////////////

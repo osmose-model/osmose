@@ -48,7 +48,6 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
@@ -71,7 +70,7 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Plankton extends OsmoseLinker {
+public class Plankton {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -85,7 +84,7 @@ public class Plankton extends OsmoseLinker {
      */
     private final float trophicLevel;
     /**
-     * Size range, in centimeter, of the plankton group. Parameters
+     * Size range, in centimetre, of the plankton group. Parameters
      * <i>plankton.size.min.plk#</i> and
      * <i>plankton.size.max.plk#</i>
      */
@@ -117,22 +116,21 @@ public class Plankton extends OsmoseLinker {
      * @param index, index of the plankton group
      */
     public Plankton(int index) {
+        
+        Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
         // Initialisation of parameters
-        name = getConfiguration().getString("plankton.name.plk" + index);
-        if (!name.matches("^[a-zA-Z0-9]*$")) {
-            error("Plankton name must contain alphanumeric characters only. Please rename " + name, null);
-        }
-        sizeMin = getConfiguration().getDouble("plankton.size.min.plk" + index);
-        sizeMax = getConfiguration().getDouble("plankton.size.max.plk" + index);
-        trophicLevel = getConfiguration().getFloat("plankton.tl.plk" + index);
-        if (!getConfiguration().isNull("plankton.accessibility2fish.file.plk" + index)) {
+        name = cfg.getString("plankton.name.plk" + index);
+        sizeMin = cfg.getDouble("plankton.size.min.plk" + index);
+        sizeMax = cfg.getDouble("plankton.size.max.plk" + index);
+        trophicLevel = cfg.getFloat("plankton.tl.plk" + index);
+        if (!cfg.isNull("plankton.accessibility2fish.file.plk" + index)) {
             SingleTimeSeries ts = new SingleTimeSeries();
-            ts.read(getConfiguration().getFile("plankton.accessibility2fish.file.plk" + index));
+            ts.read(cfg.getFile("plankton.accessibility2fish.file.plk" + index));
             accessibilityCoeff = ts.getValues();
         } else {
-            double accessibility = getConfiguration().getDouble("plankton.accessibility2fish.plk" + index);
-            accessibilityCoeff = new double[getConfiguration().getNStepYear() * getConfiguration().getNYear()];
+            double accessibility = cfg.getDouble("plankton.accessibility2fish.plk" + index);
+            accessibilityCoeff = new double[cfg.getNStepYear() * cfg.getNYear()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
             }
@@ -153,9 +151,9 @@ public class Plankton extends OsmoseLinker {
      * this function helps to determine the fraction of the plankton biomass
      * available to a predator.
      *
-     * @param accessibleSizeMin, the minimal prey size, in centimeter, that a
+     * @param accessibleSizeMin, the minimal prey size, in centimetre, that a
      * predator can prey upon
-     * @param accessibleSizeMax, the maximal prey size, in centimeter, that a
+     * @param accessibleSizeMax, the maximal prey size, in centimetre, that a
      * predator can prey upon
      * @return the fraction of the plankton size range that matches the size
      * range given as parameter.
@@ -170,7 +168,7 @@ public class Plankton extends OsmoseLinker {
      * Returns the maximal size of the organisms in the plankton group.
      * Parameter <i>plankton.size.max.plk#</i>
      *
-     * @return the maximal size, in centimeter, of the organisms in the plankton
+     * @return the maximal size, in centimetre, of the organisms in the plankton
      * group
      */
     public double getSizeMax() {
@@ -181,7 +179,7 @@ public class Plankton extends OsmoseLinker {
      * Returns the minimal size of the organisms in the plankton group.
      * Parameter <i>plankton.size.min.plk#</i>
      *
-     * @return the minimal size, in centimeter, of the organisms in the plankton
+     * @return the minimal size, in centimetre, of the organisms in the plankton
      * group
      */
     public double getSizeMin() {
