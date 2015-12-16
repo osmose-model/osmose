@@ -195,7 +195,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
             mortalityRateMatrix[is][nSchool + 1] = additionalMortality.getRate(school);
 
             // 4. Fishing mortality
-            switch (fishingMortality.getType()) {
+            switch (fishingMortality.getType(school.getSpeciesIndex())) {
                 case RATE:
                     mortalityRateMatrix[is][nSchool + 2] = fishingMortality.getRate(school);
                     break;

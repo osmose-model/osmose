@@ -168,7 +168,6 @@ public class StochasticMortalityProcess extends AbstractProcess {
         Integer[] seqStarv = Arrays.copyOf(seqPred, ns);
         MortalityCause[] mortalityCauses = MortalityCause.values();
 
-        FishingMortality.Type fishingType = fishingMortality.getType();
         shuffleArray(seqPred);
         shuffleArray(seqFish);
         shuffleArray(seqNat);
@@ -216,7 +215,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                     case FISHING:
                         // Fishing Mortality
                         school = schools.get(seqFish[i]);
-                        switch (fishingType) {
+                        switch (fishingMortality.getType(school.getSpeciesIndex())) {
                             case RATE:
                                 double F = fishingMortality.getRate(school) / subdt;
                                 nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
