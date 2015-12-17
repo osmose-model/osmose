@@ -92,7 +92,6 @@ public class FishingMortality extends AbstractMortality {
             Species species = getSpecies(iSpec);
             // Find fishing scenario
             Scenario scenario = findScenario(iSpec);
-            scenario.toString();
             debug("Fishing scenario for " + species.getName() + " set to " + scenario.toString());
             fishingType[iSpec] = scenario.type;
             switch (scenario) {
@@ -197,7 +196,7 @@ public class FishingMortality extends AbstractMortality {
             error("No fishing scenario has been defined for species " + getSpecies(iSpecies).getName(), new NullPointerException(msg.toString()));
         }
 
-        // Several fishing scenario have been defined
+        // Several fishing scenarios have been defined
         if (scenarios.size() > 1) {
             StringBuilder msg = new StringBuilder();
             msg.append("Osmose found several fishing scenarios defined for species ");
