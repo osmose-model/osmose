@@ -51,7 +51,6 @@ package fr.ird.osmose.process.movement;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
 import fr.ird.osmose.util.MapSet;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -64,7 +63,7 @@ import java.util.Random;
  */
 public class MapDistribution extends AbstractDistribution {
 
-    private final Species species;
+    private final int iSpecies;
     private Random rd1, rd2, rd3;
     private MapSet maps;
     private float[] maxProbaPresence;
@@ -73,23 +72,21 @@ public class MapDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public MapDistribution(Species species) {
-        this.species = species;
+    public MapDistribution(int species) {
+        this.iSpecies = species;
     }
 
     @Override
     public void init() {
-
-        int iSpec = species.getIndex();
 
         boolean fixedSeed = false;
         if (!getConfiguration().isNull("movement.randomseed.fixed")) {
             fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
         }
         if (fixedSeed) {
-            rd1 = new Random(13L ^ iSpec);
-            rd2 = new Random(5L ^ iSpec);
-            rd3 = new Random(1982L ^ iSpec);
+            rd1 = new Random(13L ^ iSpecies);
+            rd2 = new Random(5L ^ iSpecies);
+            rd3 = new Random(1982L ^ iSpecies);
             warning("Parameter 'movement.randomseed.fixed' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
         } else {
             rd1 = new Random();
@@ -97,7 +94,7 @@ public class MapDistribution extends AbstractDistribution {
             rd3 = new Random();
         }
 
-        maps = new MapSet(iSpec, "movement");
+        maps = new MapSet(iSpecies, "movement");
         maps.init();
         maxProbaPresence = new float[maps.getNMap()];
         for (int imap = 0; imap < maxProbaPresence.length; imap++) {
@@ -108,8 +105,8 @@ public class MapDistribution extends AbstractDistribution {
             }
         }
 
-        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpec)) {
-            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpec);
+        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpecies)) {
+            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpecies);
         } else {
             range = 1;
         }
