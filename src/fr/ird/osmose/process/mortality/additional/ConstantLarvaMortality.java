@@ -61,22 +61,14 @@ public class ConstantLarvaMortality extends AbstractMortalitySpecies {
 
     // Larval mortality rate expressed in [time_step^-1]
     private double Dlarva;
-    
-    public ConstantLarvaMortality(int rank, Species species, double Dlarva) {
-        super(rank, species);
-        this.Dlarva = Dlarva;
-    }
-    
+
     public ConstantLarvaMortality(int rank, Species species) {
-        this(rank, species, 0.d);
+        super(rank, species);
     }
     
     @Override
     public void init() {
-        
-        if (!getConfiguration().isNull("mortality.natural.larva.rate.sp" + getIndexSpecies())) {
             Dlarva = getConfiguration().getDouble("mortality.natural.larva.rate.sp" + getIndexSpecies());
-        }
     }
     
     @Override

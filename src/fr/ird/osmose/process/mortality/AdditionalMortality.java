@@ -66,7 +66,7 @@ import java.util.List;
  */
 public class AdditionalMortality extends AbstractMortality {
 
-    private AbstractMortalitySpecies[] eggMortality;
+    private AbstractMortalitySpecies[] larvaAdditionalMortality;
     private AbstractMortalitySpecies[] additionalMortality;
     /**
      * Spatial factor for natural mortality [0, 1]
@@ -81,35 +81,27 @@ public class AdditionalMortality extends AbstractMortality {
     public void init() {
 
         int rank = getRank();
-
-        // Egg mortality
-        eggMortality = new AbstractMortalitySpecies[getNSpecies()];
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            Species species = getSpecies(iSpec);
-            // Egg mortality by Dt
-            if (!getConfiguration().isNull("mortality.natural.larva.rate.bytDt.file.sp" + iSpec)) {
-                eggMortality[iSpec] = new ByDtLarvaMortality(rank, species);
-                continue;
-            }
-            // Constant Egg mortality
-            if (!getConfiguration().isNull("mortality.natural.larva.rate.sp" + iSpec)) {
-                eggMortality[iSpec] = new ConstantLarvaMortality(rank, species);
-                continue;
-            }
-            // Did not find any scenario for Egg mortality, Osmose assumes Egg mortality = 0.
-            // Warning only because some species might not reproduce in the 
-            // simulated area and therefore have no need to define larva mortality
-            eggMortality[iSpec] = new ConstantLarvaMortality(rank, species, 0.f);
-            warning("Could not find any parameters for egg mortality (mortality.natural.larva.rate.bytDt.file.sp# or mortality.natural.larva.rate.sp#) for species {0}. Osmose assumes egg mortality = 0", species.getName());
-            // Initialises egg mortality scenario
-            eggMortality[iSpec].init();
-        }
-
-        // Additional mortality
+        larvaAdditionalMortality = new AbstractMortalitySpecies[getNSpecies()];
         additionalMortality = new AbstractMortalitySpecies[getNSpecies()];
 
+        // Find and initialises larva and adult Additional Mortality scenario for every species
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             Species species = getSpecies(iSpec);
+            // Find Larva Additional Mortality scenario
+            ScenarioLarva scenarioLarva = findScenarioLarva(iSpec);
+            debug("Larva Additional Mortality scenario for " + species.getName() + " set to " + scenarioLarva.toString());
+            switch (scenarioLarva) {
+                case CONSTANT:
+                    larvaAdditionalMortality[iSpec] = new ConstantLarvaMortality(rank, species);
+                    break;
+                case BY_DT:
+                    larvaAdditionalMortality[iSpec] = new ByDtLarvaMortality(rank, species);
+                    break;
+            }
+            // Initialises Larva Additional Mortality scenario
+            larvaAdditionalMortality[iSpec].init();
+            
+            // Find Additional Mortality scenario
             Scenario scenario = findScenario(iSpec);
             debug("Additional Mortality scenario for " + species.getName() + " set to " + scenario.toString());
             switch (scenario) {
@@ -126,7 +118,7 @@ public class AdditionalMortality extends AbstractMortality {
                     additionalMortality[iSpec] = new ByDtByClassAdditionalMortality(rank, species);
                     break;
             }
-            // Initialises additional mortality scenario
+            // Initialises Additional Mortality scenario
             additionalMortality[iSpec].init();
         }
 
@@ -159,7 +151,7 @@ public class AdditionalMortality extends AbstractMortality {
         Species spec = school.getSpecies();
         if (school.getAgeDt() == 0) {
             // Egg stage
-            D = eggMortality[school.getSpeciesIndex()].getRate(school);
+            D = larvaAdditionalMortality[school.getSpeciesIndex()].getRate(school);
         } else {
             if (null != spatialD[spec.getIndex()] && !school.isUnlocated()) {
                 D = (spatialD[spec.getIndex()].getValue(school.getCell()) * additionalMortality[school.getSpeciesIndex()].getRate(school));
@@ -171,12 +163,12 @@ public class AdditionalMortality extends AbstractMortality {
     }
 
     /**
-     * Find the additional mortality scenario defined for the given species.
+     * Find the Additional Mortality scenario defined for the given species.
      * Osmose accepts exactly one scenario. The function throws an error if no
      * scenario or several scenarios are defined.
      *
      * @param iSpecies, the index of the species
-     * @return the additional mortality scenario for this species
+     * @return the Additional Mortality scenario for this species
      */
     private Scenario findScenario(int iSpecies) {
 
@@ -211,7 +203,47 @@ public class AdditionalMortality extends AbstractMortality {
     }
 
     /**
-     * Additional mortality scenario
+     * Find the Larva Additional Mortality scenario defined for the given
+     * species. Osmose accepts exactly one scenario. The function throws an
+     * error if no scenario or several scenarios are defined.
+     *
+     * @param iSpecies, the index of the species
+     * @return the Larva Additional Mortality scenario for this species
+     */
+    private ScenarioLarva findScenarioLarva(int iSpecies) {
+
+        List<ScenarioLarva> scenarios = new ArrayList();
+        // List the scenarios listed in the current configuration file
+        for (ScenarioLarva scenario : ScenarioLarva.values()) {
+            if (!getConfiguration().isNull(scenario.key + iSpecies)) {
+                scenarios.add(scenario);
+            }
+        }
+
+        // No scenario has been defined
+        if (scenarios.isEmpty()) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("Set a Larva Additional Mortality scenario among ");
+            msg.append(Arrays.toString(Scenario.values()));
+            error("No Larva Additional Mortality scenario has been defined for species " + getSpecies(iSpecies).getName(), new NullPointerException(msg.toString()));
+        }
+
+        // Several scenarios have been defined
+        if (scenarios.size() > 1) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("Osmose found several Larva Additional Mortality scenarios defined for species ");
+            msg.append(getSpecies(iSpecies).getName());
+            msg.append(": ");
+            msg.append(Arrays.toString(scenarios.toArray()));
+            error(msg.toString(), new UnsupportedOperationException("Only one Larva Additional Mortality scenario per species can be defined."));
+        }
+
+        // return the scenario
+        return scenarios.get(0);
+    }
+
+    /**
+     * Additional Mortality scenario
      */
     public enum Scenario {
 
@@ -223,6 +255,26 @@ public class AdditionalMortality extends AbstractMortality {
         private final String key;
 
         private Scenario(String key) {
+            this.key = key;
+        }
+
+        @Override
+        public String toString() {
+            return key + "#";
+        }
+    }
+
+    /**
+     * Larva Additional Mortality scenario
+     */
+    public enum ScenarioLarva {
+
+        CONSTANT("mortality.natural.larva.rate.sp"),
+        BY_DT("mortality.natural.larva.rate.bytDt.file.sp");
+
+        private final String key;
+
+        private ScenarioLarva(String key) {
             this.key = key;
         }
 
