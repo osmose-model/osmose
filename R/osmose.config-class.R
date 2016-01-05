@@ -31,5 +31,18 @@ createParameterList = function(input, path=NULL) {
   Wdata[which(names(Wdata) %in% c("res"))] = NULL
   L1 = Wdata
   
+  class(L1) = c("osmose.config", class(L1))
+  
   return(L1)
 }
+
+
+# Methods -----------------------------------------------------------------
+
+# print.osmose.config = function(x, ...)
+
+# summary.osmose.config = function(x, ...)
+
+# print.summary.osmose.config = function(x, ...)
+
+
