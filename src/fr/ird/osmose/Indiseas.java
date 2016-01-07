@@ -300,7 +300,7 @@ public class Indiseas extends OsmoseLinker {
         info("Indiseas RESPONSIVENESS");
         // Fmsy multiplier
         float[] rvFx = getConfiguration().getArrayFloat("indiseas.responsiveness.fmsy.multiplier");
-        // Number of years of spinup with F = Fcurrent
+        // Number of years of spinup with F = Fmsy
         int nyearBurnIn = getConfiguration().getInt("indiseas.responsiveness.burnin.nyear");
         // Number of years with F = Fmsy * multiplier
         int nyearChange = getConfiguration().getInt("indiseas.responsiveness.change.nyear");
@@ -325,8 +325,6 @@ public class Indiseas extends OsmoseLinker {
                 new File(destination.toString()).mkdirs();
                 for (int ispec = 0; ispec < species[is].length; ispec++) {
                     int ispecies = species[is][ispec];
-                    float F1 = getConfiguration().getFloat("mortality.fishing.rate.sp" + ispec);
-                    float F2 = rvFx[iF] * fmsy[ispecies];
                     StringBuilder csvfile = new StringBuilder();
                     csvfile.append(destination);
                     csvfile.append(File.separator);
@@ -335,7 +333,7 @@ public class Indiseas extends OsmoseLinker {
                     csvfile.append(".csv");
                     try (CSVWriter writer = new CSVWriter(new FileWriter(csvfile.toString()), ';')) {
                         for (int iy = 0; iy < nyearTot; iy++) {
-                            float F = (iy < nyearBurnIn) ? F1 : F2;
+                            float F = (iy < nyearBurnIn) ? fmsy[ispecies] : (rvFx[iF] * fmsy[ispecies]);
                             String[] newline = new String[]{String.valueOf(iy), String.valueOf(F)};
                             writer.writeNext(newline);
                         }
