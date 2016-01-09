@@ -1,20 +1,22 @@
-configureCalibration=function(L1=createParameterList(File)){
-  nameCal=names(unlist(L1$calibration))
-  valueCal=unname(unlist(L1$calibration))
+
+configureCalibration = function(L1) {
+  
+  nameCal  = names(unlist(L1$calibration))
+  valueCal = unname(unlist(L1$calibration))
   
   #guess List
-  guessList=list(guess=createCalibrationList(nameCal,valueCal,"\\.max|\\.min|\\.phase",TRUE))
+  guessList = createCalibrationList(nameCal,valueCal,"\\.max|\\.min|\\.phase",TRUE)
   
   #max List
-  maxList=list(max=createCalibrationList(nameCal,valueCal,"\\.max",FALSE))
+  maxList = createCalibrationList(nameCal,valueCal,"\\.max",FALSE)
   
   #phase List
-  phaseList=list(phase=createCalibrationList(nameCal,valueCal,"\\.phase",FALSE))
+  phaseList = createCalibrationList(nameCal,valueCal,"\\.phase",FALSE)
   
   #min List
-  minList=list(min=createCalibrationList(nameCal,valueCal,"\\.min",FALSE))
+  minList= createCalibrationList(nameCal,valueCal,"\\.min",FALSE)
   
-  L2=list.merge(guessList,maxList,minList,phaseList)
+  L2 = list(guess=guessList, max=maxList, min=minList, phase=phaseList)
   return(L2)
 }
 
