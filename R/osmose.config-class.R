@@ -5,19 +5,21 @@ configureCalibration = function(L1) {
   valueCal = unname(unlist(L1$calibration))
   
   #guess List
-  guessList = createCalibrationList(nameCal,valueCal,"\\.max|\\.min|\\.phase",TRUE)
+  guessList = .createCalibrationList(nameCal,valueCal,"\\.max|\\.min|\\.phase",TRUE)
   
   #max List
-  maxList = createCalibrationList(nameCal,valueCal,"\\.max",FALSE)
+  maxList = .createCalibrationList(nameCal,valueCal,"\\.max",FALSE)
   
   #phase List
-  phaseList = createCalibrationList(nameCal,valueCal,"\\.phase",FALSE)
+  phaseList = .createCalibrationList(nameCal,valueCal,"\\.phase",FALSE)
   
   #min List
-  minList= createCalibrationList(nameCal,valueCal,"\\.min",FALSE)
+  minList= .createCalibrationList(nameCal,valueCal,"\\.min",FALSE)
   
   L2 = list(guess=guessList, max=maxList, min=minList, phase=phaseList)
+  
   return(L2)
+  
 }
 
 createParameterList = function(input, path=NULL) {
@@ -35,7 +37,7 @@ createParameterList = function(input, path=NULL) {
     nameLines[[i]][length(nameLines[[i]])+1] = valuelist[i]
   }
   
-  makeTree=function(x, i, n) {
+  makeTree = function(x, i, n) {
     if(i==n) {
       nameLines[[x]][i]
     } else {
