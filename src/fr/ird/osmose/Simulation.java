@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.ltl.AbstractLTLForcing;
+import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.process.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
@@ -89,7 +89,7 @@ public class Simulation extends OsmoseLinker {
     /**
      * The low trophic level forcing class.
      */
-    private AbstractLTLForcing forcing;
+    private LTLForcing forcing;
     /**
      * Current year of the simulation.
      */
@@ -261,20 +261,8 @@ public class Simulation extends OsmoseLinker {
         String errMsg = "Failed to create new LTLForcing instance";
         try {
             debug("LTLForcing: " + ltlClassName);
-            forcing = (AbstractLTLForcing) Class.forName(ltlClassName).getConstructor(Integer.TYPE).newInstance(rank);
-        } catch (ClassNotFoundException ex) {
-            error(errMsg, ex);
-        } catch (IllegalAccessException ex) {
-            error(errMsg, ex);
-        } catch (IllegalArgumentException ex) {
-            error(errMsg, ex);
-        } catch (InstantiationException ex) {
-            error(errMsg, ex);
-        } catch (NoSuchMethodException ex) {
-            error(errMsg, ex);
-        } catch (SecurityException ex) {
-            error(errMsg, ex);
-        } catch (InvocationTargetException ex) {
+            forcing = (LTLForcing) Class.forName(ltlClassName).getConstructor(Integer.TYPE).newInstance(rank);
+        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
             error(errMsg, ex);
         }
 
@@ -381,7 +369,7 @@ public class Simulation extends OsmoseLinker {
      *
      * @return the {@code LTLForcing} instance
      */
-    public AbstractLTLForcing getForcing() {
+    public LTLForcing getForcing() {
         return forcing;
     }
 }

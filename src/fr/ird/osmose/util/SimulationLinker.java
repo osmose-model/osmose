@@ -50,7 +50,7 @@ package fr.ird.osmose.util;
 
 import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Simulation;
-import fr.ird.osmose.ltl.AbstractLTLForcing;
+import fr.ird.osmose.ltl.LTLForcing;
 
 /**
  *
@@ -76,7 +76,7 @@ public class SimulationLinker extends OsmoseLinker {
         return getOsmose().getSimulation(rank).getSchoolSet();
     }
 
-    public AbstractLTLForcing getForcing() {
+    public LTLForcing getForcing() {
         return getOsmose().getSimulation(rank).getForcing();
     }
 }

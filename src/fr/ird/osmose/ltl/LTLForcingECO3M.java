@@ -61,7 +61,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
 
     private String[] planktonFileListNetcdf;
     private String zlevelName;
-    private float[][][] depthOfLayer;       // table of height of layers of ROMS model used in vertical integration
+    private float[][][] depthLevel;
     private String[] plktonNetcdfNames;
     private int stride;
 
@@ -99,13 +99,13 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             int ny = shape[1];
             int nx = shape[2];
 
-            depthOfLayer = new float[nz][ny][nx];
+            depthLevel = new float[ny][nx][nz];
 
             ArrayDouble.D3 arrDepth = (ArrayDouble.D3) ncGrid.findVariable(zlevelName).read();
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny; j++) {
                     for (int z = 0; z < nz; z++) {
-                        depthOfLayer[z][j][i] = (float) arrDepth.get(z, j, i);
+                        depthLevel[j][i][z] = (float) arrDepth.get(z, j, i);
                     }
                 }
             }
@@ -133,35 +133,38 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    float[] getDepthLevel(int iLTL, int jLTL) {
+        return depthLevel[jLTL][iLTL];
+    }
 
-        float[][][] dataInit = null;
+    @Override
+    float[][][] getRawBiomass(int iPlankton, int iStepSimu) {
+
+        float[][][] rawBiomass = null;
         NetcdfFile nc = null;
         String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
-        ArrayDouble.D3 tempArray;
 
         try {
+            // Open NetCDF file
             nc = NetcdfFile.open(name);
-            // read data and put them in the local arrays
-            if (null == nc.findVariable(plktonNetcdfNames[iPlankton])) {
-                warning("Osmose could not find LTL variable " + plktonNetcdfNames[iPlankton] + " in NetCDF file " + name + ". Unless this plankton group is of type uniform, Osmose might not work correctly.");
-                return new double[0][0];
-            }
-            tempArray = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[iPlankton]).read();
-            int[] shape = tempArray.getShape();
-            dataInit = new float[shape[0]][shape[1]][shape[2]];
-
-            // fill dataInit of plankton classes from local arrays
+            // Read LTL biomass in NetCDF array
+            ArrayDouble.D3 array = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[iPlankton]).read();
+            // Get the shape of the LTL variable
+            int[] shape = array.getShape();
+            // Permute the dimensions in order to have rawBiomass[j][i][k]
+            rawBiomass = new float[shape[1]][shape[2]][shape[0]];
+            // Fill up the rawBiomass variable
             for (int i = 0; i < shape[2]; i++) {
                 for (int j = 0; j < shape[1]; j++) {
                     for (int k = 0; k < shape[0]; k++) {
-                        dataInit[k][j][i] = (float) tempArray.get(k, j, i);
+                        rawBiomass[j][i][k] = (float) array.get(k, j, i);
                     }
                 }
             }
         } catch (IOException e) {
             error("Error reading variable " + plktonNetcdfNames[iPlankton] + " from file " + name, e);
         } finally {
+            // Close the NetCDF file
             if (nc != null) {
                 try {
                     nc.close();
@@ -172,6 +175,6 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         }
 
         // vertical integration
-        return LTLUtil.verticalIntegration(dataInit, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
+        return rawBiomass;
     }
 }

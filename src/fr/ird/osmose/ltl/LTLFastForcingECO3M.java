@@ -52,34 +52,9 @@ package fr.ird.osmose.ltl;
  *
  * @author pverley
  */
-public class LTLFastForcingECO3M extends LTLForcingECO3M {
-
-    private double[][][][] data;
+public class LTLFastForcingECO3M extends AbstractLTLFastForcing {
 
     public LTLFastForcingECO3M(int rank) {
-        super(rank);
-    }
-
-    @Override
-    public void initLTLGrid() {
-
-        super.initLTLGrid();
-        loadData();
-    }
-
-    private void loadData() {
-
-        info("Loading plankton data...");
-        data = new double[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
-        for (int iStep = 0; iStep < getConfiguration().getNStepYear(); iStep++) {
-            for (int iPlankton = 0; iPlankton < getConfiguration().getNPlankton(); iPlankton++) {
-                data[iStep][iPlankton] = super.getRawBiomass(iPlankton, iStep);
-            }
-        }
-    }
-
-    @Override
-    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
-        return data[getIndexStepLTL(iStepSimu)][iPlankton];
+        super(rank, LTLForcingECO3M.class.getCanonicalName());
     }
 }

@@ -52,6 +52,7 @@ import fr.ird.osmose.Cell;
 import java.io.IOException;
 import java.util.ArrayList;
 import ucar.ma2.Array;
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
@@ -63,7 +64,7 @@ import ucar.nc2.NetcdfFile;
 public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
     String[] planktonFileListNetcdf;
-    float[][][] depthOfLayer;       // table of height of layers of ROMS model used in vertical integration
+    float[][][] depthLevel;
     String[] plktonNetcdfNames;
     private String gridFileName;
     private String strCs_r, strHC;
@@ -141,7 +142,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
             /*
              * Compute vertical levels
              */
-            depthOfLayer = getCstSigLevels(ncIn);
+            depthLevel = computeDepthLevel(ncIn);
             /*
              * Determine cell overlap for spatial integration
              */
@@ -228,19 +229,33 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     }
 
     @Override
-    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    float[][][] getRawBiomass(int iLTL, int iStepSimu) {
 
+        // Get NetCDF file name for LTL group iLTL and time step iStepSimu
         String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
-        float[][][] data3d = null;
-
+        float[][][] rawBiomass = null;
         NetcdfFile nc = null;
         try {
+            // Open NetCDF file
             nc = NetcdfFile.open(name);
-            // read data and put it local array
-            data3d = (float[][][]) nc.findVariable(plktonNetcdfNames[iPlankton]).read().reduce().copyToNDJavaArray();
+            // Read LTL biomass in NetCDF array
+            ArrayDouble.D3 array = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[iLTL]).read().reduce();
+            // Get the shape of the LTL variable
+            int[] shape = array.getShape();
+            // Permute the dimensions in order to have rawBiomass[j][i][k]
+            rawBiomass = new float[shape[1]][shape[2]][shape[0]];
+            // Fill up the rawBiomass variable
+            for (int i = 0; i < shape[2]; i++) {
+                for (int j = 0; j < shape[1]; j++) {
+                    for (int k = 0; k < shape[0]; k++) {
+                        rawBiomass[j][i][k] = (float) array.get(k, j, i);
+                    }
+                }
+            }
         } catch (IOException ex) {
-            error("Error loading plankton variable " + plktonNetcdfNames[iPlankton] + " from file " + name, ex);
+            error("Error loading plankton variable " + plktonNetcdfNames[iLTL] + " from file " + name, ex);
         } finally {
+            // Close the NetCDF file
             if (null != nc) {
                 try {
                     nc.close();
@@ -250,7 +265,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
             }
         }
 
-        return LTLUtil.verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
+        return rawBiomass;
     }
 
     @Override
@@ -262,7 +277,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
      * Computes the depth at sigma levels disregarding the free surface
      * elevation.
      */
-    private float[][][] getCstSigLevels(NetcdfFile ncIn) throws IOException {
+    private float[][][] computeDepthLevel(NetcdfFile ncIn) throws IOException {
 
         double hc;
         double[] sc_r = new double[nz];
@@ -296,10 +311,10 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         }
 
         //------------------------------------------------------------
-        // Calculation of z_w , z_r
-        float[][][] z_r = new float[nz][ny][nx];
+        // Calculation of z_r
+        float[][][] z_r = new float[ny][nx][nz];
 
-        /* 2010 June: Recent UCLA Roms version (but not AGRIF yet)
+        /* 2010 June: UCLA Roms version (but not AGRIF yet)
          * uses new formulation for computing the unperturbated depth.
          * It is specified in a ":VertCoordType" global attribute that takes
          * mainly two values : OLD / NEW
@@ -313,7 +328,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 for (int i = nx; i-- > 0;) {
                     for (int j = ny; j-- > 0;) {
                         for (int k = nz; k-- > 0;) {
-                            z_r[k][j][i] = (float) (hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i]);
+                            z_r[j][i][k] = (float) (hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i]);
                         }
                     }
                 }
@@ -323,7 +338,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 for (int i = nx; i-- > 0;) {
                     for (int j = ny; j-- > 0;) {
                         for (int k = nz; k-- > 0;) {
-                            z_r[k][j][i] = (float) (hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]));
+                            z_r[j][i][k] = (float) (hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]));
                         }
                     }
                 }
@@ -400,6 +415,11 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
          * Nothing worked and eventually returned OLD type.
          */
         return VertCoordType.OLD;
+    }
+
+    @Override
+    float[] getDepthLevel(int iLTL, int jLTL) {
+        return depthLevel[jLTL][iLTL];
     }
 
     private enum VertCoordType {

@@ -195,7 +195,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
     }
 
     @Override
-    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    float[][][] getRawBiomass(int iPlankton, int iStepSimu) {
         throw new UnsupportedOperationException("LTLFastForcing assumes that LTL biomass is already provided in tonne in each cell.");
     }
 
@@ -207,5 +207,10 @@ public class LTLFastForcing extends AbstractLTLForcing {
     @Override
     void initLTLGrid() {
         throw new UnsupportedOperationException("LTLFastForcing assumes that LTL data is provided on Osmose grid.");
+    }
+
+    @Override
+    float[] getDepthLevel(int iLTL, int jLTL) {
+        throw new UnsupportedOperationException("LTLFastForcing assumes that LTL data is provided on 2D grid.");
     }
 }

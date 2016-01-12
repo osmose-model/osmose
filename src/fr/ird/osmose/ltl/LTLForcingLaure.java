@@ -57,7 +57,7 @@ import ucar.nc2.NetcdfFile;
  */
 public class LTLForcingLaure extends LTLForcingRomsPisces {
 
-    private double[][][][] data;
+    private float[][][][][] data;
 
     public LTLForcingLaure(int rank) {
         super(rank);
@@ -71,33 +71,24 @@ public class LTLForcingLaure extends LTLForcingRomsPisces {
 
     private void loadData() {
 
-        info("Loading all plankton data...");
-        data = new double[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
+        info("Loading LTL data...");
+        data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][][];
         for (int t = 0; t < getConfiguration().getNStepYear(); t++) {
             for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
-                data[t][p] = getIntegratedBiomass(p, t);
+                String ncfile = planktonFileListNetcdf[getIndexStepLTL(t)];
+                NetcdfFile nc;
+                try {
+                    nc = NetcdfFile.open(ncfile);
+                    data[t][p] = (float[][][]) nc.findVariable(plktonNetcdfNames[p]).read().copyToNDJavaArray();
+                } catch (IOException ex) {
+                    error("Error loading LTL variable " + plktonNetcdfNames[p] + " from file " + ncfile, ex);
+                }
             }
         }
-        info("All plankton data loaded");
-    }
-
-    private double[][] getIntegratedBiomass(int p, int iStepSimu) {
-
-        float[][][] dataInit = null;
-
-        String ncfile = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
-        try {
-            NetcdfFile nc = NetcdfFile.open(ncfile);
-            dataInit = (float[][][]) nc.findVariable(plktonNetcdfNames[p]).read().copyToNDJavaArray();
-        } catch (IOException ex) {
-            error("Error loading LTL variable " + plktonNetcdfNames[p] + " from file " + ncfile, ex);
-        }
-
-        return LTLUtil.verticalIntegration(dataInit, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override
-    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
+    float[][][] getRawBiomass(int iPlankton, int iStepSimu) {
         return data[getIndexStepLTL(iStepSimu)][iPlankton];
     }
 }
