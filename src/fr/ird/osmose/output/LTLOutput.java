@@ -129,18 +129,20 @@ public class LTLOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void update() {
-        
+
         int nspec = getNSpecies();
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
-            if (!(cell.isLand() || null == getSchoolSet().getSchools(cell))) {
+            if (!(cell.isLand())) {
                 // Preyed biomass for every LTL group in current cell
                 double[] preyedLTL = new double[getConfiguration().getNPlankton()];
-                for (School school : getSchoolSet().getSchools(cell)) {
-                    for (Prey prey : school.getPreys()) {
-                        int iltl = prey.getSpeciesIndex() - nspec;
-                        if (iltl >= 0) {
-                            preyedLTL[iltl] += prey.getBiomass();
+                if (null != getSchoolSet().getSchools(cell)) {
+                    for (School school : getSchoolSet().getSchools(cell)) {
+                        for (Prey prey : school.getPreys()) {
+                            int iltl = prey.getSpeciesIndex() - nspec;
+                            if (iltl >= 0) {
+                                preyedLTL[iltl] += prey.getBiomass();
+                            }
                         }
                     }
                 }
