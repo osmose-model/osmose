@@ -49,9 +49,11 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
+import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
@@ -154,19 +156,19 @@ public class LTLFastForcing extends AbstractLTLForcing {
             Array ltlbiomass = nc.findVariable("ltl_biomass").read();
             // nLTL the number of LTL groups in the NetCDF file <= nLTL groups
             // of the Osmose configuration
-            int nLTL = ltlbiomass.getShape()[1];
+            int nPlk = ltlbiomass.getShape()[1];
             // NetCDF file may contain more time steps than number of time steps
             // to be considered, as defined by 'ltl.nstep'
             int nTime = biomass.length;
             Index index = ltlbiomass.getIndex();
-            for (int iLTL = 0; iLTL < nLTL; iLTL++) {
+            for (int iPlk = 0; iPlk < nPlk; iPlk++) {
                 for (int iTime = 0; iTime < nTime; iTime++) {
                     for (Cell cell : getGrid().getCells()) {
                         if (!cell.isLand()) {
                             int i = cell.get_igrid();
                             int j = cell.get_jgrid();
-                            index.set(iTime, iLTL, j, i);
-                            biomass[iTime][iLTL][j][i] = ltlbiomass.getDouble(index);
+                            index.set(iTime, iPlk, j, i);
+                            biomass[iTime][iPlk][j][i] = ltlbiomass.getDouble(index);
                         }
                     }
                 }
@@ -177,9 +179,9 @@ public class LTLFastForcing extends AbstractLTLForcing {
     }
 
     @Override
-    public double getBiomass(int iLTL, Cell cell) {
-        int iLTLStep = getSimulation().getIndexTimeSimu() % biomass.length;
-        return biomass[iLTLStep][iLTL][cell.get_jgrid()][cell.get_igrid()];
+    public double getBiomass(int iPlk, Cell cell) {
+        int ltlTimeStep = getSimulation().getIndexTimeSimu() % biomass.length;
+        return biomass[ltlTimeStep][iPlk][cell.get_jgrid()][cell.get_igrid()];
     }
 
     /**
@@ -195,7 +197,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
     }
 
     @Override
-    float[][][] getRawBiomass(int iPlankton, int iStepSimu) {
+    float[][][] getRawBiomass(int iPlk, int iStepSimu) {
         throw new UnsupportedOperationException("LTLFastForcing assumes that LTL biomass is already provided in tonne in each cell.");
     }
 
@@ -205,12 +207,17 @@ public class LTLFastForcing extends AbstractLTLForcing {
     }
 
     @Override
-    void initLTLGrid() {
+    void initLTL() {
         throw new UnsupportedOperationException("LTLFastForcing assumes that LTL data is provided on Osmose grid.");
     }
 
     @Override
     float[] getDepthLevel(int iLTL, int jLTL) {
         throw new UnsupportedOperationException("LTLFastForcing assumes that LTL data is provided on 2D grid.");
+    }
+
+    @Override
+    List<Point> getLTLCells(Cell cell) {
+        throw new UnsupportedOperationException("LTLFastForcing assumes that LTL data is provided on Osmose grid."); 
     }
 }

@@ -48,8 +48,12 @@
  */
 package fr.ird.osmose.ltl;
 
+import fr.ird.osmose.Cell;
+import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import ucar.ma2.ArrayDouble;
 import ucar.nc2.NetcdfFile;
 
@@ -64,6 +68,11 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     private float[][][] depthLevel;
     private String[] plktonNetcdfNames;
     private int stride;
+    /**
+     * List of LTL cells that are contained within Osmose cells. The map is
+     * indexed by Osmose cell index.
+     */
+    private HashMap<Integer, List<Point>> ltlCells;
 
     public LTLForcingECO3M(int rank) {
         super(rank);
@@ -89,7 +98,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    public void initLTLGrid() {
+    public void initLTL() {
         try {
             String gridFilename = planktonFileListNetcdf[0];
             NetcdfFile ncGrid = NetcdfFile.open(gridFilename, null);
@@ -111,18 +120,25 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             }
             ncGrid.close();
 
-            icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
-            jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
+            ltlCells = new HashMap();
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    for (int ii = 0; ii < stride; ii++) {
-                        for (int jj = 0; jj < stride; jj++) {
-                            if (null == icoordLTLGrid[j][i]) {
-                                icoordLTLGrid[j][i] = new ArrayList();
-                                jcoordLTLGrid[j][i] = new ArrayList();
+                    Cell cell = getGrid().getCell(i, j);
+                    if (!cell.isLand()) {
+                        if (!ltlCells.containsKey(cell.getIndex())) {
+                            ltlCells.put(cell.getIndex(), new ArrayList());
+                        }
+                        for (int ii = 0; ii < stride; ii++) {
+                            for (int jj = 0; jj < stride; jj++) {
+                                int iLTL = i * stride + jj;
+                                int jLTL = j * stride + ii;
+                                // Only add ECO3M ocean cells
+                                // I use depthlevel values as a proxy for the mask
+                                // Land values are usually -9999
+                                if (Math.abs(depthLevel[jLTL][iLTL][0]) < 6e3) {
+                                    ltlCells.get(cell.getIndex()).add(new Point(iLTL, jLTL));
+                                }
                             }
-                            icoordLTLGrid[j][i].add(i * stride + jj);
-                            jcoordLTLGrid[j][i].add(j * stride + ii);
                         }
                     }
                 }
@@ -176,5 +192,10 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
 
         // vertical integration
         return rawBiomass;
+    }
+
+    @Override
+    List<Point> getLTLCells(Cell cell) {
+        return ltlCells.get(cell.getIndex());
     }
 }

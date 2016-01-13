@@ -106,12 +106,12 @@ public class AbstractLTLFastForcing extends SimulationLinker implements LTLForci
         // Set biomass variable
         for (int iStep = 0; iStep < biomass.length; iStep++) {
             forcing.update(iStep);
-            for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
+            for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
                 for (Cell cell : getGrid().getCells()) {
                     if (!cell.isLand()) {
                         int i = cell.get_igrid();
                         int j = cell.get_jgrid();
-                        biomass[iStep][iLTL][j][i] = forcing.getBiomass(iLTL, cell);
+                        biomass[iStep][iPlk][j][i] = forcing.getBiomass(iPlk, cell);
                     }
                 }
             }
@@ -119,9 +119,9 @@ public class AbstractLTLFastForcing extends SimulationLinker implements LTLForci
     }
 
     @Override
-    public double getBiomass(int iLTL, Cell cell) {
+    public double getBiomass(int iPlk, Cell cell) {
         int iLTLStep = getSimulation().getIndexTimeSimu() % biomass.length;
-        return biomass[iLTLStep][iLTL][cell.get_jgrid()][cell.get_igrid()];
+        return biomass[iLTLStep][iPlk][cell.get_jgrid()][cell.get_igrid()];
     }
 
     @Override

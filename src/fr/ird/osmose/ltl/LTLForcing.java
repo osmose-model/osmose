@@ -25,12 +25,12 @@ public interface LTLForcing {
      * Returns the biomass, in tonne, of a specified LTL group in a specified
      * cell at current time step of the simulation.
      *
-     * @param iLTL, the index of the LTL group
+     * @param iPlk, the index of the LTL group
      * @param cell, a {@code Cell} of the grid
      * @return the biomass, in tonne, of the LTL group at index {@code iLTL} in
      * this {@code cell}}
      */
-    public double getBiomass(int iLTL, Cell cell);
+    public double getBiomass(int iPlk, Cell cell);
 
     /**
      * Updates the biomass of the LTL groups at the current time step of the
