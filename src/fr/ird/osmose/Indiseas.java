@@ -242,7 +242,7 @@ public class Indiseas extends OsmoseLinker {
                     for (int id = 0; id < ndraw; id++) {
                         pbm[iF][isd][id] = lnd.inverseCumulativeProbability(Math.random());
                         // Add new phytoplankton biomass to CSV file
-                        String[] newline = new String[]{String.valueOf(spFx[iF]), String.valueOf(sd[isd]), String.valueOf(Math.round(pbm[iF][isd][id]))};
+                        String[] newline = new String[]{String.valueOf(spFx[iF]), String.valueOf(sd[isd]), String.valueOf((float) pbm[iF][isd][id])};
                         writer.writeNext(newline);
                     }
                 }
