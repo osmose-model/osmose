@@ -69,27 +69,30 @@ viewDataList = function(input, path=NULL) {
   Lines_trim[grep("^[[:punct:]]", Lines_trim)] = NULL
   Lines_trim = Lines_trim[nchar(Lines_trim)!=0]
   
-  Separators    = sapply(Lines_trim, .guessSeparator)
-  KeySeparator  = sapply(Separators, function(x) x=x[1]) # sapply(Separators, "[", i=1)
+  KeySeparator    = sapply(Lines_trim, .guessSeparator)
   Key           = mapply(.getKey, Lines_trim, KeySeparator)
-  Values        = mapply(.getValues,Lines_trim,KeySeparator)
+  Values        = mapply(.getValues, Lines_trim, KeySeparator)
   
   names(Values) = tolower(Key)
   ValuesDef     = Values
   
-  #ValuesDef[grep("osmose.configuration",Key)] = NULL
   if(length(grep("osmose.configuration", Key))>0) {
-    for(i in grep("osmose.configuration", Key)){
-      ValuesRec = lapply(Values[[i]],function(x) .readOsmoseConfiguration(x, path))
-      ValuesDef = c(ValuesDef, ValuesRec[[1]])
+    for(i in grep("osmose.configuration", Key)) {
+      ValuesRec = .readOsmoseConfiguration(input=Values[[i]], path=path)
+      ValuesDef = c(ValuesDef, ValuesRec)
     }
   }
+  
+  isDuplicated = duplicated(names(ValuesDef))
+  ValuesDef = ValuesDef[!isDuplicated]
+  
   return(ValuesDef)
 }
 
 .guessSeparator = function(Line) {
   SEPARATORS = c(equal="=", semicolon=";", coma=",", colon=":", tab="\t")
-  separator  = SEPARATORS[lapply((str_split(Line,SEPARATORS)),length)>1]
+  guess = which.min(nchar(lapply(str_split(Line,SEPARATORS), "[", i=1)))
+  separator  = SEPARATORS[guess]
   return(separator)
 }
 
@@ -99,9 +102,9 @@ viewDataList = function(input, path=NULL) {
 }
 
 .getValues = function(Line,KeySeparator){
-  Values = str_sub(Line,gregexpr(KeySeparator,Line)[[1]][1]+1,nchar(Line))
+  Values = str_sub(Line, gregexpr(KeySeparator, Line)[[1]][1]+1,nchar(Line))
   ValueSeparator = .guessSeparator(Values)
-  ValueSeparator = ifelse(length(ValueSeparator)==0, "NA", ValueSeparator) # "NA"?
+  ValueSeparator = ifelse(length(ValueSeparator)==0, "NA", ValueSeparator) # "NA"? TO_DO
   Value = str_trim(str_split(Values,ValueSeparator)[[1]])
   Value = Value[nchar(Value)!=0]
   return(list(Value))

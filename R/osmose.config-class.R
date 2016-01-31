@@ -59,6 +59,7 @@ createParameterList = function(input, path=NULL) {
   return(L1)
 }
 
+readOsmoseConfiguration = createParameterList
 
 # Methods -----------------------------------------------------------------
 
