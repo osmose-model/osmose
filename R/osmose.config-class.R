@@ -22,9 +22,15 @@ configureCalibration = function(L1) {
   
 }
 
-createParameterList = function(input, path=NULL) {
+readOsmoseConfiguration = function(input, config=NULL, path=NULL) {
   
-  L0 = .readOsmoseConfiguration(input)
+  L0 = .readOsmoseConfiguration(input, path=path)
+  
+  if(!is.null(config)) {
+    config = .getConfig(config)
+    L0 = c(config, L0)
+    L0 = L0[!duplicated(names(L0))]
+  }
   
   nameLines = names(L0)
   nameLines = lapply(nameLines, function(x) gsub("."," ", x, fixed = TRUE))
@@ -46,20 +52,20 @@ createParameterList = function(input, path=NULL) {
     }
   }
   
-  Wdata=list(res=0) # is there a more elegant way? Wdata=list()?
+  wdata = list(res=0) # is there a more elegant way? Wdata=list()?
   for(i in seq(length(nameLines))) {
-    Wdata = list.merge(Wdata, makeTree(i, 1, length(nameLines[[i]])))
+    wdata = list.merge(wdata, makeTree(i, 1, length(nameLines[[i]])))
   }
   
-  Wdata[which(names(Wdata) %in% c("res"))] = NULL
-  L1 = Wdata
+  wdata[which(names(wdata) %in% c("res"))] = NULL
+  L1 = wdata
   
   class(L1) = c("osmose.config", class(L1))
   
   return(L1)
 }
 
-readOsmoseConfiguration = createParameterList
+createParameterList = readOsmoseConfiguration
 
 # Methods -----------------------------------------------------------------
 

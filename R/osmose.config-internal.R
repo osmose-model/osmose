@@ -55,21 +55,21 @@ viewDataList = function(input, path=NULL) {
 ##Funciones internas
 
 .readOsmoseConfiguration = function(input, path=NULL) {
-  
-  if(is.null(path)) {
-    path = normalizePath(dirname(input)) 
+
+  path = if(is.null(path)) {
+     normalizePath(dirname(input))
   } else {
-    if(!isAbsolutePath(input)) { 
-      input = file.path(path, input)
-    }
+     normalizePath(file.path(path, dirname(input))) 
   }
   
-  Lines = readLines(input)
+  input = basename(input)
+  
+  Lines = readLines(file.path(path, input))
   Lines_trim = lapply(Lines, str_trim)
   Lines_trim[grep("^[[:punct:]]", Lines_trim)] = NULL
   Lines_trim = Lines_trim[nchar(Lines_trim)!=0]
   
-  KeySeparator    = sapply(Lines_trim, .guessSeparator)
+  KeySeparator  = sapply(Lines_trim, .guessSeparator)
   Key           = mapply(.getKey, Lines_trim, KeySeparator)
   Values        = mapply(.getValues, Lines_trim, KeySeparator)
   
@@ -104,9 +104,26 @@ viewDataList = function(input, path=NULL) {
 .getValues = function(Line,KeySeparator){
   Values = str_sub(Line, gregexpr(KeySeparator, Line)[[1]][1]+1,nchar(Line))
   ValueSeparator = .guessSeparator(Values)
-#   ValueSeparator = ifelse(length(ValueSeparator)==0, "NA", ValueSeparator) # "NA"? TO_DO
   Value = str_trim(str_split(Values, ValueSeparator)[[1]])
   Value = Value[nchar(Value)!=0]
   return(list(Value))
 }
 
+
+# getConfig ---------------------------------------------------------------
+
+.getConfig = function(config) {
+  UseMethod(".getConfig")
+}
+
+.getConfig.character = function(config) {
+  return(.readOsmoseConfiguration(file=config))
+}
+
+.getConfig.osmose.config = function(config) {
+  return(as.list(unlist(config)))
+}
+
+.getConfig.list = function(config) {
+  return(config)
+}
