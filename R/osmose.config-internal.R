@@ -104,8 +104,8 @@ viewDataList = function(input, path=NULL) {
 .getValues = function(Line,KeySeparator){
   Values = str_sub(Line, gregexpr(KeySeparator, Line)[[1]][1]+1,nchar(Line))
   ValueSeparator = .guessSeparator(Values)
-  ValueSeparator = ifelse(length(ValueSeparator)==0, "NA", ValueSeparator) # "NA"? TO_DO
-  Value = str_trim(str_split(Values,ValueSeparator)[[1]])
+#   ValueSeparator = ifelse(length(ValueSeparator)==0, "NA", ValueSeparator) # "NA"? TO_DO
+  Value = str_trim(str_split(Values, ValueSeparator)[[1]])
   Value = Value[nchar(Value)!=0]
   return(list(Value))
 }
