@@ -54,15 +54,21 @@ viewDataList = function(input, path=NULL) {
 
 ##Funciones internas
 
-.readOsmoseConfiguration = function(input, path=NULL) {
+.readOsmoseConfiguration = function(input, path=NULL, absolute=TRUE) {
 
-  path = if(is.null(path)) {
-     normalizePath(dirname(input))
+  if(isTRUE(absolute)) {
+    if(is.null(path)) {
+      path  = normalizePath(dirname(input))
+      input = basename(input)        
+    }
   } else {
-     normalizePath(file.path(path, dirname(input))) 
+    path = if(is.null(path)) {
+      normalizePath(dirname(input))
+    } else {
+      normalizePath(file.path(path, dirname(input))) 
+    }
+    input = basename(input)    
   }
-  
-  input = basename(input)
   
   Lines = readLines(file.path(path, input))
   Lines_trim = lapply(Lines, str_trim)
@@ -78,7 +84,7 @@ viewDataList = function(input, path=NULL) {
   
   if(length(grep("osmose.configuration", Key))>0) {
     for(i in grep("osmose.configuration", Key)) {
-      ValuesRec = .readOsmoseConfiguration(input=Values[[i]], path=path)
+      ValuesRec = .readOsmoseConfiguration(input=Values[[i]], path=path, absolute=absolute)
       ValuesDef = c(ValuesDef, ValuesRec)
     }
   }

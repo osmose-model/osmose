@@ -22,9 +22,9 @@ configureCalibration = function(L1) {
   
 }
 
-readOsmoseConfiguration = function(input, config=NULL, path=NULL) {
+readOsmoseConfiguration = function(input, config=NULL, absolute=TRUE) {
   
-  L0 = .readOsmoseConfiguration(input, path=path)
+  L0 = .readOsmoseConfiguration(input=input, absolute=absolute)
   
   if(!is.null(config)) {
     config = .getConfig(config)
