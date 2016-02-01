@@ -1,20 +1,20 @@
-.makeTree = function(xList,x,i,n) {
+.makeTree = function(xList, x, i, n) {
   if(i==n){
     xList[[x]][i]
   } else {
-    spl=split(x,xList[[x]][i])
+    spl=split(x, xList[[x]][i])
     lapply(spl, function(x) .makeTree(xList,x,i+1,n))
   }
 }
 
 .listTree = function(xList) {
-  Wdata = list(res=0)
+  Wdata = list(xfnres=0)
   
-  for(i in seq(length(xList))){
+  for(i in seq_along(xList)) {
     Wdata=list.merge(Wdata, .makeTree(xList,i,1,length(xList[[i]])))
   }
   
-  Wdata[which(names(Wdata) %in% "res")] = NULL
+  Wdata[which(names(Wdata) %in% "xfnres")] = NULL
   
   return(Wdata)
 }
