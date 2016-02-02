@@ -1,12 +1,12 @@
-.makeTree = function(xList, i=1) {
-  n = length(xList)
-  if(i==n) return(xList[n])
-  out = setNames(list(.makeTree(xList, i=i+1)), xList[i])
+.makeTree = function(xList, value, i=1) {
+  n = length(xList) + 1
+  if(i==n) return(value)
+  out = setNames(list(.makeTree(xList, value, i=i+1)), xList[i])
   return(out)
 }
 
-.listTree = function(xList) {
-  do.call(list.merge, lapply(xList, FUN=.makeTree))
+.listTree = function(xList, value) {
+  do.call(list.merge, mapply(FUN=.makeTree, xList=xList, value=value, SIMPLIFY = FALSE))
 }
 
 .createCalibrationList = function(input1, input2, xString, inv){
@@ -71,6 +71,8 @@ viewDataList = function(input, path=NULL) {
   
   names(Values) = tolower(Key)
   ValuesDef     = Values
+  
+  ValuesDef = lapply(ValuesDef, addAttr, which="path", value=path)
   
   if(length(grep("osmose.configuration", Key))>0) {
     for(i in grep("osmose.configuration", Key)) {

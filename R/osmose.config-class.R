@@ -28,16 +28,14 @@ addAttr = function(x, which, value) {
 }
                                       
 .createParameterList = function(L0) {
-  
+
   nameLines    = names(L0)
   nameLines    = str_split(nameLines, "\\.")
-  valuelist    = unlist(lapply(unname(L0), toString))
-  
-  for(i in seq_along(nameLines)){
-    nameLines[[i]][length(nameLines[[i]])+1] = valuelist[i]
-  }
+  valueList    = lapply(unname(L0), toString)
+  paths        = unname(unlist(lapply(L0, attr, which="path")))
+  valueList    = mapply(addAttr, x=valueList, value=paths, which="path", SIMPLIFY = FALSE)
 
-  L1 = .listTree(nameLines)
+  L1 = .listTree(nameLines, valueList)  
   class(L1) = c("osmose.config", class(L1))
   
   return(L1)
