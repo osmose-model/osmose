@@ -1,22 +1,12 @@
-.makeTree = function(xList, x, i, n) {
-  if(i==n){
-    xList[[x]][i]
-  } else {
-    spl=split(x, xList[[x]][i])
-    lapply(spl, function(x) .makeTree(xList,x,i+1,n))
-  }
+.makeTree = function(xList, i=1) {
+  n = length(xList)
+  if(i==n) return(xList[n])
+  out = setNames(list(.makeTree(xList, i=i+1)), xList[i])
+  return(out)
 }
 
 .listTree = function(xList) {
-  Wdata = list(xfnres=0)
-  
-  for(i in seq_along(xList)) {
-    Wdata=list.merge(Wdata, .makeTree(xList,i,1,length(xList[[i]])))
-  }
-  
-  Wdata[which(names(Wdata) %in% "xfnres")] = NULL
-  
-  return(Wdata)
+  do.call(list.merge, lapply(xList, FUN=.makeTree))
 }
 
 .createCalibrationList = function(input1, input2, xString, inv){

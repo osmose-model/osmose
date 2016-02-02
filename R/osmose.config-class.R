@@ -30,8 +30,7 @@ addAttr = function(x, which, value) {
 .createParameterList = function(L0) {
   
   nameLines    = names(L0)
-  nameLines    = str_split(nameLines,"\\.")
-  lengthlayers = lapply(nameLines, function(x) length(x))
+  nameLines    = str_split(nameLines, "\\.")
   valuelist    = unlist(lapply(unname(L0), toString))
   
   for(i in seq_along(nameLines)){
