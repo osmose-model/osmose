@@ -60,50 +60,50 @@ public class OLogger {
     /**
      * The application logger
      */
-    private final static Logger logger = Logger.getAnonymousLogger();
+    private final static Logger OLOGGER = Logger.getAnonymousLogger();
 
-    public void error(String msg, Exception ex) {
-        logger.log(Level.SEVERE, msg, ex);
+    final public void error(String msg, Exception ex) {
+        OLOGGER.log(Level.SEVERE, msg, ex);
         System.exit(1);
     }
 
-    public void warning(String msg) {
-        logger.warning(msg);
+    final public void warning(String msg) {
+        OLOGGER.warning(msg);
     }
 
-    public void warning(String msg, Object param) {
-        logger.log(Level.WARNING, msg, param);
+    final public void warning(String msg, Object param) {
+        OLOGGER.log(Level.WARNING, msg, param);
     }
 
-    public void warning(String msg, Object params[]) {
-        logger.log(Level.WARNING, msg, params);
+    final public void warning(String msg, Object params[]) {
+        OLOGGER.log(Level.WARNING, msg, params);
     }
 
-    public void info(String msg) {
-        logger.info(msg);
+    final public void info(String msg) {
+        OLOGGER.info(msg);
     }
 
-    public void info(String msg, Object param) {
-        logger.log(Level.INFO, msg, param);
+    final public void info(String msg, Object param) {
+        OLOGGER.log(Level.INFO, msg, param);
     }
 
-    public void info(String msg, Object params[]) {
-        logger.log(Level.INFO, msg, params);
+    final public void info(String msg, Object params[]) {
+        OLOGGER.log(Level.INFO, msg, params);
     }
 
-    public void debug(String msg) {
-        logger.log(Level.FINE, msg);
+    final public void debug(String msg) {
+        OLOGGER.log(Level.FINE, msg);
     }
 
-    public void debug(String msg, Object param) {
-        logger.log(Level.FINE, msg, param);
+    final public void debug(String msg, Object param) {
+        OLOGGER.log(Level.FINE, msg, param);
     }
 
-    public void debug(String msg, Object params[]) {
-        logger.log(Level.FINE, msg, params);
+    final public void debug(String msg, Object params[]) {
+        OLOGGER.log(Level.FINE, msg, params);
     }
     
-    public Logger getLogger() {
-        return logger;
+    final public Logger getLogger() {
+        return OLOGGER;
     }
 }
