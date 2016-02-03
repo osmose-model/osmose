@@ -196,9 +196,10 @@ public class Configuration extends OLogger {
      */
     private int nSimulation;
     /**
-     * Number of years of the simulation. Parameter <i>simulation.nyear</i>
+     * Number of time steps of the simulation. Parameter
+     * <i>simulation.time.nstep</i>
      */
-    private int nYear;
+    private int nStep;
     /**
      * Number of time steps in one year. Time step {@code dt = 1. / nStepYear}
      * [year^-1]. Parameter <i>simulation.ndtPerYear</i>
@@ -330,8 +331,14 @@ public class Configuration extends OLogger {
         nPlankton = getInt("simulation.nplankton");
         nSimulation = getInt("simulation.nsimulation");
         nCpu = Math.min(nCpu, nSimulation);
-        nYear = getInt("simulation.time.nyear");
         nStepYear = getInt("simulation.time.ndtperyear");
+        // PhV 20160203, new parameter simulation.time.nstep
+        if (canFind("simulation.time.nstep")) {
+            nStep = getInt("simulation.time.nstep");
+        } else {
+            // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
+            nStep = nStepYear * getInt("simulation.time.nyear");
+        }
         nSchool = new int[nSpecies];
         if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
             for (int i = 0; i < nSpecies; i++) {
@@ -866,13 +873,13 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the number of years of the simulation. Parameter
-     * <i>simulation.nyear</i>
+     * Returns the number of time steps of the simulation. Parameter
+     * <i>simulation.time.nstep</i>
      *
      * @return the number of years of the simulation
      */
-    public int getNYear() {
-        return nYear;
+    public int getNStep() {
+        return nStep;
     }
 
     /**

@@ -172,7 +172,7 @@ public class MapSet extends OsmoseLinker {
         // Initialize arrays
         maps = new GridMap[mapNumber.size()];
         mapFile = new String[mapNumber.size()];
-        int nSteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
+        int nSteps = getConfiguration().getNStep();
         int lifespan = getSpecies(iSpecies).getLifespanDt();
         indexMaps = new int[lifespan][];
         for (int iAge = 0; iAge < lifespan; iAge++) {
@@ -200,14 +200,15 @@ public class MapSet extends OsmoseLinker {
              * Read year min and max concerned by this map
              */
             int yearMin = 0;
-            int yearMax = getConfiguration().getNYear();
+            int nyear = (int) (getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
+            int yearMax = nyear;
             if (!getConfiguration().isNull(prefix + ".map" + imap + ".year.min")) {
                 yearMin = getConfiguration().getInt(prefix + ".map" + imap + ".year.min");
                 yearMin = Math.max(yearMin, 0);
             }
             if (!getConfiguration().isNull(prefix + ".map" + imap + ".year.max")) {
                 yearMax = getConfiguration().getInt(prefix + ".map" + imap + ".year.max");
-                yearMax = Math.min(yearMax, getConfiguration().getNYear());
+                yearMax = Math.min(yearMax, nyear);
             }
             /*
              * Assign number of maps to numMap array
@@ -237,7 +238,7 @@ public class MapSet extends OsmoseLinker {
     private boolean checkMapIndexation() {
 
         boolean isMapOK = true;
-        int nSteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
+        int nSteps = getConfiguration().getNStep();
         int nStepYear = getConfiguration().getNStepYear();
         int lifespan = getSpecies(iSpecies).getLifespanDt();
         for (int iAge = 0; iAge < lifespan; iAge++) {

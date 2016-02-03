@@ -66,14 +66,14 @@ public class SingleTimeSeries extends OsmoseLinker {
 
     public void read(String filename) {
         int nStepYear = getConfiguration().getNStepYear();
-        int nStepSimu = nStepYear * getConfiguration().getNYear();
+        int nStepSimu = getConfiguration().getNStep();
         read(filename, nStepYear, nStepSimu);
     }
 
     public void read(String filename, int nMin, int nMax) {
 
         int nStepYear = getConfiguration().getNStepYear();
-        int nStepSimu = nStepYear * getConfiguration().getNYear();
+        int nStepSimu = getConfiguration().getNStep();
         try {
             // 1. Open the CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());

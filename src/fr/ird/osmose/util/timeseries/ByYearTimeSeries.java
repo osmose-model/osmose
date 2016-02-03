@@ -66,12 +66,13 @@ public class ByYearTimeSeries extends OsmoseLinker {
     private double[] values;
 
     public void read(String filename) {
-        read(filename, 1, getConfiguration().getNYear());
+        int nYear = (int) (getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
+        read(filename, 1, nYear);
     }
 
     public void read(String filename, int nMin, int nMax) {
 
-        int nYear = getConfiguration().getNYear();
+        int nYear = (int) (getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
         try {
             // 1. Open the CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());

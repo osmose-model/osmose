@@ -130,7 +130,7 @@ public class Plankton {
             accessibilityCoeff = ts.getValues();
         } else {
             double accessibility = cfg.getDouble("plankton.accessibility2fish.plk" + index);
-            accessibilityCoeff = new double[cfg.getNStepYear() * cfg.getNYear()];
+            accessibilityCoeff = new double[cfg.getNStep()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
             }

@@ -328,7 +328,7 @@ public class OutputManager extends SimulationLinker {
         boolean isTimeToWrite = writeRestart;
         isTimeToWrite &= (getSimulation().getYear() >= spinupRestart);
         isTimeToWrite &= ((iStepSimu + 1) % restartFrequency == 0);
-        isTimeToWrite |= (iStepSimu >= (getConfiguration().getNYear() * getConfiguration().getNStepYear() - 1));
+        isTimeToWrite |= (iStepSimu >= (getConfiguration().getNStep() - 1));
 
         if (isTimeToWrite) {
             snapshot.makeSnapshot(iStepSimu);

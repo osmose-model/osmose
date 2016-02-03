@@ -183,7 +183,7 @@ public class Simulation extends OsmoseLinker {
         // Initialize time variables
         n_steps_simu = oneStep
                 ? 1
-                : getConfiguration().getNYear() * getConfiguration().getNStepYear();
+                : getConfiguration().getNStep();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
