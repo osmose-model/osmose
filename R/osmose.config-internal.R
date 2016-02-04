@@ -107,6 +107,24 @@ viewDataList = function(input, path=NULL) {
   return(list(Value))
 }
 
+addAttr = function(x, which, value) { 
+  attr(x=x, which=which)=value
+  return(x)
+}
+
+.createParameterList = function(L0) {
+  
+  nameLines    = names(L0)
+  nameLines    = str_split(nameLines, "\\.")
+  valueList    = lapply(unname(L0), toString)
+  paths        = unname(unlist(lapply(L0, attr, which="path")))
+  valueList    = mapply(addAttr, x=valueList, value=paths, which="path", SIMPLIFY = FALSE)
+  
+  L1 = .listTree(nameLines, valueList)  
+  
+  return(L1)
+  
+}
 
 # getConfig ---------------------------------------------------------------
 

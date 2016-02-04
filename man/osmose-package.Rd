@@ -20,8 +20,7 @@ Philippe Verley
 Morgane Travers
 
 Ricardo Oliveros-Ramos
-Maintainer: Ricardo Oliveros-Ramos
-<ricardo.oliveros@gmail.com>
+Maintainer: Ricardo Oliveros-Ramos <ricardo.oliveros@gmail.com>
 }
 \references{
 osmose: Modelling Marine Exploited Ecosystems
