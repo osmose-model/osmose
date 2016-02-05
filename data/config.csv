@@ -1,0 +1,46 @@
+simulation.time.nyear;2
+simulation.time.ndtPerYear;24
+simulation.nspecies;1
+species.name.sp0;anchovy
+species.egg.size.sp0;0.1
+species.lifespan.sp0;3
+species.K.sp0;0.76
+species.Linf.sp0;3
+species.t0.sp0;-0.14
+species.vonbertalanffy.threshold.age.sp0;0.35
+# FULL PARAMETERIZATION # create new outputs?
+mortality.fishing.rate.method.sp0;constant
+mortality.fishing.deviate.byYear.enabled.sp0;true
+mortality.fishing.deviate.byYear.method.sp0;multiplicative
+mortality.fishing.deviate.byYear.random.sp0;false
+mortality.fishing.season.method.sp0;default
+# mean
+mortality.fishing.rate.sp0;0.5
+mortality.fishing.rate.slope.sp0;0.03
+mortality.fishing.rate.byRegime.file.sp0;path/to/file
+mortality.fishing.rate.byRegime.sp0;numeric_vector
+mortality.fishing.rate.byRegime.shift.sp0;24
+mortality.fishing.rate.byYear.file.sp0;path/to/file
+mortality.fishing.rate.byYear.sp0;numeric_vector
+mortality.fishing.periodsPerYear.sp0;2
+mortality.fishing.rate.byDt.file.sp0;path/to/file
+# year
+mortality.fishing.deviate.byYear.file.sp0;path/to/file
+mortality.fishing.deviate.byYear.sp0;0,0.1,0.1,0
+# season
+mortality.fishing.deviate.season.file.sp0;path/to/file
+mortality.fishing.deviate.season.sp0;0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 
+mortality.fishing.season.byDt.file.sp0;path/to/file
+mortality.fishing.season.distrib.file.sp0;
+
+# Selectivity -------------------------------------------------------------
+
+mortality.fishing.selectivity.sp0;size
+mortality.fishing.selectivity.size.type.sp0;normal,logistic
+mortality.fishing.selectivity.size.type.sp0;logistic,logistic
+mortality.fishing.selectivity.size.F50.sp0;12,11
+mortality.fishing.selectivity.size.F75.sp0;13,12
+mortality.fishing.selectivity.age.type.sp0;logistic,logistic
+mortality.fishing.selectivity.age.F50.sp0;2,3
+mortality.fishing.selectivity.age.F75.sp0;3,4
+mortality.fishing.selectivity.shift.sp0;24
