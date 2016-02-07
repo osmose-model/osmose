@@ -9,6 +9,7 @@ species.Linf.sp0;3
 species.t0.sp0;-0.14
 species.vonbertalanffy.threshold.age.sp0;0.35
 # FULL PARAMETERIZATION # create new outputs?
+mortality.fishing.useFiles;TRUE
 mortality.fishing.rate.method.sp0;constant
 mortality.fishing.deviate.byYear.enabled.sp0;true
 mortality.fishing.deviate.byYear.method.sp0;multiplicative
@@ -25,6 +26,7 @@ mortality.fishing.rate.byYear.sp0;numeric_vector
 mortality.fishing.periodsPerYear.sp0;2
 mortality.fishing.rate.byDt.file.sp0;path/to/file
 # year
+
 mortality.fishing.deviate.byYear.file.sp0;path/to/file
 mortality.fishing.deviate.byYear.sp0;0,0.1,0.1,0
 # season
