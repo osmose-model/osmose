@@ -59,7 +59,7 @@ buildConfiguration = function(file, path="_osmose", config=NULL, absolute=TRUE, 
   # other
   # write additional config File
   # config.csv: one line added with new parameters  
-  return(L1)
+  return(L1$mortality$fishing)
 }
 
 
