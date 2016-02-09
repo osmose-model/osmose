@@ -81,14 +81,14 @@ public class SingleTimeSeries extends OsmoseLinker {
 
             // 2. Check the length of the time serie and inform the user about potential problems or inconsistencies
             int nTimeSerie = lines.size() - 1;
-            if (nTimeSerie < nMin) {
+            if ((nTimeSerie != nStepSimu) && (nTimeSerie < nMin)) {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must contain at least " + nMin + " time steps.");
             }
-            if (nTimeSerie % nStepYear != 0) {
+            if ((nTimeSerie != nStepSimu) && (nTimeSerie % nStepYear != 0)) {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
             }
             if (nTimeSerie > nMax) {
-                debug("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
+                debug("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding steps.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
 

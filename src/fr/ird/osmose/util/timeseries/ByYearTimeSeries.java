@@ -67,7 +67,7 @@ public class ByYearTimeSeries extends OsmoseLinker {
 
     public void read(String filename) {
         int nYear = (int) (getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-        read(filename, 1, nYear);
+        read(filename, 1, Math.max(1, nYear));
     }
 
     public void read(String filename, int nMin, int nMax) {
