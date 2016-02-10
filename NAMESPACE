@@ -2,5 +2,6 @@
 
 export(buildConfiguration)
 export(getOsmoseParameter)
+export(osmose2R)
 export(readOsmoseConfiguration)
 export(runOsmose)

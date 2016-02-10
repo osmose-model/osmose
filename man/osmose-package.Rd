@@ -19,6 +19,8 @@ Philippe Verley
 
 Morgane Travers
 
+Laure Velez
+
 Ricardo Oliveros-Ramos
 Maintainer: Ricardo Oliveros-Ramos <ricardo.oliveros@gmail.com>
 }
