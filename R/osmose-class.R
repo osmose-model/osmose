@@ -1,24 +1,26 @@
 # All the methods for osmose class ----------------------------------------
 
+#' @export
 plot.osmose = function(x, type="biomass", ...) {
   
-  x = getVar(x, var=type)
-  plot(x)
+  x = getVar(x, var=type, expected = FALSE)
+  plot(x, ...)
   
   return(invisible())
 }
 
+#' @export
 getVar = function(object, var, ...) {
   UseMethod("getVar")
 }
 
-getVar.osmose = function(object, var, type="global", expected=TRUE, ...) {
+#' @export
+#' @method getVar osmose
+getVar.osmose = function(object, var, type="global", expected=FALSE, ...) {
   out = object[[type]][[var]]
-  
   xclass = "list" %in% class(out)
   if(isTRUE(!xclass) & isTRUE(expected))
     out = apply(out, c(1,2), mean, na.rm=TRUE)
-  
   return(out)
 }
 
