@@ -11,6 +11,7 @@
 #' @author Yunne-Jai Shin
 #' @author Philippe Verley
 #' @author Morgane Travers
+#' @author Laure Velez
 #' @author Ricardo Oliveros-Ramos 
 #' Maintainer: Ricardo Oliveros-Ramos <ricardo.oliveros@@gmail.com>
 #' @references osmose: Modelling Marine Exploited Ecosystems
@@ -92,5 +93,35 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
   
   return(invisible(run.osmose))
   
+}
+
+
+# osmose2R ----------------------------------------------------------------
+#' @title Read OSMOSE outputs into an R object
+#' @description This function create object of class \code{osmose} with the 
+#' outputs from OSMOSE in the \code{path} folder.  
+#' @param path Path to the directory containing OSMOSE outputs. 
+#' @param version OSMOSE version used to run the model. 
+#' @param species.names Display names for species, overwrite the species names
+#' provided to the OSMOSE model. Used for plots and summaries.
+#' @param ... Additional arguments
+#' @details A list of class \code{osmose} is created, individual elements can be
+#' extracted using the function \code{getVar}.
+#' @author Ricardo Oliveros-Ramos
+#' @export
+osmose2R =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
+  if(is.null(path) & interactive()) {
+    path = choose.dir(caption="Select OSMOSE outputs folder")
+  }
+  if(is.null(path)) stop("No path has been provided.")
+  
+  output = switch(version, 
+                  v3r0 = osmose2R.v3r0(path=path, species.names=species.names, ...),
+                  v3r1 = osmose2R.v3r1(path=path, species.names=species.names, ...),
+                  v3r2 = osmose2R.v3r2(path=path, species.names=species.names, ...),
+                  stop(sprintf("Incorrect osmose version %s", version))
+  )
+  class(output) = "osmose"
+  return(output)
 }
 
