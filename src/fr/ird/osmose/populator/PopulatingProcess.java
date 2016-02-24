@@ -46,10 +46,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process;
+package fr.ird.osmose.populator;
 
-import fr.ird.osmose.populator.AbstractPopulator;
-import fr.ird.osmose.populator.NetcdfPopulator;
+import fr.ird.osmose.process.AbstractProcess;
 
 /**
  *
@@ -74,7 +73,6 @@ public class PopulatingProcess extends AbstractProcess {
             populator = new NetcdfPopulator(getRank(), "simulation.restart.file");
         } else if (!getConfiguration().isNull("population.initialization.file")) {
             populator = new NetcdfPopulator(getRank(), "population.initialization.file");
-            populator.init();
         }
 
         if (null != populator) {

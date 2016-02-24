@@ -49,7 +49,6 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.util.logging.OLogger;
-import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.logging.StdoutHandler;
 import fr.ird.osmose.util.version.VersionManager;
 import java.io.*;
@@ -245,26 +244,11 @@ public class Osmose extends OLogger {
     }
 
     /**
-     * Loads a configuration file and creates a new set of simulation. It is
-     * only used externally by Osmose UI tools to access the parameters of
-     * configuration.
+     * Either update the configuration files, generate lists of Indiseas
+     * simulations or run the simulations, depending on the command line
+     * arguments.
      */
-    public void init() {
-        configuration = new Configuration(configurationFiles.get(0), cmd);
-        configuration.init();
-
-        simulation = new Simulation[configuration.getNSimulation()];
-        for (int i = 0; i < configuration.getNSimulation(); i++) {
-            simulation[i] = new Simulation(i);
-        }
-    }
-
-    /**
-     * Loops on the list of configuration files (listed in the
-     * <i>filepath.txt</i>, refer to {@link #readFilepath()} for details) and
-     * run the configurations in sequential order.
-     */
-    public void runAll() {
+    public void run() {
 
         if (flagIndiseas) {
             info("Creating Indiseas simulation batch from {0}", configurationFiles.get(0));
@@ -279,7 +263,7 @@ public class Osmose extends OLogger {
         } else {
             for (String configurationFile : configurationFiles) {
                 info("Running configuration {0}", configurationFile);
-                osmose.run(configurationFile);
+                osmose.runConfiguration(configurationFile);
                 info("*********************************************");
             }
         }
@@ -325,7 +309,7 @@ public class Osmose extends OLogger {
      *
      * @param configurationFile, the path of the configuration file.
      */
-    public void run(String configurationFile) {
+    public void runConfiguration(String configurationFile) {
 
         // Initialize the configuration
         configuration = new Configuration(configurationFile, cmd);
@@ -497,7 +481,7 @@ public class Osmose extends OLogger {
         osmose.info("http://www.osmose-model.org");
         osmose.info("*********************************************");
         osmose.info("Software version: " + VersionManager.getInstance().OSMOSE_VERSION.toString());
-        osmose.runAll();
+        osmose.run();
         osmose.info("OSMOSE Model copyright © IRD");
         osmose.info("*********************************************");
     }

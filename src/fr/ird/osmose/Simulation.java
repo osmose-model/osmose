@@ -50,7 +50,7 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.output.SchoolSetSnapshot;
-import fr.ird.osmose.process.PopulatingProcess;
+import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.DefaultStep;
 import fr.ird.osmose.util.OsmoseLinker;
@@ -67,7 +67,7 @@ import ucar.nc2.NetcdfFile;
  * The {@code Simulation} initialises all the required components for running
  * the simulation such as
  * {@link fr.ird.osmose.step.AbstractStep}, {@link fr.ird.osmose.ltl.LTLForcing}
- * or {@link fr.ird.osmose.process.PopulatingProcess} and then controls the loop
+ * or {@link fr.ird.osmose.populator.PopulatingProcess} and then controls the loop
  * over time.
  *
  * @author P.Verley (philippe.verley@ird.fr)
