@@ -70,7 +70,7 @@ public class GompertzGrowth extends AbstractGrowth {
     }
 
     @Override
-    void init() {
+    public void init() {
 
         int iSpec = getIndexSpecies();
         lStart = getConfiguration().getDouble("growth.exponential.lstart.sp" + iSpec);

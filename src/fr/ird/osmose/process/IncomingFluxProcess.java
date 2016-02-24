@@ -50,7 +50,6 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.growth.GrowthProcess;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 
 /**

@@ -46,11 +46,12 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.growth;
+package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.AbstractProcess;
+import fr.ird.osmose.process.growth.AbstractGrowth;
 import java.lang.reflect.InvocationTargetException;
 
 /**

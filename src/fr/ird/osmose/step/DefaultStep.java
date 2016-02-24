@@ -50,11 +50,10 @@ package fr.ird.osmose.step;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.OutputManager;
-import fr.ird.osmose.process.AbstractProcess;
-import fr.ird.osmose.process.growth.GrowthProcess;
+import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
-import fr.ird.osmose.process.mortality.MortalityProcess;
-import fr.ird.osmose.process.movement.MovementProcess;
+import fr.ird.osmose.process.MortalityProcess;
+import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.ReproductionProcess;
 
 /**

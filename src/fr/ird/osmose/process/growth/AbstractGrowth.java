@@ -79,7 +79,7 @@ public abstract class AbstractGrowth extends SimulationLinker {
      * Initialisation of the mortality. This function should loads the
      * appropriate parameters from the configuration files.
      */
-    abstract void init();
+    abstract public void init();
 
     /**
      * Compute the mean length, in centimetre, at a specific age, in year.
