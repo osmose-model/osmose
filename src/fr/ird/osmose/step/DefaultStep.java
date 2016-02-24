@@ -66,23 +66,23 @@ public class DefaultStep extends AbstractStep {
     /*
      * Growth process
      */
-    private AbstractProcess growthProcess;
+    private GrowthProcess growthProcess;
     /*
      * Reproduction process
      */
-    private AbstractProcess reproductionProcess;
+    private ReproductionProcess reproductionProcess;
     /*
      * Incoming flux of biomass
      */
-    private AbstractProcess incomingFLuxProcess;
+    private IncomingFluxProcess incomingFLuxProcess;
     /*
      * Generic mortality process that encompasses all mortality processes
      */
-    private AbstractProcess mortalityProcess;
+    private MortalityProcess mortalityProcess;
     /*
      * Movement process
      */
-    private AbstractProcess movementProcess;
+    private MovementProcess movementProcess;
     /*
      * List of indicators
      */
@@ -122,7 +122,7 @@ public class DefaultStep extends AbstractStep {
         // Indicators
         indicators = new OutputManager(getRank());
         indicators.init();
-        
+
         // Record time step 0 in the output
         recordStep0 = getConfiguration().getBoolean("output.step0.include", false);
     }
