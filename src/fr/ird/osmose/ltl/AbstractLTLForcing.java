@@ -69,7 +69,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 ///////////////////////////////
     /**
      * Factor for converting biomass from plankton unit to wet weight in
-     * tonne/km2. (e.g. mmolN/m2 to tonne/km2)
+     * tonne/m3. (e.g. mmolN/m3 to tonne/m3)
      */
     double[] conversionFactor;
     /**
@@ -197,7 +197,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             if (!getConfiguration().isNull("plankton.conversion2tons.plk" + iPlk)) {
                 conversionFactor[iPlk] = getConfiguration().getDouble("plankton.conversion2tons.plk" + iPlk);
             } else {
-                warning("Parameter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/km2 (or tonne/km3 for 3D dataset)", new Object[]{iPlk, getConfiguration().getPlankton(iPlk).getName()});
+                warning("Parameter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/m2 (or tonne/m3 for 3D dataset)", new Object[]{iPlk, getConfiguration().getPlankton(iPlk).getName()});
                 conversionFactor[iPlk] = 1.d;
             }
         }
