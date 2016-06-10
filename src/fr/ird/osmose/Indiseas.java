@@ -152,6 +152,8 @@ public class Indiseas extends OsmoseLinker {
                     float F = svFx[iF] * fmsy[ispecies];
                     options.put("mortality.fishing.rate.sp" + ispecies, String.valueOf(F));
                 }
+                // Start year for output set to zero
+                options.put("output.start.year", String.valueOf(0));
                 // Annual output
                 int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear");
                 options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
@@ -279,6 +281,8 @@ public class Indiseas extends OsmoseLinker {
                         for (int ipl = 0; ipl < getConfiguration().getInt("simulation.nplankton"); ipl++) {
                             options.put("plankton.multiplier.plk" + ipl, String.valueOf((float) plx));
                         }
+                        // Start year for output set to zero
+                        options.put("output.start.year", String.valueOf(0));
                         // Annual output
                         int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear");
                         options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
@@ -302,11 +306,13 @@ public class Indiseas extends OsmoseLinker {
         float[] rvFx = getConfiguration().getArrayFloat("indiseas.responsiveness.fmsy.multiplier");
         // Number of years of spinup with F = Fmsy
         int nyearBurnIn = getConfiguration().getInt("indiseas.responsiveness.burnin.nyear");
-        // Number of years with F = Fmsy * multiplier
+        // Number of years before applying F = Fmsy * multiplier
         int nyearChange = getConfiguration().getInt("indiseas.responsiveness.change.nyear");
+        // Number of years of the responsiveness simulation, after burnin time
+        int nyearRv = getConfiguration().getInt("indiseas.responsiveness.simulation.nyear");
 
         // Simulation duration
-        int nyearTot = nyearBurnIn + nyearChange;
+        int nyearTot = nyearBurnIn + nyearRv;
         // Monthly output
         int dtOut = getConfiguration().getInt("simulation.time.ndtPerYear") / 12;
 
@@ -333,7 +339,9 @@ public class Indiseas extends OsmoseLinker {
                     csvfile.append(".csv");
                     try (CSVWriter writer = new CSVWriter(new FileWriter(csvfile.toString()), ';')) {
                         for (int iy = 0; iy < nyearTot; iy++) {
-                            float F = (iy < nyearBurnIn) ? fmsy[ispecies] : (rvFx[iF] * fmsy[ispecies]);
+                            float F = (iy < (nyearBurnIn + nyearChange))
+                                    ? fmsy[ispecies]
+                                    : (rvFx[iF] * fmsy[ispecies]);
                             String[] newline = new String[]{String.valueOf(iy), String.valueOf(F)};
                             writer.writeNext(newline);
                         }
@@ -342,6 +350,8 @@ public class Indiseas extends OsmoseLinker {
                     }
                     options.put("mortality.fishing.rate.byYear.file.sp" + ispecies, csvfile.toString());
                 }
+                // Start year for output after burnin time
+                options.put("output.start.year", String.valueOf(nyearBurnIn));
                 // Monthly output
                 options.put("output.recordfrequency.ndt", String.valueOf(dtOut));
                 // Simulation duration
@@ -356,8 +366,6 @@ public class Indiseas extends OsmoseLinker {
 
     private void addGeneralOptions(HashMap<String, String> options) {
 
-        // Start year for output set to zero
-        options.put("output.start.year", String.valueOf(0));
         // Abundance output
         options.put("output.abundance.enabled", String.valueOf(true));
         // Biomass output
