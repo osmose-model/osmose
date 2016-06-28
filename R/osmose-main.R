@@ -60,7 +60,7 @@ buildConfiguration = function(file, path="_osmose", config=NULL, absolute=TRUE, 
   # other
   # write additional config File
   # config.csv: one line added with new parameters  
-  return(L1$mortality$fishing)
+  return(L1)
 }
 
 
@@ -108,6 +108,7 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
 #' @details A list of class \code{osmose} is created, individual elements can be
 #' extracted using the function \code{getVar}.
 #' @author Ricardo Oliveros-Ramos
+#' @author Laure Velez
 #' @export
 osmose2R =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
   if(is.null(path) & interactive()) {

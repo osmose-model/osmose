@@ -5,8 +5,8 @@
 .guessType = function(x, keep.att=FALSE) {
   if(!is.character(x)) return(x)
   att = attributes(x)
-  x = str_trim(strsplit(tolower(x), split=",")[[1]])
-  if(identical(x,"null")) return(NULL) 
+  x = str_trim(strsplit(x, split=",")[[1]])
+  if(identical(tolower(x),"null")) return(NULL) 
   asNum = suppressWarnings(as.numeric(x))
   isNumeric = !all(is.na(asNum))
   x[x=="na"] = NA
@@ -18,7 +18,8 @@
 
 # get a parameter from a name chain
 .getPar = function(x, ..., keep.att=FALSE) {
-  chain = tolower(unlist(list(...)))
+  # chain = tolower(unlist(list(...)))
+  chain = unlist(list(...))
   if(is.list(x)) x=do.call(.getPar, list(x=x[[chain[1]]], chain[-1]))
   return(.guessType(x, keep.att = keep.att))
 }
