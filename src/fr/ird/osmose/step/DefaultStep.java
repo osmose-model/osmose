@@ -128,6 +128,8 @@ public class DefaultStep extends AbstractStep {
 
     @Override
     public void step(int iStepSimu) {
+        
+        debug("  step " + iStepSimu);
 
         // Incoming flux
         incomingFLuxProcess.run();
