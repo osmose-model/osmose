@@ -107,26 +107,25 @@ public abstract class AbstractFishingMortality extends AbstractMortalitySpecies 
         }
     }
 
-    boolean isFishable(School school) {
+    public boolean isFishable(School school) {
         return (school.getAgeDt() >= recruitmentAge) && (school.getLength() >= recruitmentSize);
     }
 
-    /**
-     * Calculates the fishable biomass, in tonne, of the species.
+    public void resetFishableBiomass() {
+        fishableBiomass = 0.d;
+    }
+
+    /*
+     * Increment the fishable biomass, in tonne, of the species.
      */
-    public void assessFishableBiomass() {
-            fishableBiomass = 0.d;
-            for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
-                if (!school.isUnlocated() && isFishable(school)) {
-                    fishableBiomass += school.getInstantaneousBiomass();
-                }
-            }
+    public void incrementFishableBiomass(School school) {
+        fishableBiomass += school.getInstantaneousBiomass();
     }
 
     double getFishableBiomass() {
         return fishableBiomass;
     }
-    
+
     public FishingMortality.Type getType() {
         return fishingType;
     }

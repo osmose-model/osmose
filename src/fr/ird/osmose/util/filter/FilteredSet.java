@@ -48,13 +48,14 @@
  */
 package fr.ird.osmose.util.filter;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  *
  * @author pverley
+ * @param <E>
  */
-public class FilteredSet<E> extends ArrayList<E> {
+public class FilteredSet<E> extends LinkedList<E> {
 
     final private FilteredSet<E> parent;
     final private IFilter<E>[] filters;

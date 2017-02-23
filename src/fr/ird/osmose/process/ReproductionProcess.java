@@ -63,7 +63,7 @@ import java.util.List;
  * During the spin-up of the simulation (duration of spin-up either set by the
  * user or set by default to the lifespan of the longest-lived species) Osmose
  * prevents species collapse by artificially setting the SSB to a predefined
- * level (user defined, this parameter could/should be calibrated) in order to 
+ * level (user defined, this parameter could/should be calibrated) in order to
  * guarantee egg release.
  */
 public class ReproductionProcess extends AbstractProcess {
@@ -135,40 +135,51 @@ public class ReproductionProcess extends AbstractProcess {
             for (int i = 0; i < getNSpecies(); i++) {
                 yearMaxSeeding = Math.max(yearMaxSeeding, getSpecies(i).getLifespanDt());
             }
-            warning("Did not find parameter population.seeding.year.max. Osmose set it to " + ((float) yearMaxSeeding/getConfiguration().getNStepYear()) + " years, the lifespan of the longest-lived species.");
+            warning("Did not find parameter population.seeding.year.max. Osmose set it to " + ((float) yearMaxSeeding / getConfiguration().getNStepYear()) + " years, the lifespan of the longest-lived species.");
         }
     }
 
     @Override
     public void run() {
+
+        // spawning stock biomass per species
+        double[] SSB = new double[getConfiguration().getNSpecies()];
+
+        // check whether the species do reproduce or not
+        boolean[] reproduce = new boolean[getConfiguration().getNSpecies()];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            double nEgg = 0.d;
+            reproduce[i] = (sexRatio[i] > 0.d && alpha[i] > 0.d);
+        }
+
+        // loop over all the schools to compute SSB
+        for (School school : getSchoolSet().getSchools()) {
+            int i = school.getSpeciesIndex();
+            // increment spawning stock biomass
+            if (reproduce[i] && school.getSpecies().isSexuallyMature(school)) {
+                SSB[i] += school.getInstantaneousBiomass();
+            }
+            // increment age
+            school.incrementAge();
+        }
+
+        // loop over the species to lay cohort at age class 0
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            // ignore species that do not reproduce
+            if (!reproduce[i]) {
+                continue;
+            }
             Species species = getSpecies(i);
-            List<School> schools = getSchoolSet().getSchools(species);
-            if (sexRatio[i] > 0.d && alpha[i] > 0.d) {
-                double SSB = 0;
-                for (School school : schools) {
-                    if (species.isSexuallyMature(school)) {
-                        SSB += school.getInstantaneousBiomass();
-                    }
-                }
-                // Seeding for collapsed species
-                if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB == 0.) {
-                    SSB = seedingBiomass[i];
-                }
-                double season = getSeason(getSimulation().getIndexTimeSimu(), species);
-                nEgg = sexRatio[i] * alpha[i] * season * SSB * 1000000;
+            // seeding process for collapsed species
+            if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB[i] == 0.) {
+                SSB[i] = seedingBiomass[i];
             }
-
-            /*
-             * Making cohorts going up to the upper age class
-             */
-            for (School school : schools) {
-                school.incrementAge();
-            }
-
-            //UPDATE AGE CLASS 0
+            // compute nomber of eggs to be released
+            double season = getSeason(getSimulation().getIndexTimeSimu(), species);
+            double nEgg = sexRatio[i] * alpha[i] * season * SSB[i] * 1000000;
+            // lay age class zero
             int nSchool = getConfiguration().getNSchool(i);
+            // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
+            //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
             if (nEgg == 0.d) {
                 // do nothing, zero school
             } else if (nEgg < nSchool) {

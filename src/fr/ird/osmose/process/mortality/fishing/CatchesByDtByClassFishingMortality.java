@@ -145,24 +145,27 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
     }
 
     @Override
-    public void assessFishableBiomass() {
-
-        // reset fishable biomass
+    public void resetFishableBiomass() {
         for (int i = 0; i < fishableBiomass.length; i++) {
             fishableBiomass[i] = 0.d;
         }
+    }
+
+    /*
+     * Increment the fishable biomass, in tonne, of the species.
+     */
+    @Override
+    public void incrementFishableBiomass(School school) {
         int k = -1;
-        for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
-            if (null != sizeClasses) {
-                // By size class
-                k = indexOf(school.getLength(), sizeClasses);
-            } else if (null != ageClasses) {
-                // By age class
-                k = indexOf(school.getAgeDt(), ageClasses);
-            }
-            if (k >= 0) {
-                fishableBiomass[k] += school.getInstantaneousBiomass();
-            }
+        if (null != sizeClasses) {
+            // By size class
+            k = indexOf(school.getLength(), sizeClasses);
+        } else if (null != ageClasses) {
+            // By age class
+            k = indexOf(school.getAgeDt(), ageClasses);
+        }
+        if (k >= 0) {
+            fishableBiomass[k] += school.getInstantaneousBiomass();
         }
     }
 }

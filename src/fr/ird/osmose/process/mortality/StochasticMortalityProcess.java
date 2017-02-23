@@ -16,6 +16,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ForkJoinPool;
+import static java.util.concurrent.ForkJoinTask.invokeAll;
+import java.util.concurrent.RecursiveAction;
 
 /**
  * Mortality processes compete stochastically.
@@ -53,7 +56,9 @@ public class StochasticMortalityProcess extends AbstractProcess {
      * The set of plankton swarms
      */
     private HashMap<Integer, List<Swarm>> swarmSet;
-    
+
+    private final boolean MULTITHREAD = false;
+
     public StochasticMortalityProcess(int rank) {
         super(rank);
     }
@@ -125,9 +130,15 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
         for (int idt = 0; idt < subdt; idt++) {
             fishingMortality.assessFishableBiomass();
-            for (Cell cell : getGrid().getCells()) {
-                if (!cell.isLand()) {
-                    computeMortality_stochastic(subdt, cell);
+            if (MULTITHREAD) {
+                ForkStep step = new ForkStep(0, getGrid().getCells().size());
+                ForkJoinPool pool = new ForkJoinPool();
+                pool.invoke(step);
+            } else {
+                for (Cell cell : getGrid().getCells()) {
+                    if (!cell.isLand()) {
+                        computeMortality_stochastic(subdt, cell);
+                    }
                 }
             }
         }
@@ -249,6 +260,60 @@ public class StochasticMortalityProcess extends AbstractProcess {
             int j = random.nextInt(i);
             a[i - 1] = a[j];
             a[j] = tmp;
+        }
+    }
+
+    /**
+     * Implementation of the Fork/Join algorithm for splitting the set of cells
+     * in several subsets.
+     */
+    private class ForkStep extends RecursiveAction {
+
+        private final int iStart, iEnd;
+        private final int nTotCell;
+        private final int THRESHOLD = 1000;
+
+        /**
+         * Creates a new {@code ForkStep} that will handle a subset of cells.
+         *
+         * @param iStart, index of the first cell of the subset
+         * @param iEnd , index of the last cell of the subset
+         */
+        ForkStep(int iStart, int iEnd) {
+            this.iStart = iStart;
+            this.iEnd = iEnd;
+            nTotCell = getGrid().getCells().size();
+        }
+
+        /**
+         * Loop over the subset of cells and apply the
+         * {@link fr.ird.osmose.process.mortality.StochasticMortalityProcess#computeMortality_stochastic(int, fr.ird.osmose.Cell)}
+         * function.
+         */
+        private void processDirectly() {
+            for (int iCell = iStart; iCell < iEnd; iCell++) {
+                Cell cell = getGrid().getCell(iCell);
+                if (!cell.isLand()) {
+                    computeMortality_stochastic(subdt, cell);
+                }
+            }
+        }
+
+        @Override
+        protected void compute() {
+
+            // Size of the subset
+            int nCell = iEnd - iStart;
+            if (nCell < Math.max(THRESHOLD, nTotCell / Runtime.getRuntime().availableProcessors())) {
+                // If the size of the subset is smaller than the THRESHOLD,
+                // process directly the whole subset
+                processDirectly();
+            } else {
+                // If the size of the subset is greater than the THRESHOLD,
+                // splits subset in two subsets
+                int iSplit = iStart + nCell / 2;
+                invokeAll(new ForkStep(iStart, iSplit), new ForkStep(iSplit, iEnd));
+            }
         }
     }
 

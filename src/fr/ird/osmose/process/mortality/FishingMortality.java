@@ -172,8 +172,8 @@ public class FishingMortality extends AbstractMortality {
 
     /**
      * Find the fishing scenario defined for the given species. Osmose accepts
-     * exactly one fishing scenario. The function throws an error if no 
-     * scenario or several scenarios are defined.
+     * exactly one fishing scenario. The function throws an error if no scenario
+     * or several scenarios are defined.
      *
      * @param iSpecies, the index of the species
      * @return the fishing scenario for this species
@@ -243,9 +243,20 @@ public class FishingMortality extends AbstractMortality {
      */
     void assessFishableBiomass() {
 
+        // fishable biomass only has to be updated for catches
+        boolean[] catches = new boolean[getNSpecies()];
         for (int i = 0; i < getNSpecies(); i++) {
-            if (Type.CATCHES == fishingMortality[i].getType()) {
-                fishingMortality[i].assessFishableBiomass();
+            catches[i] = (Type.CATCHES == fishingMortality[i].getType());
+        }
+
+        // loop over all the schools
+        for (School school : getSchoolSet().getSchools()) {
+            int i = school.getSpeciesIndex();
+            if (catches[i]) {
+                // increment fishable biomass
+                if (!school.isUnlocated() && fishingMortality[i].isFishable(school)) {
+                    fishingMortality[i].incrementFishableBiomass(school);
+                }
             }
         }
     }
@@ -324,7 +335,7 @@ public class FishingMortality extends AbstractMortality {
             return key + "#";
         }
     }
-    
+
     /**
      * Type of fishing scenario. Fishing parameters are either rates or catches.
      */
