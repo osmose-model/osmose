@@ -90,6 +90,18 @@ public abstract class AbstractGrid extends OsmoseLinker {
      */
     private int nx;
     /**
+     * Number of ocean cells
+     */
+    private int nOceanCell;
+    /**
+     * List of cells
+     */
+    ArrayList<Cell> cells;
+    /**
+     * List of ocean cells only
+     */
+    ArrayList<Cell> oceanCells;
+    /**
      * Latitude, in degree north, of the North West corner of the grid.
      */
     private float latMax;
@@ -139,7 +151,28 @@ public abstract class AbstractGrid extends OsmoseLinker {
     public void init() {
         readParameters();
         matrix = makeGrid();
+        // geographical extent
         getDimGeogArea();
+        // compute number of ocean cells
+        nOceanCell = 0;
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                if (!matrix[j][i].isLand()) {
+                    nOceanCell++;
+                }
+            }
+        }
+        // List of cells and ocean cells
+        cells = new ArrayList(ny * nx);
+        oceanCells = new ArrayList(nOceanCell);
+        for (int j = ny; j-- > 0;) {
+            for (int i = nx; i-- > 0;) {
+                cells.add(matrix[j][i]);
+                if (!matrix[j][i].isLand()) {
+                    oceanCells.add(matrix[j][i]);
+                }
+            }
+        }
     }
 
     /**
@@ -174,13 +207,16 @@ public abstract class AbstractGrid extends OsmoseLinker {
      * @return a List of the cells.
      */
     public List<Cell> getCells() {
-        ArrayList<Cell> cells = new ArrayList(ny * nx);
-        for (int j = ny; j-- > 0;) {
-            for (int i = nx; i-- > 0;) {
-                cells.add(matrix[j][i]);
-            }
-        }
         return cells;
+    }
+
+    /**
+     * Get a list of the cells.
+     *
+     * @return a List of the cells.
+     */
+    public List<Cell> getOceanCells() {
+        return oceanCells;
     }
 
     /**
@@ -229,16 +265,7 @@ public abstract class AbstractGrid extends OsmoseLinker {
      * @return the number of cells of the grid that are in the ocean
      */
     public int getNOceanCell() {
-        int nbCells = 0;
-
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                if (!matrix[j][i].isLand()) {
-                    nbCells++;
-                }
-            }
-        }
-        return nbCells;
+        return nOceanCell;
     }
 
     /**
