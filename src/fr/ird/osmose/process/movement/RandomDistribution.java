@@ -125,15 +125,15 @@ public class RandomDistribution extends AbstractDistribution {
             randomMap = new ArrayList(nCells);
             boolean[][] alreadyChoosen = new boolean[getGrid().get_ny()][getGrid().get_nx()];
             //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpecies]];
-            int coordi, coordj;
-            coordi = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
-            coordj = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
-            while (getGrid().getCell(coordi, coordj).isLand()) {
-                coordi = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
-                coordj = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
+            int i, j;
+            i = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
+            j = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+            while (getGrid().getCell(i, j).isLand()) {
+                i = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
+                j = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
             }
-            randomMap.add(getGrid().getCell(coordi, coordj));
-            alreadyChoosen[coordi][coordj] = true;
+            randomMap.add(getGrid().getCell(i, j));
+            alreadyChoosen[j][i] = true;
             /*
              * From initial cell, successive random sorting of the
              * adjacent cells until tabCellsArea is full
@@ -147,9 +147,9 @@ public class RandomDistribution extends AbstractDistribution {
                     Iterator<Cell> iter = neigbors.iterator();
                     while ((index < (nCells - 1)) && iter.hasNext()) {
                         Cell cell = iter.next();
-                        if (!cell.isLand() && !alreadyChoosen[cell.get_igrid()][cell.get_jgrid()]) {
+                        if (!cell.isLand() && !alreadyChoosen[cell.get_jgrid()][cell.get_igrid()]) {
                             index++;
-                            alreadyChoosen[cell.get_igrid()][cell.get_jgrid()] = true;
+                            alreadyChoosen[cell.get_jgrid()][cell.get_igrid()] = true;
                             randomMap.add(cell);
                         }
                     }
