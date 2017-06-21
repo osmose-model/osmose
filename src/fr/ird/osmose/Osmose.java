@@ -335,8 +335,7 @@ public class Osmose extends OLogger {
 
         // Loop over the number of replica
         long begin = System.currentTimeMillis();
-        int nProcs = Math.min(configuration.getNCpu(), Runtime.getRuntime().availableProcessors());
-        //int nProcs = 1;
+        int nProcs = Math.min(configuration.getNCpu(), configuration.getNSimulation());
         int nBatch = (int) Math.ceil((float) configuration.getNSimulation() / nProcs);
         int rank = 0;
         for (int iBatch = 0; iBatch < nBatch; iBatch++) {

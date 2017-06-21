@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
 import static java.util.concurrent.ForkJoinTask.invokeAll;
 import java.util.concurrent.RecursiveAction;
@@ -56,8 +57,6 @@ public class StochasticMortalityProcess extends AbstractProcess {
      * The set of plankton swarms
      */
     private HashMap<Integer, List<Swarm>> swarmSet;
-
-    private final boolean MULTITHREAD = false;
 
     public StochasticMortalityProcess(int rank) {
         super(rank);
@@ -128,18 +127,29 @@ public class StochasticMortalityProcess extends AbstractProcess {
             }
         }
 
+        int ncpu = Math.max(1, getConfiguration().getNCpu() / getConfiguration().getNSimulation());
+        int[] ncell = new int[ncpu];
+        int nbasecell = getGrid().getNOceanCell() / ncpu;
+        for (int k = 0; k < ncpu; k++) {
+            ncell[k] = nbasecell;
+        }
+        int nleftcell = getGrid().getNOceanCell() - nbasecell * ncpu;
+        for (int k = 0; k < nleftcell; k++) {
+            ncell[k % nleftcell] += 1;
+        }
         for (int idt = 0; idt < subdt; idt++) {
             fishingMortality.assessFishableBiomass();
-            if (MULTITHREAD) {
-                ForkStep step = new ForkStep(0, getGrid().getCells().size());
-                ForkJoinPool pool = new ForkJoinPool();
-                pool.invoke(step);
-            } else {
-                for (Cell cell : getGrid().getCells()) {
-                    if (!cell.isLand()) {
-                        computeMortality_stochastic(subdt, cell);
-                    }
-                }
+            CountDownLatch doneSignal = new CountDownLatch(ncpu);
+            int iStart = 0, iEnd = 0;
+            for (int icpu = 0; icpu < ncpu; icpu++) {
+                iEnd += ncell[icpu];
+                new Thread(new Worker(iStart, iEnd, doneSignal)).start();
+                iStart += ncell[icpu];
+            }
+            try {
+                doneSignal.await();
+            } catch (InterruptedException ex) {
+                error("Multithread mortality process terminated unexpectedly.", ex);
             }
         }
     }
@@ -183,7 +193,6 @@ public class StochasticMortalityProcess extends AbstractProcess {
         shuffleArray(seqFish);
         shuffleArray(seqNat);
         shuffleArray(seqStarv);
-        int nspec = getConfiguration().getNSpecies();
         boolean keepRecord = getSimulation().isPreyRecord();
         for (int i = 0; i < ns; i++) {
             shuffleArray(mortalityCauses);
@@ -267,11 +276,15 @@ public class StochasticMortalityProcess extends AbstractProcess {
      * Implementation of the Fork/Join algorithm for splitting the set of cells
      * in several subsets.
      */
-    private class ForkStep extends RecursiveAction {
+    private class Worker implements Runnable {
 
         private final int iStart, iEnd;
-        private final int nTotCell;
-        private final int THRESHOLD = 1000;
+        /**
+         * The {@link java.util.concurrent.CountDownLatch} that will wait for
+         * this {@link Simulation} to complete before decrementing the count of
+         * the latch.
+         */
+        private final CountDownLatch doneSignal;
 
         /**
          * Creates a new {@code ForkStep} that will handle a subset of cells.
@@ -279,10 +292,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
          * @param iStart, index of the first cell of the subset
          * @param iEnd , index of the last cell of the subset
          */
-        ForkStep(int iStart, int iEnd) {
+        Worker(int iStart, int iEnd, CountDownLatch doneSignal) {
             this.iStart = iStart;
             this.iEnd = iEnd;
-            nTotCell = getGrid().getCells().size();
+            this.doneSignal = doneSignal;
         }
 
         /**
@@ -290,31 +303,16 @@ public class StochasticMortalityProcess extends AbstractProcess {
          * {@link fr.ird.osmose.process.mortality.StochasticMortalityProcess#computeMortality_stochastic(int, fr.ird.osmose.Cell)}
          * function.
          */
-        private void processDirectly() {
-            for (int iCell = iStart; iCell < iEnd; iCell++) {
-                Cell cell = getGrid().getCell(iCell);
-                if (!cell.isLand()) {
-                    computeMortality_stochastic(subdt, cell);
-                }
-            }
-        }
-
         @Override
-        protected void compute() {
-
-            // Size of the subset
-            int nCell = iEnd - iStart;
-            if (nCell < Math.max(THRESHOLD, nTotCell / Runtime.getRuntime().availableProcessors())) {
-                // If the size of the subset is smaller than the THRESHOLD,
-                // process directly the whole subset
-                processDirectly();
-            } else {
-                // If the size of the subset is greater than the THRESHOLD,
-                // splits subset in two subsets
-                int iSplit = iStart + nCell / 2;
-                invokeAll(new ForkStep(iStart, iSplit), new ForkStep(iSplit, iEnd));
+        public void run() {
+            try {
+                List<Cell> cells = getGrid().getOceanCells();
+                for (int iCell = iStart; iCell < iEnd; iCell++) {
+                    computeMortality_stochastic(subdt, cells.get(iCell));
+                }
+            } finally {
+                doneSignal.countDown();
             }
         }
     }
-
 }

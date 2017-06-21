@@ -323,14 +323,14 @@ public class Configuration extends OLogger {
         // Number of CPUs allocated to this run
         if (!isNull("simulation.ncpu")) {
             nCpu = getInt("simulation.ncpu");
-            nCpu = Math.max(nCpu, 1);
+            // nCpu must range between 1 and system available processors
+            nCpu = Math.min(Math.max(nCpu, 1), Runtime.getRuntime().availableProcessors());
         } else {
-            nCpu = Integer.MAX_VALUE;
+            nCpu = 1;
         }
         nSpecies = getInt("simulation.nspecies");
         nPlankton = getInt("simulation.nplankton");
         nSimulation = getInt("simulation.nsimulation");
-        nCpu = Math.min(nCpu, nSimulation);
         nStepYear = getInt("simulation.time.ndtperyear");
         // PhV 20160203, new parameter simulation.time.nstep
         if (canFind("simulation.time.nstep")) {
