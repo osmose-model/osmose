@@ -1,24 +1,24 @@
 #' @export
-plot.osmose.biomass = function(object, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+plot.osmose.biomass = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                                freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                aggregate=FALSE, ...) {
-  
+
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
   
   par(oma=c(1,1,1,1), mar=c(3,4,1,1))
-  par(mfrow=getmfrow(ncol(object)))
+  par(mfrow=getmfrow(ncol(x)))
   
   if(isTRUE(aggregate)) {
-    .plotAverageBiomass(object, col=col, ...)
+    .plotAverageBiomass(x, col=col, ...)
     return(invisible())
   }
   
-  species = colnames(object)
-  start   = if(is.null(start)) as.numeric(rownames(object)[1]) else start
+  species = colnames(x)
+  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
   
   for(sp in species) {
-    .plotBiomass(x=object, sp=sp, start=start, conf=conf, factor=factor, 
+    .plotBiomass(x=x, sp=sp, start=start, conf=conf, factor=factor, 
                  replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
                  xlim=xlim, ylim=xlim) 
     
@@ -250,29 +250,29 @@ plot.osmose.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1e-6, repl
 
 
 #' @export
-plot.osmose.yield = function(object, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
+plot.osmose.yield = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
                              freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, 
                              aggregate=FALSE, zeros=TRUE, ...) {
   
   
-  if(!isTRUE(zeros)) object = .removeZeros(object)
+  if(!isTRUE(zeros)) x = .removeZeros(x)
   
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
   
   if(isTRUE(aggregate)) {
-    .plotAverageYield(object, col=col, ...)
+    .plotAverageYield(x, col=col, ...)
     return(invisible())
   }
   
   par(oma=c(1,1,1,1), mar=c(3,4,1,1))
-  par(mfrow=getmfrow(ncol(object)))
+  par(mfrow=getmfrow(ncol(x)))
   
-  species = colnames(object)
-  start   = if(is.null(start)) as.numeric(rownames(object)[1]) else start
+  species = colnames(x)
+  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
   
   for(sp in species) {
-    .plotBiomass(x=object, sp=sp, start=start, conf=conf, factor=factor, freq=freq, nrep=nrep,
+    .plotBiomass(x=x, sp=sp, start=start, conf=conf, factor=factor, freq=freq, nrep=nrep,
                  col=col, alpha=alpha, xlim=xlim, ylim=xlim, replicates=replicates) 
     
   }

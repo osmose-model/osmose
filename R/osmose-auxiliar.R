@@ -119,7 +119,15 @@ getMortalityDeviation = function(x, stage, type, pars=NULL) {
 
 # osmose2R for specific versions ------------------------------------------
 
-osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
+#' Read Osmose (version 3 release 0) outputs
+#'
+#' @param path Osmose output path
+#' @param species.names Array of species names. If
+#' NULL, it is extracted from file.
+#'
+#' @return A list of list containing the output functions
+#'
+osmose2R.v3r0 = function(path=NULL, species.names=NULL) {
   
   # General  
   pop = list(
@@ -181,8 +189,16 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
   
 }
 
-osmose2R.v3r1 = function(path=NULL, species.names=NULL, ...) {
-  
+#' Read Osmose (version 3 release 1) outputs
+#'
+#' @param path Osmose output path
+#' @param species.names Array of species names. If
+#' NULL, it is extracted from file.
+#'
+#' @return A list of list containing the output functions
+#'
+osmose2R.v3r1 = function(path=NULL, species.names=NULL) {
+
   # General  
   pop = list(
     biomass    = readOsmoseFiles(path=path, type="biomass"),
@@ -245,8 +261,15 @@ osmose2R.v3r1 = function(path=NULL, species.names=NULL, ...) {
   
 }
 
-osmose2R.v3r2 = function (path = NULL, species.names = NULL, ...) {
-  
+#' Read Osmose (version 3 release 2) outputs
+#'
+#' @param path Osmose output path
+#' @param species.names Array of species names. If
+#' NULL, it is extracted from file.
+#'
+#' @return A list of list containing the output functions
+#'
+osmose2R.v3r2 = function (path=NULL, species.names=NULL) {
   
   pop = list(biomass = readOsmoseFiles(path = path, type = "biomass"), 
              abundance = readOsmoseFiles(path = path, type = "abundance"), 

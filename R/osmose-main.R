@@ -16,10 +16,6 @@
 #' Maintainer: Ricardo Oliveros-Ramos <ricardo.oliveros@@gmail.com>
 #' @references osmose: Modelling Marine Exploited Ecosystems
 #' @keywords modelling marine ecosystems
-#' @examples
-#' 
-#' osmose()
-#' 
 NULL
 
 
@@ -67,15 +63,25 @@ buildConfiguration = function(file, path="_osmose", config=NULL, absolute=TRUE, 
 # runOsmose ---------------------------------------------------------------
 #' @title Run an OSMOSE configuration
 #' @description This function create a valid configuration by several input files
-#' from user input parameters.  
-#' @param file Filename of the main configuration file
+#' from user input parameters. 
+#' @param osmose Name of the Osmose java .jar file
+#' @param java Name of the java executable 
+#' @param input Filename of the main configuration file
+#' @param output Output directory
+#' @param options Java options
+#' @param log Log file
+#' @param verbose NULL if run is not interactive (output in the log file)
+#' @param clean TRUE if the output directory should be cleaned
+#' @param shell Shell to use ("BASH" or "CSH")
 #' a new file is created with the modified configuration.
 #' @details Basic configurations may not need the use of \code{buildConfiguration},
 #' but it is required for configuration using interannual inputs or fishing selectivity.
 #' @author Ricardo Oliveros-Ramos
 #' @export
 runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output="output/",
-                     options=NULL, log="osmose.log", verbose=NULL, clean=TRUE) {
+                     options=NULL, log="osmose.log", verbose=NULL, clean=TRUE, shell="BASH") {
+  
+  # barrier.n: redirection 
   
   if(is.null(verbose))  verbose = interactive()
   
@@ -87,8 +93,14 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
   if(is.null(options)) options = ""
   
   run.osmose = paste(java, options, "-jar", osmose, input, output)
-  if(!isTRUE(verbose)) run.osmose = paste(run.osmose, ">", log, "2>", log)
-  
+  if(!isTRUE(verbose)) { 
+    if(shell=="BASH") {
+      run.osmose = paste(run.osmose, ">", log, "2>&1")
+    } else {
+      run.osmose = paste(run.osmose, ">&", log)
+    }
+  }
+
   system(run.osmose, wait=TRUE)
   
   return(invisible(run.osmose))

@@ -8,3 +8,4 @@ Description: Tools for running, calibrating and analyzing an OSMOSE model
 License: GPL-2
 Depends: stringr, R.utils, rlist
 LazyData: TRUE
+RoxygenNote: 6.0.1
