@@ -2,23 +2,24 @@
 % Please edit documentation in R/osmose-class.R
 \name{getVar.osmose}
 \alias{getVar.osmose}
-\title{Get a specific Osmose output.}
+\title{GetVar method for osmose objects}
 \usage{
-\method{getVar}{osmose}(object, var, type = "global", expected = FALSE)
+\method{getVar}{osmose}(object, var, type = "global", expected = FALSE, ...)
 }
 \arguments{
-\item{object}{Osmose outputs (see the \code{\link{osmose2R}} function)}
+\item{object}{Object of \code{osmose} class (see the \code{\link{osmose2R}} function).}
 
-\item{var}{Variale to extract}
+\item{var}{Name of variable to extract. It could be: "biomass","abundance",
+"yield", "yieldN".}
 
-\item{type}{Type of the variable to extract}
+\item{type}{Type of the variable to extract. By default is \code{type = "global"}.}
 
-\item{expected}{TRUE if the average over the 
-last dimensions should be performed if the output is an array.}
+\item{expected}{A logical parameter. \code{TRUE} if the average over the 
+last dimensions should be performed if the output is an array. By default is 
+\code{expected = FALSE}.}
+
+\item{...}{Additional arguments of the function.}
 }
 \value{
 An array or a list containing the data.
-}
-\description{
-Get a specific Osmose output.
 }

@@ -2,18 +2,22 @@
 % Please edit documentation in R/osmose-class.R
 \name{getVar}
 \alias{getVar}
-\title{Get a specific Osmose output.}
+\title{Get variable}
 \usage{
-getVar(object, var)
+getVar(object, var, ...)
 }
 \arguments{
-\item{object}{Osmose outputs (see the \code{\link{osmose2R}} function)}
+\item{object}{Object of \code{osmose} class (see the \code{\link{osmose2R}} function).}
 
-\item{var}{Variable to extract}
+\item{var}{Name of variable to extract. It could be: "biomass","abundance",
+"yield", "yieldN".}
+
+\item{...}{Additional arguments of the function.}
 }
 \value{
-An array or a list containing the data.
+An array or a list containing the extracted data.
 }
 \description{
-Get a specific Osmose output.
+Function to get a variable from an object of \code{osmose} 
+class. This function uses the getVar method (see the \code{\link{getVar.osmose}}).
 }
