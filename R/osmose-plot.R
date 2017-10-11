@@ -1,4 +1,6 @@
-#' @export
+
+# Internal plot functions -------------------------------------------------
+
 plot.osmose.biomass = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                                freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                aggregate=FALSE, ...) {
@@ -27,7 +29,7 @@ plot.osmose.biomass = function(x, start=NULL, conf=0.95, factor=1e-6, replicates
   return(invisible())
 }
 
-#' @export
+
 plot.osmose.abundance = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                                freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                aggregate=FALSE, ...) {
@@ -57,8 +59,37 @@ plot.osmose.abundance = function(x, start=NULL, conf=0.95, factor=1e-6, replicat
 }
 
 
+plot.osmose.yield = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
+                             freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, 
+                             aggregate=FALSE, zeros=TRUE, ...) {
+  
+  
+  if(!isTRUE(zeros)) x = .removeZeros(x)
+  
+  opar = par(no.readonly = TRUE)
+  on.exit(par(opar))
+  
+  if(isTRUE(aggregate)) {
+    .plotAverageYield(x, col=col, ...)
+    return(invisible())
+  }
+  
+  par(oma=c(1,1,1,1), mar=c(3,4,1,1))
+  par(mfrow=getmfrow(ncol(x)))
+  
+  species = colnames(x)
+  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
+  
+  for(sp in species) {
+    .plotBiomass(x=x, sp=sp, start=start, conf=conf, factor=factor, freq=freq, nrep=nrep,
+                 col=col, alpha=alpha, xlim=xlim, ylim=xlim, replicates=replicates) 
+    
+  }
+  
+  return(invisible())
+}
 
-#' @export
+
 plot.osmose.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
                              freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, 
                              aggregate=FALSE, zeros=TRUE, ...) {
@@ -90,7 +121,6 @@ plot.osmose.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=
 }
 
 
-#' @export
 plot.osmose.meanTL = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                                  freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                  aggregate=FALSE, ...) {
@@ -119,7 +149,7 @@ plot.osmose.meanTL = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=
   return(invisible())
 }
 
-#' @export
+
 plot.osmose.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                               freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                               aggregate=FALSE, ...) {
@@ -148,7 +178,7 @@ plot.osmose.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replic
   return(invisible())
 }
 
-#' @export
+
 plot.osmose.meanSize = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                               freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                               aggregate=FALSE, ...) {
@@ -177,7 +207,7 @@ plot.osmose.meanSize = function(x, start=NULL, conf=0.95, factor=1e-6, replicate
   return(invisible())
 }
 
-#' @export
+
 plot.osmose.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                               freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                               aggregate=FALSE, ...) {
@@ -207,8 +237,8 @@ plot.osmose.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1e-6, repl
 }
 
 
-# Other plots -------------------------------------------------------------
 
+# Auxiliar plot functions -------------------------------------------------
 
 .plotBiomass = function(x, sp, start, conf=0.95, factor=1e-6, freq=12, replicates=FALSE, nrep=3,
                         col="black", alpha=0.5, xlim=NULL, ylim=NULL) {
@@ -248,39 +278,6 @@ plot.osmose.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1e-6, repl
   return(invisible())
 }
 
-
-#' @export
-plot.osmose.yield = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
-                             freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, 
-                             aggregate=FALSE, zeros=TRUE, ...) {
-  
-  
-  if(!isTRUE(zeros)) x = .removeZeros(x)
-  
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
-  
-  if(isTRUE(aggregate)) {
-    .plotAverageYield(x, col=col, ...)
-    return(invisible())
-  }
-  
-  par(oma=c(1,1,1,1), mar=c(3,4,1,1))
-  par(mfrow=getmfrow(ncol(x)))
-  
-  species = colnames(x)
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  
-  for(sp in species) {
-    .plotBiomass(x=x, sp=sp, start=start, conf=conf, factor=factor, freq=freq, nrep=nrep,
-                 col=col, alpha=alpha, xlim=xlim, ylim=xlim, replicates=replicates) 
-    
-  }
-  
-  return(invisible())
-}
-
-
 .plotCI = function(x, y, prob, col, replicates=FALSE, nrep=3, lwd=2.5, alpha=0.1) {
   
   if(dim(x)[3]==1) {
@@ -303,5 +300,3 @@ plot.osmose.yield = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=F
   return(invisible(NULL))
   
 }
-
-
