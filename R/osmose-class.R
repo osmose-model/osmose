@@ -1,45 +1,51 @@
 # All the methods for osmose class ----------------------------------------
 
 
-#' Plot Osmose outputs.
-#'
-#' @param x Osmose outputs (see the \code{\link{osmose2R}} function)
-#' @param type Data type to draw ("biomass", etc)
-#' @param ... Additional arguments of the plot function
-#'
+#' Plot method for osmose objects
+#' @description This method takes a \code{osmose} object to make useful plot 
+#' for each variables.
+#' @param x Object of \code{osmose} class (see the \code{\link{osmose2R}} function).
+#' @param type Name of variable to plot. It could be: "biomass","abundance",
+#'  "yield" and "yieldN".
+#' @param ... Additional arguments of the function.
 #' @return invisible()
 #' @export
-plot.osmose = function(x, type="biomass", ...) {
+plot.osmose = function(x, type = "biomass", ...) {
   
-  x = getVar(x, var=type, expected=FALSE)
+  x = getVar(x, var = type, expected = FALSE)
   plot(x, ...)
   
   return(invisible())
 }
 
 
-#' Get a specific Osmose output.
-#'
-#' @param object Osmose outputs (see the \code{\link{osmose2R}} function)
-#' @param var Variable to extract
-#'
-#' @return An array or a list containing the data.
+#' Get variable
+#' @description Function to get a variable from an object of \code{osmose} 
+#' class. This function uses the getVar method (see the \code{\link{getVar.osmose}}).
+#' @param object Object of \code{osmose} class (see the \code{\link{osmose2R}} function).
+#' @param var Name of variable to extract. It could be: "biomass","abundance",
+#'  "yield", "yieldN".
+#' @param ... Additional arguments of the function.
+#' @return An array or a list containing the extracted data.
 #' @export
-getVar = function(object, var) {
+getVar = function(object, var, ...) {
   UseMethod("getVar")
 }
 
-#' Get a specific Osmose output.
-#' @param object Osmose outputs (see the \code{\link{osmose2R}} function)
-#' @param var Variale to extract
-#' @param type Type of the variable to extract
-#' @param expected TRUE if the average over the 
-#' last dimensions should be performed if the output is an array.
-#'
+#' GetVar method for osmose objects
+#' @description 
+#' @param object Object of \code{osmose} class (see the \code{\link{osmose2R}} function).
+#' @param var Name of variable to extract. It could be: "biomass","abundance",
+#'  "yield", "yieldN".
+#' @param type Type of the variable to extract. By default is \code{type = "global"}.
+#' @param expected A logical parameter. \code{TRUE} if the average over the 
+#' last dimensions should be performed if the output is an array. By default is 
+#' \code{expected = FALSE}.
+#' @param ... Additional arguments of the function.
 #' @return An array or a list containing the data.
 #' @export
 #' @method getVar osmose
-getVar.osmose = function(object, var, type="global", expected=FALSE) {
+getVar.osmose = function(object, var, type = "global", expected = FALSE, ...) {
   out = object[[type]][[var]]
   xclass = "list" %in% class(out)
   if(isTRUE(!xclass) & isTRUE(expected))
