@@ -6,10 +6,26 @@
 \usage{
 runOsmose(osmose = NULL, java = "java", input = "input/config.csv",
   output = "output/", options = NULL, log = "osmose.log",
-  verbose = NULL, clean = TRUE)
+  verbose = NULL, clean = TRUE, shell = "BASH")
 }
 \arguments{
-\item{file}{Filename of the main configuration file
+\item{osmose}{Name of the Osmose java .jar file}
+
+\item{java}{Name of the java executable}
+
+\item{input}{Filename of the main configuration file}
+
+\item{output}{Output directory}
+
+\item{options}{Java options}
+
+\item{log}{Log file}
+
+\item{verbose}{NULL if run is not interactive (output in the log file)}
+
+\item{clean}{TRUE if the output directory should be cleaned}
+
+\item{shell}{Shell to use ("BASH" or "CSH")
 a new file is created with the modified configuration.}
 }
 \description{
@@ -23,4 +39,3 @@ but it is required for configuration using interannual inputs or fishing selecti
 \author{
 Ricardo Oliveros-Ramos
 }
-

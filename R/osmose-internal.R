@@ -24,7 +24,11 @@
   return(.guessType(x, keep.att = keep.att))
 }
 
-# get a parameter from a name chain (error if not found)
+#' Get a parameter from a name chain (error if not found).
+#' @param x Output of the \code{link{readOsmoseConfiguration}} function
+#' @param ... String arguments 
+#' @param keep.att Whether parameter attributes should be kept
+#' @example getOsmoseParameter(param, "simulation", "time", "nyear")
 #' @export
 getOsmoseParameter = function(x, ..., keep.att=FALSE) {
   chain = unlist(list(...))

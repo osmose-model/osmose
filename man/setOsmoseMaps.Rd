@@ -41,4 +41,3 @@ setOsmoseMaps(object, type, sp, lifespan, frequency = 24, normalize = TRUE,
 \description{
 Set maps of species distribution for OSMOSE
 }
-

@@ -5,7 +5,7 @@
 \title{Create osmose maps}
 \usage{
 createOsmoseMaps(..., outdir = NULL, confdir = NULL, write = TRUE,
-  confile = "maps-parameters.csv")
+  confile = "maps-parameters.csv", prefixPath = "maps")
 }
 \arguments{
 \item{...}{Several object containing maps for species distribution}
@@ -21,4 +21,3 @@ createOsmoseMaps(..., outdir = NULL, confdir = NULL, write = TRUE,
 \description{
 Create osmose maps
 }
-

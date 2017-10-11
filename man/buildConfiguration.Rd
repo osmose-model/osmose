@@ -39,4 +39,3 @@ buildConfiguration("config.csv")
 \author{
 Ricardo Oliveros-Ramos
 }
-

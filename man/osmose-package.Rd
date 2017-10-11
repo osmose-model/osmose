@@ -2,17 +2,15 @@
 % Please edit documentation in R/osmose-main.R
 \docType{package}
 \name{osmose-package}
-\alias{osmose}
 \alias{osmose-package}
+\alias{osmose}
 \title{OSMOSE: Object-oriented Simulator of Marine biOdiverSity Exploitation}
 \description{
 \tabular{ll}{ Package: \tab osmose\cr Type: \tab Package\cr Version: \tab
 0.1\cr Date: \tab 2016-02-01\cr License: \tab GPL-2\cr }
 }
-\examples{
-
-osmose()
-
+\references{
+osmose: Modelling Marine Exploited Ecosystems
 }
 \author{
 Yunne-Jai Shin
@@ -26,10 +24,6 @@ Laure Velez
 Ricardo Oliveros-Ramos 
 Maintainer: Ricardo Oliveros-Ramos <ricardo.oliveros@gmail.com>
 }
-\references{
-osmose: Modelling Marine Exploited Ecosystems
-}
 \keyword{ecosystems}
 \keyword{marine}
 \keyword{modelling}
-

@@ -16,4 +16,3 @@ writeMaps(object, files = NULL, outdir = "maps")
 \description{
 Write maps for osmose species distribution
 }
-
