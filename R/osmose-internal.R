@@ -349,6 +349,7 @@ getOsmoseParameter = function(x, ..., keep.att=FALSE) {
 }
 
 
+
 .getmfrow = function(n) {
   m1 = floor(sqrt(n))
   m2 = ceiling(n/m1)
@@ -356,6 +357,10 @@ getOsmoseParameter = function(x, ..., keep.att=FALSE) {
   return(out)
 }
 
-
+.niceSeq = function(x, zero=FALSE) {
+  ncode = floor(log10(x)) + 1 
+  out = sprintf(paste0("%0", ncode, "d"), seq_len(x) - zero)
+  return(out)
+}
 
 

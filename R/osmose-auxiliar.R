@@ -19,6 +19,20 @@ makeTransparent = function(..., alpha=0.5) {
   
 }
 
+writeOsmoseParameters = function(conf, file, sep=";") {
+  .writeParameter = function(x) {
+    out = paste(names(x),paste(x, collapse=sep), sep=sep)
+    return(out)
+  }
+  out = sapply(conf, .writeParameter)
+  vars = names(out)
+  ind = sort(vars, index.return=TRUE)$ix
+  dim(out) = c(length(out), 1)
+  out = out[ind,, drop=FALSE]
+  rownames(out) = vars[ind]
+  write.table(out, file=file, sep="", quote=FALSE, col.names=FALSE)
+  return(invisible(out))
+}
 
 readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
   

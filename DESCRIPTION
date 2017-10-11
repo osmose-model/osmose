@@ -1,10 +1,14 @@
 Package: osmose
 Type: Package
-Title: Tools for the OSMOSE model 
+Title: Tools for the OSMOSE model
 Version: 0.1
 Date: 2015-12-19
 Authors@R: c(person("Ricardo", "Oliveros-Ramos", email = "ricardo.oliveros@gmail.com", role = c("cre", "aut")), person("Michael", "Hurtado", role = "aut"), person("Laure", "Velez", role = "aut"))
-Description: Tools for running, calibrating and analyzing an OSMOSE model 
+Description: Tools for running, calibrating and analyzing an OSMOSE model
 License: GPL-2
-Depends: stringr, R.utils, rlist
+Depends:
+    stringr,
+    R.utils,
+    rlist
 LazyData: TRUE
+RoxygenNote: 5.0.1
