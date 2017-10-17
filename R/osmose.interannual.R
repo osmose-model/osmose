@@ -22,6 +22,11 @@
 # 
 # F = Fm*exp(dy+ds)
 
+#' Write fishing files from osmose configuration list.
+#'
+#' @param L1 Osmose configuration (see \code{\link{readOsmoseConfiguration}})
+#' @param outputPath Output path
+#' @export
 writeFishingFiles = function(L1, outputPath) {
   
   nsp = getOsmoseParameter(L1, "simulation", "nspecies")
