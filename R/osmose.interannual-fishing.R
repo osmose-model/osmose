@@ -155,7 +155,7 @@ getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
   if(length(slope)>1) stop(sprintf("More than one slope for %s provided.", sp))
   
   # time is a vector that goes from 0 to T by a step of period, all in time step unit.
-  # ndt/freq is the time period.
+  # ndt/freq is the fishing period period.
   time = seq(from=0, by=freq/ndt, length=T*ndt/freq)
   rates = rate + slope*rate*time
   rates = rep(rates, each=freq)    # repeats x0 x1 to x0 x0 x0 ... x1 x1 x1 with N repetitions, N=fishing freq.
@@ -164,6 +164,22 @@ getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
   
 }
 
+#' Get fishing base rate using annual rates.
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. 
+#' 
+#' It reads the annual values either from an external file or from the configuration file.
+#' It must contain a number of elements which is a multiple of the fishing period.
+#' 
+#' Warning: The number of rate elements must be a multiple of the fishing 
+#' period since \strong{cycling is performed!)
+#' 
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @export
 getFishingBaseRate.byyear = function(sp, fishing, T, ndt) {
   
   useFiles = .getBoolean(fishing$useFiles, FALSE)
@@ -176,12 +192,13 @@ getFishingBaseRate.byyear = function(sp, fishing, T, ndt) {
     if(is.null(rates)) rates = .getFileAsVector(fishing$rate$byyear$file[[sp]])
   }
 
+  # rates contains T values
   if(is.null(rates)) stop(sprintf("No fishing rates provided for %s", sp))
   
   freq = .getFishingFrequency(sp, fishing, ndt)
-  nPeriods = ndt/freq
+  nPeriods = ndt/freq   # number of fishing periods
   
-  if((length(rate)%%nPeriods)!=0) 
+  if((length(rates)%%nPeriods)!=0) 
     stop(sprintf("You must provide a multiple of %d rates for %s.", nPeriods, sp))
   
   rates = rep(rates, each=freq, length=T*ndt)
