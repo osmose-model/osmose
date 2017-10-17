@@ -3,6 +3,18 @@
 
 # Fishing mortality -------------------------------------------------------
 
+#' Get fishing mortality rate.
+#' 
+#' \deqn{F = \frac{B \times \exp^{A+S}}{ndt}}
+#' with \eqn{B}=mortality rate, \eqn{A}=deviates by year, \eqn{S}=deviates by seasons
+#' 
+#' @param sp Species index (sp0, sp1, sp2, etc.)
+#' @param fishing List of fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @return  Fishing mortality rate.
+#' @export
 getFishingMortality = function(sp, fishing, T, ndt) {
 
   # validation?
