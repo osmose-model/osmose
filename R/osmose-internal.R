@@ -38,10 +38,12 @@ getOsmoseParameter = function(x, ..., keep.att=FALSE) {
   return(x)
 }
 
-
+# Get species names. It matches the spX regular expression.
+#
+# @param x Named data
 .getSpecies = function(x)  {
   x = names(x)
-  x = grep(pattern = "^sp[0-9]*$", x = x, value=TRUE)
+  x = grep(pattern="^sp[0-9]*$", x=x, value=TRUE)
   return(x)
 }
 
@@ -73,6 +75,8 @@ getOsmoseParameter = function(x, ..., keep.att=FALSE) {
 
 # Parsing OSMOSE outputs --------------------------------------------------
 
+# Groups input files for each species.
+# **The name of the configuration must not contain any _ or - characters**
 .bySpecies = function(files, sep=c("_", "-")) {
   out = NULL
   if(length(files)>0) {
@@ -95,6 +99,17 @@ getOsmoseParameter = function(x, ..., keep.att=FALSE) {
     strsplit(dir(path=path, pattern="_biomass_")[1],"_")[[1]][1]
   }
 
+# Read Osmose CSV files
+#
+# @param file File name
+# @param sep Column separator 
+# @param skip Number of line to skip
+# @param row.names Index of the row names column
+# @param na.strings List of NaN strings
+# @param rm  ???? Not used
+# @param ... Additional arguments of the \code{\link{read.csv}} function
+#
+# @return A data frame
 .readOsmoseCsv = function(file, sep=",", skip=1, row.names=1, 
                           na.strings=c("NA", "NaN"), rm=1, ...) {
   out = read.csv(file=file, sep=sep, skip=skip, 
@@ -197,6 +212,14 @@ getOsmoseParameter = function(x, ..., keep.att=FALSE) {
   return(output)
 }
 
+# Generic function to read 1D output files (abundance, biomass, etc).
+# If no file is found, it returns NULL.
+#
+# @param files List of input files
+# @param path  Data directory
+# @param ... Additional arguments of the \code{\link{.readOsmoseCsv}} function.
+#
+# @return A 3D array (time, species, replicates) or NULL if no file is found.
 .read_1D = function(files, path, ...) {
   # TO_DO: change for the unified approach! species as list
   if(length(files)!=0) {
@@ -221,6 +244,14 @@ getOsmoseParameter = function(x, ..., keep.att=FALSE) {
   return(output)
 }
 
+# Generic function to read 2D output files (dietMatrix, sizeSpectrum, etc).
+# If no file is found, it returns NULL.
+#
+# @param files List of input files
+# @param path  Data directory
+# @param ... Additional arguments of the \code{\link{.readOsmoseCsv}} function.
+#
+# @return A 3D array (time, species, replicates) or NULL if no file is found.
 .read_2D = function(files, path, ...) {
   
   if(length(files)!=0) {
