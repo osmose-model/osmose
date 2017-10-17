@@ -21,7 +21,7 @@
   
   selectivity = getSelectivity(sp, fishing, T, ndt)
   if(!is.null(selectivity)) {
-    Fs = f %o% selectivity   # outer product
+    Fs = f %o% selectivity   # outer product. if dim(f)=N and dim(sel)=M, dim(Fs)=NxM
     #write.osmose(f, file=sprintf(fileCode, "byDt", species$name[sp]))
     write.osmose(Fs, file=file.path(output, paste0("F-", isp, ".csv")))
     

@@ -24,7 +24,9 @@ readOsmoseConfiguration = function(file, config=NULL, absolute=TRUE) {
 
 
 
-#' Reads calibration parameters from an osmose.config list
+#' Reads calibration parameters from an osmose.config list.
+#' 
+#' The configuration argument must contain a "calibration" entry to work.
 #'
 #' @param L1 osmose.config list (see \code{\link{readOsmoseConfiguration}})
 #'
