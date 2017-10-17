@@ -5,7 +5,7 @@
 
 #' Get fishing mortality rate.
 #' 
-#' \deqn{F = \frac{B \times \exp^{A+S}}{ndt}}
+#' @details \deqn{F = \frac{B \times \exp^{A+S}}{ndt}}
 #' with \eqn{B}=mortality rate, \eqn{A}=deviates by year, \eqn{S}=deviates by seasons
 #' 
 #' @param sp Species index (sp0, sp1, sp2, etc.)
@@ -45,15 +45,29 @@ getFishingMortality = function(sp, fishing, T, ndt) {
 # mortality.fishing.rate.byYear.sp0;numeric_vector
 # mortality.fishing.rate.byDt.file.sp0;path/to/file
 
+#' Get fishing base rate.
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry.
+#' It first check for the "method" parameter for the current
+#' specie (\emph{mortality.fishing.rate.method.spX}), whose value can be
+#' 
+#' \itemize{
+#' \item{constant: use \emph{rate.spX}}
+#' \item{byRegime: use \emph{rate.byRegime.file.spX}}
+#' \item{linear  : use \emph{rate.slope.spX}}
+#' \item{byYear  : use \emph{rate.byYear.spX}}
+#' \item{byDt    : use \emph{rate.byDt.spX}}
+#' }
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#' @export
 getFishingBaseRate = function(sp, fishing, T, ndt) {
   
   method = fishing$rate$method[[sp]]
   useFiles = .getBoolean(fishing$useFiles, FALSE)
-  # # constant: use rate.sp0
-  # # byRegime: use rate.byRegime.file.sp0
-  # # linear  : use rate.slope.sp0
-  # # byYear  : use rate.byYear.sp0;
-  # # byDt    : use rate.byDt.sp;
+
   base = switch(method,
                 "constant" = getFishingBaseRate.constant(sp, fishing, T, ndt), 
                 "byregime" = getFishingBaseRate.byRegime(sp, fishing, T, ndt), 
@@ -61,11 +75,23 @@ getFishingBaseRate = function(sp, fishing, T, ndt) {
                 "byyear"   = getFishingBaseRate.byYear(sp, fishing, T, ndt), 
                 "bydt"     = getFishingBaseRate.byDt(sp, fishing, T, ndt))
   
-  base = rep(base, length=ndt*T) #???
+  # barrier.n: should not be done here.
+  # base = rep(base, length=ndt*T) #???
   
   return(base)
 }
 
+#' Get fishing base rate using constant rate
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. It reads
+#' the \emph{rate.spX} parameter, which is repeated \eqn{T \times ndt} times.
+#'
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @export
 getFishingBaseRate.constant = function(sp, fishing, T, ndt) {
   rate = fishing$rate[[sp]]
   if(is.null(rate)) stop(sprintf("No fishing rate provided for %s", sp))
