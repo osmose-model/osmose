@@ -25,11 +25,7 @@
   outputNames = lapply(outputNames,function(x) gsub("."," ",x,fixed = TRUE))
   outputNames = str_split(outputNames," ")
   
-  for(i in seq_along(outputNames)){
-    outputNames[[i]][length(outputNames[[i]])+1] = outputValue[[i]]
-  }
-  
-  calList = .listTree(outputNames)
+  calList = .listTree(outputNames, outputValue)
   return(calList)
   
 }
