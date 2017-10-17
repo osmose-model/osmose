@@ -128,6 +128,19 @@ getFishingBaseRate.byRegime = function(sp, fishing, T, ndt) {
   return(rates)
 }
 
+#' Get fishing base rate using a linear rate
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. It reads
+#' the \emph{rate.spX} and \emph{rate.slope.spX} parameters. 
+#' The slope is computed any time the fishing frequency changes (fishingperiod parameter)
+#' For instance, if ndt=20, period=5, there are 4 time steps between two fishing time step. Therefore, 
+#' the value will be (i0, i0, i0, i0, i1, i1, i1, i1, ...)
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @export
 getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
   
   # mortality.fishing.rate.slope.sp0;0.03 # 3% per year
@@ -141,9 +154,11 @@ getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
   if(is.null(slope)) stop(sprintf("No fishing slope provided for %s", sp))
   if(length(slope)>1) stop(sprintf("More than one slope for %s provided.", sp))
   
+  # time is a vector that goes from 0 to T by a step of period, all in time step unit.
+  # ndt/freq is the time period.
   time = seq(from=0, by=freq/ndt, length=T*ndt/freq)
   rates = rate + slope*rate*time
-  rates = rep(rates, each=freq)
+  rates = rep(rates, each=freq)    # repeats x0 x1 to x0 x0 x0 ... x1 x1 x1 with N repetitions, N=fishing freq.
   
   return(rates)
   
