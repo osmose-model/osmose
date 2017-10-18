@@ -1,37 +1,14 @@
 
-getmfrow = function(n) .getmfrow(n=n)
-
-
-makeTransparent = function(..., alpha=0.5) {
-  
-  if(alpha<0 | alpha>1) stop("alpha must be between 0 and 1")
-  
-  alpha = floor(255*alpha)  
-  newColor = col2rgb(col=unlist(list(...)), alpha=FALSE)
-  
-  .makeTransparent = function(col, alpha) {
-    rgb(red=col[1], green=col[2], blue=col[3], alpha=alpha, maxColorValue=255)
-  }
-  
-  newColor = apply(newColor, 2, .makeTransparent, alpha=alpha)
-  
-  return(newColor)
-  
-}
-
-writeOsmoseParameters = function(conf, file, sep=";") {
-  .writeParameter = function(x) {
-    out = paste(names(x),paste(x, collapse=sep), sep=sep)
-    return(out)
-  }
-  out = sapply(conf, .writeParameter)
-  vars = names(out)
-  ind = sort(vars, index.return=TRUE)$ix
-  dim(out) = c(length(out), 1)
-  out = out[ind,, drop=FALSE]
-  rownames(out) = vars[ind]
-  write.table(out, file=file, sep="", quote=FALSE, col.names=FALSE)
-  return(invisible(out))
+#' Write an array or dataframe in the Osmose format.
+#' The separator is ";", there are no quotes and a blank column is
+#' added for the row names column.
+#'
+#' @param x Object to be written (table or data frame)
+#' @param file Output file
+#' 
+#' @export
+write.osmose = function(x, file)   {
+  write.table(x=x, file=file, sep=";", col.names=NA, quote=FALSE)
 }
 
 #' Read Osmose output file
@@ -76,15 +53,15 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
 #'
 #' @param file File to read
 #' @param sep File separator
-#' @param ... Additional arguments of the \code{\link{.readOsmoseCsv}} function
+#' @param ... Additional arguments of the \code{read.csv} function
 #'
 #' @return A 3D array (time, legnth, species)
 #' @export
-getSizeSpectrum = function(file, sep=",") {
+getSizeSpectrum = function(file, sep=",", ...) {
   
   # sizeSpectrum = read.table(file, sep=sep, dec=".", skip=1,
   #                          header=TRUE)
-  sizeSpectrum = .readOsmoseCsv(file=file, sep=sep, header=TRUE...)
+  sizeSpectrum = .readOsmoseCsv(file=file, sep=sep, header=TRUE, ...)
   
   nsp = ncol(sizeSpectrum) - 2
   times = unique(sizeSpectrum$Time)
@@ -178,210 +155,40 @@ getMortalityDeviation = function(x, stage, type, pars=NULL) {
 
 
 
-# osmose2R for specific versions ------------------------------------------
 
-#' Read Osmose (version 3 release 0) outputs
-#'
-#' @param path Osmose output path
-#' @param species.names Array of species names. If
-#' NULL, it is extracted from file.
-#'
-#' @return A list of list containing the output functions
-#'
-osmose2R.v3r0 = function(path=NULL, species.names=NULL) {
+# Non-exported ------------------------------------------------------------
+
+
+getmfrow = function(n) .getmfrow(n=n)
+
+makeTransparent = function(..., alpha=0.5) {
   
-  # General  
-  pop = list(
-    biomass    = readOsmoseFiles(path=path, type="biomass"),
-    abundance  = readOsmoseFiles(path=path, type="abundance"),
-    yield      = readOsmoseFiles(path=path, type="yield"),
-    catch      = readOsmoseFiles(path=path, type="yieldN"),
-    mortality  = readOsmoseFiles(path=path, type="mortalityRate", bySpecies=TRUE)
-  )
+  if(alpha<0 | alpha>1) stop("alpha must be between 0 and 1")
   
-  # Trophic
-  Trophic = list(
-    meanTL      = readOsmoseFiles(path=path, type="meanTL"),
-    meanTLCatch = readOsmoseFiles(path=path, type="meanTLCatch"),
-    predatorPressure = readOsmoseFiles(path=path, type="predatorPressure"),
-    predPreyIni = readOsmoseFiles(path=path, type="biomassPredPreyIni")
-  )
+  alpha = floor(255*alpha)  
+  newColor = col2rgb(col=unlist(list(...)), alpha=FALSE)
   
-  # Size indicators
-  Size = list(
-    meanSize      = readOsmoseFiles(path=path, type="meanSize"),
-    meanSizeCatch = readOsmoseFiles(path=path, type="meanSizeCatch"),
-    SizeSpectrum  = readOsmoseFiles(path=path, type="SizeSpectrum")$Abundance,
-    SizeSpectrumN = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesN"),
-    SizeSpectrumB = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesB"),
-    SizeSpectrumC = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesYield"),
-    SizeSpectrumY = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesYieldN")
-  )
+  .makeTransparent = function(col, alpha) {
+    rgb(red=col[1], green=col[2], blue=col[3], alpha=alpha, maxColorValue=255)
+  }
   
-  # Age indicators
-  Age = list(
-    AgeSpectrumN = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesN"),
-    AgeSpectrumB = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesB"),
-    AgeSpectrumC = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesYield"),
-    AgeSpectrumY = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesYieldN")
-  )
+  newColor = apply(newColor, 2, .makeTransparent, alpha=alpha)
   
-  model = list(
-    version  = "3.0b",
-    model    = .getModelName(path=path),
-    simus    = dim(pop$biomass)[3],
-    times    = as.numeric(row.names(pop$biomass)),
-    T        = nrow(pop$biomass),
-    start    = as.numeric(row.names(pop$biomass))[1],
-    nsp      = ncol(pop$biomass),
-    lspecies = if(!is.null(species.names)) species.names else colnames(pop$biomass)
-  )
-  
-  
-  output = list(model   = model,
-                species = colnames(pop$biomass),
-                global  = pop,
-                trophic = Trophic,
-                size    = Size,
-                age     = Age
-  )
-  
-  return(output)
+  return(newColor)
   
 }
 
-#' Read Osmose (version 3 release 1) outputs
-#'
-#' @param path Osmose output path
-#' @param species.names Array of species names. If
-#' NULL, it is extracted from file.
-#'
-#' @return A list of list containing the output functions
-#'
-osmose2R.v3r1 = function(path=NULL, species.names=NULL) {
-
-  # General  
-  pop = list(
-    biomass    = readOsmoseFiles(path=path, type="biomass"),
-    abundance  = readOsmoseFiles(path=path, type="abundance"),
-    yield      = readOsmoseFiles(path=path, type="yield"),
-    catch      = readOsmoseFiles(path=path, type="yieldN"),
-    mortality  = readOsmoseFiles(path=path, type="mortalityRate", bySpecies=TRUE)
-  )
-  
-  # Trophic
-  Trophic = list(
-    dietMatrix  = readOsmoseFiles(path=path, type="dietMatrix"),
-    meanTL      = readOsmoseFiles(path=path, type="meanTL"),
-    meanTLCatch = readOsmoseFiles(path=path, type="meanTLCatch"),
-    predatorPressure = readOsmoseFiles(path=path, type="predatorPressure"),
-    predPreyIni = readOsmoseFiles(path=path, type="biomassPredPreyIni"),
-    TLDistrib   = readOsmoseFiles(path=path, type="TLDistrib")
-  )
-  
-  # Size indicators
-  Size = list(
-    meanSize      = readOsmoseFiles(path=path, type="meanSize"),
-    meanSizeCatch = readOsmoseFiles(path=path, type="meanSizeCatch"),
-    SizeSpectrum  = readOsmoseFiles(path=path, type="SizeSpectrum")$Abundance,
-    SizeSpectrumN = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesN"),
-    SizeSpectrumB = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesB"),
-    SizeSpectrumC = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesYield"),
-    SizeSpectrumY = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesYieldN")
-  )
-  
-  # Age indicators
-  Age = list(
-    AgeSpectrumN = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesN"),
-    AgeSpectrumB = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesB"),
-    AgeSpectrumC = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesYield"),
-    AgeSpectrumY = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesYieldN")
-  )
-  
-  model = list(
-    version  = "3u1",
-    model    = .getModelName(path=path),
-    simus    = dim(pop$biomass)[3],
-    times    = as.numeric(row.names(pop$biomass)),
-    T        = nrow(pop$biomass),
-    start    = as.numeric(row.names(pop$biomass))[1],
-    nsp      = ncol(pop$biomass),
-    lspecies = if(!is.null(species.names)) species.names else colnames(pop$biomass)
-  )
-  
-  
-  output = list(model   = model,
-                species = colnames(pop$biomass),
-                global  = pop,
-                trophic = Trophic,
-                size    = Size,
-                age     = Age
-  )
-  
-  return(output)
-  
+writeOsmoseParameters = function(conf, file, sep=";") {
+  .writeParameter = function(x) {
+    out = paste(names(x),paste(x, collapse=sep), sep=sep)
+    return(out)
+  }
+  out = sapply(conf, .writeParameter)
+  vars = names(out)
+  ind = sort(vars, index.return=TRUE)$ix
+  dim(out) = c(length(out), 1)
+  out = out[ind,, drop=FALSE]
+  rownames(out) = vars[ind]
+  write.table(out, file=file, sep="", quote=FALSE, col.names=FALSE)
+  return(invisible(out))
 }
-
-#' Read Osmose (version 3 release 2) outputs
-#'
-#' @param path Osmose output path
-#' @param species.names Array of species names. If
-#' NULL, it is extracted from file.
-#'
-#' @return A list of list containing the output functions
-#'
-osmose2R.v3r2 = function (path=NULL, species.names=NULL) {
-  
-  pop = list(biomass = readOsmoseFiles(path = path, type = "biomass"), 
-             abundance = readOsmoseFiles(path = path, type = "abundance"), 
-             yield = readOsmoseFiles(path = path, type = "yield"), 
-             yieldN = readOsmoseFiles(path = path, type = "yieldN"),
-             mortality = readOsmoseFiles(path = path, type = "mortalityRate", bySpecies = TRUE))
-  
-  Trophic = list(meanTL = readOsmoseFiles(path = path, type = "meanTL"), 
-                 meanTLCatch = readOsmoseFiles(path = path, type = "meanTLCatch"),
-                 biomassByTL = readOsmoseFiles(path = path, type = "biomasDistribByTL"),
-                 predatorPressure = readOsmoseFiles(path = path, type = "predatorPressure"), 
-                 predPreyIni = readOsmoseFiles(path = path, type = "biomassPredPreyIni"),
-                 dietMatrix = readOsmoseFiles(path = path, type = "dietMatrix"))
-  
-  Size = list(meanSize = readOsmoseFiles(path = path, type = "meanSize"),            
-              meanSizeCatch = readOsmoseFiles(path = path, type = "meanSizeCatch"),
-              SizeSpectrum  = readOsmoseFiles(path=path, type="SizeSpectrum")$Abundance,
-              abundanceBySize = readOsmoseFiles(path = path, type = "abundanceDistribBySize"),
-              biomassBySize = readOsmoseFiles(path = path, type = "biomasDistribBySize"),
-              yieldBySize = readOsmoseFiles(path = path, type = "yieldDistribBySize"),
-              yieldNBySize = readOsmoseFiles(path = path, type = "yieldNDistribBySize"),
-              meanTLBySize = readOsmoseFiles(path = path, type = "meanTLDistribBySize"),
-              mortalityBySize = readOsmoseFiles(path = path, type = "mortalityRateDistribBySize", bySpecies = TRUE),
-              dietMatrixBySize = readOsmoseFiles(path = path, type = "dietMatrixbySize", bySpecies = TRUE),
-              predatorPressureBySize = readOsmoseFiles(path = path, type = "predatorPressureDistribBySize", bySpecies = TRUE))
-  
-  
-  Age = list(abundanceByAge = readOsmoseFiles(path = path, type = "abundanceDistribByAge"),
-             biomassByAge = readOsmoseFiles(path = path, type = "biomasDistribByAge"),
-             yieldByAge = readOsmoseFiles(path = path, type = "yieldDistribByAge"),
-             yieldNByAge = readOsmoseFiles(path = path, type = "yieldNDistribByAge"),
-             meanSizeByAge = readOsmoseFiles(path = path, type = "meanSizeDistribByAge"),
-             meanTLByAge = readOsmoseFiles(path = path, type = "meanTLDistribByAge"),
-             mortalityByAge = readOsmoseFiles(path = path, type = "mortalityRateDistribByAge", bySpecies = TRUE),
-             dietMatrixByAge = readOsmoseFiles(path = path, type = "dietMatrixbyAge", bySpecies = TRUE),
-             predatorPressureByAge = readOsmoseFiles(path = path, type = "predatorPressureDistribByAge", bySpecies = TRUE))
-  
-  
-  model = list(version = "3u2",
-               model = .getModelName(path = path), 
-               simus = dim(pop$biomass)[3], 
-               times = as.numeric(row.names(pop$biomass)), 
-               T = nrow(pop$biomass), 
-               start = as.numeric(row.names(pop$biomass))[1], 
-               nsp = ncol(pop$biomass), 
-               lspecies = if (!is.null(species.names)) species.names else colnames(pop$biomass))
-  
-  output = list(model = model, species = colnames(pop$biomass), 
-                global = pop, trophic = Trophic, size = Size, age = Age)
-  
-  
-  return(output)
-}
-

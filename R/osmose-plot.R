@@ -267,7 +267,6 @@ plot.osmose.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1e-6, repl
   x = factor*apply(x, 2, mean, na.rm=TRUE)
   barplot(x, border=border, col=col, ...)
   return(invisible())
-  i
 }
 
 .plotAverageYield = function(x, col="grey", factor=1e-6, ...) {

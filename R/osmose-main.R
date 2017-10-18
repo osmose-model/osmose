@@ -64,6 +64,7 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
 #' @author Ricardo Oliveros-Ramos
 #' @author Laure Velez
 #' @export
+#' @aliases osmose2R
 read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
   if(is.null(path) & interactive()) {
     path = choose.dir(caption="Select OSMOSE outputs folder")
@@ -81,7 +82,6 @@ read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
 }
 
 # to keep back compatibility for a while
-#' @aliases read_osmose
 #' @export
 osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
   

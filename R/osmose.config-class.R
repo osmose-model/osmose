@@ -4,7 +4,6 @@
 #' @param config Configuration object to which file parameters are appended
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
 #' @return A list tree.
-#' @usage config = readOsmoseConfiguration(fileName)
 #' @export
 readOsmoseConfiguration = function(file, config=NULL, absolute=TRUE) {
   
@@ -28,13 +27,9 @@ readOsmoseConfiguration = function(file, config=NULL, absolute=TRUE) {
 #' 
 #' The configuration argument must contain a "calibration" entry to work.
 #'
-#' @param L1 osmose.config list (see \code{\link{readOsmoseConfiguration}})
+#' @param L1 osmose.config object (see \code{\link{readOsmoseConfiguration}})
 #'
 #' @return A list of parameters to calibrate ("guess", "max", "min", "phase")
-#' @usage 
-#' config = readOsmoseConfiguration(fileName)
-#' calpar = configureCalibration(config)
-#' @export
 configureCalibration = function(L1) {
   
   nameCal  = names(unlist(L1$calibration))

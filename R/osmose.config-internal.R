@@ -22,7 +22,7 @@
   outputNames = unlist(outputNames)
   outputNames = gsub(paste(xString,".",sep=""),".",outputNames)
   
-  outputNames = lapply(outputNames,function(x) gsub("."," ",x,fixed = TRUE))
+  outputNames = lapply(outputNames, function(x) gsub("."," ", x, fixed = TRUE))
   outputNames = str_split(outputNames," ")
   
   calList = .listTree(outputNames, outputValue)
@@ -30,11 +30,13 @@
   
 }
 
+# .strsplit = function(string, pattern) strsplit(unlist(string), pattern)
+
 viewDataList = function(input, path=NULL) {
   L0 = .readOsmoseConfiguration(input)
   namelist = names(L0)
   valuelist = unlist(lapply(unname(L0),toString))
-  L0 = data.frame(namelist,valuelist)
+  L0 = data.frame(namelist, valuelist)
   return(L0)
 }
 
@@ -57,7 +59,7 @@ viewDataList = function(input, path=NULL) {
   }
   
   Lines = readLines(file.path(path, input))
-  Lines_trim = lapply(Lines, str_trim)
+  Lines_trim = lapply(Lines, stringr::str_trim)
   Lines_trim[grep("^[[:punct:]]", Lines_trim)] = NULL
   Lines_trim = Lines_trim[nchar(Lines_trim)!=0]
   
@@ -92,13 +94,13 @@ viewDataList = function(input, path=NULL) {
 
 .getKey = function(Line, KeySeparator) {
   Key = str_split(Line, KeySeparator)[[1]][1]
-  return(str_trim(Key))
+  return(stringr::str_trim(Key))
 }
 
 .getValues = function(Line,KeySeparator){
-  Values = str_sub(Line, gregexpr(KeySeparator, Line)[[1]][1]+1,nchar(Line))
+  Values = stringr::str_sub(Line, gregexpr(KeySeparator, Line)[[1]][1]+1,nchar(Line))
   ValueSeparator = .guessSeparator(Values)
-  Value = str_trim(str_split(Values, ValueSeparator)[[1]])
+  Value = stringr::str_trim(str_split(Values, ValueSeparator)[[1]])
   Value = Value[nchar(Value)!=0]
   return(list(Value))
 }
@@ -124,18 +126,18 @@ addAttr = function(x, which, value) {
 
 # getConfig ---------------------------------------------------------------
 
-.getConfig = function(config) {
+.getConfig = function(config, ...) {
   UseMethod(".getConfig")
 }
 
-.getConfig.character = function(config) {
-  return(.readOsmoseConfiguration(file=config))
+.getConfig.character = function(config, ...) {
+  return(.readOsmoseConfiguration(input=config, ...))
 }
 
-.getConfig.osmose.config = function(config) {
+.getConfig.osmose.config = function(config, ...) {
   return(as.list(unlist(config)))
 }
 
-.getConfig.list = function(config) {
+.getConfig.list = function(config, ...) {
   return(config)
 }

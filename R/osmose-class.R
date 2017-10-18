@@ -4,7 +4,7 @@
 #' Plot method for osmose objects
 #' @description This method takes a \code{osmose} object to make useful plot 
 #' for each variables.
-#' @param x Object of \code{osmose} class (see the \code{\link{osmose2R}} function).
+#' @param x Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
 #' @param type Name of the variable to plot. By default is \code{type = "biomass"} but 
 #' it could be:
 #' \itemize{
@@ -54,6 +54,7 @@
 #' @return A graph of a osmose object.
 #' @author Ricardo Oliveros-Ramos
 #' @export
+#' @method plot osmose
 plot.osmose = function(x, type = "biomass", ...) {
   
   x = getVar(x, var = type, expected = FALSE)
@@ -66,7 +67,7 @@ plot.osmose = function(x, type = "biomass", ...) {
 #' Get variable
 #' @description Function to get a variable from an object of \code{osmose} 
 #' class. This function uses the getVar method (see the \code{\link{getVar.osmose}}).
-#' @param object Object of \code{osmose} class (see the \code{\link{osmose2R}} function).
+#' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
 #' @param var Name of variable to extract. It could be: "biomass","abundance",
 #'  "yield", "yieldN".
 #' @param ... Additional arguments of the function.
@@ -77,8 +78,8 @@ getVar = function(object, var, ...) {
 }
 
 #' GetVar method for osmose objects
-#' @description 
-#' @param object Object of \code{osmose} class (see the \code{\link{osmose2R}} function).
+#' @description Get a variable from an \code{osmose} object. 
+#' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
 #' @param var Name of variable to extract. It could be: "biomass","abundance",
 #'  "yield", "yieldN".
 #' @param type Type of the variable to extract. By default is \code{type = "global"}.
@@ -100,7 +101,8 @@ getVar.osmose = function(object, var, type = "global", expected = FALSE, ...) {
 
 #' Print informations about Osmose outputs
 #'
-#' @param x Osmose outputs (see the \code{\link{osmose2R}} function)
+#' @param x Osmose outputs (see the \code{\link{read_osmose}} function)
+#' @param ... Additional arguments for \code{print}.
 #' @method print osmose
 #'
 #' @export
@@ -114,7 +116,8 @@ print.osmose = function(x, ...) {
 
 #' Summarizes informations about Osmose outputs
 #'
-#' @param x Osmose outputs (see the \code{\link{osmose2R}} function)
+#' @param object Osmose outputs (see the \code{\link{read_osmose}} function)
+#' @param ... Additional arguments for \code{summary}.
 #' 
 #' @method summary osmose
 #' @export
@@ -136,7 +139,8 @@ summary.osmose = function(object, ...) {
 
 #' Print the summary informations about Osmose outputs
 #'
-#' @param x Osmose outputs (see the \code{\link{osmose2R}} function)
+#' @param x Osmose outputs (see the \code{\link{read_osmose}} function)
+#' @param ... Additional arguments for \code{print}.
 #' @method print summary.osmose
 #'
 #' @export
