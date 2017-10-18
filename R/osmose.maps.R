@@ -5,15 +5,16 @@
 #' Create osmose maps
 #'
 #' @param ... Several object containing maps for species distribution
-#' @param outdir 
-#' @param confdir 
+#' @param outdir Directory to write maps, only used if \code{write} is TRUE.
+#' @param confdir Directory to save the configuration file.
 #' @param write Boolean, write maps to csv files for osmose?
 #' @param confile File to save osmose configuration for choosen maps.
+#' @param prefixPath Path where the maps are located, used to write the full
+#' path in the configuration files.
 #'
-#' @return
+#' @return \code{NULL}, it writes the maps to the disk.
 #' @export
 #'
-#' @examples
 createOsmoseMaps = function(..., outdir=NULL, confdir=NULL, write=TRUE, 
                             confile = "maps-parameters.csv", prefixPath="maps") {
   
@@ -43,37 +44,42 @@ createOsmoseMaps = function(..., outdir=NULL, confdir=NULL, write=TRUE,
     }
   }
   writeOsmoseParameters(conf=conf, file=file.path(confdir, confile))
-  DateStamp(nmap, "maps written.")
+  message(paste(nmap, "maps written.", sep=" "))
   
   return(invisible())
 }
 
 #' Set maps of species distribution for OSMOSE
 #'
-#' @param object 
-#' @param type 
-#' @param interannual 
-#' @param start 
-#' @param end 
-#' @param sp 
-#' @param lifespan 
-#' @param ages 
-#' @param frequency 
-#' @param toPA 
-#' @param prob 
-#' @param criteria 
-#' @param normalize 
-#' @param lat 
-#' @param lon 
+#' @param object An object with species distribution maps. Currently only work
+#' with the \code{predict.niche.models} class from package \code{kali}.
+#' @param type Types of maps used: climatology (average for each time step),
+#' seasonal (average for each season: summer, winter, spring, fall) and annual 
+#' (average for all year) are available.
+#' @param sp Species name as used in the osmose model.
+#' @param lifespan Life span os the species.
+#' @param frequency Number of simulation time steps per year.
+#' @param ages set of ages corresponding to the maps. Default it \code{NULL} which
+#' means for all ages (from 0 to \code{lifespan})
+#' @param normalize boolean, make all probabilities add up to 1?
+#' @param interannual boolean, uses the specified type for each year 
+#' independently or for all the period.
+#' @param ... Additional arguments for specific methods. 
 #'
-#' @return
-#' @export
+#' @return A list with the information to write osmose maps to the disk.
 #'
-#' @examples
 setOsmoseMaps = function(object, type, sp, lifespan, frequency=24, 
-                         ages=NULL, normalize=TRUE, ...) {
+                         ages=NULL, normalize=TRUE, interannual=FALSE, ...) {
   UseMethod("setOsmoseMaps")
 }
+
+# @param start argument to extract a window from the time series: c(year, month)
+# @param end argument to extract a window from the time series: c(year, month)
+# @param toPA boolean, transform map information in presence/absence (0/1)?
+# @param prob boolean, keep probabilities inside the presence area?
+# @param criteria criteria used to calculate the threshold for toPA.
+# @param lat 
+# @param lon
 
 #' @export
 setOsmoseMaps.prediction.niche.models = 
@@ -81,6 +87,9 @@ setOsmoseMaps.prediction.niche.models =
            interannual=FALSE, start=NULL, end=NULL,  
            toPA=TRUE, prob=TRUE, criteria="MinROCdist", lat=NULL, lon=NULL, ...) {
   
+    if(!requireNamespace("kali", quietly = TRUE)) 
+      stop("You need to install the 'kali' package.")
+    
   if(is.null(ages)) ages = seq_len(ceiling(lifespan) + 1) - 1
   
   object = kali::window.prediction.niche.models(object, start=start, end=end) 
@@ -152,17 +161,17 @@ setOsmoseMaps.prediction.niche.models =
 
 # createOsmoseMaps - auxiliar functions -----------------------------------
 
-#' Write maps for osmose species distribution
-#'
-#' @param object 
-#' @param files 
-#' @param outdir 
-#'
-#' @return
-#' @export
-#'
-#' @examples
+# Write maps for osmose species distribution
+#
+# @param object 
+# @param files 
+# @param outdir 
+#
+# @return
+#
 writeMaps = function(object, files=NULL, outdir="maps") {
+  if(!requireNamespace("kali", quietly = TRUE)) 
+    stop("You need to install the 'kali' package.")
   if(is.null(files)) files = object$files
   if(!file.exists(outdir)) dir.create(outdir, recursive = TRUE)
   if(!file.exists(file.path(outdir, "_images"))) 
@@ -172,7 +181,7 @@ writeMaps = function(object, files=NULL, outdir="maps") {
   for(i in seq_len(nmap)) {
     file = file.path(outdir, paste0(files[i], ".csv"))
     png(filename=file.path(outdir, "_images", paste0(files[i], ".png")))
-    image.plot(kali:::.rotate(maps[,,i]))
+    fields::image.plot(kali::rotate(maps[,,i]))
     dev.off()
     write.table(maps[,,i], file=file, sep=";", quote=FALSE,
                 row.names=FALSE, col.names=FALSE, na="-99")
