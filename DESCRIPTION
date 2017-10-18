@@ -30,10 +30,15 @@ Depends:
   R (>= 2.15)
 Imports: 
   stringr, 
-  R.utils, 
-  rlist
+  rlist,
+  stats,
+  utils,
+  grDevices,
+  graphics,
+  fields
 Suggests:
   kali
 URL: 
 LazyData: FALSE
+BugReports: https://github.com/osmose-model/osmose/issues
 RoxygenNote: 6.0.1
