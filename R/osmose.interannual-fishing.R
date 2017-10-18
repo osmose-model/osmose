@@ -166,13 +166,11 @@ getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
 
 #' Get fishing base rate using annual rates.
 #' 
-#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. 
-#' 
-#' It reads the annual values either from an external file or from the configuration file.
+#' @description It reads the annual values either from an external file or from the configuration file.
 #' It must contain a number of elements which is a multiple of the fishing period.
 #' 
 #' Warning: The number of rate elements must be a multiple of the fishing 
-#' period since \strong{cycling is performed!)
+#' period since \strong{recycling} is performed!)
 #' 
 #' @param sp Current specie (sp0, sp1, etc.)
 #' @param fishing Fishing parameters
@@ -180,7 +178,7 @@ getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
 #' @param ndt  Time step
 #'
 #' @export
-getFishingBaseRate.byyear = function(sp, fishing, T, ndt) {
+getFishingBaseRate.byYear = function(sp, fishing, T, ndt) {
   
   useFiles = .getBoolean(fishing$useFiles, FALSE)
   
@@ -208,13 +206,11 @@ getFishingBaseRate.byyear = function(sp, fishing, T, ndt) {
 
 #' Get fishing base rate using time-step rates.
 #' 
-#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. 
-#' 
-#' It reads the time-step values either from an external file or from the configuration file.
+#' @description It reads the time-step values either from an external file or from the configuration file.
 #' It must contain a number of elements which is a multiple of the fishing period.
 #' 
 #' Warning: The number of rate elements must be a multiple of the fishing 
-#' period since \strong{cycling is performed!)
+#' period since \strong{recycling} is performed!)
 #' 
 #' @param sp Current specie (sp0, sp1, etc.)
 #' @param fishing Fishing parameters
@@ -222,7 +218,7 @@ getFishingBaseRate.byyear = function(sp, fishing, T, ndt) {
 #' @param ndt  Time step
 #'
 #' @export
-getFishingBaseRate.bydt = function(sp, fishing, T, ndt) {
+getFishingBaseRate.byDt = function(sp, fishing, T, ndt) {
   
   useFiles = .getBoolean(fishing$useFiles, FALSE)
   
