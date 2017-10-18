@@ -7,7 +7,7 @@
 getVar(object, var, ...)
 }
 \arguments{
-\item{object}{Object of \code{osmose} class (see the \code{\link{osmose2R}} function).}
+\item{object}{Object of \code{osmose} class (see the \code{\link{read_osmose}} function).}
 
 \item{var}{Name of variable to extract. It could be: "biomass","abundance",
 "yield", "yieldN".}

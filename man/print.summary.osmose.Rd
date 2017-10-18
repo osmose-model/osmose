@@ -7,7 +7,9 @@
 \method{print}{summary.osmose}(x, ...)
 }
 \arguments{
-\item{x}{Osmose outputs (see the \code{\link{osmose2R}} function)}
+\item{x}{Osmose outputs (see the \code{\link{read_osmose}} function)}
+
+\item{...}{Additional arguments for \code{print}.}
 }
 \description{
 Print the summary informations about Osmose outputs

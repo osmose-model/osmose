@@ -7,7 +7,7 @@
 \method{getVar}{osmose}(object, var, type = "global", expected = FALSE, ...)
 }
 \arguments{
-\item{object}{Object of \code{osmose} class (see the \code{\link{osmose2R}} function).}
+\item{object}{Object of \code{osmose} class (see the \code{\link{read_osmose}} function).}
 
 \item{var}{Name of variable to extract. It could be: "biomass","abundance",
 "yield", "yieldN".}
@@ -22,4 +22,7 @@ last dimensions should be performed if the output is an array. By default is
 }
 \value{
 An array or a list containing the data.
+}
+\description{
+Get a variable from an \code{osmose} object.
 }

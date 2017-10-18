@@ -10,13 +10,19 @@ createOsmoseMaps(..., outdir = NULL, confdir = NULL, write = TRUE,
 \arguments{
 \item{...}{Several object containing maps for species distribution}
 
-\item{outdir}{}
+\item{outdir}{Directory to write maps, only used if \code{write} is TRUE.}
 
-\item{confdir}{}
+\item{confdir}{Directory to save the configuration file.}
 
 \item{write}{Boolean, write maps to csv files for osmose?}
 
 \item{confile}{File to save osmose configuration for choosen maps.}
+
+\item{prefixPath}{Path where the maps are located, used to write the full
+path in the configuration files.}
+}
+\value{
+\code{NULL}, it writes the maps to the disk.
 }
 \description{
 Create osmose maps

@@ -7,7 +7,7 @@
 \method{plot}{osmose}(x, type = "biomass", ...)
 }
 \arguments{
-\item{x}{Object of \code{osmose} class (see the \code{\link{osmose2R}} function).}
+\item{x}{Object of \code{osmose} class (see the \code{\link{read_osmose}} function).}
 
 \item{type}{Name of the variable to plot. By default is \code{type = "biomass"} but 
 it could be:

@@ -4,10 +4,12 @@
 \alias{summary.osmose}
 \title{Summarizes informations about Osmose outputs}
 \usage{
-\method{summary}{osmose}(object)
+\method{summary}{osmose}(object, ...)
 }
 \arguments{
-\item{x}{Osmose outputs (see the \code{\link{osmose2R}} function)}
+\item{object}{Osmose outputs (see the \code{\link{read_osmose}} function)}
+
+\item{...}{Additional arguments for \code{summary}.}
 }
 \description{
 Summarizes informations about Osmose outputs

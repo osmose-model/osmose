@@ -4,39 +4,35 @@
 \alias{setOsmoseMaps}
 \title{Set maps of species distribution for OSMOSE}
 \usage{
-setOsmoseMaps(object, type, sp, lifespan, frequency = 24, normalize = TRUE,
-  ...)
+setOsmoseMaps(object, type, sp, lifespan, frequency = 24, ages = NULL,
+  normalize = TRUE, interannual = FALSE, ...)
 }
 \arguments{
-\item{object}{}
+\item{object}{An object with species distribution maps. Currently only work
+with the \code{predict.niche.models} class from package \code{kali}.}
 
-\item{type}{}
+\item{type}{Types of maps used: climatology (average for each time step),
+seasonal (average for each season: summer, winter, spring, fall) and annual 
+(average for all year) are available.}
 
-\item{sp}{}
+\item{sp}{Species name as used in the osmose model.}
 
-\item{lifespan}{}
+\item{lifespan}{Life span os the species.}
 
-\item{frequency}{}
+\item{frequency}{Number of simulation time steps per year.}
 
-\item{normalize}{}
+\item{ages}{set of ages corresponding to the maps. Default it \code{NULL} which
+means for all ages (from 0 to \code{lifespan})}
 
-\item{interannual}{}
+\item{normalize}{boolean, make all probabilities add up to 1?}
 
-\item{start}{}
+\item{interannual}{boolean, uses the specified type for each year 
+independently or for all the period.}
 
-\item{end}{}
-
-\item{ages}{}
-
-\item{toPA}{}
-
-\item{prob}{}
-
-\item{criteria}{}
-
-\item{lat}{}
-
-\item{lon}{}
+\item{...}{Additional arguments for specific methods.}
+}
+\value{
+A list with the information to write osmose maps to the disk.
 }
 \description{
 Set maps of species distribution for OSMOSE

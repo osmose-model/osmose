@@ -4,10 +4,12 @@
 \alias{print.osmose}
 \title{Print informations about Osmose outputs}
 \usage{
-\method{print}{osmose}(x)
+\method{print}{osmose}(x, ...)
 }
 \arguments{
-\item{x}{Osmose outputs (see the \code{\link{osmose2R}} function)}
+\item{x}{Osmose outputs (see the \code{\link{read_osmose}} function)}
+
+\item{...}{Additional arguments for \code{print}.}
 }
 \description{
 Print informations about Osmose outputs
