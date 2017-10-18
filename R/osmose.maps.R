@@ -70,16 +70,16 @@ createOsmoseMaps = function(..., outdir=NULL, confdir=NULL, write=TRUE,
 #' @export
 #'
 #' @examples
-setOsmoseMaps = function(object, type, sp, lifespan, frequency=24, normalize=TRUE, ...) {
+setOsmoseMaps = function(object, type, sp, lifespan, frequency=24, 
+                         ages=NULL, normalize=TRUE, ...) {
   UseMethod("setOsmoseMaps")
 }
 
 #' @export
 setOsmoseMaps.prediction.niche.models = 
-  function(object, type, interannual=FALSE, start=NULL, end=NULL, sp, lifespan, 
-           ages=NULL, frequency=24, toPA=TRUE,
-           prob=TRUE, criteria="MinROCdist",
-           normalize=TRUE, lat=NULL, lon=NULL) {
+  function(object, type, sp, lifespan, frequency=24, ages=NULL, normalize=TRUE, 
+           interannual=FALSE, start=NULL, end=NULL,  
+           toPA=TRUE, prob=TRUE, criteria="MinROCdist", lat=NULL, lon=NULL, ...) {
   
   if(is.null(ages)) ages = seq_len(ceiling(lifespan) + 1) - 1
   

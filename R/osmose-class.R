@@ -104,7 +104,7 @@ getVar.osmose = function(object, var, type = "global", expected = FALSE, ...) {
 #' @method print osmose
 #'
 #' @export
-print.osmose = function(x) {
+print.osmose = function(x, ...) {
   cat(paste0("OSMOSE v.", x$model$version,"\n"))
   cat("Model", sQuote(x$model$model),"\n")
   cat(x$model$sp, " species modeled (",x$model$simus,
@@ -118,7 +118,7 @@ print.osmose = function(x) {
 #' 
 #' @method summary osmose
 #' @export
-summary.osmose = function(object) {
+summary.osmose = function(object, ...) {
   
   output = object$model
   output$species = object$species
