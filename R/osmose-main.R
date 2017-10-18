@@ -1,48 +1,6 @@
 
 # osmose: main functions --------------------------------------------------
 
-
-# buildConfiguration ------------------------------------------------------
-#' @title Build an OSMOSE configuration
-#' @description This function create a valid configuration by several input files
-#' from user input parameters.  
-#' @param file Filename of the main configuration file
-#' @param path Path for creating the input files, by default \code{"_osmose"}
-#' @param config An \code{osmose.config} class object or a file path for an
-#' osmose configuration file. This parameters will take precedence over the ones
-#' specified in \code{file}.
-#' @param absolute Boolean, use absolute paths relative to \code{file} to build the
-#' configuration? If \code{FALSE}, relative paths are using for each individual
-#' configuration file to parse its content.
-#' @param newFile if \code{NULL}, the \code{file} provided is edited, otherwise
-#' a new file is created with the modified configuration.
-#' @details Basic configurations may not need the use of \code{buildConfiguration},
-#' but it is required for configuration using interannual inputs or fishing selectivity.
-#' @author Ricardo Oliveros-Ramos
-#' @examples
-#' \dontrun{
-#' buildConfiguration("config.csv")
-#' }
-#' @export
-buildConfiguration = function(file, path="_osmose", config=NULL, absolute=TRUE, newFile=NULL) {
-  # read osmose parameters
-  L1 = readOsmoseConfiguration(file=file, config=config, absolute=absolute)
-  L1 = rapply(L1, .guessType, how = "list", keep.att=TRUE)
-  
-  outputPath = file.path(dirname(file), path)
-  # create Time series files (output, configLines):
-  # in a folder created at the same level
-  # fishing
-#   fishing = writeFishingFiles(L1, outputPath)
-  # migration
-  # plankton?
-  # other
-  # write additional config File
-  # config.csv: one line added with new parameters  
-  return(L1)
-}
-
-
 # runOsmose ---------------------------------------------------------------
 #' @title Run an OSMOSE configuration
 #' @description This function create a valid configuration by several input files
@@ -76,6 +34,7 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
   if(is.null(options)) options = ""
   
   run.osmose = paste(java, options, "-jar", osmose, input, output)
+  
   if(!isTRUE(verbose)) { 
     if(shell=="BASH") {
       run.osmose = paste(run.osmose, ">", log, "2>&1")
@@ -83,7 +42,7 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
       run.osmose = paste(run.osmose, ">&", log)
     }
   }
-
+  
   system(run.osmose, wait=TRUE)
   
   return(invisible(run.osmose))
@@ -91,7 +50,7 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
 }
 
 
-# osmose2R ----------------------------------------------------------------
+# read_osmose -------------------------------------------------------------
 #' @title Read OSMOSE outputs into an R object
 #' @description This function create object of class \code{osmose} with the 
 #' outputs from OSMOSE in the \code{path} folder.  
@@ -105,7 +64,7 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
 #' @author Ricardo Oliveros-Ramos
 #' @author Laure Velez
 #' @export
-osmose2R =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
+read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
   if(is.null(path) & interactive()) {
     path = choose.dir(caption="Select OSMOSE outputs folder")
   }
@@ -120,4 +79,56 @@ osmose2R =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
   class(output) = "osmose"
   return(output)
 }
+
+# to keep back compatibility for a while
+#' @aliases read_osmose
+#' @export
+osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
+  
+  .Deprecated("read_osmose")
+  read_osmose(path=path, version=version, species.names=species.names, ...)
+
+}
+
+
+# buildConfiguration ------------------------------------------------------
+#' @title Build an OSMOSE configuration
+#' @description This function create a valid configuration by several input files
+#' from user input parameters.  
+#' @param file Filename of the main configuration file
+#' @param path Path for creating the input files, by default \code{"_osmose"}
+#' @param config An \code{osmose.config} class object or a file path for an
+#' osmose configuration file. This parameters will take precedence over the ones
+#' specified in \code{file}.
+#' @param absolute Boolean, use absolute paths relative to \code{file} to build the
+#' configuration? If \code{FALSE}, relative paths are using for each individual
+#' configuration file to parse its content.
+#' @param newFile if \code{NULL}, the \code{file} provided is edited, otherwise
+#' a new file is created with the modified configuration.
+#' @details Basic configurations may not need the use of \code{buildConfiguration},
+#' but it is required for configuration using interannual inputs or fishing selectivity.
+#' @author Ricardo Oliveros-Ramos
+#' @examples
+#' \dontrun{
+#' buildConfiguration("config.csv")
+#' }
+buildConfiguration = function(file, path="_osmose", config=NULL, absolute=TRUE, newFile=NULL) {
+  # read osmose parameters
+  L1 = readOsmoseConfiguration(file=file, config=config, absolute=absolute)
+  L1 = rapply(L1, .guessType, how = "list", keep.att=TRUE)
+  
+  outputPath = file.path(dirname(file), path)
+  # create Time series files (output, configLines):
+  # in a folder created at the same level
+  # fishing
+  #   fishing = writeFishingFiles(L1, outputPath)
+  # migration
+  # plankton?
+  # other
+  # write additional config File
+  # config.csv: one line added with new parameters  
+  return(L1)
+}
+
+
 
