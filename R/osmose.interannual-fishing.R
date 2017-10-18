@@ -3,6 +3,18 @@
 
 # Fishing mortality -------------------------------------------------------
 
+#' Get fishing mortality rate.
+#' 
+#' @details \deqn{F = \frac{B \times \exp^{A+S}}{ndt}}
+#' with \eqn{B}=mortality rate, \eqn{A}=deviates by year, \eqn{S}=deviates by seasons
+#' 
+#' @param sp Species index (sp0, sp1, sp2, etc.)
+#' @param fishing List of fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @return  Fishing mortality rate.
+#' @export
 getFishingMortality = function(sp, fishing, T, ndt) {
 
   # validation?
@@ -33,15 +45,29 @@ getFishingMortality = function(sp, fishing, T, ndt) {
 # mortality.fishing.rate.byYear.sp0;numeric_vector
 # mortality.fishing.rate.byDt.file.sp0;path/to/file
 
+#' Get fishing base rate.
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry.
+#' It first check for the "method" parameter for the current
+#' specie (\emph{mortality.fishing.rate.method.spX}), whose value can be
+#' 
+#' \itemize{
+#' \item{constant: use \emph{rate.spX}}
+#' \item{byRegime: use \emph{rate.byRegime.file.spX}}
+#' \item{linear  : use \emph{rate.slope.spX}}
+#' \item{byYear  : use \emph{rate.byYear.spX}}
+#' \item{byDt    : use \emph{rate.byDt.spX}}
+#' }
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#' @export
 getFishingBaseRate = function(sp, fishing, T, ndt) {
   
   method = fishing$rate$method[[sp]]
   useFiles = .getBoolean(fishing$useFiles, FALSE)
-  # # constant: use rate.sp0
-  # # byRegime: use rate.byRegime.file.sp0
-  # # linear  : use rate.slope.sp0
-  # # byYear  : use rate.byYear.sp0;
-  # # byDt    : use rate.byDt.sp;
+
   base = switch(method,
                 "constant" = getFishingBaseRate.constant(sp, fishing, T, ndt), 
                 "byregime" = getFishingBaseRate.byRegime(sp, fishing, T, ndt), 
@@ -49,11 +75,23 @@ getFishingBaseRate = function(sp, fishing, T, ndt) {
                 "byyear"   = getFishingBaseRate.byYear(sp, fishing, T, ndt), 
                 "bydt"     = getFishingBaseRate.byDt(sp, fishing, T, ndt))
   
-  base = rep(base, length=ndt*T) #???
+  # barrier.n: should not be done here.
+  # base = rep(base, length=ndt*T) #???
   
   return(base)
 }
 
+#' Get fishing base rate using constant rate
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. It reads
+#' the \emph{rate.spX} parameter, which is repeated \eqn{T \times ndt} times.
+#'
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @export
 getFishingBaseRate.constant = function(sp, fishing, T, ndt) {
   rate = fishing$rate[[sp]]
   if(is.null(rate)) stop(sprintf("No fishing rate provided for %s", sp))
@@ -90,6 +128,19 @@ getFishingBaseRate.byRegime = function(sp, fishing, T, ndt) {
   return(rates)
 }
 
+#' Get fishing base rate using a linear rate
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. It reads
+#' the \emph{rate.spX} and \emph{rate.slope.spX} parameters. 
+#' The slope is computed any time the fishing frequency changes (fishingperiod parameter)
+#' For instance, if ndt=20, period=5, there are 4 time steps between two fishing time step. Therefore, 
+#' the value will be (i0, i0, i0, i0, i1, i1, i1, i1, ...)
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @export
 getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
   
   # mortality.fishing.rate.slope.sp0;0.03 # 3% per year
@@ -103,14 +154,32 @@ getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
   if(is.null(slope)) stop(sprintf("No fishing slope provided for %s", sp))
   if(length(slope)>1) stop(sprintf("More than one slope for %s provided.", sp))
   
+  # time is a vector that goes from 0 to T by a step of period, all in time step unit.
+  # ndt/freq is the fishing period period.
   time = seq(from=0, by=freq/ndt, length=T*ndt/freq)
   rates = rate + slope*rate*time
-  rates = rep(rates, each=freq)
+  rates = rep(rates, each=freq)    # repeats x0 x1 to x0 x0 x0 ... x1 x1 x1 with N repetitions, N=fishing freq.
   
   return(rates)
   
 }
 
+#' Get fishing base rate using annual rates.
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. 
+#' 
+#' It reads the annual values either from an external file or from the configuration file.
+#' It must contain a number of elements which is a multiple of the fishing period.
+#' 
+#' Warning: The number of rate elements must be a multiple of the fishing 
+#' period since \strong{cycling is performed!)
+#' 
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @export
 getFishingBaseRate.byyear = function(sp, fishing, T, ndt) {
   
   useFiles = .getBoolean(fishing$useFiles, FALSE)
@@ -123,12 +192,13 @@ getFishingBaseRate.byyear = function(sp, fishing, T, ndt) {
     if(is.null(rates)) rates = .getFileAsVector(fishing$rate$byyear$file[[sp]])
   }
 
+  # rates contains T values
   if(is.null(rates)) stop(sprintf("No fishing rates provided for %s", sp))
   
   freq = .getFishingFrequency(sp, fishing, ndt)
-  nPeriods = ndt/freq
+  nPeriods = ndt/freq   # number of fishing periods
   
-  if((length(rate)%%nPeriods)!=0) 
+  if((length(rates)%%nPeriods)!=0) 
     stop(sprintf("You must provide a multiple of %d rates for %s.", nPeriods, sp))
   
   rates = rep(rates, each=freq, length=T*ndt)
@@ -136,6 +206,22 @@ getFishingBaseRate.byyear = function(sp, fishing, T, ndt) {
   
 }
 
+#' Get fishing base rate using time-step rates.
+#' 
+#' @details It assumes that in the Osmose configuration, there is a "fishing" entry. 
+#' 
+#' It reads the time-step values either from an external file or from the configuration file.
+#' It must contain a number of elements which is a multiple of the fishing period.
+#' 
+#' Warning: The number of rate elements must be a multiple of the fishing 
+#' period since \strong{cycling is performed!)
+#' 
+#' @param sp Current specie (sp0, sp1, etc.)
+#' @param fishing Fishing parameters
+#' @param T Number of years
+#' @param ndt  Time step
+#'
+#' @export
 getFishingBaseRate.bydt = function(sp, fishing, T, ndt) {
   
   useFiles = .getBoolean(fishing$useFiles, FALSE)

@@ -34,6 +34,15 @@ writeOsmoseParameters = function(conf, file, sep=";") {
   return(invisible(out))
 }
 
+#' Read Osmose output file
+#'
+#' @param path Osmose output path
+#' @param type Data type ("biomass", etc)
+#' @param bySpecies TRUE if should read one file per species.
+#' @param ... Additional arguments
+#'
+#' @return Output data frame
+#' @export
 readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
   
   xclass = paste("osmose", type, sep=".")
@@ -63,11 +72,20 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
   
 }
 
-
+#' Get size spectrum
+#'
+#' @param file File to read
+#' @param sep File separator
+#' @param ... Additional arguments of the \code{\link{.readOsmoseCsv}} function
+#'
+#' @return A 3D array (time, legnth, species)
+#' @export
 getSizeSpectrum = function(file, sep=",") {
-  # use readOsmoseCsv
-  sizeSpectrum = read.table(file, sep=sep, dec=".", skip=1,
-                            header=TRUE)
+  
+  # sizeSpectrum = read.table(file, sep=sep, dec=".", skip=1,
+  #                          header=TRUE)
+  sizeSpectrum = .readOsmoseCsv(file=file, sep=sep, header=TRUE...)
+  
   nsp = ncol(sizeSpectrum) - 2
   times = unique(sizeSpectrum$Time)
   lengths = unique(sizeSpectrum$Size)
@@ -84,7 +102,14 @@ getSizeSpectrum = function(file, sep=",") {
 }
 
 
-
+#' Get the total mortality rate. 
+#' 
+#' @param x Mortality dataframe
+#' @param stage Stage ("adults", etc.)
+#' @param type Mortality type ("pred", "starv", "other", "out", "total"). 
+#' The latter is computed as the sum of all mortality types
+#'
+#' @return A mortality array
 getMortality = function(x, stage="adults", type="total") {
   .calcMort = function(x) {
     x = as.data.frame(x)
@@ -104,7 +129,17 @@ getMortality = function(x, stage="adults", type="total") {
   return(out)
 }
 
-
+#' Computes the average mortality.
+#' 
+#' It computes the mean mortality, which
+#' is multiplied by the frequency.
+#'
+#' @param x Mortality dataframe
+#' @param stage Stage ("adults", etc.)
+#' @param freq Time frequency (months?)
+#'
+#' @return An array
+#' @export
 getAverageMortality = function(x, stage="adults", freq=12) {
   
   .getZ = function(x, stage) {
@@ -118,6 +153,18 @@ getAverageMortality = function(x, stage="adults", freq=12) {
   return(out)
 }
 
+#' Computes the mortality deviation. The "proxy", which is removed,
+#' can be provided by the user in the "pars" argument.
+#'
+#' @param x Mortality dataframe
+#' @param stage Stage ("adults", etc.)
+#' @param type Mortality type
+#' @param pars A list or data frame containing  
+#' \emph{dt.save}, \emph{M.proxy}, \emph{dt} entries.
+#' If NULL, then \code{proxy = colMeans(x)}
+#'
+#' @return An array
+#' @export
 getMortalityDeviation = function(x, stage, type, pars=NULL) {
   x     = getMortality(x=x, stage=stage, type=type)
   if(!is.null(pars)) {

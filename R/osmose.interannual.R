@@ -22,6 +22,11 @@
 # 
 # F = Fm*exp(dy+ds)
 
+#' Write fishing files from osmose configuration list.
+#'
+#' @param L1 Osmose configuration (see \code{\link{readOsmoseConfiguration}})
+#' @param outputPath Output path
+#' @export
 writeFishingFiles = function(L1, outputPath) {
   
   nsp = getOsmoseParameter(L1, "simulation", "nspecies")
@@ -40,3 +45,14 @@ writeFishingFiles = function(L1, outputPath) {
   return(ofiles)  
 }
 
+#' Write an array or dataframe in the Osmose format.
+#' The separator is ";", there are no quotes and a blank column is
+#' added for the row names column.
+#'
+#' @param x Object to be written (table or data frame)
+#' @param file Output file
+#' 
+#' @export
+write.osmose = function(x, file)   {
+  write.table(x=x, file=file, sep=";", col.names=NA, quote=FALSE)
+}
