@@ -1,22 +1,5 @@
-# osmose package: Modelling Marine Exploited Ecosystems
 
-#' OSMOSE: Object-oriented Simulator of Marine biOdiverSity Exploitation
-#' 
-#' \tabular{ll}{ Package: \tab osmose\cr Type: \tab Package\cr Version: \tab
-#' 0.1\cr Date: \tab 2016-02-01\cr License: \tab GPL-2\cr } 
-#' 
-#' @name osmose-package
-#' @aliases osmose-package osmose
-#' @docType package
-#' @author Yunne-Jai Shin
-#' @author Philippe Verley
-#' @author Morgane Travers
-#' @author Laure Velez
-#' @author Ricardo Oliveros-Ramos 
-#' Maintainer: Ricardo Oliveros-Ramos <ricardo.oliveros@@gmail.com>
-#' @references osmose: Modelling Marine Exploited Ecosystems
-#' @keywords modelling marine ecosystems
-NULL
+# osmose: main functions --------------------------------------------------
 
 
 # buildConfiguration ------------------------------------------------------
