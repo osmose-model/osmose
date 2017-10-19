@@ -1,17 +1,11 @@
-Package: osmose
-Type: Package
-Title: OSMOSE: Modelling Marine Exploited Ecosystems
-Version: 0.1.0
-Date: 2017-10-18
-Authors@R: c(
-  person("Nicolas", "Barrier", email="nicolas.barrier@ird.fr", role="cre"),
-  person("Ricardo", "Oliveros-Ramos", role = "aut"), 
-  person("Laure", "Velez", role = "aut"),
-  person("Criscely", "Lujan", role="aut"),
-  person("Yunne-Jai", "Shin", role="fnd"),
-  person("Michael", "Hurtado", role = "ctb")
-  )
-Description: OSMOSE is a multispecies and Individual-based model (IBM) which 
+OSMOSE: Modelling Marine Exploited Ecosystems
+=============================================
+
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/osmose)](http://cran.r-project.org/package=osmose)
+[![Github Issues](http://githubbadges.herokuapp.com/osmose-model/osmose/issues.svg?style=flat-square)](https://github.com/osmose-model/osmose/issues)
+[![](http://cranlogs.r-pkg.org/badges/osmose)](http://cran.rstudio.com/web/packages/osmose/index.html)
+
+OSMOSE is a multispecies and Individual-based model (IBM) which 
   focuses on fish species. This model assumes opportunistic predation based on 
   spatial co-occurrence and size adequacy between a predator and its prey 
   (size-based opportunistic predation). It represents fish individuals grouped 
@@ -24,21 +18,3 @@ Description: OSMOSE is a multispecies and Individual-based model (IBM) which
   for instance. This package provides tools to build a model and run simulations
   using the OSMOSE model. See <http://www.osmose-model.org/> for 
   more details.
-License: GPL-2
-Encoding: UTF-8
-Depends: 
-  R (>= 2.15)
-Imports: 
-  stringr, 
-  rlist,
-  stats,
-  utils,
-  grDevices,
-  graphics,
-  fields
-Suggests:
-  kali
-URL: 
-LazyData: FALSE
-BugReports: https://github.com/osmose-model/osmose/issues
-RoxygenNote: 6.0.1
