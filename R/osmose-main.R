@@ -19,7 +19,7 @@
 #' but it is required for configuration using interannual inputs or fishing selectivity.
 #' @author Ricardo Oliveros-Ramos
 #' @export
-runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output="output/",
+runOsmose = function(osmose="inst/java/osmose_stable_3.jar", java="java", input="input/config.csv", output="output/",
                      options=NULL, log="osmose.log", verbose=NULL, clean=TRUE, shell="BASH") {
   
   # barrier.n: redirection 
