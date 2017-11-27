@@ -19,15 +19,14 @@
 #' but it is required for configuration using interannual inputs or fishing selectivity.
 #' @author Ricardo Oliveros-Ramos
 #' @export
-runOsmose = function(osmose="inst/java/osmose_stable_3.jar", java="java", input="input/config.csv", output="output/",
+runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output="output/",
                      options=NULL, log="osmose.log", verbose=NULL, clean=TRUE, shell="BASH") {
   
   # barrier.n: redirection 
   
   if(is.null(verbose))  verbose = interactive()
   
-  if(is.null(osmose) & interactive())  stop("No default OSMOSE java executable")
-  if(is.null(osmose) & !interactive()) osmose = "osmose.jar"
+  if(is.null(osmose)) osmose = system.file("java", "osmose_stable_3.jar", package="osmose")
   
   if(isTRUE(clean)) file.remove(file.path(output, dir(path=output, recursive=TRUE)))
   
