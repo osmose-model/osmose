@@ -6,7 +6,7 @@
 \usage{
 runOsmose(osmose = NULL, java = "java", input = "input/config.csv",
   output = "output/", options = NULL, log = "osmose.log",
-  verbose = NULL, clean = TRUE, shell = "BASH")
+  verbose = NULL, clean = TRUE, shell = "BASH", version = "3")
 }
 \arguments{
 \item{osmose}{Name of the Osmose java .jar file}

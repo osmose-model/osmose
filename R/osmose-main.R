@@ -14,13 +14,14 @@
 #' @param verbose NULL if run is not interactive (output in the log file)
 #' @param clean TRUE if the output directory should be cleaned
 #' @param shell Shell to use ("BASH" or "CSH")
-#' a new file is created with the modified configuration.
+#' @param version OSMOSE Java version. From version 3 to 4, the way command arguments
+#' are set (configuration file and output directory) has been changed. 
 #' @details Basic configurations may not need the use of \code{buildConfiguration},
 #' but it is required for configuration using interannual inputs or fishing selectivity.
 #' @author Ricardo Oliveros-Ramos
 #' @export
 runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output="output/",
-                     options=NULL, log="osmose.log", verbose=NULL, clean=TRUE, shell="BASH") {
+                     options=NULL, log="osmose.log", verbose=NULL, clean=TRUE, shell="BASH", version="3") {
   
   # barrier.n: redirection 
   
@@ -32,7 +33,12 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
   
   if(is.null(options)) options = ""
   
-  run.osmose = paste(java, options, "-jar", osmose, input, output)
+  if(version=="3"){
+    run.osmose = paste(java, options, "-jar", osmose, input, output)
+  } else {
+    temp = paste("-Poutput.dir.path=", output, " ", input, sep="")
+    run.osmose = paste(java, options, "-jar", osmose, temp)
+  }
   
   if(!isTRUE(verbose)) { 
     if(shell=="BASH") {
@@ -42,6 +48,9 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
     }
   }
   
+  cat("++++++++++++++++++++++++ Running the following command: ", "\n")
+  cat(run.osmose, "\n")
+  cat("++++++++++++++++++++++++", "\n")
   system(run.osmose, wait=TRUE)
   
   return(invisible(run.osmose))
