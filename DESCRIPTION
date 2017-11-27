@@ -22,7 +22,7 @@ Description: OSMOSE is a multispecies and Individual-based model (IBM) which foc
   which can be found in FishBase for instance, and fish spatial distribution data. This
   package provides tools to build a model and run simulations using the OSMOSE model. See
   <http://www.osmose-model.org/> for more details.
-License: GPL-2
+License: CeCILL-B + file LICENSE
 Encoding: UTF-8
 Depends: 
   R (>= 2.15)
