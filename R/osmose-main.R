@@ -67,8 +67,9 @@ runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output=
 #' @aliases osmose2R
 read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
   if(is.null(path) & interactive()) {
-    path = choose.dir(caption="Select OSMOSE outputs folder")
+    path = readline(prompt="Select OSMOSE outputs folder")
   }
+  if(!dir.exists(path)) stop("The input directory does not exist.")
   if(is.null(path)) stop("No path has been provided.")
   
   output = switch(version, 

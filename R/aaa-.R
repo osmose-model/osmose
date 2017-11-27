@@ -5,7 +5,7 @@ NULL
 NULL
 #' @importFrom stats median quantile setNames dlnorm dnorm qnorm
 NULL
-#' @importFrom utils choose.dir read.csv read.table write.table
+#' @importFrom utils read.csv read.table write.table
 NULL
 #' @importFrom rlist list.merge
 NULL
