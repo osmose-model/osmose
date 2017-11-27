@@ -76,9 +76,10 @@ public class AbundanceOutput extends AbstractOutput {
     public void update() {
 
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (include(school)) {
-                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
             }
+            abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
         }
     }
 
@@ -117,7 +118,7 @@ public class AbundanceOutput extends AbstractOutput {
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
+            species[i] = getSimulation().getSpecies(i).getName();
         }
         return species;
     }

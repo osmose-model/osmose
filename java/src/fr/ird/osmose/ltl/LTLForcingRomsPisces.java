@@ -49,11 +49,8 @@
 package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
-import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
@@ -66,12 +63,12 @@ import ucar.nc2.NetcdfFile;
 public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
     String[] planktonFileListNetcdf;
-    float[][][] depthLevel;
+    float[][][] depthOfLayer;       // table of height of layers of ROMS model used in vertical integration
     String[] plktonNetcdfNames;
     private String gridFileName;
     private String strCs_r, strHC;
-    private String strLon, strLat, strMask, strH;
-    float[][] latitude, longitude, mask;
+    private String strLon, strLat, strH;
+    float[][] latitude, longitude;
     /**
      * Dimension of the LTL grid along the x-axis.
      */
@@ -84,11 +81,6 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
      * Dimension of the LTL grid along the z-axis.
      */
     private int nz;
-    /**
-     * List of LTL cells that are contained within Osmose cells. The map is
-     * indexed by Osmose cell index.
-     */
-    private HashMap<Integer, List<Point>> ltlCells;
 
     public LTLForcingRomsPisces(int rank) {
         super(rank);
@@ -110,14 +102,13 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         gridFileName = getConfiguration().getFile("ltl.netcdf.grid.file");
         strLon = getConfiguration().getString("ltl.netcdf.var.lon");
         strLat = getConfiguration().getString("ltl.netcdf.var.lat");
-        strMask = getConfiguration().getString("ltl.netcdf.var.mask");
         strH = getConfiguration().getString("ltl.netcdf.var.bathy");
         strCs_r = getConfiguration().getString("ltl.netcdf.var.csr");
         strHC = getConfiguration().getString("ltl.netcdf.var.hc");
     }
 
     @Override
-    public void initLTL() {
+    public void initLTLGrid() {
         try {
             NetcdfFile ncIn = NetcdfFile.open(gridFileName, null);
             /*
@@ -132,29 +123,25 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
              */
             Array arrLon = ncIn.findVariable(strLon).read();
             Array arrLat = ncIn.findVariable(strLat).read();
-            Array arrMask = ncIn.findVariable(strMask).read();
             if (arrLon.getElementType() == float.class) {
                 longitude = (float[][]) arrLon.copyToNDJavaArray();
                 latitude = (float[][]) arrLat.copyToNDJavaArray();
-                mask = (float[][]) arrMask.copyToNDJavaArray();
             } else {
                 longitude = new float[ny][nx];
                 latitude = new float[ny][nx];
-                mask = new float[ny][nx];
                 Index index = arrLon.getIndex();
                 for (int j = 0; j < ny; j++) {
                     for (int i = 0; i < nx; i++) {
                         index.set(j, i);
                         longitude[j][i] = arrLon.getFloat(index);
                         latitude[j][i] = arrLat.getFloat(index);
-                        mask[j][i] = arrMask.getFloat(index);
                     }
                 }
             }
             /*
              * Compute vertical levels
              */
-            depthLevel = computeDepthLevel(ncIn);
+            depthOfLayer = getCstSigLevels(ncIn);
             /*
              * Determine cell overlap for spatial integration
              */
@@ -166,29 +153,29 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
 
     // CASE SPECIFIC - uses easy relation between the grids Plume and Osmose
     private void findValidMapIndex() {
-
-        ltlCells = new HashMap();
+        int jGrid, iGrid;
+        icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
+        jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
 
         // consider only the LTL cells included within the Osmose grid
-        for (int iLTL = 0; iLTL < nx; iLTL++) {
-            for (int jLTL = 0; jLTL < ny; jLTL++) {
-                if ((latitude[jLTL][iLTL] >= getGrid().getLatMin()) && (latitude[jLTL][iLTL] <= getGrid().getLatMax()) && (longitude[jLTL][iLTL] >= getGrid().getLongMin()) && (longitude[jLTL][iLTL] <= getGrid().getLongMax())) {
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
+                if ((latitude[j][i] >= getGrid().getLatMin()) && (latitude[j][i] <= getGrid().getLatMax()) && (longitude[j][i] >= getGrid().getLongMin()) && (longitude[j][i] <= getGrid().getLongMax())) {
                     // equations giving the position of ROMS cells within the Osmose getGrid(), avoiding to read the whole matrix
-                    int j = (int) Math.floor((latitude[jLTL][iLTL] - getGrid().getLatMin()) / getGrid().getdLat());
-                    int i = (int) Math.floor((longitude[jLTL][iLTL] - getGrid().getLongMin()) / getGrid().getdLong());
-                    j = Math.min(j, getGrid().get_ny() - 1);
-                    i = Math.min(i, getGrid().get_nx() - 1);
+                    jGrid = (int) Math.floor((latitude[j][i] - getGrid().getLatMin()) / getGrid().getdLat());
+                    iGrid = (int) Math.floor((longitude[j][i] - getGrid().getLongMin()) / getGrid().getdLong());
+                    jGrid = Math.min(jGrid, getGrid().get_ny() - 1);
+                    iGrid = Math.min(iGrid, getGrid().get_nx() - 1);
+
                     // attach each LTL cells to the right Osmose cell (several LTL cells per Osmose cell is allowed)
-                    Cell cell = getGrid().getCell(i, j);
-                    if (!cell.isLand()) {
+                    if (!getGrid().getCell(iGrid, jGrid).isLand()) {
                         //System.out.println("osmose cell " + posiTemp + " " + posjTemp + " contains roms cell " + i + " " + j);
-                        if (!ltlCells.containsKey(cell.getIndex())) {
-                            ltlCells.put(cell.getIndex(), new ArrayList());
+                        if (null == icoordLTLGrid[jGrid][iGrid]) {
+                            icoordLTLGrid[jGrid][iGrid] = new ArrayList();
+                            jcoordLTLGrid[jGrid][iGrid] = new ArrayList();
                         }
-                        // Only include ROMS ocean cells
-                        if (mask[jLTL][iLTL] > 0) {
-                            ltlCells.get(cell.getIndex()).add(new Point(iLTL, jLTL));
-                        }
+                        icoordLTLGrid[jGrid][iGrid].add(i);
+                        jcoordLTLGrid[jGrid][iGrid].add(j);
                     }
                 }
             }
@@ -201,29 +188,37 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
          */
         for (int j = 0; j < getGrid().get_ny(); j++) {
             for (int i = 0; i < getGrid().get_nx(); i++) {
-                Cell cell = getGrid().getCell(i, j);
-                int index = cell.getIndex();
-                if (!cell.isLand()) {
-                    if (!ltlCells.containsKey(index)) {
-                        ltlCells.put(index, new ArrayList());
-                    }
-                    if (ltlCells.get(index).isEmpty()) {
-                        List<Cell> neighbours = new ArrayList();
+                if (!getGrid().getCell(i, j).isLand()) {
+                    if (null == icoordLTLGrid[j][i] || icoordLTLGrid[j][i].isEmpty()) {
+                        icoordLTLGrid[j][i] = new ArrayList();
+                        jcoordLTLGrid[j][i] = new ArrayList();
+                        Cell cell;
                         if (j > 0) {
-                            neighbours.add(getGrid().getCell(i, j - 1));
+                            cell = getGrid().getCell(i, j - 1);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[j][i].addAll(icoordLTLGrid[j - 1][i]);
+                                jcoordLTLGrid[j][i].addAll(jcoordLTLGrid[j - 1][i]);
+                            }
                         }
                         if (i > 0) {
-                            neighbours.add(getGrid().getCell(i - 1, j));
+                            cell = getGrid().getCell(i - 1, j);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[j][i].addAll(icoordLTLGrid[j][i - 1]);
+                                jcoordLTLGrid[j][i].addAll(jcoordLTLGrid[j][i - 1]);
+                            }
                         }
                         if (j < getGrid().get_ny() - 1) {
-                            neighbours.add(getGrid().getCell(i, j + 1));
+                            cell = getGrid().getCell(i, j + 1);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[j][i].addAll(icoordLTLGrid[j + 1][i]);
+                                jcoordLTLGrid[j][i].addAll(jcoordLTLGrid[j + 1][i]);
+                            }
                         }
                         if (i < getGrid().get_nx() - 1) {
-                            neighbours.add(getGrid().getCell(i + 1, j));
-                        }
-                        for (Cell neighbour : neighbours) {
-                            if (!neighbour.isLand()) {
-                                ltlCells.get(index).addAll(ltlCells.get(neighbour.getIndex()));
+                            cell = getGrid().getCell(i + 1, j);
+                            if (!cell.isLand()) {
+                                icoordLTLGrid[j][i].addAll(icoordLTLGrid[j][i + 1]);
+                                jcoordLTLGrid[j][i].addAll(jcoordLTLGrid[j][i + 1]);
                             }
                         }
                     }
@@ -233,34 +228,19 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
     }
 
     @Override
-    float[][][] getRawBiomass(int iPlankton, int iStepSimu) {
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
-        // Get NetCDF file name for LTL group iLTL and time step iStepSimu
         String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
-        float[][][] rawBiomass = null;
+        float[][][] data3d = null;
+
         NetcdfFile nc = null;
         try {
-            // Open NetCDF file
             nc = NetcdfFile.open(name);
-            // Read LTL biomass in NetCDF array
-            Array array = nc.findVariable(plktonNetcdfNames[iPlankton]).read().reduce();
-            // Get the shape of the LTL variable
-            int[] shape = array.getShape();
-            // Permute the dimensions in order to have rawBiomass[j][i][k]
-            rawBiomass = new float[shape[1]][shape[2]][shape[0]];
-            // Fill up the rawBiomass variable
-            Index index = array.getIndex();
-            for (int iLTL = 0; iLTL < shape[2]; iLTL++) {
-                for (int jLTL = 0; jLTL < shape[1]; jLTL++) {
-                    for (int kLTL = 0; kLTL < shape[0]; kLTL++) {
-                        rawBiomass[jLTL][iLTL][kLTL] = (float) array.getFloat(index.set(kLTL, jLTL, iLTL));
-                    }
-                }
-            }
+            // read data and put it local array
+            data3d = (float[][][]) nc.findVariable(plktonNetcdfNames[iPlankton]).read().reduce().copyToNDJavaArray();
         } catch (IOException ex) {
             error("Error loading plankton variable " + plktonNetcdfNames[iPlankton] + " from file " + name, ex);
         } finally {
-            // Close the NetCDF file
             if (null != nc) {
                 try {
                     nc.close();
@@ -270,7 +250,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
             }
         }
 
-        return rawBiomass;
+        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override
@@ -282,7 +262,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
      * Computes the depth at sigma levels disregarding the free surface
      * elevation.
      */
-    private float[][][] computeDepthLevel(NetcdfFile ncIn) throws IOException {
+    private float[][][] getCstSigLevels(NetcdfFile ncIn) throws IOException {
 
         double hc;
         double[] sc_r = new double[nz];
@@ -316,10 +296,10 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
         }
 
         //------------------------------------------------------------
-        // Calculation of z_r
-        float[][][] z_r = new float[ny][nx][nz];
+        // Calculation of z_w , z_r
+        float[][][] z_r = new float[nz][ny][nx];
 
-        /* 2010 June: UCLA Roms version (but not AGRIF yet)
+        /* 2010 June: Recent UCLA Roms version (but not AGRIF yet)
          * uses new formulation for computing the unperturbated depth.
          * It is specified in a ":VertCoordType" global attribute that takes
          * mainly two values : OLD / NEW
@@ -333,7 +313,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 for (int i = nx; i-- > 0;) {
                     for (int j = ny; j-- > 0;) {
                         for (int k = nz; k-- > 0;) {
-                            z_r[j][i][k] = (float) (hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i]);
+                            z_r[k][j][i] = (float) (hc * (sc_r[k] - Cs_r[k]) + Cs_r[k] * hRho[j][i]);
                         }
                     }
                 }
@@ -343,7 +323,7 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
                 for (int i = nx; i-- > 0;) {
                     for (int j = ny; j-- > 0;) {
                         for (int k = nz; k-- > 0;) {
-                            z_r[j][i][k] = (float) (hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]));
+                            z_r[k][j][i] = (float) (hRho[j][i] * (sc_r[k] * hc + Cs_r[k] * hRho[j][i]) / (hc + hRho[j][i]));
                         }
                     }
                 }
@@ -420,16 +400,6 @@ public class LTLForcingRomsPisces extends AbstractLTLForcing {
          * Nothing worked and eventually returned OLD type.
          */
         return VertCoordType.OLD;
-    }
-
-    @Override
-    float[] getDepthLevel(int iLTL, int jLTL) {
-        return depthLevel[jLTL][iLTL];
-    }
-
-    @Override
-    List<Point> getLTLCells(Cell cell) {
-        return ltlCells.get(cell.getIndex());
     }
 
     private enum VertCoordType {

@@ -50,7 +50,6 @@ package fr.ird.osmose.process.mortality.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.mortality.FishingMortality;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 
 /**
@@ -64,7 +63,7 @@ public class RateByDtByClassFishingMortality extends AbstractFishingMortality {
      */
     private double[][] f;
     /**
-     * Size thresholds in centimetre. Size stage k means null     {@code threshold[k] <= age < threshold[k+1]}
+     * Size thresholds in centimeter. Size stage k means null     {@code threshold[k] <= age < threshold[k+1]}
      */
     private float[] sizeThreshold;
     /**
@@ -75,14 +74,14 @@ public class RateByDtByClassFishingMortality extends AbstractFishingMortality {
     private int[] ageThreshold;
 
     public RateByDtByClassFishingMortality(int rank, Species species) {
-        super(rank, species, FishingMortality.Type.RATE);
+        super(rank, species);
     }
 
     @Override
-    public void readParameters() {
+    public void init() {
         int iSpec = getIndexSpecies();
         if (!getConfiguration().isNull("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec)) {
-            ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
+            ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
             timeSerieByAge.read(getConfiguration().getFile("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec));
             f = timeSerieByAge.getValues();
             ageThreshold = new int[timeSerieByAge.getNClass() - 1];
@@ -91,12 +90,12 @@ public class RateByDtByClassFishingMortality extends AbstractFishingMortality {
                 ageThreshold[k] = (int) Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
         } else if (!getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
-            ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
+            ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
             timeSerieBySize.read(getConfiguration().getFile("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec));
             f = timeSerieBySize.getValues();
             sizeThreshold = timeSerieBySize.getClasses();
         } else {
-            error("Could not found parameters mortality.fishing.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
+            getSimulation().error("Could not found parameters mortality.fishing.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
     }
 
@@ -143,5 +142,10 @@ public class RateByDtByClassFishingMortality extends AbstractFishingMortality {
     @Override
     public double getCatches(School school) {
         throw new UnsupportedOperationException("No catches specified in this fishing scenario.");
+    }
+
+    @Override
+    public void assessFishableBiomass() {
+        // Do not need it for this scenario
     }
 }

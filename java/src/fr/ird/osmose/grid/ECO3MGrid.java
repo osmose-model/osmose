@@ -157,7 +157,14 @@ public class ECO3MGrid extends AbstractGrid {
 
         for (int i = 0; i < imstr; i++) {
             for (int j = 0; j < jmstr; j++) {
-                osmosevar[j][i] = 0.5f * (eco3mvar[(j + 1) * stride - 1][i * stride] + eco3mvar[j * stride][i * stride]);
+                // barrier.n: bug?  in the above example, we obtain 0.5(lon1 * lon1). But works for latitude
+                // osmosevar[j][i] = 0.5f * (eco3mvar[(j + 1) * stride - 1][i * stride] + eco3mvar[j * stride][i * stride]);  
+                // calculation using the index as follows:
+                for (int ii = 0; ii < stride; ii++) {
+                    for (int jj = 0; jj < stride; jj++) {
+                        osmosevar[j][i] += eco3mvar[j * stride + jj][i * stride + ii] / (stride * stride);
+                    }
+                }
             }
         }
 

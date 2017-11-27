@@ -89,10 +89,6 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
      */
     private int[] recruitmentAge;
     /**
-     * Size of recruitment (expressed in centimetre) [SPECIES]
-     */
-    private float[] recruitmentSize;
-    /**
      * CSV separator
      */
     private final String separator;
@@ -110,8 +106,19 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         abundanceStage = new double[getNSpecies()][STAGES];
 
         // save abundance at the beginning of the time step
-        for (School school : getSchoolSet().getSchools()) {
-            abundanceStage[school.getSpeciesIndex()][getStage(school)] += school.getAbundance();
+        for (School school : getSchoolSet()) {
+            int iStage;
+            if (school.getAgeDt() == 0) {
+                // Eggss
+                iStage = EGG;
+            } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]) {
+                // Pre-recruits
+                iStage = PRE_RECRUIT;
+            } else {
+                // Recruits
+                iStage = RECRUIT;
+            }
+            abundanceStage[school.getSpeciesIndex()][iStage] += school.getAbundance();
         }
     }
 
@@ -127,8 +134,16 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         int iStage;
         int nCause = MortalityCause.values().length;
         double[][][] nDead = new double[getNSpecies()][nCause][STAGES];
-        for (School school : getSchoolSet().getSchools()) {
-            iStage = getStage(school);
+        for (School school : getSchoolSet()) {
+            if (school.getAgeDt() == 0) {
+                iStage = EGG;
+            } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]) {
+                // Pre-recruits
+                iStage = PRE_RECRUIT;
+            } else {
+                // Recruits
+                iStage = RECRUIT;
+            }
             int iSpecies = school.getSpeciesIndex();
             // Update number of deads
             for (MortalityCause cause : MortalityCause.values()) {
@@ -182,7 +197,6 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
         recruitmentAge = new int[getNSpecies()];
-        recruitmentSize = new float[getNSpecies()];
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
             File path = new File(getConfiguration().getOutputPathname());
@@ -190,7 +204,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             filename.append(File.separatorChar);
             filename.append(getConfiguration().getString("output.file.prefix"));
             filename.append("_mortalityRate-");
-            filename.append(getSpecies(iSpecies).getName());
+            filename.append(getSimulation().getSpecies(iSpecies).getName());
             filename.append("_Simu");
             filename.append(getRank());
             filename.append(".csv");
@@ -244,33 +258,14 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpecies)) {
                 float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpecies);
                 recruitmentAge[iSpecies] = Math.round(age * getConfiguration().getNStepYear());
-                recruitmentSize[iSpecies] = -1.f;
             } else if (!getConfiguration().isNull("mortality.fishing.recruitment.size.sp" + iSpecies)) {
-                recruitmentSize[iSpecies] = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpecies);
-                recruitmentAge[iSpecies] = -1;
+                float recruitmentSize = getConfiguration().getFloat("mortality.fishing.recruitment.size.sp" + iSpecies);
+                recruitmentAge[iSpecies] = getSpecies(iSpecies).computeMeanAge(recruitmentSize);
             } else {
-                warning("Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
+                getSimulation().warning("Could not find parameters mortality.fishing.recruitment.age/size.sp{0}. Osmose assumes it is one year.", new Object[]{iSpecies});
                 recruitmentAge[iSpecies] = getConfiguration().getNStepYear();
-                recruitmentSize[iSpecies] = -1.f;
-                
             }
         }
-    }
-
-    private int getStage(School school) {
-        int iStage;
-        if (school.getAgeDt() == 0) {
-            // Eggss
-            iStage = EGG;
-        } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]
-                || school.getLength() < recruitmentSize[school.getSpeciesIndex()]) {
-            // Pre-recruits
-            iStage = PRE_RECRUIT;
-        } else {
-            // Recruits
-            iStage = RECRUIT;
-        }
-        return iStage;
     }
 
     private String quote(String str) {

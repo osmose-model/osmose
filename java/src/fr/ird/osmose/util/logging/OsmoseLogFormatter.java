@@ -48,51 +48,30 @@
  */
 package fr.ird.osmose.util.logging;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
+import java.util.logging.*;
 
-/**
- *
- * @author pverley
- */
 public class OsmoseLogFormatter extends Formatter {
 
     @Override
     public String format(LogRecord record) {
         StringBuilder builder = new StringBuilder(1000);
-        builder.append("osmose");
-        // level printed as fine/info/warn (4 letters) or severe
-        String level = record.getLevel().intValue() < Level.SEVERE.intValue()
-                ? record.getLevel().toString().substring(0, 4)
-                : record.getLevel().toString();
-        builder.append("[").append(level.toLowerCase()).append("] ");
+        builder.append("osmose[").append(record.getLevel().toString().toLowerCase()).append("] - ");
         builder.append(formatMessage(record));
         if (null != record.getThrown()) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            pw.println();
-            record.getThrown().printStackTrace(pw);
-            pw.close();
-            builder.append(sw);
-        } else {
-            builder.append("\n");
+            builder.append(" | ");
+            builder.append(record.getThrown().toString());
         }
+        builder.append("\n");
         return builder.toString();
     }
 
     @Override
-    public String getHead(Handler h
-    ) {
+    public String getHead(Handler h) {
         return super.getHead(h);
     }
 
     @Override
-    public String getTail(Handler h
-    ) {
+    public String getTail(Handler h) {
         return super.getTail(h);
     }
 }

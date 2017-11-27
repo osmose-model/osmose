@@ -129,20 +129,19 @@ public class LTLOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void update() {
-
+        
         int nspec = getNSpecies();
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
-            if (!(cell.isLand())) {
+            if (!cell.isLand()) {
+                List<School> schools = getSchoolSet().getSchools(cell);
                 // Preyed biomass for every LTL group in current cell
                 double[] preyedLTL = new double[getConfiguration().getNPlankton()];
-                if (null != getSchoolSet().getSchools(cell)) {
-                    for (School school : getSchoolSet().getSchools(cell)) {
-                        for (Prey prey : school.getPreys()) {
-                            int iltl = prey.getSpeciesIndex() - nspec;
-                            if (iltl >= 0) {
-                                preyedLTL[iltl] += prey.getBiomass();
-                            }
+                for (School school : schools) {
+                    for (Prey prey : school.getPreys()) {
+                        int iltl = prey.getSpeciesIndex() - nspec;
+                        if (iltl >= 0) {
+                            preyedLTL[iltl] += prey.getBiomass();
                         }
                     }
                 }
@@ -150,7 +149,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
                 int j = cell.get_jgrid();
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
                     // ltl_biomass is the plankton biomass at the beginning of the time step
-                    ltlbiomass0[iltl][j][i] = getSimulation().getForcing().getBiomass(iltl, cell);
+                    ltlbiomass0[iltl][j][i] = getSimulation().getPlankton(iltl).getBiomass(cell);
                     // ltl_biomass_pred is the plankton biomass remaining in the water column after the predation process
                     ltlbiomass1[iltl][j][i] = ltlbiomass0[iltl][j][i] - preyedLTL[iltl];
                 }
@@ -247,7 +246,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
         for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
             str.append(kltl);
             str.append("=");
-            str.append(getConfiguration().getPlankton(kltl));
+            str.append(getSimulation().getPlankton(kltl));
             str.append(" ");
         }
         nc.addGlobalAttribute("dimension_ltl", str.toString());

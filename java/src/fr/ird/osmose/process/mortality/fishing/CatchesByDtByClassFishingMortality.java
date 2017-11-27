@@ -50,7 +50,6 @@ package fr.ird.osmose.process.mortality.fishing;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.mortality.FishingMortality;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 
 /**
@@ -65,7 +64,7 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
      */
     private double[][] catches;
     /**
-     * Size thresholds in centimetre. Size stage k means null
+     * Size thresholds in centimeter. Size stage k means 
      * {@code threshold[k] <= age < threshold[k+1]}
      */
     private float[] sizeClasses;
@@ -81,14 +80,14 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
     private double[] fishableBiomass;
 
     public CatchesByDtByClassFishingMortality(int rank, Species species) {
-        super(rank, species, FishingMortality.Type.CATCHES);
+        super(rank, species);
     }
 
     @Override
-    public void readParameters() {
+    public void init() {
         int iSpec = getIndexSpecies();
         if (!getConfiguration().isNull("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec)) {
-            ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
+            ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
             timeSerieByAge.read(getConfiguration().getFile("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec));
             catches = timeSerieByAge.getValues();
             ageClasses = new float[timeSerieByAge.getNClass() - 1];
@@ -97,12 +96,12 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
                 ageClasses[k] = Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
         } else if (!getConfiguration().isNull("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec)) {
-            ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
+            ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
             timeSerieBySize.read(getConfiguration().getFile("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec));
             catches = timeSerieBySize.getValues();
             sizeClasses = timeSerieBySize.getClasses();
         } else {
-            error("Could not found parameters mortality.fishing.catches.byDt.byAge/bySize.file.sp" + iSpec, null);
+            getSimulation().error("Could not found parameters mortality.fishing.catches.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
     }
 
@@ -145,27 +144,24 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
     }
 
     @Override
-    public void resetFishableBiomass() {
+    public void assessFishableBiomass() {
+
+        // reset fishable biomass
         for (int i = 0; i < fishableBiomass.length; i++) {
             fishableBiomass[i] = 0.d;
         }
-    }
-
-    /*
-     * Increment the fishable biomass, in tonne, of the species.
-     */
-    @Override
-    public void incrementFishableBiomass(School school) {
         int k = -1;
-        if (null != sizeClasses) {
-            // By size class
-            k = indexOf(school.getLength(), sizeClasses);
-        } else if (null != ageClasses) {
-            // By age class
-            k = indexOf(school.getAgeDt(), ageClasses);
-        }
-        if (k >= 0) {
-            fishableBiomass[k] += school.getInstantaneousBiomass();
+        for (School school : getSchoolSet().getSchools(getSpecies(), false)) {
+            if (null != sizeClasses) {
+                // By size class
+                k = indexOf(school.getLength(), sizeClasses);
+            } else if (null != ageClasses) {
+                // By age class
+                k = indexOf(school.getAgeDt(), ageClasses);
+            }
+            if (k >= 0) {
+                fishableBiomass[k] += school.getInstantaneousBiomass();
+            }
         }
     }
 }

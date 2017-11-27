@@ -67,7 +67,7 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class MPA extends OsmoseLinker {
+public class MPA extends SimulationLinker {
 
     /**
      * The index of the MPA.
@@ -89,6 +89,7 @@ public class MPA extends OsmoseLinker {
      * @param index, the index of the MPA
      */
     public MPA(int rank, int index) {
+        super(rank);
         this.index = index;
     }
 

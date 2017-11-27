@@ -50,7 +50,7 @@ package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.util.Separator;
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -60,20 +60,24 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class SingleTimeSeries extends OsmoseLinker {
+public class SingleTimeSeries extends SimulationLinker {
 
     private double[] values;
 
+    public SingleTimeSeries(int rank) {
+        super(rank);
+    }
+
     public void read(String filename) {
         int nStepYear = getConfiguration().getNStepYear();
-        int nStepSimu = getConfiguration().getNStep();
+        int nStepSimu = nStepYear * getConfiguration().getNYear();
         read(filename, nStepYear, nStepSimu);
     }
 
     public void read(String filename, int nMin, int nMax) {
 
         int nStepYear = getConfiguration().getNStepYear();
-        int nStepSimu = getConfiguration().getNStep();
+        int nStepSimu = nStepYear * getConfiguration().getNYear();
         try {
             // 1. Open the CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
@@ -81,14 +85,14 @@ public class SingleTimeSeries extends OsmoseLinker {
 
             // 2. Check the length of the time serie and inform the user about potential problems or inconsistencies
             int nTimeSerie = lines.size() - 1;
-            if ((nTimeSerie != nStepSimu) && (nTimeSerie < nMin)) {
+            if (nTimeSerie < nMin) {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must contain at least " + nMin + " time steps.");
             }
-            if ((nTimeSerie != nStepSimu) && (nTimeSerie % nStepYear != 0)) {
+            if (nTimeSerie % nStepYear != 0) {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
             }
             if (nTimeSerie > nMax) {
-                debug("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding steps.", new Object[]{filename, nTimeSerie, nMax});
+                getSimulation().warning("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
 
@@ -112,10 +116,10 @@ public class SingleTimeSeries extends OsmoseLinker {
                         }
                     }
                 }
-                debug("Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
+                getSimulation().warning("Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
             }
         } catch (IOException ex) {
-            error("Error reading CSV file " + filename, ex);
+            getSimulation().error("Error reading CSV file " + filename, ex);
         }
     }
 

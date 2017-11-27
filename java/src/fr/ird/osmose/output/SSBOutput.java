@@ -32,7 +32,7 @@ public class SSBOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (school.getSpecies().isSexuallyMature(school)) {
+            if (school.getLength() >= school.getSpecies().getSizeMaturity()) {
                 ssb[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
             }
         }
@@ -66,7 +66,7 @@ public class SSBOutput extends AbstractOutput {
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
+            species[i] = getSimulation().getSpecies(i).getName();
         }
         return species;
     }

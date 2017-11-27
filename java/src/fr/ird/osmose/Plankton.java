@@ -48,7 +48,9 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.util.SimulationLinker;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
+import java.util.HashMap;
 
 /**
  * This class represents a plankton group or any other low trophic level
@@ -70,7 +72,7 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Plankton {
+public class Plankton extends SimulationLinker {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -78,70 +80,126 @@ public class Plankton {
     /**
      * Index of the plankton group
      */
-    private final int index;
+    final private int index;
     /**
      * Trophic level of the plankton group. Parameter <i>plankton.TL.plk#</i>
      */
-    private final float trophicLevel;
+    private float trophicLevel;
     /**
-     * Size range, in centimetre, of the plankton group. Parameters
+     * Size range, in centimeter, of the plankton group. Parameters
      * <i>plankton.size.min.plk#</i> and
      * <i>plankton.size.max.plk#</i>
      */
-    private final double sizeMin, sizeMax;
+    private double sizeMin, sizeMax;
     /**
      * Name of the plankton group. (e.g. phytoplankton, diatoms, copepods).
      * Parameter <i>plankton.name.plk#</i>
      */
-    private final String name;
+    private String name;
     /**
      * Fraction of plankton biomass available to the fish, ranging [0, 1].
      * Parameter <i>plankton.accessibility2fish.plk#</i>
      */
-    private final double[] accessibilityCoeff;
+    private double[] accessibilityCoeff;
+    /**
+     * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
+     * for virtually increasing or decreasing plankton biomass.
+     */
+    private double multiplier;
+
+    private HashMap<Integer, Swarm> swarms;
     /**
      * Maximum value for plankton accessibility. It should never be one or
      * exceed one to avoid any numerical problem when converting from float to
      * double.
      */
-    private final double accessMax = 0.99d;
+    final private double accessMax = 0.99d;
 
 ///////////////
 // Constructors
 ///////////////
     /**
-     * Initialises a new plankton group with characteristics given as
+     * Initializes a new plankton group with characteristics given as
      * parameters.
      *
+     * @param rank, the simulation rank
      * @param index, index of the plankton group
      */
-    public Plankton(int index) {
-        
-        Configuration cfg = Osmose.getInstance().getConfiguration();
+    public Plankton(int rank, int index) {
+        super(rank);
         this.index = index;
-        // Initialisation of parameters
-        name = cfg.getString("plankton.name.plk" + index);
-        sizeMin = cfg.getDouble("plankton.size.min.plk" + index);
-        sizeMax = cfg.getDouble("plankton.size.max.plk" + index);
-        trophicLevel = cfg.getFloat("plankton.tl.plk" + index);
-        if (!cfg.isNull("plankton.accessibility2fish.file.plk" + index)) {
-            SingleTimeSeries ts = new SingleTimeSeries();
-            ts.read(cfg.getFile("plankton.accessibility2fish.file.plk" + index));
-            accessibilityCoeff = ts.getValues();
-        } else {
-            double accessibility = cfg.getDouble("plankton.accessibility2fish.plk" + index);
-            accessibilityCoeff = new double[cfg.getNStep()];
-            for (int i = 0; i < accessibilityCoeff.length; i++) {
-                accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
-            }
-        }
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    public double getAccessibility(int iStepSimu) {
-        return accessibilityCoeff[iStepSimu];
+    /**
+     * Intializes the parameters of the plankton group
+     */
+    public void init() {
+
+        name = getConfiguration().getString("plankton.name.plk" + index);
+        sizeMin = getConfiguration().getDouble("plankton.size.min.plk" + index);
+        sizeMax = getConfiguration().getDouble("plankton.size.max.plk" + index);
+        trophicLevel = getConfiguration().getFloat("plankton.tl.plk" + index);
+        if (!getConfiguration().isNull("plankton.accessibility2fish.file.plk" + index)) {
+            SingleTimeSeries ts = new SingleTimeSeries(getRank());
+            ts.read(getConfiguration().getFile("plankton.accessibility2fish.file.plk" + index));
+            accessibilityCoeff = ts.getValues();
+        } else {
+            double accessibility = getConfiguration().getDouble("plankton.accessibility2fish.plk" + index);
+            accessibilityCoeff = new double[getConfiguration().getNStepYear() * getConfiguration().getNYear()];
+            for (int i = 0; i < accessibilityCoeff.length; i++) {
+                accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;;
+            }
+        }
+        if (!getConfiguration().isNull("plankton.multiplier.plk" + index)) {
+            multiplier = getConfiguration().getFloat("plankton.multiplier.plk" + index);
+            warning("Plankton biomass for plankton group " + name + " will be multiplied by " + multiplier + " accordingly to parameter 'plankton.multiplier.plk'" + index + " from file " + getConfiguration().getSource("plankton.multiplier.plk" + index));
+        } else {
+            multiplier = 1.f;
+        }
+        swarms = new HashMap();
+    }
+
+    /**
+     * Gets the biomass of the plankton group in a specific cell of the grid.
+     *
+     * @param cell, a {@link Cell} of the grid
+     * @return the biomass of the plankton group, in tonne, in the given
+     * {@code cell}
+     */
+    public double getBiomass(Cell cell) {
+        return multiplier * getForcing().getBiomass(index, cell);
+    }
+
+    /**
+     * Gets the accessible biomass of the plankton group by the fish in a
+     * specific cell of the grid.
+     * {@code accessible biomass = biomass(cell) * accessibility coefficient}
+     *
+     * @param cell, a {@link Cell} of the grid
+     * @param iStepSimu, the current time step of the simulation
+     * @return the accessible biomass of the plankton group, in tonne, in the
+     * given {@code cell}
+     */
+    public double getAccessibleBiomass(Cell cell, int iStepSimu) {
+        return accessibilityCoeff[iStepSimu] * getBiomass(cell);
+    }
+
+    /**
+     * Gets the total biomass of the plankton group over the grid.
+     *
+     * @return the cumulated biomass over the domain in tonne
+     */
+    public double getTotalBiomass() {
+        double biomTot = 0.d;
+        for (Cell cell : getGrid().getCells()) {
+            if (!cell.isLand()) {
+                biomTot += getBiomass(cell);
+            }
+        }
+        return biomTot;
     }
 
     /**
@@ -151,9 +209,9 @@ public class Plankton {
      * this function helps to determine the fraction of the plankton biomass
      * available to a predator.
      *
-     * @param accessibleSizeMin, the minimal prey size, in centimetre, that a
+     * @param accessibleSizeMin, the minimal prey size, in centimeter, that a
      * predator can prey upon
-     * @param accessibleSizeMax, the maximal prey size, in centimetre, that a
+     * @param accessibleSizeMax, the maximal prey size, in centimeter, that a
      * predator can prey upon
      * @return the fraction of the plankton size range that matches the size
      * range given as parameter.
@@ -168,7 +226,7 @@ public class Plankton {
      * Returns the maximal size of the organisms in the plankton group.
      * Parameter <i>plankton.size.max.plk#</i>
      *
-     * @return the maximal size, in centimetre, of the organisms in the plankton
+     * @return the maximal size, in centimeter, of the organisms in the plankton
      * group
      */
     public double getSizeMax() {
@@ -179,7 +237,7 @@ public class Plankton {
      * Returns the minimal size of the organisms in the plankton group.
      * Parameter <i>plankton.size.min.plk#</i>
      *
-     * @return the minimal size, in centimetre, of the organisms in the plankton
+     * @return the minimal size, in centimeter, of the organisms in the plankton
      * group
      */
     public double getSizeMin() {
@@ -224,5 +282,18 @@ public class Plankton {
      */
     public float getTrophicLevel() {
         return trophicLevel;
+    }
+
+    public IAggregation getSwarm(Cell cell) {
+        if (!swarms.containsKey(cell.getIndex())) {
+            swarms.put(cell.getIndex(), new Swarm(this, cell));
+        }
+        return swarms.get(cell.getIndex());
+    }
+
+    public void updateSwarms(int iStepSimu) {
+        for (Swarm swarm : swarms.values()) {
+            swarm.updateBiomass(iStepSimu);
+        }
     }
 }

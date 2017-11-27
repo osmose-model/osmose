@@ -50,7 +50,7 @@ package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.util.Separator;
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -61,18 +61,21 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0 2013/09/01
  */
-public class ByYearTimeSeries extends OsmoseLinker {
+public class ByYearTimeSeries extends SimulationLinker {
 
     private double[] values;
 
+    public ByYearTimeSeries(int rank) {
+        super(rank);
+    }
+
     public void read(String filename) {
-        int nYear = (int) (getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-        read(filename, 1, Math.max(1, nYear));
+        read(filename, 1, getConfiguration().getNYear());
     }
 
     public void read(String filename, int nMin, int nMax) {
 
-        int nYear = (int) (getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
+        int nYear = getConfiguration().getNYear();
         try {
             // 1. Open the CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
@@ -84,7 +87,7 @@ public class ByYearTimeSeries extends OsmoseLinker {
                 throw new IOException("Found " + nTimeSerie + " years in the time serie. It must contain at least " + nMin + " year(s).");
             }
             if (nTimeSerie > nMax) {
-                debug("Time serie in file {0} contains {1} years out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
+                getSimulation().warning("Time serie in file {0} contains {1} years out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
 
@@ -108,10 +111,10 @@ public class ByYearTimeSeries extends OsmoseLinker {
                         }
                     }
                 }
-                debug("Time serie in file {0} only contains {1} years out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nYear});
+                getSimulation().warning("Time serie in file {0} only contains {1} years out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nYear});
             }
         } catch (IOException ex) {
-            error("Error reading CSV file " + filename, ex);
+            getSimulation().error("Error reading CSV file " + filename, ex);
         }
     }
 

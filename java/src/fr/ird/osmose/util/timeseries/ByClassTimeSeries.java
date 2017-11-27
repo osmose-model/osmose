@@ -49,31 +49,52 @@
 package fr.ird.osmose.util.timeseries;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.Separator;
+import fr.ird.osmose.util.SimulationLinker;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
 /**
+ * Reads a CSV file containing time series as a function of age/size class and time.
+ *
+ * The first line of the file contains the class ages (in years). 
+ * The following lines contain the time series for each class in the following format:
+ * |time1_class1|time1_class2|time1_class3|time1_class4|time1_class5|
+ * |time2_class1|time2_class2|time2_class3|time2_class4|time2_class5|
+ * |time3_class1|time3_class2|time3_class3|time3_class4|time3_class5|
+ *
+ * The number of time steps must be a multiple of {@code nStepYear}.
  *
  * @author pverley
  */
-public class ByClassTimeSeries extends OsmoseLinker {
+public class ByClassTimeSeries extends SimulationLinker {
 
-    private float[] classes;
-    private double[][] values;
+    /** Class attribute (size, age, etc.)
+     *  
+     *  Dimensions: [nclasses]
+     */
+    private float[] classes;   
+
+    /** Values read from input file
+     * Dimensions: [ntimestep][nclasses]
+     */
+    private double[][] values;  
+
+    public ByClassTimeSeries(int rank) {
+        super(rank);
+    }
 
     public void read(String filename) {
         int nStepYear = getConfiguration().getNStepYear();
-        int nStepSimu = getConfiguration().getNStep();
+        int nStepSimu = nStepYear * getConfiguration().getNYear();
         read(filename, nStepYear, nStepSimu);
     }
 
     public void read(String filename, int nMin, int nMax) {
 
         int nStepYear = getConfiguration().getNStepYear();
-        int nStepSimu = getConfiguration().getNStep();
+        int nStepSimu = nStepYear * getConfiguration().getNYear();
         try {
             // 1. Open the CSV file
             CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
@@ -88,14 +109,14 @@ public class ByClassTimeSeries extends OsmoseLinker {
 
             // 3. Check the length of the time serie and inform the user about potential problems or inconsistencies
             int nTimeSerie = lines.size() - 1;
-            if ((nTimeSerie != nStepSimu) && (nTimeSerie < nMin)) {
+            if (nTimeSerie < nMin) {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must contain at least " + nMin + " time steps.");
             }
-            if ((nTimeSerie != nStepSimu) && (nTimeSerie % nStepYear != 0)) {
+            if (nTimeSerie % nStepYear != 0) {
                 throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must be a multiple of the number of time steps per year.");
             }
             if (nTimeSerie > nMax) {
-                debug("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding steps.", new Object[]{filename, nTimeSerie, nMax});
+                getSimulation().warning("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding years.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
 
@@ -122,11 +143,10 @@ public class ByClassTimeSeries extends OsmoseLinker {
                         }
                     }
                 }
-                // 
-                debug("Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
+                getSimulation().warning("Time serie in file {0} only contains {1} steps out of {2}. Osmose will loop over it.", new Object[]{filename, nTimeSerie, nStepSimu});
             }
         } catch (IOException ex) {
-            error("Error reading CSV file " + filename, ex);
+            getSimulation().error("Error reading CSV file " + filename, ex);
         }
     }
 

@@ -50,13 +50,12 @@ package fr.ird.osmose.stage;
 
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.IMarineOrganism;
-import fr.ird.osmose.util.OsmoseLinker;
 
 /**
  *
  * @author pverley
  */
-public class PredPreyStage extends OsmoseLinker implements IStage {
+public class PredPreyStage implements IStage {
 
     private AbstractStage stage;
 
@@ -65,7 +64,7 @@ public class PredPreyStage extends OsmoseLinker implements IStage {
 
         String metrics = null;
         try {
-            metrics = getConfiguration().getString("predation.predPrey.stage.structure");
+            metrics = Osmose.getInstance().getConfiguration().getString("predation.predPrey.stage.structure");
             if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
                 metrics = null;
             }
@@ -79,7 +78,7 @@ public class PredPreyStage extends OsmoseLinker implements IStage {
                 stage = new AgeStage("predation.predPrey.stage.threshold.sp");
             }
         } else {
-            warning("Could not find parameter 'predation.predPrey.stage.structure' (or unsupported value, must be either 'age' or 'size'). Osmose assumes it is age-based threshold.");
+            Osmose.getInstance().warning("Could not find parameter 'predation.predPrey.stage.structure' (or unsupported value, must be either 'age' or 'size'). Osmose assumes it is age-based threshold.");
             stage = new AgeStage("predation.predPrey.stage.threshold.sp");
         }
 

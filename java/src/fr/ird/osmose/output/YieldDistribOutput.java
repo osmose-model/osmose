@@ -69,7 +69,7 @@ public class YieldDistribOutput extends AbstractDistribOutput {
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
+                values[school.getSpeciesIndex()][getClass(school)] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
             }
         }
     }

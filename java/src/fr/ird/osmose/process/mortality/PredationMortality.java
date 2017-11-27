@@ -69,15 +69,18 @@ public class PredationMortality extends AbstractMortality {
 
     /**
      * Predator/prey size ratio
+     * Array[nSpecies][nStage]
      */
     private double[][] predPreySizesMax, predPreySizesMin;
     /**
      * Maximum ingestion rate
+     * Array[nSpecies]
      */
     private double[] predationRate;
     /**
      * Accessibility matrix.
      * Array[nSpecies+nPlankton][nAccessStage][nSpecies][nAccessStage]
+     * Array[nSpecies+nPlankton][nAccessStagePrey][nSpecies][nAccessStagePred]
      */
     private double[][][][] accessibilityMatrix;
     /*
@@ -145,7 +148,7 @@ public class PredationMortality extends AbstractMortality {
                 }
                 reader.close();
             } catch (IOException ex) {
-                error("Error loading accessibility matrix from file " + filename, ex);
+                getSimulation().error("Error loading accessibility matrix from file " + filename, ex);
             }
         } else {
             for (int i = 0; i < nspec; i++) {
@@ -178,7 +181,6 @@ public class PredationMortality extends AbstractMortality {
     public double[] computePredation(School predator, List<IAggregation> preys, double[] accessibility, int subdt) {
 
         double[] preyUpon = new double[preys.size()];
-        double cumPreyUpon = 0.d;
         // egg do not predate
         if (predator.getAgeDt() > 0) {
             // Compute accessible biomass
@@ -208,12 +210,11 @@ public class PredationMortality extends AbstractMortality {
                     // ratio of prey i (among available preys) preyed upon by predator
                     double ratio = accessibleBiomass[i] / biomAccessibleTot;
                     preyUpon[i] = ratio * biomassToPredate;
-                    cumPreyUpon += preyUpon[i];
                 }
                 // Update predation success rate
                 // The predation success rate at the end of the time step is the
                 // average of the predation success rate for every subdt
-                float success = computePredSuccessRate(maxBiomassToPredate, cumPreyUpon);
+                float success = computePredSuccessRate(maxBiomassToPredate, sum(preyUpon));
                 predator.incrementPredSuccessRate(success / subdt);
             } else {
                 // Case 2: there is no prey available
@@ -262,8 +263,7 @@ public class PredationMortality extends AbstractMortality {
         double[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-            double biomAccessible = getForcing().getBiomass(i, cell) * getConfiguration().getPlankton(i).getAccessibility(iStepSimu);
-            biomAccessibleTot += percentPlankton[i] * tempAccess * biomAccessible;
+            biomAccessibleTot += percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell, iStepSimu);
         }
 
         // Compute the potential biomass that predators could prey upon
@@ -290,8 +290,7 @@ public class PredationMortality extends AbstractMortality {
             // Assess the loss for the plankton caused by the predator
             for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
                 double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-                double biomAccessible = getForcing().getBiomass(i, cell) * getConfiguration().getPlankton(i).getAccessibility(iStepSimu);
-                double ratio = percentPlankton[i] * tempAccess * biomAccessible / biomAccessibleTot;
+                double ratio = percentPlankton[i] * tempAccess * getSimulation().getPlankton(i).getAccessibleBiomass(cell, iStepSimu) / biomAccessibleTot;
                 preyUpon[nFish + i] = ratio * biomassToPredate;
             }
 
@@ -348,10 +347,10 @@ public class PredationMortality extends AbstractMortality {
         double preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            if ((preySizeMin > getConfiguration().getPlankton(i).getSizeMax()) || (preySizeMax < getConfiguration().getPlankton(i).getSizeMin())) {
+            if ((preySizeMin > getSimulation().getPlankton(i).getSizeMax()) || (preySizeMax < getSimulation().getPlankton(i).getSizeMin())) {
                 percentPlankton[i] = 0.0d;
             } else {
-                percentPlankton[i] = getConfiguration().getPlankton(i).computePercent(preySizeMin, preySizeMax);
+                percentPlankton[i] = getSimulation().getPlankton(i).computePercent(preySizeMin, preySizeMax);
             }
         }
         return percentPlankton;

@@ -48,7 +48,6 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
@@ -113,7 +112,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         String[] headers = new String[nColumns];
         int k = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getSimulation().getSpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             for (int s = 0; s < nStage; s++) {
@@ -131,7 +130,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         }
 
         for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
-            headers[k] = getConfiguration().getPlankton(j - nSpec).getName();
+            headers[k] = getSimulation().getPlankton(j - nSpec).getName();
             k++;
         }
         return headers;
@@ -146,7 +145,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         int nPrey = nSpec + getConfiguration().getNPlankton();
         for (int i = nSpec; i < nPrey; i++) {
             int iPlankton = i - nSpec;
-            biomassStage[i][0] += getTotalBiomass(iPlankton);
+            biomassStage[i][0] += getSimulation().getPlankton(iPlankton).getTotalBiomass();
         }
     }
 
@@ -186,20 +185,5 @@ public class BiomassDietStageOutput extends AbstractOutput {
             k++;
         }
         writeVariable(time, biomass);
-    }
-    
-    /**
-     * Gets the total biomass of the plankton group over the grid.
-     *
-     * @return the cumulated biomass over the domain in tonne
-     */
-    private double getTotalBiomass(int iPlankton) {
-        double biomTot = 0.d;
-        for (Cell cell : getGrid().getCells()) {
-            if (!cell.isLand()) {
-                biomTot += getSimulation().getForcing().getBiomass(iPlankton, cell);
-            }
-        }
-        return biomTot;
     }
 }

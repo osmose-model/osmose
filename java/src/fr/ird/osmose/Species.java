@@ -49,14 +49,17 @@
 package fr.ird.osmose;
 
 /**
- * This class represents a species. It is characterised by the following
+ * This class represents a species. It is characterized by the following
  * variables:
  * <ul>
  * <li>name</li>
  * <li>lifespan</li>
+ * <li>Von Bertalanffy growth parameters</li>
+ * <li>Threshold age for applying Von Bertalanffy growth model</li>
  * <li>Allometric parameters</li>
  * <li>Egg weight and size</li>
  * <li>Size at maturity</li>
+ * <li>Threshold age for age class zero</li>
  * </ul>
  *
  * @author P.Verley (philippe.verley@ird.fr)
@@ -70,43 +73,56 @@ public class Species {
     /**
      * Trophic level of an egg.
      */
-    public static final float TL_EGG = 3f;
+    final static public float TL_EGG = 3f;
     /**
      * Index of the species. [0 : numberTotalSpecies - 1]
      */
-    private final int index;
+    final private int index;
     /**
      * Name of the species. Parameter <i>species.name.sp#</i>
      */
-    private final String name;
+    final private String name;
     /**
      * Lifespan expressed in number of time step. A lifespan of 5 years means
      * that a fish will die as soon as it turns 5 years old. Parameter
      * <i>species.lifespan.sp#</i>
      */
-    private final int lifespan;
+    final private int lifespan;
+    /**
+     * Von Bertalanffy growth parameters. Parameters <i>species.linf.sp#</i>,
+     * <i>species.k.sp#</i> and
+     * <i>species.t0.sp#</i>
+     */
+    final private float lInf, K, t0;
     /**
      * Allometric parameters. Parameters
      * <i>species.length2weight.condition.factor.sp#</i> and
      * <i>species.length2weight.allometric.power.sp#</i>
      */
-    private final float c, bPower;
+    final private float c, bPower;
     /**
-     * Size (cm) at maturity. Parameter <i>species.maturity.size.sp#</i>
+     * Size (cm) at maturity. Parameter <i>species.maturity.age.sp#</i>
      */
-    private final float sizeMaturity;
+    final private float sizeMaturity;
     /**
-     * Age (year) at maturity. Parameter <i>species.maturity.age.sp#</i>
+     * Threshold age (year) for age class zero. It is the age from which target
+     * biomass should be considered as eggs and larvae stages are generally not
+     * considered. Parameter <i>output.cutoff.age.sp#</i>
      */
-    private final float ageMaturity;
+    final private int ageClassZero;
     /**
      * Size (cm) of eggs. Parameter <i>species.egg.size.sp#</i>
      */
-    private final float eggSize;
+    final private float eggSize;
     /**
      * Weight (gram) of eggs. Parameter <i>species.egg.weight.sp#</i>
      */
-    private final float eggWeight;
+    final private float eggWeight;
+    /**
+     * Threshold age (year) for applying Von Bertalanffy growth model. Parameter
+     * <i>species.vonbertalanffy.threshold.age.sp#</i>
+     */
+    final private float growthAgeThreshold;
 
 //////////////
 // Constructor
@@ -119,33 +135,115 @@ public class Species {
      */
     public Species(int index) {
 
-        Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
         // Initialization of parameters
-        name = cfg.getString("species.name.sp" + index);
-        c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
-        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
-        if (!cfg.isNull("species.maturity.size.sp" + index)) {
-            sizeMaturity = cfg.getFloat("species.maturity.size.sp" + index);
-            ageMaturity = Float.MAX_VALUE;
+        name = getConfiguration().getString("species.name.sp" + index);
+        lInf = getConfiguration().getFloat("species.linf.sp" + index);
+        K = getConfiguration().getFloat("species.k.sp" + index);
+        t0 = getConfiguration().getFloat("species.t0.sp" + index);
+        c = getConfiguration().getFloat("species.length2weight.condition.factor.sp" + index);
+        bPower = getConfiguration().getFloat("species.length2weight.allometric.power.sp" + index);
+        if (!getConfiguration().isNull("species.maturity.size.sp" + index)) {
+            sizeMaturity = getConfiguration().getFloat("species.maturity.size.sp" + index);
         } else {
-            ageMaturity = cfg.getFloat("species.maturity.age.sp" + index);
-            sizeMaturity = Float.MAX_VALUE;
+            float ageMaturity = getConfiguration().getFloat("species.maturity.age.sp" + index);
+            sizeMaturity = lInf * (float) (1 - Math.exp(-K * (ageMaturity - t0)));
         }
-        eggSize = cfg.getFloat("species.egg.size.sp" + index);
-        eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
-        float agemax = cfg.getFloat("species.lifespan.sp" + index);
-        lifespan = (int) Math.round(agemax * cfg.getNStepYear());
+        float age0 = getConfiguration().getFloat("output.cutoff.age.sp" + index);
+        ageClassZero = (int) Math.ceil(age0 * getConfiguration().getNStepYear());
+        eggSize = getConfiguration().getFloat("species.egg.size.sp" + index);
+        eggWeight = getConfiguration().getFloat("species.egg.weight.sp" + index);
+        if (!getConfiguration().isNull("species.vonbertalanffy.threshold.age.sp" + index)) {
+            growthAgeThreshold = getConfiguration().getFloat("species.vonbertalanffy.threshold.age.sp" + index);
+        } else {
+            // by default, von Bertalanffy model considered valid after 1 year old, linear growth from 0 to 1 year
+            growthAgeThreshold = 1.f;
+        }
+        float agemax = getConfiguration().getFloat("species.lifespan.sp" + index);
+        lifespan = (int) Math.round(agemax * getConfiguration().getNStepYear());
     }
 
 //////////////////////////////
 // Definition of the functions
 //////////////////////////////
     /**
-     * Computes the weight, in gram, corresponding to the given length, in
-     * centimetre.
+     * Computes the mean length, in centimeter, at a specific age.
      *
-     * @param length, the length in centimetre
+     * @param age, an age in number of time step.
+     * @return the mean length, in centimeter, at this {@code age}
+     */
+    public float computeMeanLength(int age) {
+
+        float length;
+        float decimalAge = age / (float) getConfiguration().getNStepYear();
+        if (age == 0) {
+            // Egg size for first time step
+            length = eggSize;
+        } else if (decimalAge < growthAgeThreshold) {
+            // Linear growth
+            float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
+            if (lengthAtAgePart < eggSize) {
+                lengthAtAgePart = eggSize;
+            }
+            length = (decimalAge / growthAgeThreshold) * (float) (lengthAtAgePart - eggSize) + eggSize;
+        } else {
+            // Von Bertalnffy growth
+            length = (float) (lInf * (1 - Math.exp(-K * (decimalAge - t0))));
+        }
+
+        return length;
+    }
+
+    /**
+     * Compute the mean age, in number of time step, at a specific length, in
+     * centimeter.
+     *
+     * @param length the length in centimeter
+     * @return the mean age in number of time step for this {@code length}
+     */
+    public int computeMeanAge(float length) {
+
+        float age;
+        float lengthAtAgePart = (float) (lInf * (1 - Math.exp(-K * (growthAgeThreshold - t0))));
+        if (length > lengthAtAgePart) {
+            if (length < lInf) {
+                age = (float) (-((Math.log(1 - (length / lInf))) / K)) + t0;
+            } else {
+                age = lifespan;
+            }
+        } else {
+            age = growthAgeThreshold * (length - eggSize) / (lengthAtAgePart - eggSize);
+        }
+        return Math.round(age * getConfiguration().getNStepYear());
+
+    }
+
+    /**
+     * Computes the mean weight, in gram, at a specific age, in number of time
+     * step.
+     *
+     * @param age, the age in number of time step
+     * @return the mean weight in gram at this {@code age}
+     */
+    public float computeMeanWeight(int age) {
+
+        float weight;
+        if (age == 0) {
+            weight = eggWeight;
+        } else {
+            weight = computeWeight(computeMeanLength(age));
+            if (weight < eggWeight) {
+                weight = eggWeight;
+            }
+        }
+        return weight;
+    }
+
+    /**
+     * Computes the weight, in gram, corresponding to the given length, in
+     * centimeter.
+     *
+     * @param length, the length in centimeter
      * @return the weight in gram for this {@code length}
      */
     public float computeWeight(float length) {
@@ -156,7 +254,7 @@ public class Species {
      * Returns the lifespan of the species. Parameter
      * <i>species.lifespan.sp#</i>
      *
-     * @return the lifespan, in number of time step
+     * @return the lifespa, in number of time step
      */
     public int getLifespanDt() {
         return lifespan;
@@ -199,8 +297,26 @@ public class Species {
         return eggWeight;
     }
 
-    public boolean isSexuallyMature(School school) {
-        return (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
+    /**
+     * Returns the threshold of age class zero, in number of time step. This
+     * parameter allows to discard schools younger that this threshold in the
+     * calculation of the indicators when parameter <i>output.cutoff.enabled</i>
+     * is set to {@code true}. Parameter <i>output.cutoff.age.sp#</i>
+     *
+     * @return the threshold age of class zero, in number of time step
+     */
+    public int getAgeClassZero() {
+        return ageClassZero;
+    }
+
+    /**
+     * Return the size, in centimeter, at (sexual) maturity. Parameter
+     * <i>species.maturity.age.sp#</i>
+     *
+     * @return the size at maturity in centimeter
+     */
+    public float getSizeMaturity() {
+        return sizeMaturity;
     }
 
     /**
@@ -213,5 +329,14 @@ public class Species {
         double Bv = 0.d;
         double Sv = 1.d;
         return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
+    }
+
+    /**
+     * Returns an instance of the {@code Configuration}.
+     *
+     * @return an instance of the {@code Configuration}
+     */
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 }

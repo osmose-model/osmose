@@ -31,7 +31,7 @@ public class NDeadSchoolOutput extends AbstractOutput {
     @Override
     public void update() {
 
-        for (School school : getSchoolSet().getSchools()) {
+        for (School school : getSchoolSet()) {
             if (!school.isAlive()) {
                 nDeadSchool[school.getSpeciesIndex()] += 1;
             }
@@ -61,7 +61,7 @@ public class NDeadSchoolOutput extends AbstractOutput {
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
+            species[i] = getSimulation().getSpecies(i).getName();
         }
         return species;
     }

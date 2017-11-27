@@ -48,14 +48,15 @@
  */
 package fr.ird.osmose.output.distribution;
 
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.IMarineOrganism;
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.Osmose;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractDistribution extends OsmoseLinker {
+public abstract class AbstractDistribution {
 
     // Distribution classes
     float[] classes;
@@ -171,5 +172,9 @@ public abstract class AbstractDistribution extends OsmoseLinker {
         return (!getConfiguration().isNull(getKeyMin()))
                 && (!getConfiguration().isNull(getKeyMax()))
                 && (!getConfiguration().isNull(getKeyIncr()));
+    }
+
+    Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 }

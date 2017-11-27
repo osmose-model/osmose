@@ -49,11 +49,12 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.util.logging.OLogger;
 import fr.ird.osmose.output.SchoolSetSnapshot;
-import fr.ird.osmose.populator.PopulatingProcess;
+import fr.ird.osmose.process.PopulatingProcess;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.DefaultStep;
-import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import ucar.nc2.NetcdfFile;
@@ -64,16 +65,16 @@ import ucar.nc2.NetcdfFile;
  * <i>simulation.nsimu</i> controls how many simulations with the same set of
  * parameters are to be run. Every replicated simulation is an instance of this
  * object {@code Simulation}.<br>
- * The {@code Simulation} initialises all the required components for running
+ * The {@code Simulation} initializes all the required components for running
  * the simulation such as
  * {@link fr.ird.osmose.step.AbstractStep}, {@link fr.ird.osmose.ltl.LTLForcing}
- * or {@link fr.ird.osmose.populator.PopulatingProcess} and then controls the loop
+ * or {@link fr.ird.osmose.process.PopulatingProcess} and then controls the loop
  * over time.
  *
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Simulation extends OsmoseLinker {
+public class Simulation extends OLogger {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -106,6 +107,14 @@ public class Simulation extends OsmoseLinker {
      * Total number of time steps of the simulation.
      */
     private int n_steps_simu;
+    /**
+     * Array of the species of the simulation.
+     */
+    private Species[] species;
+    /**
+     * Array of the LTL groups of the simulation.
+     */
+    private Plankton[] ltlGroups;
     /**
      * The object that controls what should be done during one time step.
      */
@@ -149,6 +158,7 @@ public class Simulation extends OsmoseLinker {
      * @param rank, the rank of the simulation
      */
     public Simulation(int rank) {
+        super(rank);
         this.rank = rank;
     }
 
@@ -157,7 +167,13 @@ public class Simulation extends OsmoseLinker {
      */
     public void destroy() {
 
-        schoolSet.clear();
+        for (School school : schoolSet) {
+            school.setNdead(MortalityCause.OUT, Double.MAX_VALUE);
+        }
+        schoolSet.removeDeadSchools();
+        schoolSet = null;
+        species = null;
+        ltlGroups = null;
         step = null;
         forcing = null;
         snapshot = null;
@@ -183,7 +199,7 @@ public class Simulation extends OsmoseLinker {
         // Initialize time variables
         n_steps_simu = oneStep
                 ? 1
-                : getConfiguration().getNStep();
+                : getConfiguration().getNYear() * getConfiguration().getNStepYear();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
@@ -206,6 +222,29 @@ public class Simulation extends OsmoseLinker {
                 restart = true;
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
+            }
+        }
+
+        // Create the species
+        species = new Species[getConfiguration().getNSpecies()];
+        for (int i = 0; i < species.length; i++) {
+            species[i] = new Species(i);
+            if (!species[i].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Species name must contain alphanumeric characters only. Please rename " + species[i].getName(), null);
+            }
+        }
+
+        // Init plankton groups
+        ltlGroups = new Plankton[getConfiguration().getNPlankton()];
+        for (int p = 0; p < ltlGroups.length; p++) {
+            if (getConfiguration().canFind("plankton.biomass.total.plk" + p)) {
+                ltlGroups[p] = new UniformPlankton(rank, p);
+            } else {
+                ltlGroups[p] = new Plankton(rank, p);
+            }
+            ltlGroups[p].init();
+            if (!ltlGroups[p].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Plankton name must contain alphanumeric characters only. Please rename " + ltlGroups[p].getName(), null);
             }
         }
 
@@ -260,9 +299,21 @@ public class Simulation extends OsmoseLinker {
         String ltlClassName = getConfiguration().getString("ltl.java.classname");
         String errMsg = "Failed to create new LTLForcing instance";
         try {
-            debug("LTLForcing: " + ltlClassName);
+            info("LTLForcing: " + ltlClassName);
             forcing = (LTLForcing) Class.forName(ltlClassName).getConstructor(Integer.TYPE).newInstance(rank);
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
+        } catch (ClassNotFoundException ex) {
+            error(errMsg, ex);
+        } catch (IllegalAccessException ex) {
+            error(errMsg, ex);
+        } catch (IllegalArgumentException ex) {
+            error(errMsg, ex);
+        } catch (InstantiationException ex) {
+            error(errMsg, ex);
+        } catch (NoSuchMethodException ex) {
+            error(errMsg, ex);
+        } catch (SecurityException ex) {
+            error(errMsg, ex);
+        } catch (InvocationTargetException ex) {
             error(errMsg, ex);
         }
 
@@ -289,7 +340,11 @@ public class Simulation extends OsmoseLinker {
 
             // Print progress in console at the beginning of the year
             if (i_step_simu % getConfiguration().getNStepYear() == 0) {
-                info("year {0}", year);
+                if (getConfiguration().getNCpu() > 1) {
+                    debug("year {0}", year);
+                } else {
+                    info("year {0}", year);
+                }
             }
 
             // Run a new step
@@ -303,7 +358,7 @@ public class Simulation extends OsmoseLinker {
 
             // Increment time step
             i_step_simu++;
-        }
+            }
         step.end();
 
         // Create systematically a restart file at the end of the simulation
@@ -319,6 +374,26 @@ public class Simulation extends OsmoseLinker {
      */
     public SchoolSet getSchoolSet() {
         return schoolSet;
+    }
+
+    /**
+     * Get a species
+     *
+     * @param index, the index of the species
+     * @return the species at index {@code index}
+     */
+    public Species getSpecies(int index) {
+        return species[index];
+    }
+
+    /**
+     * Gets the specified plankton group.
+     *
+     * @param index, the index of the plankton group.
+     * @return the plankton group number iPlankton.
+     */
+    public Plankton getPlankton(int index) {
+        return ltlGroups[index];
     }
 
     /**
@@ -362,6 +437,15 @@ public class Simulation extends OsmoseLinker {
 
     public void requestPreyRecord() {
         preyRecord = true;
+    }
+
+    /**
+     * Returns an instance of the {@code Configuration}.
+     *
+     * @return the current {@code Configuration}.
+     */
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 
     /**

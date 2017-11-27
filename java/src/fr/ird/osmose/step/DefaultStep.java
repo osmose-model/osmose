@@ -50,10 +50,11 @@ package fr.ird.osmose.step;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.OutputManager;
+import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
-import fr.ird.osmose.process.MortalityProcess;
-import fr.ird.osmose.process.MovementProcess;
+import fr.ird.osmose.process.mortality.MortalityProcess;
+import fr.ird.osmose.process.movement.MovementProcess;
 import fr.ird.osmose.process.ReproductionProcess;
 
 /**
@@ -65,23 +66,23 @@ public class DefaultStep extends AbstractStep {
     /*
      * Growth process
      */
-    private GrowthProcess growthProcess;
+    private AbstractProcess growthProcess;
     /*
      * Reproduction process
      */
-    private ReproductionProcess reproductionProcess;
+    private AbstractProcess reproductionProcess;
     /*
      * Incoming flux of biomass
      */
-    private IncomingFluxProcess incomingFLuxProcess;
+    private AbstractProcess incomingFLuxProcess;
     /*
      * Generic mortality process that encompasses all mortality processes
      */
-    private MortalityProcess mortalityProcess;
+    private AbstractProcess mortalityProcess;
     /*
      * Movement process
      */
-    private MovementProcess movementProcess;
+    private AbstractProcess movementProcess;
     /*
      * List of indicators
      */
@@ -121,21 +122,19 @@ public class DefaultStep extends AbstractStep {
         // Indicators
         indicators = new OutputManager(getRank());
         indicators.init();
-
+        
         // Record time step 0 in the output
-        recordStep0 = getConfiguration().getBoolean("output.step0.include", false);
+        recordStep0 = getConfiguration().getBoolean("output.step0.include");
     }
 
     @Override
     public void step(int iStepSimu) {
-        
-        debug("  step " + iStepSimu);
 
         // Incoming flux
         incomingFLuxProcess.run();
 
         // Reset some school state variables 
-        for (School school : getSchoolSet().getSchools()) {
+        for (School school : getSchoolSet()) {
             school.init();
         }
 

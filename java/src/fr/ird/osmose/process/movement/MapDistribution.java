@@ -51,6 +51,7 @@ package fr.ird.osmose.process.movement;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 import fr.ird.osmose.util.MapSet;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -63,7 +64,7 @@ import java.util.Random;
  */
 public class MapDistribution extends AbstractDistribution {
 
-    private final int iSpecies;
+    private final Species species;
     private Random rd1, rd2, rd3;
     private MapSet maps;
     private float[] maxProbaPresence;
@@ -72,21 +73,24 @@ public class MapDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public MapDistribution(int species) {
-        this.iSpecies = species;
+    public MapDistribution(int rank, Species species) {
+        super(rank);
+        this.species = species;
     }
 
     @Override
     public void init() {
+
+        int iSpec = species.getIndex();
 
         boolean fixedSeed = false;
         if (!getConfiguration().isNull("movement.randomseed.fixed")) {
             fixedSeed = getConfiguration().getBoolean("movement.randomseed.fixed");
         }
         if (fixedSeed) {
-            rd1 = new Random(13L ^ iSpecies);
-            rd2 = new Random(5L ^ iSpecies);
-            rd3 = new Random(1982L ^ iSpecies);
+            rd1 = new Random(13L ^ iSpec);
+            rd2 = new Random(5L ^ iSpec);
+            rd3 = new Random(1982L ^ iSpec);
             warning("Parameter 'movement.randomseed.fixed' is set to true. It means that two simulations with strictly identical initial school distribution will lead to same movement.");
         } else {
             rd1 = new Random();
@@ -94,7 +98,7 @@ public class MapDistribution extends AbstractDistribution {
             rd3 = new Random();
         }
 
-        maps = new MapSet(iSpecies, "movement");
+        maps = new MapSet(getRank(), iSpec, "movement");
         maps.init();
         maxProbaPresence = new float[maps.getNMap()];
         for (int imap = 0; imap < maxProbaPresence.length; imap++) {
@@ -105,8 +109,8 @@ public class MapDistribution extends AbstractDistribution {
             }
         }
 
-        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpecies)) {
-            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpecies);
+        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpec)) {
+            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpec);
         } else {
             range = 1;
         }
@@ -114,25 +118,25 @@ public class MapDistribution extends AbstractDistribution {
     }
 
     @Override
-    public void move(School school, int iStepSimu) {
-        if (!isOut(school, iStepSimu)) {
-            mapsDistribution(school, iStepSimu);
+    public void move(School school) {
+        if (!isOut(school)) {
+            mapsDistribution(school);
         } else {
             school.out();
         }
     }
 
-    private boolean isOut(School school, int iStepSimu) {
-        return (null == maps.getMap(school, iStepSimu));
+    private boolean isOut(School school) {
+        return (null == maps.getMap(school));
     }
 
-    private void mapsDistribution(School school, int iStepSimu) {
+    private void mapsDistribution(School school) {
 
-        int i_step_year = iStepSimu % getConfiguration().getNStepYear();
+        int i_step_year = getSimulation().getIndexTimeYear();
         int age = school.getAgeDt();
 
         // Get current map and max probability of presence
-        int indexMap = maps.getIndexMap(school.getAgeDt(), iStepSimu);
+        int indexMap = maps.getIndexMap(school);
         GridMap map = maps.getMap(indexMap);
 
         /*
@@ -142,7 +146,7 @@ public class MapDistribution extends AbstractDistribution {
          * assert sameMap = false;
          */
         boolean sameMap = false;
-        if (age > 0 && iStepSimu > 0) {
+        if (age > 0 && getSimulation().getIndexTimeSimu() > 0) {
             int oldTime;
             if (i_step_year == 0) {
                 oldTime = getConfiguration().getNStepYear() - 1;
@@ -192,7 +196,7 @@ public class MapDistribution extends AbstractDistribution {
             str.append(school.toString());
             str.append("\n");
             str.append("It is not in the geographical area it is supposed to be...");
-            warning(str.toString());
+            getSimulation().warning(str.toString());
         }
         List<Cell> accessibleCells = new ArrayList();
         // 1. Get all surrounding cells

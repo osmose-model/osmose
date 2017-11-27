@@ -73,7 +73,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
     public void makeSnapshot(int iStepSimu) {
 
         NetcdfFileWriteable nc = createNCFile(iStepSimu);
-        int nSchool = getSchoolSet().getSchools().size();
+        int nSchool = getSchoolSet().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
         ArrayFloat.D1 x = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 y = new ArrayFloat.D1(nSchool);
@@ -84,7 +84,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 trophiclevel = new ArrayFloat.D1(nSchool);
         int s = 0;
         // fill up the arrays
-        for (School school : getSchoolSet().getSchools()) {
+        for (School school : getSchoolSet()) {
             species.set(s, school.getSpeciesIndex());
             x.set(s, school.getX());
             y.set(s, school.getY());
@@ -108,9 +108,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.close();
             //close(nc);
         } catch (IOException ex) {
-            error("Error writing snapshot " + nc.getLocation(), ex);
+            getSimulation().error("Error writing snapshot " + nc.getLocation(), ex);
         } catch (InvalidRangeException ex) {
-            error("Error writing snapshot " + nc.getLocation(), ex);
+            getSimulation().error("Error writing snapshot " + nc.getLocation(), ex);
         }
     }
 
@@ -128,12 +128,12 @@ public class SchoolSetSnapshot extends SimulationLinker {
             file.getParentFile().mkdirs();
             nc.setLocation(file.getAbsolutePath());
         } catch (IOException ex) {
-            error("Could not create snapshot file " + nc.getLocation(), ex);
+            getSimulation().error("Could not create snapshot file " + nc.getLocation(), ex);
         }
         /*
          * Create dimensions
          */
-        Dimension nSchool = nc.addDimension("nschool", getSchoolSet().getSchools().size());
+        Dimension nSchool = nc.addDimension("nschool", getSchoolSet().size());
         /*
          * Add variables
          */
@@ -176,7 +176,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             str.append(i);
             str.append("=");
-            str.append(getSpecies(i).getName());
+            str.append(getSimulation().getSpecies(i).getName());
             str.append(" ");
         }
         nc.addGlobalAttribute("species", str.toString());
@@ -187,7 +187,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.create();
 
         } catch (IOException ex) {
-            error("Could not create snapshot file " + nc.getLocation(), ex);
+            getSimulation().error("Could not create snapshot file " + nc.getLocation(), ex);
         }
         return nc;
     }

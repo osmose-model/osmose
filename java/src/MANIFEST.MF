@@ -1,0 +1,2 @@
+Main-Class: fr.ird.osmose.Osmose
+Class-Path: /home1/datahome/nbarrier/libs/java/netcdfAll-4.6.jar /home1/datahome/nbarrier/libs/java/opencsv-2.2.jar

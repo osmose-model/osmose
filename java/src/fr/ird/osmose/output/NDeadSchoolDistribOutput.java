@@ -64,7 +64,7 @@ public class NDeadSchoolDistribOutput extends AbstractDistribOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getSchools()) {
+        for (School school : getSchoolSet()) {
             if (!school.isAlive()) {
                 values[school.getSpeciesIndex()][getClass(school)] += 1;
             }

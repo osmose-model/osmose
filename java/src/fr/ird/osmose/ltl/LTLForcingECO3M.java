@@ -48,12 +48,8 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.Cell;
-import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import ucar.ma2.ArrayDouble;
 import ucar.nc2.NetcdfFile;
 
@@ -65,14 +61,9 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
 
     private String[] planktonFileListNetcdf;
     private String zlevelName;
-    private float[][][] depthLevel;
+    private float[][][] depthOfLayer;       // table of height of layers of ROMS model used in vertical integration
     private String[] plktonNetcdfNames;
     private int stride;
-    /**
-     * List of LTL cells that are contained within Osmose cells. The map is
-     * indexed by Osmose cell index.
-     */
-    private HashMap<Integer, List<Point>> ltlCells;
 
     public LTLForcingECO3M(int rank) {
         super(rank);
@@ -98,7 +89,7 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    public void initLTL() {
+    public void initLTLGrid() {
         try {
             String gridFilename = planktonFileListNetcdf[0];
             NetcdfFile ncGrid = NetcdfFile.open(gridFilename, null);
@@ -108,37 +99,30 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
             int ny = shape[1];
             int nx = shape[2];
 
-            depthLevel = new float[ny][nx][nz];
+            depthOfLayer = new float[nz][ny][nx];
 
             ArrayDouble.D3 arrDepth = (ArrayDouble.D3) ncGrid.findVariable(zlevelName).read();
             for (int i = 0; i < nx; i++) {
                 for (int j = 0; j < ny; j++) {
                     for (int z = 0; z < nz; z++) {
-                        depthLevel[j][i][z] = (float) arrDepth.get(z, j, i);
+                        depthOfLayer[z][j][i] = (float) arrDepth.get(z, j, i);
                     }
                 }
             }
             ncGrid.close();
 
-            ltlCells = new HashMap();
+            icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
+            jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    Cell cell = getGrid().getCell(i, j);
-                    if (!cell.isLand()) {
-                        if (!ltlCells.containsKey(cell.getIndex())) {
-                            ltlCells.put(cell.getIndex(), new ArrayList());
-                        }
-                        for (int ii = 0; ii < stride; ii++) {
-                            for (int jj = 0; jj < stride; jj++) {
-                                int iLTL = i * stride + jj;
-                                int jLTL = j * stride + ii;
-                                // Only add ECO3M ocean cells
-                                // I use depthlevel values as a proxy for the mask
-                                // Land values are usually -9999
-                                if (Math.abs(depthLevel[jLTL][iLTL][0]) < 6e3) {
-                                    ltlCells.get(cell.getIndex()).add(new Point(iLTL, jLTL));
-                                }
+                    for (int ii = 0; ii < stride; ii++) {
+                        for (int jj = 0; jj < stride; jj++) {
+                            if (null == icoordLTLGrid[j][i]) {
+                                icoordLTLGrid[j][i] = new ArrayList();
+                                jcoordLTLGrid[j][i] = new ArrayList();
                             }
+                            icoordLTLGrid[j][i].add(i * stride + jj);
+                            jcoordLTLGrid[j][i].add(j * stride + ii);
                         }
                     }
                 }
@@ -149,38 +133,35 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
     }
 
     @Override
-    float[] getDepthLevel(int iLTL, int jLTL) {
-        return depthLevel[jLTL][iLTL];
-    }
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
-    @Override
-    float[][][] getRawBiomass(int iPlankton, int iStepSimu) {
-
-        float[][][] rawBiomass = null;
+        float[][][] dataInit = null;
         NetcdfFile nc = null;
         String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
+        ArrayDouble.D3 tempArray;
 
         try {
-            // Open NetCDF file
             nc = NetcdfFile.open(name);
-            // Read LTL biomass in NetCDF array
-            ArrayDouble.D3 array = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[iPlankton]).read();
-            // Get the shape of the LTL variable
-            int[] shape = array.getShape();
-            // Permute the dimensions in order to have rawBiomass[j][i][k]
-            rawBiomass = new float[shape[1]][shape[2]][shape[0]];
-            // Fill up the rawBiomass variable
+            // read data and put them in the local arrays
+            if (null == nc.findVariable(plktonNetcdfNames[iPlankton])) {
+                warning("Osmose could not find LTL variable " + plktonNetcdfNames[iPlankton] + " in NetCDF file " + name + ". Unless this plankton group is of type uniform, Osmose might not work correctly.");
+                return new double[0][0];
+            }
+            tempArray = (ArrayDouble.D3) nc.findVariable(plktonNetcdfNames[iPlankton]).read();
+            int[] shape = tempArray.getShape();
+            dataInit = new float[shape[0]][shape[1]][shape[2]];
+
+            // fill dataInit of plankton classes from local arrays
             for (int i = 0; i < shape[2]; i++) {
                 for (int j = 0; j < shape[1]; j++) {
                     for (int k = 0; k < shape[0]; k++) {
-                        rawBiomass[j][i][k] = (float) array.get(k, j, i);
+                        dataInit[k][j][i] = (float) tempArray.get(k, j, i);
                     }
                 }
             }
         } catch (IOException e) {
             error("Error reading variable " + plktonNetcdfNames[iPlankton] + " from file " + name, e);
         } finally {
-            // Close the NetCDF file
             if (nc != null) {
                 try {
                     nc.close();
@@ -191,11 +172,6 @@ public class LTLForcingECO3M extends AbstractLTLForcing {
         }
 
         // vertical integration
-        return rawBiomass;
-    }
-
-    @Override
-    List<Point> getLTLCells(Cell cell) {
-        return ltlCells.get(cell.getIndex());
+        return verticalIntegration(dataInit, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 }

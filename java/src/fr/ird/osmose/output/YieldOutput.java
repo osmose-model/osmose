@@ -77,7 +77,7 @@ public class YieldOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            yield[school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
+            yield[school.getSpeciesIndex()] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
         }
     }
 
@@ -105,7 +105,7 @@ public class YieldOutput extends AbstractOutput {
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
+            species[i] = getSimulation().getSpecies(i).getName();
         }
         return species;
     }

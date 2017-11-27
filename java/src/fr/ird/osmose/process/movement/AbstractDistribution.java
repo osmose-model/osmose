@@ -6,16 +6,20 @@
 package fr.ird.osmose.process.movement;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.SimulationLinker;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractDistribution extends OsmoseLinker {
+public abstract class AbstractDistribution extends SimulationLinker {
 
+    public AbstractDistribution(int rank) {
+        super(rank);
+    }
+    
     abstract public void init();
     
-    abstract public void move(School school, int iStepSimu);
+    abstract public void move(School school);
     
 }

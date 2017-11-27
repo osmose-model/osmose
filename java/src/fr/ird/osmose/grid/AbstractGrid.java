@@ -49,11 +49,17 @@
 package fr.ird.osmose.grid;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
+import fr.ird.osmose.output.SpatialOutput;
 import fr.ird.osmose.util.io.IOTools;
+import fr.ird.osmose.util.logging.OLogger;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -61,18 +67,16 @@ import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriteable;
 
 /**
- * This abstract class details the functions that an Osmose grid needs to
- * implement. The grid is defined in the Cartesian coordinate system, with the
- * origin of the grid on the bottom left corner, the x-axis pointing toward the
- * right and the y-axis towards the top. It limits the task of coding a new grid
- * to reading the parameters ({@link AbstractGrid#readParameters()}) and making
- * the grid ({@link AbstractGrid#makeGrid()}). Any new type of grid in Osmose
- * should extends an {@code AbstractGrid}.
+ * This abstract class implements the function listed in the interface
+ * {@code IGrid}. It limits the task of coding a new grid to reading the
+ * parameters ({@link AbstractGrid#readParameters()}) and making the grid
+ * ({@link AbstractGrid#makeGrid()}). Any new type of grid in Osmose should
+ * extends an {@code AbstractGrid}.
  *
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public abstract class AbstractGrid extends OsmoseLinker {
+public abstract class AbstractGrid extends OLogger implements IGrid {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -89,18 +93,6 @@ public abstract class AbstractGrid extends OsmoseLinker {
      * Dimension of the grid along the x-axis. Number of columns.
      */
     private int nx;
-    /**
-     * Number of ocean cells
-     */
-    private int nOceanCell;
-    /**
-     * List of cells
-     */
-    ArrayList<Cell> cells;
-    /**
-     * List of ocean cells only
-     */
-    ArrayList<Cell> oceanCells;
     /**
      * Latitude, in degree north, of the North West corner of the grid.
      */
@@ -144,103 +136,37 @@ public abstract class AbstractGrid extends OsmoseLinker {
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    /**
-     * Initialises the grid. Reads the input parameters and makes the grid. It
-     * must be called after creating a new instance of the grid.
-     */
+    @Override
     public void init() {
         readParameters();
         matrix = makeGrid();
-        // geographical extent
         getDimGeogArea();
-        // compute number of ocean cells
-        nOceanCell = 0;
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                if (!matrix[j][i].isLand()) {
-                    nOceanCell++;
-                }
-            }
-        }
-        // List of cells and ocean cells
-        cells = new ArrayList(ny * nx);
-        oceanCells = new ArrayList(nOceanCell);
-        for (int j = ny; j-- > 0;) {
-            for (int i = nx; i-- > 0;) {
-                cells.add(matrix[j][i]);
-                if (!matrix[j][i].isLand()) {
-                    oceanCells.add(matrix[j][i]);
-                }
-            }
-        }
     }
 
-    /**
-     * Get the grid cell at index (i, j)
-     *
-     * @param i, index i of the cell
-     * @param j, index j of the cell
-     * @return Cell(i, j)
-     */
+    @Override
     public Cell getCell(int i, int j) {
         return matrix[j][i];
     }
 
-    /**
-     * Get the grid cell at specified index. The index of the cell is defined
-     * such as {@code index = j * nx + i} with nx being the dimension of the
-     * grid in the x-direction (number of columns) and {i, j} the coordinates of
-     * the cell in the Cartesian system.
-     *
-     * @param index of the cell
-     * @return Cell(index)
-     */
+    @Override
     public Cell getCell(int index) {
         int j = index / nx;
         int i = index - j * nx;
         return matrix[j][i];
     }
 
-    /**
-     * Get a list of the cells.
-     *
-     * @return a List of the cells.
-     */
+    @Override
     public List<Cell> getCells() {
+        ArrayList<Cell> cells = new ArrayList(ny * nx);
+        for (int j = ny; j-- > 0;) {
+            for (int i = nx; i-- > 0;) {
+                cells.add(matrix[j][i]);
+            }
+        }
         return cells;
     }
 
-    /**
-     * Get a list of the cells.
-     *
-     * @return a List of the cells.
-     */
-    public List<Cell> getOceanCells() {
-        return oceanCells;
-    }
-
-    /**
-     * Get the adjacent cells of a given cell (including itself) within a given
-     * range of cells.
-     *
-     * For instance, for {@code cell(i, j)} with a range of 1, the function
-     * returns 8 surrounding cells:
-     * <ul>
-     * <li>{@code cell(i - 1, j - 1)}</li>
-     * <li>{@code cell(i - 1, j)}</li>
-     * <li>{@code cell(i - 1, j + 1)}</li>
-     * <li>{@code cell(i, j - 1)}</li>
-     * <li>{@code cell(i, j + 1)}</li>
-     * <li>{@code cell(i + 1, j - 1)}</li>
-     * <li>{@code cell(i + 1, j)}</li>
-     * <li>{@code cell(i + 1, j + 1)}</li>
-     * </ul>
-     * For cells at the edge of the grid, only returns 3 or 5 cells.
-     *
-     * @param cell, the cell for which to get the neighbors
-     * @param range, and integer, the range of the neighborhood
-     * @return an ArrayList of the cells surrounding <code>cell</code>
-     */
+    @Override
     public ArrayList<Cell> getNeighbourCells(Cell cell, int range) {
 
         int im1 = Math.max(cell.get_igrid() - range, 0);
@@ -259,13 +185,18 @@ public abstract class AbstractGrid extends OsmoseLinker {
         return neighbours;
     }
 
-    /**
-     * Returns the number of cells of the grid that are in the ocean.
-     *
-     * @return the number of cells of the grid that are in the ocean
-     */
+    @Override
     public int getNOceanCell() {
-        return nOceanCell;
+        int nbCells = 0;
+
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                if (!matrix[j][i].isLand()) {
+                    nbCells++;
+                }
+            }
+        }
+        return nbCells;
     }
 
     /**
@@ -330,95 +261,47 @@ public abstract class AbstractGrid extends OsmoseLinker {
         dLong = (longMax - longMin) / (float) nx;
     }
 
-    /**
-     * Returns the dimension of the grid along the y-axis. The number of lines.
-     *
-     * @return the number of lines
-     */
+    @Override
     public int get_ny() {
         return ny;
     }
 
-    /**
-     * Returns the dimension of the grid along the y-axis. The number of
-     * columns.
-     *
-     * @return the number of columns
-     */
+    @Override
     public int get_nx() {
         return nx;
     }
 
-    /**
-     * Returns the latitude, in degree north, of the North West corner of the
-     * grid.
-     *
-     * @return the latitude, in degree north, of the North West corner of the
-     * grid
-     */
+    @Override
     public float getLatMax() {
         return latMax;
     }
 
-    /**
-     * Return the latitude, in degree north, of the South East corner of the
-     * grid.
-     *
-     * @return the latitude, in degree north, of the South East corner of the
-     * grid
-     */
+    @Override
     public float getLatMin() {
         return latMin;
     }
 
-    /**
-     * Returns the longitude, in degree east, of the South East corner of the
-     * grid.
-     *
-     * @return the longitude, in degree east, of the South East corner of the
-     * grid
-     */
+    @Override
     public float getLongMax() {
         return longMax;
     }
 
-    /**
-     * Returns the longitude, in degree east, of the North West corner of the
-     * grid.
-     *
-     * @return the longitude, in degree east, of the North West corner of the
-     * grid
-     */
+    @Override
     public float getLongMin() {
         return longMin;
     }
 
-    /**
-     * Returns the meridional size, in degree, of a cell. (delta latitude)
-     *
-     * @return the dLat of a cell, in degree
-     */
+    @Override
     public float getdLat() {
         return dLat;
     }
 
-    /**
-     * Returns the zonal size, in degree, of a cell. (delta longitude)
-     *
-     * @return the dLong of a cell, in degree
-     */
+    @Override
     public float getdLong() {
         return dLong;
     }
 
-    /**
-     * Writes the current Osmose grid as a NetCDF file. Creates a NetCDF file
-     * with three Double 2D arrays: longitude[ny][nx], latitude[ny][nx] and
-     * mask[ny][nx]
-     *
-     * @param filename, the absolute filename of the NetCDF grid file to be
-     * created
-     */
+    @Override
     public void toNetCDF(String filename) {
 
         NetcdfFileWriteable nc = null;
@@ -468,7 +351,9 @@ public abstract class AbstractGrid extends OsmoseLinker {
             nc.write("longitude", arrLon);
             nc.write("latitude", arrLat);
             nc.write("mask", arrMask);
-        } catch (IOException | InvalidRangeException ex) {
+        } catch (IOException ex) {
+            error("Failed to write the NetCDF grid file", ex);
+        } catch (InvalidRangeException ex) {
             error("Failed to write the NetCDF grid file", ex);
         }
         /*
@@ -479,5 +364,14 @@ public abstract class AbstractGrid extends OsmoseLinker {
         } catch (IOException ex) {
             // do nothing
         }
+    }
+
+    /**
+     * Returns an instance of the current {@code Configuration}.
+     *
+     * @return an instance of the current {@code Configuration}
+     */
+    Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 }

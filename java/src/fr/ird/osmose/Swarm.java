@@ -6,7 +6,6 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.process.mortality.MortalityCause;
-import fr.ird.osmose.util.OsmoseLinker;
 
 /**
  * The Swarm is the equivalent of the School in Osmose for the plankton group.
@@ -17,7 +16,7 @@ import fr.ird.osmose.util.OsmoseLinker;
  * 
  * @author P. Verley
  */
-public class Swarm extends OsmoseLinker implements IAggregation {
+public class Swarm implements IAggregation {
 
     /**
      * Pointer to the plankton group
@@ -43,7 +42,7 @@ public class Swarm extends OsmoseLinker implements IAggregation {
     public Swarm(Plankton plankton, Cell cell) {
         this.plankton = plankton;
         this.cell = cell;
-        this.index = plankton.getIndex() + getNSpecies();
+        this.index = plankton.getIndex() + Osmose.getInstance().getConfiguration().getNSpecies();
     }
 
     /**
@@ -69,12 +68,16 @@ public class Swarm extends OsmoseLinker implements IAggregation {
     public double getInstantaneousAbundance() {
         return Math.max(0.d, abundance - nDead);
     }
-  
-    public void setBiomass(double biomass) {
+
+    /**
+     *
+     * @param iStepSimu
+     */
+    public void updateBiomass(int iStepSimu) {
 
         // Update abundance
         // (for plankton Osmose makes no difference between abundance and biomass)
-        abundance = biomass;
+        abundance = plankton.getAccessibleBiomass(cell, iStepSimu);
         // Rest number of dead fish
         nDead = 0.d;
     }
@@ -149,14 +152,6 @@ public class Swarm extends OsmoseLinker implements IAggregation {
     @Override
     public float getWeight() {
         return 1.f;
-    }
-    
-    public Cell getCell() {
-        return cell;
-    }
-    
-    public int getLTLIndex() {
-        return plankton.getIndex();
     }
 
 }

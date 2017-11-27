@@ -50,6 +50,7 @@ package fr.ird.osmose.process.movement;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +61,7 @@ import java.util.List;
  */
 public class RandomDistribution extends AbstractDistribution {
 
-    private final int iSpecies;
+    private final Species species;
     private int areaSize;
     private List<Cell> randomMap;
     /*
@@ -68,30 +69,32 @@ public class RandomDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public RandomDistribution(int species) {
-        this.iSpecies = species;
+    public RandomDistribution(int rank, Species species) {
+        super(rank);
+        this.species = species;
     }
 
     @Override
     public void init() {
 
-        if (!getConfiguration().isNull("movement.distribution.ncell.sp" + iSpecies)) {
-            areaSize = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpecies);
+        int iSpec = species.getIndex();
+        if (!getConfiguration().isNull("movement.distribution.ncell.sp" + iSpec)) {
+            areaSize = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpec);
         } else {
             areaSize = getGrid().getNOceanCell();
-            warning("Could not find parameter movement.distribution.ncell.sp" + iSpecies + ". Osmose assumes that schools of " + getSpecies(iSpecies).getName() + " are distrubuted over the whole domain.");
+            warning("Could not find parameter movement.distribution.ncell.sp" + iSpec + ". Osmose assumes that schools of " + getSpecies(iSpec).getName() + " are distrubuted over the whole domain.");
         }
         createRandomMap();
         
-        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpecies)) {
-            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpecies);
+        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpec)) {
+            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpec);
         } else {
             range = 1;
         }
     }
 
     @Override
-    public void move(School school, int iStepSimu) {
+    public void move(School school) {
         if (school.isUnlocated()) {
             school.moveToCell(randomDeal(randomMap));
         } else {
@@ -103,7 +106,7 @@ public class RandomDistribution extends AbstractDistribution {
 
         int nbCasesDispos = getGrid().getNOceanCell();
 
-        if (areaSize > nbCasesDispos) {
+        if (areaSize >= nbCasesDispos) {      // barrier.n: replace > by >=
             /*
              * Whole grid
              */
@@ -124,16 +127,16 @@ public class RandomDistribution extends AbstractDistribution {
             int nCells = areaSize;
             randomMap = new ArrayList(nCells);
             boolean[][] alreadyChoosen = new boolean[getGrid().get_ny()][getGrid().get_nx()];
-            //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpecies]];
-            int i, j;
-            i = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
-            j = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
-            while (getGrid().getCell(i, j).isLand()) {
-                i = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
-                j = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+            //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpec]];
+            int coordi, coordj;
+            coordi = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
+            coordj = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
+            while (getGrid().getCell(coordi, coordj).isLand()) {
+                coordi = (int) Math.round(Math.random() * (getGrid().get_nx() - 1));
+                coordj = (int) Math.round(Math.random() * (getGrid().get_ny() - 1));
             }
-            randomMap.add(getGrid().getCell(i, j));
-            alreadyChoosen[j][i] = true;
+            randomMap.add(getGrid().getCell(coordi, coordj));
+            alreadyChoosen[coordj][coordi] = true;
             /*
              * From initial cell, successive random sorting of the
              * adjacent cells until tabCellsArea is full

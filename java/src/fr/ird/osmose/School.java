@@ -104,7 +104,7 @@ public class School extends GridPoint implements IAggregation {
     private final int index;
     /**
      * Weight of the fish in tonne. The unit has been set to tonne just because
-     * it saves computation time for converting the biomass from gramme to tonne
+     * it saves computation time for converting the biomass from gram to tonne
      */
     private float weight;
     /**
@@ -120,14 +120,6 @@ public class School extends GridPoint implements IAggregation {
      * {@code instantaneousAbundance = abundance - ndead}
      */
     private double instantaneousAbundance;
-    /**
-     * Biomass, in tonne, of the school at the beginning of the time step.
-     */
-    private double biomass;
-    /**
-     * Biomass, in tonne, of the school, estimated on the fly.
-     */
-    private double instantaneousBiomass;
     /**
      * Number of dead fish in the current time step, for each mortality cause.
      */
@@ -240,8 +232,8 @@ public class School extends GridPoint implements IAggregation {
      * @param x, x coordinate of the school on the grid
      * @param y, y coordinate of the school on the grid
      * @param abundance, the number of fish in the school
-     * @param length, the length of the fish in centimetre
-     * @param weight, the weight of the fish in gramme
+     * @param length, the length of the fish in centimeter
+     * @param weight, the weight of the fish in gram
      * @param ageDt, the age of the fish in number of time step
      * @param trophicLevel, the trophic level of the fish
      */
@@ -250,8 +242,6 @@ public class School extends GridPoint implements IAggregation {
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
-        biomass = instantaneousBiomass = abundance * this.weight;
-        abundanceHasChanged = false;
         this.trophicLevel = trophicLevel;
         if (x >= 0 && x < getGrid().get_nx() && y >= 0 && y < getGrid().get_ny()) {
             moveToCell(getGrid().getCell(Math.round(x), Math.round(y)));
@@ -272,16 +262,12 @@ public class School extends GridPoint implements IAggregation {
 // Definition of the methods
 ////////////////////////////
     /**
-     * Initialises and reset some state variables
+     * Initializes and reset some state variables
      */
     public void init() {
 
-        // Update abundance
-        abundance = getInstantaneousAbundance();
-        // Update biomass
-        biomass = abundance * weight;
-        // Rest number of dead fish
-        reset(nDead);
+        // Update abundance and reset number of dead
+        updateAbundance();
         // Reset diet variables
         preys.clear();
         preyedBiomass = 0.d;
@@ -340,17 +326,24 @@ public class School extends GridPoint implements IAggregation {
     @Override
     public double getInstantaneousAbundance() {
         if (abundanceHasChanged) {
-            updateBiomAndAbd();
+            instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
+            if (instantaneousAbundance < 1.d) {
+                instantaneousAbundance = 0.d;
+            }
+            abundanceHasChanged = false;
         }
         return instantaneousAbundance;
     }
 
-    private void updateBiomAndAbd() {
-        instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
-        if (instantaneousAbundance < 1.d) {
-            instantaneousAbundance = 0.d;
-        }
-        instantaneousBiomass = instantaneousAbundance * weight;
+    /**
+     *
+     */
+    public void updateAbundance() {
+
+        // Update abundance
+        abundance = getInstantaneousAbundance();
+        // Rest number of dead fish
+        reset(nDead);
         abundanceHasChanged = false;
     }
 
@@ -363,7 +356,7 @@ public class School extends GridPoint implements IAggregation {
      */
     @Override
     public double getBiomass() {
-        return biomass;
+        return adb2biom(abundance);
     }
 
     /**
@@ -377,10 +370,7 @@ public class School extends GridPoint implements IAggregation {
      */
     @Override
     public double getInstantaneousBiomass() {
-        if (abundanceHasChanged) {
-            updateBiomAndAbd();
-        }
-        return instantaneousBiomass;
+        return adb2biom(getInstantaneousAbundance());
     }
 
     /**
@@ -402,7 +392,7 @@ public class School extends GridPoint implements IAggregation {
      * @return the corresponding biomass of this number of fish weighting
      * {@code weight}. {@code biomass = abundance * weight}
      */
-    public double abd2biom(double abundance) {
+    public double adb2biom(double abundance) {
         return abundance * weight;
     }
 
@@ -661,10 +651,19 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
+     * Gets the {@link Configuration} instance.
+     *
+     * @return the {@code Configuration} instance
+     */
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
+    }
+
+    /**
      * Checks whether the object is equal to this school.
      *
      * @param obj, the object with which to compare to this school
-     * @return {@code true} is the object is a {@code School} and has the same
+     * @return {@code true} if the object is a {@code School} and has the same
      * {@code UUID}
      */
     @Override

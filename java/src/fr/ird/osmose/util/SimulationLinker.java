@@ -48,19 +48,25 @@
  */
 package fr.ird.osmose.util;
 
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
 import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Simulation;
+import fr.ird.osmose.Species;
+import fr.ird.osmose.grid.IGrid;
 import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.util.logging.OLogger;
 
 /**
  *
  * @author pverley
  */
-public class SimulationLinker extends OsmoseLinker {
+public class SimulationLinker extends OLogger {
 
     private final int rank;
 
     public SimulationLinker(int rank) {
+        super(rank);
         this.rank = rank;
     }
 
@@ -68,15 +74,45 @@ public class SimulationLinker extends OsmoseLinker {
         return rank;
     }
 
+    public Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
+    }
+
+    public IGrid getGrid() {
+        return Osmose.getInstance().getGrid();
+    }
+
     public Simulation getSimulation() {
-        return getOsmose().getSimulation(rank);
+        return Osmose.getInstance().getSimulation(rank);
     }
 
     public SchoolSet getSchoolSet() {
-        return getOsmose().getSimulation(rank).getSchoolSet();
+        return Osmose.getInstance().getSimulation(rank).getSchoolSet();
     }
 
     public LTLForcing getForcing() {
-        return getOsmose().getSimulation(rank).getForcing();
+        return Osmose.getInstance().getSimulation(rank).getForcing();
+    }
+
+    public Species getSpecies(int index) {
+        return Osmose.getInstance().getSimulation(rank).getSpecies(index);
+    }
+
+    public Species getSpecies(String name) {
+        for (int i = 0; i < getNSpecies(); i++) {
+            if (getSpecies(i).getName().equalsIgnoreCase(name)) {
+                return getSpecies(i);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The number of simulated species
+     *
+     * @return the number of simulated species
+     */
+    public int getNSpecies() {
+        return Osmose.getInstance().getConfiguration().getNSpecies();
     }
 }

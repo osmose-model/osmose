@@ -57,38 +57,47 @@ import ucar.nc2.NetcdfFile;
  */
 public class LTLForcingLaure extends LTLForcingRomsPisces {
 
-    private float[][][][][] data;
+    private double[][][][] data;
 
     public LTLForcingLaure(int rank) {
         super(rank);
     }
 
     @Override
-    public void initLTL() {
-        super.initLTL();
+    public void initLTLGrid() {
+        super.initLTLGrid();
         loadData();
     }
 
     private void loadData() {
 
-        info("Loading LTL data...");
-        data = new float[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][][];
-        for (int iTime = 0; iTime < getConfiguration().getNStepYear(); iTime++) {
-            for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
-                String ncfile = planktonFileListNetcdf[getIndexStepLTL(iTime)];
-                NetcdfFile nc;
-                try {
-                    nc = NetcdfFile.open(ncfile);
-                    data[iTime][iPlk] = (float[][][]) nc.findVariable(plktonNetcdfNames[iPlk]).read().copyToNDJavaArray();
-                } catch (IOException ex) {
-                    error("Error loading LTL variable " + plktonNetcdfNames[iPlk] + " from file " + ncfile, ex);
-                }
+        info("Loading all plankton data...");
+        data = new double[getConfiguration().getNStepYear()][getConfiguration().getNPlankton()][][];
+        for (int t = 0; t < getConfiguration().getNStepYear(); t++) {
+            for (int p = 0; p < getConfiguration().getNPlankton(); p++) {
+                data[t][p] = getIntegratedBiomass(p, t);
             }
         }
+        info("All plankton data loaded");
+    }
+
+    private double[][] getIntegratedBiomass(int p, int iStepSimu) {
+
+        float[][][] dataInit = null;
+
+        String ncfile = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
+        try {
+            NetcdfFile nc = NetcdfFile.open(ncfile);
+            dataInit = (float[][][]) nc.findVariable(plktonNetcdfNames[p]).read().copyToNDJavaArray();
+        } catch (IOException ex) {
+            error("Error loading LTL variable " + plktonNetcdfNames[p] + " from file " + ncfile, ex);
+        }
+
+        return verticalIntegration(dataInit, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override
-    float[][][] getRawBiomass(int iPlk, int iStepSimu) {
-        return data[getIndexStepLTL(iStepSimu)][iPlk];
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
+        return data[getIndexStepLTL(iStepSimu)][iPlankton];
     }
 }

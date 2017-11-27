@@ -48,14 +48,16 @@
  */
 package fr.ird.osmose.util.version;
 
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
+import fr.ird.osmose.util.logging.OLogger;
 import java.util.Arrays;
 
 /**
  *
  * @author pverley
  */
-public class VersionManager extends OsmoseLinker {
+public class VersionManager extends OLogger {
 
     // Declaration of the existing Osmose versions
     private final AbstractVersion v3 = new Version3();
@@ -80,33 +82,30 @@ public class VersionManager extends OsmoseLinker {
         Arrays.sort(VERSIONS);
     }
 
-    public boolean checkConfiguration() {
-        
-        // Retrieve version of the Osmose configuration 
-        cfgVersion = getConfigurationVersion();
-
-        // Check version
-        if (cfgVersion.compareTo(OSMOSE_VERSION) < 0) {
-            warning("Configuration version {0} is older than software version {1}.", new Object[]{cfgVersion, OSMOSE_VERSION});
-            return false;
-        } else {
-            info("Configuration version {0} matches software version {1}. Nothing to do.", new Object[]{cfgVersion, OSMOSE_VERSION});
-        }
-        return true;
-    }
-
     /*
      * Upgrade the configuration file to the application version.
      */
     public void updateConfiguration() {
 
-        // Update the configuration file
+        // Retrieve version of the Osmose configuration 
+        cfgVersion = getConfigurationVersion();
+
+        // Check version
+        if (cfgVersion.compareTo(OSMOSE_VERSION) < 0) {
+            info("Configuration version {0} is older than Osmose version {1}. Your configuration file will be automatically updated.", new Object[]{cfgVersion, OSMOSE_VERSION});
+
+            // Update the configuration file
             for (AbstractVersion version : VERSIONS) {
                 if ((version.compareTo(OSMOSE_VERSION) <= 0) && (cfgVersion.compareTo(version) < 0)) {
                     version.updateConfiguration();
                     getConfiguration().refresh();
                 }
             }
+        } else if (cfgVersion.compareTo(OSMOSE_VERSION) > 0) {
+            info("Configuration version {0} is more recent than Osmose version {1}. Your configuration might not run correctly, you should get the latest Osmose version.", new Object[]{cfgVersion, OSMOSE_VERSION});
+        } else {
+            info("Configuration version {0} matches Osmose version {1}. Nothing to do.", new Object[]{cfgVersion, OSMOSE_VERSION});
+        }
     }
 
     /**
@@ -118,7 +117,7 @@ public class VersionManager extends OsmoseLinker {
      * @see fr.ird.osmose.util.version.Version3
      * @return the version of the configuration file
      */
-    AbstractVersion getConfigurationVersion() {
+    private AbstractVersion getConfigurationVersion() {
 
         if (!getConfiguration().isNull("osmose.version")) {
             try {
@@ -139,12 +138,14 @@ public class VersionManager extends OsmoseLinker {
                     }
                 }
             } catch (Exception ex) {
+                error("Could not identify version of the configuration, check parameter osmose.version = " + getConfiguration().getString("osmose.version"), ex);
             }
-            StringBuilder msg = new StringBuilder();
-            msg.append("Could not identify version of the configuration. Check parameter ");
-            msg.append(getConfiguration().printParameter("osmose.version"));
-            error(msg.toString(), new IllegalArgumentException("Supported versions are " + Arrays.toString(VERSIONS)));
         }
+        
         return v3;
+    }
+
+    private Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
     }
 }

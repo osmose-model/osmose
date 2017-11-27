@@ -5,7 +5,9 @@
  */
 package fr.ird.osmose.util.version;
 
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
+import fr.ird.osmose.util.logging.OLogger;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,7 +27,7 @@ import java.util.List;
  *
  * @author pverley
  */
-public abstract class AbstractVersion extends OsmoseLinker implements Comparable<AbstractVersion> {
+public abstract class AbstractVersion extends OLogger implements Comparable<AbstractVersion> {
 
     final private int number;
 
@@ -91,22 +93,6 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         return version.toString();
     }
 
-    /**
-     * Return Osmose version as a condensed String.
-     * <br />
-     * o{version_number}u{update-number}<br />
-     * Example: o3u1, for Osmose 3 Update 1
-     *
-     * @return Osmose condensed version as a String.
-     */
-    public String toShortString() {
-        StringBuilder version = new StringBuilder("o");
-        version.append(number);
-        version.append("u");
-        version.append(update);
-        return version.toString();
-    }
-
     @Override
     public int compareTo(AbstractVersion otherVersion) {
 
@@ -161,7 +147,7 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
             }
         }
         // Backup the source
-        backup(source, VersionManager.getInstance().getConfigurationVersion());
+        backup(source);
         // Build the parameter as key + separator + value
         StringBuilder parameter = new StringBuilder();
         parameter.append(key);
@@ -209,7 +195,7 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         }
         // Backup the source file
         String source = getConfiguration().getSource(key);
-        backup(source, VersionManager.getInstance().getConfigurationVersion());
+        backup(source);
         // Extract the list of parameters
         ArrayList<String> parameters = getLines(source);
         // Find the line of parameter defined by the key
@@ -264,7 +250,7 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         // Parameter exists and can be renamed safely
         // Backup the source file
         String source = getConfiguration().getSource(key);
-        backup(source, VersionManager.getInstance().getConfigurationVersion());
+        backup(source);
         // Extract the list of parameters
         ArrayList<String> parameters = getLines(source);
         // Find the line of parameter defined by the key
@@ -309,7 +295,7 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         }
         // Backup the source file
         String source = getConfiguration().getSource(key);
-        backup(source, VersionManager.getInstance().getConfigurationVersion());
+        backup(source);
         // Extract the list of parameters
         ArrayList<String> parameters = getLines(source);
         // Find the line of parameter defined by the key
@@ -375,17 +361,19 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         }
         return lines;
     }
-    
-    protected String backup(String src, AbstractVersion srcVersion) {
+
+    protected Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
+    }
+
+    protected String backup(String src) {
 
         Calendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(System.currentTimeMillis());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
         formatter.setCalendar(calendar);
         StringBuilder bak = new StringBuilder(src);
-        bak.append(".backup-");
-        bak.append(srcVersion.toShortString());
-        bak.append('-');
+        bak.append(".bak");
         bak.append(formatter.format(calendar.getTime()));
         // If the backup file already exist, no need to backup again
         // It means it has been saved withing the last minute

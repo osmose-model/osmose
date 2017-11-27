@@ -80,11 +80,12 @@ public class MeanTrophicLevelOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (include(school)) {
-                int i = school.getSpeciesIndex();
-                meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
-                biomass[i] += school.getInstantaneousBiomass();
+            if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                continue;
             }
+            int i = school.getSpeciesIndex();
+            meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
+            biomass[i] += school.getInstantaneousBiomass();
         }
     }
 
@@ -128,7 +129,7 @@ public class MeanTrophicLevelOutput extends AbstractOutput {
     String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
+            species[i] = getSimulation().getSpecies(i).getName();
         }
         return species;
     }

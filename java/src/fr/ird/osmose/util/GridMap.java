@@ -59,13 +59,13 @@ import java.util.List;
  *
  * @author pverley
  */
-public class GridMap extends OsmoseLinker {
+public class GridMap {
 
     private final float[][] matrix;
 
     public GridMap(int defaultValue) {
-        matrix = new float[getGrid().get_ny()][getGrid().get_nx()];
-        for (Cell cell : getGrid().getCells()) {
+        matrix = new float[getOsmose().getGrid().get_ny()][getOsmose().getGrid().get_nx()];
+        for (Cell cell : getOsmose().getGrid().getCells()) {
             if (cell.isLand()) {
                 matrix[cell.get_jgrid()][cell.get_igrid()] = Cell.LAND_VALUE;
             } else {
@@ -94,7 +94,7 @@ public class GridMap extends OsmoseLinker {
             /*
              * Read the map
              */
-            int ny = getGrid().get_ny();
+            int ny = getOsmose().getGrid().get_ny();
             for (int l = 0; l < lines.size(); l++) {
                 String[] line = lines.get(l);
                 int j = ny - l - 1;
@@ -105,13 +105,13 @@ public class GridMap extends OsmoseLinker {
                             matrix[j][i] = value;
                         }
                     } catch (NumberFormatException ex) {
-                        error("Error parsing CSV map " + csvFile + " row " + (l + 1) + " column " + (i + 1), ex);
+                        getOsmose().error("Error parsing CSV map " + csvFile + " row " + (l + 1) + " column " + (i + 1), ex);
                     }
                 }
             }
             reader.close();
         } catch (IOException ex) {
-            error("Error reading CSV map " + csvFile, ex);
+            getOsmose().error("Error reading CSV map " + csvFile, ex);
         }
     }
 
@@ -129,5 +129,9 @@ public class GridMap extends OsmoseLinker {
 
     public float getValue(Cell cell) {
         return getValue(cell.get_igrid(), cell.get_jgrid());
+    }
+
+    public static Osmose getOsmose() {
+        return Osmose.getInstance();
     }
 }

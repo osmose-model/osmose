@@ -48,12 +48,8 @@
  */
 package fr.ird.osmose.ltl;
 
-import fr.ird.osmose.Cell;
-import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -69,16 +65,11 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     private String bathyFile;
     private String bathyName;
     private String[] planktonNetcdfNames;
-    private float[][][] depthLevel;
+    private float[][][] depthOfLayer;
     private int[][][] indexOceanpoint;
     private int im, jm, km;
     private int timeDim;
     private int stride;
-    /**
-     * List of LTL cells that are contained within Osmose cells. The map is
-     * indexed by Osmose cell index.
-     */
-    private HashMap<Integer, List<Point>> ltlCells;
 
     public LTLForcingBFM(int rank) {
         super(rank);
@@ -106,7 +97,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     }
 
     @Override
-    public void initLTL() {
+    public void initLTLGrid() {
 
         try {
             /*
@@ -135,34 +126,29 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Compute the depth of every cell in meter
              */
-            depthLevel = new float[jm][im][km];
+            depthOfLayer = new float[km][jm][im];
             for (int z = 0; z < km; z++) {
                 for (int j = 0; j < jm; j++) {
                     for (int i = 0; i < im; i++) {
-                        depthLevel[j][i][z] = bathy[j][i] * zlevel[z];
+                        depthOfLayer[z][j][i] = bathy[j][i] * zlevel[z];
                     }
                 }
             }
             /*
              * Associate osmose cells to BFM cells
              */
-            ltlCells = new HashMap();
+            icoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
+            jcoordLTLGrid = new ArrayList[getGrid().get_ny()][getGrid().get_nx()];
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    Cell cell = getGrid().getCell(i, j);
-                    if (!cell.isLand()) {
-                        if (!ltlCells.containsKey(cell.getIndex())) {
-                            ltlCells.put(cell.getIndex(), new ArrayList());
-                        }
-                        for (int ii = 0; ii < stride; ii++) {
-                            for (int jj = 0; jj < stride; jj++) {
-                                int iLTL = i * stride + jj;
-                                int jLTL = j * stride + ii;
-                                // Only add LTL ocean cells
-                                if (indexOceanpoint[0][jLTL][iLTL] >= 0) {
-                                    ltlCells.get(cell.getIndex()).add(new Point(iLTL, jLTL));
-                                }
+                    for (int ii = 0; ii < stride; ii++) {
+                        for (int jj = 0; jj < stride; jj++) {
+                            if (null == icoordLTLGrid[j][i]) {
+                                icoordLTLGrid[j][i] = new ArrayList();
+                                jcoordLTLGrid[j][i] = new ArrayList();
                             }
+                            jcoordLTLGrid[j][i].add(j * stride + jj);
+                            icoordLTLGrid[j][i].add(i * stride + ii);
                         }
                     }
                 }
@@ -178,8 +164,8 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     /*
      * (i, j, k) ==> oceanpoint coordinate for BFM variables
      */
-    private int ijk2oceanpoint(int iLTL, int jLTL, int kLTL) {
-        return indexOceanpoint[kLTL][jLTL][iLTL];
+    private int ijk2oceanpoint(int i, int j, int k) {
+        return indexOceanpoint[k][j][i];
     }
 
     /*
@@ -217,11 +203,11 @@ public class LTLForcingBFM extends AbstractLTLForcing {
     }
 
     @Override
-    float[][][] getRawBiomass(int iPlk, int iStepSimu) {
+    double[][] getRawBiomass(int iPlankton, int iStepSimu) {
 
         String name = planktonFileListNetcdf[getIndexStepLTL(iStepSimu)];
 
-        float[][][] rawBiomass = new float[jm][im][km];
+        float[][][] data3d = new float[km][jm][im];
         try {
             /*
              * Open the BFM Plankton NetCDF file
@@ -236,7 +222,7 @@ public class LTLForcingBFM extends AbstractLTLForcing {
             /*
              * Read the concentration of plankton
              */
-            Variable ncvar = nc.findVariable(planktonNetcdfNames[iPlk]);
+            Variable ncvar = nc.findVariable(planktonNetcdfNames[iPlankton]);
             int[] shape = ncvar.getShape();
             float[] variable = (float[]) ncvar.read(new int[]{timestep, 0}, new int[]{1, shape[1]}).reduce().copyToNDJavaArray();
             /*
@@ -247,9 +233,9 @@ public class LTLForcingBFM extends AbstractLTLForcing {
                     for (int k = 0; k < km; k++) {
                         int oceanpoint = ijk2oceanpoint(i, j, k);
                         if (oceanpoint >= 0) {
-                            rawBiomass[j][i][k] = variable[oceanpoint];
+                            data3d[k][j][i] = variable[oceanpoint];
                         } else {
-                            rawBiomass[j][i][k] = 0.f;
+                            data3d[k][j][i] = 0.f;
                         }
                     }
                 }
@@ -259,25 +245,21 @@ public class LTLForcingBFM extends AbstractLTLForcing {
              */
             nc.close();
 
-        } catch (InvalidRangeException | IOException ex) {
-            error("Error loading plankton variable " + planktonNetcdfNames[iPlk] + " from file " + name, ex);
+        } catch (InvalidRangeException ex) {
+            error("Error loading plankton variable " + planktonNetcdfNames[iPlankton] + " from file " + name, ex);
+        } catch (IOException ex) {
+            error("Error loading plankton variable " + planktonNetcdfNames[iPlankton] + " from file " + name, ex);
         }
 
-        return rawBiomass;
+
+        /*
+         * Integrate plankton biomass on vertical dimension
+         */
+        return verticalIntegration(data3d, depthOfLayer, getConfiguration().getFloat("ltl.integration.depth"));
     }
 
     @Override
     public int getIndexStepLTL(int iStepSimu) {
         return (iStepSimu % getConfiguration().getNStepYear()) / timeDim;
-    }
-
-    @Override
-    float[] getDepthLevel(int iLTL, int jLTL) {
-        return depthLevel[jLTL][iLTL];
-    }
-
-    @Override
-    List<Point> getLTLCells(Cell cell) {
-        return ltlCells.get(cell.getIndex());
     }
 }

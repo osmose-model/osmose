@@ -86,7 +86,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
         // Loop over cells
         for (Cell cell : getGrid().getCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
-            if (!(cell.isLand() || (null == schools))) {
+            if (!(cell.isLand() || schools.isEmpty())) {
                 int ns = schools.size();
                 int npl = getConfiguration().getNPlankton();
 
@@ -113,11 +113,11 @@ public class IterativeMortalityProcess extends AbstractProcess {
                             if (ipr < ns) {
                                 // Prey is School
                                 School prey = schools.get(ipr);
-                                school.preyedUpon(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), prey.abd2biom(nDeadMatrix[ipr][is]), keepRecord);
+                                school.preyedUpon(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), prey.adb2biom(nDeadMatrix[ipr][is]), keepRecord);
                             } else {
                                 // Prey is Plankton
                                 int index = ipr - ns + nspec;
-                                school.preyedUpon(index, getConfiguration().getPlankton(ipr - ns).getTrophicLevel(), -1, -1, nDeadMatrix[ipr][is], keepRecord);
+                                school.preyedUpon(index, getSimulation().getPlankton(ipr - ns).getTrophicLevel(), -1, -1, nDeadMatrix[ipr][is], keepRecord);
                             }
                         }
                     }
@@ -153,7 +153,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
         double[] correctionFactor = new double[nSchool];
         double[] planktonBiomass = new double[nPlankton];
         for (int iPlk = 0; iPlk < nPlankton; iPlk++) {
-            planktonBiomass[iPlk] = getSimulation().getForcing().getBiomass(iPlk, cell);
+            planktonBiomass[iPlk] = getSimulation().getPlankton(iPlk).getBiomass(cell);
         }
 
         //
@@ -195,7 +195,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
             mortalityRateMatrix[is][nSchool + 1] = additionalMortality.getRate(school);
 
             // 4. Fishing mortality
-            switch (fishingMortality.getType(school.getSpeciesIndex())) {
+            switch (fishingMortality.getType()) {
                 case RATE:
                     mortalityRateMatrix[is][nSchool + 2] = fishingMortality.getRate(school);
                     break;
@@ -253,7 +253,7 @@ public class IterativeMortalityProcess extends AbstractProcess {
                 double preyedBiomass = 0;
                 for (int iPrey = 0; iPrey < (nSchool + nPlankton); iPrey++) {
                     if (iPrey < nSchool) {
-                        preyedBiomass += schools.get(iPrey).abd2biom(nDeadMatrix[iPrey][iPredator]);
+                        preyedBiomass += schools.get(iPrey).adb2biom(nDeadMatrix[iPrey][iPredator]);
                     } else {
                         preyedBiomass += nDeadMatrix[iPrey][iPredator];
                     }

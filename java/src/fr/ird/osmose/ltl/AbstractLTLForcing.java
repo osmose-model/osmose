@@ -2,7 +2,7 @@
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2015
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
  * 
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
@@ -50,14 +50,9 @@ package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.SimulationLinker;
-import java.awt.Point;
 import java.util.List;
 
 /**
- * This abstract class indicates how Osmose manages and retrieves the biomass of
- * the low trophic levels compartments of the ecosystem. The LTL groups are an
- * input of the model, they are forcing the model biomass as they provide food
- * to the higher trophic levels.
  *
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
@@ -68,8 +63,26 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 // Declaration of the variables
 ///////////////////////////////
     /**
+     * List of the i-coordinates of the LTL cells that overlap an Osmose cell.
+     * These are the LTL cells that are taken into account for interpolating the
+     * LTL biomass on an Osmose cell. It is an array of the size of the Osmose
+     * grid so that it provides of list of i-coordinates for every (ocean) cell
+     * of the Osmose grid.
+     *
+     */
+    List<Integer>[][] icoordLTLGrid;
+    /**
+     * List of the j-coordinates of the LTL cells that overlap an Osmose cell.
+     * These are the LTL cells that are taken into account for interpolating the
+     * LTL biomass on an Osmose cell. It is an array of the size of the Osmose
+     * grid so that it provides of list of j-coordinates for every (ocean) cell
+     * of the Osmose grid.
+     *
+     */
+    List<Integer>[][] jcoordLTLGrid;
+    /**
      * Factor for converting biomass from plankton unit to wet weight in
-     * tonne/m3. (e.g. mmolN/m3 to tonne/m3)
+     * tonne/km2. (e.g. mmolN/m2 to tonne/km2)
      */
     double[] conversionFactor;
     /**
@@ -88,28 +101,10 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
      * function.
      */
     private double[][][] biomass;
-    /**
-     * The constant biomass, in tonne, in a cell of the model. Parameter
-     * 'plankton.biomass.total.plk#' provides the total biomass of a given
-     * plankton group in the system for every time step. This feature allows to
-     * consider a plankton group with a constant biomass uniformly distributed
-     * over the grid of the model and over time. This feature has been added as
-     * a quick patch for a configuration that seems to lack a food compartment
-     * and as a result cannot reach any biomass equilibrium. It provides to the
-     * system a constant pool of biomass throughout time. It should only be used
-     * for "debugging" a configuration.
-     */
-    private double[] uBiomass;
 
-    /**
-     * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
-     * for virtually increasing or decreasing plankton biomass.
-     */
-    private double[] multiplier;
-
-//////////////
-// Constructor
-//////////////
+////////////////////////////
+// Definition of the methods
+////////////////////////////
     /**
      * Creates a new LTLForcing associated to a specified simulation.
      *
@@ -123,25 +118,17 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 // Definition of the abstract methods
 /////////////////////////////////////
     /**
-     * Get the 3D biomass of the specified plankton group on the LTL grid for a
-     * given time step. The biomass is expressed in the same unit as it is in
-     * the forcing file. Dimensions must be ordered as [jLTL][iLTL][zLTL]
+     * Get the biomass of the specified plankton group on the LTL grid and
+     * vertically integrated, for a given time step. The biomass is expressed in
+     * the same unit as it is in the forcing file except that it is vertically
+     * integrated (concentration of plankton per surface unit).
      *
      * @param iPlankton, the index of a plankton group
      * @param iStepSimu, the current step of the simulation
-     * @return an array of same dimension and unit than the LTL grid
+     * @return an array of dimension of the LTL grid with biomass vertically
+     * integrated.
      */
-    abstract float[][][] getRawBiomass(int iPlankton, int iStepSimu);
-
-    /**
-     * List the LTL cells that overlap a given Osmose cell. The LTL cells are
-     * returned as a list of Point(x, y) with x, y integer coordinates of the
-     * cell on the LTL grid. These are the LTL cells that are taken into account
-     * for interpolating the LTL biomass on an Osmose cell. The list may or may
-     * not be empty for land cells. The list must only return LTL ocean cells
-     * (so that land LTL cells are not included in the spatial integration).
-     */
-    abstract List<Point> getLTLCells(Cell cell);
+    abstract double[][] getRawBiomass(int iPlankton, int iStepSimu);
 
     /**
      * Read LTL parameters in the Osmose configuration file.
@@ -149,26 +136,11 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     abstract void readParameters();
 
     /**
-     * This function must be used for initialising the LTL plug-ins inheriting
-     * from this abstract class. It should be the place, for instance, for
-     * linking the LTL grid cells to Osmose grid cells (that are be returned by
-     * the getLTLCells function), and for (pre)loading any stuff or NetCDF
-     * variables that you deem useful for making getRawBiomass() as efficient as
-     * possible.
+     * This function loads the LTL grid. It loads longitude, latitude and depth
+     * of vertical levels. It creates the index map between osmose cells and LTL
+     * grid cells (fills up variables icoordLTLGrid & jcoordLTLGrid)
      */
-    abstract void initLTL();
-
-    /**
-     *
-     * Get the depths of the vertical levels at a given location on the LTL
-     * grid. depth[zLTL]
-     *
-     * @param iLTL the i-coordinate of the cell in the LTL grid
-     * @param jLTL the j-coordinate of the cell in the LTL grid
-     * @return an array that contains the depth, in metre, of the vertical
-     * levels at LTL cell(iLTL, jLTL)
-     */
-    abstract float[] getDepthLevel(int iLTL, int jLTL);
+    abstract void initLTLGrid();
 
 ////////////////////////////
 // Definition of the methods
@@ -197,7 +169,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
             if (!getConfiguration().isNull("plankton.conversion2tons.plk" + iPlk)) {
                 conversionFactor[iPlk] = getConfiguration().getDouble("plankton.conversion2tons.plk" + iPlk);
             } else {
-                warning("Parameter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/m2 (or tonne/m3 for 3D dataset)", new Object[]{iPlk, getConfiguration().getPlankton(iPlk).getName()});
+                warning("Paramter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/km2 (or tonne/km3 for 3D dataset)", new Object[]{iPlk, getSimulation().getPlankton(iPlk).getName()});
                 conversionFactor[iPlk] = 1.d;
             }
         }
@@ -205,70 +177,71 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         // Read LTL parameters
         readParameters();
 
-        // Initializes LTL
-        initLTL();
+        // Initializes LTL grid
+        initLTLGrid();
 
-        // Plankton multplier
-        multiplier = new double[nPlk];
-        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
-            if (!getConfiguration().isNull("plankton.multiplier.plk" + iPlk)) {
-                multiplier[iPlk] = getConfiguration().getFloat("plankton.multiplier.plk" + iPlk);
-                warning("Plankton biomass for plankton group " + iPlk + " will be multiplied by " + multiplier[iPlk] + " accordingly to parameter " + getConfiguration().printParameter("plankton.multiplier.plk" + iPlk));
-            } else {
-                multiplier[iPlk] = 1.d;
+        // Initializes biomass matrix
+        biomass = new double[nPlk][getGrid().get_ny()][getGrid().get_nx()];
+    }
+
+    /**
+     *
+     * @param data3d, the raw LTL data with a vertical dimension
+     * {@code data3d[nz][ny][nx]}
+     * @param depthLayer, an array of float that provides the depth of every
+     * cell of the LTL grid. {@code depthLayer[nz][ny][nx]}
+     * @param maxDepth, the maximum depth to be taken into account for the
+     * vertical integration. Make sure the sign of the depth is consistent
+     * between the depth of the LTL grid and the maximum depth.
+     * @return the raw LTL data vertically integrated, in concentration of
+     * plankton per surface unit.
+     */
+    public double[][] verticalIntegration(float[][][] data3d, float[][][] depthLayer, float maxDepth) {
+        int nx = data3d[0][0].length;
+        int ny = data3d[0].length;
+        int nz = data3d.length;
+        double[][] integratedData = new double[ny][nx];
+        double integr;
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
+                integr = 0.d;
+                for (int k = 0; k < nz - 1; k++) {
+                    if (depthLayer[k][j][i] > maxDepth) {
+                        if (data3d[k][j][i] >= 0 && data3d[k + 1][j][i] >= 0) {
+                            integr += (Math.abs(depthLayer[k][j][i] - depthLayer[k + 1][j][i])) * ((data3d[k][j][i] + data3d[k + 1][j][i]) / 2.d);
+                        }
+                    }
+                }
+                integratedData[j][i] = integr;
             }
         }
-
-        // Uniform biomass
-        uBiomass = new double[nPlk];
-        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
-            if (!getConfiguration().isNull("plankton.biomass.total.plk" + iPlk)) {
-                uBiomass[iPlk] = getConfiguration().getDouble("plankton.biomass.total.plk" + iPlk) / getGrid().getNOceanCell();
-            } else {
-                uBiomass[iPlk] = -1.d;
-            }
-        }
+        return integratedData;
     }
 
     /**
      * Updates the biomass of the LTL groups at the current time step of the
-     * simulation. Get the raw biomass of the LTL groups on their original grid
-     * and with their original unit and interpolates and integrates it on the
-     * Osmose grid in order to get tonnes of wet weight.
+     * simulation. Get the "raw" biomass of the LTL groups on their original
+     * grid and with their original unit and interpolates it on the Osmose grid
+     * and converts it to tonne/km2.
      *
      * @param iStepSimu, the current step of the simulation
      */
     @Override
     public void update(int iStepSimu) {
-
+        
         // Reset biomass matrix
         biomass = new double[getConfiguration().getNPlankton()][getGrid().get_ny()][getGrid().get_nx()];
 
         for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
-            biomass[iPlk] = new double[getGrid().get_ny()][getGrid().get_nx()];
-            // Check whether the biomass is read from NetCDF file or uniform
-            if (uBiomass[iPlk] < 0) {
-                // From NetCDF, rawBiomass[jLTL][iLTL][kLTL]
-                float[][][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
-                float maxDepth = getConfiguration().getFloat("ltl.integration.depth");
-                for (Cell cell : getGrid().getCells()) {
-                    if (!cell.isLand()) {
-                        double area = 1.111e5d * getGrid().getdLat() * 1.111e5d * Math.cos(cell.getLat() * Math.PI / (90.d * 2.d)) * getGrid().getdLong();
-                        int i = cell.get_igrid();
-                        int j = cell.get_jgrid();
-                        List<Point> ltlCells = getLTLCells(cell);
-                        int nCells = ltlCells.size();
-                        for (Point ltlCell : ltlCells) {
-                            double bm = zIntegration(rawBiomass[ltlCell.y][ltlCell.x], getDepthLevel(ltlCell.x, ltlCell.y), maxDepth);
-                            biomass[iPlk][j][i] += area * convertToTonneWWPerM3(iPlk, bm) / nCells;
-                        }
-                    }
-                }
-            } else {
-                // Uniform plankton biomass
-                for (Cell cell : getGrid().getCells()) {
-                    if (!cell.isLand()) {
-                        biomass[iPlk][cell.get_jgrid()][cell.get_igrid()] = uBiomass[iPlk];
+            double[][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
+            for (Cell cell : getGrid().getCells()) {
+                if (!cell.isLand()) {
+                    double area = 111.d * getGrid().getdLat() * 111.d * Math.cos(cell.getLat() * Math.PI / (90.d * 2.d)) * getGrid().getdLong();
+                    int i = cell.get_igrid();
+                    int j = cell.get_jgrid();
+                    int nCells = icoordLTLGrid[j][i].size();
+                    for (int k = 0; k < nCells; k++) {
+                        biomass[iPlk][j][i] += area * convertToTonnePerKm2(iPlk, rawBiomass[jcoordLTLGrid[j][i].get(k)][icoordLTLGrid[j][i].get(k)]) / (double) nCells; // barrier.n: mean biomass instead of sum? biomass is extensive
                     }
                 }
             }
@@ -276,45 +249,19 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     }
 
     @Override
-    public double getBiomass(int iPlk, Cell cell) {
-        return multiplier[iPlk] * biomass[iPlk][cell.get_jgrid()][cell.get_igrid()];
+    public double getBiomass(int iPlankton, Cell cell) {
+        return biomass[iPlankton][cell.get_jgrid()][cell.get_igrid()];
     }
 
     /**
-     * Converts plankton biomass (usually from mmolN/m3) to tonne of wet weight
-     * per cubic metre (tonneWW/m3).
+     * Converts plankton biomass (usually from mmolN/m2) to tonne/km2
      *
-     * @param iPlk, the index of the plankton group
+     * @param iPlankton, the index of the plankton group
      * @param concentration of the plankton biomass in the same unit as in the
      * LTL files
-     * @return concentration of plankton biomass in tonneWW/m3
+     * @return concentration of plankton biomass in tonne/km2
      */
-    private double convertToTonneWWPerM3(int iPlk, double concentration) {
-        return concentration * conversionFactor[iPlk];
-    }
-
-    /**
-     * Vertical integration of LTL data on the water column, up to a given
-     * depth.
-     *
-     * @param zdata, an array of the LTL data in the water column
-     * @param zlevel, an array of the depth levels (metre) in the water column
-     * @param maxDepth, the maximum depth (metre) to be taken into account for
-     * the vertical integration. Make sure the sign of the depth is consistent
-     * between the depth of the LTL grid and the maximum depth.
-     * @return the raw LTL data vertically integrated
-     */
-    private double zIntegration(float[] zdata, float[] zlevel, float maxDepth) {
-
-        int nz = zdata.length;
-        double integratedData = 0.d;
-        for (int k = 0; k < nz - 1; k++) {
-            if (zlevel[k] > maxDepth) {
-                if (zdata[k] >= 0 && zdata[k + 1] >= 0) {
-                    integratedData += (Math.abs(zlevel[k] - zlevel[k + 1])) * ((zdata[k] + zdata[k + 1]) / 2.d);
-                }
-            }
-        }
-        return integratedData;
+    private double convertToTonnePerKm2(int iPlankton, double concentration) {
+        return concentration * conversionFactor[iPlankton];
     }
 }

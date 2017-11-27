@@ -84,34 +84,20 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
     private float[][][] ltlbiomass;
     private float[][][] abundance;
     private float[][][] yield;
-    private boolean cutoffEnabled;
-    /**
-     * Threshold age (year) for age class zero. This parameter allows to discard
-     * schools younger that this threshold in the calculation of the indicators
-     * when parameter <i>output.cutoff.enabled</i> is set to {@code true}.
-     * Parameter <i>output.cutoff.age.sp#</i>
-     */
-    private float[] cutoffAge;
+    private boolean cutoff;
 
     public SpatialOutput(int rank) {
         super(rank);
     }
 
     private boolean includeClassZero() {
-        return !cutoffEnabled;
+        return !cutoff;
     }
 
     @Override
     public void init() {
 
-        // cutoff for egg, larvae and juveniles
-        cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
-        cutoffAge = new float[getNSpecies()];
-        if (cutoffEnabled) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
-            }
-        }
+        cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
 
         /*
          * Create NetCDF file
@@ -177,7 +163,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
             str.append(kltl);
             str.append("=");
-            str.append(getConfiguration().getPlankton(kltl));
+            str.append(getSimulation().getPlankton(kltl));
             str.append(" ");
         }
         nc.addGlobalAttribute("dimension_ltl", str.toString());
@@ -252,23 +238,21 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
             if (!cell.isLand()) {
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                if (null != getSchoolSet().getSchools(cell)) {
-                    for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
-                            continue;
-                        }
-                        if (!school.isUnlocated()) {
-                            int iSpec = school.getSpeciesIndex();
-                            biomass[iSpec][j][i] += school.getInstantaneousBiomass();
-                            abundance[iSpec][j][i] += school.getInstantaneousAbundance();
-                            mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
-                            tl[iSpec][j][i] += school.getTrophicLevel() * school.getInstantaneousBiomass();
-                            yield[iSpec][j][i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
-                        }
+                for (School school : getSchoolSet().getSchools(cell)) {
+                    if (!includeClassZero() && school.getAgeDt() < school.getSpecies().getAgeClassZero()) {
+                        continue;
+                    }
+                    if (!school.isUnlocated()) {
+                        int iSpec = school.getSpeciesIndex();
+                        biomass[iSpec][j][i] += school.getInstantaneousBiomass();
+                        abundance[iSpec][j][i] += school.getInstantaneousAbundance();
+                        mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
+                        tl[iSpec][j][i] += school.getTrophicLevel() * school.getInstantaneousBiomass();
+                        yield[iSpec][j][i] += school.adb2biom(school.getNdead(MortalityCause.FISHING));
                     }
                 }
                 for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass[iltl][j][i] = (float) getSimulation().getForcing().getBiomass(iltl, cell);
+                    ltlbiomass[iltl][j][i] = (float) getSimulation().getPlankton(iltl).getBiomass(cell);
                 }
             }
         }

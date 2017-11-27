@@ -82,7 +82,7 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0 2013/09/01
  */
-public class MapSet extends OsmoseLinker {
+public class MapSet extends SimulationLinker {
 
     /**
      * Prefix of the series of maps in the configuration file. Parameter names
@@ -108,7 +108,8 @@ public class MapSet extends OsmoseLinker {
      */
     private String[] mapFile;
 
-    public MapSet(int iSpecies, String prefix) {
+    public MapSet(int rank, int iSpecies, String prefix) {
+        super(rank);
         this.iSpecies = iSpecies;
         this.prefix = prefix;
     }
@@ -120,7 +121,7 @@ public class MapSet extends OsmoseLinker {
 
         // Check the map indexation
         if (!checkMapIndexation()) {
-            error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+            getSimulation().error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
         }
 
         // Get rid of redundant map definitions
@@ -135,16 +136,20 @@ public class MapSet extends OsmoseLinker {
         return maps[numMap];
     }
 
-    public GridMap getMap(School school, int iStepSimu) {
-        return getMap(getIndexMap(school.getAgeDt(), iStepSimu));
+    public GridMap getMap(School school) {
+        return getMap(getIndexMap(school));
     }
-
+    
     public String getMapFile(int numMap) {
         return mapFile[numMap];
     }
 
-    public int getIndexMap(int iAge, int iStepSimu) {
-        return indexMaps[iAge][iStepSimu];
+    public int getIndexMap(int iAge, int iStep) {
+        return indexMaps[iAge][iStep];
+    }
+
+    public int getIndexMap(School school) {
+        return getIndexMap(school.getAgeDt(), getSimulation().getIndexTimeSimu());
     }
 
     public void loadMaps() {
@@ -172,7 +177,7 @@ public class MapSet extends OsmoseLinker {
         // Initialize arrays
         maps = new GridMap[mapNumber.size()];
         mapFile = new String[mapNumber.size()];
-        int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
+        int nSteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
         int lifespan = getSpecies(iSpecies).getLifespanDt();
         indexMaps = new int[lifespan][];
         for (int iAge = 0; iAge < lifespan; iAge++) {
@@ -200,15 +205,14 @@ public class MapSet extends OsmoseLinker {
              * Read year min and max concerned by this map
              */
             int yearMin = 0;
-            int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-            int yearMax = nyear;
+            int yearMax = getConfiguration().getNYear();
             if (!getConfiguration().isNull(prefix + ".map" + imap + ".year.min")) {
                 yearMin = getConfiguration().getInt(prefix + ".map" + imap + ".year.min");
                 yearMin = Math.max(yearMin, 0);
             }
             if (!getConfiguration().isNull(prefix + ".map" + imap + ".year.max")) {
                 yearMax = getConfiguration().getInt(prefix + ".map" + imap + ".year.max");
-                yearMax = Math.min(yearMax, nyear);
+                yearMax = Math.min(yearMax, getConfiguration().getNYear());
             }
             /*
              * Assign number of maps to numMap array
@@ -216,13 +220,8 @@ public class MapSet extends OsmoseLinker {
             int nStepYear = getConfiguration().getNStepYear();
             for (int iAge = ageMin; iAge < ageMax; iAge++) {
                 for (int iYear = yearMin; iYear < yearMax; iYear++) {
-                    for (int iSeason : mapSeason) {
-                        int iStep = iYear * nStepYear + iSeason;
-                        if (iStep < indexMaps[iAge].length) {
-                            indexMaps[iAge][iYear * nStepYear + iSeason] = n;
-                        } else {
-                            break;
-                        }
+                    for (int iStep : mapSeason) {
+                        indexMaps[iAge][iYear * nStepYear + iStep] = n;
                     }
                 }
             }
@@ -230,12 +229,14 @@ public class MapSet extends OsmoseLinker {
              * read the name of the CSV file and load the map. If name = "null"
              * it means there is no map defined at these age-class and time-step
              */
-            if (!getConfiguration().isNull(prefix + ".map" + imap + ".file")) {
+            if (getConfiguration().canFind(prefix + ".map" + imap + ".file")) {
                 String csvFile = getConfiguration().getFile(prefix + ".map" + imap + ".file");
                 mapFile[n] = csvFile;
-                maps[n] = new GridMap(csvFile);
-            } else {
-                maps[n] = null;
+                if (null != csvFile) {
+                    maps[n] = new GridMap(csvFile);
+                } else {
+                    maps[n] = null;
+                }
             }
         }
     }
@@ -243,7 +244,7 @@ public class MapSet extends OsmoseLinker {
     private boolean checkMapIndexation() {
 
         boolean isMapOK = true;
-        int nSteps = getConfiguration().getNStep();
+        int nSteps = getConfiguration().getNStepYear() * getConfiguration().getNYear();
         int nStepYear = getConfiguration().getNStepYear();
         int lifespan = getSpecies(iSpecies).getLifespanDt();
         for (int iAge = 0; iAge < lifespan; iAge++) {
@@ -253,7 +254,7 @@ public class MapSet extends OsmoseLinker {
                     float age = (float) iAge / nStepYear;
                     int year = iStep / nStepYear;
                     int step = iStep % nStepYear;
-                    warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), age, year, step});
+                    getSimulation().warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), age, year, step});
                 }
             }
         }

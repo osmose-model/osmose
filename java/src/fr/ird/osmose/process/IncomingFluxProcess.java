@@ -140,12 +140,9 @@ public class IncomingFluxProcess extends AbstractProcess {
         biomassIn = new double[nSpecies][][];
         lengthIn = new float[nSpecies][];
         ageIn = new int[nSpecies][];
-        // Call the growth process to be able to calculate meanAgeIn or meanLengthIn
-        GrowthProcess growthProcess = new GrowthProcess(getRank());
-        growthProcess.init();
         for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
             if (!getConfiguration().isNull("flux.incoming.byDt.byAge.file.sp" + iSpec)) {
-                ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
+                ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries(getRank());
                 timeSerieByAge.read(getConfiguration().getFile("flux.incoming.byDt.byAge.file.sp" + iSpec));
                 biomassIn[iSpec] = timeSerieByAge.getValues();
                 // Read age from file, and set ageIn as the middle of the age classes
@@ -159,11 +156,10 @@ public class IncomingFluxProcess extends AbstractProcess {
                 // Compute corresponding length in with Von Bertallanfy
                 lengthIn[iSpec] = new float[timeSerieByAge.getNClass()];
                 for (int iAge = 0; iAge < ageIn[iSpec].length; iAge++) {
-                    double age = ageIn[iSpec][iAge] / (double) getConfiguration().getNStepYear();
-                    lengthIn[iSpec][iAge] = (float) growthProcess.getGrowth(iSpec).ageToLength(age);   
+                    lengthIn[iSpec][iAge] = getSpecies(iSpec).computeMeanLength(ageIn[iSpec][iAge]);
                 }
             } else if (!getConfiguration().isNull("flux.incoming.byDt.bySize.file.sp" + iSpec)) {
-                ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
+                ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries(getRank());
                 timeSerieBySize.read(getConfiguration().getFile("flux.incoming.byDt.bySize.file.sp" + iSpec));
                 biomassIn[iSpec] = timeSerieBySize.getValues();
                 // Read length from file and set lengthIn as middle of the length classes
@@ -177,8 +173,7 @@ public class IncomingFluxProcess extends AbstractProcess {
                 // Compute corresponding age in with Von Bertallanfy
                 ageIn[iSpec] = new int[timeSerieBySize.getNClass()];
                 for (int iLength = 0; iLength < ageIn[iSpec].length; iLength++) {
-                    double age = growthProcess.getGrowth(iSpec).lengthToAge(lengthIn[iSpec][iLength]);
-                    ageIn[iSpec][iLength] = (int) (age * getConfiguration().getNStepYear());
+                    ageIn[iSpec][iLength] = getSpecies(iSpec).computeMeanAge(lengthIn[iSpec][iLength]);
                 }
             } else {
                 // Nothing to do, means there is no incoming flux for this species

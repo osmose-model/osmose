@@ -106,10 +106,10 @@ public class DietDistribOutput extends AbstractDistribOutput {
         String[] headers = new String[getNSpecies() + getConfiguration().getNPlankton() + 1];
         headers[0] = getType().toString();
         for (int i = 0; i < getNSpecies(); i++) {
-            headers[i + 1] = getSpecies(i).getName();
+            headers[i + 1] = getSimulation().getSpecies(i).getName();
         }
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            headers[i + getNSpecies() + 1] = getConfiguration().getPlankton(i).getName();
+            headers[i + getNSpecies() + 1] = getSimulation().getPlankton(i).getName();
         }
         return headers;
     }

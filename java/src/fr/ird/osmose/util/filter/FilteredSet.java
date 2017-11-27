@@ -48,14 +48,13 @@
  */
 package fr.ird.osmose.util.filter;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  *
  * @author pverley
- * @param <E>
  */
-public class FilteredSet<E> extends LinkedList<E> {
+public class FilteredSet<E> extends ArrayList<E> {
 
     final private FilteredSet<E> parent;
     final private IFilter<E>[] filters;
@@ -95,27 +94,5 @@ public class FilteredSet<E> extends LinkedList<E> {
 
     public int getLevel() {
         return level;
-    }
-    
-    void refresh() {
-        if (null != parent) {
-            clear();
-            for (E member : parent) {
-                boolean accept = true;
-                if (filters != null) {
-                    for (IFilter<? super E> filter : filters) {
-                        accept = accept && filter.accept(member);
-                        if (!accept) {
-                            break;
-                        }
-                    }
-                    if (accept) {
-                        add(member);
-                    }
-                }
-            }
-        } else {
-            //throw new NullPointerException("Community's parent is null");
-        }
     }
 }

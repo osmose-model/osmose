@@ -49,7 +49,8 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.util.version.VersionManager;
-import fr.ird.osmose.grid.AbstractGrid;
+import fr.ird.osmose.grid.IGrid;
+import fr.ird.osmose.util.Properties;
 import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.logging.OLogger;
 import java.io.BufferedReader;
@@ -58,9 +59,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -137,7 +136,7 @@ import java.util.regex.Pattern;
  * entries <i>movement.map0.season;0;1;2;3;4;5</i>
  * <i>movement.map0.season=0;1;2;3;4;5</i> <i>movement.map0.season = 0, 1, 2, 3,
  * 4, 5</i> <i>movement.map0.season : 0 ; 1 ; 2;3;4;5</i> and are equivalent for
- * {@code Configuration}. It can be summarise <i>key separator1 value1
+ * {@code Configuration}. It can be summarize <i>key separator1 value1
  * separator2 value2 separator2 value3 separator2 value4</i> with separator1
  * either equal or different from separator2. *
  *
@@ -150,9 +149,19 @@ public class Configuration extends OLogger {
 // Declaration of the variables
 ///////////////////////////////
     /**
+     * A {@link fr.ird.osmose.util.Properties} object that stores the
+     * parameters.
+     */
+    final private Properties cfg;
+    /**
+     * A {@link fr.ird.osmose.util.Properties} object that stores the file of
+     * origin of each parameter.
+     */
+    final private Properties source;
+    /**
      * List of all the parameters
      */
-    private final HashMap<String, Parameter> parameters;
+    private final List<Parameter> parameters;
     /**
      * Name of the main configuration file.
      */
@@ -181,7 +190,7 @@ public class Configuration extends OLogger {
      */
     private int nCpu;
     /**
-     * Number of species that are explicitly modelled. Parameter
+     * Number of species that are explicitly modeled. Parameter
      * <i>simulation.nspecies</i>
      */
     private int nSpecies;
@@ -196,10 +205,9 @@ public class Configuration extends OLogger {
      */
     private int nSimulation;
     /**
-     * Number of time steps of the simulation. Parameter
-     * <i>simulation.time.nstep</i>
+     * Number of years of the simulation. Parameter <i>simulation.nyear</i>
      */
-    private int nStep;
+    private int nYear;
     /**
      * Number of time steps in one year. Time step {@code dt = 1. / nStepYear}
      * [year^-1]. Parameter <i>simulation.ndtPerYear</i>
@@ -215,23 +223,9 @@ public class Configuration extends OLogger {
      */
     private int[] nSchool;
     /**
-     * The spatial grid of the simulation,
-     * {@link fr.ird.osmose.grid.AbstractGrid}.
+     * The spatial grid of the simulation, {@link fr.ird.osmose.grid.IGrid}.
      */
-    private AbstractGrid grid;
-    /**
-     * Temporary flag that must be TRUE to ensure that all file paths are
-     * resolved against the main configuration file
-     */
-    private final boolean globalResolve;
-    /**
-     * Array of the species of the simulation.
-     */
-    private Species[] species;
-    /**
-     * Array of the LTL groups of the simulation.
-     */
-    private Plankton[] ltlGroups;
+    private IGrid grid;
 
 ///////////////
 // Constructors
@@ -240,72 +234,45 @@ public class Configuration extends OLogger {
      * Creates a new {@code Configuration}.
      *
      * @param mainFilename, the main configuration file
-     * @param cmd, the list of options/parameters set in command line
+     * @param outputPathname, the path of the output directory
      */
-    Configuration(String mainFilename, HashMap<String, String> cmd) {
+    Configuration(String mainFilename, String outputPathname) {
 
-        this.mainFilename = new File(mainFilename).getAbsolutePath();
-        this.inputPathname = new File(mainFilename).getAbsoluteFile().getParentFile().getAbsolutePath();
+        this.mainFilename = mainFilename;
+        this.inputPathname = new File(mainFilename).getParentFile().getAbsolutePath();
+        this.outputPathname = outputPathname;
 
-        parameters = new HashMap();
-
-        if (null != cmd) {
-            // Add the parameters from the command line
-            debug("Loading parameters from command line");
-            for (Entry<String, String> argument : cmd.entrySet()) {
-                Parameter parameter = new Parameter(argument.getKey(), argument.getValue());
-                parameters.put(argument.getKey(), parameter);
-                debug(". " + parameter.toString());
-            }
-        }
-
-        // Path resolution, global or local
-        // Option provided as command line argument
-        if (null != cmd && cmd.containsKey("resolve")) {
-            globalResolve = cmd.get("resolve").equalsIgnoreCase("global");
-        } else {
-            // global by default, for backward compatibility
-            globalResolve = true;
-        }
-    }
-
-    /**
-     * Creates a new {@code Configuration}.
-     *
-     * @param mainFilename, the main configuration file
-     */
-    Configuration(String mainFilename) {
-        this(mainFilename, null);
+        cfg = new Properties();
+        source = new Properties();
+        parameters = new ArrayList();
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
     /**
-     * Load the parameters from the main configuration file and check whether
-     * the configuration is up to date.
-     *
-     * @return {@code TRUE} if the configuration is up to date.
+     * Initializes the current configuration. Loads the parameters from the
+     * configuration file, sets the values of the main variables and creates the
+     * grid.
      */
-    public boolean load() {
+    public void init() {
+
         // Load the parameters from the main configuration file
         loadParameters(mainFilename, 0);
 
         // Check what is the default separator
         defaultSeparator = guessDefaultSeparator();
+        // Clear parameters list as it won't be needed anymore
+        parameters.clear();
 
-        return VersionManager.getInstance().checkConfiguration();
-    }
+        // Check whether the configuration file is up-to-date
+        VersionManager.getInstance().updateConfiguration();
 
-    /**
-     * Initialises the current configuration. Sets the values of the main
-     * variables and creates the grid.
-     */
-    public void init() {
-
-        // Output path
-        outputPathname = getFile("output.dir.path");
-        info("Output folder set to " + outputPathname);
+        // Check whether the path of the output folder is already set (by command line option)
+        if (null == outputPathname) {
+            // Output path read in the configuration file
+            outputPathname = resolvePath(getString("output.dir.path"));
+        }
 
         // Read Output CSV separator
         Separator separator = Separator.COMA;
@@ -323,22 +290,16 @@ public class Configuration extends OLogger {
         // Number of CPUs allocated to this run
         if (!isNull("simulation.ncpu")) {
             nCpu = getInt("simulation.ncpu");
-            // nCpu must range between 1 and system available processors
-            nCpu = Math.min(Math.max(nCpu, 1), Runtime.getRuntime().availableProcessors());
+            nCpu = Math.max(nCpu, 1);
         } else {
-            nCpu = 1;
+            nCpu = Integer.MAX_VALUE;
         }
         nSpecies = getInt("simulation.nspecies");
         nPlankton = getInt("simulation.nplankton");
         nSimulation = getInt("simulation.nsimulation");
+        nCpu = Math.min(nCpu, nSimulation);
+        nYear = getInt("simulation.time.nyear");
         nStepYear = getInt("simulation.time.ndtperyear");
-        // PhV 20160203, new parameter simulation.time.nstep
-        if (canFind("simulation.time.nstep")) {
-            nStep = getInt("simulation.time.nstep");
-        } else {
-            // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
-            nStep = nStepYear * getInt("simulation.time.nyear");
-        }
         nSchool = new int[nSpecies];
         if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
             for (int i = 0; i < nSpecies; i++) {
@@ -357,47 +318,6 @@ public class Configuration extends OLogger {
 
         // Create the grid
         initGrid();
-
-        // Create the species
-        species = new Species[nSpecies];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = new Species(i);
-            // Name must contain only alphanumerical characters
-            if (!species[i].getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Species name must contain alphanumeric characters only. Please rename " + species[i].getName(), null);
-            }
-
-        }
-
-        // Init plankton groups
-        ltlGroups = new Plankton[nPlankton];
-        for (int p = 0; p < ltlGroups.length; p++) {
-            ltlGroups[p] = new Plankton(p);
-            // Name must contain only alphanumerical characters
-            if (!ltlGroups[p].getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Plankton name must contain alphanumeric characters only. Please rename " + ltlGroups[p].getName(), null);
-            }
-        }
-    }
-
-    /**
-     * Get a species
-     *
-     * @param index, the index of the species
-     * @return the species at index {@code index}
-     */
-    public Species getSpecies(int index) {
-        return species[index];
-    }
-
-    /**
-     * Gets the specified plankton group.
-     *
-     * @param index, the index of the plankton group.
-     * @return the plankton group number iPlankton.
-     */
-    public Plankton getPlankton(int index) {
-        return ltlGroups[index];
     }
 
     /**
@@ -410,8 +330,12 @@ public class Configuration extends OLogger {
         String gridClassName = getString("grid.java.classname");
         try {
             info("Grid: " + gridClassName);
-            grid = (AbstractGrid) Class.forName(gridClassName).newInstance();
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+            grid = (IGrid) Class.forName(gridClassName).newInstance();
+        } catch (InstantiationException ex) {
+            error("Failed to create new grid instance. " + ex.getMessage(), ex);
+        } catch (IllegalAccessException ex) {
+            error("Failed to create new grid instance. " + ex.getMessage(), ex);
+        } catch (ClassNotFoundException ex) {
             error("Failed to create new grid instance. " + ex.getMessage(), ex);
         }
         // Init the grid
@@ -440,22 +364,20 @@ public class Configuration extends OLogger {
     private void loadParameters(String filename, int depth) {
 
         BufferedReader bfIn = null;
+        String path = resolveFile(filename);
         // Open the buffer
         try {
-            bfIn = new BufferedReader(new FileReader(filename));
+            bfIn = new BufferedReader(new FileReader(path));
         } catch (FileNotFoundException ex) {
-            error("Could not find Osmose configuration file: " + filename, ex);
+            error("Could not fing Osmose configuration file: " + path, ex);
         }
         StringBuilder msg = new StringBuilder();
-        StringBuilder space = new StringBuilder();
         for (int i = 0; i < depth; i++) {
-            space.append(". ");
+            msg.append("  ");
         }
-        msg.append(space);
-        msg.append("Loading parameters from ");
-        msg.append(filename);
+        msg.append("Loading parameters from file ");
+        msg.append(path);
         info(msg.toString());
-        space.append(". ");
 
         // Read it
         String line = null;
@@ -464,32 +386,36 @@ public class Configuration extends OLogger {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
                 if (!startsWithSymbol(line) & !(line.length() <= 1)) {
-                    Parameter entry = new Parameter(iline, filename);
-                    entry.parse(line);
-                    if (parameters.containsKey(entry.key)) {
-                        warning("{0}Osmose will ignore parameter {1}", new Object[]{space, entry});
-                        warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
-
-                    } else {
-                        parameters.put(entry.key, entry);
-                        debug(space + entry.toString());
+                    Parameter entry = new Parameter(line, iline, path);
+                    if (null != entry.key && null != entry.value) {
+                        parameters.add(entry);
                         if (entry.key.startsWith("osmose.configuration")) {
-                            loadParameters(getFile(entry.key), depth + 1);
+                            source.setProperty(entry.key, path);
+                            loadParameters(entry.value, depth + 1);
+                        } else {
+                            if (source.containsKey(entry.key)) {
+                                warning("Parameter {0} has already been defined in file {1} with value {2}", new Object[]{entry.key, source.getProperty(entry.key), cfg.getProperty(entry.key)});
+                                warning("Osmose will ignore parameter {0} in file {1} with value {2}", new Object[]{entry.key, path, entry.value});
+                            } else {
+                                cfg.setProperty(entry.key, entry.value);
+                                source.setProperty(entry.key, path);
+                            }
                         }
                     }
                 }
                 iline++;
             }
         } catch (IOException ex) {
-            error("Error loading parameters from " + filename + " at line " + iline + " " + line, ex);
+            error("Error loading parameters from file " + filename + " at line " + iline + " " + line, ex);
         }
     }
 
     public void refresh() {
+
         info("Reloading parameters...");
-        // Clear current lists of parameters
         parameters.clear();
-        // Reload parameters
+        cfg.clear();
+        source.clear();
         loadParameters(mainFilename, 0);
     }
 
@@ -521,10 +447,11 @@ public class Configuration extends OLogger {
      * exist
      */
     public boolean isNull(String key) {
-        Parameter param = parameters.get(key.toLowerCase());
-        return (null == param)
-                || param.value.isEmpty()
-                || param.value.equalsIgnoreCase("null");
+        try {
+            return (null == getString(key));
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     /**
@@ -533,8 +460,13 @@ public class Configuration extends OLogger {
      * @param key, the key of the parameter
      * @return {@code true} if the parameter exists.
      */
-    public final boolean canFind(String key) {
-        return parameters.containsKey(key.toLowerCase());
+    public boolean canFind(String key) {
+        try {
+            getString(key);
+        } catch (Exception ex) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -548,43 +480,7 @@ public class Configuration extends OLogger {
      * @return
      */
     public List<String> findKeys(String filter) {
-
-        // Add \Q \E around substrings of fileMask that are not meta-characters
-        String regexpPattern = filter.replaceAll("[^\\*\\?]+", "\\\\Q$0\\\\E");
-        // Replace all "*" by the corresponding java regex meta-characters
-        regexpPattern = regexpPattern.replaceAll("\\*", ".*");
-        // Replace all "?" by the corresponding java regex meta-characters
-        regexpPattern = regexpPattern.replaceAll("\\?", ".");
-
-        // List the keys and select the ones that match the filter
-        List<String> filteredKeys = new ArrayList();
-        for (String key : parameters.keySet()) {
-            if (key.matches(regexpPattern)) {
-                filteredKeys.add(key);
-            }
-        }
-        return filteredKeys;
-    }
-
-    public String printParameter(String key) {
-        return getParameter(key).toString();
-    }
-
-    /**
-     * Returns the parameter designated by its key.
-     *
-     * @param key, the key of the parameter
-     * @throws NullPointerException if the parameter is not found.
-     * @return the parameter as a {@link Parameter}
-     */
-    private Parameter getParameter(String key) {
-        String lkey = key.toLowerCase();
-        if (parameters.containsKey(lkey)) {
-            return parameters.get(lkey);
-        } else {
-            error("Could not find parameter " + key, new NullPointerException("Parameter " + key + " not found "));
-        }
-        return null;
+        return cfg.getKeys(filter);
     }
 
     /**
@@ -595,7 +491,17 @@ public class Configuration extends OLogger {
      * @return the value of the parameter as a {@code String}
      */
     final public String getString(String key) {
-        return getParameter(key).value;
+
+        String lkey = key.toLowerCase();
+        if (cfg.containsKey(lkey)) {
+            String value = cfg.getProperty(lkey);
+            if (value.equalsIgnoreCase("null")) {
+                return null;
+            }
+            return value.trim();
+        } else {
+            throw new NullPointerException("Could not find parameter " + key);
+        }
     }
 
     /**
@@ -606,7 +512,12 @@ public class Configuration extends OLogger {
      * @return the path of the configuration file that contains the parameter.
      */
     final public String getSource(String key) {
-        return parameters.get(key.toLowerCase()).source;
+        String lkey = key.toLowerCase();
+        if (source.containsKey(lkey)) {
+            return source.getProperty(lkey).trim();
+        } else {
+            return "null";
+        }
     }
 
     /**
@@ -619,7 +530,7 @@ public class Configuration extends OLogger {
      * file.
      */
     public String getFile(String key) {
-        return resolve(getString(key), globalResolve ? inputPathname : getSource(key));
+        return resolveFile(getString(key));
     }
 
     /**
@@ -650,7 +561,7 @@ public class Configuration extends OLogger {
         try {
             return Integer.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert to Integer parameter " + getParameter(key), ex);
+            error("Could not convert parameter " + key + " to integer " + s + " (from file " + getSource(key) + ")", ex);
         }
         return Integer.MIN_VALUE;
     }
@@ -668,7 +579,7 @@ public class Configuration extends OLogger {
         try {
             return Float.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert to Float parameter " + getParameter(key), ex);
+            error("Could not convert parameter " + key + " to float " + s + " (from file " + getSource(key) + ")", ex);
         }
         return Float.NaN;
     }
@@ -686,7 +597,7 @@ public class Configuration extends OLogger {
         try {
             return Double.valueOf(s);
         } catch (NumberFormatException ex) {
-            error("Could not convert to Double parameter " + getParameter(key), ex);
+            error("Could not convert parameter " + key + " to double " + s + " (from file " + getSource(key) + ")", ex);
         }
         return Double.NaN;
     }
@@ -701,16 +612,18 @@ public class Configuration extends OLogger {
      * @return the parameter as a boolean
      */
     public boolean getBoolean(String key, boolean warning) {
-        if (canFind(key)) {
+        try {
+            String s = getString(key);
             try {
-                return Boolean.valueOf(getString(key));
+                return Boolean.valueOf(s);
             } catch (NumberFormatException ex) {
-                error("Could not convert to Boolean parameter " + getParameter(key), ex);
+                error("Could not convert parameter " + key + " to boolean " + s + " (from file " + getSource(key) + ")", ex);
             }
-        } else if (warning) {
-            warning("Could not find Boolean parameter " + key + ". Osmose assumes it is false.");
+        } catch (NullPointerException ex) {
+            if (warning) {
+                warning("Could not find boolean parameter " + key + ". Osmose assumes it is false.");
+            }
         }
-
         return false;
     }
 
@@ -743,7 +656,7 @@ public class Configuration extends OLogger {
             }
             return ai;
         } catch (NumberFormatException ex) {
-            error("Could not convert to array of Integer parameter " + getParameter(key), ex);
+            error("Could not convert parameter " + key + " to array of integer " + getString(key) + " (from file " + getSource(key) + ")", ex);
         }
         return null;
     }
@@ -765,7 +678,7 @@ public class Configuration extends OLogger {
             }
             return af;
         } catch (NumberFormatException ex) {
-            error("Could not convert to array of Float parameter " + getParameter(key), ex);
+            error("Could not convert parameter " + key + " to array of float " + getString(key) + " (from file " + getSource(key) + ")", ex);
         }
         return null;
     }
@@ -787,31 +700,40 @@ public class Configuration extends OLogger {
             }
             return ad;
         } catch (NumberFormatException ex) {
-            error("Could not convert to array of Double parameter " + getParameter(key), ex);
+            error("Could not convert parameter " + key + " to array of double " + getString(key) + " (from file " + getSource(key) + ")", ex);
         }
         return null;
     }
 
     /**
-     * Resolves a file path against the the input path. If filename is a
-     * directory the function ensures the path ends with a separator.
+     * Resolves a directory path against the the input path. Adds a trailing
+     * file separator at the end of the resolved path.
      *
-     * @param filename, the file path to resolve
-     * @param relativeTo, the path against the file must be resolved
-     * @return the resolved file path
+     * @param path, the path to resolve
+     * @return the path resolved against the the input path.
      */
-    private String resolve(String filename, String relativeTo) {
-        String pathname = filename;
-        try {
-            File file = new File(relativeTo);
-            pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
-        } catch (Exception ex) {
-            // do nothing, just return the argument
-        }
-        if (new File(pathname).isDirectory() && !pathname.endsWith(File.separator)) {
+    private String resolvePath(String path) {
+        String pathname = resolveFile(path);
+        if (!pathname.endsWith(File.separator)) {
             pathname += File.separator;
         }
         return pathname;
+    }
+
+    /**
+     * Resolves a file path against the the input path.
+     *
+     * @param filename, the file path to resolve
+     * @return the file path resolved against the input path.
+     */
+    private String resolveFile(String filename) {
+        try {
+            File file = new File(inputPathname);
+            String pathname = new File(file.toURI().resolve(filename)).getCanonicalPath();
+            return pathname;
+        } catch (Exception ex) {
+            return filename;
+        }
     }
 
     /**
@@ -873,13 +795,13 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the number of time steps of the simulation. Parameter
-     * <i>simulation.time.nstep</i>
+     * Returns the number of years of the simulation. Parameter
+     * <i>simulation.nyear</i>
      *
      * @return the number of years of the simulation
      */
-    public int getNStep() {
-        return nStep;
+    public int getNYear() {
+        return nYear;
     }
 
     /**
@@ -906,11 +828,11 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the grid of the model.
+     * Returns the grid ({@link IGrid) of the model.
      *
      * @return the grid of the model.
      */
-    public AbstractGrid getGrid() {
+    public IGrid getGrid() {
         return grid;
     }
 
@@ -926,7 +848,7 @@ public class Configuration extends OLogger {
     private Separator guessDefaultSeparator() {
 
         StringBuilder sbSeparators = new StringBuilder();
-        for (Parameter parameter : parameters.values()) {
+        for (Parameter parameter : parameters) {
             sbSeparators.append(parameter.keySeparator);
         }
         String separators = sbSeparators.toString();
@@ -987,27 +909,17 @@ public class Configuration extends OLogger {
         private String valueSeparator;
 
         /**
-         * Create a new parameter out of the given line.
+         * Created a new parameter out of the given line.
          *
+         * @param line, the {@code String} to be parsed as a parameter
          * @param iline, the line of the parameter in the configuration file
          * @param source, the path of the configuration file
          */
-        Parameter(int iline, String source) {
+        Parameter(String line, int iline, String source) {
             this.iline = iline;
             this.source = source;
-        }
-
-        /**
-         * Create a new parameter from the command line
-         *
-         * @param key, the key of the parameter
-         * @param value, the value of the parameter
-         */
-        Parameter(String key, String value) {
-            this.key = key;
-            this.value = value;
-            this.source = "command line";
-            this.iline = -1;
+            parse(line);
+            debug(key + "=" + value);
         }
 
         /**
@@ -1055,7 +967,7 @@ public class Configuration extends OLogger {
 
             // make sure the line contains at least one semi-colon (key;value)
             if (!line.contains(keySeparator)) {
-                error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
+                error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from file " + source + ")", null);
             }
             // extract the key
             key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim();
@@ -1070,22 +982,10 @@ public class Configuration extends OLogger {
             if (value.isEmpty()) {
                 value = "null";
             }
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder str = new StringBuilder();
-            str.append(key);
-            str.append(" = ");
-            str.append(value);
-            str.append(" (from ");
-            str.append(source);
-            if (iline >= 0) {
-                str.append(" line ");
-                str.append(iline);
+            // send a warning if the value is null
+            if (value.equalsIgnoreCase("null")) {
+                debug("No value found for parameter {0}", key);
             }
-            str.append(")");
-            return str.toString();
         }
     }
 }

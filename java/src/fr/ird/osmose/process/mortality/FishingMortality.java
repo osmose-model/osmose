@@ -52,16 +52,14 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.mortality.fishing.AbstractFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.RateByYearBySeasonFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.RateBySeasonFishingMortality;
+import fr.ird.osmose.process.mortality.fishing.ByYearBySeasonFishingMortality;
+import fr.ird.osmose.process.mortality.fishing.AnnualFishingMortality;
+import fr.ird.osmose.process.mortality.fishing.BySeasonFishingMortality;
 import fr.ird.osmose.process.mortality.fishing.CatchesByDtByClassFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.CatchesBySeasonFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.CatchesByYearBySeasonFishingMortality;
 import fr.ird.osmose.process.mortality.fishing.RateByDtByClassFishingMortality;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.MPA;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -73,8 +71,7 @@ public class FishingMortality extends AbstractMortality {
     private AbstractFishingMortality[] fishingMortality;
     private List<MPA> mpas;
     private GridMap mpaFactor;
-    private GridMap[] spatialFactor;
-    private FishingMortality.Type[] fishingType;
+    private Type fishingType;
     private List<School>[] arrSpecies;
 
     public FishingMortality(int rank) {
@@ -84,50 +81,82 @@ public class FishingMortality extends AbstractMortality {
     @Override
     public void init() {
         fishingMortality = new AbstractFishingMortality[getNSpecies()];
-        fishingType = new FishingMortality.Type[getNSpecies()];
-        // Find type of fishing scenario
 
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            int rank = getRank();
-            Species species = getSpecies(iSpec);
-            // Find fishing scenario
-            Scenario scenario = findScenario(iSpec);
-            debug("Fishing scenario for " + species.getName() + " set to " + scenario.toString());
-            fishingType[iSpec] = scenario.type;
-            switch (scenario) {
-                case RATE_ANNUAL:
-                    fishingMortality[iSpec] = new RateBySeasonFishingMortality(rank, species);
-                    break;
-                case RATE_BY_YEAR:
-                    fishingMortality[iSpec] = new RateByYearBySeasonFishingMortality(rank, species);
-                    break;
-                case RATE_BY_DT_BY_AGE:
-                    fishingMortality[iSpec] = new RateByDtByClassFishingMortality(rank, species);
-                    break;
-                case RATE_BY_DT_BY_SIZE:
-                    fishingMortality[iSpec] = new RateByDtByClassFishingMortality(rank, species);
-                    break;
-                case CATCHES_ANNUAL:
-                    fishingMortality[iSpec] = new CatchesBySeasonFishingMortality(rank, species);
-                    break;
-                case CATCHES_BY_YEAR:
-                    fishingMortality[iSpec] = new CatchesByYearBySeasonFishingMortality(rank, species);
-                    break;
-                case CATCHES_BY_DT_BY_AGE:
-                    fishingMortality[iSpec] = new CatchesByDtByClassFishingMortality(rank, species);
-                    break;
-                case CATCHES_BY_DT_BY_SIZE:
-                    fishingMortality[iSpec] = new CatchesByDtByClassFishingMortality(rank, species);
-                    break;
-            }
-            // Initialize fishing scenario
+        // Find type of fishing scenario
+        try {
+            fishingType = Type.valueOf(getConfiguration().getString("mortality.fishing.type").toUpperCase());
+        } catch (Exception ex) {
+            // By default Osmose assumes it is fishing mortality rates
+            fishingType = Type.RATE;
+        }
+
+        // Find fishing scenario
+        switch (fishingType) {
+            case RATE:
+                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                    int rank = getRank();
+                    Species species = getSpecies(iSpec);
+                    // Fishing rate by Dt, by Age or Size
+                    if (!getConfiguration().isNull("mortality.fishing.rate.byDt.byAge.file.sp" + iSpec)
+                            || !getConfiguration().isNull("mortality.fishing.rate.byDt.bySize.file.sp" + iSpec)) {
+                        fishingMortality[iSpec] = new RateByDtByClassFishingMortality(rank, species);
+                        continue;
+                    }
+                    // Annual fishing rate by Year
+                    if (!getConfiguration().isNull("mortality.fishing.rate.byYear.file.sp" + iSpec)) {
+                        fishingMortality[iSpec] = new ByYearBySeasonFishingMortality(rank, species, Type.RATE);
+                        continue;
+                    }
+                    // Annual fishing rate
+                    if (!getConfiguration().isNull("mortality.fishing.rate.sp" + iSpec)) {
+                        if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
+                            fishingMortality[iSpec] = new BySeasonFishingMortality(rank, species, Type.RATE);
+                        } else {
+                            fishingMortality[iSpec] = new AnnualFishingMortality(rank, species, Type.RATE);
+                        }
+                    }
+                }
+                break;
+            case CATCHES:
+                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                    int rank = getRank();
+                    Species species = getSpecies(iSpec);
+                    // Fishing rate by Dt, by Age or Size
+                    if (!getConfiguration().isNull("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec)
+                            || !getConfiguration().isNull("mortality.fishing.catches.byDt.bySize.file.sp" + iSpec)) {
+                        fishingMortality[iSpec] = new CatchesByDtByClassFishingMortality(rank, species);
+                        continue;
+                    }
+                    // Annual fishing rate by Year
+                    if (!getConfiguration().isNull("mortality.fishing.catches.byYear.file.sp" + iSpec)) {
+                        fishingMortality[iSpec] = new ByYearBySeasonFishingMortality(rank, species, Type.CATCHES);
+                        continue;
+                    }
+                    // Annual fishing rate
+                    if (!getConfiguration().isNull("mortality.fishing.catches.sp" + iSpec)) {
+                        if (!getConfiguration().isNull("mortality.fishing.season.distrib.file.sp" + iSpec)) {
+                            fishingMortality[iSpec] = new BySeasonFishingMortality(rank, species, Type.CATCHES);
+                        } else {
+                            fishingMortality[iSpec] = new AnnualFishingMortality(rank, species, Type.CATCHES);
+                        }
+                    }
+                }
+                break;
+        }
+
+        // Initialize fishing scenario
+        for (int iSpec = 0;
+                iSpec < getNSpecies();
+                iSpec++) {
             fishingMortality[iSpec].init();
         }
 
         // Loads the MPAs
         int nMPA = getConfiguration().findKeys("mpa.file.mpa*").size();
         mpas = new ArrayList(nMPA);
-        for (int iMPA = 0; iMPA < nMPA; iMPA++) {
+        for (int iMPA = 0;
+                iMPA < nMPA;
+                iMPA++) {
             mpas.add(new MPA(getRank(), iMPA));
         }
         for (MPA mpa : mpas) {
@@ -141,73 +170,6 @@ public class FishingMortality extends AbstractMortality {
         for (int i = 0; i < getNSpecies(); i++) {
             arrSpecies[i] = new ArrayList();
         }
-
-        // Patch for Virginie to include space variability in fishing mortality
-        // Need to think of a better way to include it to Osmose
-        spatialFactor = new GridMap[getNSpecies()];
-        List<String> keys = getConfiguration().findKeys("mortality.fishing.spatial.distrib.file.sp*");
-        if (keys != null && !keys.isEmpty()) {
-            for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
-                if (!getConfiguration().isNull("mortality.fishing.spatial.distrib.file.sp" + iSpec)) {
-                    spatialFactor[iSpec] = new GridMap(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + iSpec));
-                    // Make sure the sum of the values in ocean cells is equal to one
-                    double sum = 0.d;
-                    for (Cell cell : getGrid().getCells()) {
-                        if (!cell.isLand()) {
-                            sum += spatialFactor[iSpec].getValue(cell);
-                        }
-                    }
-                    if (Math.abs(sum - 1.d) > 1e-2) {
-                        StringBuilder msg = new StringBuilder();
-                        msg.append("The sum of the factors in spatial fishing distribution file ");
-                        msg.append(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + iSpec));
-                        msg.append(" must be equal to one.");
-                        error(msg.toString(), null);
-                    }
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Find the fishing scenario defined for the given species. Osmose accepts
-     * exactly one fishing scenario. The function throws an error if no scenario
-     * or several scenarios are defined.
-     *
-     * @param iSpecies, the index of the species
-     * @return the fishing scenario for this species
-     */
-    private Scenario findScenario(int iSpecies) {
-
-        List<Scenario> scenarios = new ArrayList();
-        // List the fishing scenarios listed in the current configuration file
-        for (Scenario scenario : Scenario.values()) {
-            if (!getConfiguration().isNull(scenario.key + iSpecies)) {
-                scenarios.add(scenario);
-            }
-        }
-
-        // No fishing scenario has been defined
-        if (scenarios.isEmpty()) {
-            StringBuilder msg = new StringBuilder();
-            msg.append("Set a fishing scenario among ");
-            msg.append(Arrays.toString(Scenario.values()));
-            error("No fishing scenario has been defined for species " + getSpecies(iSpecies).getName(), new NullPointerException(msg.toString()));
-        }
-
-        // Several fishing scenarios have been defined
-        if (scenarios.size() > 1) {
-            StringBuilder msg = new StringBuilder();
-            msg.append("Osmose found several fishing scenarios defined for species ");
-            msg.append(getSpecies(iSpecies).getName());
-            msg.append(": ");
-            msg.append(Arrays.toString(scenarios.toArray()));
-            error(msg.toString(), new UnsupportedOperationException("Only one fishing scenario per species can be defined."));
-        }
-
-        // return the scenario
-        return scenarios.get(0);
     }
 
     public void setMPA() {
@@ -229,6 +191,9 @@ public class FishingMortality extends AbstractMortality {
                 }
             }
             int nOceanCell = getGrid().getNOceanCell();
+            // barrier.n: this correction seems to mean that if we have MPA, then 
+            // we have greater pressure in non MPA cells. If 150 cells and 30 MPA,
+            // corr = 1.25 and (nocean - npa) * corr = 150
             float correction = (float) nOceanCell / (nOceanCell - nCellMPA);
             for (Cell cell : getGrid().getCells()) {
                 if (mpaFactor.getValue(cell) > 0.f) {
@@ -238,26 +203,10 @@ public class FishingMortality extends AbstractMortality {
         }
     }
 
-    /**
-     * Assess fishable biomass for fishing scenarios based on catches
-     */
-    void assessFishableBiomass() {
+    public void assessFishableBiomass() {
 
-        // fishable biomass only has to be updated for catches
-        boolean[] catches = new boolean[getNSpecies()];
         for (int i = 0; i < getNSpecies(); i++) {
-            catches[i] = (Type.CATCHES == fishingMortality[i].getType());
-        }
-
-        // loop over all the schools
-        for (School school : getSchoolSet().getSchools()) {
-            int i = school.getSpeciesIndex();
-            if (catches[i]) {
-                // increment fishable biomass
-                if (!school.isUnlocated() && fishingMortality[i].isFishable(school)) {
-                    fishingMortality[i].incrementFishableBiomass(school);
-                }
-            }
+            fishingMortality[i].assessFishableBiomass();
         }
     }
 
@@ -271,15 +220,7 @@ public class FishingMortality extends AbstractMortality {
      */
     @Override
     public double getRate(School school) {
-        int iSpec = school.getSpeciesIndex();
-        if (null != spatialFactor[iSpec]) {
-            return fishingMortality[iSpec].getRate(school)
-                    * mpaFactor.getValue(school.getCell())
-                    * spatialFactor[iSpec].getValue(school.getCell());
-        } else {
-            return fishingMortality[iSpec].getRate(school)
-                    * mpaFactor.getValue(school.getCell());
-        }
+        return fishingMortality[school.getSpeciesIndex()].getRate(school) * mpaFactor.getValue(school.getCell());
     }
 
     /**
@@ -291,49 +232,13 @@ public class FishingMortality extends AbstractMortality {
      * current time step of the simulation
      */
     public double getCatches(School school) {
-        int iSpec = school.getSpeciesIndex();
-        double catches;
-        if (null != spatialFactor[iSpec]) {
-            catches = fishingMortality[iSpec].getCatches(school)
-                    * mpaFactor.getValue(school.getCell())
-                    * spatialFactor[iSpec].getValue(school.getCell());
-        } else {
-            catches = fishingMortality[iSpec].getCatches(school)
-                    * mpaFactor.getValue(school.getCell());
-        }
+        double catches = fishingMortality[school.getSpeciesIndex()].getCatches(school)
+                * mpaFactor.getValue(school.getCell());
         return Math.min(catches, school.getInstantaneousBiomass());
     }
 
-    public Type getType(int iSpecies) {
-        return fishingType[iSpecies];
-    }
-
-    /**
-     * Fishing scenario
-     */
-    public enum Scenario {
-
-        RATE_ANNUAL("mortality.fishing.rate.sp", Type.RATE),
-        RATE_BY_YEAR("mortality.fishing.catches.byYear.file.sp", Type.RATE),
-        RATE_BY_DT_BY_AGE("mortality.fishing.rate.byDt.byAge.file.sp", Type.RATE),
-        RATE_BY_DT_BY_SIZE("mortality.fishing.rate.byDt.bySize.file.sp", Type.RATE),
-        CATCHES_ANNUAL("mortality.fishing.catches.sp", Type.CATCHES),
-        CATCHES_BY_YEAR("mortality.fishing.catches.byYear.file.sp", Type.CATCHES),
-        CATCHES_BY_DT_BY_AGE("mortality.fishing.catches.byDt.byAge.file.sp", Type.CATCHES),
-        CATCHES_BY_DT_BY_SIZE("mortality.fishing.catches.byDt.bySize.file.sp", Type.CATCHES);
-
-        private final String key;
-        private final Type type;
-
-        private Scenario(String key, Type type) {
-            this.key = key;
-            this.type = type;
-        }
-
-        @Override
-        public String toString() {
-            return key + "#";
-        }
+    public Type getType() {
+        return fishingType;
     }
 
     /**

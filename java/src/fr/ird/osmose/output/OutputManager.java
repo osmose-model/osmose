@@ -142,18 +142,6 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new MortalitySpeciesOutput(rank, getSpecies(i), sizeDistrib));
             }
         }
-        if (getConfiguration().getBoolean("output.mortality.natural.bySize.enabled")) {
-            outputs.add(new AdditionalMortalityDistribOutput(rank, sizeDistrib));
-        }
-        if (getConfiguration().getBoolean("output.mortality.natural.byAge.enabled")) {
-            outputs.add(new AdditionalMortalityDistribOutput(rank, ageDistrib));
-        }
-        if (getConfiguration().getBoolean("output.mortality.naturalN.bySize.enabled")) {
-            outputs.add(new AdditionalMortalityNDistribOutput(rank, sizeDistrib));
-        }
-        if (getConfiguration().getBoolean("output.mortality.naturalN.byAge.enabled")) {
-            outputs.add(new AdditionalMortalityNDistribOutput(rank, ageDistrib));
-        }        
         // Yield
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new YieldOutput(rank));
@@ -328,7 +316,7 @@ public class OutputManager extends SimulationLinker {
         boolean isTimeToWrite = writeRestart;
         isTimeToWrite &= (getSimulation().getYear() >= spinupRestart);
         isTimeToWrite &= ((iStepSimu + 1) % restartFrequency == 0);
-        isTimeToWrite |= (iStepSimu >= (getConfiguration().getNStep() - 1));
+        isTimeToWrite |= (iStepSimu >= (getConfiguration().getNYear() * getConfiguration().getNStepYear() - 1));
 
         if (isTimeToWrite) {
             snapshot.makeSnapshot(iStepSimu);
