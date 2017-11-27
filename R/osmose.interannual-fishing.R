@@ -101,7 +101,7 @@ getFishingBaseRate.constant = function(sp, fishing, T, ndt) {
 
 getFishingBaseRate.byRegime = function(sp, fishing, T, ndt) {
   
-  shifts   = fishing$rate$byRegime$shift[[sp]]
+  shifts   = getOsmoseParameter(fishing, "rate", "byregime", "shift", sp)
   nRegimes = length(shifts) + 1
   shifts   = shifts[shifts<T*ndt]
   
@@ -109,14 +109,14 @@ getFishingBaseRate.byRegime = function(sp, fishing, T, ndt) {
   
   if(useFiles) {
     rates = .getFileAsVector(fishing$rate$byRegime$file[[sp]])
-    if(is.null(rates)) rates = fishing$rate$byRegime[[sp]]    
+    if(is.null(rates)) rates = getOsmoseParameter(fishing, "rate", "byregime", "sp")    
   } else {
-    rates = fishing$rate$byRegime[[sp]]           
+    rates = getOsmoseParameter(fishing, "rate", "byregime", sp)           
     if(is.null(rates)) rates = .getFileAsVector(fishing$rate$byRegime$file[[sp]])
   }
   
   if(is.null(rates)) stop(sprintf("No fishing rates provided for %s", sp))
-  if(length(rates)!=nRegimes) stop(sprintf("You must provided %d fishing rates.", nRegimes))
+  if(length(rates)!=nRegimes) stop(sprintf("You must provide %d fishing rates.", nRegimes))
   
   nRegimes = length(shifts) + 1
   rates  = rates[1:nRegimes]
@@ -144,8 +144,10 @@ getFishingBaseRate.byRegime = function(sp, fishing, T, ndt) {
 getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
   
   # mortality.fishing.rate.slope.sp0;0.03 # 3% per year
-  rate  = fishing$rate[[sp]]
-  slope = fishing$rate$slope[[sp]]
+  rate  = getOsmoseParameter(fishing, "rate", sp)
+  slope  = getOsmoseParameter(fishing, "rate", "slope", sp)
+  #rate  = fishing$rate[[sp]]
+  #slope = fishing$rate$slope[[sp]]
   
   freq = .getFishingFrequency(sp, fishing, ndt)
   
@@ -184,9 +186,9 @@ getFishingBaseRate.byYear = function(sp, fishing, T, ndt) {
   
   if(useFiles) {
     rates = .getFileAsVector(fishing$rate$byyear$file[[sp]])
-    if(is.null(rates)) rates = fishing$rate$byyear[[sp]]    
+    if(is.null(rates)) rates = getOsmoseParameter(fishing, "rate", "byyear", sp)
   } else {
-    rates = fishing$rate$byyear[[sp]]        
+    rates = getOsmoseParameter(fishing, "rate", "byyear", sp)
     if(is.null(rates)) rates = .getFileAsVector(fishing$rate$byyear$file[[sp]])
   }
 
@@ -224,9 +226,9 @@ getFishingBaseRate.byDt = function(sp, fishing, T, ndt) {
   
   if(useFiles) {
     rates = .getFileAsVector(fishing$rate$bydt$file[[sp]])
-    if(is.null(rates)) rates = fishing$rate$bydt[[sp]]    
+    if(is.null(rates)) rates = getOsmoseParameter(fishing, "rate", "bydt", sp)
   } else {
-    rates = fishing$rate$bydt[[sp]]        
+    rates = getOsmoseParameter(fishing, "rate", "bydt", sp)
     if(is.null(rates)) rates = .getFileAsVector(fishing$rate$bydt$file[[sp]])
   }
   
