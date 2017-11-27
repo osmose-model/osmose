@@ -2,8 +2,8 @@
 # Auxiliar ----------------------------------------------------------------
 
 .getFishingFrequency = function(sp, fishing, ndt) {
-  periods = fishing$periodsperyear[[sp]]
-  if(is.null(periods)) periods = 1L
+  periods = getOsmoseParameter(fishing, "periodsperyear", sp)
+  if(is.null(periods)) periods = 1L 
   if(periods%%1!=0) stop(sprintf("periodsPerYear.%s must be an integer.", sp))
   freq = ndt/periods
   if(freq%%1!=0) stop(sprintf("simulation.time.ndtPerYear must be a multiple of periodsPerYear.%s.", sp))
