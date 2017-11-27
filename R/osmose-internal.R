@@ -5,8 +5,8 @@
 .guessType = function(x, keep.att=FALSE) {
   if(!is.character(x)) return(x)
   att = attributes(x)
-  x = stringr::str_trim(strsplit(x, split=",")[[1]])
-  if(identical(tolower(x),"null")) return(NULL) 
+  x = stringr::str_trim(strsplit(x, split=",")[[1]])  # because strsplit returns a list
+  if(identical(tolower(x), "null")) return(NULL) 
   asNum = suppressWarnings(as.numeric(x))
   isNumeric = !all(is.na(asNum))
   x[x=="na"] = NA
@@ -24,12 +24,12 @@
   return(.guessType(x, keep.att = keep.att))
 }
 
-# Get a parameter from a name chain (error if not found).
-# @param x Output of the \code{link{readOsmoseConfiguration}} function
-# @param ... String arguments 
-# @param keep.att Whether parameter attributes should be kept
-# @example getOsmoseParameter(param, "simulation", "time", "nyear")
-# @export
+#' Get a parameter from a name chain (error if not found).
+#' @param x Output of the \code{link{readOsmoseConfiguration}} function
+#' @param ... String arguments 
+#' @param keep.att Whether parameter attributes should be kept
+#' @usage getOsmoseParameter(param, "simulation", "time", "nyear")
+#' @export
 getOsmoseParameter = function(x, ..., keep.att=FALSE) {
   chain = unlist(list(...))
   x = .getPar(x, ..., keep.att=TRUE)
