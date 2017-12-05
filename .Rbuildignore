@@ -1,2 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+TO_DO.txt
+cran-comments.md
+README.md
+NEWS.md
+^\docs$
