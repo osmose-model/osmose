@@ -5,55 +5,62 @@
 #' @title Run an OSMOSE configuration
 #' @description This function create a valid configuration by several input files
 #' from user input parameters. 
-#' @param osmose Name of the Osmose java .jar file
-#' @param java Name of the java executable 
 #' @param input Filename of the main configuration file
+#' @param parameters Parameters to be passed to osmose (version 4 or higher).
 #' @param output Output directory
-#' @param options Java options
-#' @param log Log file
-#' @param verbose NULL if run is not interactive (output in the log file)
-#' @param clean TRUE if the output directory should be cleaned
-#' @param shell Shell to use ("BASH" or "CSH")
-#' @param version OSMOSE Java version. From version 3 to 4, the way command arguments
-#' are set (configuration file and output directory) has been changed. 
+#' @param log File to save OSMOSE execution messages.
+#' @param version OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
+#' accepted. 
+#' @param osmose Path to a OSMOSE .jar executable. By default (NULL), uses the stable 
+#' jar for the current version.
+#' @param java Path to the java executable. The default assumes 'java' is 
+#' on the search path. 
+#' @param options Java options (e.g. -Xmx2048m to increase memory limit).
+#' @param verbose Show messages? (output in the log file if FALSE).
+#' @param clean TRUE if the output directory should be cleaned before running OSMOSE.
 #' @details Basic configurations may not need the use of \code{buildConfiguration},
 #' but it is required for configuration using interannual inputs or fishing selectivity.
 #' @author Ricardo Oliveros-Ramos
 #' @export
-runOsmose = function(osmose=NULL, java="java", input="input/config.csv", output="output/",
-                     options=NULL, log="osmose.log", verbose=NULL, clean=TRUE, shell="BASH", version="3") {
+runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
+                     version=3, osmose=NULL, java="java", 
+                     options=NULL, verbose=TRUE, clean=TRUE) {
   
   # barrier.n: redirection 
   
-  if(is.null(verbose))  verbose = interactive()
+  version = .getVersion(version)
   
-  if(is.null(osmose)) osmose = system.file("java", "osmose_stable_3.jar", package="osmose")
+  if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
   
-  if(isTRUE(clean)) file.remove(file.path(output, dir(path=output, recursive=TRUE)))
+  # update to provide by release executables
+  if(is.null(osmose)) osmose = system.file(sprintf("osmose_stable_%s.jar", version),
+                                            package="osmose", mustWork = TRUE)
+  
+  if(isTRUE(clean)) 
+    file.remove(file.path(output, dir(path=output, recursive=TRUE)))
   
   if(is.null(options)) options = ""
+  if(is.null(parameters)) parameters = ""
   
-  if(version=="3"){
-    run.osmose = paste(java, options, "-jar", osmose, input, output)
+  if(version > 3) {
+    # changes for version 4 or higher
+    outDir = paste("-Poutput.dir.path=", output, sep="")
   } else {
-    temp = paste("-Poutput.dir.path=", output, " ", input, sep="")
-    run.osmose = paste(java, options, "-jar", osmose, temp)
+    outDir = output
   }
   
-  if(!isTRUE(verbose)) { 
-    if(shell=="BASH") {
-      run.osmose = paste(run.osmose, ">", log, "2>&1")
-    } else {
-      run.osmose = paste(run.osmose, ">&", log)
-    }
-  }
+  args = paste(options, "-jar", osmose, input, outDir, parameters)
   
-  cat("++++++++++++++++++++++++ Running the following command: ", "\n")
-  cat(run.osmose, "\n")
-  cat("++++++++++++++++++++++++", "\n")
-  system(run.osmose, wait=TRUE)
+  stdout = ifelse(interactive() & verbose, "", log)
+  stderr = ifelse(interactive() & verbose, "", log)
   
-  return(invisible(run.osmose))
+  command = paste(c(shQuote(java), args), collapse = " ")
+  
+  if(isTRUE(verbose)) message(sprintf("Running: %s", command))
+  
+  system2(java, args=args, stdout=stdout, stderr=stderr, wait=TRUE)
+  
+  return(invisible(command))
   
 }
 

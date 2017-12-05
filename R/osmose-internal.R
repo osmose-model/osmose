@@ -1,6 +1,20 @@
 
 # Parsing input files -----------------------------------------------------
 
+
+.getVersion = function(version) {
+  
+  if(length(version)>1) stop("Only one 'version' value must be provided.")
+  isNum = suppressWarnings(!is.na(as.integer(version)))
+  if(isNum) return(as.integer(version))
+  isOK = grepl(version, patt="^v")
+  if(!isOK) stop("Version must be of the form 'v3r2'.")
+  version = sub(x=version, patt="^v([0-9].*)r([0-9].*)$", rep="\\1")
+  isNum = suppressWarnings(!is.na(as.integer(version)))
+  if(isNum) return(as.integer(version))
+  stop("Version must be of the form 'v3r2'.")
+}
+
 # guess the type of a vector
 .guessType = function(x, keep.att=FALSE) {
   if(!is.character(x)) return(x)
