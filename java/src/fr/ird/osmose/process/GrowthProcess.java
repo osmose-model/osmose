@@ -57,7 +57,7 @@ import fr.ird.osmose.Species;
  */
 public class GrowthProcess extends AbstractProcess {
 
-    private float[][] minDelta;
+    private float[][] minDelta;    // barrier.n dim=[nspecies][agemax in timesteps]
     private float[][] maxDelta;
     private float[][] deltaMeanLength;
     private float[] criticalPredSuccess;
@@ -93,10 +93,10 @@ public class GrowthProcess extends AbstractProcess {
             for (int age = 0; age < lifespan - 1; age++) {
                 float meanAge0 = meanAge1;
                 meanAge1 = species.computeMeanLength(age + 1);
-                deltaMeanLength[i][age] = meanAge1 - meanAge0;
+                deltaMeanLength[i][age] = meanAge1 - meanAge0; // barrier.n: difference between size[age+1]-size[age] 
 
-                minDelta[i][age] = deltaMeanLength[i][age] - deltaMeanLength[i][age];
-                maxDelta[i][age] = deltaMeanLength[i][age] + deltaMeanLength[i][age];
+                minDelta[i][age] = deltaMeanLength[i][age] - deltaMeanLength[i][age]; // barrier.n: always 0?
+                maxDelta[i][age] = deltaMeanLength[i][age] + deltaMeanLength[i][age]; // warning: data at [lifespan-1] are not set
             }
             // Read maximal length
             if (!getConfiguration().isNull("species.lmax.sp" + i)) {

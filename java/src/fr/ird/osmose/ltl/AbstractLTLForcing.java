@@ -233,7 +233,6 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         biomass = new double[getConfiguration().getNPlankton()][getGrid().get_ny()][getGrid().get_nx()];
 
         for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
-            biomass[iPlk] = new double[getGrid().get_ny()][getGrid().get_nx()];
             double[][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
             for (Cell cell : getGrid().getCells()) {
                 if (!cell.isLand()) {
@@ -242,7 +241,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
                     int j = cell.get_jgrid();
                     int nCells = icoordLTLGrid[j][i].size();
                     for (int k = 0; k < nCells; k++) {
-                        biomass[iPlk][j][i] += area * convertToTonnePerKm2(iPlk, rawBiomass[jcoordLTLGrid[j][i].get(k)][icoordLTLGrid[j][i].get(k)]) / (double) nCells;
+                        biomass[iPlk][j][i] += area * convertToTonnePerKm2(iPlk, rawBiomass[jcoordLTLGrid[j][i].get(k)][icoordLTLGrid[j][i].get(k)]) / (double) nCells; // barrier.n: mean biomass instead of sum? biomass is extensive
                     }
                 }
             }

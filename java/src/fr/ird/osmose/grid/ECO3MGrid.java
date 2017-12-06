@@ -162,7 +162,9 @@ public class ECO3MGrid extends AbstractGrid {
                 // calculation using the index as follows:
                 for (int ii = 0; ii < stride; ii++) {
                     for (int jj = 0; jj < stride; jj++) {
-                        osmosevar[j][i] += eco3mvar[j * stride + jj][i * stride + ii] / (stride * stride)
+                        osmosevar[j][i] += eco3mvar[j * stride + jj][i * stride + ii] / (stride * stride);
+                    }
+                }
             }
         }
 
