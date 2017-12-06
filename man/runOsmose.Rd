@@ -4,29 +4,33 @@
 \alias{runOsmose}
 \title{Run an OSMOSE configuration}
 \usage{
-runOsmose(osmose = NULL, java = "java", input = "input/config.csv",
-  output = "output/", options = NULL, log = "osmose.log",
-  verbose = NULL, clean = TRUE, shell = "BASH", version = "3")
+runOsmose(input, parameters = NULL, output = "output", log = "osmose.log",
+  version = 3, osmose = NULL, java = "java", options = NULL,
+  verbose = TRUE, clean = TRUE)
 }
 \arguments{
-\item{osmose}{Name of the Osmose java .jar file}
-
-\item{java}{Name of the java executable}
-
 \item{input}{Filename of the main configuration file}
+
+\item{parameters}{Parameters to be passed to osmose (version 4 or higher).}
 
 \item{output}{Output directory}
 
-\item{options}{Java options}
+\item{log}{File to save OSMOSE execution messages.}
 
-\item{log}{Log file}
+\item{version}{OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
+accepted.}
 
-\item{verbose}{NULL if run is not interactive (output in the log file)}
+\item{osmose}{Path to a OSMOSE .jar executable. By default (NULL), uses the stable 
+jar for the current version.}
 
-\item{clean}{TRUE if the output directory should be cleaned}
+\item{java}{Path to the java executable. The default assumes 'java' is 
+on the search path.}
 
-\item{shell}{Shell to use ("BASH" or "CSH")
-a new file is created with the modified configuration.}
+\item{options}{Java options (e.g. -Xmx2048m to increase memory limit).}
+
+\item{verbose}{Show messages? (output in the log file if FALSE).}
+
+\item{clean}{TRUE if the output directory should be cleaned before running OSMOSE.}
 }
 \description{
 This function create a valid configuration by several input files

@@ -2,13 +2,15 @@ Package: osmose
 Type: Package
 Title: OSMOSE: Modelling Marine Exploited Ecosystems
 Version: 0.1.0
-Date: 2017-12-05
+Date: 2017-12-06
 Authors@R: c(
-  person("Nicolas", "Barrier", email="nicolas.barrier@ird.fr", role="cre"),
+  person("Yunne-Jai", "Shin", role="aut"),
+  person("Travers", "Morgane", role="aut"),
+  person("Verley", "Philippe", role="aut"),
   person("Ricardo", "Oliveros-Ramos", role = "aut"), 
   person("Laure", "Velez", role = "aut"),
-  person("Criscely", "Lujan", role="aut"),
-  person("Yunne-Jai", "Shin", role="fnd"),
+  person("Nicolas", "Barrier", email="nicolas.barrier@ird.fr", role="cre"),
+  person("Criscely", "Lujan", role="ctb"),
   person("Michael", "Hurtado", role = "ctb")
   )
 Description: The multispecies and Individual-based model (IBM) OSMOSE focuses on fish species.
@@ -22,7 +24,7 @@ Description: The multispecies and Individual-based model (IBM) OSMOSE focuses on
   which can be found in FishBase for instance, and fish spatial distribution data. This
   package provides tools to build a model and run simulations using the OSMOSE model. See
   <http://www.osmose-model.org/> for more details.
-License: file LICENSE
+License: CeCILL
 Encoding: UTF-8
 Depends: 
   R (>= 2.15)
@@ -36,4 +38,5 @@ Imports:
 URL: 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
+SystemRequirements: Java JDK 1.7 or higher
 RoxygenNote: 6.0.1

@@ -6,7 +6,7 @@
 
 > Non-FOSS package license (file LICENSE)
 
-The CeCILL-B is a FOSS license??
+The license has be updated to CeCILL
 
 > Suggests or Enhances not in mainstream repositories:
   kali
