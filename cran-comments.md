@@ -1,5 +1,20 @@
 # version 0.1.0
 
+**round 3**
+
+**round 2**
+
+> Dear maintainer,
+ 
+> package osmose_0.1.0.tar.gz does not pass the incoming checks automatically, please see the pre-test at:
+> <https://win-builder.r-project.org/incoming_pretest/171207_074550_osmose_010/00check.log>
+> Status: 3 WARNINGs, 3 NOTEs
+
+> Best regards,
+> CRAN teams' auto-check service
+
+Upss.
+
 **round 1**
 
 > Thanks, we see:
@@ -41,7 +56,7 @@ Updated.
 > * checking package dependencies ... NOTE
 > Package suggested but not available for checking: 'kali'
 
-See below.
+Kali imports has been removed.
 
 > Please fix and resubmit.
 > Best,
