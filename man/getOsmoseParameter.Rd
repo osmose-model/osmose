@@ -4,10 +4,10 @@
 \alias{getOsmoseParameter}
 \title{Get a parameter from a name chain (error if not found).}
 \usage{
-getOsmoseParameter(param, "simulation", "time", "nyear")
+getOsmoseParameter(par, ..., keep.att=FALSE)
 }
 \arguments{
-\item{x}{Output of the \code{link{readOsmoseConfiguration}} function}
+\item{par}{Output of the \code{link{readOsmoseConfiguration}} function}
 
 \item{...}{String arguments}
 
@@ -15,4 +15,9 @@ getOsmoseParameter(param, "simulation", "time", "nyear")
 }
 \description{
 Get a parameter from a name chain (error if not found).
+}
+\examples{
+\dontrun{
+getOsmoseParameter(par, "simulation", "time", "nyear")
+}
 }
