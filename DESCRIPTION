@@ -35,7 +35,7 @@ Imports:
   stats,
   stringr, 
   utils
-URL: 
+URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
 SystemRequirements: Java JDK 1.7 or higher

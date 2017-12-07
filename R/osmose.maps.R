@@ -172,6 +172,8 @@ setOsmoseMaps.prediction.niche.models =
 writeMaps = function(object, files=NULL, outdir="maps") {
   if(!requireNamespace("kali", quietly = TRUE)) 
     stop("You need to install the 'kali' package.")
+  if(!requireNamespace("fields", quietly = TRUE)) 
+    stop("You need to install the 'fields' package.")
   if(is.null(files)) files = object$files
   if(!file.exists(outdir)) dir.create(outdir, recursive = TRUE)
   if(!file.exists(file.path(outdir, "_images"))) 
