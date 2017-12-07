@@ -4,7 +4,7 @@
 \alias{getOsmoseParameter}
 \title{Get a parameter from a name chain (error if not found).}
 \usage{
-getOsmoseParameter(param, "simulation", "time", "nyear")
+getOsmoseParameter(x, ..., keep.att = FALSE)
 }
 \arguments{
 \item{x}{Output of the \code{link{readOsmoseConfiguration}} function}

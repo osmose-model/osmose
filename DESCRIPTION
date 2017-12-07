@@ -24,7 +24,7 @@ Description: The multispecies and Individual-based model (IBM) OSMOSE focuses on
   which can be found in FishBase for instance, and fish spatial distribution data. This
   package provides tools to build a model and run simulations using the OSMOSE model. See
   <http://www.osmose-model.org/> for more details.
-License: CeCILL
+License: file LICENSE
 Encoding: UTF-8
 Depends: 
   R (>= 2.15)
@@ -34,8 +34,9 @@ Imports:
   rlist,
   stats,
   stringr, 
-  utils
-URL: 
+  utils,
+  fields,
+URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
 SystemRequirements: Java JDK 1.7 or higher
