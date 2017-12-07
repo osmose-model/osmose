@@ -7,9 +7,9 @@
   if(length(version)>1) stop("Only one 'version' value must be provided.")
   isNum = suppressWarnings(!is.na(as.integer(version)))
   if(isNum) return(as.integer(version))
-  isOK = grepl(version, patt="^v")
+  isOK = grepl(version, pattern = "^v")
   if(!isOK) stop("Version must be of the form 'v3r2'.")
-  version = sub(x=version, patt="^v([0-9].*)r([0-9].*)$", rep="\\1")
+  version = sub(x=version, pattern="^v([0-9].*)r([0-9].*)$", replacement="\\1")
   isNum = suppressWarnings(!is.na(as.integer(version)))
   if(isNum) return(as.integer(version))
   stop("Version must be of the form 'v3r2'.")
@@ -39,14 +39,18 @@
 }
 
 #' Get a parameter from a name chain (error if not found).
-#' @param x Output of the \code{link{readOsmoseConfiguration}} function
+#' @param par Output of the \code{link{readOsmoseConfiguration}} function
 #' @param ... String arguments 
 #' @param keep.att Whether parameter attributes should be kept
-#' @usage getOsmoseParameter(param, "simulation", "time", "nyear")
+#' @usage getOsmoseParameter(par, ..., keep.att=FALSE)
+#' @examples 
+#' \dontrun{
+#' getOsmoseParameter(par, "simulation", "time", "nyear")
+#' }
 #' @export
-getOsmoseParameter = function(x, ..., keep.att=FALSE) {
+getOsmoseParameter = function(par, ..., keep.att=FALSE) {
   chain = unlist(list(...))
-  x = .getPar(x, ..., keep.att=TRUE)
+  x = .getPar(par, ..., keep.att=TRUE)
   if(!isTRUE(keep.att)) attributes(x) = NULL
   if(is.null(x)) stop(sprintf("Parameter '%s' not found.", paste(chain, collapse=".")))
   return(x)
