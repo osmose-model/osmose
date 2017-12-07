@@ -7,7 +7,7 @@
   if(length(version)>1) stop("Only one 'version' value must be provided.")
   isNum = suppressWarnings(!is.na(as.integer(version)))
   if(isNum) return(as.integer(version))
-  isOK = grepl(version, pattern = "^v")
+  isOK = grepl(version, pattern="^v")
   if(!isOK) stop("Version must be of the form 'v3r2'.")
   version = sub(x=version, pattern="^v([0-9].*)r([0-9].*)$", replacement="\\1")
   isNum = suppressWarnings(!is.na(as.integer(version)))
