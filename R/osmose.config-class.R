@@ -4,6 +4,10 @@
 #' @param config Configuration object to which file parameters are appended
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
 #' @return A list tree.
+#' @examples{
+#'     filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+#'     par = readOsmoseConfiguration(filename)
+#' }
 #' @export
 readOsmoseConfiguration = function(file, config=NULL, absolute=TRUE) {
   

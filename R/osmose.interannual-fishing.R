@@ -14,6 +14,16 @@
 #' @param ndt  Time step
 #'
 #' @return  Fishing mortality rate.
+#' @examples{
+#' filename = system.file("extdata", "data_fishing.csv", package="osmose")
+#' conf = readOsmoseConfiguration(filename)
+#' ndt = getOsmoseParameter(conf, "simulation", "time", "ndtperyear")
+#' nyear = getOsmoseParameter(conf, "simulation", "time", "nyear")
+#' 
+#' fishing = conf$mortality$fishing
+#' 
+#' fish0 = getFishingMortality("sp0", fishing, nyear, ndt)
+#' }
 #' @export
 getFishingMortality = function(sp, fishing, T, ndt) {
 
@@ -21,6 +31,10 @@ getFishingMortality = function(sp, fishing, T, ndt) {
   B = getFishingBaseRate(sp, fishing, T, ndt)
   A = getFishingDeviatesByYear(sp, fishing, T, ndt) 
   S = getFishingDeviatesBySeason(sp, fishing, T, ndt)
+  
+  cat(B, "\n")
+  cat(A, "\n")
+  cat(S, "\n")
   
   F = B*exp(A+S)/ndt # rate by dt!
   
@@ -62,6 +76,17 @@ getFishingMortality = function(sp, fishing, T, ndt) {
 #' @param fishing Fishing parameters
 #' @param T Number of years
 #' @param ndt  Time step
+#' @examples
+#' {
+#' filename = system.file("extdata", "data_fishing.csv", package="osmose")
+#' conf = readOsmoseConfiguration(filename)
+#' ndt = getOsmoseParameter(conf, "simulation", "time", "ndtperyear")
+#' nyear = getOsmoseParameter(conf, "simulation", "time", "nyear")
+#' 
+#' fishing = conf$mortality$fishing
+#' 
+#' fish0 = getFishingBaseRate("sp0", fishing, nyear, ndt)
+#' }
 #' @export
 getFishingBaseRate = function(sp, fishing, T, ndt) {
   
@@ -90,10 +115,8 @@ getFishingBaseRate = function(sp, fishing, T, ndt) {
 #' @param fishing Fishing parameters
 #' @param T Number of years
 #' @param ndt  Time step
-#'
-#' @export
 getFishingBaseRate.constant = function(sp, fishing, T, ndt) {
-  rate = fishing$rate[[sp]]
+  rate = getOsmoseParameter(fishing, "rate", sp)
   if(is.null(rate)) stop(sprintf("No fishing rate provided for %s", sp))
   if(length(rate)>1) stop(sprintf("More than one fishing rate for %s provided.", sp))
   return(rep(rate, T*ndt))
@@ -139,8 +162,6 @@ getFishingBaseRate.byRegime = function(sp, fishing, T, ndt) {
 #' @param fishing Fishing parameters
 #' @param T Number of years
 #' @param ndt  Time step
-#'
-#' @export
 getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
   
   # mortality.fishing.rate.slope.sp0;0.03 # 3% per year
@@ -178,8 +199,6 @@ getFishingBaseRate.linear = function(sp, fishing, T, ndt) {
 #' @param fishing Fishing parameters
 #' @param T Number of years
 #' @param ndt  Time step
-#'
-#' @export
 getFishingBaseRate.byYear = function(sp, fishing, T, ndt) {
   
   useFiles = .getBoolean(fishing$useFiles, FALSE)
@@ -218,8 +237,6 @@ getFishingBaseRate.byYear = function(sp, fishing, T, ndt) {
 #' @param fishing Fishing parameters
 #' @param T Number of years
 #' @param ndt  Time step
-#'
-#' @export
 getFishingBaseRate.byDt = function(sp, fishing, T, ndt) {
   
   useFiles = .getBoolean(fishing$useFiles, FALSE)
@@ -386,7 +403,7 @@ getFishingDeviatesBySeason.periodic = function(sp, fishing, T, ndt, useFiles=FAL
   stopifnot(length(deviates)%%ndt==0)
   deviates = calculateSeasonalPattern(x=deviates, ndt=ndt)
   
-  return(as.numeric(deviates))  
+  return(as.numeric(deviates))
   
 }
 

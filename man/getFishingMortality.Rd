@@ -25,3 +25,15 @@ Get fishing mortality rate.
 \deqn{F = \frac{B \times \exp^{A+S}}{ndt}}
 with \eqn{B}=mortality rate, \eqn{A}=deviates by year, \eqn{S}=deviates by seasons
 }
+\examples{
+{
+filename = system.file("extdata", "data_fishing.csv", package="osmose")
+conf = readOsmoseConfiguration(filename)
+ndt = getOsmoseParameter(conf, "simulation", "time", "ndtperyear")
+nyear = getOsmoseParameter(conf, "simulation", "time", "nyear")
+
+fishing = conf$mortality$fishing
+
+fish0 = getFishingMortality("sp0", fishing, nyear, ndt)
+}
+}

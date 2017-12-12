@@ -25,6 +25,12 @@ outputs from OSMOSE in the \code{path} folder.
 A list of class \code{osmose} is created, individual elements can be
 extracted using the function \code{getVar}.
 }
+\examples{
+{
+  outdir = system.file("extdata", "outputs/", package="osmose")
+  read_osmose(outdir)
+}
+}
 \author{
 Ricardo Oliveros-Ramos
 

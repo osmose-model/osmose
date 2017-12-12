@@ -20,3 +20,12 @@ A mortality array
 \description{
 Get the total mortality rate.
 }
+\examples{
+{
+dirin = system.file("extdata", package="osmose")
+outdir = paste(dirin, "/outputs", sep="")
+data = read_osmose(outdir)
+mortality_df = data$global$mortality
+mort = getMortality(mortality_df, stage="juveniles", type="total")
+}
+}

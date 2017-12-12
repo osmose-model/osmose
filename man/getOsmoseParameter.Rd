@@ -4,7 +4,7 @@
 \alias{getOsmoseParameter}
 \title{Get a parameter from a name chain (error if not found).}
 \usage{
-getOsmoseParameter(par, ..., keep.att=FALSE)
+getOsmoseParameter(par, ..., keep.att = FALSE)
 }
 \arguments{
 \item{par}{Output of the \code{link{readOsmoseConfiguration}} function}
@@ -17,7 +17,9 @@ getOsmoseParameter(par, ..., keep.att=FALSE)
 Get a parameter from a name chain (error if not found).
 }
 \examples{
-\dontrun{
-getOsmoseParameter(par, "simulation", "time", "nyear")
+{
+   filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+   par = readOsmoseConfiguration(filename)
+   getOsmoseParameter(par, "population", "seeding", "year", "max", keep.att=FALSE)
 }
 }

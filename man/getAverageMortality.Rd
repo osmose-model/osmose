@@ -20,3 +20,12 @@ An array
 It computes the mean mortality, which
 is multiplied by the frequency.
 }
+\examples{
+{
+dirin = system.file("extdata", package="osmose")
+outdir = paste(dirin, "/outputs", sep="")
+data = read_osmose(outdir)
+mortality_df = data$global$mortality
+mort = getAverageMortality(mortality_df, stage="juveniles", freq=12)
+}
+}

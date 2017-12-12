@@ -14,8 +14,15 @@ getSizeSpectrum(file, sep = ",", ...)
 \item{...}{Additional arguments of the \code{read.csv} function}
 }
 \value{
-A 3D array (time, legnth, species)
+A 3D array (time, length, species)
 }
 \description{
 Get size spectrum
+}
+\examples{
+{
+dirin = system.file("extdata", package="osmose")
+file = paste(dirin, "/outputs/SizeIndicators/gogosm_yieldDistribBySize_Simu0.csv", sep="")
+size = getSizeSpectrum(file)
+}
 }

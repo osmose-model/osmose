@@ -31,3 +31,15 @@ specie (\emph{mortality.fishing.rate.method.spX}), whose value can be
 \item{byDt    : use \emph{rate.byDt.spX}}
 }
 }
+\examples{
+{
+filename = system.file("extdata", "data_fishing.csv", package="osmose")
+conf = readOsmoseConfiguration(filename)
+ndt = getOsmoseParameter(conf, "simulation", "time", "ndtperyear")
+nyear = getOsmoseParameter(conf, "simulation", "time", "nyear")
+
+fishing = conf$mortality$fishing
+
+fish0 = getFishingBaseRate("sp0", fishing, nyear, ndt)
+}
+}

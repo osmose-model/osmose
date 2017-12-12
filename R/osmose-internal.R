@@ -42,10 +42,10 @@
 #' @param par Output of the \code{link{readOsmoseConfiguration}} function
 #' @param ... String arguments 
 #' @param keep.att Whether parameter attributes should be kept
-#' @usage getOsmoseParameter(par, ..., keep.att=FALSE)
-#' @examples 
-#' \dontrun{
-#' getOsmoseParameter(par, "simulation", "time", "nyear")
+#' @examples{
+#'    filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+#'    par = readOsmoseConfiguration(filename)
+#'    getOsmoseParameter(par, "population", "seeding", "year", "max", keep.att=FALSE)
 #' }
 #' @export
 getOsmoseParameter = function(par, ..., keep.att=FALSE) {

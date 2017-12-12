@@ -19,11 +19,9 @@ write.osmose = function(x, file)   {
 #' @param ... Additional arguments
 #'
 #' @return Output data frame
-#' @export
 readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
   
   xclass = paste("osmose", type, sep=".")
-  
   
   allFiles = dir(path=path, recursive=TRUE, include.dirs=FALSE)
   csvFiles = allFiles[grepl(".csv", allFiles)]
@@ -55,14 +53,19 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
 #' @param sep File separator
 #' @param ... Additional arguments of the \code{read.csv} function
 #'
-#' @return A 3D array (time, legnth, species)
+#' @return A 3D array (time, length, species)
+#' @examples{
+#' dirin = system.file("extdata", package="osmose")
+#' file = paste(dirin, "/outputs/SizeIndicators/gogosm_yieldDistribBySize_Simu0.csv", sep="")
+#' size = getSizeSpectrum(file)
+#' }
 #' @export
 getSizeSpectrum = function(file, sep=",", ...) {
   
   # sizeSpectrum = read.table(file, sep=sep, dec=".", skip=1,
   #                          header=TRUE)
-  sizeSpectrum = .readOsmoseCsv(file=file, sep=sep, header=TRUE, ...)
-  
+  sizeSpectrum = .readOsmoseCsv(file=file, sep=sep, header=TRUE, row.names=NULL, ...)
+
   nsp = ncol(sizeSpectrum) - 2
   times = unique(sizeSpectrum$Time)
   lengths = unique(sizeSpectrum$Size)
@@ -85,8 +88,15 @@ getSizeSpectrum = function(file, sep=",", ...) {
 #' @param stage Stage ("adults", etc.)
 #' @param type Mortality type ("pred", "starv", "other", "out", "total"). 
 #' The latter is computed as the sum of all mortality types
-#'
 #' @return A mortality array
+#' @examples{
+#' dirin = system.file("extdata", package="osmose")
+#' outdir = paste(dirin, "/outputs", sep="")
+#' data = read_osmose(outdir)
+#' mortality_df = data$global$mortality
+#' mort = getMortality(mortality_df, stage="juveniles", type="total")
+#' }
+#' @export
 getMortality = function(x, stage="adults", type="total") {
   .calcMort = function(x) {
     x = as.data.frame(x)
@@ -116,6 +126,13 @@ getMortality = function(x, stage="adults", type="total") {
 #' @param freq Time frequency (months?)
 #'
 #' @return An array
+#' @examples{
+#' dirin = system.file("extdata", package="osmose")
+#' outdir = paste(dirin, "/outputs", sep="")
+#' data = read_osmose(outdir)
+#' mortality_df = data$global$mortality
+#' mort = getAverageMortality(mortality_df, stage="juveniles", freq=12)
+#' }
 #' @export
 getAverageMortality = function(x, stage="adults", freq=12) {
   
@@ -141,6 +158,13 @@ getAverageMortality = function(x, stage="adults", freq=12) {
 #' If NULL, then \code{proxy = colMeans(x)}
 #'
 #' @return An array
+#' @examples{
+#' dirin = system.file("extdata", package="osmose")
+#' outdir = paste(dirin, "/outputs", sep="")
+#' data = read_osmose(outdir)
+#' mortality_df = data$global$mortality
+#' mortdev = getMortalityDeviation(mortality_df, stage="juveniles", type="total")
+#' }
 #' @export
 getMortalityDeviation = function(x, stage, type, pars=NULL) {
   x     = getMortality(x=x, stage=stage, type=type)

@@ -40,6 +40,14 @@ from user input parameters.
 Basic configurations may not need the use of \code{buildConfiguration},
 but it is required for configuration using interannual inputs or fishing selectivity.
 }
+\examples{
+{
+  \donttest{
+    filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+    runOsmose(filename)
+  }
+}
+}
 \author{
 Ricardo Oliveros-Ramos
 }
