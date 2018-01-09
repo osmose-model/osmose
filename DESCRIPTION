@@ -38,5 +38,5 @@ Imports:
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
-SystemRequirements: Java JDK 1.7 or higher
+SystemRequirements: Java (>= 1.8)
 RoxygenNote: 6.0.1
