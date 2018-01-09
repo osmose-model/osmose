@@ -304,7 +304,10 @@ public class Configuration extends OLogger {
     public void init() {
 
         // Output path
-        outputPathname = getFile("output.dir.path");
+        //outputPathname = getFile("output.dir.path");
+        // barrier.n: outputPathname has been set unresolved,
+        // so that outputs are not saved in the input directory.
+        outputPathname = getString("output.dir.path");
         info("Output folder set to " + outputPathname);
 
         // Read Output CSV separator
