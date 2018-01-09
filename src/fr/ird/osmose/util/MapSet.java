@@ -108,6 +108,9 @@ public class MapSet extends OsmoseLinker {
      */
     private String[] mapFile;
 
+    /** True if the old naming convention is used, else False. */
+    private boolean correct=false;   // barrier.n
+    
     public MapSet(int iSpecies, String prefix) {
         this.iSpecies = iSpecies;
         this.prefix = prefix;
@@ -149,15 +152,42 @@ public class MapSet extends OsmoseLinker {
 
     public void loadMaps() {
 
-        int nmapmax = getConfiguration().findKeys(prefix + ".map*.species").size();
+        // barrier.n
+        int nmapmax;
+ 
+        // Barrier.n: look for the new format. If no map is found, then we switch to 
+        // the old format (setting correct = true)
+        nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
+        if(nmapmax == 0)
+        {
+            nmapmax = getConfiguration().findKeys(prefix + ".map*.species").size();
+            correct = true;
+        }
+            
         List<Integer> mapNumber = new ArrayList();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
-            while (!getConfiguration().canFind(prefix + ".map" + imap + ".species")) {
-                imap++;
+            
+            if (correct) {
+                // Old format
+                while (!getConfiguration().canFind(prefix + ".map" + imap + ".species")) {
+                    imap++;
+                }
+            } else {
+                // New format
+                while (!getConfiguration().canFind(prefix + ".species" + ".map" + imap)) {
+                    imap++;
+                }
             }
-            String key = prefix + ".map" + imap + ".species";
+            
+            String key;
+            if (correct) {
+                key = prefix + ".map" + imap + ".species";
+            } else {
+                key = prefix + ".species" + ".map" + imap;
+            }
+            
             Species species = getSpecies(getConfiguration().getString(key));
             if (null != species) {
                 if (species.getIndex() == iSpecies) {
@@ -182,33 +212,56 @@ public class MapSet extends OsmoseLinker {
             }
         }
 
+        int ageMin, ageMax; 
         // Load the maps
         for (int n = 0; n < mapNumber.size(); n++) {
             imap = mapNumber.get(n);
             /*
              * read age min and age max concerned by this map
              */
-            int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".map" + imap + ".age.min") * getConfiguration().getNStepYear());
-            int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".map" + imap + ".age.max") * getConfiguration().getNStepYear());
+            if(correct){
+                ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".map" + imap + ".age.min") * getConfiguration().getNStepYear());
+                ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".map" + imap + ".age.max") * getConfiguration().getNStepYear());
+            } else {
+                ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".age.min" + ".map" + imap ) * getConfiguration().getNStepYear());
+                ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".age.max" + ".map" + imap) * getConfiguration().getNStepYear());
+            }
             ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
 
             /*
              * read the time steps over the year concerned by this map
              */
-            int[] mapSeason = getConfiguration().getArrayInt(prefix + ".map" + imap + ".season");
+            int[] mapSeason;
+            if (correct) {
+                mapSeason = getConfiguration().getArrayInt(prefix + ".map" + imap + ".season");
+            } else {
+                mapSeason = getConfiguration().getArrayInt(prefix + ".season" + ".map" + imap);
+            }
             /*
              * Read year min and max concerned by this map
              */
             int yearMin = 0;
             int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
             int yearMax = nyear;
-            if (!getConfiguration().isNull(prefix + ".map" + imap + ".year.min")) {
-                yearMin = getConfiguration().getInt(prefix + ".map" + imap + ".year.min");
-                yearMin = Math.max(yearMin, 0);
-            }
-            if (!getConfiguration().isNull(prefix + ".map" + imap + ".year.max")) {
-                yearMax = getConfiguration().getInt(prefix + ".map" + imap + ".year.max");
-                yearMax = Math.min(yearMax, nyear);
+            
+            if (correct) {
+                if (!getConfiguration().isNull(prefix + ".map" + imap + ".year.min")) {
+                    yearMin = getConfiguration().getInt(prefix + ".map" + imap + ".year.min");
+                    yearMin = Math.max(yearMin, 0);
+                }
+                if (!getConfiguration().isNull(prefix + ".map" + imap + ".year.max")) {
+                    yearMax = getConfiguration().getInt(prefix + ".map" + imap + ".year.max");
+                    yearMax = Math.min(yearMax, nyear);
+                }
+            } else {
+                if (!getConfiguration().isNull(prefix + ".year.min" + ".map" + imap)) {
+                    yearMin = getConfiguration().getInt(prefix + ".year.min" + ".map" + imap);
+                    yearMin = Math.max(yearMin, 0);
+                }
+                if (!getConfiguration().isNull(prefix + ".year.max" + ".map" + imap)) {
+                    yearMax = getConfiguration().getInt(prefix + ".year.max" + ".map" + imap);
+                    yearMax = Math.min(yearMax, nyear);
+                }
             }
             /*
              * Assign number of maps to numMap array
@@ -230,12 +283,23 @@ public class MapSet extends OsmoseLinker {
              * read the name of the CSV file and load the map. If name = "null"
              * it means there is no map defined at these age-class and time-step
              */
-            if (!getConfiguration().isNull(prefix + ".map" + imap + ".file")) {
-                String csvFile = getConfiguration().getFile(prefix + ".map" + imap + ".file");
-                mapFile[n] = csvFile;
-                maps[n] = new GridMap(csvFile);
+            if(correct)
+            {
+                if (!getConfiguration().isNull(prefix + ".map" + imap + ".file")) {
+                    String csvFile = getConfiguration().getFile(prefix + ".map" + imap + ".file");
+                    mapFile[n] = csvFile;
+                    maps[n] = new GridMap(csvFile);
+                } else {
+                    maps[n] = null;
+                }
             } else {
-                maps[n] = null;
+                if (!getConfiguration().isNull(prefix + ".file" + ".map" + imap)) {
+                    String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
+                    mapFile[n] = csvFile;
+                    maps[n] = new GridMap(csvFile);
+                } else {
+                    maps[n] = null;
+                }
             }
         }
     }
