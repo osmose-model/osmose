@@ -61,11 +61,12 @@ public class VersionManager extends OsmoseLinker {
     private final AbstractVersion v3 = new Version3();
     private final AbstractVersion v3u1 = new Version3Update1();
     private final AbstractVersion v3u2 = new Version3Update2();
+    private final AbstractVersion v3u3 = new Version3Update3();
     // List of the existing Osmose versions
-    private final AbstractVersion[] VERSIONS = {v3, v3u1, v3u2};
+    private final AbstractVersion[] VERSIONS = {v3, v3u1, v3u2, v3u3};
 
     // Current Osmose version
-    public final AbstractVersion OSMOSE_VERSION = v3u2;
+    public final AbstractVersion OSMOSE_VERSION = v3u3;
 
     // Version of the Osmose configuration
     private AbstractVersion cfgVersion;
