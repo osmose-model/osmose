@@ -154,3 +154,15 @@ osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
 #  # config.csv: one line added with new parameters  
 #  return(L1)
 #}
+
+#' @title Report method
+#' @description This function built a report for each class including on osmose package.
+#' @param object Object of class \code{osmose}.
+#' @param format The format to export the report.
+#' @param output Folder where the report will be saved.
+#' @param ... Extra arguments passed to \code{\link{report}} function.
+#' @return A report on specific format.
+#' @export
+report = function(x, format, output, ...) {
+  UseMethod("report")
+}
