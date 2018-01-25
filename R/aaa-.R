@@ -11,3 +11,5 @@ NULL
 NULL
 #' @importFrom stringr str_split str_trim str_sub
 NULL
+#' @importFrom rmarkdown render
+NULL
