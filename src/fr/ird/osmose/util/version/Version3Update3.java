@@ -18,9 +18,9 @@ import java.util.List;
  *
  * @author pverley
  */
-public class Version3Update2 extends AbstractVersion {
+public class Version3Update3 extends AbstractVersion {
 
-    public Version3Update2() {
+    public Version3Update3() {
         super(3, 3, 2018, Calendar.JANUARY, 15);
     }
 
