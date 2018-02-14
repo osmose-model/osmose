@@ -36,13 +36,13 @@ public class Version3Update3 extends AbstractVersion {
         int nMapMax = getConfiguration().findKeys(prefix + ".map*.species").size();
 
         for (int iSpec = 0; iSpec < nMapMax; iSpec++) {
-            updateKey(prefix + ".map" + iSpec + "species", prefix + ".species.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + "age.min", prefix + ".age.min.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + "age.max", prefix + ".age.max.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + "season", prefix + ".season.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + "year.min", prefix + ".year.min.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + "year.max", prefix + ".year.max.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + "file", prefix + ".file.map" + iSpec);
+            updateKey(prefix + ".map" + iSpec + ".species", prefix + ".species.map" + iSpec);
+            updateKey(prefix + ".map" + iSpec + ".age.min", prefix + ".age.min.map" + iSpec);
+            updateKey(prefix + ".map" + iSpec + ".age.max", prefix + ".age.max.map" + iSpec);
+            updateKey(prefix + ".map" + iSpec + ".season", prefix + ".season.map" + iSpec);
+            updateKey(prefix + ".map" + iSpec + ".year.min", prefix + ".year.min.map" + iSpec);
+            updateKey(prefix + ".map" + iSpec + ".year.max", prefix + ".year.max.map" + iSpec);
+            updateKey(prefix + ".map" + iSpec + ".file", prefix + ".file.map" + iSpec);
         }
 
     }
