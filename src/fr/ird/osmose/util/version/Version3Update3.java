@@ -34,17 +34,23 @@ public class Version3Update3 extends AbstractVersion {
         prefix = "movement";
 
         int nMapMax = getConfiguration().findKeys(prefix + ".map*.species").size();
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ nmapmax " + nMapMax);
 
-        for (int iSpec = 0; iSpec < nMapMax; iSpec++) {
-            updateKey(prefix + ".map" + iSpec + ".species", prefix + ".species.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + ".age.min", prefix + ".age.min.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + ".age.max", prefix + ".age.max.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + ".season", prefix + ".season.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + ".year.min", prefix + ".year.min.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + ".year.max", prefix + ".year.max.map" + iSpec);
-            updateKey(prefix + ".map" + iSpec + ".file", prefix + ".file.map" + iSpec);
+        int cpt = 0;
+        int value = 0;
+
+        while (cpt < nMapMax) {
+            if (getConfiguration().canFind(prefix + ".map" + value + ".file")) {
+                updateKey(prefix + ".map" + value + ".species", prefix + ".species.map" + cpt);
+                updateKey(prefix + ".map" + value + ".age.min", prefix + ".age.min.map" + cpt);
+                updateKey(prefix + ".map" + value + ".age.max", prefix + ".age.max.map" + cpt);
+                updateKey(prefix + ".map" + value + ".season", prefix + ".season.map" + cpt);
+                updateKey(prefix + ".map" + value + ".year.min", prefix + ".year.min.map" + cpt);
+                updateKey(prefix + ".map" + value + ".year.max", prefix + ".year.max.map" + cpt);
+                updateKey(prefix + ".map" + value + ".file", prefix + ".file.map" + cpt);
+                cpt++;
+            }
+            value++;
         }
-
     }
-
 }
