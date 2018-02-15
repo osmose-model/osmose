@@ -159,10 +159,7 @@ public class FishingMapSet extends OsmoseLinker {
         // Count the total number of fisheries map by looking for the
         // number of "fisheries.fishingmap.find.fmapN" parameters 
         int nmapmax = getConfiguration().findKeys(prefix + ".find.fmap*").size();
-        System.out.println("key = " + prefix + ".find.fmap*");
-        System.out.println(getConfiguration().findKeys(prefix + ".find.fmap*"));
-        System.out.println("++++++++++++++ mapmax" + nmapmax);
-
+  
         List<Integer> mapNumber = new ArrayList();
         int imap = 0;
         // Retrieve the index of the maps for this species
@@ -221,8 +218,6 @@ public class FishingMapSet extends OsmoseLinker {
                 yearMax = getConfiguration().getInt(prefix + ".year.max" + ".fmap" + imap);
                 yearMax = Math.min(yearMax, nyear);
             }
-
-            System.out.println("+++++++++++++ yearMin " + yearMin + " Yearmax " + yearMax);
 
             /*
              * Assign number of maps to numMap array.
