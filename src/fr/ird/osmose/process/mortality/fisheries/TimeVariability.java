@@ -144,10 +144,12 @@ public class TimeVariability extends OsmoseLinker {
 
         int freq = this.getFishingFrequency();
        
+        int nStepYear = getConfiguration().getNStepYear();
+        
         for (int i = 0; i < ndt * nyear; i++) {   
             int x = i / freq;
             float time = (x * freq) / ((float) ndt);
-            timeArr[i] = rate * (1 + slope * time);
+            timeArr[i] = rate * (1 + slope * time) / nStepYear;
         }
 
     }
@@ -163,6 +165,8 @@ public class TimeVariability extends OsmoseLinker {
          * shift > T * ndt;
          */
         int tempshifts[] = cfg.getArrayInt("fisheries.rate.regime.shifts.fis" + index);
+        
+        int nStepYear = getConfiguration().getNStepYear();
         
         // Count the number of good shift values
         int nRegimes = 0;
@@ -206,7 +210,7 @@ public class TimeVariability extends OsmoseLinker {
 
             }
             
-            timeArr[i] = rates[irate];
+            timeArr[i] = rates[irate] / nStepYear;
             
         }
             
