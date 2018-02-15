@@ -50,6 +50,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
      * Private instance of the predation mortality
      */
     private PredationMortality predationMortality;
+
+    /* barrier.n: fisheries mortality */
+    private FisheriesMortality fisheriesMortality;
+
     /**
      * The set of plankton swarms
      */
@@ -71,7 +75,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
         predationMortality = new PredationMortality(getRank());
         predationMortality.init();
-
+        
         // Subdt 
         if (!getConfiguration().isNull("mortality.subdt")) {
             subdt = getConfiguration().getInt("mortality.subdt");
@@ -80,6 +84,13 @@ public class StochasticMortalityProcess extends AbstractProcess {
             warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose set it to {0}.", subdt);
         }
 
+        // barrier.n: initialisation of fisheries mortality if 
+        // the new fisheries are activated
+        if (getConfiguration().getBoolean("fisheries.new.activate")) {
+            fisheriesMortality = new FisheriesMortality(getRank(), subdt);
+            fisheriesMortality.init();
+        }
+        
         // Create a new swarm set, empty at the moment
         swarmSet = new HashMap();
     }
@@ -221,22 +232,33 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         }
                         break;
                     case FISHING:
-                        // Fishing Mortality
+                        // recovers the current school
                         school = schools.get(seqFish[i]);
-                        switch (fishingMortality.getType(school.getSpeciesIndex())) {
-                            case RATE:
-                                double F = fishingMortality.getRate(school) / subdt;
-                                nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
-                                break;
-                            case CATCHES:
-                                nDead = school.biom2abd(fishingMortality.getCatches(school) / subdt);
-                                break;
+                        
+                        // Fishing mortality: if new fisheries are activated.
+                        if (getConfiguration().getBoolean("fisheries.new.activate")) {
+                            // If the new fisheries are activated, we compute the mortality rate 
+                            // it returns nothing
+                            this.fisheriesMortality.getRate(school);
+
+                        } else {
+
+                            // Fishing Mortality
+                            switch (fishingMortality.getType(school.getSpeciesIndex())) {
+                                case RATE:
+                                    double F = fishingMortality.getRate(school) / subdt;
+                                    nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+                                    break;
+                                case CATCHES:
+                                    nDead = school.biom2abd(fishingMortality.getCatches(school) / subdt);
+                                    break;
+                            }
+                            school.incrementNdead(MortalityCause.FISHING, nDead);
+                            break;
                         }
-                        school.incrementNdead(MortalityCause.FISHING, nDead);
-                        break;
                 }
             }
-        }
+        }                
     }
 
     private List<Swarm> getSwarms(Cell cell) {
@@ -249,8 +271,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
         }
         return swarmSet.get(cell.getIndex());
     }
-
-    private static <T> void shuffleArray(T[] a) {
+    
+    /** Shuffles an input array.
+     * @param <T> Input array */
+    public static <T> void shuffleArray(T[] a) {
         // Shuffle array
         for (int i = a.length; i > 1; i--) {
             T tmp = a[i - 1];
