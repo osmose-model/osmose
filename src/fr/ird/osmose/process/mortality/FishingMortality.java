@@ -228,6 +228,10 @@ public class FishingMortality extends AbstractMortality {
                     }
                 }
             }
+
+            // barrier.n: this correction seems to mean that if we have MPA, then 
+            // we have greater pressure in non MPA cells. If 150 cells and 30 MPA,
+            // corr = 1.25 and (nocean - npa) * corr = 150
             int nOceanCell = getGrid().getNOceanCell();
             float correction = (float) nOceanCell / (nOceanCell - nCellMPA);
             for (Cell cell : getGrid().getCells()) {
