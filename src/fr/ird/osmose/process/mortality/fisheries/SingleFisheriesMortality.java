@@ -51,19 +51,7 @@ package fr.ird.osmose.process.mortality.fisheries;
 import fr.ird.osmose.process.mortality.*;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
-import fr.ird.osmose.process.mortality.fishing.AbstractFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.RateByYearBySeasonFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.RateBySeasonFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.CatchesByDtByClassFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.CatchesBySeasonFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.CatchesByYearBySeasonFishingMortality;
-import fr.ird.osmose.process.mortality.fishing.RateByDtByClassFishingMortality;
 import fr.ird.osmose.util.GridMap;
-import fr.ird.osmose.util.MPA;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  *
@@ -104,6 +92,12 @@ public class SingleFisheriesMortality extends AbstractMortality {
     
     }
 
+    /** Returns the fishing mortality rate associated with a given
+     * fisherie. It is the product of the time varying
+     * fishing rate, of the size selectivity and of the spatial factor.
+     * @param school
+     * @return The fishing mortality rate.
+     */
     @Override
     public double getRate(School school) {
 
@@ -113,6 +107,7 @@ public class SingleFisheriesMortality extends AbstractMortality {
         // Used to recover the selectivity value.
         float selVar;
        
+        // Looks for the selectivity variable.
         switch (select.getVariable())
         {
             case AGE:
@@ -120,23 +115,29 @@ public class SingleFisheriesMortality extends AbstractMortality {
                  break;
             default:
                 selVar = school.getLength();
-        }
+        }        
+        
+        // recovers the time varying rate of the fishing mortality
+        double timeSelect = timeVar.getTimeVar(getSimulation().getIndexTimeSimu());
                  
         // Recovers the size/age fisheries selectivity factor
         double sizeSelect = select.getSelectivity(selVar);
         
-        // recovers the time varying component of the fishing mortality
-        double timeSelect = timeVar.getTimeVar(getSimulation().getIndexTimeSimu());
-        
-        /** Recovers the map factor */
+        // Recovers the map factor
         GridMap map = fMapSet.getMap(fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()));
         double spatialSelect = map.getValue(cell);
         
-        return 0.0;
+        // modulates the mortality rate by the the size selectivity and the spatial factor.
+        double output = timeSelect * sizeSelect * spatialSelect; 
+        
+        return output;
+        
     }
 
-    public int getFIndex()
-    {
+    /**
+     * Returns the index of the current fisherie.
+     */
+    public int getFIndex() {
         return this.fIndex;
     }
     
