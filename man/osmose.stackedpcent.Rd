@@ -4,7 +4,8 @@
 \alias{osmose.stackedpcent}
 \title{Plot a stacked percent plot.}
 \usage{
-osmose.stackedpcent(data, legPosX = NULL, legPosY = NULL, ...)
+osmose.stackedpcent(data, legPosX = "right", legPosY = NULL, col = NULL,
+  ...)
 }
 \arguments{
 \item{data}{}

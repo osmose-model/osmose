@@ -64,7 +64,7 @@ osmose.barplot = function(x, ...)
 #' @param legPosY Y position of legend
 #' @param ... Additional arguments to the barplot function.
 #' @export
-osmose.stackedpcent = function(data, legPosX=NULL, legPosY=NULL,...)
+osmose.stackedpcent = function(data, legPosX="right", legPosY=NULL, col=NULL, ...)
 {
 
   # cheks that the data frame contains labeled rows and columns
@@ -77,18 +77,23 @@ osmose.stackedpcent = function(data, legPosX=NULL, legPosY=NULL,...)
   {
     stop("You must provide row names to your dataframe")
   }
+
+  if(is.null(col))
+  {
+    N = nrow(data)
+    col = brewer.pal(N, "Pastel2")
+  }
   
-  data_percentage = apply(data, 2, function(x){x*100/sum(x, na.rm=T)})    # percentage is computed by summing columns
-  
-  barplot(data_percentage, ...)
+  barplot(data, col=col, ...)
   
   # to do: check that data has colnames and rownames#
   if(!is.null(legPosX))
   {
-    
+  N = nrow(data)
   legend(legPosX, legPosY, 
          legend = rownames(data), 
-         fill=coul, bg="white")
+         ncol=1, xpd=TRUE, inset=c(-0.2, 0),
+         fill=col, bg="white")
   }
 }
 
