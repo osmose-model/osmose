@@ -1,7 +1,7 @@
 Package: osmose
 Type: Package
 Title: Object Oriented Simulator of Marine Ecosystems
-Version: 0.1.0
+Version: 0.1.1
 Date: 2017-12-06
 Authors@R: c(
   person("Yunne-Jai", "Shin", role="aut"),
@@ -34,7 +34,9 @@ Imports:
   rlist,
   stats,
   stringr, 
-  utils
+  utils,
+  RNetCDF,
+  ggplot2
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
