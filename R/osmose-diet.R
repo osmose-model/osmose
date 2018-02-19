@@ -18,6 +18,12 @@
   
   data = dietMatrix[[specName]]   # time, npreys, nreplicates
   
+  return(.osmose.extract_repl(data, repl))
+  
+}
+
+.osmose.extract_repl = function(data, repl)
+{
   # if the data has more than three dimensions.
   # if so, replicates exist. 
   if(length(dim(data)) == 3)
@@ -57,7 +63,7 @@
 #' @param thres Percentage below which the predation rates will be merged
 #'
 #' @export
-  osmose.extract_tmean_diet = function(dietMatrix, specName, repl=NULL, thres=1) {
+osmose.extract_tmean_diet = function(dietMatrix, specName, repl=NULL, thres=1) {
   
   # extracts the diet matrix for the given specie
   # and eventually averages over the replicates
@@ -81,10 +87,10 @@
   data.time.mean = sort(data.time.mean, decreasing=TRUE)
   
   attr(data.time.mean, "specie") = specName
-
+  
   return(data.time.mean)
   
-  }
+}
 
 
 
@@ -131,7 +137,7 @@ osmose.extract_ts_diet = function(dietMatrix, specName, repl=NULL, thres=1)
   output = .osmose.format_data_stacked(data)
   
   attr(output, "specie") = specName
-
+  
   return(output)
   
   
