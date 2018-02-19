@@ -80,7 +80,6 @@
   # sort the time average in increasing order
   data.time.mean = sort(data.time.mean, decreasing=TRUE)
   
-  class(data.time.mean) = "osmose.dietMean"
   attr(data.time.mean, "specie") = specName
 
   return(data.time.mean)
@@ -132,8 +131,7 @@ osmose.extract_ts_diet = function(dietMatrix, specName, repl=NULL, thres=1)
   output = .osmose.format_data_stacked(data)
   
   attr(output, "specie") = specName
-  class(output) = "osmose.dietTs"
-  
+
   return(output)
   
   
@@ -175,7 +173,7 @@ osmose.extract_ts_diet = function(dietMatrix, specName, repl=NULL, thres=1)
 #' @param ... Additional arguments to the osmose.barplot function
 #'
 #' @export
-plot.osmose.dietMean = function(x, ...)
+osmose.plot.dietMean = function(x, ...)
 {
   specName = attr(x, "specie")
   temp = as.vector(x)
@@ -191,10 +189,8 @@ plot.osmose.dietMean = function(x, ...)
 #' @param ...  Additional arguments to the geom_area ggplot2 function
 #'
 #' @export
-plot.osmose.dietTs = function(data, colors=NULL, ...)
+osmose.plot.dietTs = function(data, colors=NULL, ...)
 {
-  
-  data = data.frame(data$specie, data$time, data$value)
   
   # Set the column names.
   colnames(data) = c("Prey", "Time", "Predation")
@@ -205,7 +201,10 @@ plot.osmose.dietTs = function(data, colors=NULL, ...)
     colors = .make_default_ggplot_col(rev(levels(data$Prey)))
   }
   
-  ggplot(data, aes(x=Time, y=Predation, fill=Prey)) +  geom_area(...) + colors
+  specName = attr(data, "specie")
+  output = ggplot(data, aes(x=Time, y=Predation, fill=Prey)) +  geom_area(...) + colors + ggtitle(specName) 
+  output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+  return(output)
   
 }
 
