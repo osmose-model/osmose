@@ -4,15 +4,15 @@
 \alias{osmose.openfigure}
 \title{Opens a figure file.}
 \usage{
-osmose.openfigure(figname, width = 480, height = 480)
+osmose.openfigure(figname, width = NULL, height = NULL)
 }
 \arguments{
 \item{figname}{Name of the output file. The file sufix must
 be .png or .pdf}
 
-\item{width}{Figure width (default 480, only used for png)}
+\item{width}{Figure width (default NULL)}
 
-\item{height}{Figure height (default 480, only used for pdf)}
+\item{height}{Figure height (default NULL)}
 }
 \description{
 Opens a figure file.

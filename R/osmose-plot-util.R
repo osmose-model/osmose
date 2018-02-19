@@ -6,11 +6,11 @@
 #'
 #' @param figname Name of the output file. The file sufix must
 #' be .png or .pdf
-#' @param width  Figure width (default 480, only used for png)
-#' @param height Figure height (default 480, only used for pdf)
+#' @param width  Figure width (default NULL)
+#' @param height Figure height (default NULL)
 #'
 #' @export
-osmose.openfigure = function(figname, width=480, height=480)
+osmose.openfigure = function(figname, width=NULL, height=NULL)
 {
     usepng = endsWith(figname, '.png')
     usepdf = endsWith(figname, '.pdf')
