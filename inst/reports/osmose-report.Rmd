@@ -1,0 +1,22 @@
+---
+title: "Osmose report - Test version of the report"
+author: "Osmose package"
+fontsize: 10pt
+geometry: margin=1cm
+keep_tex: yes
+output: pdf_document
+---
+
+\pagenumbering{gobble}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Principal results of the biomass.
+
+```{r, echo=FALSE, message=FALSE, fig.height=5, fig.width=5.5}
+plot(x, type = "biomass", expected = TRUE)
+```
+
+

@@ -1,4 +1,18 @@
+# version 0.1.1
+
+** round 8 **
+
+Removing of the 0.1.0 version tar.gz file which is responsible for a note on the automatic check
+
+**round 7**
+
+Update in version name
+
 # version 0.1.0
+
+**round 6**
+
+Update in Java version name, as suggested by Brian Ripley
 
 **round 5**
 

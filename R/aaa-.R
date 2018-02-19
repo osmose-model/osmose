@@ -19,3 +19,6 @@ NULL
 # barrier.n: adding some functions for ggplot
 #' @importFrom ggplot2 ggplot geom_area scale_fill_brewer scale_fill_manual theme ggtitle
 NULL
+
+#' @importFrom rmarkdown render
+NULL
