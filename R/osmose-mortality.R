@@ -64,7 +64,7 @@ osmose.extract_mort_tmean = function(mortMatrix, specName, repl=NULL, norm=TRUE)
 osmose.plot.mortMean = function(data, ...)
 {
   
-  xlabel = "Stade"
+  xlabel = "Stage"
   specName = attr(output, "specie")
   norm = attr(output, "norm")
   if(norm) {
