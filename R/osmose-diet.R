@@ -143,33 +143,6 @@ osmose.extract_ts_diet = function(dietMatrix, specName, repl=NULL, thres=1)
   
 }
 
-# Reformat the data into the ggplot2 stacked plot format.
-# It returns a dataframe with specie, time and predation rate
-# in the columns.
-.osmose.format_data_stacked = function(data)
-{
-  
-  ntime = dim(data)[1]
-  npecie = dim(data)[2]
-  time = 1:ntime  # extracts the time array
-  
-  # Initialize the output array
-  output = data.frame()
-  
-  # loop over all the specie and update the output array.
-  for (spec in colnames(data)) {
-    temp = data.frame(specie=rep(spec, ntime), time=time, value=data[, spec])
-    output = rbind(output, temp)
-  }
-  
-  # converts specie into a factor
-  output$specie = factor(output$specie)
-  
-  return(output)
-  
-}
-
-
 
 #' Plots a time averaged diet matrix as a barplot.
 #' It also merges together all the prey species
