@@ -1,4 +1,5 @@
 
+################################################################## Test on diet matrix
 # Parsing input files -----------------------------------------------------
 
 
@@ -345,9 +346,11 @@ getOsmoseParameter = function(par, ..., keep.att=FALSE) {
     
     output=list()
     
-    output$eggs      = out[, 1, ,]
-    output$juveniles = out[, 2, ,]
-    output$adults    = out[, 3, ,]
+    # barrier.n: remove the dropping of dimensions
+    # warning, the dimension will be ntime, 1, 5, replicate.
+    output$eggs      = out[, 1, , , drop=FALSE]
+    output$juveniles = out[, 2, , , drop=FALSE]
+    output$adults    = out[, 3, , , drop=FALSE]
     
   } else {
     output = NULL
