@@ -77,7 +77,7 @@ getVar = function(object, var, ...) {
   UseMethod("getVar")
 }
 
-#' GetVar method for osmose objects
+#' GetVar method for osmose outputs objects
 #' @description Get a variable from an \code{osmose} object. 
 #' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
 #' @param var Name of variable to extract. It could be: "biomass","abundance",
@@ -89,13 +89,24 @@ getVar = function(object, var, ...) {
 #' @param ... Additional arguments of the function.
 #' @return An array or a list containing the data.
 #' @export
-#' @method getVar osmose
-getVar.osmose = function(object, var, type = "global", expected = FALSE, ...) {
-  out = object[[type]][[var]]
+#' @method getVar osmose.output
+getVar.osmose.output = function(object, var, expected=FALSE, ...) {
+  
+  out = object[["data"]][[var]]
+  
+  # if the name of the variable to extract is the dietMatrix,
+  # a specificic getVar function is used 
+  if(var %in% c("dietMatrix", "mortality"))
+  {
+    out = getVar(out, ...)
+    return(out)
+  }
+  
   xclass = "list" %in% class(out)
   if(isTRUE(!xclass) & isTRUE(expected))
     out = apply(out, c(1,2), mean, na.rm=TRUE)
   return(out)
+  
 }
 
 
