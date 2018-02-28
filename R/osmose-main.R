@@ -91,19 +91,19 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
 #' }
 #' @aliases osmose2R
 read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
+  
   if(is.null(path) & interactive()) {
     path = readline(prompt="Select OSMOSE outputs folder")
   }
+
   if(!dir.exists(path)) stop("The input directory does not exist.")
   if(is.null(path)) stop("No path has been provided.")
   
   output = switch(version, 
-                  v3r0 = osmose2R.v3r0(path=path, species.names=species.names, ...),
-                  v3r1 = osmose2R.v3r1(path=path, species.names=species.names, ...),
                   v3r2 = osmose2R.v3r2(path=path, species.names=species.names, ...),
                   stop(sprintf("Incorrect osmose version %s", version))
   )
-  class(output) = "osmose"
+  class(output) = "osmose.output"
   return(output)
 }
 
