@@ -309,7 +309,7 @@ getOsmoseParameter = function(par, ..., keep.att=FALSE) {
       dnames = dimnames(y)[1:3]
       dim(y) = dim(y)[-length(dim(y))]
       dimnames(y) = dnames
-      output[[i]] = y #drop(y): barrier.n: remove dropping
+      output[[i]] = drop(y)
     }
     
     names(output) = slices
@@ -348,9 +348,9 @@ getOsmoseParameter = function(par, ..., keep.att=FALSE) {
     
     # barrier.n: remove the dropping of dimensions
     # warning, the dimension will be ntime, 1, 5, replicate.
-    output$eggs      = out[, 1, , , drop=FALSE]
-    output$juveniles = out[, 2, , , drop=FALSE]
-    output$adults    = out[, 3, , , drop=FALSE]
+    output$eggs      = out[, 1, , ]
+    output$juveniles = out[, 2, , ]
+    output$adults    = out[, 3, , ]
     
   } else {
     output = NULL
