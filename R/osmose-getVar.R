@@ -20,12 +20,17 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
     data.time.mean = data.time.mean[keep]
     Nvalues = length(data.time.mean)
     
-    # compute the proportion of negligible species
-    other = 100 - sum(data.time.mean)
-    
-    # add the other to the output array
-    data.time.mean = c(data.time.mean, other)
-    names(data.time.mean)[Nvalues+1] = "other"
+    if(thres>0)
+    {
+      # If thresholds is greater than 0, then the negligible species are binned together.
+      
+      # compute the proportion of negligible species
+      other = 100 - sum(data.time.mean)
+      
+      # add the other to the output array
+      data.time.mean = c(data.time.mean, other)
+      names(data.time.mean)[Nvalues + 1] = "Other"
+    }
     
     # sort the time average in increasing order
     data.time.mean = sort(data.time.mean, decreasing=TRUE)
@@ -43,8 +48,11 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
   # extracts the data that match the requirement
   out = out[, keep==TRUE]
   
-  # add the concatenation of small ("other") species
-  out = cbind(out, other)
+  if(thres > 0) {
+    # add the concatenation of small ("other") species
+    out = cbind(out, other)  
+  }
+  
   
   # sort the data in descending order
   # based on the time maximum (nspecies values) 
@@ -79,7 +87,6 @@ process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
     # for each element, compute the time-average of the matrix
     out = lapply(out, apply, 2, mean)
   }
-  
   
   class(out) = c("osmose.output.mortalityRate", class(out))
   
@@ -122,3 +129,26 @@ process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
   return(out)
   
 }
+
+
+#' Title
+#'
+#' @param data 
+#' @param species 
+#' @param thres 
+#' @param ... 
+#'
+#' @return
+#' @export
+#' @method summary osmose.output.dietMatrix
+summary.osmose.output.dietMatrix = function(data, species=NULL, thres=1, ...)
+{
+  
+  dietMatrix = process.dietMatrix(data, species=species, time.mean=TRUE, thres=thres, ...)
+  dietMatrix = as.data.frame(dietMatrix)
+  colnames(dietMatrix) = 'Predation rate (%)'
+  class(dietMatrix) = c("summary.osmose.output.dietMatrix", class(temp))
+  return(dietMatrix)
+  
+}
+
