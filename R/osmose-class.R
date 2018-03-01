@@ -93,18 +93,10 @@ getVar = function(object, var, ...) {
 getVar.osmose.output = function(object, var, expected=FALSE, ...) {
   
   out = object[["data"]][[var]]
-  
-  # if the name of the variable to extract is the dietMatrix,
-  # a specificic getVar function is used 
-  if(var %in% c("dietMatrix", "mortality"))
-  {
-    out = getVar(out, ...)
-    return(out)
-  }
-  
+
   xclass = "list" %in% class(out)
   if(isTRUE(!xclass) & isTRUE(expected))
-    out = apply(out, c(1,2), mean, na.rm=TRUE)
+    out = apply(out, c(1, 2), mean, na.rm=TRUE)
   return(out)
   
 }
