@@ -2,10 +2,10 @@
 #' @return An array or a list containing the data.
 #' @export
 #' @method plot osmose.output.dietMatrix
-plot.osmose.output.dietMatrix = function(x, colors=NULL, ...)
+plot.osmose.output.dietMatrix = function(x, time.mean=FALSE, species=NULL, colors=NULL, thres=1, ...)
 {
-    time.mean = attr(x, "time.mean")
-    specName = attr(x, "specie")
+    
+    x = process.dietMatrix(x, species=species, time.mean=time.mean, thres=thres)
 
     if(time.mean)
     {
@@ -29,8 +29,7 @@ plot.osmose.output.dietMatrix = function(x, colors=NULL, ...)
         colors = .make_default_ggplot_col(rev(levels(data$Prey)))
     }
 
-    specName = attr(data, "specie")
-    output = ggplot(data, aes(x=Time, y=Predation, fill=Prey)) +  geom_area(...) + colors + ggtitle(specName) 
+    output = ggplot(data, aes(x=Time, y=Predation, fill=Prey)) +  geom_area(...) + colors + ggtitle(species) 
     output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
     return(output)
 
@@ -41,11 +40,10 @@ plot.osmose.output.dietMatrix = function(x, colors=NULL, ...)
 #' @return An array or a list containing the data.
 #' @export
 #' @method plot osmose.output.mortalityRate
-plot.osmose.output.mortalityRate = function(data, norm=FALSE, ...)
+plot.osmose.output.mortalityRate = function(data, time.mean=FALSE, norm=FALSE, species=NULL, ...)
 {
   
-  time.mean = attr(data, "time.mean")
-  specName = attr(data, "specie")
+  data = process.mortalityRate(data, species=species, time.mean=time.mean, ...)
   
   if(time.mean==FALSE)
   {
