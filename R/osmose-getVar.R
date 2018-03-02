@@ -152,3 +152,23 @@ summary.osmose.output.dietMatrix = function(data, species=NULL, thres=1, ...)
   
 }
 
+#' Title
+#'
+#' @param data 
+#' @param species 
+#' @param thres 
+#' @param ... 
+#'
+#' @return
+#' @export
+#' @method summary osmose.output.mortalityRate
+summary.osmose.output.mortalityRate = function(data, species=NULL, ...)
+{
+  data = process.mortalityRate(data, species=species, time.mean=TRUE)
+  return(as.data.frame(data))  
+}
+
+
+
+
+

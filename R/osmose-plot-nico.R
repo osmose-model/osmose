@@ -79,3 +79,73 @@ plot.osmose.output.mortalityRate = function(data, time.mean=FALSE, norm=FALSE, s
   osmose.stackedpcent(data, xlab=xlabel, main=specName, ylab=ylabel, ...)
   
 }
+
+
+
+
+
+
+#' @param ... Additional arguments of the function.
+#' @return An array or a list containing the data.
+#' @export
+#' @method plot osmose.output.biomassDistribBySize
+plot.osmose.output.biomassDistribBySize = function(data, species=NULL, time.mean=FALSE, lwd=2, ...)
+{
+  
+  .check_species(data, species)
+  
+  y = data[[species]]
+  
+  # computes the replicate mean
+  apply(y, c(1, 2), mean)
+  
+  if(time.mean == FALSE)
+  {
+
+    nlegend = as.integer(ncol(y) / 5)
+    time = 1:nrow(y)
+    
+    # First create an empty plot.
+    plot(1, type = 'n', xlim = c(min(time), max(time)), ylim = c(min(y), max(y)),
+         xlab = "Time", ylab = "Biomass")
+    
+    # Create a list of 22 colors to use for the lines.
+    cl <- rainbow(ncol(y))
+    plotcol = 1:ncol(y)
+    
+    # Now fill plot with the log transformed coverage data from the
+    # files one by one.
+    for(i in 1:ncol(y)) {
+      lines(y[,i], col=cl[i], lwd=lwd)
+      plotcol[i] <- cl[i]
+    }
+    
+    legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title='Size (cm)', ncol=nlegend)
+    return(invisible())
+  }
+  
+  if(time.mean){
+    
+    # Computes the time-mean
+    y = apply(y, 2, mean)
+    temp = as.vector(y)
+    names(temp) = names(y)
+    osmose.barplot(temp, xlab="Size (cm)", ylab="Biomass", main=species, ...)
+  }
+  
+  
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
