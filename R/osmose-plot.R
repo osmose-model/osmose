@@ -1,7 +1,7 @@
 
-# Internal plot functions -------------------------------------------------
-
-plot.osmose.biomass = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+#' @export
+#' @method plot osmose.output.biomass
+plot.osmose.output.biomass = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                                freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                aggregate=FALSE, ...) {
 
@@ -29,8 +29,9 @@ plot.osmose.biomass = function(x, start=NULL, conf=0.95, factor=1e-6, replicates
   return(invisible())
 }
 
-
-plot.osmose.abundance = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+#' @export
+#' @method plot osmose.output.abundance
+plot.osmose.output.abundance = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                                freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                aggregate=FALSE, ...) {
   
@@ -58,8 +59,9 @@ plot.osmose.abundance = function(x, start=NULL, conf=0.95, factor=1e-6, replicat
   return(invisible())
 }
 
-
-plot.osmose.yield = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
+#' @export
+#' @method plot osmose.output.yield
+plot.osmose.output.yield = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
                              freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, 
                              aggregate=FALSE, zeros=TRUE, ...) {
   
@@ -89,8 +91,9 @@ plot.osmose.yield = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=F
   return(invisible())
 }
 
-
-plot.osmose.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
+#' @export
+#' @method plot osmose.output.yieldN
+plot.osmose.output.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
                              freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, 
                              aggregate=FALSE, zeros=TRUE, ...) {
   
@@ -120,8 +123,9 @@ plot.osmose.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=
   return(invisible())
 }
 
-
-plot.osmose.meanTL = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+#' @export
+#' @method plot osmose.output.meanTL
+plot.osmose.output.meanTL = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                                  freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                  aggregate=FALSE, ...) {
   
@@ -149,8 +153,9 @@ plot.osmose.meanTL = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=
   return(invisible())
 }
 
-
-plot.osmose.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+#' @export
+#' @method plot osmose.output.meanTLCatch
+plot.osmose.output.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                               freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                               aggregate=FALSE, ...) {
   
@@ -178,8 +183,9 @@ plot.osmose.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replic
   return(invisible())
 }
 
-
-plot.osmose.meanSize = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+#' @export
+#' @method plot osmose.output.meanSize
+plot.osmose.output.meanSize = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                               freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                               aggregate=FALSE, ...) {
   
@@ -207,8 +213,9 @@ plot.osmose.meanSize = function(x, start=NULL, conf=0.95, factor=1e-6, replicate
   return(invisible())
 }
 
-
-plot.osmose.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+#' @export
+#' @method plot osmose.output.meanSizeCatch
+plot.osmose.output.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
                               freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                               aggregate=FALSE, ...) {
   
