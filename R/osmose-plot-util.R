@@ -48,6 +48,8 @@ osmose.openfigure = function(figname, width=NULL, height=NULL)
     # Change the classic attribute of plots:
     if(usepng)
     {
+        if(is.null(width)) width = 600
+        if(is.null(height)) height = 400
         png(figname , width=width, height=height)
     } else {
         pdf(figname, width=width, height=height)
@@ -130,6 +132,31 @@ osmose.stackedpcent = function(data, legPosX="right", legPosY=NULL, col=NULL, ..
   return(colors)
 }
 
+
+# Plots time-series plots.
+.osmose.plot_ts = function(y, xlab, ylab, title, lwd, ...) 
+{
+  
+  nlegend = as.integer(ncol(y) / 5)
+  time = 1:nrow(y)
+  
+  # First create an empty plot.
+  plot(1, type = 'n', xlim = c(min(time), max(time)), ylim = c(min(y), max(y)),
+       xlab=xlab, ylab=ylab, main=title)
+  
+  # Create a list of 22 colors to use for the lines.
+  cl <- rainbow(ncol(y))
+  plotcol = 1:ncol(y)
+  
+  # Now fill plot with the log transformed coverage data from the
+  # files one by one.
+  for(i in 1:ncol(y)) {
+    lines(y[,i], col=cl[i], lwd=lwd)
+    plotcol[i] <- cl[i]
+  }
+  
+  legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title='Size (cm)', ncol=nlegend)
+}
 
 
 
