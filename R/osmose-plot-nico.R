@@ -188,12 +188,6 @@ plot.osmose.output.biomassDistribByTL = function(data, species=NULL, time.mean=T
 }
 
 
-
-
-
-
-
-
 #' @param ... Additional arguments of the function.
 #' @return An array or a list containing the data.
 #' @export
