@@ -246,3 +246,35 @@ plot.osmose.output.predatorPressure = function(data, time.mean=FALSE, species=NU
 }
 
 
+#' @param ... Additional arguments of the function.
+#' @return An array or a list containing the data.
+#' @export
+#' @method plot osmose.output.biomassPredPreyIni
+plot.osmose.output.biomassPredPreyIni = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+                                      freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=NULL,
+                                      time.mean=FALSE, nmax=NULL, species=NULL, ...) {
+  
+  opar = par(no.readonly = TRUE)
+  on.exit(par(opar))
+  
+  if(isTRUE(time.mean)) {
+    .plotAverageBiomass(x, col=col, nmax=nmax, factor=factor, ylab="Biomass before mort.", title="Mean biomass before mortality", ...)
+    return(invisible())
+  }
+  
+  if(!species %in% colnames(x) | is.null(species))
+  {
+    stop("You should proper a species name")
+  }
+  
+  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
+  
+  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
+               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
+               xlim=xlim, ylim=xlim) 
+  
+  title(xlab="Time (years)", ylab="Biomass before pred.", main=species)
+  
+  return(invisible())
+}
+
