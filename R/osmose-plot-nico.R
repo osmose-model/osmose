@@ -120,7 +120,7 @@ plot.osmose.output.biomassDistribBySize = function(data, species=NULL, time.mean
   y = data[[species]]
   
   # computes the replicate mean
-  apply(y, c(1, 2), mean)
+  y = apply(y, c(1, 2), mean)
   
   if(time.mean == FALSE)
   {
@@ -136,8 +136,54 @@ plot.osmose.output.biomassDistribBySize = function(data, species=NULL, time.mean
     names(temp) = names(y)
     osmose.barplot(temp, xlab="Size (cm)", ylab="Biomass", main=species, ...)
   }
+
+}
+
+#' @return An array or a list containing the data.
+#' @export
+#' @method plot osmose.output.biomassDistribByTL
+plot.osmose.output.biomassDistribByTL = function(data, species=NULL, time.mean=TRUE, lwd=2, thres=1, colors=NULL, ...) {
   
+  .check_species(data, species)
   
+  data = data[[species]]
+
+  # computes the replicate mean
+  data = apply(data, c(1, 2), mean)
+  
+  if(time.mean)
+  {
+    # computes temporal mean
+    data = apply(data, 2, mean)
+    
+    # if threshold, removes all the time means below 
+    # threashold
+    if(!is.null(thres)) data = data[data>thres]
+  
+    # keeps only two significative digits to the TL label
+    names(data) = signif(as.numeric(names(data)), 2)
+    osmose:::osmose.barplot(data, ylab="Biomass", xlab="Trophic Level", main=species)
+    return(invisible())
+  }
+  
+  # removes the TL class for which biomass is 0
+  temp = (data != 0)
+  temp = apply(temp, 2, sum)
+  data = data[, temp>0]
+  
+  colnames(data) = signif(as.numeric(colnames(data)), 2)
+  data = osmose:::.osmose.format_data_stacked(data)
+  
+  colnames(data) = c("TL", "Time", "Biomass")
+    
+  if(is.null(colors))
+  {
+    colors = osmose:::.make_default_ggplot_col(rev(levels(data$Type)))
+  }
+  
+  output = ggplot(data, aes(x=Time, y=Biomass, fill=TL)) +  geom_area(...) + ggtitle(species)
+  output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+  return(output)
   
 }
 
@@ -148,8 +194,61 @@ plot.osmose.output.biomassDistribBySize = function(data, species=NULL, time.mean
 
 
 
+#' @param ... Additional arguments of the function.
+#' @return An array or a list containing the data.
+#' @export
+#' @method plot osmose.output.predatorPressure
+plot.osmose.output.predatorPressure = function(data, time.mean=FALSE, species=NULL, colors=NULL, nmax=25, ...)
+{
 
-
-
+  .check_species(data, species)
+  data = data[[specName]]
+  
+  # computes replicate mean
+  data = apply(data, c(1, 2), mean, na.rm=TRUE)
+  
+  if(time.mean)
+  {
+    # If using a time-averaged diet matrix, then 
+    # a barplot is draw.
+    
+    # time.mean
+    data = apply(data, 2, mean, na.rm=TRUE)
+    data = sort(data, decreasing=TRUE)
+    if(!is.null(nmax)) data = data[1:nmax]
+    
+    temp = as.vector(data)
+    names(temp) = names(data)
+    osmose.barplot(temp, xlab="", ylab="Predation pressure", main=specName, ...)
+    return(invisible())
+  } 
+  
+  # computes the temporal mean and extracts the indexes from higher to lower
+  temp = apply(data, 2, mean, na.rm=TRUE)
+  temp = sort(temp, decreasing=TRUE, index.return=TRUE)
+  index = temp$ix
+  data = data[, index]
+  if(!is.null(nmax))
+  {
+    data = data[, 1:nmax]
+  }
+  
+  # format the diet matrix to have stacked format for ggplot2
+  data = .osmose.format_data_stacked(data)
+  
+  # Set the column names.
+  colnames(data) = c("Prey", "Time", "Predation.pressure")
+  
+  # If no color is provided, we set default colors
+  if(is.null(colors))
+  {
+    colors = .make_default_ggplot_col(rev(levels(data$Prey)))
+  }
+  
+  output = ggplot(data, aes(x=Time, y=Predation.pressure, fill=Prey)) +  geom_area(...) + colors + ggtitle(species) 
+  output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+  return(output)
+  
+}
 
 

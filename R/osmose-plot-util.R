@@ -76,9 +76,9 @@ osmose.barplot = function(x, ...)
     
     # xlabel points
     xlab = seq(1.5, end_point, by=2)
-  
+
     # draw the text labels.
-    text(seq(1.5, end_point, by=2), par("usr")[3]-0.25, 
+    text(xlab, par("usr")[3], 
          srt=45, adj=1, xpd=TRUE,
          labels = paste(names(x)), cex=1)
 
@@ -157,6 +157,3 @@ osmose.stackedpcent = function(data, legPosX="right", legPosY=NULL, col=NULL, ..
   
   legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title='Size (cm)', ncol=nlegend)
 }
-
-
-

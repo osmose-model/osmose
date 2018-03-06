@@ -79,13 +79,13 @@ process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
   
   # computes the replicate mean: for each list element
   # computes the mean over the 4th dimension (replicate)
-  out = lapply(out, apply, c(1, 2), mean)
+  out = lapply(out, apply, c(1, 2), mean, na.rm=TRUE)
   
   # if time.mean, computes the time average
   if(time.mean)
   {
     # for each element, compute the time-average of the matrix
-    out = lapply(out, apply, 2, mean)
+    out = lapply(out, apply, 2, mean, na.rm=TRUE)
   }
   
   class(out) = c("osmose.output.mortalityRate", class(out))
@@ -168,7 +168,34 @@ summary.osmose.output.mortalityRate = function(data, species=NULL, ...)
   return(as.data.frame(data))  
 }
 
+#' @export
+#' @method summary osmose.output.biomass
+summary.osmose.output.biomass = function(data)
+{
+  return(summary.generic(data))
+}
 
+#' @export
+#' @method summary osmose.output.meanTL
+summary.osmose.output.meanTL = function(data)
+{
+  return(summary.generic(data))
+}
+
+#' @export
+#' @method summary osmose.output.meanTLCatch
+summary.osmose.output.meanTLCatch = function(data)
+{
+  return(summary.generic(data))
+}
+
+summary.generic = function(data)
+{
+  data = apply(data, 2, mean, na.rm=TRUE)
+  data = sort(data, decreasing=TRUE)
+  data = as.data.frame(data)
+  return(data)
+}
 
 
 

@@ -93,6 +93,11 @@ getVar = function(object, var, ...) {
 getVar.osmose.output = function(object, var, expected=FALSE, ...) {
   
   out = object[["data"]][[var]]
+  if(is.null(out))
+  {
+      message = paste("The ", var, " variable is NULL", sep="")
+      stop(message) 
+  }
 
   xclass = "list" %in% class(out)
   if(isTRUE(!xclass) & isTRUE(expected))
