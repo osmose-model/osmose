@@ -1,12 +1,12 @@
 # Reformat the data into the ggplot2 stacked plot format.
 # It returns a dataframe with specie, time and predation rate
 # in the columns.
-.osmose.format_data_stacked = function(data)
+.osmose.format_data_stacked = function(data, time=NULL)
 {
   
   ntime = dim(data)[1]
   npecie = dim(data)[2]
-  time = 1:ntime  # extracts the time array
+  if(is.null(time)) time = 1:ntime  # extracts the time array
   
   # Initialize the output array
   output = data.frame()
