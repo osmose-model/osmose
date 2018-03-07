@@ -281,36 +281,84 @@ plot.osmose.output.biomassPredPreyIni = function(x, start=NULL, conf=0.95, facto
 #' @return An array or a list containing the data.
 #' @export
 #' @method plot osmose.output.mortalityRateDistribBySize
-plot.osmose.output.mortalityRateDistribBySize = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, ...)
+plot.osmose.output.mortalityRateDistribBySize = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...)
 {
   
   mort = process.mortalityRate(mort, species=species, time.mean=time.mean, norm=norm)
   
-  # converts into matrix
-  mort = do.call(cbind.data.frame, mort)
-  mort = as.matrix(mort)
-  
-  # Counts the total mortality rate for each size class
-  tot = apply(mort, 1, sum)
-  
-  # Extracts the size class with mortality > 0
-  mort = mort[tot>0, ]
-  tot = tot[tot>0]
-  
-  # If data should be normalized, then it is divided by the total 
-  # mortality
-  if(norm) mort = (mort / tot) * 100
-  
-  # Transpose the dataframe
-  mort = t(mort)
-  
-  if(norm) {
-    ylab = "Mortality (%)"
-  } else {
-    ylab = "Mortality"
+  if(time.mean) 
+  {
+    # converts into matrix
+    mort = do.call(cbind.data.frame, mort)
+    mort = as.matrix(mort)
+    
+    # Counts the total mortality rate for each size class
+    tot = apply(mort, 1, sum)
+    
+    # Extracts the size class with mortality > 0
+    mort = mort[tot>0, ]
+    tot = tot[tot>0]
+    
+    # If data should be normalized, then it is divided by the total 
+    # mortality
+    if(norm) mort = (mort / tot) * 100
+    
+    # Transpose the dataframe
+    mort = t(mort)
+    
+    if(norm) {
+      ylab = "Mortality (%)"
+    } else {
+      ylab = "Mortality"
+    }
+    
+    osmose.stackedpcent(mort, xlab="Size (cm)", main=species, ylab=ylab)
+    return(invisible())
   }
   
-  osmose.stackedpcent(mort, xlab="Size (cm)", main=species, ylab=ylab)
+  if(mtype == "Mtot")
+  {
+    mort = mort[["Mpred"]] + mort[["Mstar"]] + mort[["Mnat"]] + mort[["F"]] + mort[["Z"]]
+  } else {
+    
+    if(!(mtype %in% names(mort)))
+    {
+      stop('Mortality type should be "Mpred", "Mstar", "Mnat", "F" or "Z"')
+    }
+    
+    # extracts the mortality type
+    mort = mort[[mtype]]
+  
+  }
+
+  # computes the sum over time (removes NaNs)
+  temp = apply(mort, 2, sum, na.rm=TRUE)
+  # extract size class for which sum is greater than 0
+  mort = mort[, temp>0]
+  
+  # removes the time-step for which there is a NaN value
+  df = as.data.frame(mort)
+  dfna = na.omit(df)
+  mort = as.matrix(dfna)
+  
+  # extracts the time
+  time = rownames(mort)
+  time = as.numeric(time)
+  
+  data = osmose:::.osmose.format_data_stacked(mort, time=time)
+  colnames(data) = c("Size", "Time", "Mortality")
+  
+  colors = NULL
+  # If no color is provided, we set default colors
+  if(is.null(colors))
+  {
+    colors = osmose:::.make_default_ggplot_col(rev(levels(data$Size)))
+  }
+  
+  title = paste(specName, " (", mtype, ")", sep="")
+  output = ggplot(data, aes(x=Time, y=Mortality, fill=Size)) +  geom_area(...) + colors + ggtitle(title) 
+  output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+  return(output)
   
 }
 
