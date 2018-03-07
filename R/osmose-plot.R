@@ -26,28 +26,11 @@ plot.osmose.output.biomass = function(x, start=NULL, conf=0.95, factor=1e-6, rep
                                freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=NULL,
                                time.mean=FALSE, nmax=NULL, species=NULL, ...) {
 
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  output = plot.osmose.output.ts.replicates(x=x, start=start, conf=conf, factor=factor, replicates=replicates,
+                                            freq=freq, alpha=alpha, col=col, xlim=xlim, ylim=ylim, nrep=nrep,
+                                            time.mean=time.mean, nmax=nmax, species=species, label="Biomass", ...) 
   
-  if(isTRUE(time.mean)) {
-    .plotAverageBiomass(x, col=col, nmax=nmax, factor=factor, ylab="Biomass", title="Mean biomass", ...)
-    return(invisible())
-  }
-  
-  if(!species %in% colnames(x) | is.null(species))
-  {
-    stop("You should proper a species name")
-  }
-  
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-
-  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
-               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-               xlim=xlim, ylim=xlim) 
-  
-  title(xlab="Time (years)", ylab="Biomass", main=species)
-  
-  return(invisible())
+  return(output)
 }
 
 #' Plots abundance time-series
@@ -74,28 +57,11 @@ plot.osmose.output.abundance = function(x, start=NULL, conf=0.95, factor=1e-6, r
                                freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=NULL,
                                time.mean=FALSE, species=NULL, nmax=NULL, ...) {
   
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  output = plot.osmose.output.ts.replicates(x=x, start=start, conf=conf, factor=factor, replicates=replicates,
+                                            freq=freq, alpha=alpha, col=col, xlim=xlim, ylim=ylim, nrep=nrep,
+                                            time.mean=time.mean, nmax=nmax, species=species, label="Abundance", ...) 
   
-  if(isTRUE(time.mean)) {
-    .plotAverageBiomass(x, col=col, nmax=nmax, factor=factor, ylab="Abundance", title="Mean abundance", ...)
-    return(invisible())
-  }
-  
-  if(!species %in% colnames(x) | is.null(species))
-  {
-    stop("You should proper a species name")
-  }
-  
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-
-  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
-               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-               xlim=xlim, ylim=xlim) 
-  
-  title(xlab="Time (years)", ylab="Abundance", main=species)
-  
-  return(invisible())
+  return(output)
 }
 
 #' Plots yield time-series
@@ -123,29 +89,12 @@ plot.osmose.output.yield = function(x, start=NULL, conf=0.95, factor=1e-6, repli
                              aggregate=FALSE, zeros=TRUE, ...) {
   
   
-  if(!isTRUE(zeros)) x = .removeZeros(x)
+  output = plot.osmose.output.ts.replicates(x=x, start=start, conf=conf, factor=factor, replicates=replicates,
+                                            freq=freq, alpha=alpha, col=col, xlim=xlim, ylim=ylim, nrep=nrep,
+                                            time.mean=time.mean, nmax=nmax, species=species, label="Yield", ...) 
   
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  return(output)
   
-  if(isTRUE(aggregate)) {
-    .plotAverageYield(x, col=col, nmax=nmax, factor=factor, ylab="Yield", title="Yield", ...)
-    return(invisible())
-  }
-  
-  par(oma=c(1,1,1,1), mar=c(3,4,1,1))
-  par(mfrow=getmfrow(ncol(x)))
-  
-  species = colnames(x)
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  
-  for(sp in species) {
-    .plotBiomass(x=x, sp=sp, start=start, conf=conf, factor=factor, freq=freq, nrep=nrep,
-                 col=col, alpha=alpha, xlim=xlim, ylim=xlim, replicates=replicates) 
-    
-  }
-  
-  return(invisible())
 }
 
 #' Plots yieldN
@@ -173,32 +122,12 @@ plot.osmose.output.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, repl
                              aggregate=FALSE, zeros=TRUE, ...) {
   
   
-  if(!isTRUE(zeros)) x = .removeZeros(x)
-  
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
-  
-  if(isTRUE(aggregate)) {
-    .plotAverageYield(x, col=col, nmax=nmax, factor=factor, ylab="YieldN", title="YieldN", ...)
-    return(invisible())
-  }
-  
-  par(oma=c(1,1,1,1), mar=c(3,4,1,1))
-  par(mfrow=getmfrow(ncol(x)))
-  
-  species = colnames(x)
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  
-  for(sp in species) {
-    .plotBiomass(x=x, sp=sp, start=start, conf=conf, factor=factor, freq=freq, nrep=nrep,
-                 col=col, alpha=alpha, xlim=xlim, ylim=xlim, replicates=replicates) 
-    
-  }
-  
-  return(invisible())
+  output = plot.osmose.output.ts.replicates(x=x, start=start, conf=conf, factor=factor, replicates=replicates,
+                                            freq=freq, alpha=alpha, col=col, xlim=xlim, ylim=ylim, nrep=nrep,
+                                            time.mean=time.mean, nmax=nmax, species=species, label="YieldN", ...) 
 }
 
-#' Plots meqn trophic level
+#' Plots mean trophic level
 #'
 #' @param x Mean trophic level data
 #' @param start First simulation year
@@ -222,28 +151,12 @@ plot.osmose.output.meanTL = function(x, start=NULL, conf=0.95, factor=1, replica
                                  freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                  time.mean=FALSE, nmax=NULL, species=NULL, ...) {
   
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  output = plot.osmose.output.ts.replicates(x=x, start=start, conf=conf, factor=factor, replicates=replicates,
+                                            freq=freq, alpha=alpha, col=col, xlim=xlim, ylim=ylim, nrep=nrep,
+                                            time.mean=time.mean, nmax=nmax, species=species, label="Mean Trophic Level", ...) 
   
-  if(isTRUE(time.mean)) {
-    .plotAverageBiomass(x, col=col, factor=factor, nmax=nmax, ylab="TL", title="Mean trophic level", ...)
-    return(invisible())
-  }
+  return(output)
   
-  if(!species %in% colnames(x) | is.null(species))
-  {
-    stop("You should proper a species name")
-  }
-  
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  
-  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
-               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-               xlim=xlim, ylim=xlim) 
-    
-  title(xlab="Time (years)", ylab="Trophic level", main=species)
-  
-  return(invisible())
 }
 
 #' Plots mean trophic level catch
@@ -270,28 +183,11 @@ plot.osmose.output.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1, re
                               freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                               time.mean=FALSE, nmax=NULL, species=NULL, ...) {
   
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  output = plot.osmose.output.ts.replicates(x=x, start=start, conf=conf, factor=factor, replicates=replicates,
+                                            freq=freq, alpha=alpha, col=col, xlim=xlim, ylim=ylim, nrep=nrep,
+                                            time.mean=time.mean, nmax=nmax, species=species, label="Mean TL Catch", ...) 
   
-  if(isTRUE(time.mean)) {
-    .plotAverageBiomass(x, col=col, factor=factor, nmax=nmax, ylab="meanTLCatch", title="meanTLCatch", ...)
-    return(invisible())
-  }
-  
-  if(!species %in% colnames(x) | is.null(species))
-  {
-    stop("You should proper a species name")
-  }
-  
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  
-  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
-               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-               xlim=xlim, ylim=xlim) 
-  
-  title(xlab="Time (years)", ylab="Mean Trophic Level Catch", main=species)
-  
-  return(invisible())
+  return(output)
 }
 
 #' Plots mean size.
@@ -318,28 +214,11 @@ plot.osmose.output.meanSize = function(x, start=NULL, conf=0.95, factor=1, repli
                                        freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                        time.mean=FALSE, nmax=NULL, species=NULL, ...) {
   
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  output = plot.osmose.output.ts.replicates(x=x, start=start, conf=conf, factor=factor, replicates=replicates,
+                                            freq=freq, alpha=alpha, col=col, xlim=xlim, ylim=ylim, nrep=nrep,
+                                            time.mean=time.mean, nmax=nmax, species=species, label="Mean Size", ...) 
   
-  if(isTRUE(time.mean)) {
-    .plotAverageBiomass(x, col=col, factor=factor, nmax=nmax, ylab="Mean Size", title="Mean Size", ...)
-    return(invisible())
-  }
-  
-  if(!species %in% colnames(x) | is.null(species))
-  {
-    stop("You should proper a species name")
-  }
-  
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  
-  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
-               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-               xlim=xlim, ylim=xlim) 
-  
-  title(xlab="Time (years)", ylab="Mean Size", main=species)
-  
-  return(invisible())
+  return(output)
 }
 
 #' Plots mean size catch.
@@ -366,29 +245,11 @@ plot.osmose.output.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1, 
                                             freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                             time.mean=FALSE, nmax=NULL, species=NULL, ...) {
   
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  output = plot.osmose.output.ts.replicates(x=x, start=start, conf=conf, factor=factor, replicates=replicates,
+                                            freq=freq, alpha=alpha, col=col, xlim=xlim, ylim=ylim, nrep=nrep,
+                                            time.mean=time.mean, nmax=nmax, species=species, label="Mean Size Catch", ...) 
   
-  if(isTRUE(time.mean)) {
-    .plotAverageBiomass(x, col=col, nmax=nmax, factor=factor, ylab="Mean Size Catch", title="Mean Size Catch",  ...)
-    return(invisible())
-  }
-  
-  if(!species %in% colnames(x) | is.null(species))
-  {
-    stop("You should proper a species name")
-  }
-  
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  
-  
-  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
-               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-               xlim=xlim, ylim=xlim) 
-  
-  title(xlab="Time (years)", ylab="Mean Size Catch", main=species)
-  
-  return(invisible())
+  return(output)
   
 }
 
@@ -470,3 +331,47 @@ plot.osmose.output.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1, 
   return(invisible(NULL))
   
 }
+
+
+
+
+
+# TS plot generic function
+plot.osmose.output.ts.replicates = function(x, start=NULL, conf=0.95, factor=1, replicates=FALSE,
+                                     freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
+                                     time.mean=FALSE, nmax=NULL, species=NULL, label=label, ...) {
+  
+  opar = par(no.readonly = TRUE)
+  on.exit(par(opar))
+  
+  if(isTRUE(time.mean)) {
+    .plotAverageBiomass(x, col=col, factor=factor, nmax=nmax, ylab=label, title=label, ...)
+    return(invisible())
+  }
+  
+  if(!species %in% colnames(x) | is.null(species))
+  {
+    stop("You should proper a species name")
+  }
+  
+  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
+  
+  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
+               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
+               xlim=xlim, ylim=xlim) 
+  
+  title(xlab="Time (years)", ylab=label, main=species)
+  
+  return(invisible())
+}
+
+
+
+
+
+
+
+
+
+
+
