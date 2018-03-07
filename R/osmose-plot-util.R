@@ -134,7 +134,7 @@ osmose.stackedpcent = function(data, legPosX="right", legPosY=NULL, col=NULL, ..
 
 
 # Plots time-series plots.
-.osmose.plot_ts = function(y, xlab, ylab, title, lwd, ...) 
+.osmose.plot_ts = function(y, xlab, ylab, title, lwd, legtitle, ...) 
 {
   
   nlegend = as.integer(ncol(y) / 5)
@@ -155,5 +155,5 @@ osmose.stackedpcent = function(data, legPosX="right", legPosY=NULL, col=NULL, ..
     plotcol[i] <- cl[i]
   }
   
-  legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title='Size (cm)', ncol=nlegend)
+  legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title=legtitle, ncol=nlegend)
 }

@@ -3,11 +3,11 @@
 #' Plots biomass.
 #'
 #' @param x osmose.output.object
-#' @param start First time-step to plot
+#' @param start First simulation year
 #' @param conf  Confidence interval
 #' @param factor Multiplication factor
-#' @param replicates Draws the biomass for each replicate
-#' @param freq Output frequency (used to convert from time-step to time)
+#' @param replicates Draws the time-series for each replicate
+#' @param freq Output frequency (used to convert from time-step into years)
 #' @param alpha Transparency for confidence interval
 #' @param col  Line color
 #' @param xlim  Xaxis limit
@@ -18,6 +18,7 @@
 #' @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
 #' @param species Name of the species to draw (only if time.mean=FALSE)
 #' @param ... 
+
 #'
 #' @export
 #' @method plot osmose.output.biomass
@@ -49,6 +50,24 @@ plot.osmose.output.biomass = function(x, start=NULL, conf=0.95, factor=1e-6, rep
   return(invisible())
 }
 
+#' Plots abundance time-series
+#'
+#' @param x Abundance data
+#' @param start First simulation year
+#' @param conf  Confidence interval
+#' @param factor Multiplication factor
+#' @param replicates Draws the time-series for each replicate
+#' @param freq Output frequency (used to convert from time-step into years)
+#' @param alpha Transparency for confidence interval
+#' @param col  Line color
+#' @param xlim  Xaxis limit
+#' @param ylim  Yaxis limit
+#' @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
+#' are drawn. Only used if replicates=TRUE
+#' @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
+#' @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
+#' @param species Name of the species to draw (only if time.mean=FALSE)
+#' @param ... 
 #' @export
 #' @method plot osmose.output.abundance
 plot.osmose.output.abundance = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
@@ -79,6 +98,24 @@ plot.osmose.output.abundance = function(x, start=NULL, conf=0.95, factor=1e-6, r
   return(invisible())
 }
 
+#' Plots yield time-series
+#'
+#' @param x Yield data
+#' @param start First simulation year
+#' @param conf  Confidence interval
+#' @param factor Multiplication factor
+#' @param replicates Draws the time-series for each replicate
+#' @param freq Output frequency (used to convert from time-step into years)
+#' @param alpha Transparency for confidence interval
+#' @param col  Line color
+#' @param xlim  Xaxis limit
+#' @param ylim  Yaxis limit
+#' @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
+#' are drawn. Only used if replicates=TRUE
+#' @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
+#' @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
+#' @param species Name of the species to draw (only if time.mean=FALSE)
+#' @param ... 
 #' @export
 #' @method plot osmose.output.yield
 plot.osmose.output.yield = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
@@ -92,7 +129,7 @@ plot.osmose.output.yield = function(x, start=NULL, conf=0.95, factor=1e-6, repli
   on.exit(par(opar))
   
   if(isTRUE(aggregate)) {
-    .plotAverageYield(x, col=col, ...)
+    .plotAverageYield(x, col=col, nmax=nmax, factor=factor, ylab="Yield", title="Yield", ...)
     return(invisible())
   }
   
@@ -111,6 +148,24 @@ plot.osmose.output.yield = function(x, start=NULL, conf=0.95, factor=1e-6, repli
   return(invisible())
 }
 
+#' Plots yieldN
+#'
+#' @param x YieldN data
+#' @param start First simulation year
+#' @param conf  Confidence interval
+#' @param factor Multiplication factor
+#' @param replicates Draws the time-series for each replicate
+#' @param freq Output frequency (used to convert from time-step into years)
+#' @param alpha Transparency for confidence interval
+#' @param col  Line color
+#' @param xlim  Xaxis limit
+#' @param ylim  Yaxis limit
+#' @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
+#' are drawn. Only used if replicates=TRUE
+#' @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
+#' @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
+#' @param species Name of the species to draw (only if time.mean=FALSE)
+#' @param ... 
 #' @export
 #' @method plot osmose.output.yieldN
 plot.osmose.output.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE, nrep=3,
@@ -124,7 +179,7 @@ plot.osmose.output.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, repl
   on.exit(par(opar))
   
   if(isTRUE(aggregate)) {
-    .plotAverageYield(x, col=col, ...)
+    .plotAverageYield(x, col=col, nmax=nmax, factor=factor, ylab="YieldN", title="YieldN", ...)
     return(invisible())
   }
   
@@ -143,9 +198,27 @@ plot.osmose.output.yieldN = function(x, start=NULL, conf=0.95, factor=1e-6, repl
   return(invisible())
 }
 
+#' Plots meqn trophic level
+#'
+#' @param x Mean trophic level data
+#' @param start First simulation year
+#' @param conf  Confidence interval
+#' @param factor Multiplication factor
+#' @param replicates Draws the time-series for each replicate
+#' @param freq Output frequency (used to convert from time-step into years)
+#' @param alpha Transparency for confidence interval
+#' @param col  Line color
+#' @param xlim  Xaxis limit
+#' @param ylim  Yaxis limit
+#' @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
+#' are drawn. Only used if replicates=TRUE
+#' @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
+#' @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
+#' @param species Name of the species to draw (only if time.mean=FALSE)
+#' @param ... 
 #' @export
 #' @method plot osmose.output.meanTL
-plot.osmose.output.meanTL = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+plot.osmose.output.meanTL = function(x, start=NULL, conf=0.95, factor=1, replicates=FALSE,
                                  freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                                  time.mean=FALSE, nmax=NULL, species=NULL, ...) {
   
@@ -173,9 +246,27 @@ plot.osmose.output.meanTL = function(x, start=NULL, conf=0.95, factor=1e-6, repl
   return(invisible())
 }
 
+#' Plots mean trophic level catch
+#'
+#' @param x Mean trophic level catch data
+#' @param start First simulation year
+#' @param conf  Confidence interval
+#' @param factor Multiplication factor
+#' @param replicates Draws the time-series for each replicate
+#' @param freq Output frequency (used to convert from time-step into years)
+#' @param alpha Transparency for confidence interval
+#' @param col  Line color
+#' @param xlim  Xaxis limit
+#' @param ylim  Yaxis limit
+#' @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
+#' are drawn. Only used if replicates=TRUE
+#' @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
+#' @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
+#' @param species Name of the species to draw (only if time.mean=FALSE)
+#' @param ... 
 #' @export
 #' @method plot osmose.output.meanTLCatch
-plot.osmose.output.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
+plot.osmose.output.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1, replicates=FALSE,
                               freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
                               time.mean=FALSE, nmax=NULL, species=NULL, ...) {
   
@@ -203,64 +294,102 @@ plot.osmose.output.meanTLCatch = function(x, start=NULL, conf=0.95, factor=1e-6,
   return(invisible())
 }
 
+#' Plots mean size.
+#'
+#' @param x Mean size data
+#' @param start First simulation year
+#' @param conf  Confidence interval
+#' @param factor Multiplication factor
+#' @param replicates Draws the time-series for each replicate
+#' @param freq Output frequency (used to convert from time-step into years)
+#' @param alpha Transparency for confidence interval
+#' @param col  Line color
+#' @param xlim  Xaxis limit
+#' @param ylim  Yaxis limit
+#' @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
+#' are drawn. Only used if replicates=TRUE
+#' @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
+#' @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
+#' @param species Name of the species to draw (only if time.mean=FALSE)
+#' @param ... 
 #' @export
 #' @method plot osmose.output.meanSize
-plot.osmose.output.meanSize = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
-                              freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
-                              aggregate=FALSE, ...) {
+plot.osmose.output.meanSize = function(x, start=NULL, conf=0.95, factor=1, replicates=FALSE,
+                                       freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
+                                       time.mean=FALSE, nmax=NULL, species=NULL, ...) {
   
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
   
-  par(oma=c(1,1,1,1), mar=c(3,4,1,1))
-  par(mfrow=getmfrow(ncol(x)))
-  
-  if(isTRUE(aggregate)) {
-    .plotAverageBiomass(x, col=col, ...)
+  if(isTRUE(time.mean)) {
+    .plotAverageBiomass(x, col=col, factor=factor, nmax=nmax, ylab="Mean Size", title="Mean Size", ...)
     return(invisible())
   }
   
-  species = colnames(x)
+  if(!species %in% colnames(x) | is.null(species))
+  {
+    stop("You should proper a species name")
+  }
+  
   start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
   
-  for(sp in species) {
-    .plotBiomass(x=x, sp=sp, start=start, conf=conf, factor=factor, 
-                 replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-                 xlim=xlim, ylim=xlim) 
-    
-  }
+  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
+               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
+               xlim=xlim, ylim=xlim) 
+  
+  title(xlab="Time (years)", ylab="Mean Size", main=species)
   
   return(invisible())
 }
 
+#' Plots mean size catch.
+#'
+#' @param x Mean size catch data
+#' @param start First simulation year
+#' @param conf  Confidence interval
+#' @param factor Multiplication factor
+#' @param replicates Draws the time-series for each replicate
+#' @param freq Output frequency (used to convert from time-step into years)
+#' @param alpha Transparency for confidence interval
+#' @param col  Line color
+#' @param xlim  Xaxis limit
+#' @param ylim  Yaxis limit
+#' @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
+#' are drawn. Only used if replicates=TRUE
+#' @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
+#' @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
+#' @param species Name of the species to draw (only if time.mean=FALSE)
+#' @param ... 
 #' @export
 #' @method plot osmose.output.meanSizeCatch
-plot.osmose.output.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
-                              freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
-                              aggregate=FALSE, ...) {
+plot.osmose.output.meanSizeCatch = function(x, start=NULL, conf=0.95, factor=1, replicates=FALSE,
+                                            freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=3,
+                                            time.mean=FALSE, nmax=NULL, species=NULL, ...) {
   
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
   
-  par(oma=c(1,1,1,1), mar=c(3,4,1,1))
-  par(mfrow=getmfrow(ncol(x)))
-  
-  if(isTRUE(aggregate)) {
-    .plotAverageBiomass(x, col=col, ...)
+  if(isTRUE(time.mean)) {
+    .plotAverageBiomass(x, col=col, nmax=nmax, factor=factor, ylab="Mean Size Catch", title="Mean Size Catch",  ...)
     return(invisible())
   }
   
-  species = colnames(x)
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  
-  for(sp in species) {
-    .plotBiomass(x=x, sp=sp, start=start, conf=conf, factor=factor, 
-                 replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-                 xlim=xlim, ylim=xlim) 
-    
+  if(!species %in% colnames(x) | is.null(species))
+  {
+    stop("You should proper a species name")
   }
   
+  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
+  
+  
+  .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
+               replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
+               xlim=xlim, ylim=xlim) 
+  
+  title(xlab="Time (years)", ylab="Mean Size Catch", main=species)
+  
   return(invisible())
+  
 }
 
 
