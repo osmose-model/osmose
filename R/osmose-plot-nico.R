@@ -45,7 +45,6 @@ plot.osmose.output.mortalityRate = function(data, stade=NULL, time.mean=FALSE, n
   
   data = process.mortalityRate(data, species=species, time.mean=time.mean, ...)
   
-  
   if(time.mean==FALSE)
   {
     message = "You must provide a life stage among 'eggs', 'juveniles' or 'adults'"
@@ -76,16 +75,8 @@ plot.osmose.output.mortalityRate = function(data, stade=NULL, time.mean=FALSE, n
   # if normalize, display mortality rates into percentage instead of absolutes.
   if(norm)
   {
-    # normalize function
-    norm_func = function(data)
-    {
-      output = 100 * data / sum(data)
-      return(output)
-    }
-    
     # apply the normalize function to all the elements of the list.
     data = lapply(data, norm_func)
-    
   }
   
   # convert the list into a matrix
@@ -103,6 +94,13 @@ plot.osmose.output.mortalityRate = function(data, stade=NULL, time.mean=FALSE, n
   
 }
 
+# normalize function
+norm_func = function(data)
+{
+  output = 100 * data / sum(data)
+  dimnames(output) = dimnames(data)
+  return(output)
+}
 
 
 
@@ -277,4 +275,44 @@ plot.osmose.output.biomassPredPreyIni = function(x, start=NULL, conf=0.95, facto
   
   return(invisible())
 }
+
+
+#' @param ... Additional arguments of the function.
+#' @return An array or a list containing the data.
+#' @export
+#' @method plot osmose.output.mortalityRateDistribBySize
+plot.osmose.output.mortalityRateDistribBySize = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, ...)
+{
+  
+  mort = process.mortalityRate(mort, species=species, time.mean=time.mean, norm=norm)
+  
+  # converts into matrix
+  mort = do.call(cbind.data.frame, mort)
+  mort = as.matrix(mort)
+  
+  # Counts the total mortality rate for each size class
+  tot = apply(mort, 1, sum)
+  
+  # Extracts the size class with mortality > 0
+  mort = mort[tot>0, ]
+  tot = tot[tot>0]
+  
+  # If data should be normalized, then it is divided by the total 
+  # mortality
+  if(norm) mort = (mort / tot) * 100
+  
+  # Transpose the dataframe
+  mort = t(mort)
+  
+  if(norm) {
+    ylab = "Mortality (%)"
+  } else {
+    ylab = "Mortality"
+  }
+  
+  osmose.stackedpcent(mort, xlab="Size (cm)", main=species, ylab=ylab)
+  
+}
+
+
 
