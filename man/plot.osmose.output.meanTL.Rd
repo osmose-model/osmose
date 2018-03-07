@@ -2,7 +2,7 @@
 % Please edit documentation in R/osmose-plot.R
 \name{plot.osmose.output.meanTL}
 \alias{plot.osmose.output.meanTL}
-\title{Plots meqn trophic level}
+\title{Plots mean trophic level}
 \usage{
 \method{plot}{osmose.output.meanTL}(x, start = NULL, conf = 0.95,
   factor = 1, replicates = FALSE, freq = 12, alpha = 0.5,
@@ -42,5 +42,5 @@ are drawn. Only used if replicates=TRUE}
 \item{...}{}
 }
 \description{
-Plots meqn trophic level
+Plots mean trophic level
 }
