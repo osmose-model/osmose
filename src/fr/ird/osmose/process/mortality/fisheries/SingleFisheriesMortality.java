@@ -101,6 +101,12 @@ public class SingleFisheriesMortality extends AbstractMortality {
     @Override
     public double getRate(School school) {
 
+        // If the map index is -1 (no map defined), it is assumed that no
+        // fishing rate is associated with the current fisherie.
+        if (fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()) == -1) {
+            return 0;
+        }
+
         // Recovers the school cell (used to recover the map factor)
         Cell cell = school.getCell();
 
@@ -123,7 +129,7 @@ public class SingleFisheriesMortality extends AbstractMortality {
         // Recovers the size/age fisheries selectivity factor
         double sizeSelect = select.getSelectivity(selVar);
         
-        // Recovers the map factor
+
         GridMap map = fMapSet.getMap(fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()));
         double spatialSelect = map.getValue(cell);
         
