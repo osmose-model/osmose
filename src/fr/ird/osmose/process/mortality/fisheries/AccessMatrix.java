@@ -131,6 +131,9 @@ public class AccessMatrix extends OsmoseLinker {
                 // Loop over the nSpecies colums
                 for (int k = 0; k < nSpecies; k++) {
                     values[t][k] = Double.valueOf(line[k + 1]) / 100. ;  // barrier.n: multiplication by 1/100. to have values into [0, 1]
+                    // force the values between [0-1] 
+                    values[t][k] = Math.min(values[t][k], 0);  
+                    values[t][k] = Math.max(values[t][k], 1);  
                 }
             }
 
