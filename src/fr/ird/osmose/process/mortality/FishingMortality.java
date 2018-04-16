@@ -318,7 +318,7 @@ public class FishingMortality extends AbstractMortality {
     public enum Scenario {
 
         RATE_ANNUAL("mortality.fishing.rate.sp", Type.RATE),
-        RATE_BY_YEAR("mortality.fishing.catches.byYear.file.sp", Type.RATE),
+        RATE_BY_YEAR("mortality.fishing.rate.byYear.file.sp", Type.RATE),
         RATE_BY_DT_BY_AGE("mortality.fishing.rate.byDt.byAge.file.sp", Type.RATE),
         RATE_BY_DT_BY_SIZE("mortality.fishing.rate.byDt.bySize.file.sp", Type.RATE),
         CATCHES_ANNUAL("mortality.fishing.catches.sp", Type.CATCHES),
