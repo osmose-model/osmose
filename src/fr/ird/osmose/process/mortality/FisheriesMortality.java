@@ -8,6 +8,7 @@
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
  * Philippe VERLEY (philippe.verley@ird.fr)
+ * Nicolas BARRIER (nicolas.barrier@ird.fr)
  * 
  * This software is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
@@ -56,7 +57,7 @@ import fr.ird.osmose.process.mortality.StochasticMortalityProcess;
 
 /**
  *
- * @author pverley
+ * @author Nicolas Barrier
  */
 public class FisheriesMortality extends AbstractMortality {
     
