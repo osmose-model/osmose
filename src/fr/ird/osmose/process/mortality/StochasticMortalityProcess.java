@@ -29,6 +29,8 @@ import java.util.concurrent.CountDownLatch;
  */
 public class StochasticMortalityProcess extends AbstractProcess {
 
+    private boolean newfisheries=false;
+    
     /*
      * Random generator
      */
@@ -84,9 +86,13 @@ public class StochasticMortalityProcess extends AbstractProcess {
             warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose set it to {0}.", subdt);
         }
 
+        if(getConfiguration().canFind("fisheries.new.activate")){
+           newfisheries = getConfiguration().getBoolean("fisheries.new.activate");
+        }
+        
         // barrier.n: initialisation of fisheries mortality if 
         // the new fisheries are activated
-        if (getConfiguration().getBoolean("fisheries.new.activate")) {
+        if (newfisheries) {
             fisheriesMortality = new FisheriesMortality(getRank(), subdt);
             fisheriesMortality.init();
         }
@@ -236,7 +242,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         school = schools.get(seqFish[i]);
                         
                         // Fishing mortality: if new fisheries are activated.
-                        if (getConfiguration().getBoolean("fisheries.new.activate")) {
+                        if (newfisheries) {
                             // If the new fisheries are activated, we compute the mortality rate 
                             // it returns nothing
                             this.fisheriesMortality.getRate(school);
