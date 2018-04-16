@@ -77,7 +77,7 @@ public class PredationMortality extends AbstractMortality {
     private double[] predationRate;
     /**
      * Accessibility matrix.
-     * Array[nSpecies+nPlankton][nAccessStage][nSpecies][nAccessStage]
+     * Array[nSpecies+nPlankton][nAccessStagePrey][nSpecies][nAccessStagePred]
      */
     private double[][][][] accessibilityMatrix;
     /*
