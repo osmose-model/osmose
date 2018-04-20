@@ -39,7 +39,7 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
   
   # update to provide by release executables
-  if(is.null(osmose)) osmose = system.file(sprintf("osmose_stable_%s.jar", version),
+  if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_stable_%s.jar", version),
                                             package="osmose", mustWork = TRUE)
   
   if(isTRUE(clean)) 
