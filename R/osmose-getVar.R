@@ -146,7 +146,7 @@ summary.osmose.output.dietMatrix = function(data, species=NULL, thres=1, ...)
   dietMatrix = process.dietMatrix(data, species=species, time.mean=TRUE, thres=thres, ...)
   dietMatrix = as.data.frame(dietMatrix)
   colnames(dietMatrix) = 'Predation rate (%)'
-  class(dietMatrix) = c("summary.osmose.output.dietMatrix", class(temp))
+  #class(dietMatrix) = c("summary.osmose.output.dietMatrix", class(temp))
   return(dietMatrix)
   
 }

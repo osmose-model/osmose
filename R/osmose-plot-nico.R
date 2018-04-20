@@ -23,7 +23,7 @@ plot.osmose.output.dietMatrix = function(x, time.mean=FALSE, species=NULL, color
         # a barplot is drawn.
         temp = as.vector(x)
         names(temp) = names(x)
-        osmose.barplot(temp, xlab="", ylab="Predation (%)", main=specName, ...)
+        osmose.barplot(temp, xlab="", ylab="Predation (%)", main=species, ...)
         return(invisible())
     } 
 
@@ -65,11 +65,18 @@ plot.osmose.output.mortalityRate = function(data, species=NULL, time.mean=TRUE, 
 {
   
   data = process.mortalityRate(data, species=species, time.mean=time.mean, ...)
+
+  message = "You must provide a life stade among 'eggs', 'juveniles' or 'adults'"
   
   if(time.mean==FALSE)
   {
-    message = "You must provide a life stage among 'eggs', 'juveniles' or 'adults'"
-    if(is.null(stade) | !(stade %in% names(data))) {
+    if(is.null(stade)) 
+    {
+      stop(paste0("No stade provided. ", message, sep=""))
+    }
+
+    if(!(stade %in% names(data))) 
+    {
       stop(message)
     }
     
@@ -84,7 +91,6 @@ plot.osmose.output.mortalityRate = function(data, species=NULL, time.mean=TRUE, 
     colors = osmose:::.make_default_ggplot_col(rev(levels(data$Type)))
     }
     
-    species = specName
     title = paste(species, " (", stade, ")", sep='')
     
     output = ggplot(data, aes(x=Time, y=Rate, fill=Type)) +  geom_area(...) + ggtitle(title)
@@ -111,7 +117,7 @@ plot.osmose.output.mortalityRate = function(data, species=NULL, time.mean=TRUE, 
     ylabel = "Mortality rate"
   }
   
-  osmose.stackedpcent(data, xlab=xlabel, main=specName, ylab=ylabel, ...)
+  osmose.stackedpcent(data, xlab=xlabel, main=species, ylab=ylabel, ...)
   return(invisible())
   
 }
@@ -229,7 +235,7 @@ plot.osmose.output.predatorPressure = function(data, time.mean=FALSE, species=NU
 {
 
   .check_species(data, species)
-  data = data[[specName]]
+  data = data[[species]]
   
   # computes replicate mean
   data = apply(data, c(1, 2), mean, na.rm=TRUE)
@@ -246,7 +252,7 @@ plot.osmose.output.predatorPressure = function(data, time.mean=FALSE, species=NU
     
     temp = as.vector(data)
     names(temp) = names(data)
-    osmose.barplot(temp, xlab="", ylab="Predation pressure", main=specName, ...)
+    osmose.barplot(temp, xlab="", ylab="Predation pressure", main=species, ...)
     return(invisible())
   } 
   
@@ -381,7 +387,7 @@ plot.osmose.output.mortalityRateDistribBySize = function(mort, species=NULL, tim
     colors = osmose:::.make_default_ggplot_col(rev(levels(data$Size)))
   }
   
-  title = paste(specName, " (", mtype, ")", sep="")
+  title = paste(species, " (", mtype, ")", sep="")
   output = ggplot(data, aes(x=Time, y=Mortality, fill=Size)) +  geom_area(...) + colors + ggtitle(title) 
   output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
   return(output)
@@ -440,7 +446,7 @@ plot.osmose.output.mortalityRateDistribByAge = function(mort, species=NULL, time
     colors = osmose:::.make_default_ggplot_col(rev(levels(data$Age)))
   }
   
-  title = paste(specName, " (", mtype, ")", sep="")
+  title = paste(species, " (", mtype, ")", sep="")
   output = ggplot(data, aes(x=Time, y=Mortality, fill=Age)) +  geom_area(...) + colors + ggtitle(title) 
   output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
   return(output)
