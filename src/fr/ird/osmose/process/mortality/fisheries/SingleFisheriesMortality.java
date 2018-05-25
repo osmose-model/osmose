@@ -134,8 +134,11 @@ public class SingleFisheriesMortality extends AbstractMortality {
         // Recovers the size/age fisheries selectivity factor [0, 1]
         double sizeSelect = select.getSelectivity(selVar);
 
-        GridMap map = fMapSet.getMap(fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()));
-        double spatialSelect = map.getValue(cell);
+        double spatialSelect = 0.0;
+        if (fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()) >= 0) {
+            GridMap map = fMapSet.getMap(fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()));
+            spatialSelect = map.getValue(cell);
+        }
 
         // modulates the mortality rate by the the size selectivity and the spatial factor.
         double output = timeSelect * sizeSelect * spatialSelect; 

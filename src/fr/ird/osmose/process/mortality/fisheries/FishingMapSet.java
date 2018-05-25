@@ -253,9 +253,8 @@ public class FishingMapSet extends OsmoseLinker {
         // Loop over all the time steps
         for (int iStep = 0; iStep < indexMaps.length; iStep++) {
             int indexMap = indexMaps[iStep];   // recover the old map index
-            indexMaps[iStep] = mapIndexNoTwin[indexMap];    // replace it by the new one.
+            if(indexMap >=0) indexMaps[iStep] = mapIndexNoTwin[indexMap];    // replace it by the new one.
         }
-
     }
 
     /**
