@@ -68,12 +68,13 @@ public class StochasticMortalityProcess extends AbstractProcess {
     @Override
     public void init() {
         random = new XSRandom(System.nanoTime());
+        
+        if(getConfiguration().canFind("fisheries.new.activate")){
+           newfisheries = getConfiguration().getBoolean("fisheries.new.activate");
+        }
 
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
-
-        fishingMortality = new FishingMortality(getRank());
-        fishingMortality.init();
 
         predationMortality = new PredationMortality(getRank());
         predationMortality.init();
@@ -86,17 +87,16 @@ public class StochasticMortalityProcess extends AbstractProcess {
             warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose set it to {0}.", subdt);
         }
 
-        if(getConfiguration().canFind("fisheries.new.activate")){
-           newfisheries = getConfiguration().getBoolean("fisheries.new.activate");
-        }
-        
         // barrier.n: initialisation of fisheries mortality if 
         // the new fisheries are activated
         if (newfisheries) {
             fisheriesMortality = new FisheriesMortality(getRank(), subdt);
             fisheriesMortality.init();
+        } else {
+            fishingMortality = new FishingMortality(getRank());
+            fishingMortality.init();
         }
-        
+
         // Create a new swarm set, empty at the moment
         swarmSet = new HashMap();
     }
@@ -105,7 +105,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
     public void run() {
 
         // Update fishing process (for MPAs)
-        fishingMortality.setMPA();
+        if(!newfisheries) fishingMortality.setMPA();
 
         // Assess accessibility for this time step
         for (Cell cell : getGrid().getOceanCells()) {
@@ -136,7 +136,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
             for (Swarm swarm : swarms) {
                 int iltl = swarm.getLTLIndex();
                 double accessibleBiom = getConfiguration().getPlankton(iltl).getAccessibility(iStepSimu)
-                        * getForcing().getBiomass(iltl, swarm.getCell());
+                    * getForcing().getBiomass(iltl, swarm.getCell());
                 swarm.setBiomass(accessibleBiom);
             }
         }
@@ -144,7 +144,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         int[] ncellBatch = dispatchCells();
         int nbatch = ncellBatch.length;
         for (int idt = 0; idt < subdt; idt++) {
-            fishingMortality.assessFishableBiomass();
+            if(!newfisheries) fishingMortality.assessFishableBiomass();
             CountDownLatch doneSignal = new CountDownLatch(nbatch);
             int iStart = 0, iEnd = 0;
             for (int ibatch = 0; ibatch < nbatch; ibatch++) {
@@ -240,7 +240,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                     case FISHING:
                         // recovers the current school
                         school = schools.get(seqFish[i]);
-                        
+
                         // Fishing mortality: if new fisheries are activated.
                         if (newfisheries) {
                             // If the new fisheries are activated, we compute the mortality rate 
@@ -277,7 +277,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         }
         return swarmSet.get(cell.getIndex());
     }
-    
+
     /** Shuffles an input array.
      * @param <T> Input array */
     public static <T> void shuffleArray(T[] a) {
@@ -298,7 +298,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
      */
     private int[] dispatchCells() {
 
-        
+
         // number of school in a batch
         int nschoolBatch = 0;
         // number of procs available for multithreading
@@ -341,25 +341,25 @@ public class StochasticMortalityProcess extends AbstractProcess {
             }
         }
 
-//        debug("Dispatch Ocean Cells over CPUs");
-//        debug("  Total number of schools " + getSchoolSet().getSchools().size());
-//        debug("  Average number of schools per CPU " + nschoolPerCPU);
-//        int iStart = 0, iEnd = 0;
-//        List<Cell> cells = getGrid().getOceanCells();
-//        int ntot = 0;
-//        for (ibatch = 0; ibatch < ncpu; ibatch++) {
-//            iEnd += ncellBatch[ibatch];
-//            int n = 0;
-//            for (int i = iStart; i < iEnd; i++) {
-//                List<School> schools = getSchoolSet().getSchools(cells.get(i));
-//                n += (null != schools) ? schools.size() : 0;
-//            }
-//            ntot += n;
-//            iStart += ncellBatch[ibatch];
-//            debug("  CPU" + ibatch + ", number of ocean cells "+ ncellBatch[ibatch] + ", number of schools " + n);
-//        }
-//        assert iEnd == cells.size();
-//        assert ntot == getSchoolSet().getSchools().size();
+        //        debug("Dispatch Ocean Cells over CPUs");
+        //        debug("  Total number of schools " + getSchoolSet().getSchools().size());
+        //        debug("  Average number of schools per CPU " + nschoolPerCPU);
+        //        int iStart = 0, iEnd = 0;
+        //        List<Cell> cells = getGrid().getOceanCells();
+        //        int ntot = 0;
+        //        for (ibatch = 0; ibatch < ncpu; ibatch++) {
+        //            iEnd += ncellBatch[ibatch];
+        //            int n = 0;
+        //            for (int i = iStart; i < iEnd; i++) {
+        //                List<School> schools = getSchoolSet().getSchools(cells.get(i));
+        //                n += (null != schools) ? schools.size() : 0;
+        //            }
+        //            ntot += n;
+        //            iStart += ncellBatch[ibatch];
+        //            debug("  CPU" + ibatch + ", number of ocean cells "+ ncellBatch[ibatch] + ", number of schools " + n);
+        //        }
+        //        assert iEnd == cells.size();
+        //        assert ntot == getSchoolSet().getSchools().size();
         return ncellBatch;
     }
 
