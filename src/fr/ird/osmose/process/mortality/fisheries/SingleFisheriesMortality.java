@@ -117,27 +117,31 @@ public class SingleFisheriesMortality extends AbstractMortality {
         switch (select.getVariable())
         {
             case AGE:
-                 selVar = school.getAge();
-                 break;
+                selVar = school.getAge();
+                break;
+            case LEN:
+                selVar = school.getLength();
+                break;
             default:
                 selVar = school.getLength();
+                error("Selectivity curve is not implemented.", new Exception());
+                break;
         }        
-        
+
         // recovers the time varying rate of the fishing mortality
         double timeSelect = timeVar.getTimeVar(getSimulation().getIndexTimeSimu());
-                 
-        // Recovers the size/age fisheries selectivity factor
+
+        // Recovers the size/age fisheries selectivity factor [0, 1]
         double sizeSelect = select.getSelectivity(selVar);
-        
 
         GridMap map = fMapSet.getMap(fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()));
         double spatialSelect = map.getValue(cell);
-        
+
         // modulates the mortality rate by the the size selectivity and the spatial factor.
         double output = timeSelect * sizeSelect * spatialSelect; 
-        
+
         return output;
-        
+
     }
 
     /**
@@ -146,5 +150,5 @@ public class SingleFisheriesMortality extends AbstractMortality {
     public int getFIndex() {
         return this.fIndex;
     }
-    
+
 }
