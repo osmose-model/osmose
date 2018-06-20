@@ -34,8 +34,7 @@ public class Version3Update3 extends AbstractVersion {
         prefix = "movement";
 
         int nMapMax = getConfiguration().findKeys(prefix + ".map*.species").size();
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ nmapmax " + nMapMax);
-
+        
         int cpt = 0;
         int value = 0;
 
