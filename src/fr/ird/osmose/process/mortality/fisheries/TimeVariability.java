@@ -4,6 +4,7 @@ package fr.ird.osmose.process.mortality.fisheries;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
  *
@@ -82,11 +83,18 @@ public class TimeVariability extends OsmoseLinker {
      */
     private void getFBaseByDt() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        double[] value = cfg.getArrayDouble("fisheries.rate.bydt.rate.fis" + mort.getFIndex());
-        for (int i=0; i< ndt * nyear; i++)
-        {
-            int k = i % value.length;
-            this.timeArr[i] = value[k];
+        
+        if (cfg.canFind("fisheries.rate.bydt.file.fis" + mort.getFIndex())) {
+            // If a file parameter has been defined 
+            SingleTimeSeries ts = new SingleTimeSeries();
+            ts.read(cfg.getFile("fisheries.rate.bydt.file.fis" + mort.getFIndex()));
+            this.timeArr = ts.getValues();
+        } else {
+            double[] value = cfg.getArrayDouble("fisheries.rate.bydt.rate.fis" + mort.getFIndex());
+            for (int i = 0; i < ndt * nyear; i++) {
+                int k = i % value.length;
+                this.timeArr[i] = value[k];
+            }
         }
         
     }
