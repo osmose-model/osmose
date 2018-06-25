@@ -48,8 +48,13 @@
  */
 package fr.ird.osmose.process.mortality.fisheries;
 
+import fr.ird.osmose.process.mortality.fisheries.sizeselect.StepSelectivity;
+import fr.ird.osmose.process.mortality.fisheries.sizeselect.SigmoSelectivity;
+import fr.ird.osmose.process.mortality.fisheries.sizeselect.GaussSelectivity;
 import fr.ird.osmose.process.mortality.*;
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
 import fr.ird.osmose.util.GridMap;
 
@@ -58,19 +63,27 @@ import fr.ird.osmose.util.GridMap;
  * @author pverley
  */
 public class SingleFisheriesMortality extends AbstractMortality {
- 
-    /** Fisheries index. */
+
+    /**
+     * Fisheries index.
+     */
     private final int fIndex;
 
-    /** Fisherie selectivity function. */
+    /**
+     * Fisherie selectivity function.
+     */
     private SizeSelectivity select;
-    
-    /** Fisherie time-variability. */
+
+    /**
+     * Fisherie time-variability.
+     */
     private TimeVariability timeVar;
-    
-    /** Fisherie map set. */
+
+    /**
+     * Fisherie map set.
+     */
     private FishingMapSet fMapSet;
-    
+
     public SingleFisheriesMortality(int rank, int findex) {
         super(rank);
         fIndex = findex;
@@ -78,23 +91,35 @@ public class SingleFisheriesMortality extends AbstractMortality {
 
     @Override
     public void init() {
-        
+        Configuration cfg = Osmose.getInstance().getConfiguration();
+        String type = cfg.getString("fisheries.select.curve.fis" + fIndex);
+        if (type.equals("step")) {
+            select = new StepSelectivity(this);
+        } else if (type.equals("gauss")) {
+            select = new GaussSelectivity(this);
+        } else if (type.equals("sigmo")) {
+            select = new SigmoSelectivity(this);
+        } else {
+            error("Selectivity curve " + type + "is not implemented. Choose 'step', 'gauss' or 'sigmo'.", new Exception());
+        }
+
         // Initialize the selectivity curve.
-        select = new SizeSelectivity(this);
         select.init();
-        
+
         // Initialize the time varying array
         timeVar = new TimeVariability(this);
         timeVar.init();
-        
+
         fMapSet = new FishingMapSet(fIndex, "fisheries.fishmap");
         fMapSet.init();
-    
+
     }
 
-    /** Returns the fishing mortality rate associated with a given
-     * fisherie. It is the product of the time varying
-     * fishing rate, of the size selectivity and of the spatial factor.
+    /**
+     * Returns the fishing mortality rate associated with a given fisherie. It
+     * is the product of the time varying fishing rate, of the size selectivity
+     * and of the spatial factor.
+     *
      * @param school
      * @return The fishing mortality rate.
      */
@@ -112,10 +137,9 @@ public class SingleFisheriesMortality extends AbstractMortality {
 
         // Used to recover the selectivity value.
         float selVar;
-       
+
         // Looks for the selectivity variable.
-        switch (select.getVariable())
-        {
+        switch (select.getVariable()) {
             case AGE:
                 selVar = school.getAge();
                 break;
@@ -126,7 +150,7 @@ public class SingleFisheriesMortality extends AbstractMortality {
                 selVar = school.getLength();
                 error("Selectivity curve is not implemented.", new Exception());
                 break;
-        }        
+        }
 
         // recovers the time varying rate of the fishing mortality
         double timeSelect = timeVar.getTimeVar(getSimulation().getIndexTimeSimu());
@@ -141,7 +165,7 @@ public class SingleFisheriesMortality extends AbstractMortality {
         }
 
         // modulates the mortality rate by the the size selectivity and the spatial factor.
-        double output = timeSelect * sizeSelect * spatialSelect; 
+        double output = timeSelect * sizeSelect * spatialSelect;
 
         return output;
 
@@ -149,6 +173,7 @@ public class SingleFisheriesMortality extends AbstractMortality {
 
     /**
      * Returns the index of the current fisherie.
+     * @return The fisherines index
      */
     public int getFIndex() {
         return this.fIndex;
