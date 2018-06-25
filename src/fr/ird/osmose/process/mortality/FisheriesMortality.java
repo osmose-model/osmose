@@ -51,6 +51,7 @@ package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.FisheriesOutput;
 import fr.ird.osmose.process.mortality.fisheries.AccessMatrix;
 import fr.ird.osmose.process.mortality.fisheries.SingleFisheriesMortality;
 import fr.ird.osmose.process.mortality.StochasticMortalityProcess;
@@ -156,6 +157,12 @@ public class FisheriesMortality extends AbstractMortality {
             
             // updates the number of dead individuals within the school
             nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+            
+            // Increment the fisheries Outputs for the given species and the given
+            // fisherie.
+            if (FisheriesOutput.saveFisheries()) {
+                FisheriesOutput.incrementFish(nDead, iSpecies, fIndex);
+            }
             
             // increments the number of DEAD individuals by fishing.
             school.incrementNdead(MortalityCause.FISHING, nDead);
