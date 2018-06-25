@@ -106,6 +106,10 @@ public class OutputManager extends SimulationLinker {
         /*
          * Instantiate indicators
          */
+        // Barrier.n: Fisheries saving
+        if (getConfiguration().getBoolean("output.fisheries.enabled")) {
+            outputs.add(new FisheriesOutput(rank));
+        }
         // Biomass
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
             outputs.add(new BiomassOutput(rank));
