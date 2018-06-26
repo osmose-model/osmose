@@ -49,12 +49,10 @@
  */
 package fr.ird.osmose.process.mortality;
 
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.FisheriesOutput;
 import fr.ird.osmose.process.mortality.fisheries.AccessMatrix;
 import fr.ird.osmose.process.mortality.fisheries.SingleFisheriesMortality;
-import fr.ird.osmose.process.mortality.StochasticMortalityProcess;
 
 /**
  *
