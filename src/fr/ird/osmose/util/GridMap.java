@@ -61,7 +61,7 @@ import java.util.List;
  */
 public class GridMap extends OsmoseLinker {
 
-    private final float[][] matrix;
+    protected final float[][] matrix;
 
     public GridMap(int defaultValue) {
         matrix = new float[getGrid().get_ny()][getGrid().get_nx()];
