@@ -58,7 +58,7 @@ public class FishingMapSet extends OsmoseLinker {
     /**
      * List of the maps.
      */
-    private GridMap[] maps;
+    private FisheriesGridMap[] maps;
     /**
      * List of the pathnames of the CSV files.
      */
@@ -133,7 +133,7 @@ public class FishingMapSet extends OsmoseLinker {
         }  // end of nmapmax loop
 
         // Initialize NSTEP arrays of gridmaps, and initialize their index to -1
-        maps = new GridMap[mapNumber.size()];
+        maps = new FisheriesGridMap[mapNumber.size()];
         mapFile = new String[mapNumber.size()];
         int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
         indexMaps = new int[nSteps];
@@ -193,7 +193,7 @@ public class FishingMapSet extends OsmoseLinker {
             if (!getConfiguration().isNull(prefix + ".file" + ".fmap" + imap)) {
                 String csvFile = getConfiguration().getFile(prefix + ".file" + ".fmap" + imap);
                 mapFile[n] = csvFile;
-                maps[n] = new GridMap(csvFile);
+                maps[n] = new FisheriesGridMap(csvFile);
             } else {
                 maps[n] = null;
             }
@@ -321,6 +321,7 @@ public class FishingMapSet extends OsmoseLinker {
         }
 
         temp /= surftot;
+        
         if (temp != 1) {
             warning("The temporal mean of the space factors is different from 1.0");
         }
@@ -334,7 +335,7 @@ public class FishingMapSet extends OsmoseLinker {
      * @return
      */
     private boolean isValueOk(float value) {
-        return ((value != -999) && (value != 0) && (value != -99));
+        return (value >= 0);
     }
 
     /**
