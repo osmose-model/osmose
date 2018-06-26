@@ -46,7 +46,7 @@ public class GaussSelectivity extends SizeSelectivity {
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
         // If L75 is found, Ricardo formulae is used
-        if (cfg.canFind("fisheries.select.l75.fis + index")) {
+        if (cfg.canFind("fisheries.select.l75.fis" + index)) {
             this.l75 = cfg.getFloat("fisheries.select.l75.fis" + index);
             // Normal distribution for init qnorm(0.75)
             NormalDistribution norm = new NormalDistribution();

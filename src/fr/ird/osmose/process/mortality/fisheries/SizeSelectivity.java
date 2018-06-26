@@ -66,7 +66,6 @@ public abstract class SizeSelectivity extends OsmoseLinker {
         if(cfg.canFind("fisheries.select.tiny.fis" + index)) {
             this.tiny  = cfg.getFloat("fisheries.select.tiny.fis" + index);
         }
-
     }
     
     /**

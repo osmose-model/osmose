@@ -49,7 +49,7 @@ public class SigmoSelectivity extends SizeSelectivity {
         Configuration cfg = Osmose.getInstance().getConfiguration();
 
         // If L75 is found, Ricardo formulae is used
-        if (cfg.canFind("fisheries.select.l75.fis + index")) {
+        if (cfg.canFind("fisheries.select.l75.fis" + index)) {
             this.l75 = cfg.getFloat("fisheries.select.l75.fis" + index);
             this.s1 = (this.l50 * Math.log(3)) / (this.l75 - this.l50);
             this.s2 = this.s1 / this.l50;
@@ -80,7 +80,7 @@ public class SigmoSelectivity extends SizeSelectivity {
         if (output < this.tiny) {
             output = 0.0;
         }
-
+        
         return output;
 
     }
