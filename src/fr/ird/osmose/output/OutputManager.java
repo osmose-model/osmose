@@ -106,6 +106,13 @@ public class OutputManager extends SimulationLinker {
         /*
          * Instantiate indicators
          */
+        // Barrier.n: Saving of spatial, class (age or size) structure abundance
+        if (getConfiguration().getBoolean("output.spatialsizespecies.enabled")) {
+            outputs.add(new SpatialSizeSpeciesOutput(rank, sizeDistrib));
+        }
+        if (getConfiguration().getBoolean("output.spatialagespecies.enabled")) {
+            outputs.add(new SpatialSizeSpeciesOutput(rank, ageDistrib));
+        }
         // Barrier.n: Fisheries saving
         if (getConfiguration().getBoolean("output.fisheries.enabled")) {
             outputs.add(new FisheriesOutput(rank));
