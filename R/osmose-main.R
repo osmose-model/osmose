@@ -101,6 +101,7 @@ read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
   
   output = switch(version, 
                   v3r2 = osmose2R.v3r2(path=path, species.names=species.names, ...),
+                  v3r1 = osmose2R.v3r1(path=path, species.names=species.names, ...),
                   stop(sprintf("Incorrect osmose version %s", version))
   )
   class(output) = "osmose.output"
