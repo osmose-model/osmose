@@ -524,3 +524,46 @@ osmose2R.v3r1 = function(path=NULL, species.names=NULL, ...) {
   return(output)
   
 }
+
+
+osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
+  
+  # Output data
+  data = list(
+    biomass    = readOsmoseFiles(path=path, type="biomass"),
+    abundance  = readOsmoseFiles(path=path, type="abundance"),
+    yield      = readOsmoseFiles(path=path, type="yield"),
+    catch      = readOsmoseFiles(path=path, type="yieldN"),
+    mortality  = readOsmoseFiles(path=path, type="mortalityRate", bySpecies=TRUE),
+    meanTL      = readOsmoseFiles(path=path, type="meanTL"),
+    meanTLCatch = readOsmoseFiles(path=path, type="meanTLCatch"),
+    predatorPressure = readOsmoseFiles(path=path, type="predatorPressure"),
+    predPreyIni = readOsmoseFiles(path=path, type="biomassPredPreyIni"),
+    meanSize      = readOsmoseFiles(path=path, type="meanSize"),
+    meanSizeCatch = readOsmoseFiles(path=path, type="meanSizeCatch"),
+    SizeSpectrum  = readOsmoseFiles(path=path, type="SizeSpectrum")$Abundance,
+    SizeSpectrumN = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesN"),
+    SizeSpectrumB = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesB"),
+    SizeSpectrumC = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesYield"),
+    SizeSpectrumY = readOsmoseFiles(path=path, type="SizeSpectrumSpeciesYieldN"),
+    AgeSpectrumN = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesN"),
+    AgeSpectrumB = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesB"),
+    AgeSpectrumC = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesYield"),
+    AgeSpectrumY = readOsmoseFiles(path=path, type="AgeSpectrumSpeciesYieldN"))
+  
+  model = list(
+    version  = "3.0b",
+    model    = .getModelName(path=path),
+    simus    = dim(pop$biomass)[3],
+    times    = as.numeric(row.names(pop$biomass)),
+    T        = nrow(pop$biomass),
+    start    = as.numeric(row.names(pop$biomass))[1],
+    nsp      = ncol(pop$biomass),
+    lspecies = if(!is.null(species.names)) species.names else colnames(pop$biomass)
+  )
+  
+  output = list(model=model, species = colnames(data$biomass), outputData = data)
+  
+  return(output)
+  
+}
