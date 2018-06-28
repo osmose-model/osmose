@@ -56,6 +56,11 @@ import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
 import java.util.List;
+import fr.ird.osmose.output.spatial.SpatialAbundanceOutput;
+import fr.ird.osmose.output.spatial.SpatialBiomassOutput;
+import fr.ird.osmose.output.spatial.SpatialYieldOutput;
+import fr.ird.osmose.output.spatial.SpatialTLOutput;
+import fr.ird.osmose.output.spatial.SpatialSizeOutput;
 
 /**
  *
@@ -106,6 +111,26 @@ public class OutputManager extends SimulationLinker {
         /*
          * Instantiate indicators
          */
+        if (getConfiguration().getBoolean("output.spatialabundance.enabled")) {
+            outputs.add(new SpatialAbundanceOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialbiomass.enabled")) {
+            outputs.add(new SpatialBiomassOutput(rank));
+        }
+      
+        if (getConfiguration().getBoolean("output.spatialsize.enabled")) {
+            outputs.add(new SpatialSizeOutput(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatialyield.enabled")) {
+            outputs.add(new SpatialYieldOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialtl.enabled")) {
+            outputs.add(new SpatialTLOutput(rank));
+        }
+        
         // Barrier.n: Saving of spatial, class (age or size) structure abundance
         if (getConfiguration().getBoolean("output.spatialsizespecies.enabled")) {
             outputs.add(new SpatialSizeSpeciesOutput(rank, sizeDistrib));
