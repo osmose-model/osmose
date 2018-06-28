@@ -475,7 +475,7 @@ osmose2R.v3r2 = function (path=NULL, species.names=NULL) {
                  nsp = ncol(data$biomass),
                  lspecies = if (!is.null(species.names)) species.names else colnames(data$biomass))
 
-    output = list(model=model, species = colnames(data$biomass), outputData = data)
+    output = list(model=model, species = colnames(data$biomass), data = data)
 
     return(output)
 }
@@ -519,7 +519,7 @@ osmose2R.v3r1 = function(path=NULL, species.names=NULL, ...) {
     lspecies = if(!is.null(species.names)) species.names else colnames(pop$biomass)
   )
   
-  output = list(model=model, species = colnames(data$biomass), outputData = data)
+  output = list(model=model, species = colnames(data$biomass), data = data)
   
   return(output)
   
@@ -562,7 +562,7 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
     lspecies = if(!is.null(species.names)) species.names else colnames(pop$biomass)
   )
   
-  output = list(model=model, species = colnames(data$biomass), outputData = data)
+  output = list(model=model, species = colnames(data$biomass), data = data)
   
   return(output)
   
