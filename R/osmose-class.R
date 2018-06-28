@@ -54,8 +54,8 @@
 #' @return A graph of a osmose object.
 #' @author Ricardo Oliveros-Ramos
 #' @export
-#' @method plot osmose.output
-plot.osmose.output = function(x, type = "biomass", ...) {
+#' @method plot osmose
+plot.osmose = function(x, type = "biomass", ...) {
   
   x = getVar(x, var = type, expected = FALSE)
   out = plot(x, ...)
