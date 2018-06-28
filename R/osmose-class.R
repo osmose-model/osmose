@@ -89,17 +89,17 @@ getVar = function(object, var, ...) {
 #' @param ... Additional arguments of the function.
 #' @return An array or a list containing the data.
 #' @export
-#' @method getVar osmose.output
-getVar.osmose.output = function(object, var, expected=FALSE, ...) {
+#' @method getVar osmose
+getVar.osmose = function(object, var, expected=FALSE, ...) {
   
-  out = object[["data"]][[var]]
+  out = object[[var]]
   if(is.null(out))
   {
       message = paste("The ", var, " variable is NULL", sep="")
       stop(message) 
   }
 
-  xclass = "list" %in% class(out)
+  xclass = "array" %in% class(out)
   if(isTRUE(!xclass) & isTRUE(expected))
     out = apply(out, c(1, 2), mean, na.rm=TRUE)
   return(out)
