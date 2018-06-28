@@ -133,8 +133,8 @@ summary.osmose = function(object, ...) {
   
   output = object$model
   output$species = object$species
-  biomass = apply(object$data$biomass, 2, mean, na.rm=TRUE)
-  yield = apply(object$data$yield, 2, mean, na.rm=TRUE)
+  biomass = apply(object$biomass, 2, mean, na.rm=TRUE)
+  yield = apply(object$yield, 2, mean, na.rm=TRUE)
   resumen = data.frame(biomass=biomass,
                        yield = yield)
   rownames(resumen) = object$species
@@ -155,7 +155,7 @@ summary.osmose = function(object, ...) {
 print.summary.osmose = function(x, ...) {
   cat(paste0("OSMOSE v.", x$version,"\n"))
   cat("Model", sQuote(x$model),"\n")
-  cat(x$sp, "species modeled:\n")
+  cat("Species modeled:\n")
   cat(paste(x$species, collapse=", "),".\n", sep="")
   cat("Main indicators:\n")
   print(x$resumen)
