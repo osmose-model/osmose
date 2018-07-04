@@ -201,8 +201,9 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   return(invisible())
 }
 
-plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, border = NA, ...) {
+plotBarplot = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
+                       factor = 1e-3, speciesNames = NULL, border = NA,
+                       cex.names = 0.8, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
@@ -211,48 +212,55 @@ plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL,
     x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
     x = x * factor
     if(isFALSE(horizontal)){
-      par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
-      ylim = c(0, 1.2*max(x)) 
+      mar = c(2.5,2,1,0.3)
+      ylim = c(0, 1.2*max(x))
       xlim = NULL
     } else {
-      par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)
-      xlim = c(0, 1.2*max(x)) 
+      mar = c(2,5.5,1,0.3)
+      xlim = c(0, 1.2*max(x))
       ylim = NULL
     } 
     
+    par(oma = c(1,1,1,1), mar = mar, las = 1)
     barplot(x, horiz = horizontal, names.arg = speciesNames, col = col,
-            ylim = ylim, xlim = xlim, cex.names = 0.8, border = border, ...)
+            ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, ...)
     
   } else {
-    barplotCI(x, horizontal = horizontal, col = col, factor = factor,
-              speciesNames = speciesNames, border = border, ...)
+    barplotCI(x, horizontal = horizontal, speciesNames = speciesNames, col = col,
+              factor = factor, border = border, cex.names = cex.names, ...)
   }
   
   box()
   mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
   
   return(invisible())
+  
 }  
 
-barplotCI = function(x, horizontal, col, factor, speciesNames, border, ...) {
+barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names = 0.8,
+                     angle = 90, code = 3, length = 0.10, ...) {
   
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
-  if(isFALSE(horizontal)){
-    ylim = c(0, 1.2*max(y.mean)) 
-    xlim = NULL
-    par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
-  } else {
-    xlim = c(0, 1.2*max(y.mean)) 
-    ylim = NULL
-    par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)
-  } 
-  barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col, ylim = ylim, xlim = xlim, cex.names = 0.8, border = border, ...)
   
   if(isFALSE(horizontal)){
-    arrows(barx, y.mean + 1.96*y.sd/10, barx, y.mean - 1.96*y.sd/10, angle = 90, code = 3, length = 0.10, ...)
+    mar = c(2.5,2,1,0.3)
+    ylim = c(0, 1.2*max(y.mean))
+    xlim = NULL
   } else {
-    arrows(y.mean - 1.96*y.sd/10, barx, y.mean + 1.96*y.sd/10, barx, angle = 90, code = 3, length = 0.10, ...)
+    mar = c(2,5.5,1,0.3)
+    xlim = c(0, 1.2*max(y.mean))
+    ylim = NULL
+  }
+  
+  par(oma = c(1,1,1,1), mar = mar, las = 1)
+  barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col,
+                 ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, ...)
+  
+  if(isFALSE(horizontal)){
+    arrows(barx, y.mean + 1.96*y.sd/10, barx, y.mean - 1.96*y.sd/10, angle = angle, code = code, length = length, ...)
+  } else {
+    arrows(y.mean - 1.96*y.sd/10, barx, y.mean + 1.96*y.sd/10, barx, angle = angle, code = code, length = length, ...)
   }
   
   
