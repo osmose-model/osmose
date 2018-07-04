@@ -19,6 +19,9 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicate
     if(type == 2){plotTsType2(x = x, species = species, replicates = replicates, nrep = nrep, ci = ci, start = start,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = NULL, 
                               alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
+    
+    if(type == 3){plotTsType3(x = x, species = species, start = start, freq = freq, factor = factor, 
+                              xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, unitNames = unitNames, ...)}  
   }
   
    
@@ -119,6 +122,58 @@ plotTsType2 = function(x, species = NULL, replicates = FALSE, nrep = 3, ci = TRU
   box()
   
   if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
+  mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
+  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
+  
+  return(invisible())
+}
+
+plotTsType3 = function(x, species = NULL, start = NULL, freq = 12, factor=1e-6,
+                       xlim=NULL, ylim=NULL, col = NULL, 
+                       speciesNames = NULL, unitNames = NULL, ...) {
+  
+  if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
+  if(!is.null(species)){x = x[ , (species + 1), drop = FALSE]}
+  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
+  
+  x = factor*x
+  x = x[, order(apply(x, 2, sum, na.rm = TRUE), decreasing = TRUE)]
+  
+  xsp0 = rep(0, times = nrow(x))
+  dataSpecies = NULL
+  for (sp in seq_len(ncol(x))) {
+    xsp  = xsp0 + x[, sp]
+    dataSpecies = cbind(dataSpecies, xsp)
+    xsp0 = xsp
+  }
+  colnames(dataSpecies) = colnames(x)
+  
+  times   = seq(from=start + 0.5/freq, by=1/freq, len=nrow(x))
+  xlim    = if(is.null(xlim)) range(times)
+  ylim    = if(is.null(ylim)) c(0.75, 1.25)*range(dataSpecies[, dim(dataSpecies)[2]])
+  
+  par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
+  plot.new()
+  plot.window(xlim=xlim, ylim=ylim)
+  
+  dataSpecies = dataSpecies[, order(apply(dataSpecies, 2, sum, na.rm = TRUE), decreasing = TRUE)]
+  if(is.null(speciesNames)) speciesNames = toupper(colnames(dataSpecies)) else speciesNames = speciesNames
+  if(is.null(col)) col = rainbow(n = ncol(dataSpecies)) else col = col
+  if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
+  
+  for(sp in seq_len(ncol(x))) {
+    
+    lines(times, dataSpecies[, sp])
+    
+    x.pol = c(times, rev(times))
+    y.pol = c(dataSpecies[, sp], rep(0, times = nrow(x)))
+    polygon(x.pol, y.pol, border=NA, col = col[sp])
+    
+  }
+  
+  axis(1)
+  axis(2, las=2)
+  box()
   mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
   legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
   
