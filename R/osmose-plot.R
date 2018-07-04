@@ -6,7 +6,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
                                ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                                ci = TRUE, freq = 12, horizontal = FALSE, 
                                conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
-                               col = "black", alpha = 0.1, lwd = 2.5, speciesNames = NULL, ...) {
+                               col = "black", alpha = 0.5, speciesNames = NULL, ...) {
   
   # species indexation
   if(!is.null(species)){
@@ -27,7 +27,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
     
     if(type == 1){plotTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = col, 
-                              alpha = alpha, lwd = lwd, speciesNames = speciesNames, ...)}
+                              alpha = alpha, speciesNames = speciesNames, ...)}
     
     if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = NULL, 
@@ -54,7 +54,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 
 plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
-                       xlim=NULL, ylim=NULL, col = "black", alpha = 0.1, lwd = 2.5,
+                       xlim=NULL, ylim=NULL, col = "black", alpha = 0.5,
                        speciesNames = NULL, ...) {
   
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
@@ -74,7 +74,7 @@ plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plot.new()
     plot.window(xlim=xlim, ylim=ylim)
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col, alpha = alpha, lwd = lwd, ...)
+           prob = prob, col = col, alpha = alpha, ...)
     axis(1)
     axis(2, las=2)
     box()
@@ -88,10 +88,10 @@ plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   return(invisible())
 }
 
-plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lwd, ...) {
+plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = NA, ...) {
   
   if(dim(x)[3] == 1){
-    lines(x = y, y = apply(x, 1, mean, na.rm = TRUE), col = col)
+    lines(x = y, y = apply(x, 1, mean, na.rm = TRUE), col = col, ...)
     return(invisible())
   }
   
@@ -102,20 +102,20 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lwd, ...) {
   y.pol = c(x.inf, rev(x.sup), x.inf[1])
   
   if(isTRUE(replicates)) {
-    polygon(x.pol, y.pol, col=makeTransparent(col=col, alpha=alpha), border=NA)
+    polygon(x.pol, y.pol, col=makeTransparent(col=col, alpha=alpha), border = border, ...)
     nrep = max(min(nrep, dim(x)[3]),2)
     matplot(y, x[,,seq_len(nrep)], add=TRUE, type="l", lty = 1, 
             col=makeTransparent(col=col, alpha=(alpha + 2)/3))
   }
-  lines(y, x.50, col = col, lwd = lwd, ...)
+  lines(y, x.50, col = col, ...)
   
   return(invisible())
 }
 
 plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
-                       xlim=NULL, ylim=NULL, col = NULL, alpha = 0.1, lwd = 2.5,
-                       speciesNames = NULL, ...) {
+                       xlim=NULL, ylim=NULL, col = NULL, alpha = 0.5, lwd = 1.5,
+                       speciesNames = NULL, border = NA, ...) {
   
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
   times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
@@ -133,7 +133,7 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     xsp   = factor*x[, sp, ,drop = FALSE]
     
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, lwd = lwd, ...)
+           prob = prob, col = col[sp], alpha = alpha, lwd = lwd, border = border, ...)
   }
   axis(1)
   axis(2, las=2)
