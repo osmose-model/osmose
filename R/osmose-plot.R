@@ -6,7 +6,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
                                ts = TRUE, type = 1, replicates = FALSE, nrep = 3,
                                ci = TRUE, freq = 12, horizontal = FALSE, 
                                conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
-                               col = "black", alpha = 0.1, lwd = 2.5, speciesNames = NULL, unitNames = NULL, ...) {
+                               col = "black", alpha = 0.1, lwd = 2.5, speciesNames = NULL, ...) {
   
   # species indexation
   if(!is.null(species)){
@@ -27,22 +27,22 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
     
     if(type == 1){plotTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = col, 
-                              alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
+                              alpha = alpha, lwd = lwd, speciesNames = speciesNames, ...)}
     
     if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = NULL, 
-                              alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
+                              alpha = alpha, lwd = lwd, speciesNames = speciesNames, ...)}
     
     if(type == 3){plotTsType3(x = x, initialYear = initialYear, freq = freq, factor = factor, 
-                              xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, unitNames = unitNames, ...)}  
+                              xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, ...)}  
   }
   
   if(isFALSE(ts)){
     if(type == 1){plotBarplot(x, ci = ci, horizontal = horizontal, col = col,
-                              factor = factor, speciesNames = speciesNames, unitNames = unitNames, ...)}
+                              factor = factor, speciesNames = speciesNames, ...)}
     
     if(type == 2){plotBoxplot(x, horizontal = horizontal, col = col, 
-                              factor = factor, speciesNames = speciesNames, unitNames = unitNames, ...)}
+                              factor = factor, speciesNames = speciesNames, ...)}
   }
   
    
@@ -55,7 +55,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 plotTsType1 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = "black", alpha = 0.1, lwd = 2.5,
-                       speciesNames = NULL, unitNames = NULL, ...) {
+                       speciesNames = NULL, ...) {
   
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
   times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
@@ -80,8 +80,7 @@ plotTsType1 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
     box()
     
     mtext(speciesNames[sp], 3, line = -1.5, adj = 0.05, cex = 0.80)
-    if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
-    mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.75)
+    mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.75)
     
     ylim = NULL 
   }
@@ -116,7 +115,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lwd, ...) {
 plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = NULL, alpha = 0.1, lwd = 2.5,
-                       speciesNames = NULL, unitNames = NULL, ...) {
+                       speciesNames = NULL, ...) {
   
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
   times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
@@ -140,8 +139,7 @@ plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
   axis(2, las=2)
   box()
   
-  if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
-  mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
   legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
   
   return(invisible())
@@ -149,7 +147,7 @@ plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
 
 plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = NULL, 
-                       speciesNames = NULL, unitNames = NULL, ...) {
+                       speciesNames = NULL, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
@@ -177,7 +175,6 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   dataSpecies = dataSpecies[, order(apply(dataSpecies, 2, sum, na.rm = TRUE), decreasing = TRUE)]
   if(is.null(speciesNames)) speciesNames = toupper(colnames(dataSpecies)) else speciesNames = speciesNames
   if(is.null(col)) col = rainbow(n = ncol(dataSpecies)) else col = col
-  if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
   
   for(sp in seq_len(ncol(x))) {
     
@@ -192,17 +189,16 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   axis(1)
   axis(2, las=2)
   box()
-  mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
   legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
   
   return(invisible())
 }
 
 plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, unitNames = NULL, ...) {
+                       factor = 1e-3, speciesNames = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
-  if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
   
   if(isFALSE(ci)){
     x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
@@ -221,16 +217,16 @@ plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL,
     
   } else {
     barplotCI(x, horizontal = horizontal, col = col, factor = factor,
-              speciesNames = speciesNames, unitNames = unitNames, ...)
+              speciesNames = speciesNames, ...)
   }
   
   box()
-  mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
   
   return(invisible())
 }  
 
-barplotCI = function(x, horizontal, col, factor, speciesNames, unitNames, ...) {
+barplotCI = function(x, horizontal, col, factor, speciesNames, ...) {
   
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
@@ -255,10 +251,9 @@ barplotCI = function(x, horizontal, col, factor, speciesNames, unitNames, ...) {
 }
 
 plotBoxplot = function(x, horizontal = FALSE, col = FALSE, 
-                       factor = 1e-3, speciesNames = NULL, unitNames = NULL, ...) {
+                       factor = 1e-3, speciesNames = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
-  if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
   
   if(isFALSE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
   } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
@@ -266,7 +261,7 @@ plotBoxplot = function(x, horizontal = FALSE, col = FALSE,
   x = apply(x*factor, c(1,2), mean, na.rm = TRUE) #mean over the replicates
   
   boxplot(x, horizontal = horizontal, names = speciesNames, col = col, ...)
-  mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
   
   return(invisible())
 }
