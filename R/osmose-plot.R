@@ -149,7 +149,7 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
 
 plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = NULL, 
-                       speciesNames = NULL, ...) {
+                       speciesNames = NULL, legend = TRUE, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
@@ -170,7 +170,7 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   xlim    = if(is.null(xlim)) range(times)
   ylim    = if(is.null(ylim)) c(0.75, 1.25)*range(dataSpecies[, dim(dataSpecies)[2]])
   
-  par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
+  par(oma = c(1,1,1,1), mar = c(2,2,1,0.5), xaxs = "i", yaxs = "i")
   plot.new()
   plot.window(xlim=xlim, ylim=ylim)
   
@@ -184,7 +184,7 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
     
     x.pol = c(times, rev(times))
     y.pol = c(dataSpecies[, sp], rep(0, times = nrow(x)))
-    polygon(x.pol, y.pol, border=NA, col = col[sp])
+    polygon(x.pol, y.pol, border=NA, col = col[sp], ...)
     
   }
   
@@ -192,7 +192,11 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   axis(2, las=2)
   box()
   mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
-  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
+  
+  if(isTRUE(legend)){
+    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
+  }
+  
   
   return(invisible())
 }
