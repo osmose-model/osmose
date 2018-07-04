@@ -55,9 +55,9 @@
 #' @author Ricardo Oliveros-Ramos
 #' @export
 #' @method plot osmose
-plot.osmose = function(x, type = "biomass", ...) {
+plot.osmose = function(x, what = "biomass", ...) {
   
-  x = getVar(x, var = type, expected = FALSE)
+  x = getVar(x, var = what, expected = FALSE)
   out = plot(x, ...)
   
   return(out)
