@@ -6,7 +6,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
                                ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                                ci = TRUE, freq = 12, horizontal = FALSE, 
                                conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
-                               col = "black", alpha = 0.5, speciesNames = NULL, ...) {
+                               col = NULL, alpha = 0.5, speciesNames = NULL, ...) {
   
   # species indexation
   if(!is.null(species)){
@@ -30,7 +30,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
                               alpha = alpha, speciesNames = speciesNames, ...)}
     
     if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
-                              freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = NULL, 
+                              freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = col, 
                               alpha = alpha, speciesNames = speciesNames, ...)}
     
     if(type == 3){plotTsType3(x = x, initialYear = initialYear, freq = freq, factor = factor, 
@@ -54,7 +54,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 
 plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
-                       xlim=NULL, ylim=NULL, col = "black", alpha = 0.5,
+                       xlim=NULL, ylim=NULL, col = NULL, alpha = 0.5,
                        speciesNames = NULL, ...) {
   
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
@@ -64,6 +64,7 @@ plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   
   par(oma = c(1,1,1,1), mar = c(3,3,1,1))
   par(mfrow = getmfrow(ncol(x)))
+  if(is.null(col)) col="black"
   
   prob = 1 - conf
   
@@ -116,6 +117,7 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = NULL, alpha = 0.5, 
                        speciesNames = NULL, ...) {
+  
   
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
   times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
@@ -195,10 +197,11 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   return(invisible())
 }
 
-plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = "gray", 
+plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL, 
                        factor = 1e-3, speciesNames = NULL, border = NA, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  if(is.null(col)) col="gray"
   
   if(isFALSE(ci)){
     x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
@@ -251,10 +254,11 @@ barplotCI = function(x, horizontal, col, factor, speciesNames, border, ...) {
   
 }
 
-plotBoxplot = function(x, horizontal = FALSE, col = FALSE, 
+plotBoxplot = function(x, horizontal = FALSE, col = NULL, 
                        factor = 1e-3, speciesNames = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  if(is.null(col)) col="gray"
   
   if(isFALSE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
   } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
