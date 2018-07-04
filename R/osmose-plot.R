@@ -3,7 +3,7 @@
 # Principal plot functions ------------------------------------------------
 
 plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
-                               ts = TRUE, type = 1, replicates = FALSE, nrep = 3,
+                               ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                                ci = TRUE, freq = 12, horizontal = FALSE, 
                                conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
                                col = "black", alpha = 0.1, lwd = 2.5, speciesNames = NULL, ...) {
@@ -52,7 +52,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 
 # Internal plot functions -------------------------------------------------
 
-plotTsType1 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
+plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = "black", alpha = 0.1, lwd = 2.5,
                        speciesNames = NULL, ...) {
@@ -112,7 +112,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lwd, ...) {
   return(invisible())
 }
 
-plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
+plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = NULL, alpha = 0.1, lwd = 2.5,
                        speciesNames = NULL, ...) {
