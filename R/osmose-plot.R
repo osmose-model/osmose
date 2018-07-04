@@ -7,28 +7,33 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicate
                                conf = 0.95, factor = 1e-6, xlim = NULL, ylim = NULL,
                                col = "black", alpha = 0.1, lwd = 2.5, speciesNames = NULL, unitNames = NULL, ...) {
   
+  # species indexation
+  if(!is.null(species)){
+    if(max(species)+1 > dim(x)[2]) stop("error on species indexation, incorrect value of species parameter")
+    x = x[ , (species + 1) , , drop = FALSE]}
+  
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
   
   if(isTRUE(ts)){
     
-    if(type == 1){plotTsType1(x = x, species = species, replicates = replicates, nrep = nrep, ci = ci, start = start,
+    if(type == 1){plotTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci, start = start,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = col, 
                               alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
     
-    if(type == 2){plotTsType2(x = x, species = species, replicates = replicates, nrep = nrep, ci = ci, start = start,
+    if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci, start = start,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = NULL, 
                               alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
     
-    if(type == 3){plotTsType3(x = x, species = species, start = start, freq = freq, factor = factor, 
+    if(type == 3){plotTsType3(x = x, start = start, freq = freq, factor = factor, 
                               xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, unitNames = unitNames, ...)}  
   }
   
   if(isFALSE(ts)){
-    if(type == 1){plotBarplot(x, species = species, ci = ci, horizontal = horizontal, col = col,
+    if(type == 1){plotBarplot(x, ci = ci, horizontal = horizontal, col = col,
                               factor = factor, speciesNames = speciesNames, unitNames = unitNames, ...)}
     
-    if(type == 2){plotBoxplot(x, species = species, horizontal = horizontal, col = col, 
+    if(type == 2){plotBoxplot(x, horizontal = horizontal, col = col, 
                               factor = factor, speciesNames = speciesNames, unitNames = unitNames, ...)}
   }
   
@@ -39,12 +44,11 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicate
 
 # Internal plot functions -------------------------------------------------
 
-plotTsType1 = function(x, species = NULL, replicates = FALSE, nrep = 3, ci = TRUE,
+plotTsType1 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
                        start = NULL, freq = 12, conf=0.95, factor=1e-6,
                        xlim=NULL, ylim=NULL, col = "black", alpha = 0.1, lwd = 2.5,
                        speciesNames = NULL, unitNames = NULL, ...) {
   
-  if(!is.null(species)){x = x[ , (species + 1) , , drop = FALSE]}
   start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
   times   = seq(from=start + 0.5/freq, by=1/freq, len=nrow(x))
   xlim    = if(is.null(xlim)) range(times)
@@ -101,12 +105,11 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lwd, ...) {
   return(invisible())
 }
 
-plotTsType2 = function(x, species = NULL, replicates = FALSE, nrep = 3, ci = TRUE,
+plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
                        start = NULL, freq = 12, conf=0.95, factor=1e-6,
                        xlim=NULL, ylim=NULL, col = NULL, alpha = 0.1, lwd = 2.5,
                        speciesNames = NULL, unitNames = NULL, ...) {
   
-  if(!is.null(species)){x = x[ , (species + 1) , , drop = FALSE]}
   start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
   times   = seq(from=start + 0.5/freq, by=1/freq, len=nrow(x))
   xlim    = if(is.null(xlim)) range(times)
@@ -136,12 +139,11 @@ plotTsType2 = function(x, species = NULL, replicates = FALSE, nrep = 3, ci = TRU
   return(invisible())
 }
 
-plotTsType3 = function(x, species = NULL, start = NULL, freq = 12, factor=1e-6,
+plotTsType3 = function(x, start = NULL, freq = 12, factor=1e-6,
                        xlim=NULL, ylim=NULL, col = NULL, 
                        speciesNames = NULL, unitNames = NULL, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
-  if(!is.null(species)){x = x[ , (species + 1), drop = FALSE]}
   start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
   
   x = factor*x
@@ -188,10 +190,9 @@ plotTsType3 = function(x, species = NULL, start = NULL, freq = 12, factor=1e-6,
   return(invisible())
 }
 
-plotBarplot = function(x, species = NULL, ci = FALSE, horizontal = FALSE, col = NULL, 
+plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL, 
                        factor = 1e-6, speciesNames = NULL, unitNames = NULL, ...) {
   
-  if(!is.null(species)){x = x[ , (species + 1) , , drop = FALSE]}
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
   
@@ -245,10 +246,9 @@ barplotCI = function(x, horizontal, col, factor, speciesNames, unitNames, ...) {
   
 }
 
-plotBoxplot = function(x, species = NULL, horizontal = FALSE, col = FALSE, 
+plotBoxplot = function(x, horizontal = FALSE, col = FALSE, 
                        factor = 1e-6, speciesNames = NULL, unitNames = NULL, ...) {
   
-  if(!is.null(species)){x = x[ , (species + 1) , , drop = FALSE]}
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
   
