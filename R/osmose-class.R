@@ -58,9 +58,9 @@
 plot.osmose = function(x, what = "biomass", ...) {
   
   x = getVar(x, var = what, expected = FALSE)
-  out = plot(x, ...)
+  plot(x, ...)
   
-  return(out)
+  return(invisible())
 }
 
 
