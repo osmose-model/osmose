@@ -24,6 +24,11 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicate
                               xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, unitNames = unitNames, ...)}  
   }
   
+  if(isFALSE(ts)){
+    if(type == 1){plotBarplot(x, species = species, ci = ci, horizontal = horizontal, col = col,
+                              factor = factor, speciesNames = speciesNames, unitNames = unitNames, ...)}
+  }
+  
    
   return(invisible())
 }
@@ -178,4 +183,61 @@ plotTsType3 = function(x, species = NULL, start = NULL, freq = 12, factor=1e-6,
   legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
   
   return(invisible())
+}
+
+plotBarplot = function(x, species = NULL, ci = FALSE, horizontal = FALSE, col = NULL, 
+                       factor = 1e-6, speciesNames = NULL, unitNames = NULL, ...) {
+  
+  if(!is.null(species)){x = x[ , (species + 1) , , drop = FALSE]}
+  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
+  
+  if(isFALSE(ci)){
+    x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
+    x = x * factor
+    if(isFALSE(horizontal)){
+      par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
+      ylim = c(0, 1.2*max(x)) 
+      xlim = NULL
+    } else {
+      par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)
+      xlim = c(0, 1.2*max(x)) 
+      ylim = NULL
+    } 
+    
+    barplot(x, horiz = horizontal, names.arg = speciesNames, col = col, ylim = ylim, xlim = xlim, cex.names = 0.8, ...)
+    
+  } else {
+    barplotCI(x, horizontal = horizontal, col = col, factor = factor,
+              speciesNames = speciesNames, unitNames = unitNames, ...)
+  }
+  
+  box()
+  mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
+  
+  return(invisible())
+}  
+
+barplotCI = function(x, horizontal, col, factor, speciesNames, unitNames, ...) {
+  
+  y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
+  y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
+  if(isFALSE(horizontal)){
+    ylim = c(0, 1.2*max(y.mean)) 
+    xlim = NULL
+    par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
+  } else {
+    xlim = c(0, 1.2*max(y.mean)) 
+    ylim = NULL
+    par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)
+  } 
+  barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col, ylim = ylim, xlim = xlim, cex.names = 0.8, ...)
+  
+  if(isFALSE(horizontal)){
+    arrows(barx, y.mean + 1.96*y.sd/10, barx, y.mean - 1.96*y.sd/10, angle = 90, code = 3, length = 0.10, ...)
+  } else {
+    arrows(y.mean - 1.96*y.sd/10, barx, y.mean + 1.96*y.sd/10, barx, angle = 90, code = 3, length = 0.10, ...)
+  }
+  
+  
 }
