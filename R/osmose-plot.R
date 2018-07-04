@@ -27,6 +27,9 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicate
   if(isFALSE(ts)){
     if(type == 1){plotBarplot(x, species = species, ci = ci, horizontal = horizontal, col = col,
                               factor = factor, speciesNames = speciesNames, unitNames = unitNames, ...)}
+    
+    if(type == 2){plotBoxplot(x, species = species, horizontal = horizontal, col = col, 
+                              factor = factor, speciesNames = speciesNames, unitNames = unitNames, ...)}
   }
   
    
@@ -240,4 +243,22 @@ barplotCI = function(x, horizontal, col, factor, speciesNames, unitNames, ...) {
   }
   
   
+}
+
+plotBoxplot = function(x, species = NULL, horizontal = FALSE, col = FALSE, 
+                       factor = 1e-6, speciesNames = NULL, unitNames = NULL, ...) {
+  
+  if(!is.null(species)){x = x[ , (species + 1) , , drop = FALSE]}
+  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
+  
+  if(isFALSE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
+  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
+  
+  x = apply(x*factor, c(1,2), mean, na.rm = TRUE) #mean over the replicates
+  
+  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, ...)
+  mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
+  
+  return(invisible())
 }
