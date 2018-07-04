@@ -178,7 +178,7 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   
   for(sp in seq_len(ncol(x))) {
     
-    lines(times, dataSpecies[, sp])
+    #lines(times, dataSpecies[, sp])
     
     x.pol = c(times, rev(times))
     y.pol = c(dataSpecies[, sp], rep(0, times = nrow(x)))
