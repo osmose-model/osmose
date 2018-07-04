@@ -5,7 +5,7 @@
 plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                                ts = TRUE, type = 1, replicates = FALSE, nrep = 3,
                                ci = TRUE, freq = 12, horizontal = FALSE, 
-                               conf = 0.95, factor = 1e-6, xlim = NULL, ylim = NULL,
+                               conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
                                col = "black", alpha = 0.1, lwd = 2.5, speciesNames = NULL, unitNames = NULL, ...) {
   
   # species indexation
@@ -53,7 +53,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 # Internal plot functions -------------------------------------------------
 
 plotTsType1 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
-                       initialYear = NULL, freq = 12, conf=0.95, factor=1e-6,
+                       initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = "black", alpha = 0.1, lwd = 2.5,
                        speciesNames = NULL, unitNames = NULL, ...) {
   
@@ -114,7 +114,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lwd, ...) {
 }
 
 plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
-                       initialYear = NULL, freq = 12, conf=0.95, factor=1e-6,
+                       initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = NULL, alpha = 0.1, lwd = 2.5,
                        speciesNames = NULL, unitNames = NULL, ...) {
   
@@ -147,7 +147,7 @@ plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
   return(invisible())
 }
 
-plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-6,
+plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
                        xlim=NULL, ylim=NULL, col = NULL, 
                        speciesNames = NULL, unitNames = NULL, ...) {
   
@@ -199,7 +199,7 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-6,
 }
 
 plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL, 
-                       factor = 1e-6, speciesNames = NULL, unitNames = NULL, ...) {
+                       factor = 1e-3, speciesNames = NULL, unitNames = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
@@ -255,7 +255,7 @@ barplotCI = function(x, horizontal, col, factor, speciesNames, unitNames, ...) {
 }
 
 plotBoxplot = function(x, horizontal = FALSE, col = FALSE, 
-                       factor = 1e-6, speciesNames = NULL, unitNames = NULL, ...) {
+                       factor = 1e-3, speciesNames = NULL, unitNames = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
