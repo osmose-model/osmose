@@ -195,8 +195,8 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   return(invisible())
 }
 
-plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, ...) {
+plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = "gray", 
+                       factor = 1e-3, speciesNames = NULL, border = NA, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   
@@ -213,11 +213,12 @@ plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL,
       ylim = NULL
     } 
     
-    barplot(x, horiz = horizontal, names.arg = speciesNames, col = col, ylim = ylim, xlim = xlim, cex.names = 0.8, ...)
+    barplot(x, horiz = horizontal, names.arg = speciesNames, col = col,
+            ylim = ylim, xlim = xlim, cex.names = 0.8, border = border, ...)
     
   } else {
     barplotCI(x, horizontal = horizontal, col = col, factor = factor,
-              speciesNames = speciesNames, ...)
+              speciesNames = speciesNames, border = border, ...)
   }
   
   box()
@@ -226,7 +227,7 @@ plotBarplot = function(x, ci = FALSE, horizontal = FALSE, col = NULL,
   return(invisible())
 }  
 
-barplotCI = function(x, horizontal, col, factor, speciesNames, ...) {
+barplotCI = function(x, horizontal, col, factor, speciesNames, border, ...) {
   
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
@@ -239,7 +240,7 @@ barplotCI = function(x, horizontal, col, factor, speciesNames, ...) {
     ylim = NULL
     par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)
   } 
-  barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col, ylim = ylim, xlim = xlim, cex.names = 0.8, ...)
+  barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col, ylim = ylim, xlim = xlim, cex.names = 0.8, border = border, ...)
   
   if(isFALSE(horizontal)){
     arrows(barx, y.mean + 1.96*y.sd/10, barx, y.mean - 1.96*y.sd/10, angle = 90, code = 3, length = 0.10, ...)
