@@ -2,8 +2,9 @@
 
 # Principal plot functions ------------------------------------------------
 
-plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicates = FALSE, nrep = 3,
-                               ci = TRUE, start = NULL, freq = 12, horizontal = FALSE, 
+plot.osmose.biomass = function(x, species = NULL, initialYear = NULL,
+                               ts = TRUE, type = 1, replicates = FALSE, nrep = 3,
+                               ci = TRUE, freq = 12, horizontal = FALSE, 
                                conf = 0.95, factor = 1e-6, xlim = NULL, ylim = NULL,
                                col = "black", alpha = 0.1, lwd = 2.5, speciesNames = NULL, unitNames = NULL, ...) {
   
@@ -17,15 +18,15 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicate
   
   if(isTRUE(ts)){
     
-    if(type == 1){plotTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci, start = start,
+    if(type == 1){plotTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = col, 
                               alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
     
-    if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci, start = start,
+    if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = NULL, 
                               alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
     
-    if(type == 3){plotTsType3(x = x, start = start, freq = freq, factor = factor, 
+    if(type == 3){plotTsType3(x = x, initialYear = initialYear, freq = freq, factor = factor, 
                               xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, unitNames = unitNames, ...)}  
   }
   
@@ -45,12 +46,12 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicate
 # Internal plot functions -------------------------------------------------
 
 plotTsType1 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
-                       start = NULL, freq = 12, conf=0.95, factor=1e-6,
+                       initialYear = NULL, freq = 12, conf=0.95, factor=1e-6,
                        xlim=NULL, ylim=NULL, col = "black", alpha = 0.1, lwd = 2.5,
                        speciesNames = NULL, unitNames = NULL, ...) {
   
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  times   = seq(from=start + 0.5/freq, by=1/freq, len=nrow(x))
+  initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
+  times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
   xlim    = if(is.null(xlim)) range(times)
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   
@@ -106,12 +107,12 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lwd, ...) {
 }
 
 plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
-                       start = NULL, freq = 12, conf=0.95, factor=1e-6,
+                       initialYear = NULL, freq = 12, conf=0.95, factor=1e-6,
                        xlim=NULL, ylim=NULL, col = NULL, alpha = 0.1, lwd = 2.5,
                        speciesNames = NULL, unitNames = NULL, ...) {
   
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-  times   = seq(from=start + 0.5/freq, by=1/freq, len=nrow(x))
+  initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
+  times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
   xlim    = if(is.null(xlim)) range(times)
   ylim    = if(is.null(ylim)) c(0.75, 1.25)*c(min(apply(x, 2, min)), max(apply(x, 2, max)))
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
@@ -139,12 +140,12 @@ plotTsType2 = function(x, replicates = FALSE, nrep = 3, ci = TRUE,
   return(invisible())
 }
 
-plotTsType3 = function(x, start = NULL, freq = 12, factor=1e-6,
+plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-6,
                        xlim=NULL, ylim=NULL, col = NULL, 
                        speciesNames = NULL, unitNames = NULL, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
-  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
+  initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
   
   x = factor*x
   x = x[, order(apply(x, 2, sum, na.rm = TRUE), decreasing = TRUE)]
@@ -158,7 +159,7 @@ plotTsType3 = function(x, start = NULL, freq = 12, factor=1e-6,
   }
   colnames(dataSpecies) = colnames(x)
   
-  times   = seq(from=start + 0.5/freq, by=1/freq, len=nrow(x))
+  times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
   xlim    = if(is.null(xlim)) range(times)
   ylim    = if(is.null(ylim)) c(0.75, 1.25)*range(dataSpecies[, dim(dataSpecies)[2]])
   
