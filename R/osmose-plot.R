@@ -11,8 +11,13 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, replicate
   on.exit(par(opar))
   
   if(isTRUE(ts)){
+    
     if(type == 1){plotTsType1(x = x, species = species, replicates = replicates, nrep = nrep, ci = ci, start = start,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = col, 
+                              alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
+    
+    if(type == 2){plotTsType2(x = x, species = species, replicates = replicates, nrep = nrep, ci = ci, start = start,
+                              freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = NULL, 
                               alpha = alpha, lwd = lwd, speciesNames = speciesNames, unitNames = unitNames, ...)}
   }
   
@@ -85,3 +90,37 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lwd, ...) {
   return(invisible())
 }
 
+plotTsType2 = function(x, species = NULL, replicates = FALSE, nrep = 3, ci = TRUE,
+                       start = NULL, freq = 12, conf=0.95, factor=1e-6,
+                       xlim=NULL, ylim=NULL, col = NULL, alpha = 0.1, lwd = 2.5,
+                       speciesNames = NULL, unitNames = NULL, ...) {
+  
+  if(!is.null(species)){x = x[ , (species + 1) , , drop = FALSE]}
+  start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
+  times   = seq(from=start + 0.5/freq, by=1/freq, len=nrow(x))
+  xlim    = if(is.null(xlim)) range(times)
+  ylim    = if(is.null(ylim)) c(0.75, 1.25)*c(min(apply(x, 2, min)), max(apply(x, 2, max)))
+  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  if(is.null(col)) col = rainbow(n = ncol(x)) else col = col
+  par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
+  
+  prob = 1 - conf
+  plot.new()
+  plot.window(xlim=xlim, ylim=ylim*factor)
+  
+  for(sp in seq_len(ncol(x))) {
+    xsp   = factor*x[, sp, ,drop = FALSE]
+    
+    plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
+           prob = prob, col = col[sp], alpha = alpha, lwd = lwd, ...)
+  }
+  axis(1)
+  axis(2, las=2)
+  box()
+  
+  if(is.null(unitNames)) unitNames = expression(paste("x", 10^{6}, "tonnes")) else unitNames = unitNames
+  mtext(text = unitNames, side = 3, line = 0, adj = 0, cex = 0.9)
+  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
+  
+  return(invisible())
+}
