@@ -31,7 +31,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
     
     if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
                               freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = NULL, 
-                              alpha = alpha, lwd = lwd, speciesNames = speciesNames, ...)}
+                              alpha = alpha, speciesNames = speciesNames, ...)}
     
     if(type == 3){plotTsType3(x = x, initialYear = initialYear, freq = freq, factor = factor, 
                               xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, ...)}  
@@ -114,8 +114,8 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
 
 plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
-                       xlim=NULL, ylim=NULL, col = NULL, alpha = 0.5, lwd = 1.5,
-                       speciesNames = NULL, border = NA, ...) {
+                       xlim=NULL, ylim=NULL, col = NULL, alpha = 0.5, 
+                       speciesNames = NULL, ...) {
   
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
   times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
@@ -133,7 +133,7 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     xsp   = factor*x[, sp, ,drop = FALSE]
     
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, lwd = lwd, border = border, ...)
+           prob = prob, col = col[sp], alpha = alpha, ...)
   }
   axis(1)
   axis(2, las=2)
