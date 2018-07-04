@@ -2,7 +2,7 @@
 
 # Principal plot functions ------------------------------------------------
 
-plot.osmose.biomass = function(x, species = NULL, initialYear = NULL,
+plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                                ts = TRUE, type = 1, replicates = FALSE, nrep = 3,
                                ci = TRUE, freq = 12, horizontal = FALSE, 
                                conf = 0.95, factor = 1e-6, xlim = NULL, ylim = NULL,
@@ -10,8 +10,15 @@ plot.osmose.biomass = function(x, species = NULL, initialYear = NULL,
   
   # species indexation
   if(!is.null(species)){
-    if(max(species)+1 > dim(x)[2]) stop("error on species indexation, incorrect value of species parameter")
+    if(max(species)+1 > dim(x)[2]) stop("error on species indexation, incorrect value in species parameter")
     x = x[ , (species + 1) , , drop = FALSE]}
+  
+  # time indexation
+  if(is.null(start)) start = 1 else start = start
+  if(is.null(end)) end = dim(x)[1] else end = end
+  if(!start > 0 | !start < end) stop("error on time indexation, incorrect value in start parameter")
+  if(!end > 0 | !end > start) stop("error on time indexation, incorrect value in end parameter")
+  x = x[c(start:end), , ,drop = FALSE]
   
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
