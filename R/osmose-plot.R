@@ -23,7 +23,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
   # xlim 
   initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
   times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
-  if(is.null(xlim)) xlim = range(times) else xlim = xlim
+  xlim = if(is.null(xlim)) range(times)
   
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
