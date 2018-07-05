@@ -246,11 +246,11 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
   
   if(isFALSE(horizontal)){
     mar = c(2.5,2,1,0.3)
-    ylim = c(0, 1.2*max(y.mean))
+    ylim = c(0, 1.2*(max(y.mean)+1.96*max(y.sd)/10))
     xlim = NULL
   } else {
     mar = c(2,5.5,1,0.3)
-    xlim = c(0, 1.2*max(y.mean))
+    xlim = c(0, 1.2*(max(y.mean)+1.96*max(y.sd)/10))
     ylim = NULL
   }
   
