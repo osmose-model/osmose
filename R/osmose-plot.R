@@ -131,7 +131,8 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   }
   
   par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
-  if(is.null(col)) col = rainbow(n = ncol(x)) else col = col
+  if(is.null(col)) col = .recycleArguments(rainbow(dim(x)[2]),dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
+  #if(is.null(col)) col = rainbow(n = ncol(x)) else col = col
   
   prob = 1 - conf
   plot.new()
