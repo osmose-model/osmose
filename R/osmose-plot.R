@@ -35,9 +35,10 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
                               conf = conf, factor = factor, col = col, alpha = alpha,
                               speciesNames = speciesNames, ...)}
     
-    if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci, initialYear = initialYear,
-                              freq = freq, conf = conf, factor = factor, xlim = xlim, ylim = ylim, col = col, 
-                              alpha = alpha, speciesNames = speciesNames, ...)}
+    if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
+                              initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
+                              conf = conf, factor = factor, col = col, alpha = alpha,
+                              speciesNames = speciesNames, ...)}
     
     if(type == 3){plotTsType3(x = x, initialYear = initialYear, freq = freq, factor = factor, 
                               xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, ...)}  
@@ -117,22 +118,24 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
 }
 
 plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                       initialYear = NULL, freq = 12, conf=0.95, factor=1e-3,
-                       xlim=NULL, ylim=NULL, col = NULL, alpha = 0.5, 
+                       initialYear, times, xlim, ylim=NULL, 
+                       conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
                        speciesNames = NULL, ...) {
   
-  
-  initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
-  times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
-  xlim    = if(is.null(xlim)) range(times)
-  ylim    = if(is.null(ylim)) c(0.75, 1.25)*c(min(apply(x, 2, min)), max(apply(x, 2, max)))
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
-  if(is.null(col)) col = rainbow(n = ncol(x)) else col = col
+  if(is.null(ylim)){
+    ylim    = if(is.null(ylim)) c(0.75, 1.25)*c(min(apply(x, 2, min))*factor, max(apply(x, 2, max))*factor)
+  } else {
+    ylim = ylim
+  }
+  
+  
   par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
+  if(is.null(col)) col = rainbow(n = ncol(x)) else col = col
   
   prob = 1 - conf
   plot.new()
-  plot.window(xlim=xlim, ylim=ylim*factor)
+  plot.window(xlim=xlim, ylim=ylim)
   
   for(sp in seq_len(ncol(x))) {
     xsp   = factor*x[, sp, ,drop = FALSE]
