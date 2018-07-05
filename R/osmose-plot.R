@@ -40,8 +40,9 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
                               conf = conf, factor = factor, col = col, alpha = alpha,
                               speciesNames = speciesNames, ...)}
     
-    if(type == 3){plotTsType3(x = x, initialYear = initialYear, freq = freq, factor = factor, 
-                              xlim = xlim, ylim = ylim, col = col, speciesNames = speciesNames, ...)}  
+    if(type == 3){plotTsType3(x = x, initialYear = initialYear, times = times,
+                              xlim = xlim, ylim = ylim, factor = factor, 
+                              col = col, speciesNames = speciesNames, ...)}  
   }
   
   if(isFALSE(ts)){
@@ -129,7 +130,6 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     ylim = ylim
   }
   
-  
   par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
   if(is.null(col)) col = rainbow(n = ncol(x)) else col = col
   
@@ -153,16 +153,13 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   return(invisible())
 }
 
-plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
-                       xlim=NULL, ylim=NULL, col = NULL, 
-                       speciesNames = NULL, legend = TRUE, ...) {
+plotTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
+                       col = NULL, speciesNames = NULL, legend = TRUE, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
-  initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
   
   x = factor*x
   x = x[, order(apply(x, 2, sum, na.rm = TRUE), decreasing = TRUE)]
-  
   xsp0 = rep(0, times = nrow(x))
   dataSpecies = NULL
   for (sp in seq_len(ncol(x))) {
@@ -172,9 +169,11 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   }
   colnames(dataSpecies) = colnames(x)
   
-  times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
-  xlim    = if(is.null(xlim)) range(times)
-  ylim    = if(is.null(ylim)) c(0.75, 1.25)*range(dataSpecies[, dim(dataSpecies)[2]])
+  if(is.null(ylim)){
+    ylim = if(is.null(ylim)) c(0.75, 1.25)*range(dataSpecies[, dim(dataSpecies)[2]])
+  } else {
+    ylim = ylim
+  }
   
   par(oma = c(1,1,1,1), mar = c(2,2,1,0.5), xaxs = "i", yaxs = "i")
   plot.new()
@@ -187,7 +186,6 @@ plotTsType3 = function(x, initialYear = NULL, freq = 12, factor=1e-3,
   for(sp in seq_len(ncol(x))) {
     
     #lines(times, dataSpecies[, sp])
-    
     x.pol = c(times, rev(times))
     y.pol = c(dataSpecies[, sp], rep(0, times = nrow(x)))
     polygon(x.pol, y.pol, border=NA, col = col[sp], ...)
