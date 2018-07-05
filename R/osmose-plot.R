@@ -69,8 +69,8 @@ plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   
   par(oma = c(1,1,1,1), mar = c(3,3,1,1))
   par(mfrow = getmfrow(ncol(x)))
-  if(is.null(col)) col="black"
-  
+  if(is.null(col)) col = .recycleArguments("black",dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
+
   prob = 1 - conf
   
   for(sp in seq_len(ncol(x))) {
@@ -80,7 +80,7 @@ plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plot.new()
     plot.window(xlim=xlim, ylim=ylim)
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col, alpha = alpha, ...)
+           prob = prob, col = col[sp], alpha = alpha, ...)
     axis(1)
     axis(2, las=2)
     box()
@@ -285,4 +285,13 @@ plotBoxplot = function(x, horizontal = FALSE, col = NULL,
   mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
   
   return(invisible())
+}
+
+.recycleArguments = function(x, length) {
+  
+  if(length(x) < length(1:length)) {x = rep(x, length.out = length)}
+  if(length(x) == length(1:length)) {x = x}
+  if(length(x) > length(1:length)) {x = x[c(1:length(1:length))]}
+  
+  return(x)
 }
