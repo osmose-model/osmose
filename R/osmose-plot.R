@@ -1,6 +1,7 @@
 
 # Plot methods ------------------------------------------------------------
 
+#' @export
 plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                                ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                                ci = TRUE, freq = 12, horizontal = FALSE, 
@@ -15,6 +16,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
   return(invisible())
 }
 
+#' @export
 plot.osmose.abundance = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                                  ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                                  ci = TRUE, freq = 12, horizontal = FALSE, 
@@ -28,7 +30,7 @@ plot.osmose.abundance = function(x, species = NULL, start = NULL, end = NULL, in
   
   return(invisible())
 }
-
+#' @export
 plot.osmose.yield = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                              ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                              ci = TRUE, freq = 12, horizontal = FALSE, 
@@ -43,6 +45,7 @@ plot.osmose.yield = function(x, species = NULL, start = NULL, end = NULL, initia
   return(invisible())
 }
 
+#' @export
 plot.osmose.yieldN = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                               ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                               ci = TRUE, freq = 12, horizontal = FALSE, 
