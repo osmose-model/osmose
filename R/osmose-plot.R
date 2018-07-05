@@ -63,14 +63,15 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear, times, xlim, ylim = NULL,
                        conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
-                       speciesNames = NULL, ...) {
+                       speciesNames = NULL, lty = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   
   par(oma = c(1,1,1,1), mar = c(3,3,1,1))
   par(mfrow = getmfrow(ncol(x)))
   if(is.null(col)) col = .recycleArguments("black",dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
-
+  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
+  
   prob = 1 - conf
   
   for(sp in seq_len(ncol(x))) {
@@ -80,7 +81,7 @@ plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plot.new()
     plot.window(xlim=xlim, ylim=ylim)
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, ...)
+           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], ...)
     axis(1)
     axis(2, las=2)
     box()
@@ -94,10 +95,10 @@ plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   return(invisible())
 }
 
-plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = NA, ...) {
+plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = NA, lty, ...) {
   
   if(dim(x)[3] == 1){
-    lines(x = y, y = apply(x, 1, mean, na.rm = TRUE), col = col, ...)
+    lines(x = y, y = apply(x, 1, mean, na.rm = TRUE), col = col, lty = lty, ...)
     return(invisible())
   }
   
@@ -110,10 +111,10 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
   if(isTRUE(replicates)) {
     polygon(x.pol, y.pol, col=makeTransparent(col=col, alpha=alpha), border = border, ...)
     nrep = max(min(nrep, dim(x)[3]),2)
-    matplot(y, x[,,seq_len(nrep)], add=TRUE, type="l", lty = 1, 
+    matplot(y, x[,,seq_len(nrep)], add=TRUE, type="l", lty = lty, 
             col=makeTransparent(col=col, alpha=(alpha + 2)/3))
   }
-  lines(y, x.50, col = col, ...)
+  lines(y, x.50, col = col, lty = lty, ...)
   
   return(invisible())
 }
@@ -121,7 +122,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
 plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                        initialYear, times, xlim, ylim=NULL, 
                        conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                       speciesNames = NULL, ...) {
+                       speciesNames = NULL, lty = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
@@ -132,7 +133,7 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   
   par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
   if(is.null(col)) col = .recycleArguments(rainbow(dim(x)[2]),dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
-  #if(is.null(col)) col = rainbow(n = ncol(x)) else col = col
+  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
   
   prob = 1 - conf
   plot.new()
@@ -142,14 +143,14 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     xsp   = factor*x[, sp, ,drop = FALSE]
     
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, ...)
+           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], ...)
   }
   axis(1)
   axis(2, las=2)
   box()
   
   mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
-  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
+  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = lty)
   
   return(invisible())
 }
