@@ -160,37 +160,37 @@ plotTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
   
   x = factor*x
-  x = x[, order(apply(x, 2, sum, na.rm = TRUE), decreasing = TRUE)]
-  xsp0 = rep(0, times = nrow(x))
+  orderData = order(apply(x, 2, sum, na.rm = TRUE), decreasing = FALSE)
+  x = x[, orderData]
+  
   dataSpecies = NULL
   for (sp in seq_len(ncol(x))) {
-    xsp  = xsp0 + x[, sp]
+    xsp  = apply(as.data.frame(x[, c(sp:(dim(x))[2])]), 1, sum, na.rm = TRUE)
     dataSpecies = cbind(dataSpecies, xsp)
-    xsp0 = xsp
   }
   colnames(dataSpecies) = colnames(x)
   
-  if(is.null(ylim)){
-    ylim = if(is.null(ylim)) c(0.75, 1.25)*range(dataSpecies[, dim(dataSpecies)[2]])
+  if(is.null(ylim)){ylim = if(is.null(ylim)) c(0.75, 1.25)*range(dataSpecies[, 1])
+  } else {ylim = ylim}
+  
+  if(is.null(speciesNames)) speciesNames = toupper(colnames(dataSpecies)) else speciesNames = speciesNames[orderData]
+  if(is.null(col)) {
+    col = .recycleArguments(rainbow(ncol(dataSpecies)), ncol(dataSpecies))
   } else {
-    ylim = ylim
-  }
+    col = .recycleArguments(col, ncol(dataSpecies))
+    col = col[orderData]
+  } 
+  #if(is.null(col)) col = rainbow(n = ncol(dataSpecies)) else col = col
   
   par(oma = c(1,1,1,1), mar = c(2,2,1,0.5), xaxs = "i", yaxs = "i")
   plot.new()
   plot.window(xlim=xlim, ylim=ylim)
   
-  dataSpecies = dataSpecies[, order(apply(dataSpecies, 2, sum, na.rm = TRUE), decreasing = TRUE)]
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(dataSpecies)) else speciesNames = speciesNames
-  if(is.null(col)) col = rainbow(n = ncol(dataSpecies)) else col = col
-  
   for(sp in seq_len(ncol(x))) {
-    
     #lines(times, dataSpecies[, sp])
     x.pol = c(times, rev(times))
     y.pol = c(dataSpecies[, sp], rep(0, times = nrow(x)))
     polygon(x.pol, y.pol, border=NA, col = col[sp], ...)
-    
   }
   
   axis(1)
@@ -201,7 +201,6 @@ plotTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
   if(isTRUE(legend)){
     legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
   }
-  
   
   return(invisible())
 }
