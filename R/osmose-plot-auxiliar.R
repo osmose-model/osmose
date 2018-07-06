@@ -43,11 +43,11 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   }
   
   if(isFALSE(ts)){
-    if(type == 1){plotBarplot(x, ci = ci, horizontal = horizontal, col = col,
-                              factor = factor, speciesNames = speciesNames, ...)}
+    if(type == 1){plotType1(x, ci = ci, horizontal = horizontal, col = col,
+                            factor = factor, speciesNames = speciesNames, ...)}
     
-    if(type == 2){plotBoxplot(x, horizontal = horizontal, col = col, 
-                              factor = factor, speciesNames = speciesNames, ...)}
+    if(type == 2){plotType2(x, horizontal = horizontal, col = col, 
+                            factor = factor, speciesNames = speciesNames, ...)}
   }
   
   
@@ -202,9 +202,9 @@ plotTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
   return(invisible())
 }
 
-plotBarplot = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
-                       factor = 1e-3, speciesNames = NULL, border = NA,
-                       cex.names = 0.8, ...) {
+plotType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
+                     factor = 1e-3, speciesNames = NULL, border = NA,
+                     cex.names = 0.8, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
@@ -267,8 +267,8 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
   
 }
 
-plotBoxplot = function(x, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, ...) {
+plotType2 = function(x, horizontal = FALSE, col = NULL, 
+                     factor = 1e-3, speciesNames = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
