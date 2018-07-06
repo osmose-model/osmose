@@ -48,6 +48,9 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
     
     if(type == 2){plotType2(x, horizontal = horizontal, col = col, 
                             factor = factor, speciesNames = speciesNames, ...)}
+    
+    if(type == 3){plotType3(x, horizontal = horizontal, col = col, 
+                            factor = factor, speciesNames = speciesNames, ...)}
   }
   
   
@@ -267,6 +270,7 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
   
 }
 
+#boxplot with mean over the replicates
 plotType2 = function(x, horizontal = FALSE, col = NULL, 
                      factor = 1e-3, speciesNames = NULL, ...) {
   
@@ -291,4 +295,22 @@ plotType2 = function(x, horizontal = FALSE, col = NULL,
   if(length(x) > length(1:length)) {x = x[c(1:length(1:length))]}
   
   return(x)
+}
+
+# boxplot with mean over the time
+plotType3 = function(x, horizontal = FALSE, col = NULL, 
+                     factor = 1e-3, speciesNames = NULL, ...) {
+  
+  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  if(is.null(col)) col="gray"
+  
+  if(isFALSE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
+  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
+  
+  x = apply(x*factor, c(3,2), mean, na.rm = TRUE) #mean over the time
+  
+  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, ...)
+  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
+  
+  return(invisible())
 }
