@@ -4,19 +4,10 @@
 \alias{plot.osmose}
 \title{Plot method for osmose objects}
 \usage{
-\method{plot}{osmose}(x, type = "biomass", ...)
+\method{plot}{osmose}(x, what = "biomass", ...)
 }
 \arguments{
 \item{x}{Object of \code{osmose} class (see the \code{\link{read_osmose}} function).}
-
-\item{type}{Name of the variable to plot. By default is \code{type = "biomass"} but 
-it could be:
-\itemize{
- \item "biomass" to plot the species biomass.
- \item "abundance" to plot the species abundance.
- \item "yield" to plot the species yield.
- \item "yieldN" to plot the species yield (in numbers).
-}}
 
 \item{...}{Extra arguments of the function. These could be:
 \itemize{
@@ -41,6 +32,15 @@ it could be:
  By default \code{col = "black"}.
  \item alpha A number between 0 and 1. Indicate the transparency with which the 
  confidence interval is colored. By default \code{alpha = 0.5}.
+}}
+
+\item{type}{Name of the variable to plot. By default is \code{type = "biomass"} but 
+it could be:
+\itemize{
+ \item "biomass" to plot the species biomass.
+ \item "abundance" to plot the species abundance.
+ \item "yield" to plot the species yield.
+ \item "yieldN" to plot the species yield (in numbers).
 }}
 }
 \value{
