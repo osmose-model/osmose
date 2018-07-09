@@ -7,14 +7,14 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   
   # species indexation
   if(!is.null(species)){
-    if(max(species)+1 > dim(x)[2]) stop("error on species indexation, incorrect value in species parameter")
+    if(max(species)+1 > dim(x)[2]) stop("error on species indexation, incorrect value in the parameter called species")
     x = x[ , (species + 1) , , drop = FALSE]}
   
   # time indexation
   if(is.null(start)) start = 1 else start = start
   if(is.null(end)) end = dim(x)[1] else end = end
-  if(!start > 0 | !start < end) stop("error on time indexation, incorrect value in start parameter")
-  if(!end > 0 | !end > start) stop("error on time indexation, incorrect value in end parameter")
+  if(!start > 0 | !start < end) stop("error on time indexation, incorrect value the parameter called start")
+  if(!end > 0 | !end > start) stop("error on time indexation, incorrect value in the parameter called")
   x = x[c(start:end), , ,drop = FALSE]
   
   # xlim 
