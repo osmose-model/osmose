@@ -28,9 +28,9 @@
 #'   }
 #' }
 #' @export
-runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version=3, osmose=NULL, java="java", 
-                     options=NULL, verbose=TRUE, clean=TRUE) {
+run_osmose = function(input, parameters = NULL, output = "output", log = "osmose.log",
+                      version = 3, osmose = NULL, java = "java",
+                      options = NULL, verbose = TRUE, clean = TRUE) {
   
   # barrier.n: redirection 
   
@@ -40,7 +40,7 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
   
   # update to provide by release executables
   if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_stable_%s.jar", version),
-                                            package="osmose", mustWork = TRUE)
+                                           package="osmose", mustWork = TRUE)
   
   if(isTRUE(clean)) 
     file.remove(file.path(output, dir(path=output, recursive=TRUE)))
@@ -68,6 +68,19 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
   
   return(invisible(command))
   
+}
+
+#' Title
+#' @export
+runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
+                     version=3, osmose=NULL, java="java", 
+                     options=NULL, verbose=TRUE, clean=TRUE) {
+  
+  message("runOsmose will be deprecated, use run_osmose instead.")
+  
+  run_osmose(input = input, parameters = parameters, output = output,
+             log = log, version = version, osmose = osmose, java = java, 
+             options = options, verbose = verbose, clean = clean) 
 }
 
 
