@@ -86,7 +86,9 @@ plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     box()
     
     mtext(speciesNames[sp], 3, line = -1.5, adj = 0.05, cex = 0.80)
-    mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.75)
+    legendFactor = -(log10(factor))
+    legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+    mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.75)
     
     ylim = NULL 
   }
@@ -148,7 +150,10 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   axis(2, las=2)
   box()
   
-  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
+  legendFactor = -(log10(factor))
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
+  
   legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = lty)
   
   return(invisible())
@@ -196,7 +201,10 @@ plotTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
   axis(1)
   axis(2, las=2)
   box()
-  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
+  
+  legendFactor = -(log10(factor))
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
   
   if(isTRUE(legend)){
     legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
@@ -235,7 +243,9 @@ plotType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
   }
   
   box()
-  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
+  legendFactor = -(log10(factor))
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
   
   return(invisible())
   
@@ -283,7 +293,10 @@ plotType2 = function(x, horizontal = FALSE, col = NULL,
   x = apply(x*factor, c(1,2), mean, na.rm = TRUE) #mean over the replicates
   
   boxplot(x, horizontal = horizontal, names = speciesNames, col = col, ...)
-  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
+  
+  legendFactor = -(log10(factor))
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
   
   return(invisible())
 }
@@ -310,7 +323,10 @@ plotType3 = function(x, horizontal = FALSE, col = NULL,
   x = apply(x*factor, c(3,2), mean, na.rm = TRUE) #mean over the time
   
   boxplot(x, horizontal = horizontal, names = speciesNames, col = col, ...)
-  mtext(text = expression(paste("x", 10^{3}, "tonnes")), side = 3, line = 0, adj = 0, cex = 0.9)
+  
+  legendFactor = -(log10(factor))
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
   
   return(invisible())
 }
