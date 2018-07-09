@@ -27,30 +27,30 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   
   if(isTRUE(ts)){
     
-    if(type == 1){plotTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
-                              initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
-                              conf = conf, factor = factor, col = col, alpha = alpha,
-                              speciesNames = speciesNames, ...)}
+    if(type == 1){plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
+                                initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
+                                conf = conf, factor = factor, col = col, alpha = alpha,
+                                speciesNames = speciesNames, ...)}
     
-    if(type == 2){plotTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
-                              initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
-                              conf = conf, factor = factor, col = col, alpha = alpha,
-                              speciesNames = speciesNames, ...)}
+    if(type == 2){plot2DTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
+                                initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
+                                conf = conf, factor = factor, col = col, alpha = alpha,
+                                speciesNames = speciesNames, ...)}
     
-    if(type == 3){plotTsType3(x = x, initialYear = initialYear, times = times,
-                              xlim = xlim, ylim = ylim, factor = factor, 
-                              col = col, speciesNames = speciesNames, ...)}  
+    if(type == 3){plot2DTsType3(x = x, initialYear = initialYear, times = times,
+                                xlim = xlim, ylim = ylim, factor = factor, 
+                                col = col, speciesNames = speciesNames, ...)}  
   }
   
   if(isFALSE(ts)){
-    if(type == 1){plotType1(x, ci = ci, horizontal = horizontal, col = col,
-                            factor = factor, speciesNames = speciesNames, ...)}
+    if(type == 1){plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
+                              factor = factor, speciesNames = speciesNames, ...)}
     
-    if(type == 2){plotType2(x, horizontal = horizontal, col = col, 
-                            factor = factor, speciesNames = speciesNames, ...)}
+    if(type == 2){plot2DType2(x, horizontal = horizontal, col = col, 
+                              factor = factor, speciesNames = speciesNames, ...)}
     
-    if(type == 3){plotType3(x, horizontal = horizontal, col = col, 
-                            factor = factor, speciesNames = speciesNames, ...)}
+    if(type == 3){plot2DType3(x, horizontal = horizontal, col = col, 
+                              factor = factor, speciesNames = speciesNames, ...)}
   }
   
   
@@ -59,10 +59,10 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
 
 # Plot types --------------------------------------------------------------
 
-plotTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                       initialYear, times, xlim, ylim = NULL,
-                       conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
-                       speciesNames = NULL, lty = NULL, ...) {
+plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
+                         initialYear, times, xlim, ylim = NULL,
+                         conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
+                         speciesNames = NULL, lty = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   
@@ -120,10 +120,10 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
   return(invisible())
 }
 
-plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                       initialYear, times, xlim, ylim=NULL, 
-                       conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                       speciesNames = NULL, lty = NULL, ...) {
+plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
+                         initialYear, times, xlim, ylim=NULL, 
+                         conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
+                         speciesNames = NULL, lty = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
@@ -159,8 +159,8 @@ plotTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   return(invisible())
 }
 
-plotTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
-                       col = NULL, speciesNames = NULL, legend = TRUE, ...) {
+plot2DTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
+                         col = NULL, speciesNames = NULL, legend = TRUE, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
   
@@ -213,9 +213,9 @@ plotTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
   return(invisible())
 }
 
-plotType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
-                     factor = 1e-3, speciesNames = NULL, border = NA,
-                     cex.names = 0.8, ...) {
+plot2DType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
+                       factor = 1e-3, speciesNames = NULL, border = NA,
+                       cex.names = 0.8, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
@@ -281,8 +281,8 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
 }
 
 #boxplot with mean over the replicates
-plotType2 = function(x, horizontal = FALSE, col = NULL, 
-                     factor = 1e-3, speciesNames = NULL, ...) {
+plot2DType2 = function(x, horizontal = FALSE, col = NULL, 
+                       factor = 1e-3, speciesNames = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
@@ -311,8 +311,8 @@ plotType2 = function(x, horizontal = FALSE, col = NULL,
 }
 
 # boxplot with mean over the time
-plotType3 = function(x, horizontal = FALSE, col = NULL, 
-                     factor = 1e-3, speciesNames = NULL, ...) {
+plot2DType3 = function(x, horizontal = FALSE, col = NULL, 
+                       factor = 1e-3, speciesNames = NULL, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
