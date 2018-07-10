@@ -127,7 +127,7 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
-    ylim    = if(is.null(ylim)) c(0.75, 1.25)*c(min(apply(x, 2, min))*factor, max(apply(x, 2, max))*factor)
+    ylim    = c(0.75, 1.25)*c(min(apply(x, 2, min))*factor, max(apply(x, 2, max))*factor)
   } else {
     ylim = ylim
   }
@@ -175,9 +175,7 @@ plot2DTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
   }
   colnames(dataSpecies) = colnames(x)
   
-  if(is.null(ylim)){ylim = if(is.null(ylim)) c(0.75, 1.25)*range(dataSpecies[, 1])
-  } else {ylim = ylim}
-  
+  if(is.null(ylim)){ylim = c(0.75, 1.25)*range(dataSpecies[, 1])} else {ylim = ylim}
   if(is.null(speciesNames)) speciesNames = toupper(colnames(dataSpecies)) else speciesNames = speciesNames[orderData]
   if(is.null(col)) {
     col = .recycleArguments(rainbow(ncol(dataSpecies)), ncol(dataSpecies))
