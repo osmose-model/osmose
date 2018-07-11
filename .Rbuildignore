@@ -6,3 +6,4 @@ README.md
 NEWS.md
 ^\docs$
 R/osmose.maps.R
+R/osmose.netcdf.R
