@@ -22,8 +22,8 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
   xlim = if(is.null(xlim)) range(times)
   
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  # opar = par(no.readonly = TRUE)
+  # on.exit(par(opar))
   
   if(isTRUE(ts)){
     
@@ -123,7 +123,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
 plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                          initialYear, times, xlim, ylim=NULL, 
                          conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                         speciesNames = NULL, lty = NULL, cex = 0.8, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
@@ -132,7 +132,7 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     ylim = ylim
   }
   
-  par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
+  # par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
   if(is.null(col)) col = .recycleArguments(rainbow(dim(x)[2]),dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
   if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
   
@@ -154,7 +154,9 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
   mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
-  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
+  if(isTRUE(legend)){
+    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
+  }
   
   return(invisible())
 }
