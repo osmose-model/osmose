@@ -112,8 +112,8 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
   if(isTRUE(replicates)) {
     polygon(x.pol, y.pol, col=makeTransparent(col=col, alpha=alpha), border = border, ...)
     nrep = max(min(nrep, dim(x)[3]),2)
-    matplot(y, x[,,seq_len(nrep)], add=TRUE, type="l", lty = lty, 
-            col=makeTransparent(col=col, alpha=(alpha + 2)/3))
+    # matplot(y, x[,,seq_len(nrep)], add=TRUE, type="l", lty = lty, 
+    #         col=makeTransparent(col=col, alpha=(alpha + 2)/3))
   }
   lines(y, x.50, col = col, lty = lty, ...)
   
