@@ -62,7 +62,7 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
 plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                          initialYear, times, xlim, ylim = NULL,
                          conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
-                         speciesNames = NULL, lty = NULL, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   
@@ -81,14 +81,14 @@ plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plot.window(xlim=xlim, ylim=ylim)
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
            prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], ...)
-    axis(1)
-    axis(2, las=2)
+    axis(1, ...)
+    axis(2, las=2, ...)
     box()
     
-    mtext(speciesNames[sp], 3, line = -1.5, adj = 0.05, cex = 0.80)
+    mtext(speciesNames[sp], 3, line = -1.5, adj = 0.05, cex = cex)
     legendFactor = -(log10(factor))
     legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-    mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.75)
+    mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
     
     ylim = NULL 
   }
@@ -123,7 +123,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
 plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                          initialYear, times, xlim, ylim=NULL, 
                          conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                         speciesNames = NULL, lty = NULL, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
@@ -146,15 +146,15 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
            prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], ...)
   }
-  axis(1)
-  axis(2, las=2)
+  axis(1, ...)
+  axis(2, las=2, ...)
   box()
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
-  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = lty)
+  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
   
   return(invisible())
 }
