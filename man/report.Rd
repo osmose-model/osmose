@@ -2,11 +2,9 @@
 % Please edit documentation in R/osmose-main.R
 \name{report}
 \alias{report}
-\title{Build an OSMOSE configuration}
+\title{Report method}
 \usage{
-buildConfiguration(file="config.csv", path="_osmose", 
-                          config=NULL, absolute=TRUE, 
-                          newFile=NULL)
+report(x, format, output, ...)
 }
 \arguments{
 \item{format}{The format to export the report.}
@@ -15,36 +13,11 @@ buildConfiguration(file="config.csv", path="_osmose",
 
 \item{...}{Extra arguments passed to \code{\link{report}} function.}
 
-\item{file}{Filename of the main configuration file}
-
-\item{path}{Path for creating the input files, by default \code{"_osmose"}}
-
-\item{config}{An \code{osmose.config} class object or a file path for an
-osmose configuration file. This parameters will take precedence over the ones
-specified in \code{file}.}
-
-\item{absolute}{Boolean, use absolute paths relative to \code{file} to build the
-configuration? If \code{FALSE}, relative paths are using for each individual
-configuration file to parse its content.}
-
-\item{newFile}{if \code{NULL}, the \code{file} provided is edited, otherwise
-a new file is created with the modified configuration.}
-
 \item{object}{Object of class \code{osmose}.}
 }
 \value{
 A report on specific format.
 }
 \description{
-This function create a valid configuration by several input files
-from user input parameters.
-
 This function built a report for each class including on osmose package.
-}
-\details{
-Basic configurations may not need the use of \code{buildConfiguration},
-but it is required for configuration using interannual inputs or fishing selectivity.
-}
-\author{
-Ricardo Oliveros-Ramos
 }
