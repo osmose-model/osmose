@@ -28,16 +28,16 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   if(isTRUE(ts)){
     
     if(type == 1){plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
-                                initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
+                                times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
                                 speciesNames = speciesNames, ...)}
     
     if(type == 2){plot2DTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
-                                initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
+                                times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
                                 speciesNames = speciesNames, ...)}
     
-    if(type == 3){plot2DTsType3(x = x, initialYear = initialYear, times = times,
+    if(type == 3){plot2DTsType3(x = x, times = times,
                                 xlim = xlim, ylim = ylim, factor = factor, 
                                 col = col, speciesNames = speciesNames, ...)}  
   }
@@ -60,7 +60,7 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
 # Plot types --------------------------------------------------------------
 
 plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                         initialYear, times, xlim, ylim = NULL,
+                         times, xlim, ylim = NULL,
                          conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
                          speciesNames = NULL, lty = NULL, cex = 0.8, ...) {
   
@@ -121,7 +121,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
 }
 
 plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                         initialYear, times, xlim, ylim=NULL, 
+                         times, xlim, ylim=NULL, 
                          conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
                          speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, ...) {
   
@@ -161,7 +161,7 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   return(invisible())
 }
 
-plot2DTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
+plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
                          col = NULL, speciesNames = NULL, legend = TRUE, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
