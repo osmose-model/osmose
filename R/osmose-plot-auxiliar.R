@@ -231,9 +231,8 @@ plot2DTsType4 = function(x, times, xlim, ylim = NULL,
   x = apply(x, 1, mean, na.rm = TRUE)*factor
   if(is.null(ylim)){ylim =  c(0, 1.25)*range(x)} else {ylim = ylim}
   
-  plot.new()
-  plot.window(xlim=xlim, ylim=ylim)
-  plot(x = times, y = x, col = col, lty = lty, type = "h", axes = FALSE, xlab = "", ylab = "", ...)
+  plot(x = times, y = x, col = col, lty = lty, type = "h", axes = FALSE, xlab = "", ylab = "",
+       xlim = xlim, ylim = ylim, ...)
   axis(1, ...)
   axis(2, las=2, ...)
   box()
