@@ -5,10 +5,13 @@
 \alias{osmose2R}
 \title{Read OSMOSE outputs into an R object}
 \usage{
-read_osmose(path = NULL, version = "v3r2", species.names = NULL, ...)
+read_osmose(path = NULL, input = NULL, version = "v3r2",
+  species.names = NULL, ...)
 }
 \arguments{
 \item{path}{Path to the directory containing OSMOSE outputs.}
+
+\item{input}{Path to a main osmose configuration file.}
 
 \item{version}{OSMOSE version used to run the model.}
 

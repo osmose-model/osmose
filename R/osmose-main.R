@@ -89,6 +89,7 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
 #' @description This function create object of class \code{osmose} with the 
 #' outputs from OSMOSE in the \code{path} folder.  
 #' @param path Path to the directory containing OSMOSE outputs. 
+#' @param input Path to a main osmose configuration file.
 #' @param version OSMOSE version used to run the model. 
 #' @param species.names Display names for species, overwrite the species names
 #' provided to the OSMOSE model. Used for plots and summaries.
@@ -103,14 +104,15 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
 #'   read_osmose(outdir)
 #' }
 #' @aliases osmose2R
-read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
+read_osmose =  function(path=NULL, input=NULL, version="v3r2", species.names=NULL, ...) {
   
-  if(is.null(path) & interactive()) {
-    path = readline(prompt="Select OSMOSE outputs folder")
-  }
+  if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
+  
+  config =  if(!is.null(input)) readOsmoseConfiguration(file=input) else NULL
+  
+  if(is.null(path)) return(config)
 
-  if(!dir.exists(path)) stop("The input directory does not exist.")
-  if(is.null(path)) stop("No path has been provided.")
+  if(!dir.exists(path)) stop("The output directory does not exist.")
   
   output = switch(version, 
                   v3r2 = osmose2R.v3r2(path=path, species.names=species.names, ...),
@@ -118,8 +120,13 @@ read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
                   v3r0 = osmose2R.v3r0(path=path, species.names=species.names, ...),
                   stop(sprintf("Incorrect osmose version %s", version))
   )
+  
+  output = c(output, config=list(config))
+  
   class(output) = "osmose"
+  
   return(output)
+  
 }
 
 # to keep back compatibility for a while
