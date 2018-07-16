@@ -133,25 +133,25 @@ osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
 
 
 ## buildConfiguration ------------------------------------------------------
-##' @title Build an OSMOSE configuration
-##' @description This function create a valid configuration by several input files
-##' from user input parameters.  
-##' @param file Filename of the main configuration file
-##' @param path Path for creating the input files, by default \code{"_osmose"}
-##' @param config An \code{osmose.config} class object or a file path for an
-##' osmose configuration file. This parameters will take precedence over the ones
-##' specified in \code{file}.
-##' @param absolute Boolean, use absolute paths relative to \code{file} to build the
-##' configuration? If \code{FALSE}, relative paths are using for each individual
-##' configuration file to parse its content.
-##' @param newFile if \code{NULL}, the \code{file} provided is edited, otherwise
-##' a new file is created with the modified configuration.
-##' @details Basic configurations may not need the use of \code{buildConfiguration},
-##' but it is required for configuration using interannual inputs or fishing selectivity.
-##' @author Ricardo Oliveros-Ramos
-##' @usage buildConfiguration(file="config.csv", path="_osmose", 
-##'                           config=NULL, absolute=TRUE, 
-##'                           newFile=NULL)
+## @title Build an OSMOSE configuration
+## @description This function create a valid configuration by several input files
+## from user input parameters.  
+## @param file Filename of the main configuration file
+## @param path Path for creating the input files, by default \code{"_osmose"}
+## @param config An \code{osmose.config} class object or a file path for an
+## osmose configuration file. This parameters will take precedence over the ones
+## specified in \code{file}.
+## @param absolute Boolean, use absolute paths relative to \code{file} to build the
+## configuration? If \code{FALSE}, relative paths are using for each individual
+## configuration file to parse its content.
+## @param newFile if \code{NULL}, the \code{file} provided is edited, otherwise
+## a new file is created with the modified configuration.
+## @details Basic configurations may not need the use of \code{buildConfiguration},
+## but it is required for configuration using interannual inputs or fishing selectivity.
+## @author Ricardo Oliveros-Ramos
+## @usage buildConfiguration(file="config.csv", path="_osmose", 
+##                           config=NULL, absolute=TRUE, 
+##                           newFile=NULL)
 #buildConfiguration = function(file="config.csv", path="_osmose", config=NULL, absolute=TRUE, newFile=NULL) {
 #  # read osmose parameters
 #  L1 = readOsmoseConfiguration(file=file, config=config, absolute=absolute)

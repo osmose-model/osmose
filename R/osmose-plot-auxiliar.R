@@ -22,24 +22,29 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
   xlim = if(is.null(xlim)) range(times)
   
-  opar = par(no.readonly = TRUE)
-  on.exit(par(opar))
+  # opar = par(no.readonly = TRUE)
+  # on.exit(par(opar))
   
   if(isTRUE(ts)){
     
     if(type == 1){plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
-                                initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
+                                times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
                                 speciesNames = speciesNames, ...)}
     
     if(type == 2){plot2DTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
-                                initialYear = initialYear, times = times, xlim = xlim, ylim = ylim,
+                                times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
                                 speciesNames = speciesNames, ...)}
     
-    if(type == 3){plot2DTsType3(x = x, initialYear = initialYear, times = times,
+    if(type == 3){plot2DTsType3(x = x, times = times,
                                 xlim = xlim, ylim = ylim, factor = factor, 
-                                col = col, speciesNames = speciesNames, ...)}  
+                                col = col, speciesNames = speciesNames, ...)}
+    
+    if(type == 4){plot2DTsType4(x = x, times = times,
+                                xlim = xlim, ylim = ylim, factor = factor,
+                                col = col, speciesNames = speciesNames, ...)} 
+      
   }
   
   if(isFALSE(ts)){
@@ -60,7 +65,7 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
 # Plot types --------------------------------------------------------------
 
 plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                         initialYear, times, xlim, ylim = NULL,
+                         times, xlim, ylim = NULL,
                          conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
                          speciesNames = NULL, lty = NULL, cex = 0.8, ...) {
   
@@ -121,9 +126,9 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
 }
 
 plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                         initialYear, times, xlim, ylim=NULL, 
+                         times, xlim, ylim=NULL, 
                          conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                         speciesNames = NULL, lty = NULL, cex = 0.8, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
@@ -132,7 +137,7 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     ylim = ylim
   }
   
-  par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
+  # par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
   if(is.null(col)) col = .recycleArguments(rainbow(dim(x)[2]),dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
   if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
   
@@ -154,12 +159,14 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
   mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
-  legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
+  if(isTRUE(legend)){
+    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
+  }
   
   return(invisible())
 }
 
-plot2DTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
+plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
                          col = NULL, speciesNames = NULL, legend = TRUE, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
@@ -210,6 +217,37 @@ plot2DTsType3 = function(x, initialYear, times, xlim, ylim=NULL, factor=1e-3,
   
   return(invisible())
 }
+
+#plot for only one species using bars
+plot2DTsType4 = function(x, times, xlim, ylim = NULL,
+                         factor = 1e-3, col = NULL, 
+                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, ...) {
+  
+  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  if(dim(x)[2]>1) stop("Plot ts = TRUE and type = 4 is only for one species")
+  if(is.null(col)) col = .recycleArguments("black",dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
+  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
+ 
+  x = apply(x, 1, mean, na.rm = TRUE)*factor
+  if(is.null(ylim)){ylim =  c(0, 1.25)*range(x)} else {ylim = ylim}
+  
+  plot(x = times, y = x, col = col, lty = lty, type = "h", axes = FALSE, xlab = "", ylab = "",
+       xlim = xlim, ylim = ylim, ...)
+  axis(1, ...)
+  axis(2, las=2, ...)
+  box()
+  
+  legendFactor = -(log10(factor))
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
+  
+  if(isTRUE(legend)){
+    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
+  }
+  
+  return(invisible())
+}
+
 
 plot2DType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
                        factor = 1e-3, speciesNames = NULL, border = NA,
