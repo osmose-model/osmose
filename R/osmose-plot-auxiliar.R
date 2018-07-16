@@ -6,15 +6,16 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
                          factor, xlim, ylim, col, alpha, speciesNames, ...) {
   
   # species indexation
-  if(!is.null(species)){
+  if(!is.null(species)) {
     if(max(species)+1 > dim(x)[2]) stop("error on species indexation, incorrect value in the parameter called species")
-    x = x[ , (species + 1) , , drop = FALSE]}
+    x = x[ , (species + 1) , , drop = FALSE]
+    }
   
   # time indexation
   if(is.null(start)) start = 1 else start = start
   if(is.null(end)) end = dim(x)[1] else end = end
-  if(!start > 0 | !start < end) stop("error on time indexation, incorrect value the parameter called start")
-  if(!end > 0 | !end > start) stop("error on time indexation, incorrect value in the parameter called")
+  if(!(start > 0) | !(start < end)) stop("error on time indexation, incorrect value the parameter called start")
+  if(!(end > 0) | !(end > start)) stop("error on time indexation, incorrect value in the parameter called")
   x = x[c(start:end), , ,drop = FALSE]
   
   # xlim 
@@ -27,37 +28,35 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   
   if(isTRUE(ts)){
     
-    if(type == 1){plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
+    if(type == 1) { plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
                                 times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
-                                speciesNames = speciesNames, ...)}
+                                speciesNames = speciesNames, ...) }
     
-    if(type == 2){plot2DTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
+    if(type == 2) { plot2DTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
                                 times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
-                                speciesNames = speciesNames, ...)}
+                                speciesNames = speciesNames, ...) }
     
-    if(type == 3){plot2DTsType3(x = x, times = times,
+    if(type == 3) { plot2DTsType3(x = x, times = times,
                                 xlim = xlim, ylim = ylim, factor = factor, 
-                                col = col, speciesNames = speciesNames, ...)}
+                                col = col, speciesNames = speciesNames, ...) }
     
-    if(type == 4){plot2DTsType4(x = x, times = times,
+    if(type == 4) { plot2DTsType4(x = x, times = times,
                                 xlim = xlim, ylim = ylim, factor = factor,
-                                col = col, speciesNames = speciesNames, ...)} 
+                                col = col, speciesNames = speciesNames, ...) } 
       
-  }
-  
-  if(isFALSE(ts)){
-    if(type == 1){plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
-                              factor = factor, speciesNames = speciesNames, ...)}
+  } else {
     
-    if(type == 2){plot2DType2(x, horizontal = horizontal, col = col, 
-                              factor = factor, speciesNames = speciesNames, ...)}
+    if(type == 1) { plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
+                              factor = factor, speciesNames = speciesNames, ...) }
     
-    if(type == 3){plot2DType3(x, horizontal = horizontal, col = col, 
-                              factor = factor, speciesNames = speciesNames, ...)}
+    if(type == 2) { plot2DType2(x, horizontal = horizontal, col = col, 
+                              factor = factor, speciesNames = speciesNames, ...) }
+    
+    if(type == 3) { plot2DType3(x, horizontal = horizontal, col = col, 
+                              factor = factor, speciesNames = speciesNames, ...) }
   }
-  
   
   return(invisible())
 }
@@ -71,8 +70,11 @@ plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   
-  par(oma = c(1,1,1,1), mar = c(3,3,1,1))
-  par(mfrow = getmfrow(ncol(x)))
+  if(ncol(x)!=1) {
+    par(oma = c(1,1,1,1), mar = c(3,3,1,1))
+    par(mfrow = getmfrow(ncol(x)))
+  }
+  
   if(is.null(col)) col = .recycleArguments("black",dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
   if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
   
@@ -86,8 +88,8 @@ plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plot.window(xlim=xlim, ylim=ylim)
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
            prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], ...)
-    axis(1, ...)
-    axis(2, las=2, ...)
+    axis(1)
+    axis(2, las=2)
     box()
     
     mtext(speciesNames[sp], 3, line = -1.5, adj = 0.05, cex = cex)
