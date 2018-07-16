@@ -4,21 +4,22 @@
 \alias{getVar.osmose}
 \title{GetVar method for osmose outputs objects}
 \usage{
-\method{getVar}{osmose}(object, var, expected = FALSE, ...)
+\method{getVar}{osmose}(object, what, how = c("matrix", "data.frame", "list"),
+  expected = FALSE, ...)
 }
 \arguments{
 \item{object}{Object of \code{osmose} class (see the \code{\link{read_osmose}} function).}
 
-\item{var}{Name of variable to extract. It could be: "biomass","abundance",
+\item{what}{Name of variable to extract. It could be: "biomass","abundance",
 "yield", "yieldN".}
+
+\item{how}{How to return the object. Current options are "matrix" and "list".}
 
 \item{expected}{A logical parameter. \code{TRUE} if the average over the 
 last dimensions should be performed if the output is an array. By default is 
 \code{expected = FALSE}.}
 
 \item{...}{Additional arguments of the function.}
-
-\item{type}{Type of the variable to extract. By default is \code{type = "global"}.}
 }
 \value{
 An array or a list containing the data.

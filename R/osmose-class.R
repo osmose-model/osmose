@@ -57,7 +57,7 @@
 #' @method plot osmose
 plot.osmose = function(x, what = "biomass", ...) {
   
-  x = getVar(x, var = what, expected = FALSE)
+  x = getVar(x, what = what, expected = FALSE)
   plot(x, ...)
   
   return(invisible())
@@ -73,35 +73,47 @@ plot.osmose = function(x, what = "biomass", ...) {
 #' @param ... Additional arguments of the function.
 #' @return An array or a list containing the extracted data.
 #' @export
-getVar = function(object, var, ...) {
+getVar = function(object, what, how, ...) {
   UseMethod("getVar")
 }
 
 #' GetVar method for osmose outputs objects
 #' @description Get a variable from an \code{osmose} object. 
+#'
 #' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
-#' @param var Name of variable to extract. It could be: "biomass","abundance",
+#' @param what Name of variable to extract. It could be: "biomass","abundance",
 #'  "yield", "yieldN".
-#' @param type Type of the variable to extract. By default is \code{type = "global"}.
+#' @param how How to return the object. Current options are "matrix" and "list".
 #' @param expected A logical parameter. \code{TRUE} if the average over the 
 #' last dimensions should be performed if the output is an array. By default is 
 #' \code{expected = FALSE}.
 #' @param ... Additional arguments of the function.
+#'
 #' @return An array or a list containing the data.
 #' @export
 #' @method getVar osmose
-getVar.osmose = function(object, var, expected=FALSE, ...) {
+getVar.osmose = function(object, what, how=c("matrix", "data.frame", "list"), 
+                         expected=FALSE, ...) {
   
-  out = object[[var]]
-  if(is.null(out))
-  {
-      message = paste("The ", var, " variable is NULL", sep="")
+  how = match.arg(how)
+  
+  if(how=="list") expected = TRUE
+  
+  out = object[[what]]
+  
+  if(is.null(out)) {
+      message = paste("The", sQuote(what), "variable is NULL.", sep="")
       stop(message) 
   }
 
-  xclass = "array" %in% class(out)
-  if(isTRUE(!xclass) & isTRUE(expected))
+  if(inherits(out, "array") & isTRUE(expected))
     out = apply(out, c(1, 2), mean, na.rm=TRUE)
+  
+  if(how=="matrix") return(out)
+  
+  if(how=="list") return(as.list(as.data.frame(out)))
+  
+  warning("No output defined for data.frame yet.")
   return(out)
   
 }

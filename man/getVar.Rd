@@ -4,15 +4,15 @@
 \alias{getVar}
 \title{Get variable}
 \usage{
-getVar(object, var, ...)
+getVar(object, what, how, ...)
 }
 \arguments{
 \item{object}{Object of \code{osmose} class (see the \code{\link{read_osmose}} function).}
 
+\item{...}{Additional arguments of the function.}
+
 \item{var}{Name of variable to extract. It could be: "biomass","abundance",
 "yield", "yieldN".}
-
-\item{...}{Additional arguments of the function.}
 }
 \value{
 An array or a list containing the extracted data.
