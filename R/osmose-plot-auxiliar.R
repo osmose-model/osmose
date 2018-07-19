@@ -66,7 +66,7 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
 plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                          times, xlim, ylim = NULL,
                          conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
-                         speciesNames = NULL, lty = NULL, cex = 0.8, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, border = NA, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   
@@ -87,7 +87,7 @@ plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plot.new()
     plot.window(xlim=xlim, ylim=ylim)
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], ...)
+           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], border = border, ...)
     axis(1)
     axis(2, las=2)
     box()
@@ -103,7 +103,7 @@ plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   return(invisible())
 }
 
-plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = NA, lty, ...) {
+plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border, lty, ...) {
   
   if(dim(x)[3] == 1){
     lines(x = y, y = apply(x, 1, mean, na.rm = TRUE), col = col, lty = lty, ...)
@@ -130,7 +130,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border = N
 plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                          times, xlim, ylim=NULL, 
                          conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, border = NA, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
@@ -151,7 +151,7 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     xsp   = factor*x[, sp, ,drop = FALSE]
     
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], ...)
+           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], border = border, ...)
   }
   axis(1, ...)
   axis(2, las=2, ...)
