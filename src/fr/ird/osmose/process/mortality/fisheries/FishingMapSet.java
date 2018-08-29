@@ -299,9 +299,9 @@ public class FishingMapSet extends OsmoseLinker {
                 surftot += getSurface(cell);
             }
         }
-
+      
         float K = mean / surftot;
-
+        
         // Loop over all the cells of the current grid
         // and corrects the fishing coefficients.
         for (Cell cell : getGrid().getCells()) {
@@ -321,9 +321,10 @@ public class FishingMapSet extends OsmoseLinker {
         }
 
         temp /= surftot;
-        
+               
         if (temp != 1) {
             warning("The temporal mean of the space factors is different from 1.0");
+            warning("iFleet = " + this.iFisheries + ", mean = " + temp);
         }
 
     }
