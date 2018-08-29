@@ -18,7 +18,7 @@ import fr.ird.osmose.output.IOutput;
         
 /**
  *
- * @author pverley
+ * @author Nicolas Barrier
  */
 public class SpatialBiomassOutput extends AbstractSpatialOutput {
 
@@ -43,7 +43,6 @@ public class SpatialBiomassOutput extends AbstractSpatialOutput {
            
         this.common_update();
      
-        
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {

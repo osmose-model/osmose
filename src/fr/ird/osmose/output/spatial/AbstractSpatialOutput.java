@@ -65,18 +65,18 @@ import fr.ird.osmose.output.IOutput;
         
 /**
  *
- * @author pverley
+ * @author Nicolas Barrier
  */
 public abstract class AbstractSpatialOutput extends SimulationLinker implements IOutput {
 
     /**
      * _FillValue attribute for cells on land
      */
-    private final float FILLVALUE = -99.f;
+    protected final float FILLVALUE = -99.f;
     /**
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriteable nc;
+    protected NetcdfFileWriteable nc;
 
     // spatial indicators
     protected float[][][] data;

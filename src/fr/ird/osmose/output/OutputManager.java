@@ -59,6 +59,7 @@ import java.util.List;
 import fr.ird.osmose.output.spatial.SpatialAbundanceOutput;
 import fr.ird.osmose.output.spatial.SpatialBiomassOutput;
 import fr.ird.osmose.output.spatial.SpatialYieldOutput;
+import fr.ird.osmose.output.spatial.SpatialYieldNOutput;
 import fr.ird.osmose.output.spatial.SpatialTLOutput;
 import fr.ird.osmose.output.spatial.SpatialSizeOutput;
 
@@ -125,6 +126,10 @@ public class OutputManager extends SimulationLinker {
 
         if (getConfiguration().getBoolean("output.spatialyield.enabled")) {
             outputs.add(new SpatialYieldOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialyieldN.enabled")) {
+            outputs.add(new SpatialYieldNOutput(rank));
         }
         
         if (getConfiguration().getBoolean("output.spatialtl.enabled")) {

@@ -21,9 +21,9 @@ import fr.ird.osmose.process.mortality.MortalityCause;
  *
  * @author Nicolas Barrier
  */
-public class SpatialYieldOutput extends AbstractSpatialOutput {
+public class SpatialYieldNOutput extends AbstractSpatialOutput {
 
-    public SpatialYieldOutput(int rank){
+    public SpatialYieldNOutput(int rank){
         super(rank);
     }
     
@@ -56,7 +56,7 @@ public class SpatialYieldOutput extends AbstractSpatialOutput {
                         }
                         if (!school.isUnlocated()) {
                             int iSpec = school.getSpeciesIndex();
-                            data[iSpec][j][i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
+                            data[iSpec][j][i] += school.getNdead(MortalityCause.FISHING);
                         }
                     }
                 }                
