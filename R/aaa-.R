@@ -13,7 +13,7 @@ NULL
 NULL
 
 # barrier.n: adding some functions for NETCDF
-#' @importFrom RNetCDF file.inq.nc var.inq.nc var.get.nc open.nc
+#' @importFrom RNetCDF file.inq.nc var.inq.nc var.get.nc open.nc close.nc
 NULL
 
 # barrier.n: adding some functions for ggplot
