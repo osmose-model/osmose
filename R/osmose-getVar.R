@@ -105,7 +105,7 @@ process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
   # Check if the specie considered exists in the dataset.
   if(!(species %in% names(out)))
   {
-    stop("The specie name ", specName, "is not in the diet matrix")
+    stop("The specie name ", species, "is not in the diet matrix")
   }
 }
 
