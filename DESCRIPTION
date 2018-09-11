@@ -36,7 +36,10 @@ Imports:
   stringr, 
   utils,
   knitr,
-  rmarkdown
+  rmarkdown,
+  ggplot2, 
+  RNetCDF,
+  abind
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
