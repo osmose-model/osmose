@@ -1,4 +1,5 @@
-
+#' Write data in osmose format
+#'
 #' Write an array or dataframe in the Osmose format.
 #' The separator is ";", there are no quotes and a blank column is
 #' added for the row names column.
@@ -7,7 +8,13 @@
 #' @param file Output file
 #' 
 #' @export
+write_osmose = function(x, file)   {
+  write.table(x=x, file=file, sep=";", col.names=NA, quote=FALSE)
+}
+
+#' @export
 write.osmose = function(x, file)   {
+  .Deprecated("write_osmose")
   write.table(x=x, file=file, sep=";", col.names=NA, quote=FALSE)
 }
 
@@ -21,7 +28,7 @@ write.osmose = function(x, file)   {
 #' @return Output data frame
 readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
   
-  xclass = paste("osmose.output", type, sep=".")
+  xclass = paste("osmose", type, sep=".")
   
   allFiles = dir(path=path, recursive=TRUE, include.dirs=FALSE)
   csvFiles = allFiles[grepl(".csv", allFiles)]

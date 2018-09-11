@@ -28,9 +28,9 @@
 #'   }
 #' }
 #' @export
-runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version=3, osmose=NULL, java="java", 
-                     options=NULL, verbose=TRUE, clean=TRUE) {
+run_osmose = function(input, parameters = NULL, output = "output", log = "osmose.log",
+                      version = 3, osmose = NULL, java = "java",
+                      options = NULL, verbose = TRUE, clean = TRUE) {
   
   # barrier.n: redirection 
   
@@ -40,7 +40,7 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
   
   # update to provide by release executables
   if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_stable_%s.jar", version),
-                                            package="osmose", mustWork = TRUE)
+                                           package="osmose", mustWork = TRUE)
   
   if(isTRUE(clean)) 
     file.remove(file.path(output, dir(path=output, recursive=TRUE)))
@@ -70,12 +70,26 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
   
 }
 
+#' Title
+#' @export
+runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
+                     version=3, osmose=NULL, java="java", 
+                     options=NULL, verbose=TRUE, clean=TRUE) {
+  
+  message("runOsmose will be deprecated, use run_osmose instead.")
+  
+  run_osmose(input = input, parameters = parameters, output = output,
+             log = log, version = version, osmose = osmose, java = java, 
+             options = options, verbose = verbose, clean = clean) 
+}
+
 
 # read_osmose -------------------------------------------------------------
 #' @title Read OSMOSE outputs into an R object
 #' @description This function create object of class \code{osmose} with the 
 #' outputs from OSMOSE in the \code{path} folder.  
 #' @param path Path to the directory containing OSMOSE outputs. 
+#' @param input Path to a main osmose configuration file.
 #' @param version OSMOSE version used to run the model. 
 #' @param species.names Display names for species, overwrite the species names
 #' provided to the OSMOSE model. Used for plots and summaries.
@@ -90,21 +104,29 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
 #'   read_osmose(outdir)
 #' }
 #' @aliases osmose2R
-read_osmose =  function(path=NULL, version="v3r2", species.names=NULL, ...) {
+read_osmose =  function(path=NULL, input=NULL, version="v3r2", species.names=NULL, ...) {
   
-  if(is.null(path) & interactive()) {
-    path = readline(prompt="Select OSMOSE outputs folder")
-  }
+  if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
+  
+  config =  if(!is.null(input)) readOsmoseConfiguration(file=input) else NULL
+  
+  if(is.null(path)) return(config)
 
-  if(!dir.exists(path)) stop("The input directory does not exist.")
-  if(is.null(path)) stop("No path has been provided.")
+  if(!dir.exists(path)) stop("The output directory does not exist.")
   
   output = switch(version, 
                   v3r2 = osmose2R.v3r2(path=path, species.names=species.names, ...),
+                  v3r1 = osmose2R.v3r1(path=path, species.names=species.names, ...),
+                  v3r0 = osmose2R.v3r0(path=path, species.names=species.names, ...),
                   stop(sprintf("Incorrect osmose version %s", version))
   )
-  class(output) = "osmose.output"
+  
+  output = c(output, config=list(config))
+  
+  class(output) = "osmose"
+  
   return(output)
+  
 }
 
 # to keep back compatibility for a while
@@ -118,25 +140,25 @@ osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
 
 
 ## buildConfiguration ------------------------------------------------------
-##' @title Build an OSMOSE configuration
-##' @description This function create a valid configuration by several input files
-##' from user input parameters.  
-##' @param file Filename of the main configuration file
-##' @param path Path for creating the input files, by default \code{"_osmose"}
-##' @param config An \code{osmose.config} class object or a file path for an
-##' osmose configuration file. This parameters will take precedence over the ones
-##' specified in \code{file}.
-##' @param absolute Boolean, use absolute paths relative to \code{file} to build the
-##' configuration? If \code{FALSE}, relative paths are using for each individual
-##' configuration file to parse its content.
-##' @param newFile if \code{NULL}, the \code{file} provided is edited, otherwise
-##' a new file is created with the modified configuration.
-##' @details Basic configurations may not need the use of \code{buildConfiguration},
-##' but it is required for configuration using interannual inputs or fishing selectivity.
-##' @author Ricardo Oliveros-Ramos
-##' @usage buildConfiguration(file="config.csv", path="_osmose", 
-##'                           config=NULL, absolute=TRUE, 
-##'                           newFile=NULL)
+## @title Build an OSMOSE configuration
+## @description This function create a valid configuration by several input files
+## from user input parameters.  
+## @param file Filename of the main configuration file
+## @param path Path for creating the input files, by default \code{"_osmose"}
+## @param config An \code{osmose.config} class object or a file path for an
+## osmose configuration file. This parameters will take precedence over the ones
+## specified in \code{file}.
+## @param absolute Boolean, use absolute paths relative to \code{file} to build the
+## configuration? If \code{FALSE}, relative paths are using for each individual
+## configuration file to parse its content.
+## @param newFile if \code{NULL}, the \code{file} provided is edited, otherwise
+## a new file is created with the modified configuration.
+## @details Basic configurations may not need the use of \code{buildConfiguration},
+## but it is required for configuration using interannual inputs or fishing selectivity.
+## @author Ricardo Oliveros-Ramos
+## @usage buildConfiguration(file="config.csv", path="_osmose", 
+##                           config=NULL, absolute=TRUE, 
+##                           newFile=NULL)
 #buildConfiguration = function(file="config.csv", path="_osmose", config=NULL, absolute=TRUE, newFile=NULL) {
 #  # read osmose parameters
 #  L1 = readOsmoseConfiguration(file=file, config=config, absolute=absolute)

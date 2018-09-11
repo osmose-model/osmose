@@ -54,13 +54,13 @@
 #' @return A graph of a osmose object.
 #' @author Ricardo Oliveros-Ramos
 #' @export
-#' @method plot osmose.output
-plot.osmose.output = function(x, type = "biomass", ...) {
+#' @method plot osmose
+plot.osmose = function(x, what = "biomass", ...) {
   
-  x = getVar(x, var = type, expected = FALSE)
-  out = plot(x, ...)
+  x = getVar(x, what = what, expected = FALSE)
+  plot(x, ...)
   
-  return(out)
+  return(invisible())
 }
 
 
@@ -73,35 +73,47 @@ plot.osmose.output = function(x, type = "biomass", ...) {
 #' @param ... Additional arguments of the function.
 #' @return An array or a list containing the extracted data.
 #' @export
-getVar = function(object, var, ...) {
+getVar = function(object, what, how, ...) {
   UseMethod("getVar")
 }
 
 #' GetVar method for osmose outputs objects
 #' @description Get a variable from an \code{osmose} object. 
+#'
 #' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
-#' @param var Name of variable to extract. It could be: "biomass","abundance",
+#' @param what Name of variable to extract. It could be: "biomass","abundance",
 #'  "yield", "yieldN".
-#' @param type Type of the variable to extract. By default is \code{type = "global"}.
+#' @param how How to return the object. Current options are "matrix" and "list".
 #' @param expected A logical parameter. \code{TRUE} if the average over the 
 #' last dimensions should be performed if the output is an array. By default is 
 #' \code{expected = FALSE}.
 #' @param ... Additional arguments of the function.
+#'
 #' @return An array or a list containing the data.
 #' @export
-#' @method getVar osmose.output
-getVar.osmose.output = function(object, var, expected=FALSE, ...) {
+#' @method getVar osmose
+getVar.osmose = function(object, what, how=c("matrix", "data.frame", "list"), 
+                         expected=FALSE, ...) {
   
-  out = object[["data"]][[var]]
-  if(is.null(out))
-  {
-      message = paste("The ", var, " variable is NULL", sep="")
+  how = match.arg(how)
+  
+  if(how=="list") expected = TRUE
+  
+  out = object[[what]]
+  
+  if(is.null(out)) {
+      message = paste("The", sQuote(what), "variable is NULL.", sep="")
       stop(message) 
   }
 
-  xclass = "list" %in% class(out)
-  if(isTRUE(!xclass) & isTRUE(expected))
+  if(inherits(out, "array") & isTRUE(expected))
     out = apply(out, c(1, 2), mean, na.rm=TRUE)
+  
+  if(how=="matrix") return(out)
+  
+  if(how=="list") return(as.list(as.data.frame(out)))
+  
+  warning("No output defined for data.frame yet.")
   return(out)
   
 }
@@ -133,8 +145,8 @@ summary.osmose = function(object, ...) {
   
   output = object$model
   output$species = object$species
-  biomass = apply(object$global$biomass, 2, mean, na.rm=TRUE)
-  yield = apply(object$global$yield, 2, mean, na.rm=TRUE)
+  biomass = apply(object$biomass, 2, mean, na.rm=TRUE)
+  yield = apply(object$yield, 2, mean, na.rm=TRUE)
   resumen = data.frame(biomass=biomass,
                        yield = yield)
   rownames(resumen) = object$species
@@ -155,7 +167,7 @@ summary.osmose = function(object, ...) {
 print.summary.osmose = function(x, ...) {
   cat(paste0("OSMOSE v.", x$version,"\n"))
   cat("Model", sQuote(x$model),"\n")
-  cat(x$sp, "species modeled:\n")
+  cat("Species modeled:\n")
   cat(paste(x$species, collapse=", "),".\n", sep="")
   cat("Main indicators:\n")
   print(x$resumen)

@@ -50,12 +50,12 @@
   
 }
 
-#' Checks if a variable exists in a NetCDF
-#'
-#' @param fid Object of class "NetCDF" which points to the NetCDF dataset.
-#' @param var Variable name
-#'
-#' @return True if the variable exists.
+# Checks if a variable exists in a NetCDF
+#
+# @param fid Object of class "NetCDF" which points to the NetCDF dataset.
+# @param var Variable name
+#
+# @return True if the variable exists.
 .check_varexists = function(fid, var)
 {
   
