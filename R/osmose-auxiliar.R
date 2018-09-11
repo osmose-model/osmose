@@ -1,3 +1,17 @@
+ 
+#' Defines isFALSE from isTRUE
+#'
+#' @param x Condition
+#'
+#' @return True if condition is not met
+#' @export
+#'
+isFALSE = function(x) {
+  output = !isTRUE(x)  
+  return(output)
+}
+
+
 #' Write data in osmose format
 #'
 #' Write an array or dataframe in the Osmose format.
@@ -100,7 +114,7 @@ getSizeSpectrum = function(file, sep=",", ...) {
 #' dirin = system.file("extdata", package="osmose")
 #' outdir = paste(dirin, "/outputs", sep="")
 #' data = read_osmose(outdir)
-#' mortality_df = data$global$mortality
+#' mortality_df = data$mortality
 #' mort = getMortality(mortality_df, stage="juveniles", type="total")
 #' }
 #' @export
@@ -137,7 +151,7 @@ getMortality = function(x, stage="adults", type="total") {
 #' dirin = system.file("extdata", package="osmose")
 #' outdir = paste(dirin, "/outputs", sep="")
 #' data = read_osmose(outdir)
-#' mortality_df = data$global$mortality
+#' mortality_df = data$mortality
 #' mort = getAverageMortality(mortality_df, stage="juveniles", freq=12)
 #' }
 #' @export
@@ -169,7 +183,7 @@ getAverageMortality = function(x, stage="adults", freq=12) {
 #' dirin = system.file("extdata", package="osmose")
 #' outdir = paste(dirin, "/outputs", sep="")
 #' data = read_osmose(outdir)
-#' mortality_df = data$global$mortality
+#' mortality_df = data$mortality
 #' mortdev = getMortalityDeviation(mortality_df, stage="juveniles", type="total")
 #' }
 #' @export
