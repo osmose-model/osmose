@@ -30,7 +30,7 @@ can be provided by the user in the "pars" argument.
 dirin = system.file("extdata", package="osmose")
 outdir = paste(dirin, "/outputs", sep="")
 data = read_osmose(outdir)
-mortality_df = data$global$mortality
+mortality_df = data$mortality
 mortdev = getMortalityDeviation(mortality_df, stage="juveniles", type="total")
 }
 }

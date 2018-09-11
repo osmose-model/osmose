@@ -25,7 +25,7 @@ Get the total mortality rate.
 dirin = system.file("extdata", package="osmose")
 outdir = paste(dirin, "/outputs", sep="")
 data = read_osmose(outdir)
-mortality_df = data$global$mortality
+mortality_df = data$mortality
 mort = getMortality(mortality_df, stage="juveniles", type="total")
 }
 }

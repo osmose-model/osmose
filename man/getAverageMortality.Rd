@@ -25,7 +25,7 @@ is multiplied by the frequency.
 dirin = system.file("extdata", package="osmose")
 outdir = paste(dirin, "/outputs", sep="")
 data = read_osmose(outdir)
-mortality_df = data$global$mortality
+mortality_df = data$mortality
 mort = getAverageMortality(mortality_df, stage="juveniles", freq=12)
 }
 }
