@@ -204,5 +204,119 @@ osmose.nc.extract_grid_mask = function(filename, varname="ltl_biomass", output_f
   
 }
 
+#' Converts the movement CSV settings into a set of NetCDF files 
+#' (one per species)
+#'
+#' @param filename Name of the parameter file containing the movement parameters.
+#'
+#' @export
+osmose.nc.make_movement_netcdf = function(filename) {
+
+    param = readOsmoseConfiguration(filename)
+
+    # Extract the list of species names
+    species_name = param$species$name
+
+    # Extract the maps names by considering that at least
+    # species is defined for any of them
+    tempspecies = param$movement$species
+
+    ntime = getOsmoseParameter(param, "simulation", "time", "ndtperyear")
+
+    for (spec in species_name) {
+
+        cat("Processing species ", spec, "\n")
+        season = c()
+        ymin = c()
+        ymax = c()
+        agemin = c()
+        agemax = c()
+        map = c()
+        N = 0
+
+        for (name in names(tempspecies))
+        {
+
+            mapspecies = getOsmoseParameter(param, "movement", "species", name)
+            if(mapspecies == spec) 
+            {
+
+                N = N + 1
+
+                if(existOsmoseParameter(param, "movement", "year", "min", name)) {
+                    ymin = c(ymin, getOsmoseParameter(param, "movement", "year", "min", name)) }
+                else {
+                    ymin = c(ymin, -1)
+                }
+
+                if(existOsmoseParameter(param, "movement", "year", "max", name)) {
+                    ymax = c(ymax, getOsmoseParameter(param, "movement", "year", "max", name)) }
+                else {
+                    ymax = c(ymax, -1)
+                }
+
+                if(existOsmoseParameter(param, "movement", "age", "max", name)) {
+                    agemax = c(agemax, getOsmoseParameter(param, "movement", "age", "max", name)) }
+                else {
+                    agemax = c(agemax, -1)
+                }
+
+                if(existOsmoseParameter(param, "movement", "age", "min", name)) {
+                    agemin = c(agemin, getOsmoseParameter(param, "movement", "age", "min", name)) }
+                else {
+                    agemin = c(agemin, -1)
+                }
+
+                temp = rep(0, ntime)
+                if(existOsmoseParameter(param, "movement", "season", name)) {
+                    tempseas = getOsmoseParameter(param, "movement", "season", name) + 1
+                    temp[tempseas] = 1
+                }
+                season = rbind(season, temp)
+
+                if(existOsmoseParameter(param, "movement", "file", name)) {
+                    temp = as.matrix(read.table(getOsmoseParameter(param, "movement", "file", name), sep=";"))
+                } else {
+                    temp = matrix(1:(dimX*dimY), nrow=dimX, ncol=dimY) * 0
+                }
+                temp = temp[nrow(temp):1, ]
+                dimX = dim(temp)[1]
+                dimY = dim(temp)[2]
+                Ntot  = dimX*dimY
+                out = array(1:Ntot, dim=c(1, dimX, dimY), dimnames=NULL)
+                out[1,,] = temp
+                map = abind(map, out, along=1)
+
+            }
+        }
+
+        filename = paste0("movement_", spec, ".nc")
+        ncid = create.nc(filename)
+        dim.def.nc(ncid, "x", dimlength=dimX)
+        dim.def.nc(ncid, "y", dimlength=dimY)
+        dim.def.nc(ncid, "m", dimlength=N)
+        dim.def.nc(ncid, "t", dimlength=ntime)
+
+        var.def.nc(ncid, "agemin", "NC_INT", c("m"))
+        var.def.nc(ncid, "agemax", "NC_INT", c("m"))
+        var.def.nc(ncid, "yearmin", "NC_INT", c("m"))
+        var.def.nc(ncid, "yearmax", "NC_INT", c("m"))
+        var.def.nc(ncid, "season", "NC_BYTE", c("t", "m"))
+        var.def.nc(ncid, "map", "NC_FLOAT", c("y", "x", "m"))
+
+        map[map<0] = NA
+        att.put.nc(ncid, "map", "missing_value", "NC_DOUBLE", -99)
+
+        var.put.nc(ncid, "agemin", agemin)
+        var.put.nc(ncid, "agemax", agemax)
+        var.put.nc(ncid, "yearmin", ymin)
+        var.put.nc(ncid, "yearmax", ymax)
+        var.put.nc(ncid, "map", aperm(map))
+        var.put.nc(ncid, "season", t(season))
+
+        close.nc(ncid)
+
+    }
+}
 
 
