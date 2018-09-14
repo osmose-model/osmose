@@ -1,70 +1,26 @@
-
-#require("RNetCDF")
-
-# Extract the names of the netcdf variable
-#
-# @param fid Object of class "NetCDF" which points to the NetCDF dataset.
-#
-# @return A list of strings
-.extract_varnames = function(fid)
+#' Returns the index of a species within the configuration.
+#' 
+#'
+#' @param spec Name of the species
+#' @param param Osmose configuration (osmose.config object)
+#'
+#' @return An integer containing the species index
+#' @export
+#'
+find_species_index = function(spec, param)
 {
   
-  # extracts the number of variables
-  inc = file.inq.nc(fid)
-  nvars = inc$nvars
-  
-  # init the output variable
-  varnames = c()
-  
-  # loop over all the variables indexes 
-  # (start from 0 and not from 1)
-  for(i in 0:(nvars-1))
-  {
-    # extracts the varname
-    temp = var.inq.nc(fid, i)  
-    varnames = c(varnames, temp$name)
+  species = param$species$name
+  .subSep = function(x) as.integer(gsub("sp", "", x))
+  index = sapply(names(species), .subSep, USE.NAMES=FALSE)
+  out = index[species == spec]
+  if(length(out) == 0) {
+    stop(paste0("No index was found for species ", spec, "\n"))
   }
   
-  return(varnames)
+  return(out)
   
 }
-
-# Extracts a NetCDF variable, which is returned as a vector or an array.
-#
-# @param fid Object of class "NetCDF" which points to the NetCDF dataset.
-# @param var Variable name
-#
-# @return True if the variable exists.
-.extract_var = function(fid, varname)
-{
-  
-  if (!.check_varexists(fid, varname))
-  { 
-    stop("The ", varname, " variable does not exist")
-  }
-  
-  # if the dim array in netcdf is (ntime, n)
-  var = var.get.nc(fid, varname)
-  
-  return(var)
-  
-}
-
-# Checks if a variable exists in a NetCDF
-#
-# @param fid Object of class "NetCDF" which points to the NetCDF dataset.
-# @param var Variable name
-#
-# @return True if the variable exists.
-.check_varexists = function(fid, var)
-{
-  
-  varnames = .extract_varnames(fid)
- 
-  return(var %in% varnames)
-  
-}
-
 
 #' Computes the Osmose grid parameters by using the
 #' LTL forcing file. The parameters are prompted in the console.
@@ -74,29 +30,30 @@
 #' @param filename NetCDF filename
 #' @param lonname  Longitude name (default "longitude")
 #' @param latname  Latitude name (default "latitude")
+#' @param csv Output CSV file (if NULL, no file is written). The directory is created recursively
+#' if it does not exist
 #'
-#' @return Nothing
+#' @return The grid format as a data frame.
 #' @export
 #'
 #' @usage extract_grid_param("ltlbiomass.nc")
-osmose.nc.extract_grid_param = function(filename, lonname="longitude", latname="latitude")
+extract_grid_param = function(filename, lonname="longitude", latname="latitude", csv=NULL)
 {
-
+  
   # checks for the file existence
   if(!file.exists(filename))
   {
-  stop("The ", filename, " file does not exist", sep="")
+    stop("The ", filename, " file does not exist", sep="")
   }
   
   # opens the netcdf file
-  fid = open.nc(filename)
+  fid = nc_open(filename)
   
-  # recovers the lon and lat values
-  lon = .extract_var(fid, lonname)
-  lat = .extract_var(fid, latname)
-
+  lon = ncvar_get(fid, lonname)
+  lat = ncvar_get(fid, lonname)
+  
   # close the netcdf
-  close.nc(fid)
+  nc_close(fid)
   
   # If the longitude is 1D, it is converted into 2D
   if(is.vector(lon))
@@ -134,14 +91,26 @@ osmose.nc.extract_grid_param = function(filename, lonname="longitude", latname="
   upperleftlon = min(lon) - dlon * 0.5
   upperleftlat = max(lat) + dlat * 0.5
   
-  cat("grid.java.classname;fr.ird.osmose.grid.OriginalGrid\n")
-  cat("grid.ncolumn;", nlon, "\n")
-  cat("grid.nline;", nlat, "\n")
-  cat("grid.lowright.lat;", lowrightlat, "\n")
-  cat("grid.lowright.lon;", lowrightlon, "\n")
-  cat("grid.upperleft.lat;", upperleftlat, "\n")
-  cat("grid.upperleft.lon;", upperleftlon, "\n")
-
+  output = data.frame(par="grid.java.classname", value="fr.ird.osmose.grid.OriginalGrid", stringsAsFactors = F)
+  output = rbind(output, c("grid.ncolumn", nlon))
+  output = rbind(output, c("grid.nline", nlat))
+  output = rbind(output, c("grid.lowright.lat", lowrightlat))
+  output = rbind(output, c("grid.lowright.lon", lowrightlon))
+  output = rbind(output, c("grid.upperleft.lat", upperleftlat))
+  output = rbind(output, c("grid.upperleft.lon", upperleftlon))
+  
+  # Handling of the saving into CSV
+  if(!is.null(csv)) 
+  {
+    # creates the directory recursively
+    if(!dir.exists(dirname(csv))) {
+      dir.create(dirname(csv), recursive=TRUE)
+    }
+    write.table(output, csv, sep=";", col.names = F, row.names = F)
+  }
+  
+  return(output)
+  
 }
 
 #' Extracts the model grid file from the LTL forcing file.
@@ -150,58 +119,49 @@ osmose.nc.extract_grid_param = function(filename, lonname="longitude", latname="
 #' @param varname  Name of the LTL biomass variable (default "ltl_biomass")
 #' @param output_file Name of the output file (default "ltl-grid-mask.csv")
 #' @param fillVal Fill Value (default NA but could be 0).
-#'
+#' @param ... Additional arguments of the ncvar_get function. Used to allow more flexibility on the choice of the
+#' mask variable via the start and count arguments. If your mask variable is already 2D, nothing to do. If it is 3D, you
+#' need to set the start/count arrays so that the final variable is of dimensions (lon, lat).
 #' @export
-osmose.nc.extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-grid-mask.csv", fillVal=NA)
+extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-grid-mask.csv", fillVal=NA, ...)
 {
- 
-  # checks for the file existence
-  if(!file.exists(filename))
-  {
-    stop("The ", filename, " file does not exist", sep="")
-  }
   
   # opens the netcdf file
-  fid = open.nc(filename)
+  fid = nc_open(filename)
   
   # extracts the LTL variable
-  var = .extract_var(fid, varname)
- 
-  # checks that the number of dimensions is 4
-  ndims = length(dim(var))
-  if(ndims != 4)
-  {
-    stop("The number of dimensions of the LTL file must be 4. Currently ", ndims, ".")
+  var = drop(ncvar_get(fid, varname, ...))
+  
+  nc_close(fid)
+  
+  if(length(dim(var)) != 2) {
+    error("The variable must be 2D. Please set the start and count arguments to extract a 2D (lon, lat) array")
   }
   
-  # extracts one time step and one ltl class
-  var = var[,,1,1]
   nlon = dim(var)[1]
   nlat = dim(var)[2]
-  output = array(var, c(nlon, nlat))
   
   # if the fillVal is not NA.
   # we set to NA all the values that are equal
   # to NA
   if(!is.na(fillVal))
   {
-    output[output == fillVal] = NA
-    
+    var[var == fillVal] = NA
   }
   
   # extracts the mask array (lon, lat)
-  output[!is.na(var)] = 0
-  output[is.na(var)] = - 99.0
-
-  # reverts the array into (lat, lon) with first latitudes at index 1
-  output = aperm(output)
+  var[!is.na(var)] = 0
+  var[is.na(var)] = - 99.0
   
-  # reverts array so that upper latitudes are at index 1
-  output = apply(output, 2, rev)
+  # reverts the array from (lon, lat) into (lat, lon) with first latitudes at index 1
+  var = aperm(var)
+  
+  # reverts array so that upper latitudes are at index 1, used for the saving of grid file
+  var = apply(var, 2, rev)
   
   # writes the output in csv file.
-  write.table(output, file=output_file, sep=";", row.names=FALSE, col.names=FALSE)
-  
+  write.table(var, file=output_file, sep=";", row.names=FALSE, col.names=FALSE)
+ 
 }
 
 #' Converts the movement CSV settings into a set of NetCDF files 
@@ -210,113 +170,147 @@ osmose.nc.extract_grid_mask = function(filename, varname="ltl_biomass", output_f
 #' @param filename Name of the parameter file containing the movement parameters.
 #'
 #' @export
-osmose.nc.make_movement_netcdf = function(filename) {
-
-    param = readOsmoseConfiguration(filename)
-
-    # Extract the list of species names
-    species_name = param$species$name
-
-    # Extract the maps names by considering that at least
-    # species is defined for any of them
-    tempspecies = param$movement$species
-
-    ntime = getOsmoseParameter(param, "simulation", "time", "ndtperyear")
-
-    for (spec in species_name) {
-
-        cat("Processing species ", spec, "\n")
-        season = c()
-        ymin = c()
-        ymax = c()
-        agemin = c()
-        agemax = c()
-        map = c()
-        N = 0
-
-        for (name in names(tempspecies))
-        {
-
-            mapspecies = getOsmoseParameter(param, "movement", "species", name)
-            if(mapspecies == spec) 
-            {
-
-                N = N + 1
-
-                if(existOsmoseParameter(param, "movement", "year", "min", name)) {
-                    ymin = c(ymin, getOsmoseParameter(param, "movement", "year", "min", name)) }
-                else {
-                    ymin = c(ymin, -1)
-                }
-
-                if(existOsmoseParameter(param, "movement", "year", "max", name)) {
-                    ymax = c(ymax, getOsmoseParameter(param, "movement", "year", "max", name)) }
-                else {
-                    ymax = c(ymax, -1)
-                }
-
-                if(existOsmoseParameter(param, "movement", "age", "max", name)) {
-                    agemax = c(agemax, getOsmoseParameter(param, "movement", "age", "max", name)) }
-                else {
-                    agemax = c(agemax, -1)
-                }
-
-                if(existOsmoseParameter(param, "movement", "age", "min", name)) {
-                    agemin = c(agemin, getOsmoseParameter(param, "movement", "age", "min", name)) }
-                else {
-                    agemin = c(agemin, -1)
-                }
-
-                temp = rep(0, ntime)
-                if(existOsmoseParameter(param, "movement", "season", name)) {
-                    tempseas = getOsmoseParameter(param, "movement", "season", name) + 1
-                    temp[tempseas] = 1
-                }
-                season = rbind(season, temp)
-
-                if(existOsmoseParameter(param, "movement", "file", name)) {
-                    temp = as.matrix(read.table(getOsmoseParameter(param, "movement", "file", name), sep=";"))
-                } else {
-                    temp = matrix(1:(dimX*dimY), nrow=dimX, ncol=dimY) * 0
-                }
-                temp = temp[nrow(temp):1, ]
-                dimX = dim(temp)[1]
-                dimY = dim(temp)[2]
-                Ntot  = dimX*dimY
-                out = array(1:Ntot, dim=c(1, dimX, dimY), dimnames=NULL)
-                out[1,,] = temp
-                map = abind(map, out, along=1)
-
-            }
-        }
-
-        filename = paste0("movement_", spec, ".nc")
-        ncid = create.nc(filename)
-        dim.def.nc(ncid, "x", dimlength=dimX)
-        dim.def.nc(ncid, "y", dimlength=dimY)
-        dim.def.nc(ncid, "m", dimlength=N)
-        dim.def.nc(ncid, "t", dimlength=ntime)
-
-        var.def.nc(ncid, "agemin", "NC_INT", c("m"))
-        var.def.nc(ncid, "agemax", "NC_INT", c("m"))
-        var.def.nc(ncid, "yearmin", "NC_INT", c("m"))
-        var.def.nc(ncid, "yearmax", "NC_INT", c("m"))
-        var.def.nc(ncid, "season", "NC_BYTE", c("t", "m"))
-        var.def.nc(ncid, "map", "NC_FLOAT", c("y", "x", "m"))
-
-        map[map<0] = NA
-        att.put.nc(ncid, "map", "missing_value", "NC_DOUBLE", -99)
-
-        var.put.nc(ncid, "agemin", agemin)
-        var.put.nc(ncid, "agemax", agemax)
-        var.put.nc(ncid, "yearmin", ymin)
-        var.put.nc(ncid, "yearmax", ymax)
-        var.put.nc(ncid, "map", aperm(map))
-        var.put.nc(ncid, "season", t(season))
-
-        close.nc(ncid)
-
+make_movement_netcdf = function(filename) {
+  
+  param = readOsmoseConfiguration(filename)
+  
+  # Extract the list of species names
+  # list of type ("sp0=names1, sp)
+  species_name = param$species$name
+  
+  # Extract the maps names by considering that at least
+  # species is defined for any of them.
+  # list of type (map0=spMap0, map1=spMap1)
+  tempspecies = param$movement$species
+  
+  ntime = getOsmoseParameter(param, "simulation", "time", "ndtperyear")
+  nlat =  getOsmoseParameter(param, "grid", "nline")
+  nlon =  getOsmoseParameter(param, "grid", "ncolumn")
+  
+  for (spec in species_name) {
+    
+    cat("+++++++++++++++++++++++ Processing ", spec, "\n")
+    
+    # Checks if the movement distribution for the current species is maps.
+    # if not, skip the foloowing
+    if(getOsmoseParameter(param, "movement", "distribution", "method", paste0("sp", find_species_index(spec, param))) != "maps") {
+      cat("Movement for species ", spec, "is not maps.\n")
+      cat("Nothing will be done\n")
+      next;
     }
+    
+    N = 0 # count the number of maps associated with the current specie
+    namesOk = c()
+    # here, loop over all the names, i.e. map0, map1, etc.
+    for (name in names(tempspecies))
+    {
+      mapspecies = getOsmoseParameter(param, "movement", "species", name)
+      # process only the maps that correspond to the propoer species
+      if(mapspecies == spec) {
+        N = N + 1
+        namesOk = c(namesOk, name)
+      }
+    }
+    
+    if(N == 0) {
+      cat("There is no map extracted for species ", spec, "\n")
+      cat("Nothing will be done\n")
+      next
+    }
+    
+    # init arrays with the good dimensions (to get rid off abind)
+    # note that to save data in NC, transposed dimensions must be used.
+    season = array(0, dim=c(ntime, N))
+    ymin = array(0, dim=c(N))
+    ymax = array(0, dim=c(N))
+    agemin = array(0, dim=c(N))
+    agemax = array(0, dim=c(N))
+    map = array(0, dim=c(nlon, nlat, N))
+    
+    i = 1
+    # here, loop over all the map names, i.e. map0, map1, etc,
+    # that are linked with the specific spacies
+    for (name in namesOk) {
+      
+      mapspecies = getOsmoseParameter(param, "movement", "species", name)
+      
+      cat("Processing map ", name, "\n")
+      
+      if(existOsmoseParameter(param, "movement", "year", "min", name)) {
+        ymin[i] = getOsmoseParameter(param, "movement", "year", "min", name)
+      } else {
+        ymin[i] = -1
+      }
+      
+      if(existOsmoseParameter(param, "movement", "year", "max", name)) {
+        ymax[i] = getOsmoseParameter(param, "movement", "year", "max", name)
+      } else {
+        ymax[i] = -1
+      }
+      
+      if(existOsmoseParameter(param, "movement", "age", "max", name)) {
+        agemax[i] = getOsmoseParameter(param, "movement", "age", "max", name)
+      } else {
+        agemax[i] = -1
+      }
+      
+      if(existOsmoseParameter(param, "movement", "age", "min", name)) {
+        agemin[i] = getOsmoseParameter(param, "movement", "age", "min", name)
+      } else {
+        agemin[i] = -1
+      }
+      
+      if(existOsmoseParameter(param, "movement", "season", name)) {
+        tempseas = getOsmoseParameter(param, "movement", "season", name) + 1
+        season[tempseas, i] = 1
+      }
+      
+      # If the map parameter exists, it is read and converted into matrix.
+      # if null, set to 0 everywhere
+      if(existOsmoseParameter(param, "movement", "file", name)) {
+        mapFile = file.path(dirname(filename), getOsmoseParameter(param, "movement", "file", name))
+        temp = t(data.matrix(read.table(mapFile, sep=";")))  # (lat, lon) converted into (lon, lat)
+        # reverts array so that upper latitudes are at index 1, used for the saving of grid file
+        temp = temp[, ncol(temp):1]
+        map[,,i] = temp
+
+      } else {
+        map[,,i] = 0
+      }
+      
+      i = i + 1
+      
+    }
+    
+    x = ncdim_def("x", "", vals=1:nlon)
+    y = ncdim_def("y", "",  vals=1:nlat)
+    m = ncdim_def("m", "",  vals=1:N)
+    t = ncdim_def("t", "",  vals=1:ntime)
+    
+    varAgemin = ncvar_def("agemin", units="",  dim=m, prec="integer")
+    varAgemax = ncvar_def( "agemax",  units="", prec="integer", dim=m)
+    varYearmin = ncvar_def("yearmin",  units="", prec="integer", dim=m)
+    varYearmax = ncvar_def("yearmax",  units="", prec="integer", dim=m)
+    varSeason = ncvar_def("season",  units="", prec="byte", dim=list(t, m))
+    varMap = ncvar_def("map",  units="", prec="float", dim=list(x, y, m))
+    
+    map[map<0] = NA
+    
+    varlist = list(varAgemin, varAgemax, varYearmin, varYearmax, varSeason, varMap)
+    
+    ncfilename = paste0("movement_", spec, ".nc")
+    ncid = nc_create(ncfilename, vars=varlist)
+    
+    ncvar_put(ncid, "agemin", agemin)
+    ncvar_put(ncid, "agemax", agemax)
+    ncvar_put(ncid, "yearmax", ymax)
+    ncvar_put(ncid, "yearmin", ymin)
+    ncvar_put(ncid, "map", map)
+    ncvar_put(ncid, "season", season)
+    
+    nc_close(ncid)
+
+  }
 }
 
 

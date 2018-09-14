@@ -38,8 +38,7 @@ Imports:
   knitr,
   rmarkdown,
   ggplot2, 
-  RNetCDF,
-  abind
+  ncdf4
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
