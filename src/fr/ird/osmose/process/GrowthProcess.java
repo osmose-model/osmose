@@ -120,7 +120,7 @@ public class GrowthProcess extends AbstractProcess {
             deltaMeanLength[i] = new double[lifespan];
                 
             // barrier.n: patch for Fabien to limit the maximum grow rate
-            double delta_lmax_factor = (getConfiguration().isNull("delta.lmax.factor.sp" + i)) ? 2 : getConfiguration().getDouble("species.delta.lmax.factor.sp" + i); 
+            double delta_lmax_factor = (getConfiguration().isNull("species.delta.lmax.factor.sp" + i)) ? 2 : getConfiguration().getDouble("species.delta.lmax.factor.sp" + i); 
 
             double meanLength1 = growth[i].ageToLength(0);
             for (int ageDt = 0; ageDt < lifespan - 1; ageDt++) {
