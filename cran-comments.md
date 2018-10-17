@@ -1,3 +1,9 @@
+# version 0.1.2
+
+Adding more plot functions
+Correction of a bug in the call to Java
+Update in the java code (v3u3)
+
 # version 0.1.1
 
 ** round 8 **
