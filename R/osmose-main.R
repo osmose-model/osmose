@@ -93,6 +93,8 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
 #' @param version OSMOSE version used to run the model. 
 #' @param species.names Display names for species, overwrite the species names
 #' provided to the OSMOSE model. Used for plots and summaries.
+#' @param absolute Whether the path is absolute (TRUE) or relative (FALSE). Only used if
+#' input is not NULL
 #' @param ... Additional arguments
 #' @details A list of class \code{osmose} is created, individual elements can be
 #' extracted using the function \code{getVar}.
@@ -104,11 +106,11 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
 #'   read_osmose(outdir)
 #' }
 #' @aliases osmose2R
-read_osmose =  function(path=NULL, input=NULL, version="v3r2", species.names=NULL, ...) {
+read_osmose =  function(path=NULL, input=NULL, version="v3r2", species.names=NULL, absolute=TRUE, ...) {
   
   if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
   
-  config =  if(!is.null(input)) readOsmoseConfiguration(file=input) else NULL
+  config =  if(!is.null(input)) readOsmoseConfiguration(file=input, absolute=absolute) else NULL
   
   if(is.null(path)) return(config)
 
