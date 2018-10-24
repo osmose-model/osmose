@@ -6,7 +6,7 @@
 \title{Read OSMOSE outputs into an R object}
 \usage{
 read_osmose(path = NULL, input = NULL, version = "v3r2",
-  species.names = NULL, ...)
+  species.names = NULL, absolute = TRUE, ...)
 }
 \arguments{
 \item{path}{Path to the directory containing OSMOSE outputs.}
@@ -17,6 +17,9 @@ read_osmose(path = NULL, input = NULL, version = "v3r2",
 
 \item{species.names}{Display names for species, overwrite the species names
 provided to the OSMOSE model. Used for plots and summaries.}
+
+\item{absolute}{Whether the path is absolute (TRUE) or relative (FALSE). Only used if
+input is not NULL}
 
 \item{...}{Additional arguments}
 }
