@@ -161,7 +161,7 @@ extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-g
   
   # writes the output in csv file.
   write.table(var, file=output_file, sep=";", row.names=FALSE, col.names=FALSE)
- 
+  
 }
 
 #' Converts the movement CSV settings into a set of NetCDF files 
@@ -273,7 +273,7 @@ make_movement_netcdf = function(filename) {
         # reverts array so that upper latitudes are at index 1, used for the saving of grid file
         temp = temp[, ncol(temp):1]
         map[,,i] = temp
-
+        
       } else {
         map[,,i] = 0
       }
@@ -309,8 +309,90 @@ make_movement_netcdf = function(filename) {
     ncvar_put(ncid, "season", season)
     
     nc_close(ncid)
-
+    
   }
 }
 
+#' Creates a NetCDF file containing the new format for LTL
+#' concentrations. The "ltl_biomass" of dims (ntime, nltl, nlat, nlon)
+#' is splitted into nltl variables of dims (ntime, nlat, nlon)
+#'
+#' @param ltl_filename Name of the NetCDF LTL file
+#' @param osmose_config Name of the main configuration file
+#' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
+#'
+#' @return
+#' @export
+correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
+{
+  
+  #absolute=FALSE
+  #dirname = "/home/nbarrier/Modeles/osmose/test_configuration_bgspecies/"
+  #ltl_filename = file.path(dirname, "eec_ltlbiomassTons.nc")
+  #osmose_config = file.path(dirname, "eec_all-parameters.csv")
+  
+  # Reads the CSV parameter files
+  param = readOsmoseConfiguration(osmose_config, absolute=absolute)
+  
+  # recovers the index for plk as 
+  pltindex = names(param$plankton$name)
+  
+  # Opens the old netcdf file
+  ncin = nc_open(ltl_filename)
+  
+  # Recover spatial coordinates
+  if(length(ncin$var$latitude$varsize) == 2) {
+    # if coordinates are 2D, then extract data as 1D
+    lon = ncvar_get(ncin, varid='longitude')[,1]
+    lat = ncvar_get(ncin, varid='latitude')[1,]
+  } else {
+    # If longitudes are 1D, nothing to do.
+    lon = ncvar_get(ncin, varid='longitude')
+    lat = ncvar_get(ncin, varid='latitude')
+  }
+  
+  # Recovers the original time coordinates and attributes (for units)
+  attr_time = ncatt_get(ncin, "time")
+  time = ncvar_get(ncin, varid='time')
+  
+  # recovers the number of plankton within the file
+  n_ltl_file = ncin$dim$ltl$len
+  
+  # biomass is of size (lon, lat, ltl, time)
+  biomass_units = ncatt_get(ncin, "ltl_biomass")$units
+  biomass = ncvar_get(ncin, varid='ltl_biomass')
+  
+  # Creates the output dimensions (lon, lat, time)
+  dim_time = ncdim_def("time", attr_time$units, time)
+  dim_lon = ncdim_def("longitude", "", lon)
+  dim_lat = ncdim_def("latitude", "", lat)
+  dims = list(dim_lon=dim_lon, dim_lat=dim_lat, dim_time=dim_time)
+  
+  # Loop over all the plankton classes to initialise variables in the NetCDF
+  list_vars = c()
+  for(i in 1:n_ltl_file) {
+    ltl_var = param$plankton$name[[pltindex[i]]]
+    var_nc = ncvar_def(ltl_var, biomass_units, dims, longname=ltl_var)
+    list_vars[[i]] = var_nc
+  }
+  
+  # Opens the output NetCDF file
+  output_file_name = file.path(dirname(ltl_filename), paste0("corrected_", basename(ltl_filename)))
+  output_file_name = basename(output_file_name)
+  ncout = nc_create(output_file_name, list_vars)
+  
+  # loops over all the LTL classes and write data into 
+  # the file
+  for(i in 1:n_ltl_file) {
+    ltl_var = param$plankton$name[[pltindex[i]]]
+    ncvar_put(ncout, ltl_var, biomass[, , i, ])
+  }
+  
+  # Add the calendar attribute to the time variable
+  ncatt_put(ncout, "time", "calendar", attr_time$calendar)
+  
+  nc_close(ncout)
+  nc_close(ncin)
+  
+}
 
