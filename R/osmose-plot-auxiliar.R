@@ -263,10 +263,10 @@ plot2DType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
   
-  if(isFALSE(ci)){
+  if(isfalse(ci)){
     x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
     x = x * factor
-    if(isFALSE(horizontal)){
+    if(isfalse(horizontal)){
       mar = c(2.5,2,1,0.3)
       ylim = c(0, 1.2*max(x))
       xlim = NULL
@@ -300,7 +300,7 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
   
-  if(isFALSE(horizontal)){
+  if(isfalse(horizontal)){
     mar = c(2.5,2,1,0.3)
     ylim = c(0, 1.2*(max(y.mean)+1.96*max(y.sd)/10))
     xlim = NULL
@@ -314,7 +314,7 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
   barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col,
                  ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, ...)
   
-  if(isFALSE(horizontal)){
+  if(isfalse(horizontal)){
     arrows(barx, y.mean + 1.96*y.sd/10, barx, y.mean - 1.96*y.sd/10, angle = angle, code = code, length = length, ...)
   } else {
     arrows(y.mean - 1.96*y.sd/10, barx, y.mean + 1.96*y.sd/10, barx, angle = angle, code = code, length = length, ...)
@@ -330,7 +330,7 @@ plot2DType2 = function(x, horizontal = FALSE, col = NULL,
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
   
-  if(isFALSE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
+  if(isfalse(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
   } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
   
   x = apply(x*factor, c(1,2), mean, na.rm = TRUE) #mean over the replicates
@@ -360,7 +360,7 @@ plot2DType3 = function(x, horizontal = FALSE, col = NULL,
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
   
-  if(isFALSE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
+  if(isfalse(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
   } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
   
   x = apply(x*factor, c(3,2), mean, na.rm = TRUE) #mean over the time

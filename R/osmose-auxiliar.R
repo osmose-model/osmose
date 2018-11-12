@@ -6,7 +6,7 @@
 #' @return True if condition is not met
 #' @export
 #'
-isFALSE = function(x) {
+isfalse = function(x) {
   output = !isTRUE(x)  
   return(output)
 }
