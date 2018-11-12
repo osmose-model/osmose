@@ -26,6 +26,11 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   # opar = par(no.readonly = TRUE)
   # on.exit(par(opar))
   
+  if(!(type %in% c(1:4))){
+    warning("The type argument selected is not correct. The value by default is used (type = 1)")
+    type = 1
+  } 
+  
   if(isTRUE(ts)){
     
     if(type == 1) { plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
