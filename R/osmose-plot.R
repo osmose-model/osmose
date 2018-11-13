@@ -28,7 +28,9 @@
 #' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
 #' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
 #' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
-#' @param freq TODO + axes.
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
 #' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
 #' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
 #' present the plots horizontaly.
@@ -86,7 +88,9 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 #' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
 #' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
 #' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
-#' @param freq TODO + axes.
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
 #' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
 #' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
 #' present the plots horizontaly.
@@ -144,7 +148,9 @@ plot.osmose.abundance = function(x, species = NULL, start = NULL, end = NULL, in
 #' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
 #' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
 #' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
-#' @param freq TODO + axes.
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
 #' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
 #' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
 #' present the plots horizontaly.
@@ -202,7 +208,9 @@ plot.osmose.yield = function(x, species = NULL, start = NULL, end = NULL, initia
 #' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
 #' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
 #' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
-#' @param freq TODO + axes.
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
 #' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
 #' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
 #' present the plots horizontaly.
