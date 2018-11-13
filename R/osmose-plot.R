@@ -34,8 +34,6 @@
 #' present the plots horizontaly.
 #' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
 #' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
-#' @param xlim TODO
-#' @param ylim TODO
 #' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
 #'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
 #'  the colors are recycled and repeated for the species that have not a specific color. 
@@ -94,8 +92,6 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 #' present the plots horizontaly.
 #' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
 #' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
-#' @param xlim TODO
-#' @param ylim TODO
 #' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
 #'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
 #'  the colors are recycled and repeated for the species that have not a specific color. 
@@ -154,8 +150,6 @@ plot.osmose.abundance = function(x, species = NULL, start = NULL, end = NULL, in
 #' present the plots horizontaly.
 #' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
 #' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
-#' @param xlim TODO
-#' @param ylim TODO
 #' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
 #'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
 #'  the colors are recycled and repeated for the species that have not a specific color. 
@@ -214,8 +208,6 @@ plot.osmose.yield = function(x, species = NULL, start = NULL, end = NULL, initia
 #' present the plots horizontaly.
 #' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
 #' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
-#' @param xlim TODO
-#' @param ylim TODO
 #' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
 #'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
 #'  the colors are recycled and repeated for the species that have not a specific color. 
