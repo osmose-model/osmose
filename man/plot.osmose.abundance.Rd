@@ -45,7 +45,9 @@ used only when \code{replicates = TRUE} and for the plot types where \code{repli
 
 \item{ci}{TODO. remove this parameter on type 1 and 2 (ts = TRUE).}
 
-\item{freq}{TODO + axes.}
+\item{freq}{A \code{numeric} value to indicate the frequence on the time series plots. 
+It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+a vector of the time for the x-axis.}
 
 \item{horizontal}{\code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
 this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
@@ -54,10 +56,6 @@ present the plots horizontaly.}
 \item{conf}{A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.}
 
 \item{factor}{A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.}
-
-\item{xlim}{TODO}
-
-\item{ylim}{TODO}
 
 \item{col}{A vector with the color names for the plots. By default \code{col = NULL} and the colors
 are chosen by the function. If the length of this parameter is shorter than the number of species, 
