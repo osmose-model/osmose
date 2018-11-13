@@ -9,7 +9,14 @@
 \arguments{
 \item{x}{Object of \code{osmose} class. See the \code{\link{read_osmose}} function for more details.}
 
-\item{what}{Variable name to plot. By default is \code{what = "biomass"}.}
+\item{what}{Variable name to plot. By default is \code{what = "biomass"}.
+This variable could be:
+\itemize{
+ \item "biomass" to plot the species biomass (see \link{plot.osmose.biomass})
+ \item "abundance" to plot the species abundance (see \link{plot.osmose.abundance})
+ \item "yield" to plot the species yield (see \link{plot.osmose.yield})
+ \item "yieldN" to plot the species yield (in numbers) (see \link{plot.osmose.yieldN})
+}}
 
 \item{...}{Additional arguments for the plot function.}
 }
