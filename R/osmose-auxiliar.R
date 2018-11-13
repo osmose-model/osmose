@@ -1,15 +1,9 @@
  
-#' Defines isFALSE from isTRUE
-#'
-#' @param x Condition
-#'
-#' @return True if condition is not met
-#' @export
-#'
-isfalse = function(x) {
-  output = !isTRUE(x)  
-  return(output)
-}
+# 
+# isfalse = function(x) {
+#   output = !isTRUE(x)  
+#   return(output)
+# }
 
 
 #' Write data in osmose format
