@@ -270,7 +270,7 @@ plot2DTsType4 = function(x, times, xlim, ylim = NULL,
 
 plot2DType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
                        factor = 1e-3, speciesNames = NULL, border = NA,
-                       cex.names = 0.8, ...) {
+                       cex.names = 0.8, cex = 0.9, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
@@ -300,7 +300,7 @@ plot2DType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
   box()
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   return(invisible())
   
