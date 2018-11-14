@@ -2,57 +2,18 @@
 
 
 #' Plot method for osmose objects
-#' @description This method takes a \code{osmose} object to make useful plot 
-#' for each variables.
-#' @param x Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
-#' @param type Name of the variable to plot. By default is \code{type = "biomass"} but 
-#' it could be:
+#' @description This method takes a \code{osmose} object and produce useful plots
+#' @param x Object of \code{osmose} class. See the \code{\link{read_osmose}} function for more details.
+#' @param what Variable name to plot. By default is \code{what = "biomass"}.
+#' This variable could be:
 #' \itemize{
-#'  \item "biomass" to plot the species biomass.
-#'  \item "abundance" to plot the species abundance.
-#'  \item "yield" to plot the species yield.
-#'  \item "yieldN" to plot the species yield (in numbers).
+#'  \item "biomass" to plot the species biomass (see \link{plot.osmose.biomass})
+#'  \item "abundance" to plot the species abundance (see \link{plot.osmose.abundance})
+#'  \item "yield" to plot the species yield (see \link{plot.osmose.yield})
+#'  \item "yieldN" to plot the species yield (in numbers) (see \link{plot.osmose.yieldN})
 #' }
-#' @param ... Extra arguments of the function. These could be:
-#' \itemize{
-#'  \item aggregate A \code{logical} parameter. By default \code{aggregate = FALSE} 
-#'  show the evolution of the variable over the time. \code{aggregate = TRUE} show 
-#'  the aggregation of the variable for each species. 
-#'  \item start A number to indicate the first x-axis element to plot when 
-#'  \code{aggregate = FALSE}. By default \code{start = NULL} and start with the 
-#'  first element of the osmose object over the time.
-#'  \item conf A number to indicate the confidence interval to plot. By default 
-#'  \code{conf = 0.95}.
-#'  \item factor A number to indicate the variable scale on the y axis. By default 
-#'  \code{factor = 1e-6}.
-#'  \item replicates A \code{logical} parameter. \code{replicates = FALSE} show the 
-#'  mean value of the variable over the time but \code{replicates = TRUE} show the 
-#'  values obtained in each replicates of the osmose object.
-#'  \item nrep A number to indicate the number of replicates to show. This 
-#'  parameter is used only when \code{replicates = TRUE}. By default \code{nrep = 3}.
-#'  \item col The color of the lines (\code{agregate = FALSE}), 
-#'  barplot (for variables biomass or abundance using \code{aggregate = TRUE}) or 
-#'  boxplot (for variables yield or yieldN using \code{aggregate = TRUE}). 
-#'  By default \code{col = "black"}.
-#'  \item alpha A number between 0 and 1. Indicate the transparency with which the 
-#'  confidence interval is colored. By default \code{alpha = 0.5}.
-#' }
-#' @details The parameters: \code{start}, \code{conf}, \code{factor},
-#'  \code{replicates}, \code{nrep}, \code{alpha} are used only when \code{aggregate = FALSE}.
-#' 
-#' When \code{aggregate = TRUE} a \code{barplot} is generated for the 
-#' variables "biomass" and "abundance". Each bar of the barplot represents the 
-#' average value of the variable over the time for each species. For the variables 
-#' "yield" and "yieldN" a \code{boxplot} is generated. Each box of the boxplot 
-#' represents one species.
-#' 
-#' The plots with the evolution of the variable over the time (\code{aggregate = FALSE}) 
-#' show the variable of each species included in a osmose object, where the x axis 
-#' represents the time and the y axis the variable. The line (by default a black line) 
-#' is the mean value over the time and the light grey part represent the confidence 
-#' interval (by default \code{conf = 0.95}).
-#' @return A graph of a osmose object.
-#' @author Ricardo Oliveros-Ramos
+#' @param ... Additional arguments for the plot function.
+#' @return A graph of a osmose object
 #' @export
 #' @method plot osmose
 plot.osmose = function(x, what = "biomass", ...) {
