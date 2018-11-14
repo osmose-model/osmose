@@ -337,13 +337,13 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
 
 #boxplot with mean over the replicates
 plot2DType2 = function(x, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, ...) {
+                       factor = 1e-3, speciesNames = NULL, cex = 0.8, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
   
-  if(!isTRUE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
-  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
+  if(!isTRUE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1, ...)
+  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1, ...)}
   
   x = apply(x*factor, c(1,2), mean, na.rm = TRUE) #mean over the replicates
   
@@ -351,7 +351,7 @@ plot2DType2 = function(x, horizontal = FALSE, col = NULL,
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   return(invisible())
 }
