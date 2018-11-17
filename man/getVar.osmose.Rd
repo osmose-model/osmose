@@ -22,7 +22,7 @@ last dimensions should be performed if the output is an array. By default is
 \item{...}{Additional arguments of the function.}
 }
 \value{
-An array or a list containing the data.
+An matrix or a list containing the data.
 }
 \description{
 Get a variable from an \code{osmose} object.

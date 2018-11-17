@@ -8,7 +8,8 @@
   end = NULL, initialYear = NULL, ts = TRUE, type = 1,
   replicates = TRUE, nrep = 3, ci = TRUE, freq = 12,
   horizontal = FALSE, conf = 0.95, factor = 0.001, xlim = NULL,
-  ylim = NULL, col = NULL, alpha = 0.5, speciesNames = NULL, ...)
+  ylim = NULL, col = NULL, alpha = 0.5, speciesNames = NULL,
+  axes = TRUE, ...)
 }
 \arguments{
 \item{x}{Object of the class \code{osmose.abundance}. This object have three dimensions: 
