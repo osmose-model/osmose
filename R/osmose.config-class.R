@@ -78,6 +78,12 @@ getVar.osmose.config = function(object, what) {
     stop(message)
   }
   
+  if(what %in% "reproduction"){
+    out = switch(what,
+                 reproduction = getReproductionData(out))
+  }
+  
+  
   class(out) = c(paste("osmose.config", what, sep = "."), class(out))
   
   return(out)

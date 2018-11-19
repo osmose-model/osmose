@@ -141,3 +141,25 @@ addAttr = function(x, which, value) {
 .getConfig.list = function(config, ...) {
   return(config)
 }
+
+
+# GetData functions -------------------------------------------------------
+
+getReproductionData = function(x){
+  
+  speciesNames = names(x$season$file)
+  reproData    = as.vector(unlist(lapply(x$season$file, FUN = "[[", 1)))
+  reproPaths   = as.vector(unlist(lapply(x$season$file, attr, "path")))
+  
+  reproData    = paste(reproPaths, reproData, sep = "/")
+  
+  dataBase = list()
+  for(i in seq_along(speciesNames)){
+    dataBase[[i]] = read.csv(file = reproData[i], sep = ";")
+  }
+  names(dataBase) = speciesNames
+  
+  return(dataBase)
+  
+}
+
