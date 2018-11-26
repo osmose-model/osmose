@@ -145,11 +145,19 @@ addAttr = function(x, which, value) {
 
 # GetData functions -------------------------------------------------------
 
-getReproductionData = function(x){
+getReproductionData = function(x, var = season.file){
   
-  speciesNames = names(x$season$file)
-  reproData    = as.vector(unlist(lapply(x$season$file, FUN = "[[", 1)))
-  reproPaths   = as.vector(unlist(lapply(x$season$file, attr, "path")))
+  # index on the list using the var
+  listIndex = paste0("x = x",
+                     switch(var,
+                            file        = "[['file']]",
+                            season.file = "[['season']][['file']]"))
+  
+  eval(parse(text = listIndex))
+  
+  speciesNames = names(x)
+  reproData    = as.vector(unlist(lapply(x, FUN = "[[", 1)))
+  reproPaths   = as.vector(unlist(lapply(x, attr, "path")))
   
   reproData    = paste(reproPaths, reproData, sep = "/")
   
@@ -160,6 +168,5 @@ getReproductionData = function(x){
   names(dataBase) = speciesNames
   
   return(dataBase)
-  
 }
 

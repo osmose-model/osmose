@@ -68,7 +68,7 @@ configureCalibration = function(L1) {
 #' the variable extracted.
 #' @export
 #' @method getVar osmose.config
-getVar.osmose.config = function(object, what) {
+getVar.osmose.config = function(object, what, ...) {
   
   out = object[[what]]
   
@@ -80,7 +80,7 @@ getVar.osmose.config = function(object, what) {
   
   if(what %in% "reproduction"){
     out = switch(what,
-                 reproduction = getReproductionData(out))
+                 reproduction = getReproductionData(out, var = "season.file"))
   }
   
   
