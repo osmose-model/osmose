@@ -38,3 +38,23 @@ osmoseConfigPlot2D = function(x, species, start, end, initialYear, freq, ts, typ
 }
 
 
+configPlot2DType1 = function(x, times, xlim, ylim, speciesNames = NULL,
+                             axes = TRUE, legend = TRUE, ...){
+  
+  # speciesNames
+  if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
+  
+  par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
+  lines(x = times, y = x[,2], type = "l", xlab = "", ylab = "", xaxs = "i", yaxs = "i",
+        xlim = xlim, ylim = ylim, ...)
+  if(isTRUE(axes)){
+    axis(1, ...)
+    axis(2, las = 2, ...)
+  }
+  
+  if(isTRUE(legend)){
+    legend(toupper(speciesNames), side = 3, line = -1.5, adj = 1, ...)
+  }
+  
+  return(invisible())
+}
