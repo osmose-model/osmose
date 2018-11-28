@@ -47,7 +47,7 @@ viewDataList = function(input, path=NULL) {
   if(isTRUE(absolute)) {
     if(is.null(path)) {
       path  = normalizePath(dirname(input))
-      input = basename(input)        
+      input = basename(input)
     }
   } else {
     path = if(is.null(path)) {
