@@ -29,17 +29,13 @@
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = "output", log = "osmose.log",
-                      version = 3, osmose = NULL, java = "java",
+                      version = "3.3.1", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE) {
-  
-  # barrier.n: redirection 
-  
-  version = .getVersion(version)
   
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
   
   # update to provide by release executables
-  if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_stable_%s.jar", version),
+  if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_%s.jar", version),
                                            package="osmose", mustWork = TRUE)
   
   if(isTRUE(clean)) 
@@ -48,11 +44,14 @@ run_osmose = function(input, parameters = NULL, output = "output", log = "osmose
   if(is.null(options)) options = ""
   if(is.null(parameters)) parameters = ""
   
-  if(version > 3) {
+  # barrier.n: redirection 
+  version = .getVersion(version)
+  
+  if(version <= 3) {
+    outDir = output
+  } else {
     # changes for version 4 or higher
     outDir = paste("-Poutput.dir.path=", output, sep="")
-  } else {
-    outDir = output
   }
   
   args = paste(options, "-jar", osmose, input, outDir, parameters)
@@ -73,7 +72,7 @@ run_osmose = function(input, parameters = NULL, output = "output", log = "osmose
 #' Title
 #' @export
 runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version=3, osmose=NULL, java="java", 
+                     version="3.3.1", osmose=NULL, java="java", 
                      options=NULL, verbose=TRUE, clean=TRUE) {
   
   message("runOsmose will be deprecated, use run_osmose instead.")
