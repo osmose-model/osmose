@@ -105,8 +105,7 @@ plot.osmose.config = function(x, what = NULL, ...) {
   
   if(!is.null(what)){
     x = getVar.osmose.config(x, what = what)
-    #plot(x, ...)
-    print("code in process...")
+    plot(x, ...)
     
   } else {
     message("An variable of the configuration file have to be chosen for the plot")

@@ -20,7 +20,7 @@ osmoseConfigPlot2D = function(x, species, start, end, initialYear, freq, ts, typ
   
   # xlim and ylim
   initialYear = if(is.null(initialYear)) as.numeric(x[1,1]) else initialYear
-  times = seq(from = initialYear, by = freq, to = x[dim(x)[1],1])
+  times = seq(from = initialYear + 0.5/freq, by = 1/freq, len = nrow(x))
   xlim = if(is.null(xlim)) range(times)
   ylim = if(is.null(ylim)) c(0, range(x[2])[2]*1.2)
   if(!(type %in% c(1,2))){
@@ -45,15 +45,16 @@ configPlot2DType1 = function(x, times, xlim, ylim, speciesNames = NULL,
   if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
   
   par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
-  lines(x = times, y = x[,2], type = "l", xlab = "", ylab = "", xaxs = "i", yaxs = "i",
-        xlim = xlim, ylim = ylim, ...)
+  plot(x = times, y = x[,2], type = "l", xlab = "", ylab = "", xaxs = "i", yaxs = "i",
+       xlim = xlim, ylim = ylim, axes = FALSE, ...)
   if(isTRUE(axes)){
     axis(1, ...)
     axis(2, las = 2, ...)
+    box()
   }
   
   if(isTRUE(legend)){
-    legend(toupper(speciesNames), side = 3, line = -1.5, adj = 1, ...)
+    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, ...)
   }
   
   return(invisible())
