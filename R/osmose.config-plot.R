@@ -26,11 +26,14 @@ plot.osmose.config.reproduction = function(x, species = NULL, start = NULL, end 
   ylim = if(is.null(ylim)) c(0, range(x[2])[2]*1.2)
   if(!(type %in% c(1,2))){
     warning("The type argument selected is not correct. The value by default is used (type = 1)")
+    type = 1
   }
   
   if(type == 1) {plotReproductionType1(x = x, times = times, xlim = xlim, ylim = ylim,
                                        speciesNames = speciesNames, axes = axes, legend = legend, ...)}
-  if(type != 1) {print("working on it ... be patient please :) ")}
+  
+  if(type == 2) {plotReproductionType2(x = x, ylim = ylim, speciesNames = speciesNames,
+                                       axes = axes, legend = legend, ...)}
   
   return(invisible())
 }
