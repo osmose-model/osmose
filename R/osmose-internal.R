@@ -4,20 +4,20 @@
 
 
 .getVersion = function(version) {
-  
+
   if(length(version) > 1) stop("Only one 'version' value must be provided.")
+
+  # conversion of the version argument into string
+  # to be matched with regular expression
+  version = toString(version)
   
-  if(is.integer(version)) {
-    return(version)
-  }
-  
-  pattern = "^ *([0-9]+)"
+  pattern = "^ *([0-9]+)(\\.[0-9]+){0,2} *$"
   if(grepl(version, pattern=pattern)) {
     version = sub(x=version, pattern=pattern, replacement="\\1")
     isNum = suppressWarnings(!is.na(as.integer(version)))
     if(isNum) return(as.integer(version))
-  } 
-  stop("Version must be of the form X, 'X', 'X.Y' or 'X.Y.Z'.")
+  }
+  stop("Version must be of the form X, X.Y or X.Y.Z.")
 }
 
 # guess the type of a vector
