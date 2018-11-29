@@ -3,7 +3,7 @@
 
 osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
                          replicates, nrep, ci, freq, horizontal, conf,
-                         factor, xlim, ylim, col, alpha, speciesNames, ...) {
+                         factor, xlim, ylim, col, alpha, speciesNames, axes, ...) {
   
   # species indexation
   if(!is.null(species)) {
@@ -26,36 +26,41 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
   # opar = par(no.readonly = TRUE)
   # on.exit(par(opar))
   
+  if(!(type %in% c(1:4))){
+    warning("The type argument selected is not correct. The value by default is used (type = 1)")
+    type = 1
+  } 
+  
   if(isTRUE(ts)){
     
     if(type == 1) { plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
                                 times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
-                                speciesNames = speciesNames, ...) }
+                                speciesNames = speciesNames, axes = axes, ...) }
     
     if(type == 2) { plot2DTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
                                 times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
-                                speciesNames = speciesNames, ...) }
+                                speciesNames = speciesNames, axes = axes, ...) }
     
     if(type == 3) { plot2DTsType3(x = x, times = times,
                                 xlim = xlim, ylim = ylim, factor = factor, 
-                                col = col, speciesNames = speciesNames, ...) }
+                                col = col, speciesNames = speciesNames, axes = axes, ...) }
     
     if(type == 4) { plot2DTsType4(x = x, times = times,
                                 xlim = xlim, ylim = ylim, factor = factor,
-                                col = col, speciesNames = speciesNames, ...) } 
+                                col = col, speciesNames = speciesNames, axes = axes, ...) } 
       
   } else {
     
     if(type == 1) { plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
-                              factor = factor, speciesNames = speciesNames, ...) }
+                              factor = factor, speciesNames = speciesNames, axes = axes, ...) }
     
     if(type == 2) { plot2DType2(x, horizontal = horizontal, col = col, 
-                              factor = factor, speciesNames = speciesNames, ...) }
+                              factor = factor, speciesNames = speciesNames, axes = axes, ...) }
     
     if(type == 3) { plot2DType3(x, horizontal = horizontal, col = col, 
-                              factor = factor, speciesNames = speciesNames, ...) }
+                              factor = factor, speciesNames = speciesNames, axes = axes, ...) }
   }
   
   return(invisible())
@@ -66,7 +71,7 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
 plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                          times, xlim, ylim = NULL,
                          conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
-                         speciesNames = NULL, lty = NULL, cex = 0.8, border = NA, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, border = NA, axes = TRUE, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   
@@ -88,9 +93,12 @@ plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plot.window(xlim=xlim, ylim=ylim)
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
            prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], border = border, ...)
-    axis(1)
-    axis(2, las=2)
-    box()
+    
+    if(isTRUE(axes)){
+      axis(1, ...)
+      axis(2, las=2, ...)
+      box()
+    }
     
     mtext(speciesNames[sp], 3, line = -1.5, adj = 0.05, cex = cex)
     legendFactor = -(log10(factor))
@@ -130,7 +138,7 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border, lt
 plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
                          times, xlim, ylim=NULL, 
                          conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, border = NA, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, border = NA, axes = TRUE, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
@@ -153,9 +161,12 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
     plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
            prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], border = border, ...)
   }
-  axis(1, ...)
-  axis(2, las=2, ...)
-  box()
+  
+  if(isTRUE(axes)){
+    axis(1, ...)
+    axis(2, las=2, ...)
+    box()
+  }
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
@@ -169,7 +180,7 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
 }
 
 plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
-                         col = NULL, speciesNames = NULL, legend = TRUE, ...) {
+                         col = NULL, speciesNames = NULL, legend = TRUE, axes = TRUE, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
   
@@ -205,9 +216,12 @@ plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
     polygon(x.pol, y.pol, border=NA, col = col[sp], ...)
   }
   
-  axis(1)
-  axis(2, las=2)
-  box()
+  if(isTRUE(axes)) {
+    axis(1, ...)
+    axis(2, las=2, ...)
+    box()
+  }
+  
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
@@ -223,7 +237,7 @@ plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
 #plot for only one species using bars
 plot2DTsType4 = function(x, times, xlim, ylim = NULL,
                          factor = 1e-3, col = NULL, 
-                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, ...) {
+                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, axes = TRUE, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(dim(x)[2]>1) stop("Plot ts = TRUE and type = 4 is only for one species")
@@ -235,9 +249,12 @@ plot2DTsType4 = function(x, times, xlim, ylim = NULL,
   
   plot(x = times, y = x, col = col, lty = lty, type = "h", axes = FALSE, xlab = "", ylab = "",
        xlim = xlim, ylim = ylim, ...)
-  axis(1, ...)
-  axis(2, las=2, ...)
-  box()
+  
+  if(isTRUE(axes)){
+    axis(1, ...)
+    axis(2, las=2, ...)
+    box()
+  }
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
@@ -253,15 +270,15 @@ plot2DTsType4 = function(x, times, xlim, ylim = NULL,
 
 plot2DType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
                        factor = 1e-3, speciesNames = NULL, border = NA,
-                       cex.names = 0.8, ...) {
+                       cex.names = 0.8, cex = 0.9, axes = TRUE, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
   
-  if(isFALSE(ci)){
+  if(!isTRUE(ci)){
     x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
     x = x * factor
-    if(isFALSE(horizontal)){
+    if(!isTRUE(horizontal)){
       mar = c(2.5,2,1,0.3)
       ylim = c(0, 1.2*max(x))
       xlim = NULL
@@ -273,29 +290,29 @@ plot2DType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
     
     par(oma = c(1,1,1,1), mar = mar, las = 1)
     barplot(x, horiz = horizontal, names.arg = speciesNames, col = col,
-            ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, ...)
+            ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, axes = axes, ...)
     
   } else {
     barplotCI(x, horizontal = horizontal, speciesNames = speciesNames, col = col,
-              factor = factor, border = border, cex.names = cex.names, ...)
+              factor = factor, border = border, cex.names = cex.names, axes = axes, ...)
   }
   
   box()
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   return(invisible())
   
 }  
 
 barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names = 0.8,
-                     angle = 90, code = 3, length = 0.10, ...) {
+                     angle = 90, code = 3, length = 0.10, axes, ...) {
   
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
   
-  if(isFALSE(horizontal)){
+  if(!isTRUE(horizontal)){
     mar = c(2.5,2,1,0.3)
     ylim = c(0, 1.2*(max(y.mean)+1.96*max(y.sd)/10))
     xlim = NULL
@@ -307,9 +324,9 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
   
   par(oma = c(1,1,1,1), mar = mar, las = 1)
   barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col,
-                 ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, ...)
+                 ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, axes = axes, ...)
   
-  if(isFALSE(horizontal)){
+  if(!isTRUE(horizontal)){
     arrows(barx, y.mean + 1.96*y.sd/10, barx, y.mean - 1.96*y.sd/10, angle = angle, code = code, length = length, ...)
   } else {
     arrows(y.mean - 1.96*y.sd/10, barx, y.mean + 1.96*y.sd/10, barx, angle = angle, code = code, length = length, ...)
@@ -320,21 +337,21 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names
 
 #boxplot with mean over the replicates
 plot2DType2 = function(x, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, ...) {
+                       factor = 1e-3, speciesNames = NULL, cex = 0.8, axes = TRUE, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
   
-  if(isFALSE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
-  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
+  if(!isTRUE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1, ...)
+  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1, ...)}
   
   x = apply(x*factor, c(1,2), mean, na.rm = TRUE) #mean over the replicates
   
-  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, ...)
+  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, axes = axes, ...)
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   return(invisible())
 }
@@ -350,21 +367,21 @@ plot2DType2 = function(x, horizontal = FALSE, col = NULL,
 
 # boxplot with mean over the time
 plot2DType3 = function(x, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, ...) {
+                       factor = 1e-3, speciesNames = NULL, cex = 0.8, axes = TRUE, ...) {
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(col)) col="gray"
   
-  if(isFALSE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1)
-  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1)}
+  if(!isTRUE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1, ...)
+  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1, ...)}
   
   x = apply(x*factor, c(3,2), mean, na.rm = TRUE) #mean over the time
   
-  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, ...)
+  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, axes = axes, ...)
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   return(invisible())
 }
