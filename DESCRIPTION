@@ -1,7 +1,7 @@
 Package: osmose
 Type: Package
 Title: Object Oriented Simulator of Marine Ecosystems
-Version: 0.1.2.9003
+Version: 0.1.2.9004
 Date: 2017-12-06
 Authors@R: c(
   person("Yunne-Jai", "Shin", role="aut"),
