@@ -1,4 +1,7 @@
 
+
+# Reproduction plot functions ---------------------------------------------
+
 plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL,
                                  axes = TRUE, legend = TRUE, ...){
   
@@ -37,6 +40,16 @@ plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  leg
   if(isTRUE(legend)){
     mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, ...)
   }
+  
+  return(invisible())
+}
+
+
+# Growth plot functions ---------------------------------------------------
+
+plotGrowthType1 = function(x, speciesNames = NULL, axes = TRUE, legend = TRUE, ...){
+  
+  print("Working ... ")
   
   return(invisible())
 }
