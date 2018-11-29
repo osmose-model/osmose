@@ -161,7 +161,7 @@ getReproductionData = function(x, var = season.file){
   
   reproData    = paste(reproPaths, reproData, sep = "/")
   
-  dataBase = ilist()
+  dataBase = list()
   for(i in seq_along(speciesNames)){
     dataBase[[i]] = read.csv(file = reproData[i], sep = ";")
   }
