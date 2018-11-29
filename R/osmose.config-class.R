@@ -70,23 +70,25 @@ configureCalibration = function(L1) {
 #' @method getVar osmose.config
 getVar.osmose.config = function(object, what, ...) {
   
-  out = object[[what]]
+  x = object[[what]]
   
-  if(is.null(out)){
+  if(is.null(x)){
     message = paste("The", sQuote(what),
                     "variable doesn't exist on the configuration file.", sep = "")
     stop(message)
   }
   
-  if(what %in% "reproduction"){
-    out = switch(what,
-                 reproduction = getReproductionData(out, var = "season.file"))
+  getConfigVar = c("reproduction", "species")
+  
+  if(what %in% getConfigVar){
+    x = switch(what,
+               reproduction  = getReproductionData(x, var = "season.file"),
+               species       = getSpeciesData(x))
   }
   
+  class(x) = c(paste("osmose.config", what, sep = "."), class(x))
   
-  class(out) = c(paste("osmose.config", what, sep = "."), class(out))
-  
-  return(out)
+  return(x)
 }
 
 # Methods -----------------------------------------------------------------

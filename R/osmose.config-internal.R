@@ -161,11 +161,51 @@ getReproductionData = function(x, var = season.file){
   
   reproData    = paste(reproPaths, reproData, sep = "/")
   
-  dataBase = list()
+  dataBase = ilist()
   for(i in seq_along(speciesNames)){
     dataBase[[i]] = read.csv(file = reproData[i], sep = ";")
   }
   names(dataBase) = speciesNames
+  
+  return(dataBase)
+}
+
+getSpeciesData = function(x) {
+  
+  # species name in configuration file
+  speciesCode = names(x$name)
+  
+  # growth variables
+  names               = as.vector(unlist(lapply(x$name, FUN = "[[", 1))[speciesCode])
+  linf                = as.vector(as.numeric(unlist(lapply(x$linf, FUN = "[[", 1))[speciesCode]))
+  k                   = as.vector(as.numeric(unlist(lapply(x$k, FUN = "[[", 1))[speciesCode]))
+  t0                  = as.vector(as.numeric(unlist(lapply(x$t0, FUN = "[[", 1))[speciesCode]))
+  thr                 = as.vector(as.numeric(unlist(lapply(x$vonbertalanffy$threshold$age, FUN = "[[", 1))[speciesCode]))
+  conditionFactor     = as.vector(as.numeric(unlist(lapply(x$length2weight$condition$factor, FUN = "[[", 1))[speciesCode]))
+  allometricPower     = as.vector(as.numeric(unlist(lapply(x$length2weight$allometric$power, FUN = "[[", 1))[speciesCode]))
+  relativityFecundity = as.vector(as.numeric(unlist(lapply(x$relativefecundity, FUN = "[[", 1))[speciesCode]))
+  eggSize             = as.vector(as.numeric(unlist(lapply(x$egg$size, FUN = "[[", 1))[speciesCode]))
+  eggWeight           = as.vector(as.numeric(unlist(lapply(x$egg$weight, FUN = "[[", 1))[speciesCode]))
+  sexRatio            = as.vector(as.numeric(unlist(lapply(x$sexratio, FUN = "[[", 1))[speciesCode]))
+  maturitySize        = as.vector(as.numeric(unlist(lapply(x$maturity$size, FUN = "[[", 1))[speciesCode]))
+  lifespan            = as.vector(as.numeric(unlist(lapply(x$lifespan, FUN = "[[", 1))[speciesCode]))
+  
+  # Data base 
+  dataBase = data.frame(names               = names,
+                        linf                = linf,
+                        k                   = k,
+                        t0                  = t0, 
+                        thr                 = thr,
+                        conditionFactor     = conditionFactor,
+                        allometricPower     = allometricPower,
+                        relativityFecundity = relativityFecundity,
+                        eggSize             = eggSize,
+                        eggWeight           = eggWeight,
+                        sexRatio            = sexRatio,
+                        maturitySize        = maturitySize,
+                        lifespan            = lifespan)
+  
+  rownames(dataBase) = speciesCode
   
   return(dataBase)
 }
