@@ -42,19 +42,13 @@ plot.osmose.config.reproduction = function(x, species = NULL, start = NULL, end 
 plot.osmose.config.species = function(x, species = NULL, speciesNames = NULL, axes = TRUE,
                                       legend = TRUE, type = 1, ...){
   
-  # species indexation
-  if(!is.null(species)){
-    if(max(species + 1) > nrow(x)) stop("error on species indexation, incorrect value in the parameter called species")
-    x = x[(species+1), ]
+  if(!(type %in% 1)){
+    warning("The type argument selected is not correct. The value by default is used (type = 1)")
+    type = 1
   }
   
-  # if(!(type %in% c(1))){
-  #   warning("The type argument selected is not correct. The value by default is used (type = 1)")
-  #   type = 1
-  # }
-  # 
-  if(type == 1) {plotGrowthType1(x = x, speciesNames = speciesNames, axes = axes,
-                                 legend = legend, ...)}
+  if(type == 1) {plotGrowthType1(x = x, species = species, speciesNames = speciesNames,
+                                 axes = axes, legend = legend, ...)}
   
   return(invisible())
 }
