@@ -39,16 +39,18 @@ plot.osmose.config.reproduction = function(x, species = NULL, start = NULL, end 
 }
 
 
-plot.osmose.config.species = function(x, species = NULL, speciesNames = NULL, axes = TRUE,
-                                      legend = TRUE, type = 1, ...){
+plot.osmose.config.species = function(x, species = NULL, type = 1, xlim = NULL, ylim = NULL, 
+                                      addSegment = TRUE, addPoint = TRUE, addPolygon = TRUE, addText = TRUE,
+                                      legend = TRUE, speciesNames = NULL, ...){
   
   if(!(type %in% 1)){
     warning("The type argument selected is not correct. The value by default is used (type = 1)")
     type = 1
   }
   
-  if(type == 1) {plotGrowthType1(x = x, species = species, speciesNames = speciesNames,
-                                 axes = axes, legend = legend, ...)}
+  if(type == 1) {plotGrowthType1(x = x, species = species, xlim = xlim, ylim = ylim,
+                                 addSegment = addSegment, addPoint = addPoint, addPolygon = addPolygon, addText = addText,
+                                 legend = legend, speciesNames = speciesNames, ...)}
   
   return(invisible())
 }
