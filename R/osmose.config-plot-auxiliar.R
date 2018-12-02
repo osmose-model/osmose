@@ -103,7 +103,6 @@ plotGrowthType1 = function(x, species, speciesNames = NULL, axes = TRUE, legend 
 }
 
 # Internal growth functions
-
 getGrowthParameters = function(par, sp) {
   
   # species indexation
@@ -111,6 +110,7 @@ getGrowthParameters = function(par, sp) {
   if(max(sp+1)>length(par$names)) stop("error on species indexation, incorrect value in the parameter called species")
   if(is.null(sp)) {warning("the value of the parameter called species is NULL, we are using the value 1 by default")
     sp = 1}
+  sp = paste0("sp", sp)
   
   output = list()
   output = within(output, {
@@ -129,7 +129,7 @@ getGrowthParameters = function(par, sp) {
   return(output)
 }
 
-.osmoseGrowth = function(age, par) {
+osmoseGrowth = function(age, par) { 
   
   linf    = par$linf
   k       = par$k
@@ -137,17 +137,16 @@ getGrowthParameters = function(par, sp) {
   thr     = par$thr
   eggSize = if(!is.null(par$eggSize)) par$eggSize else 0
   
-  l    = linf*(1-exp(-k*(age-t0)))
-  lthr = linf*(1-exp(-k*(thr-t0)))
-  l2   = eggSize + age*(lthr-eggSize)/thr
+  length  = linf*(1-exp(-k*(age-t0)))
+  lthr    = linf*(1-exp(-k*(thr-t0)))
+  length2 = eggSize + age*(lthr-eggSize)/thr
   
-  l[age <= thr] = l2[age <= thr]
+  length[age <= thr] = length2[age <= thr]
   
-  return(l)
-  
+  return(length)
 }
 
-.osmoseGrowthInv = function(length, par) {
+osmoseGrowthInv = function(length, par) {
   
   linf     = par$linf
   k        = par$k
@@ -162,6 +161,4 @@ getGrowthParameters = function(par, sp) {
   age[length<=lthr] = age2[length<=lthr]
   
   return(age)
-  
 }
-
