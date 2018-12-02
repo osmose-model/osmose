@@ -66,7 +66,7 @@ plotGrowthType1 = function(x, species, n = 100, xlim = NULL, ylim = NULL,
   ylim = if(is.null(ylim)) c(0, max(length)*1.25)
   
   # plot
-  par(mar = c(4,4,2,1.5), oma = c(1,1,0.5,0.5))
+  # par(mar = c(4,4,2,1.5), oma = c(1,1,0.5,0.5))
   plot(age, length, type = "l", lwd = 1.5, xlab = "Age (years)", ylab = "Length (cm)",
        axes = FALSE, xlim = xlim, ylim = ylim, xaxs = "i", yaxs = "i", ...)
   axis(1, ...)
