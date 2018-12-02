@@ -108,9 +108,9 @@ getGrowthParameters = function(par, sp) {
   
   # species indexation
   if(length(sp)>1) stop("the value of the parameter called species have to be of length equal to 1")
-  if(max(sp+1)>length(par$names)) stop("error on species indexation, incorrect value in the parameter called species")
+  if(max(sp)>length(par$names)) stop("error on species indexation, incorrect value in the parameter called species")
   if(is.null(sp)) {warning("the value of the parameter called species is NULL, we are using the value 1 by default")
-    sp = 1}
+    sp = 0}
   sp = paste0("sp", sp)
   
   output = list()
