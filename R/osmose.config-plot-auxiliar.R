@@ -2,12 +2,11 @@
 
 # Reproduction plot functions ---------------------------------------------
 
-plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL,
-                                 axes = TRUE, legend = TRUE, ...){
+plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL, axes = TRUE, legend = TRUE, ...){
   
   if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
   
-  par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
+  #par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
   plot(x = times, y = x[,2], type = "l", xlab = "", ylab = "", xaxs = "i", yaxs = "i",
        xlim = xlim, ylim = ylim, axes = FALSE, ...)
   if(isTRUE(axes)){
@@ -23,13 +22,15 @@ plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL,
   return(invisible())
 }
 
-plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  legend = TRUE, ...){
+plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  legend = TRUE,
+                                 names.arg = NULL, border = NA, ...){
   
   if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
   
-  par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
+  #par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
   
-  barplot(height = x[,2], border = NA, axes = FALSE, ylim = c(0, max(x[,2]*1.25)), xaxs = "i", ...)
+  barplot(height = x[,2], border = border, axes = axes, ylim = c(0, max(x[,2]*1.25)), xaxs = "i",
+          names.arg = names.arg, ...)
   
   if(isTRUE(axes)){
     axis(1, ...)
