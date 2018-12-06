@@ -321,7 +321,6 @@ make_movement_netcdf = function(filename) {
 #' @param osmose_config Name of the main configuration file
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
 #'
-#' @return
 #' @export
 correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
 {
