@@ -178,18 +178,18 @@ getSpeciesData = function(x) {
   
   # growth variables
   names               = lapply(x$name, FUN = "[[", 1)
-  linf                = lapply(x$linf, FUN = "[[", 1)
-  k                   = lapply(x$k, FUN = "[[", 1)
-  t0                  = lapply(x$t0, FUN = "[[", 1)
-  thr                 = lapply(x$vonbertalanffy$threshold$age, FUN = "[[", 1)
-  conditionFactor     = lapply(x$length2weight$condition$factor, FUN = "[[", 1)
-  allometricPower     = lapply(x$length2weight$allometric$power, FUN = "[[", 1)
-  relativityFecundity = lapply(x$relativefecundity, FUN = "[[", 1)
-  eggSize             = lapply(x$egg$size, FUN = "[[", 1)
-  eggWeight           = lapply(x$egg$weight, FUN = "[[", 1)
-  sexRatio            = lapply(x$sexratio, FUN = "[[", 1)
-  maturitySize        = lapply(x$maturity$size, FUN = "[[", 1)
-  lifespan            = lapply(x$lifespan, FUN = "[[", 1)
+  linf                = lapply(lapply(x$linf, FUN = "[[", 1), as.numeric, 1)
+  k                   = lapply(lapply(x$k, FUN = "[[", 1), as.numeric, 1)
+  t0                  = lapply(lapply(x$t0, FUN = "[[", 1), as.numeric, 1)
+  thr                 = lapply(lapply(x$vonbertalanffy$threshold$age, FUN = "[[", 1), as.numeric, 1)
+  conditionFactor     = lapply(lapply(x$length2weight$condition$factor, FUN = "[[", 1), as.numeric, 1)
+  allometricPower     = lapply(lapply(x$length2weight$allometric$power, FUN = "[[", 1), as.numeric, 1)
+  relativityFecundity = lapply(lapply(x$relativefecundity, FUN = "[[", 1), as.numeric, 1)
+  eggSize             = lapply(lapply(x$egg$size, FUN = "[[", 1), as.numeric, 1)
+  eggWeight           = lapply(lapply(x$egg$weight, FUN = "[[", 1), as.numeric, 1)
+  sexRatio            = lapply(lapply(x$sexratio, FUN = "[[", 1), as.numeric, 1)
+  maturitySize        = lapply(lapply(x$maturity$size, FUN = "[[", 1), as.numeric, 1)
+  lifespan            = lapply(lapply(x$lifespan, FUN = "[[", 1), as.numeric, 1)
   
   # Data base 
   dataBase = list(names               = names,
