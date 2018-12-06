@@ -228,10 +228,13 @@ getPredationData = function(x) {
   ingestion    = list(rateMax = lapply(lapply(x$ingestion$rate$max, FUN = "[[", 1), as.numeric, 1))
   
   # PredPrey
-  sizeRatioMax = lapply(lapply(lapply(x$predprey$sizeratio$max, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  sizeRatioMin = lapply(lapply(lapply(x$predprey$sizeratio$min, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  predPrey     = list(sizeRatioMax = lapply(sizeRatioMax, FUN = as.numeric, 1),
-                      sizeRatioMin = lapply(sizeRatioMin, FUN = as.numeric, 1))
+  sizeRatioMax   = lapply(lapply(lapply(x$predprey$sizeratio$max, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
+  sizeRatioMin   = lapply(lapply(lapply(x$predprey$sizeratio$min, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
+  stageThreshold = lapply(lapply(lapply(x$predprey$stage$threshold, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
+  predPrey     = list(sizeRatioMax   = lapply(sizeRatioMax, FUN = as.numeric, 1),
+                      sizeRatioMin   = lapply(sizeRatioMin, FUN = as.numeric, 1),
+                      stageStructure = as.character(x$predprey$stage$structure),
+                      stageThreshold = suppressWarnings(lapply(stageThreshold, FUN = as.numeric, 1)))
   
   # Data base
   dataBase = list(accessibility = accessibility,
