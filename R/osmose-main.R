@@ -105,14 +105,15 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
 #'   read_osmose(outdir)
 #' }
 #' @aliases osmose2R
-read_osmose =  function(path=NULL, input=NULL, version="v3r2", species.names=NULL, absolute=TRUE, ...) {
+read_osmose =  function(path=NULL, input=NULL, version=NULL, species.names=NULL, absolute=TRUE, ...) {
   
   if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
   
   config =  if(!is.null(input)) readOsmoseConfiguration(file=input, absolute=absolute) else NULL
   
   if(is.null(path)) return(config)
-
+  if(is.null(version)) version = "v3r2"
+  
   if(!dir.exists(path)) stop("The output directory does not exist.")
   
   output = switch(version, 

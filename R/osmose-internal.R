@@ -152,13 +152,12 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
 .readOsmoseCsv = function(file, sep=",", skip=1, row.names=1, 
                           na.strings=c("NA", "NaN"), rm=1, ...) {
     out = read.csv(file=file, sep=sep, skip=skip, 
-                   row.names=row.names, na.strings=na.strings, ...)
+                   row.names=row.names, na.strings=na.strings, check.names = FALSE, ...)
     #   mat = as.matrix(out)
     #   out[is.na(mat) & !is.nan(mat)] = Inf
     #   out[is.na(mat) & is.nan(mat)] = NA
     return(out)
 }
-
 
 .readMortalityCsv = function(file, sep=",", skip=1, row.names=1, 
                              na.strings=c("NA", "NaN"), rm=1, ...) {
@@ -300,7 +299,7 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
         rows    = unique(x[,1])
         cols    = unique(x[,2])
         slices  = names(x)[-(1:2)]
-
+        
         x = .reshapeOsmoseTable(x)
 
         out = array(dim = c(dim(x), length(files)))
@@ -459,10 +458,10 @@ osmose2R.v3r2 = function (path=NULL, species.names=NULL) {
                       yield = readOsmoseFiles(path = path, type = "yield"),
                       yieldN = readOsmoseFiles(path = path, type = "yieldN"),
                       mortality = readOsmoseFiles(path = path, type = "mortalityRate", bySpecies = TRUE),
-                      meanTL = readOsmoseFiles(path = path, type = "meanTL"), 
+                      meanTL = readOsmoseFiles(path = path, type = "meanTL"),
                       meanTLCatch = readOsmoseFiles(path = path, type = "meanTLCatch"),
                       biomassByTL = readOsmoseFiles(path = path, type = "biomassDistribByTL"),
-                      predatorPressure = readOsmoseFiles(path = path, type = "predatorPressure"), 
+                      predatorPressure = readOsmoseFiles(path = path, type = "predatorPressure"),
                       predPreyIni = readOsmoseFiles(path = path, type = "biomassPredPreyIni"),
                       dietMatrix = readOsmoseFiles(path = path, type = "dietMatrix"),
                       meanSize = readOsmoseFiles(path = path, type = "meanSize"),
