@@ -72,7 +72,7 @@ getVar.osmose = function(object, what, how=c("matrix", "data.frame", "list"),
   
   if(how=="matrix") return(out)
   
-  if(how=="list") return(as.list(as.data.frame(out)))
+  if(how=="list") return(as.list(as.data.frame(out, check.names=FALSE)))
   
   warning("No output defined for data.frame yet.")
   return(out)
