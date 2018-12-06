@@ -78,12 +78,13 @@ getVar.osmose.config = function(object, what, ...) {
     stop(message)
   }
   
-  getConfigVar = c("reproduction", "species")
+  getConfigVar = c("reproduction", "species", "predation")
   
   if(what %in% getConfigVar){
     x = switch(what,
                reproduction  = getReproductionData(x, var = "season.file"),
-               species       = getSpeciesData(x))
+               species       = getSpeciesData(x),
+               predation     = getPredationData(x))
   }
   
   class(x) = c(paste("osmose.config", what, sep = "."), class(x))

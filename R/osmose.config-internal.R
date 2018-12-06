@@ -209,3 +209,35 @@ getSpeciesData = function(x) {
   
   return(dataBase)
 }
+
+
+getPredationData = function(x) {
+  
+  # Accessibility
+  fileAccessibility = unlist(lapply(x$accessibility$file, FUN = "[[", 1))
+  pathAccessibility = attributes(x$accessibility$file)$path
+  accessibility     = list(data = read.csv(file = paste(pathAccessibility,
+                                                        fileAccessibility, sep = "/"), sep = ";"),
+                           stageStructure = as.vector(x$accessibility$stage$structure),
+                           stageThreshold = lapply(x$accessibility$stage$threshold, FUN = "[[", 1))
+  
+  # Efficiency
+  efficiency   = list(critical = lapply(lapply(x$efficiency$critical, FUN = "[[", 1), as.numeric, 1))
+  
+  # Ingestion
+  ingestion    = list(rateMax = lapply(lapply(x$ingestion$rate$max, FUN = "[[", 1), as.numeric, 1))
+  
+  # PredPrey
+  sizeRatioMax = lapply(lapply(lapply(x$predprey$sizeratio$max, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
+  sizeRatioMin = lapply(lapply(lapply(x$predprey$sizeratio$min, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
+  predPrey     = list(sizeRatioMax = lapply(sizeRatioMax, FUN = as.numeric, 1),
+                      sizeRatioMin = lapply(sizeRatioMin, FUN = as.numeric, 1))
+  
+  # Data base
+  dataBase = list(accessibility = accessibility,
+                  efficiency    = efficiency,
+                  ingestion     = ingestion,
+                  predPrey      = predPrey)
+  
+  return(dataBase)
+}
