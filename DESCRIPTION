@@ -43,4 +43,4 @@ URL: http://www.osmose-model.org/
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
 SystemRequirements: Java (>= 8)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
