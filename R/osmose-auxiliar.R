@@ -36,7 +36,7 @@ write.osmose = function(x, file)   {
 #' @return Output data frame
 readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
   
-  xclass = paste("osmose", type, sep=".")
+  xclass = paste("osmose", "output", type, sep=".")
   
   allFiles = dir(path=path, recursive=TRUE, include.dirs=FALSE)
   csvFiles = allFiles[grepl(".csv", allFiles)]
