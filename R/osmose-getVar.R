@@ -9,9 +9,9 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
   
   # Computes the mean over the replicates
   out = apply(out, c(1, 2), mean)
-  
+
   # computes the time average
-  data.time.mean = apply(out, 2, mean)
+  data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # barrier.n: adding this to avoid NULL output in summary
   keep = (data.time.mean > thres)  # keep values for which the max is greater than the threshold
   
   if(time.mean)
