@@ -47,7 +47,7 @@
 #' @return A graph of a object of the class \code{osmose.biomass}.
 #' @author Criscely Lujan Paredes
 #' @export
-plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+plot.osmose.output.biomass = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                                ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                                ci = TRUE, freq = 12, horizontal = FALSE, 
                                conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
@@ -108,7 +108,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 #' @return A graph of a object of the class \code{osmose.abundance}.
 #' @author Criscely Lujan Paredes
 #' @export
-plot.osmose.abundance = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+plot.osmose.output.abundance = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                                  ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                                  ci = TRUE, freq = 12, horizontal = FALSE, 
                                  conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
@@ -169,7 +169,7 @@ plot.osmose.abundance = function(x, species = NULL, start = NULL, end = NULL, in
 #' @return A graph of a object of the class \code{osmose.yield}.
 #' @author Criscely Lujan Paredes
 #' @export
-plot.osmose.yield = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+plot.osmose.output.yield = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                              ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                              ci = TRUE, freq = 12, horizontal = FALSE, 
                              conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
@@ -230,7 +230,7 @@ plot.osmose.yield = function(x, species = NULL, start = NULL, end = NULL, initia
 #' @return A graph of a object of the class \code{osmose.yieldN}.
 #' @author Criscely Lujan Paredes
 #' @export
-plot.osmose.yieldN = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+plot.osmose.output.yieldN = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                               ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
                               ci = TRUE, freq = 12, horizontal = FALSE, 
                               conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
