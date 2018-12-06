@@ -164,3 +164,13 @@ osmoseGrowthInv = function(length, par) {
   
   return(age)
 }
+
+
+# Predation plot functions ------------------------------------------------
+
+plotPredationType1 = function(x, species){
+  
+  print("in process")
+  
+  return(invisible())
+}

@@ -55,3 +55,16 @@ plot.osmose.config.species = function(x, species = NULL, type = 1, xlim = NULL, 
   
   return(invisible())
 }
+
+
+plot.osmose.config.predation = function(x, species = NULL, type = 1, ...){
+  
+  if(!(type %in% 1)){
+    warning("The type argument selected is not correct. The value by default is used (type = 1)")
+    type = 1
+  }
+  
+  if(type == 1) {plotPredationType1(x = x, species = species, ...)}
+  
+  return(invisible())
+}
