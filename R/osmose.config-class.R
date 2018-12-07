@@ -68,7 +68,7 @@ configureCalibration = function(L1) {
 #' the variable extracted.
 #' @export
 #' @method getVar osmose.config
-getVar.osmose.config = function(object, what, ...) {
+getVar.osmose.config = function(object, what, extraWhat = FALSE, ...) {
   
   x = object[[what]]
   
@@ -84,7 +84,7 @@ getVar.osmose.config = function(object, what, ...) {
     x = switch(what,
                reproduction  = getReproductionData(x, var = "season.file"),
                species       = getSpeciesData(x),
-               predation     = getPredationData(x))
+               predation     = getPredationData(x, object = object, extraWhat = extraWhat))
   }
   
   class(x) = c(paste("osmose.config", what, sep = "."), class(x))

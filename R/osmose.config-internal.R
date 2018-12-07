@@ -211,7 +211,7 @@ getSpeciesData = function(x) {
 }
 
 
-getPredationData = function(x) {
+getPredationData = function(x, object, extraWhat = FALSE) {
   
   # Accessibility
   fileAccessibility = unlist(lapply(x$accessibility$file, FUN = "[[", 1))
@@ -231,16 +231,21 @@ getPredationData = function(x) {
   sizeRatioMax   = lapply(lapply(lapply(x$predprey$sizeratio$max, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
   sizeRatioMin   = lapply(lapply(lapply(x$predprey$sizeratio$min, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
   stageThreshold = lapply(lapply(lapply(x$predprey$stage$threshold, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  predPrey     = list(sizeRatioMax   = lapply(sizeRatioMax, FUN = as.numeric, 1),
-                      sizeRatioMin   = lapply(sizeRatioMin, FUN = as.numeric, 1),
-                      stageStructure = as.character(x$predprey$stage$structure),
-                      stageThreshold = suppressWarnings(lapply(stageThreshold, FUN = as.numeric, 1)))
+  predPrey       = list(sizeRatioMax   = lapply(sizeRatioMax, FUN = as.numeric, 1),
+                        sizeRatioMin   = lapply(sizeRatioMin, FUN = as.numeric, 1),
+                        stageStructure = as.character(x$predprey$stage$structure),
+                        stageThreshold = suppressWarnings(lapply(stageThreshold, FUN = as.numeric, 1)))
   
   # Data base
   dataBase = list(accessibility = accessibility,
                   efficiency    = efficiency,
                   ingestion     = ingestion,
                   predPrey      = predPrey)
+  
+  if(isTRUE(extraWhat)){
+    linf = lapply(lapply(object[["species"]][["linf"]], FUN = "[[", 1), as.numeric, 1)
+    dataBase$linf = linf
+  } 
   
   return(dataBase)
 }
