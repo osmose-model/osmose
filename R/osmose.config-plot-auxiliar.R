@@ -168,9 +168,82 @@ osmoseGrowthInv = function(length, par) {
 
 # Predation plot functions ------------------------------------------------
 
-plotPredationType1 = function(x, species){
+plotPredationType1 = function(x, species, xlim = NULL, ylim = NULL, border = NA, col = rgb(0,0,1,0.1),
+                              cex.axis = 1.2, addSegment = TRUE, addPoint = TRUE, addText = TRUE,
+                              legend = TRUE, speciesNames = NULL, ...){
   
-  print("in process")
+  #get the predation parameters to plot
+  par = getPredationParameter(par = x, sp = species)
+  
+  #xlim and ylim
+  if(is.null(xlim)) xlim = c(0, tail(par$threshold, n = 1)) else xlim = xlim
+  if(is.null(ylim)) ylim = c(0, 1/tail(par$sizeRatioMax, n = 1)*tail(par$threshold, n = 1))*1.3 else ylim = ylim
+  
+  #plot
+  plot.new()
+  plot.window(xlim = xlim, ylim = ylim, xaxs = "i", yaxs = "i", ...)
+  
+  stages = seq_along(par$threshold)
+  for (stage in stages) {
+    polygon(x = c(par$threshold[stage], par$threshold[stage+1], par$threshold[stage+1], par$threshold[stage]),
+            y = c(par$threshold[stage]*1/par$sizeRatioMin[stage], par$threshold[stage+1]*1/par$sizeRatioMin[stage],
+                  par$threshold[stage+1]*1/par$sizeRatioMax[stage], par$threshold[stage]*1/par$sizeRatioMax[stage]),
+            border = border, col = col, ...)
+    
+    if(stage %in% stages[-c(1, length(stages))]){
+      if(isTRUE(addSegment)){
+        segments(x0 = par$threshold[stage], x1 = par$threshold[stage],
+                 y0 = par$threshold[stage]*1/par$sizeRatioMin[stage],
+                 y1 = 1/tail(par$sizeRatioMax, n = 1)*tail(par$threshold, n = 1)*0.75,
+                 col = "black", lwd = 2, lty = 2, ...)}
+      
+      if(isTRUE(addPoint)){
+        points(x = par$threshold[stage],
+               y = 1/tail(par$sizeRatioMax, n = 1)*tail(par$threshold, n = 1)*0.75,
+               pch = 19, ...)} 
+      
+      if(isTRUE(addText)){
+        text(x = par$threshold[stage],
+             y = 1/tail(par$sizeRatioMax, n = 1)*tail(par$threshold, n = 1)*0.75,
+             bquote(paste('S'['thr']*' = ', .(par$threshold[stage]))),
+             bty = "n", cex = 1.1, pos = 3, ...)}
+    }
+  }
+  
+  mtext(text = "Predator size", side = 1, line = 2.5)
+  mtext(text = "Prey size", side = 2, line = 2.8)
+  
+  box()
+  axis(1, cex.axis = cex.axis, ...)
+  axis(2, las = 2, cex.axis = cex.axis, ...)
+  
+  if(is.null(speciesNames)) {speciesNames = par$speciesNames} else {speciesNames = speciesNames}
+  if(isTRUE(legend)) {mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, ...)}
   
   return(invisible())
 }
+
+getPredationParameter = function(par, sp){
+  
+  # species indexation
+  if(is.null(sp)) {
+    warning("the value of the parameter called species is NULL, we are using the value 1 by default")
+    sp = 0}
+  if(length(sp) > 1) stop("the value of the parameter called species have to be of length equal to 1")
+  if(sp >= length(par$speciesNames)) stop("error on species indexation, incorrect value in the parameter called species")
+  
+  sp = paste0("sp", sp)
+  
+  linf           = as.vector(unlist(par$linf[sp]))
+  output = list()
+  output = within(output, {
+    # Vars
+    threshold      = c(0, as.vector(unlist(par$predPrey$stageThreshold[sp])), linf)
+    sizeRatioMax   = as.vector(unlist(par$predPrey$sizeRatioMax[sp]))
+    sizeRatioMin   = as.vector(unlist(par$predPrey$sizeRatioMin[sp]))
+    speciesNames   = as.vector(unlist(par$speciesNames[sp]))
+  })
+  
+  return(output)
+}
+

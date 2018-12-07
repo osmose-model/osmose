@@ -57,14 +57,21 @@ plot.osmose.config.species = function(x, species = NULL, type = 1, xlim = NULL, 
 }
 
 
-plot.osmose.config.predation = function(x, species = NULL, type = 1, ...){
+plot.osmose.config.predation = function(x, species = NULL, type = 1, xlim = NULL, ylim = NULL,
+                                        border = NA, col = rgb(0,0,1,0.1), cex.axis = 1.2,
+                                        addSegment = TRUE, addPoint = TRUE, addText = TRUE,
+                                        legend = TRUE, speciesNames = NULL, ...){
   
   if(!(type %in% 1)){
     warning("The type argument selected is not correct. The value by default is used (type = 1)")
     type = 1
   }
   
-  if(type == 1) {plotPredationType1(x = x, species = species, ...)}
+  if(type == 1) {plotPredationType1(x = x, species = species, xlim = xlim, ylim = ylim, 
+                                    border = border, col = col, cex.axis = cex.axis,
+                                    addSegment = addSegment, addPoint = addPoint, addText = addText,
+                                    legend = legend, speciesNames = speciesNames, ...)}
   
   return(invisible())
 }
+

@@ -244,7 +244,9 @@ getPredationData = function(x, object, extraWhat = FALSE) {
   
   if(isTRUE(extraWhat)){
     linf = lapply(lapply(object[["species"]][["linf"]], FUN = "[[", 1), as.numeric, 1)
+    speciesNames = lapply(hum$species$name, FUN = "[[", 1)
     dataBase$linf = linf
+    dataBase$speciesNames = speciesNames
   } 
   
   return(dataBase)
