@@ -107,7 +107,7 @@ getVar.osmose.config = function(object, what, extraWhat = FALSE, ...) {
 plot.osmose.config = function(x, what = NULL, ...) {
   
   if(!is.null(what)){
-    x = getVar.osmose.config(x, what = what)
+    x = getVar.osmose.config(x, what = what, extraWhat = TRUE)
     plot(x, ...)
     
   } else {
