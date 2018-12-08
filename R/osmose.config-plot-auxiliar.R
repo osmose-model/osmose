@@ -50,7 +50,8 @@ plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  leg
 
 plotGrowthType1 = function(x, species, n = 100, xlim = NULL, ylim = NULL, 
                            addSegment = TRUE, addPoint = TRUE, addPolygon = TRUE, addText = TRUE,
-                           legend = TRUE, speciesNames = NULL, ...) {
+                           legend = TRUE, speciesNames = NULL, cex.axis = 1.2, xlab = NULL, ylab = NULL, 
+                           border = NA, col = "black", cex = 1.2, lty = 1, lwd = 1, ...) {
   
   # get parameter to use on the von bertalanffy growth equation
   par = getGrowthParameters(par = x, sp = species)
@@ -68,11 +69,17 @@ plotGrowthType1 = function(x, species, n = 100, xlim = NULL, ylim = NULL,
   
   # plot
   # par(mar = c(4,4,2,1.5), oma = c(1,1,0.5,0.5))
-  plot(age, length, type = "l", lwd = 1.5, xlab = "Age (years)", ylab = "Length (cm)",
-       axes = FALSE, xlim = xlim, ylim = ylim, xaxs = "i", yaxs = "i", ...)
-  axis(1, ...)
-  axis(2, las = 2, ...)
+  plot(age, length, type = "l", xlab = "", ylab = "", axes = FALSE,
+       xlim = xlim, ylim = ylim, xaxs = "i", yaxs = "i", col = col, lty = lty, lwd = lwd, ...)
+  axis(1, cex.axis = cex.axis, ...)
+  axis(2, las = 2, cex.axis = cex.axis, ...)
   box()
+  
+  if(is.null(xlab)) xlab = "Age (years)" else xlab = xlab
+  mtext(text = xlab, side = 1, line = 2.5, cex = cex, ...)
+  
+  if(is.null(ylab)) ylab = "Length (cm)" else ylab = ylab
+  mtext(text = ylab, side = 2, line = 2.8, cex = cex, ...)
   
   if(isTRUE(addSegment)){
     segments(x0 = 0,      x1 = ageInv, y0 = lengthInv, y1 = lengthInv, col = "red", lty = 2, lwd = 1.5, ...)
@@ -85,21 +92,21 @@ plotGrowthType1 = function(x, species, n = 100, xlim = NULL, ylim = NULL,
     #gray area
     polygon(x = c(0, par$thr, par$thr, 0),
             y = c(0, 0, max(length)*1.25, max(length)*1.25),
-            col = rgb(0, 0, 1, 0.1), border = NA, ...)
+            col = rgb(0, 0, 1, 0.1), border = border, ...)
   } 
   
   if(isTRUE(addText)){
     text(x = (ageInv    + 2.5 * (age[2]-age[1])),
          y = (lengthInv - 2.5 * (length[2]-length[1])),
-         bquote(paste('L'['m']*' = ', .(lengthInv))), bty = "n", cex = 1.2, pos = 4, ...)
+         bquote(paste('L'['m']*' = ', .(lengthInv))), bty = "n", cex = cex, pos = 4, ...)
     
     legend("bottomright", legend = bquote(paste('A'['max']*' = ', .(par$lifespan))),
-           bty = "n", cex = 1.2, ...)
+           bty = "n", cex = cex, ...)
   }
   
   #legend
   if(is.null(speciesNames)) speciesNames = par$speciesNames else speciesNames = speciesNames
-  if(isTRUE(legend)){mtext(toupper(par$speciesNames), side = 3, line = -1.5, adj = 1, ...)}
+  if(isTRUE(legend)){mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex, ...)}
   
   return(invisible())
 }
