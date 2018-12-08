@@ -170,7 +170,8 @@ osmoseGrowthInv = function(length, par) {
 
 plotPredationType1 = function(x, species, xlim = NULL, ylim = NULL, border = NA, col = rgb(0,0,1,0.1),
                               cex.axis = 1.2, addSegment = TRUE, addPoint = TRUE, addText = TRUE,
-                              legend = TRUE, speciesNames = NULL, ...){
+                              legend = TRUE, speciesNames = NULL, cex = 1, xlab = NULL, ylab = NULL,
+                              lwd = 2, lty = 2, pch = 19, ...){
   
   #get the predation parameters to plot
   par = getPredationParameter(par = x, sp = species)
@@ -195,30 +196,33 @@ plotPredationType1 = function(x, species, xlim = NULL, ylim = NULL, border = NA,
         segments(x0 = par$threshold[stage], x1 = par$threshold[stage],
                  y0 = par$threshold[stage]*1/par$sizeRatioMin[stage],
                  y1 = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
-                 col = "black", lwd = 2, lty = 2, ...)}
+                 col = "black", lwd = lwd, lty = lty, ...)}
       
       if(isTRUE(addPoint)){
         points(x = par$threshold[stage],
                y = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
-               pch = 19, ...)} 
+               pch = pch, ...)} 
       
       if(isTRUE(addText)){
         text(x = par$threshold[stage],
              y = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
              bquote(paste('S'['thr']*' = ', .(par$threshold[stage]))),
-             bty = "n", cex = 1.1, pos = 3, ...)}
+             bty = "n", pos = 3, cex = cex, ...)}
     }
   }
   
-  mtext(text = "Predator size", side = 1, line = 2.5)
-  mtext(text = "Prey size", side = 2, line = 2.8)
+  if(is.null(xlab)) xlab = "Predator size" else xlab = xlab
+  mtext(text = xlab, side = 1, line = 2.5, cex = cex, ...)
+  
+  if(is.null(ylab)) ylab = "Prey size" else ylab = ylab
+  mtext(text = ylab, side = 2, line = 2.8, cex = cex, ...)
   
   box()
   axis(1, cex.axis = cex.axis, ...)
   axis(2, las = 2, cex.axis = cex.axis, ...)
   
   if(is.null(speciesNames)) {speciesNames = par$speciesNames} else {speciesNames = speciesNames}
-  if(isTRUE(legend)) {mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, ...)}
+  if(isTRUE(legend)) {mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex, ...)}
   
   return(invisible())
 }
