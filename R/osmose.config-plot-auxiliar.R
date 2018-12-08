@@ -177,7 +177,7 @@ plotPredationType1 = function(x, species, xlim = NULL, ylim = NULL, border = NA,
   
   #xlim and ylim
   if(is.null(xlim)) xlim = c(0, tail(par$threshold, n = 1)) else xlim = xlim
-  if(is.null(ylim)) ylim = c(0, 1/tail(par$sizeRatioMax, n = 1)*tail(par$threshold, n = 1))*1.3 else ylim = ylim
+  if(is.null(ylim)) ylim = c(0, max((1/par$sizeRatioMax)*(par$threshold[-1])))*1.3 else ylim = ylim
   
   #plot
   plot.new()
@@ -194,17 +194,17 @@ plotPredationType1 = function(x, species, xlim = NULL, ylim = NULL, border = NA,
       if(isTRUE(addSegment)){
         segments(x0 = par$threshold[stage], x1 = par$threshold[stage],
                  y0 = par$threshold[stage]*1/par$sizeRatioMin[stage],
-                 y1 = 1/tail(par$sizeRatioMax, n = 1)*tail(par$threshold, n = 1)*0.75,
+                 y1 = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
                  col = "black", lwd = 2, lty = 2, ...)}
       
       if(isTRUE(addPoint)){
         points(x = par$threshold[stage],
-               y = 1/tail(par$sizeRatioMax, n = 1)*tail(par$threshold, n = 1)*0.75,
+               y = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
                pch = 19, ...)} 
       
       if(isTRUE(addText)){
         text(x = par$threshold[stage],
-             y = 1/tail(par$sizeRatioMax, n = 1)*tail(par$threshold, n = 1)*0.75,
+             y = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
              bquote(paste('S'['thr']*' = ', .(par$threshold[stage]))),
              bty = "n", cex = 1.1, pos = 3, ...)}
     }
@@ -235,10 +235,12 @@ getPredationParameter = function(par, sp){
   sp = paste0("sp", sp)
   
   linf           = as.vector(unlist(par$linf[sp]))
+  threshold      = c(0, as.vector(unlist(par$predPrey$stageThreshold[sp])), linf)
+  
   output = list()
   output = within(output, {
     # Vars
-    threshold      = c(0, as.vector(unlist(par$predPrey$stageThreshold[sp])), linf)
+    threshold      = threshold[!is.na(threshold)]
     sizeRatioMax   = as.vector(unlist(par$predPrey$sizeRatioMax[sp]))
     sizeRatioMin   = as.vector(unlist(par$predPrey$sizeRatioMin[sp]))
     speciesNames   = as.vector(unlist(par$speciesNames[sp]))
