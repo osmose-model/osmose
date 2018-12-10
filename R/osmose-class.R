@@ -50,7 +50,7 @@ getVar = function(object, what, how, ...) {
 #' \code{expected = FALSE}.
 #' @param ... Additional arguments of the function.
 #'
-#' @return An array or a list containing the data.
+#' @return An matrix or a list containing the data.
 #' @export
 #' @method getVar osmose
 getVar.osmose = function(object, what, how=c("matrix", "data.frame", "list"), 
@@ -162,5 +162,3 @@ report.osmose = function(x, format = "latex", tangle=FALSE, output = NULL, open 
   return(invisible(file.path(output, outputFile)))
   
 }
-
-
