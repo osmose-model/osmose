@@ -3,28 +3,29 @@
 # Reproduction plot functions ---------------------------------------------
 
 plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL,
-                                 axes = TRUE, legend = TRUE, cex = 1.2, cex.axis = 1.2, ...){
+                                 axes = TRUE, legend = TRUE, cex = 1.2, cex.axis = 1.2, col = "black", ...){
   
   if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
   
   #par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
   plot(x = times, y = x[,2], type = "l", xlab = "", ylab = "", xaxs = "i", yaxs = "i",
-       xlim = xlim, ylim = ylim, axes = FALSE, ...)
+       xlim = xlim, ylim = ylim, axes = FALSE, col = col,  ...)
   if(isTRUE(axes)){
-    axis(1, cex.axis = cex.axis, ...)
-    axis(2, las = 2, cex.axis = cex.axis, ...)
+    axis(1, cex.axis = cex.axis)
+    axis(2, las = 2, cex.axis = cex.axis)
     box()
   }
   
   if(isTRUE(legend)){
-    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex)
+    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex, col = "black")
   }
   
   return(invisible())
 }
 
 plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  legend = TRUE,
-                                 names.arg = NULL, border = NA, cex = 1.2, cex.axis = 1.2, ...){
+                                 names.arg = NULL, border = NA, cex = 1.2, cex.axis = 1.2,
+                                 col = "gray", ...){
   
   if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
   
@@ -34,13 +35,13 @@ plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  leg
           names.arg = names.arg, ...)
   
   if(isTRUE(axes)){
-    axis(1, cex.axis = cex.axis, ...)
-    axis(2, las = 2, cex.axis = cex.axis, ...)
+    axis(1, cex.axis = cex.axis)
+    axis(2, las = 2, cex.axis = cex.axis)
     box()
   }
   
   if(isTRUE(legend)){
-    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex)
+    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex, col = "black")
   }
   
   return(invisible())

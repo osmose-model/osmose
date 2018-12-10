@@ -2,7 +2,7 @@
 plot.osmose.config.reproduction = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
                                            freq = 12, type = 1, xlim =NULL, ylim = NULL,
                                            speciesNames = NULL, axes = TRUE, legend = TRUE,
-                                           names.arg = NULL, ...){
+                                           names.arg = NULL, col = "black", ...){
   
   # species indexation
   if(is.null(species)){
@@ -31,10 +31,12 @@ plot.osmose.config.reproduction = function(x, species = NULL, start = NULL, end 
   }
   
   if(type == 1) {plotReproductionType1(x = x, times = times, xlim = xlim, ylim = ylim,
-                                       speciesNames = speciesNames, axes = axes, legend = legend, ...)}
+                                       speciesNames = speciesNames, axes = axes,
+                                       legend = legend, col = col, ...)}
   
   if(type == 2) {plotReproductionType2(x = x, ylim = ylim, speciesNames = speciesNames,
-                                       axes = axes, legend = legend, names.arg = names.arg, ...)}
+                                       axes = axes, legend = legend, names.arg = names.arg,
+                                       col = col, ...)}
   
   return(invisible())
 }
