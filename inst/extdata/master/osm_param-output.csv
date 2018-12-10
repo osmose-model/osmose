@@ -16,7 +16,7 @@ output.biomass.bysize.enabled;true
 output.biomass.byage.enabled;true
 
 # Abundance;
-output.abundance.enabled;false
+output.abundance.enabled;true
 output.abundance.bysize.enabled;false
 output.abundance.byage.enabled;false
 
@@ -27,7 +27,8 @@ output.mortality.perSpecies.bySize.enabled;false
 
 # Yield;
 output.yield.biomass.enabled;true
-output.yield.abundance.enabled;false
+output.yield.abundance.enabled;true
+
 output.yieldN.bySize.enabled;false
 output.yield.bySize.enabled;true
 output.yieldN.byAge.enabled;false
