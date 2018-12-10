@@ -31,13 +31,21 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
 
     final private int update;
 
+    private int release;
+
     final private String date;
 
     final private SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 
     abstract void updateParameters();
+    
+    AbstractVersion(int number, int update, int release, int year, int month, int day) {
+        this(number, update, year, month, day);
+        this.release = release;
+    }
 
     AbstractVersion(int number, int update, int year, int month, int day) {
+        this.release = 0;
         this.number = number;
         this.update = update;
         Calendar cld = Calendar.getInstance();
@@ -64,6 +72,10 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
     public int getUpdate() {
         return update;
     }
+    
+    public int getRelease() {
+        return release;
+    }
 
     public String getDate() {
         return date;
@@ -81,10 +93,13 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
     public String toString() {
         StringBuilder version = new StringBuilder("Osmose ");
         version.append(number);
-        if (update > 0) {
-            version.append(" Update ");
-            version.append(update);
-        }
+
+        version.append(" Update ");
+        version.append(update);
+        
+        version.append(" Release ");
+        version.append(release);
+
         version.append(" (");
         version.append(date);
         version.append(")");
@@ -104,6 +119,8 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         version.append(number);
         version.append("u");
         version.append(update);
+        version.append("r");
+        version.append(release);
         return version.toString();
     }
 
@@ -118,6 +135,11 @@ public abstract class AbstractVersion extends OsmoseLinker implements Comparable
         // Same version number, compare update number
         if (update != otherVersion.getUpdate()) {
             return Integer.compare(update, otherVersion.getUpdate());
+        }
+        
+        // Same version/update number, compare release number
+        if (release != otherVersion.getRelease()) {
+            return Integer.compare(release, otherVersion.getRelease());
         }
 
         // Same version number and same update number, versions are equal

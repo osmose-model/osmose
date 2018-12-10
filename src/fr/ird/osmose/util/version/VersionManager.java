@@ -62,11 +62,12 @@ public class VersionManager extends OsmoseLinker {
     private final AbstractVersion v3u1 = new Version3Update1();
     private final AbstractVersion v3u2 = new Version3Update2();
     private final AbstractVersion v3u3 = new Version3Update3();
+    private final AbstractVersion v3u3r3 = new Version3Update3Release3();
     // List of the existing Osmose versions
-    private final AbstractVersion[] VERSIONS = {v3, v3u1, v3u2, v3u3};
+    private final AbstractVersion[] VERSIONS = {v3, v3u1, v3u2, v3u3, v3u3r3};
 
     // Current Osmose version
-    public final AbstractVersion OSMOSE_VERSION = v3u3;
+    public final AbstractVersion OSMOSE_VERSION = v3u3r3;
 
     // Version of the Osmose configuration
     private AbstractVersion cfgVersion;
@@ -125,17 +126,27 @@ public class VersionManager extends OsmoseLinker {
             try {
                 String sversion = getConfiguration().getString("osmose.version");
                 // Clean the version parameter
-                sversion = sversion.replaceAll("[^0-9\\s]", "").replaceAll(" +", " ").trim();
+                
+                // replace points by space, replace all not figure/space by empty, replace date (YYYYMMDD) into empty and remove additional whitespaces     
+                sversion = sversion.replaceAll("\\.", " ").replaceAll("[^0-9\\s]", "").replaceAll(" +[0-9]{8}", "").replaceAll(" +", " ").trim();
                 String[] split = sversion.split(" ");
+
                 // Version number is the first figure
                 int number = Integer.valueOf(split[0].trim());
                 int update = 0;
+                int release = 0;
                 // Update number is the second figure
-                if (split.length >= 1) {
+                
+                if (split.length >= 2) {
                     update = Integer.valueOf(split[1].trim());
                 }
+                
+                if (split.length == 3) {
+                    release = Integer.valueOf(split[2].trim());
+                }
+                 
                 for (AbstractVersion aversion : VERSIONS) {
-                    if ((aversion.getNumber() == number) && (aversion.getUpdate() == update)) {
+                    if ((aversion.getNumber() == number) && (aversion.getUpdate() == update) && (aversion.getRelease() == release)) {
                         return aversion;
                     }
                 }
