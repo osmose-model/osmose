@@ -2,7 +2,8 @@
 
 # Reproduction plot functions ---------------------------------------------
 
-plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL, axes = TRUE, legend = TRUE, ...){
+plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL,
+                                 axes = TRUE, legend = TRUE, cex = 1.2, cex.axis = 1.2, ...){
   
   if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
   
@@ -10,36 +11,36 @@ plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL, axes
   plot(x = times, y = x[,2], type = "l", xlab = "", ylab = "", xaxs = "i", yaxs = "i",
        xlim = xlim, ylim = ylim, axes = FALSE, ...)
   if(isTRUE(axes)){
-    axis(1, ...)
-    axis(2, las = 2, ...)
+    axis(1, cex.axis = cex.axis, ...)
+    axis(2, las = 2, cex.axis = cex.axis, ...)
     box()
   }
   
   if(isTRUE(legend)){
-    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, ...)
+    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex)
   }
   
   return(invisible())
 }
 
 plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  legend = TRUE,
-                                 names.arg = NULL, border = NA, ...){
+                                 names.arg = NULL, border = NA, cex = 1.2, cex.axis = 1.2, ...){
   
   if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
   
   #par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
   
-  barplot(height = x[,2], border = border, axes = axes, ylim = c(0, max(x[,2]*1.25)), xaxs = "i",
+  barplot(height = x[,2], border = border, axes = FALSE, ylim = c(0, max(x[,2]*1.25)), xaxs = "i",
           names.arg = names.arg, ...)
   
   if(isTRUE(axes)){
-    axis(1, ...)
-    axis(2, las = 2, ...)
+    axis(1, cex.axis = cex.axis, ...)
+    axis(2, las = 2, cex.axis = cex.axis, ...)
     box()
   }
   
   if(isTRUE(legend)){
-    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, ...)
+    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex)
   }
   
   return(invisible())
