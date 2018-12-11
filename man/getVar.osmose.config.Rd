@@ -4,7 +4,7 @@
 \alias{getVar.osmose.config}
 \title{GetVar method for osmose configuration objects}
 \usage{
-\method{getVar}{osmose.config}(object, what)
+\method{getVar}{osmose.config}(object, what, extraWhat = FALSE, ...)
 }
 \arguments{
 \item{object}{Object of \code{osmose.config} class. 
