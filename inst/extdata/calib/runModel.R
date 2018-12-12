@@ -20,11 +20,6 @@ runModel  = function(param, names, ...) {
 
     # defines the user directory
     outdir = "output"
-
-    # creates output directory if does not exist
-    if(!file.exists(outdir)) dir.create(outdir)
-
-    input_file = system.file(package="osmose", "extdata", "calib", "calib_config.csv")
     
     # run Osmose Model
     run_osmose(input="calib_config.csv", 

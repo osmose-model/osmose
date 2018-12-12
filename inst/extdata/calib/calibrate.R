@@ -15,15 +15,12 @@ minmaxt = function(obs, sim) {
 }
 
 # reads calibration informations
-master_path = 
 calib_path = system.file(package="osmose", "extdata", "calib")
 calib_file = "calibration_settings.csv"
 calInfo = getCalibrationInfo(path=calib_path, file=calib_file)
-print(calInfo)
 
 # loads the observed data (path is the data directory path, 
 # data.folder is the data directory name)
-# todo: merge data.folder and path
 observed = getObservedData(calInfo, path=calib_path, data.folder="DATA")
 
 # load calibration parameters
@@ -44,21 +41,21 @@ objfn = createObjectiveFunction(runModel=runModel,
                                 names=row.names(calibData))
 
 control = list()
-control$maxgen = c(150, 200, 250, 300)   # maximum number of generations (former gen.max parameter)
+# control$maxgen = c(2, 2, 2, 2)   # maximum number of generations (former gen.max parameter)
+control$maxgen = 2   # maximum number of generations (former gen.max parameter)
 control$master = system.file(package="osmose", "extdata", "master")   # directory that will be copied
 control$run = "RUN"   # run directory
 control$restart.file = "calib_restart"   # name of the restart file
 control$REPORT = 1    # number of generations to run before saving a restart
-control$parallel = FALSE
-control$nCores = 2
-control$maxgen = 1   # maximum number of generations (former gen.max parameter)
+# control$parallel = TRUE
+# control$nCores = 2
 control$popsize = 15   # population  size (former seed parameter)
 
-cl = makeCluster(control$nCores)
-registerDoParallel(cl)
+# cl = makeCluster(control$nCores)
+# registerDoParallel(cl)
 
 cal1 = calibrate(calibData['paropt'], fn=objfn, method='default',
                  lower=calibData['parmin'], upper=calibData['parmax'], 
-                 phases=calibData['parphase'], control=control, replicates=2)
+                 phases=calibData['parphase'], replicates=1, control=control)
 
-stopCluster(cl)
+# stopCluster(cl)
