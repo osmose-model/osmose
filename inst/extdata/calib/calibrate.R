@@ -54,6 +54,11 @@ control$popsize = 15   # population  size (former seed parameter)
 # cl = makeCluster(control$nCores)
 # registerDoParallel(cl)
 
+# send the variables and loaded libraries defined in the above to the nodes
+# clusterExport(cl, c("objfn", "calibData", "calInfo", "observed", "minmaxt"))
+# clusterEvalQ(cl, library("osmose"))
+# clusterEvalQ(cl, library("calibrar"))
+
 cal1 = calibrate(calibData['paropt'], fn=objfn, method='default',
                  lower=calibData['parmin'], upper=calibData['parmax'], 
                  phases=calibData['parphase'], replicates=1, control=control)
