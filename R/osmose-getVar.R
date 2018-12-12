@@ -9,9 +9,9 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
   
   # Computes the mean over the replicates
   out = apply(out, c(1, 2), mean)
-  
+
   # computes the time average
-  data.time.mean = apply(out, 2, mean)
+  data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # barrier.n: adding this to avoid NULL output in summary
   keep = (data.time.mean > thres)  # keep values for which the max is greater than the threshold
   
   if(time.mean)
@@ -139,8 +139,8 @@ process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
 #' @param ... 
 #'
 #' @export
-#' @method summary osmose.output.dietMatrix
-summary.osmose.output.dietMatrix = function(data, species=NULL, thres=1, ...)
+#' @method summary osmose.dietMatrix
+summary.osmose.dietMatrix = function(data, species=NULL, thres=1, ...)
 {
   
   dietMatrix = process.dietMatrix(data, species=species, time.mean=TRUE, thres=thres, ...)
@@ -159,30 +159,30 @@ summary.osmose.output.dietMatrix = function(data, species=NULL, thres=1, ...)
 #' @param ... 
 #
 #' @export
-#' @method summary osmose.output.mortalityRate
-summary.osmose.output.mortalityRate = function(data, species=NULL, ...)
+#' @method summary osmose.mortalityRate
+summary.osmose.mortalityRate = function(data, species=NULL, ...)
 {
   data = process.mortalityRate(data, species=species, time.mean=TRUE)
   return(as.data.frame(data))  
 }
 
 #' @export
-#' @method summary osmose.output.biomass
-summary.osmose.output.biomass = function(data)
+#' @method summary osmose.biomass
+summary.osmose.biomass = function(data)
 {
   return(summary.generic(data))
 }
 
 #' @export
-#' @method summary osmose.output.meanTL
-summary.osmose.output.meanTL = function(data)
+#' @method summary osmose.meanTL
+summary.osmose.meanTL = function(data)
 {
   return(summary.generic(data))
 }
 
 #' @export
-#' @method summary osmose.output.meanTLCatch
-summary.osmose.output.meanTLCatch = function(data)
+#' @method summary osmose.meanTLCatch
+summary.osmose.meanTLCatch = function(data)
 {
   return(summary.generic(data))
 }

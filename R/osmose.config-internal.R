@@ -141,3 +141,113 @@ addAttr = function(x, which, value) {
 .getConfig.list = function(config, ...) {
   return(config)
 }
+
+
+# GetData functions -------------------------------------------------------
+
+getReproductionData = function(x, var = season.file){
+  
+  # index on the list using the var
+  listIndex = paste0("x = x",
+                     switch(var,
+                            file        = "[['file']]",
+                            season.file = "[['season']][['file']]"))
+  
+  eval(parse(text = listIndex))
+  
+  speciesNames = names(x)
+  reproData    = as.vector(unlist(lapply(x, FUN = "[[", 1)))
+  reproPaths   = as.vector(unlist(lapply(x, attr, "path")))
+  
+  reproData    = paste(reproPaths, reproData, sep = "/")
+  
+  dataBase = list()
+  for(i in seq_along(speciesNames)){
+    dataBase[[i]] = read.csv(file = reproData[i], sep = ";")
+  }
+  names(dataBase) = speciesNames
+  
+  return(dataBase)
+}
+
+
+getSpeciesData = function(x) {
+  
+  # species name in configuration file
+  speciesCode = names(x$name)
+  
+  # growth variables
+  names               = lapply(x$name, FUN = "[[", 1)
+  linf                = lapply(lapply(x$linf, FUN = "[[", 1), as.numeric, 1)
+  k                   = lapply(lapply(x$k, FUN = "[[", 1), as.numeric, 1)
+  t0                  = lapply(lapply(x$t0, FUN = "[[", 1), as.numeric, 1)
+  thr                 = lapply(lapply(x$vonbertalanffy$threshold$age, FUN = "[[", 1), as.numeric, 1)
+  conditionFactor     = lapply(lapply(x$length2weight$condition$factor, FUN = "[[", 1), as.numeric, 1)
+  allometricPower     = lapply(lapply(x$length2weight$allometric$power, FUN = "[[", 1), as.numeric, 1)
+  relativityFecundity = lapply(lapply(x$relativefecundity, FUN = "[[", 1), as.numeric, 1)
+  eggSize             = lapply(lapply(x$egg$size, FUN = "[[", 1), as.numeric, 1)
+  eggWeight           = lapply(lapply(x$egg$weight, FUN = "[[", 1), as.numeric, 1)
+  sexRatio            = lapply(lapply(x$sexratio, FUN = "[[", 1), as.numeric, 1)
+  maturitySize        = lapply(lapply(x$maturity$size, FUN = "[[", 1), as.numeric, 1)
+  lifespan            = lapply(lapply(x$lifespan, FUN = "[[", 1), as.numeric, 1)
+  
+  # Data base 
+  dataBase = list(names               = names,
+                  linf                = linf,
+                  k                   = k,
+                  t0                  = t0, 
+                  thr                 = thr,
+                  conditionFactor     = conditionFactor,
+                  allometricPower     = allometricPower,
+                  relativityFecundity = relativityFecundity,
+                  eggSize             = eggSize,
+                  eggWeight           = eggWeight,
+                  sexRatio            = sexRatio,
+                  maturitySize        = maturitySize,
+                  lifespan            = lifespan,
+                  speciesCode         = speciesCode)
+  
+  return(dataBase)
+}
+
+
+getPredationData = function(x, object, extraWhat = FALSE) {
+  
+  # Accessibility
+  fileAccessibility = unlist(lapply(x$accessibility$file, FUN = "[[", 1))
+  pathAccessibility = attributes(x$accessibility$file)$path
+  accessibility     = list(data = read.csv(file = paste(pathAccessibility,
+                                                        fileAccessibility, sep = "/"), sep = ";"),
+                           stageStructure = as.vector(x$accessibility$stage$structure),
+                           stageThreshold = lapply(x$accessibility$stage$threshold, FUN = "[[", 1))
+  
+  # Efficiency
+  efficiency   = list(critical = lapply(lapply(x$efficiency$critical, FUN = "[[", 1), as.numeric, 1))
+  
+  # Ingestion
+  ingestion    = list(rateMax = lapply(lapply(x$ingestion$rate$max, FUN = "[[", 1), as.numeric, 1))
+  
+  # PredPrey
+  sizeRatioMax   = lapply(lapply(lapply(x$predprey$sizeratio$max, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
+  sizeRatioMin   = lapply(lapply(lapply(x$predprey$sizeratio$min, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
+  stageThreshold = lapply(lapply(lapply(x$predprey$stage$threshold, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
+  predPrey       = list(sizeRatioMax   = lapply(sizeRatioMax, FUN = as.numeric, 1),
+                        sizeRatioMin   = lapply(sizeRatioMin, FUN = as.numeric, 1),
+                        stageStructure = as.character(x$predprey$stage$structure),
+                        stageThreshold = suppressWarnings(lapply(stageThreshold, FUN = as.numeric, 1)))
+  
+  # Data base
+  dataBase = list(accessibility = accessibility,
+                  efficiency    = efficiency,
+                  ingestion     = ingestion,
+                  predPrey      = predPrey)
+  
+  if(isTRUE(extraWhat)){
+    linf = lapply(lapply(object[["species"]][["linf"]], FUN = "[[", 1), as.numeric, 1)
+    speciesNames = lapply(object$species$name, FUN = "[[", 1)
+    dataBase$linf = linf
+    dataBase$speciesNames = speciesNames
+  } 
+  
+  return(dataBase)
+}

@@ -5,7 +5,7 @@
 \alias{osmose2R}
 \title{Read OSMOSE outputs into an R object}
 \usage{
-read_osmose(path = NULL, input = NULL, version = "v3r2",
+read_osmose(path = NULL, input = NULL, version = NULL,
   species.names = NULL, absolute = TRUE, ...)
 }
 \arguments{

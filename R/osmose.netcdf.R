@@ -50,7 +50,7 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
   fid = nc_open(filename)
   
   lon = ncvar_get(fid, lonname)
-  lat = ncvar_get(fid, lonname)
+  lat = ncvar_get(fid, latname)
   
   # close the netcdf
   nc_close(fid)
@@ -92,8 +92,8 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
   upperleftlat = max(lat) + dlat * 0.5
   
   output = data.frame(par="grid.java.classname", value="fr.ird.osmose.grid.OriginalGrid", stringsAsFactors = F)
-  output = rbind(output, c("grid.ncolumn", nlon))
-  output = rbind(output, c("grid.nline", nlat))
+  output = rbind(output, c("grid.nlon", nlon))
+  output = rbind(output, c("grid.nlat", nlat))
   output = rbind(output, c("grid.lowright.lat", lowrightlat))
   output = rbind(output, c("grid.lowright.lon", lowrightlon))
   output = rbind(output, c("grid.upperleft.lat", upperleftlat))
@@ -321,7 +321,6 @@ make_movement_netcdf = function(filename) {
 #' @param osmose_config Name of the main configuration file
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
 #'
-#' @return
 #' @export
 correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
 {

@@ -58,7 +58,64 @@ configureCalibration = function(L1) {
 }
 
 
+#' GetVar method for osmose configuration objects
+#' @description Get the configuration files from 
+#' @param object Object of \code{osmose.config} class. 
+#' See the \code{\link{read_osmose}} and \code{\link{readOsmoseConfiguration}} functions
+#'  for more information about this object.
+#' @param what Name of the variable to extract from the configuration file.
+#' @return An object of \code{list} class containing all the relevant information about 
+#' the variable extracted.
+#' @export
+#' @method getVar osmose.config
+getVar.osmose.config = function(object, what, extraWhat = FALSE, ...) {
+  
+  x = object[[what]]
+  
+  if(is.null(x)){
+    message = paste("The", sQuote(what),
+                    "variable doesn't exist on the configuration file.", sep = "")
+    stop(message)
+  }
+  
+  getConfigVar = c("reproduction", "species", "predation")
+  
+  if(what %in% getConfigVar){
+    x = switch(what,
+               reproduction  = getReproductionData(x, var = "season.file"),
+               species       = getSpeciesData(x),
+               predation     = getPredationData(x, object = object, extraWhat = extraWhat))
+  }
+  
+  class(x) = c(paste("osmose.config", what, sep = "."), class(x))
+  
+  return(x)
+}
+
 # Methods -----------------------------------------------------------------
+
+#' Title
+#'
+#' @param x TODO
+#' @param what TODO
+#' @param ... TODO
+#'
+#' @return TODO
+#' @export 
+#' @examples TODO
+#' @method plot osmose.config
+plot.osmose.config = function(x, what = NULL, ...) {
+  
+  if(!is.null(what)){
+    x = getVar.osmose.config(x, what = what, extraWhat = TRUE)
+    plot(x, ...)
+    
+  } else {
+    message("An variable of the configuration file have to be chosen for the plot")
+  }
+  
+  return(invisible())
+}
 
 # print.osmose.config = function(x, ...)
 
