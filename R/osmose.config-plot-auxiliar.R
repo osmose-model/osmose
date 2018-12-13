@@ -32,7 +32,7 @@ plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  leg
   #par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
   
   barplot(height = x[,2], border = border, axes = FALSE, ylim = c(0, max(x[,2]*1.25)), xaxs = "i",
-          names.arg = names.arg, ...)
+          names.arg = names.arg, col = col, ...)
   
   if(isTRUE(axes)){
     axis(1, cex.axis = cex.axis)
@@ -67,7 +67,7 @@ plotGrowthType1 = function(x, species, n = 100, xlim = NULL, ylim = NULL,
   lengthInv = par$maturitySize
   
   xlim = if(is.null(xlim)) c(0, max(age))
-  ylim = if(is.null(ylim)) c(0, max(length)*1.25)
+  ylim = if(is.null(ylim)) c(0, max(length, na.rm = TRUE)*1.25)
   
   # plot
   # par(mar = c(4,4,2,1.5), oma = c(1,1,0.5,0.5))
@@ -114,6 +114,14 @@ plotGrowthType1 = function(x, species, n = 100, xlim = NULL, ylim = NULL,
 }
 
 # Internal growth functions
+#' Title
+#'
+#' @param par TODO
+#' @param sp TODO
+#'
+#' @return TODO
+#' @export
+#'
 getGrowthParameters = function(par, sp) {
   
   # species indexation
@@ -140,6 +148,13 @@ getGrowthParameters = function(par, sp) {
   return(output)
 }
 
+#' Title
+#'
+#' @param age TODO 
+#' @param par TODO
+#'
+#' @return TODO
+#' @export
 osmoseGrowth = function(age, par) { 
   
   linf    = par$linf
