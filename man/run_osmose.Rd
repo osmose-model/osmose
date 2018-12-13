@@ -5,8 +5,8 @@
 \title{Run an OSMOSE configuration}
 \usage{
 run_osmose(input, parameters = NULL, output = "output",
-  log = "osmose.log", version = "3.3.3", osmose = NULL,
-  java = "java", options = NULL, verbose = TRUE, clean = TRUE)
+  log = "osmose.log", version = "3.3.3", osmose = NULL, java = "java",
+  options = NULL, verbose = TRUE, clean = TRUE)
 }
 \arguments{
 \item{input}{Filename of the main configuration file}

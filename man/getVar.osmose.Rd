@@ -4,8 +4,8 @@
 \alias{getVar.osmose}
 \title{GetVar method for osmose outputs objects}
 \usage{
-\method{getVar}{osmose}(object, what, how = c("matrix", "data.frame",
-  "list"), expected = FALSE, ...)
+\method{getVar}{osmose}(object, what, how = c("matrix", "data.frame", "list"),
+  expected = FALSE, ...)
 }
 \arguments{
 \item{object}{Object of \code{osmose} class (see the \code{\link{read_osmose}} function).}
