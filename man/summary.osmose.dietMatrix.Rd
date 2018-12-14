@@ -4,8 +4,7 @@
 \alias{summary.osmose.dietMatrix}
 \title{Title}
 \usage{
-\method{summary}{osmose.dietMatrix}(data, species = NULL, thres = 1,
-  ...)
+\method{summary}{osmose.dietMatrix}(data, species = NULL, thres = 1, ...)
 }
 \arguments{
 \item{data}{}

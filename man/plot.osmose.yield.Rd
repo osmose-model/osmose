@@ -4,12 +4,11 @@
 \alias{plot.osmose.yield}
 \title{Plot function for yield}
 \usage{
-\method{plot}{osmose.yield}(x, species = NULL, start = NULL,
-  end = NULL, initialYear = NULL, ts = TRUE, type = 1,
-  replicates = TRUE, nrep = 3, ci = TRUE, freq = 12,
-  horizontal = FALSE, conf = 0.95, factor = 0.001, xlim = NULL,
-  ylim = NULL, col = NULL, alpha = 0.5, speciesNames = NULL,
-  axes = TRUE, ...)
+\method{plot}{osmose.yield}(x, species = NULL, start = NULL, end = NULL,
+  initialYear = NULL, ts = TRUE, type = 1, replicates = TRUE,
+  nrep = 3, ci = TRUE, freq = 12, horizontal = FALSE, conf = 0.95,
+  factor = 0.001, xlim = NULL, ylim = NULL, col = NULL, alpha = 0.5,
+  speciesNames = NULL, axes = TRUE, ...)
 }
 \arguments{
 \item{x}{Object of the class \code{osmose.yield}. This object have three dimensions: 
