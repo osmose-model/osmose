@@ -77,13 +77,13 @@ public class OriginalGrid extends AbstractGrid {
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Number of lines. Parameter <i>grid.nline</i>
+     * Number of lines. Parameter <i>grid.nlat</i>
      */
-    private int nline;
+    private int nlat;
     /**
-     * Number of columns. Parameter <i>grid.ncolumn</i>
+     * Number of columns. Parameter <i>grid.nlon</i>
      */
-    private int ncolumn;
+    private int nlon;
     /**
      * Latitude, in degree north, of the North West corner of the grid.
      * Parameter <i>grid.upleft.lat</i>
@@ -112,8 +112,8 @@ public class OriginalGrid extends AbstractGrid {
     public void readParameters() {
 
         /* grid dimension */
-        nline = getConfiguration().getInt("grid.nline");
-        ncolumn = getConfiguration().getInt("grid.ncolumn");
+        nlat = getConfiguration().getInt("grid.nlat");
+        nlon = getConfiguration().getInt("grid.nlon");
 
         /* geographical extension of the grid */
         latmin = getConfiguration().getFloat("grid.lowright.lat");
@@ -131,19 +131,19 @@ public class OriginalGrid extends AbstractGrid {
     @Override
     public Cell[][] makeGrid() {
 
-        float dLat = (latmax - latmin) / (float) nline;
-        float dLong = (lonmax - lonmin) / (float) ncolumn;
+        float dLat = (latmax - latmin) / (float) nlat;
+        float dLong = (lonmax - lonmin) / (float) nlon;
 
-        Cell[][] grid = new Cell[nline][ncolumn];
+        Cell[][] grid = new Cell[nlat][nlon];
         float latitude, longitude;
         String filename = getConfiguration().getFile("grid.mask.file");
         boolean[][] land = readMaskAsCSV(filename);
-        for (int j = 0; j < nline; j++) {
+        for (int j = 0; j < nlat; j++) {
             latitude = latmin + (float) (j + 0.5f) * dLat;
-            for (int i = 0; i < ncolumn; i++) {
+            for (int i = 0; i < nlon; i++) {
                 longitude = lonmin + (float) (i + 0.5) * dLong;
                 //System.out.print(isLand(i, j) ? "0 ":"1 ");
-                grid[j][i] = new Cell((j * ncolumn + i), i, j, latitude, longitude, land[j][i]);
+                grid[j][i] = new Cell((j * nlon + i), i, j, latitude, longitude, land[j][i]);
             }
             //System.out.println();
         }

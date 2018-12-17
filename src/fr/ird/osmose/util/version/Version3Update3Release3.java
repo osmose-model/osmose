@@ -21,7 +21,7 @@ import java.util.List;
 public class Version3Update3Release3 extends AbstractVersion {
 
     public Version3Update3Release3() {
-        super(3, 3, 2, 2018, Calendar.NOVEMBER, 28);
+        super(3, 3, 3, 2018, Calendar.NOVEMBER, 28);
     }
 
     @Override

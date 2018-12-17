@@ -73,7 +73,7 @@ public class VersionManager extends OsmoseLinker {
     private AbstractVersion cfgVersion;
 
     private static final VersionManager versionManager = new VersionManager();
-
+        
     public static VersionManager getInstance() {
         return versionManager;
     }
