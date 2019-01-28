@@ -7,7 +7,7 @@
 #' from user input parameters. 
 #' @param input Filename of the main configuration file
 #' @param parameters Parameters to be passed to osmose (version 4 or higher).
-#' @param output Output directory
+#' @param output Output directory. If NULL, the value set in the configuration file is used.
 #' @param log File to save OSMOSE execution messages.
 #' @param version OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
 #' accepted. 
