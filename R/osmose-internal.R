@@ -6,20 +6,78 @@
 .getVersion = function(version) {
 
   if(length(version) > 1) stop("Only one 'version' value must be provided.")
-
+  
+  output = c(0, 0, 0)
+  
   # conversion of the version argument into string
   # to be matched with regular expression
   version = toString(version)
   
-  pattern = "^ *([0-9]+)(\\.[0-9]+){0,2} *$"
-  if(grepl(version, pattern=pattern)) {
-    version = sub(x=version, pattern=pattern, replacement="\\1")
-    isNum = suppressWarnings(!is.na(as.integer(version)))
-    if(isNum) return(as.integer(version))
+  pattern1 = "^ *([0-9]+) *$"
+  pattern2 = "^ *([0-9]+)\\.([0-9]+) *$"
+  pattern3 = "^ *([0-9]+)\\.([0-9]+)\\.([0-9]+) *$"
+  
+  if(grepl(version, pattern=pattern3)) {
+    
+    vers = sub(x=version, pattern=pattern3, replacement="\\1")
+    update = sub(x=version, pattern=pattern3, replacement="\\2")
+    release = sub(x=version, pattern=pattern3, replacement="\\3")
+    
+    isNum = suppressWarnings(!is.na(as.integer(vers)))
+    if(isNum) output[1] = as.integer(vers)
+    isNum = suppressWarnings(!is.na(as.integer(update)))
+    if(isNum) output[2] = as.integer(update)
+    isNum = suppressWarnings(!is.na(as.integer(release)))
+    if(isNum) output[3] = as.integer(release)
   }
-  stop("Version must be of the form X, X.Y or X.Y.Z.")
+  
+  if(grepl(version, pattern=pattern2)) {
+    
+    vers = sub(x=version, pattern=pattern2, replacement="\\1")
+    update = sub(x=version, pattern=pattern2, replacement="\\2")
+    isNum = suppressWarnings(!is.na(as.integer(vers)))
+    if(isNum) output[1] = as.integer(vers)
+    isNum = suppressWarnings(!is.na(as.integer(update)))
+    if(isNum) output[2] = as.integer(update)
+
+  }
+  
+  if(grepl(version, pattern=pattern1)) {
+    
+    vers = sub(x=version, pattern=pattern1, replacement="\\1")
+    isNum = suppressWarnings(!is.na(as.integer(vers)))
+    if(isNum) output[1] = as.integer(vers)
+
+  }
+  
+  if(sum(output) == 0)  stop("Version must be of the form X, X.Y or X.Y.Z.")
+  return(output)
+
 }
 
+# Returns +1 if version1 is greater than version2, -1 if version1
+# is less than version2, 0 ib both versions are equal.
+.compareVersion = function(version1, version2) {
+  
+  if(version1[1] != version2[1]) {
+    # If different versions
+    return(sign(version1[1] - version2[1]))
+  }
+  
+  if(version1[2] != version2[2]) {
+    # If different updates
+    return(sign(version1[2] - version2[2]))
+  }
+  
+  if(version1[3] != version2[3]) {
+    # if different release
+    return(sign(version1[3] - version2[3]))
+  }
+  
+  return(0)
+  
+}
+  
 # guess the type of a vector
 .guessType = function(x, keep.att=FALSE) {
     if(!is.character(x)) return(x)
