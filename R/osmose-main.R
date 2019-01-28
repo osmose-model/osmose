@@ -28,7 +28,7 @@
 #'   }
 #' }
 #' @export
-run_osmose = function(input, parameters = NULL, output = "output", log = "osmose.log",
+run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
                       version = "3.3.3", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE) {
   
