@@ -21,3 +21,5 @@ vignettes/*.pdf
 # vim backup
 
 *~
+
+man/*Rd
