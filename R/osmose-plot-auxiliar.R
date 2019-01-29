@@ -180,7 +180,7 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
 }
 
 plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
-                         col = NULL, speciesNames = NULL, legend = TRUE, axes = TRUE, ...) {
+                         col = NULL, speciesNames = NULL, legend = TRUE, axes = TRUE, cex = 0.8, ...) {
   
   if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
   
@@ -225,10 +225,10 @@ plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = 0.9)
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   if(isTRUE(legend)){
-    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = 0.7, lty = 1)
+    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = 1)
   }
   
   return(invisible())

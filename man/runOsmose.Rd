@@ -4,9 +4,9 @@
 \alias{runOsmose}
 \title{Title}
 \usage{
-runOsmose(input, parameters = NULL, output = "output", log = "osmose.log",
-  version = "3.3.1", osmose = NULL, java = "java", options = NULL,
-  verbose = TRUE, clean = TRUE)
+runOsmose(input, parameters = NULL, output = "output",
+  log = "osmose.log", version = "3.3.3", osmose = NULL,
+  java = "java", options = NULL, verbose = TRUE, clean = TRUE)
 }
 \description{
 Title
