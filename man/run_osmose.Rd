@@ -4,16 +4,16 @@
 \alias{run_osmose}
 \title{Run an OSMOSE configuration}
 \usage{
-run_osmose(input, parameters = NULL, output = "output",
-  log = "osmose.log", version = "3.3.3", osmose = NULL, java = "java",
-  options = NULL, verbose = TRUE, clean = TRUE)
+run_osmose(input, parameters = NULL, output = NULL,
+  log = "osmose.log", version = "3.3.3", osmose = NULL,
+  java = "java", options = NULL, verbose = TRUE, clean = TRUE)
 }
 \arguments{
 \item{input}{Filename of the main configuration file}
 
 \item{parameters}{Parameters to be passed to osmose (version 4 or higher).}
 
-\item{output}{Output directory}
+\item{output}{Output directory. If NULL, the value set in the configuration file is used.}
 
 \item{log}{File to save OSMOSE execution messages.}
 
