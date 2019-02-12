@@ -117,4 +117,12 @@ public interface IAggregation extends IMarineOrganism {
      */
     public double biom2abd(double biomass);
 
+    /**
+     * Converts abundance into biomass (in ton).
+     *
+     * @param biomass of the aggregation in tonne
+     * @return the corresponding abundance.
+     */
+    public double abd2biom(double biomass);
+
 }

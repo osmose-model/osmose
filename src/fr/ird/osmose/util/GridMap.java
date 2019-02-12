@@ -50,10 +50,13 @@ package fr.ird.osmose.util;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.Osmose;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import ucar.ma2.Array;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.NetcdfFile;
 
 /**
  *
@@ -61,7 +64,7 @@ import java.util.List;
  */
 public class GridMap extends OsmoseLinker {
 
-    protected final float[][] matrix;
+    protected float[][] matrix;
 
     public GridMap(int defaultValue) {
         matrix = new float[getGrid().get_ny()][getGrid().get_nx()];
@@ -101,7 +104,10 @@ public class GridMap extends OsmoseLinker {
                 for (int i = 0; i < line.length; i++) {
                     try {
                         float value = Float.valueOf(line[i]);
-                        if (value > 0.f) {
+                        // If value is greater than 0 or value is not NaN
+                        // set the value
+                        // else, value = 0
+                        if ((value > 0.f) || (!Float.isNaN(value))) {
                             matrix[j][i] = value;
                         }
                     } catch (NumberFormatException ex) {
@@ -129,5 +135,80 @@ public class GridMap extends OsmoseLinker {
 
     public float getValue(Cell cell) {
         return getValue(cell.get_igrid(), cell.get_jgrid());
+    }
+
+    /**
+     * Sums the matrix over space
+     *
+     * @author Nicolas Barrier
+     * @return
+     */
+    public float count() {
+
+        float output = 0;
+        for (int j = 0; j < getGrid().get_ny(); j++) {
+            for (int i = 0; i < getGrid().get_nx(); i++) {
+                output += matrix[j][i];
+            }
+        }
+
+        return output;
+
+    }
+
+    /**
+     * Compares two grid map
+     *
+     * @author Nicolas Barrier
+     * @param map2
+     * @return
+     */
+    public boolean equals(GridMap map2) {
+
+        for (int j = 0; j < getGrid().get_ny(); j++) {
+            for (int i = 0; i < getGrid().get_nx(); i++) {
+                if (matrix[j][i] != map2.getValue(i, j)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Reads the matrix from a NetCDF file.
+     *
+     * @param nc NetcdfFile object
+     * @param mapIndex Index of the map to read in the file (first dimension)
+     * @throws IOException
+     * @throws InvalidRangeException
+     */
+    public void read(NetcdfFile nc, int mapIndex) throws IOException, InvalidRangeException {
+
+        // Defines the indexes of the NetCDF variable to read
+        int nx = getConfiguration().getGrid().get_nx();
+        int ny = getConfiguration().getGrid().get_ny();
+        int start[] = {mapIndex, 0, 0};
+        int count[] = {1, ny, nx};
+
+        // Extracts the FillValue attribute
+        int fillValue = -99;
+        if (!nc.findVariable("map").getAttributes().isEmpty()) {
+            // The first attribute must be _FillValue
+            fillValue = nc.findVariable("map").getAttributes().get(0).getNumericValue().intValue();
+        }
+
+        // Reads the NetCDF variable
+        Array temp = nc.findVariable("map").read(start, count).reduce();
+        Index index = temp.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                index.set(j, i);
+                matrix[j][i] = (temp.getFloat(index) == fillValue) ? 0 : temp.getFloat(index);
+            }
+        }
+
     }
 }

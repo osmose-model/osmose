@@ -81,6 +81,10 @@ public class FisheriesMortality extends AbstractMortality {
     {
         return this.fisheriesMortality;
     }
+    
+    public int getNFisheries() {
+        return this.nFisheries;
+    }
 
     @Override
     public void init() {
@@ -136,7 +140,7 @@ public class FisheriesMortality extends AbstractMortality {
         // Loop over all the fisheries index in a random way
         for(int fIndex : seqFisheries)
         {
-             
+            
             // recover the current fisherie
             SingleFisheriesMortality fish = this.getFisheries()[fIndex];
             
@@ -163,6 +167,7 @@ public class FisheriesMortality extends AbstractMortality {
             }
             
             // increments the number of DEAD individuals by fishing.
+            // in so doing, abundance is changed.
             school.incrementNdead(MortalityCause.FISHING, nDead);
            
         }

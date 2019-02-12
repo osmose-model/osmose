@@ -49,6 +49,7 @@
 package fr.ird.osmose.process.mortality;
 
 import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
@@ -77,6 +78,7 @@ public class PredationMortality extends AbstractMortality {
     private double[] predationRate;
     /**
      * Accessibility matrix.
+     * Note that in the file, lines are preys while columns are predators
      * Array[nSpecies+nPlankton][nAccessStagePrey][nSpecies][nAccessStagePred]
      */
     private double[][][][] accessibilityMatrix;
@@ -98,9 +100,10 @@ public class PredationMortality extends AbstractMortality {
 
         int nspec = getNSpecies();
         int nPlankton = getConfiguration().getNPlankton();
-        predPreySizesMax = new double[nspec][];
-        predPreySizesMin = new double[nspec][];
-        predationRate = new double[nspec];
+        int nBack = getConfiguration().getNBkgSpecies();
+        predPreySizesMax = new double[nspec + nBack][];
+        predPreySizesMin = new double[nspec + nBack][];
+        predationRate = new double[nspec + nBack];
 
         for (int i = 0; i < nspec; i++) {
             predPreySizesMax[i] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + i);
@@ -108,11 +111,18 @@ public class PredationMortality extends AbstractMortality {
             predationRate[i] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i);
         }
 
+        // Recovering predation parameters for background species
+        for (int i = 0; i < nBack; i++) {
+            predPreySizesMax[i + nspec] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.bkg" + i);
+            predPreySizesMin[i + nspec] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.bkg" + i);
+            predationRate[i + nspec] = getConfiguration().getDouble("predation.ingestion.rate.max.bkg" + i);
+        }
+
         // Accessibility stages
         accessStage = new AccessibilityStage();
         accessStage.init();
 
-        // Feeding stages
+        // Feeding stages (i.e. classes for Lmin/LMax ratios
         predPreyStage = new PredPreyStage();
         predPreyStage.init();
 
@@ -123,15 +133,15 @@ public class PredationMortality extends AbstractMortality {
                 CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
                 List<String[]> lines = reader.readAll();
                 int l = 1;
-                accessibilityMatrix = new double[nspec + nPlankton][][][];
-                for (int i = 0; i < nspec + nPlankton; i++) {
+                accessibilityMatrix = new double[nspec + nBack + nPlankton][][][];   // lines are preys (order: focal, bkg, ltl)
+                for (int i = 0; i < nspec + nPlankton + nBack; i++) {
                     int nStagePrey = accessStage.getNStage(i);
                     accessibilityMatrix[i] = new double[nStagePrey][][];
                     for (int j = 0; j < nStagePrey; j++) {
                         String[] line = lines.get(l);
                         int ll = 1;
-                        accessibilityMatrix[i][j] = new double[nspec][];
-                        for (int k = 0; k < nspec; k++) {
+                        accessibilityMatrix[i][j] = new double[nspec + nBack][];      // columns are preds (order: focal, bkg)
+                        for (int k = 0; k < nspec + nBack; k++) {
                             int nStagePred = accessStage.getNStage(k);
                             accessibilityMatrix[i][j][k] = new double[nStagePred];
                             for (int m = 0; m < nStagePred; m++) {
@@ -175,7 +185,7 @@ public class PredationMortality extends AbstractMortality {
      * @param subdt
      * @return the array of biomass preyed by the predator upon the preys
      */
-    public double[] computePredation(School predator, List<IAggregation> preys, double[] accessibility, int subdt) {
+    public double[] computePredation(IAggregation predator, List<IAggregation> preys, double[] accessibility, int subdt) {
 
         double[] preyUpon = new double[preys.size()];
         double cumPreyUpon = 0.d;
@@ -310,7 +320,8 @@ public class PredationMortality extends AbstractMortality {
         return sum;
     }
 
-    /**
+    /** Should be deprecated? It is used only in iterative mortality process, not in
+     * stochastic mortality process.
      *
      * @param cell
      * @param instantaneous
@@ -341,7 +352,7 @@ public class PredationMortality extends AbstractMortality {
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
     }
 
-    private double[] getPercentPlankton(School predator) {
+    private double[] getPercentPlankton(IAggregation predator) {
         double[] percentPlankton = new double[getConfiguration().getNPlankton()];
         int iPred = predator.getSpeciesIndex();
         int iStage = predPreyStage.getStage(predator);
@@ -393,14 +404,14 @@ public class PredationMortality extends AbstractMortality {
      * @param predator
      * @return
      */
-    public double getMaxPredationRate(School predator) {
+    public double getMaxPredationRate(IAggregation predator) {
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
     }
 
     /*
      * Get the accessible biomass that predator can feed on prey
      */
-    private double getAccessibility(School predator, School prey) {
+    private double getAccessibility(IAggregation predator, IAggregation prey) {
         return accessibilityMatrix[prey.getSpeciesIndex()][accessStage.getStage(prey)][predator.getSpeciesIndex()][accessStage.getStage(predator)];
     }
 
@@ -413,7 +424,7 @@ public class PredationMortality extends AbstractMortality {
      * @param preys a list of preys that are in the same cell that the predator
      * @return an array of accessibility of the preys to this predator.
      */
-    public double[] getAccessibility(School predator, List<IAggregation> preys) {
+    public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
         double[] accessibility = new double[preys.size()];
         int iSpecPred = predator.getSpeciesIndex();
@@ -427,21 +438,22 @@ public class PredationMortality extends AbstractMortality {
             int iSpecPrey = preys.get(iPrey).getSpeciesIndex();
             int iStagePrey;
             // The prey is an other school
-            if (preys.get(iPrey) instanceof School) {
-                School prey = (School) preys.get(iPrey);
+            if (preys.get(iPrey) instanceof AbstractSchool) {
+                IAggregation prey = (IAggregation) preys.get(iPrey);
                 if (prey.equals(predator)) {
                     continue;
                 }
                 if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
                     iStagePrey = accessStage.getStage(prey);
                     accessibility[iPrey] = accessibilityMatrix[iSpecPrey][iStagePrey][iSpecPred][iStagePred];
+                } else {
+                    accessibility[iPrey] = 0.d; //no need to do it since initialization already set it to zero
                 }
-                // else accessibility[iPrey] = 0.d; no need to do it since initialization already set it to zero
             } else {
                 // The prey is a plankton group
                 iStagePrey = 0;
                 accessibility[iPrey] = accessibilityMatrix[iSpecPrey][iStagePrey][iSpecPred][iStagePred]
-                        * percentPlankton[iSpecPrey - getConfiguration().getNSpecies()];
+                        * percentPlankton[iSpecPrey - getConfiguration().getNSpecies() - getConfiguration().getNBkgSpecies()];
             }
         }
         return accessibility;

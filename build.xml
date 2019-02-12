@@ -7,7 +7,7 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="osmose-trunk" default="default" basedir=".">
+<project name="osmose-dev-bg-species" default="default" basedir=".">
     <description>Builds, tests, and runs the project osmose-trunk.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--

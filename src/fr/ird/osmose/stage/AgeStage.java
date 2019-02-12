@@ -65,13 +65,29 @@ public class AgeStage extends AbstractStage {
     public int getStage(IMarineOrganism school) {
         int stage = 0;
         int iSpec = school.getSpeciesIndex();
-        for (float threshold : this.getThresholds(iSpec)) {
-            if (school.getAge() >= threshold) {
-                stage++;
-            } else {
-                break;
+
+        // If processing a focal species, age is considered as expected
+        if (iSpec < getConfiguration().getNSpecies()) {
+            for (float threshold : this.getThresholds(iSpec)) {
+                if (school.getAge() >= threshold) {
+                    stage++;
+                } else {
+                    break;
+                }
+            }
+            
+        // If processing a background species, size is considered as expected
+        } else {
+            for (float threshold : this.getThresholds(iSpec)) {
+                if (school.getLength() >= threshold) {
+                    stage++;
+                } else {
+                    break;
+                }
             }
         }
+        
         return stage;
+    
     }
 }

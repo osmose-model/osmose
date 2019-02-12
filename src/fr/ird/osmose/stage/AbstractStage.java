@@ -69,7 +69,10 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
 
         int nSpec = getNSpecies();
         int nPlnk = getConfiguration().getNPlankton();
-        thresholds = new float[nSpec + nPlnk][];
+        int nBack = getConfiguration().getNBkgSpecies();   // barrier.n
+        thresholds = new float[nSpec + nPlnk + nBack][];
+        
+        // Set values for background species.
         for (int i = 0; i < nSpec; i++) {
             int nStage = !getConfiguration().isNull(key + i)
                     ? getConfiguration().getArrayString(key + i).length + 1
@@ -80,9 +83,26 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
                 thresholds[i] = new float[0];
             }
         }
-        for (int i = 0; i < nPlnk; i++) {
-            thresholds[nSpec + i] = new float[0];
+        
+        // Set values for background species
+        // replace ".sp" index by ".bkg" for background species
+        String keybkg = key.replace(".sp", "bkg");
+        for (int i = 0; i < nBack; i++) {
+            int nStage = !getConfiguration().isNull(keybkg + i)
+                    ? getConfiguration().getArrayString(keybkg + i).length + 1
+                    : 1;
+            if (nStage > 1) {
+                thresholds[i + nSpec] = getConfiguration().getArrayFloat(keybkg + i);
+            } else {
+                thresholds[i + nSpec] = new float[0];
+            }
         }
+        
+        // Set values for PLK
+        for (int i = 0; i < nPlnk; i++) {
+            thresholds[nSpec + nBack + i] = new float[0];
+        }
+        
     }
 
     @Override

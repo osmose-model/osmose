@@ -61,6 +61,7 @@ import ml.options.OptionSet;
 import ml.options.Options;
 import ml.options.Options.Multiplicity;
 import ml.options.Options.Separator;
+import ucar.ma2.InvalidRangeException;
 
 /**
  * This class is the entry point of the program. It contains the
@@ -247,8 +248,10 @@ public class Osmose extends OLogger {
      * Either update the configuration files, generate lists of Indiseas
      * simulations or run the simulations, depending on the command line
      * arguments.
+     * @throws java.io.IOException
+     * @throws ucar.ma2.InvalidRangeException
      */
-    public void run() {
+    public void run() throws IOException, InvalidRangeException {
 
         if (flagIndiseas) {
             info("Creating Indiseas simulation batch from {0}", configurationFiles.get(0));
@@ -305,11 +308,13 @@ public class Osmose extends OLogger {
      * each batch running concurrently as many simulations as the number of
      * allocated CPUs.
      *
+     * @throws java.io.IOException
+     * @throws ucar.ma2.InvalidRangeException
      * @see java.util.concurrent.CountDownLatch
      *
      * @param configurationFile, the path of the configuration file.
      */
-    public void runConfiguration(String configurationFile) {
+    public void runConfiguration(String configurationFile) throws IOException, InvalidRangeException {
 
         // Initialize the configuration
         configuration = new Configuration(configurationFile, cmd);
@@ -471,8 +476,10 @@ public class Osmose extends OLogger {
      * @param args, the input arguments. Refer to
      * {@link #readArgs(java.lang.String...)} for details about accepted
      * arguments.
+     * @throws java.io.IOException
+     * @throws ucar.ma2.InvalidRangeException
      */
-    public static void main(String... args) {
+    public static void main(String... args) throws IOException, InvalidRangeException {
         osmose.setupLogger();
         osmose.readArgs(args);
         osmose.info("*********************************************");

@@ -151,8 +151,16 @@ public class FishingMapSet extends OsmoseLinker {
             /*
              * read the time steps over the year concerned by this map
              */
-            int[] mapSeason = getConfiguration().getArrayInt(prefix + ".season" + ".fmap" + imap);
-
+            int [] mapSeason;
+            String key = prefix + ".season" + ".fmap" + imap;
+            if (getConfiguration().canFind(key)) {
+                mapSeason = getConfiguration().getArrayInt(key);
+            } else {
+                mapSeason = new int[getConfiguration().getNStepYear()];
+                for (int iStep = 0; iStep < getConfiguration().getNStepYear(); iStep++) {
+                    mapSeason[iStep] = iStep;
+                }
+            }
             /*
              * Read year min and max concerned by this map
              */
@@ -336,7 +344,7 @@ public class FishingMapSet extends OsmoseLinker {
      * @return
      */
     private boolean isValueOk(float value) {
-        return (value >= 0);
+        return (value >= 0) || (!Float.isNaN(value));
     }
 
     /**

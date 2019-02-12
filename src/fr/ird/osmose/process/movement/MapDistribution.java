@@ -52,10 +52,14 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.School;
 import fr.ird.osmose.util.MapSet;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.ma2.InvalidRangeException;
 
 /**
  *
@@ -95,7 +99,11 @@ public class MapDistribution extends AbstractDistribution {
         }
 
         maps = new MapSet(iSpecies, "movement");
-        maps.init();
+        try {
+            maps.init();
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(MapDistribution.class.getName()).log(Level.SEVERE, null, ex);
+        }
         maxProbaPresence = new float[maps.getNMap()];
         for (int imap = 0; imap < maxProbaPresence.length; imap++) {
             maxProbaPresence[imap] = computeMaxProbaPresence(imap);

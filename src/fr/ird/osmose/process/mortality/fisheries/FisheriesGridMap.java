@@ -49,8 +49,6 @@
 package fr.ird.osmose.process.mortality.fisheries;
 
 import au.com.bytecode.opencsv.CSVReader;
-import fr.ird.osmose.Cell;
-import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.Separator;
 import java.io.FileReader;

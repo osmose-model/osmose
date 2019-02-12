@@ -176,7 +176,8 @@ public class OriginalGrid extends AbstractGrid {
                 land[j] = new boolean[line.length];
                 for (int i = 0; i < line.length; i++) {
                     float val = Float.valueOf(line[i]);
-                    if (val < 0.f) {
+                    // Now masked (land values) are either NaN or < 0
+                    if ((val < 0.f) || (Float.isNaN(val))) {
                         land[j][i] = true;
                     }
                 }

@@ -52,7 +52,6 @@ import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * This class represents a school of fish, it is the individual of the
@@ -88,7 +87,7 @@ import java.util.UUID;
  * @see GridPoint
  * @author P.Verley (philippe.verley@ird.fr)
  */
-public class School extends GridPoint implements IAggregation {
+public class School extends AbstractSchool {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -111,32 +110,7 @@ public class School extends GridPoint implements IAggregation {
      * Trophic level of the fish.
      */
     private float trophicLevel;
-    /**
-     * Number of fish in the school at the beginning of the time step.
-     */
-    private double abundance;
-    /**
-     * Number of fish in the school, estimated on the fly.
-     * {@code instantaneousAbundance = abundance - ndead}
-     */
-    private double instantaneousAbundance;
-    /**
-     * Biomass, in tonne, of the school at the beginning of the time step.
-     */
-    private double biomass;
-    /**
-     * Biomass, in tonne, of the school, estimated on the fly.
-     */
-    private double instantaneousBiomass;
-    /**
-     * Number of dead fish in the current time step, for each mortality cause.
-     */
-    private final double[] nDead = new double[MortalityCause.values().length];
-    /**
-     * Monitor whether the number of dead has changed. It helps to prevent
-     * unnecessary recalculation of the instantaneous biomass.
-     */
-    private boolean abundanceHasChanged;
+
     /**
      * A buffer variable that will temporarily retain some eggs inside a time
      * step. The reproduction process makes all the eggs available at the
@@ -164,20 +138,7 @@ public class School extends GridPoint implements IAggregation {
      * Length of the fish in centimetre at the beginning of the time step.
      */
     private float lengthi;
-    /**
-     * List of {@code PreyRecord}. It keeps track of what the school has eaten
-     * during the time step.
-     */
-    final private HashMap<Integer, Prey> preys;
-    /**
-     * Biomass of prey, in tonne, ingested by the school at current time step.
-     */
-    private double preyedBiomass;
-    /**
-     * Predation success rate, the ratio of what is preyed on maximal ingestion.
-     * {@code predation success rate = what has been preyed / maximal ingestion}
-     */
-    private float predSuccessRate;
+
     /**
      * Starvation mortality rate.
      */
@@ -186,15 +147,6 @@ public class School extends GridPoint implements IAggregation {
      * Whether the school is out of the simulated domain at current time step.
      */
     private boolean out;
-    /**
-     * Array of temporary accessibility of preys for this predator
-     */
-    private double[] accessibility;
-    /**
-     * A unique randomly generated {@link java.util.UUID} for identifying and
-     * comparing schools.
-     */
-    final private UUID uuid = UUID.randomUUID();
 
 ///////////////
 // Constructors
@@ -319,71 +271,6 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
-     * Gets the abundance of the school at the beginning of the time step.
-     *
-     * @return the abundance of the school at the beginning of the time step
-     */
-    @Override
-    public double getAbundance() {
-        return abundance;
-    }
-
-    /**
-     * Evaluates the instantaneous abundance of the school.
-     *
-     * @return the instantaneous abundance of the school. {@code instantaneous
-     * abundance = abundance at the beginning of the time step - ndead fish}
-     * (due to any source of mortality, {@link MortalityCause}) at the time the
-     * function is called. It is a snapshot of the abundance of the school
-     * within the current time step.
-     */
-    @Override
-    public double getInstantaneousAbundance() {
-        if (abundanceHasChanged) {
-            updateBiomAndAbd();
-        }
-        return instantaneousAbundance;
-    }
-
-    private void updateBiomAndAbd() {
-        instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
-        if (instantaneousAbundance < 1.d) {
-            instantaneousAbundance = 0.d;
-        }
-        instantaneousBiomass = instantaneousAbundance * weight;
-        abundanceHasChanged = false;
-    }
-
-    /**
-     * Gets the biomass of the school, in tonne, at the beginning of the time
-     * step.
-     *
-     * @return the biomass of the school at the beginning of the time step in
-     * tonne
-     */
-    @Override
-    public double getBiomass() {
-        return biomass;
-    }
-
-    /**
-     * Evaluates the instantaneous biomass of the school.
-     *
-     * @return the instantaneous biomass of the school. {@code instantaneous
-     * biomass = biomass at the beginning of the time step - biomass dead fish}
-     * (due to any source of mortality, {@link MortalityCause}) at the time the
-     * function is called. It is a snapshot of the biomass of the school within
-     * the current time step.
-     */
-    @Override
-    public double getInstantaneousBiomass() {
-        if (abundanceHasChanged) {
-            updateBiomAndAbd();
-        }
-        return instantaneousBiomass;
-    }
-
-    /**
      * Converts the specified biomass [tonne] into abundance [number of fish]
      *
      * @param biomass, the biomass of the school, in tonne
@@ -402,6 +289,7 @@ public class School extends GridPoint implements IAggregation {
      * @return the corresponding biomass of this number of fish weighting
      * {@code weight}. {@code biomass = abundance * weight}
      */
+    @Override
     public double abd2biom(double abundance) {
         return abundance * weight;
     }
@@ -460,20 +348,6 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
-     * Increments the number of dead fish for a given mortality cause.
-     *
-     * @see MortalityCause
-     * @param cause, the mortality cause
-     * @param nDead, the number of dead fish to be incremented for this
-     * mortality cause
-     */
-    @Override
-    public void incrementNdead(MortalityCause cause, double nDead) {
-        this.nDead[cause.index] += nDead;
-        abundanceHasChanged = true;
-    }
-
-    /**
      * Resets the number of dead fish for a given mortality cause.
      *
      * @see MortalityCause
@@ -496,58 +370,6 @@ public class School extends GridPoint implements IAggregation {
 
     public void setWeight(float weight) {
         this.weight = weight;
-    }
-
-    /**
-     * Computes the sum of a given double array.
-     *
-     * @param array, the double array to be summed
-     * @return the sum of the doubles of the array
-     */
-    private double sum(double[] array) {
-        double sum = 0.d;
-        for (double d : array) {
-            sum += d;
-        }
-        return sum;
-    }
-
-    /**
-     * Reset a double array to zero.
-     *
-     * @param array to be reseted.
-     */
-    private void reset(double[] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = 0.d;
-        }
-    }
-
-    /**
-     * Record a new predation event. If keepRecord is TRUE, Osmose keeps the
-     * characteristics of the predation event (prey species index, TL, age and
-     * length) otherwise it only increments the preyed biomass.
-     *
-     * @param indexPrey, the index of the prey
-     * @param trophicLevel, the trophic level of the prey
-     * @param preyedBiomass, the biomass preyed on this prey
-     * @param age, the age of the prey
-     * @param length, the length of the prey
-     * @param keepRecord, whether or not Osmose should keep the prey record in
-     * memory.
-     */
-    public void preyedUpon(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
-        if (keepRecord) {
-            Prey prey = new Prey(indexPrey, trophicLevel, age, length, preyedBiomass);
-            int hash = prey.hashCode();
-            if (preys.containsKey(hash)) {
-                preys.get(hash).incrementBiomass(prey.getBiomass());
-            } else {
-                preys.put(prey.hashCode(), prey);
-            }
-        }
-        // Update school total preyed biomass
-        this.preyedBiomass += preyedBiomass;
     }
 
     /**
@@ -621,6 +443,7 @@ public class School extends GridPoint implements IAggregation {
      *
      * @return the age of the fish in number of time step
      */
+    @Override
     public int getAgeDt() {
         return ageDt;
     }
@@ -661,74 +484,6 @@ public class School extends GridPoint implements IAggregation {
     }
 
     /**
-     * Checks whether the object is equal to this school.
-     *
-     * @param obj, the object with which to compare to this school
-     * @return {@code true} is the object is a {@code School} and has the same
-     * {@code UUID}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final School other = (School) obj;
-        return this.uuid.equals(other.uuid);
-    }
-
-    /**
-     * Returns a hash code value for the school
-     *
-     * @see Object#hashCode()
-     * @return a hash code value for the school
-     */
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 23 * hash + uuid.hashCode();
-        return hash;
-    }
-
-    /**
-     * Returns the preyed biomass at current time step.
-     *
-     * @return the preyed biomass at current time step.
-     */
-    public double getPreyedBiomass() {
-        return preyedBiomass;
-    }
-
-    /**
-     * Returns the predation success rate.
-     *
-     * @return the predation success rate
-     */
-    public float getPredSuccessRate() {
-        return predSuccessRate;
-    }
-
-    /**
-     * Sets the predation success rate.
-     *
-     * @param rate the predSuccessRate to set
-     */
-    public void setPredSuccessRate(float rate) {
-        this.predSuccessRate = rate;
-    }
-
-    /**
-     * Increment the predation success rate.
-     *
-     * @param drate, the increment of the predation success rate.
-     */
-    public void incrementPredSuccessRate(float drate) {
-        this.predSuccessRate += drate;
-    }
-
-    /**
      * Get the starvation rate at current time step.
      *
      * @return the starvation rate
@@ -753,25 +508,13 @@ public class School extends GridPoint implements IAggregation {
         return lengthi;
     }
 
-    /**
-     * Set prey accessibility for this school (from a predator perspective) in
-     * current cell at current time step. Prey accessibility is only used in the
-     * MortalityProcess and could be temporarily stored in that class but it
-     * felt just easier and quicker to set it directly in the school object.
-     *
-     * @param accessibility, the prey accessibility of this school as a predator
-     */
-    public void setAccessibility(double[] accessibility) {
-        this.accessibility = accessibility;
-    }
-
-    /**
-     * Get the prey accessibility for this school (from a predator perspective)
-     * in current cell at current time step.
-     *
-     * @return the prey accessibility of this school as a predator.
-     */
-    public double[] getAccessibility() {
-        return accessibility;
+    @Override
+    public void updateBiomAndAbd() {
+        instantaneousAbundance = (abundance - eggRetained) - sum(nDead);
+        if (instantaneousAbundance < 1.d) {
+            instantaneousAbundance = 0.d;
+        }
+        instantaneousBiomass = instantaneousAbundance * weight;
+        abundanceHasChanged = false;
     }
 }

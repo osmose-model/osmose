@@ -43,7 +43,7 @@ public class Swarm extends OsmoseLinker implements IAggregation {
     public Swarm(Plankton plankton, Cell cell) {
         this.plankton = plankton;
         this.cell = cell;
-        this.index = plankton.getIndex() + getNSpecies();
+        this.index = plankton.getIndex() + getNSpecies() + this.getNBkgSpecies();
     }
 
     /**
@@ -125,6 +125,11 @@ public class Swarm extends OsmoseLinker implements IAggregation {
     public double biom2abd(double biomass) {
         return biomass;
     }
+    
+    @Override
+    public double abd2biom(double abund) {
+        return abund;
+    }
 
     @Override
     public int getSpeciesIndex() {
@@ -157,6 +162,26 @@ public class Swarm extends OsmoseLinker implements IAggregation {
     
     public int getLTLIndex() {
         return plankton.getIndex();
+    }
+
+    @Override
+    public void incrementPredSuccessRate(float drate) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getAgeDt() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void preyedUpon(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public double[] getAccessibility() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

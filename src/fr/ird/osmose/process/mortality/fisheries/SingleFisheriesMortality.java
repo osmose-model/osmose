@@ -159,7 +159,12 @@ public class SingleFisheriesMortality extends AbstractMortality {
         double sizeSelect = select.getSelectivity(selVar);
 
         GridMap map = fMapSet.getMap(fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()));
-        double spatialSelect = Math.max(0, map.getValue(cell));  // this is done because if value is -999, then no fisheries is applied here.
+        double spatialSelect;
+        if (map != null) {
+            spatialSelect = Math.max(0, map.getValue(cell));  // this is done because if value is -999, then no fisheries is applied here.
+        } else {
+            spatialSelect = 0.0;
+        }
         
         // modulates the mortality rate by the the size selectivity and the spatial factor.
         double output = timeSelect * sizeSelect * spatialSelect;

@@ -48,6 +48,7 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.Separator;
@@ -63,6 +64,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import ucar.ma2.InvalidRangeException;
 
 /**
  * This class handles the Osmose configuration. It knows how to read Osmose
@@ -233,6 +235,17 @@ public class Configuration extends OLogger {
      */
     private Plankton[] ltlGroups;
 
+    /**
+     * Number of species that are not explicitely modelled. Parameter
+     * <i>simulation.nbackground</i>
+     */
+    private int nBackground;
+
+    /**
+     * Array of background species.
+     */
+    private BackgroundSpecies[] bgSpecies; // barrier.n
+
 ///////////////
 // Constructors
 ///////////////
@@ -300,8 +313,10 @@ public class Configuration extends OLogger {
     /**
      * Initialises the current configuration. Sets the values of the main
      * variables and creates the grid.
+     * @throws java.io.IOException
+     * @throws ucar.ma2.InvalidRangeException
      */
-    public void init() {
+    public void init() throws IOException, InvalidRangeException {
 
         // Output path
         outputPathname = getFile("output.dir.path");
@@ -380,6 +395,19 @@ public class Configuration extends OLogger {
             if (!ltlGroups[p].getName().matches("^[a-zA-Z0-9]*$")) {
                 error("Plankton name must contain alphanumeric characters only. Please rename " + ltlGroups[p].getName(), null);
             }
+        }
+
+        // barrier.n: add number of background species
+        String key = "simulation.nbackground";
+        nBackground = 0;
+        if (canFind(key)) {
+            nBackground = getInt(key);
+        }
+
+        // Initialisation of the Background array.
+        bgSpecies = new BackgroundSpecies[nBackground];
+        for (int p = 0; p < bgSpecies.length; p++) {
+            bgSpecies[p] = new BackgroundSpecies(p);
         }
     }
 
@@ -968,7 +996,26 @@ public class Configuration extends OLogger {
     public String getMainFile() {
         return mainFilename;
     }
+    
+    /**
+     * Returns the number of species. Parameter <i>simulation.nspecies</i>
+     *
+     * @return the number of species.
+     */
+    public int getNBkgSpecies() {
+        return nBackground;
+    }
 
+    /**
+     * Get a species
+     *
+     * @param index, the index of the species
+     * @return the species at index {@code index}
+     */
+    public BackgroundSpecies getBkgSpecies(int index) {
+        return bgSpecies[index];
+    }
+    
     /**
      * Inner class that represents a parameter in the configuration file.
      * {@code Configuration} parses the configuration file line by line. When

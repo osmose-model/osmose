@@ -10,6 +10,8 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Swarm;
+import fr.ird.osmose.background.BackgroundSchool;
+import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.XSRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +31,8 @@ import java.util.concurrent.CountDownLatch;
  */
 public class StochasticMortalityProcess extends AbstractProcess {
 
-    private boolean newfisheries=false;
-    
+    private boolean newfisheries = false;
+
     /*
      * Random generator
      */
@@ -61,6 +63,12 @@ public class StochasticMortalityProcess extends AbstractProcess {
      */
     private HashMap<Integer, List<Swarm>> swarmSet;
 
+    /**
+     * The set of background species schools. Structure is (cell index, list of
+     * swarms)
+     */
+    private HashMap<Integer, List<BackgroundSchool>> bkgSet;
+
     public StochasticMortalityProcess(int rank) {
         super(rank);
     }
@@ -79,13 +87,13 @@ public class StochasticMortalityProcess extends AbstractProcess {
         if(getConfiguration().canFind("fisheries.new.activate")){
            newfisheries = getConfiguration().getBoolean("fisheries.new.activate");
         }
-
+               
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
 
         predationMortality = new PredationMortality(getRank());
         predationMortality.init();
-        
+
         // Subdt 
         if (!getConfiguration().isNull("mortality.subdt")) {
             subdt = getConfiguration().getInt("mortality.subdt");
@@ -106,13 +114,20 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
         // Create a new swarm set, empty at the moment
         swarmSet = new HashMap();
+
+        // Create a new bkg swarm, emty for the moment
+        // Structure 
+        bkgSet = new HashMap();
+
     }
 
     @Override
     public void run() {
 
         // Update fishing process (for MPAs)
-        if(!newfisheries) fishingMortality.setMPA();
+        if (!newfisheries) {
+            fishingMortality.setMPA();
+        }
 
         // Assess accessibility for this time step
         for (Cell cell : getGrid().getOceanCells()) {
@@ -124,6 +139,17 @@ public class StochasticMortalityProcess extends AbstractProcess {
             List<IAggregation> preys = new ArrayList();
             preys.addAll(schools);
             preys.addAll(getSwarms(cell));
+
+            // recovers the list of schools for background species and
+            // for the current cell. add this to the list of preys 
+            // for the current cell
+            preys.addAll(this.getBackgroundSchool(cell));
+            
+            // NOTE: at this stage, swarm and bkg biomass is not initialized but 
+            // it does not matter: only size is used to define access.
+
+            // Loop over focal schools, which are viewed here as predators.
+            // Consider predation over plankton, focal species and background species.
             for (School school : schools) {
                 school.setAccessibility(predationMortality.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
@@ -135,23 +161,41 @@ public class StochasticMortalityProcess extends AbstractProcess {
                     school.retainEgg();
                 }
             }
-        }
+
+            // Loop over background species, which are this time predators.
+            for (BackgroundSchool bkg : this.getBackgroundSchool(cell)) {
+                bkg.setAccessibility(predationMortality.getAccessibility(bkg, preys));
+                bkg.setPredSuccessRate(0);
+            }
+
+        } // end of cell loop
 
         // Update swarms biomass
         int iStepSimu = getSimulation().getIndexTimeSimu();
-        for (List<Swarm> swarms : swarmSet.values()) {
-            for (Swarm swarm : swarms) {
+        for (List<Swarm> swarms : swarmSet.values()) {    // basically a loop over the cells
+            for (Swarm swarm : swarms) {    // basically a loop over the LTL classes
                 int iltl = swarm.getLTLIndex();
                 double accessibleBiom = getConfiguration().getPlankton(iltl).getAccessibility(iStepSimu)
-                    * getForcing().getBiomass(iltl, swarm.getCell());
+                        * getForcing().getBiomass(iltl, swarm.getCell());
                 swarm.setBiomass(accessibleBiom);
+            }
+        }
+
+        // Update background species biomass
+        int istep = getSimulation().getIndexTimeSimu();
+        for (List<BackgroundSchool> bkgCell : bkgSet.values()) {    // basically a loop over the cells
+            for (BackgroundSchool bkgTmp : bkgCell) {    // basically a loop over all the background species + class
+                bkgTmp.setStep(istep);
+                bkgTmp.init();
             }
         }
 
         int[] ncellBatch = dispatchCells();
         int nbatch = ncellBatch.length;
         for (int idt = 0; idt < subdt; idt++) {
-            if(!newfisheries) fishingMortality.assessFishableBiomass();
+            if (!newfisheries) {
+                fishingMortality.assessFishableBiomass();
+            }
             CountDownLatch doneSignal = new CountDownLatch(nbatch);
             int iStart = 0, iEnd = 0;
             for (int ibatch = 0; ibatch < nbatch; ibatch++) {
@@ -190,34 +234,59 @@ public class StochasticMortalityProcess extends AbstractProcess {
                 prey.releaseEgg(subdt);
             }
         }
+
         preys.addAll(getSwarms(cell));
 
-        Integer[] seqPred = new Integer[ns];
-        for (int i = 0; i < ns; i++) {
+        // Recover the list of background schools for the current cell
+        List<BackgroundSchool> bkgSchool = this.getBackgroundSchool(cell);
+        int nBkg = bkgSchool.size();
+
+        // barrier.n: adding background species to the list of possible preys.
+        preys.addAll(bkgSchool);
+        
+        // preys contains focal species + LTL + bkg species
+
+        // Arrays for loop over schools are initialised with nfocal + nbackgroud
+        Integer[] seqPred = new Integer[ns + nBkg];
+        for (int i = 0; i < ns + nBkg; i++) {
             seqPred[i] = i;
         }
-        Integer[] seqFish = Arrays.copyOf(seqPred, ns);
-        Integer[] seqNat = Arrays.copyOf(seqPred, ns);
-        Integer[] seqStarv = Arrays.copyOf(seqPred, ns);
+        Integer[] seqFish = Arrays.copyOf(seqPred, ns + nBkg); 
+        Integer[] seqNat = Arrays.copyOf(seqPred, ns + nBkg);
+        Integer[] seqStarv = Arrays.copyOf(seqPred, ns + nBkg);
         MortalityCause[] mortalityCauses = MortalityCause.values();
+
+        // Initialisation of list of predators, which contains both
+        // background species and focal species.
+        
+        // pred contains focal + bkg species
+        
+        ArrayList<IAggregation> listPred = new ArrayList<>();
+        listPred.addAll(schools);
+        listPred.addAll(bkgSchool);
 
         shuffleArray(seqPred);
         shuffleArray(seqFish);
         shuffleArray(seqNat);
         shuffleArray(seqStarv);
+
         boolean keepRecord = getSimulation().isPreyRecord();
-        for (int i = 0; i < ns; i++) {
-            shuffleArray(mortalityCauses);
-            for (MortalityCause cause : mortalityCauses) {
+        for (int i = 0; i < ns + nBkg; i++) {               // loop over all the school (focal and bkg) as predators.
+            shuffleArray(mortalityCauses);  
+            for (MortalityCause cause : mortalityCauses) {   // random loop over all the mortality causes
                 School school;
                 double nDead = 0;
                 switch (cause) {
                     case PREDATION:
                         // Predation mortality
-                        School predator = schools.get(seqPred[i]);
+                        IAggregation predator = listPred.get(seqPred[i]);   // recover one predator (background or focal species)
+                        // compute predation from predator to all the possible preys
+                        // preyUpon is the total biomass easten by predator
                         double[] preyUpon = predationMortality.computePredation(predator, preys, predator.getAccessibility(), subdt);
                         for (int ipr = 0; ipr < preys.size(); ipr++) {
                             if (preyUpon[ipr] > 0) {
+                                // Loop over all the preys. If they are eaten by the predator,
+                                // the biomass of the prey is updted
                                 IAggregation prey = preys.get(ipr);
                                 nDead = prey.biom2abd(preyUpon[ipr]);
                                 prey.incrementNdead(MortalityCause.PREDATION, nDead);
@@ -226,6 +295,9 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         }
                         break;
                     case STARVATION:
+                        if (seqStarv[i] >= ns) {
+                            break;   // if background school, nothing is done
+                        }
                         // Starvation mortality
                         school = schools.get(seqStarv[i]);
                         double M = school.getStarvationRate() / subdt;
@@ -233,6 +305,9 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         school.incrementNdead(MortalityCause.STARVATION, nDead);
                         break;
                     case ADDITIONAL:
+                        if (seqNat[i] >= ns) {
+                            break;    // if background school, nothing is done
+                        }
                         // Additional mortality
                         school = schools.get(seqNat[i]);
                         // Egg mortality is handled separately and beforehand, 
@@ -245,6 +320,11 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         }
                         break;
                     case FISHING:
+
+                        // Possibility to fish background species?????
+                        if (seqFish[i] >= ns) {
+                            break;    // if background school, nothing is done
+                        }                        
                         // recovers the current school
                         school = schools.get(seqFish[i]);
 
@@ -271,7 +351,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         }
                 }
             }
-        }                
+        }
     }
 
     private List<Swarm> getSwarms(Cell cell) {
@@ -285,8 +365,11 @@ public class StochasticMortalityProcess extends AbstractProcess {
         return swarmSet.get(cell.getIndex());
     }
 
-    /** Shuffles an input array.
-     * @param <T> Input array */
+    /**
+     * Shuffles an input array.
+     *
+     * @param <T> Input array
+     */
     public static <T> void shuffleArray(T[] a) {
         // Shuffle array
         for (int i = a.length; i > 1; i--) {
@@ -299,12 +382,12 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
     /**
      * Split the ocean cells in batches that will run on concurrent threads.
-     * Distribute them evenly considering number of schools per batches of
-     * ocean cells.
+     * Distribute them evenly considering number of schools per batches of ocean
+     * cells.
+     *
      * @return integer array, the number of ocean cells for every batch
      */
     private int[] dispatchCells() {
-
 
         // number of school in a batch
         int nschoolBatch = 0;
@@ -414,4 +497,47 @@ public class StochasticMortalityProcess extends AbstractProcess {
             }
         }
     }
+
+    /**
+     * Recovers the list of background schools for the current cell. If the
+     * current cell does not contain any background school yet, they are added.
+     * This is the same as for the getSwarms method.
+     *
+     * @param cell
+     * @return
+     */
+    private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
+
+        if (!bkgSet.containsKey(cell.getIndex())) {
+            // If the cell does not contain any background school
+            // initialisation of a list of cells.
+            List<BackgroundSchool> output = new ArrayList<>();
+
+            // Loop over all the background species
+            for (int iBkg = 0; iBkg < getConfiguration().getNBkgSpecies(); iBkg++) {
+
+                BackgroundSpecies bkgSpec = getConfiguration().getBkgSpecies(iBkg);
+
+                // Loop over all the classes of the background species.
+                for (int iClass = 0; iClass < bkgSpec.getTimeSeries().getNClass(); iClass++) {
+
+                    // Init a background school of species bkgSpec and of class iClass
+                    BackgroundSchool BkgSchTmp = new BackgroundSchool(bkgSpec, iClass);
+                    // Move the bkg school to cell (set x and y)
+                    BkgSchTmp.moveToCell(cell);
+                    // add to output
+                    output.add(BkgSchTmp);
+
+                }   // end of iClass loop
+            }   // end of bkg loop
+
+            // add the list to the hash map
+            bkgSet.put(cell.getIndex(), output);
+
+        }   // end of contains test
+
+        return bkgSet.get(cell.getIndex());
+
+    }   // end of function
+
 }

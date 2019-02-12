@@ -90,11 +90,10 @@ public class LTLFastForcing extends AbstractLTLForcing {
     @Override
     public void init() {
 
-        String ncFile = getConfiguration().getFile("ltl.netcdf.file");
-        if (!new File(ncFile).exists()) {
-            error("Error reading LTLForcing parameters.", new FileNotFoundException("LTL NetCDF file " + ncFile + " does not exist."));
-        }
-
+        //String ncFile = getConfiguration().getFile("ltl.netcdf.file");
+        //if (!new File(ncFile).exists()) {
+        //    error("Error reading LTLForcing parameters.", new FileNotFoundException("LTL NetCDF file " + ncFile + " does not exist."));
+        //}
         // Read number of LTL steps
         int nLTLStep = getConfiguration().getInt("ltl.nstep");
         int nPlk = getConfiguration().getNPlankton();
@@ -103,7 +102,7 @@ public class LTLFastForcing extends AbstractLTLForcing {
         biomass = new double[nLTLStep][nPlk][getGrid().get_ny()][getGrid().get_nx()];
 
         // Read LTL data from NetCDF
-        loadData(ncFile);
+        loadData();
 
         // Uniform biomass. Check AbstractLTLForcing Javadoc for details.
         // In LTLFastForcing the constant LTL groups must be defined last, after
@@ -144,37 +143,62 @@ public class LTLFastForcing extends AbstractLTLForcing {
      *
      * @param ncFile, the path of the NetCDF file
      */
-    private void loadData(String ncFile) {
-        try {
-            info("Loading plankton data...");
-            debug("Forcing file {0}", ncFile);
-            NetcdfFile nc = NetcdfFile.open(ncFile);
-            // We do not load directly ltlbiomass[][][][] variable in
-            // biomass[][][][] variable because there might be more LTL groups
-            // defined in the Osmose configuration with uniform biomass
-            // (ltl.biomass.total.plk#).
-            Array ltlbiomass = nc.findVariable("ltl_biomass").read();
-            // nLTL the number of LTL groups in the NetCDF file <= nLTL groups
-            // of the Osmose configuration
-            int nPlk = ltlbiomass.getShape()[1];
-            // NetCDF file may contain more time steps than number of time steps
-            // to be considered, as defined by 'ltl.nstep'
-            int nTime = biomass.length;
-            Index index = ltlbiomass.getIndex();
-            for (int iPlk = 0; iPlk < nPlk; iPlk++) {
+    private void loadData() {
+        info("Loading plankton data...");
+        //debug("Forcing file {0}", ncFile);
+        //NetcdfFile nc = NetcdfFile.open(ncFile);
+        // We do not load directly ltlbiomass[][][][] variable in
+        // biomass[][][][] variable because there might be more LTL groups
+        // defined in the Osmose configuration with uniform biomass
+        // (ltl.biomass.total.plk#).
+        //Array ltlbiomass = nc.findVariable("ltl_biomass").read();
+        // nLTL the number of LTL groups in the NetCDF file <= nLTL groups
+        // of the Osmose configuration
+        //int nPlk = ltlbiomass.getShape()[1];
+        // NetCDF file may contain more time steps than number of time steps
+        // to be considered, as defined by 'ltl.nstep'
+        int nTime = biomass.length;
+        int nPlk = getConfiguration().getNPlankton();
+
+        //Index index = ltlbiomass.getIndex();
+        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
+
+            if (getConfiguration().isNull("plankton.file.plk" + iPlk)) {
+                if (!getConfiguration().canFind("plankton.biomass.total.plk" + iPlk)) {
+                    error("No input file is provided for plankton " + getConfiguration().getString("plankton.name.plk" + iPlk), new Exception("Cannot initialize LTL class " + iPlk));
+                }
+                continue;
+            }
+
+            String name = getConfiguration().getString("plankton.name.plk" + iPlk);
+            String ncFile = getConfiguration().getFile("plankton.file.plk" + iPlk);
+
+            if (!new File(ncFile).exists()) {
+                error("Error reading LTLForcing parameters.", new FileNotFoundException("LTL NetCDF file " + ncFile + " does not exist."));
+            }
+
+            try {
+                NetcdfFile nc = NetcdfFile.open(ncFile);
+                Array ltlbiomass = nc.findVariable(name).read();
+                Index index = ltlbiomass.getIndex();
+
                 for (int iTime = 0; iTime < nTime; iTime++) {
                     for (Cell cell : getGrid().getCells()) {
                         if (!cell.isLand()) {
                             int i = cell.get_igrid();
                             int j = cell.get_jgrid();
-                            index.set(iTime, iPlk, j, i);
+                            index.set(iTime, j, i);
                             biomass[iTime][iPlk][j][i] = ltlbiomass.getDouble(index);
                         }
                     }
                 }
+
+                nc.close();
+
+            } catch (IOException ex) {
+                error("File " + ncFile + " and variable " + name + "cannot be read", new IOException());
+
             }
-        } catch (IOException ex) {
-            error("Error while loading LTL biomass from file " + ncFile, ex);
         }
     }
 
@@ -218,6 +242,6 @@ public class LTLFastForcing extends AbstractLTLForcing {
 
     @Override
     List<Point> getLTLCells(Cell cell) {
-        throw new UnsupportedOperationException("LTLFastForcing assumes that LTL data is provided on Osmose grid."); 
+        throw new UnsupportedOperationException("LTLFastForcing assumes that LTL data is provided on Osmose grid.");
     }
 }

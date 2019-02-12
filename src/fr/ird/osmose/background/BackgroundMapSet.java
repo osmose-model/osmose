@@ -46,10 +46,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.util;
+package fr.ird.osmose.background;
 
-import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
+import fr.ird.osmose.util.GridMap;
+import fr.ird.osmose.util.MapSet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,121 +57,44 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 
 /**
- * This class handles a set of spatial maps for a given species. No matter the
- * process, spatial maps should always be inputed the same way. Here is the list
- * of parameters that the class will look for:
- * <ul>
- * <li>'{$prefix}.map#.species', the name of the species that must exactly match
- * predefined species name by parameters 'species.name.sp#'
- * <li>'{$prefix}.map#.season', a vector of time steps (within one year)
- * <li>'{$prefix}.map#.year.min', inclusive start year for this map. Zero by
- * default.
- * <li>'{$prefix}.map#.year.max', exclusive end year for this map. Number of
- * simulated year by default.
- * <li>'{$prefix}.map#.age.min', inclusive age min (in year) of the schools for
- * this map. Zero by default.
- * <li>'{$prefix}.map#.age.max', exclusive age max (in year) of the schools for
- * this map. Lifespan by default.
- * <li>'{$prefix}.map#.file', absolute or relative pathname of the CSV file.
- * </ul>
- * with {$prefix} any sequence of alpha-numeric characters (no blank or any
- * special characters allowed) and '#' standing for an integer, the index of the
- * map. Map index must be unique in the configuration for a given prefix. It
- * does not have to be defined sequentially (map0, map1, map2, map3, map4, map5,
- * etc.). For instance such indexation will be perfectly fine: map100, map101,
- * map102, map200, map201, map202, map300, etc.
+ * This class handles map sets for background species. Contrary to map sets for
+ * focus species, maps are defined from class index and not age value.
  *
- * @author P.Verley (philippe.verley@ird.fr)
- * @version 3.0 2013/09/01
  */
-public class MapSet extends OsmoseLinker {
+public class BackgroundMapSet extends MapSet {
+
+    // barrier.n: number of classes
+    private final int nClass;
 
     /**
-     * Prefix of the series of maps in the configuration file. Parameter names
-     * for maps will all be built the same way, for instance
-     * '{$prefix}.map#.species' or '{$prefix}.map#.file', etc.
+     * Public constructor.
+     *
+     * @param iSpecies Index of the background species
+     * @param prefix Prefix (movement.bkgspecies)
+     * @param suffix Suffix (bkg)
+     * @param nClass Number of size classes
      */
-    protected final String prefix;
-    
-    /** Sufix of the maps. Can be "sp" or "bkg". */
-    protected final String suffix;
-    
+    public BackgroundMapSet(int iSpecies, String prefix, String suffix, int nClass) {
+        super(iSpecies, prefix, suffix);
+        this.nClass = nClass;
+    }
+
     /**
-     * Index of the species.
+     * Loads the background maps. Contrary to the parent function, it considers
+     * classes instead of age values
+     *
+     * @throws IOException
+     * @throws InvalidRangeException
+     * @todo Maybe there is a better way to do this from the MapSet parent
+     * class.
      */
-    protected final int iSpecies;
-    /**
-     * Array of map indexes for every age class and simulation time step.
-     * int[N_AGE_CLASSES][N_STEP_SIMU]
-     */
-    protected int[][] indexMaps;
-    /**
-     * List of the maps.
-     */
-    protected GridMap[] maps;
-    /**
-     * List of the pathnames of the CSV files.
-     */
-    protected String[] mapFile;
-    
-    public MapSet(int iSpecies, String prefix) {
-        this(iSpecies, prefix, "sp");
-    }
-
-    public MapSet(int iSpecies, String prefix, String suffix) {
-        this.iSpecies = iSpecies;
-        this.prefix = prefix;
-        this.suffix = suffix;
-    }
-
-    public void init() throws IOException, InvalidRangeException {
-
-        // Load the maps
-        loadMaps();
-
-    }
-
-    public int getNMap() {
-        return maps.length;
-    }
-
-    public GridMap getMap(int numMap) {
-        return maps[numMap];
-    }
-    
-    public GridMap[] getMaps() {
-        return maps;
-    }
-
-    public GridMap getMap(School school, int iStepSimu) {
-        return getMap(getIndexMap(school.getAgeDt(), iStepSimu));
-    }
-    
-    /**
-     * Recovers the map from the class index instead of age value.
-     * @param classIndex
-     * @param iStepSimu
-     * @return 
-     */
-     public GridMap getMap(int classIndex, int iStepSimu) { 
-         return getMap(getIndexMap(classIndex, iStepSimu)); 
-     }
-
-    public String getMapFile(int numMap) {
-        return mapFile[numMap];
-    }
-
-    public int getIndexMap(int iAge, int iStepSimu) {
-        return indexMaps[iAge][iStepSimu];
-    }
-
+    @Override
     public void loadMaps() throws IOException, InvalidRangeException {
 
         // Initialisation of the indexMaps array (valid for both NetCDF and CSV maps
         int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
-        int lifespan = getSpecies(iSpecies).getLifespanDt();
-        indexMaps = new int[lifespan][];
-        for (int iAge = 0; iAge < lifespan; iAge++) {
+        indexMaps = new int[nClass][];
+        for (int iAge = 0; iAge < nClass; iAge++) {
             indexMaps[iAge] = new int[nSteps];
             for (int iStep = 0; iStep < nSteps; iStep++) {
                 indexMaps[iAge][iStep] = -1;
@@ -200,6 +123,8 @@ public class MapSet extends OsmoseLinker {
             eliminateTwinMap();
         }
 
+        this.normalize();
+
     }
 
     /**
@@ -209,6 +134,7 @@ public class MapSet extends OsmoseLinker {
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
+    @Override
     public void loadMapsNc() throws IOException, InvalidRangeException {
 
         String key = prefix + ".map." + suffix + iSpecies;
@@ -222,37 +148,21 @@ public class MapSet extends OsmoseLinker {
         
         // Initialize the total number of grid maps 
         maps = new GridMap[nmapmax];
-        
+
         // Loop over all the Maps defined in the NetCDF.
         for (int i = 0; i < nmapmax; i++) {
-            
+
             // Reads the GridMap by using NetCDF
             maps[i] = new GridMap();
             maps[i].read(nc, i);
 
-            // If the map is set to 0 everywhere
+            // If the map is set to everywhere
             if (maps[i].count() == 0) {
-                // add a warning here.
                 maps[i] = null;
             }
 
             // Reads the NetCDF variables agemin and agemax
-            // if unset, ageMin/age<ax should be set equal to -1
-            int ageMin = nc.findVariable("agemin").read(new int[]{i}, new int[]{1}).getInt(0);
-            int ageMax = nc.findVariable("agemax").read(new int[]{i}, new int[]{1}).getInt(0);
-            
-            // If ageMin is unset in the NetCDF files (values of -1),
-            // default values are set.
-            if(ageMin == -1) {
-                ageMin = 0;
-            }
-            if(ageMax == -1) {
-                ageMax = getSpecies(iSpecies).getLifespanDt() / getConfiguration().getNStepYear();
-            }
-
-            ageMin *= getConfiguration().getNStepYear();
-            ageMax *= getConfiguration().getNStepYear();
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
+            int iClass = nc.findVariable("class").read(new int[]{i}, new int[]{1}).getInt(0);
 
             // extracts the tempSeason array, with 0 if map should be use for current season and 1 if should be useed
             byte[] tempSeason = (byte[]) nc.findVariable("season").read(new int[]{i, 0}, new int[]{1, getConfiguration().getNStepYear()}).copyTo1DJavaArray();
@@ -270,37 +180,39 @@ public class MapSet extends OsmoseLinker {
             yearMin = Math.max(yearMin, 0);
 
             int nStepYear = getConfiguration().getNStepYear();
-            for (int iAge = ageMin; iAge < ageMax; iAge++) {
-                for (int iYear = yearMin; iYear < yearMax; iYear++) {
-                    int index = 0;    // index of the current season season in which we are
-                    for (int iSeason : tempSeason) {  // loop over all the seasons
-                        if (iSeason == 1) {
-                            int iStep = iYear * nStepYear + index;
-                            indexMaps[iAge][iStep] = i;
-                        }
-                        index++;
-                    }
-                }
 
+            for (int iYear = yearMin; iYear < yearMax; iYear++) {
+                int index = 0;
+                for (int iSeason : tempSeason) {  // loop over all the seasons
+                    if (iSeason == 1) {
+                        int iStep = iYear * nStepYear + index;
+                        indexMaps[iClass][iStep] = i;
+                    }
+                    index++;
+                }
             }
         }
-        
+
         nc.close();
     }
 
+    @Override
     public void loadMapsCsv() {
 
-        int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
+        // recovers the number of params starting
+        // by movement.bkgspecies.file.mapXX
+        int nmapmax = getConfiguration().findKeys(prefix + ".file.map*").size();
 
         List<Integer> mapNumber = new ArrayList();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
-            while (!getConfiguration().canFind(prefix + ".species" + ".map" + imap)) {
+            while (!getConfiguration().canFind(prefix + ".file.map" + imap)) {
                 imap++;
             }
-            String key = prefix + ".species" + ".map" + imap;
-            Species species = getSpecies(getConfiguration().getString(key));
+            // recovering the name of the bkg species (movement.bkgspecies.species..mapX)
+            String key = prefix + ".species.map" + imap;
+            BackgroundSpecies species = getBkgSpecies(getConfiguration().getString(key));
             if (null != species) {
                 if (species.getIndex() == iSpecies) {
                     mapNumber.add(imap);
@@ -320,9 +232,7 @@ public class MapSet extends OsmoseLinker {
             /*
              * read age min and age max concerned by this map
              */
-            int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".age.min" + ".map" + imap) * getConfiguration().getNStepYear());
-            int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".age.max" + ".map" + imap) * getConfiguration().getNStepYear());
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
+            int iClass = (int) Math.round(getConfiguration().getFloat(prefix + ".class." + ".map" + imap) * getConfiguration().getNStepYear());
 
             /*
              * read the time steps over the year concerned by this map
@@ -346,17 +256,17 @@ public class MapSet extends OsmoseLinker {
              * Assign number of maps to numMap array
              */
             int nStepYear = getConfiguration().getNStepYear();
-            for (int iAge = ageMin; iAge < ageMax; iAge++) {
-                for (int iYear = yearMin; iYear < yearMax; iYear++) {
-                    for (int iSeason : mapSeason) {
-                        int iStep = iYear * nStepYear + iSeason;
-                        if (iStep < indexMaps[iAge].length) {
-                            indexMaps[iAge][iYear * nStepYear + iSeason] = n;
-                        } else {
-                            break;
-                        }
+
+            for (int iYear = yearMin; iYear < yearMax; iYear++) {
+                for (int iSeason : mapSeason) {
+                    int iStep = iYear * nStepYear + iSeason;
+                    if (iStep < indexMaps[iClass].length) {
+                        indexMaps[iClass][iYear * nStepYear + iSeason] = n;
+                    } else {
+                        break;
                     }
                 }
+
             }
             /*
              * read the name of the CSV file and load the map. If name = "null"
@@ -377,15 +287,13 @@ public class MapSet extends OsmoseLinker {
         boolean isMapOK = true;
         int nSteps = getConfiguration().getNStep();
         int nStepYear = getConfiguration().getNStepYear();
-        int lifespan = getSpecies(iSpecies).getLifespanDt();
-        for (int iAge = 0; iAge < lifespan; iAge++) {
+        for (int iClass = 0; iClass < nClass; iClass++) {
             for (int iStep = 0; iStep < nSteps; iStep++) {
-                if (indexMaps[iAge][iStep] < 0) {
+                if (indexMaps[iClass][iStep] < 0) {
                     isMapOK = false;
-                    float age = (float) iAge / nStepYear;
                     int year = iStep / nStepYear;
                     int step = iStep % nStepYear;
-                    warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), iAge, year, step});
+                    warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getBkgSpecies(iSpecies).getName(), iClass, year, step});
                 }
             }
         }
@@ -422,4 +330,25 @@ public class MapSet extends OsmoseLinker {
         }
 
     }
+
+    /**
+     * Normalize maps so that they all have a mean of 1. This insures that
+     * spatially integrated biomass is equal to the value provided in the time
+     * serie.
+     */
+    private void normalize() {
+        for (GridMap m : maps) {
+            if (null != m) {
+                float N = m.count();
+                if (N > 0) {     // avoids division by 0
+                    for (int j = 0; j < getGrid().get_ny(); j++) {
+                        for (int i = 0; i < getGrid().get_nx(); i++) {
+                            m.setValue(i, j, m.getValue(i, j) / N);
+                        }   // end of i loop
+                    }   // end of j j loop
+                }   // end if N>0 check
+            }   // end of if statement
+        }   // end of loop over maps
+    }
+
 }

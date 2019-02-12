@@ -112,5 +112,18 @@ public interface IMarineOrganism {
      * @return the weight in tonne.
      */
     public float getWeight();
+    
+    public void incrementPredSuccessRate(float drate);
 
+    /**
+     * Age of the organism in year.
+     *
+     * @return the age in year.
+     */
+    public int getAgeDt();
+
+    public double[] getAccessibility();
+
+    public void preyedUpon(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord);
+    
 }

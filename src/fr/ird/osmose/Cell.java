@@ -64,7 +64,7 @@ public class Cell {
     /**
      * Identifier of cell on land
      */
-    final public static float LAND_VALUE = -99.f;
+    final public static float LAND_VALUE = Float.NaN;
 
 ///////////////////////////////
 // Declaration of the variables
