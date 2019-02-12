@@ -693,6 +693,24 @@ public class Configuration extends OLogger {
         }
         return Double.NaN;
     }
+    
+       /**
+     * Returns the specified parameter as a double.
+     *
+     * @param key, the key of the parameter
+     * @throws NumberFormatException if the value of the parameter cannot be
+     * parsed as a double.
+     * @return the parameter as a double
+     */
+    public long getLong(String key) {
+        String s = getString(key);
+        try {
+            return Long.valueOf(s);
+        } catch (NumberFormatException ex) {
+            error("Could not convert to Double parameter " + getParameter(key), ex);
+        }
+        return Long.MIN_VALUE;
+    }
 
     /**
      * Returns the specified parameter as a boolean.

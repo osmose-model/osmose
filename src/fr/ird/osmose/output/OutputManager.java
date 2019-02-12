@@ -109,6 +109,7 @@ public class OutputManager extends SimulationLinker {
 
         AbstractDistribution sizeDistrib = new SizeDistribution();
         AbstractDistribution ageDistrib = new AgeDistribution();
+    
         /*
          * Instantiate indicators
          */

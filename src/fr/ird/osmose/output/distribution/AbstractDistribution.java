@@ -104,6 +104,7 @@ public abstract class AbstractDistribution extends OsmoseLinker {
 
         // Number of classes 
         int nClass = (int) Math.ceil((max - min) / incr);
+        
         classes = new float[nClass];
         classes[0] = min;
         for (int i = 1; i < nClass; i++) {

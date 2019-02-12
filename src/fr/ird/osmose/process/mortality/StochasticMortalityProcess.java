@@ -67,7 +67,14 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        random = new XSRandom(System.nanoTime());
+        
+        // Possibility to use a seed in the definition of mortality algorithm
+        String key = "stochastic.mortality.seed";
+        if (getConfiguration().canFind(key)) {
+            random = new XSRandom(getConfiguration().getLong(key));
+        } else {
+            random = new XSRandom(System.nanoTime());
+        }
         
         if(getConfiguration().canFind("fisheries.new.activate")){
            newfisheries = getConfiguration().getBoolean("fisheries.new.activate");
