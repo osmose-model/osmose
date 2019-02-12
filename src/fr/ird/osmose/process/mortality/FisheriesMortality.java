@@ -72,6 +72,9 @@ public class FisheriesMortality extends AbstractMortality {
     // Number of predation time-steps
     private final int subdt;
     
+    // True if the array shoud be shuffled (i.e. if there are by-catches)
+    private boolean shuffle_array;
+    
     public FisheriesMortality(int rank, int subdt) {
         super(rank);
         this.subdt = subdt;
@@ -92,10 +95,13 @@ public class FisheriesMortality extends AbstractMortality {
         // Initialize the accessbility matrix, which provides the percentage of fishes that are going to be captured.
         accessMatrix = new AccessMatrix();
         accessMatrix.read(getConfiguration().getFile("fisheries.catch.matrix.file"));
-        
+                
         // Recovers the total number of fisheries and initialize the fisheries array
         nFisheries = getConfiguration().findKeys("fisheries.select.curve.fis*").size();
         fisheriesMortality = new SingleFisheriesMortality[nFisheries];
+        
+        // should be false to compare with old implementation of fisheries 
+        this.shuffle_array = this.check_shuffle_array();
         
         // Loop over all the fisheries and initialize them.
         int cpt = 0;
@@ -107,6 +113,29 @@ public class FisheriesMortality extends AbstractMortality {
             fisheriesMortality[i].init();
             cpt++;
         }
+    }
+    
+    private boolean check_shuffle_array() {
+        
+        // If number of fisheries != number of species: true-> shuffle matrix
+        if(this.nFisheries != this.getNSpecies()) {
+            return true;
+        }
+        
+        // if square matrix, assumes that matrix should be diagonal
+        // to mimic the old behaviour.
+        for(int i=0; i<this.nFisheries; i++) {
+            for(int j=0; j<this.getNSpecies(); j++) { 
+                if(i != j) { 
+                    if (accessMatrix.getValues(i, j) != 0) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+        
     }
 
     /** Calculation of the fishing mortality rate for a given school.
@@ -129,7 +158,7 @@ public class FisheriesMortality extends AbstractMortality {
         double nDead;
         
         // shuffle the fisheries index array.
-        StochasticMortalityProcess.shuffleArray(seqFisheries);
+        if(this.shuffle_array) StochasticMortalityProcess.shuffleArray(seqFisheries);
         
         // Initializes the fishing mortality rate and sets it to 0.
         double output = 0.0;
