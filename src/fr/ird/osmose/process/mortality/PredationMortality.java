@@ -312,7 +312,7 @@ public class PredationMortality extends AbstractMortality {
         return preyUpon;
     }
 
-    private double sum(double[] array) {
+    protected double sum(double[] array) {
         double sum = 0.d;
         for (int i = 0; i < array.length; i++) {
             sum += array[i];
