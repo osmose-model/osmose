@@ -126,4 +126,6 @@ public interface IMarineOrganism {
 
     public void preyedUpon(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord);
     
+    public Cell getCell();
+    
 }

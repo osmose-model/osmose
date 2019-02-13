@@ -125,4 +125,6 @@ public interface IAggregation extends IMarineOrganism {
      */
     public double abd2biom(double biomass);
 
+    public void incrementIngestion(double cumPreyUpon);
+
 }

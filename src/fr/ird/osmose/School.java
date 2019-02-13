@@ -147,6 +147,8 @@ public class School extends AbstractSchool {
      * Whether the school is out of the simulated domain at current time step.
      */
     private boolean out;
+    
+    private double ingestion;
 
 ///////////////
 // Constructors
@@ -243,6 +245,11 @@ public class School extends AbstractSchool {
         out = false;
         // Set length at the beginning of the time step
         lengthi = length;
+    }
+    
+    @Override
+    public void incrementIngestion(double cumPreyUpon) {
+        this.ingestion += cumPreyUpon;
     }
 
     /**
