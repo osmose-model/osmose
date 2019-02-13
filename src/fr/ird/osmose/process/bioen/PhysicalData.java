@@ -6,6 +6,7 @@
 package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.School;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -122,6 +123,19 @@ public class PhysicalData extends SimulationLinker {
     public double getValue(int index, Cell cell) {
         int ltlTimeStep = getSimulation().getIndexTimeSimu() % this.values.length;
         return values[ltlTimeStep][index][cell.get_jgrid()][cell.get_igrid()];
+    }
+    
+        /** Recovers the value of a physicald dataset providing the depth index.
+     * Value is converted as follows: output = factor * (offset + value)
+     * 
+     * @param index Depth index (0 = surface, 1=mean, 2=bottom)
+     * @param cell Cell index
+     * @return 
+     */
+    public double getValue(School school) {
+        Cell cell = school.getCell();
+        int index = school.getSpecies().getDepthLayer();
+        return this.getValue(index, cell);
     }
     
     
