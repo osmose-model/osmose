@@ -71,7 +71,7 @@ public class BioenPredationMortality extends PredationMortality {
 
     private double[] alpha;
     
-    private BioenIngestion bioen_ingest;
+    private OxygenFunction bioen_ingest;
     
     /**
      * Maximum ingestion rate
@@ -83,7 +83,7 @@ public class BioenPredationMortality extends PredationMortality {
         super(rank);
         
         // Initialisation of the ingestion method
-        bioen_ingest = new BioenIngestion(rank);
+        bioen_ingest = new OxygenFunction(rank);
     }
 
     @Override

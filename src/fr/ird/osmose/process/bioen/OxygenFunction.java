@@ -13,7 +13,7 @@ import fr.ird.osmose.process.AbstractProcess;
  *
  * @author nbarrier
  */
-public class BioenIngestion extends AbstractProcess {
+public class OxygenFunction extends AbstractProcess {
     
     /** Variables used to compute f02 function. */
     private double [] o2_crit;
@@ -21,7 +21,7 @@ public class BioenIngestion extends AbstractProcess {
     
     PhysicalData o2_input;
     
-    public BioenIngestion(int rank) { 
+    public OxygenFunction(int rank) { 
         
         super(rank);
         
@@ -71,6 +71,5 @@ public class BioenIngestion extends AbstractProcess {
         double output = (o2 <= spec_o2crit) ? 0 : (c1 * (o2 - spec_o2crit) / ((o2 - spec_o2crit) + c2));
         
         return output;
-    }
-    
+    }   
 }

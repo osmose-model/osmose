@@ -13,7 +13,7 @@ import fr.ird.osmose.process.bioen.PhysicalData;
  *
  * @author nbarrier
  */
-public class GrossEnergy extends AbstractProcess {
+public class EnergyBudget extends AbstractProcess {
     
     /**
      * Parameters used to compute energy gross function.
@@ -25,6 +25,8 @@ public class GrossEnergy extends AbstractProcess {
     private double[] alpha;
     private double csmr;
     
+    private double m0, m1;
+    
     
     /**
      * Parameters for the energy maintenance.
@@ -33,7 +35,7 @@ public class GrossEnergy extends AbstractProcess {
 
     PhysicalData temperature_input;
 
-    public GrossEnergy(int rank) {
+    public EnergyBudget(int rank) {
 
         super(rank);
         temperature_input = new PhysicalData(rank, "temperature");
@@ -62,6 +64,12 @@ public class GrossEnergy extends AbstractProcess {
         
         key = "bioen.maint.energy.csmr";
         csmr = getConfiguration().getDouble(key);
+        
+        key = "bioen.maturity.m0";
+        m0 = getConfiguration().getDouble(key);
+
+        key = "bioen.maturity.m1";
+        m1 = getConfiguration().getDouble(key);
         
         
         this.compute_abc();
@@ -157,6 +165,17 @@ public class GrossEnergy extends AbstractProcess {
     
     public double get_enet(School school) { 
         return this.get_egross(school) - this.get_maintenance(school);
+    }
+               
+    public int get_maturation(School school) {
+        
+        double age = school.getAge();  // returns the age in years
+        double length = school.getLength();     // warning: length in cm.
+        double llim = this.m0 * age + this.m1;   // computation of a maturity
+        
+        int output = (length >= llim) ? 1 : 0;
+        return output;
+        
     }
     
 }
