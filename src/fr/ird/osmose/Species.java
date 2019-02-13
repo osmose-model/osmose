@@ -108,6 +108,8 @@ public class Species {
      */
     private final float eggWeight;
 
+    private int zlayer;
+    
 //////////////
 // Constructor
 //////////////
@@ -136,6 +138,13 @@ public class Species {
         eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
         float agemax = cfg.getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
+        
+        zlayer = cfg.getInt("species.zlayer.sp" + index);
+        
+    }
+
+    public int getDepthLayer() {
+        return this.zlayer;
     }
 
 //////////////////////////////
