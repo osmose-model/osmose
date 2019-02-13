@@ -98,7 +98,7 @@ public class PhysicalData extends SimulationLinker {
                             int i = cell.get_igrid();
                             int j = cell.get_jgrid();
                             index.set(iTime, k, j, i);
-                            values[iTime][k][j][i] = netcdf_value.getDouble(index);
+                            values[iTime][k][j][i] = factor * (offset + netcdf_value.getDouble(index));
                         }  // end of if
                     }  // end of cell
                 }  // end of k
@@ -121,10 +121,7 @@ public class PhysicalData extends SimulationLinker {
      */
     public double getValue(int index, Cell cell) {
         int ltlTimeStep = getSimulation().getIndexTimeSimu() % this.values.length;
-        double output = values[ltlTimeStep][index][cell.get_jgrid()][cell.get_igrid()];
-        output += offset;
-        output *= factor;
-        return output;
+        return values[ltlTimeStep][index][cell.get_jgrid()][cell.get_igrid()];
     }
     
     
