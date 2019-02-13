@@ -524,4 +524,8 @@ public class School extends AbstractSchool {
         instantaneousBiomass = instantaneousAbundance * weight;
         abundanceHasChanged = false;
     }
+    
+    public double getIngestion() {
+        return ingestion;
+    }
 }
