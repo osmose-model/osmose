@@ -67,7 +67,7 @@ import java.util.List;
  *
  * @author pverley
  */
-public class BioEnPredationMortality extends PredationMortality {
+public class BioenPredationMortality extends PredationMortality {
 
     private double[] alpha;
     
@@ -78,7 +78,7 @@ public class BioEnPredationMortality extends PredationMortality {
      */
     private double[] predationRateBioen;
     
-    public BioEnPredationMortality(int rank) {
+    public BioenPredationMortality(int rank) {
         
         super(rank);
         
