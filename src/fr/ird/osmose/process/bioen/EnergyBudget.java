@@ -25,13 +25,23 @@ public class EnergyBudget extends AbstractProcess {
     private double[] alpha;
     private double csmr;
     
-    private double m0, m1;
+    private double m0, m1,a_mat;
     
     
     /**
      * Parameters for the energy maintenance.
      */
     private double c_t1, c_t2;
+    
+    /**
+     * Parameters for the kappa function.
+     */
+    private double lambda;
+    
+    /**
+     * Parameters for the allometric relationship between L and W
+     */
+    private double p1, p2;
 
     PhysicalData temperature_input;
 
@@ -70,6 +80,17 @@ public class EnergyBudget extends AbstractProcess {
 
         key = "bioen.maturity.m1";
         m1 = getConfiguration().getDouble(key);
+        
+        key = "bioen.maturity.p1";
+        p1 = getConfiguration().getDouble(key);
+        
+        key = "bioen.maturity.p2";
+        p2 = getConfiguration().getDouble(key);
+        
+        key = "bioen.maturity.lambda";
+        lambda = getConfiguration().getDouble(key);
+        
+        a_mat=-1; // Test value : while a_mat=-1, maturity has not been reached
         
         
         this.compute_abc();
@@ -167,15 +188,75 @@ public class EnergyBudget extends AbstractProcess {
         return this.get_egross(school) - this.get_maintenance(school);
     }
                
+    
+    public double get_dw(School school){
+        double dgrowth = (this.get_enet(school) >= 0) ? this.get_enet(school) : 0;
+        return(dgrowth*this.get_kappa(school));     
+    }
+    
+    public double get_dg(School school){
+        double gonadWeight = school.getGonadWeight(); // il faut créer une variable d'état g
+        double dg = (this.get_enet(school) > -gonadWeight) ? this.get_enet(school)*this.get_kappa(school) : -gonadWeight;
+        // If Enet positive, g pool increases. If Enet is negative, g is a reserve until g=0. 
+        return(dg);     
+    }
+      
     public int get_maturation(School school) {
         
         double age = school.getAge();  // returns the age in years
         double length = school.getLength();     // warning: length in cm.
         double llim = this.m0 * age + this.m1;   // computation of a maturity
-        
         int output = (length >= llim) ? 1 : 0;
         return output;
         
     }
+
+
+    public double get_kappa(School school) { 
+        double age_mature = get_Age_maturation(school);  // Obtain the maturation state 
+        double age = school.getAge();  // returns the age in years
+        double kappa = (age <= age_mature) ? 1 : Math.exp(this.lambda*(age_mature-age)); //Function in two parts according to maturity state
+        return kappa;
+    }
+        
+    public double get_dLength(School school) {
+        double dw = get_dw(school);
+        double weigth = school.getWeight();
+        double length = school.getLength();
+        double length_t_1 = p1*(weigth+dw)*(p2);
+        return (length_t_1-length);       
+    }
+       
+    public double get_Age_maturation(School school) {
+        double age = school.getAge();  // returns the age in years
+        double length  = school.getLength();  // returns the length in cm at the beginning of dt   
+        double dL = this.get_dLength(school); // returns the increment dL
+        double age_lim = ((length + dL)-this.m1)/this.m0;  // Returns recquired age to be mature with the current size + dL
+        double mat = get_maturation(school); // Returns the maturity state at the beginning of the steptime
+        double mat_t_1 = (age >= age_lim) ? 1 : 0; // Returns the maturity state at the end of the steptime
+        return  (this.a_mat == -1) ? ((mat > mat_t_1) ? age : this.a_mat) : this.a_mat; 
+        // If the maturity state changes during the timestep, a_mat become equal to the current age
+    }
     
+    public void set_Age_maturation(double a_mat){
+        this.a_mat = a_mat;
+    }
+
+
+    public void incrementWeight(float dw, School school) {
+        float weight = school.getWeight();
+        float newWeight = weight + dw;          
+        school.setWeight(newWeight);
+        
+    }
+    public void incrementGonadWeight(float dg, School school) {
+        float gonadWeight = school.getGonadWeight();
+        float newGonadWeight = gonadWeight + dg;          
+        school.setGonadWeight(newGonadWeight);
+    }
+
+    public boolean isSexuallyMature(School school) {
+        return (get_Age_maturation(school) != -1);
+    }
+
 }

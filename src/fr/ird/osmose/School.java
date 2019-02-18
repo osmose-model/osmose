@@ -15,7 +15,7 @@
  * size-based opportunistic predation based on spatio-temporal co-occurrence
  * and size adequacy between a predator and its prey. It represents fish
  * individuals grouped into schools, which are characterized by their size,
- * weight, age, taxonomy and geographical location, and which undergo major
+ * weight, gonadWeight, age, taxonomy and geographical location, and which undergo major
  * processes of fish life cycle (growth, explicit predation, natural and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
@@ -63,6 +63,7 @@ import java.util.HashMap;
  * <li>age</li>
  * <li>length</li>
  * <li>weight</li>
+ * <li>gonadWeight</li>
  * <li>trophic level</li>
  * </ul>
  * The school also has proper state variables:
@@ -107,6 +108,11 @@ public class School extends AbstractSchool {
      */
     private float weight;
     /**
+     * Weight of gonads of the fish in tonne. The unit has been set to tonne just because
+     * it saves computation time for converting the biomass from gramme to tonne
+     */
+    private float gonadWeight;
+    /**
      * Trophic level of the fish.
      */
     private float trophicLevel;
@@ -130,6 +136,10 @@ public class School extends AbstractSchool {
      * Age of the fish in year.
      */
     private float age;
+    /**
+     * Age when the maturity is reached
+     */
+    private int ageMat;
     /**
      * Length of the fish in centimetre.
      */
@@ -168,11 +178,11 @@ public class School extends AbstractSchool {
      * @param abundance, the number of eggs in the school
      */
     public School(Species species, double abundance) {
-        this(species, abundance, species.getEggSize(), species.getEggWeight(), 0);
+        this(species, abundance, species.getEggSize(), species.getEggWeight(), 0,0);
     }
 
     /**
-     * Create a new school, with given species, abundance, length, weight and
+     * Create a new school, with given species, abundance, length, weight, gonadWeight and
      * age. Trophic level is preset to {@link Species#TL_EGG} and the school is
      * not located on the grid.
      *
@@ -180,15 +190,16 @@ public class School extends AbstractSchool {
      * @param abundance, the number of fish in the school
      * @param length, the length of the fish in centimeter
      * @param weight, the weight of the fish in gram
+     * @param gonadWeight, the gonad weight of the fish in gram
      * @param age, the age of the fish in number of time step
      */
-    public School(Species species, double abundance, float length, float weight, int age) {
-        this(species, -1, -1, abundance, length, weight, age, Species.TL_EGG);
+    public School(Species species, double abundance, float length, float weight,int age, float gonadWeight) {
+        this(species, -1, -1, abundance, length, weight, age, Species.TL_EGG, gonadWeight);
     }
 
     /**
      * Create a new school, with given species, grid coordinates, abundance,
-     * length weight, age and trophic level.
+     * length weight, gonad weight, age and trophic level.
      *
      * @param species, the {@link Species} of the fish
      * @param x, x coordinate of the school on the grid
@@ -196,15 +207,17 @@ public class School extends AbstractSchool {
      * @param abundance, the number of fish in the school
      * @param length, the length of the fish in centimetre
      * @param weight, the weight of the fish in gramme
+     * @param gonadWeight, the weight of the fish in gramme
      * @param ageDt, the age of the fish in number of time step
      * @param trophicLevel, the trophic level of the fish
      */
-    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel) {
+    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel,float gonadWeight) {
         this.index = species.getIndex();
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
-        biomass = instantaneousBiomass = abundance * this.weight;
+        this.gonadWeight = gonadWeight * 1.e-6f;
+        biomass = instantaneousBiomass = abundance * (this.weight+this.gonadWeight);
         abundanceHasChanged = false;
         this.trophicLevel = trophicLevel;
         if (x >= 0 && x < getGrid().get_nx() && y >= 0 && y < getGrid().get_ny()) {
@@ -233,7 +246,7 @@ public class School extends AbstractSchool {
         // Update abundance
         abundance = getInstantaneousAbundance();
         // Update biomass
-        biomass = abundance * weight;
+        biomass = abundance * (gonadWeight+weight);
         // Rest number of dead fish
         reset(nDead);
         // Reset diet variables
@@ -282,11 +295,11 @@ public class School extends AbstractSchool {
      *
      * @param biomass, the biomass of the school, in tonne
      * @return the number of fish weighting {@code weight} corresponding to this
-     * level of biomass. {@code abundance = biomass / weight}
+     * level of biomass. {@code abundance = biomass / (gonadWeight+weight)}
      */
     @Override
     public double biom2abd(double biomass) {
-        return biomass / weight;
+        return biomass / (weight+gonadWeight);
     }
 
     /**
@@ -294,11 +307,11 @@ public class School extends AbstractSchool {
      *
      * @param abundance, a number of fish
      * @return the corresponding biomass of this number of fish weighting
-     * {@code weight}. {@code biomass = abundance * weight}
+     * {@code weight}. {@code biomass = abundance * (weight+gonadWeight)}
      */
     @Override
     public double abd2biom(double abundance) {
-        return abundance * weight;
+        return abundance * (weight+gonadWeight);
     }
 
     /**
@@ -366,9 +379,9 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * The weight of the fish (not the whole school), in tonne.
+     * The somatic weight of the fish (not the whole school), in tonne.
      *
-     * @return the weight on the fish, in tonne.
+     * @return the somatic weight on the fish, in tonne.
      */
     @Override
     public float getWeight() {
@@ -377,6 +390,20 @@ public class School extends AbstractSchool {
 
     public void setWeight(float weight) {
         this.weight = weight;
+    }
+    
+        /**
+     * The gonadic weight of the fish (not the whole school), in tonne.
+     *
+     * @return the gonadic weight on the fish, in tonne.
+     */
+//    @Override // --> HELP j'ai pas créer la méthode abstraite, mais je trouve pas où c'est  
+    public float getGonadWeight() {
+        return gonadWeight;
+    }
+
+    public void setGonadWeight(float gonadWeight) {
+        this.gonadWeight = gonadWeight;
     }
 
     /**
@@ -483,11 +510,24 @@ public class School extends AbstractSchool {
      *
      * @param dlength, the length increment in centimetre
      */
-    public void incrementLength(float dlength) {
-        if (dlength != 0.f) {
-            length += dlength;
-            setWeight(species.computeWeight(length) * 1e-6f);
-        }
+//    public void incrementLength(float dlength) {
+//        if (dlength != 0.f) {
+//            length += dlength;
+//            setWeight(species.computeWeight(length) * 1e-6f);
+//        }
+//    }
+    
+    /**
+     * Increments the length of the fish from given number of centimetre.
+     *
+     * @param dlength, the length increment in centimetre
+     */
+    
+        public void incrementWeight(float dw, School school) {
+        float w = school.getWeight();
+        float newWeight = w + dw;          
+        school.setWeight(newWeight);
+        
     }
 
     /**
