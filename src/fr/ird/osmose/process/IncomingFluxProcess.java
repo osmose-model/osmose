@@ -202,16 +202,15 @@ public class IncomingFluxProcess extends AbstractProcess {
             // Loop over age/size class
             for (int iClass = 0; iClass < biomassIn[iSpec][iTime].length; iClass++) {
                 // Compute corresponding weight to estimate abundance from biomassIn
-                float meanWeigthIn = (float) school.computeWeight(lengthIn[iSpec][iClass]);
-                float meanGonadWeigthIn = (float) school.computeGonadWeight(lengthIn[iSpec][iClass]);
+                float meanWeigthIn = (float) species.computeWeight(lengthIn[iSpec][iClass]);
                 long abundanceIn = (long) Math.round(biomassIn[iSpec][iTime][iClass] * 1000000.d / meanWeigthIn);
                 // Abundance smaller than number of schools, then create only one school
                 if (abundanceIn > 0 && abundanceIn < nSchool) {
-                    getSchoolSet().add(new School(species, abundanceIn, lengthIn[iSpec][iClass], meanWeigthIn, (int) meanGonadWeigthIn, ageIn[iSpec][iClass]));
+                    getSchoolSet().add(new School(species, abundanceIn, lengthIn[iSpec][iClass], meanWeigthIn, ageIn[iSpec][iClass]));
                 } else if (abundanceIn >= nSchool) {
                     double abdSchool = abundanceIn / nSchool;
                     for (int s = 0; s < nSchool; s++) {
-                        getSchoolSet().add(new School(species, abdSchool, lengthIn[iSpec][iClass], meanWeigthIn, (int) meanGonadWeigthIn, ageIn[iSpec][iClass]));
+                        getSchoolSet().add(new School(species, abdSchool, lengthIn[iSpec][iClass], meanWeigthIn, ageIn[iSpec][iClass]));
                     }
                 }
             }

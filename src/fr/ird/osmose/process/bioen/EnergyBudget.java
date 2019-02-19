@@ -15,9 +15,6 @@ import fr.ird.osmose.process.bioen.PhysicalData;
  */
 public class EnergyBudget extends AbstractProcess {
     
-    /**
-     * Parameters used to compute energy gross function.
-     */
     private double tmin, tmax, topt;
     private double a, b, c;
     private double ap, bp, cp;  // a prime, b prime, cprime
@@ -51,6 +48,7 @@ public class EnergyBudget extends AbstractProcess {
         temperature_input = new PhysicalData(rank, "temperature");
 
     }
+    
     
     @Override
     public void init() {
@@ -188,8 +186,17 @@ public class EnergyBudget extends AbstractProcess {
         return this.get_egross(school) - this.get_maintenance(school);
     }
                
-    
-    public double get_dw(School school){
+    public int get_maturation(School school) {
+        
+        double age = school.getAge();  // returns the age in years
+        double length = school.getLength();     // warning: length in cm.
+        double llim = this.m0 * age + this.m1;   // computation of a maturity
+        
+        int output = (length >= llim) ? 1 : 0;
+        return output;
+        
+    }
+     public double get_dw(School school){
         double dgrowth = (this.get_enet(school) >= 0) ? this.get_enet(school) : 0;
         return(dgrowth*this.get_kappa(school));     
     }
@@ -201,17 +208,6 @@ public class EnergyBudget extends AbstractProcess {
         return(dg);     
     }
       
-    public int get_maturation(School school) {
-        
-        double age = school.getAge();  // returns the age in years
-        double length = school.getLength();     // warning: length in cm.
-        double llim = this.m0 * age + this.m1;   // computation of a maturity
-        int output = (length >= llim) ? 1 : 0;
-        return output;
-        
-    }
-
-
     public double get_kappa(School school) { 
         double age_mature = get_Age_maturation(school);  // Obtain the maturation state 
         double age = school.getAge();  // returns the age in years
@@ -258,5 +254,5 @@ public class EnergyBudget extends AbstractProcess {
     public boolean isSexuallyMature(School school) {
         return (get_Age_maturation(school) != -1);
     }
-
+    
 }

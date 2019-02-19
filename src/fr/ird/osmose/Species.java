@@ -154,26 +154,24 @@ public class Species {
      * Computes the weight, in gram, corresponding to the given length, in
      * centimetre.
      *
-     * @param school
+     * @param length, the length in centimetre
      * @return the weight in gram for this {@code length}
      */
-    public float computeWeight(School school) {
-        return(school.getWeight());
+    public float computeWeight(float length) {
+        return (float) (c * (Math.pow(length, bPower)));
     }
     
-    //////////////////////////////
-// Definition of the functions
-//////////////////////////////
     /**
-     * Computes the length, in gram, corresponding to the given weight, in
-     * centimetre.
+     * Computes the length, in centimetre, corresponding to the given weight, in
+     * gram.
      *
      * @param weight, the weight in gram
-     * @return the length in gram for this {@code length}
+     * @return the length in centimetre for this {@code weight}
      */
     public float computeLength(float weight) {
         return (float) (Math.pow(weight/c, (1/bPower)));
     }
+
 
     /**
      * Returns the lifespan of the species. Parameter
