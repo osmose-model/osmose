@@ -33,7 +33,7 @@ public class EnergyBudget extends AbstractProcess {
     /**
      * Parameters for the kappa function.
      */
-    private double lambda;
+    private double r,growth_pot;
     
     /**
      * Parameters for the allometric relationship between L and W
@@ -85,8 +85,11 @@ public class EnergyBudget extends AbstractProcess {
         key = "bioen.maturity.p2";
         p2 = getConfiguration().getDouble(key);
         
-        key = "bioen.maturity.lambda";
-        lambda = getConfiguration().getDouble(key);
+        key = "bioen.maturity.r";
+        r = getConfiguration().getDouble(key);
+        
+        key = "bioen.maturity.growth_pot";
+        growth_pot = getConfiguration().getDouble(key);
         
         a_mat=-1; // Test value : while a_mat=-1, maturity has not been reached
         
@@ -112,9 +115,7 @@ public class EnergyBudget extends AbstractProcess {
     }
     
      /** Computes the phiT coefficients function for gross energy.
-     * Equation 4
-     * @param school
-     * @return 
+     * Equation 4 
      */
     public void compute_abc() {
         this.b = 2 / (topt * (tmin / topt - 1));
@@ -178,14 +179,29 @@ public class EnergyBudget extends AbstractProcess {
                 
     }
     
+    /** Returns the gross energy. 
+     * Equation 3
+     * @param school
+     * @return 
+     */
     public double get_egross(School school) { 
         return school.getIngestion() * this.get_phiT(school);
     }
     
+    /** Returns the net energy. 
+     * Equation 7
+     * @param school
+     * @return 
+     */
     public double get_enet(School school) { 
         return this.get_egross(school) - this.get_maintenance(school);
     }
-               
+    
+    /** Determines the maturity state. 
+     * Equation 8
+     * @param school
+     * @return 
+     */
     public int get_maturation(School school) {
         
         double age = school.getAge();  // returns the age in years
@@ -196,11 +212,23 @@ public class EnergyBudget extends AbstractProcess {
         return output;
         
     }
+    
+    /** Returns the somatic weight increment 
+     * Equation 11
+     * @param school
+     * @return 
+     */
      public double get_dw(School school){
         double dgrowth = (this.get_enet(school) >= 0) ? this.get_enet(school) : 0;
         return(dgrowth*this.get_kappa(school));     
     }
     
+     /** Returns the gonadic weight increment 
+     * Equation 12
+     * @param school
+     * @return 
+     */
+     
     public double get_dg(School school){
         double gonadWeight = school.getGonadWeight(); // il faut créer une variable d'état g
         double dg = (this.get_enet(school) > -gonadWeight) ? this.get_enet(school)*this.get_kappa(school) : -gonadWeight;
@@ -208,13 +236,23 @@ public class EnergyBudget extends AbstractProcess {
         return(dg);     
     }
       
+    /** Returns the proportion of net energy allocated to somatic growth 
+     * Equation 10'
+     * @param school
+     * @return 
+     */
+     
     public double get_kappa(School school) { 
         double age_mature = get_Age_maturation(school);  // Obtain the maturation state 
         double age = school.getAge();  // returns the age in years
-        double kappa = (age <= age_mature) ? 1 : Math.exp(this.lambda*(age_mature-age)); //Function in two parts according to maturity state
+        double kappa = (age <= age_mature) ? 1 : 1-(r/growth_pot)*school.getWeight(); //Function in two parts according to maturity state
         return kappa;
     }
-        
+    /** Returns dL, the increment of length
+     * Allometric relationship between w and L
+     * @param school
+     * @return 
+     */
     public double get_dLength(School school) {
         double dw = get_dw(school);
         double weigth = school.getWeight();
@@ -223,6 +261,11 @@ public class EnergyBudget extends AbstractProcess {
         return (length_t_1-length);       
     }
        
+    /** Returns the maturation age when it is reached, -1 otherwise
+     * @param school
+     * @return 
+     */
+    
     public double get_Age_maturation(School school) {
         double age = school.getAge();  // returns the age in years
         double length  = school.getLength();  // returns the length in cm at the beginning of dt   
@@ -233,24 +276,37 @@ public class EnergyBudget extends AbstractProcess {
         return  (this.a_mat == -1) ? ((mat > mat_t_1) ? age : this.a_mat) : this.a_mat; 
         // If the maturity state changes during the timestep, a_mat become equal to the current age
     }
-    
+    /** Computes the maturation age
+     * @param a_mat
+     */
     public void set_Age_maturation(double a_mat){
         this.a_mat = a_mat;
     }
-
-
+    
+    /** Computes the somatic weight increment
+     * @param dw
+     * @param school 
+     */
     public void incrementWeight(float dw, School school) {
         float weight = school.getWeight();
         float newWeight = weight + dw;          
         school.setWeight(newWeight);
         
     }
+    /** Computes the gonadic weight increment
+     * @param dg
+     * @param school 
+     */
     public void incrementGonadWeight(float dg, School school) {
         float gonadWeight = school.getGonadWeight();
         float newGonadWeight = gonadWeight + dg;          
         school.setGonadWeight(newGonadWeight);
     }
 
+    /** Tests the maturity state
+     * @param school 
+     * @return  
+     */
     public boolean isSexuallyMature(School school) {
         return (get_Age_maturation(school) != -1);
     }
