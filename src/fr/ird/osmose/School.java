@@ -173,7 +173,8 @@ public class School extends AbstractSchool {
      * @param abundance, the number of eggs in the school
      */
     public School(Species species, double abundance) {
-        this(species, abundance, species.getEggSize(), species.getEggWeight(), 0,0);
+        // constructor with length=eggSize, weight=EggWeight, age=0
+        this(species, abundance, species.getEggSize(), species.getEggWeight(), 0);
     }
 
     /**
@@ -185,12 +186,17 @@ public class School extends AbstractSchool {
      * @param abundance, the number of fish in the school
      * @param length, the length of the fish in centimeter
      * @param weight, the weight of the fish in gram
-     * @param gonadWeight, the gonad weight of the fish in gram
      * @param age, the age of the fish in number of time step
      */
-    public School(Species species, double abundance, float length, float weight,int age, float gonadWeight) {
-        this(species, -1, -1, abundance, length, weight, age, Species.TL_EGG, gonadWeight);
+    public School(Species species, double abundance, float length, float weight, int age) {
+        // call the complete cons. with x=y=-1, TL = Species.TL_EGG
+        this(species, -1, -1, abundance, length, weight, age, Species.TL_EGG);
     }
+    
+     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel) {
+         // call the complete constructor with gonadWeight = 0.f
+         this(species, x, y, abundance, length, weight, ageDt, trophicLevel, 0.f);
+     }
 
     /**
      * Create a new school, with given species, grid coordinates, abundance,
@@ -206,7 +212,7 @@ public class School extends AbstractSchool {
      * @param ageDt, the age of the fish in number of time step
      * @param trophicLevel, the trophic level of the fish
      */
-    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel,float gonadWeight) {
+    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
         this.index = species.getIndex();
         this.abundance = abundance;
         instantaneousAbundance = abundance;
@@ -556,5 +562,20 @@ public class School extends AbstractSchool {
 
     public void setGonadWeight(float gonadWeight) {
         this.gonadWeight = gonadWeight;
+    }
+    
+    /**
+     * Increments the length of the fish from given number of centimetre.
+     *
+     * @param dw Weight increment (in ton)
+     */
+    public void incrementWeight(float dw) {
+        if (dw != 0.f) {
+            this.weight += dw;
+        }
+
+        // Update in the length calculation 
+        this.setLength(species.computeLength(this.weight * 1e-6f));
+
     }
 }
