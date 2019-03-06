@@ -155,6 +155,11 @@ public class School extends AbstractSchool {
     
     private double ingestion;
 
+    // Initialisation of maturity variables.
+    // by default the school is imature.
+    private double ageMature = 0;
+    private boolean isMature = false;
+    
 ///////////////
 // Constructors
 ///////////////
@@ -565,7 +570,8 @@ public class School extends AbstractSchool {
     }
     
     /**
-     * Increments the length of the fish from given number of centimetre.
+     * Increments the weight of the fish from given number of tons.
+     * Length is recomputed thereafter from the new weigth
      *
      * @param dw Weight increment (in ton)
      */
@@ -578,4 +584,33 @@ public class School extends AbstractSchool {
         this.setLength(species.computeLength(this.weight * 1e-6f));
 
     }
+    
+    /**
+     * Increments the gonad weight of the fish from given number of tons.
+     * In this case, the length of the fish is not updated.
+     *
+     * @param dw Weight increment (in ton)
+     */
+    public void incrementGonadWeight(float dw) {
+        if (dw != 0.f) {
+            this.gonadWeight += dw;
+        }
+    }
+    
+    public boolean isMature() {
+        return this.isMature;
+    }
+  
+    public void setIsMature(boolean mature) {
+        this.isMature = mature;
+    }
+    
+    public double getAgeMat() {
+        return this.ageMature;
+    }
+
+    public void setAgeMat(double agemature) {
+        this.ageMature = agemature;
+    }
+    
 }
