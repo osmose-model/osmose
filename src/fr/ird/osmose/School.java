@@ -106,9 +106,9 @@ public class School extends AbstractSchool {
      * it saves computation time for converting the biomass from gramme to tonne
      */
     private float weight;
-    
+
     /**
-     * Weight of gonads of the fish in tonne. 
+     * Weight of gonads of the fish in tonne.
      */
     private float gonadWeight;
     /**
@@ -152,14 +152,24 @@ public class School extends AbstractSchool {
      * Whether the school is out of the simulated domain at current time step.
      */
     private boolean out;
+
+    /**
+     * Variables that are used in the bioenergetic version of the code.
+     */
+    private double e_gross;    // gross energy (assimilated)
+    private double e_maint;    // energy used for maintenance.
+    private double ingestion;   // total ingestion
+    private double kappa;    // kappa value
     
-    private double ingestion;
+    /** Mortality rates associated with the bioen module. */
+    private double mort_oxy_rate = 0;
+    private double mort_starv_rate = 0;
 
     // Initialisation of maturity variables.
     // by default the school is imature.
     private double ageMature = 0;
     private boolean isMature = false;
-    
+
 ///////////////
 // Constructors
 ///////////////
@@ -183,10 +193,10 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Create a new school, with given species, abundance, length, weight, 
-     * gonadWeight and age. Trophic level is preset to {@link Species#TL_EGG} 
+     * Create a new school, with given species, abundance, length, weight,
+     * gonadWeight and age. Trophic level is preset to {@link Species#TL_EGG}
      * and the school is not located on the grid.
-     * 
+     *
      * @param species, the {@link Species} of the fish
      * @param abundance, the number of fish in the school
      * @param length, the length of the fish in centimeter
@@ -197,11 +207,11 @@ public class School extends AbstractSchool {
         // call the complete cons. with x=y=-1, TL = Species.TL_EGG
         this(species, -1, -1, abundance, length, weight, age, Species.TL_EGG);
     }
-    
-     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel) {
-         // call the complete constructor with gonadWeight = 0.f
-         this(species, x, y, abundance, length, weight, ageDt, trophicLevel, 0.f);
-     }
+
+    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel) {
+        // call the complete constructor with gonadWeight = 0.f
+        this(species, x, y, abundance, length, weight, ageDt, trophicLevel, 0.f);
+    }
 
     /**
      * Create a new school, with given species, grid coordinates, abundance,
@@ -223,7 +233,7 @@ public class School extends AbstractSchool {
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
         this.gonadWeight = gonadWeight * 1.e-6f;
-        biomass = instantaneousBiomass = abundance * (this.weight+this.gonadWeight);
+        biomass = instantaneousBiomass = abundance * (this.weight + this.gonadWeight);
         abundanceHasChanged = false;
         this.trophicLevel = trophicLevel;
         if (x >= 0 && x < getGrid().get_nx() && y >= 0 && y < getGrid().get_ny()) {
@@ -240,7 +250,7 @@ public class School extends AbstractSchool {
         preys = new HashMap();
         starvationRate = 0.d;
     }
-    
+
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
@@ -252,7 +262,7 @@ public class School extends AbstractSchool {
         // Update abundance
         abundance = getInstantaneousAbundance();
         // Update biomass
-        biomass = abundance * (gonadWeight+weight);
+        biomass = abundance * (gonadWeight + weight);
         // Rest number of dead fish
         reset(nDead);
         // Reset diet variables
@@ -264,11 +274,10 @@ public class School extends AbstractSchool {
         out = false;
         // Set length at the beginning of the time step
         lengthi = length;
-    }
-    
-    @Override
-    public void incrementIngestion(double cumPreyUpon) {
-        this.ingestion += cumPreyUpon;
+
+        e_gross = 0.d;
+        e_maint = 0.d;
+        ingestion = 0.d;   // reset ingestion at beginning of time step;
     }
 
     /**
@@ -305,7 +314,7 @@ public class School extends AbstractSchool {
      */
     @Override
     public double biom2abd(double biomass) {
-        return biomass / (weight+gonadWeight);
+        return biomass / (weight + gonadWeight);
     }
 
     /**
@@ -317,7 +326,7 @@ public class School extends AbstractSchool {
      */
     @Override
     public double abd2biom(double abundance) {
-        return abundance * (weight+gonadWeight);
+        return abundance * (weight + gonadWeight);
     }
 
     /**
@@ -496,11 +505,11 @@ public class School extends AbstractSchool {
     public float getLength() {
         return length;
     }
-    
+
     /**
      * @param length
      */
-    public void setLength(float length){
+    public void setLength(float length) {
         this.length = length;
     }
 
@@ -550,9 +559,12 @@ public class School extends AbstractSchool {
         instantaneousBiomass = instantaneousAbundance * weight;
         abundanceHasChanged = false;
     }
-    
+
+    /**
+     * Returns the ingestion (I term, equation 1).
+     */
     public double getIngestion() {
-        return ingestion;
+        return this.ingestion;
     }
 
     /**
@@ -560,7 +572,6 @@ public class School extends AbstractSchool {
      *
      * @return the gonadic weight on the fish, in tonne.
      */
-
     public float getGonadWeight() {
         return gonadWeight;
     }
@@ -568,26 +579,25 @@ public class School extends AbstractSchool {
     public void setGonadWeight(float gonadWeight) {
         this.gonadWeight = gonadWeight;
     }
-    
+
     /**
-     * Increments the weight of the fish from given number of tons.
-     * Length is recomputed thereafter from the new weigth
+     * Increments the weight of the fish from given number of tons. Length is
+     * recomputed thereafter from the new weigth
      *
      * @param dw Weight increment (in ton)
      */
     public void incrementWeight(float dw) {
         if (dw != 0.f) {
             this.weight += dw;
+            // Update in the length calculation 
+            this.setLength(species.computeLength(this.weight * 1e-6f));
         }
 
-        // Update in the length calculation 
-        this.setLength(species.computeLength(this.weight * 1e-6f));
-
     }
-    
+
     /**
-     * Increments the gonad weight of the fish from given number of tons.
-     * In this case, the length of the fish is not updated.
+     * Increments the gonad weight of the fish from given number of tons. In
+     * this case, the length of the fish is not updated.
      *
      * @param dw Weight increment (in ton)
      */
@@ -596,21 +606,130 @@ public class School extends AbstractSchool {
             this.gonadWeight += dw;
         }
     }
-    
+
+    /**
+     * Returns true if the individual is sexually mature.
+     */
     public boolean isMature() {
         return this.isMature;
     }
-  
+
+    /**
+     * Set whether the individual is sexually mature or not.
+     */
     public void setIsMature(boolean mature) {
         this.isMature = mature;
     }
-    
+
+    /**
+     * Returns the age at maturity (only used for outputs).
+     */
     public double getAgeMat() {
         return this.ageMature;
     }
 
+    /**
+     * Sets the age at maturity (only used for outputs).
+     */
     public void setAgeMat(double agemature) {
         this.ageMature = agemature;
+    }
+
+    /**
+     * Sets the value of assimilated energy (ingestion x phiT, equation 3).
+     */
+    public void setEGross(double value) {
+        this.e_gross = value;
+    }
+
+    /**
+     * Returns the value of assimilated energy (ingestion x phiT, equation 3).
+     */
+    public double getEGross() {
+        return this.e_gross;
+    }
+
+    /**
+     * Sets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public void setEMaint(double value) {
+        this.e_maint = value;
+    }
+
+    /**
+     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public double getEMaint() {
+        return this.e_maint;
+    }
+
+    /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public double getENet() {
+        return (this.e_gross - this.e_maint);
+    }
+
+    /**
+     * Increments the ingested energy.
+     */
+    @Override
+    public void incrementIngestion(double cumPreyUpon) {
+        this.ingestion += cumPreyUpon;
+    }
+    
+    /**
+     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public double getKappa() {
+        return this.kappa;
+    }
+
+    /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public void setKappa(double value) {
+        this.kappa = value;
+    }
+    
+    /**
+     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public double getOxyMort() {
+        return this.mort_oxy_rate;
+    }
+
+    /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public void setOxyMort(double value) {
+        this.mort_oxy_rate = value;
+    }
+
+    /**
+     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public double getStarvMort() {
+        return this.mort_starv_rate;
+    }
+
+    /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public void setStarvMort(double value) {
+        this.mort_starv_rate = value;
     }
     
 }
