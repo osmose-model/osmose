@@ -245,6 +245,9 @@ public class Configuration extends OLogger {
      * Array of background species.
      */
     private BackgroundSpecies[] bgSpecies; // barrier.n
+    
+    /** True if the bioenergetic module should be activated. */
+    private boolean use_bioen = false;
 
 ///////////////
 // Constructors
@@ -409,6 +412,18 @@ public class Configuration extends OLogger {
         for (int p = 0; p < bgSpecies.length; p++) {
             bgSpecies[p] = new BackgroundSpecies(p);
         }
+        
+        // barrier.n: reads the parameter that defines whether
+        // the bioen module should be used.
+        key = "simulation.use.bioen";
+        if(canFind(key)) { 
+            this.use_bioen = this.getBoolean(key);
+        }
+        
+    }
+    
+    public boolean useBioen() {
+        return this.use_bioen;
     }
 
     /**
