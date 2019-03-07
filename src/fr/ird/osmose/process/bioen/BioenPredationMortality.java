@@ -49,18 +49,8 @@
 package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.process.mortality.*;
-import au.com.bytecode.opencsv.CSVReader;
-import fr.ird.osmose.AbstractSchool;
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
-import fr.ird.osmose.stage.AccessibilityStage;
-import fr.ird.osmose.stage.IStage;
-import fr.ird.osmose.stage.PredPreyStage;
-import fr.ird.osmose.util.Separator;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -71,7 +61,7 @@ public class BioenPredationMortality extends PredationMortality {
 
     private double[] alpha;
     
-    private OxygenFunction bioen_ingest;
+    private final OxygenFunction bioen_ingest;
     
     /**
      * Maximum ingestion rate
@@ -133,6 +123,7 @@ public class BioenPredationMortality extends PredationMortality {
      * @param subdt
      * @return the array of biomass preyed by the predator upon the preys
      */
+    @Override
     public double[] computePredation(IAggregation predator, List<IAggregation> preys, double[] accessibility, int subdt) {
 
         double[] preyUpon = new double[preys.size()];
@@ -175,11 +166,7 @@ public class BioenPredationMortality extends PredationMortality {
                     preyUpon[i] = ratio * biomassToPredate;
                     cumPreyUpon += preyUpon[i];
                 }
-                // Update predation success rate
-                // The predation success rate at the end of the time step is the
-                // average of the predation success rate for every subdt
-                float success = computePredSuccessRate(maxBiomassToPredate, cumPreyUpon);
-                //predator.incrementPredSuccessRate(success / subdt);
+                // Increments the total ingestion of preys within the system
                 predator.incrementIngestion(cumPreyUpon);
                 
             } else {
@@ -193,7 +180,7 @@ public class BioenPredationMortality extends PredationMortality {
     }
     
     /**
-     * Gets the maximum predation rate of a predator per time step
+     * Gets the maximum predation rate of a predator per time step.
      *
      * @param predator
      * @return
