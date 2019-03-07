@@ -13,32 +13,26 @@ import fr.ird.osmose.process.AbstractProcess;
  * @author nbarrier
  */
 public class EnergyBudget extends AbstractProcess {
-    
-    private double tmin, tmax, topt;
-    private double a, b, c;
-    private double ap, bp, cp;  // a prime, b prime, cprime
 
     private double[] alpha;
     private double csmr;
 
     private double m0, m1;
-
-    /**
-     * Parameters for the energy maintenance.
-     */
-    private double c_t1, c_t2;
+    
+    private final TempFunction temp_function;
 
     /**
      * Parameters for the kappa function.
      */
     private double r, growth_pot;
-
-    PhysicalData temperature_input;
+ 
+    /** K parameter for mortality by oxydation. */
+    private double k_dam;
 
     public EnergyBudget(int rank) {
 
         super(rank);
-        temperature_input = new PhysicalData(rank, "temperature");
+        temp_function = new TempFunction(rank);
 
     }
 
@@ -46,22 +40,7 @@ public class EnergyBudget extends AbstractProcess {
     public void init() {
         
         String key;
-
-        key = "bioen.gross.energy.tmin";
-        tmin = getConfiguration().getDouble(key);
-
-        key = "bioen.gross.energy.tmax";
-        tmax = getConfiguration().getDouble(key);
-
-        key = "bioen.gross.energy.topt";
-        topt = getConfiguration().getDouble(key);
-
-        key = "bioen.arrh.ct1";
-        c_t1 = getConfiguration().getDouble(key);
-
-        key = "bioen.arrh.ct2";
-        c_t2 = getConfiguration().getDouble(key);
-
+      
         key = "bioen.maint.energy.csmr";
         csmr = getConfiguration().getDouble(key);
 
@@ -76,8 +55,6 @@ public class EnergyBudget extends AbstractProcess {
 
         key = "bioen.maturity.growth_pot";
         growth_pot = getConfiguration().getDouble(key);
-
-        this.compute_abc();
 
         // Redundant with the alpha of the BioenPredationMortality class.
         int nBack = this.getNBkgSpecies();
@@ -97,57 +74,21 @@ public class EnergyBudget extends AbstractProcess {
 
     }
 
-    /**
-     * Computes the phiT coefficients function for gross energy. Equation 4
-     */
-    public void compute_abc() {
-        this.b = 2 / (topt * (tmin / topt - 1));
-        this.a = -this.b / (2 * topt);
-        this.c = 1 - this.b / 2.d * topt;
 
-        this.bp = 2 / (topt * (tmax / topt - 1));
-        this.ap = -this.bp / (2 * topt);
-        this.cp = 1 - this.bp / 2.d * topt;
-
-    }
-
+         /** Runs all the steps of the bioenergetic module. */
     @Override
     public void run() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    /**
-     * Returns the phiT function for gross energy. Equation 4
-     *
-     * @param school
-     * @return
-     */
-    public double get_phiT(School school) {
-
-        // Recovers the temperature of the school cell
-        double temp = temperature_input.getValue(school);
-
-        if ((temp <= tmin) || (temp > tmax)) {
-            return 0;
-        }
-
-        double output = (temp <= topt) ? this.a * Math.pow(temp, 2) + this.b * Math.pow(temp, 1) + this.c : this.ap * Math.pow(temp, 2) + this.bp * Math.pow(temp, 1) + this.cp;
-        return output;
-
-    }
-
-    /**
-     * Returns the Arrhenius function for a given school. Cf. equation 6
-     *
-     * @param school
-     * @return
-     */
-    public double get_Arrhenius(School school) {
-
-        // Recovers the temperature of the school cell
-        double temp = temperature_input.getValue(school);
-        return Math.exp(this.c_t1 - (this.c_t2 / temp));
-
+         
+         // Loop over all the alive schools
+         for (School school : getSchoolSet().getAliveSchools()) {
+             this.get_egross(school);   // computes E_gross, stored in the attribute.
+             this.get_maintenance(school);   // computes E_maintanance
+             this.get_maturation(school);   // computes maturation properties for the species.
+             this.get_kappa(school);   // computes the kappa function
+             this.get_dw(school);   // computes E_growth (somatic growth)
+             this.get_dg(school);   // computes the increase in gonadic weight
+          
+         }
     }
 
     /**
@@ -156,11 +97,11 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public double get_maintenance(School school) {
+    public void get_maintenance(School school) {
 
         int ispec = school.getSpeciesIndex();
-        double output = this.csmr * Math.pow(school.getBiomass(), alpha[ispec]) * this.get_Arrhenius(school);
-        return output;
+        double output = this.csmr * Math.pow(school.getBiomass(), alpha[ispec]) * temp_function.get_Arrhenius(school);
+        school.setEMaint(output);
 
     }
 
@@ -170,18 +111,8 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public double get_egross(School school) {
-        return school.getIngestion() * this.get_phiT(school);
-    }
-
-    /**
-     * Returns the net energy. Equation 7
-     *
-     * @param school
-     * @return
-     */
-    public double get_enet(School school) {
-        return this.get_egross(school) - this.get_maintenance(school);
+    public void get_egross(School school) {
+         school.setEGross(school.getIngestion() * temp_function.get_phiT(school));
     }
 
     /**
@@ -221,8 +152,7 @@ public class EnergyBudget extends AbstractProcess {
     public void get_dw(School school) {
         
         // computes the trend in structure weight dw/dt
-        double dgrowth = (this.get_enet(school) >= 0) ? this.get_enet(school) : 0;
-
+        double dgrowth = (school.getENet() > 0) ? (school.getENet() * school.getKappa()) : 0;
         // increments the weight
         school.incrementWeight((float) dgrowth);
     }
@@ -235,9 +165,10 @@ public class EnergyBudget extends AbstractProcess {
      */
     public void get_dg(School school) {
         double trend = 0;
-        double enet = this.get_enet(school);
+        double enet = school.getENet();
+        double kappa = school.getKappa();
         if(enet > 0) {
-            trend = (1 - this.get_kappa(school)) * enet;
+            trend = (1 - kappa) * enet;
         } else {
             // if enet is negative, gonad weight is removed
             // all the g is removed if enet is greater in absolute than g
@@ -255,12 +186,12 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public double get_kappa(School school) {
+    public void get_kappa(School school) {
         int ispec = school.getSpeciesIndex();
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
         double kappa = (!school.isMature()) ? 1 : 1 - (r / growth_pot) * Math.pow(school.getWeight(), 1 - alpha[ispec]); //Function in two parts according to maturity state
-        return kappa;
+        school.setKappa(kappa);
     }
-
+    
 }
