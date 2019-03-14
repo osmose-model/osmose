@@ -731,5 +731,9 @@ public class School extends AbstractSchool {
     public void setStarvMort(double value) {
         this.mort_starv_rate = value;
     }
+
+    public int[][][] getGenotype() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }
