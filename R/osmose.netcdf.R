@@ -322,7 +322,7 @@ make_movement_netcdf = function(filename) {
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
 #'
 #' @export
-correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
+correct_ltl_file = function(ltl_filename, osmose_config, varlon="longitude", varlat="latitude", vartime='time', absolute=TRUE)
 {
   
   #absolute=FALSE
@@ -340,19 +340,25 @@ correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
   ncin = nc_open(ltl_filename)
   
   # Recover spatial coordinates
-  if(length(ncin$var$latitude$varsize) == 2) {
+  if(length(ncin$var[[varlon]]$varsize) == 2) {
     # if coordinates are 2D, then extract data as 1D
-    lon = ncvar_get(ncin, varid='longitude')[,1]
-    lat = ncvar_get(ncin, varid='latitude')[1,]
+    lon = ncvar_get(ncin, varid=varlon)[,1]
+    lat = ncvar_get(ncin, varid=varlat)[1,]
   } else {
     # If longitudes are 1D, nothing to do.
-    lon = ncvar_get(ncin, varid='longitude')
-    lat = ncvar_get(ncin, varid='latitude')
+    lon = ncvar_get(ncin, varid=varlon)
+    lat = ncvar_get(ncin, varid=varlat)
   }
   
   # Recovers the original time coordinates and attributes (for units)
-  attr_time = ncatt_get(ncin, "time")
-  time = ncvar_get(ncin, varid='time')
+  if(is.null(ncin$var[[vartime]])) {
+    attr_time = ncatt_get(ncin, vartime)
+    print(attr_time)
+    time = ncin$dim[[vartime]]$vals
+  } else {
+    attr_time = ncatt_get(ncin, vartime)
+    time = ncvar_get(ncin, varid=vartime)
+  }
   
   # recovers the number of plankton within the file
   n_ltl_file = ncin$dim$ltl$len
@@ -388,7 +394,9 @@ correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
   }
   
   # Add the calendar attribute to the time variable
-  ncatt_put(ncout, "time", "calendar", attr_time$calendar)
+  if(!is.null(attr_time$calendar)) {
+    ncatt_put(ncout, "time", "calendar", attr_time$calendar)
+  }
   
   nc_close(ncout)
   nc_close(ncin)
