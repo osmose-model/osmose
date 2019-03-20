@@ -121,6 +121,4 @@ public class TempFunction extends AbstractProcess {
         return Math.exp(this.c_t1 - (this.c_t2 / temp));
 
     }
-    
-    
 }

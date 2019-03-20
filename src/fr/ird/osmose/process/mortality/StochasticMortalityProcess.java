@@ -12,6 +12,7 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.Swarm;
 import fr.ird.osmose.background.BackgroundSchool;
 import fr.ird.osmose.background.BackgroundSpecies;
+import fr.ird.osmose.process.bioen.BioenPredationMortality;
 import fr.ird.osmose.util.XSRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +58,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
     /* barrier.n: fisheries mortality */
     private FisheriesMortality fisheriesMortality;
-
+  
     /**
      * The set of plankton swarms
      */
@@ -91,8 +92,15 @@ public class StochasticMortalityProcess extends AbstractProcess {
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
 
-        predationMortality = new PredationMortality(getRank());
-        predationMortality.init();
+        // If not use of bioen, use the traditional predation mort.
+        // class. If bioen, use the dedicated class.
+        if (!getConfiguration().useBioen()) {
+            predationMortality = new PredationMortality(getRank());
+            predationMortality.init();
+        } else {
+            predationMortality = new BioenPredationMortality(getRank());
+            predationMortality.init();
+        }
 
         // Subdt 
         if (!getConfiguration().isNull("mortality.subdt")) {
