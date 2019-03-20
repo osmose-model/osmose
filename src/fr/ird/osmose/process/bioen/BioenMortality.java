@@ -20,6 +20,7 @@ public class BioenMortality extends AbstractProcess  {
         super(rank);
     }
 
+    @Override
     public void init() {
 
         String key = "bioen.damage.k_dam";
@@ -47,8 +48,7 @@ public class BioenMortality extends AbstractProcess  {
             double ndead = enet / school.getWeight();
             
             output = ndead * school.getWeight() / school.getInstantaneousBiomass();
-            
-            
+                
         }
         
         return output;
