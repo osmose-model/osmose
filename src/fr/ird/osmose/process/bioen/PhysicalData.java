@@ -69,7 +69,7 @@ public class PhysicalData extends SimulationLinker {
 
         key = String.format("%s.offset", this.variable_name);
         if (getConfiguration().canFind(key)) {
-            factor = getConfiguration().getDouble(key);
+            offset = getConfiguration().getDouble(key);
         }
 
         // Recovering the key temperature.filename
