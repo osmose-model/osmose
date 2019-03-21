@@ -43,7 +43,11 @@ public enum MortalityCause {
      *
      * @see fr.ird.osmose.process.OutMortalityProcess
      */
-    OUT(4);
+    OUT(4),
+    
+    /** Oxydation mortality (bioenergetic module) */
+    OXY(5);
+    
     /**
      * Index of the mortality cause
      */
