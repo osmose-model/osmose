@@ -7,6 +7,7 @@ package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
+import fr.ird.osmose.process.mortality.MortalityCause;
 
 /**
  *
@@ -33,26 +34,42 @@ public class BioenMortality extends AbstractProcess  {
         return this.k_dam * school.getEGross();
     }
     
-    public double compute_starv_mort(School school) {
+    public void compute_starv_mort(School school) {
         
-        double output = 0;
         double enet = school.getENet();
+   
+        if (enet > 0) {
+            // If Enet > 0, maintenance needs have been paid, no starvation mortality
+            return;
+        }
         
-        if(school.getGonadWeight() >= -enet) {
-            output = 0;
+        enet = Math.abs(enet);
+
+        // if enet < 0, the absolute value is what should be added to maintenance
+        if (school.getGonadWeight() >= enet) {
+
+            // if the gonad weight is enough to fill the remaining maintenance cost,
+            // no starvation mortality but removing of a quantity enet of gonads
+            school.incrementGonadWeight((float) -enet);
+
         }
         
         else {
             
-            // Calculation of the number of dead individuals (equation 17)
-            double ndead = enet / school.getWeight();
+            // if gonad weight is not enough to pay for maintenance needs:
             
-            output = ndead * school.getWeight() / school.getInstantaneousBiomass();
+            // all the gonad weight goes to fill part of the maintenance needs
+            enet -= school.getGonadWeight();   // part of the enet deficit is filled by gonad weight
+            school.incrementGonadWeight(-school.getGonadWeight());   // all gonad weight is removed.
+            
+            // Computes the number of dead individuals
+            double ndead = Math.abs(enet) * school.getWeight() / school.getInstantaneousBiomass();
+            
+            // set the number of dead individuals
+            school.setNdead(MortalityCause.STARVATION, ndead);
                 
         }
-        
-        return output;
-        
+                
     }
 
     @Override
