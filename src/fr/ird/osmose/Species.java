@@ -138,12 +138,12 @@ public class Species {
         eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
         float agemax = cfg.getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
-        
+
         // barrier.n: added for bioenergetic purposes.
-        if (cfg.canFind("species.zlayer.sp" + index)) {
+        if (cfg.useBioen()) {
             zlayer = cfg.getInt("species.zlayer.sp" + index);
         }
-        
+
     }
 
     public int getDepthLayer() {
