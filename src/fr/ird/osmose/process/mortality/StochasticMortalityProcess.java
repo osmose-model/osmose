@@ -12,6 +12,7 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.Swarm;
 import fr.ird.osmose.background.BackgroundSchool;
 import fr.ird.osmose.background.BackgroundSpecies;
+import fr.ird.osmose.process.bioen.BioenMortality;
 import fr.ird.osmose.process.bioen.BioenPredationMortality;
 import fr.ird.osmose.util.XSRandom;
 import java.util.ArrayList;
@@ -58,7 +59,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
     /* barrier.n: fisheries mortality */
     private FisheriesMortality fisheriesMortality;
-  
+
+    /* barrier.n: adding mortality through the bioenergetic model */
+    private BioenMortality bioenMortality;
+
     /**
      * The set of plankton swarms
      */
@@ -76,7 +80,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
     @Override
     public void init() {
-        
+
         // Possibility to use a seed in the definition of mortality algorithm
         String key = "stochastic.mortality.seed";
         if (getConfiguration().canFind(key)) {
@@ -84,11 +88,11 @@ public class StochasticMortalityProcess extends AbstractProcess {
         } else {
             random = new XSRandom(System.nanoTime());
         }
-        
-        if(getConfiguration().canFind("fisheries.new.activate")){
-           newfisheries = getConfiguration().getBoolean("fisheries.new.activate");
+
+        if (getConfiguration().canFind("fisheries.new.activate")) {
+            newfisheries = getConfiguration().getBoolean("fisheries.new.activate");
         }
-               
+
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
 
@@ -127,6 +131,12 @@ public class StochasticMortalityProcess extends AbstractProcess {
         // Structure 
         bkgSet = new HashMap();
 
+        // barrier.n: init the bioenergetic module
+        if (this.getConfiguration().useBioen()) {
+            bioenMortality = new BioenMortality(getRank());
+            bioenMortality.init();
+        }
+
     }
 
     @Override
@@ -152,10 +162,9 @@ public class StochasticMortalityProcess extends AbstractProcess {
             // for the current cell. add this to the list of preys 
             // for the current cell
             preys.addAll(this.getBackgroundSchool(cell));
-            
+
             // NOTE: at this stage, swarm and bkg biomass is not initialized but 
             // it does not matter: only size is used to define access.
-
             // Loop over focal schools, which are viewed here as predators.
             // Consider predation over plankton, focal species and background species.
             for (School school : schools) {
@@ -251,24 +260,22 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
         // barrier.n: adding background species to the list of possible preys.
         preys.addAll(bkgSchool);
-        
-        // preys contains focal species + LTL + bkg species
 
+        // preys contains focal species + LTL + bkg species
         // Arrays for loop over schools are initialised with nfocal + nbackgroud
         Integer[] seqPred = new Integer[ns + nBkg];
         for (int i = 0; i < ns + nBkg; i++) {
             seqPred[i] = i;
         }
-        Integer[] seqFish = Arrays.copyOf(seqPred, ns + nBkg); 
+        Integer[] seqFish = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqNat = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqStarv = Arrays.copyOf(seqPred, ns + nBkg);
+        Integer[] seqOxy = Arrays.copyOf(seqPred, ns + nBkg);
         MortalityCause[] mortalityCauses = MortalityCause.values();
 
         // Initialisation of list of predators, which contains both
         // background species and focal species.
-        
         // pred contains focal + bkg species
-        
         ArrayList<IAggregation> listPred = new ArrayList<>();
         listPred.addAll(schools);
         listPred.addAll(bkgSchool);
@@ -277,14 +284,31 @@ public class StochasticMortalityProcess extends AbstractProcess {
         shuffleArray(seqFish);
         shuffleArray(seqNat);
         shuffleArray(seqStarv);
+        if (this.getConfiguration().useBioen()) {
+            shuffleArray(seqOxy);
+        }
 
         boolean keepRecord = getSimulation().isPreyRecord();
         for (int i = 0; i < ns + nBkg; i++) {               // loop over all the school (focal and bkg) as predators.
-            shuffleArray(mortalityCauses);  
+            shuffleArray(mortalityCauses);
             for (MortalityCause cause : mortalityCauses) {   // random loop over all the mortality causes
                 School school;
                 double nDead = 0;
                 switch (cause) {
+
+                    // barrier.n: adding the 
+                    case OXY:
+                        
+                        if ((seqOxy[i] >= ns) || (!this.getConfiguration().useBioen())) {
+                            // if background school or no bioen module is used, nothing is done 
+                            break;   
+                        }
+
+                        school = schools.get(seqOxy[i]);
+                        this.bioenMortality.compute_oxydative_mort(school);
+
+                        break;
+
                     case PREDATION:
                         // Predation mortality
                         IAggregation predator = listPred.get(seqPred[i]);   // recover one predator (background or focal species)
@@ -303,14 +327,24 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         }
                         break;
                     case STARVATION:
+
                         if (seqStarv[i] >= ns) {
                             break;   // if background school, nothing is done
                         }
-                        // Starvation mortality
+
                         school = schools.get(seqStarv[i]);
-                        double M = school.getStarvationRate() / subdt;
-                        nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
-                        school.incrementNdead(MortalityCause.STARVATION, nDead);
+
+                        if (!this.getConfiguration().useBioen()) {
+                            // Starvation mortality when no use of bioen module.                           
+                            double M = school.getStarvationRate() / subdt;
+                            nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
+                            school.incrementNdead(MortalityCause.STARVATION, nDead);
+                        } else {
+                            // computation of the starvation mortality
+                            // which is updated directly from the BioenMortality class.
+                            this.bioenMortality.compute_starv_mort(school);
+                        }
+
                         break;
                     case ADDITIONAL:
                         if (seqNat[i] >= ns) {
@@ -332,7 +366,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         // Possibility to fish background species?????
                         if (seqFish[i] >= ns) {
                             break;    // if background school, nothing is done
-                        }                        
+                        }
                         // recovers the current school
                         school = schools.get(seqFish[i]);
 
