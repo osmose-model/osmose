@@ -15,14 +15,14 @@ import fr.ird.osmose.process.AbstractProcess;
  */
 public class TempFunction extends AbstractProcess {
 
-    private double a, b, c;
-    private double ap, bp, cp;  // a prime, b prime, cprime    
-    private double tmin, tmax, topt;
+    private double[] a, b, c;
+    private double[] ap, bp, cp;  // a prime, b prime, cprime    
+    private double[] tmin, tmax, topt;
 
     /**
      * Parameters for the energy maintenance.
      */
-    private double c_t1, c_t2;
+    private double[] c_t1, c_t2;
 
     PhysicalData temperature_input;
 
@@ -38,23 +38,47 @@ public class TempFunction extends AbstractProcess {
     @Override
     public void init() {
 
+        tmin = new double[this.getNSpecies()];
+        tmax = new double[this.getNSpecies()];
+        topt = new double[this.getNSpecies()];
+        a = new double[this.getNSpecies()];
+        b = new double[this.getNSpecies()];
+        c = new double[this.getNSpecies()];
+        ap = new double[this.getNSpecies()];
+        bp = new double[this.getNSpecies()];
+        cp = new double[this.getNSpecies()];
+
         String key;
 
         key = "bioen.gross.energy.tmin";
-        tmin = getConfiguration().getDouble(key);
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            String keytmp = String.format("%s.sp%d", key, i);
+            tmin[i] = getConfiguration().getDouble(keytmp);
+        }
 
         key = "bioen.gross.energy.tmax";
-        tmax = getConfiguration().getDouble(key);
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            String keytmp = String.format("%s.sp%d", key, i);
+            tmax[i] = getConfiguration().getDouble(keytmp);
+        }
 
         key = "bioen.gross.energy.topt";
-        topt = getConfiguration().getDouble(key);
-        
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            String keytmp = String.format("%s.sp%d", key, i);
+            topt[i] = getConfiguration().getDouble(keytmp);
+        }
+
         key = "bioen.arrh.ct1";
-        c_t1 = getConfiguration().getDouble(key);
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            String keytmp = String.format("%s.sp%d", key, i);
+            c_t1[i] = getConfiguration().getDouble(keytmp);
+        }
 
         key = "bioen.arrh.ct2";
-        c_t2 = getConfiguration().getDouble(key);
-        
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            String keytmp = String.format("%s.sp%d", key, i);
+            c_t2[i] = getConfiguration().getDouble(keytmp);
+        }
 
         this.compute_abc();
 
@@ -69,14 +93,17 @@ public class TempFunction extends AbstractProcess {
      * Computes the phiT coefficients function for gross energy. Equation 4
      */
     public void compute_abc() {
-        this.b = 2 / (topt * (tmin / topt - 1));
-        this.a = -this.b / (2 * topt);
-        this.c = 1 - this.b / 2.d * topt;
+  
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            this.b[i] = 2 / (topt[i] * (tmin[i] / topt[i] - 1));
+            this.a[i] = -this.b[i] / (2 * topt[i]);
+            this.c[i] = 1 - this.b[i] / 2.d * topt[i];
 
-        this.bp = 2 / (topt * (tmax / topt - 1));
-        this.ap = -this.bp / (2 * topt);
-        this.cp = 1 - this.bp / 2.d * topt;
-
+            this.bp[i] = 2 / (topt[i] * (tmax[i] / topt[i] - 1));
+            this.ap[i] = -this.bp[i] / (2 * topt[i]);
+            this.cp[i] = 1 - this.bp[i] / 2.d * topt[i];
+        }
+        
     }
 
     /**
@@ -98,12 +125,13 @@ public class TempFunction extends AbstractProcess {
 
         // Recovers the temperature of the school cell
         double temp = temperature_input.getValue(school);
-
-        if ((temp <= tmin) || (temp > tmax)) {
+        int i = school.getSpeciesIndex();
+        
+        if ((temp <= tmin[i]) || (temp > tmax[i])) {
             return 0;
         }
 
-        double output = (temp <= topt) ? this.a * Math.pow(temp, 2) + this.b * Math.pow(temp, 1) + this.c : this.ap * Math.pow(temp, 2) + this.bp * Math.pow(temp, 1) + this.cp;
+        double output = (temp <= topt[i]) ? this.a[i] * Math.pow(temp, 2) + this.b[i] * Math.pow(temp, 1) + this.c[i] : this.ap[i] * Math.pow(temp, 2) + this.bp[i] * Math.pow(temp, 1) + this.cp[i];
         return output;
 
     }
@@ -118,7 +146,9 @@ public class TempFunction extends AbstractProcess {
 
         // Recovers the temperature of the school cell
         double temp = this.getTemp(school);
-        return Math.exp(this.c_t1 - (this.c_t2 / temp));
+        int i = school.getSpeciesIndex();
+
+        return Math.exp(this.c_t1[i] - (this.c_t2[i] / temp));
 
     }
 }
