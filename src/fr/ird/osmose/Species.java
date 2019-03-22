@@ -108,7 +108,7 @@ public class Species {
      */
     private final float eggWeight;
 
-    private int zlayer;
+    private int zlayer = 0;
     
 //////////////
 // Constructor
@@ -140,7 +140,9 @@ public class Species {
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
         
         // barrier.n: added for bioenergetic purposes.
-        zlayer = cfg.getInt("species.zlayer.sp" + index);
+        if (cfg.canFind("species.zlayer.sp" + index)) {
+            zlayer = cfg.getInt("species.zlayer.sp" + index);
+        }
         
     }
 
