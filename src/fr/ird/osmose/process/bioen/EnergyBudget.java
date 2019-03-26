@@ -100,6 +100,7 @@ public class EnergyBudget extends AbstractProcess {
     @Override
     public void run() {
         
+        //System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         // Loop over all the alive schools
         for (School school : getSchoolSet().getAliveSchools()) {
             this.get_egross(school);   // computes E_gross, stored in the attribute.
@@ -122,8 +123,13 @@ public class EnergyBudget extends AbstractProcess {
     public void get_maintenance(School school) {
 
         int ispec = school.getSpeciesIndex();
-        double output = this.csmr[ispec] * Math.pow(school.getBiomass(), alpha[ispec]) * temp_function.get_Arrhenius(school);
+        
+        // computes the mantenance flow for one fish of the school for the current time step
+        double output = this.csmr[ispec] * Math.pow(school.getWeight(), alpha[ispec]) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
+        
+        // multiply the maintenance flow by the number of fish in the school
+        output *= school.getAbundance();
         school.setEMaint(output);
 
     }
@@ -136,6 +142,7 @@ public class EnergyBudget extends AbstractProcess {
      */
     public void get_egross(School school) {
         school.setEGross(school.getIngestion() * temp_function.get_phiT(school));
+        //System.out.println(school.getIngestion() + ", " + temp_function.get_phiT(school));
     }
 
     /**
