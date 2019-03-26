@@ -34,42 +34,55 @@ public class BioenMortality extends AbstractProcess  {
         return this.k_dam * school.getEGross();
     }
     
-    public void compute_starv_mort(School school) {
+    public void compute_starv_mort(School school, int subdt) {
         
         double enet = school.getENet();
    
-        if (enet > 0) {
+        if (enet >= 0) {
             // If Enet > 0, maintenance needs have been paid, no starvation mortality
             return;
         }
         
+        // Here, enet is converted into positive values
         enet = Math.abs(enet);
-
+        
         // if enet < 0, the absolute value is what should be added to maintenance
         if (school.getGonadWeight() >= enet) {
 
             // if the gonad weight is enough to fill the remaining maintenance cost,
             // no starvation mortality but removing of a quantity enet of gonads
-            school.incrementGonadWeight((float) -enet);
-
+            school.incrementGonadWeight((float) -enet / subdt);  // barrier.n: division by subdt: reduction of gonad weight
+            school.incrementEnet(enet / subdt);   // reduction in Enet deficit: Enet < 0 and should equal 0 at the end of the mortality time step
+            
         }
         
         else {
             
-            // if gonad weight is not enough to pay for maintenance needs:
+            // if gonad weight is not enough to pay for maintenance needs.
+            // enet_extract = fraction of enet that is subtracted at the current time
+            // step.
+            double enet_extract = Math.min(enet / subdt, school.getGonadWeight());   // maintenance to pay on the current time-step
             
-            // all the gonad weight goes to fill part of the maintenance needs
-            enet -= school.getGonadWeight();   // part of the enet deficit is filled by gonad weight
-            school.incrementGonadWeight(-school.getGonadWeight());   // all gonad weight is removed.
-            
-            // Computes the number of dead individuals
-            double ndead = Math.abs(enet) * school.getWeight() / school.getInstantaneousBiomass();
-            
-            // set the number of dead individuals
-            school.setNdead(MortalityCause.STARVATION, ndead);
-                
-        }
-                
+            // if, at the current time step, the paying of the maintenance cost is
+            // filled by gonadic weight, just decrease the gonad weight and the enet deficit
+            if (enet_extract == enet / subdt) {
+                school.incrementGonadWeight((float) -enet / subdt);  // barrier.n: division by subdt: reduction of gonad weight
+                school.incrementEnet(enet / subdt);   // reduction in Enet deficit: Enet < 0 and should equal 0 at the end of the mortality time step
+            } else {
+                // if the extraction of e_net is less than expected, there is mortality
+                // at the current time step
+                double diff = enet / subdt - enet_extract;
+                school.incrementEnet(enet_extract);   // fills what can be paid last by the few remaining gonads       
+                school.incrementGonadWeight((float) -enet_extract);  // gonad weight should be 0 here.
+
+                // Computes the number of dead individuals
+                double ndead = Math.abs(diff) * school.getWeight() / school.getInstantaneousBiomass();
+
+                // set the number of dead individuals
+                school.setNdead(MortalityCause.STARVATION, ndead);
+                                                 
+            }                           
+        }   
     }
 
     @Override
