@@ -238,4 +238,8 @@ public class Species {
         double Sv = 1.d;
         return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
     }
+    
+    public double getBPower() {
+        return this.bPower;
+    }
 }

@@ -56,7 +56,7 @@ public class PhysicalData extends SimulationLinker {
     public void init() throws IOException {
 
         String key;
-
+        
         // Recovering the name of the NetCDF variable (temperature.varname)
         key = String.format("%s.varname", this.variable_name);
         this.netcdf_variable_name = getConfiguration().getString(key);
@@ -77,7 +77,7 @@ public class PhysicalData extends SimulationLinker {
         String filename = getConfiguration().getFile(key);
 
         if (!new File(filename).exists()) {
-            error("Error reading LTLForcing parameters.", new FileNotFoundException("LTL NetCDF file " + filename + " does not exist."));
+            error("Error reading PhysicalDataset parameters.", new FileNotFoundException("LTL NetCDF file " + filename + " does not exist."));
         }
 
         try {
@@ -137,6 +137,6 @@ public class PhysicalData extends SimulationLinker {
         int index = school.getSpecies().getDepthLayer();
         return this.getValue(index, cell);
     }
-    
+
     
 }  // end of class
