@@ -267,6 +267,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         for (int i = 0; i < ns + nBkg; i++) {
             seqPred[i] = i;
         }
+        
         Integer[] seqFish = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqNat = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqStarv = Arrays.copyOf(seqPred, ns + nBkg);
@@ -342,7 +343,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         } else {
                             // computation of the starvation mortality
                             // which is updated directly from the BioenMortality class.
-                            this.bioenMortality.compute_starv_mort(school);
+                            if (school.getAgeDt() > 0) {
+                                // computes starv.mortality only for species greater than 0 years old
+                                this.bioenMortality.compute_starv_mort(school);
+                            }
                         }
 
                         break;
