@@ -158,6 +158,7 @@ public class School extends AbstractSchool {
      */
     private double e_gross;    // gross energy (assimilated)
     private double e_maint;    // energy used for maintenance.
+    private double e_net;      // net energy (gross - maintenance)
     private double ingestion;   // total ingestion
     private double kappa;    // kappa value
     
@@ -278,6 +279,7 @@ public class School extends AbstractSchool {
         e_gross = 0.d;
         e_maint = 0.d;
         ingestion = 0.d;   // reset ingestion at beginning of time step;
+        e_net = 0.d;
     }
 
     /**
@@ -670,9 +672,19 @@ public class School extends AbstractSchool {
      * @return
      */
     public double getENet() {
-        return (this.e_gross - this.e_maint);
+        return this.e_net;
     }
 
+     /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public void setENet(double enet) {
+        this.e_net = enet;
+    }
+    
     /**
      * Increments the ingested energy.
      */
@@ -734,6 +746,10 @@ public class School extends AbstractSchool {
 
     public int[][][] getGenotype() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void incrementEnet(double d) {
+        this.e_net += d;
     }
     
 }
