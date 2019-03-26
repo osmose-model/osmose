@@ -86,11 +86,11 @@ public class EnergyBudget extends AbstractProcess {
             csmr[i] = this.getConfiguration().getDouble(key);
         }
         
-                // Recovers the alpha coefficient for focal + background species
+        // Recovers the alpha coefficient for focal + background species
         growth_pot = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             double lInf = getConfiguration().getDouble("species.linf.sp" + i);
-            growth_pot[i] = r[i] * Math.pow(this.getSpecies(i).getBPower(), 1 - alpha[i]) * Math.pow(lInf, 3 * (1 - alpha[i])); ;
+            growth_pot[i] = r[i] * Math.pow(this.getSpecies(i).getBPower(), 1 - alpha[i]) * Math.pow(lInf, 3 * (1 - alpha[i]));;
         }
     }
 
@@ -105,6 +105,7 @@ public class EnergyBudget extends AbstractProcess {
             this.get_egross(school);   // computes E_gross, stored in the attribute.
             this.get_maintenance(school);   // computes E_maintanance
             this.get_maturation(school);   // computes maturation properties for the species.
+            school.setENet(school.getEGross() - school.getEMaint());
             this.get_kappa(school);   // computes the kappa function
             this.get_dw(school);   // computes E_growth (somatic growth)
             this.get_dg(school);   // computes the increase in gonadic weight
