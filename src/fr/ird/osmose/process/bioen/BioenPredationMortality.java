@@ -140,6 +140,7 @@ public class BioenPredationMortality extends PredationMortality {
             }
             
             // this is the biomass which is accessible to all predators
+            // in ton.
             double biomAccessibleTot = sum(accessibleBiomass);
 
             // this is the maximum biomass that the predator can ingest.
@@ -147,6 +148,7 @@ public class BioenPredationMortality extends PredationMortality {
             // max = predation rate * biomass^alpha 
             double fo2 = (predator instanceof School) ? this.bioen_ingest.compute_fO2((School) predator) : 1;
             // barrier.n: @@@@@@@@@@@@@@@@@@@@@@@ fo2 is at this time undefined for bkg species. to see how this can be done later on.
+            
             double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getInstantaneousBiomass(), alpha[predator.getSpeciesIndex()]) * fo2 / subdt;
             
             // By default the predator will eat as much as it can
