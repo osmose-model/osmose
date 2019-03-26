@@ -103,7 +103,7 @@ public class TempFunction extends AbstractProcess {
             this.a[i] = -this.b[i] / (2 * topt[i]);
             this.c[i] = 1 - this.b[i] / 2.d * topt[i];
 
-            this.bp[i] = 2 / (topt[i] * (tmax[i] / topt[i] - 1));
+            this.bp[i] = 2 / (topt[i] * (1 - tmax[i] / topt[i]));
             this.ap[i] = -this.bp[i] / (2 * topt[i]);
             this.cp[i] = 1 - this.bp[i] / 2.d * topt[i];
         }
@@ -131,7 +131,7 @@ public class TempFunction extends AbstractProcess {
         double temp = temperature_input.getValue(school);
         int i = school.getSpeciesIndex();
         
-        if ((temp <= tmin[i]) || (temp > tmax[i])) {
+        if ((temp < tmin[i]) || (temp > tmax[i])) {
             return 0;
         }
 
