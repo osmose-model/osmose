@@ -57,6 +57,9 @@ import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.ReproductionProcess;
 import fr.ird.osmose.process.bioen.BioenReproductionProcess;
 import fr.ird.osmose.process.bioen.EnergyBudget;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -114,8 +117,12 @@ public class DefaultStep extends AbstractStep {
             growthProcess = new GrowthProcess(getRank());
             growthProcess.init();
         } else {
-            bioenProcess = new EnergyBudget(getRank());
-            bioenProcess.init();
+            try {
+                bioenProcess = new EnergyBudget(getRank());
+                bioenProcess.init();
+            } catch (IOException ex) {
+                Logger.getLogger(DefaultStep.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         // Reproduction processes
