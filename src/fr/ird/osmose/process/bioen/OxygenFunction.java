@@ -7,6 +7,7 @@ package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
+import java.io.IOException;
 
 /** 
  * Class that handles the ingestion in the Bioenergetic model
@@ -18,15 +19,16 @@ public class OxygenFunction extends AbstractProcess {
     /** Variables used to compute f02 function. */
     private double [] o2_crit;
     private double c1, c2;
-    
+
     PhysicalData o2_input;
     
-    public OxygenFunction(int rank) { 
+    public OxygenFunction(int rank) throws IOException { 
         
         super(rank);
         
         // Initialisation of the O2 input as read from the NetCDF file.
         o2_input = new PhysicalData(rank, "oxygen");
+        o2_input.init();
            
     }
 
