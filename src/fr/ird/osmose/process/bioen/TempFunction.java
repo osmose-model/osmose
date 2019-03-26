@@ -7,6 +7,7 @@ package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
+import java.io.IOException;
 
 /**
  * Class that handles the ingestion in the Bioenergetic model
@@ -26,12 +27,13 @@ public class TempFunction extends AbstractProcess {
 
     PhysicalData temperature_input;
 
-    public TempFunction(int rank) {
+    public TempFunction(int rank) throws IOException {
 
         super(rank);
 
         // Initialisation of the O2 input as read from the NetCDF file.
         temperature_input = new PhysicalData(rank, "temperature");
+        temperature_input.init();
 
     }
 
@@ -47,7 +49,9 @@ public class TempFunction extends AbstractProcess {
         ap = new double[this.getNSpecies()];
         bp = new double[this.getNSpecies()];
         cp = new double[this.getNSpecies()];
-
+        c_t1 = new double[this.getNSpecies()];
+        c_t2 = new double[this.getNSpecies()];
+        
         String key;
 
         key = "bioen.gross.energy.tmin";
