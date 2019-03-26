@@ -15,12 +15,15 @@ import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.process.bioen.BioenMortality;
 import fr.ird.osmose.process.bioen.BioenPredationMortality;
 import fr.ird.osmose.util.XSRandom;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Mortality processes compete stochastically.
@@ -102,8 +105,12 @@ public class StochasticMortalityProcess extends AbstractProcess {
             predationMortality = new PredationMortality(getRank());
             predationMortality.init();
         } else {
-            predationMortality = new BioenPredationMortality(getRank());
-            predationMortality.init();
+            try {
+                predationMortality = new BioenPredationMortality(getRank());
+                predationMortality.init();
+            } catch (IOException ex) {
+                Logger.getLogger(StochasticMortalityProcess.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         // Subdt 
@@ -306,7 +313,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         }
 
                         school = schools.get(seqOxy[i]);
-                        this.bioenMortality.compute_oxydative_mort(school);
+                        this.bioenMortality.compute_oxydative_mort(school);  // note: should be corrected by a division by subdt
 
                         break;
 
@@ -345,7 +352,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                             // which is updated directly from the BioenMortality class.
                             if (school.getAgeDt() > 0) {
                                 // computes starv.mortality only for species greater than 0 years old
-                                this.bioenMortality.compute_starv_mort(school);
+                                this.bioenMortality.compute_starv_mort(school, subdt);
                             }
                         }
 
