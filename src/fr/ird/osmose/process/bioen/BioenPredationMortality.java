@@ -51,6 +51,7 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.process.mortality.*;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -68,12 +69,13 @@ public class BioenPredationMortality extends PredationMortality {
      */
     private double[] predationRateBioen;
     
-    public BioenPredationMortality(int rank) {
+    public BioenPredationMortality(int rank) throws IOException {
         
         super(rank);
         
         // Initialisation of the ingestion method
         bioen_ingest = new OxygenFunction(rank);
+        bioen_ingest.init();
     }
 
     @Override
