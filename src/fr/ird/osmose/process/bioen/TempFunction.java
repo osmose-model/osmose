@@ -99,13 +99,13 @@ public class TempFunction extends AbstractProcess {
     public void compute_abc() {
   
         for (int i = 0; i < this.getNSpecies(); i++) {
-            this.b[i] = 2 / (topt[i] * (tmin[i] / topt[i] - 1));
+            this.b[i] = 2 / (topt[i] * Math.pow(tmin[i] / topt[i] - 1, 2));
             this.a[i] = -this.b[i] / (2 * topt[i]);
-            this.c[i] = 1 - this.b[i] / 2.d * topt[i];
+            this.c[i] = 1 - (this.b[i] / 2.d) * topt[i];
 
-            this.bp[i] = 2 / (topt[i] * (1 - tmax[i] / topt[i]));
+            this.bp[i] = 2 / (topt[i] * Math.pow(1 - tmax[i] / topt[i], 2));
             this.ap[i] = -this.bp[i] / (2 * topt[i]);
-            this.cp[i] = 1 - this.bp[i] / 2.d * topt[i];
+            this.cp[i] = 1 - (this.bp[i] / 2.d) * topt[i];
         }
         
     }
