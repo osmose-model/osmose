@@ -69,14 +69,14 @@ public class EnergyBudget extends AbstractProcess {
         m0 = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             key = String.format("bioen.maturity.m0.sp%d", i);
-            m0[i] = this.getConfiguration().getDouble(key) * 1e-1;   // barrier.n: conversion from mm to cm
+            m0[i] = this.getConfiguration().getDouble(key);   // barrier.n: conversion from mm to cm
         }
 
         // Recovers the alpha coefficient for focal + background species
         m1 = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             key = String.format("bioen.maturity.m1.sp%d", i);
-            m1[i] = this.getConfiguration().getDouble(key) * 1e-1;  // barrier.n: conversion from mm to cm
+            m1[i] = this.getConfiguration().getDouble(key);  // barrier.n: conversion from mm to cm
         }
 
         // Recovers the alpha coefficient for focal + background species
@@ -231,7 +231,7 @@ public class EnergyBudget extends AbstractProcess {
         // int ispec = school.getSpeciesIndex();
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : Math.exp(3)*Math.exp(-school.getAge()); //Function in two parts according to maturity state
+        double kappa = (!school.isMature()) ? 1 : 0; //Function in two parts according to maturity state
         
         
         school.setKappa(kappa);
