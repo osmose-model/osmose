@@ -150,11 +150,13 @@ public class BioenPredationMortality extends PredationMortality {
             // barrier.n: @@@@@@@@@@@@@@@@@@@@@@@ fo2 is at this time undefined for bkg species. to see how this can be done later on.
             
             // maximum biomass that a single fish can eat during the time step subdt
-            double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight(), alpha[predator.getSpeciesIndex()]) * fo2 / subdt;
+            // barrier.n: weight is converted into g here
+            double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6, alpha[predator.getSpeciesIndex()]) * fo2 / subdt;
             
             // multiply the biomass eaten by one fish by the number of fishes to get the maximum biomass that the
             // entire school can eat
-            maxBiomassToPredate *= predator.getAbundance();
+            // barrier.n: converted back into ton.
+            maxBiomassToPredate *= predator.getAbundance() * 1e-6;
             
             // By default the predator will eat as much as it can
             double biomassToPredate = maxBiomassToPredate;
