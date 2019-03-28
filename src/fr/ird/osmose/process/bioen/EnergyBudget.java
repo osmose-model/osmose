@@ -125,11 +125,13 @@ public class EnergyBudget extends AbstractProcess {
         int ispec = school.getSpeciesIndex();
         
         // computes the mantenance flow for one fish of the school for the current time step
-        double output = this.csmr[ispec] * Math.pow(school.getWeight(), alpha[ispec]) * temp_function.get_Arrhenius(school);
+        // barrier.n: weight is converted into g.
+        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6, alpha[ispec]) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
         
         // multiply the maintenance flow by the number of fish in the school
-        output *= school.getAbundance();
+        // barrier.n: converted back into ton
+        output *= school.getAbundance() * 1e-6;
         school.setEMaint(output);
 
     }
@@ -185,6 +187,8 @@ public class EnergyBudget extends AbstractProcess {
         // computes the trend in structure weight dw/dt
         // note: dw should be in ton
         double dgrowth = (school.getENet() > 0) ? (school.getENet() * school.getKappa()) : 0;
+        dgrowth /= school.getAbundance();
+        
         // increments the weight
         school.incrementWeight((float) dgrowth);
     }
@@ -205,6 +209,7 @@ public class EnergyBudget extends AbstractProcess {
         double kappa = school.getKappa();
         if (enet > 0) {
             output = (1 - kappa) * enet;
+            output /= school.getAbundance();
             school.incrementGonadWeight((float) output);
         }
     }
@@ -223,7 +228,7 @@ public class EnergyBudget extends AbstractProcess {
 //        // else, only a kappa fraction goes to somatic growth
 //        //double kappa = (!school.isMature()) ? 1 : 1 - (r[ispec] / growth_pot[ispec]) * Math.pow(school.getWeight(), 1 - alpha[ispec]); //Function in two parts according to maturity state
 //        double kappa = (!school.isMature()) ? 1 : 0.3; //Function in two parts according to maturity state
-//        
+//    
 //        school.setKappa(kappa);
 //    }
     
