@@ -102,36 +102,39 @@ public class BioenReproductionProcess extends ReproductionProcess {
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
 
             Species species = getSpecies(i);
-            
+
             // initialisation of the number of eggs to be released
             double nEgg = 0.d;
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
-   
+
             if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB[i] == 0.) {
                 // seeding process for collapsed species
                 // if seeding biomass is 0 (no mature indivials, release eggs in the
                 // old fashioned way.
                 SSB[i] = this.getSeedingBiomass(i);
-                nEgg = this.getSexRatio(i) * this.getAlpha(i) * season * SSB[i] * 1000000;
+                nEgg += this.getSexRatio(i) * this.getAlpha(i) * season * SSB[i] * 1000000;
+                
             } else {
                 // if the seeding biomass is not null, loop over sexually mature schools
                 for (School school : getSchoolSet().getSchools(getSpecies(i))) {
                     if (!school.isMature()) {
                         continue;
                     }
-                    
+
                     // recovers the weight of the gonad that is lost for reproduction.
                     // in this case, the gonad weight times the season variable.
-                    float wEgg  = school.getGonadWeight() * (float) season ;
-                    
+                    float wEgg = school.getGonadWeight() * (float) season;
+
                     // the wEgg content is removed from the gonad
                     school.incrementGonadWeight(-wEgg);
 
                     // the number of eggs is equal to the total gonad weight that is gone
                     // divided by the egg weight.
-                    nEgg = wEgg * this.getSexRatio(i) / species.getEggWeight();
                     
+                    // barrier.n: change in conversion from tone to gram
+                    nEgg += wEgg * this.getSexRatio(i) / species.getEggWeight() * 1000000;
+
                 }
             }
 
