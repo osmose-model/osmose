@@ -589,10 +589,10 @@ public class School extends AbstractSchool {
      * @param dw Weight increment (in ton)
      */
     public void incrementWeight(float dw) {
-        if (dw != 0.f) {
+        if (dw > 0.f) {
             this.weight += dw;
             // Update in the length calculation 
-            this.setLength(species.computeLength(this.weight * 1e-6f));
+            this.setLength(species.computeLength((1e6f * this.weight)/(float)getAbundance()));
         }
 
     }
@@ -601,11 +601,11 @@ public class School extends AbstractSchool {
      * Increments the gonad weight of the fish from given number of tons. In
      * this case, the length of the fish is not updated.
      *
-     * @param dw Weight increment (in ton)
+     * @param dg Weight increment (in ton)
      */
-    public void incrementGonadWeight(float dw) {
-        if (dw != 0.f) {
-            this.gonadWeight += dw;
+    public void incrementGonadWeight(float dg) {
+        if (dg != 0.f) {
+            this.gonadWeight += dg;
         }
     }
 
