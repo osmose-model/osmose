@@ -76,7 +76,7 @@ public class BioenMortality extends AbstractProcess  {
                 school.incrementGonadWeight((float) -enet_extract);  // gonad weight should be 0 here.
 
                 // Computes the number of dead individuals
-                double ndead = Math.abs(diff) / (school.getWeight() / school.getInstantaneousAbundance());
+                double ndead = Math.abs(diff) / (school.getWeight());
 
                 // set the number of dead individuals
                 school.setNdead(MortalityCause.STARVATION, ndead);
