@@ -1,0 +1,20 @@
+v Prey / Predator >,Octopus_vulgaris < 3,Octopus_vulgaris > 3,Melicertus_kerathurus,Metapenaeus_monoceros,Trachurus_trachurus ,Sardina_pilchardus,Sardinella_aurita,Engraulis_encrasicholus,diplodus_annularis,Mustelus_mustelus,Merluccius_merluccius,Pagellus_erythrinus
+Octopus_vulgaris < 3,0.1,0.1,0.35,0.35,0.35,0.35,0.35,0.35,0.35,0.35,0.35,0.35
+Octopus_vulgaris > 3,0.1,0.1,0.8,0.8,0.8,0.6,0.6,0.6,0.8,0.8,0.8,0.8
+Melicertus_kerathurus,0.8,0.8,0.7,0.8,0.8,0.6,0.6,0.6,0.8,0.8,0.8,0.8
+Metapenaeus_monoceros,0.8,0.8,0.8,0.5,0.8,0.6,0.6,0.6,0.8,0.8,0.8,0.8
+Trachurus_trachurus ,0.1,0.1,0.8,0.8,0.7,0.8,0.8,0.8,0.8,0.8,0.8,0.8
+Sardina_pilchardus,0.1,0.1,0.1,0.1,0.8,0.7,0.8,0.8,0.3,0.8,0.8,0.3
+Sardinella_aurita,0.1,0.1,0.1,0.1,0.8,0.8,0.7,0.8,0.3,0.8,0.8,0.3
+Engraulis_encrasicholus,0.1,0.1,0.1,0.1,0.8,0.8,0.8,0.7,0.3,0.8,0.8,0.3
+diplodus_annularis,0.1,0.1,0.8,0.8,0.8,0.8,0.8,0.8,0.7,0.8,0.8,0.8
+Mustelus_mustelus,0.1,0.1,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.7,0.8,0.8
+Merluccius_merluccius,0.1,0.1,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8
+Pagellus_erythrinus,0.1,0.1,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.4
+CIL_C,0.18,0.18,0.1,0.1,0.15,0.8,0.8,0.5,0.35,0.1,0.05,0.1
+COP_C,0.18,0.18,0.1,0.1,0.15,0.8,0.8,0.5,0.35,0.05,0.05,0.1
+HNF_C,0.01,0.1,0.05,0.1,0.15,0.8,0.8,0.5,0.35,0.05,0.05,0.1
+PHYS_N,0.18,0.18,0.1,0.1,0.15,0.8,0.8,0.5,0.35,0.1,0.05,0.1
+PHYL_N,0.18,0.18,0.1,0.1,0.15,0.8,0.8,0.5,0.35,0.1,0.05,0.1
+Benthos,0,0.08,0.08,0.08,0,0,0,0,0.022,0.0002,0.0004,0.015
+#Benthos,0,0.7,0.5,0.5,0,0,0,0,0.05,0.0005,0,0.04
