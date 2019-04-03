@@ -13,7 +13,7 @@ import fr.ird.osmose.process.mortality.MortalityCause;
  *
  * @author nbarrier
  */
-public class BioenMortality extends AbstractProcess  {
+public class BioenMortality extends AbstractProcess {
 
     private double k_dam;
 
@@ -26,18 +26,18 @@ public class BioenMortality extends AbstractProcess  {
 
         String key = "bioen.damage.k_dam";
         k_dam = getConfiguration().getDouble(key);
-    
+
     }
 
     public double compute_oxydative_mort(School school) {
         // calculation of PhiT
         return this.k_dam * school.getEGross();
     }
-    
+
     public void compute_starv_mort(School school, int subdt) {
-        
+
         double enet = school.getENet();
-   
+
         if (enet >= 0) {
             // If Enet > 0, maintenance needs have been paid, no starvation mortality
             return;
@@ -45,7 +45,7 @@ public class BioenMortality extends AbstractProcess  {
         
         // Here, enet is converted into positive values
         enet = Math.abs(enet);
-        
+
         // if enet < 0, the absolute value is what should be added to maintenance
         if (school.getGonadWeight() >= enet) {
 
@@ -53,16 +53,14 @@ public class BioenMortality extends AbstractProcess  {
             // no starvation mortality but removing of a quantity enet of gonads
             school.incrementGonadWeight((float) -enet / subdt);  // barrier.n: division by subdt: reduction of gonad weight
             school.incrementEnet(enet / subdt);   // reduction in Enet deficit: Enet > 0 (cf row 47) and should equal 0 at the end of the mortality time step
-            
-        }
-        
-        else {
-            
+
+        } else {
+
             // if gonad weight is not enough to pay for maintenance needs.
             // enet_extract = fraction of enet that is subtracted at the current time
             // step.
             double enet_extract = Math.min(enet / subdt, school.getGonadWeight());   // maintenance to pay on the current time-step
-            
+
             // if, at the current time step, the paying of the maintenance cost is
             // filled by gonadic weight, just decrease the gonad weight and the enet deficit
             if (enet_extract == enet / subdt) {
@@ -80,9 +78,9 @@ public class BioenMortality extends AbstractProcess  {
 
                 // set the number of dead individuals
                 school.setNdead(MortalityCause.STARVATION, ndead);
-                                                 
-            }                           
-        }   
+
+            }
+        }
     }
 
     @Override
