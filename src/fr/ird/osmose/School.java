@@ -591,8 +591,9 @@ public class School extends AbstractSchool {
     public void incrementWeight(float dw) {
         if (dw > 0.f) {
             this.weight += dw;
-            // Update in the length calculation 
-            this.setLength(species.computeLength((1e6f * this.weight)/(float)getAbundance()));
+            // Update in the length calculation
+            // weight is in ton, should be converted in gram
+            this.setLength(species.computeLength(this.weight * 1e6f));
         }
 
     }
@@ -604,7 +605,7 @@ public class School extends AbstractSchool {
      * @param dg Weight increment (in ton)
      */
     public void incrementGonadWeight(float dg) {
-        if (dg != 0.f) {
+        if (dg > 0.f) {
             this.gonadWeight += dg;
         }
     }
