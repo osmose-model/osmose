@@ -126,12 +126,12 @@ public class EnergyBudget extends AbstractProcess {
         
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
-        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6, alpha[ispec]) * temp_function.get_Arrhenius(school);
+        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, alpha[ispec]) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
         
         // multiply the maintenance flow by the number of fish in the school
         // barrier.n: converted back into ton
-        output *= school.getAbundance() * 1e-6;
+        output *= school.getAbundance() * 1e-6f;
         school.setEMaint(output);
 
     }
