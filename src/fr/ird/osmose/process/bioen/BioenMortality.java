@@ -67,12 +67,12 @@ public class BioenMortality extends AbstractProcess  {
             // filled by gonadic weight, just decrease the gonad weight and the enet deficit
             if (enet_extract == enet / subdt) {
                 school.incrementGonadWeight((float) -enet / subdt);  // barrier.n: division by subdt: reduction of gonad weight
-                school.incrementEnet(-enet / subdt);   // reduction in Enet deficit: Enet > 0 (cf row 47) and should equal 0 at the end of the mortality time step
+                school.incrementEnet(enet / subdt);   // reduction in Enet deficit: Enet > 0 (cf row 47) and should equal 0 at the end of the mortality time step
             } else {
                 // if the extraction of e_net is less than expected, there is mortality
                 // at the current time step
                 double diff = enet / subdt - enet_extract;
-                school.incrementEnet(-enet_extract);   // fills what can be paid last by the few remaining gonads       
+                school.incrementEnet(enet_extract);   // fills what can be paid last by the few remaining gonads       
                 school.incrementGonadWeight((float) -enet_extract);  // gonad weight should be 0 here.
 
                 // Computes the number of dead individuals
