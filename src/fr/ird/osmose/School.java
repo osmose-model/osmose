@@ -276,12 +276,9 @@ public class School extends AbstractSchool {
         // Set length at the beginning of the time step
         lengthi = length;
 
-        e_gross = 0.d;
-        e_maint = 0.d;
         ingestion = 0.d;   // reset ingestion at beginning of time step;
-        e_net = 0.d;
     }
-
+    
     /**
      * Make some more eggs accessible. This function assumes that the initial
      * abundance of egg at the beginning of the predation process (abundance -
