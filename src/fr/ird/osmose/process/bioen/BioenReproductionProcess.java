@@ -121,7 +121,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     if (!school.isMature()) {
                         continue;
                     }
-
+                    
                     // recovers the weight of the gonad that is lost for reproduction.
                     // in this case, the gonad weight times the season variable.
                     float wEgg = school.getGonadWeight() * (float) season;
@@ -135,10 +135,9 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     // barrier.n: change in conversion from tone to gram
                     nEgg += wEgg * this.getSexRatio(i) / species.getEggWeight() * 1000000 * school.getAbundance();
 
-                }
-            }
+                }  // end of loop over the school that belong to species i            
+            }  // end of SSB statement
 
-            
             // lay age class zero
             int nSchool = getConfiguration().getNSchool(i);
             // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
