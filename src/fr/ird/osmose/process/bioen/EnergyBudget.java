@@ -26,7 +26,7 @@ public class EnergyBudget extends AbstractProcess {
      * Parameters for the kappa function.
      */
     private double[] r;
-    private double[] growth_pot;
+    private double[] Imax;
 
     
     public EnergyBudget(int rank) throws IOException {
@@ -87,10 +87,10 @@ public class EnergyBudget extends AbstractProcess {
         }
         
         // Recovers the alpha coefficient for focal + background species
-        growth_pot = new double[nspec];
+        Imax = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
-            double lInf = getConfiguration().getDouble("species.linf.sp" + i);
-            growth_pot[i] = r[i] * Math.pow(this.getSpecies(i).getBPower(), 1 - alpha[i]) * Math.pow(lInf, 3 * (1 - alpha[i]));;
+            key = String.format("predation.ingestion.rate.max.bioen.sp%d", i);
+            Imax[i] = this.getConfiguration().getDouble(key);
         }
     }
 
@@ -200,7 +200,6 @@ public class EnergyBudget extends AbstractProcess {
      * is implemented on starvation mortality.
      *
      * @param school
-     * @return
      */
     public void get_dg(School school) {
         
@@ -222,24 +221,25 @@ public class EnergyBudget extends AbstractProcess {
      * @return
      */
     
-//    public void get_kappa(School school) {
-//        int ispec = school.getSpeciesIndex();
-//        // If the organism is imature, all the net energy goes to the somatic growth.
-//        // else, only a kappa fraction goes to somatic growth
-//        //double kappa = (!school.isMature()) ? 1 : 1 - (r[ispec] / growth_pot[ispec]) * Math.pow(school.getWeight(), 1 - alpha[ispec]); //Function in two parts according to maturity state
-//        double kappa = (!school.isMature()) ? 1 : 0.3; //Function in two parts according to maturity state
-//    
-//        school.setKappa(kappa);
-//    }
-    
     public void get_kappa(School school) {
-        // int ispec = school.getSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 0; //Function in two parts according to maturity state
-        
-        
+        double kappa = (!school.isMature()) ? 1 : 1 - (r[ispec] / (Imax[ispec]-csmr[ispec])) * Math.pow(school.getWeight()*10e6f, 1 - alpha[ispec]); //Function in two parts according to maturity state
+        kappa = ((kappa<0) ? 0 : kappa); //0 if kappa<0
+        kappa = ((kappa>1) ? 1 : kappa); //1 if kappa>1
+    
         school.setKappa(kappa);
     }
+    
+//    public void get_kappa(School school) {
+//        // int ispec = school.getSpeciesIndex();
+//        // If the organism is imature, all the net energy goes to the somatic growth.
+//        // else, only a kappa fraction goes to somatic growth
+//        double kappa = (!school.isMature()) ? 1 : 0; //Function in two parts according to maturity state
+//        
+//        
+//        school.setKappa(kappa);
+//    }
 
 }

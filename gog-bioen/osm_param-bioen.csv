@@ -144,7 +144,7 @@ bioen.maturity.m0.sp10;0
 bioen.maturity.m1.sp0;10
 bioen.maturity.m1.sp1;4
 bioen.maturity.m1.sp2;8
-bioen.maturity.m1.sp3;23.9
+bioen.maturity.m1.sp3;20
 bioen.maturity.m1.sp4;11
 bioen.maturity.m1.sp5;11
 bioen.maturity.m1.sp6;7
@@ -169,17 +169,17 @@ species.o2_crit.sp9;7
 species.o2_crit.sp10;7
 ;
 ####################### parameters assessed by Alaia. (g.g^(-alpha);
-predation.ingestion.rate.max.bioen.sp0;12
-predation.ingestion.rate.max.bioen.sp1;5.6
-predation.ingestion.rate.max.bioen.sp2;5
-predation.ingestion.rate.max.bioen.sp3;10.4
-predation.ingestion.rate.max.bioen.sp4;6
-predation.ingestion.rate.max.bioen.sp5;5
-predation.ingestion.rate.max.bioen.sp6;4.8
-predation.ingestion.rate.max.bioen.sp7;6.8
-predation.ingestion.rate.max.bioen.sp8;14.8
-predation.ingestion.rate.max.bioen.sp9;14.8
-predation.ingestion.rate.max.bioen.sp10;10
+predation.ingestion.rate.max.bioen.sp0;21.4
+predation.ingestion.rate.max.bioen.sp1;9.6
+predation.ingestion.rate.max.bioen.sp2;13.6
+predation.ingestion.rate.max.bioen.sp3;18.4
+predation.ingestion.rate.max.bioen.sp4;14.3
+predation.ingestion.rate.max.bioen.sp5;14.3
+predation.ingestion.rate.max.bioen.sp6;11.4
+predation.ingestion.rate.max.bioen.sp7;8.6
+predation.ingestion.rate.max.bioen.sp8;22.9
+predation.ingestion.rate.max.bioen.sp9;17.1
+predation.ingestion.rate.max.bioen.sp10;14.3
 ;
 ######################### physical dataset parameters;
 temperature.varname;T
