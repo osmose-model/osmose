@@ -171,7 +171,7 @@ species.o2_crit.sp10;7
 ####################### parameters assessed by Alaia. (g.g^(-alpha);
 predation.ingestion.rate.max.bioen.sp0;21.4
 predation.ingestion.rate.max.bioen.sp1;9.6
-predation.ingestion.rate.max.bioen.sp2;13.6
+predation.ingestion.rate.max.bioen.sp2;14.6
 predation.ingestion.rate.max.bioen.sp3;18.4
 predation.ingestion.rate.max.bioen.sp4;14.3
 predation.ingestion.rate.max.bioen.sp5;14.3
