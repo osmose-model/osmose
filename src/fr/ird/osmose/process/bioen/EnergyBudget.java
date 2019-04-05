@@ -225,9 +225,9 @@ public class EnergyBudget extends AbstractProcess {
         int ispec = school.getSpeciesIndex();
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - (r[ispec] / (Imax[ispec]-csmr[ispec])) * Math.pow(school.getWeight()*10e6f, 1 - alpha[ispec]); //Function in two parts according to maturity state
-        kappa = ((kappa<0) ? 0 : kappa); //0 if kappa<0
-        kappa = ((kappa>1) ? 1 : kappa); //1 if kappa>1
+        double kappa = (!school.isMature()) ? 1 : 1 - (r[ispec] / (Imax[ispec]-csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - alpha[ispec]); //Function in two parts according to maturity state
+        kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
+        kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
     
         school.setKappa(kappa);
     }
