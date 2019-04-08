@@ -133,7 +133,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     // divided by the egg weight.
                     
                     // barrier.n: change in conversion from tone to gram
-                    nEgg += wEgg * this.getSexRatio(i) / species.getEggWeight() * 1000000 * school.getAbundance();
+                    nEgg += wEgg * this.getSexRatio(i) / species.getEggWeight() * 1000000 * school.getInstantaneousAbundance();
 
                 }  // end of loop over the school that belong to species i            
             }  // end of SSB statement
