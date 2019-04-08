@@ -53,6 +53,7 @@ import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -156,7 +157,7 @@ public class BioenPredationMortality extends PredationMortality {
             // multiply the biomass eaten by one fish by the number of fishes to get the maximum biomass that the
             // entire school can eat
             // barrier.n: converted back into ton.
-            maxBiomassToPredate *= predator.getAbundance() * 1e-6f;
+            maxBiomassToPredate *= predator.getInstantaneousAbundance() * 1e-6f;
             
             // By default the predator will eat as much as it can
             double biomassToPredate = maxBiomassToPredate;
@@ -175,7 +176,7 @@ public class BioenPredationMortality extends PredationMortality {
                     // ratio of prey i (among available preys) preyed upon by predator
                     double ratio = accessibleBiomass[i] / biomAccessibleTot;
                     preyUpon[i] = ratio * biomassToPredate;
-                    cumPreyUpon += preyUpon[i];
+                    cumPreyUpon += preyUpon[i];   // biomass in ton.
                 }
                 // Increments the total ingestion of preys within the system
                 predator.incrementIngestion(cumPreyUpon);
