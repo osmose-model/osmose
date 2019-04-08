@@ -170,7 +170,7 @@ public class School extends AbstractSchool {
     // by default the school is imature.
     private double ageMature = 0;
     private boolean isMature = false;
-
+    
 ///////////////
 // Constructors
 ///////////////
@@ -263,7 +263,7 @@ public class School extends AbstractSchool {
         // Update abundance
         abundance = getInstantaneousAbundance();
         // Update biomass
-        biomass = abundance * (gonadWeight + weight);
+        biomass = abundance * (weight);
         // Rest number of dead fish
         reset(nDead);
         // Reset diet variables
@@ -313,7 +313,7 @@ public class School extends AbstractSchool {
      */
     @Override
     public double biom2abd(double biomass) {
-        return biomass / (weight + gonadWeight);
+        return biomass / (weight);
     }
 
     /**
@@ -325,7 +325,7 @@ public class School extends AbstractSchool {
      */
     @Override
     public double abd2biom(double abundance) {
-        return abundance * (weight + gonadWeight);
+        return abundance * (weight);
     }
 
     /**
@@ -378,6 +378,31 @@ public class School extends AbstractSchool {
      */
     public void setNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] = nDead;
+                
+        double factor = 1;
+        if (this.getInstantaneousAbundance() != 0) {
+            factor = (this.getInstantaneousAbundance() - nDead) / this.getInstantaneousAbundance();
+        }
+
+        this.ingestion *= factor;
+        this.e_net *= factor;
+        
+        abundanceHasChanged = true;
+    }
+
+    @Override
+    public void incrementNdead(MortalityCause cause, double nDead) {
+        
+        this.nDead[cause.index] += nDead;
+        double factor = 1;
+        
+        if (this.getInstantaneousAbundance() != 0) {
+            factor = (this.getInstantaneousAbundance() - nDead) / this.getInstantaneousAbundance();
+        }
+
+        this.ingestion *= factor;
+        this.e_net *= factor;
+
         abundanceHasChanged = true;
     }
 
@@ -556,7 +581,7 @@ public class School extends AbstractSchool {
             instantaneousAbundance = 0.d;
         }
         instantaneousBiomass = instantaneousAbundance * weight;
-        abundanceHasChanged = false;
+        abundanceHasChanged = false; 
     }
 
     /**
