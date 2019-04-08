@@ -8,6 +8,7 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.mortality.MortalityCause;
+import java.util.Locale;
 
 /**
  *
@@ -77,7 +78,7 @@ public class BioenMortality extends AbstractProcess {
                 double ndead = Math.abs(diff) / (school.getWeight());
 
                 // set the number of dead individuals
-                school.setNdead(MortalityCause.STARVATION, ndead);
+                school.incrementNdead(MortalityCause.STARVATION, ndead);
 
             }
         }
