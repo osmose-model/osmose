@@ -274,7 +274,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         for (int i = 0; i < ns + nBkg; i++) {
             seqPred[i] = i;
         }
-        
+
         Integer[] seqFish = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqNat = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqStarv = Arrays.copyOf(seqPred, ns + nBkg);
@@ -306,15 +306,14 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
                     // barrier.n: adding the 
                     case OXY:
-                        
+
                         if ((seqOxy[i] >= ns) || (!this.getConfiguration().useBioen())) {
                             // if background school or no bioen module is used, nothing is done 
-                            break;   
+                            break;
                         }
 
                         school = schools.get(seqOxy[i]);
                         this.bioenMortality.compute_oxydative_mort(school);  // note: should be corrected by a division by subdt
-
                         break;
 
                     case PREDATION:
@@ -328,7 +327,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                                 // Loop over all the preys. If they are eaten by the predator,
                                 // the biomass of the prey is updted
                                 IAggregation prey = preys.get(ipr);
-                                nDead = prey.biom2abd(preyUpon[ipr]);
+                                nDead = prey.biom2abd(preyUpon[ipr]);   // total biomass that has been eaten
                                 prey.incrementNdead(MortalityCause.PREDATION, nDead);
                                 predator.preyedUpon(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
                             }
@@ -402,10 +401,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
                             school.incrementNdead(MortalityCause.FISHING, nDead);
                             break;
                         }
-                }
-            }
-        }
-    }
+                }  // end of switch (cause
+            }   // end of mort cause loop
+        }   // end of school loop species loop
+    }    // end of function
 
     private List<Swarm> getSwarms(Cell cell) {
         if (!swarmSet.containsKey(cell.getIndex())) {
