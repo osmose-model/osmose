@@ -308,6 +308,14 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
         }
 
+        if (getConfiguration().getBoolean("output.bioen.maturesize.enabled", NO_WARNING)) {
+            outputs.add(new SizeMatureOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.bioen.matureage.enabled", NO_WARNING)) {
+            outputs.add(new AgeMatureOutput(rank));
+        }
+        
         /*
          * Initialize indicators
          */

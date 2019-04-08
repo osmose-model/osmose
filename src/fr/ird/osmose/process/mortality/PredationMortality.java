@@ -268,7 +268,7 @@ public class PredationMortality extends AbstractMortality {
                     : getAccessibility(predator, prey) * prey.getBiomass();
         }
         double biomAccessibleTot = sum(accessibleBiomass);
-        // 2. from plankton
+        // 2. from plankton 
         double[] percentPlankton = getPercentPlankton(predator);
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];

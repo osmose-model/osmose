@@ -1,6 +1,10 @@
 simulation.use.bioen;true
 stochastic.mortality.seed;10
 movement.randomseed.fixed;true
+
+output.bioen.maturesize.enabled = true;
+output.bioen.matureage.enabled = true;
+
 ;
 ###### oxygen parameters for the fO2 function;
 bioen.fo2.c1;1

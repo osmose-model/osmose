@@ -169,6 +169,7 @@ public class School extends AbstractSchool {
     // Initialisation of maturity variables.
     // by default the school is imature.
     private double ageMature = 0;
+    private double sizeMature = 0;
     private boolean isMature = false;
     
 ///////////////
@@ -654,10 +655,24 @@ public class School extends AbstractSchool {
     }
 
     /**
+     * Returns the age at maturity (only used for outputs).
+     */
+    public double getSizeMat() {
+        return this.sizeMature;
+    }
+    
+    /**
      * Sets the age at maturity (only used for outputs).
      */
     public void setAgeMat(double agemature) {
         this.ageMature = agemature;
+    }
+    
+    /**
+     * Sets the age at maturity (only used for outputs).
+     */
+    public void setSizeMat(double sizemat) {
+        this.sizeMature = sizemat;
     }
 
     /**

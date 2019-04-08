@@ -169,6 +169,7 @@ public class EnergyBudget extends AbstractProcess {
         int output = (length >= llim) ? 1 : 0;
         if (output == 1) {
             school.setAgeMat(age);
+            school.setSizeMat(length);
             school.setIsMature(true);
         }
 
