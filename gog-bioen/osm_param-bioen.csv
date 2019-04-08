@@ -141,17 +141,17 @@ bioen.maturity.m0.sp9;0
 bioen.maturity.m0.sp10;0
 ;
 # Intercepte (cm);
-bioen.maturity.m1.sp0;10
-bioen.maturity.m1.sp1;4
+bioen.maturity.m1.sp0;95.7
+bioen.maturity.m1.sp1;12.7
 bioen.maturity.m1.sp2;8
-bioen.maturity.m1.sp3;20
-bioen.maturity.m1.sp4;11
-bioen.maturity.m1.sp5;11
-bioen.maturity.m1.sp6;7
-bioen.maturity.m1.sp7;9
-bioen.maturity.m1.sp8;70
-bioen.maturity.m1.sp9;55.7
-bioen.maturity.m1.sp10;11
+bioen.maturity.m1.sp3;10.6
+bioen.maturity.m1.sp4;12.2
+bioen.maturity.m1.sp5;21
+bioen.maturity.m1.sp6;12.5
+bioen.maturity.m1.sp7;14.3
+bioen.maturity.m1.sp8;117.2 
+bioen.maturity.m1.sp9;25.35
+bioen.maturity.m1.sp10;13.55
 ;
 ############### oxygen;
 # units here = mg.L;
@@ -169,7 +169,7 @@ species.o2_crit.sp9;7
 species.o2_crit.sp10;7
 ;
 ####################### parameters assessed by Alaia. (g.g^(-alpha);
-predation.ingestion.rate.max.bioen.sp0;21.4
+predation.ingestion.rate.max.bioen.sp0;100
 predation.ingestion.rate.max.bioen.sp1;9.6
 predation.ingestion.rate.max.bioen.sp2;14.6
 predation.ingestion.rate.max.bioen.sp3;18.4
@@ -177,7 +177,7 @@ predation.ingestion.rate.max.bioen.sp4;14.3
 predation.ingestion.rate.max.bioen.sp5;14.3
 predation.ingestion.rate.max.bioen.sp6;11.4
 predation.ingestion.rate.max.bioen.sp7;8.6
-predation.ingestion.rate.max.bioen.sp8;22.9
+predation.ingestion.rate.max.bioen.sp8;40
 predation.ingestion.rate.max.bioen.sp9;17.1
 predation.ingestion.rate.max.bioen.sp10;14.3
 ;
