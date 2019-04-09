@@ -96,7 +96,7 @@ public class BioenSizeInfOutput extends AbstractOutput {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
+        StringBuilder filename = new StringBuilder("Bioen");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_SizeInf_Simu");
