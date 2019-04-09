@@ -316,6 +316,11 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new AgeMatureOutput(rank));
         }
         
+        if (getConfiguration().getBoolean("output.bioen.sizeInf.enabled", NO_WARNING)) {
+            outputs.add(new SizeInfOutput(rank));
+        }
+        
+        
         /*
          * Initialize indicators
          */

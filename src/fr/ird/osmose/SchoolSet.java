@@ -53,6 +53,7 @@ import fr.ird.osmose.util.filter.AliveSchoolFilter;
 import fr.ird.osmose.util.filter.FilteredSet;
 import fr.ird.osmose.util.filter.FilteredSets;
 import fr.ird.osmose.util.filter.IFilter;
+import fr.ird.osmose.util.filter.OldSchoolFilter;
 import fr.ird.osmose.util.filter.OutSchoolFilter;
 import fr.ird.osmose.util.filter.PresentSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
@@ -219,6 +220,15 @@ public class SchoolSet extends OsmoseLinker {
      */
     public List<School> getAliveSchools() {
         return FilteredSets.subset(schoolset, new AliveSchoolFilter());
+    }
+    
+       /**
+     * Get a list of the old school.
+     *
+     * @return a list of the dead schools because olderness
+     */
+    public List<School> getOldSchools() {
+        return FilteredSets.subset(schoolset, new OldSchoolFilter());
     }
 
     /**
