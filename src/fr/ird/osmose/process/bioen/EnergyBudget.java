@@ -15,7 +15,6 @@ import java.io.IOException;
  */
 public class EnergyBudget extends AbstractProcess {
 
-    private double[] alpha;
     private double[] csmr;
 
     private double[] m0, m1;
@@ -53,18 +52,6 @@ public class EnergyBudget extends AbstractProcess {
             r[i] = this.getConfiguration().getDouble(key);
         }
         
-        // Recovers the alpha coefficient for focal + background species
-        alpha = new double[nspec + nBack];
-        for (int i = 0; i < this.getNSpecies(); i++) {
-            key = String.format("species.alpha.sp%d", i);
-            alpha[i] = this.getConfiguration().getDouble(key);
-        }
-
-        for (int i = 0; i < nBack; i++) {
-            key = String.format("species.alpha.bkg%d", i);
-            alpha[i + nspec] = this.getConfiguration().getDouble(key);
-        }
-
         // Recovers the alpha coefficient for focal + background species
         m0 = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
@@ -126,7 +113,7 @@ public class EnergyBudget extends AbstractProcess {
         
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
-        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, alpha[ispec]) * temp_function.get_Arrhenius(school);
+        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
         
         // multiply the maintenance flow by the number of fish in the school
@@ -229,7 +216,7 @@ public class EnergyBudget extends AbstractProcess {
         int ispec = school.getSpeciesIndex();
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - (r[ispec] / (Imax[ispec]-csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - alpha[ispec]); //Function in two parts according to maturity state
+        double kappa = (!school.isMature()) ? 1 : 1 - (r[ispec] / (Imax[ispec]-csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - school.getAlphaBioen()); //Function in two parts according to maturity state
         kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
         kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
     

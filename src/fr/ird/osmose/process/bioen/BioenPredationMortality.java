@@ -60,8 +60,6 @@ import java.util.Locale;
  * @author pverley
  */
 public class BioenPredationMortality extends PredationMortality {
-
-    private double[] alpha;
     
     private final OxygenFunction bioen_ingest;
     
@@ -87,19 +85,7 @@ public class BioenPredationMortality extends PredationMortality {
         
         int nBack = this.getNBkgSpecies();
         int nspec = this.getNSpecies();
-       
-        // Recovers the alpha coefficient for focal + background species
-        alpha = new double[nspec + nBack];
-        for (int i = 0; i < this.getNSpecies(); i++) {
-            String key = String.format("species.alpha.sp%d", i);
-            alpha[i] = this.getConfiguration().getDouble(key);
-        }
-
-        for (int i = 0; i < nBack; i++) {
-            String key = String.format("species.alpha.bkg%d", i);
-            alpha[i + nspec] = this.getConfiguration().getDouble(key);
-        }      
-        
+          
         // Recovers the max predation rate for bioen config (not the same unit as in
         // the standard code
         predationRateBioen = new double[nspec + nBack];
@@ -152,7 +138,7 @@ public class BioenPredationMortality extends PredationMortality {
             
             // maximum biomass that a single fish can eat during the time step subdt
             // barrier.n: weight is converted into g here
-            double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6f, alpha[predator.getSpeciesIndex()]) * fo2 / subdt;
+            double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6f, predator.getAlphaBioen()) * fo2 / subdt;
             
             // multiply the biomass eaten by one fish by the number of fishes to get the maximum biomass that the
             // entire school can eat
