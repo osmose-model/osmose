@@ -49,19 +49,18 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class AgeMatureOutput extends AbstractOutput {
+public class BioenIngestOutput extends AbstractOutput {
 
-    public double[] age_mature;
+    public double[] ingestion;
     public double[] abundance;
 
-    public AgeMatureOutput(int rank) {
+    public BioenIngestOutput(int rank) {
         super(rank);
     }
 
@@ -72,53 +71,52 @@ public class AgeMatureOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        age_mature = new double[getNSpecies()];
+        ingestion = new double[getNSpecies()];
         abundance = new double[getNSpecies()];
+
     }
 
     @Override
     public void update() {
-        
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (school.isMature()) {
-                age_mature[school.getSpeciesIndex()] += school.getAgeMat() * school.getInstantaneousAbundance();
-                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
-            }
+            int i = school.getSpeciesIndex();
+            ingestion[i] += school.getEGross() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
+            abundance[i] += 1;
         }
     }
-
+       
     @Override
     public void write(float time) {
-
-        for (int i = 0; i < this.getNSpecies(); i++) {
-            if (abundance[i] != 0) {
-                age_mature[i] /= abundance[i];
+        
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            if (abundance[i] > 0) {
+                ingestion[i] = (float) (ingestion[i] / abundance[i]);
             } else {
-                age_mature[i] = Double.NaN;
+                ingestion[i] = Double.NaN;
             }
         }
-
-        writeVariable(time, age_mature);
+        
+        writeVariable(time, ingestion);
     }
 
     @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("AgeIndicators");
+    public String getFilename() {
+        StringBuilder filename = new StringBuilder("Bioen");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_AgeMature_Simu");
+        filename.append("_ingestion_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
     }
 
     @Override
-    String getDescription() {
-        return "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
+    public String getDescription() {
+        return "Ingestion rate (in g)";
     }
 
     @Override
-    String[] getHeaders() {
+    public String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
             species[i] = getSpecies(i).getName();

@@ -309,17 +309,28 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.bioen.maturesize.enabled", NO_WARNING)) {
-            outputs.add(new SizeMatureOutput(rank));
+            outputs.add(new BioenSizeMatureOutput(rank));
         }
         
         if (getConfiguration().getBoolean("output.bioen.matureage.enabled", NO_WARNING)) {
-            outputs.add(new AgeMatureOutput(rank));
+            outputs.add(new BioenAgeMatureOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
+            outputs.add(new BioenIngestOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.bioen.maint.enabled", NO_WARNING)) {
+            outputs.add(new BioenMaintOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.bioen.growthpot.enabled", NO_WARNING)) {
+            outputs.add(new BioenGrowthPot(rank));
         }
         
         if (getConfiguration().getBoolean("output.bioen.sizeInf.enabled", NO_WARNING)) {
-            outputs.add(new SizeInfOutput(rank));
+            outputs.add(new BioenSizeInfOutput(rank));
         }
-        
         
         /*
          * Initialize indicators

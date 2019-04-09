@@ -49,19 +49,18 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author amorell
  */
-public class SizeInfOutput extends AbstractOutput {
+public class BioenSizeInfOutput extends AbstractOutput {
 
     public double[] size_Inf;
     public double[] abundance;
 
-    public SizeInfOutput(int rank) {
+    public BioenSizeInfOutput(int rank) {
         super(rank);
     }
 

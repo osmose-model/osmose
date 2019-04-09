@@ -49,19 +49,18 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class SizeMatureOutput extends AbstractOutput {
+public class BioenSizeMatureOutput extends AbstractOutput {
 
     public double[] size_mature;
     public double[] abundance;
 
-    public SizeMatureOutput(int rank) {
+    public BioenSizeMatureOutput(int rank) {
         super(rank);
     }
 
@@ -103,7 +102,7 @@ public class SizeMatureOutput extends AbstractOutput {
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
+        StringBuilder filename = new StringBuilder("Bioen");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_SizeMature_Simu");
