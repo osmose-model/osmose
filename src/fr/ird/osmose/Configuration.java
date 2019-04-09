@@ -320,6 +320,13 @@ public class Configuration extends OLogger {
      * @throws ucar.ma2.InvalidRangeException
      */
     public void init() throws IOException, InvalidRangeException {
+        
+        // barrier.n: reads the parameter that defines whether
+        // the bioen module should be used.
+        String keybioen = "simulation.use.bioen";
+        if (canFind(keybioen)) {
+            this.use_bioen = this.getBoolean(keybioen);
+        }
 
         // Output path
         outputPathname = getFile("output.dir.path");
@@ -378,7 +385,7 @@ public class Configuration extends OLogger {
 
         // Create the grid
         initGrid();
-
+        
         // Create the species
         species = new Species[nSpecies];
         for (int i = 0; i < species.length; i++) {
@@ -412,14 +419,7 @@ public class Configuration extends OLogger {
         for (int p = 0; p < bgSpecies.length; p++) {
             bgSpecies[p] = new BackgroundSpecies(p);
         }
-        
-        // barrier.n: reads the parameter that defines whether
-        // the bioen module should be used.
-        key = "simulation.use.bioen";
-        if(canFind(key)) { 
-            this.use_bioen = this.getBoolean(key);
-        }
-        
+                
     }
     
     public boolean useBioen() {
