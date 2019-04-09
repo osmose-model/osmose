@@ -1,10 +1,11 @@
 simulation.use.bioen;true
 stochastic.mortality.seed;10
 movement.randomseed.fixed;true
-
-output.bioen.maturesize.enabled = true;
-output.bioen.matureage.enabled = true;
-
+;
+output.bioen.maturesize.enabled;true
+output.bioen.matureage.enabled;true
+output.bioen.sizeInf.enabled;true
+output.bioen.sizeInf2.enabled;true
 ;
 ###### oxygen parameters for the fO2 function;
 bioen.fo2.c1;1
@@ -148,14 +149,14 @@ bioen.maturity.m0.sp10;0
 bioen.maturity.m1.sp0;95.7
 bioen.maturity.m1.sp1;12.7
 bioen.maturity.m1.sp2;8
-bioen.maturity.m1.sp3;10.6
+bioen.maturity.m1.sp3;21
 bioen.maturity.m1.sp4;12.2
 bioen.maturity.m1.sp5;21
 bioen.maturity.m1.sp6;12.5
 bioen.maturity.m1.sp7;14.3
-bioen.maturity.m1.sp8;117.2 
+bioen.maturity.m1.sp8;75
 bioen.maturity.m1.sp9;25.35
-bioen.maturity.m1.sp10;13.55
+bioen.maturity.m1.sp10;14.5
 ;
 ############### oxygen;
 # units here = mg.L;
@@ -173,17 +174,17 @@ species.o2_crit.sp9;7
 species.o2_crit.sp10;7
 ;
 ####################### parameters assessed by Alaia. (g.g^(-alpha);
-predation.ingestion.rate.max.bioen.sp0;90
-predation.ingestion.rate.max.bioen.sp1;9.6
-predation.ingestion.rate.max.bioen.sp2;14.6
-predation.ingestion.rate.max.bioen.sp3;18.4
-predation.ingestion.rate.max.bioen.sp4;14.3
-predation.ingestion.rate.max.bioen.sp5;14.3
-predation.ingestion.rate.max.bioen.sp6;11.4
-predation.ingestion.rate.max.bioen.sp7;8.6
-predation.ingestion.rate.max.bioen.sp8;25
-predation.ingestion.rate.max.bioen.sp9;17.1
-predation.ingestion.rate.max.bioen.sp10;14.3
+predation.ingestion.rate.max.bioen.sp0;78
+predation.ingestion.rate.max.bioen.sp1;6.5
+predation.ingestion.rate.max.bioen.sp2;11
+predation.ingestion.rate.max.bioen.sp3;11
+predation.ingestion.rate.max.bioen.sp4;9
+predation.ingestion.rate.max.bioen.sp5;7.5
+predation.ingestion.rate.max.bioen.sp6;8.5
+predation.ingestion.rate.max.bioen.sp7;6.5
+predation.ingestion.rate.max.bioen.sp8;12
+predation.ingestion.rate.max.bioen.sp9;8.5
+predation.ingestion.rate.max.bioen.sp10;8
 ;
 ######################### physical dataset parameters;
 temperature.varname;T
