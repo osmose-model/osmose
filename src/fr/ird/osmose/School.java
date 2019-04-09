@@ -789,5 +789,10 @@ public class School extends AbstractSchool {
     public void incrementEnet(double d) {
         this.e_net += d;
     }
+
+    @Override
+    public double getAlphaBioen() {
+        return this.getSpecies().getAlphaBioen();
+    }
     
 }
