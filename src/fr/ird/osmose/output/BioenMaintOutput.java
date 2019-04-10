@@ -49,8 +49,6 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.AbstractOutput;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
