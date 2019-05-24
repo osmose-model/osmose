@@ -19,3 +19,5 @@ NULL
 NULL
 #' @importFrom ncdf4 nc_open nc_close ncvar_put ncvar_get ncvar_put nc_create ncdim_def ncatt_get
 NULL
+#' @importFrom mgcv gam
+NULL
