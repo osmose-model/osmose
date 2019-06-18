@@ -14,6 +14,10 @@ simulation.nspecies;11
 mortality.algorithm;stochastic
 mortality.subdt;10
 
+# fix the seed of the mortality process, to insure
+# reproducible runs
+stochastic.mortality.seed;1
+
 ################################################# Configuration files;
 osmose.configuration.output;osm_param-output.csv
 osmose.configuration.movement;osm_param-movement.csv
