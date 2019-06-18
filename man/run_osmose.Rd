@@ -5,7 +5,7 @@
 \title{Run an OSMOSE configuration}
 \usage{
 run_osmose(input, parameters = NULL, output = NULL,
-  log = "osmose.log", version = "3.3.3", osmose = NULL,
+  log = "osmose.log", version = "4.1.0", osmose = NULL,
   java = "java", options = NULL, verbose = TRUE, clean = TRUE)
 }
 \arguments{

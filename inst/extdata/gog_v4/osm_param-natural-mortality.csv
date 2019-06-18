@@ -1,0 +1,29 @@
+# Larva mortality rate;
+mortality.natural.larva.rate.sp0;0.95
+mortality.natural.larva.rate.sp1;0.8
+mortality.natural.larva.rate.sp2;0.8
+mortality.natural.larva.rate.sp3;0.8
+mortality.natural.larva.rate.sp4;0.8
+mortality.natural.larva.rate.sp5;0.8
+mortality.natural.larva.rate.sp6;0.8
+mortality.natural.larva.rate.sp7;0.8
+mortality.natural.larva.rate.sp8;0.01
+mortality.natural.larva.rate.sp9;0.8
+mortality.natural.larva.rate.sp10;0.8
+# Time series can be provided in a CSV file instead;
+#mortality.natural.larva.rate.byDt.file.spX;null
+
+# Natural mortality rate;
+mortality.natural.rate.sp0;2.4558812
+mortality.natural.rate.sp1;0.44
+mortality.natural.rate.sp2;2.23
+mortality.natural.rate.sp3;0.5112923169
+mortality.natural.rate.sp4;0.6
+mortality.natural.rate.sp5;0.5
+mortality.natural.rate.sp6;0.8
+mortality.natural.rate.sp7;0.60665298
+mortality.natural.rate.sp8;0.46810079
+mortality.natural.rate.sp9;0.4
+mortality.natural.rate.sp10;0.15
+# Time series can be provided in a CSV file instead;
+#mortality.natural.rate.bytDt.file.spX

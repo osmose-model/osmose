@@ -29,7 +29,7 @@
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
-                      version = "3.3.3", osmose = NULL, java = "java",
+                      version = "4.1.0", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE) {
   
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
@@ -79,7 +79,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #' Title
 #' @export
 runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version="3.3.3", osmose=NULL, java="java", 
+                     version="4.1.0", osmose=NULL, java="java", 
                      options=NULL, verbose=TRUE, clean=TRUE) {
   
   message("runOsmose will be deprecated, use run_osmose instead.")
@@ -144,7 +144,7 @@ osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
   
   .Deprecated("read_osmose")
   read_osmose(path=path, version=version, species.names=species.names, ...)
-
+  
 }
 
 
@@ -232,25 +232,31 @@ report = function(x, format, output, ...) {
 #'# plot output data
 #'plot(data)
 #'}
-osmose_demo = function(path=NULL, config=NULL) {
+osmose_demo = function(path=NULL, config=c("gog", "gog_v4", "default")) {
   
-  if(is.null(path)) path = getwd()
+  config = match.arg(config)
   
-  if(is.null(config)) {
-    config = "default"
-    warning("Using default configuration 'Gulf of Gabbes' (gog)")
+  # if no path has been provided, create a path from the working dir.
+  if(is.null(path)) path = file.path(getwd(), config)
+  
+  # if the directory does not exist, then create
+  # the directory
+  if(!dir.exists(path)) {
+    dir.create(path)
   }
   
   # swith for the configuration directory
   input_dir = switch(config, 
                      gog = system.file(package="osmose", "extdata", "gog"),
+                     gog_v4 = system.file(package="osmose", "extdata", "gog_v4"),
                      default = system.file(package="osmose", "extdata", "gog")
   )
   
   # swith for the configuration directory and defines the configuration file
   config_file = switch(config, 
-                      gog = "osm_all-parameters.csv",
-                      default = "osm_all-parameters.csv"
+                       gog = "osm_all-parameters.csv",
+                       gog_v4 = "osm_all-parameters.csv",
+                       default = "osm_all-parameters.csv"
   )
   
   file.copy(from=input_dir, to=path, recursive=TRUE, overwrite = FALSE)
