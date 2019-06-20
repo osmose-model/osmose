@@ -1,6 +1,6 @@
 # fix the movements seed to insure that 
 # all methods are reproducible
-movement.randomseed.fixed;true
+movement.randomseed.fixed;false
 
 movement.distribution.method.sp0;maps
 movement.distribution.method.sp1;maps
