@@ -16,7 +16,7 @@ mortality.subdt;10
 
 # fix the seed of the mortality process, to insure
 # reproducible runs
-stochastic.mortality.seed;1
+# stochastic.mortality.seed;1
 
 ################################################# Configuration files;
 osmose.configuration.output;osm_param-output.csv
