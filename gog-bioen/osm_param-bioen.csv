@@ -5,7 +5,10 @@ movement.randomseed.fixed;true
 output.bioen.maturesize.enabled;true
 output.bioen.matureage.enabled;true
 output.bioen.sizeInf.enabled;true
-output.bioen.sizeInf2.enabled;true
+output.bioen.maint.enabled;true
+output.bioen.ingest.enabled;true
+output.bioen.growthpot.enabled;true
+;
 ;
 ###### oxygen parameters for the fO2 function;
 bioen.fo2.c1;1
@@ -62,18 +65,6 @@ bioen.gross.energy.tmax.sp8;35
 bioen.gross.energy.tmax.sp9;35
 bioen.gross.energy.tmax.sp10;35
 ;
-bioen.arrh.ct1.sp0;15.7
-bioen.arrh.ct1.sp1;15.7
-bioen.arrh.ct1.sp2;15.7
-bioen.arrh.ct1.sp3;15.7
-bioen.arrh.ct1.sp4;15.7
-bioen.arrh.ct1.sp5;15.7
-bioen.arrh.ct1.sp6;15.7
-bioen.arrh.ct1.sp7;15.7
-bioen.arrh.ct1.sp8;15.7
-bioen.arrh.ct1.sp9;15.7
-bioen.arrh.ct1.sp10;15.7
-;
 bioen.arrh.ct2.sp0;5020
 bioen.arrh.ct2.sp1;5020
 bioen.arrh.ct2.sp2;5020
@@ -85,6 +76,18 @@ bioen.arrh.ct2.sp7;5020
 bioen.arrh.ct2.sp8;5020
 bioen.arrh.ct2.sp9;5020
 bioen.arrh.ct2.sp10;5020
+;
+bioen.maint.energy.Tr.sp0;305
+bioen.maint.energy.Tr.sp1;305
+bioen.maint.energy.Tr.sp2;305
+bioen.maint.energy.Tr.sp3;305
+bioen.maint.energy.Tr.sp4;305
+bioen.maint.energy.Tr.sp5;305
+bioen.maint.energy.Tr.sp6;305
+bioen.maint.energy.Tr.sp7;305
+bioen.maint.energy.Tr.sp8;305
+bioen.maint.energy.Tr.sp9;305
+bioen.maint.energy.Tr.sp10;305
 ;
 ################# oxydation mortality;
 # ???? not yet filled;
@@ -104,17 +107,17 @@ species.alpha.sp9;0.75
 species.alpha.sp10;0.75
 ;
 ############# energy SMR (g.g^-alpha);
-bioen.maint.energy.csmr.sp0;2
-bioen.maint.energy.csmr.sp1;2
-bioen.maint.energy.csmr.sp2;2
-bioen.maint.energy.csmr.sp3;2
-bioen.maint.energy.csmr.sp4;2
-bioen.maint.energy.csmr.sp5;2
-bioen.maint.energy.csmr.sp6;2
-bioen.maint.energy.csmr.sp7;2
-bioen.maint.energy.csmr.sp8;2
-bioen.maint.energy.csmr.sp9;2
-bioen.maint.energy.csmr.sp10;2
+bioen.maint.energy.csmr.sp0;1
+bioen.maint.energy.csmr.sp1;1
+bioen.maint.energy.csmr.sp2;1
+bioen.maint.energy.csmr.sp3;1
+bioen.maint.energy.csmr.sp4;1
+bioen.maint.energy.csmr.sp5;1
+bioen.maint.energy.csmr.sp6;1
+bioen.maint.energy.csmr.sp7;1
+bioen.maint.energy.csmr.sp8;1
+bioen.maint.energy.csmr.sp9;1
+bioen.maint.energy.csmr.sp10;1
 ;
 ############## r for kappa calculation (no unity);
 # barrier.n: values set but fully checked. ;
@@ -175,16 +178,16 @@ species.o2_crit.sp10;7
 ;
 ####################### parameters assessed by Alaia. (g.g^(-alpha);
 predation.ingestion.rate.max.bioen.sp0;78
-predation.ingestion.rate.max.bioen.sp1;6.5
-predation.ingestion.rate.max.bioen.sp2;11
-predation.ingestion.rate.max.bioen.sp3;11
-predation.ingestion.rate.max.bioen.sp4;9
-predation.ingestion.rate.max.bioen.sp5;7.5
-predation.ingestion.rate.max.bioen.sp6;8.5
-predation.ingestion.rate.max.bioen.sp7;6.5
-predation.ingestion.rate.max.bioen.sp8;12
-predation.ingestion.rate.max.bioen.sp9;8.5
-predation.ingestion.rate.max.bioen.sp10;8
+predation.ingestion.rate.max.bioen.sp1;8
+predation.ingestion.rate.max.bioen.sp2;12
+predation.ingestion.rate.max.bioen.sp3;13
+predation.ingestion.rate.max.bioen.sp4;10
+predation.ingestion.rate.max.bioen.sp5;9
+predation.ingestion.rate.max.bioen.sp6;10
+predation.ingestion.rate.max.bioen.sp7;10
+predation.ingestion.rate.max.bioen.sp8;15
+predation.ingestion.rate.max.bioen.sp9;10
+predation.ingestion.rate.max.bioen.sp10;10
 ;
 ######################### physical dataset parameters;
 temperature.varname;T

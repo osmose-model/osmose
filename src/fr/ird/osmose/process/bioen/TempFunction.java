@@ -23,7 +23,7 @@ public class TempFunction extends AbstractProcess {
     /**
      * Parameters for the energy maintenance.
      */
-    private double[] c_t1, c_t2;
+    private double[] c_t2, Tr;
 
     PhysicalData temperature_input;
 
@@ -49,9 +49,9 @@ public class TempFunction extends AbstractProcess {
         ap = new double[this.getNSpecies()];
         bp = new double[this.getNSpecies()];
         cp = new double[this.getNSpecies()];
-        c_t1 = new double[this.getNSpecies()];
         c_t2 = new double[this.getNSpecies()];
-        
+        Tr = new double[this.getNSpecies()];
+
         String key;
 
         key = "bioen.gross.energy.tmin";
@@ -75,13 +75,18 @@ public class TempFunction extends AbstractProcess {
         key = "bioen.arrh.ct1";
         for (int i = 0; i < this.getNSpecies(); i++) {
             String keytmp = String.format("%s.sp%d", key, i);
-            c_t1[i] = getConfiguration().getDouble(keytmp);
         }
 
         key = "bioen.arrh.ct2";
         for (int i = 0; i < this.getNSpecies(); i++) {
             String keytmp = String.format("%s.sp%d", key, i);
             c_t2[i] = getConfiguration().getDouble(keytmp);
+        }
+
+        key = "bioen.maint.energy.Tr";
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            String keytmp = String.format("%s.sp%d", key, i);
+            Tr[i] = getConfiguration().getDouble(keytmp);
         }
 
         this.compute_abc();
@@ -97,7 +102,7 @@ public class TempFunction extends AbstractProcess {
      * Computes the phiT coefficients function for gross energy. Equation 4
      */
     public void compute_abc() {
-  
+
         for (int i = 0; i < this.getNSpecies(); i++) {
             this.b[i] = 2 / (topt[i] * Math.pow(tmin[i] / topt[i] - 1, 2));
             this.a[i] = -this.b[i] / (2 * topt[i]);
@@ -107,7 +112,7 @@ public class TempFunction extends AbstractProcess {
             this.ap[i] = -this.bp[i] / (2 * topt[i]);
             this.cp[i] = 1 - (this.bp[i] / 2.d) * topt[i];
         }
-        
+
     }
 
     /**
@@ -130,7 +135,7 @@ public class TempFunction extends AbstractProcess {
         // Recovers the temperature of the school cell
         double temp = temperature_input.getValue(school);
         int i = school.getSpeciesIndex();
-        
+
         if ((temp < tmin[i]) || (temp > tmax[i])) {
             return 0;
         }
@@ -139,7 +144,7 @@ public class TempFunction extends AbstractProcess {
         return output;
 
     }
-    
+
     /**
      * Returns the Arrhenius function for a given school. Cf. equation 6
      *
@@ -149,10 +154,12 @@ public class TempFunction extends AbstractProcess {
     public double get_Arrhenius(School school) {
 
         // Recovers the temperature of the school cell
+        // Autre formulation de Arrhénius : la plus récente des deux 
         double temp = this.getTemp(school);
         int i = school.getSpeciesIndex();
 
-        return Math.exp(this.c_t1[i] - (this.c_t2[i] / (temp+273.15)));
+        return Math.exp(this.c_t2[i] * (1 / (temp+273) - 1 / this.Tr[i]));
 
     }
+
 }
