@@ -1,3 +1,13 @@
+output.regional.biomass.enabled;true
+output.regional.abundance.enabled;true
+
+output.region.file0 = output_region0.csv
+output.region.name0 = Region0
+
+output.region.file1 = output_region1.csv
+output.region.name1 = Region1
+
+
 # Main output parameters;
 output.start.year;0
 output.file.prefix;gogosm
