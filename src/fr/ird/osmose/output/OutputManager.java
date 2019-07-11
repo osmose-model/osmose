@@ -332,6 +332,18 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new BioenSizeInfOutput(rank));
         }
         
+        if (getConfiguration().getBoolean("output.regional.biomass.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new RegionalOutputsBiomass(rank, getSpecies(i)));
+            }
+        }
+        
+        if (getConfiguration().getBoolean("output.regional.abundance.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new RegionalOutputsAbundance(rank, getSpecies(i)));
+            }
+        }
+        
         /*
          * Initialize indicators
          */

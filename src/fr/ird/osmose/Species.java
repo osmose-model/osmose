@@ -140,16 +140,12 @@ public class Species {
         eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
         float agemax = cfg.getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        System.out.println(cfg.useBioen());
 
         // barrier.n: added for bioenergetic purposes.
         if (cfg.useBioen()) {
             zlayer = cfg.getInt("species.zlayer.sp" + index);
-
             String key = String.format("species.alpha.sp%d", index);
             alpha_bioen = cfg.getDouble(key);
-            System.out.println("+++++ alpha = " + this.alpha_bioen);
         }
 
     }
