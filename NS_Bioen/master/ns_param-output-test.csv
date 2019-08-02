@@ -12,8 +12,8 @@ output.restart.enabled;false
 ;
 # Biomass;
 output.biomass.enabled;true
-output.biomass.bysize.enabled;true
-output.biomass.byage.enabled;true
+output.biomass.bysize.enabled;false
+output.biomass.byage.enabled;false
 ;
 # Abundance;
 output.abundance.enabled;true
@@ -26,31 +26,31 @@ output.mortality.perSpecies.byAge.enabled;false
 output.mortality.perSpecies.bySize.enabled;false
 ;
 # Yield;
-output.yield.biomass.enabled;false
+output.yield.biomass.enabled;true
 output.yield.abundance.enabled;false
 ;
 output.yieldN.bySize.enabled;false
-output.yield.bySize.enabled;true
+output.yield.bySize.enabled;false
 output.yieldN.byAge.enabled;false
 output.yield.byAge.enabled;false
 ;
 # Size;
-output.size.enabled;true
+output.size.enabled;false
 output.size.catch.enabled;false
-output.meanSize.byAge.enabled;true
+output.meanSize.byAge.enabled;false
 ;
 # TL;
-output.TL.enabled;true
-output.TL.catch.enabled;true
+output.TL.enabled;false
+output.TL.catch.enabled;false
 output.biomass.byTL.enabled;false
 output.meanTL.bySize.enabled;false
 output.meanTL.byAge.enabled;false
 ;
 # Predation;
-output.diet.composition.enabled;true
+output.diet.composition.enabled;false
 output.diet.composition.byAge.enabled;false
 output.diet.composition.bySize.enabled;false
-output.diet.pressure.enabled;true
+output.diet.pressure.enabled;false
 output.diet.pressure.byAge.enabled;false
 output.diet.pressure.bySize.enabled;false
 ;
@@ -110,3 +110,15 @@ output.distrib.byAge.max;30
 output.distrib.byAge.incr;1
 output.distrib.byAge.min.sp.1;0
 output.distrib.bySize.min.sp.1;0
+;
+;
+#Output per area;
+output.spatialabundance.enabled;false
+output.spatialbiomass.enabled;false
+output.spatialsize.enabled;false
+output.spatialyield.enabled;false
+output.spatialyieldN.enabled;false
+output.spatialtl.enabled;false
+output.spatialsizespecies.enabled;false
+output.spatialagespecies.enabled;false
+output.fisheries.enabled;false
