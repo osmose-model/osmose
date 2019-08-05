@@ -7,7 +7,7 @@ simulation.restart.file;null
 simulation.nschool;30
 simulation.ncpu;1
 simulation.nplankton;6
-simulation.nsimulation;1
+simulation.nsimulation;10
 simulation.nspecies;11
 
 # Mortality algorithm;
@@ -16,7 +16,7 @@ mortality.subdt;10
 
 # fix the seed of the mortality process, to insure
 # reproducible runs
-stochastic.mortality.seed;1
+# stochastic.mortality.seed;1
 
 ################################################# Configuration files;
 osmose.configuration.output;osm_param-output.csv
