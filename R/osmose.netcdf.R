@@ -133,11 +133,19 @@ extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-g
   var = drop(ncvar_get(fid, varname, ...))
   
   nc_close(fid)
+
+  ndims = length(dim(var))
   
-  if(length(dim(var)) != 2) {
-    error("The variable must be 2D. Please set the start and count arguments to extract a 2D (lon, lat) array")
+  if(ndims == 4) {
+      var = var[, , 1, 1]
+  } else if(ndims == 3) {
+    var = var[, , 1]
+  } else if (ndims == 2) {
+    var = var
+  } else {
+      stop("The number of dimensions of the input file must be 2, 3 or 4")
   }
-  
+
   nlon = dim(var)[1]
   nlat = dim(var)[2]
   
