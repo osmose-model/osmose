@@ -56,7 +56,7 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
   nc_close(fid)
   
   # If the longitude is 1D, it is converted into 2D
-  if(is.vector(lon))
+  if(length(dim(lon)) == 1)
   {
     cat("Longitude and Latitudes are 1D.\n")
     cat("They are be converted into 2D arrays.\n")
