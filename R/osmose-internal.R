@@ -274,8 +274,15 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
                              SizeSpectrumSpeciesYield  = .read_2D(files=files, path=path, ...),
                              SizeSpectrumSpeciesYieldN = .read_2D(files=files, path=path, ...),
                              mortalityRate             = .read_MortStage(files=files, path=path, ...),
+                             
+                             #bioen
+                             AgeMature  = .read_1D(files=files, path=path, ...),
                              growthpot  = .read_1D(files=files, path=path, ...),
-
+                             ingestion = .read_1D(files=files, path=path, ...),
+                             maint = .read_1D(files=files, path=path, ...),
+                             SizeInf = .read_1D(files=files, path=path, ...),
+                             SizeMature = .read_1D(files=files, path=path, ...),
+                             
                              # osmose 3r1
                              #            mortalityRateDistribByAge = .read_MortStagebyAgeorSize(files=files, path=path, ...),
                              #            mortalityRateDistribBySize = .read_MortStagebyAgeorSize(files=files, path=path, ...),
@@ -320,7 +327,6 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
 .read_1D = function(files, path, ...) {
     # TO_DO: change for the unified approach! species as list
     if(length(files)!=0) {
-      print(files[1])
         x = .readOsmoseCsv(file.path(path, files[1]), ...)
         species = names(x)
         times   = rownames(x)
@@ -544,7 +550,16 @@ osmose2R.v3r2 = function (path=NULL, species.names=NULL) {
                       mortalityByAge = readOsmoseFiles(path = path, type = "mortalityRateDistribByAge", bySpecies = TRUE),
                       dietMatrixByAge = readOsmoseFiles(path = path, type = "dietMatrixbyAge", bySpecies = TRUE),
                       predatorPressureByAge = readOsmoseFiles(path = path, type = "predatorPressureDistribByAge", bySpecies = TRUE),
-                      growthPotential = readOsmoseFiles(path = path, type = "growthpot"))
+                      
+                      # bioen variables
+                      ageMature = readOsmoseFiles(path = path, type = "AgeMature"),
+                      growthPotential = readOsmoseFiles(path = path, type = "growthpot"),
+                      ingestion = readOsmoseFiles(path = path, type = "ingestion"),
+                      maintenance = readOsmoseFiles(path = path, type = "maint"),
+                      sizeInf = readOsmoseFiles(path = path, type = "SizeInf"),
+                      sizeMature = readOsmoseFiles(path = path, type = "SizeMature")
+                      
+                      )
 
     model = list(version = "3u2",
                  model = .getModelName(path = path),
