@@ -1,2 +1,2 @@
-osmose.configuration.calibration;calibration-parameters.csv
-osmose.configuration.main;ns_all-parameters.csv
+osmose.configuration.calibration,calibration-parameters.csv
+osmose.configuration.main,ns_all-parameters.csv

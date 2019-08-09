@@ -1,18 +1,18 @@
-# Osmose 3 Update 2 (2015/03/01) Deprecated parameter population.initialization.method;
-# population.initialization.method;biomass
-population.seeding.biomass.sp0;503
-population.seeding.biomass.sp1;1275
-population.seeding.biomass.sp2;8140
-population.seeding.biomass.sp3;400
-population.seeding.biomass.sp4;980
-population.seeding.biomass.sp5;265
-population.seeding.biomass.sp6;800
-population.seeding.biomass.sp7;750
-population.seeding.biomass.sp8;700
-population.seeding.biomass.sp9;500
-population.seeding.biomass.sp10;1275
-population.seeding.biomass.sp11;1700
-population.seeding.biomass.sp12;482
-population.seeding.biomass.sp13;255
-population.seeding.biomass.sp14;426
-population.seeding.biomass.sp15;8140
+# Osmose 3 Update 2 (2015/03/01) Deprecated parameter population.initialization.method,
+# population.initialization.method,biomass
+population.seeding.biomass.sp0,503
+population.seeding.biomass.sp1,1275
+population.seeding.biomass.sp2,8140
+population.seeding.biomass.sp3,400
+population.seeding.biomass.sp4,980
+population.seeding.biomass.sp5,265
+population.seeding.biomass.sp6,800
+population.seeding.biomass.sp7,750
+population.seeding.biomass.sp8,700
+population.seeding.biomass.sp9,500
+population.seeding.biomass.sp10,1275
+population.seeding.biomass.sp11,1700
+population.seeding.biomass.sp12,482
+population.seeding.biomass.sp13,255
+population.seeding.biomass.sp14,426
+population.seeding.biomass.sp15,8140

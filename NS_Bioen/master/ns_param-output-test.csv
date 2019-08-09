@@ -1,124 +1,106 @@
-# Main output parameters;
-output.start.year;0
-output.file.prefix;ns
-output.dir.path;output
-output.recordfrequency.ndt;2
-;
-# CSV separator (COMA, SEMICOLON, EQUALS, COLON, TAB);
-output.csv.separator;COMA
-;
-# Save restart file;
-output.restart.enabled;false
-;
-# Biomass;
-output.biomass.enabled;true
-output.biomass.bysize.enabled;false
-output.biomass.byage.enabled;false
-;
-# Abundance;
-output.abundance.enabled;true
-output.abundance.bysize.enabled;false
-output.abundance.byage.enabled;false
-;
-# Mortality;
-output.mortality.enabled;true
-output.mortality.perSpecies.byAge.enabled;false
-output.mortality.perSpecies.bySize.enabled;false
-;
-# Yield;
-output.yield.biomass.enabled;true
-output.yield.abundance.enabled;false
-;
-output.yieldN.bySize.enabled;false
-output.yield.bySize.enabled;false
-output.yieldN.byAge.enabled;false
-output.yield.byAge.enabled;false
-;
-# Size;
-output.size.enabled;false
-output.size.catch.enabled;false
-output.meanSize.byAge.enabled;false
-;
-# TL;
-output.TL.enabled;false
-output.TL.catch.enabled;false
-output.biomass.byTL.enabled;false
-output.meanTL.bySize.enabled;false
-output.meanTL.byAge.enabled;false
-;
-# Predation;
-output.diet.composition.enabled;false
-output.diet.composition.byAge.enabled;false
-output.diet.composition.bySize.enabled;false
-output.diet.pressure.enabled;false
-output.diet.pressure.byAge.enabled;false
-output.diet.pressure.bySize.enabled;false
-;
-# Spatial;
-output.spatial.enabled;false
-output.spatial.ltl.enabled;false
-;
-# Advanced parameters;
-# Whether to include step 0 of the simulation in the outputs;
-output.step0.include;false
-;
-# Cutoff for biomass, abundance, mean size and mean trophic level outputs;
-output.cutoff.enabled;true
-output.cutoff.age.sp0;0.5
-output.cutoff.age.sp1;0.5
-output.cutoff.age.sp2;0.5
-output.cutoff.age.sp3;0.5
-output.cutoff.age.sp4;0.5
-output.cutoff.age.sp5;0.5
-output.cutoff.age.sp6;0.5
-output.cutoff.age.sp7;0.5
-output.cutoff.age.sp8;0.5
-output.cutoff.age.sp9;0.5
-output.cutoff.age.sp10;0.5
-output.cutoff.age.sp11;0.5
-output.cutoff.age.sp12;0.5
-output.cutoff.age.sp13;0.5
-output.cutoff.age.sp14;0.5
-output.cutoff.age.sp15;0.5
-;
-# Diet output stages;
-output.diet.stage.structure;size
-output.diet.stage.threshold.sp0;90
-output.diet.stage.threshold.sp1;8
-output.diet.stage.threshold.sp2;8
-output.diet.stage.threshold.sp3;11
-output.diet.stage.threshold.sp4;9
-output.diet.stage.threshold.sp5;11
-output.diet.stage.threshold.sp6;9
-output.diet.stage.threshold.sp7;9
-output.diet.stage.threshold.sp8;50
-output.diet.stage.threshold.sp9;11
-output.diet.stage.threshold.sp10;9
-output.diet.stage.threshold.sp10;null
-output.diet.stage.threshold.sp11;null
-output.diet.stage.threshold.sp12;null
-output.diet.stage.threshold.sp13;null
-output.diet.stage.threshold.sp14;null
-output.diet.stage.threshold.sp15;null
-;
-# Size tion (centimetre) ;
-output.distrib.bySize.max;205
-output.distrib.bySize.incr;10
-;
-# Age tion (year);
-output.distrib.byAge.max;30
-output.distrib.byAge.incr;1
-output.distrib.byAge.min.sp.1;0
-output.distrib.bySize.min.sp.1;0
-;
-;
-#Output per area;
-output.spatialabundance.enabled;false
-output.spatialbiomass.enabled;false
-output.spatialsize.enabled;false
-output.spatialyield.enabled;false
-output.spatialyieldN.enabled;false
-output.spatialtl.enabled;false
-output.spatialsizespecies.enabled;false
-output.spatialagespecies.enabled;false
-output.fisheries.enabled;false
+# Main output parameters,
+output.start.year,50
+output.file.prefix,ns
+output.dir.path,output
+output.recordfrequency.ndt,24
+# CSV separator (COMA, SEMICOLON, EQUALS, COLON, TAB),
+output.csv.separator,COMA
+# Save restart file,
+output.restart.enabled,false
+# Biomass,
+output.biomass.enabled,true
+output.biomass.bysize.enabled,false
+output.biomass.byage.enabled,false
+# Abundance,
+output.abundance.enabled,true
+output.abundance.bysize.enabled,false
+output.abundance.byage.enabled,false
+# Mortality,
+output.mortality.enabled,false
+output.mortality.perSpecies.byAge.enabled,false
+output.mortality.perSpecies.bySize.enabled,false
+# Yield,
+output.yield.biomass.enabled,true
+output.yield.abundance.enabled,false
+output.yieldN.bySize.enabled,false
+output.yield.bySize.enabled,false
+output.yieldN.byAge.enabled,false
+output.yield.byAge.enabled,false
+# Size,
+output.size.enabled,false
+output.size.catch.enabled,false
+output.meanSize.byAge.enabled,false
+# TL,
+output.TL.enabled,false
+output.TL.catch.enabled,false
+output.biomass.byTL.enabled,false
+output.meanTL.bySize.enabled,false
+output.meanTL.byAge.enabled,false
+# Predation,
+output.diet.composition.enabled,false
+output.diet.composition.byAge.enabled,false
+output.diet.composition.bySize.enabled,false
+output.diet.pressure.enabled,false
+output.diet.pressure.byAge.enabled,false
+output.diet.pressure.bySize.enabled,false
+# Spatial,
+output.spatial.enabled,false
+output.spatial.ltl.enabled,false
+# Advanced parameters,
+# Whether to include step 0 of the simulation in the outputs,
+output.step0.include,false
+# Cutoff for biomass, abundance, mean size and mean trophic level outputs,
+output.cutoff.enabled,true
+output.cutoff.age.sp0,0.5
+output.cutoff.age.sp1,0.5
+output.cutoff.age.sp2,0.5
+output.cutoff.age.sp3,0.5
+output.cutoff.age.sp4,0.5
+output.cutoff.age.sp5,0.5
+output.cutoff.age.sp6,0.5
+output.cutoff.age.sp7,0.5
+output.cutoff.age.sp8,0.5
+output.cutoff.age.sp9,0.5
+output.cutoff.age.sp10,0.5
+output.cutoff.age.sp11,0.5
+output.cutoff.age.sp12,0.5
+output.cutoff.age.sp13,0.5
+output.cutoff.age.sp14,0.5
+output.cutoff.age.sp15,0.5
+# Diet output stages,
+output.diet.stage.structure,size
+output.diet.stage.threshold.sp0,90
+output.diet.stage.threshold.sp1,8
+output.diet.stage.threshold.sp2,8
+output.diet.stage.threshold.sp3,11
+output.diet.stage.threshold.sp4,9
+output.diet.stage.threshold.sp5,11
+output.diet.stage.threshold.sp6,9
+output.diet.stage.threshold.sp7,9
+output.diet.stage.threshold.sp8,50
+output.diet.stage.threshold.sp9,11
+output.diet.stage.threshold.sp10,9
+output.diet.stage.threshold.sp10,null
+output.diet.stage.threshold.sp11,null
+output.diet.stage.threshold.sp12,null
+output.diet.stage.threshold.sp13,null
+output.diet.stage.threshold.sp14,null
+output.diet.stage.threshold.sp15,null
+# Size tion (centimetre) ,
+output.distrib.bySize.max,205
+output.distrib.bySize.incr,10
+# Age tion (year),
+output.distrib.byAge.max,30
+output.distrib.byAge.incr,1
+output.distrib.byAge.min.sp.1,0
+output.distrib.bySize.min.sp.1,0
+#Output per area,
+output.spatialabundance.enabled,false
+output.spatialbiomass.enabled,false
+output.spatialsize.enabled,false
+output.spatialyield.enabled,false
+output.spatialyieldN.enabled,false
+output.spatialtl.enabled,false
+output.spatialsizespecies.enabled,false
+output.spatialagespecies.enabled,false
+output.fisheries.enabled,false
