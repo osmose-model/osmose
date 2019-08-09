@@ -1,13 +1,13 @@
 grid.java.classname;fr.ird.osmose.grid.OriginalGrid
-grid.lowright.lat;62
-grid.lowright.lon;-4
+grid.lowright.lat;49
+grid.lowright.lon;8.5
 grid.mask.file;maps/grid-mask.csv
 # Osmose 3 Update 3 Release 3 (2018/11/28) Renamed parameter grid.ncolumn into grid.nlon;
 grid.nlon;25
 # Osmose 3 Update 3 Release 3 (2018/11/28) Renamed parameter grid.nline into grid.nlat;
 grid.nlat;52
-grid.upleft.lat;49
-grid.upleft.lon;8.5
+grid.upleft.lat;62
+grid.upleft.lon;-4
 ;
 grid.ncolumn;25
 grid.nline;52
