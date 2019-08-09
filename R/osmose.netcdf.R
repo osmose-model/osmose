@@ -96,8 +96,8 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
   output = rbind(output, c("grid.nlat", nlat))
   output = rbind(output, c("grid.lowright.lat", lowrightlat))
   output = rbind(output, c("grid.lowright.lon", lowrightlon))
-  output = rbind(output, c("grid.upperleft.lat", upperleftlat))
-  output = rbind(output, c("grid.upperleft.lon", upperleftlon))
+  output = rbind(output, c("grid.upleft.lat", upperleftlat))
+  output = rbind(output, c("grid.upleft.lon", upperleftlon))
   
   # Handling of the saving into CSV
   if(!is.null(csv)) 
