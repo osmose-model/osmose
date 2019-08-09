@@ -2,7 +2,7 @@ import xarray as xr
 import numpy as np
 import pylab as plt
 
-data = xr.open_dataset("corrected_ns_ltlbiomassTons_test.nc")
+data = xr.open_dataset("LTL_essai.nc")
 diatoms = data['Diatoms'].values
 time = data['time'].values
 latitude = data['latitude'].values
@@ -30,17 +30,7 @@ print(longitude.shape)
 
 ds = xr.Dataset({'T': (['time', 'zindex', 'y', 'x'], T),
                   'O2': (['time', 'zindex', 'y', 'x'], O2)},
-                 coords={'lon': (['x'], latitude),'lat': (['y'], longitude)}
+                 coords={'lat': (['y'], latitude),'lon': (['x'], longitude)}
                   )
 
-ds.to_netcdf("physical.nc", format="NETCDF4_CLASSIC")
-
-quit()
-
-mask = (np.isnan(data['T'].values) == False)
-data['O2'] = data['T']
-
-data['T'].values = 8.4 * np.ones(data['T'].values.shape) * mask   # C.
-data['O2'].values = 350 * np.ones(data['T'].values.shape) * mask  # C.   # mmol/m3
-
-data.to_netcdf("corrected_physical_forcings_northsea.nc", format="NETCDF4_CLASSIC")
+ds.to_netcdf("physical_forcings_northsea.nc", format="NETCDF4_CLASSIC")
