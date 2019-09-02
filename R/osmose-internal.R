@@ -106,7 +106,7 @@
 #' @param ... String arguments 
 #' @param keep.att Whether parameter attributes should be kept
 #' @examples{
-#'    filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+#'    filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
 #'    par = readOsmoseConfiguration(filename)
 #'    getOsmoseParameter(par, "population", "seeding", "year", "max", keep.att=FALSE)
 #' }
@@ -124,7 +124,7 @@ getOsmoseParameter = function(par, ..., keep.att=FALSE) {
 #' @param ... String arguments 
 #' @param keep.att Whether parameter attributes should be kept
 #' @examples{
-#'    filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+#'    filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
 #'    par = readOsmoseConfiguration(filename)
 #'    getOsmoseParameter(par, "population", "seeding", "year", "max", keep.att=FALSE)
 #' }
