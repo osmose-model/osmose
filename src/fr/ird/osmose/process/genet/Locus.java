@@ -14,70 +14,81 @@ import fr.ird.osmose.util.SimulationLinker;
 public class Locus extends SimulationLinker {
 
     /**
-     * Values of the two Locus (dim=2).
+     * Values of the two Locus (dim=N=2).
      */
-    private int value[];
+    private final double value[];
 
     /**
-     * Number of alleles. This is the number of possible values for the current
-     * locus.
+     * Number of values for a given loci (alleles). 
      */
-    public int n_allele;
-
-    /** Number of values for a given loci. */
     private final int N = 2;
-
+    
+    /** Trait that is associated with the given loci. 
+     This is a pointer to the trait associated with the given locus*/
+    private final Trait trait;
+    
+    /** Locus index within the given trait. */
+    private final int index;
+    
     /**
      * Locus constructor.
+     *
      * @param rank
+     * @param index
+     * @param trait
      */
-    public Locus(int rank) {
+    public Locus(int rank, int index, Trait trait) {
 
         super(rank);
-        value = new int[2];
+        this.index = index;
+        this.trait = trait;
+        value = new double[N];
 
     }
-
-    public void init() {
-
-        n_allele = this.getConfiguration().getInt("genet.nallele");
-
-    }
-
+    
     /**
      * Random draft of an allele among the n_allele possible.
      */
     public void init_random_draft() {
-        for (int k = 0; k < N; k++) {
-            double i = Math.random() * this.n_allele;
-            int n = (int) i;
-            value[k] = n;
-        }
+
+        // value index in the trait diversity array.
+        int valindex;
+         
+        // Random draft of a given value in the diversity value for 1st allel
+        valindex = (int) (Math.random() * this.trait.getNValues());
+        value[0] = this.trait.getDiv(index, valindex);
+        
+        // Random draft of a given value in the diversity value for 1st allel
+        valindex = (int) (Math.random() * this.trait.getNValues());
+        value[1] = this.trait.getDiv(index, valindex);
+        
     }
-    
-    /** Set locus values from the parents locus (uniform draft of the 
-     * parent's locus). 
+
+    /**
+     * Set locus values from the parents locus (uniform draft of the parent's
+     * locus).
+     *
      * @param parent_a
-     * @param parent_b 
+     * @param parent_b
      */
     public void set_from_parents(Locus parent_a, Locus parent_b) {
-        
+
+        // Random draft of an allel (0 or 1) from parent a
         int i = (int) (2 * Math.random());
-        value[0] = parent_a.getValue()[i];
-                        
+        value[0] = parent_a.getValue(i);
+
+        // Random draft of an allel (0 or 1) from parent 
         i = (int) (2 * Math.random());
-        value[1] = parent_b.getValue()[i];
-        
+        value[1] = parent_b.getValue(i);
+
     }
-    
-    public int[] getValue() {
-        return this.value;
+
+    public double getValue(int i) {
+        return this.value[i];
     }
-    
-    public int sum() {
-        return (value[0] + value[1]);
+
+    public double sum() {
+        return (this.getValue(0) + this.getValue(1));
     }
-            
-    
 
 }
