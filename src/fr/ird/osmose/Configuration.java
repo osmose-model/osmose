@@ -51,6 +51,7 @@ package fr.ird.osmose;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.AbstractGrid;
+import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.logging.OLogger;
 import java.io.BufferedReader;
@@ -245,9 +246,17 @@ public class Configuration extends OLogger {
      * Array of background species.
      */
     private BackgroundSpecies[] bgSpecies; // barrier.n
-    
-    /** True if the bioenergetic module should be activated. */
+
+    /**
+     * True if the bioenergetic module should be activated.
+     */
     private boolean use_bioen = false;
+
+    /**
+     * List of evolving trait.
+     */
+    private List<Trait> evolvingTrait;
+    private int n_evolving_trait;
 
 ///////////////
 // Constructors
@@ -316,11 +325,12 @@ public class Configuration extends OLogger {
     /**
      * Initialises the current configuration. Sets the values of the main
      * variables and creates the grid.
+     *
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
     public void init() throws IOException, InvalidRangeException {
-        
+
         // barrier.n: reads the parameter that defines whether
         // the bioen module should be used.
         String keybioen = "simulation.use.bioen";
@@ -385,7 +395,7 @@ public class Configuration extends OLogger {
 
         // Create the grid
         initGrid();
-        
+
         // Create the species
         species = new Species[nSpecies];
         for (int i = 0; i < species.length; i++) {
@@ -419,9 +429,20 @@ public class Configuration extends OLogger {
         for (int p = 0; p < bgSpecies.length; p++) {
             bgSpecies[p] = new BackgroundSpecies(p);
         }
-                
+
+        // Count the number of parameters that ends by trait.mean
+        List<String> genet_keys = findKeys("*.trait.mean");
+        this.n_evolving_trait = genet_keys.size();
+        for (int p = 0; p < this.n_evolving_trait; p++) {
+            key = genet_keys.get(p);
+            // recovers the trait prefix
+            String prefix = key.replace(".trait.mean", "");
+            Trait trait = new Trait(prefix);
+            this.evolvingTrait.add(trait);
+        }
+
     }
-    
+
     public boolean useBioen() {
         return this.use_bioen;
     }
@@ -736,8 +757,8 @@ public class Configuration extends OLogger {
         }
         return Double.NaN;
     }
-    
-       /**
+
+    /**
      * Returns the specified parameter as a double.
      *
      * @param key, the key of the parameter
@@ -1011,7 +1032,7 @@ public class Configuration extends OLogger {
     public String getMainFile() {
         return mainFilename;
     }
-    
+
     /**
      * Returns the number of species. Parameter <i>simulation.nspecies</i>
      *
@@ -1030,7 +1051,7 @@ public class Configuration extends OLogger {
     public BackgroundSpecies getBkgSpecies(int index) {
         return bgSpecies[index];
     }
-    
+
     /**
      * Inner class that represents a parameter in the configuration file.
      * {@code Configuration} parses the configuration file line by line. When
@@ -1171,4 +1192,13 @@ public class Configuration extends OLogger {
             return str.toString();
         }
     }
+
+    public Trait getEvolvingTrait(int i) {
+        return evolvingTrait.get(i);
+    }
+
+    public int getNEvolvingTraits() {
+        return n_evolving_trait;
+    }
+
 }
