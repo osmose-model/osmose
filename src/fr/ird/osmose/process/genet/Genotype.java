@@ -22,7 +22,7 @@ public class Genotype extends SimulationLinker {
      * vary).
      */
     private final List<List<Locus>> genotype;
-    private double traits[];
+    private final double traits[];
     private final int ntraits;
     private final int[] nlocus;
 
@@ -56,7 +56,9 @@ public class Genotype extends SimulationLinker {
     }  // end of constructor
 
     /**
-     * Init genotype using random methods.
+     * Init, for each trait, all the locus by using random draft within Normal
+     * distribution. When the initialisation of locus is done, update the trait
+     * values
      */
     public void init_genotype() {
 
@@ -67,8 +69,17 @@ public class Genotype extends SimulationLinker {
                 this.getLocus(i, j).init_random_draft();
             }
         }  // end of trait loop
+        this.update_traits();
     }  // end of method
 
+    /**
+     * Updates, for each trait, the locus values by using the genotypes of both
+     * parents. When the initialisation of locus is done, update the trait
+     * values
+     *
+     * @param parent_a
+     * @param parent_b
+     */
     public void transmit_genotype(Genotype parent_a, Genotype parent_b) {
 
         for (int i = 0; i < ntraits; i++) {
@@ -77,18 +88,32 @@ public class Genotype extends SimulationLinker {
                 this.getLocus(i, j).set_from_parents(parent_a.getLocus(i, j), parent_b.getLocus(i, j));
             }
         }  // end of trait loop
+        this.update_traits();
     }  // end of method
 
+    /** Updates the traits values by using the list of locus associated with
+     * this trait. */
     public void update_traits() {
         for (int i = 0; i < ntraits; i++) {
-            traits[i] = this.getConfiguration().getEvolvingTrait(i).getTrait(getLocusList(i));
+            this.traits[i] = this.getConfiguration().getEvolvingTrait(i).getTrait(getLocusList(i));
         }
     }
 
+    /** Returns the locus for a given trait and locus index.
+     * 
+     * @param itrait
+     * @param ilocus
+     * @return 
+     */
     public Locus getLocus(int itrait, int ilocus) {
         return genotype.get(itrait).get(ilocus);
     }
 
+    /** Returns the list of locus that are associated with a given trait. 
+     * 
+     * @param itrait
+     * @return 
+     */
     public List<Locus> getLocusList(int itrait) {
         return genotype.get(itrait);
     }
