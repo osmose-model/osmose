@@ -5,125 +5,121 @@
  */
 package fr.ird.osmose.process.genet;
 
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
  * @author nbarrier
  */
-public class Trait extends SimulationLinker {
+public class Trait extends OsmoseLinker {
 
     /**
-     * Number of alleles. This is the number of possible values for the current
-     * locus.
+     * Number of locus that code the traits.
      */
-    public int n_locus;
-
+    private int n_locus;
+            
     /**
-     * List of locus that code the given trait.
+     * Number of possible values that the locus can take.
      */
-    List<Locus> list_locus;
+    private int n_val;
 
-    /**
-     * Minimum and maximum values of the trait.
-     */
-    public double xmin, xmax;
-
-    /**
-     * Value of the trait.
-     */
-    public double x;
-
-    private double u;
-
-    String prefix;
+    /** Mean and variance of trait. */
+    private double xmean, xvar;
+    
+    /** Name of the trait. */
+    private final String prefix;
+    
+    /** Diversity matrix, used to initialize genotypes. */
+    private double[][] diversity;
 
     /**
      * Locus constructor.
      *
      * @param rank
+     * @param prefix
      */
-    public Trait(int rank, String prefix) {
+    public Trait(String prefix) {
 
         // Trait eyecolor = new Trait(rank, "eyecol")
-        super(rank);
         this.prefix = prefix;
 
     }
 
     public void init() {
 
-        n_locus = this.getConfiguration().getInt("genet.nlocus");
-        list_locus = new ArrayList(n_locus);
-
-        // look for param "eyecol.xmin"
-        String key = String.format("%s.xmin", prefix);
-        xmin = this.getConfiguration().getDouble(key);
-
-        // look for param "eyecol.xmax"
-        key = String.format("%s.xmax", prefix);
-        xmax = this.getConfiguration().getDouble(key);
-
-        if (xmin > xmax) {
-            // Flip xmin and xmax
-            warning("Xmin and Xmax have been flipped");
-            double xtmp = xmax;
-            xmax = xmin;
-            xmin = xtmp;
-        }
-
-        int n_allele = this.getConfiguration().getInt("genet.nallele");
-        u = (this.xmax - this.xmin) / ((n_allele - 1) * n_locus * 2);
-
-        for (Locus l : list_locus) {
-            l.init();
-        }
-
-    }
-
-    public void random_draft() {
-
-        for (Locus l : list_locus) {
-            l.init_random_draft();
-        }
-
-        this.setTrait();
-
-    }
-
-    public void set_from_parents(Trait parentA, Trait parentB) {
-
-        for (int i = 0; i < list_locus.size(); i++) {
-            this.list_locus.get(i).set_from_parents(parentA.getLocus(i), parentB.getLocus(i));
-        }
-
-        this.setTrait();
-
-    }
-
-    public Locus getLocus(int i) {
-        return list_locus.get(i);
-    }
-
-    public void setTrait() {
+        String key;
         
-        this.x = 0;
+        // look for the mean value of the trait
+        key = String.format("%s.trait.mean", prefix);
+        xmean = this.getConfiguration().getDouble(key);
+
+        // look for the variance (sigma^2) of the trait
+        key = String.format("%s.trait.var", prefix);
+        xvar = this.getConfiguration().getDouble(key);
+
+        // number of locus that code the trait
+        key = String.format("%s.trait.nlocus", prefix);
+        n_locus = this.getConfiguration().getInt(key);
         
-        // Computation of (V1 + V1') + (V2 + V2') + (...)
+        // number of values that the locus can take
+        key = String.format("%s.trait.nval", prefix);
+        n_val = this.getConfiguration().getInt(key);
+        
+        diversity = new double[n_locus][n_val];
+        // Convert the trait variance to "Loci" standard deviation.
+        // variance is xvar / (2 * Lc)
+        // hence standard deviation is sqrt(xvar / (2 * Lc))
+        double stddev = Math.sqrt(xvar / (2 * n_locus));
+        
+        // initialisation of the "diversity" matrix, which is
+        // the array of possible values for each of the locis
+        // that code the trait
+        Random gaussian_gen = new Random();
+        for (int i = 0; i < n_locus; i++) {
+            for (int k = 0; k < n_val; k++) {  // k = 0, 1
+                diversity[i][k] = gaussian_gen.nextGaussian() * stddev;
+            }
+        }
+    }
+
+   
+    /** Get the value of a trait provided a list of locus.
+     * @param list_locus */
+    public double getTrait(List<Locus> list_locus) {
+        
+        double x = 0;
+        
+        // Computation of (V1 + V1') + (V2 + V2') + (...) (equation  of Alaia's document)
+        //  Equation 34 from Alaia's document
         for (Locus l : list_locus) {
-            this.x += l.sum();
+            x += l.sum();
         }
 
         // Multiplication by U + adding xmin
-        this.x *= u;
-        this.x += xmin;
+        //this.x *= u;
+        x += this.xmean;
+        
+        return x;
 
     }
-
-    public double getTrait() {
-        return this.x;
+    
+    public int getNLocus() {
+        return this.n_locus;
+    }
+    
+    public int getNValues() { 
+        return this.n_val;
     }
 
+    public double getVar() { 
+        return this.xvar;
+    }
+    
+    public double getDiv(int loc_index, int val_index) { 
+        return this.diversity[loc_index][val_index];
+    }
 }
