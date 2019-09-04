@@ -5,13 +5,14 @@
  */
 package fr.ird.osmose.process.genet;
 
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.SimulationLinker;
 
 /**
  *
  * @author nbarrier
  */
-public class Locus extends SimulationLinker {
+public class Locus extends OsmoseLinker {
 
     /**
      * Values of the two Locus (dim=N=2).
@@ -37,9 +38,8 @@ public class Locus extends SimulationLinker {
      * @param index
      * @param trait
      */
-    public Locus(int rank, int index, Trait trait) {
+    public Locus(int index, Trait trait) {
 
-        super(rank);
         this.index = index;
         this.trait = trait;
         value = new double[N];
