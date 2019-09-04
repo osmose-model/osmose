@@ -42,9 +42,9 @@ public class NewBornGenotype extends AbstractProcess {
     @Override
     public void run() {
 
-        int[][][] Genotype_parent1 = ParentSelection(this.iSpec).getGenotype();
-        int[][][] Genotype_parent2 = ParentSelection(this.iSpec).getGenotype();
-        meiosis(Genotype_parent1, Genotype_parent2);
+        //int[][][] Genotype_parent1 = ParentSelection(this.iSpec).getGenotype();
+        //int[][][] Genotype_parent2 = ParentSelection(this.iSpec).getGenotype();
+        //meiosis(Genotype_parent1, Genotype_parent2);
     }
 
     private int[][][] meiosis(int[][][] Genotype_parent1, int[][][] Genotype_parent2) {
