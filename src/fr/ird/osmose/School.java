@@ -48,6 +48,7 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.Collection;
@@ -96,6 +97,10 @@ public class School extends AbstractSchool {
      * {@link Species} of the fish.
      */
     final private Species species;
+    
+    /** Genotype variable. */
+    private Genotype genotype;
+    
     /**
      * The index of the species. From [0; nSpec-1] for fish and from [nSpec;
      * nSpec+nLTL-1] for plankton.
@@ -251,6 +256,10 @@ public class School extends AbstractSchool {
         out = false;
         preys = new HashMap();
         starvationRate = 0.d;
+        
+        // initialize the genotype object for the given school
+        genotype = new Genotype();
+        
     }
 
 ////////////////////////////
@@ -782,10 +791,6 @@ public class School extends AbstractSchool {
         this.mort_starv_rate = value;
     }
 
-    public int[][][] getGenotype() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public void incrementEnet(double d) {
         this.e_net += d;
     }
@@ -793,6 +798,10 @@ public class School extends AbstractSchool {
     @Override
     public double getAlphaBioen() {
         return this.getSpecies().getAlphaBioen();
+    }
+    
+    public Genotype getGenotype() {
+        return this.genotype;
     }
     
 }
