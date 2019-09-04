@@ -50,9 +50,11 @@ package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.process.*;
 import fr.ird.osmose.School;
-import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.util.timeseries.SingleTimeSeries;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class controls the reproduction process in the simulated domain. The
@@ -68,16 +70,14 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * guarantee egg release.
  */
 public class BioenReproductionProcess extends ReproductionProcess {
-        
+
     public BioenReproductionProcess(int rank) {
         super(rank);
     }
 
     @Override
     public void init() {
-
         super.init();
-        
     }
 
     @Override
@@ -101,10 +101,11 @@ public class BioenReproductionProcess extends ReproductionProcess {
         // loop over the species to lay cohort at age class 0
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
 
+            // Recover the species object and all the schools of the given species
             Species species = getSpecies(i);
+            List<School> schoolset = getSchoolSet().getSchools(species);
+            WeightedRandomDraft weight_rand = new WeightedRandomDraft();
 
-            // initialisation of the number of eggs to be released
-            double nEgg = 0.d;
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
 
@@ -113,15 +114,26 @@ public class BioenReproductionProcess extends ReproductionProcess {
                 // if seeding biomass is 0 (no mature indivials, release eggs in the
                 // old fashioned way.
                 SSB[i] = this.getSeedingBiomass(i);
-                nEgg += this.getSexRatio(i) * this.getAlpha(i) * season * SSB[i] * 1000000;
-                
+                double nEgg = this.getSexRatio(i) * this.getAlpha(i) * season * SSB[i] * 1000000;
+                try {
+                    // in this case, weight_rand is never used.
+                    this.create_reproduction_schools(i, nEgg, true, weight_rand);
+                } catch (Exception ex) {
+                    error("Shit ", ex);
+                }
+
             } else {
+                
+                double negg_tot = 0.d;
+
                 // if the seeding biomass is not null, loop over sexually mature schools
-                for (School school : getSchoolSet().getSchools(getSpecies(i))) {
+                for (School school : schoolset) {
+
                     if (!school.isMature()) {
+                        // if school is not mature, no reproduction
                         continue;
                     }
-                    
+
                     // recovers the weight of the gonad that is lost for reproduction.
                     // in this case, the gonad weight times the season variable.
                     float wEgg = school.getGonadWeight() * (float) season;
@@ -131,29 +143,63 @@ public class BioenReproductionProcess extends ReproductionProcess {
 
                     // the number of eggs is equal to the total gonad weight that is gone
                     // divided by the egg weight.
-                    
                     // barrier.n: change in conversion from tone to gram
-                    nEgg += wEgg * this.getSexRatio(i) / species.getEggWeight() * 1000000 * school.getInstantaneousAbundance();
+                    // since EggWeight is in g.
+                    double nEgg = wEgg * this.getSexRatio(i) / species.getEggWeight() * 1000000 * school.getInstantaneousAbundance();
+                    negg_tot += nEgg;
+                    weight_rand.add(nEgg, school);
+                }  // end of loop over the school that belong to species i    
+                try {
+                    this.create_reproduction_schools(i, negg_tot, false, weight_rand);
+                } catch (Exception ex) {
+                    error("Shit ", ex);
+                }
 
-                }  // end of loop over the school that belong to species i            
             }  // end of SSB statement
 
-            // lay age class zero
-            int nSchool = getConfiguration().getNSchool(i);
-            // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
-            //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
-            if (nEgg == 0.d) {
-                // do nothing, zero school
-            } else if (nEgg < nSchool) {
-                School school0 = new School(species, nEgg);
-                getSchoolSet().add(school0);
-            } else if (nEgg >= nSchool) {
-                for (int s = 0; s < nSchool; s++) {
-                    School school0 = new School(species, nEgg / nSchool);
-                    getSchoolSet().add(school0);
-                }
-            }
         }
     }
 
-}
+    private void create_reproduction_schools(int i, double nEgg, boolean init_genotype, WeightedRandomDraft rand_draft) throws Exception {
+        // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
+        //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
+
+        // if the number of eggs is 0, nothing is done
+        if (nEgg == 0.d) {
+            return;
+        }
+
+        // lay age class zero
+        int nSchool = getConfiguration().getNSchool(i);
+        Species species = getSpecies(i);
+
+        // do nothing, zero school
+        if (nEgg < nSchool) {
+
+            School school0 = new School(species, nEgg);
+            if (init_genotype) {
+                school0.getGenotype().init_genotype();
+            } else {
+                School parent_a = (School) rand_draft.next();
+                School parent_b = (School) rand_draft.next();
+                school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
+            }
+            getSchoolSet().add(school0);
+        } else if (nEgg >= nSchool) {
+
+            for (int s = 0; s < nSchool; s++) {
+                School school0 = new School(species, nEgg / nSchool);
+                if (init_genotype) {
+                    school0.getGenotype().init_genotype();
+                } else {
+                    School parent_a = (School) rand_draft.next();
+                    School parent_b = (School) rand_draft.next();
+                    school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
+                }
+                getSchoolSet().add(school0);
+            }
+
+        } // end of test on nEgg
+    }  // end of method
+
+}  // end of class
