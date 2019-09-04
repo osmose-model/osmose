@@ -5,7 +5,7 @@
  */
 package fr.ird.osmose.process.genet;
 
-import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.OsmoseLinker;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author nbarrier
  */
-public class Genotype extends SimulationLinker {
+public class Genotype extends OsmoseLinker {
 
     /**
      * Complete genotype for an individual. It is a list (one element per
@@ -26,9 +26,8 @@ public class Genotype extends SimulationLinker {
     private final int ntraits;
     private final int[] nlocus;
 
-    public Genotype(int rank) {
+    public Genotype() {
 
-        super(rank);
         genotype = new ArrayList<>();
 
         ntraits = this.getConfiguration().getNEvolvingTraits();
@@ -46,7 +45,7 @@ public class Genotype extends SimulationLinker {
             // Init the list of locus for the given trait
             List<Locus> list_locus = new ArrayList<>();
             for (int j = 0; j < nlocus[i]; j++) {
-                Locus l = new Locus(this.getRank(), j, trait);
+                Locus l = new Locus(j, trait);
                 list_locus.add(l);
             }  // end of locus loop
 
@@ -91,31 +90,63 @@ public class Genotype extends SimulationLinker {
         this.update_traits();
     }  // end of method
 
-    /** Updates the traits values by using the list of locus associated with
-     * this trait. */
+    /**
+     * Updates the traits values by using the list of locus associated with this
+     * trait.
+     */
     public void update_traits() {
         for (int i = 0; i < ntraits; i++) {
             this.traits[i] = this.getConfiguration().getEvolvingTrait(i).getTrait(getLocusList(i));
         }
     }
 
-    /** Returns the locus for a given trait and locus index.
-     * 
+    /**
+     * Returns the locus for a given trait and locus index.
+     *
      * @param itrait
      * @param ilocus
-     * @return 
+     * @return
      */
     public Locus getLocus(int itrait, int ilocus) {
         return genotype.get(itrait).get(ilocus);
     }
 
-    /** Returns the list of locus that are associated with a given trait. 
-     * 
+    /**
+     * Returns the list of locus that are associated with a given trait.
+     *
      * @param itrait
-     * @return 
+     * @return
      */
     public List<Locus> getLocusList(int itrait) {
         return genotype.get(itrait);
+    }
+
+    /** Return the index of a trait providing it's name.
+     * @param name Name of the trait
+     * @return The index of the trait
+     * @throws java.lang.Exception */
+    public int getTraitIndex(String name) throws Exception {
+
+        for (int i = 0; i < ntraits; i++) {
+            if (name.toLowerCase().compareTo(this.getConfiguration().getEvolvingTrait(i).getName().toLowerCase()) == 0) {
+                return i;
+            }
+        }
+
+        // If the trait has not been found, return an exception.
+        throw new Exception("The trait " + name + " cannot be found");
+
+    }
+
+    /** Returns the value of the trait for a given genotype.
+     * @param name Name of the trait
+     * @return Value of the trait for the given genotype
+     * @throws java.lang.Exception  */
+    public double getTrait(String name) throws Exception {
+
+        int index = this.getTraitIndex(name);
+        return traits[index];
+
     }
 
 }  // end of class
