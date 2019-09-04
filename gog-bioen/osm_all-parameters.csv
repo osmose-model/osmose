@@ -34,3 +34,5 @@ osmose.configuration.initialization;osm_param-init-pop.csv
 osmose.version; Osmose 4 Update 2 Release 0 (2019/03/22)
 
 osmose.configuration.bioen;osm_param-bioen.csv
+
+osmose.configuration.traits;osm_param-trait.csv
