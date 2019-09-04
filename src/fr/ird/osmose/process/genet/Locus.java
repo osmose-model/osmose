@@ -6,7 +6,6 @@
 package fr.ird.osmose.process.genet;
 
 import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.SimulationLinker;
 
 /**
  *
@@ -31,17 +30,22 @@ public class Locus extends OsmoseLinker {
     /** Locus index within the given trait. */
     private final int index;
     
+    /** Species associated with the index. */
+    private final int spec_index;
+    
     /**
      * Locus constructor.
      *
      * @param rank
      * @param index
+     * @param spec_index
      * @param trait
      */
-    public Locus(int index, Trait trait) {
+    public Locus(int index, Trait trait, int spec_index) {
 
         this.index = index;
         this.trait = trait;
+        this.spec_index = spec_index;
         value = new double[N];
 
     }
@@ -55,12 +59,12 @@ public class Locus extends OsmoseLinker {
         int valindex;
          
         // Random draft of a given value in the diversity value for 1st allel
-        valindex = (int) (Math.random() * this.trait.getNValues());
-        value[0] = this.trait.getDiv(index, valindex);
+        valindex = (int) (Math.random() * this.trait.getNValues(spec_index));
+        value[0] = this.trait.getDiv(spec_index, index, valindex);
         
         // Random draft of a given value in the diversity value for 1st allel
-        valindex = (int) (Math.random() * this.trait.getNValues());
-        value[1] = this.trait.getDiv(index, valindex);
+        valindex = (int) (Math.random() * this.trait.getNValues(spec_index));
+        value[1] = this.trait.getDiv(spec_index, index, valindex);
         
     }
 

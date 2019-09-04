@@ -257,8 +257,8 @@ public class School extends AbstractSchool {
         preys = new HashMap();
         starvationRate = 0.d;
         
-        // initialize the genotype object for the given school
-        genotype = new Genotype();
+        // initialize the genotype object for the given school of the given species
+        genotype = new Genotype(species);
         
     }
 

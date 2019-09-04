@@ -18,23 +18,31 @@ import java.util.Random;
 public class Trait extends OsmoseLinker {
 
     /**
-     * Number of locus that code the traits.
+     * Number of locus that code the traits. One value for each species
      */
-    private int n_locus;
-            
-    /**
-     * Number of possible values that the locus can take.
-     */
-    private int n_val;
+    private int[] n_locus;
 
-    /** Mean and variance of trait. */
-    private double xmean, xvar;
-    
-    /** Name of the trait. */
+    /**
+     * Number of possible values that the locus can take. One value for each
+     * species
+     */
+    private int[] n_val;
+
+    /**
+     * Mean and variance of trait. One value for each species
+     */
+    private double[] xmean, xvar;
+
+    /**
+     * Name of the trait.
+     */
     private final String prefix;
-    
-    /** Diversity matrix, used to initialize genotypes. */
-    private double[][] diversity;
+
+    /**
+     * Diversity matrix, used to initialize genotypes. One matrix for each
+     * species
+     */
+    private double[][][] diversity;
 
     /**
      * Locus constructor.
@@ -52,78 +60,120 @@ public class Trait extends OsmoseLinker {
     public void init() {
 
         String key;
-        
+
+        int nspecies = this.getNSpecies();
+
         // look for the mean value of the trait
         key = String.format("%s.trait.mean", prefix);
-        xmean = this.getConfiguration().getDouble(key);
+        xmean = this.getConfiguration().getArrayDouble(key);
+        if (xmean.length != nspecies) {
+            String errorMsg = String.format("The xmean value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, xmean.length);
+            error(errorMsg, new Exception());
+        }
 
         // look for the variance (sigma^2) of the trait
         key = String.format("%s.trait.var", prefix);
-        xvar = this.getConfiguration().getDouble(key);
+        xvar = this.getConfiguration().getArrayDouble(key);
+        if (xvar.length != nspecies) {
+            String errorMsg = String.format("The xvar value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, xvar.length);
+            error(errorMsg, new Exception());
+        }
 
         // number of locus that code the trait
         key = String.format("%s.trait.nlocus", prefix);
-        n_locus = this.getConfiguration().getInt(key);
-        
+        n_locus = this.getConfiguration().getArrayInt(key);
+        if (n_locus.length != nspecies) {
+            String errorMsg = String.format("The n_locus value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, n_locus.length);
+            error(errorMsg, new Exception());
+        }
+
         // number of values that the locus can take
         key = String.format("%s.trait.nval", prefix);
-        n_val = this.getConfiguration().getInt(key);
-        
-        diversity = new double[n_locus][n_val];
-        // Convert the trait variance to "Loci" standard deviation.
-        // variance is xvar / (2 * Lc)
-        // hence standard deviation is sqrt(xvar / (2 * Lc))
-        double stddev = Math.sqrt(xvar / (2 * n_locus));
-        
-        // initialisation of the "diversity" matrix, which is
-        // the array of possible values for each of the locis
-        // that code the trait
-        Random gaussian_gen = new Random();
-        for (int i = 0; i < n_locus; i++) {
-            for (int k = 0; k < n_val; k++) {  // k = 0, 1
-                diversity[i][k] = gaussian_gen.nextGaussian() * stddev;
+        n_val = this.getConfiguration().getArrayInt(key);
+        if (n_val.length != nspecies) {
+            String errorMsg = String.format("The n_val value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, n_val.length);
+            error(errorMsg, new Exception());
+        }
+
+        diversity = new double[nspecies][][];
+
+        for (int ispec = 0; ispec < nspecies; ispec++) {
+
+            diversity[ispec] = new double[n_locus[ispec]][n_val[ispec]];
+            // Convert the trait variance to "Loci" standard deviation.
+            // variance is xvar / (2 * Lc)
+            // hence standard deviation is sqrt(xvar / (2 * Lc))
+            double stddev = Math.sqrt(xvar[ispec] / (2 * n_locus[ispec]));
+
+            // initialisation of the "diversity" matrix, which is
+            // the array of possible values for each of the locis
+            // that code the trait
+            Random gaussian_gen = new Random();
+            for (int i = 0; i < n_locus[ispec]; i++) {
+                for (int k = 0; k < n_val[ispec]; k++) {  // k = 0, 1
+                    diversity[ispec][i][k] = gaussian_gen.nextGaussian() * stddev;
+                }
             }
-        }
+        }  // end of species loop
     }
 
-   
-    /** Get the value of a trait provided a list of locus.
-     * @param list_locus */
-    public double getTrait(List<Locus> list_locus) {
-        
-        double x = 0;
-        
-        // Computation of (V1 + V1') + (V2 + V2') + (...) (equation  of Alaia's document)
-        //  Equation 34 from Alaia's document
-        for (Locus l : list_locus) {
-            x += l.sum();
-        }
-
-        // Multiplication by U + adding xmin
-        //this.x *= u;
-        x += this.xmean;
-        
-        return x;
-
-    }
-    
-    public int getNLocus() {
-        return this.n_locus;
-    }
-    
-    public int getNValues() { 
-        return this.n_val;
+    /**
+     * Returns the number of locus that codes the trait.
+     *
+     * @param index Species index
+     * @return
+     */
+    public int getNLocus(int index) {
+        return this.n_locus[index];
     }
 
-    public double getVar() { 
-        return this.xvar;
+    /**
+     * Returns the number of values a locus can take for the trait.
+     *
+     * @param index Species index
+     * @return
+     */
+    public int getNValues(int index) {
+        return this.n_val[index];
     }
-    
-    public double getDiv(int loc_index, int val_index) { 
-        return this.diversity[loc_index][val_index];
+
+    /**
+     * Returns the variance of the trait.
+     *
+     * @param index Species index
+     * @return
+     */
+    public double getVar(int index) {
+        return this.xvar[index];
     }
-    
-    public String getName() { 
+
+    /**
+     * Returns the diversity matrix of the trait.
+     *
+     * @param spec_index Species index
+     * @param loc_index Locus index (L_c)
+     * @param val_index Value index (V)
+     * @return
+     */
+    public double getDiv(int spec_index, int loc_index, int val_index) {
+        return this.diversity[spec_index][loc_index][val_index];
+    }
+
+    /**
+     * Returns the mean value of the trait.
+     *
+     * @param spec_index
+     * @return
+     */
+    public double getMean(int spec_index) {
+        return this.xmean[spec_index];
+    }
+
+    /** Get the name of the variable trait. 
+     * 
+     * @return Name of the trait. 
+     */
+    public String getName() {
         return this.prefix;
     }
 }
