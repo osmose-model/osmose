@@ -122,4 +122,8 @@ public class Trait extends OsmoseLinker {
     public double getDiv(int loc_index, int val_index) { 
         return this.diversity[loc_index][val_index];
     }
+    
+    public String getName() { 
+        return this.prefix;
+    }
 }
