@@ -53,8 +53,6 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class controls the reproduction process in the simulated domain. The
@@ -105,7 +103,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
             Species species = getSpecies(i);
             List<School> schoolset = getSchoolSet().getSchools(species);
             WeightedRandomDraft weight_rand = new WeightedRandomDraft();
-
+            
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
 
@@ -115,15 +113,12 @@ public class BioenReproductionProcess extends ReproductionProcess {
                 // old fashioned way.
                 SSB[i] = this.getSeedingBiomass(i);
                 double nEgg = this.getSexRatio(i) * this.getAlpha(i) * season * SSB[i] * 1000000;
-                try {
-                    // in this case, weight_rand is never used.
-                    this.create_reproduction_schools(i, nEgg, true, weight_rand);
-                } catch (Exception ex) {
-                    error("Shit ", ex);
-                }
+
+                // in this case, weight_rand is never used.
+                this.create_reproduction_schools(i, nEgg, true, weight_rand);
 
             } else {
-                
+
                 double negg_tot = 0.d;
 
                 // if the seeding biomass is not null, loop over sexually mature schools
@@ -137,10 +132,10 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     // recovers the weight of the gonad that is lost for reproduction.
                     // in this case, the gonad weight times the season variable.
                     float wEgg = school.getGonadWeight() * (float) season;
-
+                  
                     // the wEgg content is removed from the gonad
                     school.incrementGonadWeight(-wEgg);
-
+                    
                     // the number of eggs is equal to the total gonad weight that is gone
                     // divided by the egg weight.
                     // barrier.n: change in conversion from tone to gram
@@ -149,18 +144,14 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     negg_tot += nEgg;
                     weight_rand.add(nEgg, school);
                 }  // end of loop over the school that belong to species i    
-                try {
-                    this.create_reproduction_schools(i, negg_tot, false, weight_rand);
-                } catch (Exception ex) {
-                    error("Shit ", ex);
-                }
 
+                this.create_reproduction_schools(i, negg_tot, false, weight_rand);
+                
             }  // end of SSB statement
-
-        }
+        }  // end of species loop
     }
 
-    private void create_reproduction_schools(int i, double nEgg, boolean init_genotype, WeightedRandomDraft rand_draft) throws Exception {
+    private void create_reproduction_schools(int i, double nEgg, boolean init_genotype, WeightedRandomDraft rand_draft) {
         // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
         //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
 
