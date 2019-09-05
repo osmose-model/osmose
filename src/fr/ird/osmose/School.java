@@ -637,8 +637,9 @@ public class School extends AbstractSchool {
      * @param dg Weight increment (in ton)
      */
     public void incrementGonadWeight(float dg) {
-        if (dg > 0.f) {
-            this.gonadWeight += dg;
+        this.gonadWeight += dg;
+        if(this.gonadWeight < 0.d) { 
+            warning("Gonad weight is negative");
         }
     }
 
