@@ -8,6 +8,8 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -92,12 +94,19 @@ public class EnergyBudget extends AbstractProcess {
         for (School school : getSchoolSet().getAliveSchools()) {
             this.get_egross(school);   // computes E_gross, stored in the attribute.
             this.get_maintenance(school);   // computes E_maintanance
-            this.get_maturation(school);   // computes maturation properties for the species.
+            try {
+                this.get_maturation(school);   // computes maturation properties for the species.
+            } catch (Exception ex) {
+                Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
+            }
             school.setENet(school.getEGross() - school.getEMaint());
-            this.get_kappa(school);   // computes the kappa function
+            try {
+                this.get_kappa(school);   // computes the kappa function
+            } catch (Exception ex) {
+                Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
+            }
             this.get_dw(school);   // computes E_growth (somatic growth)
             this.get_dg(school);   // computes the increase in gonadic weight
-
         }
     }
 
@@ -140,7 +149,7 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public int get_maturation(School school) {
+    public int get_maturation(School school) throws Exception {
 
         // If the school is mature, nothing is done and returns 1
         if (school.isMature()) {
@@ -148,10 +157,17 @@ public class EnergyBudget extends AbstractProcess {
         }
 
         int ispec = school.getSpeciesIndex();
+        
+        String key = "m0";
+        double m0_temp = school.existsTrait(key) ? school.getTrait(key) : m0[ispec];
+        
+        key = "m1";
+        double m1_temp = school.existsTrait(key) ? school.getTrait(key) : m1[ispec];
+
         // If the school is not mature yet, maturation is computed following equation 8
         double age = school.getAge();  // returns the age in years
         double length = school.getLength();   // warning: length in cm.
-        double llim = this.m0[ispec] * age + this.m1[ispec];   // computation of a maturity
+        double llim = m0_temp * age + m1_temp;   // computation of a maturity
 
         int output = (length >= llim) ? 1 : 0;
         if (output == 1) {
@@ -212,11 +228,19 @@ public class EnergyBudget extends AbstractProcess {
      * @return
      */
     
-    public void get_kappa(School school) {
+    public void get_kappa(School school) throws Exception {
         int ispec = school.getSpeciesIndex();
+    
+        String key = "r";
+        double r_temp = school.existsTrait(key) ? school.getTrait(key) : r[ispec];
+        
+        key = "imax";
+        double imax_temp = school.existsTrait(key) ? school.getTrait(key) : Imax[ispec];
+        
+        
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - (r[ispec] / (Imax[ispec]-csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - school.getAlphaBioen()); //Function in two parts according to maturity state
+        double kappa = (!school.isMature()) ? 1 : 1 - (r_temp / (imax_temp - csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - school.getAlphaBioen()); //Function in two parts according to maturity state
         kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
         kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
     

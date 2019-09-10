@@ -184,5 +184,25 @@ public class Genotype extends SimulationLinker {
             traits[i] = x;
         }
     }
+    
+        /**
+     * Return the index of a trait providing it's name.
+     *
+     * @param name Name of the trait
+     * @return The index of the trait
+     * @throws java.lang.Exception
+     */
+    public boolean existsTrait(String name) {
+
+        for (int i = 0; i < ntraits; i++) {
+            if (name.toLowerCase().compareTo(this.getSimulation().getEvolvingTrait(i).getName().toLowerCase()) == 0) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+    
 
 }  // end of class

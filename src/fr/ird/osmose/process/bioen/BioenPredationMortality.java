@@ -54,6 +54,8 @@ import fr.ird.osmose.School;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -185,7 +187,18 @@ public class BioenPredationMortality extends PredationMortality {
      */
     @Override
     public double getMaxPredationRate(IAggregation predator) {
-        return predationRateBioen[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
-    }
 
+        double output = 0.d;
+        if (predator instanceof School) {
+            String key = "imax";
+            try {
+                output = ((School) predator).existsTrait(key) ? ((School) predator).getTrait(key) : predationRateBioen[predator.getSpeciesIndex()];
+            } catch (Exception ex) {
+                Logger.getLogger(BioenPredationMortality.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            output = predationRateBioen[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
+        }
+        return output;
+    }
 }
