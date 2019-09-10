@@ -5,17 +5,14 @@
  */
 package fr.ird.osmose.process.genet;
 
-import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.SimulationLinker;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
  *
  * @author nbarrier
  */
-public class Trait extends OsmoseLinker {
+public class Trait extends SimulationLinker {
 
     /**
      * Number of locus that code the traits. One value for each species
@@ -50,8 +47,9 @@ public class Trait extends OsmoseLinker {
      * @param rank
      * @param prefix
      */
-    public Trait(String prefix) {
+    public Trait(int rank, String prefix) {
 
+        super(rank);
         // Trait eyecolor = new Trait(rank, "eyecol")
         this.prefix = prefix;
 

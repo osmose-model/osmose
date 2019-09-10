@@ -51,6 +51,7 @@ package fr.ird.osmose.util;
 import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.ltl.LTLForcing;
+import fr.ird.osmose.process.genet.Trait;
 
 /**
  *
@@ -78,5 +79,22 @@ public class SimulationLinker extends OsmoseLinker {
 
     public LTLForcing getForcing() {
         return getOsmose().getSimulation(rank).getForcing();
+    }
+    
+    
+    /** Returns the ith trait for the given simulation.
+     * @param i
+     * @return 
+     */
+    public Trait getEvolvingTrait(int i) {
+        return getOsmose().getSimulation(rank).getEvolvingTrait(i);
+    }
+
+    /** Returns the total number of evolving traits for the given simulation
+     * 
+     * @return 
+     */
+    public int getNEvolvingTraits() {
+        return getOsmose().getSimulation(rank).getNEvolvingTraits();
     }
 }

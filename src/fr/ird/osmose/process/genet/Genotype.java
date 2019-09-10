@@ -6,7 +6,7 @@
 package fr.ird.osmose.process.genet;
 
 import fr.ird.osmose.Species;
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.SimulationLinker;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author nbarrier
  */
-public class Genotype extends OsmoseLinker {
+public class Genotype extends SimulationLinker {
 
     /**
      * Complete genotype for an individual. It is a list (one element per
@@ -23,17 +23,27 @@ public class Genotype extends OsmoseLinker {
      * vary).
      */
     private final List<List<Locus>> genotype;
-    private final double traits[];
-    private final int ntraits;
-    private final int[] nlocus;
+    private double traits[];
+    private int ntraits;
+    private int[] nlocus;
     private final int spec_index;
 
-    public Genotype(Species species) {
+    /** Initialize a genotype for a given School.
+     * 
+     * @param rank
+     * @param species 
+     */
+    public Genotype(int rank, Species species) {
 
+        super(rank);
         genotype = new ArrayList<>();
         this.spec_index = species.getIndex();
-
-        ntraits = this.getConfiguration().getNEvolvingTraits();
+    
+    }
+       
+    public void init() {
+        
+        ntraits = this.getNEvolvingTraits();
         traits = new double[ntraits];
         nlocus = new int[ntraits];
 
@@ -41,7 +51,7 @@ public class Genotype extends OsmoseLinker {
         for (int i = 0; i < ntraits; i++) {
 
             // Recover the trait from configuration list (assumes)
-            Trait trait = this.getConfiguration().getEvolvingTrait(i);
+            Trait trait = this.getEvolvingTrait(i);
 
             nlocus[i] = trait.getNLocus(spec_index);
 
@@ -63,7 +73,7 @@ public class Genotype extends OsmoseLinker {
      * values
      */
     public void init_genotype() {
-
+        
         for (int i = 0; i < ntraits; i++) {
             // recover the list of locus associated with the given trait
             for (int j = 0; j < nlocus[i]; j++) {
@@ -124,7 +134,7 @@ public class Genotype extends OsmoseLinker {
     public int getTraitIndex(String name) throws Exception {
 
         for (int i = 0; i < ntraits; i++) {
-            if (name.toLowerCase().compareTo(this.getConfiguration().getEvolvingTrait(i).getName().toLowerCase()) == 0) {
+            if (name.toLowerCase().compareTo(this.getSimulation().getEvolvingTrait(i).getName().toLowerCase()) == 0) {
                 return i;
             }
         }
@@ -151,13 +161,12 @@ public class Genotype extends OsmoseLinker {
     /**
      * Get the value of a trait provided a list of locus.
      *
-     * @param list_locus
      */
     public void update_traits() {
 
         for (int i = 0; i < ntraits; i++) {
 
-            Trait trait = this.getConfiguration().getEvolvingTrait(i);
+            Trait trait = this.getSimulation().getEvolvingTrait(i);
 
             List<Locus> list_locus = this.getLocusList(i);
 

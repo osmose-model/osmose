@@ -252,12 +252,6 @@ public class Configuration extends OLogger {
      */
     private boolean use_bioen = false;
 
-    /**
-     * List of evolving trait.
-     */
-    private List<Trait> evolvingTrait;
-    private int n_evolving_trait;
-
 ///////////////
 // Constructors
 ///////////////
@@ -429,20 +423,6 @@ public class Configuration extends OLogger {
         for (int p = 0; p < bgSpecies.length; p++) {
             bgSpecies[p] = new BackgroundSpecies(p);
         }
-
-        // Count the number of parameters that ends by trait.mean
-        List<String> genet_keys = findKeys("*.trait.mean");
-        this.n_evolving_trait = genet_keys.size();
-        this.evolvingTrait = new ArrayList<>();
-        for (int p = 0; p < this.n_evolving_trait; p++) {
-            key = genet_keys.get(p);
-            // recovers the trait prefix
-            String prefix = key.replace(".trait.mean", "");
-            Trait trait = new Trait(prefix);
-            trait.init();
-            this.evolvingTrait.add(trait);
-        }
-
     }
 
     public boolean useBioen() {
@@ -1194,13 +1174,4 @@ public class Configuration extends OLogger {
             return str.toString();
         }
     }
-
-    public Trait getEvolvingTrait(int i) {
-        return this.evolvingTrait.get(i);
-    }
-
-    public int getNEvolvingTraits() {
-        return this.n_evolving_trait;
-    }
-
 }

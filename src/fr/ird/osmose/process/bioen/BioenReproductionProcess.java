@@ -168,6 +168,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
         if (nEgg < nSchool) {
 
             School school0 = new School(species, nEgg);
+            school0.instance_genotype(this.getRank());
             if (init_genotype) {
                 school0.getGenotype().init_genotype();
             } else {
@@ -180,6 +181,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
 
             for (int s = 0; s < nSchool; s++) {
                 School school0 = new School(species, nEgg / nSchool);
+                school0.instance_genotype(this.getRank());
                 if (init_genotype) {
                     school0.getGenotype().init_genotype();
                 } else {

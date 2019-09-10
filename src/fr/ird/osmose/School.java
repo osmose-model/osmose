@@ -257,9 +257,6 @@ public class School extends AbstractSchool {
         preys = new HashMap();
         starvationRate = 0.d;
         
-        // initialize the genotype object for the given school of the given species
-        genotype = new Genotype(species);
-        
     }
 
 ////////////////////////////
@@ -786,6 +783,7 @@ public class School extends AbstractSchool {
      * Returns the net energy, which is the difference between gross and
      * maintenance energy.
      *
+     * @param value
      * @return
      */
     public void setStarvMort(double value) {
@@ -803,6 +801,11 @@ public class School extends AbstractSchool {
     
     public Genotype getGenotype() {
         return this.genotype;
+    }
+
+    public void instance_genotype(int rank) {
+        genotype = new Genotype(rank, this.getSpecies());
+        genotype.init();
     }
     
 }
