@@ -808,4 +808,13 @@ public class School extends AbstractSchool {
         genotype.init();
     }
     
+    public double getTrait(String key) throws Exception { 
+        return this.getGenotype().getTrait(key);
+    }
+    
+    public boolean existsTrait(String key) throws Exception {
+        return this.getGenotype().existsTrait(key);
+    }
+
+    
 }
