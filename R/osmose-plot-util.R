@@ -1,28 +1,28 @@
-# Reformat the data into the ggplot2 stacked plot format.
-# It returns a dataframe with specie, time and predation rate
-# in the columns.
-# .osmose.format_data_stacked = function(data, time=NULL)
-# {
-#   
-#   ntime = dim(data)[1]
-#   npecie = dim(data)[2]
-#   if(is.null(time)) time = 1:ntime  # extracts the time array
-#   
-#   # Initialize the output array
-#   output = data.frame()
-#   
-#   # loop over all the specie and update the output array.
-#   for (spec in colnames(data)) {
-#     temp = data.frame(specie=rep(spec, ntime), time=time, value=data[, spec])
-#     output = rbind(output, temp)
-#   }
-#   
-#   # converts specie into a factor
-#   output$specie = factor(output$specie)
-#   
-#   return(output)
-#   
-# }
+#' Reformat the data into the ggplot2 stacked plot format.
+#' It returns a dataframe with specie, time and predation rate
+#' in the columns.
+.osmose.format_data_stacked = function(data, time=NULL)
+{
+  
+  ntime = dim(data)[1]
+  npecie = dim(data)[2]
+  if(is.null(time)) time = 1:ntime  # extracts the time array
+  
+  # Initialize the output array
+  output = data.frame()
+  
+  # loop over all the specie and update the output array.
+  for (spec in colnames(data)) {
+    temp = data.frame(specie=rep(spec, ntime), time=time, value=data[, spec])
+    output = rbind(output, temp)
+  }
+  
+  # converts specie into a factor
+  output$specie = factor(output$specie)
+  
+  return(output)
+  
+}
 
 # The most basic barplot you can do:
 #barplot(my_vector)
@@ -58,31 +58,38 @@
 # }
 
 
-# Plots a barplot, with xlabels rotated with a 45degree angle
-#
-# @param x Data array
-# @param ... Additional arguments to the barplot function (color, etc.)
-#
-# @export
-# osmose.barplot = function(x, ...)
-# {
-#   
-#     # space=1 means that one blank bar is left for one drawn bar
-#     # xaxt="n" desactivates the defaut xlabel (True?)
-#     barplot(x, space=1, las=2, xaxt="n", ...)
-# 
-#     # last point
-#     end_point = 0.5 + length(x) + length(x) - 1
-#     
-#     # xlabel points
-#     xlab = seq(1.5, end_point, by=2)
-# 
-#     # draw the text labels.
-#     text(xlab, par("usr")[3], 
-#          srt=45, adj=1, xpd=TRUE,
-#          labels = paste(names(x)), cex=1)
-# 
-# }
+#' Plots a barplot, with xlabels rotated with a 45degree angle
+#'
+#' @param x Data array
+#' @param ... Additional arguments to the barplot function (color, etc.)
+#'
+#' @export
+osmose.barplot = function(x, label_size=1, add_text=TRUE, color=color, ...)
+{
+
+    col = rep(color, length(x))
+  
+    # space=1 means that one blank bar is left for one drawn bar
+    # xaxt="n" desactivates the defaut xlabel (True?)
+    barplot(x, space=1, las=2, xaxt="n", col=col, ...)
+    
+    # last point
+    end_point = 0.5 + length(x) + length(x) - 1
+
+    # xlabel points
+    xlab = seq(1.5, end_point, by=2)
+
+    # draw the text labels.
+    text(xlab, par("usr")[3], 
+         srt=45, adj=1, xpd=TRUE,
+         labels = paste(names(x)), cex=label_size)
+    
+    if(add_text) { 
+      ytext = max(x) * ( 1 - 0.1) 
+      text(xlab, ytext, round(x, digits=1), cex=0.5)
+    }
+        
+}
 
 # Plot a stacked percent plot.
 #
@@ -91,38 +98,31 @@
 # @param legPosY Y position of legend
 # @param ... Additional arguments to the barplot function.
 # @export
-# osmose.stackedpcent = function(data, legPosX="right", legPosY=NULL, col=NULL, ...)
-# {
-# 
-#   # cheks that the data frame contains labeled rows and columns
-#   if(length(colnames(data)) == 0)
-#   {
-#     stop("You must provide column names to your dataframe")
-#   }
-#   
-#   if(length(rownames(data)) == 0)
-#   {
-#     stop("You must provide row names to your dataframe")
-#   }
-# 
-#   if(is.null(col))
-#   {
-#     N = nrow(data)
-#     col = brewer.pal(N, "Pastel2")
-#   }
-#   
-#   barplot(data, col=col, ...)
-#   
-#   # to do: check that data has colnames and rownames#
-#   if(!is.null(legPosX))
-#   {
-#   N = nrow(data)
-#   legend(legPosX, legPosY, 
-#          legend = rownames(data), 
-#          ncol=1, xpd=TRUE, inset=c(-0.2, 0),
-#          fill=col, bg="white")
-#   }
-# }
+osmose.stackedpcent = function(data, ...)
+ {
+ 
+  # cheks that the data frame contains labeled rows and columns
+  if(length(colnames(data)) == 0) {
+    stop("You must provide column names to your dataframe")
+  }
+  
+  if(length(rownames(data)) == 0) {
+    stop("You must provide row names to your dataframe")
+  }
+  
+  N = nrow(data)
+  col = rainbow(N)
+  
+  barplot(data, space=1, col=col, ...)
+  
+  # to do: check that data has colnames and rownames#
+  N = nrow(data)
+  legend("right", "top", 
+         legend = rownames(data), 
+         ncol=1, xpd=TRUE, inset=c(0.2, 0.),
+         fill=col, bg="white")
+   
+ }
 
 # extract the default ggplot2 color table for fill plots
 # it takes as argument the discrete level array 
