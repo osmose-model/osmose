@@ -197,8 +197,8 @@ public class BioenPredationMortality extends PredationMortality {
                 Logger.getLogger(BioenPredationMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            output = predationRateBioen[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
+            output = predationRateBioen[predator.getSpeciesIndex()];
         }
-        return output;
+        return (output / getConfiguration().getNStepYear());
     }
 }
