@@ -18,7 +18,7 @@ Check if a parameter exists
 }
 \examples{
 {
-   filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+   filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
    par = readOsmoseConfiguration(filename)
    getOsmoseParameter(par, "population", "seeding", "year", "max", keep.att=FALSE)
 }

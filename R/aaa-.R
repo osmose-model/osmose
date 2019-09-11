@@ -11,7 +11,7 @@ NULL
 #' @importFrom stringr str_split str_trim str_sub
 NULL
 # barrier.n: adding some functions for ggplot
-#' @importFrom ggplot2 ggplot geom_area scale_fill_brewer scale_fill_manual theme ggtitle
+#' @importFrom ggplot2 ggplot geom_area scale_fill_brewer scale_fill_manual theme ggtitle qplot ggsave
 NULL
 #' @importFrom rmarkdown render
 NULL
