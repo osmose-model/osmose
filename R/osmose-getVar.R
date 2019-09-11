@@ -1,19 +1,20 @@
 # @param ... Additional arguments of the function.
+# @export
 # @return An array or a list containing the data.
 process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) {
-  
+
   .check_species(out, species)
   
   # extract the given specie
   out = out[[species]]
-  
+
   # Computes the mean over the replicates
   out = apply(out, c(1, 2), mean)
 
   # computes the time average
   data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # barrier.n: adding this to avoid NULL output in summary
   keep = (data.time.mean > thres)  # keep values for which the max is greater than the threshold
-  
+
   if(time.mean)
   {
     # extracts the mean values above a given threshold
@@ -39,7 +40,7 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
     return(data.time.mean)
     
   } 
-  
+
   # extract the data that do not match the threshold requirements
   # and sum over the specie dimension.
   other = out[, keep==FALSE]
@@ -47,16 +48,16 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
   
   # extracts the data that match the requirement
   out = out[, keep==TRUE]
-  
+
   if(thres > 0) {
     # add the concatenation of small ("other") species
     out = cbind(out, other)  
   }
-  
-  
+
   # sort the data in descending order
   # based on the time maximum (nspecies values) 
-  temp = apply(out, 2, mean)
+  temp = apply(out, 2, mean, na.rm=TRUE)
+
   index = sort(temp, decreasing=FALSE, index.return=TRUE)$ix
   # returns the sorted array
   out = out[, index]
@@ -82,8 +83,7 @@ process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
   out = lapply(out, apply, c(1, 2), mean, na.rm=TRUE)
   
   # if time.mean, computes the time average
-  if(time.mean)
-  {
+  if(time.mean) {
     # for each element, compute the time-average of the matrix
     out = lapply(out, apply, 2, mean, na.rm=TRUE)
   }
