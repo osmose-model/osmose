@@ -91,14 +91,14 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
   upperleftlon = min(lon) - dlon * 0.5
   upperleftlat = max(lat) + dlat * 0.5
   
-  output = data.frame(par="grid.java.classname", value="fr.ird.osmose.grid.OriginalGrid", stringsAsFactors = F)
-  output = rbind(output, c("grid.nlon", nlon))
-  output = rbind(output, c("grid.nlat", nlat))
-  output = rbind(output, c("grid.lowright.lat", lowrightlat))
-  output = rbind(output, c("grid.lowright.lon", lowrightlon))
-  output = rbind(output, c("grid.upleft.lat", upperleftlat))
-  output = rbind(output, c("grid.upleft.lon", upperleftlon))
-  
+  output = data.frame(value="fr.ird.osmose.grid.OriginalGrid", row.names="grid.java.classname", stringsAsFactors = F, check.rows=TRUE, check.names=TRUE)
+  output = rbind(output, data.frame(row.names="grid.nlon", value=nlon))
+  output = rbind(output, data.frame(row.names="grid.nlat", value=nlat))
+  output = rbind(output, data.frame(row.names="grid.lowright.lat", value=lowrightlat))
+  output = rbind(output, data.frame(row.names="grid.lowright.lon", value=lowrightlon))
+  output = rbind(output, data.frame(row.names="grid.upleft.lat", value=upperleftlat))
+  output = rbind(output, data.frame(row.names="grid.upleft.lon", value=upperleftlon))
+
   # Handling of the saving into CSV
   if(!is.null(csv)) 
   {
@@ -106,7 +106,7 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
     if(!dir.exists(dirname(csv))) {
       dir.create(dirname(csv), recursive=TRUE)
     }
-    write.table(output, csv, sep=";", col.names = F, row.names = F)
+    write.table(output, csv, sep=";", col.names = FALSE, row.names = TRUE, quote=FALSE)
   }
   
   return(output)
@@ -168,7 +168,9 @@ extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-g
   var = apply(var, 2, rev)
   
   # writes the output in csv file.
-  write.table(var, file=output_file, sep=";", row.names=FALSE, col.names=FALSE)
+  write.table(var, file=output_file, sep=";", row.names=FALSE, col.names=FALSE, quote=FALSE)
+
+  return(var)
   
 }
 
