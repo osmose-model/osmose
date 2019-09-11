@@ -1,3 +1,34 @@
+#' Plot the dietMatrix output
+#'
+#' @param x osmose.dietMatrix output
+#' @param time.mean True if time averaged should be drawn
+#' @param species  Species name (string or list). If NULL, al species are drawn.
+#' @param thres Threshold (in percentage) below which preys are concatenated.
+#' @param label_size Size of the xlabel of histogram (time.mean=T)
+#' @param add_text True if values sjopu
+#' @param color Histogram colors (if NULL, gray). Only used if time.mean=T
+#' @param legsize Size of the legend (if time.mean=F)
+#' @param ... Additional arguments to the barplot or line function
+#'
+#' @export
+#'
+plot.osmose.dietMatrix = function(x, time.mean=FALSE, species=NULL, 
+                                  thres=1, label_size=1, add_text=TRUE, 
+                                  color=NULL, legsize=0.5, ...) {
+  
+  #  if species is not null, plot figure for each species
+  if(is.null(species)) { 
+    species = names(x)
+  }
+  
+  for (spec in species) { 
+    par(oma=c(5, 5, 5, 5))
+    .plot_osmose_dietMatrix(x, time.mean=time.mean, species=spec, 
+                            thres=thres, label_size=label_size, add_text=add_text, color=color, legsize=legsize, ...)
+  }
+}
+
+
 
 # Plots diet matrix
 #
@@ -10,119 +41,138 @@
 # @param ... 
 #
 # @return None
-# @export
 # @method plot osmose.output.dietMatrix
-# plot.osmose.output.dietMatrix = function(x, time.mean=FALSE, species=NULL, colors=NULL, thres=1, ...)
-# {
-#     
-#     x = process.dietMatrix(x, species=species, time.mean=time.mean, thres=thres)
-# 
-#     if(time.mean)
-#     {
-#         # If using a time-averaged diet matrix, then 
-#         # a barplot is drawn.
-#         temp = as.vector(x)
-#         names(temp) = names(x)
-#         osmose.barplot(temp, xlab="", ylab="Predation (%)", main=species, ...)
-#         return(invisible())
-#     } 
-# 
-#     # format the diet matrix to have stacked format for ggplot2
-#     data = .osmose.format_data_stacked(x)
-#     
-#     # Set the column names.
-#     colnames(data) = c("Prey", "Time", "Predation")
-# 
-#     # If no color is provided, we set default colors
-#     if(is.null(colors))
-#     {
-#         colors = .make_default_ggplot_col(rev(levels(data$Prey)))
-#     }
-# 
-#     output = ggplot(data, aes(x=Time, y=Predation, fill=Prey)) +  geom_area(...) + colors + ggtitle(species) 
-#     output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
-#     return(output)
-# 
-# }
+.plot_osmose_dietMatrix = function(x, time.mean, species, thres, label_size, color, legsize, add_text, ...) {
+  
+  x = process.dietMatrix(x, species=species, time.mean=time.mean, thres=thres)
+  
+  if(time.mean) {
+    # If using a time-averaged diet matrix, then 
+    # a barplot is drawn.
+    temp = as.vector(x)
+    names(temp) = names(x)
+    osmose.barplot(temp, xlab="", ylab="Predation (%)", main=species, 
+                   label_size=label_size, add_text=add_text, color=color, ...)
+    return(invisible())
+  } 
+  
+  # format the diet matrix to have stacked format for ggplot2
+  data = .osmose.format_data_stacked(x)
+  xlim = c(min(data$time, na.rm=TRUE), max(data$time, na.rm=TRUE) * (1 + 0.5))
+  ylim = c(min(data$value, na.rm=TRUE), max(data$value, na.rm=TRUE))
+  
+  ncolors = length(levels(data$specie))
+  cl = rainbow(ncolors)
+  
+  plot(0, 0, xlim=xlim, ylim=ylim, type='n', main=species, xlab='Time', ylab='Predation rate', 
+       cex.axis=0.5, cex.main=0.5, cex.lab=0.5)
+  
+  cpt = 1
+  for (prey in levels(data$specie)) {
+    temp = data[data$specie == prey, ]
+    lines(temp[['time']], temp[['value']], type='l', col=cl[cpt], ...)
+    cpt = cpt + 1
+  }
+  
+  legend("topright", legend=levels(data$specie), col=cl, cex=legsize, lty=1)
+  
+}
 
 
+#' Plot mortality rates
+#'
+#' @param x Object of class osmose.mortalityRate
+#' @param time.mean True if time-average plot should be ok 
+#' @param species List of species to plot. If NULL, all species are drawn.
+#' @param norm True if percentage is returned instead of raw mort. rates
+#' @param ... Additional parameters to the barplot/lines functions
+#'
+#' @export
+plot.osmose.mortalityRate = function(x, time.mean=FALSE, species=NULL, norm=TRUE, ...) {
+  
+  #  if species is not null, plot figure for each species
+  if(is.null(species)) { 
+    species = names(x)
+  }
+  
+  for(spec in species) { 
+    par(oma=rep(5, 4), mar=rep(2, 4))
+    .plot_osmose_mortalityRate(x, time.mean=time.mean, species=spec, norm=norm, ...)
+  }
+}
 
-# Plots mortality rates
-#
-# @param data Mortality rate
-# @param species Species name
-# @param time.mean If TRUE, the mortality rates for each life stade and for each mortality
-# types are plotted. If FALSE, the time series for a given life stade are plotted.
-# @param stade Stade ("eggs", "juveniles", "adults). Only if time.mean=FALSE
-# @param norm Whether percentage instead of raw mortality rates should be plotted. 
-# Only if time.mean=TRUE
-# @param colors Ggplot2 color array (see for instance scale_fill_manual)
-# @param ... 
-#
-# @export
-# @method plot osmose.output.mortalityRate
-# plot.osmose.output.mortalityRate = function(data, species=NULL, time.mean=TRUE, stade=NULL, norm=TRUE, colors=NULL, ...)
-# {
-#   
-#   data = process.mortalityRate(data, species=species, time.mean=time.mean, ...)
-# 
-#   message = "You must provide a life stade among 'eggs', 'juveniles' or 'adults'"
-#   
-#   if(time.mean==FALSE)
-#   {
-#     if(is.null(stade)) 
-#     {
-#       stop(paste0("No stade provided. ", message, sep=""))
-#     }
-# 
-#     if(!(stade %in% names(data))) 
-#     {
-#       stop(message)
-#     }
-#     
-#     data = data[[stade]]
-#     
-#     data = osmose:::.osmose.format_data_stacked(data)
-#     
-#     colnames(data) = c("Type", "Time", "Rate")
-#     
-#     if(is.null(colors))
-#     {
-#     colors = osmose:::.make_default_ggplot_col(rev(levels(data$Type)))
-#     }
-#     
-#     title = paste(species, " (", stade, ")", sep='')
-#     
-#     output = ggplot(data, aes(x=Time, y=Rate, fill=Type)) +  geom_area(...) + ggtitle(title)
-#     output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
-#     return(output)
-#     
-#   }
-#   
-#   # if normalize, display mortality rates into percentage instead of absolutes.
-#   if(norm)
-#   {
-#     # apply the normalize function to all the elements of the list.
-#     data = lapply(data, norm_func)
-#   }
-#   
-#   # convert the list into a matrix
-#   data = do.call(cbind.data.frame, data)
-#   data = as.matrix(data)
-#   
-#   xlabel = "Stage"
-#   if(norm) {
-#     ylabel = "Mortality rate (%)"
-#   } else {
-#     ylabel = "Mortality rate"
-#   }
-#   
-#   osmose.stackedpcent(data, xlab=xlabel, main=species, ylab=ylabel, ...)
-#   return(invisible())
-#   
-# }
-# 
 
+#' Plot mortality rates for a given species.
+#'
+#' @param data 
+#' @param species 
+#' @param time.mean 
+#' @param norm 
+#' @param ... 
+.plot_osmose_mortalityRate = function(data, species=NULL, time.mean=TRUE, norm=TRUE, ...) {
+  
+  data = process.mortalityRate(data, species=species, time.mean=time.mean, ...)
+  
+  message = "You must provide a life stade among 'eggs', 'juveniles' or 'adults'"
+  
+  if(time.mean==FALSE)  {
+    
+    par(mfrow=c(3, 1))
+    for (stade in names(data)) {
+      datatmp = data[[stade]]
+      
+      if(norm) { 
+        datatmp = apply(datatmp, 1, norm_func)
+        datatmp = t(datatmp)
+      }
+      
+      datatmp = osmose:::.osmose.format_data_stacked(datatmp)
+      xlim = c(min(datatmp$time, na.rm=TRUE), max(datatmp$time, na.rm=TRUE) * (1 + 0.5))
+      ylim = c(min(datatmp$value, na.rm=TRUE), max(datatmp$value, na.rm=TRUE))
+    
+      ncolors = length(levels(datatmp$specie))
+      cl = rainbow(ncolors)
+      print(ncolors)
+      plot(0, 0, xlim=xlim, ylim=ylim, type='n', main=paste0(species, ", ", stade),  
+           xlab='Time', ylab='Predation rate', 
+           cex.axis=0.5, cex.main=0.5, cex.lab=0.5)
+      
+      cpt = 1
+      for (prey in levels(datatmp$specie)) {
+        temp = datatmp[datatmp$specie == prey, ]
+        lines(temp[['time']], temp[['value']], type='l', col=cl[cpt], ...)
+        cpt = cpt + 1
+      }
+      
+      legend("topright", legend=levels(datatmp$specie), col=cl, lty=1, cex=0.5)
+      
+    }
+    
+    return(invisible())
+    
+  }
+  
+  # if normalize, display mortality rates into percentage instead of absolutes.
+  if(norm) {
+    # apply the normalize function to all the elements of the list.
+    data = lapply(data, norm_func)
+  }
+  
+  # convert the list into a matrix
+  data = do.call(cbind.data.frame, data)
+  data = as.matrix(data)
+  
+  xlabel = "Stage"
+  if(norm) {
+    ylabel = "Mortality rate (%)"
+  } else {
+    ylabel = "Mortality rate"
+  }
+  
+  osmose.stackedpcent(data, xlab=xlabel, main=species, ylab=ylabel, ...)
+  return(invisible())
+  
+}
 
 # Plots biomass by size class
 #
@@ -517,12 +567,13 @@
 # 
 # normalize function. 
 # returns percentage instead of raw values
-# norm_func = function(data)
-# {
-#   output = 100 * data / sum(data)
-#   dimnames(output) = dimnames(data)
-#   return(output)
-# }
+norm_func = function(data) {
+  output = 100 * data / (sum(data, na.rm=TRUE) + .Machine$double.xmin)
+  dimnames(output) = dimnames(data)
+  return(output)
+}
+
+
 
 
 
