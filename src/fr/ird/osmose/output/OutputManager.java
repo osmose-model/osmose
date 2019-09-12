@@ -344,6 +344,16 @@ public class OutputManager extends SimulationLinker {
             }
         }
         
+      
+        // warning: simulation init is called after output init.
+        List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
+        if (genet_keys.size() > 0) {
+            if (getConfiguration().getBoolean("output.evolvingtraits.enabled")) {
+                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ init variable trait");
+                outputs.add(new VariableTraitOutput(rank));
+            }
+        }
+            
         /*
          * Initialize indicators
          */

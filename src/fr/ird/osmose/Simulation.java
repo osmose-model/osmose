@@ -218,6 +218,20 @@ public class Simulation extends OsmoseLinker {
                 error("Failed to open restart file " + ncfile, ex);
             }
         }
+        
+                // Count the number of parameters that ends by trait.mean
+        String key;
+        List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
+        this.n_evolving_trait = genet_keys.size();
+        this.evolvingTrait = new ArrayList<>();
+        for (int p = 0; p < this.n_evolving_trait; p++) {
+            key = genet_keys.get(p);
+            // recovers the trait prefix
+            String prefix = key.replace(".trait.mean", "");
+            Trait trait = new Trait(this.rank, prefix);
+            trait.init();
+            this.evolvingTrait.add(trait);
+        } 
 
         // Init LTL forcing
         initForcing();
@@ -261,19 +275,6 @@ public class Simulation extends OsmoseLinker {
         // Year to start writing the outputs
         yearOutput = getConfiguration().getInt("output.start.year");
         
-        // Count the number of parameters that ends by trait.mean
-        String key;
-        List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
-        this.n_evolving_trait = genet_keys.size();
-        this.evolvingTrait = new ArrayList<>();
-        for (int p = 0; p < this.n_evolving_trait; p++) {
-            key = genet_keys.get(p);
-            // recovers the trait prefix
-            String prefix = key.replace(".trait.mean", "");
-            Trait trait = new Trait(this.rank, prefix);
-            trait.init();
-            this.evolvingTrait.add(trait);
-        } 
     }
 
     /**
