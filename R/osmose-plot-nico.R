@@ -129,7 +129,7 @@ plot.osmose.mortalityRate = function(x, time.mean=FALSE, species=NULL, norm=TRUE
       datatmp = osmose:::.osmose.format_data_stacked(datatmp)
       xlim = c(min(datatmp$time, na.rm=TRUE), max(datatmp$time, na.rm=TRUE) * (1 + 0.5))
       ylim = c(min(datatmp$value, na.rm=TRUE), max(datatmp$value, na.rm=TRUE))
-    
+      
       ncolors = length(levels(datatmp$specie))
       cl = rainbow(ncolors)
       print(ncolors)
@@ -174,39 +174,52 @@ plot.osmose.mortalityRate = function(x, time.mean=FALSE, species=NULL, norm=TRUE
   
 }
 
-# Plots biomass by size class
-#
-# @param data Biomass distribution by size
-# @param species Species name
-# @param time.mean If true, time.mean biomass is plotted
-# @param lwd Line width
-# @param ... 
-#
-# @export
-# @method plot osmose.output.biomassDistribBySize
-# plot.osmose.output.biomassDistribBySize = function(data, species=NULL, time.mean=FALSE, lwd=2, ...)
-# {
-#   
-#   out = plot.osmose.output.ts.generic(data, species=species, time.mean=time.mean, lwd=lwd, "Size (cm)", "Biomass", ...)
-#   return(out)
-# }
+#' Plots biomass by size class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param lwd Line width
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.biomassDistribBySize
+plot.osmose.biomassDistribBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
 
-# Plots biomass by age class
-#
-# @param data Biomass distribution by age
-# @param species Species name
-# @param time.mean If true, time.mean biomass is plotted
-# @param lwd Line width
-# @param ... 
-#
-# @export
-# @method plot osmose.output.biomassDistribByAge
-# plot.osmose.output.biomassDistribByAge = function(data, species=NULL, time.mean=FALSE, lwd=2, ...)
-# {
-#   
-#   out = plot.osmose.output.ts.generic(data, species=species, time.mean=time.mean, lwd=lwd, "Age", "Biomass", ...)
-#   return(out)
-# }
+#' Plots biomass by age class
+#'
+#' @param data Biomass distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.biomassDistribByAge
+plot.osmose.biomassDistribByAge = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Age", ylab="Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
 
 
 
@@ -572,38 +585,3 @@ norm_func = function(data) {
   dimnames(output) = dimnames(data)
   return(output)
 }
-
-
-
-
-
-# 
-# plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=FALSE, lwd=2, legtitle, ylab, ...)
-# {
-#   
-#   .check_species(data, species)
-#   
-#   y = data[[species]]
-#   
-#   # computes the replicate mean
-#   y = apply(y, c(1, 2), mean)
-#   
-#   if(time.mean == FALSE)
-#   {
-#     .osmose.plot_ts(y, xlab='Time', ylab=ylab, title=species, lwd=lwd, legtitle=legtitle, ...)
-#     return(invisible())
-#   }
-#   
-#   if(time.mean){
-#     
-#     # Computes the time-mean
-#     y = apply(y, 2, mean)
-#     temp = as.vector(y)
-#     names(temp) = names(y)
-#     osmose.barplot(temp, xlab=legtitle, ylab=ylab, main=species, ...)
-#     return(invisible())
-#   }
-#   
-# }
-# 
-

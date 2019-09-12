@@ -64,8 +64,7 @@
 #' @param ... Additional arguments to the barplot function (color, etc.)
 #'
 #' @export
-osmose.barplot = function(x, label_size=1, add_text=TRUE, color=color, ...)
-{
+osmose.barplot = function(x, label_size=1, add_text=TRUE, color=NULL, ...) {
 
     col = rep(color, length(x))
   
@@ -134,26 +133,49 @@ osmose.stackedpcent = function(data, ...)
 
 
 # Plots time-series plots.
-# .osmose.plot_ts = function(y, xlab, ylab, title, lwd, legtitle, ...) 
-# {
-#   
-#   nlegend = as.integer(ncol(y) / 5)
-#   time = 1:nrow(y)
-#   
-#   # First create an empty plot.
-#   plot(1, type = 'n', xlim = c(min(time), max(time)), ylim = c(min(y), max(y)),
-#        xlab=xlab, ylab=ylab, main=title)
-#   
-#   # Create a list of 22 colors to use for the lines.
-#   cl <- rainbow(ncol(y))
-#   plotcol = 1:ncol(y)
-#   
-#   # Now fill plot with the log transformed coverage data from the
-#   # files one by one.
-#   for(i in 1:ncol(y)) {
-#     lines(y[,i], col=cl[i], lwd=lwd)
-#     plotcol[i] <- cl[i]
-#   }
-#   
-#   legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title=legtitle, ncol=nlegend)
-# }
+.osmose.plot_ts = function(y, xlab, ylab, title, legtitle, ...) 
+{
+  
+  nlegend = as.integer(ncol(y) / 5)
+  time = 1:nrow(y)
+  
+  # First create an empty plot.
+  plot(1, type = 'n', xlim = c(min(time), max(time)), ylim = c(min(y), max(y)),
+       xlab=xlab, ylab=ylab, main=title)
+  
+  # Create a list of 22 colors to use for the lines.
+  cl <- rainbow(ncol(y))
+  plotcol = 1:ncol(y)
+  
+  # Now fill plot with the log transformed coverage data from the
+  # files one by one.
+  for(i in 1:ncol(y)) {
+    lines(y[,i], col=cl[i], ...)
+    plotcol[i] <- cl[i]
+  }
+  
+  legend("topright", legend=colnames(y), col = plotcol, lwd=0.7, cex=0.7, title=legtitle, ncol=nlegend)
+}
+
+plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=FALSE, legtitle, ylab, ...) {
+  
+  .check_species(data, species)
+  
+  y = data[[species]]
+  
+  # computes the replicate mean
+  y = apply(y, c(1, 2), mean)
+  
+  if(time.mean == FALSE) {
+    .osmose.plot_ts(y, xlab='Time', ylab=ylab, title=species, legtitle=legtitle, ...)
+    return(invisible())
+  }
+  
+  # Computes the time-mean
+  y = apply(y, 2, mean)
+  temp = as.vector(y)
+  names(temp) = names(y)
+  osmose.barplot(temp, xlab=legtitle, ylab=ylab, main=species, add_text=FALSE, ...)
+  return(invisible())
+}
+
