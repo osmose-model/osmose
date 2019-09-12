@@ -179,3 +179,38 @@ plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=FALSE, le
   return(invisible())
 }
 
+
+# Geric function to plot mortality time mean as a function of class (size or age)
+plot.mort.byclass.tmean = function(mort, species, norm, class="size") {
+  
+  # converts into matrix
+  mort = do.call(cbind.data.frame, mort)
+  mort = as.matrix(mort)
+
+  # Counts the total mortality rate for each size class
+  tot = apply(mort, 1, sum)
+  
+  # Extracts the size class with mortality > 0
+  mort = mort[tot>0, ]
+  tot = tot[tot>0]
+  
+  # If data should be normalized, then it is divided by the total 
+  # mortality
+  if(norm) mort = (mort / tot) * 100
+  
+  # Transpose the dataframe
+  mort = t(mort)
+  
+  if(norm) {
+    ylab = "Mortality (%)"
+  } else {
+    ylab = "Mortality"
+  }
+  
+  if(class=="size") {
+    osmose.stackedpcent(mort, xlab="Size (cm)", main=species, ylab=ylab)
+  } else {
+    osmose.stackedpcent(mort, xlab="Age", main=species, ylab=ylab)
+  }
+  return(invisible())
+}
