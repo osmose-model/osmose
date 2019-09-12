@@ -49,7 +49,9 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
 import java.io.File;
+import java.util.List;
 
 /**
  *
@@ -57,8 +59,7 @@ import java.io.File;
  */
 public class BioenSizeInfOutput extends AbstractOutput {
 
-    public double[] size_Inf;
-    public double[] abundance;
+    public double[] sizeMax;
 
     public BioenSizeInfOutput(int rank) {
         super(rank);
@@ -66,32 +67,33 @@ public class BioenSizeInfOutput extends AbstractOutput {
 
     @Override
     public void initStep() {
-        String key;
-        size_Inf = new double[getNSpecies()];
-        for (int i = 0; i < this.getNSpecies(); i++) {
-            key = String.format("species.maturity.size.sp%d", i);
-            size_Inf[i] = this.getConfiguration().getDouble(key);
-        }
+    
     }
 
     @Override
     public void reset() {
         // Do nothing
+        sizeMax = new double[this.getNSpecies()];
     }
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            int index = school.getSpeciesIndex();
-            if (school.getLength()>size_Inf[index]){
-            size_Inf[index]= school.getLength();
+        for (int ispec = 0; ispec < this.getNSpecies(); ispec++) {
+            Species spec = this.getSpecies(ispec);
+            // List of alive schools that belong to species ispec
+            List<School> listSchool = this.getSchoolSet().getSchools(spec);
+            for (School sch : listSchool) {
+                if (sch.isAlive()) {
+                    sizeMax[ispec] = Math.max(sizeMax[ispec], sch.getLength());
+                }
             }
         }
     }
 
+
     @Override
     public void write(float time) {
-        writeVariable(time, size_Inf);
+        writeVariable(time, sizeMax);
     }
 
     @Override
