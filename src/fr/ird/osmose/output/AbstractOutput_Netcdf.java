@@ -149,7 +149,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
 
         // Init NC dimensions and coords (in define mode)
         this.init_nc_dims_coords();
-        
+
         // Create output variable
         nc.addVariable(getVarname(), DataType.FLOAT, this.getNcDims());
         nc.addVariableAttribute(getVarname(), "units", getUnits());
@@ -258,6 +258,14 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         }
     }
 
+    public float getFillValue() {
+        return this.FILLVALUE;
+    }
+
+    public Dimension[] getNcDims() {
+        return this.outDims;
+    }
+
     /**
      * Init the NetCDF file. Intitialize the output files by setting the NetCDF
      * dimension array + setting coordinates.
@@ -265,19 +273,10 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     void init_nc_dims_coords() {
 
         Dimension speciesDim = nc.addDimension("species", getNSpecies());
-
         nc.addVariable("species", DataType.INT, new Dimension[]{speciesDim});
         this.createSpeciesAttr();
         outDims = new Dimension[]{timeDim, speciesDim};
 
-    }
-
-    public float getFillValue() {
-        return this.FILLVALUE;
-    }
-
-    public Dimension[] getNcDims() {
-        return this.outDims;
     }
 
     public void write_nc_coords() {
@@ -330,7 +329,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public StringBuilder initFileName() {
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());

@@ -110,7 +110,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     String getDescription() {
-        return "\\ Biomass (tons) of preys at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)";
+        return "Biomass (tons) of preys at the beginning of the time step (before all sources of mortality - fishing, predation, starvation, others)";
     }
 
     @Override
@@ -220,7 +220,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
                     }
                 }
                 String attrname = String.format("%d", k);
-                getNc().addVariableAttribute("class_prey", Integer.toString(k), outname);
+                getNc().addVariableAttribute("class_prey", attrname, outname);
                 k++;
             }
         }

@@ -123,6 +123,11 @@ public class OutputManager extends SimulationLinker {
         outputs.add(new AbundanceDistribOutput_Netcdf(rank, sizeDistrib));
         outputs.add(new AbundanceDistribOutput_Netcdf(rank, ageDistrib));
         outputs.add(new BiomassDietStageOutput_Netcdf(rank));
+        outputs.add(new DietOutput_Netcdf(rank));
+  
+        for (int i = 0; i < getNSpecies(); i++) {
+            outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
+        }
         */
         
         /*
