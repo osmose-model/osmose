@@ -88,6 +88,8 @@ public class OutputManager extends SimulationLinker {
      * Number of years before writing restart files.
      */
     private int spinupRestart;
+    
+    private boolean useNetcdf = false;
 
     public OutputManager(int rank) {
         super(rank);
@@ -109,7 +111,20 @@ public class OutputManager extends SimulationLinker {
 
         AbstractDistribution sizeDistrib = new SizeDistribution();
         AbstractDistribution ageDistrib = new AgeDistribution();
-    
+        
+        /*
+        useNetcdf = getConfiguration().getBoolean("output.use.netcdf");
+        outputs.add(new AbundanceOutput_Netcdf(rank));
+        outputs.add(new BiomassOutput_Netcdf(rank));
+        outputs.add(new YieldOutput_Netcdf(rank));
+        outputs.add(new YieldNOutput_Netcdf(rank));
+        outputs.add(new BiomassDistribOutput_Netcdf(rank, sizeDistrib));
+        outputs.add(new BiomassDistribOutput_Netcdf(rank, ageDistrib));
+        outputs.add(new AbundanceDistribOutput_Netcdf(rank, sizeDistrib));
+        outputs.add(new AbundanceDistribOutput_Netcdf(rank, ageDistrib));
+        outputs.add(new BiomassDietStageOutput_Netcdf(rank));
+        */
+        
         /*
          * Instantiate indicators
          */
