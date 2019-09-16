@@ -88,7 +88,7 @@ public class OutputManager extends SimulationLinker {
      * Number of years before writing restart files.
      */
     private int spinupRestart;
-    
+
     private boolean useNetcdf = false;
 
     public OutputManager(int rank) {
@@ -111,9 +111,9 @@ public class OutputManager extends SimulationLinker {
 
         AbstractDistribution sizeDistrib = new SizeDistribution();
         AbstractDistribution ageDistrib = new AgeDistribution();
-        
-        /*
+
         useNetcdf = getConfiguration().getBoolean("output.use.netcdf");
+        /*
         outputs.add(new AbundanceOutput_Netcdf(rank));
         outputs.add(new BiomassOutput_Netcdf(rank));
         outputs.add(new YieldOutput_Netcdf(rank));
@@ -124,23 +124,26 @@ public class OutputManager extends SimulationLinker {
         outputs.add(new AbundanceDistribOutput_Netcdf(rank, ageDistrib));
         outputs.add(new BiomassDietStageOutput_Netcdf(rank));
         outputs.add(new DietOutput_Netcdf(rank));
-  
-        for (int i = 0; i < getNSpecies(); i++) {
-            outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
-        }
-        */
         
-        /*
+        for (int i = 0; i < getNSpecies(); i++) {
+            //outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
+            //outputs.add(new MortalityOutput_Netcdf(rank, getSpecies(i)));
+            outputs.add(new MortalitySpeciesOutput_Netcdf(rank, getSpecies(i), ageDistrib));
+            break;
+        }
+         */
+
+ /*
          * Instantiate indicators
          */
         if (getConfiguration().getBoolean("output.spatialabundance.enabled")) {
             outputs.add(new SpatialAbundanceOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.spatialbiomass.enabled")) {
             outputs.add(new SpatialBiomassOutput(rank));
         }
-      
+
         if (getConfiguration().getBoolean("output.spatialsize.enabled")) {
             outputs.add(new SpatialSizeOutput(rank));
         }
@@ -148,15 +151,15 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.spatialyield.enabled")) {
             outputs.add(new SpatialYieldOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.spatialyieldN.enabled")) {
             outputs.add(new SpatialYieldNOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.spatialtl.enabled")) {
             outputs.add(new SpatialTLOutput(rank));
         }
-        
+
         // Barrier.n: Saving of spatial, class (age or size) structure abundance
         if (getConfiguration().getBoolean("output.spatialsizespecies.enabled")) {
             outputs.add(new SpatialSizeSpeciesOutput(rank, sizeDistrib));
@@ -215,7 +218,7 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.mortality.naturalN.byAge.enabled")) {
             outputs.add(new AdditionalMortalityNDistribOutput(rank, ageDistrib));
-        }        
+        }
         // Yield
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new YieldOutput(rank));
@@ -331,40 +334,39 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.bioen.maturesize.enabled", NO_WARNING)) {
             outputs.add(new BioenSizeMatureOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.bioen.matureage.enabled", NO_WARNING)) {
             outputs.add(new BioenAgeMatureOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
             outputs.add(new BioenIngestOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.bioen.maint.enabled", NO_WARNING)) {
             outputs.add(new BioenMaintOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.bioen.growthpot.enabled", NO_WARNING)) {
             outputs.add(new BioenGrowthPot(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.bioen.sizeInf.enabled", NO_WARNING)) {
             outputs.add(new BioenSizeInfOutput(rank));
         }
-        
+
         if (getConfiguration().getBoolean("output.regional.biomass.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new RegionalOutputsBiomass(rank, getSpecies(i)));
             }
         }
-        
+
         if (getConfiguration().getBoolean("output.regional.abundance.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new RegionalOutputsAbundance(rank, getSpecies(i)));
             }
         }
-        
-      
+
         // warning: simulation init is called after output init.
         List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
         if (genet_keys.size() > 0) {
@@ -372,7 +374,7 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new VariableTraitOutput(rank));
             }
         }
-            
+
         /*
          * Initialize indicators
          */

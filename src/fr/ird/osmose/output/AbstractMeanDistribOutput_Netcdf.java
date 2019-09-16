@@ -48,117 +48,43 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.output.distribution.DistributionType;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayInt;
-import ucar.ma2.DataType;
-import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Dimension;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf {
+public abstract class AbstractMeanDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
     // Output values distributed by species and by class
-    double[][] values;
-    // Distribution 
-    private final AbstractDistribution distrib;
+    double[][] denominator;
 
-    public AbstractDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
-        super(rank);
-        this.distrib = distrib;
-        distrib.init();
+    public AbstractMeanDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
 
     @Override
     public void reset() {
-        values = new double[getNSpecies()][distrib.getNClass()];
+        super.reset();
+        denominator = new double[getNSpecies()][getNClass()];
     }
 
-    int getClass(IMarineOrganism school) {
-        return distrib.getClass(school);
-    }
-
-    
     @Override
     public void write(float time) {
 
-        int nClass = distrib.getNClass();
-        double[][] array = new double[nClass][getNSpecies()];
+        int nClass = getNClass();
+        double[][] array = new double[nClass][getNSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
+            array[iClass][0] = getClassThreshold(iClass);
             for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                array[iClass][iSpec] = values[iSpec][iClass] / getRecordFrequency();
+                if (denominator[iSpec][iClass] != 0) {
+                    array[iClass][iSpec + 1] = values[iSpec][iClass] / denominator[iSpec][iClass];
+                } else {
+                    array[iClass][iSpec + 1] = Double.NaN;
+                }
             }
         }
         writeVariable(time, array);
     }
-    
-    
-    float getClassThreshold(int iClass) {
-        return distrib.getThreshold(iClass);
-    }
 
-    int getNClass() {
-        return distrib.getNClass();
-    }
-
-    DistributionType getType() {
-        return distrib.getType();
-    }
-
-    /**
-     * Init the NetCDF file. Intitialize the output files by setting the NetCDF
-     * dimension array + setting coordinates.
-     */
-    @Override
-    void init_nc_dims_coords() {
-
-        Dimension speciesDim = getNc().addDimension("species", getNSpecies());
-        Dimension classDim = getNc().addDimension(this.getDisName(), this.distrib.getNClass());
-        
-        getNc().addVariable("species", DataType.INT, new Dimension[]{speciesDim});
-        this.createSpeciesAttr();
-
-        getNc().addVariable(this.getDisName(), DataType.FLOAT, new Dimension[]{classDim});
-
-        this.setDims(new Dimension[]{getTimeDim(), classDim, speciesDim});
-
-    }
-
-    @Override
-    public void write_nc_coords() {
-        try {
-
-            // Writes variable trait (trait names) and species (species names)
-            ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies());
-            ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.distrib.getNClass());
-
-            for (int i = 0; i < this.getNSpecies(); i++) {
-                arrSpecies.set(i, i);
-            }
-            getNc().write("species", arrSpecies);
-        
-            for (int i = 0; i < this.distrib.getNClass(); i++) {
-                arrClass.set(i, this.getClassThreshold(i));
-            }
-            getNc().write(this.getDisName(), arrClass);
-
-        } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(AbundanceOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
-    public String getDisName() {
-        return this.distrib.getType().toString();
-    }
- 
 }
