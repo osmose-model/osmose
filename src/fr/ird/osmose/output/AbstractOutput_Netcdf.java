@@ -242,6 +242,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
 
         ArrayDouble.D1 arrTime = new ArrayDouble.D1(1);
         ArrayFloat.D2 arrAbund = new ArrayFloat.D2(1, array.length);
+        arrTime.set(0, time);
 
         for (int i = 0; i < array.length; i++) {
             arrAbund.set(0, i, (float) array[i]);
@@ -308,6 +309,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     public void writeVariable(double time, double array[][]) {
 
         ArrayDouble.D1 arrTime = new ArrayDouble.D1(1);
+        arrTime.set(0, time);
         int nrows = array.length;  // number of classes
         int ncol = array[0].length;  // number of species
 

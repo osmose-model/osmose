@@ -113,11 +113,12 @@ public class OutputManager extends SimulationLinker {
         AbstractDistribution ageDistrib = new AgeDistribution();
 
         useNetcdf = getConfiguration().getBoolean("output.use.netcdf");
-        /*
+        
         outputs.add(new AbundanceOutput_Netcdf(rank));
         outputs.add(new BiomassOutput_Netcdf(rank));
         outputs.add(new YieldOutput_Netcdf(rank));
         outputs.add(new YieldNOutput_Netcdf(rank));
+        /*
         outputs.add(new BiomassDistribOutput_Netcdf(rank, sizeDistrib));
         outputs.add(new BiomassDistribOutput_Netcdf(rank, ageDistrib));
         outputs.add(new AbundanceDistribOutput_Netcdf(rank, sizeDistrib));

@@ -87,7 +87,8 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
     
     // spatial indicators
     private float[][] trait_mean;
-    private float[][] trait_var;
+    //private float[][] trait_var;
+    private float[] abundance;
     
     private int recordFrequency;
 
@@ -129,10 +130,10 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
         nc.addVariableAttribute("trait_mean", "description", "Mean value of the trait");
         nc.addVariableAttribute("trait_mean", "_FillValue", -99.f);
         
-        nc.addVariable("trait_var", DataType.FLOAT, new Dimension[]{timeDim, traitDim, speciesDim});
-        nc.addVariableAttribute("trait_var", "units", "");
-        nc.addVariableAttribute("trait_var", "description", "Variance of the trait");
-        nc.addVariableAttribute("trait_var", "_FillValue", -99.f);
+        //nc.addVariable("trait_var", DataType.FLOAT, new Dimension[]{timeDim, traitDim, speciesDim});
+        //nc.addVariableAttribute("trait_var", "units", "");
+        //nc.addVariableAttribute("trait_var", "description", "Variance of the trait");
+        //nc.addVariableAttribute("trait_var", "_FillValue", -99.f);
         
         nc.addVariable("trait", DataType.INT, new Dimension[]{traitDim});
         nc.addVariable("species", DataType.INT, new Dimension[]{speciesDim});
@@ -200,8 +201,8 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void reset() {
-        this.trait_mean = new float[this.getSimulation().getNEvolvingTraits()][this.getNSpecies()];
-        this.trait_var = new float[this.getSimulation().getNEvolvingTraits()][this.getNSpecies()];
+        this.abundance = new float[this.getNSpecies()];   // initialize abundance
+        this.trait_mean = new float[this.getSimulation().getNEvolvingTraits()][this.getNSpecies()];   // init. trait to 0
     }
 
     @Override
@@ -213,43 +214,28 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
             Species species = this.getSpecies(i);
 
             // listing all the schools that belong to the given species
-            List<School> listSchool = this.getSchoolSet().getSchools(species);
-            int nschool = listSchool.size();
-            double[] temp = new double[nschool];   // one value per individual in the school 
+            List<School> listSchool = this.getSchoolSet().getSchools(species);         
             
             // Loop over all the traits
-            for (int itrait = 0; itrait < this.getNEvolvingTraits(); itrait++) {
-                String traitName = this.getEvolvingTrait(itrait).getName();
-                for (int jschool = 0; jschool < nschool; jschool++) {
+            for (School sch : listSchool) {
+                this.abundance[i] += sch.getInstantaneousAbundance();
+                for (int itrait = 0; itrait < this.getNEvolvingTraits(); itrait++) {
+                    String traitName = this.getEvolvingTrait(itrait).getName();
                     try {
-                        temp[jschool] = listSchool.get(jschool).getTrait(traitName);
+                        this.trait_mean[itrait][i] += sch.getTrait(traitName) * sch.getInstantaneousAbundance();
                     } catch (Exception ex) {
                         Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                
-                // mean value of the trait for the given species
-                double tmean = this.computeMean(temp);
-                double tvar = this.computeVar(temp, tmean);
-                this.trait_mean[itrait][i] = (float) tmean;
-                this.trait_var[itrait][i] = (float) tvar;
-
             }
 
-        }  // end of species loop
-        
-        this.write_step();
-        this.reset();
-        
+        }  // end of species loop        
     }   // end of method
 
-    public void write_step() {
+    public void write(float time) {
 
-        int iStepSimu = this.getSimulation().getIndexTimeSimu();
-        float time = (float) (iStepSimu + 1) / getConfiguration().getNStepYear();
-        
         ArrayFloat.D3 arrMean = new ArrayFloat.D3(1, this.getNEvolvingTraits(), this.getNSpecies());
-        ArrayFloat.D3 arrVar = new ArrayFloat.D3(1, this.getNEvolvingTraits(), this.getNSpecies());
+        //ArrayFloat.D3 arrVar = new ArrayFloat.D3(1, this.getNEvolvingTraits(), this.getNSpecies());
 
         // Write into NetCDF file
         int nSpecies = getNSpecies();
@@ -257,20 +243,18 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
 
         for (int j = 0; j < nTraits; j++) {
             for (int i = 0; i < nSpecies; i++) {
-                arrMean.set(0, j, i, trait_mean[j][i]);
-                arrVar.set(0, j, i, trait_var[j][i]);
+                arrMean.set(0, j, i, trait_mean[j][i] / this.abundance[i]);
             }
         }
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
-        arrTime.set(0, (float) this.timeOut * 360 / (float) this.counter);
+        arrTime.set(0, (float) time);
 
         int index = nc.getUnlimitedDimension().getLength();
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
             nc.write("time", new int[]{index}, arrTime);
             nc.write("trait_mean", new int[]{index, 0, 0}, arrMean);
-            nc.write("trait_var", new int[]{index, 0, 0}, arrVar);
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
@@ -293,32 +277,5 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
     public boolean isTimeToWrite(int iStepSimu) {
         // Always true, every time step should be written in the NetCDF file.
         return (((iStepSimu + 1) % recordFrequency) == 0);
-    }
-    
-    
-    private double computeMean(double[] input) { 
-        double output = 0.d;
-        int N = input.length;
-        for (int i = 0; i < N; i++) { 
-            output += input[i];
-        }
-        output /= N;
-        return output;
-    }
-    
-    private double computeVar(double[] input, double vmean) {
-        double output = 0.d;
-        int N = input.length;
-        for (int i = 0; i < N; i++) {
-            output += Math.pow(input[i] - vmean, 2);
-        }
-        output /= N;
-        return output;
-    }
-
-    @Override
-    public void write(float time) {
-        
-    }
-    
+    }    
 }
