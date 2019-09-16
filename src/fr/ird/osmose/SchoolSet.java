@@ -169,7 +169,7 @@ public class SchoolSet extends OsmoseLinker {
         }
         return schoolBySpecies.get(species.getIndex());
     }
-
+   
     /**
      * Returns an up to date list of schools of the given species.
      *
@@ -179,6 +179,33 @@ public class SchoolSet extends OsmoseLinker {
     public List<School> getSchools(Species species) {
         return getSchools(species, true);
     }
+    
+    /**
+     * Returns a list of schools of the given species.
+     *
+     * @param species, the species to select
+     * @param update, if {@code false} returns the cached list of schools for
+     * this species
+     * @return a list of schools of this {@code species}
+     */
+    public List<School> getSchoolsAll(Species species, boolean update) {
+        if (update || hasSpeciesChanged[species.getIndex()]) {
+            schoolBySpecies.put(species.getIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getIndex())}));
+            hasSpeciesChanged[species.getIndex()] = false;
+        }
+        return schoolBySpecies.get(species.getIndex());
+    }
+
+    /**
+     * Returns an up to date list of schools of the given species.
+     *
+     * @param species, the species to select
+     * @return a list of schools of this {@code species}
+     */
+    public List<School> getSchoolsAll(Species species) {
+        return getSchoolsAll(species, true);
+    }
+    
 
     /**
      * Get the list of the schools that are located in the given cell at current
