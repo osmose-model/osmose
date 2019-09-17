@@ -802,42 +802,87 @@ plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=FALSE, 
 }
 
 
-#' Title
+#' Plot diet matrix by size class
 #'
-#' @param data 
-#'
-#'
-#' @method plot osmose.dietMatrixbySize
+#' @param data Data list
+#' @param species List of species name. If null, all species are plotted
+#' @param ... Extra arguments of the graphics barplot function
+#' @method plot osmose.dietMatrixbyAge
 #' @export
-plot.osmose.dietMatrixbySize = function(data, species=NULL, ...) {
+plot.osmose.dietMatrixbyAge = function(data, species=NULL, ...) {
   
   if(is.null(species)) { 
       species = names(species)
   }
   
   for (spec in species) {
-    .plot.osmose.dietMatrixbySize(data, spec, "Size (cm)", "Diet Matrix", ...)
+    .plot.osmose.dietMatrixbyDis(data, spec, "Age", "Diet Matrix", ...)
   }
   
 }
- 
-.plot.osmose.dietMatrixbySize = function(data, spec, xlab, ylab, ...) {
-    
-  # recover the diet Matrix for the given species
-  # data has one list element per prey
-  data = data[[spec]]
+
+#' Plot diet matrix by size class
+#'
+#' @param data Data list
+#' @param species List of species name. If null, all species are plotted
+#' @param ... Extra arguments of the graphics barplot function
+#' @method plot osmose.dietMatrixbySize
+#' @export
+plot.osmose.dietMatrixbySize = function(data, species=NULL, ...) {
   
-  # computes the time-average for each prey
-  data = lapply(data, apply, mean, MARGIN=2, na.rm=TRUE)
-  # converts list into array ready for barplot
-  data = as.data.frame(data)
-  data[is.na(data)] = 0
-  data = t(data.matrix(data))
+  if(is.null(species)) { 
+    species = names(species)
+  }
   
-  col = rainbow(nrow(data))
+  for (spec in species) {
+    .plot.osmose.dietMatrixbyDis(data, spec, "Size (cm)", "Diet Matrix", ...)
+  }
   
-  barplot(data, legend=rownames(data), col=col, xlab=xlab, ylab=ylab, ...)
 }
+
+
+
+#' Plot diet matrix by size class
+#'
+#' @param data Data list
+#' @param species List of species name. If null, all species are plotted
+#' @param ... Extra arguments of the graphics barplot function
+#' @method plot osmose.predatorPressureDistribBySize
+#' @export
+plot.osmose.predatorPressureDistribBySize = function(data, species=NULL, ...) {
   
+  if(is.null(species)) { 
+    species = names(species)
+  }
   
+  for (spec in species) {
+    .plot.osmose.dietMatrixbyDis(data, spec, "Size (cm)", "Predator pressure", ...)
+  }
   
+}
+
+#' Plot diet matrix by size class
+#'
+#' @param data Data list
+#' @param species List of species name. If null, all species are plotted
+#' @param ... Extra arguments of the graphics barplot function
+#' @method plot osmose.predatorPressureDistribByAge
+#' @export
+plot.osmose.predatorPressureDistribByAge = function(data, species=NULL, ...) {
+  
+  if(is.null(species)) { 
+    species = names(species)
+  }
+  
+  for (spec in species) {
+    .plot.osmose.dietMatrixbyDis(data, spec, "Age", "Predator pressure", ...)
+  }
+  
+}
+
+
+
+
+
+
+

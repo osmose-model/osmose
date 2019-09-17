@@ -65,29 +65,29 @@
 #'
 #' @export
 osmose.barplot = function(x, label_size=1, add_text=TRUE, color=NULL, ...) {
-
-    col = rep(color, length(x))
   
-    # space=1 means that one blank bar is left for one drawn bar
-    # xaxt="n" desactivates the defaut xlabel (True?)
-    barplot(x, space=1, las=2, xaxt="n", col=col, ...)
-    
-    # last point
-    end_point = 0.5 + length(x) + length(x) - 1
-
-    # xlabel points
-    xlab = seq(1.5, end_point, by=2)
-
-    # draw the text labels.
-    text(xlab, par("usr")[3], 
-         srt=45, adj=1, xpd=TRUE,
-         labels = paste(names(x)), cex=label_size)
-    
-    if(add_text) { 
-      ytext = max(x) * ( 1 - 0.1) 
-      text(xlab, ytext, round(x, digits=1), cex=0.5)
-    }
-        
+  col = rep(color, length(x))
+  
+  # space=1 means that one blank bar is left for one drawn bar
+  # xaxt="n" desactivates the defaut xlabel (True?)
+  barplot(x, space=1, las=2, xaxt="n", col=col, ...)
+  
+  # last point
+  end_point = 0.5 + length(x) + length(x) - 1
+  
+  # xlabel points
+  xlab = seq(1.5, end_point, by=2)
+  
+  # draw the text labels.
+  text(xlab, par("usr")[3], 
+       srt=45, adj=1, xpd=TRUE,
+       labels = paste(names(x)), cex=label_size)
+  
+  if(add_text) { 
+    ytext = max(x) * ( 1 - 0.1) 
+    text(xlab, ytext, round(x, digits=1), cex=0.5)
+  }
+  
 }
 
 # Plot a stacked percent plot.
@@ -98,8 +98,8 @@ osmose.barplot = function(x, label_size=1, add_text=TRUE, color=NULL, ...) {
 # @param ... Additional arguments to the barplot function.
 # @export
 osmose.stackedpcent = function(data, ...)
- {
- 
+{
+  
   # cheks that the data frame contains labeled rows and columns
   if(length(colnames(data)) == 0) {
     stop("You must provide column names to your dataframe")
@@ -120,8 +120,8 @@ osmose.stackedpcent = function(data, ...)
          legend = rownames(data), 
          ncol=1, xpd=TRUE, inset=c(0.2, 0.),
          fill=col, bg="white")
-   
- }
+  
+}
 
 # extract the default ggplot2 color table for fill plots
 # it takes as argument the discrete level array 
@@ -186,7 +186,7 @@ plot.mort.byclass.tmean = function(mort, species, norm, class="size") {
   # converts into matrix
   mort = do.call(cbind.data.frame, mort)
   mort = as.matrix(mort)
-
+  
   # Counts the total mortality rate for each size class
   tot = apply(mort, 1, sum)
   
@@ -214,3 +214,30 @@ plot.mort.byclass.tmean = function(mort, species, norm, class="size") {
   }
   return(invisible())
 }
+
+.plot.osmose.dietMatrixbyDis = function(data, spec, xlab, ylab, ...) {
+  
+  .check_species(data, species)    
+  
+  # recover the diet Matrix for the given species
+  # data has one list element per prey
+  data = data[[spec]]
+  
+  # computes the time-average for each prey
+  data = lapply(data, apply, mean, MARGIN=2, na.rm=TRUE)
+  # converts list into array ready for barplot
+  data = as.data.frame(data)
+  data[is.na(data)] = 0
+  data = t(data.matrix(data))
+  
+  col = rainbow(nrow(data))
+  
+  barplot(data, legend=rownames(data), col=col, xlab=xlab, ylab=ylab, ...)
+}
+
+
+
+
+
+
+
