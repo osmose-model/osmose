@@ -111,6 +111,7 @@ public class OutputManager extends SimulationLinker {
 
         AbstractDistribution sizeDistrib = new SizeDistribution();
         AbstractDistribution ageDistrib = new AgeDistribution();
+        AbstractDistribution tl_distrib = new TLDistribution();
 
         useNetcdf = getConfiguration().getBoolean("output.use.netcdf");
 
@@ -194,6 +195,9 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.abundance.byage.enabled")) {
             outputs.add(new AbundanceDistribOutput(rank, ageDistrib));
         }
+        if (getConfiguration().getBoolean("output.abundance.bytl.enabled")) {
+            outputs.add(new AbundanceDistribOutput(rank, tl_distrib));
+        }    
         // Mortality
         if (getConfiguration().getBoolean("output.mortality.enabled")) {
             outputs.add(new MortalityOutput(rank));
@@ -260,7 +264,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new MeanTrophicLevelCatchOutput(rank));
         }
         if (getConfiguration().getBoolean("output.biomass.bytl.enabled")) {
-            outputs.add(new BiomassDistribOutput(rank, new TLDistribution()));
+            outputs.add(new BiomassDistribOutput(rank, tl_distrib));
         }
         if (getConfiguration().getBoolean("output.meanTL.bySize.enabled")) {
             outputs.add(new MeanTrophicLevelDistribOutput(rank, sizeDistrib));
