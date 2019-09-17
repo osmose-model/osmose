@@ -519,37 +519,38 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
 osmose2R.v3r2 = function (path=NULL, species.names=NULL) {
 
     # Output data
-    outputData = list(biomass = readOsmoseFiles(path = path, type = "biomass"),
-                      abundance = readOsmoseFiles(path = path, type = "abundance"),
-                      yield = readOsmoseFiles(path = path, type = "yield"),
-                      yieldN = readOsmoseFiles(path = path, type = "yieldN"),
-                      mortality = readOsmoseFiles(path = path, type = "mortalityRate", bySpecies = TRUE),
-                      meanTL = readOsmoseFiles(path = path, type = "meanTL"),
-                      meanTLCatch = readOsmoseFiles(path = path, type = "meanTLCatch"),
-                      biomassByTL = readOsmoseFiles(path = path, type = "biomassDistribByTL"),
-                      predatorPressure = readOsmoseFiles(path = path, type = "predatorPressure"),
-                      predPreyIni = readOsmoseFiles(path = path, type = "biomassPredPreyIni"),
-                      dietMatrix = readOsmoseFiles(path = path, type = "dietMatrix"),
-                      meanSize = readOsmoseFiles(path = path, type = "meanSize"),
-                      meanSizeCatch = readOsmoseFiles(path = path, type = "meanSizeCatch"),
+    outputData = list(biomass = readOsmoseFiles(path = path, type = "biomass"),  #ok
+                      abundance = readOsmoseFiles(path = path, type = "abundance"),  #ok
+                      yield = readOsmoseFiles(path = path, type = "yield"), #ok
+                      yieldN = readOsmoseFiles(path = path, type = "yieldN"), #ok
+                      mortality = readOsmoseFiles(path = path, type = "mortalityRate", bySpecies = TRUE), #ok
+                      meanTL = readOsmoseFiles(path = path, type = "meanTL"),  #ok
+                      meanTLCatch = readOsmoseFiles(path = path, type = "meanTLCatch"), #ok
+                      biomassByTL = readOsmoseFiles(path = path, type = "biomassDistribByTL"),  #ok
+                      predatorPressure = readOsmoseFiles(path = path, type = "predatorPressure"),  #ok
+                      predPreyIni = readOsmoseFiles(path = path, type = "biomassPredPreyIni"),  # ok
+                      dietMatrix = readOsmoseFiles(path = path, type = "dietMatrix"),  #ok
+                      meanSize = readOsmoseFiles(path = path, type = "meanSize"),  #ok
+                      meanSizeCatch = readOsmoseFiles(path = path, type = "meanSizeCatch"),  #ok
                       SizeSpectrum  = readOsmoseFiles(path=path, type="SizeSpectrum")$Abundance,
-                      abundanceBySize = readOsmoseFiles(path = path, type = "abundanceDistribBySize"),
-                      biomassBySize = readOsmoseFiles(path = path, type = "biomassDistribBySize"),
-                      yieldBySize = readOsmoseFiles(path = path, type = "yieldDistribBySize"),
-                      yieldNBySize = readOsmoseFiles(path = path, type = "yieldNDistribBySize"),
-                      meanTLBySize = readOsmoseFiles(path = path, type = "meanTLDistribBySize"),
-                      mortalityBySize = readOsmoseFiles(path = path, type = "mortalityRateDistribBySize", bySpecies = TRUE),
+                      abundanceBySize = readOsmoseFiles(path = path, type = "abundanceDistribBySize"), #ok
+                      biomassBySize = readOsmoseFiles(path = path, type = "biomassDistribBySize"),  #ok 
+                      yieldBySize = readOsmoseFiles(path = path, type = "yieldDistribBySize"),  #ok
+                      yieldNBySize = readOsmoseFiles(path = path, type = "yieldNDistribBySize"),  #ok
+                      meanTLBySize = readOsmoseFiles(path = path, type = "meanTLDistribBySize"),  #ok
+                      mortalityBySize = readOsmoseFiles(path = path, type = "mortalityRateDistribBySize", bySpecies = TRUE),  #ok
                       dietMatrixBySize = readOsmoseFiles(path = path, type = "dietMatrixbySize", bySpecies = TRUE),
                       predatorPressureBySize = readOsmoseFiles(path = path, type = "predatorPressureDistribBySize", bySpecies = TRUE),
-                      abundanceByAge = readOsmoseFiles(path = path, type = "abundanceDistribByAge"),
-                      biomassByAge = readOsmoseFiles(path = path, type = "biomassDistribByAge"),
-                      yieldByAge = readOsmoseFiles(path = path, type = "yieldDistribByAge"),
-                      yieldNByAge = readOsmoseFiles(path = path, type = "yieldNDistribByAge"),
-                      meanSizeByAge = readOsmoseFiles(path = path, type = "meanSizeDistribByAge"),
-                      meanTLByAge = readOsmoseFiles(path = path, type = "meanTLDistribByAge"),
-                      mortalityByAge = readOsmoseFiles(path = path, type = "mortalityRateDistribByAge", bySpecies = TRUE),
+                      abundanceByAge = readOsmoseFiles(path = path, type = "abundanceDistribByAge"),  #ok
+                      biomassByAge = readOsmoseFiles(path = path, type = "biomassDistribByAge"),  #ok
+                      yieldByAge = readOsmoseFiles(path = path, type = "yieldDistribByAge"),  #ok
+                      yieldNByAge = readOsmoseFiles(path = path, type = "yieldNDistribByAge"),  #ok
+                      meanSizeByAge = readOsmoseFiles(path = path, type = "meanSizeDistribByAge"), 
+                      meanTLByAge = readOsmoseFiles(path = path, type = "meanTLDistribByAge"),  #ok
+                      mortalityByAge = readOsmoseFiles(path = path, type = "mortalityRateDistribByAge", bySpecies = TRUE),  # ok
                       dietMatrixByAge = readOsmoseFiles(path = path, type = "dietMatrixbyAge", bySpecies = TRUE),
                       predatorPressureByAge = readOsmoseFiles(path = path, type = "predatorPressureDistribByAge", bySpecies = TRUE),
+                      abundanceByTL = readOsmoseFiles(path = path, type = "abundanceDistribByTL"),  #ok
                       
                       # bioen variables
                       ageMature = readOsmoseFiles(path = path, type = "AgeMature"),
@@ -572,6 +573,10 @@ osmose2R.v3r2 = function (path=NULL, species.names=NULL) {
 
     output = c(model = list(model), species = list(colnames(outputData$biomass)),
                outputData)
+    
+    # barrier.n: remove NULL elements fom the list
+    cond = sapply(output, is.null)
+    output = output[!cond]
 
     return(output)
 }

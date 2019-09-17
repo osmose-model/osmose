@@ -278,57 +278,68 @@ plot.osmose.predatorPressure = function(data, species=NULL, time.mean=TRUE, ...)
 }
 
 
+#' Plot function for biomass
+#' @description This function takes a object of the class \code{osmose.biomass} and 
+#' produce useful plots for the analysis of this variable.
+#' @param x Object of the class \code{osmose.biomass}. This object have three dimensions: 
+#' species, time and size or age.
+#' @param species A \code{numeric} vector. The species indexation of the object \code{x} is specified 
+#' with this parameter. By defaul \code{species = NULL} and there is not species indexation, using 
+#' all the species of \code{x} for the plots.
+#' @param start A \code{numeric} value. The first element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{start = NULL} and the time indexation start 
+#' with the first element of \code{x}.
+#' @param end A \code{numeric} value. The last element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{end = NULL} and the time indexation finish 
+#' with the last element of \code{x}.
+#' @param initialYear A \code{numeric} value. It specifies the first element that is going to be used on 
+#' the x axis for the plots.
+#' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots are going to be time series 
+#' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
+#' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
+#' default \code{type = 1}. To see all the plot types available for this variable check the 
+#' Osmose user manual \link{COMPLETE HERE}.
+#' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
+#' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
+#' code{replicates = FALSE} show the mean value of the variable over the time.
+#' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
+#' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
+#' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
+#' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
+#' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
+#' present the plots horizontaly.
+#' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
+#' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
+#' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
+#'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
+#'  the colors are recycled and repeated for the species that have not a specific color. 
+#' @param alpha A number between 0 and 1. Indicate the transparency with which the 
+#'  confidence interval is colored. By default \code{alpha = 0.5}.
+#' @param speciesNames A vector with the names for each species. By default \code{speciesNames = NULL} and the 
+#' names inside the object \code{x} are used.
+#' @param ... Extra arguments of the function.
+#' @return A graph of a object of the class \code{osmose.biomass}.
+#' @author Criscely Lujan Paredes
+#' @method plot osmose.biomassPredPreyIni
+#' @export
+plot.osmose.biomassPredPreyIni = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+                                             ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
+                                             ci = TRUE, freq = 12, horizontal = FALSE, 
+                                             conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
+                                             col = NULL, alpha = 0.5, speciesNames = NULL, axes = TRUE, ...) {
+  
+  osmosePlots2D(x = x, species = species, start = start, end = end, initialYear = initialYear,
+                ts = ts, type = type, replicates = replicates, nrep = nrep, ci = ci,
+                freq = freq, horizontal = horizontal, conf = conf, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, speciesNames = speciesNames,
+                axes = axes, ...)
+  
+  return(invisible())
+}
 
-# Plots the prey biomass before the mortality rate is applied
-#
-# @param  Data array
-# @param x osmose.output.object
-# @param start First simulation year
-# @param conf  Confidence interval
-# @param factor Multiplication factor
-# @param replicates Draws the time-series for each replicate
-# @param freq Output frequency (used to convert from time-step into years)
-# @param alpha Transparency for confidence interval
-# @param col  Line color
-# @param xlim  Xaxis limit
-# @param ylim  Yaxis limit
-# @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
-# are drawn. Only used if replicates=TRUE
-# @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
-# @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
-# @param species Name of the species to draw (only if time.mean=FALSE)
-# @param ... 
-#
-# @return Nothing
-# @export
-# @method plot osmose.output.biomassPredPreyIni
-# plot.osmose.output.biomassPredPreyIni = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
-#                                       freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=NULL,
-#                                       time.mean=FALSE, nmax=NULL, species=NULL, ...) {
-#   
-#   opar = par(no.readonly = TRUE)
-#   on.exit(par(opar))
-#   
-#   if(isTRUE(time.mean)) {
-#     .plotAverageBiomass(x, col=col, nmax=nmax, factor=factor, ylab="Biomass before mort.", title="Mean biomass before mortality", ...)
-#     return(invisible())
-#   }
-#   
-#   if(!species %in% colnames(x) | is.null(species))
-#   {
-#     stop("You should proper a species name")
-#   }
-#   
-#   start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-#   
-#   .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
-#                replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-#                xlim=xlim, ylim=xlim) 
-#   
-#   title(xlab="Time (years)", ylab="Biomass before pred.", main=species)
-#   
-#   return(invisible())
-# }
 
 #' Plots mortality rates by size class.
 #'
@@ -418,3 +429,415 @@ norm_func = function(data) {
   dimnames(output) = dimnames(data)
   return(output)
 }
+
+
+
+
+
+
+#' Plot function for biomass
+#' @description This function takes a object of the class \code{osmose.biomass} and 
+#' produce useful plots for the analysis of this variable.
+#' @param x Object of the class \code{osmose.biomass}. This object have three dimensions: 
+#' species, time and size or age.
+#' @param species A \code{numeric} vector. The species indexation of the object \code{x} is specified 
+#' with this parameter. By defaul \code{species = NULL} and there is not species indexation, using 
+#' all the species of \code{x} for the plots.
+#' @param start A \code{numeric} value. The first element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{start = NULL} and the time indexation start 
+#' with the first element of \code{x}.
+#' @param end A \code{numeric} value. The last element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{end = NULL} and the time indexation finish 
+#' with the last element of \code{x}.
+#' @param initialYear A \code{numeric} value. It specifies the first element that is going to be used on 
+#' the x axis for the plots.
+#' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots are going to be time series 
+#' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
+#' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
+#' default \code{type = 1}. To see all the plot types available for this variable check the 
+#' Osmose user manual \link{COMPLETE HERE}.
+#' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
+#' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
+#' code{replicates = FALSE} show the mean value of the variable over the time.
+#' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
+#' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
+#' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
+#' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
+#' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
+#' present the plots horizontaly.
+#' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
+#' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
+#' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
+#'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
+#'  the colors are recycled and repeated for the species that have not a specific color. 
+#' @param alpha A number between 0 and 1. Indicate the transparency with which the 
+#'  confidence interval is colored. By default \code{alpha = 0.5}.
+#' @param speciesNames A vector with the names for each species. By default \code{speciesNames = NULL} and the 
+#' names inside the object \code{x} are used.
+#' @param ... Extra arguments of the function.
+#' @return A graph of a object of the class \code{osmose.biomass}.
+#' @author Criscely Lujan Paredes
+#' @method plot osmose.meanSize
+#' @export
+plot.osmose.meanSize = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+                                          ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
+                                          ci = TRUE, freq = 12, horizontal = FALSE, 
+                                          conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
+                                          col = NULL, alpha = 0.5, speciesNames = NULL, axes = TRUE, ...) {
+  
+  osmosePlots2D(x = x, species = species, start = start, end = end, initialYear = initialYear,
+                ts = ts, type = type, replicates = replicates, nrep = nrep, ci = ci,
+                freq = freq, horizontal = horizontal, conf = conf, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, speciesNames = speciesNames,
+                axes = axes, ...)
+  
+  return(invisible())
+}
+
+
+
+
+
+
+
+
+#' Plot function for biomass
+#' @description This function takes a object of the class \code{osmose.biomass} and 
+#' produce useful plots for the analysis of this variable.
+#' @param x Object of the class \code{osmose.biomass}. This object have three dimensions: 
+#' species, time and size or age.
+#' @param species A \code{numeric} vector. The species indexation of the object \code{x} is specified 
+#' with this parameter. By defaul \code{species = NULL} and there is not species indexation, using 
+#' all the species of \code{x} for the plots.
+#' @param start A \code{numeric} value. The first element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{start = NULL} and the time indexation start 
+#' with the first element of \code{x}.
+#' @param end A \code{numeric} value. The last element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{end = NULL} and the time indexation finish 
+#' with the last element of \code{x}.
+#' @param initialYear A \code{numeric} value. It specifies the first element that is going to be used on 
+#' the x axis for the plots.
+#' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots are going to be time series 
+#' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
+#' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
+#' default \code{type = 1}. To see all the plot types available for this variable check the 
+#' Osmose user manual \link{COMPLETE HERE}.
+#' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
+#' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
+#' code{replicates = FALSE} show the mean value of the variable over the time.
+#' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
+#' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
+#' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
+#' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
+#' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
+#' present the plots horizontaly.
+#' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
+#' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
+#' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
+#'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
+#'  the colors are recycled and repeated for the species that have not a specific color. 
+#' @param alpha A number between 0 and 1. Indicate the transparency with which the 
+#'  confidence interval is colored. By default \code{alpha = 0.5}.
+#' @param speciesNames A vector with the names for each species. By default \code{speciesNames = NULL} and the 
+#' names inside the object \code{x} are used.
+#' @param ... Extra arguments of the function.
+#' @return A graph of a object of the class \code{osmose.biomass}.
+#' @author Criscely Lujan Paredes
+#' @method plot osmose.meanSizeCatch
+#' @export
+plot.osmose.meanSizeCatch = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+                                ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
+                                ci = TRUE, freq = 12, horizontal = FALSE, 
+                                conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
+                                col = NULL, alpha = 0.5, speciesNames = NULL, axes = TRUE, ...) {
+  
+  osmosePlots2D(x = x, species = species, start = start, end = end, initialYear = initialYear,
+                ts = ts, type = type, replicates = replicates, nrep = nrep, ci = ci,
+                freq = freq, horizontal = horizontal, conf = conf, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, speciesNames = speciesNames,
+                axes = axes, ...)
+  
+  return(invisible())
+}
+
+
+
+#' Plots yield biomass by age class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.yieldByAge
+plot.osmose.yieldByAge = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Age", ylab="Yield Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots yield abundance by age class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.yieldNByAge
+plot.osmose.yieldNByAge = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Age", ylab="Yield Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots yield biomass by size class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.yieldBySize
+plot.osmose.yieldBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Yield Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots yield abundance by size class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.yieldNBySize
+plot.osmose.yieldNBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Yield Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots mean trophic level by size class
+#'
+#' @param data TL distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean TL is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.meanTLBySize
+plot.osmose.meanTLBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Trophic level", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots mean trophic level by age class
+#'
+#' @param data Trophic level distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean TL is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.meanTLByAge
+plot.osmose.meanTLByAge = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Age", ylab="Trophic level", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Plots abundance by size class
+#'
+#' @param data Abundance distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.abundanceDistribBySize
+plot.osmose.abundanceDistribBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Plots abundance by age class
+#'
+#' @param data Abundance distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.abundanceDistribByAge
+plot.osmose.abundanceDistribByAge= function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots abundance by trophic level
+#'
+#' @param data Abundance distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.abundanceDistribByTL
+plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Trophic level", ylab="Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Plots abundance by trophic level
+#'
+#' @param data Abundance distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.abundanceDistribByTL
+plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=FALSE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Trophic level", ylab="Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Title
+#'
+#' @param data 
+#'
+#'
+#' @method plot osmose.dietMatrixbySize
+#' @export
+plot.osmose.dietMatrixbySize = function(data, species=NULL, ...) {
+  
+  if(is.null(species)) { 
+      species = names(species)
+  }
+  
+  for (spec in species) {
+    .plot.osmose.dietMatrixbySize(data, spec, "Size (cm)", "Diet Matrix", ...)
+  }
+  
+}
+ 
+.plot.osmose.dietMatrixbySize = function(data, spec, xlab, ylab, ...) {
+    
+  # recover the diet Matrix for the given species
+  # data has one list element per prey
+  data = data[[spec]]
+  
+  # computes the time-average for each prey
+  data = lapply(data, apply, mean, MARGIN=2, na.rm=TRUE)
+  # converts list into array ready for barplot
+  data = as.data.frame(data)
+  data[is.na(data)] = 0
+  data = t(data.matrix(data))
+  
+  col = rainbow(nrow(data))
+  
+  barplot(data, legend=rownames(data), col=col, xlab=xlab, ylab=ylab, ...)
+}
+  
+  
+  

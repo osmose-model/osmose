@@ -2,27 +2,25 @@
 # @export
 # @return An array or a list containing the data.
 process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) {
-
+  
   .check_species(out, species)
   
   # extract the given specie
   out = out[[species]]
-
+  
   # Computes the mean over the replicates
   out = apply(out, c(1, 2), mean)
-
+  
   # computes the time average
   data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # barrier.n: adding this to avoid NULL output in summary
   keep = (data.time.mean > thres)  # keep values for which the max is greater than the threshold
-
-  if(time.mean)
-  {
+  
+  if(time.mean) {
     # extracts the mean values above a given threshold
     data.time.mean = data.time.mean[keep]
     Nvalues = length(data.time.mean)
     
-    if(thres>0)
-    {
+    if(thres>0) {
       # If thresholds is greater than 0, then the negligible species are binned together.
       
       # compute the proportion of negligible species
@@ -40,7 +38,7 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
     return(data.time.mean)
     
   } 
-
+  
   # extract the data that do not match the threshold requirements
   # and sum over the specie dimension.
   other = out[, keep==FALSE]
@@ -48,16 +46,16 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
   
   # extracts the data that match the requirement
   out = out[, keep==TRUE]
-
+  
   if(thres > 0) {
     # add the concatenation of small ("other") species
     out = cbind(out, other)  
   }
-
+  
   # sort the data in descending order
   # based on the time maximum (nspecies values) 
   temp = apply(out, 2, mean, na.rm=TRUE)
-
+  
   index = sort(temp, decreasing=FALSE, index.return=TRUE)$ix
   # returns the sorted array
   out = out[, index]
@@ -70,8 +68,7 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
 
 # @param ... Additional arguments of the function.
 # @return An array or a list containing the data.
-process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
-{
+process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...) {
   
   .check_species(out, species)
   
@@ -95,29 +92,24 @@ process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
 }
 
 
-.check_species = function(out, species)
-{
-  if(is.null(species))
-  {
+.check_species = function(out, species) {
+  if(is.null(species)) {
     stop("You must provide a specie name")
   }
   
   # Check if the specie considered exists in the dataset.
-  if(!(species %in% names(out)))
-  {
+  if(!(species %in% names(out))) {
     stop("The specie name ", species, "is not in the diet matrix")
   }
 }
 
 
-.compute_average_matrix = function(out, time.mean, repl.mean)
-{
+.compute_average_matrix = function(out, time.mean, repl.mean) {
   
   species = colnames(out)
   
   # If replicate and time average: average over dims 2 and 3
-  if(repl.mean & time.mean)
-  {
+  if(repl.mean & time.mean) {
     out = apply(out, 1, mean, na.rm=TRUE)
     names(out) = species
   } else if (repl.mean) {
@@ -140,8 +132,7 @@ process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...)
 #'
 #' @export
 #' @method summary osmose.dietMatrix
-summary.osmose.dietMatrix = function(data, species=NULL, thres=1, ...)
-{
+summary.osmose.dietMatrix = function(data, species=NULL, thres=1, ...) {
   
   dietMatrix = process.dietMatrix(data, species=species, time.mean=TRUE, thres=thres, ...)
   dietMatrix = as.data.frame(dietMatrix)
@@ -160,35 +151,30 @@ summary.osmose.dietMatrix = function(data, species=NULL, thres=1, ...)
 #
 #' @export
 #' @method summary osmose.mortalityRate
-summary.osmose.mortalityRate = function(data, species=NULL, ...)
-{
+summary.osmose.mortalityRate = function(data, species=NULL, ...) {
   data = process.mortalityRate(data, species=species, time.mean=TRUE)
   return(as.data.frame(data))  
 }
 
 #' @export
 #' @method summary osmose.biomass
-summary.osmose.biomass = function(data)
-{
-  return(summary.generic(data))
+summary.osmose.biomass = function(data) {
+  return(.summary.generic(data))
 }
 
 #' @export
 #' @method summary osmose.meanTL
-summary.osmose.meanTL = function(data)
-{
-  return(summary.generic(data))
+summary.osmose.meanTL = function(data) {
+  return(.summary.generic(data))
 }
 
 #' @export
 #' @method summary osmose.meanTLCatch
-summary.osmose.meanTLCatch = function(data)
-{
-  return(summary.generic(data))
+summary.osmose.meanTLCatch = function(data) {
+  return(.summary.generic(data))
 }
 
-summary.generic = function(data)
-{
+.summary.generic = function(data) {
   data = apply(data, 2, mean, na.rm=TRUE)
   data = sort(data, decreasing=TRUE)
   data = as.data.frame(data)

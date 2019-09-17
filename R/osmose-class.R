@@ -67,8 +67,9 @@ getVar.osmose = function(object, what, how=c("matrix", "data.frame", "list"),
       stop(message) 
   }
 
-  if(inherits(out, "array") & isTRUE(expected))
+  if(inherits(out, "array") & isTRUE(expected)) {
     out = apply(out, c(1, 2), mean, na.rm=TRUE)
+  }
   
   if(how=="matrix") return(out)
   
