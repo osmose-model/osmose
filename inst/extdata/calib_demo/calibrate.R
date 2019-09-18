@@ -64,4 +64,4 @@ cal1 = calibrate(calibData['paropt'], fn=objfn, method='default',
                  lower=calibData['parmin'], upper=calibData['parmax'], 
                  phases=calibData['parphase'], replicates=1, control=control)
 
-# stopCluster(cl)
+stopCluster(cl)

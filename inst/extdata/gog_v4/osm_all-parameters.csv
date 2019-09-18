@@ -7,7 +7,7 @@ simulation.restart.file;null
 simulation.nschool;30
 simulation.ncpu;1
 simulation.nplankton;6
-simulation.nsimulation;10
+simulation.nsimulation;2
 simulation.nspecies;11
 
 # Mortality algorithm;

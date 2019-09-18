@@ -20,11 +20,13 @@ runModel  = function(param, names, ...) {
 
     # defines the user directory
     outdir = "output"
+
+    cat("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ", getwd(), "\n")
     
     # run Osmose Model
     run_osmose(input="calib_config.csv", 
               output=outdir, options=NULL, log="osmose.log", 
-              verbose=FALSE, clean=TRUE)   
+              verbose=TRUE, clean=TRUE)   
     
     # read Osmose outputs 
     data = read_osmose(path=outdir)
