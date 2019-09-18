@@ -4,7 +4,8 @@ require("calibrar")
 require("doParallel")
 
 # Recovering of the runModel function associated with the reference configuration
-filename = system.file(package="osmose", "extdata", "calib", "runModel.R")
+dirin = getwd()
+filename = file.path(dirin, "runModel.R")
 source(filename)
 
 # creates a user defined likelyhood function
@@ -15,7 +16,7 @@ minmaxt = function(obs, sim) {
 }
 
 # reads calibration informations
-calib_path = system.file(package="osmose", "extdata", "calib")
+calib_path = dirin
 calib_file = "calibration_settings.csv"
 calInfo = getCalibrationInfo(path=calib_path, file=calib_file)
 
@@ -24,7 +25,7 @@ calInfo = getCalibrationInfo(path=calib_path, file=calib_file)
 observed = getObservedData(calInfo, path=calib_path, data.folder="DATA")
 
 # load calibration parameters
-param_to_calib = system.file(package="osmose", "extdata", "calib", "parameters_to_calib.csv")
+param_to_calib = file.path(dirin, "parameters_to_calib.csv")
 calibData = read.csv(file=param_to_calib, 
                      header=TRUE, 
                      sep=",", 
@@ -43,21 +44,21 @@ objfn = createObjectiveFunction(runModel=runModel,
 control = list()
 # control$maxgen = c(2, 2, 2, 2)   # maximum number of generations (former gen.max parameter)
 control$maxgen = 2   # maximum number of generations (former gen.max parameter)
-control$master = system.file(package="osmose", "extdata", "master")   # directory that will be copied
+control$master = "gog_v4" # directory that will be copied
 control$run = "RUN"   # run directory
 control$restart.file = "calib_restart"   # name of the restart file
 control$REPORT = 1    # number of generations to run before saving a restart
-# control$parallel = TRUE
-# control$nCores = 2
+control$parallel = TRUE
+control$nCores = 2
 control$popsize = 15   # population  size (former seed parameter)
 
-# cl = makeCluster(control$nCores)
-# registerDoParallel(cl)
+cl = makeCluster(control$nCores)
+registerDoParallel(cl)
 
 # send the variables and loaded libraries defined in the above to the nodes
-# clusterExport(cl, c("objfn", "calibData", "calInfo", "observed", "minmaxt"))
-# clusterEvalQ(cl, library("osmose"))
-# clusterEvalQ(cl, library("calibrar"))
+clusterExport(cl, c("objfn", "calibData", "calInfo", "observed", "minmaxt"))
+clusterEvalQ(cl, library("osmose"))
+clusterEvalQ(cl, library("calibrar"))
 
 cal1 = calibrate(calibData['paropt'], fn=objfn, method='default',
                  lower=calibData['parmin'], upper=calibData['parmax'], 
