@@ -12,7 +12,7 @@
 #'
 #' @export
 #'
-plot.osmose.dietMatrix = function(x, time.mean=FALSE, species=NULL, 
+plot.osmose.dietMatrix = function(x, time.mean=TRUE, species=NULL, 
                                   thres=1, label_size=1, add_text=TRUE, 
                                   color=NULL, legsize=0.5, ...) {
   
@@ -22,8 +22,7 @@ plot.osmose.dietMatrix = function(x, time.mean=FALSE, species=NULL,
   }
   
   for (spec in species) { 
-    par(oma=c(5, 5, 5, 5))
-    .plot_osmose_dietMatrix(x, time.mean=time.mean, species=spec, plot_name='DietMatrix (%)s', 
+    .plot_osmose_dietMatrix(x, time.mean=time.mean, species=spec, plot_name='DietMatrix (%)', 
                             thres=thres, label_size=label_size, add_text=add_text, color=color, legsize=legsize, ...)
   }
 }
@@ -88,7 +87,7 @@ plot.osmose.dietMatrix = function(x, time.mean=FALSE, species=NULL,
 #' @param ... Additional parameters to the barplot/lines functions
 #'
 #' @export
-plot.osmose.mortalityRate = function(x, time.mean=FALSE, species=NULL, norm=TRUE, ...) {
+plot.osmose.mortalityRate = function(x, time.mean=TRUE, species=NULL, norm=TRUE, ...) {
   
   #  if species is not null, plot figure for each species
   if(is.null(species)) { 
@@ -96,7 +95,7 @@ plot.osmose.mortalityRate = function(x, time.mean=FALSE, species=NULL, norm=TRUE
   }
   
   for(spec in species) { 
-    par(oma=rep(5, 4), mar=rep(2, 4))
+    #par(oma=rep(5, 4), mar=rep(2, 4))
     .plot_osmose_mortalityRate(x, time.mean=time.mean, species=spec, norm=norm, ...)
   }
 }
@@ -184,7 +183,7 @@ plot.osmose.mortalityRate = function(x, time.mean=FALSE, species=NULL, norm=TRUE
 #'
 #' @export
 #' @method plot osmose.biomassDistribBySize
-plot.osmose.biomassDistribBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.biomassDistribBySize = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -207,7 +206,7 @@ plot.osmose.biomassDistribBySize = function(data, species=NULL, time.mean=FALSE,
 #'
 #' @export
 #' @method plot osmose.biomassDistribByAge
-plot.osmose.biomassDistribByAge = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.biomassDistribByAge = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -577,7 +576,7 @@ plot.osmose.meanSizeCatch = function(x, species = NULL, start = NULL, end = NULL
 #'
 #' @export
 #' @method plot osmose.yieldByAge
-plot.osmose.yieldByAge = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.yieldByAge = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -600,7 +599,7 @@ plot.osmose.yieldByAge = function(data, species=NULL, time.mean=FALSE, ...) {
 #'
 #' @export
 #' @method plot osmose.yieldNByAge
-plot.osmose.yieldNByAge = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.yieldNByAge = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -623,7 +622,7 @@ plot.osmose.yieldNByAge = function(data, species=NULL, time.mean=FALSE, ...) {
 #'
 #' @export
 #' @method plot osmose.yieldBySize
-plot.osmose.yieldBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.yieldBySize = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -646,7 +645,7 @@ plot.osmose.yieldBySize = function(data, species=NULL, time.mean=FALSE, ...) {
 #'
 #' @export
 #' @method plot osmose.yieldNBySize
-plot.osmose.yieldNBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.yieldNBySize = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -669,7 +668,7 @@ plot.osmose.yieldNBySize = function(data, species=NULL, time.mean=FALSE, ...) {
 #'
 #' @export
 #' @method plot osmose.meanTLBySize
-plot.osmose.meanTLBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.meanTLBySize = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -692,7 +691,7 @@ plot.osmose.meanTLBySize = function(data, species=NULL, time.mean=FALSE, ...) {
 #'
 #' @export
 #' @method plot osmose.meanTLByAge
-plot.osmose.meanTLByAge = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.meanTLByAge = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -716,7 +715,7 @@ plot.osmose.meanTLByAge = function(data, species=NULL, time.mean=FALSE, ...) {
 #'
 #' @export
 #' @method plot osmose.abundanceDistribBySize
-plot.osmose.abundanceDistribBySize = function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.abundanceDistribBySize = function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -740,7 +739,7 @@ plot.osmose.abundanceDistribBySize = function(data, species=NULL, time.mean=FALS
 #'
 #' @export
 #' @method plot osmose.abundanceDistribByAge
-plot.osmose.abundanceDistribByAge= function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.abundanceDistribByAge= function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -763,7 +762,7 @@ plot.osmose.abundanceDistribByAge= function(data, species=NULL, time.mean=FALSE,
 #'
 #' @export
 #' @method plot osmose.abundanceDistribByTL
-plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)
@@ -787,7 +786,7 @@ plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=FALSE, 
 #'
 #' @export
 #' @method plot osmose.abundanceDistribByTL
-plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=FALSE, ...) {
+plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(data)

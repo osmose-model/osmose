@@ -24,40 +24,6 @@
   
 }
 
-# The most basic barplot you can do:
-#barplot(my_vector)
-
-# Opens a figure file.
-#
-# @param figname Name of the output file. The file sufix must
-# be .png or .pdf
-# @param width  Figure width (default NULL)
-# @param height Figure height (default NULL)
-#
-# @export
-# osmose.openfigure = function(figname, width=NULL, height=NULL)
-# {
-#     usepng = endsWith(figname, '.png')
-#     usepdf = endsWith(figname, '.pdf')
-# 
-#     if(!usepng & !usepdf)
-#     {
-#         stop("The filename must end by .png or .pdf")
-#     }
-# 
-#     # Change the classic attribute of plots:
-#     if(usepng)
-#     {
-#         if(is.null(width)) width = 600
-#         if(is.null(height)) height = 400
-#         png(figname , width=width, height=height)
-#     } else {
-#         pdf(figname, width=width, height=height)
-#     }
-#     
-# }
-
-
 #' Plots a barplot, with xlabels rotated with a 45degree angle
 #'
 #' @param x Data array
@@ -66,26 +32,35 @@
 #' @export
 osmose.barplot = function(x, label_size=1, add_text=TRUE, color=NULL, ...) {
   
+  # format the data so that at the end we have
+  # a table of dim [N. 1]
   col = rep(color, length(x))
+  x = as.table(x)
+  names = rownames(x)
+  N = length(names)
+  dim(x) <- c(length(x), 1)
+
+  # recover the arguments of varplot 
+  # and modify xlim and legend pos.
+  args = list(...)
+  args[["args.legend"]]['x'] = N * (1  + 0.5)
+  xlim = c(0, N * (1 + 0.5))
+  args[['xlim']] = xlim
   
-  # space=1 means that one blank bar is left for one drawn bar
-  # xaxt="n" desactivates the defaut xlabel (True?)
-  barplot(x, space=1, las=2, xaxt="n", col=col, ...)
+  # updates the list of barplot arguments
+  # to use with do.call
+  args$height = x
+  args$col = rainbow(N)
+  args$legend = names
+  args$beside = TRUE
+  print(args)
   
-  # last point
-  end_point = 0.5 + length(x) + length(x) - 1
-  
-  # xlabel points
-  xlab = seq(1.5, end_point, by=2)
-  
-  # draw the text labels.
-  text(xlab, par("usr")[3], 
-       srt=45, adj=1, xpd=TRUE,
-       labels = paste(names(x)), cex=label_size)
+  #barplot(x, col=col, legend = names, beside=TRUE, args) 
+  do.call(barplot, args, )
   
   if(add_text) { 
-    ytext = max(x) * ( 1 - 0.1) 
-    text(xlab, ytext, round(x, digits=1), cex=0.5)
+    ytext = max(x) * (1 - 0.1) 
+    text(1:N + 0.5, ytext, round(x, digits=1), cex=0.5)
   }
   
 }
@@ -157,7 +132,8 @@ osmose.stackedpcent = function(data, ...)
   legend("topright", legend=colnames(y), col = plotcol, lwd=0.7, cex=0.7, title=legtitle, ncol=nlegend)
 }
 
-plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=FALSE, legtitle, ylab, ...) {
+
+plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=TRUE, legtitle, ylab, ...) {
   
   .check_species(data, species)
   

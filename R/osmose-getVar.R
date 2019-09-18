@@ -1,7 +1,7 @@
 # @param ... Additional arguments of the function.
 # @export
 # @return An array or a list containing the data.
-process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) {
+process.dietMatrix = function(out, species=NULL, time.mean=TRUE, thres=1, ...) {
   
   .check_species(out, species)
   
@@ -68,7 +68,7 @@ process.dietMatrix = function(out, species=NULL, time.mean=FALSE, thres=1, ...) 
 
 # @param ... Additional arguments of the function.
 # @return An array or a list containing the data.
-process.mortalityRate = function(out, species=NULL, time.mean=FALSE, ...) {
+process.mortalityRate = function(out, species=NULL, time.mean=TRUE, ...) {
   
   .check_species(out, species)
   
