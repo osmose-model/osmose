@@ -56,7 +56,7 @@ osmose.barplot = function(x, label_size=1, add_text=TRUE, color=NULL, ...) {
   print(args)
   
   #barplot(x, col=col, legend = names, beside=TRUE, args) 
-  do.call(barplot, args, )
+  do.call(barplot, args)
   
   if(add_text) { 
     ytext = max(x) * (1 - 0.1) 
