@@ -4,7 +4,6 @@
 #' @param time.mean True if time averaged should be drawn
 #' @param species  Species name (string or list). If NULL, al species are drawn.
 #' @param thres Threshold (in percentage) below which preys are concatenated.
-#' @param label_size Size of the xlabel of histogram (time.mean=T)
 #' @param add_text True if values sjopu
 #' @param color Histogram colors (if NULL, gray). Only used if time.mean=T
 #' @param legsize Size of the legend (if time.mean=F)
@@ -13,7 +12,7 @@
 #' @export
 #'
 plot.osmose.dietMatrix = function(x, time.mean=TRUE, species=NULL, 
-                                  thres=1, label_size=1, add_text=TRUE, 
+                                  thres=1, add_text=TRUE, 
                                   color=NULL, legsize=0.5, ...) {
   
   #  if species is not null, plot figure for each species
@@ -23,7 +22,7 @@ plot.osmose.dietMatrix = function(x, time.mean=TRUE, species=NULL,
   
   for (spec in species) { 
     .plot_osmose_dietMatrix(x, time.mean=time.mean, species=spec, plot_name='DietMatrix (%)', 
-                            thres=thres, label_size=label_size, add_text=add_text, color=color, legsize=legsize, ...)
+                            thres=thres, add_text=add_text, color=color, legsize=legsize, ...)
   }
 }
 
@@ -41,42 +40,45 @@ plot.osmose.dietMatrix = function(x, time.mean=TRUE, species=NULL,
 #
 # @return None
 # @method plot osmose.output.dietMatrix
-.plot_osmose_dietMatrix = function(x, time.mean, species, thres, label_size, color, legsize, add_text, plot_name, ...) {
+.plot_osmose_dietMatrix = function(x, time.mean, species, thres, color, legsize, add_text, plot_name, ...) {
   
   x = process.dietMatrix(x, species=species, time.mean=time.mean, thres=thres)
-  
+
   if(time.mean) {
     # If using a time-averaged diet matrix, then 
     # a barplot is drawn.
     temp = as.vector(x)
     names(temp) = names(x)
     osmose.barplot(temp, xlab="", ylab=plot_name, main=species, 
-                   label_size=label_size, add_text=add_text, color=color, ...)
+                   add_text=add_text, color=color, ...)
     return(invisible())
   } 
+
   
   # format the diet matrix to have stacked format for ggplot2
-  data = .osmose.format_data_stacked(x)
-  xlim = c(min(data$time, na.rm=TRUE), max(data$time, na.rm=TRUE) * (1 + 0.5))
-  ylim = c(min(data$value, na.rm=TRUE), max(data$value, na.rm=TRUE))
+  time = rownames(x)
+  time = as.numeric(time)
+  cnames = colnames(x)
+  xlim = c(min(time, na.rm=TRUE), max(time, na.rm=TRUE) * (1 + 0.5))
+  ylim = c(min(x, na.rm=TRUE), max(x, na.rm=TRUE))
   
-  ncolors = length(levels(data$specie))
+  ncolors = length(cnames)
   cl = rainbow(ncolors)
-  
+
+  x = apply(x, c(1, 2), mean, na.rm=TRUE)
   plot(0, 0, xlim=xlim, ylim=ylim, type='n', main=species, xlab='Time', ylab=plot_name, 
        cex.axis=0.5, cex.main=0.5, cex.lab=0.5)
   
   cpt = 1
-  for (prey in levels(data$specie)) {
-    temp = data[data$specie == prey, ]
-    lines(temp[['time']], temp[['value']], type='l', col=cl[cpt], ...)
+  for (cpt in 1:ncolors) {
+    temp = x[, cpt]
+    lines(time, temp, type='l', col=cl[cpt])
     cpt = cpt + 1
   }
-  
-  legend("topright", legend=levels(data$specie), col=cl, cex=legsize, lty=1)
+
+  legend("topright", legend=cnames, col=cl, cex=legsize, lty=1)
   
 }
-
 
 #' Plot mortality rates
 #'
@@ -125,25 +127,26 @@ plot.osmose.mortalityRate = function(x, time.mean=TRUE, species=NULL, norm=TRUE,
         datatmp = t(datatmp)
       }
       
-      datatmp = osmose:::.osmose.format_data_stacked(datatmp)
-      xlim = c(min(datatmp$time, na.rm=TRUE), max(datatmp$time, na.rm=TRUE) * (1 + 0.5))
-      ylim = c(min(datatmp$value, na.rm=TRUE), max(datatmp$value, na.rm=TRUE))
+      cnames = colnames(datatmp)
+      time = as.numeric(rownames(datatmp))
       
-      ncolors = length(levels(datatmp$specie))
+      xlim = c(min(time, na.rm=TRUE), max(time, na.rm=TRUE) * (1 + 0.5))
+      ylim = c(min(datatmp, na.rm=TRUE), max(datatmp, na.rm=TRUE))
+      
+      ncolors = length(cnames)
       cl = rainbow(ncolors)
-      print(ncolors)
       plot(0, 0, xlim=xlim, ylim=ylim, type='n', main=paste0(species, ", ", stade),  
            xlab='Time', ylab='Predation rate', 
            cex.axis=0.5, cex.main=0.5, cex.lab=0.5)
       
       cpt = 1
-      for (prey in levels(datatmp$specie)) {
-        temp = datatmp[datatmp$specie == prey, ]
-        lines(temp[['time']], temp[['value']], type='l', col=cl[cpt], ...)
+      for (cpt in 1:ncolors) {
+        temp = datatmp[, cpt]
+        lines(time, temp, type='l', col=cl[cpt], ...)
         cpt = cpt + 1
       }
       
-      legend("topright", legend=levels(datatmp$specie), col=cl, lty=1, cex=0.5)
+      legend("topright", legend=cnames, col=cl, lty=1, cex=0.5)
       
     }
     

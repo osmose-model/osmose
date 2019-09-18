@@ -30,7 +30,7 @@
 #' @param ... Additional arguments to the barplot function (color, etc.)
 #'
 #' @export
-osmose.barplot = function(x, label_size=1, add_text=TRUE, color=NULL, ...) {
+osmose.barplot = function(x, add_text=TRUE, color=NULL, ...) {
   
   # format the data so that at the end we have
   # a table of dim [N. 1]
@@ -53,8 +53,7 @@ osmose.barplot = function(x, label_size=1, add_text=TRUE, color=NULL, ...) {
   args$col = rainbow(N)
   args$legend = names
   args$beside = TRUE
-  print(args)
-  
+
   #barplot(x, col=col, legend = names, beside=TRUE, args) 
   do.call(barplot, args)
   
@@ -118,6 +117,9 @@ osmose.stackedpcent = function(data, ...)
   plot(1, type = 'n', xlim = c(min(time), max(time)), ylim = c(min(y), max(y)),
        xlab=xlab, ylab=ylab, main=title)
   
+  args = list(...)
+  lwd = args[['lwd']]
+  
   # Create a list of 22 colors to use for the lines.
   cl <- rainbow(ncol(y))
   plotcol = 1:ncol(y)
@@ -129,7 +131,7 @@ osmose.stackedpcent = function(data, ...)
     plotcol[i] <- cl[i]
   }
   
-  legend("topright", legend=colnames(y), col = plotcol, lwd=0.7, cex=0.7, title=legtitle, ncol=nlegend)
+  legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title=legtitle, ncol=nlegend)
 }
 
 
@@ -139,7 +141,7 @@ plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=TRUE, leg
   
   y = data[[species]]
   
-  # computes the replicate mean
+  # computes the replicate mean 
   y = apply(y, c(1, 2), mean)
   
   if(time.mean == FALSE) {
