@@ -31,7 +31,7 @@
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
-                      version = "4.1.0", osmose = NULL, java = "java",
+                      version = "4.2.1", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE) {
   
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
