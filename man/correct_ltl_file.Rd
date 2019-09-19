@@ -6,12 +6,19 @@
 concentrations. The "ltl_biomass" of dims (ntime, nltl, nlat, nlon)
 is splitted into nltl variables of dims (ntime, nlat, nlon)}
 \usage{
-correct_ltl_file(ltl_filename, osmose_config, absolute = TRUE)
+correct_ltl_file(ltl_filename, osmose_config, varlon = "longitude",
+  varlat = "latitude", vartime = "time", absolute = TRUE)
 }
 \arguments{
 \item{ltl_filename}{Name of the NetCDF LTL file}
 
 \item{osmose_config}{Name of the main configuration file}
+
+\item{varlon}{Name of the longitude variable}
+
+\item{varlat}{Name of the latitude variable}
+
+\item{vartime}{Name of the time variable}
 
 \item{absolute}{Whether the path is absolute (TRUE) or relative (FALSE)}
 }

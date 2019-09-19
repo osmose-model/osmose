@@ -1,4 +1,16 @@
  
+#' Returns the list of Osmoee Java versions
+#'
+#' @return List of Osmose Java versions
+#' @export
+#'
+#' @examples list_osmose_versions()
+list_osmose_versions = function() {
+  dirin = system.file(package="osmose", "java")
+  output = list.files(path=dirin, pattern=".jar")
+  return(output)
+}
+
 # 
 # isfalse = function(x) {
 #   output = !isTRUE(x)  

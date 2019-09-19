@@ -35,8 +35,6 @@ find_species_index = function(spec, param)
 #'
 #' @return The grid format as a data frame.
 #' @export
-#'
-#' @usage extract_grid_param("ltlbiomass.nc")
 extract_grid_param = function(filename, lonname="longitude", latname="latitude", csv=NULL)
 {
   
@@ -56,7 +54,7 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
   nc_close(fid)
   
   # If the longitude is 1D, it is converted into 2D
-  if(is.vector(lon))
+  if(length(dim(lon)) == 1)
   {
     cat("Longitude and Latitudes are 1D.\n")
     cat("They are be converted into 2D arrays.\n")
@@ -91,14 +89,14 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
   upperleftlon = min(lon) - dlon * 0.5
   upperleftlat = max(lat) + dlat * 0.5
   
-  output = data.frame(par="grid.java.classname", value="fr.ird.osmose.grid.OriginalGrid", stringsAsFactors = F)
-  output = rbind(output, c("grid.nlon", nlon))
-  output = rbind(output, c("grid.nlat", nlat))
-  output = rbind(output, c("grid.lowright.lat", lowrightlat))
-  output = rbind(output, c("grid.lowright.lon", lowrightlon))
-  output = rbind(output, c("grid.upperleft.lat", upperleftlat))
-  output = rbind(output, c("grid.upperleft.lon", upperleftlon))
-  
+  output = data.frame(value="fr.ird.osmose.grid.OriginalGrid", row.names="grid.java.classname", stringsAsFactors = F, check.rows=TRUE, check.names=TRUE)
+  output = rbind(output, data.frame(row.names="grid.nlon", value=nlon))
+  output = rbind(output, data.frame(row.names="grid.nlat", value=nlat))
+  output = rbind(output, data.frame(row.names="grid.lowright.lat", value=lowrightlat))
+  output = rbind(output, data.frame(row.names="grid.lowright.lon", value=lowrightlon))
+  output = rbind(output, data.frame(row.names="grid.upleft.lat", value=upperleftlat))
+  output = rbind(output, data.frame(row.names="grid.upleft.lon", value=upperleftlon))
+
   # Handling of the saving into CSV
   if(!is.null(csv)) 
   {
@@ -106,7 +104,7 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
     if(!dir.exists(dirname(csv))) {
       dir.create(dirname(csv), recursive=TRUE)
     }
-    write.table(output, csv, sep=";", col.names = F, row.names = F)
+    write.table(output, csv, sep=";", col.names = FALSE, row.names = TRUE, quote=FALSE)
   }
   
   return(output)
@@ -133,11 +131,19 @@ extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-g
   var = drop(ncvar_get(fid, varname, ...))
   
   nc_close(fid)
+
+  ndims = length(dim(var))
   
-  if(length(dim(var)) != 2) {
-    error("The variable must be 2D. Please set the start and count arguments to extract a 2D (lon, lat) array")
+  if(ndims == 4) {
+      var = var[, , 1, 1]
+  } else if(ndims == 3) {
+    var = var[, , 1]
+  } else if (ndims == 2) {
+    var = var
+  } else {
+      stop("The number of dimensions of the input file must be 2, 3 or 4")
   }
-  
+
   nlon = dim(var)[1]
   nlat = dim(var)[2]
   
@@ -160,7 +166,9 @@ extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-g
   var = apply(var, 2, rev)
   
   # writes the output in csv file.
-  write.table(var, file=output_file, sep=";", row.names=FALSE, col.names=FALSE)
+  write.table(var, file=output_file, sep=";", row.names=FALSE, col.names=FALSE, quote=FALSE)
+
+  return(var)
   
 }
 
@@ -320,9 +328,12 @@ make_movement_netcdf = function(filename) {
 #' @param ltl_filename Name of the NetCDF LTL file
 #' @param osmose_config Name of the main configuration file
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
+#' @param varlon Name of the longitude variable
+#' @param varlat Name of the latitude variable
+#' @param vartime Name of the time variable
 #'
 #' @export
-correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
+correct_ltl_file = function(ltl_filename, osmose_config, varlon="longitude", varlat="latitude", vartime='time', absolute=TRUE)
 {
   
   #absolute=FALSE
@@ -340,19 +351,25 @@ correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
   ncin = nc_open(ltl_filename)
   
   # Recover spatial coordinates
-  if(length(ncin$var$latitude$varsize) == 2) {
+  if(length(ncin$var[[varlon]]$varsize) == 2) {
     # if coordinates are 2D, then extract data as 1D
-    lon = ncvar_get(ncin, varid='longitude')[,1]
-    lat = ncvar_get(ncin, varid='latitude')[1,]
+    lon = ncvar_get(ncin, varid=varlon)[,1]
+    lat = ncvar_get(ncin, varid=varlat)[1,]
   } else {
     # If longitudes are 1D, nothing to do.
-    lon = ncvar_get(ncin, varid='longitude')
-    lat = ncvar_get(ncin, varid='latitude')
+    lon = ncvar_get(ncin, varid=varlon)
+    lat = ncvar_get(ncin, varid=varlat)
   }
   
   # Recovers the original time coordinates and attributes (for units)
-  attr_time = ncatt_get(ncin, "time")
-  time = ncvar_get(ncin, varid='time')
+  if(is.null(ncin$var[[vartime]])) {
+    attr_time = ncatt_get(ncin, vartime)
+    print(attr_time)
+    time = ncin$dim[[vartime]]$vals
+  } else {
+    attr_time = ncatt_get(ncin, vartime)
+    time = ncvar_get(ncin, varid=vartime)
+  }
   
   # recovers the number of plankton within the file
   n_ltl_file = ncin$dim$ltl$len
@@ -388,7 +405,9 @@ correct_ltl_file = function(ltl_filename, osmose_config, absolute=TRUE)
   }
   
   # Add the calendar attribute to the time variable
-  ncatt_put(ncout, "time", "calendar", attr_time$calendar)
+  if(!is.null(attr_time$calendar)) {
+    ncatt_put(ncout, "time", "calendar", attr_time$calendar)
+  }
   
   nc_close(ncout)
   nc_close(ncin)

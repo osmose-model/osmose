@@ -1,0 +1,38 @@
+# Time;
+simulation.time.ndtPerYear;24
+simulation.time.nyear;10
+simulation.restart.file;null
+
+# Advanced parameters;
+simulation.nschool;30
+simulation.ncpu;1
+simulation.nplankton;6
+simulation.nsimulation;3
+simulation.nspecies;11
+
+# Mortality algorithm;
+mortality.algorithm;stochastic
+mortality.subdt;10
+
+# fix the seed of the mortality process, to insure
+# reproducible runs
+stochastic.mortality.seed;1
+
+################################################# Configuration files;
+osmose.configuration.output;osm_param-output.csv
+osmose.configuration.movement;osm_param-movement.csv
+
+## No MPA at the moment;
+#osmose.configuration.mpa;osm_param-mpa.csv
+
+osmose.configuration.mortality.fishing;osm_param-fishing.csv
+osmose.configuration.mortality.natural;osm_param-natural-mortality.csv
+osmose.configuration.mortality.predation;osm_param-predation.csv
+osmose.configuration.mortality.starvation;osm_param-starvation.csv
+
+osmose.configuration.reproduction;osm_param-reproduction.csv
+osmose.configuration.species;osm_param-species.csv
+osmose.configuration.plankton;osm_param-ltl.csv
+osmose.configuration.grid;osm_param-grid.csv
+osmose.configuration.initialization;osm_param-init-pop.csv
+osmose.version; Osmose 3 Update 3 Release 3 (2018/11/28)

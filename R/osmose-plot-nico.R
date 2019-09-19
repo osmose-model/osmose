@@ -1,496 +1,401 @@
-
-# Plots diet matrix
-#
-# @param x Diet matrix
-# @param time.mean If TRUE, the time mean diet matrix is computed is displayed.
-# @param species Species name
-# @param colors GGplot2 colors (see for instance scale_fill_manual)
-# @param thres Thresholds (in percentage). Time-average predation rates below this threashold 
-# are binned together ("other" column).
-# @param ... 
-#
-# @return None
-# @export
-# @method plot osmose.output.dietMatrix
-# plot.osmose.output.dietMatrix = function(x, time.mean=FALSE, species=NULL, colors=NULL, thres=1, ...)
-# {
-#     
-#     x = process.dietMatrix(x, species=species, time.mean=time.mean, thres=thres)
-# 
-#     if(time.mean)
-#     {
-#         # If using a time-averaged diet matrix, then 
-#         # a barplot is drawn.
-#         temp = as.vector(x)
-#         names(temp) = names(x)
-#         osmose.barplot(temp, xlab="", ylab="Predation (%)", main=species, ...)
-#         return(invisible())
-#     } 
-# 
-#     # format the diet matrix to have stacked format for ggplot2
-#     data = .osmose.format_data_stacked(x)
-#     
-#     # Set the column names.
-#     colnames(data) = c("Prey", "Time", "Predation")
-# 
-#     # If no color is provided, we set default colors
-#     if(is.null(colors))
-#     {
-#         colors = .make_default_ggplot_col(rev(levels(data$Prey)))
-#     }
-# 
-#     output = ggplot(data, aes(x=Time, y=Predation, fill=Prey)) +  geom_area(...) + colors + ggtitle(species) 
-#     output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
-#     return(output)
-# 
-# }
+#' Plot the dietMatrix output
+#'
+#' @param x osmose.dietMatrix output
+#' @param time.mean True if time averaged should be drawn
+#' @param species  Species name (string or list). If NULL, al species are drawn.
+#' @param thres Threshold (in percentage) below which preys are concatenated.
+#' @param add_text True if values sjopu
+#' @param color Histogram colors (if NULL, gray). Only used if time.mean=T
+#' @param legsize Size of the legend (if time.mean=F)
+#' @param ... Additional arguments to the barplot or line function
+#'
+#' @export
+#'
+plot.osmose.dietMatrix = function(x, time.mean=TRUE, species=NULL, 
+                                  thres=1, add_text=TRUE, 
+                                  color=NULL, legsize=0.5, ...) {
+  
+  #  if species is not null, plot figure for each species
+  if(is.null(species)) { 
+    species = names(x)
+  }
+  
+  for (spec in species) { 
+    .plot_osmose_dietMatrix(x, time.mean=time.mean, species=spec, plot_name='DietMatrix (%)', 
+                            thres=thres, add_text=add_text, color=color, legsize=legsize, ...)
+  }
+}
 
 
 
-# Plots mortality rates
-#
-# @param data Mortality rate
-# @param species Species name
-# @param time.mean If TRUE, the mortality rates for each life stade and for each mortality
-# types are plotted. If FALSE, the time series for a given life stade are plotted.
-# @param stade Stade ("eggs", "juveniles", "adults). Only if time.mean=FALSE
-# @param norm Whether percentage instead of raw mortality rates should be plotted. 
-# Only if time.mean=TRUE
-# @param colors Ggplot2 color array (see for instance scale_fill_manual)
-# @param ... 
-#
-# @export
-# @method plot osmose.output.mortalityRate
-# plot.osmose.output.mortalityRate = function(data, species=NULL, time.mean=TRUE, stade=NULL, norm=TRUE, colors=NULL, ...)
-# {
-#   
-#   data = process.mortalityRate(data, species=species, time.mean=time.mean, ...)
-# 
-#   message = "You must provide a life stade among 'eggs', 'juveniles' or 'adults'"
-#   
-#   if(time.mean==FALSE)
-#   {
-#     if(is.null(stade)) 
-#     {
-#       stop(paste0("No stade provided. ", message, sep=""))
-#     }
-# 
-#     if(!(stade %in% names(data))) 
-#     {
-#       stop(message)
-#     }
-#     
-#     data = data[[stade]]
-#     
-#     data = osmose:::.osmose.format_data_stacked(data)
-#     
-#     colnames(data) = c("Type", "Time", "Rate")
-#     
-#     if(is.null(colors))
-#     {
-#     colors = osmose:::.make_default_ggplot_col(rev(levels(data$Type)))
-#     }
-#     
-#     title = paste(species, " (", stade, ")", sep='')
-#     
-#     output = ggplot(data, aes(x=Time, y=Rate, fill=Type)) +  geom_area(...) + ggtitle(title)
-#     output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
-#     return(output)
-#     
-#   }
-#   
-#   # if normalize, display mortality rates into percentage instead of absolutes.
-#   if(norm)
-#   {
-#     # apply the normalize function to all the elements of the list.
-#     data = lapply(data, norm_func)
-#   }
-#   
-#   # convert the list into a matrix
-#   data = do.call(cbind.data.frame, data)
-#   data = as.matrix(data)
-#   
-#   xlabel = "Stage"
-#   if(norm) {
-#     ylabel = "Mortality rate (%)"
-#   } else {
-#     ylabel = "Mortality rate"
-#   }
-#   
-#   osmose.stackedpcent(data, xlab=xlabel, main=species, ylab=ylabel, ...)
-#   return(invisible())
-#   
-# }
-# 
+#' Plots diet matrix
+#'
+#' @param x Diet matrix
+#' @param time.mean If TRUE, the time mean diet matrix is computed is displayed.
+#' @param species Species name
+#' @param thres Thresholds (in percentage). Time-average predation rates below this threashold 
+#' are binned together ("other" column).
+#' @param color 
+#' @param legsize 
+#' @param add_text 
+#' @param plot_name 
+#' @param ... Additional plot arguments
+#'
+#' @return None
+.plot_osmose_dietMatrix = function(x, time.mean, species, thres, color, legsize, add_text, plot_name, ...) {
+  
+  x = process.dietMatrix(x, species=species, time.mean=time.mean, thres=thres)
+
+  if(time.mean) {
+    # If using a time-averaged diet matrix, then 
+    # a barplot is drawn.
+    temp = as.vector(x)
+    names(temp) = names(x)
+    .osmose.barplot(temp, xlab="", ylab=plot_name, main=species, 
+                   add_text=add_text, color=color, ...)
+    return(invisible())
+  } 
+
+  
+  # format the diet matrix to have stacked format for ggplot2
+  time = rownames(x)
+  time = as.numeric(time)
+  cnames = colnames(x)
+  xlim = c(min(time, na.rm=TRUE), max(time, na.rm=TRUE) * (1 + 0.5))
+  ylim = c(min(x, na.rm=TRUE), max(x, na.rm=TRUE))
+  
+  ncolors = length(cnames)
+  cl = rainbow(ncolors)
+
+  x = apply(x, c(1, 2), mean, na.rm=TRUE)
+  plot(0, 0, xlim=xlim, ylim=ylim, type='n', main=species, xlab='Time', ylab=plot_name, 
+       cex.axis=0.5, cex.main=0.5, cex.lab=0.5)
+  
+  cpt = 1
+  for (cpt in 1:ncolors) {
+    temp = x[, cpt]
+    lines(time, temp, type='l', col=cl[cpt])
+    cpt = cpt + 1
+  }
+
+  legend("topright", legend=cnames, col=cl, cex=legsize, lty=1)
+  
+}
+
+#' Plot mortality rates
+#'
+#' @param x Object of class osmose.mortalityRate
+#' @param time.mean True if time-average plot should be ok 
+#' @param species List of species to plot. If NULL, all species are drawn.
+#' @param norm True if percentage is returned instead of raw mort. rates
+#' @param ... Additional parameters to the barplot/lines functions
+#'
+#' @export
+plot.osmose.mortalityRate = function(x, time.mean=TRUE, species=NULL, norm=TRUE, ...) {
+  
+  #  if species is not null, plot figure for each species
+  if(is.null(species)) { 
+    species = names(x)
+  }
+  
+  for(spec in species) { 
+    #par(oma=rep(5, 4), mar=rep(2, 4))
+    .plot_osmose_mortalityRate(x, time.mean=time.mean, species=spec, norm=norm, ...)
+  }
+}
 
 
-# Plots biomass by size class
-#
-# @param data Biomass distribution by size
-# @param species Species name
-# @param time.mean If true, time.mean biomass is plotted
-# @param lwd Line width
-# @param ... 
-#
-# @export
-# @method plot osmose.output.biomassDistribBySize
-# plot.osmose.output.biomassDistribBySize = function(data, species=NULL, time.mean=FALSE, lwd=2, ...)
-# {
-#   
-#   out = plot.osmose.output.ts.generic(data, species=species, time.mean=time.mean, lwd=lwd, "Size (cm)", "Biomass", ...)
-#   return(out)
-# }
+#' Plot mortality rates for a given species.
+#'
+#' @param data 
+#' @param species 
+#' @param time.mean 
+#' @param norm 
+#' @param ... 
+.plot_osmose_mortalityRate = function(data, species=NULL, time.mean=TRUE, norm=TRUE, ...) {
+  
+  data = process.mortalityRate(data, species=species, time.mean=time.mean, ...)
+  
+  message = "You must provide a life stade among 'eggs', 'juveniles' or 'adults'"
+  
+  if(time.mean==FALSE)  {
+    
+    par(mfrow=c(3, 1))
+    for (stade in names(data)) {
+      datatmp = data[[stade]]
+      
+      if(norm) { 
+        datatmp = apply(datatmp, 1, norm_func)
+        datatmp = t(datatmp)
+      }
+      
+      cnames = colnames(datatmp)
+      time = as.numeric(rownames(datatmp))
+      
+      xlim = c(min(time, na.rm=TRUE), max(time, na.rm=TRUE) * (1 + 0.5))
+      ylim = c(min(datatmp, na.rm=TRUE), max(datatmp, na.rm=TRUE))
+      
+      ncolors = length(cnames)
+      cl = rainbow(ncolors)
+      plot(0, 0, xlim=xlim, ylim=ylim, type='n', main=paste0(species, ", ", stade),  
+           xlab='Time', ylab='Predation rate', 
+           cex.axis=0.5, cex.main=0.5, cex.lab=0.5)
+      
+      cpt = 1
+      for (cpt in 1:ncolors) {
+        temp = datatmp[, cpt]
+        lines(time, temp, type='l', col=cl[cpt], ...)
+        cpt = cpt + 1
+      }
+      
+      legend("topright", legend=cnames, col=cl, lty=1, cex=0.5)
+      
+    }
+    
+    return(invisible())
+    
+  }
+  
+  # if normalize, display mortality rates into percentage instead of absolutes.
+  if(norm) {
+    # apply the normalize function to all the elements of the list.
+    data = lapply(data, norm_func)
+  }
+  
+  # convert the list into a matrix
+  data = do.call(cbind.data.frame, data)
+  data = as.matrix(data)
+  
+  xlabel = "Stage"
+  if(norm) {
+    ylabel = "Mortality rate (%)"
+  } else {
+    ylabel = "Mortality rate"
+  }
+  
+  osmose.stackedpcent(data, xlab=xlabel, main=species, ylab=ylabel, ...)
+  return(invisible())
+  
+}
 
-# Plots biomass by age class
-#
-# @param data Biomass distribution by age
-# @param species Species name
-# @param time.mean If true, time.mean biomass is plotted
-# @param lwd Line width
-# @param ... 
-#
-# @export
-# @method plot osmose.output.biomassDistribByAge
-# plot.osmose.output.biomassDistribByAge = function(data, species=NULL, time.mean=FALSE, lwd=2, ...)
-# {
-#   
-#   out = plot.osmose.output.ts.generic(data, species=species, time.mean=time.mean, lwd=lwd, "Age", "Biomass", ...)
-#   return(out)
-# }
+#' Plots biomass by size class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ...  Additional plot arguments
+#'
+#' @export
+#' @method plot osmose.biomassDistribBySize
+plot.osmose.biomassDistribBySize = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
 
-
-
-# Plots the biomass distribution by trophic level
-#
-# @param data Biomass by trophic level data
-# @param species  Species name
-# @param time.mean If TRUE, the time-mean biomass is plotted for each TL class
-# @param lwd Line width
-# @param thres  Threshold below which data are not plotted. If NULL, all data are plotted. Only if time.mean=TRUE
-# @param colors GGplot2 colors
-# @param ... 
-#
-# @export
-# @method plot osmose.output.biomassDistribByTL
-# plot.osmose.output.biomassDistribByTL = function(data, species=NULL, time.mean=TRUE, lwd=2, thres=1, colors=NULL, ...) {
-#   
-#   .check_species(data, species)
-#   
-#   data = data[[species]]
-# 
-#   # computes the replicate mean
-#   data = apply(data, c(1, 2), mean)
-#   
-#   if(time.mean)
-#   {
-#     # computes temporal mean
-#     data = apply(data, 2, mean)
-#     
-#     # if threshold, removes all the time means below 
-#     # threashold
-#     if(!is.null(thres)) data = data[data>thres]
-#   
-#     # keeps only two significative digits to the TL label
-#     names(data) = signif(as.numeric(names(data)), 2)
-#     osmose:::osmose.barplot(data, ylab="Biomass", xlab="Trophic Level", main=species)
-#     return(invisible())
-#   }
-#   
-#   # removes the TL class for which biomass is 0
-#   temp = (data != 0)   
-#   temp = apply(temp, 2, sum)
-#   data = data[, temp>0]
-#   
-#   colnames(data) = signif(as.numeric(colnames(data)), 2)
-#   data = osmose:::.osmose.format_data_stacked(data)
-#   
-#   colnames(data) = c("TL", "Time", "Biomass")
-#     
-#   if(is.null(colors))
-#   {
-#     colors = osmose:::.make_default_ggplot_col(rev(levels(data$Type)))
-#   }
-#   
-#   output = ggplot(data, aes(x=Time, y=Biomass, fill=TL)) +  geom_area(...) + ggtitle(species)
-#   output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
-#   return(output)
-#   
-# }
-# 
-
-
-# Plots predator pressure.
-#
-# @param data Predator pressure.
-# @param time.mean If TRUE, plots the time-average predator pressure 
-# sorted in decreasing order 
-# @param species Species names
-# @param colors  GGplot2 colors
-# @param nmax Maximum number of values to draw. If NULL, all data are plotted.
-# @param ... 
-#
-# @export
-# @method plot osmose.output.predatorPressure
-# plot.osmose.output.predatorPressure = function(data, time.mean=FALSE, species=NULL, colors=NULL, nmax=NULL, ...)
-# {
-# 
-#   .check_species(data, species)
-#   data = data[[species]]
-#   
-#   # computes replicate mean
-#   data = apply(data, c(1, 2), mean, na.rm=TRUE)
-#   
-#   if(time.mean)
-#   {
-#     # If using a time-averaged diet matrix, then 
-#     # a barplot is draw.
-#     
-#     # time.mean
-#     data = apply(data, 2, mean, na.rm=TRUE)
-#     data = sort(data, decreasing=TRUE)
-#     if(!is.null(nmax)) data = data[1:nmax]
-#     
-#     temp = as.vector(data)
-#     names(temp) = names(data)
-#     osmose.barplot(temp, xlab="", ylab="Predation pressure", main=species, ...)
-#     return(invisible())
-#   } 
-#   
-#   # computes the temporal mean and extracts the indexes from higher to lower
-#   temp = apply(data, 2, mean, na.rm=TRUE)
-#   temp = sort(temp, decreasing=TRUE, index.return=TRUE)
-#   index = temp$ix
-#   data = data[, index]
-#   if(!is.null(nmax))
-#   {
-#     data = data[, 1:nmax]
-#   }
-#   
-#   # format the diet matrix to have stacked format for ggplot2
-#   data = .osmose.format_data_stacked(data)
-#   
-#   # Set the column names.
-#   colnames(data) = c("Prey", "Time", "Predation.pressure")
-#   
-#   # If no color is provided, we set default colors
-#   if(is.null(colors))
-#   {
-#     colors = .make_default_ggplot_col(rev(levels(data$Prey)))
-#   }
-#   
-#   output = ggplot(data, aes(x=Time, y=Predation.pressure, fill=Prey)) +  geom_area(...) + colors + ggtitle(species) 
-#   output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
-#   return(output)
-#   
-# }
-
-# Plots the prey biomass before the mortality rate is applied
-#
-# @param  Data array
-# @param x osmose.output.object
-# @param start First simulation year
-# @param conf  Confidence interval
-# @param factor Multiplication factor
-# @param replicates Draws the time-series for each replicate
-# @param freq Output frequency (used to convert from time-step into years)
-# @param alpha Transparency for confidence interval
-# @param col  Line color
-# @param xlim  Xaxis limit
-# @param ylim  Yaxis limit
-# @param nrep  Maximum number of replicate to draw. If NULL, all the replicates
-# are drawn. Only used if replicates=TRUE
-# @param time.mean If FALSE, the mean biomass is drawn for each specie as a barplot.
-# @param nmax Maximum number of species to draw (only used if time.mean=TRUE)
-# @param species Name of the species to draw (only if time.mean=FALSE)
-# @param ... 
-#
-# @return Nothing
-# @export
-# @method plot osmose.output.biomassPredPreyIni
-# plot.osmose.output.biomassPredPreyIni = function(x, start=NULL, conf=0.95, factor=1e-6, replicates=FALSE,
-#                                       freq=12, alpha=0.5, col="black", xlim=NULL, ylim=NULL, nrep=NULL,
-#                                       time.mean=FALSE, nmax=NULL, species=NULL, ...) {
-#   
-#   opar = par(no.readonly = TRUE)
-#   on.exit(par(opar))
-#   
-#   if(isTRUE(time.mean)) {
-#     .plotAverageBiomass(x, col=col, nmax=nmax, factor=factor, ylab="Biomass before mort.", title="Mean biomass before mortality", ...)
-#     return(invisible())
-#   }
-#   
-#   if(!species %in% colnames(x) | is.null(species))
-#   {
-#     stop("You should proper a species name")
-#   }
-#   
-#   start   = if(is.null(start)) as.numeric(rownames(x)[1]) else start
-#   
-#   .plotBiomass(x=x, sp=species, start=start, conf=conf, factor=factor, 
-#                replicates=replicates, nrep=nrep, freq=freq, col=col, alpha=alpha, 
-#                xlim=xlim, ylim=xlim) 
-#   
-#   title(xlab="Time (years)", ylab="Biomass before pred.", main=species)
-#   
-#   return(invisible())
-# }
-# 
-# Plots mortality rates by size class.
-#
-# @param mort Mortality object
-# @param species Species name
-# @param time.mean If time-average should be plotted. If TRUE, mortality rates by
-# for each age class and for each mortality types are plotted. Else, the time series for
-# a specific type of mortality is plotted. 
-# @param norm Wheter mortality should be normalized (only if time.mean=TRUE)
-# @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
-# @param ... Additional arguments of the function.
-#
-# @return If time.mean=FALSE, returns a ggplot2 object
-# @export
-# @method plot osmose.output.mortalityRateDistribBySize
-# plot.osmose.output.mortalityRateDistribBySize = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...)
-# {
-#   
-#   mort = process.mortalityRate(mort, species=species, time.mean=time.mean, norm=norm)
-#   
-#   if(time.mean) 
-#   {
-#     plot.mort.byclass.tmean(mort, species, norm, class="size")
-#     return(invisible())
-#   }
-#   
-#   mort = extract_mort(mort, mtype)
-# 
-#   # computes the sum over time (removes NaNs)
-#   temp = apply(mort, 2, sum, na.rm=TRUE)
-#   
-#   # extract size class for which sum is greater than 0
-#   mort = mort[, temp>0]
-#   
-#   # removes the time-step for which there is a NaN value
-#   df = as.data.frame(mort)
-#   dfna = na.omit(df)
-#   mort = as.matrix(dfna)
-#   
-#   # extracts the time
-#   time = rownames(mort)
-#   time = as.numeric(time)
-#   
-#   data = osmose:::.osmose.format_data_stacked(mort, time=time)
-#   colnames(data) = c("Size", "Time", "Mortality")
-#   
-#   colors = NULL
-#   # If no color is provided, we set default colors
-#   if(is.null(colors))
-#   {
-#     colors = osmose:::.make_default_ggplot_col(rev(levels(data$Size)))
-#   }
-#   
-#   title = paste(species, " (", mtype, ")", sep="")
-#   output = ggplot(data, aes(x=Time, y=Mortality, fill=Size)) +  geom_area(...) + colors + ggtitle(title) 
-#   output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
-#   return(output)
-#   
-# }
-
-# Plots mortality rates by age class.
-#
-# @param mort Mortality object
-# @param species Species name
-# @param time.mean If time-average should be plotted. If TRUE, mortality rates by
-# for each age class and for each mortality types are plotted. Else, the time series for
-# a specific type of mortality is plotted. 
-# @param norm Wheter mortality should be normalized (only if time.mean=TRUE)
-# @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
-# @param ... Additional arguments of the function.
-#
-# @return If time.mean=FALSE, returns a ggplot2 object
-# @export
-# @method plot osmose.output.mortalityRateDistribByAge
-# plot.osmose.output.mortalityRateDistribByAge = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...)
-# {
-#   
-#   mort = process.mortalityRate(mort, species=species, time.mean=time.mean, norm=norm)
-#   
-#   if(time.mean) 
-#   {
-#     plot.mort.byclass.tmean(mort, species, norm, class="age")
-#     return(invisible())
-#   }
-#   
-#   mort = extract_mort(mort, mtype)
-#   
-#   # computes the sum over time (removes NaNs)
-#   temp = apply(mort, 2, sum, na.rm=TRUE)
-#   
-#   # extract size class for which sum is greater than 0
-#   mort = mort[, temp>0]
-#   
-#   # removes the time-step for which there is a NaN value
-#   df = as.data.frame(mort)
-#   dfna = na.omit(df)
-#   mort = as.matrix(dfna)
-#   
-#   # extracts the time
-#   time = rownames(mort)
-#   time = as.numeric(time)
-#   
-#   data = osmose:::.osmose.format_data_stacked(mort, time=time)
-#   colnames(data) = c("Age", "Time", "Mortality")
-#   
-#   colors = NULL
-#   # If no color is provided, we set default colors
-#   if(is.null(colors))
-#   {
-#     colors = osmose:::.make_default_ggplot_col(rev(levels(data$Age)))
-#   }
-#   
-#   title = paste(species, " (", mtype, ")", sep="")
-#   output = ggplot(data, aes(x=Time, y=Mortality, fill=Age)) +  geom_area(...) + colors + ggtitle(title) 
-#   output = output + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
-#   return(output)
-#   
-# }
+#' Plots biomass by age class
+#'
+#' @param data Biomass distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ...  Additional plot arguments
+#'
+#' @export
+#' @method plot osmose.biomassDistribByAge
+plot.osmose.biomassDistribByAge = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Age", ylab="Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
 
 
-# Geric function to plot mortality time mean as a function of class (size or age)
-# plot.mort.byclass.tmean = function(mort, species, norm, class="size")
-# {
-#   
-#   # converts into matrix
-#   mort = do.call(cbind.data.frame, mort)
-#   mort = as.matrix(mort)
-#   
-#   # Counts the total mortality rate for each size class
-#   tot = apply(mort, 1, sum)
-#   
-#   # Extracts the size class with mortality > 0
-#   mort = mort[tot>0, ]
-#   tot = tot[tot>0]
-#   
-#   # If data should be normalized, then it is divided by the total 
-#   # mortality
-#   if(norm) mort = (mort / tot) * 100
-#   
-#   # Transpose the dataframe
-#   mort = t(mort)
-#   
-#   if(norm) {
-#     ylab = "Mortality (%)"
-#   } else {
-#     ylab = "Mortality"
-#   }
-#   
-#   if(class=="size")
-#   {
-#     osmose.stackedpcent(mort, xlab="Size (cm)", main=species, ylab=ylab)
-#   } else {
-#     osmose.stackedpcent(mort, xlab="Age", main=species, ylab=ylab)
-#   }
-#   return(invisible())
-# }
-# 
+
+#' Plots the biomass distribution by trophic level
+#'
+#' @param data Biomass by trophic level data
+#' @param species  Species name
+#' @param time.mean If TRUE, the time-mean biomass is plotted for each TL class
+#' @param ...  Additional plot arguments
+#'
+#' @export
+#' @method plot osmose.biomassDistribByTL
+plot.osmose.biomassDistribByTL = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Trophic Level", ylab="Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+
+#' Plots predator pressure.
+#'
+#' @param data Predator pressure.
+#' @param time.mean If TRUE, plots the time-average predator pressure 
+#' sorted in decreasing order 
+#' @param species Species names
+#' @param ...  Additional plot arguments
+#
+#' @export
+#' @method plot osmose.predatorPressure
+plot.osmose.predatorPressure = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Trophic Level", ylab="Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Plot function for biomass
+#' @description This function takes a object of the class \code{osmose.biomass} and 
+#' produce useful plots for the analysis of this variable.
+#' @param x Object of the class \code{osmose.biomass}. This object have three dimensions: 
+#' species, time and size or age.
+#' @param species A \code{numeric} vector. The species indexation of the object \code{x} is specified 
+#' with this parameter. By defaul \code{species = NULL} and there is not species indexation, using 
+#' all the species of \code{x} for the plots.
+#' @param start A \code{numeric} value. The first element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{start = NULL} and the time indexation start 
+#' with the first element of \code{x}.
+#' @param end A \code{numeric} value. The last element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{end = NULL} and the time indexation finish 
+#' with the last element of \code{x}.
+#' @param initialYear A \code{numeric} value. It specifies the first element that is going to be used on 
+#' the x axis for the plots.
+#' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots are going to be time series 
+#' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
+#' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
+#' default \code{type = 1}. To see all the plot types available for this variable check the 
+#' Osmose user manual.
+#' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
+#' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
+#' code{replicates = FALSE} show the mean value of the variable over the time.
+#' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
+#' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
+#' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
+#' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
+#' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
+#' present the plots horizontaly.
+#' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
+#' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
+#' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
+#'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
+#'  the colors are recycled and repeated for the species that have not a specific color. 
+#' @param alpha A number between 0 and 1. Indicate the transparency with which the 
+#'  confidence interval is colored. By default \code{alpha = 0.5}.
+#' @param speciesNames A vector with the names for each species. By default \code{speciesNames = NULL} and the 
+#' names inside the object \code{x} are used.
+#' @param ... Extra arguments of the function.
+#' @return A graph of a object of the class \code{osmose.biomass}.
+#' @author Criscely Lujan Paredes
+#' @method plot osmose.biomassPredPreyIni
+#' @export
+plot.osmose.biomassPredPreyIni = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+                                             ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
+                                             ci = TRUE, freq = 12, horizontal = FALSE, 
+                                             conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
+                                             col = NULL, alpha = 0.5, speciesNames = NULL, axes = TRUE, ...) {
+  
+  osmosePlots2D(x = x, species = species, start = start, end = end, initialYear = initialYear,
+                ts = ts, type = type, replicates = replicates, nrep = nrep, ci = ci,
+                freq = freq, horizontal = horizontal, conf = conf, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, speciesNames = speciesNames,
+                axes = axes, ...)
+  
+  return(invisible())
+}
+
+
+#' Plots mortality rates by size class.
+#'
+#' @param mort Mortality object
+#' @param species Species name
+#' @param time.mean If time-average should be plotted. If TRUE, mortality rates by
+#' for each age class and for each mortality types are plotted. Else, the time series for
+#' a specific type of mortality is plotted. 
+#' @param norm Wheter mortality should be normalized (only if time.mean=TRUE)
+#' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
+#' @param ... Additional arguments of the function.
+#'
+#' @return None
+#' @export
+#' @method plot osmose.mortalityRateDistribBySize
+plot.osmose.mortalityRateDistribBySize = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...) {
+  
+  if(is.null(species)) { 
+    species = names(x)
+  }
+  
+  for(spec in species) { 
+    mort = process.mortalityRate(mort, species=species, time.mean=time.mean, norm=norm)
+    plot.mort.byclass.tmean(mort, species, norm, class="size")
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots mortality rates by age class.
+#'
+#' @param mort Mortality object
+#' @param species Species name
+#' @param time.mean If time-average should be plotted. If TRUE, mortality rates by
+#' for each age class and for each mortality types are plotted. Else, the time series for
+#' a specific type of mortality is plotted. 
+#' @param norm Wheter mortality should be normalized (only if time.mean=TRUE)
+#' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
+#' @param ... Additional arguments of the function.
+#'
+#' @return Nothing
+#' @export
+#' @method plot osmose.mortalityRateDistribByAge
+plot.osmose.mortalityRateDistribByAge = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...) {
+  
+  if(is.null(species)) { 
+    species = names(x)
+  }
+  
+  for(spec in species) {
+    mort = process.mortalityRate(mort, species=species, time.mean=time.mean, norm=norm)
+    plot.mort.byclass.tmean(mort, species, norm, class="Age")
+  }
+  
+  return(invisible())
+  
+}
 
 # Extract the mortality array providing the 
 # mortality type.
@@ -517,42 +422,465 @@
 # 
 # normalize function. 
 # returns percentage instead of raw values
-# norm_func = function(data)
-# {
-#   output = 100 * data / sum(data)
-#   dimnames(output) = dimnames(data)
-#   return(output)
-# }
+norm_func = function(data) {
+  output = 100 * data / (sum(data, na.rm=TRUE) + .Machine$double.xmin)
+  dimnames(output) = dimnames(data)
+  return(output)
+}
 
 
 
-# 
-# plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=FALSE, lwd=2, legtitle, ylab, ...)
-# {
-#   
-#   .check_species(data, species)
-#   
-#   y = data[[species]]
-#   
-#   # computes the replicate mean
-#   y = apply(y, c(1, 2), mean)
-#   
-#   if(time.mean == FALSE)
-#   {
-#     .osmose.plot_ts(y, xlab='Time', ylab=ylab, title=species, lwd=lwd, legtitle=legtitle, ...)
-#     return(invisible())
-#   }
-#   
-#   if(time.mean){
-#     
-#     # Computes the time-mean
-#     y = apply(y, 2, mean)
-#     temp = as.vector(y)
-#     names(temp) = names(y)
-#     osmose.barplot(temp, xlab=legtitle, ylab=ylab, main=species, ...)
-#     return(invisible())
-#   }
-#   
-# }
-# 
+
+
+
+#' Plot function for biomass
+#' @description This function takes a object of the class \code{osmose.biomass} and 
+#' produce useful plots for the analysis of this variable.
+#' @param x Object of the class \code{osmose.biomass}. This object have three dimensions: 
+#' species, time and size or age.
+#' @param species A \code{numeric} vector. The species indexation of the object \code{x} is specified 
+#' with this parameter. By defaul \code{species = NULL} and there is not species indexation, using 
+#' all the species of \code{x} for the plots.
+#' @param start A \code{numeric} value. The first element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{start = NULL} and the time indexation start 
+#' with the first element of \code{x}.
+#' @param end A \code{numeric} value. The last element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{end = NULL} and the time indexation finish 
+#' with the last element of \code{x}.
+#' @param initialYear A \code{numeric} value. It specifies the first element that is going to be used on 
+#' the x axis for the plots.
+#' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots are going to be time series 
+#' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
+#' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
+#' default \code{type = 1}. To see all the plot types available for this variable check the 
+#' Osmose user manual.
+#' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
+#' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
+#' code{replicates = FALSE} show the mean value of the variable over the time.
+#' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
+#' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
+#' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
+#' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
+#' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
+#' present the plots horizontaly.
+#' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
+#' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
+#' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
+#'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
+#'  the colors are recycled and repeated for the species that have not a specific color. 
+#' @param alpha A number between 0 and 1. Indicate the transparency with which the 
+#'  confidence interval is colored. By default \code{alpha = 0.5}.
+#' @param speciesNames A vector with the names for each species. By default \code{speciesNames = NULL} and the 
+#' names inside the object \code{x} are used.
+#' @param ... Extra arguments of the function.
+#' @return A graph of a object of the class \code{osmose.biomass}.
+#' @author Criscely Lujan Paredes
+#' @method plot osmose.meanSize
+#' @export
+plot.osmose.meanSize = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+                                          ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
+                                          ci = TRUE, freq = 12, horizontal = FALSE, 
+                                          conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
+                                          col = NULL, alpha = 0.5, speciesNames = NULL, axes = TRUE, ...) {
+  
+  osmosePlots2D(x = x, species = species, start = start, end = end, initialYear = initialYear,
+                ts = ts, type = type, replicates = replicates, nrep = nrep, ci = ci,
+                freq = freq, horizontal = horizontal, conf = conf, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, speciesNames = speciesNames,
+                axes = axes, ...)
+  
+  return(invisible())
+}
+
+
+
+
+
+
+
+
+#' Plot function for biomass
+#' @description This function takes a object of the class \code{osmose.biomass} and 
+#' produce useful plots for the analysis of this variable.
+#' @param x Object of the class \code{osmose.biomass}. This object have three dimensions: 
+#' species, time and size or age.
+#' @param species A \code{numeric} vector. The species indexation of the object \code{x} is specified 
+#' with this parameter. By defaul \code{species = NULL} and there is not species indexation, using 
+#' all the species of \code{x} for the plots.
+#' @param start A \code{numeric} value. The first element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{start = NULL} and the time indexation start 
+#' with the first element of \code{x}.
+#' @param end A \code{numeric} value. The last element of the time indexation of the object \code{x} is
+#' specified with this parameter. By default \code{end = NULL} and the time indexation finish 
+#' with the last element of \code{x}.
+#' @param initialYear A \code{numeric} value. It specifies the first element that is going to be used on 
+#' the x axis for the plots.
+#' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots are going to be time series 
+#' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
+#' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
+#' default \code{type = 1}. To see all the plot types available for this variable check the 
+#' Osmose user manual.
+#' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
+#' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
+#' code{replicates = FALSE} show the mean value of the variable over the time.
+#' @param nrep A \code{numeric} value. Indicate the number of replicates to show on the plots. This parameter is 
+#' used only when \code{replicates = TRUE} and for the plot types where \code{replicates} is used.
+#' @param ci TODO. remove this parameter on type 1 and 2 (ts = TRUE).
+#' @param freq A \code{numeric} value to indicate the frequence on the time series plots. 
+#' It is \code{freq = 12} (monthly) by default. This parameter is going to be used to create 
+#' a vector of the time for the x-axis.
+#' @param horizontal \code{logical} parameter. For plots types that are not time series (barplots or boxplots), 
+#' this parameter allows represent verticaly the plot (\code{horizontal = FALSE}). \code{horizontal = TRUE} 
+#' present the plots horizontaly.
+#' @param conf A number to indicate the confidence interval to plot. By default \code{conf = 0.95}.
+#' @param factor A number to indicate the scale of the variable on the y-axis. By default \code{factor = 1e-3}.
+#' @param col A vector with the color names for the plots. By default \code{col = NULL} and the colors
+#'  are chosen by the function. If the length of this parameter is shorter than the number of species, 
+#'  the colors are recycled and repeated for the species that have not a specific color. 
+#' @param alpha A number between 0 and 1. Indicate the transparency with which the 
+#'  confidence interval is colored. By default \code{alpha = 0.5}.
+#' @param speciesNames A vector with the names for each species. By default \code{speciesNames = NULL} and the 
+#' names inside the object \code{x} are used.
+#' @param ... Extra arguments of the function.
+#' @return A graph of a object of the class \code{osmose.biomass}.
+#' @author Criscely Lujan Paredes
+#' @method plot osmose.meanSizeCatch
+#' @export
+plot.osmose.meanSizeCatch = function(x, species = NULL, start = NULL, end = NULL, initialYear = NULL,
+                                ts = TRUE, type = 1, replicates = TRUE, nrep = 3,
+                                ci = TRUE, freq = 12, horizontal = FALSE, 
+                                conf = 0.95, factor = 1e-3, xlim = NULL, ylim = NULL,
+                                col = NULL, alpha = 0.5, speciesNames = NULL, axes = TRUE, ...) {
+  
+  osmosePlots2D(x = x, species = species, start = start, end = end, initialYear = initialYear,
+                ts = ts, type = type, replicates = replicates, nrep = nrep, ci = ci,
+                freq = freq, horizontal = horizontal, conf = conf, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, speciesNames = speciesNames,
+                axes = axes, ...)
+  
+  return(invisible())
+}
+
+
+
+#' Plots yield biomass by age class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.yieldByAge
+plot.osmose.yieldByAge = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Age", ylab="Yield Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots yield abundance by age class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.yieldNByAge
+plot.osmose.yieldNByAge = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Age", ylab="Yield Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots yield biomass by size class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean biomass is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.yieldBySize
+plot.osmose.yieldBySize = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Yield Biomass", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots yield abundance by size class
+#'
+#' @param data Biomass distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.yieldNBySize
+plot.osmose.yieldNBySize = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Yield Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots mean trophic level by size class
+#'
+#' @param data TL distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean TL is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.meanTLBySize
+plot.osmose.meanTLBySize = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Trophic level", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots mean trophic level by age class
+#'
+#' @param data Trophic level distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean TL is plotted
+#' @param ... 
+#'
+#' @export
+#' @method plot osmose.meanTLByAge
+plot.osmose.meanTLByAge = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Age", ylab="Trophic level", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Plots abundance by size class
+#'
+#' @param data Abundance distribution by size
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ... Additional plot arguments
+#'
+#' @export
+#' @method plot osmose.abundanceDistribBySize
+plot.osmose.abundanceDistribBySize = function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Plots abundance by age class
+#'
+#' @param data Abundance distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ...  Additional plot arguments
+#'
+#' @export
+#' @method plot osmose.abundanceDistribByAge
+plot.osmose.abundanceDistribByAge= function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+#' Plots abundance by trophic level
+#'
+#' @param data Abundance distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ...  Additional plot arguments
+#'
+#' @export
+#' @method plot osmose.abundanceDistribByTL
+plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Trophic level", ylab="Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Plots abundance by trophic level
+#'
+#' @param data Abundance distribution by age
+#' @param species Species name
+#' @param time.mean If true, time.mean abundance is plotted
+#' @param ...  Additional plot arguments
+#'
+#' @export
+#' @method plot osmose.abundanceDistribByTL
+plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=TRUE, ...) {
+  
+  if(is.null(species)) {
+    species = names(data)
+  }
+  
+  for(spec in species) {
+    plot.osmose.output.ts.generic(data, species=spec, time.mean=time.mean, legtitle="Trophic level", ylab="Abundance", ...)
+  }
+  
+  return(invisible())
+  
+}
+
+
+#' Plot diet matrix by size class
+#'
+#' @param data Data list
+#' @param species List of species name. If null, all species are plotted
+#' @param ... Extra arguments of the graphics barplot function
+#' @method plot osmose.dietMatrixbyAge
+#' @export
+plot.osmose.dietMatrixbyAge = function(data, species=NULL, ...) {
+  
+  if(is.null(species)) { 
+      species = names(species)
+  }
+  
+  for (spec in species) {
+    .plot.osmose.dietMatrixbyDis(data, spec, "Age", "Diet Matrix", ...)
+  }
+  
+}
+
+#' Plot diet matrix by size class
+#'
+#' @param data Data list
+#' @param species List of species name. If null, all species are plotted
+#' @param ... Extra arguments of the graphics barplot function
+#' @method plot osmose.dietMatrixbySize
+#' @export
+plot.osmose.dietMatrixbySize = function(data, species=NULL, ...) {
+  
+  if(is.null(species)) { 
+    species = names(species)
+  }
+  
+  for (spec in species) {
+    .plot.osmose.dietMatrixbyDis(data, spec, "Size (cm)", "Diet Matrix", ...)
+  }
+  
+}
+
+
+
+#' Plot diet matrix by size class
+#'
+#' @param data Data list
+#' @param species List of species name. If null, all species are plotted
+#' @param ... Extra arguments of the graphics barplot function
+#' @method plot osmose.predatorPressureDistribBySize
+#' @export
+plot.osmose.predatorPressureDistribBySize = function(data, species=NULL, ...) {
+  
+  if(is.null(species)) { 
+    species = names(species)
+  }
+  
+  for (spec in species) {
+    .plot.osmose.dietMatrixbyDis(data, spec, "Size (cm)", "Predator pressure", ...)
+  }
+  
+}
+
+#' Plot diet matrix by size class
+#'
+#' @param data Data list
+#' @param species List of species name. If null, all species are plotted
+#' @param ... Extra arguments of the graphics barplot function
+#' @method plot osmose.predatorPressureDistribByAge
+#' @export
+plot.osmose.predatorPressureDistribByAge = function(data, species=NULL, ...) {
+  
+  if(is.null(species)) { 
+    species = names(species)
+  }
+  
+  for (spec in species) {
+    .plot.osmose.dietMatrixbyDis(data, spec, "Age", "Predator pressure", ...)
+  }
+  
+}
+
+
+
+
+
+
 

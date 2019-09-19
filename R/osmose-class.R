@@ -28,10 +28,12 @@ plot.osmose = function(x, what = "biomass", ...) {
 #' Get variable
 #' @description Function to get a variable from an object of \code{osmose} 
 #' class. This function uses the getVar method (see the \code{\link{getVar.osmose}}).
+#'
 #' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
-#' @param var Name of variable to extract. It could be: "biomass","abundance",
-#'  "yield", "yieldN".
+#' @param what Variable to extract
+#' @param how Output format
 #' @param ... Additional arguments of the function.
+#'
 #' @return An array or a list containing the extracted data.
 #' @export
 getVar = function(object, what, how, ...) {
@@ -67,8 +69,9 @@ getVar.osmose = function(object, what, how=c("matrix", "data.frame", "list"),
       stop(message) 
   }
 
-  if(inherits(out, "array") & isTRUE(expected))
+  if(inherits(out, "array") & isTRUE(expected)) {
     out = apply(out, c(1, 2), mean, na.rm=TRUE)
+  }
   
   if(how=="matrix") return(out)
   

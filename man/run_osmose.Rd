@@ -4,8 +4,8 @@
 \alias{run_osmose}
 \title{Run an OSMOSE configuration}
 \usage{
-run_osmose(input, parameters = NULL, output = "output",
-  log = "osmose.log", version = "3.3.3", osmose = NULL,
+run_osmose(input, parameters = NULL, output = NULL,
+  log = "osmose.log", version = "4.1.0", osmose = NULL,
   java = "java", options = NULL, verbose = TRUE, clean = TRUE)
 }
 \arguments{
@@ -13,7 +13,7 @@ run_osmose(input, parameters = NULL, output = "output",
 
 \item{parameters}{Parameters to be passed to osmose (version 4 or higher).}
 
-\item{output}{Output directory}
+\item{output}{Output directory. If NULL, the value set in the configuration file is used.}
 
 \item{log}{File to save OSMOSE execution messages.}
 
@@ -43,7 +43,7 @@ but it is required for configuration using interannual inputs or fishing selecti
 \examples{
 {
   \donttest{
-    filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+    filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
     runOsmose(filename)
   }
 }

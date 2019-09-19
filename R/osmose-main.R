@@ -5,9 +5,10 @@
 #' @title Run an OSMOSE configuration
 #' @description This function create a valid configuration by several input files
 #' from user input parameters. 
+#'
 #' @param input Filename of the main configuration file
 #' @param parameters Parameters to be passed to osmose (version 4 or higher).
-#' @param output Output directory
+#' @param output Output directory. If NULL, the value set in the configuration file is used.
 #' @param log File to save OSMOSE execution messages.
 #' @param version OSMOSE version. Integer (2, 3, etc.) or releases ('v3r2') are
 #' accepted. 
@@ -18,18 +19,19 @@
 #' @param options Java options (e.g. -Xmx2048m to increase memory limit).
 #' @param verbose Show messages? (output in the log file if FALSE).
 #' @param clean TRUE if the output directory should be cleaned before running OSMOSE.
+#'
 #' @details Basic configurations may not need the use of \code{buildConfiguration},
 #' but it is required for configuration using interannual inputs or fishing selectivity.
 #' @author Ricardo Oliveros-Ramos
 #' @examples{
 #'   \donttest{
-#'     filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+#'     filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
 #'     runOsmose(filename)
 #'   }
 #' }
 #' @export
-run_osmose = function(input, parameters = NULL, output = "output", log = "osmose.log",
-                      version = "3.3.3", osmose = NULL, java = "java",
+run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
+                      version = "4.2.1", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE) {
   
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
@@ -38,7 +40,7 @@ run_osmose = function(input, parameters = NULL, output = "output", log = "osmose
   if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_%s.jar", version),
                                            package="osmose", mustWork = TRUE)
   
-  if(isTRUE(clean)) 
+  if(isTRUE(clean) & (!is.null(output))) 
     file.remove(file.path(output, dir(path=output, recursive=TRUE)))
   
   if(is.null(options)) options = ""
@@ -46,12 +48,19 @@ run_osmose = function(input, parameters = NULL, output = "output", log = "osmose
   
   # barrier.n: redirection 
   version = .getVersion(version)
+  versionRef = .getVersion("3.4")
   
-  if(version <= 3) {
-    outDir = output
+  if(is.null(output)) {
+    # If output is NULL, file output path is used.
+    outDir = ""
   } else {
-    # changes for version 4 or higher
-    outDir = paste("-Poutput.dir.path=", output, sep="")
+    # else, overwrites the Osmose output parameter
+    if(.compareVersion(version, versionRef) < 0) {
+      outDir = output
+    } else {
+      # changes for version 4 or higher
+      outDir = paste("-Poutput.dir.path=", output, sep="")
+    }
   }
   
   args = paste(options, "-jar", osmose, input, outDir, parameters)
@@ -72,7 +81,7 @@ run_osmose = function(input, parameters = NULL, output = "output", log = "osmose
 #' Title
 #' @export
 runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version="3.3.1", osmose=NULL, java="java", 
+                     version="4.1.0", osmose=NULL, java="java", 
                      options=NULL, verbose=TRUE, clean=TRUE) {
   
   message("runOsmose will be deprecated, use run_osmose instead.")
@@ -137,7 +146,7 @@ osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
   
   .Deprecated("read_osmose")
   read_osmose(path=path, version=version, species.names=species.names, ...)
-
+  
 }
 
 
@@ -190,3 +199,170 @@ osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
 report = function(x, format, output, ...) {
   UseMethod("report")
 }
+
+
+#' Generates Osmose configuration files to run an Osmose demo.
+#' 
+#' @param path Path where to put the Osmose configuration file.
+#' @param config Reference configuration to run ("gog"). 
+#' @note So far, only one configuration is propose ("gog")
+#' 
+#'
+#' @return A list containing the configuration file to use (config_file) for running the code
+#' and the output directory to use when reading data.
+#' 
+#' @export
+#' @examples
+#' \dontrun{
+#' rm(list=ls())
+#'
+#'library("osmose")
+#'
+#'# Copy configuration files into the proper directory
+#'demo = osmose_demo(path="../", config="gog")
+#'
+#'# run the osmose model
+#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="3.3.3", 
+#'           options=NULL, verbose=TRUE, clean=TRUE)
+#'
+#'# reads output data
+#'data = read_osmose(demo$output_dir)
+#'
+#'# summarize output data
+#'summary(data)
+#'
+#'# plot output data
+#'plot(data)
+#'}
+osmose_demo = function(path=NULL, config=c("gog", "gog_v4", "default")) {
+  
+  config = match.arg(config)
+  
+  # if no path has been provided, create a path from the working dir.
+  if(is.null(path)) path = file.path(getwd(), config)
+  
+  # if the directory does not exist, then create
+  # the directory
+  if(!dir.exists(path)) {
+    dir.create(path)
+  }
+  
+  # swith for the configuration directory
+  input_dir = switch(config, 
+                     gog = system.file(package="osmose", "extdata", "gog"),
+                     gog_v4 = system.file(package="osmose", "extdata", "gog_v4"),
+                     default = system.file(package="osmose", "extdata", "gog")
+  )
+  
+  # swith for the configuration directory and defines the configuration file
+  config_file = switch(config, 
+                       gog = "osm_all-parameters.csv",
+                       gog_v4 = "osm_all-parameters.csv",
+                       default = "osm_all-parameters.csv"
+  )
+  
+  file.copy(from=input_dir, to=path, recursive=TRUE, overwrite = FALSE)
+  config = basename(input_dir)
+  
+  demo = list()
+  config_file = file.path(path, config, config_file)
+  demo$config_file = config_file
+  demo$output_dir = file.path(dirname(config_file), "output")
+  
+  return(demo)
+  
+}
+
+
+
+
+
+
+
+#' Generates Osmose configuration files to run an Osmose demo.
+#' 
+#' @param path Path where to put the Osmose configuration file.
+#' @param config Reference configuration to run ("gog"). 
+#' @note So far, only one configuration is propose ("gog")
+#' 
+#' @return A list containing the configuration file to use (config_file) for running the code
+#' and the output directory to use when reading data.
+#' 
+#' @export
+#' @examples
+#' \dontrun{
+#' rm(list=ls())
+#'
+#'library("osmose")
+#'
+#'# Copy configuration files into the proper directory
+#'demo = osmose_demo(path="../", config="gog")
+#'
+#'# run the osmose model
+#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="3.3.3", 
+#'           options=NULL, verbose=TRUE, clean=TRUE)
+#'
+#'# reads output data
+#'data = read_osmose(demo$output_dir)
+#'
+#'# summarize output data
+#'summary(data)
+#'
+#'# plot output data
+#'plot(data)
+#'}
+osmose_calib_demo = function(path=NULL) {
+  
+  # if no path has been provided, create a path from the working dir.
+  if(is.null(path)) path = file.path(getwd())
+  
+  # if the directory does not exist, then create
+  # the directory
+  if(!dir.exists(path)) {
+    dir.create(path)
+  }
+  
+  # copy the calibration data into the path directory
+  input_dir = system.file(package="osmose", "extdata", "calib_demo")
+  file.copy(from=input_dir, to=path, recursive=TRUE, overwrite = TRUE)
+
+  # Copy the reference gog_v4 configuration in the calibration folder
+  input_dir = system.file(package="osmose", "extdata", "gog_v4")
+  file.copy(from=input_dir, to=file.path(path, "calib_demo"), recursive=TRUE, overwrite = TRUE)
+            
+  demo = list(path=file.path(path, "calib_demo"))
+  demo$file = "calibrate.R"
+  
+  return(demo)
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
