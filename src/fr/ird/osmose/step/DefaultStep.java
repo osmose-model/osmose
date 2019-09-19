@@ -55,13 +55,18 @@ import fr.ird.osmose.process.IncomingFluxProcess;
 import fr.ird.osmose.process.MortalityProcess;
 import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.ReproductionProcess;
+import fr.ird.osmose.process.bioen.BioenReproductionProcess;
+import fr.ird.osmose.process.bioen.EnergyBudget;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author pverley
  */
 public class DefaultStep extends AbstractStep {
-
+    
     /*
      * Growth process
      */
@@ -90,6 +95,9 @@ public class DefaultStep extends AbstractStep {
      * Record time step 0 (initial state) in the outputs 
      */
     private boolean recordStep0;
+    
+    /** Adding a class for the management of bioenergetic module */
+    private EnergyBudget bioenProcess;
 
     public DefaultStep(int rank) {
         super(rank);
@@ -97,19 +105,36 @@ public class DefaultStep extends AbstractStep {
 
     @Override
     public void init() {
-
+        
         // Initialize general mortality process
         mortalityProcess = new MortalityProcess(getRank());
         mortalityProcess.init();
 
-        // initiliaza growth process
-        growthProcess = new GrowthProcess(getRank());
-        growthProcess.init();
+        // If the bioen module is activated, no more use of the 
+        // GrowthProcess class, use of the EnergyBudget module instead.
+        if (!getConfiguration().useBioen()) {
+            // initiliaza growth process
+            growthProcess = new GrowthProcess(getRank());
+            growthProcess.init();
+        } else {
+            try {
+                bioenProcess = new EnergyBudget(getRank());
+                bioenProcess.init();
+            } catch (IOException ex) {
+                Logger.getLogger(DefaultStep.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 
         // Reproduction processes
-        reproductionProcess = new ReproductionProcess(getRank());
-        reproductionProcess.init();
-
+        if (!getConfiguration().useBioen()) {
+            reproductionProcess = new ReproductionProcess(getRank());
+            reproductionProcess.init();
+        } else {
+            reproductionProcess = new BioenReproductionProcess(getRank());
+            reproductionProcess.init();
+        }
+        
+        
         // Incoming flux
         incomingFLuxProcess = new IncomingFluxProcess(getRank());
         incomingFLuxProcess.init();
@@ -158,8 +183,14 @@ public class DefaultStep extends AbstractStep {
         // (predation + fishing + natural mortality + starvation)
         mortalityProcess.run();
 
-        // Growth
-        growthProcess.run();
+        // If the bioen module is activated, then use of the
+        // bioenProcess model instead.
+        if (!getConfiguration().useBioen()) {
+            // Growth
+            growthProcess.run();
+        } else {
+            bioenProcess.run();
+        }
 
         // Save steps
         indicators.update(iStepSimu);

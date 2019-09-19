@@ -147,4 +147,14 @@ public class BackgroundSchool extends AbstractSchool {
        
     }
 
+    @Override
+    public void incrementIngestion(double cumPreyUpon) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public double getAlphaBioen() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

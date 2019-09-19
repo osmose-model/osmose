@@ -111,7 +111,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             error("Failed to create output file " + file.getAbsolutePath(), ex);
         }
         prw = new PrintWriter(fos, true);
-
+        
         if (!fileExists) {
             prw.println(quote(getDescription()));
             prw.print(quote("Time"));
@@ -129,7 +129,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     }
 
     boolean include(School school) {
-        return !cutoffEnabled || school.getAge() >= cutoffAge[school.getSpeciesIndex()];
+        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getSpeciesIndex()]));
     }
 
     @Override

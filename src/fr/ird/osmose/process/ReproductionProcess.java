@@ -194,7 +194,7 @@ public class ReproductionProcess extends AbstractProcess {
         }
     }
 
-    private double getSeason(int iStepSimu, Species species) {
+    protected double getSeason(int iStepSimu, Species species) {
 
         int iSpec = species.getIndex();
         int length = seasonSpawning[iSpec].length;
@@ -208,4 +208,22 @@ public class ReproductionProcess extends AbstractProcess {
         }
         return seasonSpawning[iSpec][iStep];
     }
-}
+    
+    public double getSeedingBiomass(int i) {
+        return this.seedingBiomass[i];
+    }
+
+    public double getSexRatio(int i) {
+        return this.sexRatio[i];
+    }
+
+    public int getYearSeading() {
+        return this.yearMaxSeeding;
+    }
+
+    public double getAlpha(int i) {
+        return this.alpha[i];
+    }
+    
+    
+    }

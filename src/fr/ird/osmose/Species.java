@@ -108,6 +108,10 @@ public class Species {
      */
     private final float eggWeight;
 
+    private int zlayer = 0;
+    
+    private double alpha_bioen;
+    
 //////////////
 // Constructor
 //////////////
@@ -136,6 +140,22 @@ public class Species {
         eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
         float agemax = cfg.getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
+
+        // barrier.n: added for bioenergetic purposes.
+        if (cfg.useBioen()) {
+            zlayer = cfg.getInt("species.zlayer.sp" + index);
+            String key = String.format("species.alpha.sp%d", index);
+            alpha_bioen = cfg.getDouble(key);
+        }
+
+    }
+    
+    public double getAlphaBioen() {
+        return this.alpha_bioen;
+    }
+
+    public int getDepthLayer() {
+        return this.zlayer;
     }
 
 //////////////////////////////
@@ -151,6 +171,18 @@ public class Species {
     public float computeWeight(float length) {
         return (float) (c * (Math.pow(length, bPower)));
     }
+    
+    /**
+     * Computes the length, in centimetre, corresponding to the given weight, in
+     * gram.
+     *
+     * @param weight, the weight in gram
+     * @return the length in centimetre for this {@code weight}
+     */
+    public float computeLength(float weight) {
+        return (float) (Math.pow(weight/c, (1/bPower)));
+    }
+
 
     /**
      * Returns the lifespan of the species. Parameter
@@ -213,5 +245,9 @@ public class Species {
         double Bv = 0.d;
         double Sv = 1.d;
         return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
+    }
+    
+    public double getBPower() {
+        return this.bPower;
     }
 }

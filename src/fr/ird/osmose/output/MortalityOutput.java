@@ -56,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -96,6 +97,9 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
      * CSV separator
      */
     private final String separator;
+    
+    /** Stage of the schools at the beginning of the time step. */
+    private int[] stage_init;
 
     public MortalityOutput(int rank) {
         super(rank);
@@ -109,9 +113,16 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         // time step
         abundanceStage = new double[getNSpecies()][STAGES];
 
+        stage_init = new int[getSchoolSet().getSchools().size()];
+
+        int cpt = 0;
+
         // save abundance at the beginning of the time step
         for (School school : getSchoolSet().getSchools()) {
-            abundanceStage[school.getSpeciesIndex()][getStage(school)] += school.getAbundance();
+            int stage = getStage(school);
+            stage_init[cpt] = stage;
+            abundanceStage[school.getSpeciesIndex()][stage] += school.getAbundance();
+            cpt += 1;
         }
     }
 
@@ -124,16 +135,18 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void update() {
-        int iStage;
+        int iStage, cpt = 0;
         int nCause = MortalityCause.values().length;
         double[][][] nDead = new double[getNSpecies()][nCause][STAGES];
         for (School school : getSchoolSet().getSchools()) {
-            iStage = getStage(school);
+            //iStage = getStage(school);
+            iStage = stage_init[cpt];
             int iSpecies = school.getSpeciesIndex();
             // Update number of deads
             for (MortalityCause cause : MortalityCause.values()) {
                 nDead[iSpecies][cause.index][iStage] += school.getNdead(cause);
             }
+            cpt += 1;
         }
         // Cumulate the mortality rates
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
@@ -144,8 +157,11 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                         nDeadTot += nDead[iSpecies][iDeath][iStage];
                     }
                     double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
-                    for (int iDeath = 0; iDeath < nCause; iDeath++) {
-                        mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
+
+                    if (Ftot != 0) {
+                        for (int iDeath = 0; iDeath < nCause; iDeath++) {
+                            mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
+                        }
                     }
                 }
             }
@@ -228,6 +244,10 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     prw[iSpecies].print(separator);
                     prw[iSpecies].print(quote("Zout"));
                 }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Moxy"));
+                }
                 prw[iSpecies].println();
                 for (MortalityCause cause : MortalityCause.values()) {
                     prw[iSpecies].print(separator);
@@ -256,19 +276,41 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             }
         }
     }
-
+    
     private int getStage(School school) {
+        
         int iStage;
-        if (school.getAgeDt() == 0) {
-            // Eggss
-            iStage = EGG;
-        } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]
-                || school.getLength() < recruitmentSize[school.getSpeciesIndex()]) {
-            // Pre-recruits
-            iStage = PRE_RECRUIT;
+        
+        if(this.getConfiguration().useBioen()) {
+    
+            if (school.getAgeDt() == 0) {
+                // Eggss
+                iStage = EGG;
+
+            } else if (!school.isMature()) {
+                // Pre-recruits
+                iStage = PRE_RECRUIT;
+
+            } else {
+                // Recruits
+                iStage = RECRUIT;
+            }
+            
         } else {
-            // Recruits
-            iStage = RECRUIT;
+        
+            if (school.getAgeDt() == 0) {
+                // Eggss
+                iStage = EGG;
+
+            } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]
+                    || school.getLength() < recruitmentSize[school.getSpeciesIndex()]) {
+                // Pre-recruits
+                iStage = PRE_RECRUIT;
+
+            } else {
+                // Recruits
+                iStage = RECRUIT;
+            }
         }
         return iStage;
     }

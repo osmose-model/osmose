@@ -51,11 +51,14 @@ package fr.ird.osmose;
 import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.populator.PopulatingProcess;
+import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.DefaultStep;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -139,6 +142,13 @@ public class Simulation extends OsmoseLinker {
      * Year to start writing the outputs
      */
     private int yearOutput;
+    
+        
+    /**
+     * List of evolving trait.
+     */
+    private List<Trait> evolvingTrait;
+    private int n_evolving_trait;
 
 //////////////
 // Constructor
@@ -208,6 +218,20 @@ public class Simulation extends OsmoseLinker {
                 error("Failed to open restart file " + ncfile, ex);
             }
         }
+        
+                // Count the number of parameters that ends by trait.mean
+        String key;
+        List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
+        this.n_evolving_trait = genet_keys.size();
+        this.evolvingTrait = new ArrayList<>();
+        for (int p = 0; p < this.n_evolving_trait; p++) {
+            key = genet_keys.get(p);
+            // recovers the trait prefix
+            String prefix = key.replace(".trait.mean", "");
+            Trait trait = new Trait(this.rank, prefix);
+            trait.init();
+            this.evolvingTrait.add(trait);
+        } 
 
         // Init LTL forcing
         initForcing();
@@ -250,6 +274,7 @@ public class Simulation extends OsmoseLinker {
 
         // Year to start writing the outputs
         yearOutput = getConfiguration().getInt("output.start.year");
+        
     }
 
     /**
@@ -371,5 +396,25 @@ public class Simulation extends OsmoseLinker {
      */
     public LTLForcing getForcing() {
         return forcing;
+    }    
+    
+    
+    /**
+     * Returns the ith evolving trait for the given simulation.
+     * @param i Index of the evolving trait
+     * @return A Trait object
+     */
+    public Trait getEvolvingTrait(int i) {
+        return this.evolvingTrait.get(i);
     }
+
+    /**
+     * Returns the total number of evolving trait for the given simulation.
+     * @return The number of evolving trait
+     */
+    public int getNEvolvingTraits() {
+        return this.n_evolving_trait;
+    }
+
+    
 }

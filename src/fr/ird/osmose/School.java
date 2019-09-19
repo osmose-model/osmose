@@ -15,10 +15,10 @@
  * size-based opportunistic predation based on spatio-temporal co-occurrence
  * and size adequacy between a predator and its prey. It represents fish
  * individuals grouped into schools, which are characterized by their size,
- * weight, age, taxonomy and geographical location, and which undergo major
- * processes of fish life cycle (growth, explicit predation, natural and
- * starvation mortalities, reproduction and migration) and fishing mortalities
- * (Shin and Cury 2001, 2004).
+ * somatic and gonadic weight, age, taxonomy and geographical location, and 
+ * which undergo major processes of fish life cycle (growth, explicit predation, 
+ * natural and starvation mortalities, reproduction and migration) and fishing 
+ * mortalities (Shin and Cury 2001, 2004).
  * 
  * This software is governed by the CeCILL-B license under French law and
  * abiding by the rules of distribution of free software.  You can  use, 
@@ -48,6 +48,7 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.Collection;
@@ -96,6 +97,10 @@ public class School extends AbstractSchool {
      * {@link Species} of the fish.
      */
     final private Species species;
+    
+    /** Genotype variable. */
+    private Genotype genotype;
+    
     /**
      * The index of the species. From [0; nSpec-1] for fish and from [nSpec;
      * nSpec+nLTL-1] for plankton.
@@ -106,6 +111,11 @@ public class School extends AbstractSchool {
      * it saves computation time for converting the biomass from gramme to tonne
      */
     private float weight;
+
+    /**
+     * Weight of gonads of the fish in tonne.
+     */
+    private float gonadWeight;
     /**
      * Trophic level of the fish.
      */
@@ -148,6 +158,25 @@ public class School extends AbstractSchool {
      */
     private boolean out;
 
+    /**
+     * Variables that are used in the bioenergetic version of the code.
+     */
+    private double e_gross;    // gross energy (assimilated)
+    private double e_maint;    // energy used for maintenance.
+    private double e_net;      // net energy (gross - maintenance)
+    private double ingestion;   // total ingestion
+    private double kappa;    // kappa value
+    
+    /** Mortality rates associated with the bioen module. */
+    private double mort_oxy_rate = 0;
+    private double mort_starv_rate = 0;
+
+    // Initialisation of maturity variables.
+    // by default the school is imature.
+    private double ageMature = 0;
+    private double sizeMature = 0;
+    private boolean isMature = false;
+    
 ///////////////
 // Constructors
 ///////////////
@@ -166,13 +195,14 @@ public class School extends AbstractSchool {
      * @param abundance, the number of eggs in the school
      */
     public School(Species species, double abundance) {
+        // constructor with length=eggSize, weight=EggWeight, age=0
         this(species, abundance, species.getEggSize(), species.getEggWeight(), 0);
     }
 
     /**
-     * Create a new school, with given species, abundance, length, weight and
-     * age. Trophic level is preset to {@link Species#TL_EGG} and the school is
-     * not located on the grid.
+     * Create a new school, with given species, abundance, length, weight,
+     * gonadWeight and age. Trophic level is preset to {@link Species#TL_EGG}
+     * and the school is not located on the grid.
      *
      * @param species, the {@link Species} of the fish
      * @param abundance, the number of fish in the school
@@ -181,12 +211,18 @@ public class School extends AbstractSchool {
      * @param age, the age of the fish in number of time step
      */
     public School(Species species, double abundance, float length, float weight, int age) {
+        // call the complete cons. with x=y=-1, TL = Species.TL_EGG
         this(species, -1, -1, abundance, length, weight, age, Species.TL_EGG);
+    }
+
+    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel) {
+        // call the complete constructor with gonadWeight = 0.f
+        this(species, x, y, abundance, length, weight, ageDt, trophicLevel, 0.f);
     }
 
     /**
      * Create a new school, with given species, grid coordinates, abundance,
-     * length weight, age and trophic level.
+     * length weight, gonad weight, age and trophic level.
      *
      * @param species, the {@link Species} of the fish
      * @param x, x coordinate of the school on the grid
@@ -194,15 +230,17 @@ public class School extends AbstractSchool {
      * @param abundance, the number of fish in the school
      * @param length, the length of the fish in centimetre
      * @param weight, the weight of the fish in gramme
+     * @param gonadWeight, the weight of the fish in gramme
      * @param ageDt, the age of the fish in number of time step
      * @param trophicLevel, the trophic level of the fish
      */
-    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel) {
+    public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
         this.index = species.getIndex();
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
-        biomass = instantaneousBiomass = abundance * this.weight;
+        this.gonadWeight = gonadWeight * 1.e-6f;
+        biomass = instantaneousBiomass = abundance * (this.weight + this.gonadWeight);
         abundanceHasChanged = false;
         this.trophicLevel = trophicLevel;
         if (x >= 0 && x < getGrid().get_nx() && y >= 0 && y < getGrid().get_ny()) {
@@ -218,6 +256,7 @@ public class School extends AbstractSchool {
         out = false;
         preys = new HashMap();
         starvationRate = 0.d;
+        
     }
 
 ////////////////////////////
@@ -231,7 +270,7 @@ public class School extends AbstractSchool {
         // Update abundance
         abundance = getInstantaneousAbundance();
         // Update biomass
-        biomass = abundance * weight;
+        biomass = abundance * (weight);
         // Rest number of dead fish
         reset(nDead);
         // Reset diet variables
@@ -243,8 +282,10 @@ public class School extends AbstractSchool {
         out = false;
         // Set length at the beginning of the time step
         lengthi = length;
-    }
 
+        ingestion = 0.d;   // reset ingestion at beginning of time step;
+    }
+    
     /**
      * Make some more eggs accessible. This function assumes that the initial
      * abundance of egg at the beginning of the predation process (abundance -
@@ -275,11 +316,11 @@ public class School extends AbstractSchool {
      *
      * @param biomass, the biomass of the school, in tonne
      * @return the number of fish weighting {@code weight} corresponding to this
-     * level of biomass. {@code abundance = biomass / weight}
+     * level of biomass. {@code abundance = biomass / (gonadWeight+weight)}
      */
     @Override
     public double biom2abd(double biomass) {
-        return biomass / weight;
+        return biomass / (weight);
     }
 
     /**
@@ -287,11 +328,11 @@ public class School extends AbstractSchool {
      *
      * @param abundance, a number of fish
      * @return the corresponding biomass of this number of fish weighting
-     * {@code weight}. {@code biomass = abundance * weight}
+     * {@code weight}. {@code biomass = abundance * (weight+gonadWeight)}
      */
     @Override
     public double abd2biom(double abundance) {
-        return abundance * weight;
+        return abundance * (weight);
     }
 
     /**
@@ -344,6 +385,31 @@ public class School extends AbstractSchool {
      */
     public void setNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] = nDead;
+                
+        double factor = 1;
+        if (this.getInstantaneousAbundance() != 0) {
+            factor = (this.getInstantaneousAbundance() - nDead) / this.getInstantaneousAbundance();
+        }
+
+        this.ingestion *= factor;
+        this.e_net *= factor;
+        
+        abundanceHasChanged = true;
+    }
+
+    @Override
+    public void incrementNdead(MortalityCause cause, double nDead) {
+        
+        this.nDead[cause.index] += nDead;
+        double factor = 1;
+        
+        if (this.getInstantaneousAbundance() != 0) {
+            factor = (this.getInstantaneousAbundance() - nDead) / this.getInstantaneousAbundance();
+        }
+
+        this.ingestion *= factor;
+        this.e_net *= factor;
+
         abundanceHasChanged = true;
     }
 
@@ -472,6 +538,13 @@ public class School extends AbstractSchool {
     }
 
     /**
+     * @param length
+     */
+    public void setLength(float length) {
+        this.length = length;
+    }
+
+    /**
      * Increments the length of the fish from given number of centimetre.
      *
      * @param dlength, the length increment in centimetre
@@ -515,6 +588,233 @@ public class School extends AbstractSchool {
             instantaneousAbundance = 0.d;
         }
         instantaneousBiomass = instantaneousAbundance * weight;
-        abundanceHasChanged = false;
+        abundanceHasChanged = false; 
     }
+
+    /**
+     * Returns the ingestion (I term, equation 1).
+     */
+    public double getIngestion() {
+        return this.ingestion;
+    }
+
+    /**
+     * The gonadic weight of the fish (not the whole school), in tonne.
+     *
+     * @return the gonadic weight on the fish, in tonne.
+     */
+    public float getGonadWeight() {
+        return gonadWeight;
+    }
+
+    public void setGonadWeight(float gonadWeight) {
+        this.gonadWeight = gonadWeight;
+    }
+
+    /**
+     * Increments the weight of the fish from given number of tons. Length is
+     * recomputed thereafter from the new weigth
+     *
+     * @param dw Weight increment (in ton)
+     */
+    public void incrementWeight(float dw) {
+        if (dw > 0.f) {
+            this.weight += dw;
+            // Update in the length calculation
+            // weight is in ton, should be converted in gram
+            this.setLength(species.computeLength(this.weight * 1e6f));
+        }
+
+    }
+
+    /**
+     * Increments the gonad weight of the fish from given number of tons. In
+     * this case, the length of the fish is not updated.
+     *
+     * @param dg Weight increment (in ton)
+     */
+    public void incrementGonadWeight(float dg) {
+        this.gonadWeight += dg;
+        if(this.gonadWeight < 0.d) { 
+            warning("Gonad weight is negative");
+        }
+    }
+
+    /**
+     * Returns true if the individual is sexually mature.
+     */
+    public boolean isMature() {
+        return this.isMature;
+    }
+
+    /**
+     * Set whether the individual is sexually mature or not.
+     */
+    public void setIsMature(boolean mature) {
+        this.isMature = mature;
+    }
+
+    /**
+     * Returns the age at maturity (only used for outputs).
+     */
+    public double getAgeMat() {
+        return this.ageMature;
+    }
+
+    /**
+     * Returns the age at maturity (only used for outputs).
+     */
+    public double getSizeMat() {
+        return this.sizeMature;
+    }
+    
+    /**
+     * Sets the age at maturity (only used for outputs).
+     */
+    public void setAgeMat(double agemature) {
+        this.ageMature = agemature;
+    }
+    
+    /**
+     * Sets the age at maturity (only used for outputs).
+     */
+    public void setSizeMat(double sizemat) {
+        this.sizeMature = sizemat;
+    }
+
+    /**
+     * Sets the value of assimilated energy (ingestion x phiT, equation 3).
+     */
+    public void setEGross(double value) {
+        this.e_gross = value;
+    }
+
+    /**
+     * Returns the value of assimilated energy (ingestion x phiT, equation 3).
+     */
+    public double getEGross() {
+        return this.e_gross;
+    }
+
+    /**
+     * Sets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public void setEMaint(double value) {
+        this.e_maint = value;
+    }
+
+    /**
+     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public double getEMaint() {
+        return this.e_maint;
+    }
+
+    /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public double getENet() {
+        return this.e_net;
+    }
+
+     /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public void setENet(double enet) {
+        this.e_net = enet;
+    }
+    
+    /**
+     * Increments the ingested energy.
+     */
+    @Override
+    public void incrementIngestion(double cumPreyUpon) {
+        this.ingestion += cumPreyUpon;
+    }
+    
+    /**
+     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public double getKappa() {
+        return this.kappa;
+    }
+
+    /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public void setKappa(double value) {
+        this.kappa = value;
+    }
+    
+    /**
+     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public double getOxyMort() {
+        return this.mort_oxy_rate;
+    }
+
+    /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @return
+     */
+    public void setOxyMort(double value) {
+        this.mort_oxy_rate = value;
+    }
+
+    /**
+     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     */
+    public double getStarvMort() {
+        return this.mort_starv_rate;
+    }
+
+    /**
+     * Returns the net energy, which is the difference between gross and
+     * maintenance energy.
+     *
+     * @param value
+     * @return
+     */
+    public void setStarvMort(double value) {
+        this.mort_starv_rate = value;
+    }
+
+    public void incrementEnet(double d) {
+        this.e_net += d;
+    }
+
+    @Override
+    public double getAlphaBioen() {
+        return this.getSpecies().getAlphaBioen();
+    }
+    
+    public Genotype getGenotype() {
+        return this.genotype;
+    }
+
+    public void instance_genotype(int rank) {
+        genotype = new Genotype(rank, this.getSpecies());
+        genotype.init();
+    }
+    
+    public double getTrait(String key) throws Exception { 
+        return this.getGenotype().getTrait(key);
+    }
+    
+    public boolean existsTrait(String key) throws Exception {
+        return this.getGenotype().existsTrait(key);
+    }
+
+    
 }

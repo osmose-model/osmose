@@ -290,5 +290,9 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
         final AbstractSchool other = (AbstractSchool) obj;
         return this.uuid.equals(other.uuid);
     }
+    
+    public UUID getID() {
+        return uuid;
+    }
 
 }
