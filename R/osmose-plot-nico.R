@@ -28,18 +28,20 @@ plot.osmose.dietMatrix = function(x, time.mean=TRUE, species=NULL,
 
 
 
-# Plots diet matrix
-#
-# @param x Diet matrix
-# @param time.mean If TRUE, the time mean diet matrix is computed is displayed.
-# @param species Species name
-# @param colors GGplot2 colors (see for instance scale_fill_manual)
-# @param thres Thresholds (in percentage). Time-average predation rates below this threashold 
-# are binned together ("other" column).
-# @param ... 
-#
-# @return None
-# @method plot osmose.output.dietMatrix
+#' Plots diet matrix
+#'
+#' @param x Diet matrix
+#' @param time.mean If TRUE, the time mean diet matrix is computed is displayed.
+#' @param species Species name
+#' @param thres Thresholds (in percentage). Time-average predation rates below this threashold 
+#' are binned together ("other" column).
+#' @param color 
+#' @param legsize 
+#' @param add_text 
+#' @param plot_name 
+#' @param ... Additional plot arguments
+#'
+#' @return None
 .plot_osmose_dietMatrix = function(x, time.mean, species, thres, color, legsize, add_text, plot_name, ...) {
   
   x = process.dietMatrix(x, species=species, time.mean=time.mean, thres=thres)
@@ -49,7 +51,7 @@ plot.osmose.dietMatrix = function(x, time.mean=TRUE, species=NULL,
     # a barplot is drawn.
     temp = as.vector(x)
     names(temp) = names(x)
-    osmose.barplot(temp, xlab="", ylab=plot_name, main=species, 
+    .osmose.barplot(temp, xlab="", ylab=plot_name, main=species, 
                    add_text=add_text, color=color, ...)
     return(invisible())
   } 
@@ -181,8 +183,7 @@ plot.osmose.mortalityRate = function(x, time.mean=TRUE, species=NULL, norm=TRUE,
 #' @param data Biomass distribution by size
 #' @param species Species name
 #' @param time.mean If true, time.mean biomass is plotted
-#' @param lwd Line width
-#' @param ... 
+#' @param ...  Additional plot arguments
 #'
 #' @export
 #' @method plot osmose.biomassDistribBySize
@@ -205,7 +206,7 @@ plot.osmose.biomassDistribBySize = function(data, species=NULL, time.mean=TRUE, 
 #' @param data Biomass distribution by age
 #' @param species Species name
 #' @param time.mean If true, time.mean biomass is plotted
-#' @param ... 
+#' @param ...  Additional plot arguments
 #'
 #' @export
 #' @method plot osmose.biomassDistribByAge
@@ -230,10 +231,7 @@ plot.osmose.biomassDistribByAge = function(data, species=NULL, time.mean=TRUE, .
 #' @param data Biomass by trophic level data
 #' @param species  Species name
 #' @param time.mean If TRUE, the time-mean biomass is plotted for each TL class
-#' @param lwd Line width
-#' @param thres  Threshold below which data are not plotted. If NULL, all data are plotted. Only if time.mean=TRUE
-#' @param colors GGplot2 colors
-#' @param ... 
+#' @param ...  Additional plot arguments
 #'
 #' @export
 #' @method plot osmose.biomassDistribByTL
@@ -259,9 +257,7 @@ plot.osmose.biomassDistribByTL = function(data, species=NULL, time.mean=TRUE, ..
 #' @param time.mean If TRUE, plots the time-average predator pressure 
 #' sorted in decreasing order 
 #' @param species Species names
-#' @param colors  GGplot2 colors
-#' @param nmax Maximum number of values to draw. If NULL, all data are plotted.
-#' @param ... 
+#' @param ...  Additional plot arguments
 #
 #' @export
 #' @method plot osmose.predatorPressure
@@ -300,7 +296,7 @@ plot.osmose.predatorPressure = function(data, species=NULL, time.mean=TRUE, ...)
 #' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
 #' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
 #' default \code{type = 1}. To see all the plot types available for this variable check the 
-#' Osmose user manual \link{COMPLETE HERE}.
+#' Osmose user manual.
 #' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
 #' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
 #' code{replicates = FALSE} show the mean value of the variable over the time.
@@ -354,7 +350,7 @@ plot.osmose.biomassPredPreyIni = function(x, species = NULL, start = NULL, end =
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
 #'
-#' @return If time.mean=FALSE, returns a ggplot2 object
+#' @return None
 #' @export
 #' @method plot osmose.mortalityRateDistribBySize
 plot.osmose.mortalityRateDistribBySize = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...) {
@@ -383,7 +379,7 @@ plot.osmose.mortalityRateDistribBySize = function(mort, species=NULL, time.mean=
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
 #'
-#' @return If time.mean=FALSE, returns a ggplot2 object
+#' @return Nothing
 #' @export
 #' @method plot osmose.mortalityRateDistribByAge
 plot.osmose.mortalityRateDistribByAge = function(mort, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...) {
@@ -457,7 +453,7 @@ norm_func = function(data) {
 #' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
 #' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
 #' default \code{type = 1}. To see all the plot types available for this variable check the 
-#' Osmose user manual \link{COMPLETE HERE}.
+#' Osmose user manual.
 #' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
 #' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
 #' code{replicates = FALSE} show the mean value of the variable over the time.
@@ -526,7 +522,7 @@ plot.osmose.meanSize = function(x, species = NULL, start = NULL, end = NULL, ini
 #' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
 #' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
 #' default \code{type = 1}. To see all the plot types available for this variable check the 
-#' Osmose user manual \link{COMPLETE HERE}.
+#' Osmose user manual.
 #' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
 #' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
 #' code{replicates = FALSE} show the mean value of the variable over the time.
@@ -714,7 +710,7 @@ plot.osmose.meanTLByAge = function(data, species=NULL, time.mean=TRUE, ...) {
 #' @param data Abundance distribution by size
 #' @param species Species name
 #' @param time.mean If true, time.mean abundance is plotted
-#' @param ... 
+#' @param ... Additional plot arguments
 #'
 #' @export
 #' @method plot osmose.abundanceDistribBySize
@@ -738,7 +734,7 @@ plot.osmose.abundanceDistribBySize = function(data, species=NULL, time.mean=TRUE
 #' @param data Abundance distribution by age
 #' @param species Species name
 #' @param time.mean If true, time.mean abundance is plotted
-#' @param ... 
+#' @param ...  Additional plot arguments
 #'
 #' @export
 #' @method plot osmose.abundanceDistribByAge
@@ -761,7 +757,7 @@ plot.osmose.abundanceDistribByAge= function(data, species=NULL, time.mean=TRUE, 
 #' @param data Abundance distribution by age
 #' @param species Species name
 #' @param time.mean If true, time.mean abundance is plotted
-#' @param ... 
+#' @param ...  Additional plot arguments
 #'
 #' @export
 #' @method plot osmose.abundanceDistribByTL
@@ -785,7 +781,7 @@ plot.osmose.abundanceDistribByTL= function(data, species=NULL, time.mean=TRUE, .
 #' @param data Abundance distribution by age
 #' @param species Species name
 #' @param time.mean If true, time.mean abundance is plotted
-#' @param ... 
+#' @param ...  Additional plot arguments
 #'
 #' @export
 #' @method plot osmose.abundanceDistribByTL

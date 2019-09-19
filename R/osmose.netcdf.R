@@ -35,8 +35,6 @@ find_species_index = function(spec, param)
 #'
 #' @return The grid format as a data frame.
 #' @export
-#'
-#' @usage extract_grid_param("ltlbiomass.nc")
 extract_grid_param = function(filename, lonname="longitude", latname="latitude", csv=NULL)
 {
   
@@ -330,6 +328,9 @@ make_movement_netcdf = function(filename) {
 #' @param ltl_filename Name of the NetCDF LTL file
 #' @param osmose_config Name of the main configuration file
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
+#' @param varlon Name of the longitude variable
+#' @param varlat Name of the latitude variable
+#' @param vartime Name of the time variable
 #'
 #' @export
 correct_ltl_file = function(ltl_filename, osmose_config, varlon="longitude", varlat="latitude", vartime='time', absolute=TRUE)

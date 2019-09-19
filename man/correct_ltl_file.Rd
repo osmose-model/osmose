@@ -14,6 +14,12 @@ correct_ltl_file(ltl_filename, osmose_config, varlon = "longitude",
 
 \item{osmose_config}{Name of the main configuration file}
 
+\item{varlon}{Name of the longitude variable}
+
+\item{varlat}{Name of the latitude variable}
+
+\item{vartime}{Name of the time variable}
+
 \item{absolute}{Whether the path is absolute (TRUE) or relative (FALSE)}
 }
 \description{

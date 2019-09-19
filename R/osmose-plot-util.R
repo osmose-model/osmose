@@ -1,6 +1,9 @@
 #' Reformat the data into the ggplot2 stacked plot format.
 #' It returns a dataframe with specie, time and predation rate
 #' in the columns.
+#'
+#' @param data Data to plot
+#' @param time Time vector
 .osmose.format_data_stacked = function(data, time=NULL)
 {
   
@@ -27,10 +30,10 @@
 #' Plots a barplot, with xlabels rotated with a 45degree angle
 #'
 #' @param x Data array
+#' @param add_text True if text should be added.
+#' @param color Color of the barplot
 #' @param ... Additional arguments to the barplot function (color, etc.)
-#'
-#' @export
-osmose.barplot = function(x, add_text=TRUE, color=NULL, ...) {
+.osmose.barplot = function(x, add_text=TRUE, color=NULL, ...) {
   
   # format the data so that at the end we have
   # a table of dim [N. 1]
@@ -153,7 +156,7 @@ plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=TRUE, leg
   y = apply(y, 2, mean)
   temp = as.vector(y)
   names(temp) = names(y)
-  osmose.barplot(temp, xlab=legtitle, ylab=ylab, main=species, add_text=FALSE, ...)
+  .osmose.barplot(temp, xlab=legtitle, ylab=ylab, main=species, add_text=FALSE, ...)
   return(invisible())
 }
 
