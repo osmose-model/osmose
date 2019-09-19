@@ -29,7 +29,6 @@ public class EnergyBudget extends AbstractProcess {
     private double[] r;
     private double[] Imax;
 
-    
     public EnergyBudget(int rank) throws IOException {
 
         super(rank);
@@ -47,13 +46,13 @@ public class EnergyBudget extends AbstractProcess {
         int nBack = this.getNBkgSpecies();
         int nspec = this.getNSpecies();
 
-                // Recovers the alpha coefficient for focal + background species
+        // Recovers the alpha coefficient for focal + background species
         r = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             key = String.format("bioen.maturity.r.sp%d", i);
             r[i] = this.getConfiguration().getDouble(key);
         }
-        
+
         // Recovers the alpha coefficient for focal + background species
         m0 = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
@@ -74,7 +73,7 @@ public class EnergyBudget extends AbstractProcess {
             key = String.format("bioen.maint.energy.csmr.sp%d", i);
             csmr[i] = this.getConfiguration().getDouble(key);
         }
-        
+
         // Recovers the alpha coefficient for focal + background species
         Imax = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
@@ -88,23 +87,26 @@ public class EnergyBudget extends AbstractProcess {
      */
     @Override
     public void run() {
-        
+
         //System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         // Loop over all the alive schools
         for (School school : getSchoolSet().getAliveSchools()) {
             this.get_egross(school);   // computes E_gross, stored in the attribute.
             this.get_maintenance(school);   // computes E_maintanance
+
             try {
                 this.get_maturation(school);   // computes maturation properties for the species.
             } catch (Exception ex) {
                 Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
             }
+
             school.setENet(school.getEGross() - school.getEMaint());
             try {
                 this.get_kappa(school);   // computes the kappa function
             } catch (Exception ex) {
                 Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
             }
+
             this.get_dw(school);   // computes E_growth (somatic growth)
             this.get_dg(school);   // computes the increase in gonadic weight
         }
@@ -119,12 +121,12 @@ public class EnergyBudget extends AbstractProcess {
     public void get_maintenance(School school) {
 
         int ispec = school.getSpeciesIndex();
-        
+
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
         double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
-        
+
         // multiply the maintenance flow by the number of fish in the school
         // barrier.n: converted back into ton
         output *= school.getInstantaneousAbundance() * 1e-6f;
@@ -157,10 +159,10 @@ public class EnergyBudget extends AbstractProcess {
         }
 
         int ispec = school.getSpeciesIndex();
-        
+
         String key = "m0";
         double m0_temp = school.existsTrait(key) ? school.getTrait(key) : m0[ispec];
-        
+
         key = "m1";
         double m1_temp = school.existsTrait(key) ? school.getTrait(key) : m1[ispec];
 
@@ -201,15 +203,14 @@ public class EnergyBudget extends AbstractProcess {
     }
 
     /**
-     * Returns the gonadic weight increment (Equation 12).
-     * In this function, only positive increments of gonad weights 
-     * (Enet > 0) are considered. Gonad removal if (Enet < 0)
-     * is implemented on starvation mortality.
+     * Returns the gonadic weight increment (Equation 12). In this function,
+     * only positive increments of gonad weights (Enet > 0) are considered.
+     * Gonad removal if (Enet < 0) is implemented on starvation mortality.
      *
      * @param school
      */
     public void get_dg(School school) {
-        
+
         double output = 0;
         double enet = school.getENet();
         double kappa = school.getKappa();
@@ -225,28 +226,25 @@ public class EnergyBudget extends AbstractProcess {
      * (equation 10').
      *
      * @param school
-     * @return
      */
-    
     public void get_kappa(School school) throws Exception {
         int ispec = school.getSpeciesIndex();
-    
+
         String key = "r";
         double r_temp = school.existsTrait(key) ? school.getTrait(key) : r[ispec];
-        
+
         key = "imax";
         double imax_temp = school.existsTrait(key) ? school.getTrait(key) : Imax[ispec];
-        
-        
+
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
         double kappa = (!school.isMature()) ? 1 : 1 - (r_temp / (imax_temp - csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - school.getAlphaBioen()); //Function in two parts according to maturity state
         kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
         kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
-    
+
         school.setKappa(kappa);
     }
-    
+
 //    public void get_kappa(School school) {
 //        // int ispec = school.getSpeciesIndex();
 //        // If the organism is imature, all the net energy goes to the somatic growth.
@@ -256,5 +254,4 @@ public class EnergyBudget extends AbstractProcess {
 //        
 //        school.setKappa(kappa);
 //    }
-
 }
