@@ -115,29 +115,93 @@ public class OutputManager extends SimulationLinker {
 
         useNetcdf = getConfiguration().getBoolean("output.use.netcdf");
 
-        /*
-        outputs.add(new AbundanceOutput_Netcdf(rank));
-        outputs.add(new BiomassOutput_Netcdf(rank));
-        outputs.add(new YieldOutput_Netcdf(rank));
-        outputs.add(new YieldNOutput_Netcdf(rank));
-        
-        outputs.add(new BiomassDistribOutput_Netcdf(rank, sizeDistrib));
-        outputs.add(new BiomassDistribOutput_Netcdf(rank, ageDistrib));
-        outputs.add(new AbundanceDistribOutput_Netcdf(rank, sizeDistrib));
-        outputs.add(new AbundanceDistribOutput_Netcdf(rank, ageDistrib));
-        outputs.add(new BiomassDietStageOutput_Netcdf(rank));
-        outputs.add(new DietOutput_Netcdf(rank));
-        
-        for (int i = 0; i < getNSpecies(); i++) {
-            //outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
-            //outputs.add(new MortalityOutput_Netcdf(rank, getSpecies(i)));
-            outputs.add(new MortalitySpeciesOutput_Netcdf(rank, getSpecies(i), ageDistrib));
-            break;
+        if (getConfiguration().getBoolean("output.abundance.netcdf.enabled")) {
+            outputs.add(new AbundanceOutput_Netcdf(rank));
         }
 
-        outputs.add(new PredatorPressureOutput_Netcdf(rank));
-         */
- /*
+        if (getConfiguration().getBoolean("output.biomass.netcdf.enabled")) {
+            outputs.add(new BiomassOutput_Netcdf(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.yield.biomass.netcdf.enabled")) {
+            outputs.add(new YieldOutput_Netcdf(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.yieldN.netcdf.enabled")) {
+            outputs.add(new YieldNOutput_Netcdf(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.biomass.bysize.netcdf.enabled")) {
+            outputs.add(new BiomassDistribOutput_Netcdf(rank, sizeDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.biomass.bytl.netcdf.enabled")) {
+            outputs.add(new BiomassDistribOutput_Netcdf(rank, tl_distrib));
+        }
+
+        if (getConfiguration().getBoolean("output.biomass.byage.netcdf.enabled")) {
+            outputs.add(new BiomassDistribOutput_Netcdf(rank, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.abundance.bysize.netcdf.enabled")) {
+            outputs.add(new AbundanceDistribOutput_Netcdf(rank, sizeDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.abundance.byage.netcdf.enabled")) {
+            outputs.add(new AbundanceDistribOutput_Netcdf(rank, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.diet.pressure.netcdf.enabled")) {
+            outputs.add(new BiomassDietStageOutput_Netcdf(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.diet.composition.netcdf.enabled")) {
+            outputs.add(new DietOutput_Netcdf(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.mortality.perSpecies.byage.netcdf.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new MortalitySpeciesOutput_Netcdf(rank, getSpecies(i), ageDistrib));
+            }
+        }
+        
+        if (getConfiguration().getBoolean("output.diet.composition.byage.netcdf.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
+            }
+        }
+        
+        if (getConfiguration().getBoolean("output.diet.composition.bysize.netcdf.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), sizeDistrib));
+            }
+        }
+
+        if (getConfiguration().getBoolean("output.yield.bySize.netcdf.enabled")) {
+            outputs.add(new YieldDistribOutput_Netcdf(rank, sizeDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.yield.byage.netcdf.enabled")) {
+            outputs.add(new YieldDistribOutput_Netcdf(rank, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.yieldN.bySize.netcdf.enabled")) {
+            outputs.add(new YieldNDistribOutput_Netcdf(rank, sizeDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.yieldN.byage.netcdf.enabled")) {
+            outputs.add(new YieldNDistribOutput_Netcdf(rank, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.meanSize.byAge.netcdf.enabled")) {
+            outputs.add(new MeanSizeDistribOutput_Netcdf(rank, ageDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.diet.pressure.netcdf.enabled")) {
+            outputs.add(new PredatorPressureOutput_Netcdf(rank));
+        }
+
+        /*
          * Instantiate indicators
          */
         if (getConfiguration().getBoolean("output.spatialabundance.enabled")) {
@@ -197,7 +261,7 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.abundance.bytl.enabled")) {
             outputs.add(new AbundanceDistribOutput(rank, tl_distrib));
-        }    
+        }
         // Mortality
         if (getConfiguration().getBoolean("output.mortality.enabled")) {
             outputs.add(new MortalityOutput(rank));
@@ -230,13 +294,18 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new YieldOutput(rank));
         }
-        if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
+        if (getConfiguration().getBoolean("output.yieldN.enabled")) {
             outputs.add(new YieldNOutput(rank));
         }
         // Size
         if (getConfiguration().getBoolean("output.size.enabled")) {
             outputs.add(new MeanSizeOutput(rank));
         }
+        // Size
+        if (getConfiguration().getBoolean("output.weight.enabled")) {
+            outputs.add(new MeanWeightOutput(rank));
+        }
+
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
             outputs.add(new MeanSizeCatchOutput(rank));
         }
@@ -338,28 +407,35 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
         }
 
-        if (getConfiguration().getBoolean("output.bioen.maturesize.enabled", NO_WARNING)) {
-            outputs.add(new BioenSizeMatureOutput(rank));
-        }
+        if (getConfiguration().useBioen()) {
 
-        if (getConfiguration().getBoolean("output.bioen.matureage.enabled", NO_WARNING)) {
-            outputs.add(new BioenAgeMatureOutput(rank));
-        }
+            if (getConfiguration().getBoolean("output.bioen.maturesize.enabled", NO_WARNING)) {
+                outputs.add(new BioenSizeMatureOutput(rank));
+            }
 
-        if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
-            outputs.add(new BioenIngestOutput(rank));
-        }
+            if (getConfiguration().getBoolean("output.bioen.matureage.enabled", NO_WARNING)) {
+                outputs.add(new BioenAgeMatureOutput(rank));
+            }
 
-        if (getConfiguration().getBoolean("output.bioen.maint.enabled", NO_WARNING)) {
-            outputs.add(new BioenMaintOutput(rank));
-        }
+            if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
+                outputs.add(new BioenIngestOutput(rank));
+            }
 
-        if (getConfiguration().getBoolean("output.bioen.growthpot.enabled", NO_WARNING)) {
-            outputs.add(new BioenGrowthPot(rank));
-        }
+            if (getConfiguration().getBoolean("output.bioen.maint.enabled", NO_WARNING)) {
+                outputs.add(new BioenMaintOutput(rank));
+            }
 
-        if (getConfiguration().getBoolean("output.bioen.sizeInf.enabled", NO_WARNING)) {
-            outputs.add(new BioenSizeInfOutput(rank));
+            if (getConfiguration().getBoolean("output.bioen.growthpot.enabled", NO_WARNING)) {
+                outputs.add(new BioenGrowthPot(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.bioen.sizeInf.enabled", NO_WARNING)) {
+                outputs.add(new BioenSizeInfOutput(rank));
+            }
+
+            if (getConfiguration().getBoolean("output.bioen.kappa.enabled", NO_WARNING)) {
+                outputs.add(new BioenKappaOutput(rank));
+            }
         }
 
         if (getConfiguration().getBoolean("output.regional.biomass.enabled")) {
