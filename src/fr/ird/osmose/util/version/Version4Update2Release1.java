@@ -28,6 +28,7 @@ public class Version4Update2Release1 extends AbstractVersion {
     void updateParameters() {
         
         updateKey("output.yield.abundance.enabled", "output.yieldN.enabled");
+        updateKey("output.yield.biomass.enabled", "output.yield.enabled");
 
     }
 }
