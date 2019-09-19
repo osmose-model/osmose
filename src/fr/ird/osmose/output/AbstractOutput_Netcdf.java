@@ -173,7 +173,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     }
 
     boolean include(School school) {
-        return !cutoffEnabled || school.getAge() >= cutoffAge[school.getSpeciesIndex()];
+        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getSpeciesIndex()]));
     }
 
     @Override
