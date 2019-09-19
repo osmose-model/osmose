@@ -41,4 +41,4 @@ osmose.configuration.initialization;osm_param-init-pop.csv
 # Osmose 3 Update 2 Release 0 (2015/03/01) Updated parameter osmose.version to Osmose 3 Update 2 Release 0 (2015/03/01)
 # Osmose 3 Update 3 Release 0 (2018/01/15) Updated parameter osmose.version to Osmose 3 Update 3 Release 0 (2018/01/15)
 # Osmose 3 Update 3 Release 3 (2018/11/28) Updated parameter osmose.version to Osmose 3 Update 3 Release 3 (2018/11/28)
-osmose.version; Osmose 4 Update 1 Release 0
+osmose.version; Osmose 4 Update 2 Release 1
