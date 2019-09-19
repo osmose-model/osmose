@@ -37,8 +37,8 @@ Imports:
   utils,
   knitr,
   rmarkdown,
-  ggplot2, 
-  ncdf4
+  ncdf4,
+  mgcv
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues

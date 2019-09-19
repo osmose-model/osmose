@@ -21,7 +21,7 @@
 #' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
 #' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
 #' default \code{type = 1}. To see all the plot types available for this variable check the 
-#' Osmose user manual \link{COMPLETE HERE}.
+#' Osmose user manual.
 #' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
 #' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
 #' code{replicates = FALSE} show the mean value of the variable over the time.
@@ -82,7 +82,7 @@ plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, init
 #' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
 #' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
 #' default \code{type = 1}. To see all the plot types available for this variable check the 
-#' Osmose user manual \link{COMPLETE HERE}.
+#' Osmose user manual.
 #' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
 #' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
 #' code{replicates = FALSE} show the mean value of the variable over the time.
@@ -143,7 +143,7 @@ plot.osmose.abundance = function(x, species = NULL, start = NULL, end = NULL, in
 #' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
 #' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
 #' default \code{type = 1}. To see all the plot types available for this variable check the 
-#' Osmose user manual \link{COMPLETE HERE}.
+#' Osmose user manual.
 #' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
 #' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
 #' code{replicates = FALSE} show the mean value of the variable over the time.
@@ -204,7 +204,7 @@ plot.osmose.yield = function(x, species = NULL, start = NULL, end = NULL, initia
 #' where the x-axis is the time. For plots where the x-axis is not the time \code{ts = FALSE}.
 #' @param type A \code{numeric} value. This parameter specifies the type of the plot to be performed. By 
 #' default \code{type = 1}. To see all the plot types available for this variable check the 
-#' Osmose user manual \link{COMPLETE HERE}.
+#' Osmose user manual.
 #' @param replicates \code{logical} parameter. Parameter used for plots types: \code{type = 1} and \code{type = 2}.
 #' When \code{replicates = TRUE} the plot show the values obtained in each replicates of object (\code{x}). 
 #' code{replicates = FALSE} show the mean value of the variable over the time.

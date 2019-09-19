@@ -43,7 +43,7 @@ but it is required for configuration using interannual inputs or fishing selecti
 \examples{
 {
   \donttest{
-    filename = system.file("extdata", "inputs/osm_all-parameters.csv", package="osmose")
+    filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
     runOsmose(filename)
   }
 }
