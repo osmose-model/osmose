@@ -109,7 +109,7 @@ public class BioenSizeInfOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
+        return "Maximum size observed on the timespan (centimeter)";
     }
 
     @Override

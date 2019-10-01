@@ -112,7 +112,7 @@ public class BioenIngestOutput extends AbstractOutput {
 
     @Override
     public String getDescription() {
-        return "Ingestion rate (in g)";
+        return "Ingestion rate (grams.grams^-alpha)";
     }
 
     @Override
