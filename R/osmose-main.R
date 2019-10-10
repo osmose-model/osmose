@@ -39,7 +39,10 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   # update to provide by release executables
   if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_%s.jar", version),
                                            package="osmose", mustWork = TRUE)
-  
+  # barrier.n: 10/10/2019
+  # adding a small patch to allow for space char in jar name
+  osmose = paste0('"', osmose, '"')
+    
   if(isTRUE(clean) & (!is.null(output))) 
     file.remove(file.path(output, dir(path=output, recursive=TRUE)))
   
