@@ -251,6 +251,11 @@ public class Configuration extends OLogger {
      * True if the bioenergetic module should be activated.
      */
     private boolean use_bioen = false;
+    
+    /**
+     * True if the genetic module should be activated.
+     */
+    private boolean use_genetic = false;
 
 ///////////////
 // Constructors
@@ -327,11 +332,13 @@ public class Configuration extends OLogger {
 
         // barrier.n: reads the parameter that defines whether
         // the bioen module should be used.
-        String keybioen = "simulation.use.bioen";
-        if (canFind(keybioen)) {
-            this.use_bioen = this.getBoolean(keybioen);
-        }
-
+        // String keybioen = "simulation.use.bioen";
+        String keybioen = "simulation.bioen.enabled";
+        this.use_bioen = this.getBoolean(keybioen);
+       
+        String key = "simulation.genetic.enabled";
+        use_genetic = this.getBoolean(key);
+               
         // Output path
         outputPathname = getFile("output.dir.path");
         // barrier.n: outputPathname has been set unresolved,
@@ -412,7 +419,7 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: add number of background species
-        String key = "simulation.nbackground";
+        key = "simulation.nbackground";
         nBackground = 0;
         if (canFind(key)) {
             nBackground = getInt(key);
@@ -425,8 +432,14 @@ public class Configuration extends OLogger {
         }
     }
 
+    /** Returns true if bioen module should be used. */
     public boolean useBioen() {
         return this.use_bioen;
+    }
+    
+    /** Returns true of genetic module is used or not. **/
+    public boolean useGenetic() {
+        return this.use_genetic;
     }
 
     /**

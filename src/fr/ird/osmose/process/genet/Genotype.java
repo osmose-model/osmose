@@ -182,6 +182,9 @@ public class Genotype extends SimulationLinker {
             //this.x *= u;
             x += trait.getMean(i);
             traits[i] = x;
+            
+            // adding noise to 
+            traits[i] += trait.addTraitNoise(spec_index);
         }
     }
     
