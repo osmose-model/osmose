@@ -12,25 +12,18 @@ import fr.ird.osmose.process.AbstractProcess;
  *
  * @author nbarrier
  */
-public class BioenMortality extends AbstractProcess {
+public class BioenStarvationMortality extends AbstractProcess {
 
-    private double k_dam;
+    
 
-    public BioenMortality(int rank) {
+    public BioenStarvationMortality(int rank) {
         super(rank);
     }
 
     @Override
     public void init() {
-
-        String key = "bioen.damage.k_dam";
-        k_dam = getConfiguration().getDouble(key);
-
-    }
-
-    public double compute_oxydative_mort(School school) {
-        // calculation of PhiT
-        return this.k_dam * school.getEGross();
+        // nothing to do
+        // Bioen starvation mortality does not directly rely on user-defined parameters
     }
 
    public double computeStarvation(School school, int subdt) {

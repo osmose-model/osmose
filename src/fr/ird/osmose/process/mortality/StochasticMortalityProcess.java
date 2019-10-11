@@ -12,7 +12,7 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.Swarm;
 import fr.ird.osmose.background.BackgroundSchool;
 import fr.ird.osmose.background.BackgroundSpecies;
-import fr.ird.osmose.process.bioen.BioenMortality;
+import fr.ird.osmose.process.bioen.BioenStarvationMortality;
 import fr.ird.osmose.process.bioen.BioenPredationMortality;
 import fr.ird.osmose.util.XSRandom;
 import java.io.IOException;
@@ -63,8 +63,11 @@ public class StochasticMortalityProcess extends AbstractProcess {
     /* barrier.n: fisheries mortality */
     private FisheriesMortality fisheriesMortality;
 
-    /* barrier.n: adding mortality through the bioenergetic model */
-    private BioenMortality bioenMortality;
+    /* barrier.n: bioenergetic starvation mortality */
+    private BioenStarvationMortality starvationMortality;
+
+    /* PhV, bioenergetic oxidative mortality */
+    private OxidativeMortality oxidativeMortality;
 
     /**
      * The set of plankton swarms
@@ -140,8 +143,12 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
         // barrier.n: init the bioenergetic module
         if (this.getConfiguration().useBioen()) {
-            bioenMortality = new BioenMortality(getRank());
-            bioenMortality.init();
+            // starvation mortality
+            starvationMortality = new BioenStarvationMortality(getRank());
+            starvationMortality.init();
+            // oxidative mortality
+            oxidativeMortality = new OxidativeMortality(getRank());
+            oxidativeMortality.init();
         }
 
     }
@@ -292,9 +299,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         shuffleArray(seqFish);
         shuffleArray(seqNat);
         shuffleArray(seqStarv);
-        if (this.getConfiguration().useBioen()) {
-            shuffleArray(seqOxy);
-        }
+        shuffleArray(seqOxy);
 
         boolean keepRecord = getSimulation().isPreyRecord();
         for (int i = 0; i < ns + nBkg; i++) {               // loop over all the school (focal and bkg) as predators.
@@ -305,17 +310,19 @@ public class StochasticMortalityProcess extends AbstractProcess {
                 switch (cause) {
 
                     // barrier.n: adding the 
-                    case OXY:
-
-                        if ((seqOxy[i] >= ns) || (!this.getConfiguration().useBioen())) {
-                            // if background school or no bioen module is used, nothing is done 
+                    case OXIDATIVE:
+                        if ((seqOxy[i] >= ns) || (!getConfiguration().useBioen())) {
+                            // oxidative mortality for bion module and focal species only
                             break;
                         }
-
                         school = schools.get(seqOxy[i]);
-                        this.bioenMortality.compute_oxydative_mort(school);  // note: should be corrected by a division by subdt
+                        // oxidative mortality rate at current sub time step                      
+                        double Mo = oxidativeMortality.getRate(school) / subdt;
+                        if (Mo > 0.d) {
+                            nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-Mo));
+                            school.incrementNdead(MortalityCause.OXIDATIVE, nDead);
+                        }
                         break;
-
                     case PREDATION:
                         // Predation mortality
                         IAggregation predator = listPred.get(seqPred[i]);   // recover one predator (background or focal species)
@@ -349,7 +356,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
                             // computation of the starvation mortality
                             // which is updated directly from the BioenMortality class.
                             // computes starv.mortality only for species greater than 0 years old
-                            nDead = bioenMortality.computeStarvation(school, subdt);
+                            nDead = starvationMortality.computeStarvation(school, subdt);
                         }
                         if (nDead > 0.d) {
                             school.incrementNdead(MortalityCause.STARVATION, nDead);
