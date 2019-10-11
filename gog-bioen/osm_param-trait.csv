@@ -1,5 +1,3 @@
-simulation.genetics.enabled,true
-
 output.evolvingtraits.enabled,true,,,,,,,,,,
 
 m0.trait.mean,0,0,0,0,0,0,0,0,0,0,0

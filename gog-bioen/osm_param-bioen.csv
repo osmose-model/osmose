@@ -1,9 +1,16 @@
-simulation.use.bioen;true
-stochastic.mortality.seed;10
-movement.randomseed.fixed;true
+# Osmose 4 Update 2 Release 2 (2019/10/11) Renamed parameter simulation.use.bioen into simulation.bioen.enabled
+simulation.bioen.enabled;true
+simulation.genetic.enabled;true
+
+#stochastic.mortality.seed;10
+movement.randomseed.fixed;false
 ;
-output.bioen.maturesize.enabled;true
-output.bioen.matureage.enabled;true
+
+output.bioen.maturesize.enabled;true;
+output.bioen.matureage.enabled;true;
+output.bioen.growthpot.enabled;true;
+output.bioen.maint.enabled;true;
+output.bioen.ingest.enabled;true;
 output.bioen.sizeInf.enabled;true
 output.bioen.maint.enabled;true
 output.bioen.ingest.enabled;true
@@ -134,7 +141,7 @@ bioen.maturity.r.sp9;0.3
 bioen.maturity.r.sp10;0.3
 ;
 ;
-### Maturité à Lm sans variabilité de Lm;
+### Maturitï¿½ ï¿½ Lm sans variabilitï¿½ de Lm;
 # Slope (cm.L^-1);
 bioen.maturity.m0.sp0;0
 bioen.maturity.m0.sp1;0

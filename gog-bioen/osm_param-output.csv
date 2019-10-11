@@ -1,5 +1,8 @@
 output.regional.biomass.enabled;true
 output.regional.abundance.enabled;true
+output.biomass.bytl.enabled;true
+
+output.diet.composition.bysize.enabled;true
 
 output.region.file0 = output_region0.csv
 output.region.name0 = Region0
@@ -22,13 +25,14 @@ output.restart.enabled;false
 
 # Biomass;
 output.biomass.enabled;true
-output.biomass.bysize.enabled;true
+output.biomass.bysize.enabled;false
 output.biomass.byage.enabled;true
 
 # Abundance;
 output.abundance.enabled;true
 output.abundance.bysize.enabled;false
 output.abundance.byage.enabled;false
+output.abundance.bytl.enabled;true
 
 # Mortality;
 output.mortality.enabled;true
@@ -37,7 +41,8 @@ output.mortality.perSpecies.bySize.enabled;false
 
 # Yield;
 output.yield.biomass.enabled;true
-output.yield.abundance.enabled;true
+# Osmose 4 Update 2 Release 1 (2019/09/19) Renamed parameter output.yield.abundance.enabled into output.yieldN.enabled
+output.yieldN.enabled;true
 
 output.yieldN.bySize.enabled;false
 output.yield.bySize.enabled;true
@@ -47,7 +52,7 @@ output.yield.byAge.enabled;false
 # Size;
 output.size.enabled;true
 output.size.catch.enabled;true
-output.meanSize.byAge.enabled;false
+output.meanSize.byAge.enabled;true
 
 # TL;
 output.TL.enabled;true
@@ -61,8 +66,8 @@ output.diet.composition.enabled;true
 output.diet.composition.byAge.enabled;false
 output.diet.composition.bySize.enabled;false
 output.diet.pressure.enabled;true
-output.diet.pressure.byAge.enabled;false
-output.diet.pressure.bySize.enabled;false
+output.diet.pressure.byAge.enabled;true
+output.diet.pressure.bySize.enabled;true
 
 # Spatial;
 output.spatial.enabled;false

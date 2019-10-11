@@ -31,7 +31,7 @@ osmose.configuration.species;osm_param-species.csv
 osmose.configuration.plankton;osm_param-ltl.csv
 osmose.configuration.grid;osm_param-grid.csv
 osmose.configuration.initialization;osm_param-init-pop.csv
-osmose.version; Osmose 4 Update 2 Release 0 (2019/03/22)
+osmose.version; Osmose 4 Update 2 Release 2 (2019/10/11)
 
 osmose.configuration.bioen;osm_param-bioen.csv
 
