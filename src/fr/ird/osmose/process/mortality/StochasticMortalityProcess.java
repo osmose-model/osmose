@@ -340,19 +340,19 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         }
 
                         school = schools.get(seqStarv[i]);
-
+                        nDead = 0.d;
                         if (!this.getConfiguration().useBioen()) {
                             // Starvation mortality when no use of bioen module.                           
                             double M = school.getStarvationRate() / subdt;
                             nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
-                            school.incrementNdead(MortalityCause.STARVATION, nDead);
-                        } else {
+                        } else if (school.getAgeDt() > 0) {
                             // computation of the starvation mortality
                             // which is updated directly from the BioenMortality class.
-                            if (school.getAgeDt() > 0) {
-                                // computes starv.mortality only for species greater than 0 years old
-                                this.bioenMortality.compute_starv_mort(school, subdt);
-                            }
+                            // computes starv.mortality only for species greater than 0 years old
+                            nDead = bioenMortality.computeStarvation(school, subdt);
+                        }
+                        if (nDead > 0.d) {
+                            school.incrementNdead(MortalityCause.STARVATION, nDead);
                         }
 
                         break;
