@@ -59,6 +59,9 @@
 # is less than version2, 0 ib both versions are equal.
 .compareVersion = function(version1, version2) {
   
+  if(is.character(version1)) version1 = .getVersion(version1)
+  if(is.character(version2)) version2 = .getVersion(version2)
+  
   if(version1[1] != version2[1]) {
     # If different versions
     return(sign(version1[1] - version2[1]))
