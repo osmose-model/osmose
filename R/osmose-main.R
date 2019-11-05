@@ -132,6 +132,43 @@ read_osmose =  function(path=NULL, input=NULL, version="4.2.1", species.names=NU
 
 
 
+#' Update OSMOSE configuration
+#'
+#' @param input 
+#' @param log 
+#' @param version 
+#' @param osmose 
+#' @param java 
+#' @param verbose 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+update_osmose = function(input, log = "osmose.log",
+                         version = "4.2.1", osmose = NULL, java = "java",
+                         verbose = TRUE) {
+  
+  if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
+  
+  # update to provide by release executables
+  if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_%s.jar", version),
+                                           package="osmose", mustWork = TRUE)
+  
+  args = paste("-jar", osmose, "-update", input)
+  
+  stdout = ifelse(interactive() & verbose, "", log)
+  stderr = ifelse(interactive() & verbose, "", log)
+  
+  command = paste(c(shQuote(java), args), collapse = " ")
+  
+  if(isTRUE(verbose)) message(sprintf("Running: %s", command))
+  
+  system2(java, args=args, stdout=stdout, stderr=stderr, wait=TRUE)
+  
+  return(invisible(command))
+  
+}
 
 ## buildConfiguration ------------------------------------------------------
 ## @title Build an OSMOSE configuration
