@@ -28,15 +28,11 @@ list_osmose_versions = function() {
 #' @param file Output file
 #' 
 #' @export
-write_osmose = function(x, file)   {
-  write.table(x=x, file=file, sep=";", col.names=NA, quote=FALSE)
+write_osmose = function(x, file, row.names=TRUE)   {
+  write.table(x=x, file=file, sep=",", col.names=NA, quote=FALSE,
+              row.names=row.names)
 }
 
-#' @export
-write.osmose = function(x, file)   {
-  .Deprecated("write_osmose")
-  write.table(x=x, file=file, sep=";", col.names=NA, quote=FALSE)
-}
 
 #' Read Osmose output file
 #'
