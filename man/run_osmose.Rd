@@ -5,7 +5,7 @@
 \title{Run an OSMOSE configuration}
 \usage{
 run_osmose(input, parameters = NULL, output = NULL,
-  log = "osmose.log", version = "4.1.0", osmose = NULL,
+  log = "osmose.log", version = "4.2.1", osmose = NULL,
   java = "java", options = NULL, verbose = TRUE, clean = TRUE)
 }
 \arguments{
@@ -44,7 +44,7 @@ but it is required for configuration using interannual inputs or fishing selecti
 {
   \donttest{
     filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
-    runOsmose(filename)
+    run_osmose(filename)
   }
 }
 }
