@@ -1,7 +1,7 @@
 
 # osmose: main functions --------------------------------------------------
 
-# runOsmose ---------------------------------------------------------------
+# run_osmose --------------------------------------------------------------
 #' @title Run an OSMOSE configuration
 #' @description This function create a valid configuration by several input files
 #' from user input parameters. 
@@ -26,7 +26,7 @@
 #' @examples{
 #'   \donttest{
 #'     filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
-#'     runOsmose(filename)
+#'     run_osmose(filename)
 #'   }
 #' }
 #' @export
@@ -78,19 +78,6 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   
 }
 
-#' Title
-#' @export
-runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version="4.1.0", osmose=NULL, java="java", 
-                     options=NULL, verbose=TRUE, clean=TRUE) {
-  
-  message("runOsmose will be deprecated, use run_osmose instead.")
-  
-  run_osmose(input = input, parameters = parameters, output = output,
-             log = log, version = version, osmose = osmose, java = java, 
-             options = options, verbose = verbose, clean = clean) 
-}
-
 
 # read_osmose -------------------------------------------------------------
 #' @title Read OSMOSE outputs into an R object
@@ -140,14 +127,7 @@ read_osmose =  function(path=NULL, input=NULL, version=NULL, species.names=NULL,
   
 }
 
-# to keep back compatibility for a while
-#' @export
-osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
-  
-  .Deprecated("read_osmose")
-  read_osmose(path=path, version=version, species.names=species.names, ...)
-  
-}
+
 
 
 ## buildConfiguration ------------------------------------------------------
@@ -277,6 +257,7 @@ osmose_demo = function(path=NULL, config=c("gog", "gog_v4", "default")) {
 
 
 
+# Demo --------------------------------------------------------------------
 
 
 #' Generates Osmose configuration files to run an Osmose demo.
@@ -336,33 +317,5 @@ osmose_calib_demo = function(path=NULL) {
   return(demo)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
