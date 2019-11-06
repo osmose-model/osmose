@@ -50,12 +50,11 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
-import fr.ird.osmose.process.mortality.IterativeMortalityProcess;
+import fr.ird.osmose.process.mortality.AbstractMortality;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.process.mortality.OutMortality;
 import fr.ird.osmose.process.mortality.StarvationMortality;
 import fr.ird.osmose.process.mortality.StochasticMortalityProcess;
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -72,40 +71,11 @@ public class MortalityProcess extends AbstractProcess {
     /*
      * Mortality process for particles outside the simulated domain
      */
-    private OutMortality outsideMortalityProcess;
+    private AbstractMortality outsideMortalityProcess;
     /*
      * Private instance of the starvation process
      */
-    private StarvationMortality starvationMortality;
-
-    /**
-     * Types of mortality algorithm
-     */
-    private enum MortalityAlgorithm {
-
-        /**
-         * Mortality rates are obtained through an iterative process.
-         * <ul>
-         * <li>It is assumed that every cause is independant and
-         * concomitant.</li>
-         * <li>No stochasticity neither competition within predation process:
-         * every predator sees preys as they are at the begining of the
-         * time-step.</li>
-         * <li>Synchromous updating of school biomass.</li>
-         * </ul>
-         */
-        ITERATIVE,
-        /**
-         * Mortality processes compete stochastically.
-         * <ul>
-         * <li>It is assumed that every cause compete with each other.</li>
-         * <li>Stochasticity and competition within predation process.</li>
-         * <li>Asynchronous updating of school biomass (it means biomass are
-         * updated on the fly).</li>
-         * </ul>
-         */
-        STOCHASTIC;
-    }
+    private AbstractMortality starvationMortality;
     
     public MortalityProcess(int rank) {
         super(rank);
@@ -113,32 +83,9 @@ public class MortalityProcess extends AbstractProcess {
     
     @Override
     public void init() {
-
-        // Chooses the mortality algorithm for schools inside the simulated domain
-        MortalityAlgorithm mortalityAlgorithm = MortalityAlgorithm.STOCHASTIC;
-        if (!getConfiguration().isNull("mortality.algorithm")) {
-            try {
-                mortalityAlgorithm = MortalityAlgorithm.valueOf(getConfiguration().getString("mortality.algorithm").toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                StringBuilder msg = new StringBuilder();
-                msg.append("Unrecognised value for parameter mortality.algorithm = ");
-                msg.append(getConfiguration().getString("mortality.algorithm"));
-                msg.append(". It should be either ");
-                msg.append(Arrays.toString(MortalityAlgorithm.values()));
-                warning(msg.toString());
-            }
-        }
-        info("Mortality algorithm set to " + mortalityAlgorithm);
-        
-        switch (mortalityAlgorithm) {
-            case ITERATIVE:
-                insideMortalityProcess = new IterativeMortalityProcess(getRank());
-                break;
-            case STOCHASTIC:
-                insideMortalityProcess = new StochasticMortalityProcess(getRank());
-                break;
-        }
+              
         // Initialises the mortality algorithm
+        insideMortalityProcess = new StochasticMortalityProcess(getRank());
         insideMortalityProcess.init();
 
         // Mortality that occurs outside the simulated domain is handled separatly

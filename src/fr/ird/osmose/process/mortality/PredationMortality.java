@@ -50,7 +50,6 @@ package fr.ird.osmose.process.mortality;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.AbstractSchool;
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import fr.ird.osmose.stage.AccessibilityStage;
@@ -59,7 +58,6 @@ import fr.ird.osmose.stage.PredPreyStage;
 import fr.ird.osmose.util.Separator;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,8 +75,8 @@ public class PredationMortality extends AbstractMortality {
      */
     private double[] predationRate;
     /**
-     * Accessibility matrix.
-     * Note that in the file, lines are preys while columns are predators
+     * Accessibility matrix. Note that in the file, lines are preys while
+     * columns are predators
      * Array[nSpecies+nPlankton][nAccessStagePrey][nSpecies][nAccessStagePred]
      */
     private double[][][][] accessibilityMatrix;
@@ -129,8 +127,7 @@ public class PredationMortality extends AbstractMortality {
         // accessibility matrix
         if (!getConfiguration().isNull("predation.accessibility.file")) {
             String filename = getConfiguration().getFile("predation.accessibility.file");
-            try {
-                CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
+            try (CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator())) {
                 List<String[]> lines = reader.readAll();
                 int l = 1;
                 accessibilityMatrix = new double[nspec + nBack + nPlankton][][][];   // lines are preys (order: focal, bkg, ltl)
@@ -153,7 +150,6 @@ public class PredationMortality extends AbstractMortality {
                         l++;
                     }
                 }
-                reader.close();
             } catch (IOException ex) {
                 error("Error loading accessibility matrix from file " + filename, ex);
             }
@@ -235,108 +231,12 @@ public class PredationMortality extends AbstractMortality {
         return preyUpon;
     }
 
-    /**
-     * Returns the matrix of predation for a given predator.
-     *
-     * @param predator
-     * @param instantaneous, whether we should consider the instantaneous
-     * biomass of the schools or the biomass at the beginning of the time step.
-     * @param subdt, one by default
-     * @return the matrix of predation
-     */
-    public double[] computePredation(School predator, boolean instantaneous, int subdt) {
-
-        Cell cell = predator.getCell();
-        List<School> schools = getSchoolSet().getSchools(predator.getCell());
-        int nFish = schools.size();
-        int iStepSimu = getSimulation().getIndexTimeSimu();
-        double[] preyUpon = new double[schools.size() + getConfiguration().getNPlankton()];
-        // egg do not predate
-        if (predator.getAgeDt() == 0) {
-            return preyUpon;
-        }
-        // find the preys
-        int[] indexPreys = findPreys(predator);
-
-        // Compute accessible biomass
-        // 1. from preys
-        double[] accessibleBiomass = new double[indexPreys.length];
-        for (int i = 0; i < indexPreys.length; i++) {
-            School prey = schools.get(indexPreys[i]);
-            accessibleBiomass[i] = (instantaneous)
-                    ? getAccessibility(predator, prey) * prey.getInstantaneousBiomass()
-                    : getAccessibility(predator, prey) * prey.getBiomass();
-        }
-        double biomAccessibleTot = sum(accessibleBiomass);
-        // 2. from plankton 
-        double[] percentPlankton = getPercentPlankton(predator);
-        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-            double biomAccessible = getForcing().getBiomass(i, cell) * getConfiguration().getPlankton(i).getAccessibility(iStepSimu);
-            biomAccessibleTot += percentPlankton[i] * tempAccess * biomAccessible;
-        }
-
-        // Compute the potential biomass that predators could prey upon
-        double biomassToPredate = instantaneous
-                ? getMaxPredationRate(predator) * predator.getInstantaneousBiomass() / subdt
-                : getMaxPredationRate(predator) * predator.getBiomass() / subdt;
-
-        // Distribute the predation over the preys
-        if (biomAccessibleTot != 0) {
-            // There is less prey available than the predator can
-            // potentially prey upon. Predator will feed upon the total
-            // accessible biomass
-            if (biomAccessibleTot <= biomassToPredate) {
-                biomassToPredate = biomAccessibleTot;
-            }
-
-            // Assess the loss for the preys caused by this predator
-            // Assess the gain for the predator from preys
-            for (int i = 0; i < indexPreys.length; i++) {
-                double ratio = accessibleBiomass[i] / biomAccessibleTot;
-                preyUpon[indexPreys[i]] = ratio * biomassToPredate;
-            }
-            // Assess the gain for the predator from plankton
-            // Assess the loss for the plankton caused by the predator
-            for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-                double tempAccess = accessibilityMatrix[getConfiguration().getNSpecies() + i][0][predator.getSpeciesIndex()][accessStage.getStage(predator)];
-                double biomAccessible = getForcing().getBiomass(i, cell) * getConfiguration().getPlankton(i).getAccessibility(iStepSimu);
-                double ratio = percentPlankton[i] * tempAccess * biomAccessible / biomAccessibleTot;
-                preyUpon[nFish + i] = ratio * biomassToPredate;
-            }
-
-        } else {
-            // Case 2: there is no prey available
-            // No loss !
-        }
-        return preyUpon;
-    }
-
     protected double sum(double[] array) {
         double sum = 0.d;
         for (int i = 0; i < array.length; i++) {
             sum += array[i];
         }
         return sum;
-    }
-
-    /** Should be deprecated? It is used only in iterative mortality process, not in
-     * stochastic mortality process.
-     *
-     * @param cell
-     * @param instantaneous
-     * @param subdt
-     * @return
-     */
-    public double[][] computePredationMatrix(Cell cell, boolean instantaneous, int subdt) {
-
-        List<School> schools = getSchoolSet().getSchools(cell);
-        double[][] preyUpon = new double[schools.size() + getConfiguration().getNPlankton()][schools.size() + getConfiguration().getNPlankton()];
-        // Loop over the schools of the cell
-        for (int iPred = 0; iPred < schools.size(); iPred++) {
-            preyUpon[iPred] = computePredation(schools.get(iPred), instantaneous, subdt);
-        }
-        return preyUpon;
     }
 
     /**
@@ -369,36 +269,6 @@ public class PredationMortality extends AbstractMortality {
     }
 
     /**
-     * Returns a list of preys for a given predator.
-     *
-     * @param predator
-     * @return the list of preys for this predator
-     */
-    private int[] findPreys(School predator) {
-
-        int iPred = predator.getSpeciesIndex();
-        List<School> schoolsInCell = getSchoolSet().getSchools(predator.getCell());
-        int iStage = predPreyStage.getStage(predator);
-        double preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
-        double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
-        List<Integer> indexPreys = new ArrayList();
-        for (int iPrey = 0; iPrey < schoolsInCell.size(); iPrey++) {
-            School prey = schoolsInCell.get(iPrey);
-            if (prey.equals(predator)) {
-                continue;
-            }
-            if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
-                indexPreys.add(iPrey);
-            }
-        }
-        int[] index = new int[indexPreys.size()];
-        for (int iPrey = 0; iPrey < indexPreys.size(); iPrey++) {
-            index[iPrey] = indexPreys.get(iPrey);
-        }
-        return index;
-    }
-
-    /**
      * Gets the maximum predation rate of a predator per time step
      *
      * @param predator
@@ -406,13 +276,6 @@ public class PredationMortality extends AbstractMortality {
      */
     public double getMaxPredationRate(IAggregation predator) {
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
-    }
-
-    /*
-     * Get the accessible biomass that predator can feed on prey
-     */
-    private double getAccessibility(IAggregation predator, IAggregation prey) {
-        return accessibilityMatrix[prey.getSpeciesIndex()][accessStage.getStage(prey)][predator.getSpeciesIndex()][accessStage.getStage(predator)];
     }
 
     /**
@@ -461,6 +324,6 @@ public class PredationMortality extends AbstractMortality {
 
     @Override
     public double getRate(School school) {
-        throw new UnsupportedOperationException("Predation mortality is handled explicetly in Osmose.");
+        throw new UnsupportedOperationException("Predation mortality is handled explicitly in Osmose.");
     }
 }

@@ -5,14 +5,7 @@
  */
 package fr.ird.osmose.util.version;
 
-import au.com.bytecode.opencsv.CSVReader;
-import au.com.bytecode.opencsv.CSVWriter;
-import fr.ird.osmose.util.Separator;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  *
@@ -28,6 +21,9 @@ public class Version4Update2Release2 extends AbstractVersion {
     void updateParameters() {
         
         updateKey("simulation.use.bioen", "simulation.bioen.enabled");
-
+        
+        // got rid of iterative mortality process, so only one mortality algorithm left
+        deprecateParameter("mortality.algorithm");
+        
     }
 }
