@@ -180,8 +180,11 @@ public class Genotype extends SimulationLinker {
 
             // Multiplication by U + adding xmin
             //this.x *= u;
-            x += trait.getMean(i);
+            x += trait.getMean(spec_index);
             traits[i] = x;
+            
+            // adding noise to 
+            traits[i] += trait.addTraitNoise(spec_index);
         }
     }
     

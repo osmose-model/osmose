@@ -112,7 +112,7 @@ public class BioenKappaOutput extends AbstractOutput {
 
     @Override
     public String getDescription() {
-        return "Ingestion rate (in g)";
+        return " Kappa (rate [0-1])";
     }
 
     @Override

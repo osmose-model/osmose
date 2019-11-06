@@ -112,7 +112,7 @@ public class BioenMaintOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "Maintenance rate (in g)";
+        return "Maintenance rate (grams.grams^-alpha)";
     }
 
     @Override

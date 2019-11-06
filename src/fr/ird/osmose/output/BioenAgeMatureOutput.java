@@ -114,7 +114,7 @@ public class BioenAgeMatureOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
+        return "Age at maturity (years)";
     }
 
     @Override

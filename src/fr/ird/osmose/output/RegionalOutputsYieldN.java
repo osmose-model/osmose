@@ -8,6 +8,7 @@ package fr.ird.osmose.output;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 import java.util.List;
 
@@ -15,9 +16,9 @@ import java.util.List;
  *
  * @author nbarrier
  */
-public class RegionalOutputsAbundance extends RegionalOutputsBiomass {
+public class RegionalOutputsYieldN extends RegionalOutputsBiomass {
     
-    public RegionalOutputsAbundance(int rank, Species species) {
+    public RegionalOutputsYieldN(int rank, Species species) {
         super(rank, species);
     }
 
@@ -37,7 +38,7 @@ public class RegionalOutputsAbundance extends RegionalOutputsBiomass {
 
     @Override
     String getDescription() {
-        String output = "Mean abundance over pre-defined regional domains";
+        String output = "Mean yield biomass integrated over pre-defined regional domains";
         return output;
     }
 
@@ -61,8 +62,8 @@ public class RegionalOutputsAbundance extends RegionalOutputsBiomass {
                 if (null != listSchool) {
                     for (School school : listSchool) {
                         // integration of the biomass that belong to the proper index
-                        if ((school.getSpeciesIndex() == this.getSpecies().getIndex()) && (this.include(school))) { 
-                            values[idom] += school.getInstantaneousAbundance();
+                        if (school.getSpeciesIndex() == this.getSpecies().getIndex()) { 
+                            values[idom] += school.getNdead(MortalityCause.FISHING);
                         } // end if species test
                     }  // end of school loop
                 }  // end if if null

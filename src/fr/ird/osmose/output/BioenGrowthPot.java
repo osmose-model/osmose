@@ -112,7 +112,7 @@ public class BioenGrowthPot extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "Ingestion rate (in g)";
+        return "Potential net growth rate (grams.grams^-alpha) (grams net usable per gram of predator)";
     }
 
     @Override

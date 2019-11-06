@@ -18,6 +18,9 @@ public class Trait extends SimulationLinker {
      * Number of locus that code the traits. One value for each species
      */
     private int[] n_locus;
+    
+    /** Variance of the trait expressed due to env. One value per species. */
+    private double[] env_var;
 
     /**
      * Number of possible values that the locus can take. One value for each
@@ -66,6 +69,13 @@ public class Trait extends SimulationLinker {
         xmean = this.getConfiguration().getArrayDouble(key);
         if (xmean.length != nspecies) {
             String errorMsg = String.format("The xmean value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, xmean.length);
+            error(errorMsg, new Exception());
+        }
+        
+        key = String.format("%s.trait.envvar", prefix);
+        env_var = this.getConfiguration().getArrayDouble(key);
+        if (env_var.length != nspecies) {
+            String errorMsg = String.format("The env_var value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, xvar.length);
             error(errorMsg, new Exception());
         }
 
@@ -174,4 +184,18 @@ public class Trait extends SimulationLinker {
     public String getName() {
         return this.prefix;
     }
+    
+    /**
+     * Add some environmental noise to the trait "expression". Trait expressed is due 
+     * to genotype + some noise (sigma_e^2). Species dependent.
+     * @param index
+     * @return
+     */
+    public double addTraitNoise(int index) {
+        Random random = new Random();
+        double std = Math.sqrt(this.env_var[index]);
+        double val = random.nextGaussian() * std;
+        return val;
+    }
+    
 }

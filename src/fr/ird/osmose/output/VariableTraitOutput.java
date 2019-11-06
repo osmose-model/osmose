@@ -54,6 +54,7 @@ import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,10 +62,12 @@ import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
 import ucar.ma2.ArrayString;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayInt;
+import ucar.nc2.Attribute;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -76,21 +79,20 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
      * _FillValue attribute for cells on land
      */
     private final float FILLVALUE = -99.f;
-    
-    private double timeOut;
-    private int counter;
-    
+        
     /**
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriteable nc;
+    private NetcdfFileWriter nc;
     
     // spatial indicators
     private float[][] trait_mean;
-    //private float[][] trait_var;
     private float[] abundance;
     
     private int recordFrequency;
+    
+    // index of the record index (iterating at each write event)
+    private int record_index;
 
     public VariableTraitOutput(int rank) {
         super(rank);
@@ -99,59 +101,57 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
     @Override
     public void init() {
         
+        record_index = 0;
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
         /*
          * Create NetCDF file
          */
         try {
-            nc = NetcdfFileWriteable.createNew("");
             String filename = getFilename();
             IOTools.makeDirectories(filename);
-            nc.setLocation(filename);
+            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4_classic, filename);
+            //nc.setLocation(filename);
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*
-         * Create dimensions
+         * Create dimensions (time, species, trait)
          */
-        Dimension speciesDim = nc.addDimension("species", getNSpecies());
-        Dimension traitDim = nc.addDimension("trait", this.getSimulation().getNEvolvingTraits());
+        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
+        Dimension traitDim = nc.addDimension(null, "trait", this.getSimulation().getNEvolvingTraits());
         Dimension timeDim = nc.addUnlimitedDimension("time");
+        
         /*
          * Add variables
-         */
-        nc.addVariable("time", DataType.FLOAT, new Dimension[]{timeDim});
-        nc.addVariableAttribute("time", "units", "days since 0-1-1 0:0:0");
-        nc.addVariableAttribute("time", "calendar", "360_day");
-        nc.addVariableAttribute("time", "description", "time ellapsed, in days, since the beginning of the simulation");
-      
-        nc.addVariable("trait_mean", DataType.FLOAT, new Dimension[]{timeDim, traitDim, speciesDim});
-        nc.addVariableAttribute("trait_mean", "units", "");
-        nc.addVariableAttribute("trait_mean", "description", "Mean value of the trait");
-        nc.addVariableAttribute("trait_mean", "_FillValue", -99.f);
+         */    
+        // Creating coordinate time variable 
+        Variable tvar = nc.addVariable(null, "time", DataType.FLOAT, "time");
+        tvar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        tvar.addAttribute(new Attribute("calendar", "360_day"));
+        tvar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
         
-        //nc.addVariable("trait_var", DataType.FLOAT, new Dimension[]{timeDim, traitDim, speciesDim});
-        //nc.addVariableAttribute("trait_var", "units", "");
-        //nc.addVariableAttribute("trait_var", "description", "Variance of the trait");
-        //nc.addVariableAttribute("trait_var", "_FillValue", -99.f);
+        // Creation of the output variable
+        ArrayList<Dimension> outdim_l = new ArrayList<>();
+        outdim_l.add(timeDim);
+        outdim_l.add(traitDim);
+        outdim_l.add(speciesDim);
+        Variable trait_mean_var = nc.addVariable(null, "trait_mean", DataType.FLOAT, outdim_l);
+        trait_mean_var.addAttribute(new Attribute("units", ""));
+        trait_mean_var.addAttribute(new Attribute("description", "Mean value of the trait"));
+        trait_mean_var.addAttribute(new Attribute("_FillValue", -99.f));
         
-        nc.addVariable("trait", DataType.INT, new Dimension[]{traitDim});
-        nc.addVariable("species", DataType.INT, new Dimension[]{speciesDim});
-        
-        StringBuilder bld = new StringBuilder();
+        // Writting coordinate species variable + attributes
+        Variable specvar = nc.addVariable(null, "species", DataType.INT, "species");        
         for(int i = 0; i<this.getNSpecies(); i++) {
-            bld.append(String.format("Species%d=, name=%s\n", i, this.getSpecies(i).getName()));
+            specvar.addAttribute(new Attribute(String.format("species%d", i), this.getSpecies(i).getName()));
         }
-        nc.addVariableAttribute("species", "description", bld.toString());
-        
-        bld = new StringBuilder();
+       
+        // Writting coordinate trait variable + attributes
+        Variable traitvar = nc.addVariable(null, "trait", DataType.INT, "trait"); 
         for (int i = 0; i < this.getNEvolvingTraits(); i++) {
-            String attr = String.format("Trait%d=, name=%s\n", i, this.getEvolvingTrait(i).getName());
-            bld.append(attr);
+            traitvar.addAttribute(new Attribute(String.format("trait%d", i), this.getEvolvingTrait(i).getName()));
         }
-        nc.addVariableAttribute("trait", "description", bld.toString());
-        
-          
+         
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -171,13 +171,16 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
                 arrTrait.set(i, i);
             }
             
-            nc.write("species", arrSpecies);
-            nc.write("trait", arrTrait);
+            Variable varspec = nc.findVariable("species");
+            nc.write(varspec, arrSpecies);
+            
+            Variable vartrait = nc.findVariable("trait");            
+            nc.write(vartrait, arrTrait);
 
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -185,7 +188,7 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getLocation();
+            String strFilePart = nc.getNetcdfFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -232,10 +235,10 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
         }  // end of species loop        
     }   // end of method
 
+    @Override
     public void write(float time) {
 
         ArrayFloat.D3 arrMean = new ArrayFloat.D3(1, this.getNEvolvingTraits(), this.getNSpecies());
-        //ArrayFloat.D3 arrVar = new ArrayFloat.D3(1, this.getNEvolvingTraits(), this.getNSpecies());
 
         // Write into NetCDF file
         int nSpecies = getNSpecies();
@@ -250,16 +253,20 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, (float) time);
 
-        int index = nc.getUnlimitedDimension().getLength();
-        //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write("time", new int[]{index}, arrTime);
-            nc.write("trait_mean", new int[]{index, 0, 0}, arrMean);
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Variable timevar = this.nc.findVariable("time");
+            nc.write(timevar, new int[]{record_index}, arrTime);
+            Variable tmeanvar = this.nc.findVariable("trait_mean");
+            nc.write(tmeanvar, new int[]{record_index, 0, 0}, arrMean);
         } catch (InvalidRangeException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        // increments the record index.
+        record_index += 1;
+        
     }
 
     private String getFilename() {

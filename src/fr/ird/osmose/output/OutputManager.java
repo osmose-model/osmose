@@ -449,10 +449,22 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new RegionalOutputsAbundance(rank, getSpecies(i)));
             }
         }
+        
+        if (getConfiguration().getBoolean("output.regional.yield.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new RegionalOutputsYield(rank, getSpecies(i)));
+            }
+        }
+
+        if (getConfiguration().getBoolean("output.regional.yieldN.enabled")) {
+            for (int i = 0; i < getNSpecies(); i++) {
+                outputs.add(new RegionalOutputsYieldN(rank, getSpecies(i)));
+            }
+        }
 
         // warning: simulation init is called after output init.
-        List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
-        if (genet_keys.size() > 0) {
+        //List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
+        if (this.getConfiguration().useGenetic()) {
             if (getConfiguration().getBoolean("output.evolvingtraits.enabled")) {
                 outputs.add(new VariableTraitOutput(rank));
             }

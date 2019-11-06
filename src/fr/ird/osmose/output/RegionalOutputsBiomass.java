@@ -152,7 +152,7 @@ public class RegionalOutputsBiomass extends AbstractOutput {
                 if (null != listSchool) {
                     for (School school : listSchool) {
                         // integration of the biomass that belong to the proper index
-                        if (school.getSpeciesIndex() == this.species.getIndex()) {
+                        if ((school.getSpeciesIndex() == this.species.getIndex()) && (this.include(school))) {
                             values[idom] += school.getInstantaneousBiomass();
                         } // end if species test
                     }  // end of school loop
@@ -185,5 +185,5 @@ public class RegionalOutputsBiomass extends AbstractOutput {
     protected int[] getJDom(int idom) {
         return j_dom[idom];
     }
-
+    
 }
