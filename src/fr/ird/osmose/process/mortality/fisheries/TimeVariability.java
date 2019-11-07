@@ -177,15 +177,15 @@ public class TimeVariability extends OsmoseLinker {
         int nStepYear = getConfiguration().getNStepYear();
         
         // Count the number of good shift values
-        int nRegimes = 0;
+        int nShift = 0;
         for (int i = 0; i < tempshifts.length; i++) {
             if (tempshifts[i] < ndt * nyear) {
-                nRegimes++;
+                nShift++;
             }
         }
         
         // Initialize the shift values 
-        int[] shifts = new int[nRegimes];
+        int[] shifts = new int[nShift];
         int cpt = 0;
         for (int i = 0; i < tempshifts.length; i++) {
             if (tempshifts[i] < ndt * nyear) {
@@ -194,12 +194,13 @@ public class TimeVariability extends OsmoseLinker {
             }
         }
         
+        // number of regimes is number of shifts + 1
+        int nRegime = nShift+1;
+        
         double[] rates = cfg.getArrayDouble("fisheries.rate.regime.rates.fis" + index);
-        if (rates.length != nRegimes) {
-            error("You must provide " + nRegimes + " fishing rates.", new Exception());
+        if (rates.length != nRegime) {
+            error("You must provide " + nRegime + " fishing rates.", new Exception());
         }
-
-        nRegimes++;
 
         int irate = 0;   // current index in the rate array.
         int ishift = 0;  // current index in the shift array.
