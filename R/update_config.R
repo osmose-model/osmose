@@ -1,3 +1,47 @@
+#' Update OSMOSE configuration
+#'
+#' @param input path to the main configuration file
+#' @param log File to save OSMOSE execution messages.
+#' @param version target OSMOSE version for the update.
+#' @param osmose Path to a OSMOSE .jar executable. By default (NULL), uses the stable 
+#' jar for the current version.
+#' @param java Path to the java executable. The default assumes 'java' is 
+#' on the search path. 
+#' @param verbose Show messages? (output in the log file if FALSE).
+#'
+#' @return
+#' @export
+#'
+#' @examples
+update_osmose = function(input, log = "osmose.log",
+                         version = "4.2.1", osmose = NULL, java = "java",
+                         verbose = TRUE, absolute=TRUE) {
+  
+  if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
+  
+  # update to provide by release executables
+  if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_%s.jar", version),
+                                           package="osmose", mustWork = TRUE)
+  
+  args = paste("-jar", osmose, "-update", input)
+  
+  stdout = ifelse(interactive() & verbose, "", log)
+  stderr = ifelse(interactive() & verbose, "", log)
+  
+  command = paste(c(shQuote(java), args), collapse = " ")
+  
+  if(isTRUE(verbose)) message(sprintf("Running: %s", command))
+ 
+  # update LTL ncdf if ltl.netcdf.file is found in input file (if version 4)
+  if(.compareVersion(version, "4") >= 0) {
+    update_ltl(input = input, absolute=absolute)
+  }
+  # update configuration file
+  system2(java, args=args, stdout=stdout, stderr=stderr, wait=TRUE)
+  
+  return(invisible(command))
+  
+}
 
 
 #' Update LTL ncdf files to version 4 format
@@ -7,13 +51,19 @@
 #' @param absolute Whether the input file uses absolute (TRUE) or relative (FALSE) paths.
 #'
 #' @export
-update_ltl = function(filename, input, absolute=TRUE) {
+update_ltl = function(input, filename=NULL, absolute=TRUE) {
   
-  # check in right format
   # get path from config
   
   # Reads the CSV parameter files
   param = readOsmoseConfiguration(input, absolute=absolute)
+  if(is.null(filename)) {
+    filename = param$ltl$netcdf$file
+    if(is.null(filename)) {
+      warning("LTL filename not found in configuration file, nothing to do.")
+      return(invisible())
+    }
+  }
   
   # recovers the index for plk as 
   pltindex = names(param$plankton$name)
@@ -28,6 +78,15 @@ update_ltl = function(filename, input, absolute=TRUE) {
   
   # Opens the old netcdf file
   ncin = nc_open(filename)
+  if(length(ncin$var)!=1) {
+    warning("More than one variable in ncdf file, skipping LTL update.")
+    return(invisible())
+  }
+  
+  if(ncin$ndims!=4) {
+    warning("Wrong number of dimensions in ncdf file, skipping LTL update.")
+    return(invisible())
+  }
   
   varlon  = names(ncin$dim)[1]
   varlat  = names(ncin$dim)[2]
