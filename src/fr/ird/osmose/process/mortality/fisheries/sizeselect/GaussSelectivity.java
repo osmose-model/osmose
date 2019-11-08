@@ -3,11 +3,8 @@ package fr.ird.osmose.process.mortality.fisheries.sizeselect;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.process.mortality.FisheriesMortality;
 import fr.ird.osmose.process.mortality.fisheries.SingleFisheriesMortality;
 import fr.ird.osmose.process.mortality.fisheries.SizeSelectivity;
-import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.logging.OLogger;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
@@ -46,15 +43,15 @@ public class GaussSelectivity extends SizeSelectivity {
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
         // If L75 is found, Ricardo formulae is used
-        if (cfg.canFind("fisheries.select.l75.fis" + index)) {
-            this.l75 = cfg.getFloat("fisheries.select.l75.fis" + index);
+        if (cfg.canFind("fishery.selectivity.l75.fsh" + index)) {
+            this.l75 = cfg.getFloat("fishery.selectivity.l75.fsh" + index);
             // Normal distribution for init qnorm(0.75)
             NormalDistribution norm = new NormalDistribution();
             double sd = (this.l75 - this.l50) / norm.inverseCumulativeProbability(0.75);  // this is the qnorm function
             // initialisation of the distribution used in selectity calculation
             this.distrib = new NormalDistribution(this.l50, sd);
         } else {
-            this.b = cfg.getFloat("fisheries.select.b.fis" + index);
+            this.b = cfg.getFloat("fishery.selectivity.b.fsh" + index);
         }
     }
 

@@ -48,7 +48,7 @@
  */
 package fr.ird.osmose.process.mortality.fisheries;
 
-import fr.ird.osmose.process.mortality.fisheries.sizeselect.StepSelectivity;
+import fr.ird.osmose.process.mortality.fisheries.sizeselect.KnifeEdgeSelectivity;
 import fr.ird.osmose.process.mortality.fisheries.sizeselect.SigmoSelectivity;
 import fr.ird.osmose.process.mortality.fisheries.sizeselect.GaussSelectivity;
 import fr.ird.osmose.process.mortality.*;
@@ -92,15 +92,15 @@ public class SingleFisheriesMortality extends AbstractMortality {
     @Override
     public void init() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        String type = cfg.getString("fisheries.select.curve.fis" + fIndex);
-        if (type.equals("step")) {
-            select = new StepSelectivity(this);
-        } else if (type.equals("gauss")) {
+        String type = cfg.getString("fishery.selectivity.type.fsh" + fIndex);
+        if (type.equals("knife-edge")) {
+            select = new KnifeEdgeSelectivity(this);
+        } else if (type.equals("gaussian")) {
             select = new GaussSelectivity(this);
-        } else if (type.equals("sigmo")) {
+        } else if (type.equals("sigmoidal")) {
             select = new SigmoSelectivity(this);
         } else {
-            error("Selectivity curve " + type + "is not implemented. Choose 'step', 'gauss' or 'sigmo'.", new Exception());
+            error("Selectivity curve " + type + "is not implemented. Choose 'knife-edge', 'gaussian' or 'sigmoidal'.", new Exception());
         }
 
         // Initialize the selectivity curve.
@@ -110,13 +110,13 @@ public class SingleFisheriesMortality extends AbstractMortality {
         timeVar = new TimeVariability(this);
         timeVar.init();
 
-        fMapSet = new FishingMapSet(fIndex, "fisheries.fishmap");
+        fMapSet = new FishingMapSet(fIndex, "fishery.movement");
         fMapSet.init();
 
     }
 
     /**
-     * Returns the fishing mortality rate associated with a given fisherie. It
+     * Returns the fishing mortality rate associated with a given fishery. It
      * is the product of the time varying fishing rate, of the size selectivity
      * and of the spatial factor.
      *
@@ -143,7 +143,7 @@ public class SingleFisheriesMortality extends AbstractMortality {
             case AGE:
                 selVar = school.getAge();
                 break;
-            case LEN:
+            case SIZE:
                 selVar = school.getLength();
                 break;
             default:

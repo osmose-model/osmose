@@ -9,14 +9,14 @@ import fr.ird.osmose.process.mortality.fisheries.SizeSelectivity;
  * classes (Step, Gaussian and Sigmo)
  * @author nbarrier
  */
-public class StepSelectivity extends SizeSelectivity {
+public class KnifeEdgeSelectivity extends SizeSelectivity {
 
     /**
      * Public constructor. Initialize the FisheriesMortality pointer.
      *
      * @param fmort
      */
-    public StepSelectivity(SingleFisheriesMortality fmort) {
+    public KnifeEdgeSelectivity(SingleFisheriesMortality fmort) {
         super(fmort);
     }
 

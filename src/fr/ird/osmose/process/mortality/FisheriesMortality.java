@@ -94,10 +94,10 @@ public class FisheriesMortality extends AbstractMortality {
         
         // Initialize the accessbility matrix, which provides the percentage of fishes that are going to be captured.
         accessMatrix = new AccessMatrix();
-        accessMatrix.read(getConfiguration().getFile("fisheries.catch.matrix.file"));
+        accessMatrix.read(getConfiguration().getFile("fishery.catchability.file"));
                 
         // Recovers the total number of fisheries and initialize the fisheries array
-        nFisheries = getConfiguration().findKeys("fisheries.select.curve.fis*").size();
+        nFisheries = getConfiguration().findKeys("fishery.selectivity.type.fsh*").size();
         fisheriesMortality = new SingleFisheriesMortality[nFisheries];
         
         // should be false to compare with old implementation of fisheries 
@@ -106,7 +106,7 @@ public class FisheriesMortality extends AbstractMortality {
         // Loop over all the fisheries and initialize them.
         int cpt = 0;
         for (int i = 0; i < nFisheries; i++) {
-            while (!getConfiguration().canFind("fisheries.select.curve.fis" + cpt)) {
+            while (!getConfiguration().canFind("fishery.selectivity.type.fsh" + cpt)) {
                 cpt++;
             }
             fisheriesMortality[i] = new SingleFisheriesMortality(this.getRank(), cpt);

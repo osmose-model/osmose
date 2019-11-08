@@ -19,7 +19,7 @@ public class TimeVariability extends OsmoseLinker {
      */
     private final SingleFisheriesMortality mort;
 
-    private TimeVariability.FishBase fishBase;
+    private TimeVariability.FishingRate fishBase;
     
     private double[] timeArr;
     
@@ -46,26 +46,26 @@ public class TimeVariability extends OsmoseLinker {
         this.nyear = cfg.getNStep() / ndt;
         this.timeArr = new double[nyear * ndt];
         
-        String type = cfg.getString("fisheries.rate.method.fis" + index);
+        String type = cfg.getString("fishery.fishing.rate.method.fsh" + index);
         switch (type) {
             case "constant":
-                this.fishBase = FishBase.CONS;
+                this.fishBase = FishingRate.CONSTANT;
                 this.getFBaseConstant();
                 break;
             case "byregime":
-                this.fishBase = FishBase.BYREGIME;
+                this.fishBase = FishingRate.BYREGIME;
                 this.getFBaseRegime();
                 break;
             case "linear":
-                this.fishBase = FishBase.LINEAR;
+                this.fishBase = FishingRate.LINEAR;
                 this.getFBaseLinear();
                 break;
             case "byyear":
-                this.fishBase = FishBase.BYYEAR;
+                this.fishBase = FishingRate.BYYEAR;
                 this.getFBaseByYear();
                 break;
             case "bydt":
-                this.fishBase = FishBase.BYDT;
+                this.fishBase = FishingRate.BYDT;
                  this.getFBaseByDt();
                 break;
             default:
@@ -84,13 +84,13 @@ public class TimeVariability extends OsmoseLinker {
     private void getFBaseByDt() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
-        if (cfg.canFind("fisheries.rate.bydt.file.fis" + mort.getFIndex())) {
+        if (cfg.canFind("fishery.fishing.rate.bydt.file.fsh" + mort.getFIndex())) {
             // If a file parameter has been defined 
             SingleTimeSeries ts = new SingleTimeSeries();
-            ts.read(cfg.getFile("fisheries.rate.bydt.file.fis" + mort.getFIndex()));
+            ts.read(cfg.getFile("fishery.fishing.rate.bydt.file.fsh" + mort.getFIndex()));
             this.timeArr = ts.getValues();
         } else {
-            double[] value = cfg.getArrayDouble("fisheries.rate.bydt.rate.fis" + mort.getFIndex());
+            double[] value = cfg.getArrayDouble("fishery.fishing.rate.bydt.fsh" + mort.getFIndex());
             for (int i = 0; i < ndt * nyear; i++) {
                 int k = i % value.length;
                 this.timeArr[i] = value[k];
@@ -111,7 +111,7 @@ public class TimeVariability extends OsmoseLinker {
      */
     private void getFBaseByYear() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        double[] value = cfg.getArrayDouble("fisheries.rate.byyear.rate.fis" + mort.getFIndex());
+        double[] value = cfg.getArrayDouble("fishery.fishing.rate.byYear.fsh" + mort.getFIndex());
 
         int freq = this.getFishingFrequency();    // Number of fishing values to provide per year. Equals ndt / peryear
         if (freq != value.length) {
@@ -133,7 +133,7 @@ public class TimeVariability extends OsmoseLinker {
     /** Initialize the time array from constant yearly mortality rate. */
     private void getFBaseConstant() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        double value = cfg.getDouble("fisheries.rate.const.rate.fis" + mort.getFIndex());
+        double value = cfg.getDouble("fishery.fishing.rate.fsh" + mort.getFIndex());
         
         int nStepYear = getConfiguration().getNStepYear();
 
@@ -147,8 +147,8 @@ public class TimeVariability extends OsmoseLinker {
      */
     private void getFBaseLinear() {
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        double rate = cfg.getDouble("fisheries.rate.linear.rate.fis" + mort.getFIndex());
-        double slope = cfg.getDouble("fisheries.rate.linear.slope.fis" + mort.getFIndex());
+        double rate = cfg.getDouble("fishery.fishing.rate.linear.fsh" + mort.getFIndex());
+        double slope = cfg.getDouble("fishery.fishing.rate.linear.slope.fsh" + mort.getFIndex());
 
         int freq = this.getFishingFrequency();
        
@@ -172,7 +172,7 @@ public class TimeVariability extends OsmoseLinker {
         /** Recover the shift array from file, and remove values for which 
          * shift > T * ndt;
          */
-        int tempshifts[] = cfg.getArrayInt("fisheries.rate.regime.shifts.fis" + index);
+        int tempshifts[] = cfg.getArrayInt("fishery.fishing.rate.byRegime.shifts.fsh" + index);
         
         int nStepYear = getConfiguration().getNStepYear();
         
@@ -197,7 +197,7 @@ public class TimeVariability extends OsmoseLinker {
         // number of regimes is number of shifts + 1
         int nRegime = nShift+1;
         
-        double[] rates = cfg.getArrayDouble("fisheries.rate.regime.rates.fis" + index);
+        double[] rates = cfg.getArrayDouble("fishery.fishing.rate.byRegime.fsh" + index);
         if (rates.length != nRegime) {
             error("You must provide " + nRegime + " fishing rates.", new Exception());
         }
@@ -237,8 +237,8 @@ public class TimeVariability extends OsmoseLinker {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
         int periods;
-        if (cfg.canFind("fisheries.rate.periodsperyear.fis" + mort.getFIndex())) {
-            periods = cfg.getInt("fisheries.rate.periodsperyear.fis" + mort.getFIndex());
+        if (cfg.canFind("fishery.fishing.rate.nperiod.fsh" + mort.getFIndex())) {
+            periods = cfg.getInt("fishery.fishing.rate.nperiod.fsh" + mort.getFIndex());
         } else {
             periods = 1;
         }
@@ -263,9 +263,9 @@ public class TimeVariability extends OsmoseLinker {
         return timeArr[idt];
     }
 
-    public enum FishBase
+    public enum FishingRate
     {
-        CONS,
+        CONSTANT,
         BYREGIME,
         LINEAR,
         BYYEAR,

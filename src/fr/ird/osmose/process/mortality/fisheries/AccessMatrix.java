@@ -89,7 +89,7 @@ public class AccessMatrix extends OsmoseLinker {
         int nSpecies = getConfiguration().getNSpecies();
 
         // recovers the number of fisheries
-        nFisheries = cfg.findKeys("fisheries.select.curve.fis*").size();
+        nFisheries = cfg.findKeys("fishery.selectivity.type.fsh*").size();
 
         read(filename, nFisheries, nSpecies);
     }

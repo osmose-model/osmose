@@ -3,10 +3,7 @@ package fr.ird.osmose.process.mortality.fisheries;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.process.mortality.FisheriesMortality;
 import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.logging.OLogger;
-import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
  * 
@@ -52,19 +49,19 @@ public abstract class SizeSelectivity extends OsmoseLinker {
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
         // Initialize the selectivity variable 
-        String var = cfg.getString("fisheries.select.var.fis" + index);
+        String var = cfg.getString("fishery.selectivity.structure.fsh" + index);
         if (var.equals("age")) {
             this.variable = SizeSelectivity.Variable.AGE;
         } else {
-            this.variable = SizeSelectivity.Variable.LEN;
+            this.variable = SizeSelectivity.Variable.SIZE;
         }
         
         // Init the l50 variable
-        this.l50 = cfg.getFloat("fisheries.select.l50.fis" + index);
+        this.l50 = cfg.getFloat("fishery.selectivity.l50.fsh" + index);
 
         // if tiny parameter exists, set tiny. Else, use default
-        if(cfg.canFind("fisheries.select.tiny.fis" + index)) {
-            this.tiny  = cfg.getFloat("fisheries.select.tiny.fis" + index);
+        if(cfg.canFind("fishery.selectivity.tiny.fsh" + index)) {
+            this.tiny  = cfg.getFloat("fishery.selectivity.tiny.fsh" + index);
         }
     }
     
@@ -81,13 +78,14 @@ public abstract class SizeSelectivity extends OsmoseLinker {
     /** Abstract init method. */
     public abstract void init();
    
-    /** Returns the selectivity variable. */
+    /** Returns the selectivity variable.
+     * @return  */
     public Variable getVariable() {
         return this.variable;
     }
     
     public enum  Variable {
-        LEN,
+        SIZE,
         AGE,
     }
     

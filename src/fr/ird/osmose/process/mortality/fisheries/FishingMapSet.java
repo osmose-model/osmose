@@ -66,7 +66,7 @@ public class FishingMapSet extends OsmoseLinker {
 
     public FishingMapSet(int iFisheries, String prefix) {
         this.iFisheries = iFisheries;
-        this.prefix = prefix;  // should be fisheries.fishmap
+        this.prefix = prefix;  // should be fishery.movement
     }
 
     public void init() {
@@ -106,8 +106,8 @@ public class FishingMapSet extends OsmoseLinker {
     public void loadMaps() {
 
         // Count the total number of fisheries map by looking for the
-        // number of "fisheries.fishingmap.find.fmapN" parameters 
-        int nmapmax = getConfiguration().findKeys(prefix + ".find.fmap*").size();
+        // number of "fishery.map.index.map#" parameters 
+        int nmapmax = getConfiguration().findKeys(prefix + ".index.map*").size();
   
         List<Integer> mapNumber = new ArrayList();
         int imap = 0;
@@ -115,14 +115,14 @@ public class FishingMapSet extends OsmoseLinker {
         for (int n = 0; n < nmapmax; n++) {
 
             // This is done if the indexing of fishering maps start with one for instance
-            while (!getConfiguration().canFind(prefix + ".find.fmap" + imap)) {
+            while (!getConfiguration().canFind(prefix + ".index.map" + imap)) {
                 imap++;
             }
 
             // Recovers the fisherie index associated with the current map.
             // If it matches the current fisherie, the map index is added to the list of
             // maps to be processed.
-            String key = prefix + ".find.fmap" + imap;
+            String key = prefix + ".index.map" + imap;
             int fisheriesIndex = getConfiguration().getInt(key);
 
             if (fisheriesIndex == iFisheries) {
@@ -152,7 +152,7 @@ public class FishingMapSet extends OsmoseLinker {
              * read the time steps over the year concerned by this map
              */
             int [] mapSeason;
-            String key = prefix + ".season" + ".fmap" + imap;
+            String key = prefix + ".season" + ".map" + imap;
             if (getConfiguration().canFind(key)) {
                 mapSeason = getConfiguration().getArrayInt(key);
             } else {
@@ -167,12 +167,12 @@ public class FishingMapSet extends OsmoseLinker {
             int yearMin = 0;
             int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
             int yearMax = nyear;
-            if (!getConfiguration().isNull(prefix + ".year.min" + ".fmap" + imap)) {
-                yearMin = getConfiguration().getInt(prefix + ".year.min" + ".fmap" + imap);
+            if (!getConfiguration().isNull(prefix + ".year.min" + ".map" + imap)) {
+                yearMin = getConfiguration().getInt(prefix + ".year.min" + ".map" + imap);
                 yearMin = Math.max(yearMin, 0);
             }
-            if (!getConfiguration().isNull(prefix + ".year.max" + ".fmap" + imap)) {
-                yearMax = getConfiguration().getInt(prefix + ".year.max" + ".fmap" + imap);
+            if (!getConfiguration().isNull(prefix + ".year.max" + ".map" + imap)) {
+                yearMax = getConfiguration().getInt(prefix + ".year.max" + ".map" + imap);
                 yearMax = Math.min(yearMax, nyear);
             }
 
@@ -198,8 +198,8 @@ public class FishingMapSet extends OsmoseLinker {
              * read the name of the CSV file and load the map. If name = "null"
              * it means there is no map defined at these age-class and time-step
              */
-            if (!getConfiguration().isNull(prefix + ".file" + ".fmap" + imap)) {
-                String csvFile = getConfiguration().getFile(prefix + ".file" + ".fmap" + imap);
+            if (!getConfiguration().isNull(prefix + ".file" + ".map" + imap)) {
+                String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
                 maps[n] = new FisheriesGridMap(csvFile);
             } else {
