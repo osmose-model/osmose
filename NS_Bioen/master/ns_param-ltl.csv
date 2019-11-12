@@ -41,8 +41,8 @@ plankton.size.max.plk0,0.002
 plankton.size.max.plk1,0.02
 plankton.size.max.plk2,0.002
 plankton.size.max.plk3,0.02
-plankton.size.max.plk4,0.2
-plankton.size.max.plk5,2
+plankton.size.max.plk4,0.5
+plankton.size.max.plk5,6
 plankton.size.max.plk6,2
 plankton.size.max.plk7,0.5
 plankton.size.min.plk0,0.0002
@@ -50,7 +50,7 @@ plankton.size.min.plk1,0.001
 plankton.size.min.plk2,0.0002
 plankton.size.min.plk3,0.002
 plankton.size.min.plk4,0.02
-plankton.size.min.plk5,0.1
+plankton.size.min.plk5,2
 plankton.size.min.plk6,0.1
 plankton.size.min.plk7,0.0045
 plankton.TL.plk0,1
