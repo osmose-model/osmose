@@ -134,4 +134,19 @@ public class DietDistribOutput extends AbstractDistribOutput {
     public void initStep() {
         // nothing to do
     }
+    
+    @Override
+    public void write(float time) {
+        
+        // values = new double[getNSpecies() + getConfiguration().getNPlankton()][getNClass()];
+        int nClass = this.getNClass();
+        double[][] array = new double[nClass][getNSpecies() + getConfiguration().getNPlankton() + 1];
+        for (int iClass = 0; iClass < nClass; iClass++) {
+            array[iClass][0] = this.getClassThreshold(iClass);
+            for (int iSpec = 0; iSpec < getNSpecies() + getConfiguration().getNPlankton() ; iSpec++) {
+                array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
+            }
+        }
+        writeVariable(time, array);
+    }
 }
