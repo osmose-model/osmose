@@ -11,6 +11,8 @@ ${licensePrefix}Yunne SHIN (yunne.shin@ird.fr),
 ${licensePrefix}Morgane TRAVERS (morgane.travers@ifremer.fr)
 ${licensePrefix}Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
 ${licensePrefix}Philippe VERLEY (philippe.verley@ird.fr)
+${licensePrefix}Laure VELEZ (laure.velez@ird.fr)
+${licensePrefix}Nicolas Barrier (nicolas.barrier@ird.fr)
 ${licensePrefix}
 ${licensePrefix}This software is a computer program whose purpose is to simulate fish
 ${licensePrefix}populations and their interactions with their biotic and abiotic environment.

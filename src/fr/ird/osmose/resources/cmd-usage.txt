@@ -1,0 +1,23 @@
+Command line usage:
+Usage1: java -jar osmose.jar -F FILE [-resolve=global|local] [-update] [-P<key>=<value> [...]]
+Usage2: java -jar osmose.jar [-resolve=global|local] [-update] [-P<key>=<value> [...]] FILE1 [FILE2] [...]
+Usage3: java -jar osmose.jar [-resolve=global|local] -indiseas FILE
+Options summary:
+ -F     Path of a text file that lists Osmose configuration files.
+ -resolve=global|local  Controls relative pathname/filename resolution in Osmose configuration files.
+   global, pathnames are resolved against the main configuration file ;
+   local, pathnames are resolved against the current configuration file (i.e. the file that contains the pathname parameter).
+ -update    Update the configuration file(s).
+ -P<key>=<value>    Set Osmose parameters that will have precedence over the parameters from the configuration file.
+   key must be the exact name of the Osmose parameter as it is in the configuration file
+   value must be the value of the Osmose parameter, without any blank.
+   In the event that the value contains blank (for instance a path), surround it with double quotes. E.g. -Poutput.dir.path="/home/my output folder/"
+   The user can redefine as many parameters as needed.
+     java -jar osmose.jar -Poutput.dir.path=/home/user/output/ my_config.csv
+     java -jar osmose.jar -Pmovement.map1.season=6;7;8;9;10;11 my_config.csv
+     java -jar osmose.jar -Pspecies.K.sp1=1.6 -Pspecies.name.sp4=sardine my_config.csv
+    Parameters osmose.configuration.* will not be interpreted as configuration files. 
+   -P and -update options are mutually exclusive.
+   -verbose     Enable verbose output
+   -quiet     Only print error message
+   -indiseas    (beta) Generates folder tree and java command line instructions for launching batches of Indiseas simulations.

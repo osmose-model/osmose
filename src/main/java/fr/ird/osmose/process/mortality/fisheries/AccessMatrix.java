@@ -1,14 +1,17 @@
-/*
+/* 
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
- * Copyright IRD (Institut de Recherche pour le Développement) 2013
+ * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
  * 
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
- *
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * 
  * This software is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
