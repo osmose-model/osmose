@@ -145,6 +145,10 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void run() {
 
+        if(getConfiguration().useBioen()) {
+            error("ReproductionProcess run method not usable in Osmose-PHYSIO", new Exception());
+        }
+        
         // spawning stock biomass per species
         double[] SSB = new double[getConfiguration().getNSpecies()];
 
