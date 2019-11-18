@@ -57,13 +57,16 @@ import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -199,11 +202,11 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     void init_nc_dims_coords() {
 
-        Dimension classDim = getNc().addDimension("class_prey", nColumns);
+        Dimension classDim = getNc().addDimension(null, "class_prey", nColumns);
         StringBuilder bld = new StringBuilder();
         
-        getNc().addVariable("class_prey", DataType.FLOAT, new Dimension[]{classDim});
-        this.setDims(new Dimension[]{getTimeDim(), classDim});
+        getNc().addVariable(null, "class_prey", DataType.FLOAT, "class_prey");
+        this.setDims(new ArrayList<Dimension>(Arrays.asList(getTimeDim(), classDim)));
         
         int nSpec = getNSpecies();
         int k = 0;
@@ -223,7 +226,8 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
                     }
                 }
                 String attrname = String.format("%d", k);
-                getNc().addVariableAttribute("class_prey", attrname, outname);
+                Variable var = this.getNc().findVariable("class_prey");
+                var.addAttribute(new Attribute(attrname, outname));
                 k++;
             }
         }
@@ -232,18 +236,21 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void write_nc_coords() {
+
+        // Writes variable trait (trait names) and species (species names)
+        ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.nColumns);
+
+        for (int i = 0; i < this.nColumns; i++) {
+            arrClass.set(i, i);
+        }
+
+        Variable var = this.getNc().findVariable("class_prey");
         try {
-
-            // Writes variable trait (trait names) and species (species names)
-            ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.nColumns);
-
-            for (int i = 0; i < this.nColumns; i++) {
-                arrClass.set(i, i);
-            }
-            getNc().write("class_prey", arrClass);
-
-        } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(AbundanceOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+            getNc().write(var, arrClass);
+        } catch (IOException ex) {
+            Logger.getLogger(BiomassDietStageOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(BiomassDietStageOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

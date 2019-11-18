@@ -62,6 +62,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,7 +71,9 @@ import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -153,7 +156,8 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
         arrTime.set(0, time);
         int index = this.getTimeIndex();
         try {
-            getNc().write("time", new int[]{index}, arrTime);
+            Variable tvar = this.getNc().findVariable("time");
+            getNc().write(tvar, new int[]{index}, arrTime);
         } catch (IOException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
@@ -181,12 +185,16 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
         }  // end of predator species loop 
 
         try {
-            getNc().write(this.getVarname(), new int[]{index, 0, 0}, arrOut);
+            Variable outvar = this.getNc().findVariable(this.getVarname());
+            getNc().write(outvar, new int[]{index, 0, 0}, arrOut);
         } catch (IOException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        this.incrementIndex();
+        
 
     }
 
@@ -235,11 +243,11 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
             }
         }
 
-        Dimension predDim = getNc().addDimension("pred_index", this.nPred);
-        getNc().addVariable("pred_index", DataType.INT, new Dimension[]{predDim});
+        Dimension predDim = getNc().addDimension(null, "pred_index", this.nPred);
+        Variable predvar = getNc().addVariable(null, "pred_index", DataType.INT, predDim.getFullName());
         int cpt = 0;
         for (String name : listPred) {
-            getNc().addVariableAttribute("pred_index", String.format("pred_index%d", cpt), name);
+            predvar.addAttribute(new Attribute(String.format("pred_index%d", cpt), name));
             cpt++;
         }
 
@@ -248,15 +256,15 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
             this.nPreys++;
         }
 
-        Dimension preyDim = getNc().addDimension("prey_index", this.nPreys);
-        getNc().addVariable("prey_index", DataType.INT, new Dimension[]{preyDim});
+        Dimension preyDim = getNc().addDimension(null, "prey_index", this.nPreys);
+        Variable preyvar = getNc().addVariable(null, "prey_index", DataType.INT, preyDim.getFullName());
         cpt = 0;
         for (String name : listPrey) {
-            getNc().addVariableAttribute("prey_index", String.format("prey_index%d", cpt), name);
+            preyvar.addAttribute(new Attribute(String.format("prey_index%d", cpt), name));
             cpt++;
         }
 
-        this.setDims(new Dimension[]{this.getTimeDim(), predDim, preyDim});
+        this.setDims(new ArrayList<Dimension>(Arrays.asList(this.getTimeDim(), predDim, preyDim)));
 
     }
 

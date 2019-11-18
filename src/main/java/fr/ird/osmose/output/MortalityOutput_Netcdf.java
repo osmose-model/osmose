@@ -60,6 +60,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -67,7 +69,9 @@ import java.util.logging.Logger;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -119,7 +123,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
         this.species = species;
         separator = getConfiguration().getOutputSeparator();
     }
-    
+
     public void init() {
         // Get the age of recruitment
         int iSpecies = this.species.getIndex();
@@ -268,17 +272,17 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     String getDescription() {
-        return("Mortality rate"); //To change body of generated methods, choose Tools | Templates.
+        return ("Mortality rate"); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getUnits() {
-        return(""); //To change body of generated methods, choose Tools | Templates.
+        return (""); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        return("mortality"); //To change body of generated methods, choose Tools | Templates.
+        return ("mortality"); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
@@ -288,54 +292,57 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     void init_nc_dims_coords() {
 
-        Dimension stageDim = getNc().addDimension("stage", STAGES);
-        getNc().addVariable("stage", DataType.INT, new Dimension[]{stageDim});
+        Dimension stageDim = getNc().addDimension(null, "stage", STAGES);
+        Variable stagevar = getNc().addVariable(null, "stage", DataType.INT, stageDim.getFullName());
         String[] stages_str = new String[]{"Egg", "Pre-recruit", "Recruit"};
         for (int i = 0; i < STAGES; i++) {
             String attrname = String.format("stage%d", i);
             String attval = stages_str[i];
-            getNc().addVariableAttribute("stage", attrname, attval);
+            stagevar.addAttribute(new Attribute(attrname, attval));
         }
 
-        Dimension mortDim = getNc().addDimension("mortality_cause", MortalityCause.values().length);
-        getNc().addVariable("mortality_cause", DataType.INT, new Dimension[]{mortDim});
+        Dimension mortDim = getNc().addDimension(null, "mortality_cause", MortalityCause.values().length);
+        Variable mortvar = getNc().addVariable(null, "mortality_cause", DataType.INT, mortDim.getFullName());
         for (int i = 0; i < MortalityCause.values().length; i++) {
             String attrname = String.format("mortality_cause%d", i);
             String attval = MortalityCause.values()[i].name();
-            getNc().addVariableAttribute("mortality_cause", attrname, attval);
+            mortvar.addAttribute(new Attribute(attrname, attval));
         }
 
         //this.createSpeciesAttr();
         //outDims = new Dimension[]{timeDim, speciesDim};
-        this.setDims(new Dimension[]{this.getTimeDim(), mortDim, stageDim});
+        this.setDims(new ArrayList<>(Arrays.asList(this.getTimeDim(), mortDim, stageDim)));
     }
 
     @Override
     public void write_nc_coords() {
-        try {
 
-            // Writes variable trait (trait names) and species (species names)
-            ArrayInt.D1 arrMort = new ArrayInt.D1(MortalityCause.values().length);
+        // Writes variable trait (trait names) and species (species names)
+        ArrayInt.D1 arrMort = new ArrayInt.D1(MortalityCause.values().length);
 
-            for (int i = 0; i < MortalityCause.values().length; i++) {
-                arrMort.set(i, i);
-            }
-
-            getNc().write("mortality_cause", arrMort);
-
-            // Writes variable trait (trait names) and species (species names)
-            ArrayInt.D1 arrStage = new ArrayInt.D1(STAGES);
-
-            for (int i = 0; i < STAGES; i++) {
-                arrStage.set(i, i);
-            }
-
-            getNc().write("stage", arrStage);
-
-        } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(AbundanceOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        for (int i = 0; i < MortalityCause.values().length; i++) {
+            arrMort.set(i, i);
         }
 
+        Variable mortvar = this.getNc().findVariable("mortality_cause");
+        try {
+            getNc().write(mortvar, arrMort);
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(MortalityOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Writes variable trait (trait names) and species (species names)
+        ArrayInt.D1 arrStage = new ArrayInt.D1(STAGES);
+
+        for (int i = 0; i < STAGES; i++) {
+            arrStage.set(i, i);
+        }
+        Variable stagevar = this.getNc().findVariable("stage");
+        try {
+            getNc().write(stagevar, arrStage);
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(MortalityOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

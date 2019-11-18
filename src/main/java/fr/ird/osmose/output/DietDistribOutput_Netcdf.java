@@ -57,6 +57,8 @@ import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
@@ -64,6 +66,8 @@ import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
+import ucar.nc2.Variable;
+import ucar.nc2.Attribute;
 
 /**
  *
@@ -138,30 +142,30 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     void init_nc_dims_coords() {
 
         // Defines the prey dimension and coordinate. 
-        Dimension preyDim = getNc().addDimension("prey_index", getNSpecies() + getConfiguration().getNPlankton());
+        Dimension preyDim = getNc().addDimension(null, "prey_index", getNSpecies() + getConfiguration().getNPlankton());
         StringBuilder bld = new StringBuilder();
 
-        getNc().addVariable("prey_index", DataType.FLOAT, new Dimension[]{preyDim});
+        Variable preyvar = getNc().addVariable(null, "prey_index", DataType.FLOAT, preyDim.getFullName());
         int k = 0;
         for (int i = 0; i < getNSpecies(); i++) {
             String name = String.format("prey%d", k);
-            getNc().addVariableAttribute("prey_index", name, getSpecies(i).getName());
+            preyvar.addAttribute(new Attribute(name, getSpecies(i).getName()));
             k++;
         }
 
         for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
             String name = String.format("prey%d", k);
-            getNc().addVariableAttribute("prey_index", name, getConfiguration().getPlankton(i).getName());
+            preyvar.addAttribute(new Attribute(name, getConfiguration().getPlankton(i).getName()));
             k++;
         }
 
         // Defines the prey dimension and coordinate. 
-        Dimension classDim = getNc().addDimension(this.getDisName(), this.getNClass());
-        getNc().addVariable(this.getDisName(), DataType.FLOAT, new Dimension[]{classDim});
+        Dimension classDim = getNc().addDimension(null, this.getDisName(), this.getNClass());
+        Variable disvar = getNc().addVariable(null, this.getDisName(), DataType.FLOAT, classDim.getFullName());
       
-        this.setDims(new Dimension[]{getTimeDim(), classDim, preyDim});
+        this.setDims(new ArrayList<Dimension>(Arrays.asList(getTimeDim(), classDim, preyDim)));
 
-        getNc().addGlobalAttribute("Species: ", this.species.getName());
+        getNc().addGroupAttribute(null, new Attribute("Species: ", this.species.getName()));
         
     }
     
@@ -174,14 +178,17 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
             for (int i = 0; i < this.getNSpecies(); i++) {
                 arrSpecies.set(i, i);
             }
-            getNc().write("prey_index", arrSpecies);
+            
+            Variable preyvar = this.getNc().findVariable("prey_index");
+            getNc().write(preyvar, arrSpecies);
 
             // Writes variable trait (trait names) and species (species names)
             ArrayDouble.D1 arrClass = new ArrayDouble.D1(this.getNClass());
             for (int i = 0; i < this.getNClass(); i++) {
                 arrClass.set(i, this.getClassThreshold(i));
             }
-            getNc().write(this.getDisName(), arrClass);
+            Variable disvar = this.getNc().findVariable(this.getDisName());
+            getNc().write(disvar, arrClass);
             
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DietDistribOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);

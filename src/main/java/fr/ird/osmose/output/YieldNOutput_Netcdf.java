@@ -87,7 +87,6 @@ public class YieldNOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void write(float time) {
-
         writeVariable(time, yieldN);
     }
 

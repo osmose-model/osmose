@@ -57,13 +57,17 @@ import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -192,20 +196,20 @@ public class MortalitySpeciesOutput_Netcdf extends AbstractDistribOutput_Netcdf 
     @Override
     void init_nc_dims_coords() {
 
-        Dimension classDim = getNc().addDimension(this.getDisName(), this.getNClass());
-        getNc().addVariable(this.getDisName(), DataType.FLOAT, new Dimension[]{classDim});
+        Dimension classDim = getNc().addDimension(null, this.getDisName(), this.getNClass());
+        getNc().addVariable(null, this.getDisName(), DataType.FLOAT, classDim.getFullName());
 
-        Dimension mortDim = getNc().addDimension("mortality_cause", MortalityCause.values().length);
-        getNc().addVariable("mortality_cause", DataType.INT, new Dimension[]{mortDim});
+        Dimension mortDim = getNc().addDimension(null, "mortality_cause", MortalityCause.values().length);
+        Variable mortvar = getNc().addVariable(null, "mortality_cause", DataType.INT, mortDim.getFullName());
         for (int i = 0; i < MortalityCause.values().length; i++) {
             String attrname = String.format("mortality_cause%d", i);
             String attval = MortalityCause.values()[i].name();
-            getNc().addVariableAttribute("mortality_cause", attrname, attval);
+            mortvar.addAttribute(new Attribute(attrname, attval));
         }
 
         //this.createSpeciesAttr();
         //outDims = new Dimension[]{timeDim, speciesDim};
-        this.setDims(new Dimension[]{this.getTimeDim(), classDim, mortDim});
+        this.setDims(new ArrayList<>(Arrays.asList(this.getTimeDim(), classDim, mortDim)));
     }
 
     @Override
@@ -217,13 +221,15 @@ public class MortalitySpeciesOutput_Netcdf extends AbstractDistribOutput_Netcdf 
             for (int i = 0; i < MortalityCause.values().length; i++) {
                 arrMort.set(i, i);
             }
-            getNc().write("mortality_cause", arrMort);
+            Variable mortvar = this.getNc().findVariable("mortality_cause");
+            getNc().write(mortvar, arrMort);
 
             ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.getNClass());
             for (int i = 0; i < this.getNClass(); i++) {
                 arrClass.set(i, this.getClassThreshold(i));
             }
-            getNc().write(this.getDisName(), arrClass);
+            Variable disvar = this.getNc().findVariable(this.getDisName());
+            getNc().write(disvar, arrClass);
 
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(AbundanceOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);

@@ -56,6 +56,8 @@ import fr.ird.osmose.util.SimulationLinker;
 import fr.ird.osmose.util.io.IOTools;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
@@ -63,8 +65,10 @@ import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -84,7 +88,8 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      * _FillValue attribute for cells on land
      */
     private final float FILLVALUE = -99.f;
-    private NetcdfFileWriteable nc;
+    private NetcdfFileWriter nc;
+    private int record_index;
 
     /**
      * Threshold age (year) for age class zero. This parameter allows to discard
@@ -94,7 +99,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      */
     private float[] cutoffAge;
     private final String separator;
-    private Dimension[] outDims;
+    private List<Dimension> outDims;
 
     /**
      * Returns NetCdf file
@@ -134,30 +139,29 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
          * Create NetCDF file
          */
         try {
-            nc = NetcdfFileWriteable.createNew("");
             String filename = getFilename();
-            System.out.println(filename);
             IOTools.makeDirectories(filename);
-            nc.setLocation(filename);
+            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
         } catch (IOException ex) {
             Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Add time dim and variable (common to all files)
         timeDim = nc.addUnlimitedDimension("time");
-        nc.addVariable("time", DataType.DOUBLE, new Dimension[]{timeDim});
-        nc.addVariableAttribute("time", "units", "days since 0-1-1 0:0:0");
-        nc.addVariableAttribute("time", "calendar", "360_day");
-        nc.addVariableAttribute("time", "description", "time ellapsed, in days, since the beginning of the simulation");
+        
+        Variable tvar = nc.addVariable(null, "time", DataType.DOUBLE, "time");
+        tvar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        tvar.addAttribute(new Attribute("calendar", "360_day"));
+        tvar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
 
         // Init NC dimensions and coords (in define mode)
         this.init_nc_dims_coords();
 
         // Create output variable
-        nc.addVariable(getVarname(), DataType.FLOAT, this.getNcDims());
-        nc.addVariableAttribute(getVarname(), "units", getUnits());
-        nc.addVariableAttribute(getVarname(), "description", getDescription());
-        nc.addVariableAttribute(getVarname(), "_FillValue", getFillValue());
+        Variable outvar = nc.addVariable(null, getVarname(), DataType.FLOAT, this.getNcDims());
+        outvar.addAttribute(new Attribute("units", getUnits()));
+        outvar.addAttribute(new Attribute("description", getDescription()));
+        outvar.addAttribute(new Attribute("_FillValue", getFillValue()));
 
         try {
             // Validates the structure of the NetCDF file.
@@ -183,7 +187,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getLocation();
+            String strFilePart = nc.getNetcdfFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -222,11 +226,12 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      */
     public String createSpeciesAttr() {
 
+        Variable species = this.nc.findVariable("species");
         StringBuilder bld = new StringBuilder();
         for (int i = 0; i < this.getNSpecies(); i++) {
             String attrname = String.format("species%d", i);
             String attval = this.getSpecies(i).getName();
-            nc.addVariableAttribute("species", attrname, attval);
+            species.addAttribute(new Attribute(attrname, attval));
         }
 
         return bld.toString();
@@ -234,7 +239,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     }
 
     public int getTimeIndex() {
-        return this.nc.getUnlimitedDimension().getLength();
+        return this.record_index;
     }
 
     public Dimension getTimeDim() {
@@ -253,20 +258,23 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
 
         int index = this.getTimeIndex();
         try {
-            nc.write("time", new int[]{index}, arrTime);
-            nc.write(this.getVarname(), new int[]{index, 0}, arrAbund);
+            Variable tvar = nc.findVariable("time");
+            nc.write(tvar, new int[]{index}, arrTime);
+            Variable outvar = nc.findVariable(this.getVarname());
+            nc.write(outvar, new int[]{index, 0}, arrAbund);
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
+        this.incrementIndex();    
     }
 
     public float getFillValue() {
         return this.FILLVALUE;
     }
 
-    public Dimension[] getNcDims() {
+    public List<Dimension> getNcDims() {
         return this.outDims;
     }
 
@@ -276,36 +284,40 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      */
     void init_nc_dims_coords() {
 
-        Dimension speciesDim = nc.addDimension("species", getNSpecies());
-        nc.addVariable("species", DataType.INT, new Dimension[]{speciesDim});
+        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
+        Variable varspec = nc.addVariable(null, "species", DataType.INT, "species");
         this.createSpeciesAttr();
-        outDims = new Dimension[]{timeDim, speciesDim};
-
+        outDims = new ArrayList<>();
+        outDims.add(timeDim);
+        outDims.add(speciesDim);
+                
     }
-
+    
     public void write_nc_coords() {
-        try {
 
-            // Writes variable trait (trait names) and species (species names)
-            ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies());
+        // Writes variable trait (trait names) and species (species names)
+        ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies());
 
-            for (int i = 0; i < this.getNSpecies(); i++) {
-                arrSpecies.set(i, i);
-            }
-
-            nc.write("species", arrSpecies);
-
-        } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(AbundanceOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        for (int i = 0; i < this.getNSpecies(); i++) {
+            arrSpecies.set(i, i);
         }
 
+        Variable varspec = this.nc.findVariable("species");
+
+        try {
+            nc.write(varspec, arrSpecies);
+        } catch (IOException ex) {
+            Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-    public NetcdfFileWriteable getNc() {
+    public NetcdfFileWriter getNc() {
         return this.nc;
     }
 
-    public void setDims(Dimension[] dims) {
+    public void setDims(List<Dimension> dims) {
         this.outDims = dims;
     }
 
@@ -326,13 +338,16 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
 
         int index = this.getTimeIndex();
         try {
-            nc.write("time", new int[]{index}, arrTime);
-            nc.write(this.getVarname(), new int[]{index, 0, 0}, arrAbund);
+            Variable tvar = nc.findVariable("time");
+            nc.write(tvar, new int[]{index}, arrTime);
+            Variable outvar = nc.findVariable(this.getVarname());
+            nc.write(outvar, new int[]{index, 0, 0}, arrAbund);
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
+        this.incrementIndex();
     }
 
     public StringBuilder initFileName() {
@@ -340,6 +355,10 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         return filename;
+    }
+    
+    public void incrementIndex() {
+        this.record_index++;
     }
 
 }

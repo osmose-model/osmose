@@ -54,8 +54,10 @@ package fr.ird.osmose.output;
 import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
@@ -63,6 +65,7 @@ import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -124,15 +127,17 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
     @Override
     void init_nc_dims_coords() {
 
-        Dimension speciesDim = getNc().addDimension("species", getNSpecies());
-        Dimension classDim = getNc().addDimension(this.getDisName(), this.distrib.getNClass());
+        Dimension speciesDim = getNc().addDimension(null, "species", getNSpecies());
+        Dimension classDim = getNc().addDimension(null, this.getDisName(), this.distrib.getNClass());
         
-        getNc().addVariable("species", DataType.INT, new Dimension[]{speciesDim});
+        Variable varspec = getNc().addVariable(null, "species", DataType.INT, "species");
         this.createSpeciesAttr();
 
-        getNc().addVariable(this.getDisName(), DataType.FLOAT, new Dimension[]{classDim});
-
-        this.setDims(new Dimension[]{getTimeDim(), classDim, speciesDim});
+        Variable vardis = getNc().addVariable(null, this.getDisName(), DataType.FLOAT, this.getDisName());
+        
+        // Initialize the outdims (time, class, species) as a NetCDF file
+        List<Dimension> outdims = new ArrayList<>(Arrays.asList(getTimeDim(), classDim, speciesDim));
+        this.setDims(outdims);
 
     }
 
@@ -147,12 +152,15 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
             for (int i = 0; i < this.getNSpecies(); i++) {
                 arrSpecies.set(i, i);
             }
-            getNc().write("species", arrSpecies);
+            
+            Variable varspec = this.getNc().findVariable("species");
+            getNc().write(varspec, arrSpecies);
         
             for (int i = 0; i < this.distrib.getNClass(); i++) {
                 arrClass.set(i, this.getClassThreshold(i));
             }
-            getNc().write(this.getDisName(), arrClass);
+            Variable vardis = this.getNc().findVariable(this.getDisName());
+            getNc().write(vardis, arrClass);
 
         } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(AbundanceOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
