@@ -132,14 +132,28 @@ public class Species {
         name = cfg.getString("species.name.sp" + index);
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
-        if (!cfg.isNull("species.maturity.size.sp" + index)) {
-            sizeMaturity = cfg.getFloat("species.maturity.size.sp" + index);
-            ageMaturity = Float.MAX_VALUE;
+       
+        if (!cfg.useBioen()) {
+            
+            // If not bioen, initialize age at maturity 
+            // used for reproduction process and egg size
+            // used for growth
+            if (!cfg.isNull("species.maturity.size.sp" + index)) {
+                sizeMaturity = cfg.getFloat("species.maturity.size.sp" + index);
+                ageMaturity = Float.MAX_VALUE;
+            } else {
+                ageMaturity = cfg.getFloat("species.maturity.age.sp" + index);
+                sizeMaturity = Float.MAX_VALUE;
+            }
+
+            eggSize = cfg.getFloat("species.egg.size.sp" + index);
+
         } else {
-            ageMaturity = cfg.getFloat("species.maturity.age.sp" + index);
             sizeMaturity = Float.MAX_VALUE;
+            ageMaturity = Float.MAX_VALUE;
+            eggSize = Float.MAX_VALUE;
         }
-        eggSize = cfg.getFloat("species.egg.size.sp" + index);
+        
         eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
         float agemax = cfg.getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
@@ -221,9 +235,13 @@ public class Species {
      * @return the size of an egg in centimeter
      */
     public float getEggSize() {
-        return eggSize;
+        if (Osmose.getInstance().getConfiguration().useBioen()) {
+            throw new UnsupportedOperationException("getEggSize not supported in Osmose-PHYSIO");
+        } else {
+            return eggSize;
+        }
     }
-
+    
     /**
      * Returns the weight of an egg in gram. Parameter
      * <i>species.egg.weight.sp#</i>
@@ -235,7 +253,11 @@ public class Species {
     }
 
     public boolean isSexuallyMature(School school) {
-        return (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
+        if (Osmose.getInstance().getConfiguration().useBioen()) {
+            throw new UnsupportedOperationException("isSexualluMature not supported in Osmose-PHYSIO");
+        } else {
+            return (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);
+        }
     }
 
     /**
