@@ -104,23 +104,6 @@
                 </executions>  
             </plugin>
             
-            <!-- Link the jar with the dependencies in libs folder -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>${mainClass}</mainClass>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            
             <!-- Copy dependencies in lib folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -144,6 +127,23 @@
                 </executions>
             </plugin>
             
+            <!-- Link the jar with the dependencies in libs folder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>${mainClass}</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            
             <!-- Create a jar with dependencies inside -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -158,9 +158,10 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>
-                                        ${mainclass}
-                                    </mainClass>
+                                    <addClasspath>true</addClasspath>
+                                    <classpathPrefix>lib/</classpathPrefix>
+                                    <mainClass>${mainClass}</mainClass>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
