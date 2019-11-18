@@ -97,8 +97,10 @@ public class MortalityProcess extends AbstractProcess {
 
         // The starvation process is needed to update the starvation mortality
         // rate at the end of the mortality algorithm
-        starvationMortality = new StarvationMortality(getRank());
-        starvationMortality.init();
+        if (!this.getConfiguration().useBioen()) {
+            starvationMortality = new StarvationMortality(getRank());
+            starvationMortality.init();
+        }
     }
     
     @Override
@@ -112,7 +114,9 @@ public class MortalityProcess extends AbstractProcess {
         // Update starvation mortality rate and trophic level
         for (School school : getSchoolSet().getSchools()) {
             // Calculate starvation mortality rate that will be apply at next time step
-            school.setStarvationRate(starvationMortality.getRate(school));
+            if (!this.getConfiguration().useBioen()) {
+                school.setStarvationRate(starvationMortality.getRate(school));
+            }
             // Update trophic level
             if (school.getPreyedBiomass() > 0) {
                 Collection<Prey> preys = school.getPreys();
