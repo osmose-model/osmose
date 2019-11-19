@@ -58,13 +58,17 @@ import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -86,7 +90,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
     /**
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriteable nc;
+    private NetcdfFileWriter nc;
     // spatial indicators
     private float[][][][] abundance;
     private boolean cutoffEnabled;
@@ -99,6 +103,9 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
     private float[] cutoffAge;
     
     private int recordFrequency;
+    
+    private int ncindex;
+    private Variable timeVar, abunVar, classVar, latVar, lonVar;
 
     public SpatialSizeSpeciesOutput(int rank, AbstractDistribution distrib) {
         super(rank);
@@ -129,46 +136,45 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
          * Create NetCDF file
          */
         try {
-            nc = NetcdfFileWriteable.createNew("");
             String filename = getFilename();
             IOTools.makeDirectories(filename);
-            nc.setLocation(filename);
+            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*
          * Create dimensions
          */
-        Dimension speciesDim = nc.addDimension("species", getNSpecies());
-        Dimension ltlDim = nc.addDimension("class", this.distrib.getNClass());
-        Dimension columnsDim = nc.addDimension("nx", getGrid().get_nx());
-        Dimension linesDim = nc.addDimension("ny", getGrid().get_ny());
+        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
+        Dimension ltlDim = nc.addDimension(null, "class", this.distrib.getNClass());
+        Dimension columnsDim = nc.addDimension(null, "nx", getGrid().get_nx());
+        Dimension linesDim = nc.addDimension(null, "ny", getGrid().get_ny());
         Dimension timeDim = nc.addUnlimitedDimension("time");
         /*
          * Add variables
          */
-        nc.addVariable("time", DataType.FLOAT, new Dimension[]{timeDim});
-        nc.addVariableAttribute("time", "units", "days since 0-1-1 0:0:0");
-        nc.addVariableAttribute("time", "calendar", "360_day");
-        nc.addVariableAttribute("time", "description", "time ellapsed, in days, since the beginning of the simulation");
+        timeVar = nc.addVariable(null, "time", DataType.FLOAT, "time");
+        timeVar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        timeVar.addAttribute(new Attribute("calendar", "360_day"));
+        timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
       
-        nc.addVariable("abundance", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, speciesDim, linesDim, columnsDim});
-        nc.addVariableAttribute("abundance", "units", "number of fish");
-        nc.addVariableAttribute("abundance", "description", "Number of fish per species and per cell");
-        nc.addVariableAttribute("abundance", "_FillValue", -99.f);
+        abunVar = nc.addVariable(null, "abundance", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, speciesDim, linesDim, columnsDim)));
+        abunVar.addAttribute(new Attribute("units", "number of fish"));
+        abunVar.addAttribute(new Attribute("description", "Number of fish per species and per cell"));
+        abunVar.addAttribute(new Attribute("_FillValue", -99.f));
         
-        nc.addVariable("class", DataType.FLOAT, new Dimension[]{ltlDim});
+        classVar = nc.addVariable(null, "class", DataType.FLOAT, "class");
         /*nc.addVariableAttribute("class", "units", "number of fish");
         nc.addVariableAttribute("class", "description", "Number of fish per species and per cell");
         nc.addVariableAttribute("class", "_FillValue", -99.f);*/
         
-        nc.addVariable("latitude", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
-        nc.addVariableAttribute("latitude", "units", "degree");
-        nc.addVariableAttribute("latitude", "description", "latitude of the center of the cell");
+        latVar = nc.addVariable(null, "latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
+        latVar.addAttribute(new Attribute("units", "degree"));
+        latVar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
         
-        nc.addVariable("longitude", DataType.FLOAT, new Dimension[]{linesDim, columnsDim});
-        nc.addVariableAttribute("longitude", "units", "degree");
-        nc.addVariableAttribute("longitude", "description", "longitude of the center of the cell");
+        lonVar = nc.addVariable(null, "longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
+        lonVar.addAttribute(new Attribute("units", "degree"));
+        lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
         /*
          * Add global attributes
          */
@@ -205,9 +211,9 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
                 arrClass.set(iclass, this.distrib.getThreshold(iclass));
             }
             
-            nc.write("class", arrClass);
-            nc.write("longitude", arrLon);
-            nc.write("latitude", arrLat);
+            nc.write(classVar, arrClass);
+            nc.write(lonVar, arrLon);
+            nc.write(latVar, arrLat);
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
@@ -219,7 +225,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getLocation();
+            String strFilePart = nc.getNetcdfFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -327,11 +333,11 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, (float) this.timeOut * 360 / (float) this.counter);
 
-        int index = nc.getUnlimitedDimension().getLength();
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write("time", new int[]{index}, arrTime);        
-            nc.write("abundance", new int[]{index, 0, 0, 0, 0}, arrAbundance);
+            nc.write(timeVar, new int[]{ncindex}, arrTime);        
+            nc.write(this.abunVar, new int[]{ncindex, 0, 0, 0, 0}, arrAbundance);
+            ncindex++;
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
