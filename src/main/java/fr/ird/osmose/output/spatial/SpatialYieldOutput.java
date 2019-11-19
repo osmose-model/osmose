@@ -143,11 +143,12 @@ public class SpatialYieldOutput extends AbstractSpatialOutput {
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, (float) this.timeOut * 360 / (float) this.counter);
 
-        int index = nc.getUnlimitedDimension().getLength();
+        int index = this.getNetcdfIndex();
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write("time", new int[]{index}, arrTime);
-            nc.write(this.getVarName(), new int[]{index, 0, 0, 0}, arrBiomass);
+            nc.write(this.getTimeVar(), new int[]{index}, arrTime);
+            nc.write(this.getOutVar(), new int[]{index, 0, 0, 0}, arrBiomass);
+            this.incrementIndex();
         } catch (IOException ex) {
             Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {
