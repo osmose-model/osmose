@@ -60,14 +60,18 @@ import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 
 /**
  *
  * @author pverley
  */
 public class SchoolSetSnapshot extends SimulationLinker {
+    
+    private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
 
     public SchoolSetSnapshot(int rank) {
         super(rank);
@@ -75,7 +79,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
 
     public void makeSnapshot(int iStepSimu) {
 
-        NetcdfFileWriteable nc = createNCFile(iStepSimu);
+        NetcdfFileWriter nc = createNCFile(iStepSimu);
         int nSchool = getSchoolSet().getSchools().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
         ArrayFloat.D1 x = new ArrayFloat.D1(nSchool);
@@ -100,81 +104,81 @@ public class SchoolSetSnapshot extends SimulationLinker {
         }
         // write the arrays in the NetCDF file
         try {
-            nc.write("species", species);
-            nc.write("x", x);
-            nc.write("y", y);
-            nc.write("abundance", abundance);
-            nc.write("age", age);
-            nc.write("length", length);
-            nc.write("weight", weight);
-            nc.write("trophiclevel", trophiclevel);
+            nc.write(this.specVar, species);
+            nc.write(this.xVar, x);
+            nc.write(this.yVar, y);
+            nc.write(this.abVar, abundance);
+            nc.write(this.ageVar, age);
+            nc.write(this.lengthVar, length);
+            nc.write(this.weightVar, weight);
+            nc.write(this.tlVar, trophiclevel);
             nc.close();
             //close(nc);
         } catch (IOException ex) {
-            error("Error writing snapshot " + nc.getLocation(), ex);
+            error("Error writing snapshot " + nc.getNetcdfFile().getLocation(), ex);
         } catch (InvalidRangeException ex) {
-            error("Error writing snapshot " + nc.getLocation(), ex);
+            error("Error writing snapshot " + nc.getNetcdfFile().getLocation(), ex);
         }
     }
 
-    private NetcdfFileWriteable createNCFile(int iStepSimu) {
+    private NetcdfFileWriter createNCFile(int iStepSimu) {
 
-        NetcdfFileWriteable nc = null;
+        NetcdfFileWriter nc = null;
+        File file = null;
+        
         /*
          * Create NetCDF file
          */
         try {
-            nc = NetcdfFileWriteable.createNew("");
-
+          
             File path = new File(getConfiguration().getOutputPathname());
-            File file = new File(path, getFilename(iStepSimu));
+            file = new File(path, getFilename(iStepSimu));
             file.getParentFile().mkdirs();
-            nc.setLocation(file.getAbsolutePath());
+            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, file.getAbsolutePath());
         } catch (IOException ex) {
-            error("Could not create snapshot file " + nc.getLocation(), ex);
+            error("Could not create snapshot file " + file.getAbsolutePath(), ex);
         }
         /*
          * Create dimensions
          */
-        Dimension nSchool = nc.addDimension("nschool", getSchoolSet().getSchools().size());
+        Dimension nSchool = nc.addDimension(null, "nschool", getSchoolSet().getSchools().size());
         /*
          * Add variables
          */
-        nc.addVariable("species", DataType.INT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("species", "units", "scalar");
-        nc.addVariableAttribute("species", "description", "index of the species");
+        specVar = nc.addVariable(null, "species", DataType.INT, "nschool");
+        specVar.addAttribute(new Attribute("description", "index of the species"));
 
-        nc.addVariable("x", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("x", "units", "scalar");
-        nc.addVariableAttribute("x", "description", "x-grid index of the school");
+        xVar = nc.addVariable(null, "x", DataType.FLOAT, "nschool");
+        xVar.addAttribute(new Attribute("units", "scalar"));
+        xVar.addAttribute(new Attribute("description", "x-grid index of the school"));
 
-        nc.addVariable("y", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("x", "units", "scalar");
-        nc.addVariableAttribute("x", "description", "y-grid index of the school");
+        yVar = nc.addVariable(null, "y", DataType.FLOAT, "nschool");
+        yVar.addAttribute(new Attribute("units", "scalar"));
+        yVar.addAttribute(new Attribute("description", "y-grid index of the school"));
 
-        nc.addVariable("abundance", DataType.DOUBLE, new Dimension[]{nSchool});
-        nc.addVariableAttribute("abundance", "units", "scalar");
-        nc.addVariableAttribute("abundance", "description", "number of fish in the school");
+        abVar = nc.addVariable(null, "abundance", DataType.DOUBLE, "nschool");
+        abVar.addAttribute(new Attribute("units", "scalar"));
+        abVar.addAttribute(new Attribute("description", "number of fish in the school"));
 
-        nc.addVariable("age", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("age", "units", "year");
-        nc.addVariableAttribute("age", "description", "age of the school in year");
+        ageVar = nc.addVariable(null, "age", DataType.FLOAT, "nschool");
+        ageVar.addAttribute(new Attribute("units", "year"));
+        ageVar.addAttribute(new Attribute("description", "age of the school in year"));
 
-        nc.addVariable("length", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("length", "units", "cm");
-        nc.addVariableAttribute("length", "description", "length of the fish in the school in centimeter");
+        lengthVar = nc.addVariable(null, "length", DataType.FLOAT, "nschool");
+        lengthVar.addAttribute(new Attribute("units", "cm"));
+        lengthVar.addAttribute(new Attribute("description", "length of the fish in the school in centimeter"));
 
-        nc.addVariable("weight", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("weight", "units", "g");
-        nc.addVariableAttribute("weight", "description", "weight of the fish in the school in gram");
+        weightVar = nc.addVariable(null, "weight", DataType.FLOAT, "nschool");
+        weightVar.addAttribute(new Attribute("units", "g"));
+        weightVar.addAttribute(new Attribute("description", "weight of the fish in the school in gram"));
 
-        nc.addVariable("trophiclevel", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("trophiclevel", "units", "scalar");
-        nc.addVariableAttribute("trophiclevel", "description", "trophiclevel of the fish in the school");
+        tlVar = nc.addVariable(null, "trophiclevel", DataType.FLOAT, "nschool");
+        tlVar.addAttribute(new Attribute("units", "scalar"));
+        tlVar.addAttribute(new Attribute("description", "trophiclevel of the fish in the school"));
         /*
          * Add global attributes
          */
-        nc.addGlobalAttribute("step", String.valueOf(iStepSimu));
+        nc.addGroupAttribute(null, new Attribute("step", String.valueOf(iStepSimu)));
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             str.append(i);
@@ -182,7 +186,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             str.append(getSpecies(i).getName());
             str.append(" ");
         }
-        nc.addGlobalAttribute("species", str.toString());
+        nc.addGroupAttribute(null, new Attribute("species", str.toString()));
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -190,7 +194,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.create();
 
         } catch (IOException ex) {
-            error("Could not create snapshot file " + nc.getLocation(), ex);
+            error("Could not create snapshot file " + nc.getNetcdfFile().getLocation(), ex);
         }
         return nc;
     }

@@ -53,18 +53,7 @@ package fr.ird.osmose.output.spatial;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.util.io.IOTools;
-import fr.ird.osmose.util.SimulationLinker;
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import ucar.ma2.ArrayFloat;
-import ucar.ma2.DataType;
-import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
-import fr.ird.osmose.output.IOutput;
+
         
 /**
  *

@@ -53,18 +53,11 @@ package fr.ird.osmose.output.spatial;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-import fr.ird.osmose.util.io.IOTools;
-import fr.ird.osmose.util.SimulationLinker;
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
-import fr.ird.osmose.output.IOutput;
 import fr.ird.osmose.process.mortality.MortalityCause;
         
 /**
@@ -149,9 +142,7 @@ public class SpatialYieldOutput extends AbstractSpatialOutput {
             nc.write(this.getTimeVar(), new int[]{index}, arrTime);
             nc.write(this.getOutVar(), new int[]{index, 0, 0, 0}, arrBiomass);
             this.incrementIndex();
-        } catch (IOException ex) {
-            Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
+        } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

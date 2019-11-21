@@ -58,14 +58,17 @@ import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -80,7 +83,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
     /**
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriteable nc;
+    private NetcdfFileWriter nc;
     /**
      * LTL biomass array at the beginning of the time step.
      */
@@ -89,6 +92,9 @@ public class LTLOutput extends SimulationLinker implements IOutput {
      * LTL biomass array after predation process.
      */
     private double[][][] ltlbiomass1;
+    
+    private int index;
+    private Variable timeVar, ltlbiomVar, ltlbiomPredVar, lonVar, latVar;
 
     public LTLOutput(int rank) {
         super(rank);
@@ -107,7 +113,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getLocation();
+            String strFilePart = nc.getNetcdfFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -192,57 +198,59 @@ public class LTLOutput extends SimulationLinker implements IOutput {
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, time * 360);
 
-        int index = nc.getUnlimitedDimension().getLength();
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write("time", new int[]{index}, arrTime);
-            nc.write("ltl_biomass", new int[]{index, 0, 0, 0}, arrLTL0);
-            nc.write("ltl_biomass_pred", new int[]{index, 0, 0, 0}, arrLTL1);
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+            nc.write(ltlbiomVar, new int[]{index, 0, 0, 0}, arrLTL0);
+            nc.write(timeVar, new int[]{index}, arrTime);
+            nc.write(this.ltlbiomPredVar, new int[]{index, 0, 0, 0}, arrLTL1);
+            this.index++;
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private void createNCFile(String ncfile) {
-        /*
-         * Create NetCDF file
-         */
         try {
-            nc = NetcdfFileWriteable.createNew("");
-            nc.setLocation(ncfile);
+            /*
+             * Create NetCDF file
+             */
+            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, ncfile);
         } catch (IOException ex) {
             Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
+ 
         /*
          * Create dimensions
          */
-        Dimension ltlDim = nc.addDimension("ltl", getConfiguration().getNPlankton());
-        Dimension nxDim = nc.addDimension("nx", getGrid().get_nx());
-        Dimension nyDim = nc.addDimension("ny", getGrid().get_ny());
+        Dimension ltlDim = nc.addDimension(null, "ltl", getConfiguration().getNPlankton());
+        Dimension nxDim = nc.addDimension(null, "nx", getGrid().get_nx());
+        Dimension nyDim = nc.addDimension(null, "ny", getGrid().get_ny());
         Dimension timeDim = nc.addUnlimitedDimension("time");
         /*
          * Add variables
          */
-        nc.addVariable("time", DataType.FLOAT, new Dimension[]{timeDim});
-        nc.addVariableAttribute("time", "units", "days since 1-1-1 0:0:0");
-        nc.addVariableAttribute("time", "calendar", "360_day");
-        nc.addVariableAttribute("time", "description", "time ellapsed, in days, since the beginning of the simulation");
-        nc.addVariable("ltl_biomass", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, nyDim, nxDim});
-        nc.addVariableAttribute("ltl_biomass", "units", "tons per cell");
-        nc.addVariableAttribute("ltl_biomass", "description", "plankton biomass in osmose cell, in tons integrated on water column, per group and per cell");
-        nc.addVariableAttribute("ltl_biomass", "_FillValue", -99.f);
-        nc.addVariable("ltl_biomass_pred", DataType.FLOAT, new Dimension[]{timeDim, ltlDim, nyDim, nxDim});
-        nc.addVariableAttribute("ltl_biomass_pred", "units", "tons per cell");
-        nc.addVariableAttribute("ltl_biomass_pred", "description", "plankton biomass after predation process in osmose cell, in tons integrated on water column, per group and per cell");
-        nc.addVariableAttribute("ltl_biomass_pred", "_FillValue", -99.f);
-        nc.addVariable("latitude", DataType.FLOAT, new Dimension[]{nyDim, nxDim});
-        nc.addVariableAttribute("latitude", "units", "degree");
-        nc.addVariableAttribute("latitude", "description", "latitude of the center of the cell");
-        nc.addVariable("longitude", DataType.FLOAT, new Dimension[]{nyDim, nxDim});
-        nc.addVariableAttribute("longitude", "units", "degree");
-        nc.addVariableAttribute("longitude", "description", "longitude of the center of the cell");
+        timeVar = nc.addVariable(null, "time", DataType.FLOAT, "time");
+        timeVar.addAttribute(new Attribute("units", "days since 1-1-1 0:0:0"));
+        timeVar.addAttribute(new Attribute("calendar", "360_day"));
+        timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+        
+        ltlbiomVar = nc.addVariable(null, "ltl_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, nyDim, nxDim)));
+        ltlbiomVar.addAttribute(new Attribute("units", "tons per cell"));
+        ltlbiomVar.addAttribute(new Attribute("description", "plankton biomass in osmose cell, in tons integrated on water column, per group and per cell"));
+        ltlbiomVar.addAttribute(new Attribute("_FillValue", -99.f));
+        
+        ltlbiomPredVar = nc.addVariable(null, "ltl_biomass_pred", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, nyDim, nxDim)));
+        ltlbiomPredVar.addAttribute(new Attribute("units", "tons per cell"));
+        ltlbiomPredVar.addAttribute(new Attribute("description", "plankton biomass after predation process in osmose cell, in tons integrated on water column, per group and per cell"));
+        ltlbiomPredVar.addAttribute(new Attribute("_FillValue", -99.f));
+        
+        latVar = nc.addVariable(null, "latitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
+        latVar.addAttribute(new Attribute( "units", "degree"));
+        latVar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
+        
+        lonVar = nc.addVariable(null, "longitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
+        lonVar.addAttribute(new Attribute("units", "degree"));
+        lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
         /*
          * Add global attributes
          */
@@ -253,7 +261,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
             str.append(getConfiguration().getPlankton(kltl));
             str.append(" ");
         }
-        nc.addGlobalAttribute("dimension_ltl", str.toString());
+        nc.addGroupAttribute(null, new Attribute("dimension_ltl", str.toString()));
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -268,11 +276,9 @@ public class LTLOutput extends SimulationLinker implements IOutput {
                 arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
                 arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
-            nc.write("longitude", arrLon);
-            nc.write("latitude", arrLat);
-        } catch (IOException ex) {
-            Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
+            nc.write(lonVar, arrLon);
+            nc.write(latVar, arrLat);
+        } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

@@ -51,22 +51,24 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.Cell;
-import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 
-/** Class that manages the input of fisheries data.
+/**
+ * Class that manages the input of fisheries data.
  *
  * @author Nicolas Barrier
  */
@@ -76,18 +78,25 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
      * _FillValue attribute for cells on land
      */
     private final float FILLVALUE = -99.f;
-    
-    /** Number of fisheries. */
+
+    /**
+     * Number of fisheries.
+     */
     private final int nFisheries;
-    
+
     /**
      * Object for creating/writing netCDF files.
      */
-    private NetcdfFileWriteable nc;
-    
-    /** Array containing the fisheries catches by species and by fisheries. Output
-     * has (species, fisheries) dimensions.
-     * This variable is static since it is updated in the FisheriesMortality class
+    private NetcdfFileWriter nc;
+
+    private Variable timeVar, biomassVar;
+
+    private int index = 0;
+
+    /**
+     * Array containing the fisheries catches by species and by fisheries.
+     * Output has (species, fisheries) dimensions. This variable is static since
+     * it is updated in the FisheriesMortality class
      */
     private static float[][] biomass;      // output should be of size (time, species, fisheries)  
 
@@ -95,10 +104,11 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
         super(rank);
         this.nFisheries = getConfiguration().findKeys("fisheries.select.curve.fis*").size();;
     }
-    
-    /** True if fisheries should be saved or not. */
-    public static boolean saveFisheries()
-    {
+
+    /**
+     * True if fisheries should be saved or not.
+     */
+    public static boolean saveFisheries() {
         // If biomass is null, then no saving.
         return !(biomass == null);
     }
@@ -110,32 +120,31 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
          * Create NetCDF file
          */
         try {
-            nc = NetcdfFileWriteable.createNew("");
             String filename = getFilename();
             IOTools.makeDirectories(filename);
-            nc.setLocation(filename);
+            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
         } catch (IOException ex) {
             Logger.getLogger(FisheriesOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*
          * Create dimensions
          */
-        Dimension speciesDim = nc.addDimension("species", getNSpecies());
-        Dimension fisheriesDim = nc.addDimension("fishing", this.nFisheries);
+        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
+        Dimension fisheriesDim = nc.addDimension(null, "fishing", this.nFisheries);
         Dimension timeDim = nc.addUnlimitedDimension("time");
         /*
          * Add variables
          */
-        nc.addVariable("time", DataType.FLOAT, new Dimension[]{timeDim});
-        nc.addVariableAttribute("time", "units", "days since 0-1-1 0:0:0");
-        nc.addVariableAttribute("time", "calendar", "360_day");
-        nc.addVariableAttribute("time", "description", "time ellapsed, in days, since the beginning of the simulation");
-        
-        nc.addVariable("biomass", DataType.FLOAT, new Dimension[]{timeDim, speciesDim, fisheriesDim});
-        nc.addVariableAttribute("biomass", "units", "ton");
-        nc.addVariableAttribute("biomass", "description", "biomass, in tons, per species and per cell");
-        nc.addVariableAttribute("biomass", "_FillValue", -99.f);
-               
+        timeVar = nc.addVariable(null, "time", DataType.FLOAT, "time");
+        timeVar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
+        timeVar.addAttribute(new Attribute("calendar", "360_day"));
+        timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
+
+        biomassVar = nc.addVariable(null, "biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, speciesDim, fisheriesDim)));
+        biomassVar.addAttribute(new Attribute("units", "ton"));
+        biomassVar.addAttribute(new Attribute("description", "biomass, in tons, per species and per cell"));
+        biomassVar.addAttribute(new Attribute("_FillValue", -99.f));
+
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -144,7 +153,7 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
 
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-      
+
         }
     }
 
@@ -152,7 +161,7 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
     public void close() {
         try {
             nc.close();
-            String strFilePart = nc.getLocation();
+            String strFilePart = nc.getNetcdfFile().getLocation();
             String strFileBase = strFilePart.substring(0, strFilePart.indexOf(".part"));
             File filePart = new File(strFilePart);
             File fileBase = new File(strFileBase);
@@ -162,28 +171,35 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
         }
     }
 
-    /** Nothing to be done here. */
+    /**
+     * Nothing to be done here.
+     */
     @Override
     public void initStep() {
     }
 
-    /** Reset the biomass array. This is done at each time step. */
+    /**
+     * Reset the biomass array. This is done at each time step.
+     */
     @Override
     public void reset() {
         int nSpecies = getNSpecies();
         biomass = new float[nSpecies][this.nFisheries];
     }
-    
-    /** Increment the biomass array for a given species and a given fisherie. */
-    public static void incrementFish(double value, int ispecies, int ifish)
-    {
+
+    /**
+     * Increment the biomass array for a given species and a given fisherie.
+     */
+    public static void incrementFish(double value, int ispecies, int ifish) {
         biomass[ispecies][ifish] += value;
     }
 
-    /** Update is empty since the update is done the FisheriesMortality class. */
+    /**
+     * Update is empty since the update is done the FisheriesMortality class.
+     */
     @Override
     public void update() {
-       
+
     }
 
     @Override
@@ -194,19 +210,18 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
         ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies, this.nFisheries);
         for (int kspec = 0; kspec < nSpecies; kspec++) {
             for (int ifis = 0; ifis < this.nFisheries; ifis++) {
-                    arrBiomass.set(0, kspec, ifis, biomass[kspec][ifis]);
+                arrBiomass.set(0, kspec, ifis, biomass[kspec][ifis]);
             }
         }
-        
+
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, time * 360);
 
-        int index = nc.getUnlimitedDimension().getLength();
         //System.out.println("NetCDF saving time " + index + " - " + time);
-        
         try {
-            nc.write("time", new int[]{index}, arrTime);
-            nc.write("biomass", new int[]{index, 0, 0}, arrBiomass);
+            nc.write(timeVar, new int[]{index}, arrTime);
+            nc.write(biomassVar, new int[]{index, 0, 0}, arrBiomass);
+            index++;
         } catch (IOException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidRangeException ex) {

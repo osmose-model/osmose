@@ -56,12 +56,15 @@ import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.io.IOTools;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 
 /**
  * This abstract class details the functions that an Osmose grid needs to
@@ -424,34 +427,35 @@ public abstract class AbstractGrid extends OsmoseLinker {
      */
     public void toNetCDF(String filename) {
 
-        NetcdfFileWriteable nc = null;
+        NetcdfFileWriter nc = null;
         /*
          * Create NetCDF file
          */
         try {
-            nc = NetcdfFileWriteable.createNew("");
             IOTools.makeDirectories(filename);
-            nc.setLocation(filename);
+            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
         } catch (IOException ex) {
             error("Failed to created NetCDF grid file " + filename, ex);
         }
         /*
          * Create dimensions
          */
-        Dimension nxDim = nc.addDimension("nx", nx);
-        Dimension nyDim = nc.addDimension("ny", ny);
+        Dimension nxDim = nc.addDimension(null, "nx", nx);
+        Dimension nyDim = nc.addDimension(null, "ny", ny);
         /*
          * Add variables
          */
-        nc.addVariable("latitude", DataType.DOUBLE, new Dimension[]{nyDim, nxDim});
-        nc.addVariableAttribute("latitude", "units", "north degree");
-        nc.addVariableAttribute("latitude", "description", "latitude of the center of the cell");
-        nc.addVariable("longitude", DataType.DOUBLE, new Dimension[]{nyDim, nxDim});
-        nc.addVariableAttribute("longitude", "units", "south degree");
-        nc.addVariableAttribute("longitude", "description", "longitude of the center of the cell");
-        nc.addVariable("mask", DataType.DOUBLE, new Dimension[]{nyDim, nxDim});
-        nc.addVariableAttribute("mask", "units", "boolean");
-        nc.addVariableAttribute("mask", "description", "mask of the grid, one means ocean and zero means continent");
+        Variable latVar = nc.addVariable(null, "latitude", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
+        latVar.addAttribute(new Attribute ("units", "north degree"));
+        latVar.addAttribute(new Attribute ("description", "latitude of the center of the cell"));
+        
+        Variable lonVar = nc.addVariable(null, "longitude", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
+        lonVar.addAttribute(new Attribute ("units", "south degree"));
+        lonVar.addAttribute(new Attribute ("description", "longitude of the center of the cell"));
+        
+        Variable maskVar = nc.addVariable(null, "mask", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
+        maskVar.addAttribute(new Attribute("units", "boolean"));
+        maskVar.addAttribute(new Attribute("description", "mask of the grid, one means ocean and zero means continent"));
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -468,9 +472,9 @@ public abstract class AbstractGrid extends OsmoseLinker {
                 arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
                 arrMask.set(cell.get_jgrid(), cell.get_igrid(), cell.isLand() ? 0.d : 1.d);
             }
-            nc.write("longitude", arrLon);
-            nc.write("latitude", arrLat);
-            nc.write("mask", arrMask);
+            nc.write(lonVar, arrLon);
+            nc.write(latVar, arrLat);
+            nc.write(maskVar, arrMask);
         } catch (IOException | InvalidRangeException ex) {
             error("Failed to write the NetCDF grid file", ex);
         }
