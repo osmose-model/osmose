@@ -59,6 +59,7 @@ import fr.ird.osmose.util.filter.IFilter;
 import fr.ird.osmose.util.filter.OldSchoolFilter;
 import fr.ird.osmose.util.filter.OutSchoolFilter;
 import fr.ird.osmose.util.filter.PresentSchoolFilter;
+import fr.ird.osmose.util.filter.RegionSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,7 +137,7 @@ public class SchoolSet extends OsmoseLinker {
      * Remove dead schools from the set
      */
     public void removeDeadSchools() {
-        
+
         Iterator<School> it = schoolset.iterator();
         while (it.hasNext()) {
             if (!it.next().isAlive()) {
@@ -172,7 +173,7 @@ public class SchoolSet extends OsmoseLinker {
         }
         return schoolBySpecies.get(species.getIndex());
     }
-   
+
     /**
      * Returns an up to date list of schools of the given species.
      *
@@ -182,7 +183,7 @@ public class SchoolSet extends OsmoseLinker {
     public List<School> getSchools(Species species) {
         return getSchools(species, true);
     }
-    
+
     /**
      * Returns a list of schools of the given species.
      *
@@ -208,7 +209,6 @@ public class SchoolSet extends OsmoseLinker {
     public List<School> getSchoolsAll(Species species) {
         return getSchoolsAll(species, true);
     }
-    
 
     /**
      * Get the list of the schools that are located in the given cell at current
@@ -251,8 +251,8 @@ public class SchoolSet extends OsmoseLinker {
     public List<School> getAliveSchools() {
         return FilteredSets.subset(schoolset, new AliveSchoolFilter());
     }
-    
-       /**
+
+    /**
      * Get a list of the old school.
      *
      * @return a list of the dead schools because olderness
@@ -292,4 +292,18 @@ public class SchoolSet extends OsmoseLinker {
             }
         }
     }
+
+    /**
+     * Returns a list of alive schools within 
+     * a given output domain.
+     *
+     * @param species, the species to select
+     * @param update, if {@code false} returns the cached list of schools for
+     * this species
+     * @return a list of schools of this {@code species}
+     */
+    public List<School> getRegionSchools(int idom) {
+        return FilteredSets.subset(schoolset, new IFilter[]{new AliveSchoolFilter(), new RegionSchoolFilter(idom)});
+    }
+
 }
