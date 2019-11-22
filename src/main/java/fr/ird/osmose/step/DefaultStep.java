@@ -139,8 +139,10 @@ public class DefaultStep extends AbstractStep {
         
         
         // Incoming flux
-        incomingFLuxProcess = new IncomingFluxProcess(getRank());
-        incomingFLuxProcess.init();
+        if (getConfiguration().useIncomingFlux()) {
+            incomingFLuxProcess = new IncomingFluxProcess(getRank());
+            incomingFLuxProcess.init();
+        }
 
         // Movement of the schools
         movementProcess = new MovementProcess(getRank());
@@ -159,8 +161,10 @@ public class DefaultStep extends AbstractStep {
         
         debug("  step " + iStepSimu);
 
-        // Incoming flux                
-        incomingFLuxProcess.run();
+        // Incoming flux            
+        if (getConfiguration().useIncomingFlux()) {
+            incomingFLuxProcess.run();
+        }
 
         // Reset some school state variables 
         for (School school : getSchoolSet().getSchools()) {

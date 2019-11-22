@@ -259,6 +259,11 @@ public class Configuration extends OLogger {
      * True if the genetic module should be activated.
      */
     private boolean use_genetic = false;
+    
+    /**
+     * True if incoming fluxes should be used.
+     */
+    private boolean use_incoming = false;
 
 ///////////////
 // Constructors
@@ -342,6 +347,9 @@ public class Configuration extends OLogger {
 
         String key = "simulation.genetic.enabled";
         use_genetic = this.getBoolean(key);
+
+        String keyincom = "simulation.incoming.flux.enabled";
+        this.use_incoming = this.getBoolean(keyincom);
 
         // Output path
         outputPathname = getFile("output.dir.path");
@@ -1056,6 +1064,13 @@ public class Configuration extends OLogger {
     public BackgroundSpecies getBkgSpecies(int index) {
         return bgSpecies[index];
     }
+        
+    
+    /** Returns true if incoming fluxes should be used. */
+    public boolean useIncomingFlux(){ 
+        return this.use_incoming;
+    }
+    
 
     /**
      * Inner class that represents a parameter in the configuration file.
