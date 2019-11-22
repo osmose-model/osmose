@@ -80,7 +80,7 @@ public class BioenIngestOutput extends AbstractOutput {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
-            ingestion[i] += school.getEGross() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
+            ingestion[i] += school.getIngestion() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
             abundance[i] += 1;
         }
     }

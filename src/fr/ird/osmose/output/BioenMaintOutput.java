@@ -57,7 +57,7 @@ import java.io.File;
  */
 public class BioenMaintOutput extends AbstractOutput {
 
-    public double[] ingestion;
+    public double[] maintenance;
     public double[] abundance;
 
     public BioenMaintOutput(int rank) {
@@ -71,7 +71,7 @@ public class BioenMaintOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        ingestion = new double[getNSpecies()];
+        maintenance = new double[getNSpecies()];
         abundance = new double[getNSpecies()];
 
     }
@@ -80,7 +80,7 @@ public class BioenMaintOutput extends AbstractOutput {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
-            ingestion[i] += school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
+            maintenance[i] += school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
             abundance[i] += 1;
         }
     }
@@ -90,13 +90,13 @@ public class BioenMaintOutput extends AbstractOutput {
         
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             if (abundance[i] > 0) {
-                ingestion[i] = (float) (ingestion[i] / abundance[i]);
+                maintenance[i] = (float) (maintenance[i] / abundance[i]);
             } else {
-                ingestion[i] = Double.NaN;
+                maintenance[i] = Double.NaN;
             }
         }
         
-        writeVariable(time, ingestion);
+        writeVariable(time, maintenance);
     }
 
     @Override

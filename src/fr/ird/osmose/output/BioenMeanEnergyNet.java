@@ -55,12 +55,12 @@ import java.io.File;
  *
  * @author pverley
  */
-public class BioenGrowthPot extends AbstractOutput {
+public class BioenMeanEnergyNet extends AbstractOutput {
 
-    public double[] ingestion;
+    public double[] meanEnet;
     public double[] abundance;
 
-    public BioenGrowthPot(int rank) {
+    public BioenMeanEnergyNet(int rank) {
         super(rank);
     }
 
@@ -71,7 +71,7 @@ public class BioenGrowthPot extends AbstractOutput {
 
     @Override
     public void reset() {
-        ingestion = new double[getNSpecies()];
+        meanEnet = new double[getNSpecies()];
         abundance = new double[getNSpecies()];
 
     }
@@ -80,7 +80,7 @@ public class BioenGrowthPot extends AbstractOutput {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
-            ingestion[i] += school.getENet() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
+            meanEnet[i] += school.getENet() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
             abundance[i] += 1;
         }
     }
@@ -90,13 +90,13 @@ public class BioenGrowthPot extends AbstractOutput {
         
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             if (abundance[i] > 0) {
-                ingestion[i] = (float) (ingestion[i] / abundance[i]);
+                meanEnet[i] = (float) (meanEnet[i] / abundance[i]);
             } else {
-                ingestion[i] = Double.NaN;
+                meanEnet[i] = 0;
             }
         }
         
-        writeVariable(time, ingestion);
+        writeVariable(time, meanEnet);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class BioenGrowthPot extends AbstractOutput {
         StringBuilder filename = new StringBuilder("Bioen");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_growthpot_Simu");
+        filename.append("_meanEnet_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -112,7 +112,7 @@ public class BioenGrowthPot extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "Potential net growth rate (grams.grams^-alpha) (grams net usable per gram of predator)";
+        return "Mean energy net rate (grams.grams^-alpha) (grams net usable per gram of predator)";
     }
 
     @Override

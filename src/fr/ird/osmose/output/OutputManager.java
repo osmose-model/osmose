@@ -420,13 +420,17 @@ public class OutputManager extends SimulationLinker {
             if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
                 outputs.add(new BioenIngestOutput(rank));
             }
+            
+            if (getConfiguration().getBoolean("output.bioen.ingesttot.enabled", NO_WARNING)) {
+                outputs.add(new BioenIngestTotOutput(rank));
+            }
 
             if (getConfiguration().getBoolean("output.bioen.maint.enabled", NO_WARNING)) {
                 outputs.add(new BioenMaintOutput(rank));
             }
 
-            if (getConfiguration().getBoolean("output.bioen.growthpot.enabled", NO_WARNING)) {
-                outputs.add(new BioenGrowthPot(rank));
+            if (getConfiguration().getBoolean("output.bioen.enet.enabled", NO_WARNING)) {
+                outputs.add(new BioenMeanEnergyNet(rank));
             }
 
             if (getConfiguration().getBoolean("output.bioen.sizeInf.enabled", NO_WARNING)) {
