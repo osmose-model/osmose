@@ -231,5 +231,10 @@ public class RegionalOutputsBiomass extends AbstractOutput {
     protected int[] getJDom(int idom) {
         return j_dom[idom];
     }
+
+    @Override
+    String getRegionalFilename(int idom) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

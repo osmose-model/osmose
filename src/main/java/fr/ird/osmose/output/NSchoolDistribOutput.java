@@ -94,4 +94,9 @@ public class NSchoolDistribOutput extends AbstractDistribOutput {
             values[school.getSpeciesIndex()][getClass(school)] += 1;
         }
     }
+
+    @Override
+    String getRegionalFilename(int idom) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

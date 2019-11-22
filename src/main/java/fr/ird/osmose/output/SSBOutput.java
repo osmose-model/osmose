@@ -52,47 +52,42 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class SSBOutput extends AbstractOutput {
-
-    private double[] ssb;
+public class SSBOutput extends SimpleOutput {
 
     public SSBOutput(int rank) {
         super(rank);
     }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        ssb = new double[getNSpecies()];
+    
+    public SSBOutput(int rank, boolean reg) {
+        super(rank, reg);
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             if (school.getSpecies().isSexuallyMature(school)) {
-                ssb[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+                value[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+            }
+        }
+        
+        if (this.saveRegional()) {
+            int nregion = Regions.getNRegions();
+            for (int idom = 0; idom < nregion; idom++) {
+                for (School school : this.getSchoolSet().getRegionSchools(idom)) {
+                    if (school.getSpecies().isSexuallyMature(school)) {
+                        valueReg[idom][school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+                    }
+                }
             }
         }
     }
 
-    @Override
-    public void write(float time) {
-
-        double nsteps = getRecordFrequency();
-        for (int i = 0; i < ssb.length; i++) {
-            ssb[i] /= nsteps;
-        }
-        writeVariable(time, ssb);
-    }
 
     @Override
     String getFilename() {
@@ -109,12 +104,16 @@ public class SSBOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
-        String[] species = new String[getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
-        }
-        return species;
+    String getRegionalFilename(int idom) {
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
+        filename.append(File.separator);
+        filename.append("Regional");
+        filename.append(File.separator);
+        filename.append(Regions.getRegionName(idom));
+        filename.append("_SSB_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
     }
-    
+       
 }

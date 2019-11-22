@@ -119,4 +119,9 @@ public class PredSuccessOutput extends AbstractOutput {
         }
         return species;
     }
+
+    @Override
+    String getRegionalFilename(int idom) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

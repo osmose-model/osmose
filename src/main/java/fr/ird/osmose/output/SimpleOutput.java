@@ -56,15 +56,19 @@ import java.io.File;
 
 /**
  *
- * @author pverley
+ * @author nbarrier
  */
-public class BioenMaintOutput extends AbstractOutput {
+public class SimpleOutput extends AbstractOutput {
 
-    public double[] ingestion;
-    public double[] abundance;
+    protected double[] value;
+    protected double[][] valueReg;
 
-    public BioenMaintOutput(int rank) {
+    public SimpleOutput(int rank) {
         super(rank);
+    }
+    
+    public SimpleOutput(int rank, boolean regional) {
+        super(rank, regional);
     }
 
     @Override
@@ -74,40 +78,57 @@ public class BioenMaintOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        ingestion = new double[getNSpecies()];
-        abundance = new double[getNSpecies()];
-
+        value = new double[getNSpecies()];
+        if (this.saveRegional()) {
+            int nregion = Regions.getNRegions();
+            valueReg = new double[nregion][];
+            for (int i = 0; i < nregion; i++) {
+                valueReg[i] = new double[getNSpecies()];
+            }
+        }
     }
 
     @Override
     public void update() {
+
         for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getSpeciesIndex();
-            ingestion[i] += school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
-            abundance[i] += 1;
-        }
-    }
-       
-    @Override
-    public void write(float time) {
-        
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (abundance[i] > 0) {
-                ingestion[i] = (float) (ingestion[i] / abundance[i]);
-            } else {
-                ingestion[i] = Double.NaN;
+            if (include(school)) {
+                value[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
             }
         }
         
-        writeVariable(time, ingestion);
+        if (this.saveRegional()) {
+            for (int idom = 0; idom < Regions.getNRegions(); idom++) {
+                for (School school : getSchoolSet().getRegionSchools(idom)) {
+                    valueReg[idom][school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void write(float time) {
+
+        double nsteps = getRecordFrequency();
+        for (int i = 0; i < value.length; i++) {
+            value[i] /= nsteps;
+        }
+        writeVariable(time, value);
+
+        if (this.saveRegional()) {
+            for (int idom = 0; idom < valueReg.length; idom++) {
+                for (int i = 0; i < valueReg[idom].length; i++) {
+                    valueReg[idom][i] /= nsteps;
+                }
+                writeVariable(idom + 1, time, valueReg[idom]);
+            }
+        }
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Bioen");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_maint_Simu");
+        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
+        filename.append("_abundance_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
@@ -115,7 +136,14 @@ public class BioenMaintOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "Maintenance rate (grams.grams^-alpha)";
+        StringBuilder str = new StringBuilder("Mean abundance (number of fish), ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
 
     @Override
@@ -129,6 +157,16 @@ public class BioenMaintOutput extends AbstractOutput {
 
     @Override
     String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPathname());
+        filename.append(File.separatorChar);
+        filename.append("Regional");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_");
+        filename.append(Regions.getRegionName(idom));
+        filename.append("_abundance_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
     }
 }

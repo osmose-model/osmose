@@ -52,46 +52,34 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class BiomassOutput extends AbstractOutput {
-
-    private double[] biomass;
+public class BiomassOutput extends SimpleOutput {
 
     public BiomassOutput(int rank) {
         super(rank);
     }
 
     @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        biomass = new double[getNSpecies()];
-    }
-
-    @Override
     public void update() {
+        
         for (School school : getSchoolSet().getAliveSchools()) {
             if (include(school)) {
-                biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+                value[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
             }
         }
-    }
 
-    @Override
-    public void write(float time) {
-
-        double nsteps = getRecordFrequency();
-        for (int i = 0; i < biomass.length; i++) {
-            biomass[i] /= nsteps;
+        if (this.saveRegional()) {
+            for (int idom = 0; idom < Regions.getNRegions(); idom++) {
+                for (School school : getSchoolSet().getRegionSchools(idom)) {
+                    valueReg[idom][school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+                }
+            }
         }
-        writeVariable(time, biomass);
     }
 
     @Override
@@ -116,11 +104,17 @@ public class BiomassOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
-        String[] species = new String[getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
-        }
-        return species;
+    String getRegionalFilename(int idom) {
+        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPathname());
+        filename.append(File.separatorChar);
+        filename.append("Regional");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_");
+        filename.append(Regions.getRegionName(idom));
+        filename.append("_biomass_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
     }
 }

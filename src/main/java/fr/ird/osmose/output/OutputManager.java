@@ -254,7 +254,7 @@ public class OutputManager extends SimulationLinker {
         }
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
-            outputs.add(new AbundanceOutput(rank));
+            outputs.add(new AbundanceOutput(rank, true));
         }
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
             outputs.add(new AbundanceDistribOutput(rank, sizeDistrib));

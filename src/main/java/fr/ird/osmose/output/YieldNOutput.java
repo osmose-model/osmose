@@ -53,43 +53,41 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.MortalityCause;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class YieldNOutput extends AbstractOutput {
-
-    public double[] yieldN;
+public class YieldNOutput extends SimpleOutput {
 
     public YieldNOutput(int rank) {
         super(rank);
     }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        yieldN = new double[getNSpecies()];
-
+    
+    public YieldNOutput(int rank, boolean reg) {
+        super(rank, reg);
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            yieldN[school.getSpeciesIndex()] += school.getNdead(MortalityCause.FISHING);
+            value[school.getSpeciesIndex()] += school.getNdead(MortalityCause.FISHING);
         }
     }
 
     @Override
     public void write(float time) {
 
-        writeVariable(time, yieldN);
-    }
+        writeVariable(time, value);
 
+        if (this.saveRegional()) {
+            for (int idom = 0; idom < valueReg.length; idom++) {
+                writeVariable(idom + 1, time, valueReg[idom]);
+            }
+        }
+    }
+    
     @Override
     String getFilename() {
         StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
@@ -105,11 +103,18 @@ public class YieldNOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
-        String[] species = new String[getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
-        }
-        return species;
+    String getRegionalFilename(int idom) {
+        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPathname());
+        filename.append(File.separatorChar);
+        filename.append("Regional");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_");
+        filename.append(Regions.getRegionName(idom));
+        filename.append("_yieldN_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
     }
+      
 }

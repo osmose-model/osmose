@@ -52,27 +52,20 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class AbundanceOutput extends AbstractOutput {
-
-    private double[] abundance;
+public class AbundanceOutput extends SimpleOutput {
 
     public AbundanceOutput(int rank) {
         super(rank);
     }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        abundance = new double[getNSpecies()];
+    
+    public AbundanceOutput(int rank, boolean regional) {
+        super(rank, regional);
     }
 
     @Override
@@ -80,19 +73,17 @@ public class AbundanceOutput extends AbstractOutput {
 
         for (School school : getSchoolSet().getAliveSchools()) {
             if (include(school)) {
-                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+                value[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
             }
         }
-    }
-
-    @Override
-    public void write(float time) {
-
-        double nsteps = getRecordFrequency();
-        for (int i = 0; i < abundance.length; i++) {
-            abundance[i] /= nsteps;
+        
+        if (this.saveRegional()) {
+            for (int idom = 0; idom < Regions.getNRegions(); idom++) {
+                for (School school : getSchoolSet().getRegionSchools(idom)) {
+                    valueReg[idom][school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+                }
+            }
         }
-        writeVariable(time, abundance);
     }
 
     @Override
@@ -117,11 +108,17 @@ public class AbundanceOutput extends AbstractOutput {
     }
 
     @Override
-    String[] getHeaders() {
-        String[] species = new String[getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
-        }
-        return species;
+    String getRegionalFilename(int idom) {
+        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPathname());
+        filename.append(File.separatorChar);
+        filename.append("Regional");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_");
+        filename.append(Regions.getRegionName(idom));
+        filename.append("_abundance_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
     }
 }

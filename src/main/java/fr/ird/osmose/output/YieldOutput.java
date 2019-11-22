@@ -58,36 +58,43 @@ import fr.ird.osmose.process.mortality.MortalityCause;
  *
  * @author pverley
  */
-public class YieldOutput extends AbstractOutput {
-
-    public double[] yield;
+public class YieldOutput extends SimpleOutput {
 
     public YieldOutput(int rank) {
         super(rank);
     }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        yield = new double[getNSpecies()];
-
+    
+    public YieldOutput(int rank, boolean reg) {
+        super(rank, reg);
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            yield[school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
+            value[school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
         }
+        
+        if (this.saveRegional()) {
+            for (int idom = 0; idom < Regions.getNRegions(); idom++) {
+                for (School school : getSchoolSet().getRegionSchools(idom)) {
+                    valueReg[idom][school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
+                }
+            }
+        }
+        
     }
 
     @Override
     public void write(float time) {
 
-        writeVariable(time, yield);
+        writeVariable(time, value);
+        
+        if (this.saveRegional()) {
+            for (int idom = 0; idom < valueReg.length; idom++) {
+                writeVariable(idom + 1, time, valueReg[idom]);
+            }
+        }
+        
     }
 
     @Override
@@ -111,5 +118,10 @@ public class YieldOutput extends AbstractOutput {
             species[i] = getSpecies(i).getName();
         }
         return species;
+    }
+
+    @Override
+    String getRegionalFilename(int idom) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

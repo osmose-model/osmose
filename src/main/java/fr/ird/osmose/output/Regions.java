@@ -65,10 +65,15 @@ import fr.ird.osmose.util.OsmoseLinker;
  */
 public class Regions extends OsmoseLinker {
 
-    private String[] domain_names;
+    private static String[] domain_names;
     private static int i_dom[][];   // ndomain, npoints
     private static int j_dom[][];   // ndomain, npoints
-    private static int nregion;
+    private static int nregion = 0;
+    public final static Regions regions = new Regions();
+    
+    public Regions() {
+        this.init();
+    }
 
     public void init() {
 
@@ -138,6 +143,10 @@ public class Regions extends OsmoseLinker {
         return j_dom[idom];
     }
 
+    public static String getRegionName(int idom) {
+        return domain_names[idom];
+    }
+
     public static int getNRegions() {
         return nregion;
     }
@@ -160,5 +169,9 @@ public class Regions extends OsmoseLinker {
         }
 
         return false;
+    }
+    
+    public static Regions getRegion() {
+        return regions;
     }
 }

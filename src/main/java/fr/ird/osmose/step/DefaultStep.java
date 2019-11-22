@@ -159,7 +159,7 @@ public class DefaultStep extends AbstractStep {
         
         debug("  step " + iStepSimu);
 
-        // Incoming flux
+        // Incoming flux                
         incomingFLuxProcess.run();
 
         // Reset some school state variables 

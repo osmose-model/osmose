@@ -66,9 +66,16 @@ import java.io.PrintWriter;
 abstract public class AbstractOutput extends SimulationLinker implements IOutput {
 
     private FileOutputStream fos;
-    private PrintWriter prw;
     private boolean cutoffEnabled;
     private int recordFrequency;
+
+    /** List of files where the given variable will be stored.
+     * prw[0] = integrated over all the domain
+     * prw[1] = over the first region
+     * prw[2] = over the second region. etc.
+     */
+    private PrintWriter[] prw;
+
     /**
      * Threshold age (year) for age class zero. This parameter allows to discard
      * schools younger that this threshold in the calculation of the indicators
@@ -80,17 +87,32 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
     abstract String getFilename();
 
+    abstract String getRegionalFilename(int idom);
+
     abstract String getDescription();
 
     abstract String[] getHeaders();
-
-    AbstractOutput(int rank) {
+    
+    /** Boolean that defines whether the variable can be saved regionally.
+     * Default is false.
+     */
+    private final boolean save_regional;
+    
+    AbstractOutput(int rank, boolean save_regional) {
         super(rank);
+        this.save_regional = save_regional;
         separator = getConfiguration().getOutputSeparator();
     }
-
+    
+    AbstractOutput(int rank) {
+        this(rank, false);
+    }
+    
     @Override
     public void init() {
+
+        File file;
+        boolean fileExists;
 
         // Cutoff
         cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
@@ -104,27 +126,38 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
         // Create parent directory
         File path = new File(getConfiguration().getOutputPathname());
-        File file = new File(path, getFilename());
-        boolean fileExists = file.exists();
-        file.getParentFile().mkdirs();
-        try {
-            // Init stream
-            fos = new FileOutputStream(file, true);
-        } catch (FileNotFoundException ex) {
-            error("Failed to create output file " + file.getAbsolutePath(), ex);
-        }
-        prw = new PrintWriter(fos, true);
-        
-        if (!fileExists) {
-            prw.println(quote(getDescription()));
-            prw.print(quote("Time"));
-            String[] headers = getHeaders();
-            for (String header : headers) {
-                prw.print(separator);
-                prw.print(quote(header));
+  
+        // Creation of the regional output files for each region.
+        int nregions = this.save_regional ? Regions.getNRegions() : 0;
+        prw = new PrintWriter[nregions + 1];
+        for (int i = 0; i < nregions + 1; i++) {
+            if (i == 0) {
+                file = new File(path, getFilename());
+            } else {
+                file = new File(path, getRegionalFilename(i - 1));
             }
-            prw.println();
+            fileExists = file.exists();
+            file.getParentFile().mkdirs();
+            try {
+                // Init stream
+                fos = new FileOutputStream(file, true);
+            } catch (FileNotFoundException ex) {
+                error("Failed to create output file " + file.getAbsolutePath(), ex);
+            }
+            prw[i] = new PrintWriter(fos, true);
+
+            if (!fileExists) {
+                prw[i].println(quote(getDescription()));
+                prw[i].print(quote("Time"));
+                String[] headers = getHeaders();
+                for (String header : headers) {
+                    prw[i].print(separator);
+                    prw[i].print(quote(header));
+                }
+                prw[i].println();
+            }
         }
+
     }
 
     boolean includeClassZero() {
@@ -137,9 +170,14 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 
     @Override
     public void close() {
-        if (null != prw) {
-            prw.close();
+
+        // Adding the closing of regional files
+        for (int i = 0; i < prw.length; i++) {
+            if (null != prw[i]) {
+                prw[i].close();
+            }
         }
+
         if (null != fos) {
             try {
                 fos.close();
@@ -148,31 +186,45 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             }
         }
     }
-
+    
+    /** Write variables integrated over the entire region. 
+     It writes on the file index 0.* 
+     */
     void writeVariable(float time, double[] variable) {
+        writeVariable(0, time, variable);
+    }
+    
+    /** Write variables integrated over the entire region. 
+     It writes on the file index 0.* 
+     */
+    void writeVariable(float time, double[][] variable) {
+        writeVariable(0, time, variable);
+    }
 
-        prw.print(time);
+    void writeVariable(int fileindex, float time, double[] variable) {
+
+        prw[fileindex].print(time);
         for (int i = 0; i < variable.length; i++) {
-            prw.print(separator);
+            prw[fileindex].print(separator);
             String sval = Float.isInfinite((float) variable[i])
                     ? "Inf"
                     : Float.toString((float) variable[i]);
-            prw.print(sval);
+            prw[fileindex].print(sval);
         }
-        prw.println();
+        prw[fileindex].println();
     }
 
-    void writeVariable(float time, double[][] variable) {
+    void writeVariable(int fileindex, float time, double[][] variable) {
         for (double[] row : variable) {
-            prw.print(time);
+            prw[fileindex].print(time);
             for (int j = 0; j < row.length; j++) {
-                prw.print(separator);
+                prw[fileindex].print(separator);
                 String sval = Float.isInfinite((float) row[j])
                         ? "Inf"
                         : Float.toString((float) row[j]);
-                prw.print(sval);
+                prw[fileindex].print(sval);
             }
-            prw.println();
+            prw[fileindex].println();
         }
     }
 
@@ -198,5 +250,10 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             arr[i] = quote(str[i]);
         }
         return arr;
+    }    
+    
+    public boolean saveRegional() {
+        return this.save_regional;  
     }
+
 }

@@ -137,4 +137,9 @@ public class DietDistribOutput extends AbstractDistribOutput {
     public void initStep() {
         // nothing to do
     }
+
+    @Override
+    String getRegionalFilename(int idom) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

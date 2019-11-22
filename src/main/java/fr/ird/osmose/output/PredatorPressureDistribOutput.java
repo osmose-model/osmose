@@ -118,4 +118,9 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
         // nothing to do
     }
 
+    @Override
+    String getRegionalFilename(int idom) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
