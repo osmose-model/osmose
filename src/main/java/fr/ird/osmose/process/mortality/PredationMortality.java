@@ -109,7 +109,7 @@ public class PredationMortality extends AbstractMortality {
         for (int i = 0; i < nspec; i++) {
             predPreySizesMax[i] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + i);
             predPreySizesMin[i] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.sp" + i);
-            if (!getConfiguration().useBioen()) {
+            if (!getConfiguration().isBioenEnabled()) {
                 predationRate[i] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i);
             }
         }
@@ -118,7 +118,7 @@ public class PredationMortality extends AbstractMortality {
         for (int i = 0; i < nBack; i++) {
             predPreySizesMax[i + nspec] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.bkg" + i);
             predPreySizesMin[i + nspec] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.bkg" + i);
-            if (!getConfiguration().useBioen()) {
+            if (!getConfiguration().isBioenEnabled()) {
                 predationRate[i + nspec] = getConfiguration().getDouble("predation.ingestion.rate.max.bkg" + i);
             }
         }
@@ -282,7 +282,7 @@ public class PredationMortality extends AbstractMortality {
      * @return
      */
     public double getMaxPredationRate(IAggregation predator) {
-        if(getConfiguration().useBioen()) {
+        if(getConfiguration().isBioenEnabled()) {
             error("The getMaxPredationRate method of PredationMortality not suitable in Osmose-PHYSIO", new Exception());
         }
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();

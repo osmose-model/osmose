@@ -222,7 +222,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
 
         int iStage;
 
-        if (this.getConfiguration().useBioen()) {
+        if (this.getConfiguration().isBioenEnabled()) {
 
             if (school.getAgeDt() == 0) {
                 // Eggss

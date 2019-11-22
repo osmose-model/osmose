@@ -145,7 +145,7 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void run() {
 
-        if(getConfiguration().useBioen()) {
+        if(getConfiguration().isBioenEnabled()) {
             error("ReproductionProcess run method not usable in Osmose-PHYSIO", new Exception());
         }
         

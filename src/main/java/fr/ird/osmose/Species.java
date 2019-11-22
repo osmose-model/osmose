@@ -133,7 +133,7 @@ public class Species {
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
        
-        if (!cfg.useBioen()) {
+        if (!cfg.isBioenEnabled()) {
             
             // If not bioen, initialize age at maturity 
             // used for reproduction process and egg size
@@ -159,7 +159,7 @@ public class Species {
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
 
         // barrier.n: added for bioenergetic purposes.
-        if (cfg.useBioen()) {
+        if (cfg.isBioenEnabled()) {
             zlayer = cfg.getInt("species.zlayer.sp" + index);
             String key = String.format("species.alpha.sp%d", index);
             alpha_bioen = cfg.getDouble(key);
@@ -235,7 +235,7 @@ public class Species {
      * @return the size of an egg in centimeter
      */
     public float getEggSize() {
-        if (Osmose.getInstance().getConfiguration().useBioen()) {
+        if (Osmose.getInstance().getConfiguration().isBioenEnabled()) {
             throw new UnsupportedOperationException("getEggSize not supported in Osmose-PHYSIO");
         } else {
             return eggSize;
@@ -253,7 +253,7 @@ public class Species {
     }
 
     public boolean isSexuallyMature(School school) {
-        if (Osmose.getInstance().getConfiguration().useBioen()) {
+        if (Osmose.getInstance().getConfiguration().isBioenEnabled()) {
             throw new UnsupportedOperationException("isSexualluMature not supported in Osmose-PHYSIO");
         } else {
             return (school.getLength() >= sizeMaturity) || (school.getAge() >= ageMaturity);

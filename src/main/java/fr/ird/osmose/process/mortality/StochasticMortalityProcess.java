@@ -150,7 +150,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
         // If not use of bioen, use the traditional predation mort.
         // class. If bioen, use the dedicated class.
-        if (!getConfiguration().useBioen()) {
+        if (!getConfiguration().isBioenEnabled()) {
             predationMortality = new PredationMortality(getRank());
             predationMortality.init();
         } else {
@@ -188,7 +188,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         bkgSet = new HashMap();
 
         // barrier.n: init the bioenergetic module
-        if (this.getConfiguration().useBioen()) {
+        if (this.getConfiguration().isBioenEnabled()) {
             // starvation mortality
             starvationMortality = new BioenStarvationMortality(getRank());
             starvationMortality.init();
@@ -357,7 +357,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
                     // barrier.n: adding the 
                     case OXIDATIVE:
-                        if ((seqOxy[i] >= ns) || (!getConfiguration().useBioen())) {
+                        if ((seqOxy[i] >= ns) || (!getConfiguration().isBioenEnabled())) {
                             // oxidative mortality for bion module and focal species only
                             break;
                         }
@@ -394,7 +394,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
                         school = schools.get(seqStarv[i]);
                         nDead = 0.d;
-                        if (!this.getConfiguration().useBioen()) {
+                        if (!this.getConfiguration().isBioenEnabled()) {
                             // Starvation mortality when no use of bioen module.                           
                             double M = school.getStarvationRate() / subdt;
                             nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));

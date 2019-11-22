@@ -410,7 +410,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
         }
 
-        if (getConfiguration().useBioen()) {
+        if (getConfiguration().isBioenEnabled()) {
 
             if (getConfiguration().getBoolean("output.bioen.maturesize.enabled", NO_WARNING)) {
                 outputs.add(new BioenSizeMatureOutput(rank));
@@ -467,7 +467,7 @@ public class OutputManager extends SimulationLinker {
 
         // warning: simulation init is called after output init.
         //List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
-        if (this.getConfiguration().useGenetic()) {
+        if (this.getConfiguration().isGeneticEnabled()) {
             if (getConfiguration().getBoolean("output.evolvingtraits.enabled")) {
                 outputs.add(new VariableTraitOutput(rank));
             }

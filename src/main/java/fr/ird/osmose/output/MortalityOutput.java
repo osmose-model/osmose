@@ -284,7 +284,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         
         int iStage;
         
-        if(this.getConfiguration().useBioen()) {
+        if(this.getConfiguration().isBioenEnabled()) {
     
             if (school.getAgeDt() == 0) {
                 // Eggss

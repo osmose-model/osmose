@@ -253,17 +253,17 @@ public class Configuration extends OLogger {
     /**
      * True if the bioenergetic module should be activated.
      */
-    private boolean use_bioen = false;
+    private boolean bioenEnabled = false;
 
     /**
      * True if the genetic module should be activated.
      */
-    private boolean use_genetic = false;
+    private boolean geneticEnabled = false;
     
     /**
      * True if incoming fluxes should be used.
      */
-    private boolean use_incoming = false;
+    private boolean incomingFluxEnabled = false;
 
 ///////////////
 // Constructors
@@ -343,13 +343,13 @@ public class Configuration extends OLogger {
         // the bioen module should be used.
         // String keybioen = "simulation.use.bioen";
         String keybioen = "simulation.bioen.enabled";
-        this.use_bioen = this.getBoolean(keybioen);
+        this.bioenEnabled = this.getBoolean(keybioen);
 
         String key = "simulation.genetic.enabled";
-        use_genetic = this.getBoolean(key);
+        geneticEnabled = this.getBoolean(key);
 
         String keyincom = "simulation.incoming.flux.enabled";
-        this.use_incoming = this.getBoolean(keyincom);
+        this.incomingFluxEnabled = this.getBoolean(keyincom);
 
         // Output path
         outputPathname = getFile("output.dir.path");
@@ -447,15 +447,15 @@ public class Configuration extends OLogger {
     /**
      * Returns true if bioen module should be used.
      */
-    public boolean useBioen() {
-        return this.use_bioen;
+    public boolean isBioenEnabled() {
+        return this.bioenEnabled;
     }
 
     /**
      * Returns true of genetic module is used or not. *
      */
-    public boolean useGenetic() {
-        return this.use_genetic;
+    public boolean isGeneticEnabled() {
+        return this.geneticEnabled;
     }
 
     /**
@@ -1067,8 +1067,8 @@ public class Configuration extends OLogger {
         
     
     /** Returns true if incoming fluxes should be used. */
-    public boolean useIncomingFlux(){ 
-        return this.use_incoming;
+    public boolean isIncomingFluxEnabled(){ 
+        return this.incomingFluxEnabled;
     }
     
 

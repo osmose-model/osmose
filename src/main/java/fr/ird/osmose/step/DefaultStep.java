@@ -115,7 +115,7 @@ public class DefaultStep extends AbstractStep {
 
         // If the bioen module is activated, no more use of the 
         // GrowthProcess class, use of the EnergyBudget module instead.
-        if (!getConfiguration().useBioen()) {
+        if (!getConfiguration().isBioenEnabled()) {
             // initiliaza growth process
             growthProcess = new GrowthProcess(getRank());
             growthProcess.init();
@@ -129,7 +129,7 @@ public class DefaultStep extends AbstractStep {
         }
 
         // Reproduction processes
-        if (!getConfiguration().useBioen()) {
+        if (!getConfiguration().isBioenEnabled()) {
             reproductionProcess = new ReproductionProcess(getRank());
             reproductionProcess.init();
         } else {
@@ -139,7 +139,7 @@ public class DefaultStep extends AbstractStep {
         
         
         // Incoming flux
-        if (getConfiguration().useIncomingFlux()) {
+        if (getConfiguration().isIncomingFluxEnabled()) {
             incomingFLuxProcess = new IncomingFluxProcess(getRank());
             incomingFLuxProcess.init();
         }
@@ -162,7 +162,7 @@ public class DefaultStep extends AbstractStep {
         debug("  step " + iStepSimu);
 
         // Incoming flux            
-        if (getConfiguration().useIncomingFlux()) {
+        if (getConfiguration().isIncomingFluxEnabled()) {
             incomingFLuxProcess.run();
         }
 
@@ -192,7 +192,7 @@ public class DefaultStep extends AbstractStep {
 
         // If the bioen module is activated, then use of the
         // bioenProcess model instead.
-        if (!getConfiguration().useBioen()) {
+        if (!getConfiguration().isBioenEnabled()) {
             // Growth
             growthProcess.run();
         } else {

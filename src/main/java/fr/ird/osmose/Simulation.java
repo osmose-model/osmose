@@ -223,7 +223,7 @@ public class Simulation extends OsmoseLinker {
         }
         
         
-        if (this.getConfiguration().useGenetic()) {
+        if (this.getConfiguration().isGeneticEnabled()) {
             List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
             this.n_evolving_trait = genet_keys.size();
             this.evolvingTrait = new ArrayList<>();
