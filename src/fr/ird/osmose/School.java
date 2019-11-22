@@ -166,6 +166,8 @@ public class School extends AbstractSchool {
     private double e_net;      // net energy (gross - maintenance)
     private double ingestion;   // total ingestion
     private double kappa;    // kappa value
+    double ingestionTot = 0; // sum of all the food ingested during life of the 
+                             // school
     
     /** Mortality rates associated with the bioen module. */
     private double mort_oxy_rate = 0;
@@ -176,6 +178,7 @@ public class School extends AbstractSchool {
     private double ageMature = 0;
     private double sizeMature = 0;
     private boolean isMature = false;
+    
     
 ///////////////
 // Constructors
@@ -596,6 +599,16 @@ public class School extends AbstractSchool {
      */
     public double getIngestion() {
         return this.ingestion;
+    }
+    
+    
+    // Calculate the total ingestion of food during life of the school 
+    public double getIngestionTot(){
+        return this.ingestionTot;
+    }
+    
+    public void updateIngestionTot(double ingestion, double abundance) {
+        this.ingestionTot += (ingestion/abundance);
     }
 
     /**

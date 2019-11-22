@@ -93,6 +93,7 @@ public class EnergyBudget extends AbstractProcess {
         for (School school : getSchoolSet().getAliveSchools()) {
             this.get_egross(school);   // computes E_gross, stored in the attribute.
             this.get_maintenance(school);   // computes E_maintanance
+            school.updateIngestionTot(school.getIngestion(),school.getInstantaneousAbundance());
 
             try {
                 this.get_maturation(school);   // computes maturation properties for the species.

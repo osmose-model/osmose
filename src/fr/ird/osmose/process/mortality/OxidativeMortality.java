@@ -33,7 +33,8 @@ public class OxidativeMortality extends AbstractMortality {
     @Override
     public double getRate(School school) {
         // calculation of PhiT
-        return this.k_dam * school.getIngestion()/school.getAbundance();
+        // This mortality increase with individual ingestion --> division by abundance
+        return this.k_dam * school.getIngestionTot();
     }
    
 }
