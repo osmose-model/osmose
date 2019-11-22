@@ -21,7 +21,7 @@ public class OxidativeMortality extends AbstractMortality {
 
     @Override
     public void init() {
-
+        
         k_dam = 0.d;
         String key = "bioen.damage.k_dam";
         if (!getConfiguration().isNull(key)) {
@@ -29,11 +29,11 @@ public class OxidativeMortality extends AbstractMortality {
         }
 
     }
-
+    
     @Override
     public double getRate(School school) {
         // calculation of PhiT
-        return this.k_dam * school.getEGross();
+        return this.k_dam * school.getIngestion()/school.getAbundance();
     }
-
+   
 }
