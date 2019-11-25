@@ -56,6 +56,7 @@ import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -84,14 +85,6 @@ public class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Number of time step in the RSC time series inputed to Osmose. This value
-     * must be a multiple of the number of time step per year in Osmose. It
-     * means the user can provide either one year, 5 years or 50 years of RSC
-     * data and Osmose will loop over it (if necessary) until the end of the
-     * simulation.
-     */
-    private int nRscStep;
-    /**
      * Array of float that stores the biomass, in tonne, of every RSC groups on
      * the Osmose grid for the current time step of the simulation.
      * {@code biomass[n_rsc_groups][nline_osmose][ncolumn_osmose]}. The array is
@@ -117,6 +110,11 @@ public class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
      */
     private double[] multiplier;
 
+    /**
+     *
+     */
+    private int[] timeLength;
+
 //////////////
 // Constructor
 //////////////
@@ -135,9 +133,6 @@ public class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
     @Override
     public void init() {
 
-        // Read number of LTL steps
-        nRscStep = getConfiguration().getInt("ltl.nstep");
-
         // Read conversion factors
         int nRsc = getConfiguration().getNRscSpecies();
 
@@ -145,10 +140,13 @@ public class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
         uBiomass = new double[nRsc];
         // Resource multplier
         multiplier = new double[nRsc];
+        // Time length
+        timeLength = new int[nRsc];
 
         for (int iRsc = 0; iRsc < nRsc; iRsc++) {
             if (!getConfiguration().isNull("resource.biomass.total.rsc" + iRsc)) {
                 uBiomass[iRsc] = getConfiguration().getDouble("resource.biomass.total.rsc" + iRsc) / getGrid().getNOceanCell();
+                timeLength[iRsc] = getConfiguration().getNStepYear();
             } else if (!getConfiguration().isNull("resource.file.rsc" + iRsc)) {
                 // set negative value to uniform biomass
                 uBiomass[iRsc] = -1.d;
@@ -165,9 +163,10 @@ public class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
                     Variable variable = nc.findVariable(name);
                     int[] shape = variable.getShape();
                     // check time length
-                    if (nRscStep != shape[0]) {
-                        throw new IOException("Parameter ltl.nstep=" + nRscStep + " does not match time dimension=" + shape[0] + " of the NetCDF resource group " + iRsc);
+                    if ((shape[0] < getConfiguration().getNStep()) && (shape[0] % getConfiguration().getNStepYear() != 0)) {
+                        throw new IOException("Time dimension of the NetCDF resource group " + iRsc + " must be a multiple of the number of time steps per year");
                     }
+                    timeLength[iRsc] = shape[0];
                     // check grid dimension
                     if (getGrid().get_ny() != shape[1] | getGrid().get_nx() != shape[2]) {
                         throw new IOException("NetCDF grid dimensions of resource group " + iRsc + " does not match Osmose grid dimensions");
@@ -189,10 +188,8 @@ public class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
     }
 
     /**
-     * Updates the biomass of the LTL groups at the current time step of the
-     * simulation. Get the raw biomass of the LTL groups on their original grid
-     * and with their original unit and interpolates and integrates it on the
-     * Osmose grid in order to get tonnes of wet weight.
+     * Updates the biomass of the resource groups at the current time step of
+     * the simulation.
      *
      * @param iStepSimu, the current step of the simulation
      */
@@ -200,47 +197,64 @@ public class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
     public void update(int iStepSimu) {
 
         // Reset biomass matrix
-        biomass = new double[getConfiguration().getNRscSpecies()][getGrid().get_ny()][getGrid().get_nx()];
-
-        int iStepNc = iStepSimu % nRscStep;
-        int nx = getGrid().get_nx();
-        int ny = getGrid().get_ny();
+        biomass = new double[getConfiguration().getNRscSpecies()][][];
 
         for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
-            biomass[iRsc] = new double[getGrid().get_ny()][getGrid().get_nx()];
+
             // Check whether the biomass is read from NetCDF file or uniform
-            if (uBiomass[iRsc] < 0) {
-                // Resource biomass from NetCDF file
-                String name = getConfiguration().getString("resource.name.rsc" + iRsc);
-                String ncFile = getConfiguration().getFile("resource.file.rsc" + iRsc);
-                try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
-                    Variable variable = nc.findVariable(name);
-                    Array ncbiomass = variable.read(new int[]{iStepNc, 0, 0}, new int[]{1, ny, nx}).reduce();
-                    Index index = ncbiomass.getIndex();
-                    for (Cell cell : getGrid().getCells()) {
-                        if (!cell.isLand()) {
-                            int i = cell.get_igrid();
-                            int j = cell.get_jgrid();
-                            index.set(j, i);
-                            biomass[iRsc][j][i] = ncbiomass.getDouble(index);
-                        }
-                    }
-                } catch (IOException | InvalidRangeException ex) {
-                    error("File " + ncFile + ", variable " + name + "cannot be read", ex);
-                }
-            } else {
-                // Uniform resource biomass
-                for (Cell cell : getGrid().getCells()) {
-                    if (!cell.isLand()) {
-                        biomass[iRsc][cell.get_jgrid()][cell.get_igrid()] = uBiomass[iRsc];
-                    }
-                }
-            }
+            biomass[iRsc] = (uBiomass[iRsc] < 0)
+                    ? readBiomass(iRsc, iStepSimu)
+                    : fillBiomass(uBiomass[iRsc]);
         }
     }
 
     @Override
     public double getBiomass(int iRsc, Cell cell) {
         return multiplier[iRsc] * biomass[iRsc][cell.get_jgrid()][cell.get_igrid()];
+    }
+
+    double[][] readBiomass(int iRsc, int iStepSimu) {
+
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
+
+        double[][] rscbiomass = new double[ny][nx];
+
+        String name = getConfiguration().getString("resource.name.rsc" + iRsc);
+        String ncFile = getConfiguration().getFile("resource.file.rsc" + iRsc);
+        try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
+            Variable variable = nc.findVariable(name);
+            int nTimeStep = variable.getShape(0);
+            int iStepNc = iStepSimu % nTimeStep;
+            Array ncbiomass = variable.read(new int[]{iStepNc, 0, 0}, new int[]{1, ny, nx}).reduce();
+            Index index = ncbiomass.getIndex();
+            for (Cell cell : getGrid().getCells()) {
+                if (!cell.isLand()) {
+                    int i = cell.get_igrid();
+                    int j = cell.get_jgrid();
+                    index.set(j, i);
+                    rscbiomass[j][i] = ncbiomass.getDouble(index);
+                }
+            }
+        } catch (IOException | InvalidRangeException ex) {
+            error("File " + ncFile + ", variable " + name + "cannot be read", ex);
+        }
+        return rscbiomass;
+    }
+
+    int getTimeLength(int iRsc) {
+        return timeLength[iRsc];
+    }
+
+    private double[][] fillBiomass(double b) {
+
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
+
+        double[][] rscbiomass = new double[ny][nx];
+        for (double[] row : rscbiomass) {
+            Arrays.fill(row, b);
+        }
+        return rscbiomass;
     }
 }

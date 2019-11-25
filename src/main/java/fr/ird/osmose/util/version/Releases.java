@@ -261,6 +261,18 @@ public class Releases {
                 // got rid of iterative mortality process, so only one mortality algorithm left
                 deprecateParameter("mortality.algorithm");
             }
+        },
+        new Release("4.2.3") {
+        @Override
+        void updateParameters() {
+            
+            // time length of the resource groups is defined in the NetCDF file
+            // consistency of the tiem length can be done with value from NetCDF
+            // file, no need for overparametrisation.
+            deprecateParameter("ltl.nstep");
+            
+            }
+            
         }
     };
 }

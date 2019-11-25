@@ -79,19 +79,26 @@ public class LTLFastForcing extends AbstractLTLForcing {
         super.init();
 
         // Read number of LTL steps
-        int nLTLStep = getConfiguration().getInt("ltl.nstep");
         int nRsc = getConfiguration().getNRscSpecies();
 
         // Initialises biomass variable
-        biomass = new double[nLTLStep][nRsc][getGrid().get_ny()][getGrid().get_nx()];
-        for (int iTime = 0; iTime < nLTLStep; iTime++) {
+        biomass = new double[nRsc][][][];
+        int maxTimeLength = 0;
+        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
+            biomass[iRsc] = new double[getTimeLength(iRsc)][getGrid().get_ny()][getGrid().get_nx()];
+            maxTimeLength = Math.max(getTimeLength(iRsc), maxTimeLength);
+
+        }
+        for (int iTime = 0; iTime < maxTimeLength; iTime++) {
             super.update(iTime);
             for (int iRsc = 0; iRsc < nRsc; iRsc++) {
-                for (Cell cell : getGrid().getCells()) {
-                    if (!cell.isLand()) {
-                        int i = cell.get_igrid();
-                        int j = cell.get_jgrid();
-                        biomass[iTime][iRsc][j][i] = super.getBiomass(iRsc, cell);
+                if (iTime < biomass[iRsc].length) {
+                    for (Cell cell : getGrid().getCells()) {
+                        if (!cell.isLand()) {
+                            int i = cell.get_igrid();
+                            int j = cell.get_jgrid();
+                            biomass[iRsc][iTime][j][i] = super.getBiomass(iRsc, cell);
+                        }
                     }
                 }
             }
@@ -100,8 +107,8 @@ public class LTLFastForcing extends AbstractLTLForcing {
 
     @Override
     public double getBiomass(int iRsc, Cell cell) {
-        int ltlTimeStep = getSimulation().getIndexTimeSimu() % biomass.length;
-        return biomass[ltlTimeStep][iRsc][cell.get_jgrid()][cell.get_igrid()];
+        int rscTimeStep = getSimulation().getIndexTimeSimu() % getTimeLength(iRsc);
+        return biomass[iRsc][rscTimeStep][cell.get_jgrid()][cell.get_igrid()];
     }
 
     /**
