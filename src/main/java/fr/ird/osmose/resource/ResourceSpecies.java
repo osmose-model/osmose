@@ -49,8 +49,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose;
+package fr.ird.osmose.resource;
 
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**

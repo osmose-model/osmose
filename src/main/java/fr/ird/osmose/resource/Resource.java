@@ -49,8 +49,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose;
+package fr.ird.osmose.resource;
 
+import fr.ird.osmose.Cell;
+import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.OsmoseLinker;
 

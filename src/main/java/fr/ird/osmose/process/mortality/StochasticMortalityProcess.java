@@ -55,7 +55,7 @@ import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
-import fr.ird.osmose.Resource;
+import fr.ird.osmose.resource.Resource;
 import fr.ird.osmose.background.BackgroundSchool;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.process.bioen.BioenStarvationMortality;
@@ -253,7 +253,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
             for (Resource resource : resources) {    // loop over the resources
                 int iRsc = resource.getRscIndex();
                 double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
-                        * getForcing().getBiomass(iRsc, resource.getCell());
+                        * getResourceForcing(iRsc).getBiomass(resource.getCell());
                 resource.setBiomass(accessibleBiom);
             }
         }

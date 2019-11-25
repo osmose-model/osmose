@@ -51,15 +51,15 @@
  */
 package fr.ird.osmose;
 
-import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
+import fr.ird.osmose.resource.ResourceCaching;
+import fr.ird.osmose.resource.ResourceForcing;
 import fr.ird.osmose.step.AbstractStep;
 import fr.ird.osmose.step.DefaultStep;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import ucar.nc2.NetcdfFile;
@@ -73,8 +73,8 @@ import ucar.nc2.NetcdfFile;
  * The {@code Simulation} initialises all the required components for running
  * the simulation such as
  * {@link fr.ird.osmose.step.AbstractStep}, {@link fr.ird.osmose.ltl.LTLForcing}
- * or {@link fr.ird.osmose.populator.PopulatingProcess} and then controls the loop
- * over time.
+ * or {@link fr.ird.osmose.populator.PopulatingProcess} and then controls the
+ * loop over time.
  *
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
@@ -95,7 +95,7 @@ public class Simulation extends OsmoseLinker {
     /**
      * The low trophic level forcing class.
      */
-    private LTLForcing forcing;
+    private ResourceForcing[] resourceForcing;
     /**
      * Current year of the simulation.
      */
@@ -145,8 +145,7 @@ public class Simulation extends OsmoseLinker {
      * Year to start writing the outputs
      */
     private int yearOutput;
-    
-        
+
     /**
      * List of evolving trait.
      */
@@ -172,7 +171,7 @@ public class Simulation extends OsmoseLinker {
 
         schoolSet.clear();
         step = null;
-        forcing = null;
+        resourceForcing = null;
         snapshot = null;
     }
 
@@ -221,8 +220,7 @@ public class Simulation extends OsmoseLinker {
                 error("Failed to open restart file " + ncfile, ex);
             }
         }
-        
-        
+
         if (this.getConfiguration().isGeneticEnabled()) {
             List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
             this.n_evolving_trait = genet_keys.size();
@@ -237,8 +235,8 @@ public class Simulation extends OsmoseLinker {
             }
         }
 
-        // Init LTL forcing
-        initForcing();
+        // Init resource forcing
+        initResourceForcing();
 
         // By default do not make prey records as it is memory expensive
         /**
@@ -278,24 +276,20 @@ public class Simulation extends OsmoseLinker {
 
         // Year to start writing the outputs
         yearOutput = getConfiguration().getInt("output.start.year");
-        
+
     }
 
     /**
-     * Creates a specific instance of {@link fr.ird.osmose.ltl.LTLForcing}.
+     * Initializes resources forcing.
      */
-    private void initForcing() {
+    private void initResourceForcing() {
 
-        String ltlClassName = getConfiguration().getString("ltl.java.classname");
-        String errMsg = "Failed to create new LTLForcing instance";
-        try {
-            debug("LTLForcing: " + ltlClassName);
-            forcing = (LTLForcing) Class.forName(ltlClassName).getConstructor(Integer.TYPE).newInstance(rank);
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
-            error(errMsg, ex);
+        int nRsc = getConfiguration().getNRscSpecies();
+        resourceForcing = new ResourceForcing[nRsc];
+        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
+            resourceForcing[iRsc] = new ResourceForcing(iRsc, ResourceCaching.ALL);
+            resourceForcing[iRsc].init();
         }
-
-        forcing.init();
     }
 
     /**
@@ -394,17 +388,18 @@ public class Simulation extends OsmoseLinker {
     }
 
     /**
-     * Returns the {@code LTLForcing} instance.
+     * Returns the {@code ResourceForcing} instance for specified resource.
      *
-     * @return the {@code LTLForcing} instance
+     * @param index, the index of the resource
+     * @return the {@code ResourceForcing} instance for specified resource.
      */
-    public LTLForcing getForcing() {
-        return forcing;
-    }    
-    
-    
+    public ResourceForcing getResourceForcing(int index) {
+        return resourceForcing[index];
+    }
+
     /**
      * Returns the ith evolving trait for the given simulation.
+     *
      * @param i Index of the evolving trait
      * @return A Trait object
      */
@@ -414,11 +409,11 @@ public class Simulation extends OsmoseLinker {
 
     /**
      * Returns the total number of evolving trait for the given simulation.
+     *
      * @return The number of evolving trait
      */
     public int getNEvolvingTraits() {
         return this.n_evolving_trait;
     }
 
-    
 }

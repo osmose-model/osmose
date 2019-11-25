@@ -53,8 +53,8 @@ package fr.ird.osmose.util;
 
 import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Simulation;
-import fr.ird.osmose.ltl.LTLForcing;
 import fr.ird.osmose.process.genet.Trait;
+import fr.ird.osmose.resource.ResourceForcing;
 
 /**
  *
@@ -80,8 +80,8 @@ public class SimulationLinker extends OsmoseLinker {
         return getOsmose().getSimulation(rank).getSchoolSet();
     }
 
-    public LTLForcing getForcing() {
-        return getOsmose().getSimulation(rank).getForcing();
+    public ResourceForcing getResourceForcing(int index) {
+        return getOsmose().getSimulation(rank).getResourceForcing(index);
     }
     
     

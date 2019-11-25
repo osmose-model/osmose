@@ -159,7 +159,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                 int j = cell.get_jgrid();
                 for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
                     // rscBiomass0 is the resource biomass at the beginning of the time step
-                    rscBiomass0[iRsc][j][i] = getSimulation().getForcing().getBiomass(iRsc, cell);
+                    rscBiomass0[iRsc][j][i] = getSimulation().getResourceForcing(iRsc).getBiomass(cell);
                     // rscBiomass1 is the resource biomass remaining in the water column after the predation process
                     rscBiomass1[iRsc][j][i] = rscBiomass0[iRsc][j][i] - preyedResources[iRsc];
                 }

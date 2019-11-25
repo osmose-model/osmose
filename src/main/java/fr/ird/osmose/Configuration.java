@@ -51,6 +51,7 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.resource.ResourceSpecies;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.AbstractGrid;

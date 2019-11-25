@@ -1,4 +1,4 @@
-/* 
+/*
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
@@ -49,77 +49,26 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.ltl;
-
-import fr.ird.osmose.Cell;
+package fr.ird.osmose.resource;
 
 /**
- * This class loads in memory all resource data from a NetCDF file at the
- * beginning of the simulation, conversely to LTLForcing class that loads the
- * data at each time step. It was coded in order to speed up configurations that
- * loop over the same year of NetCDF data during all the simulation.
- *
+ * Caching mode for resources biomass.
+ * 
  * @author P.Verley (philippe.verley@ird.fr)
  */
-public class LTLFastForcing extends AbstractLTLForcing {
+public enum ResourceCaching {
 
     /**
-     * The LTL biomass [TIME][NRESOURCE][NY][NX]
+     * No caching, resource biomass is read on the fly every time step.
      */
-    private double[][][][] biomass;
-
-    public LTLFastForcing(int rank) {
-        super(rank);
-    }
-
-    @Override
-    public void init() {
-
-        // initializes ResourceForcing
-        super.init();
-
-        // Read number of LTL steps
-        int nRsc = getConfiguration().getNRscSpecies();
-
-        // Initialises biomass variable
-        biomass = new double[nRsc][][][];
-        int maxTimeLength = 0;
-        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
-            biomass[iRsc] = new double[getTimeLength(iRsc)][getGrid().get_ny()][getGrid().get_nx()];
-            maxTimeLength = Math.max(getTimeLength(iRsc), maxTimeLength);
-
-        }
-        for (int iTime = 0; iTime < maxTimeLength; iTime++) {
-            super.update(iTime);
-            for (int iRsc = 0; iRsc < nRsc; iRsc++) {
-                if (iTime < biomass[iRsc].length) {
-                    for (Cell cell : getGrid().getCells()) {
-                        if (!cell.isLand()) {
-                            int i = cell.get_igrid();
-                            int j = cell.get_jgrid();
-                            biomass[iRsc][iTime][j][i] = super.getBiomass(iRsc, cell);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public double getBiomass(int iRsc, Cell cell) {
-        int rscTimeStep = getSimulation().getIndexTimeSimu() % getTimeLength(iRsc);
-        return biomass[iRsc][rscTimeStep][cell.get_jgrid()][cell.get_igrid()];
-    }
-
+    NONE,
     /**
-     * In the case of LTLFastForcing, and conversely to other classes extending
-     * AbstractLTLForcing, there is no data to update as it is already loaded in
-     * memory since the beginning of the simulation.
-     *
-     * @param iStepSimu, the current time step of the simulation
+     * Reads resource biomass and caches it for next access.
      */
-    @Override
-    public void update(int iStepSimu) {
-        // Do nothing
-    }
+    INCREMENTAL,
+    /**
+     * Caches all resource biomass at the beginning of the simulation.
+     */
+    ALL;
+
 }

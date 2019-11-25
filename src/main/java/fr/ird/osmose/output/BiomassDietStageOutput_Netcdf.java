@@ -179,7 +179,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
         double biomTot = 0.d;
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
-                biomTot += getSimulation().getForcing().getBiomass(iRsc, cell);
+                biomTot += getSimulation().getResourceForcing(iRsc).getBiomass(cell);
             }
         }
         return biomTot;

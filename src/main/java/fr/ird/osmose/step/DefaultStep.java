@@ -51,7 +51,6 @@
  */
 package fr.ird.osmose.step;
 
-import fr.ird.osmose.School;
 import fr.ird.osmose.output.OutputManager;
 import fr.ird.osmose.process.GrowthProcess;
 import fr.ird.osmose.process.IncomingFluxProcess;
@@ -166,13 +165,15 @@ public class DefaultStep extends AbstractStep {
             incomingFLuxProcess.run();
         }
 
-        // Reset some school state variables 
-        for (School school : getSchoolSet().getSchools()) {
+        // Reset some school state variables
+        getSchoolSet().getSchools().forEach((school) -> {
             school.init();
-        }
+        });
 
         // Update LTL biomass
-        getForcing().update(iStepSimu);
+        for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
+            getResourceForcing(iRsc).update(iStepSimu);
+        }
 
         // Some indicators might need a snapshot of the population
         // at the beginning of the step

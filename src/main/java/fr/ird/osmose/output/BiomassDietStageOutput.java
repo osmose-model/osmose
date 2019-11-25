@@ -192,7 +192,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
     }
     
     /**
-     * Gets the total biomass of the resource group over the grid.
+     * Gets the total biomass of the resource groups over the grid.
      *
      * @return the cumulated biomass over the domain in tonne
      */
@@ -200,7 +200,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         double biomTot = 0.d;
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
-                biomTot += getSimulation().getForcing().getBiomass(iRsc, cell);
+                biomTot += getSimulation().getResourceForcing(iRsc).getBiomass(cell);
             }
         }
         return biomTot;
