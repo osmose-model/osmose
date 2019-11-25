@@ -20,4 +20,3 @@ Options summary:
    -P and -update options are mutually exclusive.
    -verbose     Enable verbose output
    -quiet     Only print error message
-   -indiseas    (beta) Generates folder tree and java command line instructions for launching batches of Indiseas simulations.

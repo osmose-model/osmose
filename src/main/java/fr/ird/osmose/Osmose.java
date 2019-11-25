@@ -78,7 +78,7 @@ public class Osmose extends OLogger {
     /**
      * Static instance of Osmose.
      */
-    private final static Osmose osmose = new Osmose();
+    private final static Osmose OSMOSE = new Osmose();
     /**
      * Set of simulations with the same set of parameters (replicates).
      * Controlled by parameter <i>simulation.nsimu</i>
@@ -100,10 +100,6 @@ public class Osmose extends OLogger {
      * Whether to update the configuration files
      */
     private boolean updateConfiguration = false;
-    /**
-     * Run Indiseas simulation generator
-     */
-    private boolean flagIndiseas = false;
 
     /**
      * Read input arguments. If no argument are provided, Osmose assumes that it
@@ -170,12 +166,6 @@ public class Osmose extends OLogger {
                     error("Invalid command line options.", new IllegalArgumentException("-update and -P options are mutually exclusive."));
                 }
             }
-        }
-
-        // Usage3, INDISEAS
-        if (set.getSetName().equals("Usage3")) {
-            configurationFiles.add(set.getOption("indiseas").getResultValue(0));
-            flagIndiseas = true;
         }
 
         // Initialises the set of command line options
@@ -257,31 +247,19 @@ public class Osmose extends OLogger {
      */
     public void run() throws IOException, InvalidRangeException {
 
-        if (flagIndiseas) {
-            info("Creating Indiseas simulation batch from {0}", configurationFiles.get(0));
-            osmose.indiseas();
-            info("*********************************************");
-        } else if (updateConfiguration) {
+        if (updateConfiguration) {
             for (String configurationFile : configurationFiles) {
                 info("Updating configuration {0}", configurationFile);
-                osmose.update(configurationFile);
+                OSMOSE.update(configurationFile);
                 info("*********************************************");
             }
         } else {
             for (String configurationFile : configurationFiles) {
                 info("Running configuration {0}", configurationFile);
-                osmose.runConfiguration(configurationFile);
+                OSMOSE.runConfiguration(configurationFile);
                 info("*********************************************");
             }
         }
-    }
-
-    public void indiseas() {
-        configuration = new Configuration(configurationFiles.get(0), cmd);
-        configuration.load();
-        Indiseas indiseas = new Indiseas();
-        indiseas.init();
-        indiseas.run();
     }
 
     /**
@@ -484,16 +462,16 @@ public class Osmose extends OLogger {
      * @throws ucar.ma2.InvalidRangeException
      */
     public static void main(String... args) throws IOException, InvalidRangeException {
-        osmose.setupLogger();
-        osmose.readArgs(args);
-        osmose.info("*********************************************");
-        osmose.info("OSMOSE - Modelling Marin Exploited Ecosystems");
-        osmose.info("http://www.osmose-model.org");
-        osmose.info("*********************************************");
-        osmose.info("Software version: " + VersionManager.getInstance().getJarVersion());
-        osmose.run();
-        osmose.info("OSMOSE Model copyright © IRD");
-        osmose.info("*********************************************");
+        OSMOSE.setupLogger();
+        OSMOSE.readArgs(args);
+        OSMOSE.info("*********************************************");
+        OSMOSE.info("OSMOSE - Modelling Marin Exploited Ecosystems");
+        OSMOSE.info("http://www.osmose-model.org");
+        OSMOSE.info("*********************************************");
+        OSMOSE.info("Software version: " + VersionManager.getInstance().getJarVersion());
+        OSMOSE.run();
+        OSMOSE.info("OSMOSE Model copyright © IRD");
+        OSMOSE.info("*********************************************");
     }
 
     /**
@@ -501,7 +479,7 @@ public class Osmose extends OLogger {
      * @return
      */
     public static Osmose getInstance() {
-        return osmose;
+        return OSMOSE;
     }
 
     /**
