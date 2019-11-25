@@ -1,0 +1,39 @@
+# EEC main configuration file;
+osmose.configuration.simulation;eec_param-simulation-papierTROPHIC.csv
+osmose.configuration.movement;eec_param-movement.csv
+osmose.configuration.mortality.fishing;eec_param-fishing_2Phase.csv
+osmose.configuration.mortality.predation;eec_param-predation.csv
+osmose.configuration.mortality.starvation;eec_param-starvation.csv
+osmose.configuration.reproduction;eec_param-reproduction.csv
+osmose.configuration.species;eec_param-species.csv
+osmose.configuration.plankton;eec_param-ltl-papierTROPHIC.csv
+osmose.configuration.grid;eec_param-grid.csv
+osmose.configuration.initialization;eec_param-init-pop.csv
+osmose.configuration.migration;eec_param-out-mortality.csv
+osmose.configuration.output;eec_param-output_papierTROPHIC.csv
+osmose.configuration.mortality.additional;eec_param-additional-mortality_2Phase.csv
+;
+mortality.algorithm;stochastic
+mortality.subdt;10
+simulation.nschool.sp0;21
+simulation.nschool.sp1;35
+simulation.nschool.sp2;23
+simulation.nschool.sp3;19
+simulation.nschool.sp4;58
+simulation.nschool.sp5;14
+simulation.nschool.sp6;19
+simulation.nschool.sp7;34
+simulation.nschool.sp8;26
+simulation.nschool.sp9;37
+simulation.nschool.sp10;29
+simulation.nschool.sp11;16
+simulation.nschool.sp12;25
+simulation.nschool.sp13;28
+;
+# Osmose 3 Update 3 Release 0 (2018/01/15) Updated parameter osmose.version to Osmose 3 Update 3 Release 0 (2018/01/15);
+# Osmose 3 Update 3 Release 3 (2018/11/28) Updated parameter osmose.version to Osmose 3 Update 3 Release 3 (2018/11/28);
+# Osmose 4 Update 0 Release 0 (2019/02/12) Updated parameter osmose.version to Osmose 4 Update 0 Release 0 (2019/02/12)
+# Osmose 4 Update 1 Release 0 (2019/02/12) Updated parameter osmose.version to Osmose 4 Update 1 Release 0 (2019/02/12)
+# Osmose 4 Update 2 Release 0 (2019/03/22) Updated parameter osmose.version to Osmose 4 Update 2 Release 0 (2019/03/22)
+# Osmose 4 Update 2 Release 1 (2019/09/19) Updated parameter osmose.version to Osmose 4 Update 2 Release 1 (2019/09/19)
+osmose.version;Osmose 4 Update 2 Release 1 (2019/09/19)

@@ -1,0 +1,7 @@
+simulation.ncpu;1
+simulation.nplankton;10
+simulation.nsimulation;50
+simulation.nspecies;14
+# Osmose 3 Update 1 (2014/06/01) Renamed parameter simulation.restart.recordfrequency.ndt into output.restart.recordfrequency.ndt;
+simulation.time.ndtPerYear;24
+simulation.time.nyear;120
