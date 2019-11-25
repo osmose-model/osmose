@@ -263,16 +263,49 @@ public class Releases {
             }
         },
         new Release("4.2.3") {
-        @Override
-        void updateParameters() {
-            
-            // time length of the resource groups is defined in the NetCDF file
-            // consistency of the tiem length can be done with value from NetCDF
-            // file, no need for overparametrisation.
-            deprecateParameter("ltl.nstep");
-            
+            @Override
+            void updateParameters() {
+
+                // time length of the resource groups is defined in the NetCDF file
+                // consistency of the tiem length can be done with value from NetCDF
+                // file, no need for overparametrisation.
+                deprecateParameter("ltl.nstep");
+
+                // update every plankton.*.plk# parameter into resource.*.rsc#
+                int nRsc = getConfiguration().findKeys("plankton.name.plk*").size();
+                for (int index = 0; index < nRsc; index++) {
+                    updateKey("plankton.name.plk" + index, "resource.name.rsc" + index);
+                    updateKey("plankton.tl.plk" + index, "resource.tl.rsc" + index);
+                    updateKey("plankton.size.min.plk" + index, "resource.size.min.rsc" + index);
+                    updateKey("plankton.size.max.plk" + index, "resource.size.max.rsc" + index);
+                    updateKey("plankton.accessibility2fish.file.plk" + index, "resource.accessibility2fish.file.rsc" + index);
+                    updateKey("plankton.accessibility2fish.plk" + index, "resource.accessibility2fish.rsc" + index);
+                    updateKey("plankton.biomass.total.plk" + index, "resource.biomass.total.rsc" + index);
+                    updateKey("plankton.file.plk" + index, "resource.file.rsc" + index);
+                    updateKey("plankton.multiplier.plk" + index, "resource.multiplier.rsc" + index);
+                    deprecateParameter("plankton.conversion2tons.plk" + index);
+                }
+
+                // deprecate every other old parameters related to ltl management
+                deprecateParameter("ltl.netcdf.grid.file");
+                deprecateParameter("ltl.netcdf.var.lon");
+                deprecateParameter("ltl.netcdf.var.lat");
+                deprecateParameter("ltl.netcdf.var.bathy");
+                deprecateParameter("ltl.netcdf.var.csr");
+                deprecateParameter("ltl.netcdf.var.hc");
+                deprecateParameter("ltl.integration.depth");
+                deprecateParameter("ltl.netcdf.dim.ntime");
+                deprecateParameter("ltl.netcdf.var.zlevel");
+                deprecateParameter("ltl.netcdf.var.bathy");
+                deprecateParameter("ltl.netcdf.grid.file");
+                for (int index = 0; index < nRsc; index++) {
+                    deprecateParameter("ltl.netcdf.var.plankton.plk" + index);
+                }
+                for (int t = 0; t < getConfiguration().findKeys("ltl.netcdf.file.t*").size(); t++) {
+                    deprecateParameter("ltl.netcdf.file.t" + t);
+                }
+
             }
-            
         }
     };
 }
