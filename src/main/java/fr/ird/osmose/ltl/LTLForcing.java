@@ -62,7 +62,7 @@ public interface LTLForcing {
     /**
      * Initialises the LTLForcing. Read configuration files; load the LTL grid
      * (as it may be different from the Osmose grid); ensure that the LTL
-     * forcing files matches the description of the plankton groups; etc. Such
+     * forcing files matches the description of the resource groups; etc. Such
      * are the actions to be undertaken in this function.
      */
     public void init();
@@ -71,12 +71,12 @@ public interface LTLForcing {
      * Returns the biomass, in tonne, of a specified LTL group in a specified
      * cell at current time step of the simulation.
      *
-     * @param iPlk, the index of the LTL group
+     * @param iRsc, the index of the resource group
      * @param cell, a {@code Cell} of the grid
-     * @return the biomass, in tonne, of the LTL group at index {@code iLTL} in
-     * this {@code cell}}
+     * @return the biomass, in tonne, of the resource group at index
+     * {@code iRsc} in this {@code cell}}
      */
-    public double getBiomass(int iPlk, Cell cell);
+    public double getBiomass(int iRsc, Cell cell);
 
     /**
      * Updates the biomass of the LTL groups at the current time step of the

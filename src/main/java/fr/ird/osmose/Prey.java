@@ -79,11 +79,11 @@ public class Prey implements IMarineOrganism {
      */
     private final float trophicLevel;
     /**
-     * The index of the species or / plankton group of the prey. In order to
-     * distinguish a school from a plankton, the index follows the following
+     * The index of the species or resource group of the prey. In order to
+     * distinguish a school from a resource, the index follows the following
      * convention: index = index species if the prey is an instance of
-     * {@code School} and index = nSpecies + index plankton group if the prey is
-     * an instance of {@code Plankton}
+     * {@code School} and index = nSpecies + index resource group if the prey is
+     * an instance of {@code ResourceSpecies}
      */
     private final int index;
     /**
@@ -137,9 +137,10 @@ public class Prey implements IMarineOrganism {
 
     /**
      * Returns the index of the prey. In order to distinguish a school from a
-     * plankton, the index follows the following convention: index = index
+     * resource group, the index follows the following convention: index = index
      * species if the prey is an instance of {@code School} and index = nSpecies
-     * + index plankton group if the prey is an instance of {@code Plankton}
+     * + index resource group if the prey is an instance of
+     * {@code ResourceSpecies}
      *
      * @return the index of the prey
      */

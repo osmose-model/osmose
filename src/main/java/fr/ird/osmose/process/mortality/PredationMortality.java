@@ -80,7 +80,7 @@ public class PredationMortality extends AbstractMortality {
     /**
      * Accessibility matrix. Note that in the file, lines are preys while
      * columns are predators
-     * Array[nSpecies+nPlankton][nAccessStagePrey][nSpecies][nAccessStagePred]
+     * Array[nSp+nBkg+nRsc][nAccessStagePrey][nSpecies][nAccessStagePred]
      */
     private double[][][][] accessibilityMatrix;
     /*
@@ -99,14 +99,14 @@ public class PredationMortality extends AbstractMortality {
     @Override
     public void init() {
 
-        int nspec = getNSpecies();
-        int nPlankton = getConfiguration().getNPlankton();
-        int nBack = getConfiguration().getNBkgSpecies();
-        predPreySizesMax = new double[nspec + nBack][];
-        predPreySizesMin = new double[nspec + nBack][];
-        predationRate = new double[nspec + nBack];
+        int nsp = getNSpecies();
+        int nrsc = getConfiguration().getNRscSpecies();
+        int nbkg = getConfiguration().getNBkgSpecies();
+        predPreySizesMax = new double[nsp + nbkg][];
+        predPreySizesMin = new double[nsp + nbkg][];
+        predationRate = new double[nsp + nbkg];
 
-        for (int i = 0; i < nspec; i++) {
+        for (int i = 0; i < nsp; i++) {
             predPreySizesMax[i] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + i);
             predPreySizesMin[i] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.sp" + i);
             if (!getConfiguration().isBioenEnabled()) {
@@ -115,11 +115,11 @@ public class PredationMortality extends AbstractMortality {
         }
 
         // Recovering predation parameters for background species
-        for (int i = 0; i < nBack; i++) {
-            predPreySizesMax[i + nspec] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.bkg" + i);
-            predPreySizesMin[i + nspec] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.bkg" + i);
+        for (int i = 0; i < nbkg; i++) {
+            predPreySizesMax[i + nsp] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.bkg" + i);
+            predPreySizesMin[i + nsp] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.bkg" + i);
             if (!getConfiguration().isBioenEnabled()) {
-                predationRate[i + nspec] = getConfiguration().getDouble("predation.ingestion.rate.max.bkg" + i);
+                predationRate[i + nsp] = getConfiguration().getDouble("predation.ingestion.rate.max.bkg" + i);
             }
         }
                        
@@ -137,15 +137,15 @@ public class PredationMortality extends AbstractMortality {
             try (CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator())) {
                 List<String[]> lines = reader.readAll();
                 int l = 1;
-                accessibilityMatrix = new double[nspec + nBack + nPlankton][][][];   // lines are preys (order: focal, bkg, ltl)
-                for (int i = 0; i < nspec + nPlankton + nBack; i++) {
+                accessibilityMatrix = new double[nsp + nbkg + nrsc][][][];   // lines are preys (order: focal, bkg, rsc)
+                for (int i = 0; i < nsp + nrsc + nbkg; i++) {
                     int nStagePrey = accessStage.getNStage(i);
                     accessibilityMatrix[i] = new double[nStagePrey][][];
                     for (int j = 0; j < nStagePrey; j++) {
                         String[] line = lines.get(l);
                         int ll = 1;
-                        accessibilityMatrix[i][j] = new double[nspec + nBack][];      // columns are preds (order: focal, bkg)
-                        for (int k = 0; k < nspec + nBack; k++) {
+                        accessibilityMatrix[i][j] = new double[nsp + nbkg][];      // columns are preds (order: focal, bkg)
+                        for (int k = 0; k < nsp + nbkg; k++) {
                             int nStagePred = accessStage.getNStage(k);
                             accessibilityMatrix[i][j][k] = new double[nStagePred];
                             for (int m = 0; m < nStagePred; m++) {
@@ -161,17 +161,17 @@ public class PredationMortality extends AbstractMortality {
                 error("Error loading accessibility matrix from file " + filename, ex);
             }
         } else {
-            for (int i = 0; i < nspec; i++) {
+            for (int i = 0; i < nsp; i++) {
                 accessibilityMatrix[i] = new double[1][][];
-                accessibilityMatrix[i][0] = new double[nspec][];
-                for (int j = 0; j < nspec; j++) {
+                accessibilityMatrix[i][0] = new double[nsp][];
+                for (int j = 0; j < nsp; j++) {
                     accessibilityMatrix[i][0][j] = new double[]{0.8d};
                 }
             }
-            for (int i = nspec; i < nspec + nPlankton; i++) {
+            for (int i = nsp; i < nsp + nrsc; i++) {
                 accessibilityMatrix[i] = new double[1][][];
-                accessibilityMatrix[i][0] = new double[nspec][];
-                for (int j = 0; j < nspec; j++) {
+                accessibilityMatrix[i][0] = new double[nsp][];
+                for (int j = 0; j < nsp; j++) {
                     accessibilityMatrix[i][0][j] = new double[]{0.8d};
                 }
             }
@@ -259,20 +259,20 @@ public class PredationMortality extends AbstractMortality {
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
     }
 
-    private double[] getPercentPlankton(IAggregation predator) {
-        double[] percentPlankton = new double[getConfiguration().getNPlankton()];
+    private double[] getPercentResource(IAggregation predator) {
+        double[] percentResource = new double[getConfiguration().getNRscSpecies()];
         int iPred = predator.getSpeciesIndex();
         int iStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
-        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            if ((preySizeMin > getConfiguration().getPlankton(i).getSizeMax()) || (preySizeMax < getConfiguration().getPlankton(i).getSizeMin())) {
-                percentPlankton[i] = 0.0d;
+        for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
+            if ((preySizeMin > getConfiguration().getResourceSpecies(i).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(i).getSizeMin())) {
+                percentResource[i] = 0.0d;
             } else {
-                percentPlankton[i] = getConfiguration().getPlankton(i).computePercent(preySizeMin, preySizeMax);
+                percentResource[i] = getConfiguration().getResourceSpecies(i).computePercent(preySizeMin, preySizeMax);
             }
         }
-        return percentPlankton;
+        return percentResource;
     }
 
     /**
@@ -304,7 +304,7 @@ public class PredationMortality extends AbstractMortality {
         int iPredPreyStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iSpecPred][iPredPreyStage];
-        double[] percentPlankton = getPercentPlankton(predator);
+        double[] percentResource = getPercentResource(predator);
         int iStagePred = accessStage.getStage(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
@@ -323,10 +323,10 @@ public class PredationMortality extends AbstractMortality {
                     accessibility[iPrey] = 0.d; //no need to do it since initialization already set it to zero
                 }
             } else {
-                // The prey is a plankton group
+                // The prey is a resource group
                 iStagePrey = 0;
                 accessibility[iPrey] = accessibilityMatrix[iSpecPrey][iStagePrey][iSpecPred][iStagePred]
-                        * percentPlankton[iSpecPrey - getConfiguration().getNSpecies() - getConfiguration().getNBkgSpecies()];
+                        * percentResource[iSpecPrey - getConfiguration().getNSpecies() - getConfiguration().getNBkgSpecies()];
             }
         }
         return accessibility;

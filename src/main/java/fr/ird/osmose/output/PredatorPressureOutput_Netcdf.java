@@ -55,9 +55,7 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
-import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -108,7 +106,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void reset() {
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNPlankton();
+        int nPrey = nSpec + getConfiguration().getNRscSpecies();
         predatorPressure = new double[nSpec][][][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
             int nStage = dietOutputStage.getNStage(iSpec);
@@ -163,7 +161,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
                     }  // end of prey  stage
                 }  // end of prey species
 
-                for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
+                for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
                     arrOut.set(0, ipred, iprey, (float) (predatorPressure[iSpec][iStage][j][0] / this.getRecordFrequency()));
                     iprey++;
                 }
@@ -266,8 +264,8 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
             cpt++;
         }
 
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
-            listPrey.add(this.getConfiguration().getPlankton(j - nSpec).getName());
+        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
+            listPrey.add(this.getConfiguration().getResourceSpecies(j - nSpec).getName());
             this.nPreys++;
         }
 

@@ -183,13 +183,13 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
          */
         nc.addGroupAttribute(null, new Attribute("dimension_step", "step=0 before predation, step=1 after predation"));
         StringBuilder str = new StringBuilder();
-        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
-            str.append(kltl);
+        for (int krsc = 0; krsc < getConfiguration().getNRscSpecies(); krsc++) {
+            str.append(krsc);
             str.append("=");
-            str.append(getConfiguration().getPlankton(kltl));
+            str.append(getConfiguration().getResourceSpecies(krsc));
             str.append(" ");
         }
-        nc.addGroupAttribute(null, new Attribute("dimension_ltl", str.toString()));
+        nc.addGroupAttribute(null, new Attribute("dimension_rsc", str.toString()));
         str = new StringBuilder();
         for (int ispec = 0; ispec < getConfiguration().getNSpecies(); ispec++) {
             str.append(ispec);

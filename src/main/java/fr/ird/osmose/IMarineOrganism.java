@@ -75,7 +75,7 @@ public interface IMarineOrganism {
      * school species index is the index of the species in the configuration
      * file (species.name.sp#, index is the #). For LTL, the species index is
      * nSpecies + index of the LTL group in the configuration file
-     * (plankton.name.plk# the species index is nSpecies + #). This is error
+     * (resource.name.rsc# the species index is nSpecies + #). This is error
      * prone as every object that implements IMarineOrganism must carefully
      * check all the other objects that already implements IMarineOrganism for
      * generating a unique species index. For instance a new class Birds that

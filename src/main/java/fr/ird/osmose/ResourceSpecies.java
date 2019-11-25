@@ -54,56 +54,56 @@ package fr.ird.osmose;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
 /**
- * This class represents a plankton group or any other low trophic level
- * compartment of the ecosystem that is not explicitly represented in Osmose. A
- * plankton group provides a pool of biomass, spatially distributed, with a
- * given size range, accessible (to a certain level) to the schools of fish.
- * Plankton groups are therefore the forcing of the model. A plankton group is
+ * This class represents a resource such as a plankton group or any other low
+ * trophic level compartment of the ecosystem that is not explicitly represented
+ * in Osmose. A resource provides a pool of biomass, spatially distributed, with
+ * a given size range, accessible (to a certain level) to the schools of fish.
+ * Resources are therefore the forcing of the model. A resource species is
  * defined by :
  * <ul>
- * <li>a trophic level, parameter <i>plankton.TL.plk#</i></li>
- * <li>a size min and max, parameters <i>plankton.size.min.plk#</i> and
- * <i>plankton.size.max.plk#</i></li>
+ * <li>a trophic level, parameter <i>resource.TL.rsc#</i></li>
+ * <li>a size min and max, parameters <i>resource.size.min.rsc#</i> and
+ * <i>resource.size.max.rsc#</i></li>
  * <li>a conversion factor to wet weight [ton/km2], parameter
- * <i>plankton.conversion2tons.plk#</i></li>
- * <li>an accessibility coefficient, the percent of plankton available to the
- * fish, parameter <i>plankton.accessibility2fish.plk</i></li>
+ * <i>resource.conversion2tons.rsc#</i></li>
+ * <li>an accessibility coefficient, the percent of resource available to the
+ * fish, parameter <i>resource.accessibility2fish.rsc</i></li>
  * </ul>
  *
  * @author P.Verley (philippe.verley@ird.fr)
- * @version 3.0b 2013/09/01
+ * @version 4.2 2019/11/25
  */
-public class Plankton {
+public class ResourceSpecies {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Index of the plankton group
+     * Index of the resource group
      */
     private final int index;
     /**
-     * Trophic level of the plankton group. Parameter <i>plankton.TL.plk#</i>
+     * Trophic level of the resource group. Parameter <i>resource.TL.rsc#</i>
      */
     private final float trophicLevel;
     /**
-     * Size range, in centimetre, of the plankton group. Parameters
-     * <i>plankton.size.min.plk#</i> and
-     * <i>plankton.size.max.plk#</i>
+     * Size range, in centimeter, of the resource group. Parameters
+     * <i>resource.size.min.rsc#</i> and
+     * <i>resource.size.max.rsc#</i>
      */
     private final double sizeMin, sizeMax;
     /**
-     * Name of the plankton group. (e.g. phytoplankton, diatoms, copepods).
-     * Parameter <i>plankton.name.plk#</i>
+     * Name of the resource group. (e.g. phytoplankton, diatoms, copepods).
+     * Parameter <i>resource.name.rsc#</i>
      */
     private final String name;
     /**
-     * Fraction of plankton biomass available to the fish, ranging [0, 1].
-     * Parameter <i>plankton.accessibility2fish.plk#</i>
+     * Fraction of the resource biomass available to the fish, ranging [0, 1].
+     * Parameter <i>resource.accessibility2fish.rsc#</i>
      */
     private final double[] accessibilityCoeff;
     /**
-     * Maximum value for plankton accessibility. It should never be one or
+     * Maximum value for resource accessibility. It should never be one or
      * exceed one to avoid any numerical problem when converting from float to
      * double.
      */
@@ -113,26 +113,26 @@ public class Plankton {
 // Constructors
 ///////////////
     /**
-     * Initialises a new plankton group with characteristics given as
+     * Initializes a new resource species with characteristics given as
      * parameters.
      *
-     * @param index, index of the plankton group
+     * @param index, index of the resource group
      */
-    public Plankton(int index) {
-        
+    public ResourceSpecies(int index) {
+
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
         // Initialisation of parameters
-        name = cfg.getString("plankton.name.plk" + index);
-        sizeMin = cfg.getDouble("plankton.size.min.plk" + index);
-        sizeMax = cfg.getDouble("plankton.size.max.plk" + index);
-        trophicLevel = cfg.getFloat("plankton.tl.plk" + index);
-        if (!cfg.isNull("plankton.accessibility2fish.file.plk" + index)) {
+        name = cfg.getString("resource.name.rsc" + index);
+        sizeMin = cfg.getDouble("resource.size.min.rsc" + index);
+        sizeMax = cfg.getDouble("resource.size.max.rsc" + index);
+        trophicLevel = cfg.getFloat("resource.tl.rsc" + index);
+        if (!cfg.isNull("resource.accessibility2fish.file.rsc" + index)) {
             SingleTimeSeries ts = new SingleTimeSeries();
-            ts.read(cfg.getFile("plankton.accessibility2fish.file.plk" + index));
+            ts.read(cfg.getFile("resource.accessibility2fish.file.rsc" + index));
             accessibilityCoeff = ts.getValues();
         } else {
-            double accessibility = cfg.getDouble("plankton.accessibility2fish.plk" + index);
+            double accessibility = cfg.getDouble("resource.accessibility2fish.rsc" + index);
             accessibilityCoeff = new double[cfg.getNStep()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
@@ -148,17 +148,17 @@ public class Plankton {
     }
 
     /**
-     * Computes the fraction of the plankton size range that is contained within
+     * Computes the fraction of the resource size range that is contained within
      * the given size range. The size range given as parameter represents the
      * minimal and maximal prey size that a predator can prey upon. Therefore
-     * this function helps to determine the fraction of the plankton biomass
+     * this function helps to determine the fraction of the resource biomass
      * available to a predator.
      *
-     * @param accessibleSizeMin, the minimal prey size, in centimetre, that a
+     * @param accessibleSizeMin, the minimal prey size, in centimeter, that a
      * predator can prey upon
-     * @param accessibleSizeMax, the maximal prey size, in centimetre, that a
+     * @param accessibleSizeMax, the maximal prey size, in centimeter, that a
      * predator can prey upon
-     * @return the fraction of the plankton size range that matches the size
+     * @return the fraction of the resource size range that matches the size
      * range given as parameter.
      */
     public double computePercent(double accessibleSizeMin, double accessibleSizeMax) {
@@ -168,10 +168,10 @@ public class Plankton {
     }
 
     /**
-     * Returns the maximal size of the organisms in the plankton group.
-     * Parameter <i>plankton.size.max.plk#</i>
+     * Returns the maximal size of the organisms in the resource group.
+     * Parameter <i>resource.size.max.rsc#</i>
      *
-     * @return the maximal size, in centimetre, of the organisms in the plankton
+     * @return the maximal size, in centimeter, of the organisms in the resource
      * group
      */
     public double getSizeMax() {
@@ -179,10 +179,10 @@ public class Plankton {
     }
 
     /**
-     * Returns the minimal size of the organisms in the plankton group.
-     * Parameter <i>plankton.size.min.plk#</i>
+     * Returns the minimal size of the organisms in the resource group.
+     * Parameter <i>resource.size.min.rsc#</i>
      *
-     * @return the minimal size, in centimetre, of the organisms in the plankton
+     * @return the minimal size, in centimeter, of the organisms in the resource
      * group
      */
     public double getSizeMin() {
@@ -190,20 +190,20 @@ public class Plankton {
     }
 
     /**
-     * Returns the name of the plankton group. Parameter
-     * <i>plankton.name.plk#</i>
+     * Returns the name of the resource group. Parameter
+     * <i>resource.name.rsc#</i>
      *
-     * @return the name of the plankton group
+     * @return the name of the resource group
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Returns the name of the plankton group.
+     * Returns the name of the resource group.
      *
      * @see #getName()
-     * @return the name of the plankton group
+     * @return the name of the resource group
      */
     @Override
     public String toString() {
@@ -211,19 +211,19 @@ public class Plankton {
     }
 
     /**
-     * Returns the index of the plankton group.
+     * Returns the index of the resource group.
      *
-     * @return the index of the plankton group
+     * @return the index of the resource group
      */
     public int getIndex() {
         return index;
     }
 
     /**
-     * Returns the averaged trophic level of the plankton group. Parameter
-     * <i>plankton.TL.plk#</i>
+     * Returns the averaged trophic level of the resource group. Parameter
+     * <i>resource.TL.rsc#</i>
      *
-     * @return the averaged trophic level of the plankton group
+     * @return the averaged trophic level of the resource group
      */
     public float getTrophicLevel() {
         return trophicLevel;

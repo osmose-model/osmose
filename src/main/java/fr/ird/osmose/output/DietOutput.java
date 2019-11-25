@@ -96,7 +96,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
     @Override
     public void reset() {
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNPlankton();
+        int nPrey = nSpec + getConfiguration().getNRscSpecies();
         diet = new double[nSpec][][][];
         abundanceStage = new double[nSpec][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
@@ -175,10 +175,10 @@ public class DietOutput extends SimulationLinker implements IOutput {
                 prw.println();
             }
         }
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
+        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
             prw.print(time);
             prw.print(separator);
-            prw.print(getConfiguration().getPlankton(j - nSpec));
+            prw.print(getConfiguration().getResourceSpecies(j - nSpec));
             prw.print(separator);
             for (int i = 0; i < nSpec; i++) {
                 int nStagePred = dietOutputStage.getNStage(i);

@@ -379,7 +379,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new SpatialOutput(rank));
         }
         if (getConfiguration().getBoolean("output.spatial.ltl.enabled")) {
-            outputs.add(new LTLOutput(rank));
+            outputs.add(new ResourceOutput(rank));
         }
 
         // Debugging outputs

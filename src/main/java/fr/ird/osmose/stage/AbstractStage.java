@@ -70,13 +70,13 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
     @Override
     public void init() {
 
-        int nSpec = getNSpecies();
-        int nPlnk = getConfiguration().getNPlankton();
-        int nBack = getConfiguration().getNBkgSpecies();   // barrier.n
-        thresholds = new float[nSpec + nPlnk + nBack][];
+        int nSp = getNSpecies();
+        int nRsc = getConfiguration().getNRscSpecies();
+        int nBkg = getConfiguration().getNBkgSpecies();
+        thresholds = new float[nSp + nRsc + nBkg][];
         
-        // Set values for background species.
-        for (int i = 0; i < nSpec; i++) {
+        // Set values for focal species.
+        for (int i = 0; i < nSp; i++) {
             int nStage = !getConfiguration().isNull(key + i)
                     ? getConfiguration().getArrayString(key + i).length + 1
                     : 1;
@@ -90,20 +90,20 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
         // Set values for background species
         // replace ".sp" index by ".bkg" for background species
         String keybkg = key.replace(".sp", "bkg");
-        for (int i = 0; i < nBack; i++) {
+        for (int i = 0; i < nBkg; i++) {
             int nStage = !getConfiguration().isNull(keybkg + i)
                     ? getConfiguration().getArrayString(keybkg + i).length + 1
                     : 1;
             if (nStage > 1) {
-                thresholds[i + nSpec] = getConfiguration().getArrayFloat(keybkg + i);
+                thresholds[i + nSp] = getConfiguration().getArrayFloat(keybkg + i);
             } else {
-                thresholds[i + nSpec] = new float[0];
+                thresholds[i + nSp] = new float[0];
             }
         }
         
-        // Set values for PLK
-        for (int i = 0; i < nPlnk; i++) {
-            thresholds[nSpec + nBack + i] = new float[0];
+        // Set values for resources
+        for (int i = 0; i < nRsc; i++) {
+            thresholds[nSp + nBkg + i] = new float[0];
         }
         
     }

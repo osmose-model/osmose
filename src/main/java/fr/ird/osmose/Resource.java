@@ -55,20 +55,21 @@ import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.OsmoseLinker;
 
 /**
- * The Swarm is the equivalent of the School in Osmose for the plankton group.
- * It is simplified though as the Swarm is only used in the predation process.
- * We only need to keep track of the preyed biomass to provide the instantaneous
- * biomass. In this class we make no distinction between abundance and biomass
- * 
- * 
+ * The Resource is the equivalent of the School in Osmose for the resource
+ * group. It is simplified though as the Resource is only used in the predation
+ * process. We only need to keep track of the preyed biomass to provide the
+ * instantaneous biomass. In this class we make no distinction between abundance
+ * and biomass
+ *
+ *
  * @author P. Verley
  */
-public class Swarm extends OsmoseLinker implements IAggregation {
+public class Resource extends OsmoseLinker implements IAggregation {
 
     /**
-     * Pointer to the plankton group
+     * Pointer to the resource group
      */
-    final private Plankton plankton;
+    final private ResourceSpecies species;
     /**
      * Pointer to the cell where this swarm is located
      */
@@ -82,14 +83,14 @@ public class Swarm extends OsmoseLinker implements IAggregation {
      */
     private double abundance;
     /**
-     * Number of dead plankton in the current time step, killed by predation
+     * Number of dead organisms in the current time step, killed by predation
      */
     private double nDead;
 
-    public Swarm(Plankton plankton, Cell cell) {
-        this.plankton = plankton;
+    public Resource(ResourceSpecies species, Cell cell) {
+        this.species = species;
         this.cell = cell;
-        this.index = plankton.getIndex() + getNSpecies() + this.getNBkgSpecies();
+        this.index = species.getIndex() + getNSpecies() + this.getNBkgSpecies();
     }
 
     /**
@@ -115,11 +116,11 @@ public class Swarm extends OsmoseLinker implements IAggregation {
     public double getInstantaneousAbundance() {
         return Math.max(0.d, abundance - nDead);
     }
-  
+
     public void setBiomass(double biomass) {
 
         // Update abundance
-        // (for plankton Osmose makes no difference between abundance and biomass)
+        // (for resource Osmose makes no difference between abundance and biomass)
         abundance = biomass;
         // Rest number of dead fish
         nDead = 0.d;
@@ -171,7 +172,7 @@ public class Swarm extends OsmoseLinker implements IAggregation {
     public double biom2abd(double biomass) {
         return biomass;
     }
-    
+
     @Override
     public double abd2biom(double abund) {
         return abund;
@@ -194,20 +195,21 @@ public class Swarm extends OsmoseLinker implements IAggregation {
 
     @Override
     public float getTrophicLevel() {
-        return plankton.getTrophicLevel();
+        return species.getTrophicLevel();
     }
 
     @Override
     public float getWeight() {
         return 1.f;
     }
-    
+
+    @Override
     public Cell getCell() {
         return cell;
     }
-    
-    public int getLTLIndex() {
-        return plankton.getIndex();
+
+    public int getRscIndex() {
+        return species.getIndex();
     }
 
     @Override

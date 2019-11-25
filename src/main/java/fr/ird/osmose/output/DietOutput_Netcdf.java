@@ -55,12 +55,8 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
-import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,7 +64,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
@@ -102,7 +97,7 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void reset() {
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNPlankton();
+        int nPrey = nSpec + getConfiguration().getNRscSpecies();
         diet = new double[nSpec][][][];
         abundanceStage = new double[nSpec][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
@@ -158,9 +153,7 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
         try {
             Variable tvar = this.getNc().findVariable("time");
             getNc().write(tvar, new int[]{index}, arrTime);
-        } catch (IOException ex) {
-            Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
+        } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -176,10 +169,10 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
                     }  // end of Prey Stage loop
                 }   // end of loop on species prey
 
-                for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
+                for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
                     arrOut.set(0, ipred, iprey, (float) (100.d * diet[iSpec][st][j][0] / abundanceStage[iSpec][st]));
                     iprey++;
-                }  // end of loop of plankton as preys
+                }  // end of loop of resources as preys
                 ipred++;
             }  // end of predator stage loop
         }  // end of predator species loop 
@@ -187,9 +180,7 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
         try {
             Variable outvar = this.getNc().findVariable(this.getVarname());
             getNc().write(outvar, new int[]{index, 0, 0}, arrOut);
-        } catch (IOException ex) {
-            Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
+        } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(DietOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
         
@@ -251,8 +242,8 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
             cpt++;
         }
 
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
-            listPrey.add(this.getConfiguration().getPlankton(j - nSpec).getName());
+        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
+            listPrey.add(this.getConfiguration().getResourceSpecies(j - nSpec).getName());
             this.nPreys++;
         }
 

@@ -86,7 +86,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             nColumns += dietOutputStage.getNStage(iSpec);
         }
-        nColumns += getConfiguration().getNPlankton();
+        nColumns += getConfiguration().getNRscSpecies();
         
         super.init();
     }
@@ -133,8 +133,8 @@ public class BiomassDietStageOutput extends AbstractOutput {
             }
         }
 
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
-            headers[k] = getConfiguration().getPlankton(j - nSpec).getName();
+        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
+            headers[k] = getConfiguration().getResourceSpecies(j - nSpec).getName();
             k++;
         }
         return headers;
@@ -146,23 +146,23 @@ public class BiomassDietStageOutput extends AbstractOutput {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         }
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNPlankton();
+        int nPrey = nSpec + getConfiguration().getNRscSpecies();
         for (int i = nSpec; i < nPrey; i++) {
-            int iPlankton = i - nSpec;
-            biomassStage[i][0] += getTotalBiomass(iPlankton);
+            int iRsc = i - nSpec;
+            biomassStage[i][0] += getTotalBiomass(iRsc);
         }
     }
 
     @Override
     public void reset() {
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNPlankton();
+        int nPrey = nSpec + getConfiguration().getNRscSpecies();
         biomassStage = new double[nPrey][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
             biomassStage[iSpec] = new double[dietOutputStage.getNStage(iSpec)];
         }
         for (int i = nSpec; i < nPrey; i++) {
-            // we consider just 1 stage per plankton group
+            // we consider just 1 stage per resource group
             biomassStage[i] = new double[1];
         }
     }
@@ -184,7 +184,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
                 k++;
             }
         }
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNPlankton()); j++) {
+        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
             biomass[k] = biomassStage[j][0] / nsteps;
             k++;
         }
@@ -192,15 +192,15 @@ public class BiomassDietStageOutput extends AbstractOutput {
     }
     
     /**
-     * Gets the total biomass of the plankton group over the grid.
+     * Gets the total biomass of the resource group over the grid.
      *
      * @return the cumulated biomass over the domain in tonne
      */
-    private double getTotalBiomass(int iPlankton) {
+    private double getTotalBiomass(int iRsc) {
         double biomTot = 0.d;
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
-                biomTot += getSimulation().getForcing().getBiomass(iPlankton, cell);
+                biomTot += getSimulation().getForcing().getBiomass(iRsc, cell);
             }
         }
         return biomTot;

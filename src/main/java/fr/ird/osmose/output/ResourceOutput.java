@@ -74,7 +74,7 @@ import ucar.nc2.Variable;
  *
  * @author pverley
  */
-public class LTLOutput extends SimulationLinker implements IOutput {
+public class ResourceOutput extends SimulationLinker implements IOutput {
 
     /**
      * _FillValue attribute for cells on land
@@ -85,18 +85,18 @@ public class LTLOutput extends SimulationLinker implements IOutput {
      */
     private NetcdfFileWriter nc;
     /**
-     * LTL biomass array at the beginning of the time step.
+     * Resource biomass array at the beginning of the time step.
      */
-    private double[][][] ltlbiomass0;
+    private double[][][] rscBiomass0;
     /**
-     * LTL biomass array after predation process.
+     * Resource biomass array after predation process.
      */
-    private double[][][] ltlbiomass1;
+    private double[][][] rscBiomass1;
     
     private int index;
-    private Variable timeVar, ltlbiomVar, ltlbiomPredVar, lonVar, latVar;
+    private Variable timeVar, rscBiomVar, rscBiomPredVar, lonVar, latVar;
 
-    public LTLOutput(int rank) {
+    public ResourceOutput(int rank) {
         super(rank);
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
@@ -132,8 +132,8 @@ public class LTLOutput extends SimulationLinker implements IOutput {
     public void reset() {
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
-        ltlbiomass0 = new double[getConfiguration().getNPlankton()][ny][nx];
-        ltlbiomass1 = new double[getConfiguration().getNPlankton()][ny][nx];
+        rscBiomass0 = new double[getConfiguration().getNRscSpecies()][ny][nx];
+        rscBiomass1 = new double[getConfiguration().getNRscSpecies()][ny][nx];
     }
 
     @Override
@@ -143,25 +143,25 @@ public class LTLOutput extends SimulationLinker implements IOutput {
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!(cell.isLand())) {
-                // Preyed biomass for every LTL group in current cell
-                double[] preyedLTL = new double[getConfiguration().getNPlankton()];
+                // Preyed biomass for every resource group in current cell
+                double[] preyedResources = new double[getConfiguration().getNRscSpecies()];
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         for (Prey prey : school.getPreys()) {
-                            int iltl = prey.getSpeciesIndex() - nspec;
-                            if (iltl >= 0) {
-                                preyedLTL[iltl] += prey.getBiomass();
+                            int iRsc = prey.getSpeciesIndex() - nspec;
+                            if (iRsc >= 0) {
+                                preyedResources[iRsc] += prey.getBiomass();
                             }
                         }
                     }
                 }
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    // ltl_biomass is the plankton biomass at the beginning of the time step
-                    ltlbiomass0[iltl][j][i] = getSimulation().getForcing().getBiomass(iltl, cell);
-                    // ltl_biomass_pred is the plankton biomass remaining in the water column after the predation process
-                    ltlbiomass1[iltl][j][i] = ltlbiomass0[iltl][j][i] - preyedLTL[iltl];
+                for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
+                    // rscBiomass0 is the resource biomass at the beginning of the time step
+                    rscBiomass0[iRsc][j][i] = getSimulation().getForcing().getBiomass(iRsc, cell);
+                    // rscBiomass1 is the resource biomass remaining in the water column after the predation process
+                    rscBiomass1[iRsc][j][i] = rscBiomass0[iRsc][j][i] - preyedResources[iRsc];
                 }
             }
         }
@@ -175,22 +175,22 @@ public class LTLOutput extends SimulationLinker implements IOutput {
             int j = cell.get_jgrid();
             // Set _FillValue on land cells
             if (cell.isLand()) {
-                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
-                    ltlbiomass0[iltl][j][i] = FILLVALUE;
-                    ltlbiomass1[iltl][j][i] = FILLVALUE;
+                for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
+                    rscBiomass0[iRsc][j][i] = FILLVALUE;
+                    rscBiomass1[iRsc][j][i] = FILLVALUE;
                 }
             }
         }
 
         // Write into NetCDF file
-        ArrayFloat.D4 arrLTL0 = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().get_ny(), getGrid().get_nx());
-        ArrayFloat.D4 arrLTL1 = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrRsc0 = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrRsc1 = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
         int nl = getGrid().get_ny() - 1;
-        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
+        for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    arrLTL0.set(0, kltl, j, i, (float) ltlbiomass0[kltl][j][i]);
-                    arrLTL1.set(0, kltl, j, i, (float) ltlbiomass1[kltl][j][i]);
+                    arrRsc0.set(0, iRsc, j, i, (float) rscBiomass0[iRsc][j][i]);
+                    arrRsc1.set(0, iRsc, j, i, (float) rscBiomass1[iRsc][j][i]);
                 }
             }
         }
@@ -200,12 +200,12 @@ public class LTLOutput extends SimulationLinker implements IOutput {
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(ltlbiomVar, new int[]{index, 0, 0, 0}, arrLTL0);
+            nc.write(rscBiomVar, new int[]{index, 0, 0, 0}, arrRsc0);
             nc.write(timeVar, new int[]{index}, arrTime);
-            nc.write(this.ltlbiomPredVar, new int[]{index, 0, 0, 0}, arrLTL1);
+            nc.write(this.rscBiomPredVar, new int[]{index, 0, 0, 0}, arrRsc1);
             this.index++;
         } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -216,13 +216,13 @@ public class LTLOutput extends SimulationLinker implements IOutput {
              */
             nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, ncfile);
         } catch (IOException ex) {
-            Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
  
         /*
          * Create dimensions
          */
-        Dimension ltlDim = nc.addDimension(null, "ltl", getConfiguration().getNPlankton());
+        Dimension rscDim = nc.addDimension(null, "rsc", getConfiguration().getNRscSpecies());
         Dimension nxDim = nc.addDimension(null, "nx", getGrid().get_nx());
         Dimension nyDim = nc.addDimension(null, "ny", getGrid().get_ny());
         Dimension timeDim = nc.addUnlimitedDimension("time");
@@ -234,15 +234,15 @@ public class LTLOutput extends SimulationLinker implements IOutput {
         timeVar.addAttribute(new Attribute("calendar", "360_day"));
         timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
         
-        ltlbiomVar = nc.addVariable(null, "ltl_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, nyDim, nxDim)));
-        ltlbiomVar.addAttribute(new Attribute("units", "tons per cell"));
-        ltlbiomVar.addAttribute(new Attribute("description", "plankton biomass in osmose cell, in tons integrated on water column, per group and per cell"));
-        ltlbiomVar.addAttribute(new Attribute("_FillValue", -99.f));
+        rscBiomVar = nc.addVariable(null, "rsc_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, rscDim, nyDim, nxDim)));
+        rscBiomVar.addAttribute(new Attribute("units", "tons per cell"));
+        rscBiomVar.addAttribute(new Attribute("description", "resource biomass in osmose cell, in tons integrated on water column, per group and per cell"));
+        rscBiomVar.addAttribute(new Attribute("_FillValue", -99.f));
         
-        ltlbiomPredVar = nc.addVariable(null, "ltl_biomass_pred", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, nyDim, nxDim)));
-        ltlbiomPredVar.addAttribute(new Attribute("units", "tons per cell"));
-        ltlbiomPredVar.addAttribute(new Attribute("description", "plankton biomass after predation process in osmose cell, in tons integrated on water column, per group and per cell"));
-        ltlbiomPredVar.addAttribute(new Attribute("_FillValue", -99.f));
+        rscBiomPredVar = nc.addVariable(null, "rsc_biomass_pred", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, rscDim, nyDim, nxDim)));
+        rscBiomPredVar.addAttribute(new Attribute("units", "tons per cell"));
+        rscBiomPredVar.addAttribute(new Attribute("description", "resource biomass after predation process in osmose cell, in tons integrated on water column, per group and per cell"));
+        rscBiomPredVar.addAttribute(new Attribute("_FillValue", -99.f));
         
         latVar = nc.addVariable(null, "latitude", DataType.FLOAT,  new ArrayList<>(Arrays.asList(nyDim, nxDim)));
         latVar.addAttribute(new Attribute( "units", "degree"));
@@ -255,13 +255,13 @@ public class LTLOutput extends SimulationLinker implements IOutput {
          * Add global attributes
          */
         StringBuilder str = new StringBuilder();
-        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
-            str.append(kltl);
+        for (int kRsc = 0; kRsc < getConfiguration().getNRscSpecies(); kRsc++) {
+            str.append(kRsc);
             str.append("=");
-            str.append(getConfiguration().getPlankton(kltl));
+            str.append(getConfiguration().getResourceSpecies(kRsc));
             str.append(" ");
         }
-        nc.addGroupAttribute(null, new Attribute("dimension_ltl", str.toString()));
+        nc.addGroupAttribute(null, new Attribute("dimension_rsc", str.toString()));
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -279,7 +279,7 @@ public class LTLOutput extends SimulationLinker implements IOutput {
             nc.write(lonVar, arrLon);
             nc.write(latVar, arrLat);
         } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(LTLOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -287,10 +287,10 @@ public class LTLOutput extends SimulationLinker implements IOutput {
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
-        filename.append("planktonBiomass");
+        filename.append("resourceBiomass");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_ltlbiomass_integrated_");
+        filename.append("_rscbiomass_integrated_");
         filename.append("Simu");
         filename.append(getRank());
         filename.append(".nc.part");

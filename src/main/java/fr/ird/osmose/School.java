@@ -106,7 +106,7 @@ public class School extends AbstractSchool {
     
     /**
      * The index of the species. From [0; nSpec-1] for fish and from [nSpec;
-     * nSpec+nLTL-1] for plankton.
+     * nSpec+nLTL-1] for resource.
      */
     private final int index;
     /**
@@ -339,10 +339,9 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Returns the averaged trophic level of the plankton group. Parameter
-     * <i>plankton.TL.plk#</i>
+     * Returns the trophic level of the fish.
      *
-     * @return the averaged trophic level of the plankton group
+     * @return the trophic level of fish
      */
     @Override
     public float getTrophicLevel() {

@@ -55,7 +55,7 @@ import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
-import fr.ird.osmose.Swarm;
+import fr.ird.osmose.Resource;
 import fr.ird.osmose.background.BackgroundSchool;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.process.bioen.BioenStarvationMortality;
@@ -116,13 +116,13 @@ public class StochasticMortalityProcess extends AbstractProcess {
     private OxidativeMortality oxidativeMortality;
 
     /**
-     * The set of plankton swarms
+     * The set of resource aggregations
      */
-    private HashMap<Integer, List<Swarm>> swarmSet;
+    private HashMap<Integer, List<Resource>> resourcesSet;
 
     /**
      * The set of background species schools. Structure is (cell index, list of
-     * swarms)
+     * schools)
      */
     private HashMap<Integer, List<BackgroundSchool>> bkgSet;
 
@@ -180,10 +180,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
             fishingMortality.init();
         }
 
-        // Create a new swarm set, empty at the moment
-        swarmSet = new HashMap();
+        // Create a new resources set, empty at the moment
+        resourcesSet = new HashMap();
 
-        // Create a new bkg swarm, emty for the moment
+        // Create a new bkg set, emty for the moment
         // Structure 
         bkgSet = new HashMap();
 
@@ -213,20 +213,20 @@ public class StochasticMortalityProcess extends AbstractProcess {
             if (null == schools) {
                 continue;
             }
-            // Create the list of preys by gathering the schools and the plankton group
+            // Create the list of preys by gathering the schools and the resource groups
             List<IAggregation> preys = new ArrayList();
             preys.addAll(schools);
-            preys.addAll(getSwarms(cell));
+            preys.addAll(getResources(cell));
 
             // recovers the list of schools for background species and
             // for the current cell. add this to the list of preys 
             // for the current cell
             preys.addAll(this.getBackgroundSchool(cell));
 
-            // NOTE: at this stage, swarm and bkg biomass is not initialized but 
+            // NOTE: at this stage, rsc and bkg biomass is not initialized but 
             // it does not matter: only size is used to define access.
             // Loop over focal schools, which are viewed here as predators.
-            // Consider predation over plankton, focal species and background species.
+            // Consider predation over resource, background and focal species.
             for (School school : schools) {
                 school.setAccessibility(predationMortality.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
@@ -247,21 +247,21 @@ public class StochasticMortalityProcess extends AbstractProcess {
 
         } // end of cell loop
 
-        // Update swarms biomass
+        // Update resources biomass
         int iStepSimu = getSimulation().getIndexTimeSimu();
-        for (List<Swarm> swarms : swarmSet.values()) {    // basically a loop over the cells
-            for (Swarm swarm : swarms) {    // basically a loop over the LTL classes
-                int iltl = swarm.getLTLIndex();
-                double accessibleBiom = getConfiguration().getPlankton(iltl).getAccessibility(iStepSimu)
-                        * getForcing().getBiomass(iltl, swarm.getCell());
-                swarm.setBiomass(accessibleBiom);
+        for (List<Resource> resources : resourcesSet.values()) {    // loop over the cells
+            for (Resource resource : resources) {    // loop over the resources
+                int iRsc = resource.getRscIndex();
+                double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
+                        * getForcing().getBiomass(iRsc, resource.getCell());
+                resource.setBiomass(accessibleBiom);
             }
         }
 
         // Update background species biomass
         int istep = getSimulation().getIndexTimeSimu();
-        for (List<BackgroundSchool> bkgCell : bkgSet.values()) {    // basically a loop over the cells
-            for (BackgroundSchool bkgTmp : bkgCell) {    // basically a loop over all the background species + class
+        for (List<BackgroundSchool> bkgCell : bkgSet.values()) {    // loop over the cells
+            for (BackgroundSchool bkgTmp : bkgCell) {    // loop over all the background species + class
                 bkgTmp.setStep(istep);
                 bkgTmp.init();
             }
@@ -302,7 +302,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         }
         int ns = schools.size();
 
-        // Create the list of preys by gathering the schools and the plankton group
+        // Create the list of preys by gathering the schools and the resource groups
         List<IAggregation> preys = new ArrayList();
         preys.addAll(schools);
         for (School prey : schools) {
@@ -312,7 +312,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
             }
         }
 
-        preys.addAll(getSwarms(cell));
+        preys.addAll(getResources(cell));
 
         // Recover the list of background schools for the current cell
         List<BackgroundSchool> bkgSchool = this.getBackgroundSchool(cell);
@@ -321,7 +321,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         // barrier.n: adding background species to the list of possible preys.
         preys.addAll(bkgSchool);
 
-        // preys contains focal species + LTL + bkg species
+        // preys contains focal species + resources + bkg species
         // Arrays for loop over schools are initialised with nfocal + nbackgroud
         Integer[] seqPred = new Integer[ns + nBkg];
         for (int i = 0; i < ns + nBkg; i++) {
@@ -459,15 +459,15 @@ public class StochasticMortalityProcess extends AbstractProcess {
         }   // end of school loop species loop
     }    // end of function
 
-    private List<Swarm> getSwarms(Cell cell) {
-        if (!swarmSet.containsKey(cell.getIndex())) {
-            List<Swarm> swarms = new ArrayList();
-            for (int iLTL = 0; iLTL < getConfiguration().getNPlankton(); iLTL++) {
-                swarms.add(new Swarm(getConfiguration().getPlankton(iLTL), cell));
+    private List<Resource> getResources(Cell cell) {
+        if (!resourcesSet.containsKey(cell.getIndex())) {
+            List<Resource> resources = new ArrayList();
+            for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
+                resources.add(new Resource(getConfiguration().getResourceSpecies(iRsc), cell));
             }
-            swarmSet.put(cell.getIndex(), swarms);
+            resourcesSet.put(cell.getIndex(), resources);
         }
-        return swarmSet.get(cell.getIndex());
+        return resourcesSet.get(cell.getIndex());
     }
 
     /**
@@ -606,7 +606,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
     /**
      * Recovers the list of background schools for the current cell. If the
      * current cell does not contain any background school yet, they are added.
-     * This is the same as for the getSwarms method.
+     * This is the same as for the getResources method.
      *
      * @param cell
      * @return

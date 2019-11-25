@@ -192,10 +192,10 @@ public class Configuration extends OLogger {
      */
     private int nSpecies;
     /**
-     * Number of plankton groups that force the simulation. Parameter
-     * <i>simulation.nplankton</i>
+     * Number of resource groups that force the simulation. Parameter
+     * <i>simulation.nresource</i>
      */
-    private int nPlankton;
+    private int nResource;
     /**
      * Number of replicated simulations. It is the number of simulation to be
      * run with the same set of parameters. Parameter <i>simulation.nsimu</i>
@@ -235,9 +235,9 @@ public class Configuration extends OLogger {
      */
     private Species[] species;
     /**
-     * Array of the LTL groups of the simulation.
+     * Array of the resource species of the simulation.
      */
-    private Plankton[] ltlGroups;
+    private ResourceSpecies[] rscSpecies;
 
     /**
      * Number of species that are not explicitely modelled. Parameter
@@ -248,7 +248,7 @@ public class Configuration extends OLogger {
     /**
      * Array of background species.
      */
-    private BackgroundSpecies[] bgSpecies; // barrier.n
+    private BackgroundSpecies[] bkgSpecies; // barrier.n
 
     /**
      * True if the bioenergetic module should be activated.
@@ -380,7 +380,7 @@ public class Configuration extends OLogger {
             nCpu = 1;
         }
         nSpecies = getInt("simulation.nspecies");
-        nPlankton = getInt("simulation.nplankton");
+        nResource = getInt("simulation.nresource");
         nSimulation = getInt("simulation.nsimulation");
         nStepYear = getInt("simulation.time.ndtperyear");
         // PhV 20160203, new parameter simulation.time.nstep
@@ -420,13 +420,13 @@ public class Configuration extends OLogger {
 
         }
 
-        // Init plankton groups
-        ltlGroups = new Plankton[nPlankton];
-        for (int p = 0; p < ltlGroups.length; p++) {
-            ltlGroups[p] = new Plankton(p);
+        // Init resource groups
+        rscSpecies = new ResourceSpecies[nResource];
+        for (int rsc = 0; rsc < rscSpecies.length; rsc++) {
+            rscSpecies[rsc] = new ResourceSpecies(rsc);
             // Name must contain only alphanumerical characters
-            if (!ltlGroups[p].getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Plankton name must contain alphanumeric characters only. Please rename " + ltlGroups[p].getName(), null);
+            if (!rscSpecies[rsc].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Resource name must contain alphanumeric characters only. Please rename " + rscSpecies[rsc].getName(), null);
             }
         }
 
@@ -438,9 +438,9 @@ public class Configuration extends OLogger {
         }
 
         // Initialisation of the Background array.
-        bgSpecies = new BackgroundSpecies[nBackground];
-        for (int p = 0; p < bgSpecies.length; p++) {
-            bgSpecies[p] = new BackgroundSpecies(p);
+        bkgSpecies = new BackgroundSpecies[nBackground];
+        for (int p = 0; p < bkgSpecies.length; p++) {
+            bkgSpecies[p] = new BackgroundSpecies(p);
         }
     }
 
@@ -469,13 +469,13 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Gets the specified plankton group.
+     * Gets the specified resource group.
      *
-     * @param index, the index of the plankton group.
-     * @return the plankton group number iPlankton.
+     * @param index, the index of the resource group.
+     * @return the resource group with given index
      */
-    public Plankton getPlankton(int index) {
-        return ltlGroups[index];
+    public ResourceSpecies getResourceSpecies(int index) {
+        return rscSpecies[index];
     }
 
     /**
@@ -951,13 +951,13 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the number of plankton groups. Parameter
-     * <i>simulation.nplanton</i>
+     * Returns the number of resource species. Parameter
+     * <i>simulation.nresource</i>
      *
-     * @return the number of plankton groups.
+     * @return the number of resource groups.
      */
-    public int getNPlankton() {
-        return nPlankton;
+    public int getNRscSpecies() {
+        return nResource;
     }
 
     /**
@@ -1062,7 +1062,7 @@ public class Configuration extends OLogger {
      * @return the species at index {@code index}
      */
     public BackgroundSpecies getBkgSpecies(int index) {
-        return bgSpecies[index];
+        return bkgSpecies[index];
     }
         
     

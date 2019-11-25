@@ -87,7 +87,7 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
     @Override
     public void reset() {
-        values = new double[getNSpecies() + getConfiguration().getNPlankton()][getNClass()];
+        values = new double[getNSpecies() + getConfiguration().getNRscSpecies()][getNClass()];
     }
 
     @Override
@@ -142,7 +142,7 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     void init_nc_dims_coords() {
 
         // Defines the prey dimension and coordinate. 
-        Dimension preyDim = getNc().addDimension(null, "prey_index", getNSpecies() + getConfiguration().getNPlankton());
+        Dimension preyDim = getNc().addDimension(null, "prey_index", getNSpecies() + getConfiguration().getNRscSpecies());
         StringBuilder bld = new StringBuilder();
 
         Variable preyvar = getNc().addVariable(null, "prey_index", DataType.FLOAT, preyDim.getFullName());
@@ -153,9 +153,9 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
             k++;
         }
 
-        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
+        for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
             String name = String.format("prey%d", k);
-            preyvar.addAttribute(new Attribute(name, getConfiguration().getPlankton(i).getName()));
+            preyvar.addAttribute(new Attribute(name, getConfiguration().getResourceSpecies(i).getName()));
             k++;
         }
 
@@ -163,7 +163,7 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
         Dimension classDim = getNc().addDimension(null, this.getDisName(), this.getNClass());
         Variable disvar = getNc().addVariable(null, this.getDisName(), DataType.FLOAT, classDim.getFullName());
       
-        this.setDims(new ArrayList<Dimension>(Arrays.asList(getTimeDim(), classDim, preyDim)));
+        this.setDims(new ArrayList(Arrays.asList(getTimeDim(), classDim, preyDim)));
 
         getNc().addGroupAttribute(null, new Attribute("Species: ", this.species.getName()));
         
@@ -174,7 +174,7 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
        
         try {
             // Writes variable trait (trait names) and species (species names)
-            ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies() + getConfiguration().getNPlankton());
+            ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies() + getConfiguration().getNRscSpecies());
             for (int i = 0; i < this.getNSpecies(); i++) {
                 arrSpecies.set(i, i);
             }

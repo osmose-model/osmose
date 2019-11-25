@@ -136,7 +136,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
          * Create dimensions
          */
         Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        Dimension ltlDim = nc.addDimension(null, "ltl", getConfiguration().getNPlankton());
+        Dimension ltlDim = nc.addDimension(null, "ltl", getConfiguration().getNRscSpecies());
         Dimension columnsDim = nc.addDimension(null, "nx", getGrid().get_nx());
         Dimension linesDim = nc.addDimension(null, "ny", getGrid().get_ny());
         Dimension timeDim = nc.addUnlimitedDimension("time");
@@ -175,7 +175,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         
         ltlbiomVar = nc.addVariable(null, "ltl_biomass", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, linesDim, columnsDim)));
         ltlbiomVar.addAttribute(new Attribute("units", "ton/km2"));
-        ltlbiomVar.addAttribute(new Attribute("description", "plankton biomass, in tons per km2 integrated on water column, per group and per cell"));
+        ltlbiomVar.addAttribute(new Attribute("description", "resource biomass, in tons per km2 integrated on water column, per group and per cell"));
         ltlbiomVar.addAttribute(new Attribute("_FillValue", -99.f));
         
         latvar = nc.addVariable(null, "latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
@@ -190,10 +190,10 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
          */
         nc.addGroupAttribute(null, new Attribute("dimension_step", "step=0 before predation, step=1 after predation"));
         StringBuilder str = new StringBuilder();
-        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
+        for (int kltl = 0; kltl < getConfiguration().getNRscSpecies(); kltl++) {
             str.append(kltl);
             str.append("=");
-            str.append(getConfiguration().getPlankton(kltl));
+            str.append(getConfiguration().getResourceSpecies(kltl));
             str.append(" ");
         }
         nc.addGroupAttribute(null, new Attribute("dimension_ltl", str.toString()));
@@ -256,7 +256,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         biomass = new float[nSpecies][ny][nx];
         mean_size = new float[nSpecies][ny][nx];
         tl = new float[nSpecies][ny][nx];
-        ltlbiomass = new float[getConfiguration().getNPlankton()][ny][nx];
+        ltlbiomass = new float[getConfiguration().getNRscSpecies()][ny][nx];
         abundance = new float[nSpecies][ny][nx];
         yield = new float[nSpecies][ny][nx];
     }
@@ -283,7 +283,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                         }
                     }
                 }
-                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
+                for (int iltl = 0; iltl < getConfiguration().getNRscSpecies(); iltl++) {
                     ltlbiomass[iltl][j][i] = (float) getSimulation().getForcing().getBiomass(iltl, cell);
                 }
             }
@@ -306,7 +306,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                     tl[ispec][j][i] = FILLVALUE;
                     yield[ispec][j][i] = FILLVALUE;
                 }
-                for (int iltl = 0; iltl < getConfiguration().getNPlankton(); iltl++) {
+                for (int iltl = 0; iltl < getConfiguration().getNRscSpecies(); iltl++) {
                     ltlbiomass[iltl][j][i] = FILLVALUE;
                 }
             } else {
@@ -328,7 +328,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         ArrayFloat.D4 arrYield = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
         ArrayFloat.D4 arrSize = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
         ArrayFloat.D4 arrTL = new ArrayFloat.D4(1, nSpecies, getGrid().get_ny(), getGrid().get_nx());
-        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getConfiguration().getNPlankton(), getGrid().get_ny(), getGrid().get_nx());
+        ArrayFloat.D4 arrLTL = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
         for (int kspec = 0; kspec < nSpecies; kspec++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
@@ -340,7 +340,7 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 }
             }
         }
-        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
+        for (int kltl = 0; kltl < getConfiguration().getNRscSpecies(); kltl++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
                     arrLTL.set(0, kltl, j, i, ltlbiomass[kltl][j][i]);

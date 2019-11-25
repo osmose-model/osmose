@@ -75,7 +75,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
     
     @Override
     public void reset() {
-        values = new double[getNSpecies() + getConfiguration().getNPlankton()][getNClass()];
+        values = new double[getNSpecies() + getConfiguration().getNRscSpecies()][getNClass()];
     }
 
     @Override
@@ -106,13 +106,13 @@ public class DietDistribOutput extends AbstractDistribOutput {
 
     @Override
     String[] getHeaders() {
-        String[] headers = new String[getNSpecies() + getConfiguration().getNPlankton() + 1];
+        String[] headers = new String[getNSpecies() + getConfiguration().getNRscSpecies() + 1];
         headers[0] = getType().toString();
         for (int i = 0; i < getNSpecies(); i++) {
             headers[i + 1] = getSpecies(i).getName();
         }
-        for (int i = 0; i < getConfiguration().getNPlankton(); i++) {
-            headers[i + getNSpecies() + 1] = getConfiguration().getPlankton(i).getName();
+        for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
+            headers[i + getNSpecies() + 1] = getConfiguration().getResourceSpecies(i).getName();
         }
         return headers;
     }
@@ -140,12 +140,12 @@ public class DietDistribOutput extends AbstractDistribOutput {
     
     @Override
     public void write(float time) {
-        // values = new double[getNSpecies() + getConfiguration().getNPlankton()][getNClass()];
+        // values = new double[getNSpecies() + getConfiguration().getNResource()][getNClass()];
         int nClass = this.getNClass();
-        double[][] array = new double[nClass][getNSpecies() + getConfiguration().getNPlankton() + 1];
+        double[][] array = new double[nClass][getNSpecies() + getConfiguration().getNRscSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
             array[iClass][0] = this.getClassThreshold(iClass);
-            for (int iSpec = 0; iSpec < getNSpecies() + getConfiguration().getNPlankton(); iSpec++) {
+            for (int iSpec = 0; iSpec < getNSpecies() + getConfiguration().getNRscSpecies(); iSpec++) {
                 array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
             }
         }

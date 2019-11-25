@@ -71,7 +71,7 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Factor for converting biomass from plankton unit to wet weight in
+     * Factor for converting biomass from resource unit to wet weight in
      * tonne/m3. (e.g. mmolN/m3 to tonne/m3)
      */
     double[] conversionFactor;
@@ -93,9 +93,9 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     private double[][][] biomass;
     /**
      * The constant biomass, in tonne, in a cell of the model. Parameter
-     * 'plankton.biomass.total.plk#' provides the total biomass of a given
-     * plankton group in the system for every time step. This feature allows to
-     * consider a plankton group with a constant biomass uniformly distributed
+     * 'resource.biomass.total.rsc#' provides the total biomass of a given
+     * resource group in the system for every time step. This feature allows to
+     * consider a resource group with a constant biomass uniformly distributed
      * over the grid of the model and over time. This feature has been added as
      * a quick patch for a configuration that seems to lack a food compartment
      * and as a result cannot reach any biomass equilibrium. It provides to the
@@ -105,8 +105,8 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     private double[] uBiomass;
 
     /**
-     * Multiplier of the plankton biomass. Parameter 'plankton.multiplier.plk#'
-     * for virtually increasing or decreasing plankton biomass.
+     * Multiplier of the resource biomass. Parameter 'resource.multiplier.rsc#'
+     * for virtually increasing or decreasing resource biomass.
      */
     private double[] multiplier;
 
@@ -126,15 +126,15 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 // Definition of the abstract methods
 /////////////////////////////////////
     /**
-     * Get the 3D biomass of the specified plankton group on the LTL grid for a
+     * Get the 3D biomass of the specified resource group on the LTL grid for a
      * given time step. The biomass is expressed in the same unit as it is in
      * the forcing file. Dimensions must be ordered as [jLTL][iLTL][zLTL]
      *
-     * @param iPlankton, the index of a plankton group
+     * @param iRsc, the index of a resource group
      * @param iStepSimu, the current step of the simulation
      * @return an array of same dimension and unit than the LTL grid
      */
-    abstract float[][][] getRawBiomass(int iPlankton, int iStepSimu);
+    abstract float[][][] getRawBiomass(int iRsc, int iStepSimu);
 
     /**
      * List the LTL cells that overlap a given Osmose cell. The LTL cells are
@@ -194,14 +194,14 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         nLTLStep = getConfiguration().getInt("ltl.nstep");
 
         // Read conversion factors
-        int nPlk = getConfiguration().getNPlankton();
-        conversionFactor = new double[nPlk];
-        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
-            if (!getConfiguration().isNull("plankton.conversion2tons.plk" + iPlk)) {
-                conversionFactor[iPlk] = getConfiguration().getDouble("plankton.conversion2tons.plk" + iPlk);
+        int nRsc = getConfiguration().getNRscSpecies();
+        conversionFactor = new double[nRsc];
+        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
+            if (!getConfiguration().isNull("resource.conversion2tons.rsc" + iRsc)) {
+                conversionFactor[iRsc] = getConfiguration().getDouble("resource.conversion2tons.rsc" + iRsc);
             } else {
-                warning("Parameter plankton.conversion2tons.plk{0} not found (or set to null). Osmose assumes that LTL data for plankton group {1} is already expressed in tonne/m2 (or tonne/m3 for 3D dataset)", new Object[]{iPlk, getConfiguration().getPlankton(iPlk).getName()});
-                conversionFactor[iPlk] = 1.d;
+                warning("Parameter resource.conversion2tons.rsc{0} not found (or set to null). Osmose assumes that LTL data for resource group {1} is already expressed in tonne/m2 (or tonne/m3 for 3D dataset)", new Object[]{iRsc, getConfiguration().getResourceSpecies(iRsc).getName()});
+                conversionFactor[iRsc] = 1.d;
             }
         }
 
@@ -211,24 +211,24 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         // Initializes LTL
         initLTL();
 
-        // Plankton multplier
-        multiplier = new double[nPlk];
-        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
-            if (!getConfiguration().isNull("plankton.multiplier.plk" + iPlk)) {
-                multiplier[iPlk] = getConfiguration().getFloat("plankton.multiplier.plk" + iPlk);
-                warning("Plankton biomass for plankton group " + iPlk + " will be multiplied by " + multiplier[iPlk] + " accordingly to parameter " + getConfiguration().printParameter("plankton.multiplier.plk" + iPlk));
+        // resource multplier
+        multiplier = new double[nRsc];
+        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
+            if (!getConfiguration().isNull("resource.multiplier.rsc" + iRsc)) {
+                multiplier[iRsc] = getConfiguration().getFloat("resource.multiplier.rsc" + iRsc);
+                warning("Resource biomass for resource group " + iRsc + " will be multiplied by " + multiplier[iRsc] + " accordingly to parameter " + getConfiguration().printParameter("resource.multiplier.rsc" + iRsc));
             } else {
-                multiplier[iPlk] = 1.d;
+                multiplier[iRsc] = 1.d;
             }
         }
 
         // Uniform biomass
-        uBiomass = new double[nPlk];
-        for (int iPlk = 0; iPlk < nPlk; iPlk++) {
-            if (!getConfiguration().isNull("plankton.biomass.total.plk" + iPlk)) {
-                uBiomass[iPlk] = getConfiguration().getDouble("plankton.biomass.total.plk" + iPlk) / getGrid().getNOceanCell();
+        uBiomass = new double[nRsc];
+        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
+            if (!getConfiguration().isNull("resource.biomass.total.rsc" + iRsc)) {
+                uBiomass[iRsc] = getConfiguration().getDouble("resource.biomass.total.rsc" + iRsc) / getGrid().getNOceanCell();
             } else {
-                uBiomass[iPlk] = -1.d;
+                uBiomass[iRsc] = -1.d;
             }
         }
     }
@@ -245,14 +245,14 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     public void update(int iStepSimu) {
 
         // Reset biomass matrix
-        biomass = new double[getConfiguration().getNPlankton()][getGrid().get_ny()][getGrid().get_nx()];
+        biomass = new double[getConfiguration().getNRscSpecies()][getGrid().get_ny()][getGrid().get_nx()];
 
-        for (int iPlk = 0; iPlk < getConfiguration().getNPlankton(); iPlk++) {
-            biomass[iPlk] = new double[getGrid().get_ny()][getGrid().get_nx()];
+        for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
+            biomass[iRsc] = new double[getGrid().get_ny()][getGrid().get_nx()];
             // Check whether the biomass is read from NetCDF file or uniform
-            if (uBiomass[iPlk] < 0) {
+            if (uBiomass[iRsc] < 0) {
                 // From NetCDF, rawBiomass[jLTL][iLTL][kLTL]
-                float[][][] rawBiomass = getRawBiomass(iPlk, iStepSimu);
+                float[][][] rawBiomass = getRawBiomass(iRsc, iStepSimu);
                 float maxDepth = getConfiguration().getFloat("ltl.integration.depth");
                 for (Cell cell : getGrid().getCells()) {
                     if (!cell.isLand()) {
@@ -263,15 +263,15 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
                         int nCells = ltlCells.size();
                         for (Point ltlCell : ltlCells) {
                             double bm = zIntegration(rawBiomass[ltlCell.y][ltlCell.x], getDepthLevel(ltlCell.x, ltlCell.y), maxDepth);
-                            biomass[iPlk][j][i] += area * convertToTonneWWPerM3(iPlk, bm) / nCells;
+                            biomass[iRsc][j][i] += area * convertToTonneWWPerM3(iRsc, bm) / nCells;
                         }
                     }
                 }
             } else {
-                // Uniform plankton biomass
+                // Uniform resource biomass
                 for (Cell cell : getGrid().getCells()) {
                     if (!cell.isLand()) {
-                        biomass[iPlk][cell.get_jgrid()][cell.get_igrid()] = uBiomass[iPlk];
+                        biomass[iRsc][cell.get_jgrid()][cell.get_igrid()] = uBiomass[iRsc];
                     }
                 }
             }
@@ -279,21 +279,21 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     }
 
     @Override
-    public double getBiomass(int iPlk, Cell cell) {
-        return multiplier[iPlk] * biomass[iPlk][cell.get_jgrid()][cell.get_igrid()];
+    public double getBiomass(int iRsc, Cell cell) {
+        return multiplier[iRsc] * biomass[iRsc][cell.get_jgrid()][cell.get_igrid()];
     }
 
     /**
-     * Converts plankton biomass (usually from mmolN/m3) to tonne of wet weight
+     * Converts resource biomass (usually from mmolN/m3) to tonne of wet weight
      * per cubic metre (tonneWW/m3).
      *
-     * @param iPlk, the index of the plankton group
-     * @param concentration of the plankton biomass in the same unit as in the
+     * @param iRsc, the index of the resource group
+     * @param concentration of the resource biomass in the same unit as in the
      * LTL files
-     * @return concentration of plankton biomass in tonneWW/m3
+     * @return concentration of resource biomass in tonneWW/m3
      */
-    private double convertToTonneWWPerM3(int iPlk, double concentration) {
-        return concentration * conversionFactor[iPlk];
+    private double convertToTonneWWPerM3(int iRsc, double concentration) {
+        return concentration * conversionFactor[iRsc];
     }
 
     /**

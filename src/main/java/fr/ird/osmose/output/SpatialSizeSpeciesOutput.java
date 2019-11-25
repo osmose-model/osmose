@@ -175,20 +175,6 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
         lonVar = nc.addVariable(null, "longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
         lonVar.addAttribute(new Attribute("units", "degree"));
         lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
-        /*
-         * Add global attributes
-         */
-        /*
-        nc.addGlobalAttribute("dimension_step", "step=0 before predation, step=1 after predation");
-        StringBuilder str = new StringBuilder();
-        for (int kltl = 0; kltl < getConfiguration().getNPlankton(); kltl++) {
-            str.append(kltl);
-            str.append("=");
-            str.append(getConfiguration().getPlankton(kltl));
-            str.append(" ");
-        }
-        nc.addGlobalAttribute("dimension_ltl", str.toString());
-        */
         
         try {
             /*
