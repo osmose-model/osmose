@@ -105,9 +105,8 @@ public class VersionManager extends OsmoseLinker {
         // Retrieve version of the Osmose configuration 
         cfgVersion = getConfigurationVersion();
 
-        // Check version (compare to latest release with pending updates)
-        VersionNumber latestChanges = Releases.ALL[Releases.ALL.length - 1].getVersionNumber();
-        return cfgVersion.compareTo(latestChanges) >= 0;
+        // compare current configuration to jar version
+        return cfgVersion.compareTo(jarVersion) >= 0;
     }
 
     /*
