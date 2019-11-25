@@ -53,42 +53,49 @@ package fr.ird.osmose.ltl;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.SimulationLinker;
-import java.awt.Point;
-import java.util.List;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import ucar.ma2.Array;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
- * This abstract class indicates how Osmose manages and retrieves the biomass of
- * the low trophic levels compartments of the ecosystem. The LTL groups are an
- * input of the model, they are forcing the model biomass as they provide food
- * to the higher trophic levels.
+ * This class indicates how Osmose manages and retrieves the biomass of the
+ * resource compartments of the ecosystem. The resource groups are an input of
+ * the model, they are forcing the model biomass as they provide food to the
+ * focal species. The class reads the data from a NetCDF file with the following
+ * characteristics: (i) the NetCDF grid is the same than the Osmose grid ; (ii)
+ * the biomass is provided in variables of the same name than the resource group
+ * (time, ny, nx), with time the number of time steps (this value must be a
+ * multiple of the number of time step per year in Osmose, and ny, nx the grid
+ * dimension. It means the user can provide either one year, 5 years or 50 years
+ * of LTL data and Osmose will loop over it until the end of the simulation).
+ * The biomass is provided in tonnes.
  *
  * @author P.Verley (philippe.verley@ird.fr)
- * @version 3.0b 2013/09/01
+ * @version 4.2 2019/11/25
  */
-public abstract class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
+public class AbstractLTLForcing extends SimulationLinker implements LTLForcing {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Factor for converting biomass from resource unit to wet weight in
-     * tonne/m3. (e.g. mmolN/m3 to tonne/m3)
-     */
-    double[] conversionFactor;
-    /**
-     * Number of time step in the LTL time series inputed to Osmose. This value
+     * Number of time step in the RSC time series inputed to Osmose. This value
      * must be a multiple of the number of time step per year in Osmose. It
-     * means the user can provide either one year, 5 years or 50 years of LTL
+     * means the user can provide either one year, 5 years or 50 years of RSC
      * data and Osmose will loop over it (if necessary) until the end of the
      * simulation.
      */
-    private int nLTLStep;
+    private int nRscStep;
     /**
-     * Array of float that stores the biomass, in tonne, of every LTL groups
-     * interpolated on the Osmose grid for the current time step of the
-     * simulation. {@code biomass[n_LTL_groups][nline_osmose][ncolumn_osmose]}.
-     * The array is updated every time step in the {@link #update(int)}
-     * function.
+     * Array of float that stores the biomass, in tonne, of every RSC groups on
+     * the Osmose grid for the current time step of the simulation.
+     * {@code biomass[n_rsc_groups][nline_osmose][ncolumn_osmose]}. The array is
+     * updated every time step in the {@link #update(int)} function.
      */
     private double[][][] biomass;
     /**
@@ -114,121 +121,69 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
 // Constructor
 //////////////
     /**
-     * Creates a new LTLForcing associated to a specified simulation.
+     * Creates a new ResourceForcing associated to a specified simulation.
      *
      * @param rank, the rank of the simulation
      */
-    AbstractLTLForcing(int rank) {
+    public AbstractLTLForcing(int rank) {
         super(rank);
     }
-
-/////////////////////////////////////
-// Definition of the abstract methods
-/////////////////////////////////////
-    /**
-     * Get the 3D biomass of the specified resource group on the LTL grid for a
-     * given time step. The biomass is expressed in the same unit as it is in
-     * the forcing file. Dimensions must be ordered as [jLTL][iLTL][zLTL]
-     *
-     * @param iRsc, the index of a resource group
-     * @param iStepSimu, the current step of the simulation
-     * @return an array of same dimension and unit than the LTL grid
-     */
-    abstract float[][][] getRawBiomass(int iRsc, int iStepSimu);
-
-    /**
-     * List the LTL cells that overlap a given Osmose cell. The LTL cells are
-     * returned as a list of Point(x, y) with x, y integer coordinates of the
-     * cell on the LTL grid. These are the LTL cells that are taken into account
-     * for interpolating the LTL biomass on an Osmose cell. The list may or may
-     * not be empty for land cells. The list must only return LTL ocean cells
-     * (so that land LTL cells are not included in the spatial integration).
-     */
-    abstract List<Point> getLTLCells(Cell cell);
-
-    /**
-     * Read LTL parameters in the Osmose configuration file.
-     */
-    abstract void readParameters();
-
-    /**
-     * This function must be used for initialising the LTL plug-ins inheriting
-     * from this abstract class. It should be the place, for instance, for
-     * linking the LTL grid cells to Osmose grid cells (that are be returned by
-     * the getLTLCells function), and for (pre)loading any stuff or NetCDF
-     * variables that you deem useful for making getRawBiomass() as efficient as
-     * possible.
-     */
-    abstract void initLTL();
-
-    /**
-     *
-     * Get the depths of the vertical levels at a given location on the LTL
-     * grid. depth[zLTL]
-     *
-     * @param iLTL the i-coordinate of the cell in the LTL grid
-     * @param jLTL the j-coordinate of the cell in the LTL grid
-     * @return an array that contains the depth, in metre, of the vertical
-     * levels at LTL cell(iLTL, jLTL)
-     */
-    abstract float[] getDepthLevel(int iLTL, int jLTL);
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-    /**
-     * Converts the current time step of the simulation into the corresponding
-     * time step of the LTL data.
-     *
-     * @param iStepSimu, the current step of the simulation.
-     * @return the corresponding time step of the LTL data.
-     */
-    public int getIndexStepLTL(int iStepSimu) {
-        return iStepSimu % nLTLStep;
-    }
-
     @Override
     public void init() {
 
         // Read number of LTL steps
-        nLTLStep = getConfiguration().getInt("ltl.nstep");
+        nRscStep = getConfiguration().getInt("ltl.nstep");
 
         // Read conversion factors
         int nRsc = getConfiguration().getNRscSpecies();
-        conversionFactor = new double[nRsc];
-        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
-            if (!getConfiguration().isNull("resource.conversion2tons.rsc" + iRsc)) {
-                conversionFactor[iRsc] = getConfiguration().getDouble("resource.conversion2tons.rsc" + iRsc);
-            } else {
-                warning("Parameter resource.conversion2tons.rsc{0} not found (or set to null). Osmose assumes that LTL data for resource group {1} is already expressed in tonne/m2 (or tonne/m3 for 3D dataset)", new Object[]{iRsc, getConfiguration().getResourceSpecies(iRsc).getName()});
-                conversionFactor[iRsc] = 1.d;
-            }
-        }
 
-        // Read LTL parameters
-        readParameters();
-
-        // Initializes LTL
-        initLTL();
-
-        // resource multplier
+        // Uniform biomass
+        uBiomass = new double[nRsc];
+        // Resource multplier
         multiplier = new double[nRsc];
+
         for (int iRsc = 0; iRsc < nRsc; iRsc++) {
+            if (!getConfiguration().isNull("resource.biomass.total.rsc" + iRsc)) {
+                uBiomass[iRsc] = getConfiguration().getDouble("resource.biomass.total.rsc" + iRsc) / getGrid().getNOceanCell();
+            } else if (!getConfiguration().isNull("resource.file.rsc" + iRsc)) {
+                // set negative value to uniform biomass
+                uBiomass[iRsc] = -1.d;
+
+                // check resource is properly defined in the NetCDF file
+                String name = getConfiguration().getString("resource.name.rsc" + iRsc);
+                String ncFile = getConfiguration().getFile("resource.file.rsc" + iRsc);
+
+                if (!new File(ncFile).exists()) {
+                    error("Error reading LTLForcing parameters.", new FileNotFoundException("LTL NetCDF file " + ncFile + " does not exist."));
+                }
+
+                try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
+                    Variable variable = nc.findVariable(name);
+                    int[] shape = variable.getShape();
+                    // check time length
+                    if (nRscStep != shape[0]) {
+                        throw new IOException("Parameter ltl.nstep=" + nRscStep + " does not match time dimension=" + shape[0] + " of the NetCDF resource group " + iRsc);
+                    }
+                    // check grid dimension
+                    if (getGrid().get_ny() != shape[1] | getGrid().get_nx() != shape[2]) {
+                        throw new IOException("NetCDF grid dimensions of resource group " + iRsc + " does not match Osmose grid dimensions");
+                    }
+                } catch (IOException ex) {
+                    error("File " + ncFile + ", variable " + name + "cannot be read", ex);
+                }
+            } else {
+                error("No input file is provided for resource " + getConfiguration().getString("resource.name.rsc" + iRsc), new IOException("Cannot initialize resource group " + iRsc));
+            }
+
             if (!getConfiguration().isNull("resource.multiplier.rsc" + iRsc)) {
                 multiplier[iRsc] = getConfiguration().getFloat("resource.multiplier.rsc" + iRsc);
                 warning("Resource biomass for resource group " + iRsc + " will be multiplied by " + multiplier[iRsc] + " accordingly to parameter " + getConfiguration().printParameter("resource.multiplier.rsc" + iRsc));
             } else {
                 multiplier[iRsc] = 1.d;
-            }
-        }
-
-        // Uniform biomass
-        uBiomass = new double[nRsc];
-        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
-            if (!getConfiguration().isNull("resource.biomass.total.rsc" + iRsc)) {
-                uBiomass[iRsc] = getConfiguration().getDouble("resource.biomass.total.rsc" + iRsc) / getGrid().getNOceanCell();
-            } else {
-                uBiomass[iRsc] = -1.d;
             }
         }
     }
@@ -247,25 +202,31 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
         // Reset biomass matrix
         biomass = new double[getConfiguration().getNRscSpecies()][getGrid().get_ny()][getGrid().get_nx()];
 
+        int iStepNc = iStepSimu % nRscStep;
+        int nx = getGrid().get_nx();
+        int ny = getGrid().get_ny();
+
         for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
             biomass[iRsc] = new double[getGrid().get_ny()][getGrid().get_nx()];
             // Check whether the biomass is read from NetCDF file or uniform
             if (uBiomass[iRsc] < 0) {
-                // From NetCDF, rawBiomass[jLTL][iLTL][kLTL]
-                float[][][] rawBiomass = getRawBiomass(iRsc, iStepSimu);
-                float maxDepth = getConfiguration().getFloat("ltl.integration.depth");
-                for (Cell cell : getGrid().getCells()) {
-                    if (!cell.isLand()) {
-                        double area = 1.111e5d * getGrid().getdLat() * 1.111e5d * Math.cos(cell.getLat() * Math.PI / (90.d * 2.d)) * getGrid().getdLong();
-                        int i = cell.get_igrid();
-                        int j = cell.get_jgrid();
-                        List<Point> ltlCells = getLTLCells(cell);
-                        int nCells = ltlCells.size();
-                        for (Point ltlCell : ltlCells) {
-                            double bm = zIntegration(rawBiomass[ltlCell.y][ltlCell.x], getDepthLevel(ltlCell.x, ltlCell.y), maxDepth);
-                            biomass[iRsc][j][i] += area * convertToTonneWWPerM3(iRsc, bm) / nCells;
+                // Resource biomass from NetCDF file
+                String name = getConfiguration().getString("resource.name.rsc" + iRsc);
+                String ncFile = getConfiguration().getFile("resource.file.rsc" + iRsc);
+                try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
+                    Variable variable = nc.findVariable(name);
+                    Array ncbiomass = variable.read(new int[]{iStepNc, 0, 0}, new int[]{1, ny, nx}).reduce();
+                    Index index = ncbiomass.getIndex();
+                    for (Cell cell : getGrid().getCells()) {
+                        if (!cell.isLand()) {
+                            int i = cell.get_igrid();
+                            int j = cell.get_jgrid();
+                            index.set(j, i);
+                            biomass[iRsc][j][i] = ncbiomass.getDouble(index);
                         }
                     }
+                } catch (IOException | InvalidRangeException ex) {
+                    error("File " + ncFile + ", variable " + name + "cannot be read", ex);
                 }
             } else {
                 // Uniform resource biomass
@@ -281,43 +242,5 @@ public abstract class AbstractLTLForcing extends SimulationLinker implements LTL
     @Override
     public double getBiomass(int iRsc, Cell cell) {
         return multiplier[iRsc] * biomass[iRsc][cell.get_jgrid()][cell.get_igrid()];
-    }
-
-    /**
-     * Converts resource biomass (usually from mmolN/m3) to tonne of wet weight
-     * per cubic metre (tonneWW/m3).
-     *
-     * @param iRsc, the index of the resource group
-     * @param concentration of the resource biomass in the same unit as in the
-     * LTL files
-     * @return concentration of resource biomass in tonneWW/m3
-     */
-    private double convertToTonneWWPerM3(int iRsc, double concentration) {
-        return concentration * conversionFactor[iRsc];
-    }
-
-    /**
-     * Vertical integration of LTL data on the water column, up to a given
-     * depth.
-     *
-     * @param zdata, an array of the LTL data in the water column
-     * @param zlevel, an array of the depth levels (metre) in the water column
-     * @param maxDepth, the maximum depth (metre) to be taken into account for
-     * the vertical integration. Make sure the sign of the depth is consistent
-     * between the depth of the LTL grid and the maximum depth.
-     * @return the raw LTL data vertically integrated
-     */
-    private double zIntegration(float[] zdata, float[] zlevel, float maxDepth) {
-
-        int nz = zdata.length;
-        double integratedData = 0.d;
-        for (int k = 0; k < nz - 1; k++) {
-            if (zlevel[k] > maxDepth) {
-                if (zdata[k] >= 0 && zdata[k + 1] >= 0) {
-                    integratedData += (Math.abs(zlevel[k] - zlevel[k + 1])) * ((zdata[k] + zdata[k + 1]) / 2.d);
-                }
-            }
-        }
-        return integratedData;
     }
 }
