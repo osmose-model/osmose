@@ -128,8 +128,6 @@ public class Osmose extends OLogger {
         // Set 3: Set up Indiseas simulations
         opt.addSet("Usage3", 0)
                 .addOption("indiseas", Separator.BLANK);
-        // For all sets, user can specify how to resolve pathnames
-        opt.addOptionAllSets("resolve", Separator.EQUALS, Multiplicity.ZERO_OR_ONE);
         // For all sets, user can specify parameter values that will overwrite
         // the values defined in the configuration files
         opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
@@ -170,17 +168,6 @@ public class Osmose extends OLogger {
 
         // Initialises the set of command line options
         cmd = new HashMap();
-
-        // Resolve option -resolve=global|local
-        if (set.isSet("resolve")) {
-            String resolve = set.getOption("resolve").getResultValue(0);
-            if (resolve.matches("^.*?(local|global).*$")) {
-                cmd.put("resolve", resolve);
-            } else {
-                info(getCmdUsage());
-                error("Invalid command line option -resolve=" + resolve, new IllegalArgumentException("-resolve=global or -resolve=local only"));
-            }
-        }
 
         // Parameters option -Pkey=value
         if (set.isSet("P")) {
@@ -246,6 +233,8 @@ public class Osmose extends OLogger {
      * @throws ucar.ma2.InvalidRangeException
      */
     public void run() throws IOException, InvalidRangeException {
+        
+        
 
         if (updateConfiguration) {
             for (String configurationFile : configurationFiles) {

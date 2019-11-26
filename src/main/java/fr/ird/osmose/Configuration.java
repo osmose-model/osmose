@@ -55,7 +55,6 @@ import fr.ird.osmose.resource.ResourceSpecies;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.AbstractGrid;
-import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.logging.OLogger;
 import java.io.BufferedReader;
@@ -179,10 +178,6 @@ public class Configuration extends OLogger {
      */
     private String outputSeparator;
     /**
-     * Path of the directory of the main configuration file.
-     */
-    final private String inputPathname;
-    /**
      * Number of CPUs allocated to {@code Osmose} for running the simulations
      * concurrently. Parameter <i>simulation.ncpu</i>
      */
@@ -227,11 +222,6 @@ public class Configuration extends OLogger {
      */
     private AbstractGrid grid;
     /**
-     * Temporary flag that must be TRUE to ensure that all file paths are
-     * resolved against the main configuration file
-     */
-    private final boolean globalResolve;
-    /**
      * Array of the species of the simulation.
      */
     private Species[] species;
@@ -260,7 +250,7 @@ public class Configuration extends OLogger {
      * True if the genetic module should be activated.
      */
     private boolean geneticEnabled = false;
-    
+
     /**
      * True if incoming fluxes should be used.
      */
@@ -278,7 +268,6 @@ public class Configuration extends OLogger {
     Configuration(String mainFilename, HashMap<String, String> cmd) {
 
         this.mainFilename = new File(mainFilename).getAbsolutePath();
-        this.inputPathname = new File(mainFilename).getAbsoluteFile().getParentFile().getAbsolutePath();
 
         parameters = new HashMap();
 
@@ -290,15 +279,6 @@ public class Configuration extends OLogger {
                 parameters.put(argument.getKey(), parameter);
                 debug(". " + parameter.toString());
             }
-        }
-
-        // Path resolution, global or local
-        // Option provided as command line argument
-        if (null != cmd && cmd.containsKey("resolve")) {
-            globalResolve = cmd.get("resolve").equalsIgnoreCase("global");
-        } else {
-            // global by default, for backward compatibility
-            globalResolve = true;
         }
     }
 
@@ -446,14 +426,19 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns true if bioen module should be used.
+     * Returns {@code true} if Bioenergetics module is enabled.
+     *
+     * @return {@code true} if Bioenergetics module is enabled.
      */
     public boolean isBioenEnabled() {
         return this.bioenEnabled;
     }
 
     /**
-     * Returns true of genetic module is used or not. *
+     * Returns true of genetic module is used or not.
+     *
+     *
+     * @return
      */
     public boolean isGeneticEnabled() {
         return this.geneticEnabled;
@@ -518,12 +503,13 @@ public class Configuration extends OLogger {
      */
     private void loadParameters(String filename, int depth) {
 
-        BufferedReader bfIn = null;
+        BufferedReader bfIn;
         // Open the buffer
         try {
             bfIn = new BufferedReader(new FileReader(filename));
         } catch (FileNotFoundException ex) {
             error("Could not find Osmose configuration file: " + filename, ex);
+            return;
         }
         StringBuilder msg = new StringBuilder();
         StringBuilder space = new StringBuilder();
@@ -571,7 +557,7 @@ public class Configuration extends OLogger {
         // Reload parameters
         loadParameters(mainFilename, 0);
         info("Configuration version: " + VersionManager.getInstance().getConfigurationVersion());
-        
+
     }
 
     /**
@@ -691,16 +677,15 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the specified parameter as a path resolved again the main
-     * configuration file.
+     * Returns the specified parameter as a path resolved again the path of the
+     * configuration file that defined the parameter.
      *
-     * @see #resolveFile(java.lang.String)
      * @param key, the key of the parameter
-     * @return, the parameter as a path resolved again the main configuration
-     * file.
+     * @return, the parameter as a path resolved again the path of the
+     * configuration file that defined the parameter.
      */
     public String getFile(String key) {
-        return resolve(getString(key), globalResolve ? inputPathname : getSource(key));
+        return resolve(getString(key), getSource(key));
     }
 
     /**
@@ -892,7 +877,7 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Resolves a file path against the the input path. If filename is a
+     * Resolves a file path against the the provided path. If filename is a
      * directory the function ensures the path ends with a separator.
      *
      * @param filename, the file path to resolve
@@ -1065,13 +1050,15 @@ public class Configuration extends OLogger {
     public BackgroundSpecies getBkgSpecies(int index) {
         return bkgSpecies[index];
     }
-        
-    
-    /** Returns true if incoming fluxes should be used. */
-    public boolean isIncomingFluxEnabled(){ 
+
+    /**
+     * Returns {@code true} if incoming fluxes is enabled.
+     *
+     * @return {@code true} if incoming fluxes is enabled.
+     */
+    public boolean isIncomingFluxEnabled() {
         return this.incomingFluxEnabled;
     }
-    
 
     /**
      * Inner class that represents a parameter in the configuration file.
