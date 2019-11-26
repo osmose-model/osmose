@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -76,7 +77,7 @@ public abstract class Release extends OsmoseLinker {
     final private VersionNumber versionNumber;
 
     abstract void updateParameters();
-    
+
     Release(String versionNumber) {
         this.versionNumber = VersionNumber.valueOf(versionNumber);
     }
@@ -142,7 +143,7 @@ public abstract class Release extends OsmoseLinker {
         ArrayList<String> parameters = getLines(source);
         // Add comment 
         StringBuilder msg = new StringBuilder();
-        msg.append("Osmose").append(versionNumber).append(" - ");
+        msg.append("Osmose ").append(versionNumber).append(" - ");
         msg.append("Added parameter ").append(parameter);
         parameters.add("# " + msg.toString());
         // Add parameter
@@ -156,8 +157,9 @@ public abstract class Release extends OsmoseLinker {
 
     private int findLine(String key, ArrayList<String> parameters) {
         int iline = -1;
+        String keyLC = key.toLowerCase();
         for (int i = 0; i < parameters.size(); i++) {
-            if (parameters.get(i).startsWith(key)) {
+            if (parameters.get(i).toLowerCase().startsWith(keyLC)) {
                 iline = i;
                 break;
             }
@@ -187,7 +189,7 @@ public abstract class Release extends OsmoseLinker {
         parameters.set(iline, deprecated);
         // Add comment
         StringBuilder msg = new StringBuilder();
-        msg.append("Osmose").append(versionNumber).append(" - ");
+        msg.append("Osmose ").append(versionNumber).append(" - ");
         msg.append(comment);
         parameters.add(iline, "# " + msg);
         // Print the change in the console
@@ -208,7 +210,7 @@ public abstract class Release extends OsmoseLinker {
             commentParameter(key, msg.toString());
             return;
         }
-        
+
         // Check whether the parameter exists in the current configuration
         if (!getConfiguration().canFind(key)) {
             StringBuilder warning = new StringBuilder();
@@ -217,7 +219,7 @@ public abstract class Release extends OsmoseLinker {
             info(warning.toString());
             return;
         }
-        
+
         // Parameter exists and can be renamed safely
         // Backup the source file
         String source = getConfiguration().getSource(key);
@@ -226,12 +228,12 @@ public abstract class Release extends OsmoseLinker {
         ArrayList<String> parameters = getLines(source);
         // Find the line of parameter defined by the key
         int iline = findLine(key, parameters);
-        // Update the name of the key
-        String updatedParameter = parameters.get(iline).replace(key, newKey);
+        // Update the name of the key (case insensitive)
+        String updatedParameter = parameters.get(iline).replaceAll("(?i)" + Pattern.quote(key), newKey);
         parameters.set(iline, updatedParameter);
         // Add comment
         StringBuilder msg = new StringBuilder();
-        msg.append("Osmose").append(versionNumber).append(" - ");
+        msg.append("Osmose ").append(versionNumber).append(" - ");
         msg.append("Renamed parameter ").append(key).append(" into ").append(newKey);
         parameters.add(iline, "# " + msg);
         // Print the change in the console
@@ -318,7 +320,7 @@ public abstract class Release extends OsmoseLinker {
         }
         return lines;
     }
-    
+
     protected String backup(String src, VersionNumber srcVersion) {
 
         Calendar calendar = new GregorianCalendar();

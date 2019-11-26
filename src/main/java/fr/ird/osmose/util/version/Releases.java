@@ -276,7 +276,7 @@ public class Releases {
                 int nRsc = getConfiguration().findKeys("plankton.name.plk*").size();
                 for (int index = 0; index < nRsc; index++) {
                     updateKey("plankton.name.plk" + index, "resource.name.rsc" + index);
-                    updateKey("plankton.tl.plk" + index, "resource.tl.rsc" + index);
+                    updateKey("plankton.TL.plk" + index, "resource.TL.rsc" + index);
                     updateKey("plankton.size.min.plk" + index, "resource.size.min.rsc" + index);
                     updateKey("plankton.size.max.plk" + index, "resource.size.max.rsc" + index);
                     updateKey("plankton.accessibility2fish.file.plk" + index, "resource.accessibility2fish.file.rsc" + index);
@@ -308,13 +308,20 @@ public class Releases {
 
             }
         },
+        // 2019/11/25
+        new Release("4.2.4") {
+            @Override
+            void updateParameters() {
+                deprecateParameter("ltl.java.classname");
+            }
+        },
         // 2019/11/26
         new Release("4.2.5") {
             @Override
             void updateParameters() {
 
                 int nSpecies = getConfiguration().getInt("simulation.nspecies");
-                
+
                 // rename *mortality.natural* into *mortality.additional*
                 for (int i = 0; i < nSpecies; i++) {
                     // time series
