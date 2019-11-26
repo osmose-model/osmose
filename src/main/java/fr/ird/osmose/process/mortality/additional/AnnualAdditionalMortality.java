@@ -73,7 +73,7 @@ public class AnnualAdditionalMortality extends AbstractMortalitySpecies {
     public void init() {
         int nStepYear = getConfiguration().getNStepYear();
         int iSpec = getIndexSpecies();
-        instantaneousD = getConfiguration().getDouble("mortality.natural.rate.sp" + iSpec) / nStepYear;
+        instantaneousD = getConfiguration().getDouble("mortality.additional.rate.sp" + iSpec) / nStepYear;
        
     }
 

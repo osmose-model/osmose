@@ -188,7 +188,7 @@ public class DefaultStep extends AbstractStep {
         }
 
         // Compute mortality
-        // (predation + fishing + natural mortality + starvation)
+        // (predation + fishing + additional mortality + starvation)
         mortalityProcess.run();
 
         // If the bioen module is activated, then use of the

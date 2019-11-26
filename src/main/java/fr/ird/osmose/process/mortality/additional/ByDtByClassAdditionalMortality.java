@@ -84,22 +84,22 @@ public class ByDtByClassAdditionalMortality extends AbstractMortalitySpecies {
     @Override
     public void init() {
         int iSpec = getIndexSpecies();
-        if (!getConfiguration().isNull("mortality.natural.rate.byDt.byAge.file.sp" + iSpec)) {
+        if (!getConfiguration().isNull("mortality.additional.rate.byDt.byAge.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
-            timeSerieByAge.read(getConfiguration().getFile("mortality.natural.rate.byDt.byAge.file.sp" + iSpec));
+            timeSerieByAge.read(getConfiguration().getFile("mortality.additional.rate.byDt.byAge.file.sp" + iSpec));
             m = timeSerieByAge.getValues();
             ageClasses = new int[timeSerieByAge.getNClass() - 1];
             for (int k = 0; k < ageClasses.length; k++) {
                 // Converts age in year into number of time steps
                 ageClasses[k] = (int) Math.round(timeSerieByAge.getClass(k) * getConfiguration().getNStepYear());
             }
-        } else if (!getConfiguration().isNull("mortality.natural.rate.byDt.bySize.file.sp" + iSpec)) {
+        } else if (!getConfiguration().isNull("mortality.additional.rate.byDt.bySize.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
-            timeSerieBySize.read(getConfiguration().getFile("mortality.natural.rate.byDt.bySize.file.sp" + iSpec));
+            timeSerieBySize.read(getConfiguration().getFile("mortality.additional.rate.byDt.bySize.file.sp" + iSpec));
             m = timeSerieBySize.getValues();
             sizeClasses = timeSerieBySize.getClasses();
         } else {
-            error("Could not found parameters mortality.natural.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
+            error("Could not found parameters mortality.additional.rate.byDt.byAge/bySize.file.sp" + iSpec, null);
         }
     }
 

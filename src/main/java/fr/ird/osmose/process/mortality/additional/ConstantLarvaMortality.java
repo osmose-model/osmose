@@ -71,7 +71,7 @@ public class ConstantLarvaMortality extends AbstractMortalitySpecies {
     
     @Override
     public void init() {
-            Dlarva = getConfiguration().getDouble("mortality.natural.larva.rate.sp" + getIndexSpecies());
+            Dlarva = getConfiguration().getDouble("mortality.additional.larva.rate.sp" + getIndexSpecies());
     }
     
     @Override

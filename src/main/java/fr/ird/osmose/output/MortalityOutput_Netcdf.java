@@ -208,7 +208,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
         for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
             for (int iStage = 0; iStage < STAGES; iStage++) {
                 if (iDeath == MortalityCause.ADDITIONAL.index && iStage == EGG) {
-                    // instantenous mortality rate for eggs natural mortality 
+                    // instantenous mortality rate for eggs additional mortality 
                     mortalityRates[iDeath][iStage] /= recordFrequency;
                 }
             }

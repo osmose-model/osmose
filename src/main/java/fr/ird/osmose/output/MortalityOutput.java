@@ -180,7 +180,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             for (int iDeath = 0; iDeath < MortalityCause.values().length; iDeath++) {
                 for (int iStage = 0; iStage < STAGES; iStage++) {
                     if (iDeath == MortalityCause.ADDITIONAL.index && iStage == EGG) {
-                        // instantenous mortality rate for eggs natural mortality 
+                        // instantenous mortality rate for eggs additional mortality 
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage] / recordFrequency);
                     } else {
                         prw[iSpecies].print(mortalityRates[iSpecies][iDeath][iStage]);
@@ -225,7 +225,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             prw[iSpecies] = new PrintWriter(fos[iSpecies], true);
             if (!fileExists) {
                 // Write headers
-                prw[iSpecies].println(quote("Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Zout) mortality rates per time step of saving, except for Mnat Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year."));
+                prw[iSpecies].println(quote("Predation (Mpred), Starvation (Mstarv), Additional mortality (Madd), Fishing (F) & Out-of-domain (Zout) mortality rates per time step of saving, except for Madd Eggs that is expressed in osmose time step. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year."));
                 prw[iSpecies].print(quote("Time"));
                 for (int i = 0; i < STAGES; i++) {
                     prw[iSpecies].print(separator);
@@ -237,7 +237,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                 }
                 for (int i = 0; i < STAGES; i++) {
                     prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Mnat"));
+                    prw[iSpecies].print(quote("Madd"));
                 }
                 for (int i = 0; i < STAGES; i++) {
                     prw[iSpecies].print(separator);

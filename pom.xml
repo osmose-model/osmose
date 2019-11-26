@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.ird</groupId>
     <artifactId>osmose</artifactId>
-    <version>4.2.4</version>
+    <version>4.2.5</version>
     <packaging>jar</packaging>
     <name>Osmose Stable 4</name>
     <description></description>

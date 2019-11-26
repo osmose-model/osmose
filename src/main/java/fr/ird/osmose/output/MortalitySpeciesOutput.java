@@ -95,7 +95,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
 
     @Override
     String getDescription() {
-        return "Predation (Mpred), Starvation (Mstarv), Other Natural mortality (Mnat), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving and per size class. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.";
+        return "Predation (Mpred), Starvation (Mstarv), Additional mortality (Madd), Fishing (F) & Out-of-domain (Z) mortality rates per time step of saving and per size class. Z is the total mortality for migratory fish outside the simulation grid. To get annual mortality rates, sum the mortality rates within one year.";
     }
 
     @Override
@@ -155,7 +155,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
 
     @Override
     String[] getHeaders() {
-        return new String[]{getType().toString(), "Mpred", "Mstar", "Mnat", "F", "Z", "Moxy"};
+        return new String[]{getType().toString(), "Mpred", "Mstar", "Madd", "F", "Z", "Moxy"};
     }
 
     @Override

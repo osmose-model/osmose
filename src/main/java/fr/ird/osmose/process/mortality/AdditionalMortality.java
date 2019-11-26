@@ -72,7 +72,7 @@ public class AdditionalMortality extends AbstractMortality {
     private AbstractMortalitySpecies[] larvaAdditionalMortality;
     private AbstractMortalitySpecies[] additionalMortality;
     /**
-     * Spatial factor for natural mortality [0, 1]
+     * Spatial factor for additional mortality [0, 1]
      */
     private GridMap[] spatialD;
 
@@ -125,15 +125,15 @@ public class AdditionalMortality extends AbstractMortality {
             additionalMortality[iSpec].init();
         }
 
-        // Patch for Ricardo to include space variability in natural mortality
+        // Patch for Ricardo to include space variability in additional mortality
         // Need to think of a better parametrization before including it
         // formally in Osmose
         spatialD = new GridMap[getNSpecies()];
-        List<String> keys = getConfiguration().findKeys("mortality.natural.spatial.distrib.file.sp*");
+        List<String> keys = getConfiguration().findKeys("mortality.additional.spatial.distrib.file.sp*");
         if (keys != null && !keys.isEmpty()) {
             for (int iSpec = 0; iSpec < getConfiguration().getNSpecies(); iSpec++) {
-                if (!getConfiguration().isNull("mortality.natural.spatial.distrib.file.sp" + iSpec)) {
-                    spatialD[iSpec] = new GridMap(getConfiguration().getFile("mortality.natural.spatial.distrib.file.sp" + iSpec));
+                if (!getConfiguration().isNull("mortality.additional.spatial.distrib.file.sp" + iSpec)) {
+                    spatialD[iSpec] = new GridMap(getConfiguration().getFile("mortality.additional.spatial.distrib.file.sp" + iSpec));
                 }
             }
         }
@@ -145,7 +145,7 @@ public class AdditionalMortality extends AbstractMortality {
      * current time step.
      *
      * @param school, a school of the system
-     * @return the natural mortality rate for the current time step, and the
+     * @return the additional mortality rate for the current time step, and the
      * larva mortality rate for school of age 0.
      */
     @Override
@@ -250,10 +250,10 @@ public class AdditionalMortality extends AbstractMortality {
      */
     public enum Scenario {
 
-        ANNUAL("mortality.natural.rate.sp"),
-        BY_DT("mortality.natural.rate.bytDt.file.sp"),
-        BY_DT_BY_AGE("mortality.natural.rate.byDt.byAge.file.sp"),
-        BY_DT_BY_SIZE("mortality.natural.rate.byDt.bySize.file.sp");
+        ANNUAL("mortality.additional.rate.sp"),
+        BY_DT("mortality.additional.rate.bytDt.file.sp"),
+        BY_DT_BY_AGE("mortality.additional.rate.byDt.byAge.file.sp"),
+        BY_DT_BY_SIZE("mortality.additional.rate.byDt.bySize.file.sp");
 
         private final String key;
 
@@ -272,8 +272,8 @@ public class AdditionalMortality extends AbstractMortality {
      */
     public enum ScenarioLarva {
 
-        CONSTANT("mortality.natural.larva.rate.sp"),
-        BY_DT("mortality.natural.larva.rate.bytDt.file.sp");
+        CONSTANT("mortality.additional.larva.rate.sp"),
+        BY_DT("mortality.additional.larva.rate.bytDt.file.sp");
 
         private final String key;
 

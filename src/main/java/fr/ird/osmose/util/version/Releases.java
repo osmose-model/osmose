@@ -262,6 +262,7 @@ public class Releases {
                 deprecateParameter("mortality.algorithm");
             }
         },
+        // 2019/11/25
         new Release("4.2.3") {
             @Override
             void updateParameters() {
@@ -305,6 +306,32 @@ public class Releases {
                     deprecateParameter("ltl.netcdf.file.t" + t);
                 }
 
+            }
+        },
+        // 2019/11/26
+        new Release("4.2.5") {
+            @Override
+            void updateParameters() {
+
+                int nSpecies = getConfiguration().getInt("simulation.nspecies");
+                
+                // rename *mortality.natural* into *mortality.additional*
+                for (int i = 0; i < nSpecies; i++) {
+                    // time series
+                    updateKey("mortality.natural.rate.sp" + i, "mortality.additional.rate.sp" + i);
+                    updateKey("mortality.natural.rate.bytDt.file.sp" + i, "mortality.additional.rate.bytDt.file.sp" + i);
+                    updateKey("mortality.natural.rate.byDt.byAge.file.sp" + i, "mortality.additional.rate.byDt.byAge.file.sp" + i);
+                    updateKey("mortality.natural.rate.byDt.bySize.file.sp" + i, "mortality.additional.rate.byDt.bySize.file.sp" + i);
+                    updateKey("mortality.natural.larva.rate.sp" + i, "mortality.additional.larva.rate.sp" + i);
+                    updateKey("mortality.natural.larva.rate.bytDt.file.sp" + i, "mortality.additional.larva.rate.bytDt.file.sp" + i);
+                    // spatial 
+                    updateKey("mortality.natural.spatial.distrib.file.sp" + i, "mortality.additional.spatial.distrib.file.sp" + i);
+                    // outputs
+                    updateKey("output.mortality.natural.bySize.enabled", "output.mortality.additional.bySize.enabled");
+                    updateKey("output.mortality.natural.byAge.enabled", "output.mortality.additional.byAge.enabled");
+                    updateKey("output.mortality.naturalN.bySize.enabled", "output.mortality.additionalN.bySize.enabled");
+                    updateKey("output.mortality.naturalN.byAge.enabled", "output.mortality.additionalN.byAge.enabled");
+                }
             }
         }
     };

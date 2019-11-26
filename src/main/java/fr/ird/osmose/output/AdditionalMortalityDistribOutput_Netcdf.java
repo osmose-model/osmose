@@ -83,7 +83,7 @@ public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutp
         filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_naturalMortalityDistribBy");
+        filename.append("_additionalMortalityDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());
@@ -95,7 +95,7 @@ public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutp
     @Override
     String getDescription() {
         StringBuilder description = new StringBuilder();
-        description.append("Distribution of natural mortality biomass (tonne of fish dead from unexplicited cause per time step of saving) by ");
+        description.append("Distribution of additional mortality biomass (tonne of fish dead from unexplicited cause per time step of saving) by ");
         description.append(getType().getDescription());
         description.append(". For class i, the biomass of dead fish in [i,i+1[ is reported.");
         return description.toString();

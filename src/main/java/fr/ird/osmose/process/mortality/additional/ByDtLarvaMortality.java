@@ -77,7 +77,7 @@ public class ByDtLarvaMortality extends AbstractMortalitySpecies {
     public void init() {
 
         SingleTimeSeries ts = new SingleTimeSeries();
-        ts.read(getConfiguration().getFile("mortality.natural.larva.rate.bytDt.file.sp" + getIndexSpecies()));
+        ts.read(getConfiguration().getFile("mortality.additional.larva.rate.bytDt.file.sp" + getIndexSpecies()));
         Dlarva = ts.getValues();
     }
 
