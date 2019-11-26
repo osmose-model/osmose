@@ -10,15 +10,11 @@ predation.accessibility.stage.threshold.sp6,0.25
 predation.accessibility.stage.threshold.sp7,0.25
 predation.accessibility.stage.threshold.sp8,0.25
 predation.accessibility.stage.threshold.sp9,0.25
-# barrier.n,
-#predation.accessibility.stage.threshold.sp10,0.25
 predation.accessibility.stage.threshold.sp10,null
 predation.accessibility.stage.threshold.sp11,0.25
 predation.accessibility.stage.threshold.sp12,0.25
 predation.accessibility.stage.threshold.sp13,0.25
 predation.accessibility.stage.threshold.sp14,0.25
-# barrier.n,
-#predation.accessibility.stage.threshold.sp15,0.25
 predation.accessibility.stage.threshold.sp15,null
 ,
 predation.efficiency.critical.sp0,0.57
