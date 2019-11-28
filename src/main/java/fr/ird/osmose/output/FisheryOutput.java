@@ -72,7 +72,7 @@ import ucar.nc2.Variable;
  *
  * @author Nicolas Barrier
  */
-public class FisheriesOutput extends SimulationLinker implements IOutput {
+public class FisheryOutput extends SimulationLinker implements IOutput {
 
     /*
      * _FillValue attribute for cells on land
@@ -100,7 +100,7 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
      */
     private static float[][] biomass;      // output should be of size (time, species, fisheries)  
 
-    public FisheriesOutput(int rank) {
+    public FisheryOutput(int rank) {
         super(rank);
         this.nFishery = getConfiguration().findKeys("fishery.select.curve.fsh*").size();;
     }
@@ -124,7 +124,7 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
             IOTools.makeDirectories(filename);
             nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
         } catch (IOException ex) {
-            Logger.getLogger(FisheriesOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FisheryOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*
          * Create dimensions
