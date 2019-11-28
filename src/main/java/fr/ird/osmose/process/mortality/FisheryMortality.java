@@ -53,6 +53,7 @@ package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.FisheryOutput;
+import fr.ird.osmose.process.MortalityProcess;
 import fr.ird.osmose.process.mortality.fishery.AccessMatrix;
 import fr.ird.osmose.process.mortality.fishery.SingleFisheryMortality;
 
@@ -160,7 +161,7 @@ public class FisheryMortality extends AbstractMortality {
         double nDead;
         
         // shuffle the fisheries index array.
-        if(this.shuffle_array) StochasticMortalityProcess.shuffleArray(seqFisheries);
+        if(this.shuffle_array) MortalityProcess.shuffleArray(seqFisheries);
         
         // Initializes the fishing mortality rate and sets it to 0.
         double output = 0.0;

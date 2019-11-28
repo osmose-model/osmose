@@ -52,13 +52,13 @@
 package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.AbstractProcess;
+import fr.ird.osmose.process.mortality.AbstractMortality;
 
 /**
  *
  * @author nbarrier
  */
-public class BioenStarvationMortality extends AbstractProcess {
+public class BioenStarvationMortality extends AbstractMortality {
 
     
 
@@ -107,7 +107,7 @@ public class BioenStarvationMortality extends AbstractProcess {
     }
 
     @Override
-    public void run() {
+    public double getRate(School school) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

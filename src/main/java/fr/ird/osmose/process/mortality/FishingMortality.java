@@ -248,7 +248,7 @@ public class FishingMortality extends AbstractMortality {
     /**
      * Assess fishable biomass for fishing scenarios based on catches
      */
-    void assessFishableBiomass() {
+    public void assessFishableBiomass() {
 
         // fishable biomass only has to be updated for catches
         boolean[] catches = new boolean[getNSpecies()];
