@@ -53,7 +53,7 @@ package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.process.mortality.fishery.SingleFisheryMortality;
+import fr.ird.osmose.process.mortality.FisheryMortality;
 import fr.ird.osmose.process.mortality.fishery.SizeSelectivity;
 
 /**
@@ -80,7 +80,7 @@ public class SigmoSelectivity extends SizeSelectivity {
      *
      * @param fmort
      */
-    public SigmoSelectivity(SingleFisheryMortality fmort) {
+    public SigmoSelectivity(FisheryMortality fmort) {
         super(fmort);
     }
     

@@ -53,7 +53,7 @@ package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.process.mortality.fishery.SingleFisheryMortality;
+import fr.ird.osmose.process.mortality.FisheryMortality;
 import fr.ird.osmose.process.mortality.fishery.SizeSelectivity;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
@@ -78,7 +78,7 @@ public class GaussSelectivity extends SizeSelectivity {
      *
      * @param fmort
      */
-    public GaussSelectivity(SingleFisheryMortality fmort) {
+    public GaussSelectivity(FisheryMortality fmort) {
         super(fmort);
     }
     

@@ -61,13 +61,13 @@ import fr.ird.osmose.process.bioen.BioenPredationMortality;
 import fr.ird.osmose.process.bioen.BioenStarvationMortality;
 import fr.ird.osmose.process.mortality.AbstractMortality;
 import fr.ird.osmose.process.mortality.AdditionalMortality;
-import fr.ird.osmose.process.mortality.FisheryMortality;
 import fr.ird.osmose.process.mortality.FishingMortality;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.process.mortality.OutMortality;
 import fr.ird.osmose.process.mortality.OxidativeMortality;
 import fr.ird.osmose.process.mortality.PredationMortality;
 import fr.ird.osmose.process.mortality.StarvationMortality;
+import fr.ird.osmose.process.mortality.FisheryMortality;
 import fr.ird.osmose.resource.Resource;
 import fr.ird.osmose.util.XSRandom;
 import java.io.IOException;
@@ -113,7 +113,7 @@ public class MortalityProcess extends AbstractProcess {
     /*
      * Private instance of fishery mortality
      */
-    private AbstractMortality fisheryMortality;
+    private AbstractMortality[] fisheriesMortality;
     /**
      * Private instance of bioenergetic starvation mortality
      */
@@ -126,6 +126,10 @@ public class MortalityProcess extends AbstractProcess {
      * Whether the Osmose v4 fishery implementation is enabled
      */
     private boolean fisheryEnabled = false;
+    /**
+     * Number of fisheries
+     */
+    private int nfishery;
     /*
      * Random generator
      */
@@ -161,6 +165,7 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         fisheryEnabled = getConfiguration().getBoolean("fishery.enabled");
+        nfishery = fisheryEnabled ? getConfiguration().findKeys("fishery.select.curve.fsh*").size() : 0;
 
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
@@ -189,8 +194,16 @@ public class MortalityProcess extends AbstractProcess {
 
         // fishery (Osmose 4) vs fishing mortality (Osmose 3)
         if (fisheryEnabled) {
-            fisheryMortality = new FisheryMortality(getRank(), subdt);
-            fisheryMortality.init();
+            fisheriesMortality = new FisheryMortality[nfishery];
+            int count = 0;
+            for (int i = 0; i < nfishery; i++) {
+                while (!getConfiguration().canFind("fishery.select.curve.fsh" + count)) {
+                    count++;
+                }
+                fisheriesMortality[i] = new FisheryMortality(getRank(), count);
+                fisheriesMortality[i].init();
+                count++;
+            }
         } else {
             fishingMortality = new FishingMortality(getRank());
             fishingMortality.init();
@@ -386,7 +399,29 @@ public class MortalityProcess extends AbstractProcess {
         Integer[] seqNat = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqStarv = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqOxy = Arrays.copyOf(seqPred, ns + nBkg);
-        MortalityCause[] mortalityCauses = MortalityCause.values();
+        List<MortalityCause> causes = new ArrayList();
+        causes.addAll(Arrays.asList(MortalityCause.values()));
+        if (fisheryEnabled) {
+            // every fishery accounts as an independant fishing mortality source
+            // note that we start at 1 since the addAll already include one fishing
+            // mortality source
+            for (int i = 1; i < nfishery; i++) {
+                causes.add(MortalityCause.FISHING);
+            }
+        }
+        MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
+
+        // random fishery sequences
+        Integer[][] seqFishery = new Integer[ns + nBkg][];
+        Integer[] singleSeqFishery = new Integer[nfishery];
+        for (int i = 0; i < nfishery; i++) {
+            singleSeqFishery[i] = i;
+        }
+        for (int i = 0; i < ns + nBkg; i++) {
+            seqFishery[i] = Arrays.copyOf(singleSeqFishery, nfishery);
+            shuffleArray(seqFishery[i]);
+        }
+        int[] indexFishery = new int[ns + nBkg];
 
         // Initialisation of list of predators, which contains both
         // background species and focal species.
@@ -489,7 +524,12 @@ public class MortalityProcess extends AbstractProcess {
 
                         // Osmose 4 fishery mortality
                         if (fisheryEnabled) {
-                            fisheryMortality.getRate(school);
+                            double F = fisheriesMortality[seqFishery[i][indexFishery[i]]].getRate(school) / subdt;
+                            // make sure a different fishery is called every time
+                            // it is just a trick since we do not have case FISHERY1,
+                            // case FISHERY2, etc. like the other mortality sources.
+                            indexFishery[i]++;
+                            nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
                         } else {
                             // Osmose 3 fishing Mortality
                             switch (fishingMortality.getType(school.getSpeciesIndex())) {
@@ -501,9 +541,9 @@ public class MortalityProcess extends AbstractProcess {
                                     nDead = school.biom2abd(fishingMortality.getCatches(school) / subdt);
                                     break;
                             }
-                            school.incrementNdead(MortalityCause.FISHING, nDead);
-                            break;
                         }
+                        school.incrementNdead(MortalityCause.FISHING, nDead);
+                        break;
                 }  // end of switch (cause
             }   // end of mort cause loop
         }   // end of school loop species loop

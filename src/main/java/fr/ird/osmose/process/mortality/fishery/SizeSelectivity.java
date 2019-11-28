@@ -51,6 +51,7 @@
  */
 package fr.ird.osmose.process.mortality.fishery;
 
+import fr.ird.osmose.process.mortality.FisheryMortality;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;
@@ -76,14 +77,14 @@ public abstract class SizeSelectivity extends OsmoseLinker {
     /** Pointer to the fishery mortality array. 
      * Allows to recover the fishery index and the MPI rank.
      */
-    protected final SingleFisheryMortality mort;
+    protected final FisheryMortality mort;
     
     /**
      * Public constructor. Initialize the FisheryMortality pointer.
      *
      * @param fmort
      */
-    public SizeSelectivity(SingleFisheryMortality fmort) {
+    public SizeSelectivity(FisheryMortality fmort) {
         this.mort = fmort;
         this.init_var();
     }

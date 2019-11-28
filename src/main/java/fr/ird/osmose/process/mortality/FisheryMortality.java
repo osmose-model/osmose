@@ -51,161 +51,157 @@
  */
 package fr.ird.osmose.process.mortality;
 
+import fr.ird.osmose.process.mortality.fishery.sizeselect.KnifeEdgeSelectivity;
+import fr.ird.osmose.process.mortality.fishery.sizeselect.SigmoSelectivity;
+import fr.ird.osmose.process.mortality.fishery.sizeselect.GaussSelectivity;
+import fr.ird.osmose.process.mortality.*;
+import fr.ird.osmose.Cell;
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.FisheryOutput;
-import fr.ird.osmose.process.MortalityProcess;
 import fr.ird.osmose.process.mortality.fishery.AccessMatrix;
-import fr.ird.osmose.process.mortality.fishery.SingleFisheryMortality;
+import fr.ird.osmose.process.mortality.fishery.FishingMapSet;
+import fr.ird.osmose.process.mortality.fishery.SizeSelectivity;
+import fr.ird.osmose.process.mortality.fishery.TimeVariability;
+import fr.ird.osmose.util.GridMap;
 
 /**
  *
- * @author Nicolas Barrier
+ * @author pverley
  */
 public class FisheryMortality extends AbstractMortality {
-    
-    // List of fishery classes. One per fishery type
-    private SingleFisheryMortality[] fisheriesMortality;
-    
-    // Total number of fisheries
-    private int nFishery;
-    
-    // Accessibility matrix
-    private AccessMatrix accessMatrix;
-    
-    // Number of predation time-steps
-    private final int subdt;
-    
-    // True if the array shoud be shuffled (i.e. if there are by-catches)
-    private boolean shuffle_array;
-    
-    public FisheryMortality(int rank, int subdt) {
+
+    /**
+     * Fishery index.
+     */
+    private final int fIndex;
+
+    /**
+     * Fisherie selectivity function.
+     */
+    private SizeSelectivity select;
+
+    /**
+     * Fisherie time-variability.
+     */
+    private TimeVariability timeVar;
+
+    /**
+     * Fisherie map set.
+     */
+    private FishingMapSet fMapSet;
+
+    private double[] accessibility;
+
+    public FisheryMortality(int rank, int findex) {
         super(rank);
-        this.subdt = subdt;
-    }
-    
-    public SingleFisheryMortality[] getFisheries()
-    {
-        return this.fisheriesMortality;
-    }
-    
-    public int getNFishery() {
-        return this.nFishery;
+        fIndex = findex;
     }
 
     @Override
     public void init() {
-        
-        // Initialize the accessbility matrix, which provides the percentage of fishes that are going to be captured.
-        accessMatrix = new AccessMatrix();
+
+        Configuration cfg = Osmose.getInstance().getConfiguration();
+        String type = cfg.getString("fishery.selectivity.type.fsh" + fIndex);
+        if (type.equals("knife-edge")) {
+            select = new KnifeEdgeSelectivity(this);
+        } else if (type.equals("gaussian")) {
+            select = new GaussSelectivity(this);
+        } else if (type.equals("sigmoidal")) {
+            select = new SigmoSelectivity(this);
+        } else {
+            error("Selectivity curve " + type + "is not implemented. Choose 'knife-edge', 'gaussian' or 'sigmoidal'.", new Exception());
+        }
+
+        // Initialize the selectivity curve.
+        select.init();
+
+        // Initialize the time varying array
+        timeVar = new TimeVariability(this);
+        timeVar.init();
+
+        // fishery spatial maps
+        fMapSet = new FishingMapSet(fIndex, "fishery.movement");
+        fMapSet.init();
+
+        // accessibility matrix
+        // (it provides the percentage of fishes that are going to be captured)
+        AccessMatrix accessMatrix = new AccessMatrix();
         accessMatrix.read(getConfiguration().getFile("fishery.catch.matrix.file"));
-                
-        // Recovers the total number of fisheries and initialize the fisheries array
-        nFishery = getConfiguration().findKeys("fishery.select.curve.fsh*").size();
-        fisheriesMortality = new SingleFisheryMortality[nFishery];
-        
-        // should be false to compare with old implementation of fisheries 
-        this.shuffle_array = this.check_shuffle_array();
-        
-        // Loop over all the fisheries and initialize them.
-        int cpt = 0;
-        for (int i = 0; i < nFishery; i++) {
-            while (!getConfiguration().canFind("fishery.select.curve.fsh" + cpt)) {
-                cpt++;
-            }
-            fisheriesMortality[i] = new SingleFisheryMortality(this.getRank(), cpt);
-            fisheriesMortality[i].init();
-            cpt++;
-        }
-    }
-    
-    private boolean check_shuffle_array() {
-        
-        // If number of fisheries != number of species: true-> shuffle matrix
-        if(this.nFishery != this.getNSpecies()) {
-            return true;
-        }
-        
-        // if square matrix, assumes that matrix should be diagonal
-        // to mimic the old behaviour.
-        for(int i=0; i<this.nFishery; i++) {
-            for(int j=0; j<this.getNSpecies(); j++) { 
-                if(i != j) { 
-                    if (accessMatrix.getValues(i, j) != 0) {
-                        return true;
-                    }
-                }
-            }
-        }
-        
-        return false;
-        
+        accessibility = accessMatrix.getValues(fIndex);
+
     }
 
-    /** Calculation of the fishing mortality rate for a given school.
-     * A loop is performed over all the defined fisheries. 
-     * If the analysed fisherie doesn't catch the defined fish, nothing is done.
-     * Else, the total mortality rate is updated.
+    /**
+     * Returns the fishing mortality rate associated with a given fishery. It is
+     * the product of the time varying fishing rate, of the size selectivity and
+     * of the spatial factor.
+     *
      * @param school
-     * @return 
+     * @return The fishing mortality rate.
      */
     @Override
     public double getRate(School school) {
-       
-        // Initialize an array of fisheries index
-        Integer[] seqFisheries = new Integer[nFishery];
-        for (int i = 0; i < nFishery; i++) {
-            seqFisheries[i] = i;
+
+        // If the map index is -1 (no map defined), it is assumed that no
+        // fishing rate is associated with the current fisherie.
+        if (fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()) == -1) {
+            return 0;
         }
-        
-        // Initialize the number of dead individuals
-        double nDead;
-        
-        // shuffle the fisheries index array.
-        if(this.shuffle_array) MortalityProcess.shuffleArray(seqFisheries);
-        
-        // Initializes the fishing mortality rate and sets it to 0.
-        double output = 0.0;
-        
-        // Recover the species index
-        int iSpecies = school.getSpeciesIndex();
-       
-        // Loop over all the fisheries index in a random way
-        for(int fIndex : seqFisheries)
-        {
-            
-            // recover the current fisherie
-            SingleFisheryMortality fish = this.getFisheries()[fIndex];
-            
-            // computes the accessibility: 100% for the targeted species, >0 for bycatches
-            double accessVal = accessMatrix.getValues(fIndex, iSpecies);
-            
-            // if the current specie is not targeted by the fisherie, nothing is done
-            if(accessVal == 0) {
-                continue;
-            }
-            
-            // Computation of the mortality fishing rate.
-            // F is the fishing rate for the current specie (i.e.
-            // spatial * timevar * size select) time *  
-            double F = fish.getRate(school) * accessVal / subdt;
-            
-            // updates the number of dead individuals within the school
-            nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
-            
-            // Increment the fisheries Outputs for the given species and the given
-            // fisherie.
-            if (FisheryOutput.saveFisheries()) {
-                FisheryOutput.incrementFish(nDead, iSpecies, fIndex);
-            }
-            
-            // increments the number of DEAD individuals by fishing.
-            // in so doing, abundance is changed.
-            school.incrementNdead(MortalityCause.FISHING, nDead);
-           
+
+        double speciesAccessibility = accessibility[school.getSpeciesIndex()];
+        if (speciesAccessibility == 0.d) {
+            return 0.d;
         }
-        
+
+        // Recovers the school cell (used to recover the map factor)
+        Cell cell = school.getCell();
+
+        // Used to recover the selectivity value.
+        float selVar;
+
+        // Looks for the selectivity variable.
+        switch (select.getVariable()) {
+            case AGE:
+                selVar = school.getAge();
+                break;
+            case SIZE:
+                selVar = school.getLength();
+                break;
+            default:
+                selVar = school.getLength();
+                error("Selectivity curve is not implemented.", new Exception());
+                break;
+        }
+
+        // recovers the time varying rate of the fishing mortality
+        double timeSelect = timeVar.getTimeVar(getSimulation().getIndexTimeSimu());
+
+        // Recovers the size/age fishery selectivity factor [0, 1]
+        double sizeSelect = select.getSelectivity(selVar);
+
+        GridMap map = fMapSet.getMap(fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()));
+        double spatialSelect;
+        if (map != null) {
+            spatialSelect = Math.max(0, map.getValue(cell));  // this is done because if value is -999, then no fishery is applied here.
+        } else {
+            spatialSelect = 0.0;
+        }
+
+        // modulates the mortality rate by the the size selectivity and the spatial factor.
+        double output = speciesAccessibility * timeSelect * sizeSelect * spatialSelect;
+
         return output;
-        
+
     }
-    
+
+    /**
+     * Returns the index of the current fisherie.
+     *
+     * @return The fisherines index
+     */
+    public int getFIndex() {
+        return this.fIndex;
+    }
+
 }
