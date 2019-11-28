@@ -122,7 +122,22 @@ public class VersionManager extends OsmoseLinker {
                 getConfiguration().refresh();
             }
         }
-        info("Configuration file updated successfully.");
+        // update cfg number to jar version in case last release is anterior to jar version
+        if (jarVersion.compareTo(Releases.ALL[Releases.ALL.length - 1].getVersionNumber()) > 0) {
+            latest().updateConfiguration();
+            getConfiguration().refresh();
+        }
+        info("Configuration file updated successfully to version " + jarVersion.toString());
+    }
+
+    private Release latest() {
+        return new Release(jarVersion.toString()) {
+            @Override
+            void updateParameters() {
+                // Update version
+                updateValue("osmose.version", getVersionNumber().toString());
+            }
+        };
     }
 
     /**
