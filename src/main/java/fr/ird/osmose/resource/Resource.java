@@ -244,4 +244,9 @@ public class Resource extends OsmoseLinker implements IAggregation {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public void fishedBy(int fisheryIndex, double fishedBiomass) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

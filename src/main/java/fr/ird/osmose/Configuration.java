@@ -255,6 +255,10 @@ public class Configuration extends OLogger {
      * True if incoming fluxes should be used.
      */
     private boolean incomingFluxEnabled = false;
+    /**
+     * Number of fisheries.
+     */
+    private int nFishery;
 
 ///////////////
 // Constructors
@@ -423,6 +427,18 @@ public class Configuration extends OLogger {
         for (int p = 0; p < bkgSpecies.length; p++) {
             bkgSpecies[p] = new BackgroundSpecies(p);
         }
+        
+        // Fisheries
+        boolean fisheryEnabled = getBoolean("fishery.enabled");
+        nFishery = fisheryEnabled ? findKeys("fishery.select.curve.fsh*").size() : 0;
+    }
+    
+    public int getNFishery() {
+        return nFishery;
+    }
+    
+    public boolean isFisheryEnabled() {
+        return nFishery > 0;
     }
 
     /**

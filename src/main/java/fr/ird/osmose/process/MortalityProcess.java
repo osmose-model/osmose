@@ -164,8 +164,8 @@ public class MortalityProcess extends AbstractProcess {
             random = new XSRandom(System.nanoTime());
         }
 
-        fisheryEnabled = getConfiguration().getBoolean("fishery.enabled");
-        nfishery = fisheryEnabled ? getConfiguration().findKeys("fishery.select.curve.fsh*").size() : 0;
+        fisheryEnabled = getConfiguration().isFisheryEnabled();
+        nfishery = getConfiguration().getNFishery();
 
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
@@ -411,7 +411,7 @@ public class MortalityProcess extends AbstractProcess {
         }
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
 
-        // random fishery sequences
+        // distinct random fishery sequences for every school
         Integer[][] seqFishery = new Integer[ns + nBkg][];
         Integer[] singleSeqFishery = new Integer[nfishery];
         for (int i = 0; i < nfishery; i++) {
@@ -524,12 +524,14 @@ public class MortalityProcess extends AbstractProcess {
 
                         // Osmose 4 fishery mortality
                         if (fisheryEnabled) {
-                            double F = fisheriesMortality[seqFishery[i][indexFishery[i]]].getRate(school) / subdt;
+                            int iFishery = seqFishery[i][indexFishery[i]];
+                            double F = fisheriesMortality[iFishery].getRate(school) / subdt;
+                            nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+                            school.fishedBy(iFishery, school.abd2biom(nDead));
                             // make sure a different fishery is called every time
                             // it is just a trick since we do not have case FISHERY1,
                             // case FISHERY2, etc. like the other mortality sources.
                             indexFishery[i]++;
-                            nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
                         } else {
                             // Osmose 3 fishing Mortality
                             switch (fishingMortality.getType(school.getSpeciesIndex())) {

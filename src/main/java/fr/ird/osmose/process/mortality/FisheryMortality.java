@@ -54,7 +54,6 @@ package fr.ird.osmose.process.mortality;
 import fr.ird.osmose.process.mortality.fishery.sizeselect.KnifeEdgeSelectivity;
 import fr.ird.osmose.process.mortality.fishery.sizeselect.SigmoSelectivity;
 import fr.ird.osmose.process.mortality.fishery.sizeselect.GaussSelectivity;
-import fr.ird.osmose.process.mortality.*;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
@@ -77,20 +76,22 @@ public class FisheryMortality extends AbstractMortality {
     private final int fIndex;
 
     /**
-     * Fisherie selectivity function.
+     * Fishery selectivity function.
      */
     private SizeSelectivity select;
 
     /**
-     * Fisherie time-variability.
+     * Fishery time-variability.
      */
     private TimeVariability timeVar;
 
     /**
-     * Fisherie map set.
+     * Fishery map set.
      */
     private FishingMapSet fMapSet;
-
+    /**
+     * Fishery accessibility.
+     */
     private double[] accessibility;
 
     public FisheryMortality(int rank, int findex) {
@@ -103,14 +104,19 @@ public class FisheryMortality extends AbstractMortality {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
         String type = cfg.getString("fishery.selectivity.type.fsh" + fIndex);
-        if (type.equals("knife-edge")) {
-            select = new KnifeEdgeSelectivity(this);
-        } else if (type.equals("gaussian")) {
-            select = new GaussSelectivity(this);
-        } else if (type.equals("sigmoidal")) {
-            select = new SigmoSelectivity(this);
-        } else {
-            error("Selectivity curve " + type + "is not implemented. Choose 'knife-edge', 'gaussian' or 'sigmoidal'.", new Exception());
+        switch (type) {
+            case "knife-edge":
+                select = new KnifeEdgeSelectivity(this);
+                break;
+            case "gaussian":
+                select = new GaussSelectivity(this);
+                break;
+            case "sigmoidal":
+                select = new SigmoSelectivity(this);
+                break;
+            default:
+                error("Selectivity curve " + type + "is not implemented. Choose 'knife-edge', 'gaussian' or 'sigmoidal'.", new Exception());
+                break;
         }
 
         // Initialize the selectivity curve.
@@ -188,17 +194,13 @@ public class FisheryMortality extends AbstractMortality {
             spatialSelect = 0.0;
         }
 
-        // modulates the mortality rate by the the size selectivity and the spatial factor.
-        double output = speciesAccessibility * timeSelect * sizeSelect * spatialSelect;
-
-        return output;
-
+        return speciesAccessibility * timeSelect * sizeSelect * spatialSelect;
     }
 
     /**
-     * Returns the index of the current fisherie.
+     * Returns the fishery index.
      *
-     * @return The fisherines index
+     * @return the fishery index
      */
     public int getFIndex() {
         return this.fIndex;

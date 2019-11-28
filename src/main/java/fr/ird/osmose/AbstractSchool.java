@@ -127,6 +127,8 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * unnecessary recalculation of the instantaneous biomass.
      */
     protected boolean abundanceHasChanged;
+    
+    protected double[] fishedBiomass;
 
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {
@@ -196,6 +198,21 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
         }
         // Update school total preyed biomass
         this.preyedBiomass += preyedBiom;
+    }
+    
+    @Override
+    public void fishedBy(int fisheryIndex, double fishedBiomass) {
+        this.fishedBiomass[fisheryIndex] += fishedBiomass;
+    }
+    
+    /**
+     * Gets the biomass of the school fished by a given fishery.
+     * 
+     * @param fisheryIndex, the fishery index
+     * @return the fished biomass in tons
+     */
+    public double getFishedBiomass(int fisheryIndex) {
+        return fishedBiomass[fisheryIndex];
     }
 
     /**

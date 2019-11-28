@@ -75,46 +75,37 @@ import ucar.nc2.Variable;
 public class FisheryOutput extends SimulationLinker implements IOutput {
 
     /*
-     * _FillValue attribute for cells on land
-     */
-    private final static float FILL_VALUE = -99.f;
-
-    /*
      * Number of fisheries.
      */
-    private final int nFishery;
-
+    private int nFishery;
     /*
      * Object for creating/writing netCDF files.
      */
     private NetcdfFileWriter nc;
-
+    /*
+     * NetCDF time and biomass variables.
+     */
     private Variable timeVar, biomassVar;
-
+    /*
+     * NetCDF time index.
+     */
     private int index = 0;
-
     /*
      * Array containing the fisheries catches by species and by fisheries.
-     * Output has (species, fisheries) dimensions. This variable is static since
-     * it is updated in the FisheryMortality class
+     * Output has (species, fisheries) dimensions.
      */
-    private static float[][] biomass;      // output should be of size (time, species, fisheries)  
+    private float[][] biomass;
 
     public FisheryOutput(int rank) {
         super(rank);
-        this.nFishery = getConfiguration().findKeys("fishery.select.curve.fsh*").size();;
-    }
-
-    /**
-     * True if fisheries should be saved or not.
-     */
-    public static boolean saveFisheries() {
-        // If biomass is null, then no saving.
-        return !(biomass == null);
+        
     }
 
     @Override
     public void init() {
+        
+        // initializes the number of fisheries
+        nFishery = getConfiguration().getNFishery();
 
         /*
          * Create NetCDF file
@@ -130,7 +121,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
          * Create dimensions
          */
         Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        Dimension fisheriesDim = nc.addDimension(null, "fishing", this.nFishery);
+        Dimension fisheriesDim = nc.addDimension(null, "fishery", nFishery);
         Dimension timeDim = nc.addUnlimitedDimension("time");
         /*
          * Add variables
@@ -183,25 +174,18 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
      */
     @Override
     public void reset() {
-        int nSpecies = getNSpecies();
-        biomass = new float[nSpecies][nFishery];
+        biomass = new float[getNSpecies()][nFishery];
     }
 
-    /**
-     * Increment the biomass array for a given species and a given fisherie.
-     * @param value
-     * @param ispecies
-     * @param ifish
-     */
-    public static void incrementFish(double value, int ispecies, int ifish) {
-        biomass[ispecies][ifish] += value;
-    }
-
-    /**
-     * Update is empty since the update is done the FisheriesMortality class.
-     */
     @Override
     public void update() {
+
+        getSchoolSet().getAliveSchools().forEach((school) -> {
+            int iSpecies = school.getSpeciesIndex();
+            for (int iFishery = 0; iFishery < nFishery; iFishery++) {
+                biomass[iSpecies][iFishery] += school.getFishedBiomass(iFishery);
+            }
+        });
 
     }
 
@@ -210,10 +194,10 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
 
         // Write into NetCDF file
         int nSpecies = getNSpecies();
-        ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies, this.nFishery);
-        for (int kspec = 0; kspec < nSpecies; kspec++) {
-            for (int ifis = 0; ifis < this.nFishery; ifis++) {
-                arrBiomass.set(0, kspec, ifis, biomass[kspec][ifis]);
+        ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies, nFishery);
+        for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
+            for (int iFishery = 0; iFishery < nFishery; iFishery++) {
+                arrBiomass.set(0, iSpecies, iFishery, biomass[iSpecies][iFishery]);
             }
         }
 
@@ -235,7 +219,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_fisheriesOutput_Simu");
+        filename.append("_fisheryOutput_Simu");
         filename.append(getRank());
         filename.append(".nc.part");
         return filename.toString();

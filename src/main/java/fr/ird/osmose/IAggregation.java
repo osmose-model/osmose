@@ -130,4 +130,12 @@ public interface IAggregation extends IMarineOrganism {
 
     public void incrementIngestion(double cumPreyUpon);
 
+    /**
+     * Records the amount of biomass fished by a given fishery.
+     *
+     * @param fisheryIndex, the fishery index
+     * @param fishedBiomass, fished biomass in tons
+     */
+    public void fishedBy(int fisheryIndex, double fishedBiomass);
+
 }

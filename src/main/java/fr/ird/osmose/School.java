@@ -259,6 +259,7 @@ public class School extends AbstractSchool {
         out = false;
         preys = new HashMap();
         starvationRate = 0.d;
+        fishedBiomass = new double[getConfiguration().getNFishery()];
         
     }
 
@@ -285,8 +286,10 @@ public class School extends AbstractSchool {
         out = false;
         // Set length at the beginning of the time step
         lengthi = length;
-
-        ingestion = 0.d;   // reset ingestion at beginning of time step;
+        // reset ingestion at beginning of time step;
+        ingestion = 0.d;
+        // reset fished biomass
+        reset(fishedBiomass);
     }
     
     /**

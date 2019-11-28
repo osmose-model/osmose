@@ -167,13 +167,13 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new MortalitySpeciesOutput_Netcdf(rank, getSpecies(i), ageDistrib));
             }
         }
-        
+
         if (getConfiguration().getBoolean("output.diet.composition.byage.netcdf.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), ageDistrib));
             }
         }
-        
+
         if (getConfiguration().getBoolean("output.diet.composition.bysize.netcdf.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new DietDistribOutput_Netcdf(rank, getSpecies(i), sizeDistrib));
@@ -239,7 +239,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new SpatialSizeSpeciesOutput(rank, ageDistrib));
         }
         // Fisheries output
-        if (getConfiguration().getBoolean("output.fishery.enabled")) {
+        if (getConfiguration().isFisheryEnabled() && getConfiguration().getBoolean("output.fishery.enabled")) {
             outputs.add(new FisheryOutput(rank));
         }
         // Biomass
@@ -452,7 +452,7 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new RegionalOutputsAbundance(rank, getSpecies(i)));
             }
         }
-        
+
         if (getConfiguration().getBoolean("output.regional.yield.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
                 outputs.add(new RegionalOutputsYield(rank, getSpecies(i)));
