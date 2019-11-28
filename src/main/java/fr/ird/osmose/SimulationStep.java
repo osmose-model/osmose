@@ -49,7 +49,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.step;
+package fr.ird.osmose;
 
 import fr.ird.osmose.output.OutputManager;
 import fr.ird.osmose.process.GrowthProcess;
@@ -59,6 +59,7 @@ import fr.ird.osmose.process.MovementProcess;
 import fr.ird.osmose.process.ReproductionProcess;
 import fr.ird.osmose.process.bioen.BioenReproductionProcess;
 import fr.ird.osmose.process.bioen.EnergyBudget;
+import fr.ird.osmose.util.SimulationLinker;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,7 +68,7 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class DefaultStep extends AbstractStep {
+public class SimulationStep extends SimulationLinker {
     
     /*
      * Growth process
@@ -101,11 +102,14 @@ public class DefaultStep extends AbstractStep {
     /** Adding a class for the management of bioenergetic module */
     private EnergyBudget bioenProcess;
 
-    public DefaultStep(int rank) {
+    public SimulationStep(int rank) {
         super(rank);
     }
 
-    @Override
+    /**
+     * Initialization of the step.
+     * It is called once at the beginning of the simulation.
+     */
     public void init() {
         
         // Initialize general mortality process
@@ -123,7 +127,7 @@ public class DefaultStep extends AbstractStep {
                 bioenProcess = new EnergyBudget(getRank());
                 bioenProcess.init();
             } catch (IOException ex) {
-                Logger.getLogger(DefaultStep.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SimulationStep.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -155,7 +159,11 @@ public class DefaultStep extends AbstractStep {
         recordStep0 = getConfiguration().getBoolean("output.step0.include", false);
     }
 
-    @Override
+    /**
+     * This functions details what must be done in one time step.
+     * It is called every time step of the simulation.
+     * @param iStepSimu , the current time step of the simulation
+     */
     public void step(int iStepSimu) {
         
         debug("  step " + iStepSimu);
@@ -210,7 +218,10 @@ public class DefaultStep extends AbstractStep {
         getSchoolSet().removeDeadSchools();
     }
 
-    @Override
+    /**
+     * This function is called once at the end of the simulation.
+     * It basically servers to cleanup and close down everything before exiting.
+     */
     public void end() {
         // close indicators on last step
         indicators.close();

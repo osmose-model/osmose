@@ -56,8 +56,6 @@ import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.resource.ResourceCaching;
 import fr.ird.osmose.resource.ResourceForcing;
-import fr.ird.osmose.step.AbstractStep;
-import fr.ird.osmose.step.DefaultStep;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -115,7 +113,7 @@ public class Simulation extends OsmoseLinker {
     /**
      * The object that controls what should be done during one time step.
      */
-    private AbstractStep step;
+    private SimulationStep step;
     /**
      * Object that is able to take a snapshot of the set of schools and write it
      * in a NetCDF file. Osmose will be able to restart on such a file.
@@ -247,7 +245,7 @@ public class Simulation extends OsmoseLinker {
         preyRecord = false;
 
         // Instantiate the Step
-        step = new DefaultStep(rank);
+        step = new SimulationStep(rank);
 
         // Intialize the step
         step.init();
