@@ -74,17 +74,17 @@ import ucar.nc2.Variable;
  */
 public class FisheriesOutput extends SimulationLinker implements IOutput {
 
-    /**
+    /*
      * _FillValue attribute for cells on land
      */
-    private final float FILLVALUE = -99.f;
+    private final static float FILL_VALUE = -99.f;
 
-    /**
+    /*
      * Number of fisheries.
      */
-    private final int nFisheries;
+    private final int nFishery;
 
-    /**
+    /*
      * Object for creating/writing netCDF files.
      */
     private NetcdfFileWriter nc;
@@ -93,16 +93,16 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
 
     private int index = 0;
 
-    /**
+    /*
      * Array containing the fisheries catches by species and by fisheries.
      * Output has (species, fisheries) dimensions. This variable is static since
-     * it is updated in the FisheriesMortality class
+     * it is updated in the FisheryMortality class
      */
     private static float[][] biomass;      // output should be of size (time, species, fisheries)  
 
     public FisheriesOutput(int rank) {
         super(rank);
-        this.nFisheries = getConfiguration().findKeys("fisheries.select.curve.fis*").size();;
+        this.nFishery = getConfiguration().findKeys("fishery.select.curve.fsh*").size();;
     }
 
     /**
@@ -130,7 +130,7 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
          * Create dimensions
          */
         Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        Dimension fisheriesDim = nc.addDimension(null, "fishing", this.nFisheries);
+        Dimension fisheriesDim = nc.addDimension(null, "fishing", this.nFishery);
         Dimension timeDim = nc.addUnlimitedDimension("time");
         /*
          * Add variables
@@ -184,11 +184,14 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
     @Override
     public void reset() {
         int nSpecies = getNSpecies();
-        biomass = new float[nSpecies][this.nFisheries];
+        biomass = new float[nSpecies][nFishery];
     }
 
     /**
      * Increment the biomass array for a given species and a given fisherie.
+     * @param value
+     * @param ispecies
+     * @param ifish
      */
     public static void incrementFish(double value, int ispecies, int ifish) {
         biomass[ispecies][ifish] += value;
@@ -207,9 +210,9 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
 
         // Write into NetCDF file
         int nSpecies = getNSpecies();
-        ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies, this.nFisheries);
+        ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies, this.nFishery);
         for (int kspec = 0; kspec < nSpecies; kspec++) {
-            for (int ifis = 0; ifis < this.nFisheries; ifis++) {
+            for (int ifis = 0; ifis < this.nFishery; ifis++) {
                 arrBiomass.set(0, kspec, ifis, biomass[kspec][ifis]);
             }
         }
@@ -222,9 +225,7 @@ public class FisheriesOutput extends SimulationLinker implements IOutput {
             nc.write(timeVar, new int[]{index}, arrTime);
             nc.write(biomassVar, new int[]{index, 0, 0}, arrBiomass);
             index++;
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
+        } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

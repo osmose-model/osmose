@@ -53,22 +53,22 @@ package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.FisheriesOutput;
-import fr.ird.osmose.process.mortality.fisheries.AccessMatrix;
-import fr.ird.osmose.process.mortality.fisheries.SingleFisheriesMortality;
+import fr.ird.osmose.process.mortality.fishery.AccessMatrix;
+import fr.ird.osmose.process.mortality.fishery.SingleFisheryMortality;
 
 /**
  *
  * @author Nicolas Barrier
  */
-public class FisheriesMortality extends AbstractMortality {
+public class FisheryMortality extends AbstractMortality {
     
-    /** List of fisheries classes. One per fisherie type. */
-    private SingleFisheriesMortality[] fisheriesMortality;
+    // List of fishery classes. One per fishery type
+    private SingleFisheryMortality[] fisheriesMortality;
     
-    /** Total number of fisheries. */
-    private int nFisheries;
+    // Total number of fisheries
+    private int nFishery;
     
-    /** Accessibility matrix. */
+    // Accessibility matrix
     private AccessMatrix accessMatrix;
     
     // Number of predation time-steps
@@ -77,18 +77,18 @@ public class FisheriesMortality extends AbstractMortality {
     // True if the array shoud be shuffled (i.e. if there are by-catches)
     private boolean shuffle_array;
     
-    public FisheriesMortality(int rank, int subdt) {
+    public FisheryMortality(int rank, int subdt) {
         super(rank);
         this.subdt = subdt;
     }
     
-    public SingleFisheriesMortality[] getFisheries()
+    public SingleFisheryMortality[] getFisheries()
     {
         return this.fisheriesMortality;
     }
     
-    public int getNFisheries() {
-        return this.nFisheries;
+    public int getNFishery() {
+        return this.nFishery;
     }
 
     @Override
@@ -96,22 +96,22 @@ public class FisheriesMortality extends AbstractMortality {
         
         // Initialize the accessbility matrix, which provides the percentage of fishes that are going to be captured.
         accessMatrix = new AccessMatrix();
-        accessMatrix.read(getConfiguration().getFile("fisheries.catch.matrix.file"));
+        accessMatrix.read(getConfiguration().getFile("fishery.catch.matrix.file"));
                 
         // Recovers the total number of fisheries and initialize the fisheries array
-        nFisheries = getConfiguration().findKeys("fisheries.select.curve.fis*").size();
-        fisheriesMortality = new SingleFisheriesMortality[nFisheries];
+        nFishery = getConfiguration().findKeys("fishery.select.curve.fsh*").size();
+        fisheriesMortality = new SingleFisheryMortality[nFishery];
         
         // should be false to compare with old implementation of fisheries 
         this.shuffle_array = this.check_shuffle_array();
         
         // Loop over all the fisheries and initialize them.
         int cpt = 0;
-        for (int i = 0; i < nFisheries; i++) {
-            while (!getConfiguration().canFind("fisheries.select.curve.fis" + cpt)) {
+        for (int i = 0; i < nFishery; i++) {
+            while (!getConfiguration().canFind("fishery.select.curve.fsh" + cpt)) {
                 cpt++;
             }
-            fisheriesMortality[i] = new SingleFisheriesMortality(this.getRank(), cpt);
+            fisheriesMortality[i] = new SingleFisheryMortality(this.getRank(), cpt);
             fisheriesMortality[i].init();
             cpt++;
         }
@@ -120,13 +120,13 @@ public class FisheriesMortality extends AbstractMortality {
     private boolean check_shuffle_array() {
         
         // If number of fisheries != number of species: true-> shuffle matrix
-        if(this.nFisheries != this.getNSpecies()) {
+        if(this.nFishery != this.getNSpecies()) {
             return true;
         }
         
         // if square matrix, assumes that matrix should be diagonal
         // to mimic the old behaviour.
-        for(int i=0; i<this.nFisheries; i++) {
+        for(int i=0; i<this.nFishery; i++) {
             for(int j=0; j<this.getNSpecies(); j++) { 
                 if(i != j) { 
                     if (accessMatrix.getValues(i, j) != 0) {
@@ -151,8 +151,8 @@ public class FisheriesMortality extends AbstractMortality {
     public double getRate(School school) {
        
         // Initialize an array of fisheries index
-        Integer[] seqFisheries = new Integer[nFisheries];
-        for (int i = 0; i < nFisheries; i++) {
+        Integer[] seqFisheries = new Integer[nFishery];
+        for (int i = 0; i < nFishery; i++) {
             seqFisheries[i] = i;
         }
         
@@ -173,7 +173,7 @@ public class FisheriesMortality extends AbstractMortality {
         {
             
             // recover the current fisherie
-            SingleFisheriesMortality fish = this.getFisheries()[fIndex];
+            SingleFisheryMortality fish = this.getFisheries()[fIndex];
             
             // computes the accessibility: 100% for the targeted species, >0 for bycatches
             double accessVal = accessMatrix.getValues(fIndex, iSpecies);

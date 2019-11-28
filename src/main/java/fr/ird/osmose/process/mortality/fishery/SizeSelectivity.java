@@ -49,64 +49,94 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fisheries;
+package fr.ird.osmose.process.mortality.fishery;
 
-import au.com.bytecode.opencsv.CSVReader;
-import fr.ird.osmose.util.GridMap;
-import fr.ird.osmose.util.Separator;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
+import fr.ird.osmose.Configuration;
+import fr.ird.osmose.Osmose;
+import fr.ird.osmose.util.OsmoseLinker;
 
 /**
- *
- * @author pverley
+ * 
+ * @todo Eventually Move the selectivity into Interface, with three different classes (Step, Gaussian and Sigmo) 
+ * @author nbarrier
  */
-public class FisheriesGridMap extends GridMap {
-
-    public FisheriesGridMap(int defaultValue) {
-        super(defaultValue);
-    }
-
-    public FisheriesGridMap() {
-        super(0);
-    }
-
-    public FisheriesGridMap(String csvFile) {
-        this();
-        read(csvFile);
+public abstract class SizeSelectivity extends OsmoseLinker {
+    
+    /**
+     * Type of the selectivity variable (age or size).
+     */
+    protected SizeSelectivity.Variable variable;
+    
+    /** L50 size. Used in all three types of selectivities. */
+    protected double l50;
+    
+     /** Tiny size. Size below which no fish is captured. */
+    protected double tiny = 1.e-6;
+    
+    /** Pointer to the fishery mortality array. 
+     * Allows to recover the fishery index and the MPI rank.
+     */
+    protected final SingleFisheryMortality mort;
+    
+    /**
+     * Public constructor. Initialize the FisheryMortality pointer.
+     *
+     * @param fmort
+     */
+    public SizeSelectivity(SingleFisheryMortality fmort) {
+        this.mort = fmort;
+        this.init_var();
     }
     
-    private void read(String csvFile) {
+    /** Initializes the selectivity class. The selectivity parameters
+     * are initialized from the configuration file.
+     * The number of parameters depends on the selectivity curve.
+     */
+    public final void init_var() {
+        
+        int index = mort.getFIndex();
+        
+        Configuration cfg = Osmose.getInstance().getConfiguration();
+        
+        // Initialize the selectivity variable 
+        String var = cfg.getString("fishery.selectivity.structure.fsh" + index);
+        if (var.equals("age")) {
+            this.variable = SizeSelectivity.Variable.AGE;
+        } else {
+            this.variable = SizeSelectivity.Variable.SIZE;
+        }
+        
+        // Init the l50 variable
+        this.l50 = cfg.getFloat("fishery.selectivity.l50.fsh" + index);
 
-        try {
-            /*
-             * Read the CSV file
-             */
-            System.out.println(csvFile);
-            CSVReader reader = new CSVReader(new FileReader(csvFile), Separator.guess(csvFile).getSeparator());
-            List<String[]> lines = reader.readAll();
-            /*
-             * Read the map
-             */
-            int ny = getGrid().get_ny();
-            for (int l = 0; l < lines.size(); l++) {
-                String[] line = lines.get(l);
-                int j = ny - l - 1;
-                for (int i = 0; i < line.length; i++) {
-                    try {
-                        // barrier.n: fisheries grid Map can have values of -999
-                        // i.e. it does not have fishing values here.
-                        float value = Float.valueOf(line[i]);
-                        this.matrix[j][i] = value;     
-                    } catch (NumberFormatException ex) {
-                        error("Error parsing CSV map " + csvFile + " row " + (l + 1) + " column " + (i + 1), ex);
-                    }
-                }
-            }
-            reader.close();
-        } catch (IOException ex) {
-            error("Error reading CSV map " + csvFile, ex);
+        // if tiny parameter exists, set tiny. Else, use default
+        if(cfg.canFind("fishery.selectivity.tiny.fsh" + index)) {
+            this.tiny  = cfg.getFloat("fishery.selectivity.tiny.fsh" + index);
         }
     }
+    
+    /**
+     * Returns a selectivity value. It depends on the size of the specieand
+     * on the selectivity curve and parameters. Output value is 
+     * between 0 and 1.
+     * @param size Specie size
+     * @return A selectivity value (0<output<1)
+     */
+    public abstract double getSelectivity(double size);
+    
+    
+    /** Abstract init method. */
+    public abstract void init();
+   
+    /** Returns the selectivity variable.
+     * @return  */
+    public Variable getVariable() {
+        return this.variable;
+    }
+    
+    public enum  Variable {
+        SIZE,
+        AGE,
+    }
+    
 }

@@ -49,7 +49,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fisheries;
+package fr.ird.osmose.process.mortality.fishery;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.GridMap;
@@ -99,7 +99,7 @@ public class FishingMapSet extends OsmoseLinker {
     /**
      * Index of the species.
      */
-    private final int iFisheries;
+    private final int iFishery;
 
     /**
      * Array of map indexes for every age class and simulation time step.
@@ -109,14 +109,14 @@ public class FishingMapSet extends OsmoseLinker {
     /**
      * List of the maps.
      */
-    private FisheriesGridMap[] maps;
+    private FisheryGridMap[] maps;
     /**
      * List of the pathnames of the CSV files.
      */
     private String[] mapFile;
 
-    public FishingMapSet(int iFisheries, String prefix) {
-        this.iFisheries = iFisheries;
+    public FishingMapSet(int iFishery, String prefix) {
+        this.iFishery = iFishery;
         this.prefix = prefix;  // should be fishery.movement
     }
 
@@ -127,7 +127,7 @@ public class FishingMapSet extends OsmoseLinker {
 
         // Check the map indexation
         if (!this.checkMapIndexation()) {
-            error("Missing map indexation for Fisheries index " + iFisheries + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+            error("Missing map indexation for Fishery index " + iFishery + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
         }
 
         // Get rid of redundant map definitions
@@ -156,7 +156,7 @@ public class FishingMapSet extends OsmoseLinker {
 
     public void loadMaps() {
 
-        // Count the total number of fisheries map by looking for the
+        // Count the total number of fishery maps by looking for the
         // number of "fishery.map.index.map#" parameters 
         int nmapmax = getConfiguration().findKeys(prefix + ".index.map*").size();
   
@@ -174,9 +174,9 @@ public class FishingMapSet extends OsmoseLinker {
             // If it matches the current fisherie, the map index is added to the list of
             // maps to be processed.
             String key = prefix + ".index.map" + imap;
-            int fisheriesIndex = getConfiguration().getInt(key);
+            int fisheryIndex = getConfiguration().getInt(key);
 
-            if (fisheriesIndex == iFisheries) {
+            if (fisheryIndex == iFishery) {
                 mapNumber.add(imap);
             }
 
@@ -184,7 +184,7 @@ public class FishingMapSet extends OsmoseLinker {
         }  // end of nmapmax loop
 
         // Initialize NSTEP arrays of gridmaps, and initialize their index to -1
-        maps = new FisheriesGridMap[mapNumber.size()];
+        maps = new FisheryGridMap[mapNumber.size()];
         mapFile = new String[mapNumber.size()];
         int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
         indexMaps = new int[nSteps];
@@ -252,7 +252,7 @@ public class FishingMapSet extends OsmoseLinker {
             if (!getConfiguration().isNull(prefix + ".file" + ".map" + imap)) {
                 String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
-                maps[n] = new FisheriesGridMap(csvFile);
+                maps[n] = new FisheryGridMap(csvFile);
             } else {
                 maps[n] = null;
             }
@@ -260,7 +260,7 @@ public class FishingMapSet extends OsmoseLinker {
     }
 
     /**
-     * Checks the map indexation. In the fisheries,
+     * Checks the map indexation. In the fishery,
      * if a map is not provided for the current specie, it
      * is assumed that fishing mortality is null.
      *
@@ -275,8 +275,8 @@ public class FishingMapSet extends OsmoseLinker {
             if (indexMaps[iStep] < 0) {
                 int year = iStep / nStepYear;
                 int step = iStep % nStepYear;
-                warning("No map assigned for fisheries {0} year {1} step {2}", new Object[]{iFisheries, year, step});
-                warning("Fisheries {0} will therefore be deactivated during year {1} and step {2}", new Object[]{iFisheries, year, step});
+                warning("No map assigned for fishery {0} year {1} step {2}", new Object[]{iFishery, year, step});
+                warning("Fishery {0} will therefore be deactivated during year {1} and step {2}", new Object[]{iFishery, year, step});
             }
         }
 
@@ -383,7 +383,7 @@ public class FishingMapSet extends OsmoseLinker {
                
         if (temp != 1) {
             warning("The temporal mean of the space factors is different from 1.0");
-            warning("iFleet = " + this.iFisheries + ", mean = " + temp);
+            warning("iFleet = " + this.iFishery + ", mean = " + temp);
         }
 
     }

@@ -82,7 +82,7 @@ import java.util.logging.Logger;
  */
 public class StochasticMortalityProcess extends AbstractProcess {
 
-    private boolean newfisheries = false;
+    private boolean fisheryEnabled = false;
 
     /*
      * Random generator
@@ -105,22 +105,23 @@ public class StochasticMortalityProcess extends AbstractProcess {
      * Private instance of the predation mortality
      */
     private PredationMortality predationMortality;
-
-    /* barrier.n: fisheries mortality */
-    private FisheriesMortality fisheriesMortality;
-
-    /* barrier.n: bioenergetic starvation mortality */
-    private BioenStarvationMortality starvationMortality;
-
-    /* PhV, bioenergetic oxidative mortality */
-    private OxidativeMortality oxidativeMortality;
-
+    /*
+     * Private instance of fishery mortality
+     */
+    private FisheryMortality fisheryMortality;
     /**
+     * Bioenergetic starvation mortality
+     */
+    private BioenStarvationMortality starvationMortality;
+    /*
+     * Bioenergetic oxidative mortality
+     */
+    private OxidativeMortality oxidativeMortality;
+    /*
      * The set of resource aggregations
      */
     private HashMap<Integer, List<Resource>> resourcesSet;
-
-    /**
+    /*
      * The set of background species schools. Structure is (cell index, list of
      * schools)
      */
@@ -141,9 +142,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
             random = new XSRandom(System.nanoTime());
         }
 
-        if (getConfiguration().canFind("fisheries.new.activate")) {
-            newfisheries = getConfiguration().getBoolean("fisheries.new.activate");
-        }
+        fisheryEnabled = getConfiguration().getBoolean("fishery.enabled");
 
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
@@ -170,11 +169,10 @@ public class StochasticMortalityProcess extends AbstractProcess {
             warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose set it to {0}.", subdt);
         }
 
-        // barrier.n: initialisation of fisheries mortality if 
-        // the new fisheries are activated
-        if (newfisheries) {
-            fisheriesMortality = new FisheriesMortality(getRank(), subdt);
-            fisheriesMortality.init();
+        // fishery (Osmose 4) vs fishing mortality (Osmose 3)
+        if (fisheryEnabled) {
+            fisheryMortality = new FisheryMortality(getRank(), subdt);
+            fisheryMortality.init();
         } else {
             fishingMortality = new FishingMortality(getRank());
             fishingMortality.init();
@@ -203,7 +201,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
     public void run() {
 
         // Update fishing process (for MPAs)
-        if (!newfisheries) {
+        if (!fisheryEnabled) {
             fishingMortality.setMPA();
         }
 
@@ -270,7 +268,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         int[] ncellBatch = dispatchCells();
         int nbatch = ncellBatch.length;
         for (int idt = 0; idt < subdt; idt++) {
-            if (!newfisheries) {
+            if (!fisheryEnabled) {
                 fishingMortality.assessFishableBiomass();
             }
             CountDownLatch doneSignal = new CountDownLatch(nbatch);
@@ -433,15 +431,11 @@ public class StochasticMortalityProcess extends AbstractProcess {
                         // recovers the current school
                         school = schools.get(seqFish[i]);
 
-                        // Fishing mortality: if new fisheries are activated.
-                        if (newfisheries) {
-                            // If the new fisheries are activated, we compute the mortality rate 
-                            // it returns nothing
-                            this.fisheriesMortality.getRate(school);
-
+                        // Osmose 4 fishery mortality
+                        if (fisheryEnabled) {
+                            fisheryMortality.getRate(school);
                         } else {
-
-                            // Fishing Mortality
+                            // Osmose 3 fishing Mortality
                             switch (fishingMortality.getType(school.getSpeciesIndex())) {
                                 case RATE:
                                     double F = fishingMortality.getRate(school) / subdt;

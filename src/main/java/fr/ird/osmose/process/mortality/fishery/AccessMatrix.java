@@ -49,7 +49,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fisheries;
+package fr.ird.osmose.process.mortality.fishery;
 
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Configuration;
@@ -76,11 +76,11 @@ public class AccessMatrix extends OsmoseLinker {
     /**
      * Number of Fisheries.
      */
-    private int nFisheries;
+    private int nFishery;
 
     /**
-     * Reads the fisheries accessibility matrix. The return value is of
-     * dimensions [nFisheries][nSpecies]
+     * Reads the fishery accessibility matrix. The return value is of
+     * dimensions [nFishery][nSpecies]
      *
      * @param filename
      */
@@ -92,20 +92,20 @@ public class AccessMatrix extends OsmoseLinker {
         int nSpecies = getConfiguration().getNSpecies();
 
         // recovers the number of fisheries
-        nFisheries = cfg.findKeys("fishery.selectivity.type.fsh*").size();
+        nFishery = cfg.findKeys("fishery.selectivity.type.fsh*").size();
 
-        read(filename, nFisheries, nSpecies);
+        read(filename, nFishery, nSpecies);
     }
 
     /**
-     * Reads the fisheries accessibility matrix. The return value is of
-     * dimensions [nFisheries][nSpecies]
+     * Reads the fishery accessibility matrix. The return value is of
+     * dimensions [nFishery][nSpecies]
      *
      * @param filename
-     * @param nFisheries
+     * @param nFishery
      * @param nSpecies
      */
-    public void read(String filename, int nFisheries, int nSpecies) {
+    public void read(String filename, int nFishery, int nSpecies) {
 
         try {
             // 1. Open the CSV file
@@ -114,16 +114,16 @@ public class AccessMatrix extends OsmoseLinker {
 
             // 2. Check the number of line and checks that it equal to nFisheries 
             int nTimeSerie = lines.size() - 1;
-            if (nTimeSerie < nFisheries) {
-                error("Found " + nTimeSerie + " lines in the file. It must contain " + nFisheries + " lines.", new Exception());
+            if (nTimeSerie < nFishery) {
+                error("Found " + nTimeSerie + " lines in the file. It must contain " + nFishery + " lines.", new Exception());
             }
 
             // 3. Read the time serie
             // Initialize the output array
-            values = new double[nFisheries][nSpecies];
+            values = new double[nFishery][nSpecies];
 
             // Loop over the lines (skip header)
-            for (int t = 0; t < nFisheries; t++) {
+            for (int t = 0; t < nFishery; t++) {
                 String[] line = lines.get(t + 1);
 
                 // Checks that the matrix contains nSpecies column (skip column index)
@@ -146,7 +146,7 @@ public class AccessMatrix extends OsmoseLinker {
     }
 
     /**
-     * Returns the [nFisheries, nSpecies] accessibility matrix.
+     * Returns the [nFishery, nSpecies] accessibility matrix.
      * @return 
      */
     public double[][] getValues() {
@@ -156,23 +156,23 @@ public class AccessMatrix extends OsmoseLinker {
     /**
      * Returns the [nSpecies] accessibility matrix for a given fisheries
      *
-     * @param iFish Fisheries index
+     * @param iFishery Fishery index
      * @return 
      */
-    public double[] getValues(int iFish) {
-        return values[iFish];
+    public double[] getValues(int iFishery) {
+        return values[iFishery];
     }
 
     /**
      * Returns the accessibility matrix for a given fisheries and a given
      * specie.
      *
-     * @param iFish Fisheries index
+     * @param iFishery Fishery index
      * @param iSpec Species index
      * @return 
      */
-    public double getValues(int iFish, int iSpec) {
-        return values[iFish][iSpec];
+    public double getValues(int iFishery, int iSpec) {
+        return values[iFishery][iSpec];
 
     }
 

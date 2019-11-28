@@ -49,11 +49,11 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fisheries;
+package fr.ird.osmose.process.mortality.fishery;
 
-import fr.ird.osmose.process.mortality.fisheries.sizeselect.KnifeEdgeSelectivity;
-import fr.ird.osmose.process.mortality.fisheries.sizeselect.SigmoSelectivity;
-import fr.ird.osmose.process.mortality.fisheries.sizeselect.GaussSelectivity;
+import fr.ird.osmose.process.mortality.fishery.sizeselect.KnifeEdgeSelectivity;
+import fr.ird.osmose.process.mortality.fishery.sizeselect.SigmoSelectivity;
+import fr.ird.osmose.process.mortality.fishery.sizeselect.GaussSelectivity;
 import fr.ird.osmose.process.mortality.*;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
@@ -65,10 +65,10 @@ import fr.ird.osmose.util.GridMap;
  *
  * @author pverley
  */
-public class SingleFisheriesMortality extends AbstractMortality {
+public class SingleFisheryMortality extends AbstractMortality {
 
     /**
-     * Fisheries index.
+     * Fishery index.
      */
     private final int fIndex;
 
@@ -87,7 +87,7 @@ public class SingleFisheriesMortality extends AbstractMortality {
      */
     private FishingMapSet fMapSet;
 
-    public SingleFisheriesMortality(int rank, int findex) {
+    public SingleFisheryMortality(int rank, int findex) {
         super(rank);
         fIndex = findex;
     }
@@ -158,13 +158,13 @@ public class SingleFisheriesMortality extends AbstractMortality {
         // recovers the time varying rate of the fishing mortality
         double timeSelect = timeVar.getTimeVar(getSimulation().getIndexTimeSimu());
 
-        // Recovers the size/age fisheries selectivity factor [0, 1]
+        // Recovers the size/age fishery selectivity factor [0, 1]
         double sizeSelect = select.getSelectivity(selVar);
 
         GridMap map = fMapSet.getMap(fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()));
         double spatialSelect;
         if (map != null) {
-            spatialSelect = Math.max(0, map.getValue(cell));  // this is done because if value is -999, then no fisheries is applied here.
+            spatialSelect = Math.max(0, map.getValue(cell));  // this is done because if value is -999, then no fishery is applied here.
         } else {
             spatialSelect = 0.0;
         }

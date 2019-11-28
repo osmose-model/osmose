@@ -49,7 +49,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fisheries;
+package fr.ird.osmose.process.mortality.fishery;
 
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
@@ -62,10 +62,10 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 public class TimeVariability extends OsmoseLinker {
 
     /**
-     * Pointer to the fisheries mortality array. Allows to recover the fisheries
+     * Pointer to the fishery mortality array. Allows to recover the fishery
      * index and the MPI rank.
      */
-    private final SingleFisheriesMortality fishery;
+    private final SingleFisheryMortality fishery;
 
     private double[] timeArr;
 
@@ -80,11 +80,11 @@ public class TimeVariability extends OsmoseLinker {
     private int nyear;
 
     /**
-     * Public constructor. Initialize the FisheriesMortality pointer.
+     * Public constructor. Initialize the FisheryMortality pointer.
      *
      * @param fishery
      */
-    public TimeVariability(SingleFisheriesMortality fishery) {
+    public TimeVariability(SingleFisheryMortality fishery) {
         this.fishery = fishery;
     }
 

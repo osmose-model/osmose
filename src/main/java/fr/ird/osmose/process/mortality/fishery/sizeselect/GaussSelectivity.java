@@ -49,94 +49,87 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fisheries;
+package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.process.mortality.fishery.SingleFisheryMortality;
+import fr.ird.osmose.process.mortality.fishery.SizeSelectivity;
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
  * 
  * @todo Eventually Move the selectivity into Interface, with three different classes (Step, Gaussian and Sigmo) 
  * @author nbarrier
  */
-public abstract class SizeSelectivity extends OsmoseLinker {
+public class GaussSelectivity extends SizeSelectivity {
+    
+    /** L75 size. If < 0, consider that the old formulation is used */
+    private double l75 = -999;
+       
+    /** Exponential factors. Used only in GAUSS selectivities. */
+    private double b;
+    
+    /** Maximum value. Use only in the case of guaussian distribution for normalisation purposes */
+    private NormalDistribution distrib;
     
     /**
-     * Type of the selectivity variable (age or size).
-     */
-    protected SizeSelectivity.Variable variable;
-    
-    /** L50 size. Used in all three types of selectivities. */
-    protected double l50;
-    
-     /** Tiny size. Size below which no fish is captured. */
-    protected double tiny = 1.e-6;
-    
-    /** Pointer to the fisheries mortality array. 
-     * Allows to recover the fisheries index and the MPI rank.
-     */
-    protected final SingleFisheriesMortality mort;
-    
-    /**
-     * Public constructor. Initialize the FisheriesMortality pointer.
+     * Public constructor. Initialize the FisheryMortality pointer.
      *
      * @param fmort
      */
-    public SizeSelectivity(SingleFisheriesMortality fmort) {
-        this.mort = fmort;
-        this.init_var();
+    public GaussSelectivity(SingleFisheryMortality fmort) {
+        super(fmort);
     }
     
     /** Initializes the selectivity class. The selectivity parameters
      * are initialized from the configuration file.
      * The number of parameters depends on the selectivity curve.
      */
-    public final void init_var() {
+    @Override
+    public void init() {
         
         int index = mort.getFIndex();
-        
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
-        // Initialize the selectivity variable 
-        String var = cfg.getString("fishery.selectivity.structure.fsh" + index);
-        if (var.equals("age")) {
-            this.variable = SizeSelectivity.Variable.AGE;
+        // If L75 is found, Ricardo formulae is used
+        if (cfg.canFind("fishery.selectivity.l75.fsh" + index)) {
+            this.l75 = cfg.getFloat("fishery.selectivity.l75.fsh" + index);
+            // Normal distribution for init qnorm(0.75)
+            NormalDistribution norm = new NormalDistribution();
+            double sd = (this.l75 - this.l50) / norm.inverseCumulativeProbability(0.75);  // this is the qnorm function
+            // initialisation of the distribution used in selectity calculation
+            this.distrib = new NormalDistribution(this.l50, sd);
         } else {
-            this.variable = SizeSelectivity.Variable.SIZE;
-        }
-        
-        // Init the l50 variable
-        this.l50 = cfg.getFloat("fishery.selectivity.l50.fsh" + index);
-
-        // if tiny parameter exists, set tiny. Else, use default
-        if(cfg.canFind("fishery.selectivity.tiny.fsh" + index)) {
-            this.tiny  = cfg.getFloat("fishery.selectivity.tiny.fsh" + index);
+            this.b = cfg.getFloat("fishery.selectivity.b.fsh" + index);
         }
     }
-    
+
     /**
-     * Returns a selectivity value. It depends on the size of the specieand
-     * on the selectivity curve and parameters. Output value is 
-     * between 0 and 1.
+     * Returns a selectivity value. It depends on the size of the specieand on
+     * the selectivity curve and parameters. Output value is between 0 and 1.
+     *
      * @param size Specie size
      * @return A selectivity value (0<output<1)
      */
-    public abstract double getSelectivity(double size);
-    
-    
-    /** Abstract init method. */
-    public abstract void init();
-   
-    /** Returns the selectivity variable.
-     * @return  */
-    public Variable getVariable() {
-        return this.variable;
+    @Override
+    public double getSelectivity(double size) {
+        
+        double output; 
+        // calculation of selectivity. Normalisation by the maximum value 
+        // (i.e. the value computed with x = mean).
+        if (this.l75 > 0) {
+            // If L75 > 0, assumes Ricardo Formulation should be used
+            output = this.distrib.density(size) / this.distrib.density(this.l50);
+        } else {
+            output = Math.exp(-this.b * Math.pow(size - this.l50, 2));
+        }
+
+        if (output < this.tiny) {
+            output = 0.0;
+        }
+
+        return output;
+
     }
-    
-    public enum  Variable {
-        SIZE,
-        AGE,
-    }
-    
 }

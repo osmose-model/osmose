@@ -49,36 +49,38 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fisheries.sizeselect;
+package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.process.mortality.fisheries.SingleFisheriesMortality;
-import fr.ird.osmose.process.mortality.fisheries.SizeSelectivity;
-import org.apache.commons.math3.distribution.NormalDistribution;
+import fr.ird.osmose.process.mortality.fishery.SingleFisheryMortality;
+import fr.ird.osmose.process.mortality.fishery.SizeSelectivity;
 
 /**
  * 
  * @todo Eventually Move the selectivity into Interface, with three different classes (Step, Gaussian and Sigmo) 
  * @author nbarrier
  */
-public class GaussSelectivity extends SizeSelectivity {
+public class SigmoSelectivity extends SizeSelectivity {
     
-    /** L75 size. If < 0, consider that the old formulation is used */
+    /** L75 size. Used in all three types of selectivities. */
     private double l75 = -999;
-       
-    /** Exponential factors. Used only in GAUSS selectivities. */
+    
+    /** Exponential factors. Used only in SIGMO and GAUSS selectivities. */
     private double b;
     
-    /** Maximum value. Use only in the case of guaussian distribution for normalisation purposes */
-    private NormalDistribution distrib;
+    /** Multiplication factor. Used only for SIGMO selectivities. */
+    private double a;
+    
+    private double s1;
+    private double s2;
     
     /**
-     * Public constructor. Initialize the FisheriesMortality pointer.
+     * Public constructor. Initialize the FisheryMortality pointer.
      *
      * @param fmort
      */
-    public GaussSelectivity(SingleFisheriesMortality fmort) {
+    public SigmoSelectivity(SingleFisheryMortality fmort) {
         super(fmort);
     }
     
@@ -88,47 +90,43 @@ public class GaussSelectivity extends SizeSelectivity {
      */
     @Override
     public void init() {
-        
+
         int index = mort.getFIndex();
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        
+
         // If L75 is found, Ricardo formulae is used
         if (cfg.canFind("fishery.selectivity.l75.fsh" + index)) {
             this.l75 = cfg.getFloat("fishery.selectivity.l75.fsh" + index);
-            // Normal distribution for init qnorm(0.75)
-            NormalDistribution norm = new NormalDistribution();
-            double sd = (this.l75 - this.l50) / norm.inverseCumulativeProbability(0.75);  // this is the qnorm function
-            // initialisation of the distribution used in selectity calculation
-            this.distrib = new NormalDistribution(this.l50, sd);
+            this.s1 = (this.l50 * Math.log(3)) / (this.l75 - this.l50);
+            this.s2 = this.s1 / this.l50;
         } else {
             this.b = cfg.getFloat("fishery.selectivity.b.fsh" + index);
+            this.a = cfg.getFloat("fishery.selectivity.a.fsh" + index);
         }
     }
-
+    
     /**
-     * Returns a selectivity value. It depends on the size of the specieand on
-     * the selectivity curve and parameters. Output value is between 0 and 1.
-     *
+     * Returns a selectivity value. It depends on the size of the specieand
+     * on the selectivity curve and parameters. Output value is 
+     * between 0 and 1.
      * @param size Specie size
      * @return A selectivity value (0<output<1)
      */
     @Override
     public double getSelectivity(double size) {
-        
-        double output; 
-        // calculation of selectivity. Normalisation by the maximum value 
-        // (i.e. the value computed with x = mean).
+        double output;
+        // If Ricardo formulation should be used.
         if (this.l75 > 0) {
-            // If L75 > 0, assumes Ricardo Formulation should be used
-            output = this.distrib.density(size) / this.distrib.density(this.l50);
+            output = 1 / (1 + Math.exp(this.s1 - (this.s2 * size)));
         } else {
-            output = Math.exp(-this.b * Math.pow(size - this.l50, 2));
+            // Sel = 1 / (1 + a*exp(-b(x-l50)))
+            output = 1 / (1 + this.a * Math.exp(-this.b * (size - this.l50)));
         }
 
         if (output < this.tiny) {
             output = 0.0;
         }
-
+        
         return output;
 
     }

@@ -49,49 +49,64 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fisheries.sizeselect;
+package fr.ird.osmose.process.mortality.fishery;
 
-import fr.ird.osmose.process.mortality.fisheries.SingleFisheriesMortality;
-import fr.ird.osmose.process.mortality.fisheries.SizeSelectivity;
+import au.com.bytecode.opencsv.CSVReader;
+import fr.ird.osmose.util.GridMap;
+import fr.ird.osmose.util.Separator;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
 
 /**
  *
- * @todo Eventually Move the selectivity into Interface, with three different
- * classes (Step, Gaussian and Sigmo)
- * @author nbarrier
+ * @author pverley
  */
-public class KnifeEdgeSelectivity extends SizeSelectivity {
+public class FisheryGridMap extends GridMap {
 
-    /**
-     * Public constructor. Initialize the FisheriesMortality pointer.
-     *
-     * @param fmort
-     */
-    public KnifeEdgeSelectivity(SingleFisheriesMortality fmort) {
-        super(fmort);
+    public FisheryGridMap(int defaultValue) {
+        super(defaultValue);
     }
 
-    /**
-     * Initializes the selectivity class. For step, only L50 is used. Hence
-     * no more init is used.
-     * 
-     */
-    @Override
-    public void init() {
-
+    public FisheryGridMap() {
+        super(0);
     }
 
-    /**
-     * Returns a selectivity value. It depends on the size of the specieand on
-     * the selectivity curve and parameters. Output value is between 0 and 1.
-     *
-     * @param size Specie size
-     * @return A selectivity value (0<output<1)
-     */
-    @Override
-    public double getSelectivity(double size) {
+    public FisheryGridMap(String csvFile) {
+        this();
+        read(csvFile);
+    }
+    
+    private void read(String csvFile) {
 
-        double output = size < l50 ? 0 : 1;
-        return output;
+        try {
+            /*
+             * Read the CSV file
+             */
+            System.out.println(csvFile);
+            CSVReader reader = new CSVReader(new FileReader(csvFile), Separator.guess(csvFile).getSeparator());
+            List<String[]> lines = reader.readAll();
+            /*
+             * Read the map
+             */
+            int ny = getGrid().get_ny();
+            for (int l = 0; l < lines.size(); l++) {
+                String[] line = lines.get(l);
+                int j = ny - l - 1;
+                for (int i = 0; i < line.length; i++) {
+                    try {
+                        // barrier.n: fisheries grid Map can have values of -999
+                        // i.e. it does not have fishing values here.
+                        float value = Float.valueOf(line[i]);
+                        this.matrix[j][i] = value;     
+                    } catch (NumberFormatException ex) {
+                        error("Error parsing CSV map " + csvFile + " row " + (l + 1) + " column " + (i + 1), ex);
+                    }
+                }
+            }
+            reader.close();
+        } catch (IOException ex) {
+            error("Error reading CSV map " + csvFile, ex);
+        }
     }
 }
