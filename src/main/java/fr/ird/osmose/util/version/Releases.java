@@ -271,6 +271,9 @@ public class Releases {
                 // consistency of the tiem length can be done with value from NetCDF
                 // file, no need for overparametrisation.
                 deprecateParameter("ltl.nstep");
+                
+                // rename simulation.nplankton into simulation.nresource
+                updateKey("simulation.nplankton", "simulation.nresource");
 
                 // update every plankton.*.plk# parameter into resource.*.rsc#
                 int nRsc = getConfiguration().findKeys("plankton.name.plk*").size();
