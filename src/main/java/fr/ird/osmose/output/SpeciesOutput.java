@@ -58,17 +58,23 @@ import java.io.File;
  *
  * @author nbarrier
  */
-public class SimpleOutput extends AbstractOutput {
+public class SpeciesOutput extends AbstractOutput {
 
     protected double[] value;
     protected double[][] valueReg;
+    private final String name;
+    private final String description;
+    private final SchoolVariableGetter schoolVariable;
 
-    public SimpleOutput(int rank) {
-        super(rank);
+    public SpeciesOutput(int rank, String name, String description, SchoolVariableGetter schoolVariable) {
+        this(rank, false, name, description, schoolVariable);
     }
-    
-    public SimpleOutput(int rank, boolean regional) {
+
+    public SpeciesOutput(int rank, boolean regional, String name, String description, SchoolVariableGetter schoolVariable) {
         super(rank, regional);
+        this.name = name;
+        this.description = description;
+        this.schoolVariable = schoolVariable;
     }
 
     @Override
@@ -93,14 +99,14 @@ public class SimpleOutput extends AbstractOutput {
 
         for (School school : getSchoolSet().getAliveSchools()) {
             if (include(school)) {
-                value[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+                value[school.getSpeciesIndex()] += schoolVariable.getVariable(school);
             }
         }
-        
+
         if (this.saveRegional()) {
             for (int idom = 0; idom < Regions.getNRegions(); idom++) {
                 for (School school : getSchoolSet().getRegionSchools(idom)) {
-                    valueReg[idom][school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+                    valueReg[idom][school.getSpeciesIndex()] += schoolVariable.getVariable(school);
                 }
             }
         }
@@ -126,28 +132,16 @@ public class SimpleOutput extends AbstractOutput {
     }
 
     @Override
-    String getFilename() {
+    final String getFilename() {
         StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_abundance_Simu");
+        filename.append("_").append(name).append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
     }
 
     @Override
-    String getDescription() {
-        StringBuilder str = new StringBuilder("Mean abundance (number of fish), ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
-    }
-
-    @Override
-    String[] getHeaders() {
+    final String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
             species[i] = getSpecies(i).getName();
@@ -156,7 +150,7 @@ public class SimpleOutput extends AbstractOutput {
     }
 
     @Override
-    String getRegionalFilename(int idom) {
+    final String getRegionalFilename(int idom) {
         StringBuilder filename = new StringBuilder(getConfiguration().getOutputPathname());
         filename.append(File.separatorChar);
         filename.append("Regional");
@@ -164,9 +158,14 @@ public class SimpleOutput extends AbstractOutput {
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_");
         filename.append(Regions.getRegionName(idom));
-        filename.append("_abundance_Simu");
+        filename.append("_").append(name).append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
         return filename.toString();
+    }
+
+    @Override
+    String getDescription() {
+        return description;
     }
 }

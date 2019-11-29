@@ -65,6 +65,7 @@ import fr.ird.osmose.output.spatial.SpatialYieldOutput;
 import fr.ird.osmose.output.spatial.SpatialYieldNOutput;
 import fr.ird.osmose.output.spatial.SpatialTLOutput;
 import fr.ird.osmose.output.spatial.SpatialSizeOutput;
+import fr.ird.osmose.process.mortality.MortalityCause;
 
 /**
  *
@@ -94,6 +95,8 @@ public class OutputManager extends SimulationLinker {
 
     private boolean useNetcdf = false;
 
+    private boolean cutoff;
+
     public OutputManager(int rank) {
         super(rank);
         outputs = new ArrayList();
@@ -117,6 +120,8 @@ public class OutputManager extends SimulationLinker {
         AbstractDistribution tl_distrib = new TLDistribution();
 
         useNetcdf = getConfiguration().getBoolean("output.use.netcdf");
+
+        cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
 
         if (getConfiguration().getBoolean("output.abundance.netcdf.enabled")) {
             outputs.add(new AbundanceOutput_Netcdf(rank));
@@ -244,7 +249,9 @@ public class OutputManager extends SimulationLinker {
         }
         // Biomass
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
-            outputs.add(new BiomassOutput(rank));
+            outputs.add(new SpeciesOutput(rank, true, "biomass",
+                    "Mean biomass (tons), " + (cutoff ? "including" : "excluding") + " first ages specified in input",
+                    (school) -> school.getInstantaneousBiomass()));
         }
         if (getConfiguration().getBoolean("output.biomass.bysize.enabled")) {
             outputs.add(new BiomassDistribOutput(rank, sizeDistrib));
@@ -254,7 +261,9 @@ public class OutputManager extends SimulationLinker {
         }
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
-            outputs.add(new AbundanceOutput(rank, true));
+            outputs.add(new SpeciesOutput(rank, true, "abundance",
+                    "Mean abundance (number of fish), " + (cutoff ? "including" : "excluding") + " first ages specified in input",
+                    (school) -> school.getInstantaneousAbundance()));
         }
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
             outputs.add(new AbundanceDistribOutput(rank, sizeDistrib));
@@ -295,10 +304,14 @@ public class OutputManager extends SimulationLinker {
         }
         // Yield
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
-            outputs.add(new YieldOutput(rank));
+            outputs.add(new SpeciesOutput(rank, true, "yield",
+                    "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved",
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING))));
         }
         if (getConfiguration().getBoolean("output.yieldN.enabled")) {
-            outputs.add(new YieldNOutput(rank));
+            outputs.add(new SpeciesOutput(rank, true, "yieldN",
+                    "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved",
+                    school -> school.getNdead(MortalityCause.FISHING)));
         }
         // Size
         if (getConfiguration().getBoolean("output.size.enabled")) {
@@ -385,7 +398,9 @@ public class OutputManager extends SimulationLinker {
         // Debugging outputs
         boolean NO_WARNING = false;
         if (getConfiguration().getBoolean("output.ssb.enabled", NO_WARNING)) {
-            outputs.add(new SSBOutput(rank));
+            outputs.add(new SpeciesOutput(rank, false, "SSB",
+                    "Spawning Stock Biomass (tons",
+                    school -> school.getSpecies().isSexuallyMature(school) ? school.getInstantaneousBiomass() : 0.d));
         }
         if (getConfiguration().getBoolean("output.nschool.enabled", NO_WARNING)) {
             outputs.add(new NSchoolOutput(rank));

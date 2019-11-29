@@ -1,4 +1,4 @@
-/* 
+/*
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
@@ -52,76 +52,13 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.MortalityCause;
 
 /**
  *
  * @author pverley
  */
-public class YieldOutput extends SimpleOutput {
-
-    public YieldOutput(int rank) {
-        super(rank);
-    }
+public interface SchoolVariableGetter {
     
-    public YieldOutput(int rank, boolean reg) {
-        super(rank, reg);
-    }
-
-    @Override
-    public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            value[school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
-        }
-        
-        if (this.saveRegional()) {
-            for (int idom = 0; idom < Regions.getNRegions(); idom++) {
-                for (School school : getSchoolSet().getRegionSchools(idom)) {
-                    valueReg[idom][school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
-                }
-            }
-        }
-        
-    }
-
-    @Override
-    public void write(float time) {
-
-        writeVariable(time, value);
-        
-        if (this.saveRegional()) {
-            for (int idom = 0; idom < valueReg.length; idom++) {
-                writeVariable(idom + 1, time, valueReg[idom]);
-            }
-        }
-        
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_yield_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
-    @Override
-    String getDescription() {
-        return "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved";
-    }
-
-    @Override
-    String[] getHeaders() {
-        String[] species = new String[getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
-        }
-        return species;
-    }
-
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public double getVariable(School school);
+    
 }
