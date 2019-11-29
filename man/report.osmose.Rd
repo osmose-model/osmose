@@ -5,7 +5,7 @@
 \title{Report method for osmose objects}
 \usage{
 \method{report}{osmose}(x, format = "latex", tangle = FALSE,
-  output = NULL, open = TRUE)
+  output = NULL, open = FALSE)
 }
 \arguments{
 \item{x}{Object of \code{osmose} class.}

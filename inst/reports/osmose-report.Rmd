@@ -18,37 +18,37 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Time series of biomass: for all species with replicates
 
-### plot(gog, what="biomass", ts = TRUE, type=1, col = "gray40")
+### plot(outputs, what="biomass", ts = TRUE, type=1, col = "gray40")
 
 ```{r, echo=FALSE, message=FALSE, fig.height=7, fig.width=8}
-plot(gog, what="biomass", ts = TRUE, type=1, col = "gray40")
+plot(outputs, what="biomass", ts = TRUE, type=1, col = "gray40")
 ```
 
 \pagebreak
 
 ## Time series of biomass: for four species without replicates
 
-### plot(gog, what="biomass", ts = TRUE, type=1, col = "blue", species = c(0,1,2,3) , replicates = FALSE)
+### plot(outputs, what="biomass", ts = TRUE, type=1, col = "blue", species = c(0,1,2,3) , replicates = FALSE)
 
 ```{r, echo=FALSE, message=FALSE, fig.height=8, fig.width=8}
-plot(gog, what="biomass", ts = TRUE, type=1, col = "blue", species = c(0,1,2,3) , replicates = FALSE, initialYear = 1992)
+plot(outputs, what="biomass", ts = TRUE, type=1, col = "blue", species = c(0,1,2,3) , replicates = FALSE, initialYear = 1992)
 ```
 
 ## Time series of biomass: type = 2
 
-### plot(gog, what="biomass", type=2, species = c(0,1,2,4,5,6), initialYear = 2000) 
+### plot(outputs, what="biomass", type=2, species = c(0,1,2,4,5,6), initialYear = 2000) 
 ```{r, echo=FALSE, message=FALSE, fig.height=8, fig.width=8}
-plot(gog, what="biomass", type=2, species = c(0,1,2,4,5,6), initialYear = 2000)
+plot(outputs, what="biomass", type=2, species = c(0,1,2,4,5,6), initialYear = 2000)
 ```
 
 \pagebreak
 
 ## Time series of biomass: type = 3
 
-### plot(gog, what="biomass", type=3, start = 25, initialYear = 2002)
+### plot(outputs, what="biomass", type=3, start = 25, initialYear = 2002)
 
 ```{r, echo=FALSE, message=FALSE, fig.height=8, fig.width=8}
-plot(gog, what="biomass", type=3, start = 25, initialYear = 2002) 
+plot(outputs, what="biomass", type=3, start = 25, initialYear = 2002) 
 
 ```
 
@@ -56,34 +56,34 @@ plot(gog, what="biomass", type=3, start = 25, initialYear = 2002)
 
 ## Total biomass: type = 1
 
-### plot(gog, what="biomass", ts = FALSE, type=1, factor = 1e-6)
+### plot(outputs, what="biomass", ts = FALSE, type=1, factor = 1e-6)
 
 ```{r, echo=FALSE, message=FALSE, fig.height=4.5, fig.width=8}
-plot(gog, what="biomass", ts = FALSE, type=1, factor = 1e-6, ci = TRUE)
+plot(outputs, what="biomass", ts = FALSE, type=1, factor = 1e-6, ci = TRUE)
 
 ```
 
-### plot(gog, what="biomass", ts = FALSE, type=1, horizontal=TRUE, ci = FALSE, , cex.names = 0.6) 
+### plot(outputs, what="biomass", ts = FALSE, type=1, horizontal=TRUE, ci = FALSE, , cex.names = 0.6) 
 
 ```{r, echo=FALSE, message=FALSE, fig.height=4, fig.width=8}
-plot(gog, what="biomass", ts = FALSE, type=1, horizontal=TRUE, ci = FALSE, cex.names = 0.6) 
+plot(outputs, what="biomass", ts = FALSE, type=1, horizontal=TRUE, ci = FALSE, cex.names = 0.6) 
 ```
 
 \pagebreak
 
 ## Total biomass: type = 2 - means over replicates
 
-### plot(gog, what="biomass", ts = FALSE, type=2, col = "green")
+### plot(outputs, what="biomass", ts = FALSE, type=2, col = "green")
 
 ```{r, echo=FALSE, message=FALSE, fig.height=4, fig.width=8.5}
-plot(gog, what="biomass", ts = FALSE, type=2, col = "green")
+plot(outputs, what="biomass", ts = FALSE, type=2, col = "green")
 ```
 
 ## Total biomass: type = 3 - means over the time
 
-### plot(gog, what="biomass", ts = FALSE, type=1, horizontal=TRUE, ci = FALSE, , cex.names = 0.6) 
+### plot(outputs, what="biomass", ts = FALSE, type=1, horizontal=TRUE, ci = FALSE, , cex.names = 0.6) 
 
 ```{r, echo=FALSE, message=FALSE, fig.height=4, fig.width=8.5}
-plot(gog, what="biomass", ts = FALSE, type=3, col = "blue")
+plot(outputs, what="biomass", ts = FALSE, type=3, col = "blue")
 ```
 

@@ -143,7 +143,7 @@ print.summary.osmose = function(x, ...) {
 #' @method report osmose
 #' 
 #' @export
-report.osmose = function(x, format = "latex", tangle=FALSE, output = NULL, open = TRUE) {
+report.osmose = function(x, format = "latex", tangle=FALSE, output = NULL, open = FALSE) {
   
   if(is.null(output)) output = getwd()
   
