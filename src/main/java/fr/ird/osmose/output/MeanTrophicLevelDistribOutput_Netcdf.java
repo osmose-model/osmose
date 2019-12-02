@@ -63,8 +63,6 @@ public class MeanTrophicLevelDistribOutput_Netcdf extends AbstractMeanDistribOut
 
     public MeanTrophicLevelDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
         super(rank, distrib);
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

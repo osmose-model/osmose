@@ -61,8 +61,6 @@ public class MeanTrophicLevelDistribOutput extends AbstractMeanDistribOutput {
 
     public MeanTrophicLevelDistribOutput(int rank, AbstractDistribution distrib) {
         super(rank, "Trophic", "meanTL", distrib);
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
     
     @Override

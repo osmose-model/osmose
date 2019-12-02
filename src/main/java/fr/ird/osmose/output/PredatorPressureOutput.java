@@ -84,8 +84,6 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     public PredatorPressureOutput(int rank) {
         super(rank);
         separator = getConfiguration().getOutputSeparator();
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

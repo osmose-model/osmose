@@ -98,8 +98,6 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
     public ResourceOutput(int rank) {
         super(rank);
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

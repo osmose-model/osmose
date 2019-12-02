@@ -86,8 +86,6 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
 
     public DietOutput_Netcdf(int rank) {
         super(rank);
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

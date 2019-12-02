@@ -65,8 +65,6 @@ public class MeanTrophicLevelOutput_Netcdf extends AbstractOutput_Netcdf {
 
     public MeanTrophicLevelOutput_Netcdf(int rank) {
         super(rank);
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

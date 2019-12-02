@@ -68,8 +68,6 @@ public class PredatorPressureDistribOutput_Netcdf extends AbstractDistribOutput_
     public PredatorPressureDistribOutput_Netcdf(int rank, Species species, AbstractDistribution distrib) {
         super(rank, distrib);
         this.species = species;
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

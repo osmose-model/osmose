@@ -65,8 +65,6 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
     public PredatorPressureDistribOutput(int rank, Species species, AbstractDistribution distrib) {
         super(rank, "Trophic", "predatorPressure", species, distrib);
         this.species = species;
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

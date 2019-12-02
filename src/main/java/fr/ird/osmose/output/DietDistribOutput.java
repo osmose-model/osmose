@@ -66,8 +66,6 @@ public class DietDistribOutput extends AbstractDistribOutput {
     public DietDistribOutput(int rank, Species species, AbstractDistribution distrib) {
         super(rank, "Trophic", "dietMatrix", species, distrib);
         this.species = species;
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

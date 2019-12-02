@@ -81,8 +81,6 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     public DietDistribOutput_Netcdf(int rank, Species species, AbstractDistribution distrib) {
         super(rank, distrib);
         this.species = species;
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override

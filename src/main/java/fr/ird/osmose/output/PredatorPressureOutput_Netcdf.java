@@ -89,13 +89,8 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     private int nPreys;
     private int nPred;
 
-    private final String separator;
-
     public PredatorPressureOutput_Netcdf(int rank) {
         super(rank);
-        separator = getConfiguration().getOutputSeparator();
-        // Ensure that prey records will be made during the simulation
-        getSimulation().requestPreyRecord();
     }
 
     @Override
