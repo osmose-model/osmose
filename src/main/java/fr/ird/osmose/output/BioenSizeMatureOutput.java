@@ -51,9 +51,6 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-import java.io.File;
-
 /**
  *
  * @author pverley
@@ -64,7 +61,7 @@ public class BioenSizeMatureOutput extends AbstractOutput {
     public double[] abundance;
 
     public BioenSizeMatureOutput(int rank) {
-        super(rank);
+        super(rank, "Bioen", "SizeMature");
     }
 
     @Override
@@ -80,13 +77,13 @@ public class BioenSizeMatureOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        
-        for (School school : getSchoolSet().getAliveSchools()) {
-            if (school.isMature()) {
-                size_mature[school.getSpeciesIndex()] += school.getSizeMat() * school.getInstantaneousAbundance();
-                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
-            }
-        }
+
+        getSchoolSet().getAliveSchools().stream()
+                .filter(school -> school.isMature())
+                .forEach(school -> {
+                    size_mature[school.getSpeciesIndex()] += school.getSizeMat() * school.getInstantaneousAbundance();
+                    abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+                });
     }
 
     @Override
@@ -104,17 +101,6 @@ public class BioenSizeMatureOutput extends AbstractOutput {
     }
 
     @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Bioen");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeMature_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
-    @Override
     String getDescription() {
         return "Size at maturity (centimeter)";
     }
@@ -128,8 +114,4 @@ public class BioenSizeMatureOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

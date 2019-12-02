@@ -51,9 +51,6 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-import java.io.File;
-
 /**
  *
  * @author pverley
@@ -64,7 +61,7 @@ public class MeanSizeOutput extends AbstractOutput {
     private double[] abundance;
 
     public MeanSizeOutput(int rank) {
-        super(rank);
+        super(rank, "SizeIndicators", "meanSize");
     }
 
     @Override
@@ -81,13 +78,13 @@ public class MeanSizeOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            if (include(school)) {
-                int i = school.getSpeciesIndex();
-                meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
-                abundance[i] += school.getInstantaneousAbundance();
-            }
-        }
+        getSchoolSet().getAliveSchools().stream()
+                .filter(school -> include(school))
+                .forEach(school -> {
+                    int i = school.getSpeciesIndex();
+                    meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
+                    abundance[i] += school.getInstantaneousAbundance();
+                });
     }
 
     @Override
@@ -101,17 +98,6 @@ public class MeanSizeOutput extends AbstractOutput {
             }
         }
         writeVariable(time, meanSize);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanSize_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -135,8 +121,4 @@ public class MeanSizeOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

@@ -52,10 +52,8 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.School;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
-import java.io.File;
 
 /**
  *
@@ -68,16 +66,16 @@ public class BiomassDietStageOutput extends AbstractOutput {
      * Biomass per diet stages [SPECIES][DIET_STAGES]
      */
     private double[][] biomassStage;
-    
+
     private IStage dietOutputStage;
 
     public BiomassDietStageOutput(int rank) {
-        super(rank);
+        super(rank, "Trophic", "biomassPredPreyIni");
     }
 
     @Override
     public void init() {
-        
+
         dietOutputStage = new DietOutputStage();
         dietOutputStage.init();
 
@@ -87,21 +85,8 @@ public class BiomassDietStageOutput extends AbstractOutput {
             nColumns += dietOutputStage.getNStage(iSpec);
         }
         nColumns += getConfiguration().getNRscSpecies();
-        
-        super.init();
-    }
 
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPathname());
-        filename.append(File.separatorChar);
-        filename = new StringBuilder("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_biomassPredPreyIni_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
+        super.init();
     }
 
     @Override
@@ -142,9 +127,9 @@ public class BiomassDietStageOutput extends AbstractOutput {
 
     @Override
     public void initStep() {
-        for (School school : getSchoolSet().getPresentSchools()) {
+        getSchoolSet().getPresentSchools().forEach(school -> {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
-        }
+        });
         int nSpec = getNSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies();
         for (int i = nSpec; i < nPrey; i++) {
@@ -190,7 +175,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         }
         writeVariable(time, biomass);
     }
-    
+
     /**
      * Gets the total biomass of the resource groups over the grid.
      *
@@ -206,8 +191,4 @@ public class BiomassDietStageOutput extends AbstractOutput {
         return biomTot;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

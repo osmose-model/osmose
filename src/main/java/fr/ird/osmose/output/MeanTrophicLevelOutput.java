@@ -51,9 +51,6 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-import java.io.File;
-
 /**
  *
  * @author pverley
@@ -64,7 +61,7 @@ public class MeanTrophicLevelOutput extends AbstractOutput {
     private double[] biomass;
 
     public MeanTrophicLevelOutput(int rank) {
-        super(rank);
+        super(rank, "Trophic", "meanTL");
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
     }
@@ -82,13 +79,13 @@ public class MeanTrophicLevelOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            if (include(school)) {
-                int i = school.getSpeciesIndex();
-                meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
-                biomass[i] += school.getInstantaneousBiomass();
-            }
-        }
+        getSchoolSet().getAliveSchools().stream()
+                .filter(school -> include(school))
+                .forEach(school -> {
+                    int i = school.getSpeciesIndex();
+                    meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
+                    biomass[i] += school.getInstantaneousBiomass();
+                });
     }
 
     @Override
@@ -102,17 +99,6 @@ public class MeanTrophicLevelOutput extends AbstractOutput {
             }
         }
         writeVariable(time, meanTL);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTL_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -136,8 +122,4 @@ public class MeanTrophicLevelOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

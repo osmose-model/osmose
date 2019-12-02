@@ -51,9 +51,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import java.io.File;
 
 /**
  *
@@ -62,24 +60,11 @@ import java.io.File;
 public class MeanTrophicLevelDistribOutput extends AbstractMeanDistribOutput {
 
     public MeanTrophicLevelDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
+        super(rank, "Trophic", "meanTL", distrib);
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
     }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTLDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
+    
     @Override
     String getDescription() {
         StringBuilder description = new StringBuilder();
@@ -96,18 +81,14 @@ public class MeanTrophicLevelDistribOutput extends AbstractMeanDistribOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().forEach((school) -> {
             int iSpec = school.getSpeciesIndex();
             int iClass = getClass(school);
             if (iClass >= 0) {
                 values[iSpec][iClass] += school.getInstantaneousBiomass() * school.getTrophicLevel();
                 denominator[iSpec][iClass] += school.getInstantaneousBiomass();
             }
-        }
+        });
     }
-
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 }

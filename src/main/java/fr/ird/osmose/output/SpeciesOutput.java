@@ -52,7 +52,6 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import java.io.File;
 
 /**
  *
@@ -62,17 +61,15 @@ public class SpeciesOutput extends AbstractOutput {
 
     protected double[] value;
     protected double[][] valueReg;
-    private final String name;
     private final String description;
     private final SchoolVariableGetter schoolVariable;
 
-    public SpeciesOutput(int rank, String name, String description, SchoolVariableGetter schoolVariable) {
-        this(rank, false, name, description, schoolVariable);
+    public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable) {
+        this(rank, subfolder, name, description, schoolVariable, false);
     }
 
-    public SpeciesOutput(int rank, boolean regional, String name, String description, SchoolVariableGetter schoolVariable) {
-        super(rank, regional);
-        this.name = name;
+    public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, boolean regional) {
+        super(rank, subfolder, name, regional);
         this.description = description;
         this.schoolVariable = schoolVariable;
     }
@@ -132,15 +129,6 @@ public class SpeciesOutput extends AbstractOutput {
     }
 
     @Override
-    final String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_").append(name).append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
-    @Override
     final String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
@@ -148,22 +136,7 @@ public class SpeciesOutput extends AbstractOutput {
         }
         return species;
     }
-
-    @Override
-    final String getRegionalFilename(int idom) {
-        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPathname());
-        filename.append(File.separatorChar);
-        filename.append("Regional");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_");
-        filename.append(Regions.getRegionName(idom));
-        filename.append("_").append(name).append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
+    
     @Override
     String getDescription() {
         return description;

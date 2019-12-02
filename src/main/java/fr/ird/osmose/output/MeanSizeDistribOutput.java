@@ -51,9 +51,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import java.io.File;
 
 /**
  *
@@ -62,21 +60,7 @@ import java.io.File;
 public class MeanSizeDistribOutput extends AbstractMeanDistribOutput {
 
     public MeanSizeDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getType().toString());
-        filename.append("Indicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanSizeDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
+        super(rank, "Indicators", "meanSize", distrib);
     }
 
     @Override
@@ -95,18 +79,14 @@ public class MeanSizeDistribOutput extends AbstractMeanDistribOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().forEach(school -> {
             int iSpec = school.getSpeciesIndex();
             int iClass = getClass(school);
             if (iClass >= 0) {
                 values[iSpec][iClass] += school.getInstantaneousAbundance() * school.getLength();
                 denominator[iSpec][iClass] += school.getInstantaneousAbundance();
             }
-        }
+        });
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

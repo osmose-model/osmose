@@ -52,6 +52,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.IMarineOrganism;
+import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
 
@@ -66,10 +67,13 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
     // Distribution 
     private final AbstractDistribution distrib;
 
-    public AbstractDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank);
+    public AbstractDistribOutput(int rank, String subfolder, String name, Species species, AbstractDistribution distrib) {
+        super(rank, subfolder, name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""));
         this.distrib = distrib;
-        distrib.init();
+    }
+    
+    public AbstractDistribOutput(int rank, String subfolder, String name, AbstractDistribution distrib) {
+        this(rank, subfolder, name, null, distrib);
     }
 
     @Override

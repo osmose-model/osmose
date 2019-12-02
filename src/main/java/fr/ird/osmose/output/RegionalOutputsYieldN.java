@@ -55,7 +55,6 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.mortality.MortalityCause;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -65,21 +64,7 @@ import java.util.List;
 public class RegionalOutputsYieldN extends RegionalOutputsBiomass {
     
     public RegionalOutputsYieldN(int rank, Species species) {
-        super(rank, species);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Regional");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_abundanceByDomain");
-        filename.append("-");
-        filename.append(this.getSpecies().getName());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
+        super(rank, "yieldN", species);
     }
 
     @Override

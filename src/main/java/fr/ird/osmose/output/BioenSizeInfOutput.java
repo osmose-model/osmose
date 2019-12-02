@@ -51,11 +51,6 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
-import java.io.File;
-import java.util.List;
-
 /**
  *
  * @author amorell
@@ -65,49 +60,32 @@ public class BioenSizeInfOutput extends AbstractOutput {
     public double[] sizeMax;
 
     public BioenSizeInfOutput(int rank) {
-        super(rank);
+        super(rank, "Bioen", "SizeInf");
     }
 
     @Override
     public void initStep() {
-    
+
     }
 
     @Override
     public void reset() {
         // Do nothing
-        sizeMax = new double[this.getNSpecies()];
+        sizeMax = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
-        for (int ispec = 0; ispec < this.getNSpecies(); ispec++) {
-            Species spec = this.getSpecies(ispec);
-            // List of alive schools that belong to species ispec
-            List<School> listSchool = this.getSchoolSet().getSchools(spec);
-            for (School sch : listSchool) {
-                if (sch.isAlive()) {
-                    sizeMax[ispec] = Math.max(sizeMax[ispec], sch.getLength());
-                }
-            }
-        }
-    }
 
+        getSchoolSet().getAliveSchools().forEach(school -> {
+            int ispec = school.getSpeciesIndex();
+            sizeMax[ispec] = Math.max(sizeMax[ispec], school.getLength());
+        });
+    }
 
     @Override
     public void write(float time) {
         writeVariable(time, sizeMax);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Bioen");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_SizeInf_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -124,9 +102,4 @@ public class BioenSizeInfOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }
-

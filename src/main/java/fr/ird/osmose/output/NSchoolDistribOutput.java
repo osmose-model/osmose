@@ -61,23 +61,12 @@ import fr.ird.osmose.output.distribution.AbstractDistribution;
 public class NSchoolDistribOutput extends AbstractDistribOutput {
 
     public NSchoolDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
+        super(rank, null, "nschool", distrib);
     }
 
     @Override
     public void update() {
         // nothing to do
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_nschoolDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -95,8 +84,4 @@ public class NSchoolDistribOutput extends AbstractDistribOutput {
         }
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

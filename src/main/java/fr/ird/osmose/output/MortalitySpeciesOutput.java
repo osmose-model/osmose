@@ -55,7 +55,6 @@ import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import java.io.File;
 
 /**
  *
@@ -74,23 +73,8 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
     private double[][] mortalityRates;
 
     public MortalitySpeciesOutput(int rank, Species species, AbstractDistribution distrib) {
-        super(rank, distrib);
+        super(rank, "Mortality", "mortalityRate", species, distrib);
         this.species = species;
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Mortality");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_mortalityRateDistribBy");
-        filename.append(getType().toString());
-        filename.append("-");
-        filename.append(species.getName());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -172,8 +156,4 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
         }
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

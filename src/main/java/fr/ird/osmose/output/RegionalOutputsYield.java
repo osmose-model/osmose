@@ -65,21 +65,7 @@ import java.util.List;
 public class RegionalOutputsYield extends RegionalOutputsBiomass {
     
     public RegionalOutputsYield(int rank, Species species) {
-        super(rank, species);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Regional");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_abundanceByDomain");
-        filename.append("-");
-        filename.append(this.getSpecies().getName());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
+        super(rank, "yield", species);
     }
 
     @Override

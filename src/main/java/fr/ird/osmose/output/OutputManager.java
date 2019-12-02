@@ -116,8 +116,11 @@ public class OutputManager extends SimulationLinker {
         }
 
         AbstractDistribution sizeDistrib = new SizeDistribution();
+        sizeDistrib.init();
         AbstractDistribution ageDistrib = new AgeDistribution();
+        ageDistrib.init();
         AbstractDistribution tl_distrib = new TLDistribution();
+        tl_distrib.init();
 
         useNetcdf = getConfiguration().getBoolean("output.use.netcdf");
 
@@ -249,9 +252,11 @@ public class OutputManager extends SimulationLinker {
         }
         // Biomass
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
-            outputs.add(new SpeciesOutput(rank, true, "biomass",
+            outputs.add(new SpeciesOutput(rank, null, "biomass",
                     "Mean biomass (tons), " + (cutoff ? "including" : "excluding") + " first ages specified in input",
-                    (school) -> school.getInstantaneousBiomass()));
+                    (school) -> school.getInstantaneousBiomass(),
+                    true)
+            );
         }
         if (getConfiguration().getBoolean("output.biomass.bysize.enabled")) {
             outputs.add(new BiomassDistribOutput(rank, sizeDistrib));
@@ -261,9 +266,11 @@ public class OutputManager extends SimulationLinker {
         }
         // Abundance
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
-            outputs.add(new SpeciesOutput(rank, true, "abundance",
+            outputs.add(new SpeciesOutput(rank, null, "abundance",
                     "Mean abundance (number of fish), " + (cutoff ? "including" : "excluding") + " first ages specified in input",
-                    (school) -> school.getInstantaneousAbundance()));
+                    (school) -> school.getInstantaneousAbundance(),
+                    true)
+            );
         }
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
             outputs.add(new AbundanceDistribOutput(rank, sizeDistrib));
@@ -304,14 +311,18 @@ public class OutputManager extends SimulationLinker {
         }
         // Yield
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
-            outputs.add(new SpeciesOutput(rank, true, "yield",
+            outputs.add(new SpeciesOutput(rank, null, "yield",
                     "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING))));
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)),
+                    true)
+            );
         }
         if (getConfiguration().getBoolean("output.yieldN.enabled")) {
-            outputs.add(new SpeciesOutput(rank, true, "yieldN",
+            outputs.add(new SpeciesOutput(rank, null, "yieldN",
                     "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved",
-                    school -> school.getNdead(MortalityCause.FISHING)));
+                    school -> school.getNdead(MortalityCause.FISHING),
+                    true)
+            );
         }
         // Size
         if (getConfiguration().getBoolean("output.size.enabled")) {
@@ -398,9 +409,11 @@ public class OutputManager extends SimulationLinker {
         // Debugging outputs
         boolean NO_WARNING = false;
         if (getConfiguration().getBoolean("output.ssb.enabled", NO_WARNING)) {
-            outputs.add(new SpeciesOutput(rank, false, "SSB",
+            outputs.add(new SpeciesOutput(rank, null, "SSB",
                     "Spawning Stock Biomass (tons",
-                    school -> school.getSpecies().isSexuallyMature(school) ? school.getInstantaneousBiomass() : 0.d));
+                    school -> school.getSpecies().isSexuallyMature(school) ? school.getInstantaneousBiomass() : 0.d,
+                    false)
+            );
         }
         if (getConfiguration().getBoolean("output.nschool.enabled", NO_WARNING)) {
             outputs.add(new NSchoolOutput(rank));
@@ -458,7 +471,7 @@ public class OutputManager extends SimulationLinker {
 
         if (getConfiguration().getBoolean("output.regional.biomass.enabled")) {
             for (int i = 0; i < getNSpecies(); i++) {
-                outputs.add(new RegionalOutputsBiomass(rank, getSpecies(i)));
+                outputs.add(new RegionalOutputsBiomass(rank, "biomass", getSpecies(i)));
             }
         }
 

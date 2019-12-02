@@ -51,9 +51,6 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-import java.io.File;
-
 /**
  *
  * @author pverley
@@ -64,7 +61,7 @@ public class BioenIngestOutput extends AbstractOutput {
     public double[] abundance;
 
     public BioenIngestOutput(int rank) {
-        super(rank);
+        super(rank, "Bioen", "ingestion");
     }
 
     @Override
@@ -81,16 +78,16 @@ public class BioenIngestOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().forEach(school -> {
             int i = school.getSpeciesIndex();
             ingestion[i] += school.getEGross() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
             abundance[i] += 1;
-        }
+        });
     }
-       
+
     @Override
     public void write(float time) {
-        
+
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             if (abundance[i] > 0) {
                 ingestion[i] = (float) (ingestion[i] / abundance[i]);
@@ -98,19 +95,8 @@ public class BioenIngestOutput extends AbstractOutput {
                 ingestion[i] = Double.NaN;
             }
         }
-        
-        writeVariable(time, ingestion);
-    }
 
-    @Override
-    public String getFilename() {
-        StringBuilder filename = new StringBuilder("Bioen");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_ingestion_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
+        writeVariable(time, ingestion);
     }
 
     @Override
@@ -127,8 +113,4 @@ public class BioenIngestOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

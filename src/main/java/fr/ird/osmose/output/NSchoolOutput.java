@@ -60,7 +60,7 @@ public class NSchoolOutput extends AbstractOutput {
     private double[] nschool;
 
     public NSchoolOutput(int rank) {
-        super(rank);
+        super(rank, null, "nschool");
     }
 
     @Override
@@ -76,7 +76,7 @@ public class NSchoolOutput extends AbstractOutput {
     @Override
     public void update() {
 
-        for (int iSpec = 0; iSpec < this.getNSpecies(); iSpec++) {
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             nschool[iSpec] = getSchoolSet().getSchools(getSpecies(iSpec)).size();
         }
     }
@@ -84,15 +84,6 @@ public class NSchoolOutput extends AbstractOutput {
     @Override
     public void write(float time) {
         writeVariable(time, nschool);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_nschool_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -109,8 +100,4 @@ public class NSchoolOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

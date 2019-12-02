@@ -51,9 +51,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.MortalityCause;
-import java.io.File;
 
 /**
  *
@@ -65,7 +63,7 @@ public class MeanTrophicLevelCatchOutput extends AbstractOutput {
     private double[] yield;
 
     public MeanTrophicLevelCatchOutput(int rank) {
-        super(rank);
+        super(rank, "Trophic", "meanTLCatch");
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
     }
@@ -83,11 +81,11 @@ public class MeanTrophicLevelCatchOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().forEach(school -> {
             int i = school.getSpeciesIndex();
             meanTLCatch[i] += school.getTrophicLevel() * school.abd2biom(school.getNdead(MortalityCause.FISHING));
             yield[i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
-        }
+        });
     }
 
     @Override
@@ -104,17 +102,6 @@ public class MeanTrophicLevelCatchOutput extends AbstractOutput {
     }
 
     @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTLCatch_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
-    @Override
     String getDescription() {
         return "Mean Trophic Level of fish species, weighted by fish catch, and including first ages specified in input";
     }
@@ -128,8 +115,4 @@ public class MeanTrophicLevelCatchOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

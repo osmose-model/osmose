@@ -51,9 +51,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import java.io.File;
 
 /**
  *
@@ -62,32 +60,17 @@ import java.io.File;
 public class BiomassDistribOutput extends AbstractDistribOutput {
 
     public BiomassDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
+        super(rank, "Indicators", "biomass", distrib);
     }
     
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().forEach(school -> {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
                 values[school.getSpeciesIndex()][classSchool] += school.getInstantaneousBiomass();
             }
-        }
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getType().toString());
-        filename.append("Indicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_biomassDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-
+        });
     }
 
     @Override
@@ -102,11 +85,6 @@ public class BiomassDistribOutput extends AbstractDistribOutput {
     @Override
     public void initStep() {
         // nothing to do
-    }
-
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

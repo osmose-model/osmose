@@ -51,8 +51,6 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-
 /**
  *
  * @author pverley
@@ -63,17 +61,17 @@ public class NewSchoolOutput extends AbstractOutput {
     private double[] egg;
 
     public NewSchoolOutput(int rank) {
-        super(rank);
+        super(rank, null, "egg");
     }
 
     @Override
     public void initStep() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().stream().forEach(school -> {
             if (school.getAgeDt() == 0) {
                 egg[school.getSpeciesIndex()] += school.getBiomass();
             }
             biomass[school.getSpeciesIndex()] += school.getBiomass();
-        }
+        });
     }
 
     @Override
@@ -98,15 +96,6 @@ public class NewSchoolOutput extends AbstractOutput {
     }
 
     @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_egg_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
-    @Override
     String getDescription() {
         return "Percentage of egg biomass for each species";
     }
@@ -120,8 +109,4 @@ public class NewSchoolOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

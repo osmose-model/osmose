@@ -55,7 +55,6 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.GridMap;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -71,8 +70,8 @@ public class RegionalOutputsBiomass extends AbstractOutput {
     private int nregion;
     protected double values[];
 
-    public RegionalOutputsBiomass(int rank, Species species) {
-        super(rank);
+    public RegionalOutputsBiomass(int rank, String name, Species species) {
+        super(rank, "Regional", name + "ByDomain-" + species.getName());
         this.species = species;
     }
 
@@ -138,20 +137,6 @@ public class RegionalOutputsBiomass extends AbstractOutput {
                 }
             }
         }
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Regional");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_biomassByDomain");
-        filename.append("-");
-        filename.append(species.getName());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -232,9 +217,4 @@ public class RegionalOutputsBiomass extends AbstractOutput {
         return j_dom[idom];
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
 }

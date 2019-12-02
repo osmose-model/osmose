@@ -54,7 +54,6 @@ package fr.ird.osmose.output;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -64,21 +63,7 @@ import java.util.List;
 public class RegionalOutputsAbundance extends RegionalOutputsBiomass {
     
     public RegionalOutputsAbundance(int rank, Species species) {
-        super(rank, species);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Regional");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_abundanceByDomain");
-        filename.append("-");
-        filename.append(this.getSpecies().getName());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
+        super(rank, "abundance", species);
     }
 
     @Override

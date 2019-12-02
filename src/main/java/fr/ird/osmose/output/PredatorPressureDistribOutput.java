@@ -51,40 +51,22 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.Prey;
-import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import java.io.File;
 
 /**
  *
  * @author pverley
  */
 public class PredatorPressureDistribOutput extends AbstractDistribOutput {
-    
-   private final Species species;
+
+    private final Species species;
 
     public PredatorPressureDistribOutput(int rank, Species species, AbstractDistribution distrib) {
-        super(rank, distrib);
+        super(rank, "Trophic", "predatorPressure", species, distrib);
         this.species = species;
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_predatorPressureDistribBy");
-        filename.append(getType().toString());
-        filename.append("-");
-        filename.append(species.getName());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -101,26 +83,21 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
     @Override
     public void update() {
 
-        for (School predator : getSchoolSet().getAliveSchools()) {
-            for (Prey prey : predator.getPreys()) {
-                if (prey.getSpeciesIndex() == species.getIndex()) {
-                    int classPrey = getClass(prey);
-                    if (classPrey >= 0) {
-                        values[predator.getSpeciesIndex()][classPrey] += prey.getBiomass();
-                    }
-                }
-            }
-        }
+        getSchoolSet().getAliveSchools().forEach(predator -> {
+            predator.getPreys().stream()
+                    .filter(prey -> (prey.getSpeciesIndex() == species.getIndex()))
+                    .forEach(prey -> {
+                        int classPrey = getClass(prey);
+                        if (classPrey >= 0) {
+                            values[predator.getSpeciesIndex()][classPrey] += prey.getBiomass();
+                        }
+                    });
+        });
     }
 
     @Override
     public void initStep() {
         // nothing to do
-    }
-
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

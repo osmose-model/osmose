@@ -51,9 +51,7 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.MortalityCause;
-import java.io.File;
 
 /**
  *
@@ -65,7 +63,7 @@ public class MeanSizeCatchOutput extends AbstractOutput {
     private double[] yieldN;
 
     public MeanSizeCatchOutput(int rank) {
-        super(rank);
+        super(rank, "SizeIndicators", "meanSizeCatch");
     }
 
     @Override
@@ -81,11 +79,11 @@ public class MeanSizeCatchOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().forEach(school -> {
             int i = school.getSpeciesIndex();
             meanSizeCatch[i] += school.getNdead(MortalityCause.FISHING) * school.getLength();
             yieldN[i] += school.getNdead(MortalityCause.FISHING);
-        }
+        });
     }
 
     @Override
@@ -102,17 +100,6 @@ public class MeanSizeCatchOutput extends AbstractOutput {
     }
 
     @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanSizeCatch_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
-    @Override
     String getDescription() {
         return "Mean size of fish species in cm, weighted by fish numbers in the catches, and including first ages specified in input.";
     }
@@ -125,9 +112,5 @@ public class MeanSizeCatchOutput extends AbstractOutput {
         }
         return species;
     }
-
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 }

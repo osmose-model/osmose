@@ -61,7 +61,7 @@ import fr.ird.osmose.output.distribution.AbstractDistribution;
 public class NDeadSchoolDistribOutput extends AbstractDistribOutput {
 
     public NDeadSchoolDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
+        super(rank, null, "ndeadschool", distrib);
     }
 
     @Override
@@ -71,17 +71,6 @@ public class NDeadSchoolDistribOutput extends AbstractDistribOutput {
                 values[school.getSpeciesIndex()][getClass(school)] += 1;
             }
         }
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_ndeadschoolDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -97,8 +86,4 @@ public class NDeadSchoolDistribOutput extends AbstractDistribOutput {
         // nothing to do
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

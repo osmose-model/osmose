@@ -63,7 +63,7 @@ public class PredSuccessOutput extends AbstractOutput {
     private double[] nschool;
 
     public PredSuccessOutput(int rank) {
-        super(rank);
+        super(rank, null, "predsuccess");
     }
 
     @Override
@@ -79,13 +79,10 @@ public class PredSuccessOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-//            if (school.getPredSuccessRate() >= 0.57) {
-//                predSuccess[school.getSpeciesIndex()] += 1;
-//            }
+        getSchoolSet().getAliveSchools().stream().forEach(school -> {
             predSuccess[school.getSpeciesIndex()] += school.getPredSuccessRate();
             nschool[school.getSpeciesIndex()] += 1;
-        }
+        });
     }
 
     @Override
@@ -95,15 +92,6 @@ public class PredSuccessOutput extends AbstractOutput {
             predSuccess[i] /= (nschool[i]);
         }
         writeVariable(time, predSuccess);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_predsuccess_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -120,8 +108,4 @@ public class PredSuccessOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

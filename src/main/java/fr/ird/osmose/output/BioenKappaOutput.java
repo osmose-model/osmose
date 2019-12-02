@@ -51,11 +51,9 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-import java.io.File;
-
 /**
  * Save the kappa values
+ *
  * @author barrier.n
  */
 public class BioenKappaOutput extends AbstractOutput {
@@ -64,7 +62,7 @@ public class BioenKappaOutput extends AbstractOutput {
     public double[] abundance;
 
     public BioenKappaOutput(int rank) {
-        super(rank);
+        super(rank, "Bioen", "kappa");
     }
 
     @Override
@@ -81,11 +79,11 @@ public class BioenKappaOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().forEach(school -> {
             int i = school.getSpeciesIndex();
-                kappa[i] += school.getKappa() * school.getInstantaneousAbundance();
-                abundance[i] += school.getInstantaneousAbundance();
-        }
+            kappa[i] += school.getKappa() * school.getInstantaneousAbundance();
+            abundance[i] += school.getInstantaneousAbundance();
+        });
     }
 
     @Override
@@ -95,22 +93,11 @@ public class BioenKappaOutput extends AbstractOutput {
             if (abundance[i] > 0) {
                 kappa[i] = (float) (kappa[i] / abundance[i]);
             } else {
-                kappa[i] = Double.NaN;  
+                kappa[i] = Double.NaN;
             }
         }
 
         writeVariable(time, kappa);
-    }
-
-    @Override
-    public String getFilename() {
-        StringBuilder filename = new StringBuilder("Bioen");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_kappa_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -127,8 +114,4 @@ public class BioenKappaOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

@@ -62,7 +62,7 @@ public class NDeadSchoolOutput extends AbstractOutput {
     private double[] nDeadSchool;
 
     public NDeadSchoolOutput(int rank) {
-        super(rank);
+        super(rank, null, "ndeadschool");
     }
 
     @Override
@@ -78,25 +78,16 @@ public class NDeadSchoolOutput extends AbstractOutput {
     @Override
     public void update() {
 
-        for (School school : getSchoolSet().getSchools()) {
-            if (!school.isAlive()) {
-                nDeadSchool[school.getSpeciesIndex()] += 1;
-            }
-        }
+        getSchoolSet().getSchools().stream()
+                .filter(school -> !school.isAlive())
+                .forEach(school -> {
+                    nDeadSchool[school.getSpeciesIndex()] += 1;
+                });
     }
 
     @Override
     public void write(float time) {
         writeVariable(time, nDeadSchool);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getConfiguration().getString("output.file.prefix"));
-        filename.append("_ndeadschool_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -113,8 +104,4 @@ public class NDeadSchoolOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

@@ -62,8 +62,8 @@ public abstract class AbstractMeanDistribOutput extends AbstractDistribOutput {
     // Output values distributed by species and by class
     double[][] denominator;
 
-    public AbstractMeanDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
+    public AbstractMeanDistribOutput(int rank, String subfolder, String name, AbstractDistribution distrib) {
+        super(rank, subfolder, name, distrib);
     }
 
     @Override

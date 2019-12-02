@@ -64,7 +64,7 @@ public class MeanWeightOutput extends AbstractOutput {
     private double[] abundance;
 
     public MeanWeightOutput(int rank) {
-        super(rank);
+        super(rank, "SizeIndicators", "meanWeight");
     }
 
     @Override
@@ -81,13 +81,13 @@ public class MeanWeightOutput extends AbstractOutput {
 
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            if (include(school)) {
-                int i = school.getSpeciesIndex();
-                meanSize[i] += school.getInstantaneousAbundance() * school.getWeight();
-                abundance[i] += school.getInstantaneousAbundance();
-            }
-        }
+        getSchoolSet().getAliveSchools().stream()
+                .filter(school -> include(school))
+                .forEach(school -> {
+                    int i = school.getSpeciesIndex();
+                    meanSize[i] += school.getInstantaneousAbundance() * school.getWeight();
+                    abundance[i] += school.getInstantaneousAbundance();
+                });
     }
 
     @Override
@@ -101,17 +101,6 @@ public class MeanWeightOutput extends AbstractOutput {
             }
         }
         writeVariable(time, meanSize);
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("SizeIndicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanWeight_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -135,8 +124,4 @@ public class MeanWeightOutput extends AbstractOutput {
         return species;
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

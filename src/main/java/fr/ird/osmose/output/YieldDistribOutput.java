@@ -51,10 +51,8 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.process.mortality.MortalityCause;
-import java.io.File;
 
 /**
  *
@@ -63,32 +61,17 @@ import java.io.File;
 public class YieldDistribOutput extends AbstractDistribOutput {
 
     public YieldDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
+        super(rank, "Indicators", "yield", distrib);
     }
-    
+
     @Override
     public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
+        getSchoolSet().getAliveSchools().forEach((school) -> {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
                 values[school.getSpeciesIndex()][getClass(school)] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
             }
-        }
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder(getType().toString());
-        filename.append("Indicators");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_yieldDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-
+        });
     }
 
     @Override
@@ -105,9 +88,4 @@ public class YieldDistribOutput extends AbstractDistribOutput {
         // nothing to do
     }
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
 }

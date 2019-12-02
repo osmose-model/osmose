@@ -51,11 +51,8 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-import fr.ird.osmose.Prey;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import java.io.File;
 
 /**
  *
@@ -67,30 +64,15 @@ public class DietDistribOutput extends AbstractDistribOutput {
     private final Species species;
 
     public DietDistribOutput(int rank, Species species, AbstractDistribution distrib) {
-        super(rank, distrib);
+        super(rank, "Trophic", "dietMatrix", species, distrib);
         this.species = species;
         // Ensure that prey records will be made during the simulation
         getSimulation().requestPreyRecord();
     }
-    
+
     @Override
     public void reset() {
         values = new double[getNSpecies() + getConfiguration().getNRscSpecies()][getNClass()];
-    }
-
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_dietMatrixby");
-        filename.append(getType().toString());
-        filename.append("-");
-        filename.append(species.getName());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
     }
 
     @Override
@@ -120,24 +102,23 @@ public class DietDistribOutput extends AbstractDistribOutput {
     @Override
     public void update() {
 
-        for (School predator : getSchoolSet().getSchools(species, false)) {
-            double preyedBiomass = predator.getPreyedBiomass();
-            if (preyedBiomass > 0) {
-                for (Prey prey : predator.getPreys()) {
-                    int classPredator = getClass(predator);
-                    if (classPredator >= 0) {
-                        values[prey.getSpeciesIndex()][classPredator] += prey.getBiomass();
-                    }
-                }
-            }
-        }
+        getSchoolSet().getSchools(species, false).stream()
+                .filter(predator -> predator.getPreyedBiomass() > 0)
+                .forEach(predator -> {
+                    predator.getPreys().forEach(prey -> {
+                        int classPredator = getClass(predator);
+                        if (classPredator >= 0) {
+                            values[prey.getSpeciesIndex()][classPredator] += prey.getBiomass();
+                        }
+                    });
+                });
     }
 
     @Override
     public void initStep() {
         // nothing to do
     }
-    
+
     @Override
     public void write(float time) {
         // values = new double[getNSpecies() + getConfiguration().getNResource()][getNClass()];
@@ -151,10 +132,5 @@ public class DietDistribOutput extends AbstractDistribOutput {
         }
         writeVariable(time, array);
     }
-    
 
-    @Override
-    String getRegionalFilename(int idom) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }
