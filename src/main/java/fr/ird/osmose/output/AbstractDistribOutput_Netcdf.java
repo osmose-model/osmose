@@ -81,7 +81,6 @@ public abstract class AbstractDistribOutput_Netcdf extends AbstractOutput_Netcdf
     public AbstractDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
         super(rank);
         this.distrib = distrib;
-        distrib.init();
     }
 
     @Override

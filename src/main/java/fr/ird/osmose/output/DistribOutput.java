@@ -51,36 +51,63 @@
  */
 package fr.ird.osmose.output;
 
+import fr.ird.osmose.IMarineOrganism;
+import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.process.mortality.MortalityCause;
+import fr.ird.osmose.output.distribution.DistributionType;
 
 /**
  *
  * @author pverley
  */
-public class AdditionalMortalityNDistribOutput extends AbstractDistribOutput {
+public class DistribOutput extends AbstractOutput {
 
-    public AdditionalMortalityNDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, "Indicators", "additionalMortalityN", distrib);
+    // Output values distributed by species and by class
+    double[][] values;
+    // Distribution 
+    private final AbstractDistribution distrib;
+    // school variable getter
+    protected final SchoolVariableGetter schoolVariable;
+    // description
+    private final String description;
+
+    public DistribOutput(int rank, String subfolder,
+            String name, String description,
+            Species species,
+            SchoolVariableGetter schoolVariable,
+            AbstractDistribution distrib) {
+        super(rank, subfolder, name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""));
+        this.distrib = distrib;
+        this.schoolVariable = schoolVariable;
+        this.description = description;
     }
-    
+
+    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib) {
+        this(rank, subfolder, name, description, null, schoolVariable, distrib);
+    }
+
+    @Override
+    public void reset() {
+        values = new double[getNSpecies()][distrib.getNClass()];
+    }
+
     @Override
     public void update() {
         getSchoolSet().getAliveSchools().forEach(school -> {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(MortalityCause.ADDITIONAL);
+                values[school.getSpeciesIndex()][getClass(school)] += schoolVariable.getVariable(school);
             }
         });
     }
 
     @Override
     String getDescription() {
-        StringBuilder description = new StringBuilder();
-        description.append("Distribution of additional mortality (number of fish dead from unexplicited cause per time step of saving) by ");
-        description.append(getType().getDescription());
-        description.append(". For class i, the number of dead fish in [i,i+1[ is reported.");
-        return description.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append(description);
+        sb.append(" by ").append(getType().getDescription());
+        sb.append(". Class i designates interval [i,i+1[.");
+        return sb.toString();
     }
 
     @Override
@@ -88,4 +115,43 @@ public class AdditionalMortalityNDistribOutput extends AbstractDistribOutput {
         // nothing to do
     }
 
+    int getClass(IMarineOrganism school) {
+        return distrib.getClass(school);
+    }
+
+    @Override
+    public void write(float time) {
+
+        int nClass = distrib.getNClass();
+        double[][] array = new double[nClass][getNSpecies() + 1];
+        for (int iClass = 0; iClass < nClass; iClass++) {
+            array[iClass][0] = distrib.getThreshold(iClass);
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
+            }
+        }
+        writeVariable(time, array);
+    }
+
+    @Override
+    String[] getHeaders() {
+        String[] headers = new String[getNSpecies() + 1];
+        headers[0] = distrib.getType().toString();
+        for (int i = 0; i < getNSpecies(); i++) {
+            headers[i + 1] = getSpecies(i).getName();
+        }
+        return headers;
+    }
+
+    float getClassThreshold(int iClass) {
+        return distrib.getThreshold(iClass);
+    }
+
+    int getNClass() {
+        return distrib.getNClass();
+    }
+
+    DistributionType getType() {
+        return distrib.getType();
+    }
 }

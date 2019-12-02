@@ -110,7 +110,6 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
     public SpatialSizeSpeciesOutput(int rank, AbstractDistribution distrib) {
         super(rank);
         this.distrib = distrib;
-        this.distrib.init();
     }
 
     private boolean includeClassZero() {
