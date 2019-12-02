@@ -66,8 +66,6 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriter;
-import ucar.ma2.ArrayString;
-import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayInt;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
@@ -115,7 +113,7 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
             nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4_classic, filename);
             //nc.setLocation(filename);
         } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*
          * Create dimensions (time, species, trait)
@@ -180,9 +178,7 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
             Variable vartrait = nc.findVariable("trait");            
             nc.write(vartrait, arrTrait);
 
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
+        } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -261,9 +257,7 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
             nc.write(timevar, new int[]{record_index}, arrTime);
             Variable tmeanvar = this.nc.findVariable("trait_mean");
             nc.write(tmeanvar, new int[]{record_index, 0, 0}, arrMean);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (InvalidRangeException | IOException ex) {
             Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         

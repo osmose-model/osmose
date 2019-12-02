@@ -49,56 +49,25 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
+import fr.ird.osmose.Prey;
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.MortalityCause;
+import fr.ird.osmose.Species;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanTrophicLevelCatchOutput_Netcdf extends AbstractOutput_Netcdf {
+public class PredatorPressureDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
+    
+   private final Species species;
 
-    private double[] meanTLCatch;
-    private double[] yield;
-
-    public MeanTrophicLevelCatchOutput_Netcdf(int rank) {
-        super(rank);
-    }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        meanTLCatch = new double[getNSpecies()];
-        yield = new double[getNSpecies()];
-    }
-
-    @Override
-    public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getSpeciesIndex();
-            meanTLCatch[i] += school.getTrophicLevel() * school.abd2biom(school.getNdead(MortalityCause.FISHING));
-            yield[i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
-        }
-    }
-
-    @Override
-    public void write(float time) {
-
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (yield[i] > 0) {
-                meanTLCatch[i] = meanTLCatch[i] / yield[i];
-            } else {
-                meanTLCatch[i] = Double.NaN;
-            }
-        }
-        writeVariable(time, meanTLCatch);
+    public PredatorPressureDistribOutput_Netcdf(int rank, Species species, AbstractDistribution distrib) {
+        super(rank, distrib);
+        this.species = species;
     }
 
     @Override
@@ -107,24 +76,55 @@ public class MeanTrophicLevelCatchOutput_Netcdf extends AbstractOutput_Netcdf {
         filename.append("Trophic");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTLCatch_Simu");
+        filename.append("_predatorPressureDistribBy");
+        filename.append(getType().toString());
+        filename.append("-");
+        filename.append(species.getName());
+        filename.append("_Simu");
         filename.append(getRank());
-        filename.append(".nc.part");
+        filename.append(".csv");
         return filename.toString();
     }
 
     @Override
     String getDescription() {
-        return "Mean Trophic Level of fish species, weighted by fish catch, and including first ages specified in input";
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of the preyed biomass (tonne) of ");
+        description.append(species.getName());
+        description.append(" among the predator species (in column) by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the % of preyed biomass in [i,i+1[ is reported.");
+        return description.toString();
+    }
+
+    @Override
+    public void update() {
+
+        for (School predator : getSchoolSet().getAliveSchools()) {
+            for (Prey prey : predator.getPreys()) {
+                if (prey.getSpeciesIndex() == species.getIndex()) {
+                    int classPrey = getClass(prey);
+                    if (classPrey >= 0) {
+                        values[predator.getSpeciesIndex()][classPrey] += prey.getBiomass();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void initStep() {
+        // nothing to do
     }
 
     @Override
     String getUnits() {
-        return(""); //To change body of generated methods, choose Tools | Templates.
+        return("ton");
     }
 
     @Override
     String getVarname() {
-        return("trophic_level"); //To change body of generated methods, choose Tools | Templates.
+        return("preyed_biomass");
     }
+
 }

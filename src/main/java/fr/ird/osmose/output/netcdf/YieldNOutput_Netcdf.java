@@ -49,68 +49,71 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanTrophicLevelDistribOutput_Netcdf extends AbstractMeanDistribOutput_Netcdf {
+public class YieldNOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    public MeanTrophicLevelDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
-    }
+    public double[] yieldN;
 
-    @Override
-    String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTLDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
-    }
-
-    @Override
-    String getDescription() {
-        StringBuilder description = new StringBuilder();
-        description.append("Mean trophic level of fish species by ");
-        description.append(getType().getDescription());
-        description.append(". For class i, the mean trophic level in [i,i+1[ is reported.");
-        return description.toString();
+    public YieldNOutput_Netcdf(int rank) {
+        super(rank);
     }
 
     @Override
     public void initStep() {
-        // nothing to do
+        // Nothing to do
+    }
+
+    @Override
+    public void reset() {
+        yieldN = new double[getNSpecies()];
+
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int iSpec = school.getSpeciesIndex();
-            int iClass = getClass(school);
-            if (iClass >= 0) {
-                values[iSpec][iClass] += school.getInstantaneousBiomass() * school.getTrophicLevel();
-                denominator[iSpec][iClass] += school.getInstantaneousBiomass();
-            }
+            yieldN[school.getSpeciesIndex()] += school.getNdead(MortalityCause.FISHING);
         }
     }
 
     @Override
+    public void write(float time) {
+        writeVariable(time, yieldN);
+    }
+
+    @Override
+    String getFilename() {
+        File path = new File(getConfiguration().getOutputPathname());
+        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_yieldN_Simu");
+        filename.append(getRank());
+        filename.append(".nc.part");
+        return filename.toString();
+    }
+
+    @Override
+    String getDescription() {
+        return "cumulative catch. ex: if time step of saving is the year, then annual catches in fish numbers are saved";
+    }
+
+    @Override
     String getUnits() {
-        return(""); //To change body of generated methods, choose Tools | Templates.
+        return "number of fish caught per time step of saving";
     }
 
     @Override
     String getVarname() {
-        return("trophic_level"); //To change body of generated methods, choose Tools | Templates.
+        return "yieldN";
     }
 }

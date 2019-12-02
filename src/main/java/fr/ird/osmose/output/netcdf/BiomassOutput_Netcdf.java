@@ -49,22 +49,20 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanSizeCatchOutput_Netcdf extends AbstractOutput_Netcdf {
+public class BiomassOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    private double[] meanSizeCatch;
-    private double[] yieldN;
+    private double[] biomass;
 
-    public MeanSizeCatchOutput_Netcdf(int rank) {
+    public BiomassOutput_Netcdf(int rank) {
         super(rank);
     }
 
@@ -75,39 +73,35 @@ public class MeanSizeCatchOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void reset() {
-        meanSizeCatch = new double[getNSpecies()];
-        yieldN = new double[getNSpecies()];
+        biomass = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getSpeciesIndex();
-            meanSizeCatch[i] += school.getNdead(MortalityCause.FISHING) * school.getLength();
-            yieldN[i] += school.getNdead(MortalityCause.FISHING);
+            if (include(school)) {
+                biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+            }
         }
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (yieldN[i] > 0) {
-                meanSizeCatch[i] = meanSizeCatch[i] / yieldN[i];
-            } else {
-                meanSizeCatch[i] = Double.NaN;
-            }
+        double nsteps = getRecordFrequency();
+        for (int i = 0; i < biomass.length; i++) {
+            biomass[i] /= nsteps;
         }
-        writeVariable(time, meanSizeCatch);
+        writeVariable(time, biomass);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = this.initFileName();
-        filename.append("SizeIndicators");
+        File path = new File(getConfiguration().getOutputPathname());
+        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanSizeCatch_Simu");
+        filename.append(String.format("_%s_Simu", getVarname()));
         filename.append(getRank());
         filename.append(".nc.part");
         return filename.toString();
@@ -115,16 +109,24 @@ public class MeanSizeCatchOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     String getDescription() {
-        return "Mean size of fish species in cm, weighted by fish numbers in the catches, and including first ages specified in input.";
+        StringBuilder str = new StringBuilder("Mean biomass (tons), ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
 
     @Override
     String getUnits() {
-        return("cm"); //To change body of generated methods, choose Tools | Templates.
+        return ("tons");
     }
 
     @Override
     String getVarname() {
-        return("size"); //To change body of generated methods, choose Tools | Templates.
+        return ("biomass");
     }
+
 }

@@ -49,7 +49,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
 import java.io.File;
@@ -58,12 +58,12 @@ import java.io.File;
  *
  * @author pverley
  */
-public class MeanTrophicLevelOutput_Netcdf extends AbstractOutput_Netcdf {
+public class MeanSizeOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    private double[] meanTL;
-    private double[] biomass;
+    private double[] meanSize;
+    private double[] abundance;
 
-    public MeanTrophicLevelOutput_Netcdf(int rank) {
+    public MeanSizeOutput_Netcdf(int rank) {
         super(rank);
     }
 
@@ -74,8 +74,9 @@ public class MeanTrophicLevelOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void reset() {
-        meanTL = new double[getNSpecies()];
-        biomass = new double[getNSpecies()];
+
+        meanSize = new double[getNSpecies()];
+        abundance = new double[getNSpecies()];
     }
 
     @Override
@@ -83,8 +84,8 @@ public class MeanTrophicLevelOutput_Netcdf extends AbstractOutput_Netcdf {
         for (School school : getSchoolSet().getAliveSchools()) {
             if (include(school)) {
                 int i = school.getSpeciesIndex();
-                meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
-                biomass[i] += school.getInstantaneousBiomass();
+                meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
+                abundance[i] += school.getInstantaneousAbundance();
             }
         }
     }
@@ -93,29 +94,30 @@ public class MeanTrophicLevelOutput_Netcdf extends AbstractOutput_Netcdf {
     public void write(float time) {
 
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (biomass[i] > 0.d) {
-                meanTL[i] = (float) (meanTL[i] / biomass[i]);
+            if (abundance[i] > 0) {
+                meanSize[i] = (float) (meanSize[i] / abundance[i]);
             } else {
-                meanTL[i] = Double.NaN;
+                meanSize[i] = Double.NaN;
             }
         }
-        writeVariable(time, meanTL);
+        writeVariable(time, meanSize);
     }
 
     @Override
     String getFilename() {
-        StringBuilder filename = new StringBuilder("Trophic");
+        StringBuilder filename = this.initFileName();
+        filename.append("SizeIndicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanTL_Simu");
+        filename.append("_meanSize_Simu");
         filename.append(getRank());
-        filename.append(".nc.part");
+        filename.append(".csv");
         return filename.toString();
     }
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Mean Trophic Level of fish species, weighted by fish biomass, and ");
+        StringBuilder str = new StringBuilder("Mean size of fish species in cm, weighted by fish numbers, and ");
         if (includeClassZero()) {
             str.append("including ");
         } else {
@@ -127,11 +129,11 @@ public class MeanTrophicLevelOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     String getUnits() {
-        return (""); //To change body of generated methods, choose Tools | Templates.
+        return("cm"); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        return ("trophic_level");
+        return("size"); //To change body of generated methods, choose Tools | Templates.
     }
 }

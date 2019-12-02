@@ -143,7 +143,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
             nc.create();
 
         } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FisheryOutput.class.getName()).log(Level.SEVERE, null, ex);
 
         }
     }
@@ -210,7 +210,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
             nc.write(biomassVar, new int[]{index, 0, 0}, arrBiomass);
             index++;
         } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FisheryOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

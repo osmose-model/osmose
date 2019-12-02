@@ -49,7 +49,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
@@ -60,9 +60,9 @@ import java.io.File;
  *
  * @author pverley
  */
-public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
+public class YieldDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
-    public AdditionalMortalityDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+    public YieldDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
         super(rank, distrib);
     }
     
@@ -71,7 +71,7 @@ public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutp
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.abd2biom(school.getNdead(MortalityCause.ADDITIONAL));
+                values[school.getSpeciesIndex()][getClass(school)] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
             }
         }
     }
@@ -79,15 +79,15 @@ public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutp
     @Override
     String getFilename() {
         StringBuilder filename = this.initFileName();
-        filename.append(getType().toString());
+         filename.append(getType().toString());
         filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_additionalMortalityDistribBy");
+        filename.append("_yieldDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());
-        filename.append(".nc.part");
+        filename.append(".csv");
         return filename.toString();
 
     }
@@ -95,9 +95,9 @@ public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutp
     @Override
     String getDescription() {
         StringBuilder description = new StringBuilder();
-        description.append("Distribution of additional mortality biomass (tonne of fish dead from unexplicited cause per time step of saving) by ");
+        description.append("Distribution of cumulative catch (tonne per time step of saving) by ");
         description.append(getType().getDescription());
-        description.append(". For class i, the biomass of dead fish in [i,i+1[ is reported.");
+        description.append(". For class i, the yield in [i,i+1[ is reported.");
         return description.toString();
     }
 
@@ -108,12 +108,12 @@ public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutp
 
     @Override
     String getUnits() {
-        throw new UnsupportedOperationException("tonne of fish dead from unexplicited cause per time step of saving"); //To change body of generated methods, choose Tools | Templates.
+        return ("ton per timestep"); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        throw new UnsupportedOperationException("additional_mortality"); //To change body of generated methods, choose Tools | Templates.
+        return("biomass"); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

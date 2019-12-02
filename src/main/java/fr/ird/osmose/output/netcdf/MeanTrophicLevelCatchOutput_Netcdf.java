@@ -49,20 +49,22 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.MortalityCause;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class PredSuccessOutput_Netcdf extends AbstractOutput_Netcdf {
+public class MeanTrophicLevelCatchOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    private double[] predSuccess;
-    private double[] nschool;
+    private double[] meanTLCatch;
+    private double[] yield;
 
-    public PredSuccessOutput_Netcdf(int rank) {
+    public MeanTrophicLevelCatchOutput_Netcdf(int rank) {
         super(rank);
     }
 
@@ -73,53 +75,56 @@ public class PredSuccessOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void reset() {
-        predSuccess = new double[getNSpecies()];
-        nschool = new double[getNSpecies()];
+        meanTLCatch = new double[getNSpecies()];
+        yield = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-//            if (school.getPredSuccessRate() >= 0.57) {
-//                predSuccess[school.getSpeciesIndex()] += 1;
-//            }
-            predSuccess[school.getSpeciesIndex()] += school.getPredSuccessRate();
-            nschool[school.getSpeciesIndex()] += 1;
+            int i = school.getSpeciesIndex();
+            meanTLCatch[i] += school.getTrophicLevel() * school.abd2biom(school.getNdead(MortalityCause.FISHING));
+            yield[i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
         }
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < predSuccess.length; i++) {
-            predSuccess[i] /= (nschool[i]);
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            if (yield[i] > 0) {
+                meanTLCatch[i] = meanTLCatch[i] / yield[i];
+            } else {
+                meanTLCatch[i] = Double.NaN;
+            }
         }
-        writeVariable(time, predSuccess);
+        writeVariable(time, meanTLCatch);
     }
 
     @Override
     String getFilename() {
         StringBuilder filename = this.initFileName();
-         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_predsuccess_Simu");
+        filename.append("Trophic");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_meanTLCatch_Simu");
         filename.append(getRank());
-        filename.append(".csv");
+        filename.append(".nc.part");
         return filename.toString();
     }
 
     @Override
     String getDescription() {
-        return "Predation success rate per species.";
+        return "Mean Trophic Level of fish species, weighted by fish catch, and including first ages specified in input";
     }
 
     @Override
     String getUnits() {
-        throw new UnsupportedOperationException(""); //To change body of generated methods, choose Tools | Templates.
+        return(""); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        throw new UnsupportedOperationException("predation_success"); //To change body of generated methods, choose Tools | Templates.
+        return("trophic_level"); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

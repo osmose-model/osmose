@@ -51,6 +51,22 @@
  */
 package fr.ird.osmose.output;
 
+import fr.ird.osmose.output.spatial.SpatialSizeSpeciesOutput;
+import fr.ird.osmose.output.spatial.SpatialOutput;
+import fr.ird.osmose.output.netcdf.AbundanceDistribOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.BiomassDietStageOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.BiomassOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.BiomassDistribOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.MeanSizeDistribOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.MortalitySpeciesOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.DietDistribOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.YieldNDistribOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.DietOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.PredatorPressureOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.AbundanceOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.YieldDistribOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.YieldNOutput_Netcdf;
+import fr.ird.osmose.output.netcdf.YieldOutput_Netcdf;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.AgeDistribution;
 import fr.ird.osmose.output.distribution.SizeDistribution;

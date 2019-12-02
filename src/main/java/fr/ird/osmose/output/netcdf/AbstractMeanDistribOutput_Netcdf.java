@@ -49,72 +49,45 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
-import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.MortalityCause;
-import java.io.File;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 
 /**
  *
  * @author pverley
  */
-public class YieldOutput_Netcdf extends AbstractOutput_Netcdf {
+public abstract class AbstractMeanDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
-    public double[] yield;
+    // Output values distributed by species and by class
+    double[][] denominator;
 
-    public YieldOutput_Netcdf(int rank) {
-        super(rank);
-    }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
+    public AbstractMeanDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
 
     @Override
     public void reset() {
-        yield = new double[getNSpecies()];
-
-    }
-
-    @Override
-    public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            yield[school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
-        }
+        super.reset();
+        denominator = new double[getNSpecies()][getNClass()];
     }
 
     @Override
     public void write(float time) {
-        writeVariable(time, yield);
-    }
 
-    @Override
-    String getFilename() {
-        File path = new File(getConfiguration().getOutputPathname());
-        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_yield_Simu");
-        filename.append(getRank());
-        filename.append(".nc.part");
-        return filename.toString();
-    }
-
-    @Override
-    String getDescription() {
-        return "cumulative catch. ex: if time step of saving is the year, then annual catches are saved";
-    }
-
-    @Override
-    String getUnits() {
-        return ("tons per time step of saving");
-    }
-
-    @Override
-    String getVarname() {
-        return ("yield");
+        int nClass = getNClass();
+        double[][] array = new double[nClass][getNSpecies() + 1];
+        for (int iClass = 0; iClass < nClass; iClass++) {
+            array[iClass][0] = getClassThreshold(iClass);
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                if (denominator[iSpec][iClass] != 0) {
+                    array[iClass][iSpec + 1] = values[iSpec][iClass] / denominator[iSpec][iClass];
+                } else {
+                    array[iClass][iSpec + 1] = Double.NaN;
+                }
+            }
+        }
+        writeVariable(time, array);
     }
 
 }

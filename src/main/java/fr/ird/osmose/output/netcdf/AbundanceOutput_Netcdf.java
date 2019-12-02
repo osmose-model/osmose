@@ -49,82 +49,95 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
-import fr.ird.osmose.Prey;
 import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
 import java.io.File;
+
 
 /**
  *
  * @author pverley
  */
-public class PredatorPressureDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
-    
-   private final Species species;
+public class AbundanceOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    public PredatorPressureDistribOutput_Netcdf(int rank, Species species, AbstractDistribution distrib) {
-        super(rank, distrib);
-        this.species = species;
+    private double[] abundance;
+
+    public AbundanceOutput_Netcdf(int rank) {
+        super(rank);
     }
 
     @Override
-    String getFilename() {
-        StringBuilder filename = this.initFileName();
-        filename.append("Trophic");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_predatorPressureDistribBy");
-        filename.append(getType().toString());
-        filename.append("-");
-        filename.append(species.getName());
-        filename.append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
+    public void init() {
+        super.init();
     }
 
     @Override
-    String getDescription() {
-        StringBuilder description = new StringBuilder();
-        description.append("Distribution of the preyed biomass (tonne) of ");
-        description.append(species.getName());
-        description.append(" among the predator species (in column) by ");
-        description.append(getType().getDescription());
-        description.append(". For class i, the % of preyed biomass in [i,i+1[ is reported.");
-        return description.toString();
+    public void initStep() {
+        // Nothing to do
+    }
+
+    @Override
+    public void reset() {
+        abundance = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
 
-        for (School predator : getSchoolSet().getAliveSchools()) {
-            for (Prey prey : predator.getPreys()) {
-                if (prey.getSpeciesIndex() == species.getIndex()) {
-                    int classPrey = getClass(prey);
-                    if (classPrey >= 0) {
-                        values[predator.getSpeciesIndex()][classPrey] += prey.getBiomass();
-                    }
-                }
+        for (School school : getSchoolSet().getAliveSchools()) {
+            if (include(school)) {
+                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
             }
         }
     }
 
     @Override
-    public void initStep() {
-        // nothing to do
+    public void write(float time) {
+
+        double nsteps = getRecordFrequency();
+        for (int i = 0; i < abundance.length; i++) {
+            abundance[i] /= nsteps;
+        }
+
+        this.writeVariable(time, abundance);
+
+    }
+
+    @Override
+    String getFilename() {
+        File path = new File(getConfiguration().getOutputPathname());
+        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append(String.format("_%s_Simu", getVarname()));
+        filename.append(getRank());
+        filename.append(".nc.part");
+        return filename.toString();
+    }
+
+    @Override
+    String getDescription() {
+        StringBuilder str = new StringBuilder("Mean abundance, ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
 
     @Override
     String getUnits() {
-        return("ton");
+        String out = "Number of fishes"; //To change body of generated methods, choose Tools | Templates.
+        return out;
     }
-
+    
     @Override
     String getVarname() {
-        return("preyed_biomass");
+        String out = "abundance"; //To change body of generated methods, choose Tools | Templates.
+        return out;
     }
 
 }

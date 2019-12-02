@@ -49,9 +49,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.IOutput;
 import fr.ird.osmose.util.SimulationLinker;
 import fr.ird.osmose.util.io.IOTools;
 import java.io.File;
@@ -223,6 +224,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
 
     /**
      * Function to create a species attribute.
+     * @return 
      */
     public String createSpeciesAttr() {
 
@@ -262,10 +264,8 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
             nc.write(tvar, new int[]{index}, arrTime);
             Variable outvar = nc.findVariable(this.getVarname());
             nc.write(outvar, new int[]{index, 0}, arrAbund);
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
         this.incrementIndex();    
     }
@@ -306,9 +306,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
 
         try {
             nc.write(varspec, arrSpecies);
-        } catch (IOException ex) {
-            Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
+        } catch (IOException | InvalidRangeException ex) {
             Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -342,10 +340,8 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
             nc.write(tvar, new int[]{index}, arrTime);
             Variable outvar = nc.findVariable(this.getVarname());
             nc.write(outvar, new int[]{index, 0, 0}, arrAbund);
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }
         this.incrementIndex();
     }

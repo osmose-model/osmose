@@ -52,7 +52,6 @@
 package fr.ird.osmose.output.spatial;
 
 import fr.ird.osmose.Cell;
-import fr.ird.osmose.School;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
@@ -65,7 +64,6 @@ import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriter;
 import fr.ird.osmose.output.IOutput;
-import fr.ird.osmose.output.SpatialOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import ucar.nc2.Attribute;
@@ -301,7 +299,7 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
             nc.write(outVar, new int[]{index, 0, 0, 0}, arrBiomass);
             this.incrementIndex();
         } catch (IOException | InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

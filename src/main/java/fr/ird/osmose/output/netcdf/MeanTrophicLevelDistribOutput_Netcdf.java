@@ -49,45 +49,68 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
+import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public abstract class AbstractMeanDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
+public class MeanTrophicLevelDistribOutput_Netcdf extends AbstractMeanDistribOutput_Netcdf {
 
-    // Output values distributed by species and by class
-    double[][] denominator;
-
-    public AbstractMeanDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+    public MeanTrophicLevelDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
         super(rank, distrib);
     }
 
     @Override
-    public void reset() {
-        super.reset();
-        denominator = new double[getNSpecies()][getNClass()];
+    String getFilename() {
+        StringBuilder filename = new StringBuilder("Trophic");
+        filename.append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_meanTLDistribBy");
+        filename.append(getType().toString());
+        filename.append("_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
     }
 
     @Override
-    public void write(float time) {
-
-        int nClass = getNClass();
-        double[][] array = new double[nClass][getNSpecies() + 1];
-        for (int iClass = 0; iClass < nClass; iClass++) {
-            array[iClass][0] = getClassThreshold(iClass);
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                if (denominator[iSpec][iClass] != 0) {
-                    array[iClass][iSpec + 1] = values[iSpec][iClass] / denominator[iSpec][iClass];
-                } else {
-                    array[iClass][iSpec + 1] = Double.NaN;
-                }
-            }
-        }
-        writeVariable(time, array);
+    String getDescription() {
+        StringBuilder description = new StringBuilder();
+        description.append("Mean trophic level of fish species by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the mean trophic level in [i,i+1[ is reported.");
+        return description.toString();
     }
 
+    @Override
+    public void initStep() {
+        // nothing to do
+    }
+
+    @Override
+    public void update() {
+        for (School school : getSchoolSet().getAliveSchools()) {
+            int iSpec = school.getSpeciesIndex();
+            int iClass = getClass(school);
+            if (iClass >= 0) {
+                values[iSpec][iClass] += school.getInstantaneousBiomass() * school.getTrophicLevel();
+                denominator[iSpec][iClass] += school.getInstantaneousBiomass();
+            }
+        }
+    }
+
+    @Override
+    String getUnits() {
+        return(""); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    String getVarname() {
+        return("trophic_level"); //To change body of generated methods, choose Tools | Templates.
+    }
 }

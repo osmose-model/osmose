@@ -49,91 +49,71 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class MeanSizeOutput_Netcdf extends AbstractOutput_Netcdf {
+public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
-    private double[] meanSize;
-    private double[] abundance;
-
-    public MeanSizeOutput_Netcdf(int rank) {
-        super(rank);
+    public AdditionalMortalityDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-
-        meanSize = new double[getNSpecies()];
-        abundance = new double[getNSpecies()];
-    }
-
+    
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (include(school)) {
-                int i = school.getSpeciesIndex();
-                meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
-                abundance[i] += school.getInstantaneousAbundance();
+            int classSchool = getClass(school);
+            if (classSchool >= 0) {
+                values[school.getSpeciesIndex()][getClass(school)] += school.abd2biom(school.getNdead(MortalityCause.ADDITIONAL));
             }
         }
-    }
-
-    @Override
-    public void write(float time) {
-
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (abundance[i] > 0) {
-                meanSize[i] = (float) (meanSize[i] / abundance[i]);
-            } else {
-                meanSize[i] = Double.NaN;
-            }
-        }
-        writeVariable(time, meanSize);
     }
 
     @Override
     String getFilename() {
         StringBuilder filename = this.initFileName();
-        filename.append("SizeIndicators");
+        filename.append(getType().toString());
+        filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_meanSize_Simu");
+        filename.append("_additionalMortalityDistribBy");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
-        filename.append(".csv");
+        filename.append(".nc.part");
         return filename.toString();
+
     }
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Mean size of fish species in cm, weighted by fish numbers, and ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of additional mortality biomass (tonne of fish dead from unexplicited cause per time step of saving) by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the biomass of dead fish in [i,i+1[ is reported.");
+        return description.toString();
+    }
+
+    @Override
+    public void initStep() {
+        // nothing to do
     }
 
     @Override
     String getUnits() {
-        return("cm"); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("tonne of fish dead from unexplicited cause per time step of saving"); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        return("size"); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("additional_mortality"); //To change body of generated methods, choose Tools | Templates.
     }
+    
 }

@@ -49,71 +49,89 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class AdditionalMortalityNDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
+public class MeanTrophicLevelOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    public AdditionalMortalityNDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
+    private double[] meanTL;
+    private double[] biomass;
+
+    public MeanTrophicLevelOutput_Netcdf(int rank) {
+        super(rank);
     }
-    
+
+    @Override
+    public void initStep() {
+        // Nothing to do
+    }
+
+    @Override
+    public void reset() {
+        meanTL = new double[getNSpecies()];
+        biomass = new double[getNSpecies()];
+    }
+
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int classSchool = getClass(school);
-            if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(MortalityCause.ADDITIONAL);
+            if (include(school)) {
+                int i = school.getSpeciesIndex();
+                meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
+                biomass[i] += school.getInstantaneousBiomass();
             }
         }
     }
 
     @Override
+    public void write(float time) {
+
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            if (biomass[i] > 0.d) {
+                meanTL[i] = (float) (meanTL[i] / biomass[i]);
+            } else {
+                meanTL[i] = Double.NaN;
+            }
+        }
+        writeVariable(time, meanTL);
+    }
+
+    @Override
     String getFilename() {
-        StringBuilder filename = this.initFileName();
-        filename.append(getType().toString());
-        filename.append("Indicators");
+        StringBuilder filename = new StringBuilder("Trophic");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_additionalMortalityNDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
+        filename.append("_meanTL_Simu");
         filename.append(getRank());
         filename.append(".nc.part");
         return filename.toString();
-
     }
 
     @Override
     String getDescription() {
-        StringBuilder description = new StringBuilder();
-        description.append("Distribution of additional mortality by ");
-        description.append(getType().getDescription());
-        description.append(". For class i, the number of dead fish in [i,i+1[ is reported.");
-        return description.toString();
-    }
-
-    @Override
-    public void initStep() {
-        // nothing to do
+        StringBuilder str = new StringBuilder("Mean Trophic Level of fish species, weighted by fish biomass, and ");
+        if (includeClassZero()) {
+            str.append("including ");
+        } else {
+            str.append("excluding ");
+        }
+        str.append("first ages specified in input");
+        return str.toString();
     }
 
     @Override
     String getUnits() {
-        return "number of fish dead from unexplicited cause per time step of saving";
+        return (""); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        return "additional_mortality";
+        return ("trophic_level");
     }
-    
 }

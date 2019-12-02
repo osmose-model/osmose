@@ -49,55 +49,43 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class YieldNDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
+public class MeanSizeDistribOutput_Netcdf extends AbstractMeanDistribOutput_Netcdf {
 
-    public YieldNDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+    public MeanSizeDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
         super(rank, distrib);
-    }
-    
-    @Override
-    public void update() {
-        for (School school : getSchoolSet().getAliveSchools()) {
-            int classSchool = getClass(school);
-            if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(MortalityCause.FISHING);
-            }
-        }
     }
 
     @Override
     String getFilename() {
-         StringBuilder filename = this.initFileName();
-       filename.append(getType().toString());
+        StringBuilder filename = this.initFileName();
+        filename.append(getType().toString());
         filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_yieldNDistribBy");
+        filename.append("_meanSizeDistribBy");
         filename.append(getType().toString());
         filename.append("_Simu");
         filename.append(getRank());
-        filename.append(".csv");
+        filename.append(".nc.part");
         return filename.toString();
-
     }
 
     @Override
     String getDescription() {
         StringBuilder description = new StringBuilder();
-        description.append("Distribution of cumulative catch (number of fish caught per time step of saving) by ");
+        description.append("Mean size of fish (centimeter) by ");
         description.append(getType().getDescription());
-        description.append(". For class i, the number of fish caught in [i,i+1[ is reported.");
+        description.append(". For class i, the mean size in [i,i+1[ is reported.");
         return description.toString();
     }
 
@@ -107,13 +95,24 @@ public class YieldNDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
     }
 
     @Override
+    public void update() {
+        for (School school : getSchoolSet().getAliveSchools()) {
+            int iSpec = school.getSpeciesIndex();
+            int iClass = getClass(school);
+            if (iClass >= 0) {
+                values[iSpec][iClass] += school.getInstantaneousAbundance() * school.getLength();
+                denominator[iSpec][iClass] += school.getInstantaneousAbundance();
+            }
+        }
+    }
+
+    @Override
     String getUnits() {
-        return("number of fish"); //To change body of generated methods, choose Tools | Templates.
+        return("cm"); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        return("abundance"); //To change body of generated methods, choose Tools | Templates.
+        return("size");
     }
-    
 }

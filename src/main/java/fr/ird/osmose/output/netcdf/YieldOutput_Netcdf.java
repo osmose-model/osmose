@@ -49,30 +49,45 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class BiomassDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
+public class YieldOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    public BiomassDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
-        super(rank, distrib);
+    public double[] yield;
+
+    public YieldOutput_Netcdf(int rank) {
+        super(rank);
     }
-    
+
+    @Override
+    public void initStep() {
+        // Nothing to do
+    }
+
+    @Override
+    public void reset() {
+        yield = new double[getNSpecies()];
+
+    }
+
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int classSchool = getClass(school);
-            if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][classSchool] += school.getInstantaneousBiomass();
-            }
+            yield[school.getSpeciesIndex()] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
         }
+    }
+
+    @Override
+    public void write(float time) {
+        writeVariable(time, yield);
     }
 
     @Override
@@ -80,41 +95,26 @@ public class BiomassDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
         File path = new File(getConfiguration().getOutputPathname());
         StringBuilder filename = new StringBuilder(path.getAbsolutePath());
         filename.append(File.separatorChar);
-        filename.append(getType().toString());
-        filename.append("Indicators");
-        filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_biomassDistribBy");
-        filename.append(getType().toString());
-        filename.append("_Simu");
+        filename.append("_yield_Simu");
         filename.append(getRank());
-        filename.append(".nc.part");;
+        filename.append(".nc.part");
         return filename.toString();
-
     }
 
     @Override
     String getDescription() {
-        StringBuilder description = new StringBuilder();
-        description.append("Distribution of fish species biomass (tonne) by ");
-        description.append(getType().getDescription());
-        description.append(". For class i, the biomass of fish in [i,i+1[ is reported.");
-        return description.toString();
-    }
-
-    @Override
-    public void initStep() {
-        // nothing to do
+        return "cumulative catch. ex: if time step of saving is the year, then annual catches are saved";
     }
 
     @Override
     String getUnits() {
-        return("tons");
+        return ("tons per time step of saving");
     }
 
     @Override
     String getVarname() {
-       return("biomass");
+        return ("yield");
     }
-    
+
 }

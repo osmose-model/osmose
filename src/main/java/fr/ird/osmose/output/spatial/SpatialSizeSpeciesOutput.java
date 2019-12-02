@@ -49,10 +49,11 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.spatial;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.IOutput;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.util.io.IOTools;
 import fr.ird.osmose.util.SimulationLinker;
@@ -139,7 +140,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
             IOTools.makeDirectories(filename);
             nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
         } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SpatialSizeSpeciesOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*
          * Create dimensions
@@ -199,10 +200,8 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
             nc.write(classVar, arrClass);
             nc.write(lonVar, arrLon);
             nc.write(latVar, arrLat);
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(SpatialSizeSpeciesOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -323,10 +322,8 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
             nc.write(timeVar, new int[]{ncindex}, arrTime);        
             nc.write(this.abunVar, new int[]{ncindex, 0, 0, 0, 0}, arrAbundance);
             ncindex++;
-        } catch (IOException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidRangeException ex) {
-            Logger.getLogger(SpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | InvalidRangeException ex) {
+            Logger.getLogger(SpatialSizeSpeciesOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

@@ -49,20 +49,20 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
-import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class BiomassOutput_Netcdf extends AbstractOutput_Netcdf {
+public class PredSuccessOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    private double[] biomass;
+    private double[] predSuccess;
+    private double[] nschool;
 
-    public BiomassOutput_Netcdf(int rank) {
+    public PredSuccessOutput_Netcdf(int rank) {
         super(rank);
     }
 
@@ -73,60 +73,53 @@ public class BiomassOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void reset() {
-        biomass = new double[getNSpecies()];
+        predSuccess = new double[getNSpecies()];
+        nschool = new double[getNSpecies()];
     }
 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            if (include(school)) {
-                biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
-            }
+//            if (school.getPredSuccessRate() >= 0.57) {
+//                predSuccess[school.getSpeciesIndex()] += 1;
+//            }
+            predSuccess[school.getSpeciesIndex()] += school.getPredSuccessRate();
+            nschool[school.getSpeciesIndex()] += 1;
         }
     }
 
     @Override
     public void write(float time) {
 
-        double nsteps = getRecordFrequency();
-        for (int i = 0; i < biomass.length; i++) {
-            biomass[i] /= nsteps;
+        for (int i = 0; i < predSuccess.length; i++) {
+            predSuccess[i] /= (nschool[i]);
         }
-        writeVariable(time, biomass);
+        writeVariable(time, predSuccess);
     }
 
     @Override
     String getFilename() {
-        File path = new File(getConfiguration().getOutputPathname());
-        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append(String.format("_%s_Simu", getVarname()));
+        StringBuilder filename = this.initFileName();
+         filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_predsuccess_Simu");
         filename.append(getRank());
-        filename.append(".nc.part");
+        filename.append(".csv");
         return filename.toString();
     }
 
     @Override
     String getDescription() {
-        StringBuilder str = new StringBuilder("Mean biomass (tons), ");
-        if (includeClassZero()) {
-            str.append("including ");
-        } else {
-            str.append("excluding ");
-        }
-        str.append("first ages specified in input");
-        return str.toString();
+        return "Predation success rate per species.";
     }
 
     @Override
     String getUnits() {
-        return ("tons");
+        throw new UnsupportedOperationException(""); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        return ("biomass");
+        throw new UnsupportedOperationException("predation_success"); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

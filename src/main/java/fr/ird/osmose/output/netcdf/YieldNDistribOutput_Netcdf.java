@@ -49,9 +49,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.output;
+package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import java.io.File;
 
@@ -59,61 +60,60 @@ import java.io.File;
  *
  * @author pverley
  */
-public class YieldNOutput_Netcdf extends AbstractOutput_Netcdf {
+public class YieldNDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
-    public double[] yieldN;
-
-    public YieldNOutput_Netcdf(int rank) {
-        super(rank);
+    public YieldNDistribOutput_Netcdf(int rank, AbstractDistribution distrib) {
+        super(rank, distrib);
     }
-
-    @Override
-    public void initStep() {
-        // Nothing to do
-    }
-
-    @Override
-    public void reset() {
-        yieldN = new double[getNSpecies()];
-
-    }
-
+    
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            yieldN[school.getSpeciesIndex()] += school.getNdead(MortalityCause.FISHING);
+            int classSchool = getClass(school);
+            if (classSchool >= 0) {
+                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(MortalityCause.FISHING);
+            }
         }
     }
 
     @Override
-    public void write(float time) {
-        writeVariable(time, yieldN);
-    }
-
-    @Override
     String getFilename() {
-        File path = new File(getConfiguration().getOutputPathname());
-        StringBuilder filename = new StringBuilder(path.getAbsolutePath());
+         StringBuilder filename = this.initFileName();
+       filename.append(getType().toString());
+        filename.append("Indicators");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_yieldN_Simu");
+        filename.append("_yieldNDistribBy");
+        filename.append(getType().toString());
+        filename.append("_Simu");
         filename.append(getRank());
-        filename.append(".nc.part");
+        filename.append(".csv");
         return filename.toString();
+
     }
 
     @Override
     String getDescription() {
-        return "cumulative catch. ex: if time step of saving is the year, then annual catches in fish numbers are saved";
+        StringBuilder description = new StringBuilder();
+        description.append("Distribution of cumulative catch (number of fish caught per time step of saving) by ");
+        description.append(getType().getDescription());
+        description.append(". For class i, the number of fish caught in [i,i+1[ is reported.");
+        return description.toString();
+    }
+
+    @Override
+    public void initStep() {
+        // nothing to do
     }
 
     @Override
     String getUnits() {
-        return "number of fish caught per time step of saving";
+        return("number of fish"); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     String getVarname() {
-        return "yieldN";
+        return("abundance"); //To change body of generated methods, choose Tools | Templates.
     }
+    
 }
