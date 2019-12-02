@@ -322,15 +322,28 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new DistribOutput(rank, "Indicators", "additionalMortality",
                     "Distribution of additional mortality biomass (tonne of fish dead from unexplicited cause per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.ADDITIONAL)),
-                    getConfiguration().getBoolean("output.mortality.additional.byAge.enabled") ? ageDistrib : sizeDistrib
+                    sizeDistrib
             ));
         }
-        if (getConfiguration().getBoolean("output.mortality.additionalN.bySize.enabled")
-                || getConfiguration().getBoolean("output.mortality.additionalN.byAge.enabled")) {
+        if (getConfiguration().getBoolean("output.mortality.additional.byAge.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "additionalMortality",
+                    "Distribution of additional mortality biomass (tonne of fish dead from unexplicited cause per time step of saving)",
+                    school -> school.abd2biom(school.getNdead(MortalityCause.ADDITIONAL)),
+                    ageDistrib
+            ));
+        }
+        if (getConfiguration().getBoolean("output.mortality.additionalN.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "additionalMortalityN",
                     "Distribution of additional mortality biomass (number of fish dead from unexplicited cause per time step of saving)",
                     school -> school.getNdead(MortalityCause.ADDITIONAL),
-                    getConfiguration().getBoolean("output.mortality.additionalN.byAge.enabled") ? ageDistrib : sizeDistrib
+                    sizeDistrib
+            ));
+        }
+        if (getConfiguration().getBoolean("output.mortality.additionalN.byAge.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "additionalMortalityN",
+                    "Distribution of additional mortality biomass (number of fish dead from unexplicited cause per time step of saving)",
+                    school -> school.getNdead(MortalityCause.ADDITIONAL),
+                    ageDistrib
             ));
         }
         // Yield
@@ -375,7 +388,13 @@ public class OutputManager extends SimulationLinker {
             ));
         }
         if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
-            outputs.add(new MeanSizeDistribOutput(rank, ageDistrib));
+            outputs.add(new WeightedDistribOutput(
+                    rank, "Indicators", "meanSize",
+                    "Mean size of fish (centimeter)",
+                    school -> school.getInstantaneousAbundance() * school.getLength(),
+                    school -> school.getInstantaneousAbundance(),
+                    ageDistrib
+            ));
         }
         // Age
         if (getConfiguration().getBoolean("output.yieldN.byAge.enabled")) {
@@ -410,11 +429,23 @@ public class OutputManager extends SimulationLinker {
         }
         if (getConfiguration().getBoolean("output.meanTL.bySize.enabled")) {
             getSimulation().requestPreyRecord();
-            outputs.add(new MeanTrophicLevelDistribOutput(rank, sizeDistrib));
+            outputs.add(new WeightedDistribOutput(
+                    rank, "Trophic", "meanTL",
+                    "Mean trophic level of fish species",
+                    school -> school.getInstantaneousBiomass() * school.getTrophicLevel(),
+                    school -> school.getInstantaneousBiomass(),
+                    sizeDistrib
+            ));
         }
         if (getConfiguration().getBoolean("output.meanTL.byAge.enabled")) {
             getSimulation().requestPreyRecord();
-            outputs.add(new MeanTrophicLevelDistribOutput(rank, ageDistrib));
+            outputs.add(new WeightedDistribOutput(
+                    rank, "Trophic", "meanTL",
+                    "Mean trophic level of fish species",
+                    school -> school.getInstantaneousBiomass() * school.getTrophicLevel(),
+                    school -> school.getInstantaneousBiomass(),
+                    ageDistrib
+            ));
         }
         // Predation
         if (getConfiguration().getBoolean("output.diet.composition.enabled")) {

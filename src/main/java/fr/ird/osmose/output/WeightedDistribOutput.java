@@ -1,4 +1,4 @@
-/* 
+/*
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
@@ -57,36 +57,54 @@ import fr.ird.osmose.output.distribution.AbstractDistribution;
  *
  * @author pverley
  */
-public class MeanTrophicLevelDistribOutput extends AbstractMeanDistribOutput {
+public class WeightedDistribOutput extends DistribOutput {
 
-    public MeanTrophicLevelDistribOutput(int rank, AbstractDistribution distrib) {
-        super(rank, "Trophic", "meanTL", distrib);
-    }
-    
-    @Override
-    String getDescription() {
-        StringBuilder description = new StringBuilder();
-        description.append("Mean trophic level of fish species by ");
-        description.append(getType().getDescription());
-        description.append(". For class i, the mean trophic level in [i,i+1[ is reported.");
-        return description.toString();
-    }
+    // Output values distributed by species and by class
+    private double[][] denominator;
+    // school variable getter
+    private final SchoolVariableGetter denominatorVariable;
 
-    @Override
-    public void initStep() {
-        // nothing to do
+    public WeightedDistribOutput(int rank, String subfolder, String name, String description,
+            SchoolVariableGetter schoolVariable, SchoolVariableGetter denominatorVariable,
+            AbstractDistribution distrib) {
+        super(rank, subfolder, name, description, null, schoolVariable, distrib);
+        this.denominatorVariable = denominatorVariable;
     }
 
     @Override
     public void update() {
-        getSchoolSet().getAliveSchools().forEach((school) -> {
+        getSchoolSet().getAliveSchools().forEach(school -> {
+            int classSchool = getClass(school);
             int iSpec = school.getSpeciesIndex();
-            int iClass = getClass(school);
-            if (iClass >= 0) {
-                values[iSpec][iClass] += school.getInstantaneousBiomass() * school.getTrophicLevel();
-                denominator[iSpec][iClass] += school.getInstantaneousBiomass();
+            if (classSchool >= 0) {
+                values[school.getSpeciesIndex()][getClass(school)] += schoolVariable.getVariable(school);
+                denominator[iSpec][classSchool] += denominatorVariable.getVariable(school);
             }
         });
     }
-    
+
+    @Override
+    public void reset() {
+        super.reset();
+        denominator = new double[getNSpecies()][getNClass()];
+    }
+
+    @Override
+    public void write(float time) {
+
+        int nClass = getNClass();
+        double[][] array = new double[nClass][getNSpecies() + 1];
+        for (int iClass = 0; iClass < nClass; iClass++) {
+            array[iClass][0] = getClassThreshold(iClass);
+            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                if (denominator[iSpec][iClass] != 0) {
+                    array[iClass][iSpec + 1] = values[iSpec][iClass] / denominator[iSpec][iClass];
+                } else {
+                    array[iClass][iSpec + 1] = Double.NaN;
+                }
+            }
+        }
+        writeVariable(time, array);
+    }
+
 }
