@@ -82,6 +82,8 @@ import fr.ird.osmose.output.spatial.SpatialYieldNOutput;
 import fr.ird.osmose.output.spatial.SpatialTLOutput;
 import fr.ird.osmose.output.spatial.SpatialSizeOutput;
 import fr.ird.osmose.process.mortality.MortalityCause;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -120,6 +122,10 @@ public class OutputManager extends SimulationLinker {
      */
     private float[] cutoffAge;
 
+    
+
+    private final static boolean NO_WARNING = false;
+
     public OutputManager(int rank) {
         super(rank);
         outputs = new ArrayList();
@@ -137,6 +143,8 @@ public class OutputManager extends SimulationLinker {
             String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + rank + "*";
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         }
+
+        
 
         AbstractDistribution sizeDistrib = new SizeDistribution();
         sizeDistrib.init();
@@ -554,7 +562,6 @@ public class OutputManager extends SimulationLinker {
         }
 
         // Debugging outputs
-        boolean NO_WARNING = false;
         if (getConfiguration().getBoolean("output.ssb.enabled", NO_WARNING)) {
             outputs.add(new SpeciesOutput(rank, null, "SSB",
                     "Spawning Stock Biomass (tonne)",
@@ -639,30 +646,6 @@ public class OutputManager extends SimulationLinker {
                         school -> school.getKappa(),
                         school -> school.getInstantaneousAbundance()
                 ));
-            }
-        }
-
-        if (getConfiguration().getBoolean("output.regional.biomass.enabled")) {
-            for (int i = 0; i < getNSpecies(); i++) {
-                outputs.add(new RegionalOutputsBiomass(rank, "biomass", getSpecies(i)));
-            }
-        }
-
-        if (getConfiguration().getBoolean("output.regional.abundance.enabled")) {
-            for (int i = 0; i < getNSpecies(); i++) {
-                outputs.add(new RegionalOutputsAbundance(rank, getSpecies(i)));
-            }
-        }
-
-        if (getConfiguration().getBoolean("output.regional.yield.enabled")) {
-            for (int i = 0; i < getNSpecies(); i++) {
-                outputs.add(new RegionalOutputsYield(rank, getSpecies(i)));
-            }
-        }
-
-        if (getConfiguration().getBoolean("output.regional.yieldN.enabled")) {
-            for (int i = 0; i < getNSpecies(); i++) {
-                outputs.add(new RegionalOutputsYieldN(rank, getSpecies(i)));
             }
         }
 

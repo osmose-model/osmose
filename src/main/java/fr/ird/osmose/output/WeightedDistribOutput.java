@@ -60,7 +60,7 @@ import fr.ird.osmose.output.distribution.AbstractDistribution;
 public class WeightedDistribOutput extends DistribOutput {
 
     // Output values distributed by species and by class
-    private double[][] denominator;
+    private double[][][] denominator;
     // school variable getter
     private final SchoolVariableGetter denominatorVariable;
 
@@ -77,8 +77,16 @@ public class WeightedDistribOutput extends DistribOutput {
             int classSchool = getClass(school);
             int iSpec = school.getSpeciesIndex();
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += schoolVariable.getVariable(school);
-                denominator[iSpec][classSchool] += denominatorVariable.getVariable(school);
+                double var = schoolVariable.getVariable(school);
+                double denum = denominatorVariable.getVariable(school);
+                int irg = 0;
+                for (OutputRegion region : getOutputRegions()) {
+                    if (region.contains(school)) {
+                        values[irg][school.getSpeciesIndex()][getClass(school)] += var;
+                        denominator[irg][iSpec][classSchool] += denum;
+                    }
+                    irg++;
+                }
             }
         });
     }
@@ -86,25 +94,27 @@ public class WeightedDistribOutput extends DistribOutput {
     @Override
     public void reset() {
         super.reset();
-        denominator = new double[getNSpecies()][getNClass()];
+        denominator = new double[getNOutputRegion()][getNSpecies()][getNClass()];
     }
 
     @Override
     public void write(float time) {
 
         int nClass = getNClass();
-        double[][] array = new double[nClass][getNSpecies() + 1];
-        for (int iClass = 0; iClass < nClass; iClass++) {
-            array[iClass][0] = getClassThreshold(iClass);
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                if (denominator[iSpec][iClass] != 0) {
-                    array[iClass][iSpec + 1] = values[iSpec][iClass] / denominator[iSpec][iClass];
-                } else {
-                    array[iClass][iSpec + 1] = Double.NaN;
+        for (int irg = 0; irg < getNOutputRegion(); irg++) {
+            double[][] array = new double[nClass][getNSpecies() + 1];
+            for (int iClass = 0; iClass < nClass; iClass++) {
+                array[iClass][0] = getClassThreshold(iClass);
+                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                    if (denominator[irg][iSpec][iClass] != 0) {
+                        array[iClass][iSpec + 1] = values[irg][iSpec][iClass] / denominator[irg][iSpec][iClass];
+                    } else {
+                        array[iClass][iSpec + 1] = Double.NaN;
+                    }
                 }
             }
+            writeVariable(irg, time, array);
         }
-        writeVariable(time, array);
     }
 
 }

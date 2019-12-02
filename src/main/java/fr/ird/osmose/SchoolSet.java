@@ -59,7 +59,6 @@ import fr.ird.osmose.util.filter.IFilter;
 import fr.ird.osmose.util.filter.OldSchoolFilter;
 import fr.ird.osmose.util.filter.OutSchoolFilter;
 import fr.ird.osmose.util.filter.PresentSchoolFilter;
-import fr.ird.osmose.util.filter.RegionSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -291,19 +290,6 @@ public class SchoolSet extends OsmoseLinker {
                 it.remove();
             }
         }
-    }
-
-    /**
-     * Returns a list of alive schools within 
-     * a given output domain.
-     *
-     * @param species, the species to select
-     * @param update, if {@code false} returns the cached list of schools for
-     * this species
-     * @return a list of schools of this {@code species}
-     */
-    public List<School> getRegionSchools(int idom) {
-        return FilteredSets.subset(schoolset, new IFilter[]{new AliveSchoolFilter(), new RegionSchoolFilter(idom)});
     }
 
 }

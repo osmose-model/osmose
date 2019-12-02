@@ -55,9 +55,8 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  *
@@ -68,7 +67,6 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////    
-    private FileOutputStream fos;
     private boolean cutoffEnabled;
     private int recordFrequency;
 
@@ -78,12 +76,6 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
      * over the second region. etc.
      */
     private PrintWriter[] prw;
-
-    /**
-     * Boolean that defines whether the variable can be saved regionally.
-     * Default is false.
-     */
-    private final boolean save_regional;
 
     /**
      * Threshold age (year) for age class zero. This parameter allows to discard
@@ -96,15 +88,16 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
      * CSV separator
      */
     private final String separator;
-    
+
     private final String subfolder;
-    
+
     private final String name;
+
+    private final int nOutputRegion;
 
 ///////////////////
 // Abstract methods
 ///////////////////    
-
     abstract String getDescription();
 
     abstract String[] getHeaders();
@@ -112,23 +105,18 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
 ///////////////
 // Constructors
 ///////////////    
-    AbstractOutput(int rank, String subfolder, String name, boolean save_regional) {
+    AbstractOutput(int rank, String subfolder, String name) {
         super(rank);
         this.subfolder = subfolder;
         this.name = name;
-        this.save_regional = save_regional;
         separator = getConfiguration().getOutputSeparator();
-    }
-
-    AbstractOutput(int rank, String subfolder, String name) {
-        this(rank, subfolder, name, false);
+        nOutputRegion = getConfiguration().getOutputRegions().size();
     }
 
 ////////////////////////////
 // Definition of the methods
 ////////////////////////////
-
-    final String getFilename() {
+    final String getFilename(int region) {
         StringBuilder filename = new StringBuilder();
         if (null != subfolder && !subfolder.isEmpty()) {
             filename.append(subfolder).append(File.separatorChar);
@@ -137,28 +125,22 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         filename.append("_").append(name).append("_Simu");
         filename.append(getRank());
         filename.append(".csv");
+        if (region > 0) {
+            filename.append(".").append(region);
+        }
         return filename.toString();
     }
-    
-    final String getRegionalFilename(int idom) {
-        StringBuilder filename = new StringBuilder(getConfiguration().getOutputPathname());
-        filename.append(File.separatorChar);
-        filename.append("Regional");
-        filename.append(File.separatorChar);
-        filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_");
-        filename.append(Regions.getRegionName(idom));
-        filename.append("_").append(name).append("_Simu");
-        filename.append(getRank());
-        filename.append(".csv");
-        return filename.toString();
+
+    public int getNOutputRegion() {
+        return nOutputRegion;
     }
-    
+
+    public List<OutputRegion> getOutputRegions() {
+        return getConfiguration().getOutputRegions();
+    }
+
     @Override
     public void init() {
-
-        File file;
-        boolean fileExists;
 
         // Cutoff
         cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
@@ -174,23 +156,20 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         File path = new File(getConfiguration().getOutputPathname());
 
         // Creation of the regional output files for each region.
-        int nregions = this.save_regional ? Regions.getNRegions() : 0;
-        prw = new PrintWriter[nregions + 1];
-        for (int i = 0; i < nregions + 1; i++) {
-            if (i == 0) {
-                file = new File(path, getFilename());
-            } else {
-                file = new File(path, getRegionalFilename(i - 1));
-            }
-            fileExists = file.exists();
+        List<OutputRegion> regions = getConfiguration().getOutputRegions();
+        prw = new PrintWriter[regions.size()];
+
+        int i = 0;
+        for (OutputRegion region : getOutputRegions()) {
+            File file = new File(path, getFilename(region.getIndex()));
+            boolean fileExists = file.exists();
             file.getParentFile().mkdirs();
             try {
                 // Init stream
-                fos = new FileOutputStream(file, true);
+                prw[i] = new PrintWriter(file);
             } catch (FileNotFoundException ex) {
                 error("Failed to create output file " + file.getAbsolutePath(), ex);
             }
-            prw[i] = new PrintWriter(fos, true);
 
             if (!fileExists) {
                 prw[i].println(quote(getDescription()));
@@ -202,6 +181,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
                 }
                 prw[i].println();
             }
+            i++;
         }
 
     }
@@ -223,57 +203,41 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
                 prw[i].close();
             }
         }
-
-        if (null != fos) {
-            try {
-                fos.close();
-            } catch (IOException ex) {
-                // do nothing
-            }
-        }
     }
 
-    /**
-     * Write variables integrated over the entire region. It writes on the file
-     * index 0.*
-     */
-    void writeVariable(float time, double[] variable) {
-        writeVariable(0, time, variable);
-    }
+    void writeVariable(int region, float time, double[] variable) {
 
-    /**
-     * Write variables integrated over the entire region. It writes on the file
-     * index 0.*
-     */
-    void writeVariable(float time, double[][] variable) {
-        writeVariable(0, time, variable);
-    }
-
-    void writeVariable(int fileindex, float time, double[] variable) {
-
-        prw[fileindex].print(time);
+        prw[region].print(time);
         for (int i = 0; i < variable.length; i++) {
-            prw[fileindex].print(separator);
+            prw[region].print(separator);
             String sval = Float.isInfinite((float) variable[i])
                     ? "Inf"
                     : Float.toString((float) variable[i]);
-            prw[fileindex].print(sval);
+            prw[region].print(sval);
         }
-        prw[fileindex].println();
+        prw[region].println();
     }
 
-    void writeVariable(int fileindex, float time, double[][] variable) {
+    void writeVariable(int region, float time, double[][] variable) {
         for (double[] row : variable) {
-            prw[fileindex].print(time);
+            prw[region].print(time);
             for (int j = 0; j < row.length; j++) {
-                prw[fileindex].print(separator);
+                prw[region].print(separator);
                 String sval = Float.isInfinite((float) row[j])
                         ? "Inf"
                         : Float.toString((float) row[j]);
-                prw[fileindex].print(sval);
+                prw[region].print(sval);
             }
-            prw[fileindex].println();
+            prw[region].println();
         }
+    }
+    
+    void writeVariable(float time, double[] variable) {
+        writeVariable(0, time, variable);
+    }
+    
+    void writeVariable(float time, double[][] variable) {
+        writeVariable(0, time, variable);
     }
 
     /**
@@ -299,9 +263,4 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         }
         return arr;
     }
-
-    public boolean saveRegional() {
-        return this.save_regional;
-    }
-
 }

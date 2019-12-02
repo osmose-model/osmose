@@ -63,7 +63,7 @@ import fr.ird.osmose.output.distribution.DistributionType;
 public class DistribOutput extends AbstractOutput {
 
     // Output values distributed by species and by class
-    double[][] values;
+    double[][][] values;
     // Distribution 
     private final AbstractDistribution distrib;
     // school variable getter
@@ -88,7 +88,7 @@ public class DistribOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        values = new double[getNSpecies()][distrib.getNClass()];
+        values = new double[getNOutputRegion()][getNSpecies()][distrib.getNClass()];
     }
 
     @Override
@@ -96,7 +96,14 @@ public class DistribOutput extends AbstractOutput {
         getSchoolSet().getAliveSchools().forEach(school -> {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += schoolVariable.getVariable(school);
+                double var = schoolVariable.getVariable(school);
+                int irg = 0;
+                for (OutputRegion region : getOutputRegions()) {
+                    if (region.contains(school)) {
+                        values[irg][school.getSpeciesIndex()][getClass(school)] += var;
+                    }
+                    irg++;
+                }
             }
         });
     }
@@ -123,14 +130,17 @@ public class DistribOutput extends AbstractOutput {
     public void write(float time) {
 
         int nClass = distrib.getNClass();
-        double[][] array = new double[nClass][getNSpecies() + 1];
-        for (int iClass = 0; iClass < nClass; iClass++) {
-            array[iClass][0] = distrib.getThreshold(iClass);
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
+        double nsteps = getRecordFrequency();
+        for (int irg = 0; irg < getNOutputRegion(); irg++) {
+            double[][] array = new double[nClass][getNSpecies() + 1];
+            for (int iClass = 0; iClass < nClass; iClass++) {
+                array[iClass][0] = distrib.getThreshold(iClass);
+                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+                    array[iClass][iSpec + 1] = values[irg][iSpec][iClass] / nsteps;
+                }
             }
+            writeVariable(irg, time, array);
         }
-        writeVariable(time, array);
     }
 
     @Override

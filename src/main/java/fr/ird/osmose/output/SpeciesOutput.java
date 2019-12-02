@@ -51,16 +51,13 @@
  */
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-
 /**
  *
  * @author nbarrier
  */
 public class SpeciesOutput extends AbstractOutput {
 
-    protected double[] value;
-    protected double[][] valueReg;
+    protected double[][] value;
     private final String description;
     private final SchoolVariableGetter schoolVariable;
 
@@ -69,7 +66,7 @@ public class SpeciesOutput extends AbstractOutput {
     }
 
     public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, boolean regional) {
-        super(rank, subfolder, name, regional);
+        super(rank, subfolder, name);
         this.description = description;
         this.schoolVariable = schoolVariable;
     }
@@ -81,50 +78,34 @@ public class SpeciesOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        value = new double[getNSpecies()];
-        if (this.saveRegional()) {
-            int nregion = Regions.getNRegions();
-            valueReg = new double[nregion][];
-            for (int i = 0; i < nregion; i++) {
-                valueReg[i] = new double[getNSpecies()];
-            }
-        }
+        value = new double[getNOutputRegion()][getNSpecies()];
     }
 
     @Override
     public void update() {
 
-        for (School school : getSchoolSet().getAliveSchools()) {
-            if (include(school)) {
-                value[school.getSpeciesIndex()] += schoolVariable.getVariable(school);
-            }
-        }
-
-        if (this.saveRegional()) {
-            for (int idom = 0; idom < Regions.getNRegions(); idom++) {
-                for (School school : getSchoolSet().getRegionSchools(idom)) {
-                    valueReg[idom][school.getSpeciesIndex()] += schoolVariable.getVariable(school);
-                }
-            }
-        }
+        getSchoolSet().getAliveSchools().stream()
+                .filter(school -> include(school))
+                .forEach(school -> {
+                    int irg = 0;
+                    for (OutputRegion region : getOutputRegions()) {
+                        if (region.contains(school)) {
+                            value[irg][school.getSpeciesIndex()] += schoolVariable.getVariable(school);
+                        }
+                        irg++;
+                    }
+                });
     }
 
     @Override
     public void write(float time) {
 
         double nsteps = getRecordFrequency();
-        for (int i = 0; i < value.length; i++) {
-            value[i] /= nsteps;
-        }
-        writeVariable(time, value);
-
-        if (this.saveRegional()) {
-            for (int idom = 0; idom < valueReg.length; idom++) {
-                for (int i = 0; i < valueReg[idom].length; i++) {
-                    valueReg[idom][i] /= nsteps;
-                }
-                writeVariable(idom + 1, time, valueReg[idom]);
+        for (int irg = 0; irg < getNOutputRegion(); irg++) {
+            for (int isp = 0; isp < value.length; isp++) {
+                value[irg][isp] /= nsteps;
             }
+            writeVariable(irg, time, value[irg]);
         }
     }
 
@@ -136,7 +117,7 @@ public class SpeciesOutput extends AbstractOutput {
         }
         return species;
     }
-    
+
     @Override
     String getDescription() {
         return description;

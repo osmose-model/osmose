@@ -55,6 +55,8 @@ import fr.ird.osmose.resource.ResourceSpecies;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.AbstractGrid;
+import fr.ird.osmose.output.OutputRegion;
+import fr.ird.osmose.output.OutputWholeRegion;
 import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.logging.OLogger;
 import java.io.BufferedReader;
@@ -64,10 +66,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import ucar.ma2.InvalidRangeException;
 
 /**
@@ -260,6 +264,8 @@ public class Configuration extends OLogger {
      */
     private int nFishery;
 
+    private List<OutputRegion> outputRegions;
+
 ///////////////
 // Constructors
 ///////////////
@@ -427,16 +433,54 @@ public class Configuration extends OLogger {
         for (int p = 0; p < bkgSpecies.length; p++) {
             bkgSpecies[p] = new BackgroundSpecies(p);
         }
-        
+
         // Fisheries
         boolean fisheryEnabled = getBoolean("fishery.enabled");
         nFishery = fisheryEnabled ? findKeys("fishery.select.curve.fsh*").size() : 0;
+
+        // Output regions
+        outputRegions = new ArrayList();
+        // special case region0, the whole domain
+        if (!canFind("output.region.enabled.rg0")
+                || getBoolean("output.region.enabled.rg0")) {
+            if (findKeys("output.region.*.rg0").size() > 1) {
+                error("Output region 0 corresponds to the whole grid and cannot be redefined.", new IllegalArgumentException("Region0 cannot be overwritten"));
+            }
+            outputRegions.add(new OutputWholeRegion(0));
+        }
+        // list output regions
+        HashSet<Integer> rg = new HashSet(
+                findKeys("output.region.*.rg*").stream()
+                        .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rg") + 3)))
+                        .collect(Collectors.toList())
+        );
+        // remove rg0 (whole domain) that is handled separately
+        rg.remove(0);
+        rg.forEach(index -> {
+            if (!canFind("output.region.enabled.rg" + index)
+                    || getBoolean("output.region.enabled.rg" + index)) {
+                outputRegions.add(new OutputRegion(index));
+            }
+        });
+        if (outputRegions.size() <= 0) {
+            // phv 20191203, should throw an error instead?
+            warning("No output region defined");
+        }
+        // init output regions
+        outputRegions.forEach(region -> {
+            region.init();
+        });
+
     }
-    
+
+    public List<OutputRegion> getOutputRegions() {
+        return outputRegions;
+    }
+
     public int getNFishery() {
         return nFishery;
     }
-    
+
     public boolean isFisheryEnabled() {
         return nFishery > 0;
     }

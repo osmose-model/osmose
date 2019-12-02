@@ -60,8 +60,8 @@ import java.util.function.Predicate;
  */
 public class WeightedSpeciesOutput extends AbstractOutput {
 
-    protected double[] numerator;
-    protected double[] denumerator;
+    protected double[][] numerator;
+    protected double[][] denumerator;
     private final String description;
     private final Predicate<School> predicate;
     private final SchoolVariableGetter variable;
@@ -71,13 +71,13 @@ public class WeightedSpeciesOutput extends AbstractOutput {
             String subfolder, String name, String description,
             Predicate<School> predicate,
             SchoolVariableGetter variable, SchoolVariableGetter weight) {
-        super(rank, subfolder, name, false);
+        super(rank, subfolder, name);
         this.description = description;
         this.predicate = predicate;
         this.variable = variable;
         this.weight = weight;
     }
-    
+
     public WeightedSpeciesOutput(int rank,
             String subfolder, String name, String description,
             SchoolVariableGetter schoolVariable, SchoolVariableGetter weight) {
@@ -91,8 +91,8 @@ public class WeightedSpeciesOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        numerator = new double[getNSpecies()];
-        denumerator = new double[getNSpecies()];
+        numerator = new double[getNOutputRegion()][getNSpecies()];
+        denumerator = new double[getNOutputRegion()][getNSpecies()];
 
     }
 
@@ -103,21 +103,30 @@ public class WeightedSpeciesOutput extends AbstractOutput {
                 .filter(predicate)
                 .forEach(school -> {
                     double w = weight.getVariable(school);
-                    numerator[school.getSpeciesIndex()] += variable.getVariable(school) * w;
-                    denumerator[school.getSpeciesIndex()] += w;
+                    double var = variable.getVariable(school) * w;
+                    int irg = 0;
+                    for (OutputRegion region : getOutputRegions()) {
+                        if (region.contains(school)) {
+                            numerator[irg][school.getSpeciesIndex()] += var;
+                            denumerator[irg][school.getSpeciesIndex()] += w;
+                        }
+                        irg++;
+                    }
                 });
     }
 
     @Override
     public void write(float time) {
 
-        double[] result = new double[getNSpecies()];
-        for (int i = 0; i < numerator.length; i++) {
-            result[i] = (0 != denumerator[i])
-                    ? numerator[i] / denumerator[i]
-                    : Double.NaN;
+        for (int irg = 0; irg < getNOutputRegion(); irg++) {
+            double[] result = new double[getNSpecies()];
+            for (int isp = 0; isp < numerator.length; isp++) {
+                result[isp] = (0 != denumerator[irg][isp])
+                        ? numerator[irg][isp] / denumerator[irg][isp]
+                        : Double.NaN;
+            }
+            writeVariable(irg, time, result);
         }
-        writeVariable(time, result);
     }
 
     @Override
