@@ -1,4 +1,4 @@
-/* 
+/*
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
@@ -51,17 +51,37 @@
  */
 package fr.ird.osmose.output;
 
+import fr.ird.osmose.School;
+import java.util.function.Predicate;
+
 /**
  *
  * @author pverley
  */
-public class BioenMaintOutput extends AbstractOutput {
+public class WeightedSpeciesOutput extends AbstractOutput {
 
-    public double[] ingestion;
-    public double[] abundance;
+    protected double[] numerator;
+    protected double[] denumerator;
+    private final String description;
+    private final Predicate<School> predicate;
+    private final SchoolVariableGetter variable;
+    private final SchoolVariableGetter weight;
 
-    public BioenMaintOutput(int rank) {
-        super(rank, "Bioen", "maint");
+    public WeightedSpeciesOutput(int rank,
+            String subfolder, String name, String description,
+            Predicate<School> predicate,
+            SchoolVariableGetter variable, SchoolVariableGetter weight) {
+        super(rank, subfolder, name, false);
+        this.description = description;
+        this.predicate = predicate;
+        this.variable = variable;
+        this.weight = weight;
+    }
+    
+    public WeightedSpeciesOutput(int rank,
+            String subfolder, String name, String description,
+            SchoolVariableGetter schoolVariable, SchoolVariableGetter weight) {
+        this(rank, subfolder, name, description, school -> true, schoolVariable, weight);
     }
 
     @Override
@@ -71,46 +91,47 @@ public class BioenMaintOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        ingestion = new double[getNSpecies()];
-        abundance = new double[getNSpecies()];
+        numerator = new double[getNSpecies()];
+        denumerator = new double[getNSpecies()];
 
     }
 
     @Override
     public void update() {
-        getSchoolSet().getAliveSchools().forEach(school -> {
-            int i = school.getSpeciesIndex();
-            ingestion[i] += school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
-            abundance[i] += 1;
-        });
+
+        getSchoolSet().getAliveSchools().stream()
+                .filter(predicate)
+                .forEach(school -> {
+                    double w = weight.getVariable(school);
+                    numerator[school.getSpeciesIndex()] += variable.getVariable(school) * w;
+                    denumerator[school.getSpeciesIndex()] += w;
+                });
     }
 
     @Override
     public void write(float time) {
 
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            if (abundance[i] > 0) {
-                ingestion[i] = (float) (ingestion[i] / abundance[i]);
-            } else {
-                ingestion[i] = Double.NaN;
-            }
+        double[] result = new double[getNSpecies()];
+        for (int i = 0; i < numerator.length; i++) {
+            result[i] = (0 != denumerator[i])
+                    ? numerator[i] / denumerator[i]
+                    : Double.NaN;
         }
-
-        writeVariable(time, ingestion);
+        writeVariable(time, result);
     }
 
     @Override
-    String getDescription() {
-        return "Maintenance rate (grams.grams^-alpha)";
-    }
-
-    @Override
-    String[] getHeaders() {
+    final String[] getHeaders() {
         String[] species = new String[getNSpecies()];
         for (int i = 0; i < species.length; i++) {
             species[i] = getSpecies(i).getName();
         }
         return species;
+    }
+
+    @Override
+    String getDescription() {
+        return description;
     }
 
 }
