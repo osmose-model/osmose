@@ -59,16 +59,16 @@ import fr.ird.osmose.output.distribution.AbstractDistribution;
  */
 public class WeightedDistribOutput extends DistribOutput {
 
-    // Output values distributed by species and by class
+    // Denumerator distributed by species and by class
     private double[][][] denominator;
     // school variable getter
-    private final SchoolVariableGetter denominatorVariable;
+    private final SchoolVariableGetter weight;
 
     public WeightedDistribOutput(int rank, String subfolder, String name, String description,
-            SchoolVariableGetter schoolVariable, SchoolVariableGetter denominatorVariable,
+            SchoolVariableGetter variable, SchoolVariableGetter weight,
             AbstractDistribution distrib) {
-        super(rank, subfolder, name, description, null, schoolVariable, distrib);
-        this.denominatorVariable = denominatorVariable;
+        super(rank, subfolder, name, description, null, variable, distrib);
+        this.weight = weight;
     }
 
     @Override
@@ -77,13 +77,13 @@ public class WeightedDistribOutput extends DistribOutput {
             int classSchool = getClass(school);
             int iSpec = school.getSpeciesIndex();
             if (classSchool >= 0) {
-                double var = schoolVariable.getVariable(school);
-                double denum = denominatorVariable.getVariable(school);
+                double w = weight.getVariable(school);
+                double wvar = w * variable.getVariable(school);
                 int irg = 0;
                 for (OutputRegion region : getOutputRegions()) {
                     if (region.contains(school)) {
-                        values[irg][school.getSpeciesIndex()][getClass(school)] += var;
-                        denominator[irg][iSpec][classSchool] += denum;
+                        values[irg][school.getSpeciesIndex()][getClass(school)] += wvar;
+                        denominator[irg][iSpec][classSchool] += w;
                     }
                     irg++;
                 }

@@ -82,8 +82,6 @@ import fr.ird.osmose.output.spatial.SpatialYieldNOutput;
 import fr.ird.osmose.output.spatial.SpatialTLOutput;
 import fr.ird.osmose.output.spatial.SpatialSizeOutput;
 import fr.ird.osmose.process.mortality.MortalityCause;
-import java.util.HashSet;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -122,8 +120,6 @@ public class OutputManager extends SimulationLinker {
      */
     private float[] cutoffAge;
 
-    
-
     private final static boolean NO_WARNING = false;
 
     public OutputManager(int rank) {
@@ -143,8 +139,6 @@ public class OutputManager extends SimulationLinker {
             String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + rank + "*";
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         }
-
-        
 
         AbstractDistribution sizeDistrib = new SizeDistribution();
         sizeDistrib.init();
@@ -444,7 +438,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new WeightedDistribOutput(
                     rank, "Indicators", "meanSize",
                     "Mean size of fish (centimeter)",
-                    school -> school.getInstantaneousAbundance() * school.getLength(),
+                    school -> school.getLength(),
                     school -> school.getInstantaneousAbundance(),
                     ageDistrib
             ));
@@ -494,7 +488,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new WeightedDistribOutput(
                     rank, "Trophic", "meanTL",
                     "Mean trophic level of fish species",
-                    school -> school.getInstantaneousBiomass() * school.getTrophicLevel(),
+                    school -> school.getTrophicLevel(),
                     school -> school.getInstantaneousBiomass(),
                     sizeDistrib
             ));
@@ -504,7 +498,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new WeightedDistribOutput(
                     rank, "Trophic", "meanTL",
                     "Mean trophic level of fish species",
-                    school -> school.getInstantaneousBiomass() * school.getTrophicLevel(),
+                    school -> school.getTrophicLevel(),
                     school -> school.getInstantaneousBiomass(),
                     ageDistrib
             ));
@@ -660,10 +654,10 @@ public class OutputManager extends SimulationLinker {
         /*
          * Initialize indicators
          */
-        for (IOutput indicator : outputs) {
+        outputs.forEach(indicator -> {
             indicator.init();
             indicator.reset();
-        }
+        });
 
         // Initialize the restart maker
         restartFrequency = Integer.MAX_VALUE;
@@ -685,16 +679,12 @@ public class OutputManager extends SimulationLinker {
     }
 
     public void close() {
-        for (IOutput indicator : outputs) {
-            indicator.close();
-        }
+        outputs.forEach(IOutput::close);
     }
 
     public void initStep() {
         if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
-            for (IOutput indicator : outputs) {
-                indicator.initStep();
-            }
+            outputs.forEach(IOutput::initStep);
         }
     }
 
@@ -702,7 +692,7 @@ public class OutputManager extends SimulationLinker {
 
         // UPDATE
         if (getSimulation().getYear() >= getConfiguration().getInt("output.start.year")) {
-            for (IOutput indicator : outputs) {
+            outputs.forEach(indicator -> {
                 indicator.update();
                 // WRITE
                 if (indicator.isTimeToWrite(iStepSimu)) {
@@ -710,7 +700,7 @@ public class OutputManager extends SimulationLinker {
                     indicator.write(time);
                     indicator.reset();
                 }
-            }
+            });
         }
     }
 

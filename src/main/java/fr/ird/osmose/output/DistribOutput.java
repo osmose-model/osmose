@@ -67,18 +67,18 @@ public class DistribOutput extends AbstractOutput {
     // Distribution 
     private final AbstractDistribution distrib;
     // school variable getter
-    protected final SchoolVariableGetter schoolVariable;
+    protected final SchoolVariableGetter variable;
     // description
     private final String description;
 
     public DistribOutput(int rank, String subfolder,
             String name, String description,
             Species species,
-            SchoolVariableGetter schoolVariable,
+            SchoolVariableGetter variable,
             AbstractDistribution distrib) {
         super(rank, subfolder, name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""));
         this.distrib = distrib;
-        this.schoolVariable = schoolVariable;
+        this.variable = variable;
         this.description = description;
     }
 
@@ -96,7 +96,7 @@ public class DistribOutput extends AbstractOutput {
         getSchoolSet().getAliveSchools().forEach(school -> {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                double var = schoolVariable.getVariable(school);
+                double var = variable.getVariable(school);
                 int irg = 0;
                 for (OutputRegion region : getOutputRegions()) {
                     if (region.contains(school)) {

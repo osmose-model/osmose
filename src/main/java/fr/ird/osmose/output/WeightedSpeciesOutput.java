@@ -103,11 +103,11 @@ public class WeightedSpeciesOutput extends AbstractOutput {
                 .filter(predicate)
                 .forEach(school -> {
                     double w = weight.getVariable(school);
-                    double var = variable.getVariable(school) * w;
+                    double wvar = variable.getVariable(school) * w;
                     int irg = 0;
                     for (OutputRegion region : getOutputRegions()) {
                         if (region.contains(school)) {
-                            numerator[irg][school.getSpeciesIndex()] += var;
+                            numerator[irg][school.getSpeciesIndex()] += wvar;
                             denumerator[irg][school.getSpeciesIndex()] += w;
                         }
                         irg++;
