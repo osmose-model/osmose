@@ -24,13 +24,10 @@ public class OxidativeMortality extends AbstractMortality {
     @Override
     public void init() {
         int nspec = this.getNSpecies();
-        
+        k_dam = new double[nspec];
         for (int i=0;i<nspec;i++){
             k_dam[i] = getConfiguration().getDouble("bioen.damage.k_dam.sp" + i);
-
         }
-       
-
     }
 
     @Override
