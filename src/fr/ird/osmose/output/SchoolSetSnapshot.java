@@ -221,7 +221,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
            Dimension lociDim = nc.addDimension(null, "loci", nMaxLoci);        
            Dimension locValDim = nc.addDimension(null, "loci_val",  2);
            
-           genetVar = nc.addVariable(null, "genotyope", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim, lociDim, locValDim)));
+           genetVar = nc.addVariable(null, "genotype", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim, lociDim, locValDim)));
            
         }
         
