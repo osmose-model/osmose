@@ -53,7 +53,12 @@ import fr.ird.osmose.Species;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.ma2.ArrayFloat;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -100,6 +105,10 @@ public class NetcdfPopulator extends AbstractPopulator {
     @Override
     public void populate() {
 
+        boolean useGenetic = this.getConfiguration().useGenetic();
+        Variable genetVar = null;  // variable containing the genotype
+        ArrayFloat.D4 genotype = null;   // data array containing the Netcdf genotype array
+
         int nSchool = nc.findDimension("nschool").getLength();
         try {
             int[] ispecies = (int[]) nc.findVariable("species").read().copyTo1DJavaArray();
@@ -110,7 +119,13 @@ public class NetcdfPopulator extends AbstractPopulator {
             float[] weight = (float[]) nc.findVariable("weight").read().copyTo1DJavaArray();
             float[] age = (float[]) nc.findVariable("age").read().copyTo1DJavaArray();
             float[] trophiclevel = (float[]) nc.findVariable("trophiclevel").read().copyTo1DJavaArray();
+            if (useGenetic) {
+                genetVar = nc.findVariable("genotype");
+                genotype = (ArrayFloat.D4) genetVar.read();
+            }
+
             for (int s = 0; s < nSchool; s++) {
+
                 School school = new School(
                         getSpecies(ispecies[s]),
                         x[s],
@@ -120,6 +135,9 @@ public class NetcdfPopulator extends AbstractPopulator {
                         weight[s],
                         Math.round(age[s] * getConfiguration().getNStepYear()),
                         trophiclevel[s]);
+                if (useGenetic) {
+                    school.restartGenotype(this.getRank(), s, genotype);
+                }
                 getSchoolSet().add(school);
             }
             nc.close();
