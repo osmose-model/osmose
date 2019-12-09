@@ -73,14 +73,14 @@ import ucar.nc2.Variable;
  *
  * @author pverley
  */
-public class SchoolSetSnapshotBis extends SimulationLinker {
+public class SchoolSetSnapshot extends SimulationLinker {
     
     private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
     private Variable genetVar;
     private int nTrait=0;
     private int nMaxLoci;
     
-    public SchoolSetSnapshotBis(int rank) {
+    public SchoolSetSnapshot(int rank) {
         super(rank);
     }
 
