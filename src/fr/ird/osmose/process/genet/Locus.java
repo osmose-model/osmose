@@ -87,6 +87,11 @@ public class Locus extends OsmoseLinker {
 
     }
 
+    /** Recovers the ith value of a loci par.
+     * 
+     * @param i Loci pair index (0 or 1)
+     * @return Loci pair value
+     */
     public double getValue(int i) {
         if((i < 0) || (i>1)) {
             error("Locus index must be 0 or 1", new IllegalArgumentException());
@@ -94,6 +99,21 @@ public class Locus extends OsmoseLinker {
         return this.value[i];
     }
 
+    /** Sets the value of a given loci.
+     * 
+     * @param i Index of the loci (0 or 1)
+     * @param val  Loci value
+     */
+    public void setValue(int i, double val) {
+        if ((i < 0) || (i > 1)) {
+            error("Locus index must be 0 or 1", new IllegalArgumentException());
+        }
+        this.value[i] = val;
+    }
+    
+    /** Returns the sum of the two loci values.
+     * @return Sum of the two loci values
+     */
     public double sum() {
         return (this.getValue(0) + this.getValue(1));
     }
