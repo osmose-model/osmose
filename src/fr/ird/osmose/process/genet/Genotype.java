@@ -210,5 +210,17 @@ public class Genotype extends SimulationLinker {
     public int getNLocus(int itrait) {
         return this.nlocus[itrait];
     }
+    
+    /**  Forces the value of a Loci pair. Used when restart with genetic.
+     * 
+     * @param itrait Index of the variable trait
+     * @param iloc  Index of the loci
+     * @param val0  First value of the loci
+     * @param val1  Second value of the loci
+     */
+    public void setLocusVal(int itrait, int iloc, double val0, double val1) {
+        this.getLocus(itrait, iloc).setValue(0, val0);
+        this.getLocus(itrait, iloc).setValue(1, val1);
+    }
 
 }  // end of class
