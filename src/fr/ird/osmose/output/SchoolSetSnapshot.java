@@ -1,4 +1,4 @@
-/*
+/* 
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
@@ -7,7 +7,10 @@
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
  * This software is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
@@ -49,30 +52,43 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.genet.Genotype;
+import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
 
 /**
  *
  * @author pverley
  */
-public class SchoolSetSnapshot extends SimulationLinker {
-
-    public SchoolSetSnapshot(int rank) {
+public class SchoolSetSnapshotBis extends SimulationLinker {
+    
+    private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
+    private Variable genetVar;
+    private int nTrait=0;
+    private int nMaxLoci;
+    
+    public SchoolSetSnapshotBis(int rank) {
         super(rank);
     }
 
     public void makeSnapshot(int iStepSimu) {
 
-        NetcdfFileWriteable nc = createNCFile(iStepSimu);
+        boolean useGenet = this.getConfiguration().useGenetic();
+        ArrayFloat.D4 genotype = null;
+        NetcdfFileWriter nc = createNCFile(iStepSimu);
         int nSchool = getSchoolSet().getSchools().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
         ArrayFloat.D1 x = new ArrayFloat.D1(nSchool);
@@ -82,6 +98,12 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 length = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 weight = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 trophiclevel = new ArrayFloat.D1(nSchool);
+        
+        // if use genetic, initialize the output of the genotype (nschool x ntrait x nloci x 2)
+        if (useGenet) {
+            genotype = new ArrayFloat.D4(nSchool, this.nTrait, this.nMaxLoci, 2);
+        }
+        
         int s = 0;
         // fill up the arrays
         for (School school : getSchoolSet().getSchools()) {
@@ -93,85 +115,119 @@ public class SchoolSetSnapshot extends SimulationLinker {
             length.set(s, school.getLength());
             weight.set(s, school.getWeight() * 1e6f);
             trophiclevel.set(s, school.getTrophicLevel());
+            
+            if(useGenet) {
+                // If use genetic module, save the list of loci pairs for each trait.
+                Genotype gen = school.getGenotype();
+                for(int iTrait=0; iTrait<nTrait; iTrait++) {
+                    int nLoci = gen.getNLocus(iTrait);
+                    for(int iLoci = 0; iLoci < nLoci; iLoci++) {
+                       genotype.set(s, iTrait, iLoci, 0, (float) gen.getLocus(iTrait, iLoci).getValue(0)); 
+                       genotype.set(s, iTrait, iLoci, 1, (float) gen.getLocus(iTrait, iLoci).getValue(1)); 
+                    }
+                }
+            }
+            // writes genotype for each school
             s++;
         }
         // write the arrays in the NetCDF file
         try {
-            nc.write("species", species);
-            nc.write("x", x);
-            nc.write("y", y);
-            nc.write("abundance", abundance);
-            nc.write("age", age);
-            nc.write("length", length);
-            nc.write("weight", weight);
-            nc.write("trophiclevel", trophiclevel);
+            nc.write(this.specVar, species);
+            nc.write(this.xVar, x);
+            nc.write(this.yVar, y);
+            nc.write(this.abVar, abundance);
+            nc.write(this.ageVar, age);
+            nc.write(this.lengthVar, length);
+            nc.write(this.weightVar, weight);
+            nc.write(this.tlVar, trophiclevel);
+            if(useGenet) { 
+                nc.write(this.genetVar, genotype);
+            }
             nc.close();
             //close(nc);
         } catch (IOException ex) {
-            error("Error writing snapshot " + nc.getLocation(), ex);
+            error("Error writing snapshot " + nc.getNetcdfFile().getLocation(), ex);
         } catch (InvalidRangeException ex) {
-            error("Error writing snapshot " + nc.getLocation(), ex);
+            error("Error writing snapshot " + nc.getNetcdfFile().getLocation(), ex);
         }
     }
 
-    private NetcdfFileWriteable createNCFile(int iStepSimu) {
+    private NetcdfFileWriter createNCFile(int iStepSimu) {
 
-        NetcdfFileWriteable nc = null;
+        NetcdfFileWriter nc = null;
+        File file = null;
+        
         /*
          * Create NetCDF file
          */
         try {
-            nc = NetcdfFileWriteable.createNew("");
-
+          
             File path = new File(getConfiguration().getOutputPathname());
-            File file = new File(path, getFilename(iStepSimu));
+            file = new File(path, getFilename(iStepSimu));
             file.getParentFile().mkdirs();
-            nc.setLocation(file.getAbsolutePath());
+            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, file.getAbsolutePath());
         } catch (IOException ex) {
-            error("Could not create snapshot file " + nc.getLocation(), ex);
+            error("Could not create snapshot file " + file.getAbsolutePath(), ex);
         }
         /*
          * Create dimensions
          */
-        Dimension nSchool = nc.addDimension("nschool", getSchoolSet().getSchools().size());
+        Dimension nSchool = nc.addDimension(null, "nschool", getSchoolSet().getSchools().size());
         /*
          * Add variables
          */
-        nc.addVariable("species", DataType.INT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("species", "units", "scalar");
-        nc.addVariableAttribute("species", "description", "index of the species");
+        specVar = nc.addVariable(null, "species", DataType.INT, "nschool");
+        specVar.addAttribute(new Attribute("description", "index of the species"));
 
-        nc.addVariable("x", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("x", "units", "scalar");
-        nc.addVariableAttribute("x", "description", "x-grid index of the school");
+        xVar = nc.addVariable(null, "x", DataType.FLOAT, "nschool");
+        xVar.addAttribute(new Attribute("units", "scalar"));
+        xVar.addAttribute(new Attribute("description", "x-grid index of the school"));
 
-        nc.addVariable("y", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("x", "units", "scalar");
-        nc.addVariableAttribute("x", "description", "y-grid index of the school");
+        yVar = nc.addVariable(null, "y", DataType.FLOAT, "nschool");
+        yVar.addAttribute(new Attribute("units", "scalar"));
+        yVar.addAttribute(new Attribute("description", "y-grid index of the school"));
 
-        nc.addVariable("abundance", DataType.DOUBLE, new Dimension[]{nSchool});
-        nc.addVariableAttribute("abundance", "units", "scalar");
-        nc.addVariableAttribute("abundance", "description", "number of fish in the school");
+        abVar = nc.addVariable(null, "abundance", DataType.DOUBLE, "nschool");
+        abVar.addAttribute(new Attribute("units", "scalar"));
+        abVar.addAttribute(new Attribute("description", "number of fish in the school"));
 
-        nc.addVariable("age", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("age", "units", "year");
-        nc.addVariableAttribute("age", "description", "age of the school in year");
+        ageVar = nc.addVariable(null, "age", DataType.FLOAT, "nschool");
+        ageVar.addAttribute(new Attribute("units", "year"));
+        ageVar.addAttribute(new Attribute("description", "age of the school in year"));
 
-        nc.addVariable("length", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("length", "units", "cm");
-        nc.addVariableAttribute("length", "description", "length of the fish in the school in centimeter");
+        lengthVar = nc.addVariable(null, "length", DataType.FLOAT, "nschool");
+        lengthVar.addAttribute(new Attribute("units", "cm"));
+        lengthVar.addAttribute(new Attribute("description", "length of the fish in the school in centimeter"));
 
-        nc.addVariable("weight", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("weight", "units", "g");
-        nc.addVariableAttribute("weight", "description", "weight of the fish in the school in gram");
+        weightVar = nc.addVariable(null, "weight", DataType.FLOAT, "nschool");
+        weightVar.addAttribute(new Attribute("units", "g"));
+        weightVar.addAttribute(new Attribute("description", "weight of the fish in the school in gram"));
 
-        nc.addVariable("trophiclevel", DataType.FLOAT, new Dimension[]{nSchool});
-        nc.addVariableAttribute("trophiclevel", "units", "scalar");
-        nc.addVariableAttribute("trophiclevel", "description", "trophiclevel of the fish in the school");
+        tlVar = nc.addVariable(null, "trophiclevel", DataType.FLOAT, "nschool");
+        tlVar.addAttribute(new Attribute("units", "scalar"));
+        tlVar.addAttribute(new Attribute("description", "trophiclevel of the fish in the school"));
+        
+        if(this.getConfiguration().useGenetic()) {
+            // Determines the maximum number of Loci that codes a trait
+            nTrait = this.getSimulation().getNEvolvingTraits();
+            for (int iTrait = 0; iTrait < nTrait; iTrait++) {
+                Trait trait = this.getEvolvingTrait(iTrait);
+                for (int iSpec = 0; iSpec < this.getConfiguration().getNSpecies(); iSpec++) {
+                    nMaxLoci = Math.max(trait.getNLocus(iSpec), nMaxLoci);
+                }   
+            }
+            
+           //Dimension[] dimOut = new Dimension[3] {
+           Dimension traitDim = new Dimension(null, nTrait);
+           Dimension lociDim = new Dimension(null, nMaxLoci);
+           Dimension schoolDim = new Dimension(null, getSchoolSet().getSchools().size());
+           genetVar = nc.addVariable(null, "genotyope", DataType.FLOAT, new ArrayList(Arrays.asList(schoolDim, traitDim, lociDim)));
+        }
+        
         /*
          * Add global attributes
          */
-        nc.addGlobalAttribute("step", String.valueOf(iStepSimu));
+        nc.addGroupAttribute(null, new Attribute("step", String.valueOf(iStepSimu)));
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             str.append(i);
@@ -179,7 +235,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             str.append(getSpecies(i).getName());
             str.append(" ");
         }
-        nc.addGlobalAttribute("species", str.toString());
+        nc.addGroupAttribute(null, new Attribute("species", str.toString()));
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -187,7 +243,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.create();
 
         } catch (IOException ex) {
-            error("Could not create snapshot file " + nc.getLocation(), ex);
+            error("Could not create snapshot file " + nc.getNetcdfFile().getLocation(), ex);
         }
         return nc;
     }
