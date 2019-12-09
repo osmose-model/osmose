@@ -88,6 +88,9 @@ public class Locus extends OsmoseLinker {
     }
 
     public double getValue(int i) {
+        if((i < 0) || (i>1)) {
+            error("Locus index must be 0 or 1", new IllegalArgumentException());
+        }
         return this.value[i];
     }
 
