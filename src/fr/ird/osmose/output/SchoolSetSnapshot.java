@@ -59,6 +59,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
@@ -85,7 +86,6 @@ public class SchoolSetSnapshot extends SimulationLinker {
     }
 
     public void makeSnapshot(int iStepSimu) {
-
         boolean useGenet = this.getConfiguration().useGenetic();
         ArrayFloat.D4 genotype = null;
         NetcdfFileWriter nc = createNCFile(iStepSimu);
@@ -161,10 +161,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
          * Create NetCDF file
          */
         try {
-          
             File path = new File(getConfiguration().getOutputPathname());
             file = new File(path, getFilename(iStepSimu));
-            file.getParentFile().mkdirs();
+            file.getParentFile().mkdirs();            
             nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, file.getAbsolutePath());
         } catch (IOException ex) {
             error("Could not create snapshot file " + file.getAbsolutePath(), ex);
@@ -172,7 +171,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         /*
          * Create dimensions
          */
-        Dimension nSchool = nc.addDimension(null, "nschool", getSchoolSet().getSchools().size());
+        Dimension schoolDim = nc.addDimension(null, "nschool", getSchoolSet().getSchools().size());
         /*
          * Add variables
          */
@@ -218,10 +217,12 @@ public class SchoolSetSnapshot extends SimulationLinker {
             }
             
            //Dimension[] dimOut = new Dimension[3] {
-           Dimension traitDim = new Dimension(null, nTrait);
-           Dimension lociDim = new Dimension(null, nMaxLoci);
-           Dimension schoolDim = new Dimension(null, getSchoolSet().getSchools().size());
-           genetVar = nc.addVariable(null, "genotyope", DataType.FLOAT, new ArrayList(Arrays.asList(schoolDim, traitDim, lociDim)));
+           Dimension traitDim = nc.addDimension(null, "trait", nTrait);
+           Dimension lociDim = nc.addDimension(null, "loci", nMaxLoci);        
+           Dimension locValDim = nc.addDimension(null, "loci_val",  2);
+           
+           genetVar = nc.addVariable(null, "genotyope", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim, lociDim, locValDim)));
+           
         }
         
         /*
@@ -235,7 +236,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
             str.append(getSpecies(i).getName());
             str.append(" ");
         }
+        
         nc.addGroupAttribute(null, new Attribute("species", str.toString()));
+        
         try {
             /*
              * Validates the structure of the NetCDF file.
