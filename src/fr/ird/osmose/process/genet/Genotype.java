@@ -207,5 +207,8 @@ public class Genotype extends SimulationLinker {
 
     }
     
+    public int getNLocus(int itrait) {
+        return this.nlocus[itrait];
+    }
 
 }  // end of class
