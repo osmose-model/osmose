@@ -53,6 +53,7 @@ import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.Collection;
 import java.util.HashMap;
+import ucar.ma2.ArrayFloat;
 
 /**
  * This class represents a school of fish, it is the individual of the
@@ -828,6 +829,28 @@ public class School extends AbstractSchool {
     public boolean existsTrait(String key) throws Exception {
         return this.getGenotype().existsTrait(key);
     }
-
     
+    /** Reads the genotype from restart file. 
+     * 
+     * @param rank Simulation rank
+     * @param index School index
+     * @param genArray Netcdf Array (school, itrait, ilocus, 2)
+     */
+    public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray) {
+        
+        // Instanciate (i.e. init arrays) genotype for the current school
+        this.instance_genotype(rank);
+        
+        // Sets the genotype values from NetCDF files
+        int ntrait = this.getGenotype().getNEvolvingTraits();
+        for(int itrait=0; itrait<ntrait; itrait++) {
+            int nlocus = this.getGenotype().getNLocus(itrait);
+            for(int iloc=0; iloc<nlocus; iloc++) {
+                // Recovers the NetCDF values
+                double val0 = genArray.get(index, itrait, iloc, 0);
+                double val1 = genArray.get(index, itrait, iloc, 1);
+                this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
+            }
+        }   
+    }
 }
