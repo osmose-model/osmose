@@ -821,5 +821,9 @@ public class School extends AbstractSchool {
         return this.getGenotype().existsTrait(key);
     }
 
+    @Override
+    public String getSpeciesName() {
+        return this.species.getName();
+    }
     
 }
