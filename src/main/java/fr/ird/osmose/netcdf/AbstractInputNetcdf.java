@@ -59,6 +59,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayDouble;
 import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -68,20 +69,49 @@ import ucar.nc2.Variable;
  */
 public class AbstractInputNetcdf {
 
-    /** Input netcdf file. */
+    /**
+     * Input netcdf file.
+     */
     private NetcdfFile nc;
+    /**
+     * Variable to read. For instance, accessibility.
+     */
     private final String varname;
+    /**
+     * Filename.
+     */
     private final String filename;
-    private int shape[];
-    private ClassType classType;
+
+    /**
+     * Upper bounds of the class. Either age or size. One for prey, one for pred
+     */
     private double[] classPrey, classPred;
+
+    /**
+     * Species name. One for prey, one for pred. One for each class
+     */
     private String[] namesPrey, namesPred;
+
+    /**
+     * Interface to recover the class of a given school. Pointer to getSize or
+     * getAge school methods.
+     */
     private ClassManager classManager;
-    private double varArray[][];
-    
-    private interface ClassManager  {
+
+    private int nRecords;
+
+    /**
+     * Variable array to read. Should be of dims (time, prey, pred).
+     */
+    private double varArray[][][];  // accessibility matrix: (time, prey, pred)
+
+    /**
+     * Defines the interface to recover the class.
+     */
+    private interface ClassManager {
+
         double getClass(IAggregation school);
-    } 
+    }
 
     public AbstractInputNetcdf(String filename, String varname) {
         this.varname = varname;
@@ -97,80 +127,114 @@ public class AbstractInputNetcdf {
 
         nc = NetcdfFile.open(filename, null);
 
+        // Recovers the number of time records.
+        Dimension timeDim = nc.findDimension("time");
+        nRecords = timeDim.getLength();
+
         // Recovers the variable to read
         Variable netcdfVar = nc.findVariable(varname);
-        varArray = (double [][]) netcdfVar.read().copyToNDJavaArray();
+        varArray = (double[][][]) netcdfVar.read().copyToNDJavaArray();
 
+        // Reads the upper bounds of the predator/prey class
         Variable preyClassVar = nc.findVariable("preyClass");
         classPrey = (double[]) preyClassVar.read().copyTo1DJavaArray();
 
         Variable predClassVar = nc.findVariable("predClass");
         classPred = (double[]) predClassVar.read().copyTo1DJavaArray();
 
+        // Reads the species names for the prey and predatorxs
         Variable preySpeciesVar = nc.findVariable("preySpeciesName");
         namesPrey = (String[]) preySpeciesVar.read().copyTo1DJavaArray();
- 
+
         Variable predSpeciesVar = nc.findVariable("predSpeciesName");
         namesPred = (String[]) predSpeciesVar.read().copyTo1DJavaArray();
-        
-        Attribute attVar = preyClassVar.findAttribute("type");
-        String type = (String) attVar.getValue(0);
-        switch (type.toLowerCase()) {
-            case ("age"):
-                classType = ClassType.AGE;
-                classManager = (x) -> x.getAge();
-                break;
-            case ("size"):
-                classType = ClassType.SIZE;
-                classManager = (x) -> x.getLength();
-                break;
-            default:
-                classType = ClassType.SIZE;
+
+        // Loop for the type attribute for the netcdfVar
+        Attribute attVar = netcdfVar.findAttribute("class_type");
+        if (attVar == null) {
+            // If no attribute has been found, assumes that length is used.
+            classManager = (x) -> x.getLength();
+        } else {
+            String type = (String) attVar.getValue(0);
+            switch (type.toLowerCase()) {
+                case ("age"):
+                    classManager = (x) -> x.getAge();
+                    break;
+                case ("size"):
+                    classManager = (x) -> x.getLength();
+                    break;
+                default:
+                    classManager = (x) -> x.getLength();
+            }
         }
-        
+
         nc.close();
-        
+
     } // end of init
 
-    public int findIndex(String name, double specClass, String[] listNames, double[] listClass) {
+    /**
+     * Finds the index that match the name and the class within 2 lists.
+     *
+     * @param name Name of the species to match (either predator or prey)
+     * @param specClass Class of the species to match (either predator or prey,
+     * age or size)
+     * @param listNames List of species names
+     * @param listClass List of species class upper bounds
+     * @return
+     */
+    public int findIndex(String name, double specClass, String[] listNames, double[] listClass) throws Exception {
         int index = -1;
+
+        if (listNames.length != listClass.length) {
+            throw new Exception("The listNames and listClass don't have the same size");
+        }
+
         for (int i = 0; i < listNames.length; i++) {
-            if (this.namesPred[i].equals(name)) {
-                if (specClass < this.classPred[i]) {
+            // Loop over the list of names. 
+            if (listNames[i].equals(name)) {
+                // If the name matches, check for the class
+                if (specClass < listClass[i]) {
                     index = i;
-                    return(index);
+                    return (index);
                 }
             }
         }
-        
+
         return index;
-        
+
     }
-    
-    
-    public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
+
+    /**
+     * Finds the accessibility coefficient for a given time step.
+     *
+     * @param timeStep Simulation time step
+     * @param predator Predator (should be of type School).
+     * @param preys
+     * @return
+     * @throws Exception
+     */
+    public double[] getAccessibility(int timeStep, IAggregation predator, List<IAggregation> preys) throws Exception {
+
+        int ncIndex = timeStep % nRecords;
+
+        // finds the index (i.e. column index) for the predator
         int indexPred = this.findIndex(predator.getSpeciesName(), this.classManager.getClass(predator), namesPred, classPred);
+
         double[] output = new double[preys.size()];
-        for(int iprey=0; iprey < preys.size(); iprey++) {
+        for (int iprey = 0; iprey < preys.size(); iprey++) {
             IAggregation prey = preys.get(iprey);
+            // finds the prey index (i.e. row index)
             int indexPrey = this.findIndex(prey.getSpeciesName(), this.classManager.getClass(prey), namesPrey, classPrey);
             try {
-                output[iprey] = varArray[indexPrey][indexPred];
+                output[iprey] = varArray[ncIndex][indexPrey][indexPred];
             } catch (ArrayIndexOutOfBoundsException ex) {
                 String errorMsg = String.format("Problem with indexes. indexPrey=%d and indexPred=%d", indexPrey, indexPred);
                 System.out.println(errorMsg);
-                throw(ex);
+                throw (ex);
             }
-        }       
-        
-        return(output);
-        
-    }
+        }
 
-    private enum SpeciesType {
-        PREY,
-        PRED;
-    }
+        return (output);
 
-    
+    }
 }
