@@ -1,0 +1,61 @@
+# mortality.fishing.recruitment.age.sp0;0
+# mortality.fishing.recruitment.age.sp1;0
+# mortality.fishing.recruitment.age.sp10;0
+# mortality.fishing.recruitment.age.sp11;0
+# mortality.fishing.recruitment.age.sp12;0
+# mortality.fishing.recruitment.age.sp13;0
+# mortality.fishing.recruitment.age.sp2;0
+# mortality.fishing.recruitment.age.sp3;0
+# mortality.fishing.recruitment.age.sp4;0
+# mortality.fishing.recruitment.age.sp5;0
+# mortality.fishing.recruitment.age.sp6;0
+# mortality.fishing.recruitment.age.sp7;0
+# mortality.fishing.recruitment.age.sp8;0
+# mortality.fishing.recruitment.age.sp9;0
+mortality.fishing.recruitment.age.sp0;4
+mortality.fishing.recruitment.age.sp1;0.4
+mortality.fishing.recruitment.age.sp10;0.5
+mortality.fishing.recruitment.age.sp11;1.5
+mortality.fishing.recruitment.age.sp12;0.5
+mortality.fishing.recruitment.age.sp13;0.5
+mortality.fishing.recruitment.age.sp2;1
+mortality.fishing.recruitment.age.sp3;1
+mortality.fishing.recruitment.age.sp4;1
+mortality.fishing.recruitment.age.sp5;1
+mortality.fishing.recruitment.age.sp6;1
+mortality.fishing.recruitment.age.sp7;1.5
+mortality.fishing.recruitment.age.sp8;1
+mortality.fishing.recruitment.age.sp9;0.5
+;
+mortality.fishing.rate.sp0;0.09
+mortality.fishing.rate.sp1;0.194
+mortality.fishing.rate.sp2;0.106
+mortality.fishing.rate.sp3;0.122
+mortality.fishing.rate.sp4;0.0
+mortality.fishing.rate.sp5;0.219
+mortality.fishing.rate.sp6;0.0
+mortality.fishing.rate.sp7;0.187
+mortality.fishing.rate.sp8;0.44
+mortality.fishing.rate.sp9;0.052
+mortality.fishing.rate.sp10;0.142
+mortality.fishing.rate.sp11;0.156
+mortality.fishing.rate.sp12;0.03
+mortality.fishing.rate.sp13;0.036
+# mortality.fishing.rate.sp0;0.09
+# mortality.fishing.rate.sp1;0.194
+# mortality.fishing.rate.sp2;0.106
+# mortality.fishing.rate.sp3;0.122
+# mortality.fishing.rate.sp4;0.0
+# mortality.fishing.rate.sp5;0.219
+# mortality.fishing.rate.sp6;0.0
+# mortality.fishing.rate.sp7;0.187
+# mortality.fishing.rate.sp8;0.44
+# mortality.fishing.rate.sp9;0.052
+# mortality.fishing.rate.sp10;0.142
+# mortality.fishing.rate.sp11;0.156
+# mortality.fishing.rate.sp12;0.03
+# mortality.fishing.rate.sp13;0.036
+;
+mortality.fishing.season.distrib.file.sp9;fishing/fishing-seasonality-horse-mackerel.csv
+mortality.fishing.season.distrib.file.sp13;fishing/fishing-seasonality-squids.csv
+

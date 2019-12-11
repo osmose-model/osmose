@@ -110,7 +110,7 @@ summary.osmose = function(object, ...) {
   output = object$model
   output$species = object$species
   biomass = apply(object$biomass, 2, mean, na.rm=TRUE)
-  yieldN = apply(object$yieldN, 2, mean, na.rm=TRUE)
+  yield = apply(object$yieldN, 2, mean, na.rm=TRUE)
   resumen = data.frame(biomass=biomass,
                        yield = yield)
   rownames(resumen) = object$species
@@ -143,7 +143,7 @@ print.summary.osmose = function(x, ...) {
 #' @method report osmose
 #' 
 #' @export
-report.osmose = function(x, format = "latex", tangle=FALSE, output = NULL, open = TRUE) {
+report.osmose = function(x, format = "latex", tangle=FALSE, output = NULL, open = FALSE) {
   
   if(is.null(output)) output = getwd()
   
