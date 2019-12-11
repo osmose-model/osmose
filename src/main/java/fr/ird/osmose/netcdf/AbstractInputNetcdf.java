@@ -142,12 +142,12 @@ public class AbstractInputNetcdf {
         Variable predClassVar = nc.findVariable("predClass");
         classPred = (double[]) predClassVar.read().copyTo1DJavaArray();
 
-        // Reads the species names for the prey and predatorxs
+        // Reads the species names for the prey and predators
         Variable preySpeciesVar = nc.findVariable("preySpeciesName");
-        namesPrey = (String[]) preySpeciesVar.read().copyTo1DJavaArray();
+        namesPrey = this.getStringVar((char[][]) preySpeciesVar.read().copyTo1DJavaArray());
 
         Variable predSpeciesVar = nc.findVariable("predSpeciesName");
-        namesPred = (String[]) predSpeciesVar.read().copyTo1DJavaArray();
+        namesPred = this.getStringVar((char[][]) predSpeciesVar.read().copyTo1DJavaArray());
 
         // Loop for the type attribute for the netcdfVar
         Attribute attVar = netcdfVar.findAttribute("class_type");
@@ -237,4 +237,16 @@ public class AbstractInputNetcdf {
         return (output);
 
     }
+    
+    public String[] getStringVar(char[][] input) {
+        int nPrey = input.length;
+        namesPrey = new String[nPrey];
+        for (int itmp = 0; itmp < nPrey; itmp++) {
+            namesPrey[itmp] = String.valueOf(input[itmp]);
+        }
+        
+        return namesPrey;
+        
+    }
+
 }
