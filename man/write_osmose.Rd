@@ -4,7 +4,7 @@
 \alias{write_osmose}
 \title{Write data in osmose format}
 \usage{
-write_osmose(x, file)
+write_osmose(x, file, row.names = TRUE)
 }
 \arguments{
 \item{x}{Object to be written (table or data frame)}

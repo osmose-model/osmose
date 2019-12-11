@@ -44,7 +44,7 @@ but it is required for configuration using interannual inputs or fishing selecti
 {
   \donttest{
     filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
-    runOsmose(filename)
+    run_osmose(filename)
   }
 }
 }

@@ -84,7 +84,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #' Title
 #' @export
 runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version="4.1.0", osmose=NULL, java="java", 
+                     version="4.2.1", osmose=NULL, java="java", 
                      options=NULL, verbose=TRUE, clean=TRUE) {
   
   message("runOsmose will be deprecated, use run_osmose instead.")
@@ -117,18 +117,21 @@ runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
 #'   read_osmose(outdir)
 #' }
 #' @aliases osmose2R
-read_osmose =  function(path=NULL, input=NULL, version=NULL, species.names=NULL, absolute=TRUE, ...) {
+read_osmose =  function(path=NULL, input=NULL, version="4.2.1", species.names=NULL, absolute=TRUE, ...) {
   
   if(is.null(path) & is.null(input)) stop("No output or configuration path has been provided.")
   
   config =  if(!is.null(input)) readOsmoseConfiguration(file=input, absolute=absolute) else NULL
   
   if(is.null(path)) return(config)
-  if(is.null(version)) version = "v3r2"
+
+  output_version = "v3r0"
+  if(.compareVersion(version, "3.1.0") >= 0) output_version = "v3r1"
+  if(.compareVersion(version, "3.2.0") >= 0) output_version = "v3r2"
   
   if(!dir.exists(path)) stop("The output directory does not exist.")
   
-  output = switch(version, 
+  output = switch(output_version, 
                   v3r2 = osmose2R.v3r2(path=path, species.names=species.names, ...),
                   v3r1 = osmose2R.v3r1(path=path, species.names=species.names, ...),
                   v3r0 = osmose2R.v3r0(path=path, species.names=species.names, ...),
@@ -145,7 +148,7 @@ read_osmose =  function(path=NULL, input=NULL, version=NULL, species.names=NULL,
 
 # to keep back compatibility for a while
 #' @export
-osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
+osmose2R = function(path=NULL, version="3.2", species.names=NULL, ...) {
   
   .Deprecated("read_osmose")
   read_osmose(path=path, version=version, species.names=species.names, ...)
@@ -339,33 +342,3 @@ osmose_calib_demo = function(path=NULL) {
   return(demo)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
