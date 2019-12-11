@@ -217,7 +217,7 @@ getPredationData = function(x, object, extraWhat = FALSE) {
   fileAccessibility = unlist(lapply(x$accessibility$file, FUN = "[[", 1))
   pathAccessibility = attributes(x$accessibility$file)$path
   accessibility     = list(data = read.csv(file = paste(pathAccessibility,
-                                                        fileAccessibility, sep = "/"), sep = ";"),
+                                                        fileAccessibility, sep = "/"), sep = ";", header=TRUE, row.names=1),
                            stageStructure = as.vector(x$accessibility$stage$structure),
                            stageThreshold = lapply(x$accessibility$stage$threshold, FUN = "[[", 1))
   
