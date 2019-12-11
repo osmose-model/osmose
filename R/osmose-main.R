@@ -1,7 +1,7 @@
 
 # osmose: main functions --------------------------------------------------
 
-# runOsmose ---------------------------------------------------------------
+# run_osmose ---------------------------------------------------------------
 #' @title Run an OSMOSE configuration
 #' @description This function create a valid configuration by several input files
 #' from user input parameters. 
@@ -26,7 +26,7 @@
 #' @examples{
 #'   \donttest{
 #'     filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
-#'     runOsmose(filename)
+#'     run_osmose(filename)
 #'   }
 #' }
 #' @export
