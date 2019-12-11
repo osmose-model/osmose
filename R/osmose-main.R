@@ -1,7 +1,7 @@
 
 # osmose: main functions --------------------------------------------------
 
-# run_osmose --------------------------------------------------------------
+# runOsmose ---------------------------------------------------------------
 #' @title Run an OSMOSE configuration
 #' @description This function create a valid configuration by several input files
 #' from user input parameters. 
@@ -26,7 +26,7 @@
 #' @examples{
 #'   \donttest{
 #'     filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
-#'     run_osmose(filename)
+#'     runOsmose(filename)
 #'   }
 #' }
 #' @export
@@ -81,6 +81,19 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   
 }
 
+#' Title
+#' @export
+runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
+                     version="4.2.1", osmose=NULL, java="java", 
+                     options=NULL, verbose=TRUE, clean=TRUE) {
+  
+  message("runOsmose will be deprecated, use run_osmose instead.")
+  
+  run_osmose(input = input, parameters = parameters, output = output,
+             log = log, version = version, osmose = osmose, java = java, 
+             options = options, verbose = verbose, clean = clean) 
+}
+
 
 # read_osmose -------------------------------------------------------------
 #' @title Read OSMOSE outputs into an R object
@@ -111,7 +124,7 @@ read_osmose =  function(path=NULL, input=NULL, version="4.2.1", species.names=NU
   config =  if(!is.null(input)) readOsmoseConfiguration(file=input, absolute=absolute) else NULL
   
   if(is.null(path)) return(config)
-  
+
   output_version = "v3r0"
   if(.compareVersion(version, "3.1.0") >= 0) output_version = "v3r1"
   if(.compareVersion(version, "3.2.0") >= 0) output_version = "v3r2"
@@ -130,6 +143,15 @@ read_osmose =  function(path=NULL, input=NULL, version="4.2.1", species.names=NU
   class(output) = "osmose"
   
   return(output)
+  
+}
+
+# to keep back compatibility for a while
+#' @export
+osmose2R = function(path=NULL, version="3.2", species.names=NULL, ...) {
+  
+  .Deprecated("read_osmose")
+  read_osmose(path=path, version=version, species.names=species.names, ...)
   
 }
 
@@ -261,7 +283,6 @@ osmose_demo = function(path=NULL, config=c("gog", "gog_v4", "default")) {
 
 
 
-# Demo --------------------------------------------------------------------
 
 
 #' Generates Osmose configuration files to run an Osmose demo.
@@ -321,5 +342,3 @@ osmose_calib_demo = function(path=NULL) {
   return(demo)
 
 }
-
-
