@@ -77,7 +77,7 @@ import ucar.nc2.Variable;
 public class SchoolSetSnapshot extends SimulationLinker {
     
     private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
-    private Variable genetVar;
+    private Variable genetVar, traitVarVar;
     private int nTrait=0;
     private int nMaxLoci;
     
@@ -88,6 +88,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
     public void makeSnapshot(int iStepSimu) {
         boolean useGenet = this.getConfiguration().useGenetic();
         ArrayFloat.D4 genotype = null;
+        ArrayFloat.D2 traitnoise = null;
         NetcdfFileWriter nc = createNCFile(iStepSimu);
         int nSchool = getSchoolSet().getSchools().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
@@ -102,6 +103,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         // if use genetic, initialize the output of the genotype (nschool x ntrait x nloci x 2)
         if (useGenet) {
             genotype = new ArrayFloat.D4(nSchool, this.nTrait, this.nMaxLoci, 2);
+            traitnoise = new ArrayFloat.D2(nSchool, this.nTrait);
         }
         
         int s = 0;
@@ -120,6 +122,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
                 // If use genetic module, save the list of loci pairs for each trait.
                 Genotype gen = school.getGenotype();
                 for(int iTrait=0; iTrait<nTrait; iTrait++) {
+                    traitnoise.set(s, iTrait, (float) gen.getEnvNoise(iTrait));
                     int nLoci = gen.getNLocus(iTrait);
                     for(int iLoci = 0; iLoci < nLoci; iLoci++) {
                        genotype.set(s, iTrait, iLoci, 0, (float) gen.getLocus(iTrait, iLoci).getValue(0)); 
@@ -142,6 +145,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.write(this.tlVar, trophiclevel);
             if(useGenet) { 
                 nc.write(this.genetVar, genotype);
+                nc.write(this.traitVarVar, traitnoise);
             }
             nc.close();
             //close(nc);

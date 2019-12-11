@@ -835,8 +835,9 @@ public class School extends AbstractSchool {
      * @param rank Simulation rank
      * @param index School index
      * @param genArray Netcdf Array (school, itrait, ilocus, 2)
+     * @param envNoise
      */
-    public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray) {
+    public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray, ArrayFloat.D2 envNoise) {
         
         // Instanciate (i.e. init arrays) genotype for the current school
         this.instance_genotype(rank);
@@ -850,6 +851,10 @@ public class School extends AbstractSchool {
                 double val0 = genArray.get(index, itrait, iloc, 0);
                 double val1 = genArray.get(index, itrait, iloc, 1);
                 this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
+                
+                // Sets the value for the environmental noise
+                double envnoise = envNoise.get(index, itrait);
+                this.getGenotype().setEnvNoise(itrait, envnoise);
             }
         }   
     }

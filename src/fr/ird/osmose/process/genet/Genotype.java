@@ -27,24 +27,27 @@ public class Genotype extends SimulationLinker {
     private int ntraits;
     private int[] nlocus;
     private final int spec_index;
+    private double traitsEnvNoise[];
 
-    /** Initialize a genotype for a given School.
-     * 
+    /**
+     * Initialize a genotype for a given School.
+     *
      * @param rank
-     * @param species 
+     * @param species
      */
     public Genotype(int rank, Species species) {
 
         super(rank);
         genotype = new ArrayList<>();
         this.spec_index = species.getIndex();
-    
+
     }
-       
+
     public void init() {
-        
+
         ntraits = this.getNEvolvingTraits();
         traits = new double[ntraits];
+        traitsEnvNoise = new double[ntraits];
         nlocus = new int[ntraits];
 
         // Loop over the traits that may vary due to genetics
@@ -73,7 +76,7 @@ public class Genotype extends SimulationLinker {
      * values
      */
     public void init_genotype() {
-        
+
         for (int i = 0; i < ntraits; i++) {
             // recover the list of locus associated with the given trait
             for (int j = 0; j < nlocus[i]; j++) {
@@ -154,7 +157,7 @@ public class Genotype extends SimulationLinker {
     public double getTrait(String name) throws Exception {
 
         int index = this.getTraitIndex(name);
-        return traits[index];
+        return (traits[index] + this.traitsEnvNoise[index]);
 
     }
 
@@ -182,13 +185,12 @@ public class Genotype extends SimulationLinker {
             //this.x *= u;
             x += trait.getMean(spec_index);
             traits[i] = x;
-            
-            // adding noise to 
-            traits[i] += trait.addTraitNoise(spec_index);
+
+            this.traitsEnvNoise[i] = trait.addTraitNoise(spec_index);
         }
     }
-    
-        /**
+
+    /**
      * Return the index of a trait providing it's name.
      *
      * @param name Name of the trait
@@ -206,21 +208,41 @@ public class Genotype extends SimulationLinker {
         return false;
 
     }
-    
+
     public int getNLocus(int itrait) {
         return this.nlocus[itrait];
     }
-    
-    /**  Forces the value of a Loci pair. Used when restart with genetic.
-     * 
+
+    /**
+     * Forces the value of a Loci pair. Used when restart with genetic.
+     *
      * @param itrait Index of the variable trait
-     * @param iloc  Index of the loci
-     * @param val0  First value of the loci
-     * @param val1  Second value of the loci
+     * @param iloc Index of the loci
+     * @param val0 First value of the loci
+     * @param val1 Second value of the loci
      */
     public void setLocusVal(int itrait, int iloc, double val0, double val1) {
         this.getLocus(itrait, iloc).setValue(0, val0);
         this.getLocus(itrait, iloc).setValue(1, val1);
     }
 
+    /**
+     * Forces the value of a Loci pair. Used when restart with genetic.
+     *
+     * @param itrait Index of the variable trait
+     * @param value Value fof the environmental noise
+     */
+    public void setEnvNoise(int itrait, double value) {
+        this.traitsEnvNoise[itrait] = value;
+    }
+       
+    /**
+     * Forces the value of a Loci pair. Used when restart with genetic.
+     *
+     * @param itrait Index of the variable trait
+     */
+    public double getEnvNoise(int itrait) {
+        return this.traitsEnvNoise[itrait];
+    }
+    
 }  // end of class
