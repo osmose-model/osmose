@@ -414,3 +414,107 @@ correct_ltl_file = function(ltl_filename, osmose_config, varlon="longitude", var
   
 }
 
+convert_access_to_netcdf = function(config_file, output_file="access.nc") {
+  
+  params = readOsmoseConfiguration(config_file)
+  
+  #predationstage = getOsmoseParameter(params, "predation", "accessibility", "stage", keep.att=TRUE)
+  # reading the predation accessibility file
+  #predationfile = getOsmoseParameter(params, "predation", "accessibility", "file", keep.att=TRUE)
+  #path = attributes(predationfile)$path
+  #access = read.csv(file.path(path, predationfile))
+  
+  access = getVar(params, what="predation", sep=',')$accessibility
+  data = access$data
+  
+  nprey = dim(data)[1]
+  npred = dim(data)[2]
+  
+  pattern = "([A-Za-z_]+) < ([0-9]+)"
+  pattern1 = "([A-Za-z_]+).*"
+  preynames = rownames(data)
+  
+  upper_bounds_prey = 1:nprey
+  names_prey = 1:nprey
+  upper_bounds_pred = 1:npred
+  names_pred = 1:npred
+  
+  cpt = 1
+  for (v in preynames) {
+    if(grepl(v, pattern=pattern)) { 
+      # if class row contains a < string, recover the class value
+      name = sub(x=v, pattern=pattern, replacement="\\1")
+      class = sub(x=v, pattern=pattern, replacement="\\2")
+      upper_bounds_prey[cpt] = class
+    }
+    
+    else {
+      # if not, assumes that upper bounds is infinity
+      name = sub(x=v, pattern=pattern1, replacement="\\1")
+      upper_bounds_prey[cpt] = .Machine$double.xmax
+    }
+    
+    # updates the names of preys.
+    names_prey[cpt] = name
+    cpt = cpt + 1
+    
+  }
+  
+  # data is of format prey(line)/predator(column)
+  # but R will transpose at writting.
+  # hence transposing is forced here
+  data = as.matrix(t(data)) # predator/prey
+  
+  # Recovers the maximum length of names
+  nchars = max(sapply(names_prey, nchar))
+  
+  # pad prey names + convert into string
+  names_prey = sapply(names_prey, str_pad, nchars, side="right", pad=" ")
+  names_prey = sapply(names_prey, str_split, "")
+  
+  # convert inyo array
+  names_prey_array = as.data.frame(names_prey)  # nchars, npreys
+  names_prey_array = as.matrix(names_prey_array)
+  
+  # create dimensions
+  preyDim = ncdim_def("prey", "", 1:nprey, create_dimvar=FALSE)
+  predDim = ncdim_def("pred", "", 1:npred, create_dimvar=FALSE)
+  timeDim = ncdim_def("time", "", 1, unlim=TRUE)
+  charDim = ncdim_def("nchar", "", 1:nchars, create_dimvar=FALSE)
+  
+  # create variables
+  var_access = ncvar_def("accessibility", "%", list(predDim, preyDim, timeDim), -99.99, "accessibility", prec="double")
+  
+  # defines the string variables (nchars, nprey/npred)
+  var_names_prey = ncvar_def("preySpeciesName", "", list(charDim, preyDim), prec="char")
+  var_names_pred = ncvar_def("predSpeciesName", "", list(charDim, predDim), prec="char")
+  # creates the class variables 
+  var_class_prey = ncvar_def("preyClass", "", list(preyDim), prec="double")
+  var_class_pred = ncvar_def("predClass", "", list(predDim), prec="double")
+  
+  varlist = list(var_access, var_names_prey, var_names_pred, var_class_prey, var_class_pred)
+  
+  # create the file
+  nc = nc_create(output_file, varlist, force_v4=TRUE, verbose=FALSE)
+  
+  # add the class type attribute
+  ncatt_put(nc, var_access, "class_type", access$stageStructure)
+  ncvar_put(nc, var_access, data)
+  
+  # writes variables for prey
+  ncvar_put(nc, var_class_prey, upper_bounds_prey, verbose=TRUE)
+  ncvar_put(nc, var_names_prey, names_prey_array, verbose=TRUE)
+  
+  # writes variables for preys (subspan of predators)
+  ncvar_put(nc, var_names_pred, names_prey_array[, 1:npred], verbose=TRUE)
+  ncvar_put(nc, var_class_pred, upper_bounds_prey[1:npred], verbose=TRUE)
+  
+  nc_close(nc)
+  
+  nc = nc_open("access.nc")
+  var = ncvar_get(nc, "preySpeciesName")
+  nc_close(nc)
+  
+  
+}
+
