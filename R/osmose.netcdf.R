@@ -96,7 +96,7 @@ extract_grid_param = function(filename, lonname="longitude", latname="latitude",
   output = rbind(output, data.frame(row.names="grid.lowright.lon", value=lowrightlon))
   output = rbind(output, data.frame(row.names="grid.upleft.lat", value=upperleftlat))
   output = rbind(output, data.frame(row.names="grid.upleft.lon", value=upperleftlon))
-
+  
   # Handling of the saving into CSV
   if(!is.null(csv)) 
   {
@@ -131,19 +131,19 @@ extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-g
   var = drop(ncvar_get(fid, varname, ...))
   
   nc_close(fid)
-
+  
   ndims = length(dim(var))
   
   if(ndims == 4) {
-      var = var[, , 1, 1]
+    var = var[, , 1, 1]
   } else if(ndims == 3) {
     var = var[, , 1]
   } else if (ndims == 2) {
     var = var
   } else {
-      stop("The number of dimensions of the input file must be 2, 3 or 4")
+    stop("The number of dimensions of the input file must be 2, 3 or 4")
   }
-
+  
   nlon = dim(var)[1]
   nlat = dim(var)[2]
   
@@ -167,7 +167,7 @@ extract_grid_mask = function(filename, varname="ltl_biomass", output_file="ltl-g
   
   # writes the output in csv file.
   write.table(var, file=output_file, sep=";", row.names=FALSE, col.names=FALSE, quote=FALSE)
-
+  
   return(var)
   
 }
@@ -465,16 +465,7 @@ convert_access_to_netcdf = function(config_file, output_file="access.nc") {
   # hence transposing is forced here
   data = as.matrix(t(data)) # predator/prey
   
-  # Recovers the maximum length of names
-  nchars = max(sapply(names_prey, nchar))
-  
-  # pad prey names + convert into string
-  names_prey = sapply(names_prey, str_pad, nchars, side="right", pad=" ")
-  names_prey = sapply(names_prey, str_split, "")
-  
-  # convert inyo array
-  names_prey_array = as.data.frame(names_prey)  # nchars, npreys
-  names_prey_array = as.matrix(names_prey_array)
+  nchars = .get_max_nchars(names_prey)
   
   # create dimensions
   preyDim = ncdim_def("prey", "", 1:nprey, create_dimvar=FALSE)
@@ -502,19 +493,108 @@ convert_access_to_netcdf = function(config_file, output_file="access.nc") {
   ncvar_put(nc, var_access, data)
   
   # writes variables for prey
-  ncvar_put(nc, var_class_prey, upper_bounds_prey, verbose=TRUE)
-  ncvar_put(nc, var_names_prey, names_prey_array, verbose=TRUE)
+  ncvar_put(nc, var_class_prey, upper_bounds_prey, verbose=FALSE)
+  ncvar_put(nc, var_names_prey, names_prey, verbose=TRUE)
   
-  # writes variables for preys (subspan of predators)
-  ncvar_put(nc, var_names_pred, names_prey_array[, 1:npred], verbose=TRUE)
-  ncvar_put(nc, var_class_pred, upper_bounds_prey[1:npred], verbose=TRUE)
+  # writes variables for predators (subspan of preys)
+  ncvar_put(nc, var_names_pred, names_prey[1:npred], verbose=FALSE)
+  ncvar_put(nc, var_class_pred, upper_bounds_prey[1:npred], verbose=FALSE)
   
   nc_close(nc)
-  
-  nc = nc_open("access.nc")
-  var = ncvar_get(nc, "preySpeciesName")
-  nc_close(nc)
-  
   
 }
 
+.get_max_nchars = function(names_prey) {
+  
+  # Recovers the maximum length of names
+  nchars = max(sapply(names_prey, nchar))
+  
+  # pad prey names + convert into string
+  #names_prey = sapply(names_prey, str_pad, nchars, side="right", pad=" ")
+  #names_prey = sapply(names_prey, str_split, "")
+  # convert inyo array
+  #names_prey_array = as.data.frame(names_prey)  # nchars, npreys
+  #names_prey_array = as.matrix(names_prey_array)
+  
+  return(nchars)
+  
+}
+
+.convert_predPrey_netcdf = function(filename, output_file='predPrey.nc') {
+
+  config = readOsmoseConfiguration(filename)
+  
+  # Extract the predation params
+  predation = getVar(config, what="predation")
+  predPrey = predation$predPrey
+  
+  # recover the species params
+  species = getVar(config, what="species")
+  nspecies = length(species)
+  species_index = c()
+  for(i in 0:(nspecies-1)) {
+    species_index = c(species_index, paste0("sp", i))
+  }
+  
+  # loop over all the species to recover the thresholds 
+  final_species = c()
+  final_thres = c()
+  final_min = c()
+  final_max = c()
+  for (sp in species_index) {
+    thres = predPrey$stageThreshold[[sp]]
+    if(any(is.na(thres))) {
+      final_species = c(final_species, species$names[[sp]])
+      final_thres = c(final_thres, .Machine$double.xmax)
+      final_min = c(final_max, predPrey$sizeRatioMin[[sp]])
+      final_max = c(final_max, predPrey$sizeRatioMax[[sp]])
+    } else {
+      thres = c(thres, .Machine$double.xmax)
+      nclass = length(thres)
+      final_species = c(final_species, rep(c(species$names[[sp]]), times=nclass))
+      final_thres = c(final_thres, thres)
+      final_min = c(final_max, predPrey$sizeRatioMin[[sp]])
+      final_max = c(final_max, predPrey$sizeRatioMax[[sp]])
+    }
+  }
+  
+  npred = length(final_species)
+  
+  nchars = .get_max_nchars(final_species)
+  
+  # # create dimensions
+  predDim = ncdim_def("species", "", 1:npred, create_dimvar=TRUE)
+  timeDim = ncdim_def("time", "", 1, unlim=TRUE)
+  charDim = ncdim_def("nchar", "", 1:nchars, create_dimvar=FALSE)
+  
+  # create variables
+  var_ratiomin = ncvar_def("sizeRatioMin", "", list(predDim, timeDim), -99.99, "sizeRatioMin", prec="double")
+  var_ratiomax = ncvar_def("sizeRatioMax", "", list(predDim, timeDim), -99.99, "sizeRatioMax", prec="double")
+  
+  # defines the string variables (nchars, nprey/npred)
+  var_names_species= ncvar_def("speciesname", "", list(charDim, predDim), prec="char")
+  
+  # creates the class variables
+  var_class_species = ncvar_def("SpeciesClass", "", list(predDim), prec="double")
+  
+  # concatenates the list of variables
+  varlist = list(var_names_species, var_ratiomin, var_ratiomax, var_class_species)
+  
+  # # create the file
+  nc = nc_create(output_file, varlist)
+  
+  # add the class type attribute
+  ncatt_put(nc, var_ratiomax, "class_type", predPrey$stageStructure)
+  ncatt_put(nc, var_ratiomin, "class_type", predPrey$stageStructure)
+  
+  # adds the ratio variables
+  ncvar_put(nc, var_ratiomin, final_min)
+  ncvar_put(nc, var_ratiomax, final_max)
+  
+  # writes variables for prey
+  ncvar_put(nc, var_class_species, final_thres)
+  ncvar_put(nc, var_names_species, final_species)
+  
+  nc_close(nc)
+  
+}
