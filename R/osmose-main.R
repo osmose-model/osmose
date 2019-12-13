@@ -81,19 +81,6 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   
 }
 
-#' Title
-#' @export
-runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version="4.2.1", osmose=NULL, java="java", 
-                     options=NULL, verbose=TRUE, clean=TRUE) {
-  
-  message("runOsmose will be deprecated, use run_osmose instead.")
-  
-  run_osmose(input = input, parameters = parameters, output = output,
-             log = log, version = version, osmose = osmose, java = java, 
-             options = options, verbose = verbose, clean = clean) 
-}
-
 
 # read_osmose -------------------------------------------------------------
 #' @title Read OSMOSE outputs into an R object
@@ -143,15 +130,6 @@ read_osmose =  function(path=NULL, input=NULL, version="4.2.1", species.names=NU
   class(output) = "osmose"
   
   return(output)
-  
-}
-
-# to keep back compatibility for a while
-#' @export
-osmose2R = function(path=NULL, version="3.2", species.names=NULL, ...) {
-  
-  .Deprecated("read_osmose")
-  read_osmose(path=path, version=version, species.names=species.names, ...)
   
 }
 
