@@ -1,7 +1,7 @@
 
 # to keep back compatibility for a while
 #' @export
-osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
+osmose2R = function(path=NULL, version="4.2.1", species.names=NULL, ...) {
   
   .Deprecated("read_osmose")
   read_osmose(path=path, version=version, species.names=species.names, ...)
@@ -11,7 +11,7 @@ osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
 
 #' @export
 runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",
-                     version="4.1.0", osmose=NULL, java="java", 
+                     version="4.2.1", osmose=NULL, java="java", 
                      options=NULL, verbose=TRUE, clean=TRUE) {
   
   message("runOsmose will be deprecated, use run_osmose instead.")
