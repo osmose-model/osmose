@@ -753,7 +753,7 @@ public class School extends AbstractSchool {
     }
     
     /**
-     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     * Gets the value of kappa 
      */
     public double getKappa() {
         return this.kappa;
