@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 public class OxidativeMortality extends AbstractMortality {
 
     private double[] k_dam;
+    private double[] I_max;
 
     public OxidativeMortality(int rank) {
         super(rank);
@@ -25,8 +26,10 @@ public class OxidativeMortality extends AbstractMortality {
     public void init() {
         int nspec = this.getNSpecies();
         k_dam = new double[nspec];
+        I_max = new double[nspec];
         for (int i=0;i<nspec;i++){
             k_dam[i] = getConfiguration().getDouble("bioen.damage.k_dam.sp" + i);
+            I_max[i] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
         }
     }
 
@@ -35,23 +38,25 @@ public class OxidativeMortality extends AbstractMortality {
 
         // This mortality increase with individual ingestion --> division by abundance
 
-        return k_dam[school.getSpeciesIndex()]*school.getIngestion()/ school.getInstantaneousAbundance();
+//        return k_dam[school.getSpeciesIndex()]*school.getIngestion()*1000000 / school.getInstantaneousAbundance()/(Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
         
-//        // calcul de la mortalité en lien avec Imax
-//        double output = 0 ;
-//        if (this.getConfiguration().useGenetic()) {
-//            String key = "imax";
-//        
-//            try {
-//                output = this.k_dam * school.getTrait(key);
-//                //* school.getAgeDt() / getSpecies(school.getSpeciesIndex()).getLifespanDt() 
-//            } catch (Exception ex) {
-//                Logger.getLogger(OxidativeMortality.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }else{
-//            output =  0;
-//        }
-//        return output;
+        // calcul de la mortalité en lien avec Imax
+        double output = 0 ;
+        if (this.getConfiguration().useGenetic()) {
+            String key = "imax";
+        
+            try {
+                output = school.getTrait(key) * this.k_dam[school.getSpeciesIndex()]/24;
+            } catch (Exception ex) {
+                Logger.getLogger(OxidativeMortality.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
+            output =  I_max[school.getSpeciesIndex()] * this.k_dam[school.getSpeciesIndex()]/24;;
+        }
+        if (output<0) {
+            output = 0;
+                    }
+        return output;
     }
    
 }
