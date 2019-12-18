@@ -8,6 +8,13 @@ osmose2R = function(path=NULL, version="v3r2", species.names=NULL, ...) {
   
 }
 
+#' @export
+getVar = function(object, what, how, ...) {
+  
+  .Deprecated("get_var")
+  get_var(object=object, what=what, how=how, ...)
+  
+}
 
 #' @export
 runOsmose = function(input, parameters=NULL, output="output", log="osmose.log",

@@ -92,7 +92,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #' input is not NULL
 #' @param ... Additional arguments
 #' @details A list of class \code{osmose} is created, individual elements can be
-#' extracted using the function \code{getVar}.
+#' extracted using the function \code{get_var}.
 #' @author Ricardo Oliveros-Ramos
 #' @author Laure Velez
 #' @export
@@ -112,13 +112,15 @@ read_osmose =  function(path=NULL, input=NULL, version="4.2.1", species.names=NU
   output_version = "v3r0"
   if(.compareVersion(version, "3.1.0") >= 0) output_version = "v3r1"
   if(.compareVersion(version, "3.2.0") >= 0) output_version = "v3r2"
+  if(.compareVersion(version, "4.0.0") >= 0) output_version = "v4r0"
   
   if(!dir.exists(path)) stop("The output directory does not exist.")
   
   output = switch(output_version, 
-                  v3r2 = osmose2R.v3r2(path=path, species.names=species.names, ...),
-                  v3r1 = osmose2R.v3r1(path=path, species.names=species.names, ...),
                   v3r0 = osmose2R.v3r0(path=path, species.names=species.names, ...),
+                  v3r1 = osmose2R.v3r1(path=path, species.names=species.names, ...),
+                  v3r2 = osmose2R.v3r2(path=path, species.names=species.names, ...),
+                  v4r0 = osmose2R.v4r0(path=path, species.names=species.names, ...),
                   stop(sprintf("Incorrect osmose version %s", version))
   )
   

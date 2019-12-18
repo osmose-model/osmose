@@ -58,7 +58,7 @@ configureCalibration = function(L1) {
 }
 
 
-#' GetVar method for osmose configuration objects
+#' get_var method for osmose configuration objects
 #' @description Get the configuration files from 
 #' @param object Object of \code{osmose.config} class. 
 #' See the \code{\link{read_osmose}} and \code{\link{readOsmoseConfiguration}} functions
@@ -67,8 +67,8 @@ configureCalibration = function(L1) {
 #' @return An object of \code{list} class containing all the relevant information about 
 #' the variable extracted.
 #' @export
-#' @method getVar osmose.config
-getVar.osmose.config = function(object, what, extraWhat = FALSE, ...) {
+#' @method get_var osmose.config
+get_var.osmose.config = function(object, what, extraWhat = FALSE, ...) {
   
   x = object[[what]]
   
@@ -107,7 +107,7 @@ getVar.osmose.config = function(object, what, extraWhat = FALSE, ...) {
 plot.osmose.config = function(x, what = NULL, ...) {
   
   if(!is.null(what)){
-    x = getVar.osmose.config(x, what = what, extraWhat = TRUE)
+    x = get_var.osmose.config(x, what = what, extraWhat = TRUE)
     plot(x, ...)
     
   } else {
