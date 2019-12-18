@@ -29,7 +29,7 @@ outputs from OSMOSE in the \code{path} folder.
 }
 \details{
 A list of class \code{osmose} is created, individual elements can be
-extracted using the function \code{getVar}.
+extracted using the function \code{get_var}.
 }
 \examples{
 {
