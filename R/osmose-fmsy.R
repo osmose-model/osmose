@@ -190,8 +190,8 @@ F_msy <- function(sp, input.file, restart=FALSE,
     ### Load output files (Biomass and Yield)
     
     out = read_osmose(file.path("output", paste("Sp", sp, "F", Fval[i], sep="")))
-    biomass = getVar(out, "biomass")
-    yield = getVar(out, "yield")
+    biomass = get_var(out, "biomass")
+    yield = get_var(out, "yield")
  
     if (Fval[i]==0) {
       

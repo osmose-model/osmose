@@ -1,5 +1,5 @@
  
-#' Returns the list of Osmoee Java versions
+#' Returns the list of Osmose Java versions
 #'
 #' @return List of Osmose Java versions
 #' @export
@@ -42,23 +42,23 @@ write_osmose = function(x, file, row.names=TRUE)   {
 #' @param ... Additional arguments
 #'
 #' @return Output data frame
-readOsmoseFiles = function(path, type, bySpecies=FALSE, ...) {
+readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", ...) {
   
   xclass = paste("osmose", type, sep=".")
   
   allFiles = dir(path=path, recursive=TRUE, include.dirs=FALSE)
-  csvFiles = allFiles[grepl(".csv", allFiles)]
+  extFiles = allFiles[grepl(paste0(".", ext), allFiles)]
   
   if(!isTRUE(bySpecies)) {
     
     type_  = paste0(type, "_")
-    files  = csvFiles[grepl(type_, csvFiles)]
+    files  = extFiles[grepl(type_, extFiles)]
     output = .readFilesList(files=files, path=path, type=type, ...)
     
   } else {
     
     type_  = paste0(type, "-")
-    files  = csvFiles[grepl(type_, csvFiles)]
+    files  = extFiles[grepl(type_, extFiles)]
     files  = .bySpecies(files=files)
     output = lapply(files, FUN=.readFilesList, path=path, type=type, ...)
     

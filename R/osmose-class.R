@@ -18,7 +18,7 @@
 #' @method plot osmose
 plot.osmose = function(x, what = "biomass", ...) {
   
-  x = getVar(x, what = what, expected = FALSE)
+  x = get_var(x, what = what, expected = FALSE)
   plot(x, ...)
   
   return(invisible())
@@ -27,7 +27,7 @@ plot.osmose = function(x, what = "biomass", ...) {
 
 #' Get variable
 #' @description Function to get a variable from an object of \code{osmose} 
-#' class. This function uses the getVar method (see the \code{\link{getVar.osmose}}).
+#' class. This function uses the get_var method (see the \code{\link{get_var.osmose}}).
 #'
 #' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
 #' @param what Variable to extract
@@ -36,11 +36,11 @@ plot.osmose = function(x, what = "biomass", ...) {
 #'
 #' @return An array or a list containing the extracted data.
 #' @export
-getVar = function(object, what, how, ...) {
-  UseMethod("getVar")
+get_var = function(object, what, how, ...) {
+  UseMethod("get_var")
 }
 
-#' GetVar method for osmose outputs objects
+#' get_var method for osmose outputs objects
 #' @description Get a variable from an \code{osmose} object. 
 #'
 #' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
@@ -54,8 +54,8 @@ getVar = function(object, what, how, ...) {
 #'
 #' @return An matrix or a list containing the data.
 #' @export
-#' @method getVar osmose
-getVar.osmose = function(object, what, how=c("matrix", "data.frame", "list"), 
+#' @method get_var osmose
+get_var.osmose = function(object, what, how=c("matrix", "data.frame", "list"), 
                          expected=FALSE, ...) {
   
   how = match.arg(how)

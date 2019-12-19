@@ -33,9 +33,9 @@ runModel  = function(param, names, ...) {
 
     # extract the biomass and yields variables (monthly data).
     # expectes = TRUE to average over the replicates
-    osmose.biomass = getVar(data, "biomass", expected=TRUE)
-    osmose.thresholds = getVar(data, "biomass", expected=TRUE)
-    osmose.yields = getVar(data, "yield", expected=TRUE)
+    osmose.biomass = get_var(data, "biomass", expected=TRUE)
+    osmose.thresholds = get_var(data, "biomass", expected=TRUE)
+    osmose.yields = get_var(data, "yield", expected=TRUE)
 
     # define a year factor for yearly integration of biomass
     # from monthly biomass
