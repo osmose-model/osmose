@@ -7,8 +7,12 @@ LTL forcing file. The parameters are prompted in the console.
 The user should copy the console output and paste it into
 the Osmose configuration file.}
 \usage{
-extract_grid_param(filename, lonname = "longitude",
-  latname = "latitude", csv = NULL)
+extract_grid_param(
+  filename,
+  lonname = "longitude",
+  latname = "latitude",
+  csv = NULL
+)
 }
 \arguments{
 \item{filename}{NetCDF filename}

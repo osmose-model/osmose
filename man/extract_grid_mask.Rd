@@ -4,8 +4,13 @@
 \alias{extract_grid_mask}
 \title{Extracts the model grid file from the LTL forcing file.}
 \usage{
-extract_grid_mask(filename, varname = "ltl_biomass",
-  output_file = "ltl-grid-mask.csv", fillVal = NA, ...)
+extract_grid_mask(
+  filename,
+  varname = "ltl_biomass",
+  output_file = "ltl-grid-mask.csv",
+  fillVal = NA,
+  ...
+)
 }
 \arguments{
 \item{filename}{LTL forcing file name}
