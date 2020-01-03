@@ -826,4 +826,12 @@ public class School extends AbstractSchool {
         return this.species.getName();
     }
     
+    /** Returns true if the school is considered as a larva. 
+     * Based on the comparison of ageDt with threshold age by dt (default 1).
+     * @return True if larva, False if adult
+     */
+    public boolean isLarva() { 
+        return (this.getAgeDt() < this.getSpecies().getThresAge());
+    }
+    
 }

@@ -224,7 +224,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
 
         if (this.getConfiguration().isBioenEnabled()) {
 
-            if (school.getAgeDt() == 0) {
+            if (school.isLarva()) {
                 // Eggss
                 iStage = EGG;
 
@@ -239,7 +239,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
 
         } else {
 
-            if (school.getAgeDt() == 0) {
+            if (school.isLarva()) {
                 // Eggss
                 iStage = EGG;
 

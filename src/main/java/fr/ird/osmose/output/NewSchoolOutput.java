@@ -67,7 +67,7 @@ public class NewSchoolOutput extends AbstractOutput {
     @Override
     public void initStep() {
         getSchoolSet().getAliveSchools().stream().forEach(school -> {
-            if (school.getAgeDt() == 0) {
+            if (school.isLarva()) {
                 egg[school.getSpeciesIndex()] += school.getBiomass();
             }
             biomass[school.getSpeciesIndex()] += school.getBiomass();

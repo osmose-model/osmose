@@ -81,7 +81,7 @@ public class StarvationMortality extends AbstractMortality {
     public double getRate(School school) {
 
         // no starvation for eggs
-        if (school.getAgeDt() == 0) {
+        if (school.isLarva()) {
             return 0.d;
         }
 

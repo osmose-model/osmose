@@ -115,6 +115,12 @@ public class Species {
     
     private double alpha_bioen;
     
+    /** Threshold (number of time-steps) at which
+     * a species move from larva to adults. Expressed in
+     * time steps.
+     */
+    private final int lar2ad_thres;
+    
 //////////////
 // Constructor
 //////////////
@@ -164,7 +170,21 @@ public class Species {
             String key = String.format("species.alpha.sp%d", index);
             alpha_bioen = cfg.getDouble(key);
         }
-
+        
+        // If the key is found, then the age switch in years is converted into
+        // time-step.
+        String key = "species.larva2adults.agethres.sp" + index;
+        if(cfg.canFind(key)) {
+            float age_adult = cfg.getFloat(key);
+            this.lar2ad_thres = (int) Math.round(age_adult * cfg.getNStepYear());
+        } else {
+            // if no parameter exists, species become larva when ageDt = 1
+            this.lar2ad_thres = 1;
+        }       
+    }
+    
+    public int getThresAge() {
+        return this.lar2ad_thres;
     }
     
     public double getAlphaBioen() {
@@ -174,7 +194,7 @@ public class Species {
     public int getDepthLayer() {
         return this.zlayer;
     }
-
+    
 //////////////////////////////
 // Definition of the functions
 //////////////////////////////

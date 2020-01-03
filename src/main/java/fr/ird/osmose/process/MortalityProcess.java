@@ -269,7 +269,7 @@ public class MortalityProcess extends AbstractProcess {
             for (School school : schools) {
                 school.setAccessibility(predationMortality.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
-                if (school.getAgeDt() == 0) {
+                if (school.isLarva()) {
                     // Egg loss, not accessible to predation process
                     double D = additionalMortality.getRate(school);
                     double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
@@ -374,7 +374,7 @@ public class MortalityProcess extends AbstractProcess {
         preys.addAll(schools);
         for (School prey : schools) {
             // Release some eggs for current subdt (initial abundance / subdt)
-            if (prey.getAgeDt() == 0) {
+            if (prey.isLarva()) {
                 prey.releaseEgg(subdt);
             }
         }
