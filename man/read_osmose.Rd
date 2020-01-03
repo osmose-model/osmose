@@ -5,8 +5,14 @@
 \alias{osmose2R}
 \title{Read OSMOSE outputs into an R object}
 \usage{
-read_osmose(path = NULL, input = NULL, version = "4.2.1",
-  species.names = NULL, absolute = TRUE, ...)
+read_osmose(
+  path = NULL,
+  input = NULL,
+  version = "4.2.1",
+  species.names = NULL,
+  absolute = TRUE,
+  ...
+)
 }
 \arguments{
 \item{path}{Path to the directory containing OSMOSE outputs.}

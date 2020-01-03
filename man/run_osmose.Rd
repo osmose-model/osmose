@@ -4,9 +4,18 @@
 \alias{run_osmose}
 \title{Run an OSMOSE configuration}
 \usage{
-run_osmose(input, parameters = NULL, output = NULL,
-  log = "osmose.log", version = "4.2.1", osmose = NULL,
-  java = "java", options = NULL, verbose = TRUE, clean = TRUE)
+run_osmose(
+  input,
+  parameters = NULL,
+  output = NULL,
+  log = "osmose.log",
+  version = "4.2.1",
+  osmose = NULL,
+  java = "java",
+  options = NULL,
+  verbose = TRUE,
+  clean = TRUE
+)
 }
 \arguments{
 \item{input}{Filename of the main configuration file}

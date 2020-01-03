@@ -598,3 +598,87 @@ convert_access_to_netcdf = function(config_file, output_file="access.nc") {
   nc_close(nc)
   
 }
+
+
+
+#' Creates a NetCDF file containing the land-sea mask extracted
+#' from the resource file
+#'
+#' @param filename Name of the NetCDF resource file.
+#' @param varname  Name of the variable used to extract the mask
+#' @param lonname Name of the longitude variable
+#' @param latname  Name of the latitude variable.
+#' @param output_file  Name of the output file.
+#' @param ...  Additional arguments
+#'
+#' @return None
+#' @export
+create_netcdf_mask = function(filename, varname, lonname, latname, output_file="grid-mask.nc", ...) {
+  
+  # opens the netcdf file
+  fid = nc_open(filename)
+  
+  # extracts the LTL variable
+  var = drop(ncvar_get(fid, varname, ...))
+  
+  # extracts the grid coordinates
+  lon = drop(ncvar_get(fid, lonname, ...))
+  lat = drop(ncvar_get(fid, latname, ...))
+
+  nc_close(fid)
+  
+  # counts the number of dimensions
+  ndims = length(dim(var))
+  
+  if(ndims == 4) {
+    # sum arrays along the time and ltl dimensions
+    var = apply(var, c(1, 2), sum)
+  } else if(ndims == 3) {
+    # sum arrays along the time dimension
+    var = apply(var, c(1, 2), sum)
+  } else if (ndims == 2) {
+    var = var
+  } else {
+    stop("The number of dimensions of the input file must be 2, 3 or 4")
+  }
+  
+  nlon = dim(var)[1]
+  nlat = dim(var)[2]
+  
+  # if the lon/lat arrays are 1D, convert them into 2d
+  if(length(dim(lon)) == 1) {
+    lon = array(rep(lon, times=nlat), dim=c(nlon, nlat))
+    lat = array(rep(lat, each=nlon), dim=c(nlon, nlat))
+  }
+  
+  # converts NA and 0 to land (0)
+  # else, to water (1)
+  var[is.na(var)] = 0
+  var[var == 0] = 0
+  var[var != 0] = 1
+
+  # create dimensions
+  lonDim = ncdim_def("x", "", 1:nlon, create_dimvar=FALSE)
+  latDim = ncdim_def("y", "", 1:nlat, create_dimvar=FALSE)
+  
+  # create variables
+  var_lon = ncvar_def("lon", "", list(lonDim, latDim), -99.99, "lon", prec="float")
+  var_lat = ncvar_def("lat", "", list(lonDim, latDim), -99.99, "lat", prec="float")
+  var_mask = ncvar_def("mask", "", list(lonDim, latDim), -99.99, "mask", prec="byte")
+  
+  # concatenates the list of variables
+  varlist = list(var_lon, var_lat, var_mask)
+  
+  # create the file
+  nc = nc_create(output_file, varlist)
+  
+  # writes variables for prey
+  ncvar_put(nc, var_lon, lon)
+  ncvar_put(nc, var_lat, lat)
+  ncvar_put(nc, var_mask, var)
+  
+  nc_close(nc)
+
+}
+
+
