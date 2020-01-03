@@ -446,13 +446,13 @@ public abstract class AbstractGrid extends OsmoseLinker {
          * Add variables
          */
         Variable latVar = nc.addVariable(null, "latitude", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
-        latVar.addAttribute(new Attribute ("units", "north degree"));
-        latVar.addAttribute(new Attribute ("description", "latitude of the center of the cell"));
-        
+        latVar.addAttribute(new Attribute("units", "north degree"));
+        latVar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
+
         Variable lonVar = nc.addVariable(null, "longitude", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
-        lonVar.addAttribute(new Attribute ("units", "south degree"));
-        lonVar.addAttribute(new Attribute ("description", "longitude of the center of the cell"));
-        
+        lonVar.addAttribute(new Attribute("units", "south degree"));
+        lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
+
         Variable maskVar = nc.addVariable(null, "mask", DataType.DOUBLE, new ArrayList<>(Arrays.asList(nyDim, nxDim)));
         maskVar.addAttribute(new Attribute("units", "boolean"));
         maskVar.addAttribute(new Attribute("description", "mask of the grid, one means ocean and zero means continent"));
@@ -477,7 +477,7 @@ public abstract class AbstractGrid extends OsmoseLinker {
             nc.write(maskVar, arrMask);
         } catch (IOException | InvalidRangeException ex) {
             error("Failed to write the NetCDF grid file", ex);
-        }
+        } 
         /*
          * CLose the NetCDF file 
          */
@@ -487,4 +487,33 @@ public abstract class AbstractGrid extends OsmoseLinker {
             // do nothing
         }
     }
+    
+    /** Computes the surface of a cell on a regular grid.
+     * 
+     * 
+     * @param lat Latitude (degrees)
+     * @param lon Longitude (degrees)
+     * @return Surface (m2)
+     */
+    public double computeSurface(double lat, double lon) {
+
+        float dlat = getGrid().getdLat();
+        float dlon = getGrid().getdLong();
+
+        // Earth radius in m
+        double Rt = 6371 * 1e3;
+        double surf = Rt * deg2rad(dlat) * Rt * deg2rad(dlon) * Math.cos(deg2rad(lat));
+        return surf;
+    }
+
+    /**
+     * Converts a degree angle into radian.
+     *
+     * @param value
+     * @return
+     */
+    private double deg2rad(double value) {
+        return value * Math.PI / 180.;
+    }
+
 }

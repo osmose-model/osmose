@@ -91,6 +91,12 @@ public class NcGrid extends AbstractGrid {
      * <i>grid.var.mask</i>.
      */
     private String strMask;
+    
+    /**    
+     * Name of the mask variable in the NetCDF grid file. Parameter
+     * <i>grid.var.surf</i>.
+     */
+    private String strSurf = null;
 
     @Override
     void readParameters() {
@@ -98,6 +104,9 @@ public class NcGrid extends AbstractGrid {
         this.strLat = getConfiguration().getString("grid.var.lat");
         this.strLon = getConfiguration().getString("grid.var.lon");
         this.strMask = getConfiguration().getString("grid.var.mask");
+        if(this.getConfiguration().canFind("grid.var.surf")) {
+            this.strSurf = this.getConfiguration().getString("grid.var.surf");
+        }
     }
 
     /**
@@ -112,15 +121,32 @@ public class NcGrid extends AbstractGrid {
         NetcdfFile ncGrid = openNetcdfFile(gridFile);
         double[][] lon = readVariable(ncGrid, strLon);
         double[][] lat = readVariable(ncGrid, strLat);
-
         double[][] mask = readVariable(ncGrid, strMask);
+        
         int ny = lon.length;
         int nx = lon[0].length;
+        
+        double[][] surf;      
+        if(this.strSurf != null) {
+            // if the surf string has been set, 
+            // read surface from NetCDF. 
+            surf = readVariable(ncGrid, strLat);
+        } else {
+            // If string surf not set, init. 
+            // surface array
+            surf = new double[ny][nx];           
+        }
+       
         Cell[][] grid = new Cell[ny][nx];
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
                 boolean land = (mask[j][i] <= 0);
-                grid[j][i] = new Cell((j * nx + i), i, j, (float) lat[j][i], (float) lon[j][i], land);
+                if(this.strSurf == null) { 
+                    // If the string surf has not been set, 
+                    // init
+                    surf[j][i] = computeSurface(lat[j][i], lon[j][i]);
+                }
+                grid[j][i] = new Cell((j * nx + i), i, j, (float) lat[j][i], (float) lon[j][i], (float) surf[j][i], land);
             }
         }
 
@@ -153,7 +179,7 @@ public class NcGrid extends AbstractGrid {
      */
     private double[][] readVariable(NetcdfFile nc, String varname) {
         try {
-            return (double[][]) nc.findVariable(varname).read().copyToNDJavaArray();
+            return (double[][]) nc.findVariable(varname).read().reduce().copyToNDJavaArray();
         } catch (IOException ex) {
             error("Error while reading variable " + varname + " in NetCDF grid file " + nc.getLocation(), ex);
         }

@@ -99,6 +99,9 @@ public class Cell {
      * Whether the cell is inland
      */
     final private boolean land;
+    
+    /** Surface of the cell (m2). */
+    private float surf;
 
 ///////////////
 // Constructors
@@ -112,15 +115,17 @@ public class Cell {
      * @param j an integer, the j-grid
      * @param lat a float, the latitude of the cell, North degree
      * @param lon a float, the longitude of the cell, East degree
+     * @param surf a float, the surface of the cell (in m2)
      * @param land a boolean, {@code true} if the cell is on land, {@code false}
      * if the cell is in ocean
      */
-    public Cell(int index, int i, int j, float lat, float lon, boolean land) {
+    public Cell(int index, int i, int j, float lat, float lon, float surf, boolean land) {
         this.index = index;
         this.i = i;
         this.j = j;
         this.lat = lat;
         this.lon = lon;
+        this.surf = surf;
         this.land = land;
     }
 
@@ -234,5 +239,21 @@ public class Cell {
     @Override
     public int hashCode() {
         return index;
+    }    
+    
+    /** Returns the cell surface (m2). 
+     * 
+     * @return  Surface (m2)
+     */
+    public float getSurface() {
+        return this.surf;
     }
+    
+    /** Sets the cell surface (m2). 
+     * 
+     * @param surf Surface (m2)
+     */
+    public void setSurface(float surf) {
+        this.surf = surf;
+    } 
 }

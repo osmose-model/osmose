@@ -354,8 +354,8 @@ public class FishingMapSet extends OsmoseLinker {
             // the mean and surftot are updated.
 
             if ((!cell.isLand()) && (isValueOk(map.getValue(cell)))) {
-                mean += map.getValue(cell) * getSurface(cell);
-                surftot += getSurface(cell);
+                mean += map.getValue(cell) * cell.getSurface();
+                surftot += cell.getSurface();
             }
         }
       
@@ -375,7 +375,7 @@ public class FishingMapSet extends OsmoseLinker {
         float temp = 0;
         for (Cell cell : getGrid().getCells()) {
             if ((!cell.isLand()) && (isValueOk(map.getValue(cell)))) {
-                temp += map.getValue(cell) * getSurface(cell);
+                temp += map.getValue(cell) * cell.getSurface();
             }
         }
 
@@ -411,9 +411,7 @@ public class FishingMapSet extends OsmoseLinker {
 
         // Earth radius in m
         double Rt = 6371 * 1e3;
-
         double surf = Rt * deg2rad(dlat) * Rt * deg2rad(dlon) * Math.cos(deg2rad(lat));
-
         return surf;
 
     }
