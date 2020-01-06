@@ -51,7 +51,7 @@
  */
 package fr.ird.osmose.process.mortality.fishery;
 
-import fr.ird.osmose.process.mortality.FisheryMortality;
+import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
@@ -66,7 +66,7 @@ public class TimeVariability extends OsmoseLinker {
      * Pointer to the fishery mortality array. Allows to recover the fishery
      * index and the MPI rank.
      */
-    private final FisheryMortality fishery;
+    private final FishingGear fishery;
 
     private double[] timeArr;
 
@@ -85,7 +85,7 @@ public class TimeVariability extends OsmoseLinker {
      *
      * @param fishery
      */
-    public TimeVariability(FisheryMortality fishery) {
+    public TimeVariability(FishingGear fishery) {
         this.fishery = fishery;
     }
 

@@ -49,9 +49,9 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fishery;
+package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
-import fr.ird.osmose.process.mortality.FisheryMortality;
+import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;
@@ -66,25 +66,25 @@ public abstract class SizeSelectivity extends OsmoseLinker {
     /**
      * Type of the selectivity variable (age or size).
      */
-    protected SizeSelectivity.Variable variable;
+    private SizeSelectivity.Variable variable;
     
     /** L50 size. Used in all three types of selectivities. */
-    protected double l50;
+    private double l50;
     
      /** Tiny size. Size below which no fish is captured. */
-    protected double tiny = 1.e-6;
+    private double tiny = 1.e-6;
     
     /** Pointer to the fishery mortality array. 
      * Allows to recover the fishery index and the MPI rank.
      */
-    protected final FisheryMortality mort;
+    private final FishingGear mort;
     
     /**
      * Public constructor. Initialize the FisheryMortality pointer.
      *
      * @param fmort
      */
-    public SizeSelectivity(FisheryMortality fmort) {
+    public SizeSelectivity(FishingGear fmort) {
         this.mort = fmort;
         this.init_var();
     }
@@ -140,4 +140,15 @@ public abstract class SizeSelectivity extends OsmoseLinker {
         AGE,
     }
     
+    public FishingGear getGear() {
+        return this.mort;
+    }
+    
+    public double getL50() {
+        return this.l50;
+    }
+
+    public double getTiny() {
+        return this.tiny;
+    }
 }

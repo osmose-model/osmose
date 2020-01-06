@@ -60,7 +60,7 @@ import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.fishery.AccessMatrix;
 import fr.ird.osmose.process.mortality.fishery.FishingMapSet;
-import fr.ird.osmose.process.mortality.fishery.SizeSelectivity;
+import fr.ird.osmose.process.mortality.fishery.sizeselect.SizeSelectivity;
 import fr.ird.osmose.process.mortality.fishery.TimeVariability;
 import fr.ird.osmose.util.GridMap;
 
@@ -68,8 +68,10 @@ import fr.ird.osmose.util.GridMap;
  *
  * @author pverley
  */
-public class FisheryMortality extends AbstractMortality {
+public class FishingGear extends AbstractMortality {
 
+    private String name;
+    
     /**
      * Fishery index.
      */
@@ -94,7 +96,7 @@ public class FisheryMortality extends AbstractMortality {
      */
     private double[] accessibility;
 
-    public FisheryMortality(int rank, int findex) {
+    public FishingGear(int rank, int findex) {
         super(rank);
         fIndex = findex;
     }
@@ -134,7 +136,7 @@ public class FisheryMortality extends AbstractMortality {
         // (it provides the percentage of fishes that are going to be captured)
         AccessMatrix accessMatrix = new AccessMatrix();
         accessMatrix.read(getConfiguration().getFile("fishery.catch.matrix.file"));
-        accessibility = accessMatrix.getValues(fIndex);
+        accessibility = accessMatrix.getValues(fIndex);  // accessibility for one gear (nspecies).
 
     }
 
@@ -204,6 +206,14 @@ public class FisheryMortality extends AbstractMortality {
      */
     public int getFIndex() {
         return this.fIndex;
+    }
+    
+    public String getName() {
+        return this.name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

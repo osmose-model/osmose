@@ -52,13 +52,8 @@
 package fr.ird.osmose.netcdf;
 
 import fr.ird.osmose.IAggregation;
-import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.FishingGear;
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import ucar.ma2.ArrayDouble;
-import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -67,100 +62,88 @@ import ucar.nc2.Variable;
  *
  * @author nbarrier
  */
-public abstract class AbstractInputNetcdf {
+public class FisheryAccessMatrixNetcdf extends AbstractInputNetcdf {
 
     /**
-     * Input netcdf file.
+     * Species name. One for prey, one for pred. One for each class
      */
-    private NetcdfFile nc;
-    /**
-     * Variable to read. For instance, accessibility.
-     */
-    private final String varname;
-    /**
-     * Netcdf filename.
-     */
-    private final String filename;
+    private String[] namesFish, namesGear;
 
-    /** Number of records (i.e. time steps) in the Netcdf file. */
-    private int nRecords;
-    
-    /** Abstract method for class initialization.
-     * @throws java.io.IOException */
-    public abstract void init() throws IOException;
-    
-    /**
-     * Variable array to read. Should be of dims (time, prey, pred).
-     */
-    protected double varArray[][][];  // accessibility matrix: (time, prey, pred)
-    
-    
-    /** Returns the Netcdf filename.
-     * @return Filename  */
-    public String getFilename() {
-        return this.filename;
-    }
-    
-    /** Returns the Netcdf variable name. */
-    public String getVarname() {
-        return this.varname;
-    }
-    
-    /** Returns the NetcdfFile object.
-     * @return 
-     */
-    public NetcdfFile getNcFile() {
-        return this.nc;
-    }
-    
-    /** Open the NetcdfFile object.
-     * 
-     * @throws IOException 
-     */
-    public void openNcFile() throws IOException {
-        nc = NetcdfFile.open(filename, null);
+    public FisheryAccessMatrixNetcdf(String filename, String varname) {
+        super(filename, varname);
     }
 
-    /** Public constructor. 
-     * 
-     * @param filename
-     * @param varname 
+    @Override
+    public void init() throws IOException {
+
+        this.openNcFile();
+
+        try (NetcdfFile nc = this.getNcFile()) {
+            String varname = this.getVarname();
+            
+            // Recovers the number of time records.
+            Dimension timeDim = nc.findDimension("time");
+            this.setNRecords(timeDim.getLength());
+            
+            // Recovers the variable to read
+            Variable netcdfVar = nc.findVariable(varname);
+            varArray = (double[][][]) netcdfVar.read().copyToNDJavaArray();
+            
+            // Reads the species names for the prey and predators
+            Variable speciesVar = nc.findVariable("SpeciesName");
+            namesFish = this.getStringVar((char[][]) speciesVar.read().copyTo1DJavaArray());
+            
+            Variable gearVar = nc.findVariable("fishingGearName");
+            namesGear = this.getStringVar((char[][]) gearVar.read().copyTo1DJavaArray());
+        }
+
+    } // end of init
+
+    /**
+     * Finds the index that match the name and the class within 2 lists.
+     *
+     * @param name Name of the species to match (either predator or prey)
+     * @param listNames List of species names
+     * @return
+     * @throws java.lang.Exception
      */
-    public AbstractInputNetcdf(String filename, String varname) {
-        this.varname = varname;
-        this.filename = filename;
+    public int findIndex(String name, String[] listNames) throws Exception {
+
+        for (int i = 0; i < listNames.length; i++) {
+            // Loop over the list of names. 
+            if (listNames[i].equals(name)) {
+                return (i);
+            }
+
+        }
+
+        return -1;
+
     }
-    
-    /** Get the number of time steps in the file.
-     * 
-     * @return 
+
+    /**
+     * Finds the accessibility coefficient for a given time step.
+     *
+     * @param timeStep Simulation time step
+     * @param predator Predator (should be of type School).
+     * @param gear
+     * @param fisheryIndex
+     * @return
+     * @throws Exception
      */
-    public int getNRecords() {
-        return this.nRecords;
+    public double getAccessibility(int timeStep, IAggregation predator, FishingGear gear) throws Exception {
+
+        int ncIndex = this.getNcIndex(timeStep);
+
+        // finds the index (i.e. column index) for the predator
+        int indexSpecies = this.findIndex(predator.getSpeciesName(), this.namesFish);
+        
+        // fins the index of the fishing gear
+        int fisheryIndex = this.findIndex(gear.getName(), this.namesGear);
+        
+        double output =  varArray[ncIndex][fisheryIndex][indexSpecies];
+
+        return (output);
+
     }
-    
-    /** Sets the number of time steps in the file.
-     * 
-     * @param nRecords 
-     */
-    public void setNRecords(int nRecords) {
-        this.nRecords = nRecords;
-    }
-    
-    /** Converts char array ([][]) into  string array ([]).
-     * @param input
-     * @return  */
-    public String[] getStringVar(char[][] input) {
-        int nPrey = input.length;
-        String output[] = new String[nPrey];
-        for (int itmp = 0; itmp < nPrey; itmp++) {
-            output[itmp] = String.valueOf(input[itmp]);
-        } 
-        return output;    
-    }
-    
-    public int getNcIndex(int timeStep) { 
-        return (timeStep % this.getNRecords());
-    }
-    
 }

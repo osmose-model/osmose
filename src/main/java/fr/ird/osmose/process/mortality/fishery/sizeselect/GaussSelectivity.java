@@ -53,8 +53,7 @@ package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.process.mortality.FisheryMortality;
-import fr.ird.osmose.process.mortality.fishery.SizeSelectivity;
+import fr.ird.osmose.process.mortality.FishingGear;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
@@ -78,7 +77,7 @@ public class GaussSelectivity extends SizeSelectivity {
      *
      * @param fmort
      */
-    public GaussSelectivity(FisheryMortality fmort) {
+    public GaussSelectivity(FishingGear fmort) {
         super(fmort);
     }
     
@@ -89,7 +88,7 @@ public class GaussSelectivity extends SizeSelectivity {
     @Override
     public void init() {
         
-        int index = mort.getFIndex();
+        int index = this.getGear().getFIndex();
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
         // If L75 is found, Ricardo formulae is used
@@ -97,9 +96,9 @@ public class GaussSelectivity extends SizeSelectivity {
             this.l75 = cfg.getFloat("fishery.selectivity.l75.fsh" + index);
             // Normal distribution for init qnorm(0.75)
             NormalDistribution norm = new NormalDistribution();
-            double sd = (this.l75 - this.l50) / norm.inverseCumulativeProbability(0.75);  // this is the qnorm function
+            double sd = (this.l75 - this.getL50()) / norm.inverseCumulativeProbability(0.75);  // this is the qnorm function
             // initialisation of the distribution used in selectity calculation
-            this.distrib = new NormalDistribution(this.l50, sd);
+            this.distrib = new NormalDistribution(this.getL50(), sd);
         } else {
             this.b = cfg.getFloat("fishery.selectivity.b.fsh" + index);
         }
@@ -120,12 +119,12 @@ public class GaussSelectivity extends SizeSelectivity {
         // (i.e. the value computed with x = mean).
         if (this.l75 > 0) {
             // If L75 > 0, assumes Ricardo Formulation should be used
-            output = this.distrib.density(size) / this.distrib.density(this.l50);
+            output = this.distrib.density(size) / this.distrib.density(this.getL50());
         } else {
-            output = Math.exp(-this.b * Math.pow(size - this.l50, 2));
+            output = Math.exp(-this.b * Math.pow(size - this.getL50(), 2));
         }
 
-        if (output < this.tiny) {
+        if (output < this.getTiny()) {
             output = 0.0;
         }
 

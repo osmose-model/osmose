@@ -67,7 +67,7 @@ import fr.ird.osmose.process.mortality.OutMortality;
 import fr.ird.osmose.process.mortality.OxidativeMortality;
 import fr.ird.osmose.process.mortality.PredationMortality;
 import fr.ird.osmose.process.mortality.StarvationMortality;
-import fr.ird.osmose.process.mortality.FisheryMortality;
+import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.resource.Resource;
 import fr.ird.osmose.util.XSRandom;
 import java.io.IOException;
@@ -194,13 +194,13 @@ public class MortalityProcess extends AbstractProcess {
 
         // fishery (Osmose 4) vs fishing mortality (Osmose 3)
         if (fisheryEnabled) {
-            fisheriesMortality = new FisheryMortality[nfishery];
+            fisheriesMortality = new FishingGear[nfishery];
             int count = 0;
             for (int i = 0; i < nfishery; i++) {
                 while (!getConfiguration().canFind("fishery.select.curve.fsh" + count)) {
                     count++;
                 }
-                fisheriesMortality[i] = new FisheryMortality(getRank(), count);
+                fisheriesMortality[i] = new FishingGear(getRank(), count);
                 fisheriesMortality[i].init();
                 count++;
             }

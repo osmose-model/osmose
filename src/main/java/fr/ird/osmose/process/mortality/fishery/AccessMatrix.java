@@ -173,7 +173,6 @@ public class AccessMatrix extends OsmoseLinker {
      */
     public double getValues(int iFishery, int iSpec) {
         return values[iFishery][iSpec];
-
     }
 
 }
