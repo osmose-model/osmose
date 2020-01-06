@@ -19,7 +19,7 @@
  * and size adequacy between a predator and its prey. It represents fish
  * individuals grouped into schools, which are characterized by their size,
  * weight, age, taxonomy and geographical location, and which undergo major
- * processes of fish life cycle (growth, explicit predation, natural and
+ * processes of fish life cycle (growth, explicit predation, additional and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
