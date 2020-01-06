@@ -120,6 +120,8 @@ public class FishingGear extends AbstractMortality {
                 error("Selectivity curve " + type + "is not implemented. Choose 'knife-edge', 'gaussian' or 'sigmoidal'.", new Exception());
                 break;
         }
+        
+        this.name = cfg.getString("fishery.name.fsh" + fIndex);
 
         // Initialize the selectivity curve.
         select.init();
