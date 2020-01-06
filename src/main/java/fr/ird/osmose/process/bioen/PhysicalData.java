@@ -89,8 +89,14 @@ public class PhysicalData extends SimulationLinker {
     private String netcdf_variable_name;
 
     /**
-     * Array containing the fields to read. Dimensions should be (time, 3, lat,
-     * lon) with k=0 => surface, k=1: column average, k=2: last ocean cell.
+     * True if a constant value should be used.
+     */
+    private boolean useConstantVal;
+    private double constantVal;
+
+    /**
+     * Array containing the fields to read. Dimensions should be (time, layer,
+     * lat, lon) with layer the index of the vertical layer.
      */
     private double[][][][] values;
 
@@ -102,7 +108,7 @@ public class PhysicalData extends SimulationLinker {
     public void init() throws IOException {
 
         String key;
-        
+
         // Recovering the name of the NetCDF variable (temperature.varname)
         key = String.format("%s.varname", this.variable_name);
         this.netcdf_variable_name = getConfiguration().getString(key);
@@ -119,64 +125,76 @@ public class PhysicalData extends SimulationLinker {
         }
 
         // Recovering the key temperature.filename
-        key = String.format("%s.filename", this.variable_name);
-        String filename = getConfiguration().getFile(key);
+        key = String.format("%s.value", this.variable_name);
+        if (getConfiguration().canFind(key)) {
+            // if a constant value is provided, then set the value
+            // and force boolean to true
+            this.useConstantVal = true;
+            this.constantVal = getConfiguration().getDouble(key);
+        } else {
+            // if no constant value is provided, ask for a netcdf file.
+            this.useConstantVal = false;
 
-        if (!new File(filename).exists()) {
-            error("Error reading PhysicalDataset parameters.", new FileNotFoundException("LTL NetCDF file " + filename + " does not exist."));
-        }
+            // Recovering the key temperature.filename
+            key = String.format("%s.filename", this.variable_name);
+            String filename = getConfiguration().getFile(key);
 
-        try {
-            
-        
-            NetcdfFile nc = NetcdfFile.open(filename);
+            if (!new File(filename).exists()) {
+                error("Error reading PhysicalDataset parameters.", new FileNotFoundException("LTL NetCDF file " + filename + " does not exist."));
+            }
+
             // count the number of time steps
-            int ntime = nc.findVariable(netcdf_variable_name).getDimension(0).getLength();
-            values = new double[ntime][3][getGrid().get_ny()][getGrid().get_nx()];;
+            try (NetcdfFile nc = NetcdfFile.open(filename)) {
+                // count the number of time steps
+                int ntime = nc.findVariable(netcdf_variable_name).getDimension(0).getLength();
 
-            Array netcdf_value = nc.findVariable(netcdf_variable_name).read();
-            
-            Index index = netcdf_value.getIndex();
+                // count the number of layers (i.e. depth levels) within the physical variable
+                int nlayers = nc.findVariable(netcdf_variable_name).getDimension(1).getLength();
+                values = new double[ntime][nlayers][getGrid().get_ny()][getGrid().get_nx()];;
 
-            for (int iTime = 0; iTime < ntime; iTime++) {
-                for (int k = 0; k < 3; k++) {
-                    for (Cell cell : getGrid().getCells()) {
-                        if (!cell.isLand()) {
-                            int i = cell.get_igrid();
-                            int j = cell.get_jgrid();
-                            index.set(iTime, k, j, i);
-                            values[iTime][k][j][i] = factor * (offset + netcdf_value.getDouble(index));
-                        }  // end of if
-                    }  // end of cell
-                }  // end of k
-            }   // end of time
+                Array netcdf_value = nc.findVariable(netcdf_variable_name).read();
 
-            nc.close();
+                Index index = netcdf_value.getIndex();
 
-        } catch (IOException ex) {
-            error("File " + filename + " and variable " + netcdf_variable_name + "cannot be read", new IOException());
-
-        }  // end of try catch
+                for (int iTime = 0; iTime < ntime; iTime++) {
+                    for (int k = 0; k < nlayers; k++) {
+                        for (Cell cell : getGrid().getCells()) {
+                            if (!cell.isLand()) {
+                                int i = cell.get_igrid();
+                                int j = cell.get_jgrid();
+                                index.set(iTime, k, j, i);
+                                values[iTime][k][j][i] = factor * (offset + netcdf_value.getDouble(index));
+                            }  // end of if
+                        }  // end of cell
+                    }  // end of k
+                }   // end of time
+            } // end of try
+        }  // end of canfind constant value.
     }  // end of init method
-    
-    /** Recovers the value of a physicald dataset providing the depth index.
+
+    /**
+     * Recovers the value of a physicald dataset providing the depth index.
      * Value is converted as follows: output = factor * (offset + value)
-     * 
+     *
      * @param index Depth index (0 = surface, 1=mean, 2=bottom)
      * @param cell Cell index
-     * @return 
+     * @return
      */
     public double getValue(int index, Cell cell) {
-        int ltlTimeStep = getSimulation().getIndexTimeSimu() % this.values.length;
-        return values[ltlTimeStep][index][cell.get_jgrid()][cell.get_igrid()];
+        if (this.useConstantVal) {
+            return this.constantVal;
+        } else {
+            int ltlTimeStep = getSimulation().getIndexTimeSimu() % this.values.length;
+            return values[ltlTimeStep][index][cell.get_jgrid()][cell.get_igrid()];
+        }
     }
-    
-        /** Recovers the value of a physicald dataset providing the depth index.
+
+    /**
+     * Recovers the value of a physicald dataset providing the depth index.
      * Value is converted as follows: output = factor * (offset + value)
-     * 
-     * @param index Depth index (0 = surface, 1=mean, 2=bottom)
-     * @param cell Cell index
-     * @return 
+     *
+     * @param school
+     * @return
      */
     public double getValue(School school) {
         Cell cell = school.getCell();
@@ -184,5 +202,4 @@ public class PhysicalData extends SimulationLinker {
         return this.getValue(index, cell);
     }
 
-    
 }  // end of class

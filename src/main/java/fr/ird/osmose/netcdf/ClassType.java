@@ -51,13 +51,6 @@
  */
 package fr.ird.osmose.netcdf;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
-
 /**
  *
  * @author nbarrier

@@ -98,6 +98,8 @@ public class AbstractInputNetcdf {
      */
     private ClassManager classManager;
 
+    
+    /** Number of records (i.e. time steps) in the Netcdf file. */
     private int nRecords;
 
     /**
@@ -238,6 +240,7 @@ public class AbstractInputNetcdf {
 
     }
     
+    /** Converts char array ([][]) into  string array ([]). */
     public String[] getStringVar(char[][] input) {
         int nPrey = input.length;
         namesPrey = new String[nPrey];
