@@ -71,6 +71,11 @@ public class TimeVariability extends OsmoseLinker {
     private double[] timeArr;
 
     /**
+     * Seasonality array. Used only if byDt is not used.
+     */
+    private double[] season;
+
+    /**
      * Number of time steps per year.
      */
     private int ndt;
@@ -93,10 +98,11 @@ public class TimeVariability extends OsmoseLinker {
      * Initialize the time varying index.
      */
     public void init() {
-        
+
         int index = fishery.getFIndex();
         this.ndt = getConfiguration().getNStepYear();
         this.nyear = Math.max(getConfiguration().getNStep() / ndt, 1);
+        this.initFishingSeason();
 
         String type = getConfiguration().getString("fishery.fishing.rate.method.fsh" + index);
         switch (type) {
@@ -114,6 +120,9 @@ public class TimeVariability extends OsmoseLinker {
                 break;
             case "bydt":
                 this.getFBaseByDt();
+                break;
+            case "byperiod":
+                this.getFBaseByPeriod();
                 break;
             default:
                 error("Fishing base " + type + "is not implemented.", new Exception());
@@ -142,7 +151,7 @@ public class TimeVariability extends OsmoseLinker {
             }
             for (int i = 0; i < timeArr.length; i++) {
                 int k = i % value.length;
-                this.timeArr[i] = value[k];
+                this.timeArr[i] = value[k] * season[i % ndt];
             }
         }
     }
@@ -170,7 +179,7 @@ public class TimeVariability extends OsmoseLinker {
         timeArr = new double[getConfiguration().getNStep()];
         for (int iStep = 0; iStep < timeArr.length; iStep++) {
             int iYear = (iStep / ndt) % annualF.length;
-            timeArr[iStep] = annualF[iYear] / ndt;
+            timeArr[iStep] = annualF[iYear] * season[iStep % ndt];
         }
 
     }
@@ -210,7 +219,7 @@ public class TimeVariability extends OsmoseLinker {
         timeArr = new double[getConfiguration().getNStep()];
         for (int iStep = 0; iStep < timeArr.length; iStep++) {
             int iRegime = (iStep * nperiod / ndt) % value.length;
-            timeArr[iStep] = value[iRegime] / ndt;
+            timeArr[iStep] = value[iRegime] * season[iStep % ndt];
         }
     }
 
@@ -218,14 +227,15 @@ public class TimeVariability extends OsmoseLinker {
      * Initialize the time array from constant annual mortality rate.
      */
     private void initFBaseConstant() {
-        
+
         double F = getConfiguration().getDouble("fishery.fishing.rate.fsh" + fishery.getFIndex());
 
-        int nStepYear = getConfiguration().getNStepYear();
+        this.initFishingSeason();
+
         timeArr = new double[getConfiguration().getNStep()];
         for (int i = 0; i < timeArr.length; i++) {
             // convert from annual mortality rate to seasonal mortality rate
-            timeArr[i] = F / nStepYear;
+            timeArr[i] = F * this.season[i % ndt];
         }
     }
 
@@ -233,7 +243,7 @@ public class TimeVariability extends OsmoseLinker {
      * Initialize the time array from linear value.
      */
     private void initFBaseLinear() {
-        
+
         double rate = getConfiguration().getDouble("fishery.fishing.rate.linear.fsh" + fishery.getFIndex());
         double slope = getConfiguration().getDouble("fishery.fishing.rate.linear.slope.fsh" + fishery.getFIndex());
 
@@ -242,7 +252,7 @@ public class TimeVariability extends OsmoseLinker {
         for (int i = 0; i < ndt * nyear; i++) {
             int x = i / freq;
             float time = (x * freq) / ((float) ndt);
-            timeArr[i] = rate * (1 + slope * time) / ndt;
+            timeArr[i] = rate * (1 + slope * time) * season[i % ndt];
         }
 
     }
@@ -251,7 +261,7 @@ public class TimeVariability extends OsmoseLinker {
      * Initialize the time array from regime shift values.
      */
     private void initFBaseRegime() {
-        
+
         int index = fishery.getFIndex();
 
         /**
@@ -259,8 +269,6 @@ public class TimeVariability extends OsmoseLinker {
          * > T * ndt;
          */
         int tempshifts[] = getConfiguration().getArrayInt("fishery.fishing.rate.byRegime.shifts.fsh" + index);
-
-        int nStepYear = getConfiguration().getNStepYear();
 
         // Count the number of good shift values
         int nShift = 0;
@@ -305,7 +313,7 @@ public class TimeVariability extends OsmoseLinker {
 
             }
 
-            timeArr[i] = rates[irate] / nStepYear;
+            timeArr[i] = rates[irate] * season[i % ndt];
 
         }
 
@@ -345,6 +353,42 @@ public class TimeVariability extends OsmoseLinker {
      */
     public double getTimeVar(int idt) {
         return timeArr[idt];
+    }
+
+    /**
+     * Init the seasonality array.
+     */
+    private void initFishingSeason() {
+
+        int nStepYear = getConfiguration().getNStepYear();
+
+        // Fishing seasonality
+        if (!getConfiguration().isNull("fishery.fishing.rate.season.fsh" + fishery.getFIndex())) {
+            // Read seasonality from CSV file
+            SingleTimeSeries sts = new SingleTimeSeries();
+            String filename = getConfiguration().getFile("fishery.fishing.rate.season.fsh" + fishery.getFIndex());
+            // Seasonality must be at least one year, and at max the length of the simulation
+            sts.read(filename);
+            season = sts.getValues();
+        } else {
+            // Uniform fishing throughout the year
+            season = new double[nStepYear];
+            for (int iTime = 0; iTime < season.length; iTime++) {
+                season[iTime] = 1.d / nStepYear;
+            }
+        }
+
+        double total = 0.;
+        for (int i = 0; i < nStepYear; i++) {
+            total += season[i];
+        }
+
+        if (total != 1.0) {
+            for (int i = 0; i < nStepYear; i++) {
+                season[i] /= total;
+            }
+        }
+
     }
 
 }
