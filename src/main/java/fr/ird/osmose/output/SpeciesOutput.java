@@ -60,11 +60,20 @@ public class SpeciesOutput extends AbstractOutput {
     protected double[][] value;
     private final String description;
     private final SchoolVariableGetter schoolVariable;
+    public final boolean computeAverage;
 
     public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable) {
         super(rank, subfolder, name);
         this.description = description;
         this.schoolVariable = schoolVariable;
+        this.computeAverage = true;
+    }
+    
+     public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, boolean computeAverage) {
+        super(rank, subfolder, name);
+        this.description = description;
+        this.schoolVariable = schoolVariable;
+        this.computeAverage = computeAverage;
     }
 
     @Override
@@ -98,8 +107,12 @@ public class SpeciesOutput extends AbstractOutput {
 
         double nsteps = getRecordFrequency();
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
-            for (int isp = 0; isp < value.length; isp++) {
-                value[irg][isp] /= nsteps;
+            if (this.computeAverage) {
+                // If the average should be computed, then divides by the number
+                // of time steps.
+                for (int isp = 0; isp < value.length; isp++) {
+                    value[irg][isp] /= nsteps;
+                }
             }
             writeVariable(irg, time, value[irg]);
         }
