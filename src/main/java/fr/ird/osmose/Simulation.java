@@ -59,6 +59,7 @@ import fr.ird.osmose.resource.ResourceForcing;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import ucar.nc2.NetcdfFile;
 
@@ -93,7 +94,7 @@ public class Simulation extends OsmoseLinker {
     /**
      * The low trophic level forcing class.
      */
-    private ResourceForcing[] resourceForcing;
+    private HashMap<Integer, ResourceForcing> resourceForcing;
     /**
      * Current year of the simulation.
      */
@@ -281,13 +282,23 @@ public class Simulation extends OsmoseLinker {
      * Initializes resources forcing.
      */
     private void initResourceForcing() {
+        
+        this.getConfiguration().findKeys("species.type.sp*").stream()
+                .filter(name -> (name.equals("background") || name.equals("resource")))
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3)))
+                .forEach(i -> {
+                    ResourceForcing resForcing = new ResourceForcing(i);
+                    resForcing.init();
+                    resourceForcing.put(i, resForcing);
+                    // Name must contain only alphanumerical characters
+                });
 
-        int nRsc = getConfiguration().getNRscSpecies();
-        resourceForcing = new ResourceForcing[nRsc];
-        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
-            resourceForcing[iRsc] = new ResourceForcing(iRsc);
-            resourceForcing[iRsc].init();
-        }
+//        int nRsc = getConfiguration().getNRscSpecies();
+//        resourceForcing = new ResourceForcing[nRsc];
+//        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
+//            resourceForcing[iRsc] = new ResourceForcing(iRsc);
+//            resourceForcing[iRsc].init();
+//        }
     }
 
     /**
@@ -392,7 +403,7 @@ public class Simulation extends OsmoseLinker {
      * @return the {@code ResourceForcing} instance for specified resource.
      */
     public ResourceForcing getResourceForcing(int index) {
-        return resourceForcing[index];
+        return resourceForcing.get(index);
     }
 
     /**
