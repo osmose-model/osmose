@@ -91,7 +91,7 @@ public class ResourceForcing extends OsmoseLinker {
     /**
      * Caching mode.
      */
-    private ResourceCaching caching;
+    private ResourceCaching caching = ResourceCaching.ALL;
 
     /**
      * The constant biomass, in tonne, in a cell of the model. Parameter
@@ -120,10 +120,8 @@ public class ResourceForcing extends OsmoseLinker {
 //////////////
 // Constructor
 //////////////
-    public ResourceForcing(int index, ResourceCaching caching) {
-
+    public ResourceForcing(int index) {
         this.index = index;
-        this.caching = caching;
     }
 
 ////////////////////////////
