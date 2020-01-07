@@ -285,7 +285,7 @@ public class Simulation extends OsmoseLinker {
         int nRsc = getConfiguration().getNRscSpecies();
         resourceForcing = new ResourceForcing[nRsc];
         for (int iRsc = 0; iRsc < nRsc; iRsc++) {
-            resourceForcing[iRsc] = new ResourceForcing(iRsc, ResourceCaching.ALL);
+            resourceForcing[iRsc] = new ResourceForcing(iRsc);
             resourceForcing[iRsc].init();
         }
     }
