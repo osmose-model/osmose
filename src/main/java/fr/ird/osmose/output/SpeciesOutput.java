@@ -62,10 +62,6 @@ public class SpeciesOutput extends AbstractOutput {
     private final SchoolVariableGetter schoolVariable;
 
     public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable) {
-        this(rank, subfolder, name, description, schoolVariable, false);
-    }
-
-    public SpeciesOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, boolean regional) {
         super(rank, subfolder, name);
         this.description = description;
         this.schoolVariable = schoolVariable;

@@ -287,8 +287,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "biomass",
                     "Mean biomass (tons), " + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    (school) -> school.getInstantaneousBiomass(),
-                    true)
+                    (school) -> school.getInstantaneousBiomass())
             );
         }
         if (getConfiguration().getBoolean("output.biomass.bysize.enabled")) {
@@ -309,8 +308,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.abundance.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "abundance",
                     "Mean abundance (number of fish), " + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    (school) -> school.getInstantaneousAbundance(),
-                    true)
+                    (school) -> school.getInstantaneousAbundance())
             );
         }
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
@@ -383,15 +381,13 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yield",
                     "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)),
-                    true)
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)))
             );
         }
         if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yieldN",
                     "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved",
-                    school -> school.getNdead(MortalityCause.FISHING),
-                    true)
+                    school -> school.getNdead(MortalityCause.FISHING))
             );
         }
         // Size
@@ -559,8 +555,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.ssb.enabled", NO_WARNING)) {
             outputs.add(new SpeciesOutput(rank, null, "SSB",
                     "Spawning Stock Biomass (tonne)",
-                    school -> school.getSpecies().isSexuallyMature(school) ? school.getInstantaneousBiomass() : 0.d,
-                    false)
+                    school -> school.getSpecies().isSexuallyMature(school) ? school.getInstantaneousBiomass() : 0.d)
             );
         }
         if (getConfiguration().getBoolean("output.nschool.enabled", NO_WARNING)) {
