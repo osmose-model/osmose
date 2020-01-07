@@ -21,7 +21,7 @@ ${licensePrefix}size-based opportunistic predation based on spatio-temporal co-o
 ${licensePrefix}and size adequacy between a predator and its prey. It represents fish
 ${licensePrefix}individuals grouped into schools, which are characterized by their size,
 ${licensePrefix}weight, age, taxonomy and geographical location, and which undergo major
-${licensePrefix}processes of fish life cycle (growth, explicit predation, natural and
+${licensePrefix}processes of fish life cycle (growth, explicit predation, additional and
 ${licensePrefix}starvation mortalities, reproduction and migration) and fishing mortalities
 ${licensePrefix}(Shin and Cury 2001, 2004).
 ${licensePrefix}

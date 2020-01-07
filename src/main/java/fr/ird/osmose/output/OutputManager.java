@@ -167,7 +167,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new YieldOutput_Netcdf(rank));
         }
 
-        if (getConfiguration().getBoolean("output.yieldN.netcdf.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.abundance.netcdf.enabled")) {
             outputs.add(new YieldNOutput_Netcdf(rank));
         }
 
@@ -220,19 +220,19 @@ public class OutputManager extends SimulationLinker {
             }
         }
 
-        if (getConfiguration().getBoolean("output.yield.bySize.netcdf.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.biomass.bySize.netcdf.enabled")) {
             outputs.add(new YieldDistribOutput_Netcdf(rank, sizeDistrib));
         }
 
-        if (getConfiguration().getBoolean("output.yield.byage.netcdf.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.biomass.byage.netcdf.enabled")) {
             outputs.add(new YieldDistribOutput_Netcdf(rank, ageDistrib));
         }
 
-        if (getConfiguration().getBoolean("output.yieldN.bySize.netcdf.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.abundance.bySize.netcdf.enabled")) {
             outputs.add(new YieldNDistribOutput_Netcdf(rank, sizeDistrib));
         }
 
-        if (getConfiguration().getBoolean("output.yieldN.byage.netcdf.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.abundance.byage.netcdf.enabled")) {
             outputs.add(new YieldNDistribOutput_Netcdf(rank, ageDistrib));
         }
 
@@ -260,11 +260,11 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new SpatialSizeOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialyield.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.yield.biomass.enabled")) {
             outputs.add(new SpatialYieldOutput(rank));
         }
 
-        if (getConfiguration().getBoolean("output.spatialyieldN.enabled")) {
+        if (getConfiguration().getBoolean("output.spatial.yield.abundance.enabled")) {
             outputs.add(new SpatialYieldNOutput(rank));
         }
 
@@ -387,7 +387,7 @@ public class OutputManager extends SimulationLinker {
                     true)
             );
         }
-        if (getConfiguration().getBoolean("output.yieldN.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yieldN",
                     "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved",
                     school -> school.getNdead(MortalityCause.FISHING),
@@ -420,14 +420,14 @@ public class OutputManager extends SimulationLinker {
                     school -> school.getNdead(MortalityCause.FISHING)
             ));
         }
-        if (getConfiguration().getBoolean("output.yieldN.bySize.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.abundance.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
                     school -> school.getNdead(MortalityCause.FISHING),
                     sizeDistrib
             ));
         }
-        if (getConfiguration().getBoolean("output.yield.bySize.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.biomass.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)),
@@ -444,14 +444,14 @@ public class OutputManager extends SimulationLinker {
             ));
         }
         // Age
-        if (getConfiguration().getBoolean("output.yieldN.byAge.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.abundance.byAge.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
                     school -> school.getNdead(MortalityCause.FISHING),
                     ageDistrib
             ));
         }
-        if (getConfiguration().getBoolean("output.yield.byAge.enabled")) {
+        if (getConfiguration().getBoolean("output.yield.biomass.byAge.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)),
