@@ -60,14 +60,16 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     
   )
   
-  # temporal
-  outputData$yield = aperm(apply(outputData$yieldByFishery, 2:4, sum, na.rm=TRUE), 
-                           perm = c(2,1,3))
-  rownames(outputData$yield) = seq_len(nrow(outputData$yield)) - 1
-  colnames(outputData$yield) = colnames(outputData$biomass)
-  
-  class(outputData$yield) = "osmose.yield"
-  # end of temporal
+  if(!is.null(outputData$yieldByFishery)) {
+    # temporal
+    outputData$yield = aperm(apply(outputData$yieldByFishery, 2:4, sum, na.rm=TRUE), 
+                             perm = c(2,1,3))
+    rownames(outputData$yield) = seq_len(nrow(outputData$yield)) - 1
+    colnames(outputData$yield) = colnames(outputData$biomass)
+    
+    class(outputData$yield) = "osmose.yield"
+    # end of temporal
+  }
   
   model = list(version = "4",
                model = .getModelName(path = path),
