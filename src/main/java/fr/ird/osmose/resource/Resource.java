@@ -210,10 +210,6 @@ public class Resource extends OsmoseLinker implements IAggregation {
         return cell;
     }
 
-    public int getRscIndex() {
-        return species.getIndex();
-    }
-
     @Override
     public void incrementPredSuccessRate(float drate) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
