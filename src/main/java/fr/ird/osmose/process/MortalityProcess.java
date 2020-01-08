@@ -290,12 +290,22 @@ public class MortalityProcess extends AbstractProcess {
         int iStepSimu = getSimulation().getIndexTimeSimu();
         for (List<Resource> resources : resourcesSet.values()) {    // loop over the cells
             for (Resource resource : resources) {    // loop over the resources
-                int iRsc = resource.getRscIndex();
+                int iRsc = resource.getSpeciesIndex();
                 double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
                         * getResourceForcing(iRsc).getBiomass(resource.getCell());
                 resource.setBiomass(accessibleBiom);
             }
         }
+        
+        // Init the biomass of background species by using the ResourceForcing class
+        for (List<BackgroundSchool> bkgSchoolList : bkgSet.values()) {    // loop over the cells
+            for (BackgroundSchool bkg : bkgSchoolList) {    // loop over the resources
+                int ibkg = bkg.getSpeciesIndex();
+                double accessibleBiom = getResourceForcing(ibkg).getBiomass(bkg.getCell());
+                bkg.setBiomass(accessibleBiom);
+            }
+        }
+        
 
         // Update background species biomass
         int istep = getSimulation().getIndexTimeSimu();
@@ -561,7 +571,7 @@ public class MortalityProcess extends AbstractProcess {
         }
         return resourcesSet.get(cell.getIndex());
     }
-
+    
     /**
      * Shuffles an input array.
      *
@@ -677,6 +687,38 @@ public class MortalityProcess extends AbstractProcess {
         }
     }
 
+//    /**
+//     * Recovers the list of background schools for the current cell. If the
+//     * current cell does not contain any background school yet, they are added.
+//     * This is the same as for the getResources method.
+//     *
+//     * @param cell
+//     * @return
+//     */
+//    private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
+//        if (!bkgSet.containsKey(cell.getIndex())) {
+//            // If the cell does not contain any background school
+//            // initialisation of a list of cells.
+//            List<BackgroundSchool> output = new ArrayList<>();
+//            // Loop over all the background species
+//            for (int iBkg = 0; iBkg < getConfiguration().getNBkgSpecies(); iBkg++) {
+//                BackgroundSpecies bkgSpec = getConfiguration().getBkgSpecies(iBkg);
+//                // Loop over all the classes of the background species.
+//                for (int iClass = 0; iClass < bkgSpec.getTimeSeries().getNClass(); iClass++) {
+//                    // Init a background school of species bkgSpec and of class iClass
+//                    BackgroundSchool BkgSchTmp = new BackgroundSchool(bkgSpec, iClass);
+//                    // Move the bkg school to cell (set x and y)
+//                    BkgSchTmp.moveToCell(cell);
+//                    // add to output
+//                    output.add(BkgSchTmp);
+//                }   // end of iClass loop
+//            }   // end of bkg loop
+//            // add the list to the hash map
+//            bkgSet.put(cell.getIndex(), output);
+//        }   // end of contains test
+//        return bkgSet.get(cell.getIndex());
+//    }   // end of function
+    
     /**
      * Recovers the list of background schools for the current cell. If the
      * current cell does not contain any background school yet, they are added.
@@ -686,36 +728,16 @@ public class MortalityProcess extends AbstractProcess {
      * @return
      */
     private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
-
         if (!bkgSet.containsKey(cell.getIndex())) {
-            // If the cell does not contain any background school
-            // initialisation of a list of cells.
-            List<BackgroundSchool> output = new ArrayList<>();
-
-            // Loop over all the background species
-            for (int iBkg = 0; iBkg < getConfiguration().getNBkgSpecies(); iBkg++) {
-
-                BackgroundSpecies bkgSpec = getConfiguration().getBkgSpecies(iBkg);
-
-                // Loop over all the classes of the background species.
-                for (int iClass = 0; iClass < bkgSpec.getTimeSeries().getNClass(); iClass++) {
-
-                    // Init a background school of species bkgSpec and of class iClass
-                    BackgroundSchool BkgSchTmp = new BackgroundSchool(bkgSpec, iClass);
-                    // Move the bkg school to cell (set x and y)
-                    BkgSchTmp.moveToCell(cell);
-                    // add to output
-                    output.add(BkgSchTmp);
-
-                }   // end of iClass loop
-            }   // end of bkg loop
-
-            // add the list to the hash map
-            bkgSet.put(cell.getIndex(), output);
-
-        }   // end of contains test
-
+            List<BackgroundSchool> bkgSchools = new ArrayList();  // list of all the background species within the cell
+            for (int i = 0; i < getConfiguration().getNBkgSpecies(); i++) {
+                int ibkg = this.getConfiguration().getBkgIndex(i);
+                bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg)));
+            }
+            bkgSet.put(cell.getIndex(), bkgSchools);
+        }
         return bkgSet.get(cell.getIndex());
-
-    }   // end of function
+    }
+    
+    
 }
