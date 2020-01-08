@@ -282,6 +282,8 @@ public class Simulation extends OsmoseLinker {
      * Initializes resources forcing.
      */
     private void initResourceForcing() {
+       
+        resourceForcing = new HashMap();
         
         this.getConfiguration().findKeys("species.type.sp*").stream()
                 .filter(name -> (name.equals("background") || name.equals("resource")))
