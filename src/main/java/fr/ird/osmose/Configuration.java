@@ -378,21 +378,22 @@ public class Configuration extends OLogger {
             nCpu = 1;
         }
 
-//        // barrier.n: new way to count the number of species, resource and background based on types.
-//        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter(name -> name.equals("focal")).count();
-//        nResource = (int) this.findKeys("species.type.sp*").stream().filter(name -> name.equals("resource")).count();
-//        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(name -> name.equals("background")).count();
+        // barrier.n: new way to count the number of species, resource and background based on types.
+        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((name) -> (getString(name).equals("focal"))).count();
+        nResource = (int) this.findKeys("species.type.sp*").stream().filter(name -> getString(name).equals("resource")).count();
+        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(name -> getString(name).equals("background")).count();
+        
         // Extract the species indexes for the the 
         this.focalIndex = this.findKeys("species.type.sp*").stream()
-                .filter(name -> name.equals("focal"))
+                .filter(name -> getString(name).equals("focal"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
         this.bkgIndex = this.findKeys("species.type.sp*").stream()
-                .filter(name -> name.equals("background"))
+                .filter(name -> getString(name).equals("background"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
         this.rscIndex = this.findKeys("species.type.sp*").stream()
-                .filter(name -> name.equals("resource"))
+                .filter(name -> getString(name).equals("resource"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
-
+        
         nSpecies = getInt("simulation.nspecies");
         nResource = getInt("simulation.nresource");
         nSimulation = getInt("simulation.nsimulation");
@@ -433,20 +434,6 @@ public class Configuration extends OLogger {
             }
         }
 
-//        // barrier.n: new way to init species based on the species type
-//        List<Species> listSpecies = new ArrayList();
-//        this.findKeys("species.type.sp*").stream()
-//                .filter(name -> name.equals("focal"))
-//                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3)))
-//                .forEach(i -> {
-//                    Species spec = new Species(i);
-//                    listSpecies.add(spec);
-//                    // Name must contain only alphanumerical characters
-//                    if (!spec.getName().matches("^[a-zA-Z0-9]*$")) {
-//                        error("Species name must contain alphanumeric characters only. Please rename " + species[i].getName(), null);
-//                    }
-//                });
-//        this.species = (Species[]) listSpecies.toArray();
         // Init resource groups
         //rscSpecies = new ResourceSpecies[nResource];
         rscSpecies = new HashMap();
@@ -458,20 +445,6 @@ public class Configuration extends OLogger {
             }
         }
 
-//        // barrier.n: new way to init resources based on the species type
-//        List<ResourceSpecies> listRscSpecies = new ArrayList<>(nResource);
-//        this.findKeys("species.type.sp*").stream()
-//                .filter(name -> name.equals("resource"))
-//                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3)))
-//                .forEach(rsc -> {
-//                    ResourceSpecies resource = new ResourceSpecies(rsc);
-//                    listRscSpecies.add(resource);
-//                    // Name must contain only alphanumerical characters
-//                    if (!resource.getName().matches("^[a-zA-Z0-9]*$")) {
-//                        error("Resource name must contain alphanumeric characters only. Please rename " + rscSpecies[rsc].getName(), null);
-//                    }
-//                });
-//        this.rscSpecies = (ResourceSpecies []) listRscSpecies.toArray();
         // barrier.n: add number of background species
         key = "simulation.nbackground";
         nBackground = 0;
@@ -488,26 +461,6 @@ public class Configuration extends OLogger {
             }
         }
 
-//        // barrier.n: new way to init resources based on the species type
-//        bkgSpecies = new BackgroundSpecies[nBackground];
-//        List<BackgroundSpecies> listBkgSpecies = new ArrayList<>();
-//        this.findKeys("species.type.sp*").stream()
-//                .filter(name -> name.equals("background"))
-//                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3)))
-//                .forEach(bkg -> {
-//                    try {
-//                        BackgroundSpecies bkgSpec = new BackgroundSpecies(bkg);
-//                        listBkgSpecies.add(bkgSpec);
-//                        // Name must contain only alphanumerical characters
-//                        if (!bkgSpec.getName().matches("^[a-zA-Z0-9]*$")) {
-//                            error("Background species name must contain alphanumeric characters only. Please rename " + rscSpecies[bkg].getName(), null);
-//                        }
-//                    } catch (IOException | InvalidRangeException ex) {
-//                        Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex);
-//                    }
-//                });
-//        
-//        bkgSpecies = (BackgroundSpecies[]) listBkgSpecies.toArray();
         // Fisheries
         boolean fisheryEnabled = getBoolean("fishery.enabled");
         nFishery = fisheryEnabled ? findKeys("fishery.select.curve.fsh*").size() : 0;
