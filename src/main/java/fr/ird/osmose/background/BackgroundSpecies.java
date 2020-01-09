@@ -84,21 +84,15 @@ public class BackgroundSpecies extends OsmoseLinker {
      * <i>species.length2weight.allometric.power.sp#</i>
      */
     private final float c, bPower;
-
-    /** Movement map set for the current background species. */
-    private final BackgroundMapSet maps;
-
+ 
     /**
      * Trophic Level.
      *
      * @todo Use TL by stage instead?
      */
-    private final float[] trophicLevel;
-
-    /**
-     * By size class time series of background species biomass.
-     */
-    ByClassTimeSeries timeSerieBySize;
+    private final float trophicLevel;
+    
+    private final float length;
 
     /**
      * Constructor of background species.
@@ -114,67 +108,22 @@ public class BackgroundSpecies extends OsmoseLinker {
         // Initialiaze the index of the Background species
         this.index = index;
 
-        // Reads the biomass by dt by size class for the current background species.
-        timeSerieBySize = new ByClassTimeSeries();
-        timeSerieBySize.read(cfg.getFile("biomass.byDt.bySize.file.bkg" + index));
-
         // Initialization of parameters
         name = cfg.getString("species.name.bkg" + index);
 
         // Reads allometric variables to obtain weight from size
         c = cfg.getFloat("species.length2weight.condition.factor.bkg" + index);
         bPower = cfg.getFloat("species.length2weight.allometric.power.bkg" + index);
-
-        // Initialize movement maps for background species. For one bkg species, there
-        // will be one map per size class
-        maps = new BackgroundMapSet(index, "movement.bkgspecies", "bkg", timeSerieBySize.getNClass());
-        maps.loadMaps();
-
+        
         //trophicLevel = cfg.getFloat("species.trophiclevel.bkg" + index);
-        trophicLevel = cfg.getArrayFloat("species.trophiclevel.bkg" + index);
-        if(trophicLevel.length != timeSerieBySize.getNClass()) {
-            error("The number of trophic levels for bkg " + index + " is inconsistent with then number of class", new Exception("Init of bkg failed"));
-        }
-
+        trophicLevel = cfg.getFloat("species.trophiclevel.bkg" + index);
+        
+        length = cfg.getFloat("species.length.bkg" + index);
+        
     }
 
-    /**
-     * Returns the time series object.
-     *
-     * @return by class time series.
-     */
-    public ByClassTimeSeries getTimeSeries() {
-        return this.timeSerieBySize;
-    }
-
-    /**
-     * Returns the biomass value for the current step and the current size class.
-     *
-     * @param step
-     * @param school
-     * @return
-     */
-    public double getValues(int step, float school) {
-        return getTimeSeries().getValue(step, school);
-    }
-
-    /** Returns the class index for an individual of
-     * the current bkg species. 
-     * @param length Length of the species.
-     * @return 
-     */
-    public int getClass(float length) {
-        return getTimeSeries().classOf(length);
-    }
-    
-    /** Returns the global bkg species index (ibkg + nspecies).
-     * @return 
-     */
-    public int getFinalIndex() {
-        return (this.index + getConfiguration().getNSpecies());
-    }
-
-    /** Returns the index of the background species. */
+    /** Returns the index of the background species.
+     * @return  */
     public int getIndex() {
         return this.index;
     }
@@ -183,19 +132,8 @@ public class BackgroundSpecies extends OsmoseLinker {
      * @todo Do this by class?
      * @return 
      */
-    public float[] getTrophicLevel() {
+    public float getTrophicLevel() {
         return this.trophicLevel;
-    }
-
-    /**
-     * Returns the trophic level of the current background species
-     * and for a given size class
-     *
-     * @param k Size class
-     * @return
-     */
-    public float getTrophicLevel(int k) {
-        return this.trophicLevel[k];
     }
 
     /**
@@ -214,55 +152,8 @@ public class BackgroundSpecies extends OsmoseLinker {
     public String getName() {
         return name;
     }
-
-    /**
-     * Recovers the biomass value from the time-series, eg from time-step and
-     * length class and from the map coefficient.
-     *
-     * @param step
-     * @param length
-     * @param cell
-     * @return
-     */
-    public double getBiomass(int step, float length, Cell cell) {
-        // recovers the biomass value from the time-series, 
-        // i.e. from time-step and length class. 
-        int i = cell.get_igrid();
-        int j = cell.get_igrid();
-        return this.getBiomass(step, length, i, j);
-    }
-
-    /**
-     * Recovers the biomass value from the time-series, eg from time-step and
-     * length class and from the map coefficient.
-     *
-     * @param step
-     * @param length
-     * @param i
-     * @param j
-     * @return
-     */
-    public double getBiomass(int step, float length, int i, int j) {
-        // recovers the biomass value from the time-series, 
-        // i.e. from time-step and length class. 
-        double mapVal = this.getMapVal(step, length, i, j);
-        double output = this.getValues(step, length);
-        return output * mapVal;
-    }
     
-    /** Return the map multiplication factor to convert biomass time-series
-     * into biomass map.
-     * @param step
-     * @param length
-     * @param i
-     * @param j
-     * @return 
-     */
-    public double getMapVal(int step, float length, int i, int j) {
-        if (maps.getMap(this.getClass(length), step) != null) {
-            return maps.getMap(this.getClass(length), step).getValue(i, j);
-        } else {
-            return 0.d;
-        }
+    public float getLength() {
+        return this.length;
     }
 }

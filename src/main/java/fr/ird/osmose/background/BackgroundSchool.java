@@ -66,31 +66,16 @@ public class BackgroundSchool extends AbstractSchool {
     final private BackgroundSpecies bkgSpecies;
 
     /**
-     * Class index associated with the background School.
-     */
-    private final int iClass;
-
-    /**
-     * Time step index.
-     */
-    private int iStep;
-
-    /**
      * Public constructor. Initialisation from background species, class index
      * and time step.
      *
      * @param species
      * @param iClass
      */
-    public BackgroundSchool(BackgroundSpecies species, int iClass) {
+    public BackgroundSchool(BackgroundSpecies species) {
         this.bkgSpecies = species;
-        this.iClass = iClass;
         abundanceHasChanged = false;
         preys = new HashMap();
-    }
-
-    public void setStep(int step) {
-        this.iStep = step;
     }
 
     /**
@@ -98,10 +83,6 @@ public class BackgroundSchool extends AbstractSchool {
      * provided in file.
      */
     public void init() {
-        this.abundance = this.getAbundance();
-        this.biomass = this.getBiomass();
-        this.instantaneousAbundance = abundance;
-        this.instantaneousBiomass = biomass;
         this.reset(nDead);
         // Reset diet variables
         preys.clear();
@@ -117,7 +98,7 @@ public class BackgroundSchool extends AbstractSchool {
      */
     @Override
     public double getBiomass() {
-        return this.bkgSpecies.getBiomass(iStep, this.getLength(), Math.round(this.getX()), Math.round(this.getY()));
+        return this.biomass;
     }
 
     /**
@@ -154,9 +135,9 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public int getSpeciesIndex() {
-        return this.bkgSpecies.getFinalIndex();
+        return this.bkgSpecies.getIndex();
     }
-
+    
     @Override
     public float getAge() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -164,12 +145,13 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public float getLength() {
-        return (float) this.bkgSpecies.getTimeSeries().getClass(iClass);
+        //return (float) this.bkgSpecies.getTimeSeries().getClass(iClass);
+        return this.bkgSpecies.getLength();
     }
 
     @Override
     public float getTrophicLevel() {
-        return this.bkgSpecies.getTrophicLevel(iClass);
+        return this.bkgSpecies.getTrophicLevel();
     }
 
     @Override
@@ -190,7 +172,6 @@ public class BackgroundSchool extends AbstractSchool {
         // if (predator.getAgeDt() > 0) {
         // i.e. bkg species will always feed.
         return 1;
-       
     }
 
     @Override
@@ -207,5 +188,9 @@ public class BackgroundSchool extends AbstractSchool {
     public String getSpeciesName() {
         return this.bkgSpecies.getName();
     }
-
+    
+    public void setBiomass(double biomass) {
+        this.biomass = biomass;
+    }
+    
 }
