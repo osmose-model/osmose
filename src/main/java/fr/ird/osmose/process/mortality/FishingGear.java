@@ -51,6 +51,7 @@
  */
 package fr.ird.osmose.process.mortality;
 
+import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.process.mortality.fishery.sizeselect.KnifeEdgeSelectivity;
 import fr.ird.osmose.process.mortality.fishery.sizeselect.SigmoSelectivity;
 import fr.ird.osmose.process.mortality.fishery.sizeselect.GaussSelectivity;
@@ -150,8 +151,7 @@ public class FishingGear extends AbstractMortality {
      * @param school
      * @return The fishing mortality rate.
      */
-    @Override
-    public double getRate(School school) {
+    public double getRate(AbstractSchool school) {
 
         // If the map index is -1 (no map defined), it is assumed that no
         // fishing rate is associated with the current fisherie.
@@ -216,6 +216,11 @@ public class FishingGear extends AbstractMortality {
     
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public double getRate(School school) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
