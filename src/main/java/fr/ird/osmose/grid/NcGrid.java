@@ -53,7 +53,12 @@ package fr.ird.osmose.grid;
 
 import fr.ird.osmose.Cell;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  * This class creates the Osmose grid from a NetCDF grid file. It is the
@@ -118,37 +123,71 @@ public class NcGrid extends AbstractGrid {
     @Override
     Cell[][] makeGrid() {
 
+        // true if lon array is 1D (lon), else assumed to be 2D
+        boolean isCoord1D;
+
+        // Init index and netcdf arrays
+        Index surfIndex = null;
+        Array arrLon = null, arrLat = null, arrMask = null, arrSurf = null;
+        
         NetcdfFile ncGrid = openNetcdfFile(gridFile);
-        double[][] lon = readVariable(ncGrid, strLon);
-        double[][] lat = readVariable(ncGrid, strLat);
-        double[][] mask = readVariable(ncGrid, strMask);
-        
-        int ny = lon.length;
-        int nx = lon[0].length;
-        
-        double[][] surf;      
-        if(this.strSurf != null) {
-            // if the surf string has been set, 
-            // read surface from NetCDF. 
-            surf = readVariable(ncGrid, strLat);
-        } else {
-            // If string surf not set, init. 
-            // surface array
-            surf = new double[ny][nx];           
+
+        try {
+            arrLon = ncGrid.findVariable(strLon).read().reduce();
+            arrLat = ncGrid.findVariable(strLat).read().reduce();
+            arrMask = ncGrid.findVariable(strMask).read().reduce();
+        } catch (IOException ex) {
+            Logger.getLogger(NcGrid.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        isCoord1D = (arrLon.getRank() == 1);
+        int ny = arrMask.getShape()[0];
+        int nx = arrMask.getShape()[1];
+           
+        if(this.strSurf != null) {
+            try {
+                // if the surf string has been set,
+                // read surface from NetCDF.
+                arrSurf = ncGrid.findVariable(strSurf).read().reduce();
+                surfIndex = arrSurf.getIndex();
+            } catch (IOException ex) {
+                Logger.getLogger(NcGrid.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } 
        
+        Index maskIndex = arrMask.getIndex();
+        Index lonIndex = arrLon.getIndex();
+        Index latIndex = arrLat.getIndex();
+        
+        double surf;
+
         Cell[][] grid = new Cell[ny][nx];
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
-                boolean land = (mask[j][i] <= 0);
-                if(this.strSurf == null) { 
+                if (isCoord1D) {
+                    lonIndex.set(i);
+                    latIndex.set(j);
+                } else {
+                    lonIndex.set(j, i);
+                    latIndex.set(j, i);
+                }
+                maskIndex.set(j, i);
+                boolean land = (arrMask.getDouble(maskIndex) <= 0);
+                double tmpLat = arrLat.getDouble(latIndex);
+                double tmpLon = arrLon.getDouble(lonIndex);
+                if (this.strSurf == null) {
                     // If the string surf has not been set, 
                     // init
-                    surf[j][i] = computeSurface(lat[j][i], lon[j][i]);
+                    surf = computeSurface(tmpLat, tmpLon);
+                } else {
+                    surf = arrLat.getDouble(surfIndex);
                 }
-                grid[j][i] = new Cell((j * nx + i), i, j, (float) lat[j][i], (float) lon[j][i], (float) surf[j][i], land);
+
+                grid[j][i] = new Cell((j * nx + i), i, j, (float) tmpLat, (float) tmpLon, (float) surf, land);
             }
         }
+
+        this.closeNetcdfFile(ncGrid);
 
         return grid;
     }
@@ -168,21 +207,20 @@ public class NcGrid extends AbstractGrid {
         }
         return null;
     }
-
-    /**
-     * Load a NetCDF variable from the NetCDF grid file. The function assumes
-     * that the variables is a two-dimensional double array.
+ 
+       /**
+     * Opens the NetCDF grid file.
      *
-     * @param nc, the {@code NetcdfFile} that contains the variable
-     * @param varname, the name of the variable in the NetCDF file
-     * @return the values of the variable as a two-dimensional array of double
+     * @param gridFile, the path of the NetCDF grid file
+     * @return a {@code NetcdfFile} object
      */
-    private double[][] readVariable(NetcdfFile nc, String varname) {
+    private void closeNetcdfFile(NetcdfFile nc) {
+
         try {
-            return (double[][]) nc.findVariable(varname).read().reduce().copyToNDJavaArray();
+            nc.close();
         } catch (IOException ex) {
-            error("Error while reading variable " + varname + " in NetCDF grid file " + nc.getLocation(), ex);
+            error("Failed to close NetCDF grid file " + nc.getLocation(), ex);
         }
-        return null;
     }
+    
 }
