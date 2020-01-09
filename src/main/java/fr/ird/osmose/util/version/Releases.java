@@ -324,6 +324,12 @@ public class Releases {
             void updateParameters() {
 
                 int nSpecies = getConfiguration().getInt("simulation.nspecies");
+                
+                // outputs
+                updateKey("output.mortality.natural.bySize.enabled", "output.mortality.additional.bySize.enabled");
+                updateKey("output.mortality.natural.byAge.enabled", "output.mortality.additional.byAge.enabled");
+                updateKey("output.mortality.naturalN.bySize.enabled", "output.mortality.additionalN.bySize.enabled");
+                updateKey("output.mortality.naturalN.byAge.enabled", "output.mortality.additionalN.byAge.enabled");
 
                 // rename *mortality.natural* into *mortality.additional*
                 for (int i = 0; i < nSpecies; i++) {
@@ -336,11 +342,6 @@ public class Releases {
                     updateKey("mortality.natural.larva.rate.bytDt.file.sp" + i, "mortality.additional.larva.rate.bytDt.file.sp" + i);
                     // spatial 
                     updateKey("mortality.natural.spatial.distrib.file.sp" + i, "mortality.additional.spatial.distrib.file.sp" + i);
-                    // outputs
-                    updateKey("output.mortality.natural.bySize.enabled", "output.mortality.additional.bySize.enabled");
-                    updateKey("output.mortality.natural.byAge.enabled", "output.mortality.additional.byAge.enabled");
-                    updateKey("output.mortality.naturalN.bySize.enabled", "output.mortality.additionalN.bySize.enabled");
-                    updateKey("output.mortality.naturalN.byAge.enabled", "output.mortality.additionalN.byAge.enabled");
                 }
             }
         }
