@@ -69,8 +69,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -379,20 +377,17 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: new way to count the number of species, resource and background based on types.
-        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((name) -> (getString(name).equals("focal"))).count();
-        nResource = (int) this.findKeys("species.type.sp*").stream().filter(name -> getString(name).equals("resource")).count();
-        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(name -> getString(name).equals("background")).count();
+        nSpecies = (int) this.findKeys("species.name.sp*").stream().count();
+        nResource = (int) this.findKeys("species.name.rsc*").stream().count();
+        nBackground = (int) this.findKeys("species.name.bkg*").stream().count();
         
         // Extract the species indexes for the the 
-        this.focalIndex = this.findKeys("species.type.sp*").stream()
-                .filter(name -> getString(name).equals("focal"))
+        this.focalIndex = this.findKeys("species.name.sp*").stream()
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
-        this.bkgIndex = this.findKeys("species.type.sp*").stream()
-                .filter(name -> getString(name).equals("background"))
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
-        this.rscIndex = this.findKeys("species.type.sp*").stream()
-                .filter(name -> getString(name).equals("resource"))
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
+        this.bkgIndex = this.findKeys("species.name.bkg*").stream()
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".bkg") + 4))).toArray();
+        this.rscIndex = this.findKeys("species.type.rsc*").stream()
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rsc") + 4))).toArray();
         
         nSpecies = getInt("simulation.nspecies");
         nResource = getInt("simulation.nresource");
