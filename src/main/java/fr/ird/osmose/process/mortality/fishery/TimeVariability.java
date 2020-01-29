@@ -116,13 +116,13 @@ public class TimeVariability extends OsmoseLinker {
                 this.initFBaseLinear();
                 break;
             case "byyear":
-                this.getFBaseByYear();
+                this.initFBaseByYear();
                 break;
             case "bydt":
-                this.getFBaseByDt();
+                this.initFBaseByDt();
                 break;
             case "byperiod":
-                this.getFBaseByPeriod();
+                this.initFBaseByPeriod();
                 break;
             default:
                 error("Fishing base " + type + "is not implemented.", new Exception());
@@ -135,7 +135,7 @@ public class TimeVariability extends OsmoseLinker {
      * is 8 values to fill, the timeArr array will be [1, 3, 7, 8, 20, 1, 3, 7]
      *
      */
-    private void getFBaseByDt() {
+    private void initFBaseByDt() {
 
         if (getConfiguration().canFind("fishery.fishing.rate.bydt.file.fsh" + fishery.getFIndex())) {
             // If a file parameter has been defined 
@@ -162,7 +162,7 @@ public class TimeVariability extends OsmoseLinker {
      * simulated years, Osmose will loop over it. If there are more F values
      * than number of simulated years, Osmose will ignore exceeding years.
      */
-    private void getFBaseByYear() {
+    private void initFBaseByYear() {
 
         double[] annualF = getConfiguration().getArrayDouble("fishery.fishing.rate.byYear.fsh" + fishery.getFIndex());
         if (annualF.length != nyear) {
@@ -190,7 +190,7 @@ public class TimeVariability extends OsmoseLinker {
      * If rate = [a, b, c, d], then timeArr = [ a, a, a, b, b, b, c, c, c, d, d,
      * d, (year 1) a, a, a, b, b, b, c, c, c, d, d, d, (year 2) ]
      */
-    private void getFBaseByPeriod() {
+    private void initFBaseByPeriod() {
 
         // fishing rate vector
         double[] value = getConfiguration().getArrayDouble("fishery.fishing.rate.byPeriod.fsh" + fishery.getFIndex());
