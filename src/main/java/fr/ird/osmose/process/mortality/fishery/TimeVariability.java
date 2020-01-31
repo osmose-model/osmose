@@ -363,10 +363,10 @@ public class TimeVariability extends OsmoseLinker {
         int nStepYear = getConfiguration().getNStepYear();
 
         // Fishing seasonality
-        if (!getConfiguration().isNull("fishery.fishing.rate.season.fsh" + fishery.getFIndex())) {
+        if (!getConfiguration().isNull("fishery.season.distrib.file.fsh" + fishery.getFIndex())) {
             // Read seasonality from CSV file
             SingleTimeSeries sts = new SingleTimeSeries();
-            String filename = getConfiguration().getFile("fishery.fishing.rate.season.fsh" + fishery.getFIndex());
+            String filename = getConfiguration().getFile("fishery.season.distrib.file.fsh" + fishery.getFIndex());
             // Seasonality must be at least one year, and at max the length of the simulation
             sts.read(filename);
             season = sts.getValues();
