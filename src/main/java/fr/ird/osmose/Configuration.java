@@ -378,7 +378,7 @@ public class Configuration extends OLogger {
 
         // barrier.n: new way to count the number of species, resource and background based on types.
         nSpecies = (int) this.findKeys("species.name.sp*").stream().count();
-        nResource = (int) this.findKeys("species.name.rsc*").stream().count();
+        nResource = (int) this.findKeys("resource.name.rsc*").stream().count();
         nBackground = (int) this.findKeys("species.name.bkg*").stream().count();
         
         // Extract the species indexes for the the 
@@ -386,7 +386,7 @@ public class Configuration extends OLogger {
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
         this.bkgIndex = this.findKeys("species.name.bkg*").stream()
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".bkg") + 4))).toArray();
-        this.rscIndex = this.findKeys("species.type.rsc*").stream()
+        this.rscIndex = this.findKeys("resource.name.rsc*").stream()
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rsc") + 4))).toArray();
         
         nSpecies = getInt("simulation.nspecies");

@@ -79,6 +79,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Mortality processes compete stochastically.
@@ -198,7 +200,7 @@ public class MortalityProcess extends AbstractProcess {
             fisheriesMortality = new FishingGear[nfishery];
             int count = 0;
             for (int i = 0; i < nfishery; i++) {
-                while (!getConfiguration().canFind("fishery.select.curve.fsh" + count)) {
+                while (!getConfiguration().canFind("fishery.name.fsh" + count)) {
                     count++;
                 }
                 fisheriesMortality[i] = new FishingGear(getRank(), count);
@@ -364,7 +366,7 @@ public class MortalityProcess extends AbstractProcess {
      * process. > Asynchronous updating of school biomass (it means biomass are
      * updated on the fly).
      */
-    private void computeMortality(int subdt, Cell cell) {
+    private void computeMortality(int subdt, Cell cell) throws Exception {
 
         List<School> schools = getSchoolSet().getSchools(cell);
         if (null == schools) {
@@ -682,7 +684,11 @@ public class MortalityProcess extends AbstractProcess {
             try {
                 List<Cell> cells = getGrid().getOceanCells();
                 for (int iCell = iStart; iCell < iEnd; iCell++) {
-                    computeMortality(subdt, cells.get(iCell));
+                    try {
+                        computeMortality(subdt, cells.get(iCell));
+                    } catch (Exception ex) {
+                        Logger.getLogger(MortalityProcess.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             } finally {
                 doneSignal.countDown();
