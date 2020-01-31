@@ -371,17 +371,6 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Returns the number of dead fish for a given mortality cause.
-     *
-     * @see MortalityCause
-     * @param cause, the mortality cause
-     * @return the number of dead fish for this mortality cause
-     */
-    public double getNdead(MortalityCause cause) {
-        return nDead[cause.index];
-    }
-
-    /**
      * Sets the number of dead fish for a given mortality cause.
      *
      * @see MortalityCause
