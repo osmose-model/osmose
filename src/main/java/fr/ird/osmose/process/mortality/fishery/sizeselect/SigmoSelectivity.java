@@ -51,8 +51,10 @@
  */
 package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
+import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
+import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.FishingGear;
 
 /**
@@ -94,14 +96,9 @@ public class SigmoSelectivity extends SizeSelectivity {
         Configuration cfg = Osmose.getInstance().getConfiguration();
 
         // If L75 is found, Ricardo formulae is used
-        if (cfg.canFind("fishery.selectivity.l75.fsh" + index)) {
             this.l75 = cfg.getFloat("fishery.selectivity.l75.fsh" + index);
             this.s1 = (this.getL50() * Math.log(3)) / (this.l75 - this.getL50());
             this.s2 = this.s1 / this.getL50();
-        } else {
-            this.b = cfg.getFloat("fishery.selectivity.b.fsh" + index);
-            this.a = cfg.getFloat("fishery.selectivity.a.fsh" + index);
-        }
     }
     
     /**
@@ -112,20 +109,16 @@ public class SigmoSelectivity extends SizeSelectivity {
      * @return A selectivity value (0<output<1)
      */
     @Override
-    public double getSelectivity(double size) {
+    public double getSelectivity(AbstractSchool school) {
+        
         double output;
-        // If Ricardo formulation should be used.
-        if (this.l75 > 0) {
-            output = 1 / (1 + Math.exp(this.s1 - (this.s2 * size)));
-        } else {
-            // Sel = 1 / (1 + a*exp(-b(x-l50)))
-            output = 1 / (1 + this.a * Math.exp(-this.b * (size - this.getL50())));
-        }
+
+        output = 1 / (1 + Math.exp(this.s1 - (this.s2 * school.getLength())));
 
         if (output < this.getTiny()) {
             output = 0.0;
         }
-        
+
         return output;
 
     }

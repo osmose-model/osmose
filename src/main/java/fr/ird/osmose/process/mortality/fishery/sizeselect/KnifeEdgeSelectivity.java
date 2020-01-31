@@ -51,6 +51,8 @@
  */
 package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
+import fr.ird.osmose.AbstractSchool;
+import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.FishingGear;
 
 /**
@@ -88,9 +90,9 @@ public class KnifeEdgeSelectivity extends SizeSelectivity {
      * @return A selectivity value (0<output<1)
      */
     @Override
-    public double getSelectivity(double size) {
+    public double getSelectivity(AbstractSchool school) {
 
-        double output = size < this.getL50() ? 0 : 1;
+        double output = school.getLength() < this.getL50() ? 0 : 1;
         return output;
     }
 }

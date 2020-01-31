@@ -51,9 +51,12 @@
  */
 package fr.ird.osmose.process.mortality.fishery.sizeselect;
 
+import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
+import fr.ird.osmose.School;
+import fr.ird.osmose.stage.SizeStage;
 import fr.ird.osmose.util.OsmoseLinker;
 
 /**
@@ -62,11 +65,6 @@ import fr.ird.osmose.util.OsmoseLinker;
  * @author nbarrier
  */
 public abstract class SizeSelectivity extends OsmoseLinker {
-    
-    /**
-     * Type of the selectivity variable (age or size).
-     */
-    private SizeSelectivity.Variable variable;
     
     /** L50 size. Used in all three types of selectivities. */
     private double l50;
@@ -78,6 +76,8 @@ public abstract class SizeSelectivity extends OsmoseLinker {
      * Allows to recover the fishery index and the MPI rank.
      */
     private final FishingGear mort;
+    
+    private SizeStage sizeStage;
     
     /**
      * Public constructor. Initialize the FisheryMortality pointer.
@@ -99,14 +99,6 @@ public abstract class SizeSelectivity extends OsmoseLinker {
         
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
-        // Initialize the selectivity variable 
-        String var = cfg.getString("fishery.selectivity.structure.fsh" + index);
-        if (var.equals("age")) {
-            this.variable = SizeSelectivity.Variable.AGE;
-        } else {
-            this.variable = SizeSelectivity.Variable.SIZE;
-        }
-        
         // Init the l50 variable
         this.l50 = cfg.getFloat("fishery.selectivity.l50.fsh" + index);
 
@@ -123,22 +115,10 @@ public abstract class SizeSelectivity extends OsmoseLinker {
      * @param size Specie size
      * @return A selectivity value (0<output<1)
      */
-    public abstract double getSelectivity(double size);
-    
+    public abstract double getSelectivity(AbstractSchool school);
     
     /** Abstract init method. */
     public abstract void init();
-   
-    /** Returns the selectivity variable.
-     * @return  */
-    public Variable getVariable() {
-        return this.variable;
-    }
-    
-    public enum  Variable {
-        SIZE,
-        AGE,
-    }
     
     public FishingGear getGear() {
         return this.mort;
