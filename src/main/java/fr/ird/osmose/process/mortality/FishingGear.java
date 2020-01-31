@@ -52,18 +52,15 @@
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.AbstractSchool;
-import fr.ird.osmose.process.mortality.fishery.sizeselect.KnifeEdgeSelectivity;
-import fr.ird.osmose.process.mortality.fishery.sizeselect.SigmoSelectivity;
-import fr.ird.osmose.process.mortality.fishery.sizeselect.GaussSelectivity;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.fishery.AccessMatrix;
 import fr.ird.osmose.process.mortality.fishery.FishingMapSet;
-import fr.ird.osmose.process.mortality.fishery.sizeselect.SizeSelectivity;
 import fr.ird.osmose.process.mortality.fishery.TimeVariability;
 import fr.ird.osmose.util.GridMap;
+import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
+import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
@@ -73,7 +70,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 public class FishingGear extends AbstractMortality {
 
     private String name;
-    
+
     /**
      * Fishery index.
      */
@@ -88,29 +85,52 @@ public class FishingGear extends AbstractMortality {
      * Fishery map set.
      */
     private FishingMapSet fMapSet;
-    
+
     /**
-     * Fishery accessibility.
+     * Fishery accessibility file. Provides the catchability for the given
+     * fishery. Function of time and species.
      */
-    private double[] accessibility;
-    
-    /** Array of l50 values. One value per time step. */
+    private BySpeciesTimeSeries catchability;
+
+    /**
+     * Array of l50 values. One value per time step.
+     */
     private double[] l50_array;
-    
-    /** Array of l50 values. One value per time step. */
+
+    /**
+     * Array of l75 values. One value per time step.
+     */
     private double[] l75_array;
-    
-    /** Value below which selectivity is forced to 0. */
+
+    /**
+     * Value below which selectivity is forced to 0.
+     */
     private double tiny = 0;
-    
-    /** Array of seelectivity types. One value per time step. */
-    private int[] selectType_array;
-    
-    /** Array of selectivity type. */
+
+    /**
+     * Array of seelectivity types. One value per time step.
+     */
+    private double[] selectType_array;
+
+    /**
+     * Array of selectivity methods. 0 = knife edge. 1 = Sigmoid 2 = Guaussian
+     */
     private SizeSelect select[];
-    
-    private interface SizeSelect { 
+
+    private interface SizeSelect {
+
         double getSelectivity(AbstractSchool school);
+    }
+
+    /**
+     * Interface to allow recovering the size/age of species. Both background
+     * and focal.
+     */
+    private VarGetter varGetter;
+
+    private interface VarGetter {
+
+        public double getVariable(AbstractSchool school);
     }
 
     public FishingGear(int rank, int findex) {
@@ -122,18 +142,35 @@ public class FishingGear extends AbstractMortality {
     public void init() {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        
+
+        if (cfg.canFind("fishery.selectivity.variable.fsh" + fIndex)) {
+            String selVar = cfg.getString("fishery.selectivity.variable.fsh" + fIndex);
+            if (selVar.equals("age")) {
+                varGetter = (school) -> (school.getAge());
+            } else {
+                varGetter = (school) -> (school.getLength());
+            }
+        } else {
+            varGetter = (school) -> (school.getLength());
+        }
+
         // Recover the fishery name
         this.name = cfg.getString("fishery.name.fsh" + fIndex);
-        
+
         // if tiny parameter exists, set tiny. Else, use default
         if (cfg.canFind("fishery.selectivity.tiny.fsh" + fIndex)) {
             this.tiny = cfg.getFloat("fishery.selectivity.tiny.fsh" + fIndex);
         }
-        
-        this.l50_array = this.getConfiguration().getArrayDouble("fishery.l50.fsh" + fIndex);
-        this.l75_array = this.getConfiguration().getArrayDouble("fishery.l75.fsh" + fIndex);
-        this.selectType_array = this.getConfiguration().getArrayInt("fishery.selectivity.fsh" + fIndex);
+
+        SingleTimeSeries ts = new SingleTimeSeries();
+        ts.read(this.getConfiguration().getFile("fishery.l50.file.fsh" + fIndex));
+        this.l50_array = ts.getValues();
+
+        ts.read(this.getConfiguration().getFile("fishery.l75.file.fsh" + fIndex));
+        this.l75_array = ts.getValues();
+
+        ts.read(this.getConfiguration().getFile("fishery.selectivity.type.file.fsh" + fIndex));
+        this.selectType_array = ts.getValues();
 
         // Initialize the time varying array
         timeVar = new TimeVariability(this);
@@ -145,19 +182,17 @@ public class FishingGear extends AbstractMortality {
 
         // accessibility matrix
         // (it provides the percentage of fishes that are going to be captured)
-        AccessMatrix accessMatrix = new AccessMatrix();
-        accessMatrix.read(getConfiguration().getFile("fishery.catch.matrix.file"));
-        accessibility = accessMatrix.getValues(fIndex);  // accessibility for one gear (nspecies).
-        
+        BySpeciesTimeSeries accessMatrix = new BySpeciesTimeSeries();
+        accessMatrix.read(getConfiguration().getFile("fishery.catchability.file.fsh" + fIndex));
+
         // Init the size selectivity array
         select = new SizeSelect[3];
         select[0] = (sch -> this.getKnifeEdgeSelectivity(sch));  // knife edge selectivity
         select[1] = (sch -> this.getSigmoidSelectivity(sch));    // Sigmoid selectivity
         select[2] = (sch -> this.getGaussianSelectivity(sch));   // Gaussian selectivity
-        
 
     }
-    
+
     /**
      * Returns the fishing mortality rate associated with a given fishery. It is
      * the product of the time varying fishing rate, of the size selectivity and
@@ -166,26 +201,28 @@ public class FishingGear extends AbstractMortality {
      * @param school
      * @return The fishing mortality rate.
      */
-    public double getRate(AbstractSchool school) {
+    public double getRate(AbstractSchool school) throws Exception {
+
+        int index = getSimulation().getIndexTimeSimu();
 
         // If the map index is -1 (no map defined), it is assumed that no
         // fishing rate is associated with the current fisherie.
-        if (fMapSet.getIndexMap(getSimulation().getIndexTimeSimu()) == -1) {
+        if (fMapSet.getIndexMap(index) == -1) {
             return 0;
         }
 
-        double speciesAccessibility = accessibility[school.getSpeciesIndex()];
-        if (speciesAccessibility == 0.d) {
+        double speciesCatchability = this.catchability.getValue(index, school.getSpeciesName());
+        if (speciesCatchability == 0.d) {
             return 0.d;
         }
 
         // Recovers the school cell (used to recover the map factor)
         Cell cell = school.getCell();
 
-        int selectIndex =  this.getSimulation().getIndexTimeSimu() % selectType_array.length;
-
         // recovers the time varying rate of the fishing mortality
-        double timeSelect = timeVar.getTimeVar(getSimulation().getIndexTimeSimu());
+        double timeSelect = timeVar.getTimeVar(index);
+
+        int selectIndex = (int) this.selectType_array[index];
 
         // Recovers the size/age fishery selectivity factor [0, 1]
         double sizeSelect = select[selectIndex].getSelectivity(school);
@@ -198,7 +235,7 @@ public class FishingGear extends AbstractMortality {
             spatialSelect = 0.0;
         }
 
-        return speciesAccessibility * timeSelect * sizeSelect * spatialSelect;
+        return speciesCatchability * timeSelect * sizeSelect * spatialSelect;
     }
 
     /**
@@ -209,18 +246,20 @@ public class FishingGear extends AbstractMortality {
     public int getFIndex() {
         return this.fIndex;
     }
-    
-    /** Returns the fishery name. 
-     * 
-     * @return 
+
+    /**
+     * Returns the fishery name.
+     *
+     * @return
      */
     public String getName() {
         return this.name;
     }
-    
-    /** Sets the name of the fishery.
-     * 
-     * @param name 
+
+    /**
+     * Sets the name of the fishery.
+     *
+     * @param name
      */
     public void setName(String name) {
         this.name = name;
@@ -230,65 +269,74 @@ public class FishingGear extends AbstractMortality {
     public double getRate(School school) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    /** Computes the knife edge selectivity.
+
+    /**
+     * Computes the knife edge selectivity.
+     *
      * @param school
-     * @return 
+     * @return
      */
     public double getKnifeEdgeSelectivity(AbstractSchool school) {
-        
-        double l50 = this.getArrayVal(this.l50_array);
-        
-        double output = (school.getLength() < l50) ? 0 : 1;
+
+        int index = this.getSimulation().getIndexTimeSimu();
+
+        double l50 = this.l50_array[index];
+
+        double output = (varGetter.getVariable(school) < l50) ? 0 : 1;
         return output;
     }
 
-    /** Computes the Gaussian selectivity.
-     * 
+    /**
+     * Computes the Gaussian selectivity.
+     *
      * @param school
-     * @return 
+     * @return
      */
     public double getGaussianSelectivity(AbstractSchool school) {
-        
-        double l50 = this.getArrayVal(this.l50_array);
-        double l75 = this.getArrayVal(this.l75_array);
-        
+
+        int index = this.getSimulation().getIndexTimeSimu();
+
+        double l50 = this.l50_array[index];
+        double l75 = this.l75_array[index];
+
         NormalDistribution norm = new NormalDistribution();
-        
+
         double sd = (l75 - l50) / norm.inverseCumulativeProbability(0.75);  // this is the qnorm function
         // initialisation of the distribution used in selectity calculation
         NormalDistribution distrib = new NormalDistribution(l50, sd);
-        
+
         double output;
         // calculation of selectivity. Normalisation by the maximum value 
         // (i.e. the value computed with x = mean).
         // If L75 > 0, assumes Ricardo Formulation should be used
-        output = distrib.density(school.getLength()) / distrib.density(l50);
+        output = distrib.density(varGetter.getVariable(school)) / distrib.density(l50);
 
         if (output < tiny) {
             output = 0.0;
         }
 
         return output;
-        
+
     }
 
-    /** Computes the sigmoid selectivity. 
-     * 
+    /**
+     * Computes the sigmoid selectivity.
+     *
      * @param school
-     * @return 
+     * @return
      */
     public double getSigmoidSelectivity(AbstractSchool school) {
-        
-        double l50 = this.getArrayVal(this.l50_array);
-        double l75 = this.getArrayVal(this.l75_array);
+
+        int index = this.getSimulation().getIndexTimeSimu();
+        double l50 = this.l50_array[index];
+        double l75 = this.l75_array[index];
 
         double s1 = (l50 * Math.log(3)) / (l75 - l50);
         double s2 = s1 / l50;
 
         double output;
 
-        output = 1 / (1 + Math.exp(s1 - (s2 * school.getLength())));
+        output = 1 / (1 + Math.exp(s1 - (s2 * varGetter.getVariable(school))));
 
         if (output < tiny) {
             output = 0.0;
@@ -297,17 +345,4 @@ public class FishingGear extends AbstractMortality {
         return output;
 
     }
-    
-    
-    /** Recovers the value of an array by recycling values. 
-     * 
-     * @param input Input array (l50 for instance)
-     * @return 
-     */
-    private double getArrayVal(double[] input) {      
-        int length = input.length;
-        int index = this.getSimulation().getIndexTimeSimu() % length;
-        return input[index];    
-    }
-    
 }
