@@ -90,7 +90,7 @@ public class FisheryAccessMatrixNetcdf extends AbstractInputNetcdf {
             varArray = (double[][][]) netcdfVar.read().copyToNDJavaArray();
             
             // Reads the species names for the prey and predators
-            Variable speciesVar = nc.findVariable("SpeciesName");
+            Variable speciesVar = nc.findVariable("speciesName");
             namesFish = this.getStringVar((char[][]) speciesVar.read().copyTo1DJavaArray());
             
             Variable gearVar = nc.findVariable("fishingGearName");
@@ -133,15 +133,16 @@ public class FisheryAccessMatrixNetcdf extends AbstractInputNetcdf {
      */
     public double getAccessibility(int timeStep, IAggregation predator, FishingGear gear) throws Exception {
 
-        int ncIndex = this.getNcIndex(timeStep);
-
+        this.setNcIndex(timeStep);
+        
+        
         // finds the index (i.e. column index) for the predator
         int indexSpecies = this.findIndex(predator.getSpeciesName(), this.namesFish);
         
         // fins the index of the fishing gear
         int fisheryIndex = this.findIndex(gear.getName(), this.namesGear);
         
-        double output =  varArray[ncIndex][fisheryIndex][indexSpecies];
+        double output =  varArray[this.getNcIndex()][fisheryIndex][indexSpecies];
 
         return (output);
 

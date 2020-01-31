@@ -191,7 +191,7 @@ public class PredationAccessMatrixNetcdf extends AbstractInputNetcdf {
      */
     public double[] getAccessibility(int timeStep, IAggregation predator, List<IAggregation> preys) throws Exception {
 
-        int ncIndex = this.getNcIndex(timeStep);
+        this.setNcIndex(timeStep);
         
         // finds the index (i.e. column index) for the predator
         int indexPred = this.findIndex(predator.getSpeciesName(), this.classManager.getClass(predator), namesPred, classPred);
@@ -202,7 +202,7 @@ public class PredationAccessMatrixNetcdf extends AbstractInputNetcdf {
             // finds the prey index (i.e. row index)
             int indexPrey = this.findIndex(prey.getSpeciesName(), this.classManager.getClass(prey), namesPrey, classPrey);
             try {
-                output[iprey] = varArray[ncIndex][indexPrey][indexPred];
+                output[iprey] = varArray[this.getNcIndex()][indexPrey][indexPred];
             } catch (ArrayIndexOutOfBoundsException ex) {
                 String errorMsg = String.format("Problem with indexes. indexPrey=%d and indexPred=%d", indexPrey, indexPred);
                 System.out.println(errorMsg);

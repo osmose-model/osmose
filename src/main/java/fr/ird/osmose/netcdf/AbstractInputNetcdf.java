@@ -85,6 +85,8 @@ public abstract class AbstractInputNetcdf {
     /** Number of records (i.e. time steps) in the Netcdf file. */
     private int nRecords;
     
+    private int ncIndex;
+    
     /** Abstract method for class initialization.
      * @throws java.io.IOException */
     public abstract void init() throws IOException;
@@ -119,6 +121,10 @@ public abstract class AbstractInputNetcdf {
      */
     public void openNcFile() throws IOException {
         nc = NetcdfFile.open(filename, null);
+    }
+    
+    public void closeNcFile() throws IOException {
+        nc.close();
     }
 
     /** Public constructor. 
@@ -159,8 +165,12 @@ public abstract class AbstractInputNetcdf {
         return output;    
     }
     
-    public int getNcIndex(int timeStep) { 
-        return (timeStep % this.getNRecords());
+    public void setNcIndex(int timeStep) { 
+        this.ncIndex = (timeStep % this.getNRecords());
+    }
+    
+    public int getNcIndex() { 
+        return this.ncIndex;
     }
     
 }
