@@ -95,28 +95,33 @@ public class MapSet extends OsmoseLinker {
      * '{$prefix}.map#.species' or '{$prefix}.map#.file', etc.
      */
     protected final String prefix;
-    
-    /** Sufix of the maps. Can be "sp" or "bkg". */
+
+    /**
+     * Sufix of the maps. Can be "sp" or "bkg".
+     */
     protected final String suffix;
-    
+
     /**
      * Index of the species.
      */
     protected final int iSpecies;
+    
     /**
      * Array of map indexes for every age class and simulation time step.
      * int[N_AGE_CLASSES][N_STEP_SIMU]
      */
     protected int[][] indexMaps;
+    
     /**
      * List of the maps.
      */
     protected GridMap[] maps;
+    
     /**
      * List of the pathnames of the CSV files.
      */
     protected String[] mapFile;
-    
+
     public MapSet(int iSpecies, String prefix) {
         this(iSpecies, prefix, "sp");
     }
@@ -141,7 +146,7 @@ public class MapSet extends OsmoseLinker {
     public GridMap getMap(int numMap) {
         return maps[numMap];
     }
-    
+
     public GridMap[] getMaps() {
         return maps;
     }
@@ -149,16 +154,17 @@ public class MapSet extends OsmoseLinker {
     public GridMap getMap(School school, int iStepSimu) {
         return getMap(getIndexMap(school.getAgeDt(), iStepSimu));
     }
-    
+
     /**
      * Recovers the map from the class index instead of age value.
+     *
      * @param classIndex
      * @param iStepSimu
-     * @return 
+     * @return
      */
-     public GridMap getMap(int classIndex, int iStepSimu) { 
-         return getMap(getIndexMap(classIndex, iStepSimu)); 
-     }
+    public GridMap getMap(int classIndex, int iStepSimu) {
+        return getMap(getIndexMap(classIndex, iStepSimu));
+    }
 
     public String getMapFile(int numMap) {
         return mapFile[numMap];
@@ -222,13 +228,13 @@ public class MapSet extends OsmoseLinker {
 
         // Counts the number of maps associated with the current species
         int nmapmax = nc.findDimension("m").getLength();
-        
+
         // Initialize the total number of grid maps 
         maps = new GridMap[nmapmax];
-        
+
         // Loop over all the Maps defined in the NetCDF.
         for (int i = 0; i < nmapmax; i++) {
-            
+
             // Reads the GridMap by using NetCDF
             maps[i] = new GridMap();
             maps[i].read(nc, i);
@@ -243,13 +249,13 @@ public class MapSet extends OsmoseLinker {
             // if unset, ageMin/age<ax should be set equal to -1
             int ageMin = nc.findVariable("agemin").read(new int[]{i}, new int[]{1}).getInt(0);
             int ageMax = nc.findVariable("agemax").read(new int[]{i}, new int[]{1}).getInt(0);
-            
+
             // If ageMin is unset in the NetCDF files (values of -1),
             // default values are set.
-            if(ageMin == -1) {
+            if (ageMin == -1) {
                 ageMin = 0;
             }
-            if(ageMax == -1) {
+            if (ageMax == -1) {
                 ageMax = getSpecies(iSpecies).getLifespanDt() / getConfiguration().getNStepYear();
             }
 
@@ -287,7 +293,7 @@ public class MapSet extends OsmoseLinker {
 
             }
         }
-        
+
         nc.close();
     }
 

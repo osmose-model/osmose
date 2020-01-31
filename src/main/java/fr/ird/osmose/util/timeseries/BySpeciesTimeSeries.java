@@ -59,6 +59,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * 
+ * Class to manage time series defined by species.
  *
  * @author Nicolas Barrier
  */
@@ -133,6 +135,12 @@ public class BySpeciesTimeSeries extends OsmoseLinker {
         }
     }
 
+    /** Gets the column index based on header files.
+     * 
+     * @param name
+     * @return
+     * @throws Exception 
+     */
     public int classOf(String name) throws Exception {
         
         for(int i = 0; i < this.names.length; i++) {
