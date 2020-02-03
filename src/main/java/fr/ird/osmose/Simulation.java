@@ -285,9 +285,18 @@ public class Simulation extends OsmoseLinker {
        
         resourceForcing = new HashMap();
         
-        this.getConfiguration().findKeys("species.type.sp*").stream()
-                .filter(name -> (name.equals("background") || name.equals("resource")))
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3)))
+        // Init resources for background species
+        this.getConfiguration().findKeys("species.name.bkg*").stream()
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".bkg") + 4)))
+                .forEach(i -> {
+                    ResourceForcing resForcing = new ResourceForcing(i);
+                    resForcing.init();
+                    resourceForcing.put(i, resForcing);
+                    // Name must contain only alphanumerical characters
+                });
+
+        this.getConfiguration().findKeys("resource.name.rsc*").stream()
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rsc") + 4)))
                 .forEach(i -> {
                     ResourceForcing resForcing = new ResourceForcing(i);
                     resForcing.init();
