@@ -458,7 +458,7 @@ public class Configuration extends OLogger {
 
         // Fisheries
         boolean fisheryEnabled = getBoolean("fishery.enabled");
-        nFishery = fisheryEnabled ? findKeys("fishery.select.curve.fsh*").size() : 0;
+        nFishery = fisheryEnabled ? findKeys("fishery.name.fsh*").size() : 0;
 
         // Output regions
         outputRegions = new ArrayList();
