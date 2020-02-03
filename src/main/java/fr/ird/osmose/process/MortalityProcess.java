@@ -293,7 +293,7 @@ public class MortalityProcess extends AbstractProcess {
         int iStepSimu = getSimulation().getIndexTimeSimu();
         for (List<Resource> resources : resourcesSet.values()) {    // loop over the cells
             for (Resource resource : resources) {    // loop over the resources
-                int iRsc = resource.getSpeciesIndex();
+                int iRsc = resource.getSpeciesIndex() - this.getNSpecies();
                 double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
                         * getResourceForcing(iRsc).getBiomass(resource.getCell());
                 resource.setBiomass(accessibleBiom);

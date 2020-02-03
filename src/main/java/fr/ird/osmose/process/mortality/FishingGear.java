@@ -187,8 +187,8 @@ public class FishingGear extends AbstractMortality {
 
         // accessibility matrix
         // (it provides the percentage of fishes that are going to be captured)
-        BySpeciesTimeSeries accessMatrix = new BySpeciesTimeSeries();
-        accessMatrix.read(getConfiguration().getFile("fishery.catchability.file.fsh" + fIndex));
+        this.catchability = new BySpeciesTimeSeries();
+        catchability.read(getConfiguration().getFile("fishery.catchability.file.fsh" + fIndex));
 
         // Init the size selectivity array
         select = new SizeSelect[3];
