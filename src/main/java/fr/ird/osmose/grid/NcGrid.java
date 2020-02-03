@@ -110,6 +110,9 @@ public class NcGrid extends AbstractGrid {
         this.strLon = getConfiguration().getString("grid.var.lon");
         this.strMask = getConfiguration().getString("grid.var.mask");
         if(this.getConfiguration().canFind("grid.var.surf")) {
+            // If a surface string parameter is found, assumes surface
+            // is read.
+            this.setReadSurf(true);
             this.strSurf = this.getConfiguration().getString("grid.var.surf");
         }
     }
@@ -128,7 +131,9 @@ public class NcGrid extends AbstractGrid {
 
         // Init index and netcdf arrays
         Index surfIndex = null;
-        Array arrLon = null, arrLat = null, arrMask = null, arrSurf = null;
+        Array arrLon = null;
+        Array arrLat = null;
+        Array arrMask = null;
         
         NetcdfFile ncGrid = openNetcdfFile(gridFile);
 
@@ -144,11 +149,11 @@ public class NcGrid extends AbstractGrid {
         int ny = arrMask.getShape()[0];
         int nx = arrMask.getShape()[1];
            
-        if(this.strSurf != null) {
+        if(this.isReadSurf()) {
             try {
                 // if the surf string has been set,
                 // read surface from NetCDF.
-                arrSurf = ncGrid.findVariable(strSurf).read().reduce();
+                Array arrSurf = ncGrid.findVariable(strSurf).read().reduce();
                 surfIndex = arrSurf.getIndex();
             } catch (IOException ex) {
                 Logger.getLogger(NcGrid.class.getName()).log(Level.SEVERE, null, ex);
@@ -159,8 +164,6 @@ public class NcGrid extends AbstractGrid {
         Index lonIndex = arrLon.getIndex();
         Index latIndex = arrLat.getIndex();
         
-        double surf;
-
         Cell[][] grid = new Cell[ny][nx];
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
@@ -175,15 +178,12 @@ public class NcGrid extends AbstractGrid {
                 boolean land = (arrMask.getDouble(maskIndex) <= 0);
                 double tmpLat = arrLat.getDouble(latIndex);
                 double tmpLon = arrLon.getDouble(lonIndex);
-                if (this.strSurf == null) {
-                    // If the string surf has not been set, 
-                    // init
-                    surf = computeSurface(tmpLat, tmpLon);
-                } else {
-                    surf = arrLat.getDouble(surfIndex);
+                grid[j][i] = new Cell((j * nx + i), i, j, (float) tmpLat, (float) tmpLon, land);
+                if (this.strSurf != null) {
+                    double surf = arrLat.getDouble(surfIndex);
+                    grid[j][i].setSurface((float) surf);
                 }
 
-                grid[j][i] = new Cell((j * nx + i), i, j, (float) tmpLat, (float) tmpLon, (float) surf, land);
             }
         }
 
@@ -222,5 +222,5 @@ public class NcGrid extends AbstractGrid {
             error("Failed to close NetCDF grid file " + nc.getLocation(), ex);
         }
     }
-    
+        
 }

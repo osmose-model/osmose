@@ -131,6 +131,8 @@ public abstract class AbstractGrid extends OsmoseLinker {
      * Zonal size, in degree, of a cell (delta longitude).
      */
     private float dLong;
+       
+    private boolean readSurf = false;
 
 /////////////////////////////////////
 // Definition of the abstract methods
@@ -334,6 +336,16 @@ public abstract class AbstractGrid extends OsmoseLinker {
          */
         dLat = (latMax - latMin) / (float) ny;
         dLong = (longMax - longMin) / (float) nx;
+        
+        if(!this.readSurf) { 
+            for(int i=0; i<nx; i++) { 
+                 for(j=0; j<ny; j++) {
+                     double surf = this.computeSurface(matrix[j][i].getLat(), matrix[j][i].getLon());
+                     matrix[j][i].setSurface((float) surf);
+                 }
+            }
+        }
+        
     }
 
     /**
@@ -499,7 +511,7 @@ public abstract class AbstractGrid extends OsmoseLinker {
 
         float dlat = getGrid().getdLat();
         float dlon = getGrid().getdLong();
-
+        
         // Earth radius in m
         double Rt = 6371 * 1e3;
         double surf = Rt * deg2rad(dlat) * Rt * deg2rad(dlon) * Math.cos(deg2rad(lat));
@@ -515,5 +527,13 @@ public abstract class AbstractGrid extends OsmoseLinker {
     private double deg2rad(double value) {
         return value * Math.PI / 180.;
     }
+    
+    public boolean isReadSurf() {
+        return this.readSurf;
+    }
 
+    public void setReadSurf(boolean readSurf) {
+        this.readSurf = readSurf;
+    }
+    
 }

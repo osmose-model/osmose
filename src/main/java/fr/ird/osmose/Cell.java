@@ -119,13 +119,12 @@ public class Cell {
      * @param land a boolean, {@code true} if the cell is on land, {@code false}
      * if the cell is in ocean
      */
-    public Cell(int index, int i, int j, float lat, float lon, float surf, boolean land) {
+    public Cell(int index, int i, int j, float lat, float lon, boolean land) {
         this.index = index;
         this.i = i;
         this.j = j;
         this.lat = lat;
         this.lon = lon;
-        this.surf = surf;
         this.land = land;
     }
 
