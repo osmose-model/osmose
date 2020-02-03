@@ -83,7 +83,6 @@ public class FisheryGridMap extends GridMap {
             /*
              * Read the CSV file
              */
-            System.out.println(csvFile);
             CSVReader reader = new CSVReader(new FileReader(csvFile), Separator.guess(csvFile).getSeparator());
             List<String[]> lines = reader.readAll();
             /*

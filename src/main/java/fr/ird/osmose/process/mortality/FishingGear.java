@@ -61,7 +61,9 @@ import fr.ird.osmose.process.mortality.fishery.TimeVariability;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
+import java.util.Arrays;
 import org.apache.commons.math3.distribution.NormalDistribution;
+
 
 /**
  *
@@ -140,7 +142,7 @@ public class FishingGear extends AbstractMortality {
 
     @Override
     public void init() {
-
+        
         Configuration cfg = Osmose.getInstance().getConfiguration();
 
         if (cfg.canFind("fishery.selectivity.variable.fsh" + fIndex)) {
@@ -166,11 +168,14 @@ public class FishingGear extends AbstractMortality {
         ts.read(this.getConfiguration().getFile("fishery.l50.file.fsh" + fIndex));
         this.l50_array = ts.getValues();
 
-        ts.read(this.getConfiguration().getFile("fishery.l75.file.fsh" + fIndex));
-        this.l75_array = ts.getValues();
-
         ts.read(this.getConfiguration().getFile("fishery.selectivity.type.file.fsh" + fIndex));
         this.selectType_array = ts.getValues();
+        
+        double sum = Arrays.stream(this.selectType_array).sum();
+        if (sum != 0) {
+            ts.read(this.getConfiguration().getFile("fishery.l75.file.fsh" + fIndex));
+            this.l75_array = ts.getValues();
+        }
 
         // Initialize the time varying array
         timeVar = new TimeVariability(this);
@@ -190,7 +195,7 @@ public class FishingGear extends AbstractMortality {
         select[0] = (sch -> this.getKnifeEdgeSelectivity(sch));  // knife edge selectivity
         select[1] = (sch -> this.getSigmoidSelectivity(sch));    // Sigmoid selectivity
         select[2] = (sch -> this.getGaussianSelectivity(sch));   // Gaussian selectivity
-
+        
     }
 
     /**
@@ -318,7 +323,7 @@ public class FishingGear extends AbstractMortality {
         return output;
 
     }
-
+ 
     /**
      * Computes the sigmoid selectivity.
      *
