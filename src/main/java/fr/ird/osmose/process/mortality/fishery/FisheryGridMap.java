@@ -97,8 +97,13 @@ public class FisheryGridMap extends GridMap {
                     try {
                         // barrier.n: fisheries grid Map can have values of -999
                         // i.e. it does not have fishing values here.
-                        float value = Float.valueOf(line[i]);
-                        this.matrix[j][i] = value;     
+                        String val = line[i].toLowerCase();
+                        if (val.equals("na") || val.equals("nan")) {
+                            this.matrix[j][i] = Float.NaN;
+                        } else {
+                            float value = Float.valueOf(line[i]);
+                            this.matrix[j][i] = value;
+                        }
                     } catch (NumberFormatException ex) {
                         error("Error parsing CSV map " + csvFile + " row " + (l + 1) + " column " + (i + 1), ex);
                     }
