@@ -414,6 +414,13 @@ correct_ltl_file = function(ltl_filename, osmose_config, varlon="longitude", var
   
 }
 
+#' Convert accessibility to NetCDF
+#'
+#' @param config_file Configuration file
+#' @param output_file Output file
+#'
+#' @return
+#' @export
 convert_access_to_netcdf = function(config_file, output_file="access.nc") {
   
   params = readOsmoseConfiguration(config_file)
@@ -424,13 +431,13 @@ convert_access_to_netcdf = function(config_file, output_file="access.nc") {
   #path = attributes(predationfile)$path
   #access = read.csv(file.path(path, predationfile))
   
-  access = getVar(params, what="predation", sep=',')$accessibility
+  access = get_var(params, what="predation", sep=',')$accessibility
   data = access$data
-  
+
   nprey = dim(data)[1]
   npred = dim(data)[2]
   
-  pattern = "([A-Za-z_]+) < ([0-9]+)"
+  pattern = "([A-Za-z_]+) < ([0-9]+\\.?[0-9]*)"
   pattern1 = "([A-Za-z_]+).*"
   preynames = rownames(data)
   
@@ -443,7 +450,7 @@ convert_access_to_netcdf = function(config_file, output_file="access.nc") {
   for (v in preynames) {
     if(grepl(v, pattern=pattern)) { 
       # if class row contains a < string, recover the class value
-      name = sub(x=v, pattern=pattern, replacement="\\1")
+      name = trimws(sub(x=v, pattern=pattern, replacement="\\1"))
       class = sub(x=v, pattern=pattern, replacement="\\2")
       upper_bounds_prey[cpt] = class
     }
@@ -466,7 +473,7 @@ convert_access_to_netcdf = function(config_file, output_file="access.nc") {
   data = as.matrix(t(data)) # predator/prey
   
   nchars = .get_max_nchars(names_prey)
-  
+
   # create dimensions
   preyDim = ncdim_def("prey", "", 1:nprey, create_dimvar=FALSE)
   predDim = ncdim_def("pred", "", 1:npred, create_dimvar=FALSE)
@@ -493,8 +500,11 @@ convert_access_to_netcdf = function(config_file, output_file="access.nc") {
   ncvar_put(nc, var_access, data)
   
   # writes variables for prey
+  print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ lala")
+  print(upper_bounds_prey)
+  print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ toto")
   ncvar_put(nc, var_class_prey, upper_bounds_prey, verbose=FALSE)
-  ncvar_put(nc, var_names_prey, names_prey, verbose=TRUE)
+  ncvar_put(nc, var_names_prey, names_prey, verbose=FALSE)
   
   # writes variables for predators (subspan of preys)
   ncvar_put(nc, var_names_pred, names_prey[1:npred], verbose=FALSE)
