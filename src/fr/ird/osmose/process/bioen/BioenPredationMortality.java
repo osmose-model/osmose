@@ -70,6 +70,9 @@ public class BioenPredationMortality extends PredationMortality {
      */
     private double[] predationRateBioen;
     
+    /** Maximum ingestion rate for larvae. */
+    private double[] larvaePredationRateBioen;
+    
     public BioenPredationMortality(int rank) throws IOException {
         
         super(rank);
@@ -91,17 +94,20 @@ public class BioenPredationMortality extends PredationMortality {
         // Recovers the max predation rate for bioen config (not the same unit as in
         // the standard code
         predationRateBioen = new double[nspec + nBack];
+        larvaePredationRateBioen = new double[nspec + nBack];
 
         for (int i = 0; i < nspec; i++) {
             predationRateBioen[i] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
+            larvaePredationRateBioen[i] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i);
         }
 
         // Recovering predation parameters for background species
         for (int i = 0; i < nBack; i++) {
             predationRateBioen[i + nspec] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.bkg" + i);
+            larvaePredationRateBioen[i] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i);
         }
     }
-        
+
 
 
     /**
@@ -129,7 +135,7 @@ public class BioenPredationMortality extends PredationMortality {
             }
             
             // this is the biomass which is accessible to all predators
-            // in ton.
+            // in ton.  this should be the P(w) values.
             double biomAccessibleTot = sum(accessibleBiomass);
 
             // this is the maximum biomass that the predator can ingest.
@@ -140,7 +146,8 @@ public class BioenPredationMortality extends PredationMortality {
             
             // maximum biomass that a single fish can eat during the time step subdt
             // barrier.n: weight is converted into g here
-            double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6f, predator.getAlphaBioen()) * fo2 / subdt;
+            // this is the (Imax * w^alpha) variable 
+            double maxBiomassToPredate = getMaxPredationRate(predator) * Math.pow(predator.getWeight() * 1e6f, predator.getAlphaBioen()) / subdt;
             
             // multiply the biomass eaten by one fish by the number of fishes to get the maximum biomass that the
             // entire school can eat
@@ -148,6 +155,7 @@ public class BioenPredationMortality extends PredationMortality {
             maxBiomassToPredate *= predator.getInstantaneousAbundance() * 1e-6f;
             
             // By default the predator will eat as much as it can
+            // this is the fP(P(W)) variable.
             double biomassToPredate = maxBiomassToPredate;
 
             // Distribute the predation over the preys
@@ -156,6 +164,7 @@ public class BioenPredationMortality extends PredationMortality {
                 // potentially prey upon. Predator will feed upon the total
                 // accessible biomass
                 if (biomAccessibleTot <= biomassToPredate) {
+                    // Force fP(P(W)) to Imax * w^alpha
                     biomassToPredate = biomAccessibleTot;
                 }
 
@@ -163,7 +172,7 @@ public class BioenPredationMortality extends PredationMortality {
                 for (int i = 0; i < preys.size(); i++) {
                     // ratio of prey i (among available preys) preyed upon by predator
                     double ratio = accessibleBiomass[i] / biomAccessibleTot;
-                    preyUpon[i] = ratio * biomassToPredate;
+                    preyUpon[i] = ratio * biomassToPredate * fo2;
                     cumPreyUpon += preyUpon[i];   // biomass in ton.
                 }
                 // Increments the total ingestion of preys within the system
@@ -187,7 +196,15 @@ public class BioenPredationMortality extends PredationMortality {
      */
     @Override
     public double getMaxPredationRate(IAggregation predator) {
-
+        
+        // recovers the species index
+        int speciesIndex = predator.getSpeciesIndex();
+        
+        // recovers the thresshold age (stored on Dt)
+        int thresAge = this.getSpecies(speciesIndex).getThresAge();
+       
+        double factor = (predator.getAgeDt() < thresAge) ? larvaePredationRateBioen[predator.getSpeciesIndex()] : 1;
+        
         double output = 0.d;
         if (predator instanceof School) {
             String key = "imax";
@@ -199,6 +216,6 @@ public class BioenPredationMortality extends PredationMortality {
         } else {
             output = predationRateBioen[predator.getSpeciesIndex()];
         }
-        return (output / getConfiguration().getNStepYear());
+        return (factor * output / getConfiguration().getNStepYear());
     }
 }
