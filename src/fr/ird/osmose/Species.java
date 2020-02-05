@@ -109,9 +109,15 @@ public class Species {
     private final float eggWeight;
 
     private int zlayer = 0;
-    
+
     private double alpha_bioen;
-    
+
+    /**
+     * Threshold (number of time-steps) at which a species move from larva to
+     * adults. Expressed in time steps.
+     */
+    private final int lar2ad_thres;
+
 //////////////
 // Constructor
 //////////////
@@ -148,8 +154,23 @@ public class Species {
             alpha_bioen = cfg.getDouble(key);
         }
 
+        // If the key is found, then the age switch in years is converted into
+        // time-step.
+        String key = "species.larvae.growth.threshold.age.sp" + index;
+        if (cfg.canFind(key)) {
+            float age_adult = cfg.getFloat(key);
+            this.lar2ad_thres = (int) Math.round(age_adult * cfg.getNStepYear());
+        } else {
+            // if no parameter exists, species become larva when ageDt = 1
+            this.lar2ad_thres = 1;
+        }
+
     }
-    
+
+    public int getThresAge() {
+        return this.lar2ad_thres;
+    }
+
     public double getAlphaBioen() {
         return this.alpha_bioen;
     }
@@ -171,7 +192,7 @@ public class Species {
     public float computeWeight(float length) {
         return (float) (c * (Math.pow(length, bPower)));
     }
-    
+
     /**
      * Computes the length, in centimetre, corresponding to the given weight, in
      * gram.
@@ -180,9 +201,8 @@ public class Species {
      * @return the length in centimetre for this {@code weight}
      */
     public float computeLength(float weight) {
-        return (float) (Math.pow(weight/c, (1/bPower)));
+        return (float) (Math.pow(weight / c, (1 / bPower)));
     }
-
 
     /**
      * Returns the lifespan of the species. Parameter
@@ -246,7 +266,7 @@ public class Species {
         double Sv = 1.d;
         return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
     }
-    
+
     public double getBPower() {
         return this.bPower;
     }
