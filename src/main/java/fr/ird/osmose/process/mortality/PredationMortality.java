@@ -77,20 +77,13 @@ public class PredationMortality extends AbstractMortality {
      * Maximum ingestion rate
      */
     private double[] predationRate;
-    /**
-     * Accessibility matrix. Note that in the file, lines are preys while
-     * columns are predators
-     * Array[nSp+nBkg+nRsc][nAccessStagePrey][nSpecies][nAccessStagePred]
-     */
-    private double[][][][] accessibilityMatrix;
-    /*
-     * Accessibility stages
-     */
-    private IStage accessStage;
+   
     /*
      * Feeding stages
      */
     private IStage predPreyStage;
+    
+    private PredationAccessibility predationAccess;
 
     public PredationMortality(int rank) {
         super(rank);
@@ -99,6 +92,9 @@ public class PredationMortality extends AbstractMortality {
     @Override
     public void init() {
 
+        predationAccess = new PredationAccessibility(this.getRank());
+        predationAccess.init();
+        
         int nsp = getNSpecies();
         int nrsc = getConfiguration().getNRscSpecies();
         int nbkg = getConfiguration().getNBkgSpecies();
@@ -123,59 +119,10 @@ public class PredationMortality extends AbstractMortality {
             }
         }
                        
-        // Accessibility stages
-        accessStage = new AccessibilityStage();
-        accessStage.init();
-
         // Feeding stages (i.e. classes for Lmin/LMax ratios
         predPreyStage = new PredPreyStage();
         predPreyStage.init();
-
-        // accessibility matrix
-        if (!getConfiguration().isNull("predation.accessibility.file")) {
-            String filename = getConfiguration().getFile("predation.accessibility.file");
-            try (CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator())) {
-                List<String[]> lines = reader.readAll();
-                int l = 1;
-                accessibilityMatrix = new double[nsp + nbkg + nrsc][][][];   // lines are preys (order: focal, bkg, rsc)
-                for (int i = 0; i < nsp + nrsc + nbkg; i++) {
-                    int nStagePrey = accessStage.getNStage(i);
-                    accessibilityMatrix[i] = new double[nStagePrey][][];
-                    for (int j = 0; j < nStagePrey; j++) {
-                        String[] line = lines.get(l);
-                        int ll = 1;
-                        accessibilityMatrix[i][j] = new double[nsp + nbkg][];      // columns are preds (order: focal, bkg)
-                        for (int k = 0; k < nsp + nbkg; k++) {
-                            int nStagePred = accessStage.getNStage(k);
-                            accessibilityMatrix[i][j][k] = new double[nStagePred];
-                            for (int m = 0; m < nStagePred; m++) {
-                                double value = Double.valueOf(line[ll]);
-                                accessibilityMatrix[i][j][k][m] = value;
-                                ll++;
-                            }
-                        }
-                        l++;
-                    }
-                }
-            } catch (IOException ex) {
-                error("Error loading accessibility matrix from file " + filename, ex);
-            }
-        } else {
-            for (int i = 0; i < nsp; i++) {
-                accessibilityMatrix[i] = new double[1][][];
-                accessibilityMatrix[i][0] = new double[nsp][];
-                for (int j = 0; j < nsp; j++) {
-                    accessibilityMatrix[i][0][j] = new double[]{0.8d};
-                }
-            }
-            for (int i = nsp; i < nsp + nrsc; i++) {
-                accessibilityMatrix[i] = new double[1][][];
-                accessibilityMatrix[i][0] = new double[nsp][];
-                for (int j = 0; j < nsp; j++) {
-                    accessibilityMatrix[i][0][j] = new double[]{0.8d};
-                }
-            }
-        }
+        
     }
 
     /**
@@ -298,6 +245,8 @@ public class PredationMortality extends AbstractMortality {
      * @return an array of accessibility of the preys to this predator.
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
+        
+        double[][][][] accessibilityMatrix = predationAccess.getAccessMatrix();
 
         double[] accessibility = new double[preys.size()];
         int iSpecPred = predator.getSpeciesIndex();
@@ -305,7 +254,7 @@ public class PredationMortality extends AbstractMortality {
         double preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iSpecPred][iPredPreyStage];
         double[] percentResource = getPercentResource(predator);
-        int iStagePred = accessStage.getStage(predator);
+        int iStagePred = predationAccess.getStage().getStage(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
             int iSpecPrey = preys.get(iPrey).getSpeciesIndex();
@@ -317,7 +266,7 @@ public class PredationMortality extends AbstractMortality {
                     continue;
                 }
                 if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
-                    iStagePrey = accessStage.getStage(prey);
+                    iStagePrey = predationAccess.getStage().getStage(prey);
                     accessibility[iPrey] = accessibilityMatrix[iSpecPrey][iStagePrey][iSpecPred][iStagePred];
                 } else {
                     accessibility[iPrey] = 0.d; //no need to do it since initialization already set it to zero
