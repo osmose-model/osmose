@@ -5,7 +5,7 @@ simulation.nspecies,16
 # Osmose 3 Update 1 (2014/06/01) Renamed parameter simulation.restart.recordfrequency.ndt into output.restart.recordfrequency.ndt,
 output.restart.recordfrequency.ndt,null
 simulation.time.ndtPerYear,24
-simulation.time.nyear,100
+simulation.time.nyear,60
 #simulation.nschool,30
 simulation.nschool.sp0,25
 simulation.nschool.sp1,38

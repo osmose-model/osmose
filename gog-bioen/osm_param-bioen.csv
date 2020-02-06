@@ -1,212 +1,212 @@
-# Osmose 4 Update 2 Release 2 (2019/10/11) Renamed parameter simulation.use.bioen into simulation.bioen.enabled
-simulation.bioen.enabled;true
-simulation.genetic.enabled;true
-
-#stochastic.mortality.seed;10
-movement.randomseed.fixed;false
-;
-
-output.bioen.maturesize.enabled;true;
-output.bioen.matureage.enabled;true;
-output.bioen.growthpot.enabled;true;
-output.bioen.maint.enabled;true;
-output.bioen.ingest.enabled;true;
-output.bioen.sizeInf.enabled;true
-output.bioen.maint.enabled;true
-output.bioen.ingest.enabled;true
-output.bioen.growthpot.enabled;true
-;
-;
-###### oxygen parameters for the fO2 function;
-bioen.fo2.c1;1
-bioen.fo2.c2;1.2
-;
-############### sets the index of the data file to read.;
-# 0 = surface, 1 = mean surface-bottom, 2=bottom;
-species.zlayer.sp0;0
-species.zlayer.sp1;0
-species.zlayer.sp2;0
-species.zlayer.sp3;0
-species.zlayer.sp4;0
-species.zlayer.sp5;0
-species.zlayer.sp6;0
-species.zlayer.sp7;0
-species.zlayer.sp8;0
-species.zlayer.sp9;0
-species.zlayer.sp10;0
-;
-### temperature coefficients;
-bioen.gross.energy.tmin.sp0;3.5
-bioen.gross.energy.tmin.sp1;3.5
-bioen.gross.energy.tmin.sp2;3.5
-bioen.gross.energy.tmin.sp3;3.5
-bioen.gross.energy.tmin.sp4;3.5
-bioen.gross.energy.tmin.sp5;3.5
-bioen.gross.energy.tmin.sp6;3.5
-bioen.gross.energy.tmin.sp7;3.5
-bioen.gross.energy.tmin.sp8;3.5
-bioen.gross.energy.tmin.sp9;3.5
-bioen.gross.energy.tmin.sp10;3.5
-;
-bioen.gross.energy.topt.sp0;8.4
-bioen.gross.energy.topt.sp1;8.4
-bioen.gross.energy.topt.sp2;8.4
-bioen.gross.energy.topt.sp3;8.4
-bioen.gross.energy.topt.sp4;8.4
-bioen.gross.energy.topt.sp5;8.4
-bioen.gross.energy.topt.sp6;8.4
-bioen.gross.energy.topt.sp7;8.4
-bioen.gross.energy.topt.sp8;8.4
-bioen.gross.energy.topt.sp9;8.4
-bioen.gross.energy.topt.sp10;8.4
-;
-bioen.gross.energy.tmax.sp0;35
-bioen.gross.energy.tmax.sp1;35
-bioen.gross.energy.tmax.sp2;35
-bioen.gross.energy.tmax.sp3;35
-bioen.gross.energy.tmax.sp4;35
-bioen.gross.energy.tmax.sp5;35
-bioen.gross.energy.tmax.sp6;35
-bioen.gross.energy.tmax.sp7;35
-bioen.gross.energy.tmax.sp8;35
-bioen.gross.energy.tmax.sp9;35
-bioen.gross.energy.tmax.sp10;35
-;
-bioen.arrh.ct2.sp0;5020
-bioen.arrh.ct2.sp1;5020
-bioen.arrh.ct2.sp2;5020
-bioen.arrh.ct2.sp3;5020
-bioen.arrh.ct2.sp4;5020
-bioen.arrh.ct2.sp5;5020
-bioen.arrh.ct2.sp6;5020
-bioen.arrh.ct2.sp7;5020
-bioen.arrh.ct2.sp8;5020
-bioen.arrh.ct2.sp9;5020
-bioen.arrh.ct2.sp10;5020
-;
-bioen.maint.energy.Tr.sp0;305
-bioen.maint.energy.Tr.sp1;305
-bioen.maint.energy.Tr.sp2;305
-bioen.maint.energy.Tr.sp3;305
-bioen.maint.energy.Tr.sp4;305
-bioen.maint.energy.Tr.sp5;305
-bioen.maint.energy.Tr.sp6;305
-bioen.maint.energy.Tr.sp7;305
-bioen.maint.energy.Tr.sp8;305
-bioen.maint.energy.Tr.sp9;305
-bioen.maint.energy.Tr.sp10;305
-;
-################# oxydation mortality;
-# ???? not yet filled;
-bioen.damage.k_dam;0
-;
-############### alpha values (no unity);
-species.alpha.sp0;0.75
-species.alpha.sp1;0.75
-species.alpha.sp2;0.75
-species.alpha.sp3;0.75
-species.alpha.sp4;0.75
-species.alpha.sp5;0.75
-species.alpha.sp6;0.75
-species.alpha.sp7;0.75
-species.alpha.sp8;0.75
-species.alpha.sp9;0.75
-species.alpha.sp10;0.75
-;
-############# energy SMR (g.g^-alpha);
-bioen.maint.energy.csmr.sp0;1
-bioen.maint.energy.csmr.sp1;1
-bioen.maint.energy.csmr.sp2;1
-bioen.maint.energy.csmr.sp3;1
-bioen.maint.energy.csmr.sp4;1
-bioen.maint.energy.csmr.sp5;1
-bioen.maint.energy.csmr.sp6;1
-bioen.maint.energy.csmr.sp7;1
-bioen.maint.energy.csmr.sp8;1
-bioen.maint.energy.csmr.sp9;1
-bioen.maint.energy.csmr.sp10;1
-;
-############## r for kappa calculation (no unity);
-# barrier.n: values set but fully checked. ;
-bioen.maturity.r.sp0;0.3
-bioen.maturity.r.sp1;0.3
-bioen.maturity.r.sp2;0.3
-bioen.maturity.r.sp3;0.3
-bioen.maturity.r.sp4;0.3
-bioen.maturity.r.sp5;0.3
-bioen.maturity.r.sp6;0.3
-bioen.maturity.r.sp7;0.3
-bioen.maturity.r.sp8;0.3
-bioen.maturity.r.sp9;0.3
-bioen.maturity.r.sp10;0.3
-;
-;
-### Maturit� � Lm sans variabilit� de Lm;
-# Slope (cm.L^-1);
-bioen.maturity.m0.sp0;0
-bioen.maturity.m0.sp1;0
-bioen.maturity.m0.sp2;0
-bioen.maturity.m0.sp3;0
-bioen.maturity.m0.sp4;0
-bioen.maturity.m0.sp5;0
-bioen.maturity.m0.sp6;0
-bioen.maturity.m0.sp7;0
-bioen.maturity.m0.sp8;0
-bioen.maturity.m0.sp9;0
-bioen.maturity.m0.sp10;0
-;
-# Intercepte (cm);
-bioen.maturity.m1.sp0;95.7
-bioen.maturity.m1.sp1;12.7
-bioen.maturity.m1.sp2;8
-bioen.maturity.m1.sp3;21
-bioen.maturity.m1.sp4;12.2
-bioen.maturity.m1.sp5;21
-bioen.maturity.m1.sp6;12.5
-bioen.maturity.m1.sp7;14.3
-bioen.maturity.m1.sp8;75
-bioen.maturity.m1.sp9;25.35
-bioen.maturity.m1.sp10;14.5
-;
-############### oxygen;
-# units here = mg.L;
-# conversion should use molar mass of O: 15.999;
-species.o2_crit.sp0;7
-species.o2_crit.sp1;7
-species.o2_crit.sp2;7
-species.o2_crit.sp3;7
-species.o2_crit.sp4;7
-species.o2_crit.sp5;7
-species.o2_crit.sp6;7
-species.o2_crit.sp7;7
-species.o2_crit.sp8;7
-species.o2_crit.sp9;7
-species.o2_crit.sp10;7
-;
-####################### parameters assessed by Alaia. (g.g^(-alpha);
-predation.ingestion.rate.max.bioen.sp0;78
-predation.ingestion.rate.max.bioen.sp1;8
-predation.ingestion.rate.max.bioen.sp2;12
-predation.ingestion.rate.max.bioen.sp3;13
-predation.ingestion.rate.max.bioen.sp4;10
-predation.ingestion.rate.max.bioen.sp5;9
-predation.ingestion.rate.max.bioen.sp6;10
-predation.ingestion.rate.max.bioen.sp7;10
-predation.ingestion.rate.max.bioen.sp8;15
-predation.ingestion.rate.max.bioen.sp9;10
-predation.ingestion.rate.max.bioen.sp10;10
-;
-######################### physical dataset parameters;
-temperature.varname;T
-temperature.filename;physical_forcings.nc
-temperature.factor;1
-temperature.offset;0
-;
-oxygen.varname;O2
-oxygen.filename;physical_forcings.nc
-# conversion of O2 from mmol/m3 into mmol/L;
-# conversion of mmol/m3 into mg/L is hard coded in Osmose;
-# conversion mmol/m3 -> mmol/L: *= 1e-3;
-# conversion mmol/L -> mg/L: *= 31.9988;
-oxygen.factor;0.0319988
-oxygen.offset;0
+# Osmose 4 Update 2 Release 2 (2019/10/11) Renamed parameter simulation.use.bioen into simulation.bioen.enabled,
+simulation.bioen.enabled,true
+simulation.genetic.enabled,true
+,
+#stochastic.mortality.seed,10
+movement.randomseed.fixed,false
+,
+,
+output.bioen.maturesize.enabled,true
+output.bioen.matureage.enabled,true
+output.bioen.growthpot.enabled,true
+output.bioen.maint.enabled,true
+output.bioen.ingest.enabled,true
+output.bioen.sizeInf.enabled,true
+output.bioen.maint.enabled,true
+output.bioen.ingest.enabled,true
+output.bioen.growthpot.enabled,true
+,
+,
+###### oxygen parameters for the fO2 function,
+bioen.fo2.c1,1
+bioen.fo2.c2,1.2
+,
+############### sets the index of the data file to read.,
+# 0 = surface,
+species.zlayer.sp0,0
+species.zlayer.sp1,0
+species.zlayer.sp2,0
+species.zlayer.sp3,0
+species.zlayer.sp4,0
+species.zlayer.sp5,0
+species.zlayer.sp6,0
+species.zlayer.sp7,0
+species.zlayer.sp8,0
+species.zlayer.sp9,0
+species.zlayer.sp10,0
+,
+### temperature coefficients,
+bioen.gross.energy.tmin.sp0,3.5
+bioen.gross.energy.tmin.sp1,3.5
+bioen.gross.energy.tmin.sp2,3.5
+bioen.gross.energy.tmin.sp3,3.5
+bioen.gross.energy.tmin.sp4,3.5
+bioen.gross.energy.tmin.sp5,3.5
+bioen.gross.energy.tmin.sp6,3.5
+bioen.gross.energy.tmin.sp7,3.5
+bioen.gross.energy.tmin.sp8,3.5
+bioen.gross.energy.tmin.sp9,3.5
+bioen.gross.energy.tmin.sp10,3.5
+,
+bioen.gross.energy.topt.sp0,8.4
+bioen.gross.energy.topt.sp1,8.4
+bioen.gross.energy.topt.sp2,8.4
+bioen.gross.energy.topt.sp3,8.4
+bioen.gross.energy.topt.sp4,8.4
+bioen.gross.energy.topt.sp5,8.4
+bioen.gross.energy.topt.sp6,8.4
+bioen.gross.energy.topt.sp7,8.4
+bioen.gross.energy.topt.sp8,8.4
+bioen.gross.energy.topt.sp9,8.4
+bioen.gross.energy.topt.sp10,8.4
+,
+bioen.gross.energy.tmax.sp0,35
+bioen.gross.energy.tmax.sp1,35
+bioen.gross.energy.tmax.sp2,35
+bioen.gross.energy.tmax.sp3,35
+bioen.gross.energy.tmax.sp4,35
+bioen.gross.energy.tmax.sp5,35
+bioen.gross.energy.tmax.sp6,35
+bioen.gross.energy.tmax.sp7,35
+bioen.gross.energy.tmax.sp8,35
+bioen.gross.energy.tmax.sp9,35
+bioen.gross.energy.tmax.sp10,35
+,
+bioen.arrh.ct2.sp0,5020
+bioen.arrh.ct2.sp1,5020
+bioen.arrh.ct2.sp2,5020
+bioen.arrh.ct2.sp3,5020
+bioen.arrh.ct2.sp4,5020
+bioen.arrh.ct2.sp5,5020
+bioen.arrh.ct2.sp6,5020
+bioen.arrh.ct2.sp7,5020
+bioen.arrh.ct2.sp8,5020
+bioen.arrh.ct2.sp9,5020
+bioen.arrh.ct2.sp10,5020
+,
+bioen.maint.energy.Tr.sp0,305
+bioen.maint.energy.Tr.sp1,305
+bioen.maint.energy.Tr.sp2,305
+bioen.maint.energy.Tr.sp3,305
+bioen.maint.energy.Tr.sp4,305
+bioen.maint.energy.Tr.sp5,305
+bioen.maint.energy.Tr.sp6,305
+bioen.maint.energy.Tr.sp7,305
+bioen.maint.energy.Tr.sp8,305
+bioen.maint.energy.Tr.sp9,305
+bioen.maint.energy.Tr.sp10,305
+,
+################# oxydation mortality,
+# ???? not yet filled,
+bioen.damage.k_dam,0
+,
+############### alpha values (no unity),
+species.alpha.sp0,0.75
+species.alpha.sp1,0.75
+species.alpha.sp2,0.75
+species.alpha.sp3,0.75
+species.alpha.sp4,0.75
+species.alpha.sp5,0.75
+species.alpha.sp6,0.75
+species.alpha.sp7,0.75
+species.alpha.sp8,0.75
+species.alpha.sp9,0.75
+species.alpha.sp10,0.75
+,
+############# energy SMR (g.g^-alpha),
+bioen.maint.energy.csmr.sp0,1
+bioen.maint.energy.csmr.sp1,1
+bioen.maint.energy.csmr.sp2,1
+bioen.maint.energy.csmr.sp3,1
+bioen.maint.energy.csmr.sp4,1
+bioen.maint.energy.csmr.sp5,1
+bioen.maint.energy.csmr.sp6,1
+bioen.maint.energy.csmr.sp7,1
+bioen.maint.energy.csmr.sp8,1
+bioen.maint.energy.csmr.sp9,1
+bioen.maint.energy.csmr.sp10,1
+,
+############## r for kappa calculation (no unity),
+# barrier.n: values set but fully checked. ,
+bioen.maturity.r.sp0,0.3
+bioen.maturity.r.sp1,0.3
+bioen.maturity.r.sp2,0.3
+bioen.maturity.r.sp3,0.3
+bioen.maturity.r.sp4,0.3
+bioen.maturity.r.sp5,0.3
+bioen.maturity.r.sp6,0.3
+bioen.maturity.r.sp7,0.3
+bioen.maturity.r.sp8,0.3
+bioen.maturity.r.sp9,0.3
+bioen.maturity.r.sp10,0.3
+,
+,
+### Maturit� � Lm sans variabilit� de Lm,
+# Slope (cm.L^-1),
+bioen.maturity.m0.sp0,0
+bioen.maturity.m0.sp1,0
+bioen.maturity.m0.sp2,0
+bioen.maturity.m0.sp3,0
+bioen.maturity.m0.sp4,0
+bioen.maturity.m0.sp5,0
+bioen.maturity.m0.sp6,0
+bioen.maturity.m0.sp7,0
+bioen.maturity.m0.sp8,0
+bioen.maturity.m0.sp9,0
+bioen.maturity.m0.sp10,0
+,
+# Intercepte (cm),
+bioen.maturity.m1.sp0,95.7
+bioen.maturity.m1.sp1,12.7
+bioen.maturity.m1.sp2,8
+bioen.maturity.m1.sp3,21
+bioen.maturity.m1.sp4,12.2
+bioen.maturity.m1.sp5,21
+bioen.maturity.m1.sp6,12.5
+bioen.maturity.m1.sp7,14.3
+bioen.maturity.m1.sp8,75
+bioen.maturity.m1.sp9,25.35
+bioen.maturity.m1.sp10,14.5
+,
+############### oxygen,
+# units here = mg.L,
+# conversion should use molar mass of O: 15.999,
+species.o2_crit.sp0,7
+species.o2_crit.sp1,7
+species.o2_crit.sp2,7
+species.o2_crit.sp3,7
+species.o2_crit.sp4,7
+species.o2_crit.sp5,7
+species.o2_crit.sp6,7
+species.o2_crit.sp7,7
+species.o2_crit.sp8,7
+species.o2_crit.sp9,7
+species.o2_crit.sp10,7
+,
+####################### parameters assessed by Alaia. (g.g^(-alpha),
+predation.ingestion.rate.max.bioen.sp0,78
+predation.ingestion.rate.max.bioen.sp1,8
+predation.ingestion.rate.max.bioen.sp2,12
+predation.ingestion.rate.max.bioen.sp3,13
+predation.ingestion.rate.max.bioen.sp4,10
+predation.ingestion.rate.max.bioen.sp5,9
+predation.ingestion.rate.max.bioen.sp6,10
+predation.ingestion.rate.max.bioen.sp7,10
+predation.ingestion.rate.max.bioen.sp8,15
+predation.ingestion.rate.max.bioen.sp9,10
+predation.ingestion.rate.max.bioen.sp10,10
+,
+######################### physical dataset parameters,
+temperature.varname,T
+temperature.filename,physical_forcings.nc
+temperature.factor,1
+temperature.offset,0
+,
+oxygen.varname,O2
+oxygen.filename,physical_forcings.nc
+# conversion of O2 from mmol/m3 into mmol/L,
+# conversion of mmol/m3 into mg/L is hard coded in Osmose,
+# conversion mmol/m3 -> mmol/L: *= 1e-3,
+# conversion mmol/L -> mg/L: *= 31.9988,
+oxygen.factor,0.0319988
+oxygen.offset,0
