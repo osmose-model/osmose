@@ -80,8 +80,11 @@ public class BioenMeanEnergyNet extends AbstractOutput {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
-            meanEnet[i] += school.getENet() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
-            abundance[i] += 1;
+            if (1 <= school.getAge()){
+                meanEnet[i] += school.getENet() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
+                abundance[i] += 1;
+            }
+                      
         }
     }
        
