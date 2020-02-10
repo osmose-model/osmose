@@ -103,7 +103,7 @@ public class TimeVariability extends OsmoseLinker {
         this.ndt = getConfiguration().getNStepYear();
         this.nyear = Math.max(getConfiguration().getNStep() / ndt, 1);
         this.initFishingSeason();
-
+        
         String type = getConfiguration().getString("fishery.fishing.rate.method.fsh" + index);
         switch (type) {
             case "constant":
@@ -263,6 +263,7 @@ public class TimeVariability extends OsmoseLinker {
     private void initFBaseRegime() {
 
         int index = fishery.getFIndex();
+        timeArr = new double[getConfiguration().getNStep()];
 
         /**
          * Recover the shift array from file, and remove values for which shift
@@ -303,7 +304,7 @@ public class TimeVariability extends OsmoseLinker {
 
             // if the current array index is greater than shift,
             // we update the ishift and irate array.
-            if (i >= sh) {
+            if (i >= sh * ndt) {
                 ishift++;
                 irate++;
 
