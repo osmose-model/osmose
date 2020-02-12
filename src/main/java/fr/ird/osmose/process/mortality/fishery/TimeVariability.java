@@ -194,31 +194,28 @@ public class TimeVariability extends OsmoseLinker {
 
         // fishing rate vector
         double[] value = getConfiguration().getArrayDouble("fishery.fishing.rate.byPeriod.fsh" + fishery.getFIndex());
+        String errorMes;
 
         // number of fishing values per year
         int nperiod = !getConfiguration().isNull("fishery.fishing.rate.nperiod.fsh" + fishery.getFIndex())
                 ? getConfiguration().getInt("fishery.fishing.rate.nperiod.fsh" + fishery.getFIndex())
                 : 1;
-        if (value.length % nperiod != 0) {
-            error("The number of rate values (" + value.length + ") must be a multiple of the number of periods " + nperiod, new Exception("Fishery " + fishery.getFIndex()));
-        }
-        int nyearF = value.length / nperiod;
-        if (nyearF != nyear) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Length of fishery.fishing.rate.byPeriod.fsh").append(fishery.getFIndex())
-                    .append(" ").append(value.length).append(" / nperiod=")
-                    .append(nperiod).append(" = ").append(nyearF);
-            sb.append(", number of simulated years ").append(nyear).append("\n");
-            sb.append(nyearF > nyear
-                    ? "Osmose will ignore exceeding values in the F vector."
-                    : "Osmose will loop over the F vector.");
-            warning(sb.toString());
-        }
 
+        // Number of rate values.
+        // In period, the number of rates should be equal to (nperiod * nyears)
+        int nValues = value.length;
+        
+        if(nValues % nperiod != 0) {
+            errorMes = String.format("The number of rate values (%d) must be a multiple of the number of periods (%d)", nValues, nperiod);
+            error(errorMes, new Exception("Fishery " + fishery.getFIndex()));
+        }
+        
         // converts annual rates into seasonal rates
         timeArr = new double[getConfiguration().getNStep()];
+        
+        // Fills the array with
         for (int iStep = 0; iStep < timeArr.length; iStep++) {
-            int iRegime = (iStep * nperiod / ndt) % value.length;
+            int iRegime = (iStep * nperiod / ndt) % nValues;
             timeArr[iStep] = value[iRegime] * season[iStep % ndt];
         }
     }
@@ -229,9 +226,7 @@ public class TimeVariability extends OsmoseLinker {
     private void initFBaseConstant() {
 
         double F = getConfiguration().getDouble("fishery.fishing.rate.fsh" + fishery.getFIndex());
-
-        this.initFishingSeason();
-
+        
         timeArr = new double[getConfiguration().getNStep()];
         for (int i = 0; i < timeArr.length; i++) {
             // convert from annual mortality rate to seasonal mortality rate

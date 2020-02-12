@@ -372,7 +372,7 @@ public class FishingMapSet extends OsmoseLinker {
         // Checks that the final map value has a weighted mean of 1.
         // Loop over all the cells of the current grid
         // and corrects the fishing coefficients.
-        float temp = 0;
+        double temp = 0;
         for (Cell cell : getGrid().getCells()) {
             if ((!cell.isLand()) && (isValueOk(map.getValue(cell)))) {
                 temp += map.getValue(cell) * cell.getSurface();
@@ -380,11 +380,6 @@ public class FishingMapSet extends OsmoseLinker {
         }
 
         temp /= surftot;
-               
-        if (temp != 1) {
-            warning("The temporal mean of the space factors is different from 1.0");
-            warning("iFleet = " + this.iFishery + ", mean = " + temp);
-        }
 
     }
 
