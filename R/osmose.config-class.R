@@ -4,11 +4,6 @@
 #' @param config Configuration object to which file parameters are appended
 #' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
 #' @return A list tree.
-#' @examples{
-#'     filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
-#'     par = readOsmoseConfiguration(filename)
-#' }
-#' @export
 readOsmoseConfiguration = function(file, config=NULL, absolute=TRUE) {
   
   L0 = .readOsmoseConfiguration(input=file, absolute=absolute)
@@ -64,16 +59,19 @@ configureCalibration = function(L1) {
 #' See the \code{\link{read_osmose}} and \code{\link{readOsmoseConfiguration}} functions
 #'  for more information about this object.
 #' @param what Name of the variable to extract from the configuration file.
+#' @param ... Extra arguments for plotting method.
 #' @return An object of \code{list} class containing all the relevant information about 
 #' the variable extracted.
 #' @export
 #' @method get_var osmose.config
-get_var.osmose.config = function(object, what, extraWhat = FALSE, ...) {
+get_var.osmose.config = function(object, what, ...) {
   
-  x = object[[what]]
+  what <- getWhats(x = what)
+  
+  x = object[[what[1]]]
   
   if(is.null(x)){
-    message = paste("The", sQuote(what),
+    message = paste("The", sQuote(what[1]),
                     "variable doesn't exist on the configuration file.", sep = "")
     stop(message)
   }
@@ -82,9 +80,9 @@ get_var.osmose.config = function(object, what, extraWhat = FALSE, ...) {
   
   if(what %in% getConfigVar){
     x = switch(what,
-               reproduction  = getReproductionData(x, var = "season.file"),
-               species       = getSpeciesData(x),
-               predation     = getPredationData(x, object = object, extraWhat = extraWhat))
+               reproduction  = getReproductionData(x, var = "season.file", ...),
+               species       = getSpeciesData(x, ...),
+               predation     = getPredationData(x, object = object, extraWhat = what[2], ...))
   }
   
   class(x) = c(paste("osmose.config", what, sep = "."), class(x))
@@ -102,7 +100,6 @@ get_var.osmose.config = function(object, what, extraWhat = FALSE, ...) {
 #'
 #' @return TODO
 #' @export 
-#' @examples TODO
 #' @method plot osmose.config
 plot.osmose.config = function(x, what = NULL, ...) {
   

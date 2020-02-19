@@ -2,29 +2,33 @@
 # Internal plot functions -------------------------------------------------
 
 osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
-                         replicates, nrep, ci, freq, horizontal, conf,
-                         factor, xlim, ylim, col, alpha, speciesNames, axes, ...) {
+                         replicates, nrep, ci = TRUE, freq, horizontal, conf,
+                         factor, xlim, ylim, col, alpha, speciesNames, axes,
+                         legend, cex, ...) {
   
   # species indexation
-  if(!is.null(species)) {
-    if(max(species)+1 > dim(x)[2]) stop("error on species indexation, incorrect value in the parameter called species")
-    x = x[ , (species + 1) , , drop = FALSE]
+  if(!is.null(species)){
+    
+    if((max(species) + 1) > dim(x)[2]){
+      stop("error on species indexation, incorrect value in the parameter called species")
     }
+    
+    x = x[ , species + 1, , drop = FALSE]
+  }
   
-  # time indexation
-  if(is.null(start)) start = 1 else start = start
-  if(is.null(end)) end = dim(x)[1] else end = end
-  if(!(start > 0) | !(start < end)) stop("error on time indexation, incorrect value the parameter called start")
-  if(!(end > 0) | !(end > start)) stop("error on time indexation, incorrect value in the parameter called")
-  x = x[c(start:end), , ,drop = FALSE]
+  # Check start and end args
+  start <- ifelse(is.null(start), 1, start)
+  end <- ifelse(is.null(end), dim(x)[1], end)
+  
+  if(start < 1 | start > end) stop("Incorrect value for 'start' argument")
+  if(end < 1 | end < start) stop("Incorrect value for 'end' argument")
+  
+  x = x[seq(start, end), , ,drop = FALSE]
   
   # xlim 
-  initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
-  times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
-  xlim = if(is.null(xlim)) range(times)
-  
-  # opar = par(no.readonly = TRUE)
-  # on.exit(par(opar))
+  initialYear = ifelse(is.null(initialYear), as.numeric(rownames(x)[1]), initialYear)
+  times       = seq(from = initialYear + 0.5/freq, by = 1/freq, length.out = nrow(x))
+  xlim        = if(is.null(xlim)) range(times) else xlim
   
   if(!(type %in% c(1:4))){
     warning("The type argument selected is not correct. The value by default is used (type = 1)")
@@ -36,12 +40,13 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
     if(type == 1) { plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
                                 times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
-                                speciesNames = speciesNames, axes = axes, ...) }
+                                speciesNames = speciesNames, axes = axes, cex = cex, ...) }
     
     if(type == 2) { plot2DTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
                                 times = times, xlim = xlim, ylim = ylim,
                                 conf = conf, factor = factor, col = col, alpha = alpha,
-                                speciesNames = speciesNames, axes = axes, ...) }
+                                speciesNames = speciesNames, axes = axes,
+                                legend = legend, cex = cex, ...) }
     
     if(type == 3) { plot2DTsType3(x = x, times = times,
                                 xlim = xlim, ylim = ylim, factor = factor, 
@@ -68,103 +73,96 @@ osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
 
 # Plot types --------------------------------------------------------------
 
-plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                         times, xlim, ylim = NULL,
-                         conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
-                         speciesNames = NULL, lty = NULL, cex = 0.8, border = NA, axes = TRUE, ...) {
+plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf, factor, 
+                         col, alpha, speciesNames, axes, cex, ...) {
   
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  # Define name of species
+  if(is.null(speciesNames)){
+    speciesNames <- toupper(colnames(x))
+  } 
   
-  if(ncol(x)!=1) {
-    par(oma = c(1,1,1,1), mar = c(3,3,1,1))
-    par(mfrow = getmfrow(ncol(x)))
+  # Define multiplot array if there're more than 1 species
+  if(ncol(x) > 1){
+    par(oma = rep(1, 4), mar = c(3, 3, 1, 1), mfrow = getmfrow(ncol(x)))
   }
   
-  if(is.null(col)) col = .recycleArguments("black",dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
-  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
+  # Extract args related with line customization
+  col <- rep(x = if(is.null(list(...)$col)) "black" else list(...)$col, length.out = ncol(x))
+  lty <- rep(x = if(is.null(list(...)$lty)) "solid" else list(...)$lty, length.out = ncol(x))
+  lwd <- rep(x = if(is.null(list(...)$lwd)) 1 else list(...)$lty, length.out = ncol(x))
+  border <- rep(x = if(is.null(list(...)$border)) NA else list(...)$border, length.out = ncol(x))
   
-  prob = 1 - conf
+  # Define ylim
+  if(is.null(ylim)){
+    ylim = range(as.numeric(x))*factor
+  }  #pending: ylim flexible for the users
   
-  for(sp in seq_len(ncol(x))) {
-    xsp   = factor*x[, sp, ,drop = FALSE]
-    if(is.null(ylim)) ylim = c(0.75, 1.25)*range(xsp) #pending: ylim flexible for the users 
+  # Generate plots by spp
+  for(sp in seq_len(ncol(x))){
+    # Extract values for spp i
+    xsp = factor*x[, sp, ,drop = FALSE]
     
+    # Set an empty canvas
     plot.new()
-    plot.window(xlim=xlim, ylim=ylim)
-    plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], border = border, ...)
+    plot.window(xlim = xlim, ylim = ylim)
     
-    if(isTRUE(axes)){
-      axis(1, ...)
-      axis(2, las=2, ...)
-      box()
-    }
+    # Draw the plot
+    plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep, prob = 1 - conf, 
+           col = col[sp], alpha = alpha, lty = lty[sp], lwd = lwd[sp], border = border, ...)
     
-    mtext(speciesNames[sp], 3, line = -1.5, adj = 0.05, cex = cex)
-    legendFactor = -(log10(factor))
+    # Add spp names
+    mtext(text = speciesNames[sp], side = 3, line = -1.5, adj = 0.05, cex = cex)
+    
+    # Add factor label at topleft
+    legendFactor = -log10(factor)
     legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
     mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
     
-    ylim = NULL 
+    if(isTRUE(axes)){
+      axis(side = 1)
+      axis(side = 2, las = 1)
+      box()
+    }
   }
   
   return(invisible())
 }
 
-plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border, lty, ...) {
+plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf, factor, 
+                         col, alpha, speciesNames, axes, legend, cex, ...) {
   
-  if(dim(x)[3] == 1){
-    lines(x = y, y = apply(x, 1, mean, na.rm = TRUE), col = col, lty = lty, ...)
-    return(invisible())
+  # Define name of species
+  if(is.null(speciesNames)){
+    speciesNames <- toupper(colnames(x))
   }
   
-  x.inf = apply(x, 1, quantile, prob=prob/2)
-  x.sup = apply(x, 1, quantile, prob=1-prob/2)
-  x.50  = apply(x, 1, median)
-  x.pol = c(y, rev(y), y[1])
-  y.pol = c(x.inf, rev(x.sup), x.inf[1])
-  
-  if(isTRUE(replicates)) {
-    polygon(x.pol, y.pol, col=makeTransparent(col=col, alpha=alpha), border = border, ...)
-    nrep = max(min(nrep, dim(x)[3]),2)
-    # matplot(y, x[,,seq_len(nrep)], add=TRUE, type="l", lty = lty, 
-    #         col=makeTransparent(col=col, alpha=(alpha + 2)/3))
-  }
-  lines(y, x.50, col = col, lty = lty, ...)
-  
-  return(invisible())
-}
-
-plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                         times, xlim, ylim=NULL, 
-                         conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, border = NA, axes = TRUE, ...) {
-  
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(is.null(ylim)){
-    ylim    = c(0.75, 1.25)*c(min(apply(x, 2, min))*factor, max(apply(x, 2, max))*factor)
-  } else {
-    ylim = ylim
+    ylim = range(as.numeric(x))*factor
   }
   
-  # par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
-  if(is.null(col)) col = .recycleArguments(rainbow(dim(x)[2]),dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
-  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
+  # Extract args related with line customization
+  col <- if(is.null(list(...)$col)) rainbow(n = ncol(x)) else rep(x = col, length.out = ncol(x))
+  lty <- rep(x = if(is.null(list(...)$lty)) "solid" else list(...)$lty, length.out = ncol(x))
+  lwd <- rep(x = if(is.null(list(...)$lwd)) 1 else list(...)$lty, length.out = ncol(x))
+  border <- rep(x = if(is.null(list(...)$border)) NA else list(...)$border, length.out = ncol(x))
   
-  prob = 1 - conf
+  # Set an empty canvas
   plot.new()
-  plot.window(xlim=xlim, ylim=ylim)
+  plot.window(xlim = xlim, ylim = ylim)
   
-  for(sp in seq_len(ncol(x))) {
-    xsp   = factor*x[, sp, ,drop = FALSE]
+  # Generate plots by spp
+  for(sp in seq(ncol(x))) {
+    # Extract values for spp i
+    xsp = factor*x[, sp, ,drop = FALSE]
     
-    plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], border = border, ...)
+    # Draw the plot
+    plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep, prob = 1 - conf, 
+           col = col[sp], alpha = alpha, lty = lty[sp], lwd = lwd[sp], border = border, ...)
   }
   
   if(isTRUE(axes)){
-    axis(1, ...)
-    axis(2, las=2, ...)
+    axis(side = 1)
+    axis(side = 2, las = 1)
     box()
   }
   
@@ -175,6 +173,32 @@ plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
   if(isTRUE(legend)){
     legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
   }
+  
+  return(invisible())
+}
+
+plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lty, lwd, border, ...){
+  
+  if(dim(x)[3] == 1){
+    lines(x = y, y = apply(x, 1, mean, na.rm = TRUE), col = col, lty = lty, ...)
+    
+    return(invisible())
+  }
+  
+  x.50  = apply(x, 1, median)
+  
+  if(isTRUE(replicates)) {
+    x.inf = apply(x, 1, quantile, prob = prob/2)
+    x.sup = apply(x, 1, quantile, prob = 1 - prob/2)
+    
+    x.pol = c(y, rev(y), y[1])
+    y.pol = c(x.inf, rev(x.sup), x.inf[1])
+    
+    polygon(x = x.pol, y = y.pol, col = adjustcolor(col = col, alpha.f = alpha), 
+            border = border, ...)
+  }
+  
+  lines(x = y, y = x.50, col = col, lty = lty, lwd = lwd, ...)
   
   return(invisible())
 }
@@ -197,13 +221,9 @@ plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
   
   if(is.null(ylim)){ylim = c(0.75, 1.25)*range(dataSpecies[, 1])} else {ylim = ylim}
   if(is.null(speciesNames)) speciesNames = toupper(colnames(dataSpecies)) else speciesNames = speciesNames[orderData]
-  if(is.null(col)) {
-    col = .recycleArguments(rainbow(ncol(dataSpecies)), ncol(dataSpecies))
-  } else {
-    col = .recycleArguments(col, ncol(dataSpecies))
-    col = col[orderData]
-  } 
-  #if(is.null(col)) col = rainbow(n = ncol(dataSpecies)) else col = col
+  
+  col <- rep(x = if(is.null(col)) rainbow(ncol(dataSpecies)) else col, 
+             length.out = ncol(dataSpecies))[orderData]
   
   par(oma = c(1,1,1,1), mar = c(2,2,1,0.5), xaxs = "i", yaxs = "i")
   plot.new()
@@ -216,9 +236,9 @@ plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
     polygon(x.pol, y.pol, border=NA, col = col[sp], ...)
   }
   
-  if(isTRUE(axes)) {
-    axis(1, ...)
-    axis(2, las=2, ...)
+  if(isTRUE(axes)){
+    axis(side = 1)
+    axis(side = 2, las = 1)
     box()
   }
   
@@ -241,8 +261,9 @@ plot2DTsType4 = function(x, times, xlim, ylim = NULL,
   
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
   if(dim(x)[2]>1) stop("Plot ts = TRUE and type = 4 is only for one species")
-  if(is.null(col)) col = .recycleArguments("black",dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
-  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
+  
+  col <- rep(x = if(is.null(col)) "black" else col, length.out = dim(x)[2])
+  lty <- rep(x = if(is.null(lty)) "black" else lty, length.out = dim(x)[2])
  
   x = apply(x, 1, mean, na.rm = TRUE)*factor
   if(is.null(ylim)){ylim =  c(0, 1.25)*range(x)} else {ylim = ylim}
@@ -251,8 +272,8 @@ plot2DTsType4 = function(x, times, xlim, ylim = NULL,
        xlim = xlim, ylim = ylim, ...)
   
   if(isTRUE(axes)){
-    axis(1, ...)
-    axis(2, las=2, ...)
+    axis(side = 1)
+    axis(side = 2, las = 1)
     box()
   }
   
@@ -356,14 +377,14 @@ plot2DType2 = function(x, horizontal = FALSE, col = NULL,
   return(invisible())
 }
 
-.recycleArguments = function(x, length) {
-  
-  if(length(x) < length(1:length)) {x = rep(x, length.out = length)}
-  if(length(x) == length(1:length)) {x = x}
-  if(length(x) > length(1:length)) {x = x[c(1:length(1:length))]}
-  
-  return(x)
-}
+# .recycleArguments = function(x, length) {
+#   
+#   if(length(x) < length(1:length)) {x = rep(x, length.out = length)}
+#   if(length(x) == length(1:length)) {x = x}
+#   if(length(x) > length(1:length)) {x = x[c(1:length(1:length))]}
+#   
+#   return(x)
+# }
 
 # boxplot with mean over the time
 plot2DType3 = function(x, horizontal = FALSE, col = NULL, 
@@ -385,3 +406,35 @@ plot2DType3 = function(x, horizontal = FALSE, col = NULL,
   
   return(invisible())
 }
+
+
+# normalize function. 
+# returns percentage instead of raw values
+norm_func = function(data) {
+  output = 100 * data / (sum(data, na.rm=TRUE) + .Machine$double.xmin)
+  dimnames(output) = dimnames(data)
+  return(output)
+}
+
+# Extract the mortality array providing the 
+# mortality type.
+# extract_mort = function(mort, mtype){
+#   
+#   if(mtype == "Mtot")
+#   {
+#     mort = mort[["Mpred"]] + mort[["Mstar"]] + mort[["Mnat"]] + mort[["F"]] + mort[["Z"]]
+#   } else {
+#     
+#     if(!(mtype %in% names(mort)))
+#     {
+#       stop('Mortality type should be "Mtot", Mpred", "Mstar", "Mnat", "F" or "Z"')
+#     }
+#     
+#     # extracts the mortality type
+#     mort = mort[[mtype]]
+#     
+#   }
+#   
+#   return(mort)
+# 
+# }

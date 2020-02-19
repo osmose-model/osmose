@@ -2,9 +2,7 @@
 #' Returns the list of Osmose Java versions
 #'
 #' @return List of Osmose Java versions
-#' @export
 #'
-#' @examples list_osmose_versions()
 list_osmose_versions = function() {
   dirin = system.file(package="osmose", "java")
   output = list.files(path=dirin, pattern=".jar")
@@ -26,11 +24,24 @@ list_osmose_versions = function() {
 #'
 #' @param x Object to be written (table or data frame)
 #' @param file Output file
+#' @param sep The field separator string. Values within each row of x are 
+#' separated by this string.
+#' @param col.names either a logical value indicating whether the column names 
+#' of x are to be written along with x, or a character vector of column names to 
+#' be written. See the section on ‘CSV files’ for the meaning of 
+#' \code{col.names = NA}.
+#' @param quote A \code{logical} value (\code{TRUE} or \code{FALSE}) or a 
+#' \code{numeric} vector.
+#' @param row.names either a logical value indicating whether the row names of x 
+#' are to be written along with x, or a character vector of row names to be 
+#' written.
+#' @param ... Extra arguments passed to \code{write.table} funtion.
 #' 
 #' @export
-write_osmose = function(x, file, row.names=TRUE)   {
-  write.table(x=x, file=file, sep=",", col.names=NA, quote=FALSE,
-              row.names=row.names)
+write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE, 
+                        row.names = TRUE, ...){
+  write.table(x = x, file = file, sep = sep, col.names = col.names, quote = quote,
+              row.names = row.names, ...)
 }
 
 
@@ -39,6 +50,7 @@ write_osmose = function(x, file, row.names=TRUE)   {
 #' @param path Osmose output path
 #' @param type Data type ("biomass", etc)
 #' @param bySpecies TRUE if should read one file per species.
+#' @param ext The extension of the files shich will be read.
 #' @param ... Additional arguments
 #'
 #' @return Output data frame
@@ -70,160 +82,34 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", ...) {
   
 }
 
-#' Get size spectrum
-#'
-#' @param file File to read
-#' @param sep File separator
-#' @param ... Additional arguments of the \code{read.csv} function
-#'
-#' @return A 3D array (time, length, species)
-#' @examples{
-#' dirin = system.file("extdata", package="osmose")
-#' file = paste(dirin, "/outputs/SizeIndicators/gogosm_yieldDistribBySize_Simu0.csv", sep="")
-#' size = getSizeSpectrum(file)
-#' }
-#' @export
-getSizeSpectrum = function(file, sep=",", ...) {
-  
-  # sizeSpectrum = read.table(file, sep=sep, dec=".", skip=1,
-  #                          header=TRUE)
-  sizeSpectrum = .readOsmoseCsv(file=file, sep=sep, header=TRUE, row.names=NULL, ...)
-
-  nsp = ncol(sizeSpectrum) - 2
-  times = unique(sizeSpectrum$Time)
-  lengths = unique(sizeSpectrum$Size)
-  
-  out = array(dim = c(length(times), length(lengths), nsp))
-  
-  for(t in seq_along(times)) {
-    out[t,,]  = as.matrix(sizeSpectrum[sizeSpectrum$Time==times[t],-(1:2)])
-  }
-  colnames(out) = lengths
-  rownames(out) = round(times,3)
-  dimnames(out)[[3]] = paste0("sp.", seq(nsp)-1)
-  return(out)
-}
-
-
-#' Get the total mortality rate. 
-#' 
-#' @param x Mortality dataframe
-#' @param stage Stage ("adults", etc.)
-#' @param type Mortality type ("pred", "starv", "other", "out", "total"). 
-#' The latter is computed as the sum of all mortality types
-#' @return A mortality array
-#' @examples{
-#' dirin = system.file("extdata", package="osmose")
-#' outdir = paste(dirin, "/outputs", sep="")
-#' data = read_osmose(outdir)
-#' mortality_df = data$mortality
-#' mort = getMortality(mortality_df, stage="juveniles", type="total")
-#' }
-#' @export
-getMortality = function(x, stage="adults", type="total") {
-  .calcMort = function(x) {
-    x = as.data.frame(x)
-    x$natural = x$pred + x$starv + x$other + x$out
-    x$total = x$natural + x$fishing
-    return(x)
-  }
-  .getZ = function(x, stage, type) {
-    x = x[[stage]]
-    x = apply(x, 1:2, mean, na.rm=TRUE)
-    x = .calcMort(x)
-    x = x[, type]
-    return(x)
-  }
-  
-  out = sapply(x, .getZ, stage=stage, type=type)
-  return(out)
-}
-
-#' Computes the average mortality.
-#' 
-#' It computes the mean mortality, which
-#' is multiplied by the frequency.
-#'
-#' @param x Mortality dataframe
-#' @param stage Stage ("adults", etc.)
-#' @param freq Time frequency (months?)
-#'
-#' @return An array
-#' @examples{
-#' dirin = system.file("extdata", package="osmose")
-#' outdir = paste(dirin, "/outputs", sep="")
-#' data = read_osmose(outdir)
-#' mortality_df = data$mortality
-#' mort = getAverageMortality(mortality_df, stage="juveniles", freq=12)
-#' }
-#' @export
-getAverageMortality = function(x, stage="adults", freq=12) {
-  
-  .getZ = function(x, stage) {
-    x = x[[stage]]
-    x = apply(x, 1:2, mean, na.rm=TRUE)
-    x = freq*colMeans(x, na.rm=TRUE)
-    return(x)
-  }
-  
-  out = sapply(x, .getZ, stage=stage)
-  return(out)
-}
-
-#' Computes the mortality deviation. The "proxy", which is removed,
-#' can be provided by the user in the "pars" argument.
-#'
-#' @param x Mortality dataframe
-#' @param stage Stage ("adults", etc.)
-#' @param type Mortality type
-#' @param pars A list or data frame containing  
-#' \emph{dt.save}, \emph{M.proxy}, \emph{dt} entries.
-#' If NULL, then \code{proxy = colMeans(x)}
-#'
-#' @return An array
-#' @examples{
-#' dirin = system.file("extdata", package="osmose")
-#' outdir = paste(dirin, "/outputs", sep="")
-#' data = read_osmose(outdir)
-#' mortality_df = data$mortality
-#' mortdev = getMortalityDeviation(mortality_df, stage="juveniles", type="total")
-#' }
-#' @export
-getMortalityDeviation = function(x, stage, type, pars=NULL) {
-  x     = getMortality(x=x, stage=stage, type=type)
-  if(!is.null(pars)) {
-    proxy = pars$dt.save*pars$M.proxy/pars$dt    
-  } else {
-    proxy = colMeans(x)
-  }
-  out   = t(apply(x, 1, "-", proxy))
-  return(out)
-}
-
-
-
-
 # Non-exported ------------------------------------------------------------
 
 
-getmfrow = function(n) .getmfrow(n=n)
-
-makeTransparent = function(..., alpha=0.5) {
+getmfrow = function(n){
+  m1 = floor(sqrt(n))
+  m2 = ceiling(n/m1)
+  out = rev(sort(c(m1, m2)))
   
-  if(alpha<0 | alpha>1) stop("alpha must be between 0 and 1")
-  
-  alpha = floor(255*alpha)  
-  newColor = col2rgb(col=unlist(list(...)), alpha=FALSE)
-  
-  .makeTransparent = function(col, alpha) {
-    rgb(red=col[1], green=col[2], blue=col[3], alpha=alpha, maxColorValue=255)
-  }
-  
-  newColor = apply(newColor, 2, .makeTransparent, alpha=alpha)
-  
-  return(newColor)
-  
+  return(out)
 }
+
+# adjustcolor?
+# makeTransparent = function(..., alpha=0.5) {
+#   
+#   if(alpha<0 | alpha>1) stop("alpha must be between 0 and 1")
+#   
+#   alpha = floor(255*alpha)  
+#   newColor = col2rgb(col=unlist(list(...)), alpha=FALSE)
+#   
+#   .makeTransparent = function(col, alpha) {
+#     rgb(red=col[1], green=col[2], blue=col[3], alpha=alpha, maxColorValue=255)
+#   }
+#   
+#   newColor = apply(newColor, 2, .makeTransparent, alpha=alpha)
+#   
+#   return(newColor)
+#   
+# }
 
 writeOsmoseParameters = function(conf, file, sep=";") {
   .writeParameter = function(x) {
@@ -238,4 +124,15 @@ writeOsmoseParameters = function(conf, file, sep=";") {
   rownames(out) = vars[ind]
   write.table(out, file=file, sep="", quote=FALSE, col.names=FALSE)
   return(invisible(out))
+}
+
+# Takes a string and returns the words splitted by "_"
+getWhats <- function(x){
+  index <- grep(pattern = "_", x = x)
+  
+  if(length(index) > 0){
+    x <- unlist(strsplit(x = x, split = "_"))
+  }
+  
+  return(x)
 }

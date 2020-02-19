@@ -119,9 +119,6 @@ plotGrowthType1 = function(x, species, n = 100, xlim = NULL, ylim = NULL,
 #' @param par TODO
 #' @param sp TODO
 #'
-#' @return TODO
-#' @export
-#'
 getGrowthParameters = function(par, sp) {
   
   # species indexation
@@ -154,7 +151,6 @@ getGrowthParameters = function(par, sp) {
 #' @param par TODO
 #'
 #' @return TODO
-#' @export
 osmoseGrowth = function(age, par) { 
   
   linf    = par$linf
@@ -188,7 +184,6 @@ osmoseGrowthInv = function(length, par) {
   
   return(age)
 }
-
 
 # Predation plot functions ------------------------------------------------
 

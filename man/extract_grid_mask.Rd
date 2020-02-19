@@ -21,10 +21,13 @@ extract_grid_mask(
 
 \item{fillVal}{Fill Value (default NA but could be 0).}
 
-\item{...}{Additional arguments of the ncvar_get function. Used to allow more flexibility on the choice of the
-mask variable via the start and count arguments. If your mask variable is already 2D, nothing to do. If it is 3D, you
-need to set the start/count arrays so that the final variable is of dimensions (lon, lat).}
+\item{...}{Additional arguments of the \code{ncvar_get} function. See Details.}
 }
 \description{
 Extracts the model grid file from the LTL forcing file.
+}
+\details{
+\code{...} can be used to allow more flexibility on the choice of 
+the mask variable via the start and count arguments in order to get a final
+2D matrix.
 }

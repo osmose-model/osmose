@@ -8,11 +8,9 @@
 #' @param java Path to the java executable. The default assumes 'java' is 
 #' on the search path. 
 #' @param verbose Show messages? (output in the log file if FALSE).
+#' @param absolute Whether the input file uses absolute (\code{TRUE}, default) or relative (\code{FALSE}) paths.
 #'
-#' @return
 #' @export
-#'
-#' @examples
 update_osmose = function(input, log = "osmose.log",
                          version = "4.2.1", osmose = NULL, java = "java",
                          verbose = TRUE, absolute=TRUE) {
@@ -50,7 +48,6 @@ update_osmose = function(input, log = "osmose.log",
 #' @param input Filename of the main configuration file
 #' @param absolute Whether the input file uses absolute (TRUE) or relative (FALSE) paths.
 #'
-#' @export
 update_ltl = function(input, filename=NULL, absolute=TRUE) {
   
   # get path from config
@@ -167,5 +164,3 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
   return(invisible())
   
 }
-
-

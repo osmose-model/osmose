@@ -11,7 +11,7 @@ extract_grid_param(
   filename,
   lonname = "longitude",
   latname = "latitude",
-  csv = NULL
+  outfile = NULL
 )
 }
 \arguments{
@@ -21,11 +21,13 @@ extract_grid_param(
 
 \item{latname}{Latitude name (default "latitude")}
 
-\item{csv}{Output CSV file (if NULL, no file is written). The directory is created recursively
-if it does not exist}
-}
-\value{
-The grid format as a data frame.
+\item{outfile}{Output CSV file (if NULL, no file is written). The directory is created recursively
+if it does not exist
+Warning: This function must be checked in order to be sure that it's not just
+being created for an specific version of osmose-java (the return has names of
+parameters that are only valid for an specific version). Besides, it'd be 
+better to create a more global function that extract parameters, mask, etc 
+from LTL netCDF files ('extract_grid_mask' function).}
 }
 \description{
 Computes the Osmose grid parameters by using the

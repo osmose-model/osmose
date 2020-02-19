@@ -1,7 +1,7 @@
 # @param ... Additional arguments of the function.
 # @export
 # @return An array or a list containing the data.
-process.dietMatrix = function(out, species=NULL, time.mean=TRUE, thres=1, ...) {
+process.dietMatrix = function(out, species = NULL, time.mean = TRUE, thres = 1, ...) {
   
   .check_species(out, species)
   
@@ -12,7 +12,7 @@ process.dietMatrix = function(out, species=NULL, time.mean=TRUE, thres=1, ...) {
   out = apply(out, c(1, 2), mean)
   
   # computes the time average
-  data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # barrier.n: adding this to avoid NULL output in summary
+  data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # adding this to avoid NULL output in summary
   keep = (data.time.mean > thres)  # keep values for which the max is greater than the threshold
   
   if(time.mean) {
@@ -20,7 +20,7 @@ process.dietMatrix = function(out, species=NULL, time.mean=TRUE, thres=1, ...) {
     data.time.mean = data.time.mean[keep]
     Nvalues = length(data.time.mean)
     
-    if(thres>0) {
+    if(thres > 0) {
       # If thresholds is greater than 0, then the negligible species are binned together.
       
       # compute the proportion of negligible species
@@ -125,57 +125,56 @@ process.mortalityRate = function(out, species=NULL, time.mean=TRUE, ...) {
 
 #' Title
 #'
-#' @param data 
-#' @param species 
-#' @param thres 
-#' @param ... 
+#' @param object an object of class \code{osmose.mortalityRate} for which a summary is desired.
+#' @param species Name of the species to get a summary. 
+#' @param thres Threshold which is used to keep values of species matrix.
+#' @param ... Extra arguments passed to the method.
 #'
 #' @export
 #' @method summary osmose.dietMatrix
-summary.osmose.dietMatrix = function(data, species=NULL, thres=1, ...) {
+summary.osmose.dietMatrix = function(object, species = NULL, thres = 1, ...) {
   
-  dietMatrix = process.dietMatrix(data, species=species, time.mean=TRUE, thres=thres, ...)
+  dietMatrix = process.dietMatrix(object, species = species, time.mean = TRUE, thres = thres, ...)
   dietMatrix = as.data.frame(dietMatrix)
   colnames(dietMatrix) = 'Predation rate (%)'
+  
   #class(dietMatrix) = c("summary.osmose.output.dietMatrix", class(temp))
   return(dietMatrix)
-  
 }
 
 #' Title
 #'
-#' @param data 
-#' @param species 
-#' @param thres 
-#' @param ... 
+#' @param object an object of class \code{osmose.mortalityRate} for which a summary is desired.
+#' @param species Name of the species to get a summary. 
+#' @param ... Extra arguments passed to the method.
 #
 #' @export
 #' @method summary osmose.mortalityRate
-summary.osmose.mortalityRate = function(data, species=NULL, ...) {
-  data = process.mortalityRate(data, species=species, time.mean=TRUE)
+summary.osmose.mortalityRate = function(object, species = NULL, ...) {
+  data = process.mortalityRate(object, species = species, time.mean = TRUE)
   return(as.data.frame(data))  
 }
 
 #' @export
 #' @method summary osmose.biomass
-summary.osmose.biomass = function(data) {
-  return(.summary.generic(data))
+summary.osmose.biomass = function(object, ...) {
+  return(.summary.generic(object))
 }
 
 #' @export
 #' @method summary osmose.meanTL
-summary.osmose.meanTL = function(data) {
-  return(.summary.generic(data))
+summary.osmose.meanTL = function(object, ...) {
+  return(.summary.generic(object))
 }
 
 #' @export
 #' @method summary osmose.meanTLCatch
-summary.osmose.meanTLCatch = function(data) {
-  return(.summary.generic(data))
+summary.osmose.meanTLCatch = function(object, ...) {
+  return(.summary.generic(object))
 }
 
-.summary.generic = function(data) {
-  data = apply(data, 2, mean, na.rm=TRUE)
+.summary.generic = function(object) {
+  data = apply(object, 2, mean, na.rm=TRUE)
   data = sort(data, decreasing=TRUE)
   data = as.data.frame(data)
   return(data)

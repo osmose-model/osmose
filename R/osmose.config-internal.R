@@ -145,7 +145,7 @@ addAttr = function(x, which, value) {
 
 # GetData functions -------------------------------------------------------
 
-getReproductionData = function(x, var = season.file){
+getReproductionData = function(x, var = "season.file", ...){
   
   # index on the list using the var
   listIndex = paste0("x = x",
@@ -171,7 +171,7 @@ getReproductionData = function(x, var = season.file){
 }
 
 
-getSpeciesData = function(x) {
+getSpeciesData = function(x, ...){
   
   # species name in configuration file
   speciesCode = names(x$name)
@@ -211,13 +211,13 @@ getSpeciesData = function(x) {
 }
 
 
-getPredationData = function(x, object, extraWhat = FALSE) {
+getPredationData = function(x, object, extraWhat = FALSE, ...) {
   
   # Accessibility
   fileAccessibility = unlist(lapply(x$accessibility$file, FUN = "[[", 1))
   pathAccessibility = attributes(x$accessibility$file)$path
   accessibility     = list(data = read.csv(file = paste(pathAccessibility,
-                                                        fileAccessibility, sep = "/"), sep = ";", header=TRUE, row.names=1),
+                                                        fileAccessibility, sep = "/"), sep = ";"),
                            stageStructure = as.vector(x$accessibility$stage$structure),
                            stageThreshold = lapply(x$accessibility$stage$threshold, FUN = "[[", 1))
   

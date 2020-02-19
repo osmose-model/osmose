@@ -19,9 +19,3 @@ A list tree.
 \description{
 Reads Osmose configuration files.
 }
-\examples{
-{
-    filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
-    par = readOsmoseConfiguration(filename)
-}
-}

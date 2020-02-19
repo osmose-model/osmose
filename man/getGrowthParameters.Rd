@@ -11,9 +11,6 @@ getGrowthParameters(par, sp)
 
 \item{sp}{TODO}
 }
-\value{
-TODO
-}
 \description{
 Title
 }
