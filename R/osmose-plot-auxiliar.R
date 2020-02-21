@@ -9,7 +9,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   # CHECK ARGUMENTS
   if(!is.null(species)){
     # Check species I
-    message1 <- "'species' must be whether a numeric or character vector without NA or duplicated values."
+    message1 = "'species' must be whether a numeric or character vector without NA or duplicated values."
     if(!is.vector(species) || # isn't it a vector?
        all(!is.element(c("character", "numeric"), class(species))) || # is it character or numeric?
        length(species) < 1 || # its length is greater than 1?
@@ -32,7 +32,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
         stop("Some values of 'species' does not exist.")
       }
       
-      species <- match(species, colnames(x))
+      species = match(species, colnames(x))
     }
     
     x = x[ , species, , drop = FALSE]
@@ -324,7 +324,7 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha,
   
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
   cex = if(is.null(list(...)$cex)) 0.8 else cex
- 
+  
   x = apply(x, 1, mean, na.rm = TRUE)*factor
   if(is.null(ylim)){
     ylim =  c(0, 1.25)*range(x)
@@ -361,6 +361,10 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   
   if(is.null(col)) col = "gray"
   cex = if(is.null(list(...)$cex)) 0.8 else cex
+  
+  # To keep the plot params as the beggining
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
   
   if(isTRUE(ci)){
     barplotCI(x, horizontal = horizontal, speciesNames = speciesNames, 
@@ -414,12 +418,9 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, axes, ...){
   code    = ifelse(is.null(list(...)$code), 3, list(...)$code)
   length  = ifelse(is.null(list(...)$length), 0.1, list(...)$length)
   
-  arrowLimits <- list(x = as.numeric(barx),
-                      min = y.mean - 1.96*y.sd/10,
-                      max = y.mean + 1.96*y.sd/10)
-  
-  index <- abs(arrowLimits$max - arrowLimits$min) > 0
-  arrowLimits <- lapply(arrowLimits, "[", index)
+  arrowLimits = list(x = as.numeric(barx),
+                     min = y.mean - 1.96*y.sd/10,
+                     max = y.mean + 1.96*y.sd/10)
   
   if(isTRUE(horizontal)){
     suppressWarnings(arrows(x0 = arrowLimits$min, y0 = arrowLimits$x, 
@@ -443,6 +444,10 @@ plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
   }
   
   cex = if(is.null(list(...)$cex)) 0.8 else cex
+  
+  # To keep the plot params as the beggining
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
   
   mar = if(isTRUE(horizontal)) c(2, 5.5) else c(2.5, 2)
   par(oma = rep(1, 4), mar = c(mar, 1, 0.3), las = 1, ...)
@@ -469,6 +474,10 @@ plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes, units,
   
   if(is.null(col)) col = "gray"
   cex = if(is.null(list(...)$cex)) 0.8 else cex
+  
+  # To keep the plot params as the beggining
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
   
   mar = if(isTRUE(horizontal)) c(2, 5.5) else c(2.5, 2)
   par(oma = rep(1, 4), mar = c(mar, 1, 0.3), las = 1, ...)
