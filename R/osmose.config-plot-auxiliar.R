@@ -197,7 +197,7 @@ plotPredationType1 = function(x, species, xlim = NULL, ylim = NULL, border = NA,
   
   #xlim and ylim
   if(is.null(xlim)) xlim = c(0, tail(par$threshold, n = 1)) else xlim = xlim
-  if(is.null(ylim)) ylim = c(0, max((1/par$sizeRatioMax)*(par$threshold[-1])))*1.3 else ylim = ylim
+  if(is.null(ylim)) ylim = c(0, max((1/par$sizeRatioMax)*(par$threshold[1])))*1.3 else ylim = ylim
   
   #plot
   plot.new()

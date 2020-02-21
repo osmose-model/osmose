@@ -82,7 +82,7 @@ get_var.osmose.config = function(object, what, ...) {
     x = switch(what,
                reproduction  = getReproductionData(x, var = "season.file", ...),
                species       = getSpeciesData(x, ...),
-               predation     = getPredationData(x, object = object, extraWhat = what[2], ...))
+               predation     = getPredationData(x, object = object, ...))
   }
   
   class(x) = c(paste("osmose.config", what, sep = "."), class(x))
@@ -104,7 +104,7 @@ get_var.osmose.config = function(object, what, ...) {
 plot.osmose.config = function(x, what = NULL, ...) {
   
   if(!is.null(what)){
-    x = get_var.osmose.config(x, what = what, extraWhat = TRUE)
+    x = get_var.osmose.config(x, what = what)
     plot(x, ...)
     
   } else {

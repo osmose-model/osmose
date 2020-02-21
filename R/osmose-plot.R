@@ -130,7 +130,8 @@ plot.osmose.yield = function(x, species = NULL, speciesNames = NULL,
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
-                lty = lty, lwd = lwd, axes = axes, legend = legend, ...)
+                lty = lty, lwd = lwd, axes = axes, legend = legend,
+                units = units, ...)
   
   return(invisible())
 }
@@ -153,7 +154,8 @@ plot.osmose.yieldN = function(x, species = NULL, speciesNames = NULL,
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
-                lty = lty, lwd = lwd, axes = axes, legend = legend, ...)
+                lty = lty, lwd = lwd, axes = axes, legend = legend,
+                units = units, ...)
   
   return(invisible())
 }

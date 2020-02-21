@@ -211,7 +211,7 @@ getSpeciesData = function(x, ...){
 }
 
 
-getPredationData = function(x, object, extraWhat = FALSE, ...) {
+getPredationData = function(x, object, ...) {
   
   # Accessibility
   fileAccessibility = unlist(lapply(x$accessibility$file, FUN = "[[", 1))
@@ -240,14 +240,9 @@ getPredationData = function(x, object, extraWhat = FALSE, ...) {
   dataBase = list(accessibility = accessibility,
                   efficiency    = efficiency,
                   ingestion     = ingestion,
-                  predPrey      = predPrey)
-  
-  if(isTRUE(extraWhat)){
-    linf = lapply(lapply(object[["species"]][["linf"]], FUN = "[[", 1), as.numeric, 1)
-    speciesNames = lapply(object$species$name, FUN = "[[", 1)
-    dataBase$linf = linf
-    dataBase$speciesNames = speciesNames
-  } 
+                  predPrey      = predPrey,
+                  linf          = as.numeric(do.call(c, object$species$linf)),
+                  speciesNames  = as.character(do.call(c, object$species$name)))
   
   return(dataBase)
 }

@@ -11,7 +11,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
     # Check species I
     message1 = "'species' must be whether a numeric or character vector without NA or duplicated values."
     if(!is.vector(species) || # isn't it a vector?
-       all(!is.element(c("character", "numeric"), class(species))) || # is it character or numeric?
+       all(!is.element(c("character", "numeric"), mode(species))) || # is it character or numeric?
        length(species) < 1 || # its length is greater than 1?
        sum(is.na(species)) > 0 || # is there any NA?
        any(duplicated(species))){ # is there any duplicated value?
@@ -124,7 +124,9 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
   lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
   lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
-  cex = if(is.null(list(...)[["cex"]])) 1 else cex
+  
+  cex = list(...)[["cex"]]
+  if(is.null(cex)) cex = 1
   
   # Define ylim
   if(is.null(ylim)){
@@ -181,7 +183,8 @@ plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
   lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
   
-  cex = if(is.null(list(...)[["cex"]])) 1 else cex
+  cex = list(...)[["cex"]]
+  if(is.null(cex)) cex = 1
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
@@ -276,7 +279,9 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
   }
   
   col = if(is.null(col)) rainbow(n = ncol(dataSpecies)) else rep(x = col, length.out = ncol(x))
-  cex = if(is.null(list(...)[["cex"]])) 1 else cex
+  
+  cex = list(...)[["cex"]]
+  if(is.null(cex)) cex = 1
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
@@ -323,7 +328,9 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha,
   if(ncol(x) > 1) stop("Plot ts = TRUE and type = 4 is only for one species")
   
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
-  cex = if(is.null(list(...)[["cex"]])) 0.8 else cex
+  
+  cex = list(...)[["cex"]]
+  if(is.null(cex)) cex = 1
   
   x = apply(x, 1, mean, na.rm = TRUE)*factor
   if(is.null(ylim)){
@@ -360,7 +367,9 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   }
   
   if(is.null(col)) col = "gray"
-  cex = if(is.null(list(...)[["cex"]])) 0.9 else list(...)[["cex"]]
+  
+  cex = list(...)[["cex"]]
+  cex = if(is.null(cex)) 0.9
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
@@ -443,7 +452,8 @@ plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
     speciesNames = toupper(colnames(x))
   }
   
-  cex = if(is.null(list(...)[["cex"]])) 0.8 else cex
+  cex = list(...)[["cex"]]
+  cex = if(is.null(cex)) 0.8
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
@@ -473,7 +483,9 @@ plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes, units,
   }
   
   if(is.null(col)) col = "gray"
-  cex = if(is.null(list(...)[["cex"]])) 0.8 else cex
+  
+  cex = list(...)[["cex"]]
+  cex = if(is.null(cex)) 0.8
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
