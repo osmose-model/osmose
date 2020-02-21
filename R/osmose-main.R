@@ -109,7 +109,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #'   read_osmose(path = outdir)
 #' }
 #' @aliases osmose2R
-read_osmose = function(path = NULL, input = NULL, version = "4.2.1", 
+read_osmose = function(path = NULL, input = NULL, version = "3.3.3", 
                        species.names = NULL, absolute = TRUE, ...){
   
   # If both path and input are NULL, then show an error message

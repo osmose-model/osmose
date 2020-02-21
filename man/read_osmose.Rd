@@ -10,7 +10,7 @@ osmose2R(path = NULL, version = "v3r2", species.names = NULL, ...)
 read_osmose(
   path = NULL,
   input = NULL,
-  version = "4.2.1",
+  version = "3.3.3",
   species.names = NULL,
   absolute = TRUE,
   ...
