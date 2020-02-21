@@ -66,7 +66,7 @@ configureCalibration = function(L1) {
 #' @method get_var osmose.config
 get_var.osmose.config = function(object, what, ...) {
   
-  what <- getWhats(x = what)
+  what = getWhats(x = what)
   
   x = object[[what[1]]]
   

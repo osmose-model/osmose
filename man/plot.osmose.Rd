@@ -13,6 +13,7 @@
 \method{plot}{osmose.biomass}(
   x,
   species = NULL,
+  speciesNames = NULL,
   start = NULL,
   end = NULL,
   initialYear = NULL,
@@ -28,8 +29,8 @@
   ylim = NULL,
   col = NULL,
   alpha = 0.5,
-  cex = 1,
-  speciesNames = NULL,
+  lty = 1,
+  lwd = 1,
   axes = TRUE,
   legend = TRUE,
   ...
@@ -38,6 +39,7 @@
 \method{plot}{osmose.abundance}(
   x,
   species = NULL,
+  speciesNames = NULL,
   start = NULL,
   end = NULL,
   initialYear = NULL,
@@ -53,8 +55,8 @@
   ylim = NULL,
   col = NULL,
   alpha = 0.5,
-  cex = 1,
-  speciesNames = NULL,
+  lty = 1,
+  lwd = 1,
   axes = TRUE,
   legend = TRUE,
   ...
@@ -63,6 +65,7 @@
 \method{plot}{osmose.yield}(
   x,
   species = NULL,
+  speciesNames = NULL,
   start = NULL,
   end = NULL,
   initialYear = NULL,
@@ -78,15 +81,18 @@
   ylim = NULL,
   col = NULL,
   alpha = 0.5,
-  cex = 1,
-  speciesNames = NULL,
+  lty = 1,
+  lwd = 1,
   axes = TRUE,
+  legend = TRUE,
+  units = "tonnes",
   ...
 )
 
 \method{plot}{osmose.yieldN}(
   x,
   species = NULL,
+  speciesNames = NULL,
   start = NULL,
   end = NULL,
   initialYear = NULL,
@@ -102,9 +108,11 @@
   ylim = NULL,
   col = NULL,
   alpha = 0.5,
-  cex = 1,
-  speciesNames = NULL,
+  lty = 1,
+  lwd = 1,
   axes = TRUE,
+  legend = TRUE,
+  units = "individuals",
   ...
 )
 }
@@ -119,6 +127,9 @@ See Details}
 \item{species}{A \code{numeric} vector specifying the species that will be 
 showed. If \code{NULL} (default), all the available species time series will 
 be plotted.}
+
+\item{speciesNames}{A vector with the names for each species. If \code{NULL}
+(default) the names of \code{x} will be used.}
 
 \item{start}{A \code{numeric} value indicating the first element of the time 
 indexation of the object \code{x} is specified with this parameter. By 
@@ -166,18 +177,18 @@ ranges.}
 \code{col = NULL} and the colors will be chosen by the function.}
 
 \item{alpha}{factor modifying the opacity alpha (typically in [0,1], by 
-default 0.5) given to confidence interval shadow.}
+default 0.5) given to confidence interval shadow (check 
+\code{\link{adjustcolor}}).}
 
-\item{cex}{\code{numeric}, a factor used to control the text size of both legend 
-and factor labels (\code{cex = 1}, by default).}
+\item{lty}{The line type (check \code{\link{par}}).}
 
-\item{speciesNames}{A vector with the names for each species. If \code{NULL}
-(default) the names of \code{x} will be used.}
+\item{lwd}{The line width (check \code{\link{par}}).}
 
 \item{axes}{a \code{logical} value indicating whether both axes should be 
 drawn on the plot.}
 
-\item{legend}{\code{logical} do you want to show a legend of species?}
+\item{legend}{\code{logical} do you want to show a legend of species? (valid
+only for those plot types TS-2)}
 }
 \value{
 A graph of an \code{osmose} object.

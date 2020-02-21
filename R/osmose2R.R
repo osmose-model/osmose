@@ -767,7 +767,7 @@ calculateSelectivity = function(par, n=1, tiny=1e-6) {
 #' @param Sub_StepF Fishing mortality step between Fmin and StepF
 #' @param ...  Additionnal arguments of the run_osmose function
 
-F_msy <- function(sp, input.file, restart=FALSE,
+F_msy = function(sp, input.file, restart=FALSE,
                   Fmin=0, Fmax=2, StepF=0.1, Sub_StepF=0.01, ...) {
   
   # Initial values

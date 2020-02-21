@@ -127,11 +127,11 @@ writeOsmoseParameters = function(conf, file, sep=";") {
 }
 
 # Takes a string and returns the words splitted by "_"
-getWhats <- function(x){
-  index <- grep(pattern = "_", x = x)
+getWhats = function(x){
+  index = grep(pattern = "_", x = x)
   
   if(length(index) > 0){
-    x <- unlist(strsplit(x = x, split = "_"))
+    x = unlist(strsplit(x = x, split = "_"))
   }
   
   return(x)

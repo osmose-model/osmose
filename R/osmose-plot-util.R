@@ -41,7 +41,7 @@
   x = as.table(x)
   names = rownames(x)
   N = length(names)
-  dim(x) <- c(length(x), 1)
+  dim(x) = c(length(x), 1)
 
   # recover the arguments of varplot 
   # and modify xlim and legend pos.
@@ -124,14 +124,14 @@ osmose.stackedpcent = function(data, ...)
   lwd = args[['lwd']]
   
   # Create a list of 22 colors to use for the lines.
-  cl <- rainbow(ncol(y))
+  cl = rainbow(ncol(y))
   plotcol = 1:ncol(y)
   
   # Now fill plot with the log transformed coverage data from the
   # files one by one.
   for(i in 1:ncol(y)) {
     lines(y[,i], col=cl[i], ...)
-    plotcol[i] <- cl[i]
+    plotcol[i] = cl[i]
   }
   
   legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title=legtitle, ncol=nlegend)

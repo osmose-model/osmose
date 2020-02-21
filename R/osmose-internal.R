@@ -8,8 +8,8 @@
   if(length(version) > 1) stop("Only one 'version' value must be provided.")
   
   # Split string by places where there's dots
-  version <- unlist(strsplit(x = as.character(version), split = "\\."))
-  version <- suppressWarnings(as.numeric(version))
+  version = unlist(strsplit(x = as.character(version), split = "\\."))
+  version = suppressWarnings(as.numeric(version))
   
   # Check if version has a valid form
   if(any(is.na(version)) | length(version) > 3 | any(version < 0, na.rm = TRUE)){
@@ -17,7 +17,7 @@
   }
   
   # Complete version with zeros if its length is less than 3
-  version <- as.integer(c(version, rep(0, 3 - length(version))))
+  version = as.integer(c(version, rep(0, 3 - length(version))))
   
   return(version)
 }
@@ -30,7 +30,7 @@
   if(is.character(version2)) version2 = .getVersion(version2)
   
   # Check numbers of version
-  output <- as.integer(sign(mapply("-", version1, version2)))
+  output = as.integer(sign(mapply("-", version1, version2)))
   
   # Return -1, 0, +1 if corresponds
   for(i in seq_along(output)) if(output[i] != 0) return(output[i])

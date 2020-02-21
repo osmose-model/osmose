@@ -12,6 +12,8 @@
 #' @param species A \code{numeric} vector specifying the species that will be 
 #' showed. If \code{NULL} (default), all the available species time series will 
 #' be plotted. 
+#' @param speciesNames A vector with the names for each species. If \code{NULL}
+#' (default) the names of \code{x} will be used.
 #' @param start A \code{numeric} value indicating the first element of the time 
 #' indexation of the object \code{x} is specified with this parameter. By 
 #' default \code{start = NULL} and the time indexation start with the first 
@@ -45,14 +47,14 @@
 #' @param col A vector with the color names for the plots. By default 
 #' \code{col = NULL} and the colors will be chosen by the function.  
 #' @param alpha factor modifying the opacity alpha (typically in [0,1], by 
-#' default 0.5) given to confidence interval shadow.
-#' @param cex \code{numeric}, a factor used to control the text size of both legend 
-#' and factor labels (\code{cex = 1}, by default).
-#' @param speciesNames A vector with the names for each species. If \code{NULL}
-#' (default) the names of \code{x} will be used.
+#' default 0.5) given to confidence interval shadow (check 
+#' \code{\link{adjustcolor}}).
+#' @param lty The line type (check \code{\link{par}}).
+#' @param lwd The line width (check \code{\link{par}}).
 #' @param axes a \code{logical} value indicating whether both axes should be 
 #' drawn on the plot. 
-#' @param legend \code{logical} do you want to show a legend of species?
+#' @param legend \code{logical} do you want to show a legend of species? (valid
+#' only for those plot types TS-2)
 #' @param ... Extra arguments of the function.
 #' 
 #' @details Describe types-ts
@@ -66,102 +68,95 @@
 #' @author Criscely Lujan Paredes
 #' 
 #' @export
-plot.osmose.biomass = function(x, species = NULL, start = NULL, end = NULL, 
+plot.osmose.biomass = function(x, species = NULL, speciesNames = NULL, 
+                               start = NULL, end = NULL, 
                                initialYear = NULL, ts = TRUE, type = 1, 
                                replicates = TRUE, nrep = 3, freq = 12, 
                                horizontal = FALSE, conf = 0.95, factor = 1e-3, 
-                               xlim = NULL, ylim = NULL, col = NULL, alpha = 0.5, 
-                               cex = 1, speciesNames = NULL, axes = TRUE, 
-                               legend = TRUE, ...){
-  
-  # To keep the plot params as the beggining
-  op <- par(no.readonly = TRUE)
-  on.exit(op, add = TRUE, after = FALSE)
+                               xlim = NULL, ylim = NULL, col = NULL, alpha = 0.5,
+                               lty = 1, lwd = 1, axes = TRUE, legend = TRUE, ...){
   
   # Run the plot
-  osmosePlots2D(x = x, species = species, start = start, end = end, 
+  osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
+                start = start, end = end, 
                 initialYear = initialYear, ts = ts, type = type, 
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
-                xlim = xlim, ylim = ylim, col = col, alpha = alpha, cex = cex, 
-                speciesNames = speciesNames, axes = axes, legend = legend, ...)
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
+                lty = lty, lwd = lwd, axes = axes, legend = legend,
+                units = "tonnes", ...)
   
   return(invisible())
 }
 
 #' @rdname plot.osmose
 #' @export
-plot.osmose.abundance = function(x, species = NULL, start = NULL, end = NULL, 
+plot.osmose.abundance = function(x, species = NULL, speciesNames = NULL, 
+                                 start = NULL, end = NULL, 
                                  initialYear = NULL, ts = TRUE, type = 1, 
                                  replicates = TRUE, nrep = 3, freq = 12, 
                                  horizontal = FALSE, conf = 0.95, factor = 1e-3, 
-                                 xlim = NULL, ylim = NULL, col = NULL, 
-                                 alpha = 0.5, cex = 1, speciesNames = NULL, 
-                                 axes = TRUE, legend = TRUE, ...) {
-  
-  # To keep the plot params as the beggining
-  op <- par(no.readonly = TRUE)
-  on.exit(op, add = TRUE, after = FALSE)
+                                 xlim = NULL, ylim = NULL, col = NULL, alpha = 0.5,
+                                 lty = 1, lwd = 1, axes = TRUE, legend = TRUE, ...){
   
   # Run the plot
-  osmosePlots2D(x = x, species = species, start = start, end = end, 
+  osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
+                start = start, end = end, 
                 initialYear = initialYear, ts = ts, type = type, 
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
-                xlim = xlim, ylim = ylim, col = col, alpha = alpha, cex = cex, 
-                speciesNames = speciesNames, axes = axes, legend = legend, ...)
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
+                lty = lty, lwd = lwd, axes = axes, legend = legend,
+                units = "individuals", ...)
   
   return(invisible())
 }
 
 #' @rdname plot.osmose
 #' @export
-plot.osmose.yield = function(x, species = NULL, start = NULL, end = NULL, 
+plot.osmose.yield = function(x, species = NULL, speciesNames = NULL, 
+                             start = NULL, end = NULL, 
                              initialYear = NULL, ts = TRUE, type = 1, 
                              replicates = TRUE, nrep = 3, freq = 12, 
                              horizontal = FALSE, conf = 0.95, factor = 1e-3, 
-                             xlim = NULL, ylim = NULL, col = NULL, alpha = 0.5, 
-                             cex = 1, speciesNames = NULL, axes = TRUE, ...) {
-  
-  # To keep the plot params as the beggining
-  op <- par(no.readonly = TRUE)
-  on.exit(op, add = TRUE, after = FALSE)
+                             xlim = NULL, ylim = NULL, col = NULL, alpha = 0.5,
+                             lty = 1, lwd = 1, axes = TRUE, legend = TRUE, 
+                             units = "tonnes", ...){
   
   # Run the plot
-  osmosePlots2D(x = x, species = species, start = start, end = end, 
+  osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
+                start = start, end = end, 
                 initialYear = initialYear, ts = ts, type = type, 
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
-                xlim = xlim, ylim = ylim, col = col, alpha = alpha, cex = cex, 
-                speciesNames = speciesNames, axes = axes, ...)
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
+                lty = lty, lwd = lwd, axes = axes, legend = legend, ...)
   
   return(invisible())
 }
 
 #' @rdname plot.osmose
 #' @export
-plot.osmose.yieldN = function(x, species = NULL, start = NULL, end = NULL, 
+plot.osmose.yieldN = function(x, species = NULL, speciesNames = NULL, 
+                              start = NULL, end = NULL, 
                               initialYear = NULL, ts = TRUE, type = 1, 
                               replicates = TRUE, nrep = 3, freq = 12, 
                               horizontal = FALSE, conf = 0.95, factor = 1e-3, 
-                              xlim = NULL, ylim = NULL, col = NULL, alpha = 0.5, 
-                              cex = 1, speciesNames = NULL, axes = TRUE, ...){
-  
-  # To keep the plot params as the beggining
-  op <- par(no.readonly = TRUE)
-  on.exit(op, add = TRUE, after = FALSE)
+                              xlim = NULL, ylim = NULL, col = NULL, alpha = 0.5,
+                              lty = 1, lwd = 1, axes = TRUE, legend = TRUE, 
+                              units = "individuals", ...){
   
   # Run the plot
-  osmosePlots2D(x = x, species = species, start = start, end = end, 
+  osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
+                start = start, end = end, 
                 initialYear = initialYear, ts = ts, type = type, 
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
-                xlim = xlim, ylim = ylim, col = col, alpha = alpha, cex = cex, 
-                speciesNames = speciesNames, axes = axes, ...)
+                xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
+                lty = lty, lwd = lwd, axes = axes, legend = legend, ...)
   
   return(invisible())
 }
-
 
 
 # osmose-plot-nico (prev) -------------------------------------------------

@@ -130,7 +130,7 @@ extract_grid_mask = function(filename, varname = "ltl_biomass",
   if(length(dim(var)) < 2) stop("The number of dimensions of the input file must be greater than 2.")
   
   # Extract a matrix with the first two dimensions of var
-  var <- matrix(data = as.numeric(var), nrow = nrow(var), ncol = ncol(var))
+  var = matrix(data = as.numeric(var), nrow = nrow(var), ncol = ncol(var))
   
   # Define NA
   var[var == fillVal] = NA
