@@ -124,7 +124,7 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
   lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
   lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
-  cex = if(is.null(list(...)$cex)) 1 else cex
+  cex = if(is.null(list(...)[["cex"]])) 1 else cex
   
   # Define ylim
   if(is.null(ylim)){
@@ -181,7 +181,7 @@ plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
   lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
   
-  cex = if(is.null(list(...)$cex)) 1 else cex
+  cex = if(is.null(list(...)[["cex"]])) 1 else cex
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
@@ -238,8 +238,8 @@ plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lty, lwd, ...){
     y.pol = c(x.inf, rev(x.sup), x.inf[1])
     
     polygon(x = x.pol, y = y.pol, col = adjustcolor(col = col, alpha.f = alpha), 
-            border = NA, density = list(...)$density, 
-            angle = ifelse(is.null(list(...)$angle), 45, list(...)$angle))
+            border = NA, density = list(...)[["density"]], 
+            angle = ifelse(is.null(list(...)[["angle"]]), 45, list(...)[["angle"]]))
   }
   
   lines(x = y, y = x.50, col = col, lty = lty, lwd = lwd, ...)
@@ -276,7 +276,7 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
   }
   
   col = if(is.null(col)) rainbow(n = ncol(dataSpecies)) else rep(x = col, length.out = ncol(x))
-  cex = if(is.null(list(...)$cex)) 1 else cex
+  cex = if(is.null(list(...)[["cex"]])) 1 else cex
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
@@ -323,7 +323,7 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha,
   if(ncol(x) > 1) stop("Plot ts = TRUE and type = 4 is only for one species")
   
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
-  cex = if(is.null(list(...)$cex)) 0.8 else cex
+  cex = if(is.null(list(...)[["cex"]])) 0.8 else cex
   
   x = apply(x, 1, mean, na.rm = TRUE)*factor
   if(is.null(ylim)){
@@ -360,9 +360,9 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   }
   
   if(is.null(col)) col = "gray"
-  cex = if(is.null(list(...)$cex)) 0.8 else cex
+  cex = if(is.null(list(...)[["cex"]])) 0.9 else list(...)[["cex"]]
   
-  # To keep the plot params as the beggining
+  # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
   on.exit(par(op))
   
@@ -414,9 +414,9 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, axes, ...){
   barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col,
                  ylim = ylim, xlim = xlim, axes = axes, ...)
   
-  angle   = ifelse(is.null(list(...)$angle), 90, list(...)$angle) 
-  code    = ifelse(is.null(list(...)$code), 3, list(...)$code)
-  length  = ifelse(is.null(list(...)$length), 0.1, list(...)$length)
+  angle   = ifelse(is.null(list(...)[["angle"]]), 90, list(...)[["angle"]]) 
+  code    = ifelse(is.null(list(...)[["code"]]), 3, list(...)[["code"]])
+  length  = ifelse(is.null(list(...)[["length"]]), 0.1, list(...)[["length"]])
   
   arrowLimits = list(x = as.numeric(barx),
                      min = y.mean - 1.96*y.sd/10,
@@ -443,7 +443,7 @@ plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
     speciesNames = toupper(colnames(x))
   }
   
-  cex = if(is.null(list(...)$cex)) 0.8 else cex
+  cex = if(is.null(list(...)[["cex"]])) 0.8 else cex
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
@@ -473,7 +473,7 @@ plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes, units,
   }
   
   if(is.null(col)) col = "gray"
-  cex = if(is.null(list(...)$cex)) 0.8 else cex
+  cex = if(is.null(list(...)[["cex"]])) 0.8 else cex
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)

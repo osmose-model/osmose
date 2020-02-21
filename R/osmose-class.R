@@ -177,7 +177,7 @@ report.osmose = function(x, format = "pdf_document", output = NULL, tangle = FAL
   render(input = skeleton, output_format = format, output_file = outputFile, output_dir = output, encoding = "latin1", )
   
   if(Sys.info()['sysname'] == "Windows" && isTRUE(open)){
-    shell.exec(file = file.path(output, outputFile))
+    shell.exec(file = file.path(output, outputFile, fsep = "\\"))
   }
   
   return(invisible(file.path(output, outputFile)))
