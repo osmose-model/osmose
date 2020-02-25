@@ -13,7 +13,7 @@ osmose.configuration.initialization,ns_param-init-pop.csv
 osmose.configuration.output,ns_param-output-test.csv
 osmose.configuration.mortality.additional,ns_param-additional-mortality.csv
 osmose.configuration.bioen,ns_param-bioen.csv
-osmose.configuration.traits,ns_param-trait.csv
+#osmose.configuration.traits,ns_param-trait.csv
 ,
 mortality.algorithm,stochastic
 mortality.subdt,10
