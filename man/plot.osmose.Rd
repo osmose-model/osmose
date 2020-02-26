@@ -28,11 +28,12 @@
   xlim = NULL,
   ylim = NULL,
   col = NULL,
-  alpha = 0.5,
+  alpha = 1,
   lty = 1,
   lwd = 1,
   axes = TRUE,
   legend = TRUE,
+  units = "tonnes",
   ...
 )
 
@@ -54,11 +55,12 @@
   xlim = NULL,
   ylim = NULL,
   col = NULL,
-  alpha = 0.5,
+  alpha = 1,
   lty = 1,
   lwd = 1,
   axes = TRUE,
   legend = TRUE,
+  units = "individuals",
   ...
 )
 
@@ -80,7 +82,7 @@
   xlim = NULL,
   ylim = NULL,
   col = NULL,
-  alpha = 0.5,
+  alpha = 1,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -107,7 +109,7 @@
   xlim = NULL,
   ylim = NULL,
   col = NULL,
-  alpha = 0.5,
+  alpha = 1,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -126,7 +128,7 @@ See Details}
 
 \item{species}{A \code{numeric} vector specifying the species that will be 
 showed. If \code{NULL} (default), all the available species time series will 
-be plotted.}
+be plotted. See Details.}
 
 \item{speciesNames}{A vector with the names for each species. If \code{NULL}
 (default) the names of \code{x} will be used.}
@@ -177,7 +179,7 @@ ranges.}
 \code{col = NULL} and the colors will be chosen by the function.}
 
 \item{alpha}{factor modifying the opacity alpha (typically in [0,1], by 
-default 0.5) given to confidence interval shadow (check 
+default 1) given to confidence interval shadow (check 
 \code{\link{adjustcolor}}).}
 
 \item{lty}{The line type (check \code{\link{par}}).}
@@ -189,6 +191,11 @@ drawn on the plot.}
 
 \item{legend}{\code{logical} do you want to show a legend of species? (valid
 only for those plot types TS-2)}
+
+\item{units}{String with units of the variable that defines the label set 
+on top of the plot. If \code{NULL} (default), the value will depend on the
+class. For instance, if plot if about biomass or abundance, units will be set
+on 'tonnes' or 'individuals', respectively.}
 }
 \value{
 A graph of an \code{osmose} object.
@@ -211,11 +218,15 @@ classes.
 
 Describe types-ts
 
-Default value for \code{freq} will be calculated from \code{x}: 
-\code{freq = 1/x$model$start}.
+\code{species} argument follows the indexation way of java: starting in zero,
+as osmose-java returns species outputs.
 
-Extra arguments can be passed from \code{plot.default}: \code{xlim}, 
-\code{ylim}, \code{col}, \code{cex}, \code{cex.axis}, etc.
+Default value for \code{freq} will be calculated from \code{x}: 
+\eqn{freq = 1/\code{x$model$start}}.
+
+Extra arguments can be passed from \code{plot.default} using \code{...}: 
+\code{cex},  \code{cex.axis}, \code{border} (useful for \code{polygon}, 
+\code{boxplot}s and \code{barplot}s), etc.
 }
 \author{
 Criscely Lujan Paredes

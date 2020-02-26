@@ -232,7 +232,7 @@ report = function(x, format, output, ...) {
 #'# plot output data
 #'plot(data)
 #'}
-osmose_demo = function(path=NULL, config=c("gog", "gog_v4", "default")) {
+osmose_demo = function(path = NULL, config = "gog"){
   
   config = match.arg(config)
   
@@ -245,30 +245,27 @@ osmose_demo = function(path=NULL, config=c("gog", "gog_v4", "default")) {
     dir.create(path)
   }
   
-  # swith for the configuration directory
+  # Switch for the configuration directory
   input_dir = switch(config, 
-                     gog = system.file(package="osmose", "extdata", "gog"),
-                     gog_v4 = system.file(package="osmose", "extdata", "gog_v4"),
-                     default = system.file(package="osmose", "extdata", "gog")
+                     gog = system.file(package = "osmose", "extdata", "gog"),
+                     stop(paste("There is not reference for", config))
   )
   
   # swith for the configuration directory and defines the configuration file
   config_file = switch(config, 
                        gog = "osm_all-parameters.csv",
-                       gog_v4 = "osm_all-parameters.csv",
-                       default = "osm_all-parameters.csv"
+                       stop(paste("There is not reference for", config))
   )
   
-  file.copy(from=input_dir, to=path, recursive=TRUE, overwrite = FALSE)
-  config = basename(input_dir)
+  file.copy(from = input_dir, to = path, recursive = TRUE, overwrite = FALSE)
+  config = basename(path = input_dir)
   
   demo = list()
   config_file = file.path(path, config, config_file)
   demo$config_file = config_file
-  demo$output_dir = file.path(dirname(config_file), "output")
+  demo$output_dir = file.path(dirname(path = config_file), "output")
   
   return(demo)
-  
 }
 
 
