@@ -22,7 +22,6 @@ vignettes/*.pdf
 
 *~
 
-man/*Rd
 inst/extdata/Rplots.pdf
 inst/extdata/plot_test.R
 
