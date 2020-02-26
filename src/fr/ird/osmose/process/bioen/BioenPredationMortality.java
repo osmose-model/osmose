@@ -70,8 +70,11 @@ public class BioenPredationMortality extends PredationMortality {
      */
     private double[] predationRateBioen;
     
-    /** Maximum ingestion rate for larvae. */
+    /** Maximum ingestion rate use to calcul max ingestion for larvae. */
     private double[] larvaePredationRateBioen;
+    
+    /** Mean enet rate for larvae. */
+    private double[] c_rateBioen;
     
     public BioenPredationMortality(int rank) throws IOException {
         
@@ -95,16 +98,19 @@ public class BioenPredationMortality extends PredationMortality {
         // the standard code
         predationRateBioen = new double[nspec + nBack];
         larvaePredationRateBioen = new double[nspec + nBack];
+        c_rateBioen = new double[nspec + nBack];
 
         for (int i = 0; i < nspec; i++) {
             predationRateBioen[i] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
             larvaePredationRateBioen[i] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i);
+            c_rateBioen[i] = getConfiguration().getDouble("predation.c.bioen.sp" + i);
         }
 
         // Recovering predation parameters for background species
         for (int i = 0; i < nBack; i++) {
             predationRateBioen[i + nspec] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.bkg" + i);
-            larvaePredationRateBioen[i] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i);
+            larvaePredationRateBioen[i] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.bkg" + i);
+            c_rateBioen[i] = getConfiguration().getDouble("predation.c.bioen.bkg" + i);
         }
     }
 
@@ -216,6 +222,6 @@ public class BioenPredationMortality extends PredationMortality {
         } else {
             output = predationRateBioen[predator.getSpeciesIndex()];
         }
-        return (factor * output / getConfiguration().getNStepYear());
+        return ((output + (factor-1)*c_rateBioen[predator.getSpeciesIndex()]) / getConfiguration().getNStepYear());
     }
 }
