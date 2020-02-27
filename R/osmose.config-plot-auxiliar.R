@@ -2,46 +2,75 @@
 
 # Reproduction plot functions ---------------------------------------------
 
-plotReproductionType1 = function(x, times, xlim, ylim, speciesNames = NULL,
-                                 axes = TRUE, legend = TRUE, cex = 1.2, cex.axis = 1.2, col = "black", ...){
+plotReproductionType1 = function(x, times, xlim, ylim, speciesNames, axes, 
+                                 legend, col, ...){
   
-  if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
+  if(is.null(speciesNames)) speciesNames = colnames(x)[2]
   
-  #par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
-  plot(x = times, y = x[,2], type = "l", xlab = "", ylab = "", xaxs = "i", yaxs = "i",
-       xlim = xlim, ylim = ylim, axes = FALSE, col = col,  ...)
+  plot(x = times, y = x[,2], type = "l", xlab = NA, ylab = NA,
+       xlim = xlim, ylim = ylim, axes = FALSE, col = col, ...)
+  
   if(isTRUE(axes)){
-    axis(1, cex.axis = cex.axis)
-    axis(2, las = 2, cex.axis = cex.axis)
+    las <- list(...)$las
+    las <- ifelse(is.null(las), 1, las)
+    
+    line <- list(...)$line
+    line <- ifelse(is.null(line), NA, line)
+    
+    cex.axis = list(...)[["cex.axis"]]
+    cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+    
+    axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+    axis(side = 2, las = las, line = line, cex.axis = cex.axis)
     box()
   }
   
   if(isTRUE(legend)){
-    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex, col = "black")
+    adj = list(...)[["adj"]]
+    adj = ifelse(is.null(adj), 0.99, adj)
+    
+    cex = list(...)[["cex"]]
+    cex = ifelse(is.null(cex), 1, cex)
+    
+    mtext(text = toupper(speciesNames), side = 3, line = -1.5, adj = adj, 
+          cex = cex, col = "black")
   }
   
   return(invisible())
 }
 
-plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  legend = TRUE,
-                                 names.arg = NULL, border = NA, cex = 1.2, cex.axis = 1.2,
-                                 col = "gray", ...){
+plotReproductionType2 = function(x, ylim, speciesNames, axes,  legend, names.arg, 
+                                 col, ...){
   
-  if(is.null(speciesNames)) {speciesNames = colnames(x)[2]} else {speciesNames = speciesNames}
+  if(is.null(speciesNames)) speciesNames = colnames(x)[2]
   
-  #par(oma = c(1,1,1,1), mar = c(2,2.2,1,1.5)) 
-  
-  barplot(height = x[,2], border = border, axes = FALSE, ylim = c(0, max(x[,2]*1.25)), xaxs = "i",
-          names.arg = names.arg, col = col, ...)
+  barplot(height = x[,2], axes = FALSE, ylim = ylim, names.arg = names.arg, 
+          col = col, ...)
   
   if(isTRUE(axes)){
-    axis(1, cex.axis = cex.axis)
-    axis(2, las = 2, cex.axis = cex.axis)
+    las <- list(...)$las
+    las <- ifelse(is.null(las), 1, las)
+    
+    line <- list(...)$line
+    line <- ifelse(is.null(line), NA, line)
+    
+    cex.axis = list(...)[["cex.axis"]]
+    cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+    
+    axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+    axis(side = 2, las = las, line = line, cex.axis = cex.axis)
     box()
   }
   
   if(isTRUE(legend)){
-    mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex, col = "black")
+    adj = list(...)[["adj"]]
+    adj = ifelse(is.null(adj), 0.99, adj)
+    
+    cex = list(...)[["cex"]]
+    cex = ifelse(is.null(cex), 1, cex)
+    
+    mtext(text = toupper(speciesNames), side = 3, line = -1.5, adj = adj, 
+          cex = cex, col = "black")
   }
   
   return(invisible())
@@ -50,224 +79,253 @@ plotReproductionType2 = function(x, ylim, speciesNames = NULL, axes = TRUE,  leg
 
 # Growth plot functions ---------------------------------------------------
 
-plotGrowthType1 = function(x, species, n = 100, xlim = NULL, ylim = NULL, 
-                           addSegment = TRUE, addPoint = TRUE, addPolygon = TRUE, addText = TRUE,
-                           legend = TRUE, speciesNames = NULL, cex.axis = 1.2, xlab = NULL, ylab = NULL, 
-                           border = NA, col = "black", cex = 1.2, lty = 1, lwd = 1, ...) {
+plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim, 
+                           legend, axes, col, ...) {
   
-  # get parameter to use on the von bertalanffy growth equation
-  par = getGrowthParameters(par = x, sp = species)
+  # Get parameters to display Von Bertalanffy growth equation
+  params = getGrowthParameters(x = x, species = species)
   
   # growth estimation
-  age = seq(from = 0, to = 1.1*par$lifespan, len = n)
-  length = osmoseGrowth(age = age, par = par)
+  age = seq(from = 0, to = params$lifespan, length.out = n)
+  length = osmoseGrowth(age = age, params = params)
   
-  # growth inver. estimation
-  ageInv    = osmoseGrowthInv(length = par$maturitySize, par = par)
-  lengthInv = par$maturitySize
+  # growth inverted estimation
+  ageInv    = osmoseGrowthInv(length = params$maturitySize, params = params)
+  lengthInv = params$maturitySize
   
-  xlim = if(is.null(xlim)) c(0, max(age))
-  ylim = if(is.null(ylim)) c(0, max(length, na.rm = TRUE)*1.25)
+  if(is.null(xlim)) xlim = c(0, max(age))
+  if(is.null(ylim)) ylim = c(0, max(length, na.rm = TRUE))
   
-  # plot
-  # par(mar = c(4,4,2,1.5), oma = c(1,1,0.5,0.5))
-  plot(age, length, type = "l", xlab = "", ylab = "", axes = FALSE,
-       xlim = xlim, ylim = ylim, xaxs = "i", yaxs = "i", col = col, lty = lty, lwd = lwd, ...)
-  axis(1, cex.axis = cex.axis, ...)
-  axis(2, las = 2, cex.axis = cex.axis, ...)
-  box()
+  # Set default values for some graphical parameters
+  xlab = list(...)[["xlab"]]
+  xlab = ifelse(is.null(xlab), "Age (years)", xlab)
   
-  if(is.null(xlab)) xlab = "Age (years)" else xlab = xlab
-  mtext(text = xlab, side = 1, line = 2.5, cex = cex, ...)
+  ylab = list(...)[["ylab"]]
+  ylab = ifelse(is.null(ylab), "Length (cm)", ylab)
   
-  if(is.null(ylab)) ylab = "Length (cm)" else ylab = ylab
-  mtext(text = ylab, side = 2, line = 2.8, cex = cex, ...)
+  # Draw an empty canvas
+  plot(1, 1, type = "n", axes = FALSE, xlab = xlab, ylab = ylab, 
+       xlim = xlim, ylim = ylim)
   
-  if(isTRUE(addSegment)){
-    segments(x0 = 0,      x1 = ageInv, y0 = lengthInv, y1 = lengthInv, col = "red", lty = 2, lwd = 1.5, ...)
-    segments(x0 = ageInv, x1 = ageInv, y0 = 0,         y1 = lengthInv, col = "red", lty = 2, lwd = 1.5, ...)
+  lines(x = age, y = length, col = col, ...)
+  
+  # Add axes
+  if(isTRUE(axes)){
+    las <- list(...)$las
+    las <- ifelse(is.null(las), 1, las)
+    
+    line <- list(...)$line
+    line <- ifelse(is.null(line), NA, line)
+    
+    cex.axis = list(...)[["cex.axis"]]
+    cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+    
+    axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+    axis(side = 2, las = las, line = line, cex.axis = cex.axis)
+    box()
   }
   
-  if(isTRUE(addPoint)) points(x = ageInv, y = lengthInv, pch = 19, col = "red", ...)
+  usr <- par("usr")
   
-  if(isTRUE(addPolygon)){
-    #gray area
-    polygon(x = c(0, par$thr, par$thr, 0),
-            y = c(0, 0, max(length)*1.25, max(length)*1.25),
-            col = rgb(0, 0, 1, 0.1), border = border, ...)
+  # Add segments
+  if(is.element("segments", tolower(addElements))){
+    segments(x0 = usr[1], x1 = ageInv, 
+             y0 = lengthInv, y1 = lengthInv, 
+             col = "red", ...)
+    segments(x0 = ageInv, x1 = ageInv, 
+             y0 = usr[3], y1 = lengthInv, 
+             col = "red", ...)
+  }
+  
+  # Add points
+  if(is.element("points", tolower(addElements))){
+    points(x = ageInv, y = lengthInv, pch = 19, col = "red", ...)
   } 
   
-  if(isTRUE(addText)){
-    text(x = (ageInv    + 2.5 * (age[2]-age[1])),
-         y = (lengthInv - 2.5 * (length[2]-length[1])),
-         bquote(paste('L'['m']*' = ', .(lengthInv))), bty = "n", cex = cex, pos = 4, ...)
+  # Add polygons
+  if(is.element("polygon", tolower(addElements))){
+    polygon(x = c(usr[1], rep(params$thr, 2), usr[1]),
+            y = rep(usr[3:4], each = 2),
+            col = adjustcolor(col = col, alpha.f = 0.5), border = NA)
+  } 
+  
+  # Add text
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 1, cex)
+  
+  if(is.element("text", tolower(addElements))){
     
-    legend("bottomright", legend = bquote(paste('A'['max']*' = ', .(par$lifespan))),
-           bty = "n", cex = cex, ...)
+    text(x = ageInv, y = lengthInv,
+         labels = bquote(paste('L'['m']*' = ', .(lengthInv))), 
+         bty = "n", cex = cex, pos = 3)
+    
+    legend("bottomright", legend = bquote(paste('A'['max']*' = ', .(params$lifespan))),
+           bty = "n", cex = cex)
   }
   
-  #legend
-  if(is.null(speciesNames)) speciesNames = par$speciesNames else speciesNames = speciesNames
-  if(isTRUE(legend)){mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex, ...)}
+  # Add legend
+  if(isTRUE(legend)){
+    if(is.null(speciesNames)) speciesNames = params$speciesNames
+    
+    mtext(text = toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex)
+  }
   
   return(invisible())
 }
 
-# Internal growth functions
-#' Title
-#'
-#' @param par TODO
-#' @param sp TODO
-#'
-getGrowthParameters = function(par, sp) {
+getGrowthParameters = function(x, species){
   
-  # species indexation
-  if(length(sp)>1) stop("the value of the parameter called species have to be of length equal to 1")
-  if(max(sp)>length(par$names)) stop("error on species indexation, incorrect value in the parameter called species")
-  if(is.null(sp)) {warning("the value of the parameter called species is NULL, we are using the value 1 by default")
-    sp = 0}
-  sp = paste0("sp", sp)
+  # Check species argument
+  if(length(species) > 1) stop("The value of 'species' must be of length 1.")
+  if(min(species) < 0 || max(species) > (length(x) - 1)) stop("Incorrect value for 'species'.")
   
-  output = list()
-  output = within(output, {
-    
-    lifespan      = as.numeric(par$lifespan[sp])
-    linf          = as.numeric(par$linf[sp])
-    k             = as.numeric(par$k[sp])
-    t0            = as.numeric(par$t0[sp])
-    thr           = as.numeric(par$thr[sp])
-    eggSize       = as.numeric(par$eggSize[sp])
-    maturitySize  = as.numeric(par$maturitySize[sp]) # check, only work with sizes! TODO
-    speciesNames  = as.character(par$names[sp])
-    
-  })
+  species = paste0("sp", species)
+  
+  output = list(lifespan      = as.numeric(x$lifespan[species]),
+                linf          = as.numeric(x$linf[species]),
+                k             = as.numeric(x$k[species]),
+                t0            = as.numeric(x$t0[species]),
+                thr           = as.numeric(x$thr[species]),
+                eggSize       = as.numeric(x$eggSize[species]),
+                maturitySize  = as.numeric(x$maturitySize[species]), # check, only work with sizes! TODO
+                speciesNames  = as.character(x$names[species]))
   
   return(output)
 }
 
-#' Title
-#'
-#' @param age TODO 
-#' @param par TODO
-#'
-#' @return TODO
-osmoseGrowth = function(age, par) { 
+
+osmoseGrowth = function(age, params) { 
   
-  linf    = par$linf
-  k       = par$k
-  t0      = par$t0
-  thr     = par$thr
-  eggSize = if(!is.null(par$eggSize)) par$eggSize else 0
+  linf    = params$linf
+  k       = params$k
+  t0      = params$t0
+  thr     = params$thr
+  eggSize = if(is.null(params$eggSize)) 0 else params$eggSize
   
-  length  = linf*(1-exp(-k*(age-t0)))
-  lthr    = linf*(1-exp(-k*(thr-t0)))
-  length2 = eggSize + age*(lthr-eggSize)/thr
+  length  = linf*(1 - exp(-k*(age - t0)))
+  lthr    = linf*(1 - exp(-k*(thr - t0)))
+  length2 = eggSize + age*(lthr - eggSize)/thr
   
   length[age <= thr] = length2[age <= thr]
   
   return(length)
 }
 
-osmoseGrowthInv = function(length, par) {
+osmoseGrowthInv = function(length, params) {
   
-  linf     = par$linf
-  k        = par$k
-  t0       = par$t0
-  thr      = par$thr
-  eggSize  = if(!is.null(par$eggSize)) par$eggSize else 0
-  lthr     = linf*(1-exp(-k*(thr-t0)))
+  linf     = params$linf
+  k        = params$k
+  t0       = params$t0
+  thr      = params$thr
+  eggSize  = if(is.null(params$eggSize)) 0 else params$eggSize
+  lthr     = linf*(1 - exp(-k*(thr - t0)))
   
-  age     = t0 - (1/k)*log(1-length/linf)
-  age2    = thr*(length-eggSize)/(lthr-eggSize)
+  age     = t0 - (1/k)*log(1 - length/linf)
+  age2    = thr*(length - eggSize)/(lthr - eggSize)
   
-  age[length<=lthr] = age2[length<=lthr]
+  age[length <= lthr] = age2[length <= lthr]
   
   return(age)
 }
 
 # Predation plot functions ------------------------------------------------
 
-plotPredationType1 = function(x, species, xlim = NULL, ylim = NULL, border = NA, col = rgb(0,0,1,0.1),
-                              cex.axis = 1.2, addSegment = TRUE, addPoint = TRUE, addText = TRUE,
-                              legend = TRUE, speciesNames = NULL, cex = 1, xlab = NULL, ylab = NULL,
-                              lwd = 2, lty = 2, pch = 19, ...){
+plotPredationType1 = function(x, species, speciesNames, addElements, axes, 
+                              xlim, ylim, col, legend, ...){
   
   #get the predation parameters to plot
-  par = getPredationParameter(par = x, sp = species)
+  params = getPredationParameter(x = x, species = species)
   
   #xlim and ylim
-  if(is.null(xlim)) xlim = c(0, tail(par$threshold, n = 1)) else xlim = xlim
-  if(is.null(ylim)) ylim = c(0, max((1/par$sizeRatioMax)*(par$threshold[1])))*1.3 else ylim = ylim
+  if(is.null(xlim)) xlim = c(0, tail(params$threshold, n = 1))
+  if(is.null(ylim)) ylim = c(0, max(params$threshold[1]/params$sizeRatioMax))
   
-  #plot
+  # Draw an empty canvas
+  xlab = list(...)[["xlab"]]
+  xlab = ifelse(is.null(xlab), "Predator size", xlab)
+  
+  ylab = list(...)[["ylab"]]
+  ylab = ifelse(is.null(ylab), "Prey size", ylab)
+  
   plot.new()
-  plot.window(xlim = xlim, ylim = ylim, xaxs = "i", yaxs = "i", ...)
+  plot.window(xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
   
-  stages = seq_along(par$threshold)
-  for (stage in stages) {
-    polygon(x = c(par$threshold[stage], par$threshold[stage+1], par$threshold[stage+1], par$threshold[stage]),
-            y = c(par$threshold[stage]*1/par$sizeRatioMin[stage], par$threshold[stage+1]*1/par$sizeRatioMin[stage],
-                  par$threshold[stage+1]*1/par$sizeRatioMax[stage], par$threshold[stage]*1/par$sizeRatioMax[stage]),
-            border = border, col = col, ...)
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 1, cex)
+  
+  for(i in seq_along(params$threshold)){
+    xValues <- params$threshold[c(i, rep(i + 1, 2), i)]
+    yValues <- xValues/rep(c(params$sizeRatioMin[i], params$sizeRatioMax[i]), each = 1)
     
-    if(stage %in% stages[-c(1, length(stages))]){
-      if(isTRUE(addSegment)){
-        segments(x0 = par$threshold[stage], x1 = par$threshold[stage],
-                 y0 = par$threshold[stage]*1/par$sizeRatioMin[stage],
-                 y1 = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
-                 col = "black", lwd = lwd, lty = lty, ...)}
+    polygon(x = xValues, yValues, border = NA, col = col, ...)
+    
+    if(!is.element(i, c(1, length(params$threshold)))){
       
-      if(isTRUE(addPoint)){
-        points(x = par$threshold[stage],
-               y = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
-               pch = pch, ...)} 
+      # Add segments
+      if(is.element("segments", tolower(addElements))){
+        segments(x0 = params$threshold[i], x1 = params$threshold[i],
+                 y0 = params$threshold[i]/params$sizeRatioMin[i],
+                 y1 = max(params$threshold[-1]/params$sizeRatioMax),
+                 col = "black", ...)
+      }
       
-      if(isTRUE(addText)){
-        text(x = par$threshold[stage],
-             y = max((1/par$sizeRatioMax)*(par$threshold[-1]))*0.975,
-             bquote(paste('S'['thr']*' = ', .(par$threshold[stage]))),
-             bty = "n", pos = 3, cex = cex, ...)}
+      # Add points
+      if(is.element("points", tolower(addElements))){
+        points(x = params$threshold[i],
+               y = max(params$threshold[-1]/params$sizeRatioMax), ...)
+      } 
+      
+      # Add text
+      cex = list(...)[["cex"]]
+      cex = ifelse(is.null(cex), 1, cex)
+      
+      if(is.element("text", tolower(addElements))){
+        
+        text(x = params$threshold[i],
+             y = max(params$threshold[-1]/params$sizeRatioMax),
+             labels = bquote(paste('S'['thr']*' = ', .(params$threshold[i]))),
+             pos = 3, cex = cex)
+      }
     }
   }
   
-  if(is.null(xlab)) xlab = "Predator size" else xlab = xlab
-  mtext(text = xlab, side = 1, line = 2.5, cex = cex, ...)
+  # Add axes
+  if(isTRUE(axes)){
+    las <- list(...)$las
+    las <- ifelse(is.null(las), 1, las)
+    
+    line <- list(...)$line
+    line <- ifelse(is.null(line), NA, line)
+    
+    cex.axis = list(...)[["cex.axis"]]
+    cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+    
+    axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+    axis(side = 2, las = las, line = line, cex.axis = cex.axis)
+    box()
+  }
   
-  if(is.null(ylab)) ylab = "Prey size" else ylab = ylab
-  mtext(text = ylab, side = 2, line = 2.8, cex = cex, ...)
-  
-  box()
-  axis(1, cex.axis = cex.axis, ...)
-  axis(2, las = 2, cex.axis = cex.axis, ...)
-  
-  if(is.null(speciesNames)) {speciesNames = par$speciesNames} else {speciesNames = speciesNames}
-  if(isTRUE(legend)) {mtext(toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex, ...)}
+  # Add legend
+  if(isTRUE(legend)){
+    if(is.null(speciesNames)) speciesNames = params$speciesNames
+    
+    mtext(text = toupper(speciesNames), side = 3, line = -1.5, adj = 1, cex = cex)
+  }
   
   return(invisible())
 }
 
-getPredationParameter = function(par, sp){
+getPredationParameter = function(x, species){
   
-  # species indexation
-  if(is.null(sp)) {
-    warning("the value of the parameter called species is NULL, we are using the value 1 by default")
-    sp = 0}
-  if(length(sp) > 1) stop("the value of the parameter called species have to be of length equal to 1")
-  if(sp >= length(par$speciesNames)) stop("error on species indexation, incorrect value in the parameter called species")
+  species <- species + 1
   
-  sp = paste0("sp", sp)
+  linf      = as.numeric(x$linf[species])
+  threshold = c(0, x$predPrey$stageThreshold[[species]], linf)
   
-  linf           = as.vector(unlist(par$linf[sp]))
-  threshold      = c(0, as.vector(unlist(par$predPrey$stageThreshold[sp])), linf)
-  
-  output = list()
-  output = within(output, {
-    # Vars
-    threshold      = threshold[!is.na(threshold)]
-    sizeRatioMax   = as.vector(unlist(par$predPrey$sizeRatioMax[sp]))
-    sizeRatioMin   = as.vector(unlist(par$predPrey$sizeRatioMin[sp]))
-    speciesNames   = as.vector(unlist(par$speciesNames[sp]))
-  })
+  output = list(threshold    = threshold[!is.na(threshold)],
+                sizeRatioMax = x$predPrey$sizeRatioMax[[species]],
+                sizeRatioMin = x$predPrey$sizeRatioMin[[species]],
+                speciesNames = x$speciesNames[species])
   
   return(output)
 }

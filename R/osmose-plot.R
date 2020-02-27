@@ -9,6 +9,11 @@
 #' classes.
 #' 
 #' @param x \code{osmose} like object. 
+#' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots 
+#' are going to be time series where the x-axis is the time. For plots where the 
+#' x-axis is not the time \code{ts = FALSE}.
+#' @param type A \code{numeric} value, indicating the type of plot to be used 
+#' (\code{type = 1}, by default). See Details.
 #' @param species A \code{numeric} vector specifying the species that will be 
 #' showed. If \code{NULL} (default), all the available species time series will 
 #' be plotted. See Details.
@@ -24,11 +29,6 @@
 #' \code{x}.
 #' @param initialYear A \code{numeric} value. It specifies the first element 
 #' that is going to be used on the x axis for the plots.
-#' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots 
-#' are going to be time series where the x-axis is the time. For plots where the 
-#' x-axis is not the time \code{ts = FALSE}.
-#' @param type A \code{numeric} value, indicating the type of plot to be used 
-#' (\code{type = 1}, by default). See Details.
 #' @param replicates \code{logical}. It controls to show whether the values in 
 #' each simulation (\code{TRUE}) or the median of the values along the time 
 #' (\code{FALSE}).
@@ -76,14 +76,13 @@
 #' @author Criscely Lujan Paredes
 #' 
 #' @export
-plot.osmose.biomass = function(x, species = NULL, speciesNames = NULL, 
-                               start = NULL, end = NULL, 
-                               initialYear = NULL, ts = TRUE, type = 1, 
-                               replicates = TRUE, nrep = 3, freq = 12, 
-                               horizontal = FALSE, conf = 0.95, factor = 1e-3, 
-                               xlim = NULL, ylim = NULL, col = NULL, alpha = 1,
-                               lty = 1, lwd = 1, axes = TRUE, legend = TRUE, 
-                               units = "tonnes", ...){
+plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, 
+                               speciesNames = NULL, start = NULL, end = NULL,  
+                               initialYear = NULL, replicates = TRUE, nrep = 3, 
+                               freq = 12, horizontal = FALSE, conf = 0.95, 
+                               factor = 1e-3, xlim = NULL, ylim = NULL, 
+                               col = NULL, alpha = 1, lty = 1, lwd = 1, 
+                               axes = TRUE, legend = TRUE, units = "tonnes", ...){
   
   # Run the plot
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 

@@ -716,3 +716,58 @@ osmose2R.v3r0 = function(path=NULL, species.names=NULL, ...) {
   return(output)
   
 }
+
+
+#' Reads Osmose configuration files.
+#' 
+#' @param file Main configuration file
+#' @param config Configuration object to which file parameters are appended
+#' @param absolute Whether the path is absolute (TRUE) or relative (FALSE)
+#' @return A list tree.
+readOsmoseConfiguration = function(file, config=NULL, absolute=TRUE) {
+  
+  L0 = .readOsmoseConfiguration(input=file, absolute=absolute)
+  
+  if(!is.null(config)) {
+    config = .getConfig(config)
+    L0 = c(config, L0)
+    L0 = L0[!duplicated(names(L0))]
+  }
+  
+  L1 = .createParameterList(L0)
+  class(L1) = c("osmose.config", class(L1))
+  
+  return(L1)
+}
+
+
+
+#' Reads calibration parameters from an osmose.config list.
+#' 
+#' The configuration argument must contain a "calibration" entry to work.
+#'
+#' @param L1 osmose.config object (see \code{\link{readOsmoseConfiguration}})
+#'
+#' @return A list of parameters to calibrate ("guess", "max", "min", "phase")
+configureCalibration = function(L1) {
+  
+  nameCal  = names(unlist(L1$calibration))
+  valueCal = unname(unlist(L1$calibration))
+  
+  #guess List
+  guessList = .createCalibrationList(nameCal, valueCal, "\\.max|\\.min|\\.phase", TRUE)
+  
+  #max List
+  maxList   = .createCalibrationList(nameCal, valueCal, "\\.max", FALSE)
+  
+  #phase List
+  phaseList = .createCalibrationList(nameCal, valueCal, "\\.phase", FALSE)
+  
+  #min List
+  minList   = .createCalibrationList(nameCal, valueCal, "\\.min", FALSE)
+  
+  L2 = list(guess=guessList, max=maxList, min=minList, phase=phaseList)
+  
+  return(L2)
+  
+}

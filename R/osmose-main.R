@@ -147,45 +147,6 @@ read_osmose = function(path = NULL, input = NULL, version = "3.3.3",
   return(output)
 }
 
-
-## buildConfiguration ------------------------------------------------------
-## @title Build an OSMOSE configuration
-## @description This function create a valid configuration by several input files
-## from user input parameters.  
-## @param file Filename of the main configuration file
-## @param path Path for creating the input files, by default \code{"_osmose"}
-## @param config An \code{osmose.config} class object or a file path for an
-## osmose configuration file. This parameters will take precedence over the ones
-## specified in \code{file}.
-## @param absolute Boolean, use absolute paths relative to \code{file} to build the
-## configuration? If \code{FALSE}, relative paths are using for each individual
-## configuration file to parse its content.
-## @param newFile if \code{NULL}, the \code{file} provided is edited, otherwise
-## a new file is created with the modified configuration.
-## @details Basic configurations may not need the use of \code{buildConfiguration},
-## but it is required for configuration using interannual inputs or fishing selectivity.
-## @author Ricardo Oliveros-Ramos
-## @usage buildConfiguration(file="config.csv", path="_osmose", 
-##                           config=NULL, absolute=TRUE, 
-##                           newFile=NULL)
-#buildConfiguration = function(file="config.csv", path="_osmose", config=NULL, absolute=TRUE, newFile=NULL) {
-#  # read osmose parameters
-#  L1 = readOsmoseConfiguration(file=file, config=config, absolute=absolute)
-#  L1 = rapply(L1, .guessType, how = "list", keep.att=TRUE)
-#  
-#  outputPath = file.path(dirname(file), path)
-#  # create Time series files (output, configLines):
-#  # in a folder created at the same level
-#  # fishing
-#  #   fishing = writeFishingFiles(L1, outputPath)
-#  # migration
-#  # plankton?
-#  # other
-#  # write additional config File
-#  # config.csv: one line added with new parameters  
-#  return(L1)
-#}
-
 #' @title Report method
 #' @description This function built a report for each class including on osmose package.
 #' @param x Object of class \code{osmose}.
@@ -196,6 +157,22 @@ read_osmose = function(path = NULL, input = NULL, version = "3.3.3",
 #' @export
 report = function(x, format, output, ...) {
   UseMethod("report")
+}
+
+
+#' @title Get variable from an \code{osmose}-like object.
+#' @description Function to get a variable from an object of \code{osmose} class. 
+#' This function uses the get_var method (see the \code{\link{get_var.osmose}}).
+#'
+#' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
+#' @param what Variable to extract
+#' @param how Output format
+#' @param ... Additional arguments of the function.
+#'
+#' @return An array or a list containing the extracted data.
+#' @export
+get_var = function(object, what, how, ...){
+  UseMethod("get_var")
 }
 
 
@@ -269,12 +246,7 @@ osmose_demo = function(path = NULL, config = "gog"){
 }
 
 
-
-
-
 # Demo --------------------------------------------------------------------
-
-
 #' Generates Osmose configuration files to run an Osmose demo.
 #' 
 #' @param path Path where to put the Osmose configuration file.
@@ -326,5 +298,3 @@ osmose_calib_demo = function(path = NULL) {
   
   return(demo)
 }
-
-

@@ -12,13 +12,13 @@
 
 \method{plot}{osmose.biomass}(
   x,
+  ts = TRUE,
+  type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
   initialYear = NULL,
-  ts = TRUE,
-  type = 1,
   replicates = TRUE,
   nrep = 3,
   freq = 12,
@@ -126,6 +126,13 @@ See Details}
 
 \item{...}{Extra arguments of the function.}
 
+\item{ts}{\code{logical} parameter. By default \code{ts = TRUE} and the plots 
+are going to be time series where the x-axis is the time. For plots where the 
+x-axis is not the time \code{ts = FALSE}.}
+
+\item{type}{A \code{numeric} value, indicating the type of plot to be used 
+(\code{type = 1}, by default). See Details.}
+
 \item{species}{A \code{numeric} vector specifying the species that will be 
 showed. If \code{NULL} (default), all the available species time series will 
 be plotted. See Details.}
@@ -145,13 +152,6 @@ the object \code{x} is specified with this parameter. By default
 
 \item{initialYear}{A \code{numeric} value. It specifies the first element 
 that is going to be used on the x axis for the plots.}
-
-\item{ts}{\code{logical} parameter. By default \code{ts = TRUE} and the plots 
-are going to be time series where the x-axis is the time. For plots where the 
-x-axis is not the time \code{ts = FALSE}.}
-
-\item{type}{A \code{numeric} value, indicating the type of plot to be used 
-(\code{type = 1}, by default). See Details.}
 
 \item{replicates}{\code{logical}. It controls to show whether the values in 
 each simulation (\code{TRUE}) or the median of the values along the time 

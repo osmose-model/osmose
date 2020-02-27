@@ -39,11 +39,11 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   }
   
   # Check start and end args
-  start = ifelse(is.null(start), 1, start)
-  end = ifelse(is.null(end), dim(x)[1], end)
+  if(is.null(start)) start = 1
+  if(is.null(end)) start = dim(x)[1]
   
   if(start < 1 | start > end) stop("Incorrect value for 'start' argument")
-  if(end < 1 | end < start) stop("Incorrect value for 'end' argument")
+  if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
   
   x = x[seq(start, end), , ,drop = FALSE]
   
@@ -119,8 +119,17 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   
   # Define multiplot array if there're more than 1 species
   if(ncol(x) > 1){
-    par(mfrow = getmfrow(ncol(x)))
+    mar <- rep(0, 4)
+    oma <- c(2, 3, 2, 3)
+    
+    par(mar = mar, oma = oma)
+    
+    mfrow <- getmfrow(ncol(x))
+  }else{
+    mfrow <- c(1, 1)
   }
+  
+  par(mfrow = mfrow)
   
   # Extract args related with line customization
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
@@ -136,9 +145,9 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   }  #pending: ylim flexible for the users
   
   # Generate plots by spp
-  for(sp in seq_len(ncol(x))){
+  for(i in seq_len(ncol(x))){
     # Extract values for spp i
-    xsp = factor*x[, sp, ,drop = FALSE]
+    xsp = factor*x[, i, ,drop = FALSE]
     
     # Set an empty canvas
     plot.new()
@@ -146,16 +155,18 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
     
     # Draw the plot
     plotCI(x = times, y = xsp, replicates = replicates, ci = ci, nrep = nrep, 
-           prob = 1 - conf, col = col[sp], alpha = alpha, lty = lty[sp], 
-           lwd = lwd[sp], ...)
+           prob = 1 - conf, col = col[i], alpha = alpha, lty = lty[i], 
+           lwd = lwd[i], ...)
     
     # Add spp names
-    mtext(text = speciesNames[sp], side = 3, line = -1.5, adj = 0.05, cex = cex)
+    mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 0.05, cex = cex)
     
     # Add factor label at topleft
-    legendFactor = -log10(factor)
-    legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
-    mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
+    if(i == 1){
+      legendFactor = -log10(factor)
+      legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
+      mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)  
+    }
     
     # Add axis
     if(isTRUE(axes)){
@@ -168,8 +179,23 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
       cex.axis = list(...)[["cex.axis"]]
       cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
       
-      axis(side = 1, las = las, line = line, cex.axis = cex.axis)
-      axis(side = 2, las = las, line = line, cex.axis = cex.axis)
+      if(is.element(i %% (mfrow[2]*2), c(0, 1))){
+        axis(side = ifelse(i %% 2 == 1, 2, 4), las = las, line = line, 
+             cex.axis = cex.axis)  
+      }
+      
+      if(ncol(x) > 1 && is.element(i, seq(2, mfrow[2], 2))){
+        axis(side = 3, las = las, line = line, cex.axis = cex.axis)
+      }
+      
+      index <- c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
+                     to = prod(mfrow) - mfrow[2] + 1),
+                 seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
+      if(is.element(i, index)){
+        axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+      }
+      
+      
       box()
     }
   }

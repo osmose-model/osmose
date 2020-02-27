@@ -1,7 +1,7 @@
 # All the methods for osmose class ----------------------------------------
 
 
-#' Plot method for osmose objects
+#' @title Plot method for osmose objects
 #' @description This method takes a \code{osmose} object and produce useful 
 #' plots
 #' @param x Object of \code{osmose} class. See the \code{\link{read_osmose}} 
@@ -27,22 +27,6 @@ plot.osmose = function(x, what = "biomass", ...) {
   plot(x, ...)
   
   return(invisible())
-}
-
-
-#' @title Get variable from an \code{osmose}-like object.
-#' @description Function to get a variable from an object of \code{osmose} class. 
-#' This function uses the get_var method (see the \code{\link{get_var.osmose}}).
-#'
-#' @param object Object of \code{osmose} class (see the \code{\link{read_osmose}} function).
-#' @param what Variable to extract
-#' @param how Output format
-#' @param ... Additional arguments of the function.
-#'
-#' @return An array or a list containing the extracted data.
-#' @export
-get_var = function(object, what, how, ...){
-  UseMethod("get_var")
 }
 
 #' get_var method for osmose outputs objects
