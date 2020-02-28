@@ -176,6 +176,35 @@ get_var = function(object, what, how, ...){
 }
 
 
+#' Write data in osmose format
+#'
+#' Write an array or dataframe in the Osmose format.
+#' The separator is ";", there are no quotes and a blank column is
+#' added for the row names column.
+#'
+#' @param x Object to be written (table or data frame)
+#' @param file Output file
+#' @param sep The field separator string. Values within each row of x are 
+#' separated by this string.
+#' @param col.names either a logical value indicating whether the column names 
+#' of x are to be written along with x, or a character vector of column names to 
+#' be written. See the section on ‘CSV files’ for the meaning of 
+#' \code{col.names = NA}.
+#' @param quote A \code{logical} value (\code{TRUE} or \code{FALSE}) or a 
+#' \code{numeric} vector.
+#' @param row.names either a logical value indicating whether the row names of x 
+#' are to be written along with x, or a character vector of row names to be 
+#' written.
+#' @param ... Extra arguments passed to \code{write.table} funtion.
+#' 
+#' @export
+write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE, 
+                        row.names = TRUE, ...){
+  write.table(x = x, file = file, sep = sep, col.names = col.names, quote = quote,
+              row.names = row.names, ...)
+}
+
+
 #' Generates Osmose configuration files to run an Osmose demo.
 #' 
 #' @param path Path where to put the Osmose configuration file.

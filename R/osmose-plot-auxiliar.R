@@ -40,7 +40,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   
   # Check start and end args
   if(is.null(start)) start = 1
-  if(is.null(end)) start = dim(x)[1]
+  if(is.null(end)) end = dim(x)[1]
   
   if(start < 1 | start > end) stop("Incorrect value for 'start' argument")
   if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
@@ -226,7 +226,6 @@ plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
-  op = op[-match("mar", names(op))]
   on.exit(par(op))
   
   # Set an empty canvas
@@ -332,7 +331,6 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
-  op = op[-match("mar", names(op))]
   on.exit(par(op))
   
   plot.new()
@@ -440,7 +438,6 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
-  op = op[-match("mar", names(op))]
   on.exit(par(op))
   
   if(isTRUE(ci)){
@@ -519,7 +516,6 @@ plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
-  op = op[-match("mar", names(op))]
   on.exit(par(op))
   
   x = apply(x*factor, c(1, 2), mean, na.rm = TRUE) #mean over the replicates
@@ -549,7 +545,6 @@ plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes, units,
   
   # To keep the plot params as the beggining
   op = par(no.readonly = TRUE)
-  op = op[-match("mar", names(op))]
   on.exit(par(op))
   
   x = apply(x*factor, c(3, 2), mean, na.rm = TRUE) #mean over the time

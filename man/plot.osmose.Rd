@@ -119,12 +119,12 @@
 )
 }
 \arguments{
-\item{x}{\code{osmose} like object.}
+\item{x}{\code{osmose} object.}
 
 \item{what}{Variable name to plot. By default is \code{what = "biomass"}. 
 See Details}
 
-\item{...}{Extra arguments of the function.}
+\item{...}{Extra arguments of the function. See Details.}
 
 \item{ts}{\code{logical} parameter. By default \code{ts = TRUE} and the plots 
 are going to be time series where the x-axis is the time. For plots where the 
@@ -216,16 +216,36 @@ classes.
  \item "yieldN" to plot the species yield (in numbers) (see \link{plot.osmose.yieldN})
 }
 
-Describe types-ts
+Plot types can be changed using \code{type} and \code{ts} arguments.
+So, for \code{ts = TRUE}, user will select within:
+\itemize{
+ \item{\code{type = 1}: }{Generates a matrix plot of the selected variable 
+ plotted independently.}
+ \item{\code{type = 2}: }{Generates a single plot with overlaped time series.
+ You can include confidence interval shadow around lines.}
+ \item{\code{type = 3}: }{Generates a single plot with cumulated time series.
+ So, the method will sort and overlap the time series values for the selected 
+ variable}
+ \item{\code{type = 4}: }{ONLY valid for a single species. It generates a bar 
+ plot of the time series.}
+}
+
+For \code{ts = FALSE}, user will select within:
+\itemize{
+ \item{\code{type = 1}: }{Generates a bar plot of the selected variable by 
+ species, including interval confidence bars.}
+ \item{\code{type = 2}: }{Generates a boxplot of the selected variable by 
+ species.}
+}
 
 \code{species} argument follows the indexation way of java: starting in zero,
 as osmose-java returns species outputs.
 
 Default value for \code{freq} will be calculated from \code{x}: 
-\eqn{freq = 1/\code{x$model$start}}.
+\eqn{freq = 1/x$model$start}.
 
 Extra arguments can be passed from \code{plot.default} using \code{...}: 
-\code{cex},  \code{cex.axis}, \code{border} (useful for \code{polygon}, 
+\code{cex}, \code{cex.axis}, \code{border} (useful for \code{polygon}, 
 \code{boxplot}s and \code{barplot}s), etc.
 }
 \author{

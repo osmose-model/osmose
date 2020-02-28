@@ -12,7 +12,7 @@
 \method{plot}{osmose.config.reproduction}(
   x,
   type = 1,
-  species = NULL,
+  species = 0,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
@@ -23,7 +23,6 @@
   col = "black",
   axes = TRUE,
   legend = TRUE,
-  names.arg = NULL,
   ...
 )
 
@@ -31,7 +30,7 @@
   x,
   n = 100,
   type = 1,
-  species = NULL,
+  species = 0,
   speciesNames = NULL,
   addElements = c("segments", "points", "polygon", "text"),
   axes = TRUE,
@@ -51,7 +50,7 @@
   axes = TRUE,
   xlim = NULL,
   ylim = NULL,
-  col = "black",
+  col = "gray70",
   legend = TRUE,
   ...
 )
@@ -102,18 +101,12 @@ drawn on the plot.}
 \item{legend}{\code{logical} do you want to show a legend of species? (valid
 only for those plot types TS-2)}
 
-\item{names.arg}{A vector of names to be plotted below each bar or group of 
-bars (check \code{\link{barplot}}).}
-
 \item{n}{\code{numeric} value indicating the number of steps that are going
 to be used to plot the growth curve (\code{n = 100} as default). The larger
 is n, the more resolution the curve will have.}
 
 \item{addElements}{A \code{character} vector indicating extra graphical 
 elements that can be included.}
-}
-\value{
-A graph of an \code{osmose.config} object.
 }
 \description{
 This method takes a \code{osmose.config} object and produce 
@@ -123,25 +116,32 @@ This function implements a plot method for different osmose
 classes.
 }
 \details{
-\code{what} argument can take next values:
+Plot types will depend on the class of \code{x}, which is defined
+by \code{what}. Thereby,
 \itemize{
- \item "predation" to plot growth parameters, where the red dot indicates the 
- L50 parameter.
- \item "reproduction" to produce a plot of seasonality of reproduction.
- \item "species" to plot predator-prey size range.
+ \item{\code{what = reproduction}: }{Generates a single plots of seasonality of 
+ reproduction whether as lines (\code{type = 1}) or bars (\code{type = 2})}
+ \item{\code{what = species}: }{Generates a plot of growth curve following the
+ VB parameters defined on configuration files (\code{type = 1}).}
 }
-
-Describe types
 
 \code{species} argument follows the indexation way of java: starting in zero,
 as osmose-java returns species outputs.
 
 Default value for \code{freq} will be calculated from \code{x}: 
-\eqn{freq = 1/\code{x$model$start}}.
+\eqn{freq = 1/x$model$start}.
 
-Extra arguments can be passed from \code{plot.default} using \code{...}: 
-\code{cex},  \code{cex.axis}, \code{border} (useful for \code{polygon}, 
-\code{boxplot}s and \code{barplot}s), etc.
+Extra arguments can be passed using \code{...} and depending on the type, you
+can modify arguments like: \code{cex},  \code{cex.axis}, \code{border} 
+(useful for \code{polygon} and \code{barplot}s), etc.
+}
+\note{
+Ellipsis (\code{...}) must be used carefully, since it will pass the
+arguments to diferent generic plot funcions. For instance, \code{type = 2} of
+\code{osmose.config.reproduction} method will use \code{...} to pass arguments
+to \link{barplot}, so some arguments like \code{cex} may match with many 
+formal arguments (e.g. \code{cex.axis} and \code{cex.names}), so it may cause
+errors.
 }
 \author{
 Criscely Lujan Paredes

@@ -8,15 +8,6 @@
 #' See Details.
 #' @param ... Additional arguments for the plot function.
 #' 
-#' @details \code{what} argument can take next values:
-#' \itemize{
-#'  \item "predation" to plot growth parameters, where the red dot indicates the 
-#'  L50 parameter.
-#'  \item "reproduction" to produce a plot of seasonality of reproduction.
-#'  \item "species" to plot predator-prey size range.
-#' }
-#' 
-#' @return A graph of an \code{osmose.config} object.
 #' @export
 #' @method plot osmose.config
 plot.osmose.config = function(x, what = "predation", ...) {
@@ -51,14 +42,11 @@ get_var.osmose.config = function(object, what, ...) {
     stop(message)
   }
   
-  getConfigVar = c("reproduction", "species", "predation")
-  
-  if(what %in% getConfigVar){
-    x = switch(what,
-               reproduction  = getReproductionData(x, var = "season.file", ...),
-               species       = getSpeciesData(x, ...),
-               predation     = getPredationData(x, object = object, ...))
-  }
+  x = switch(what,
+             reproduction  = getReproductionData(x, var = "season.file", ...),
+             species       = getSpeciesData(x, ...),
+             predation     = getPredationData(x, object = object, ...),
+             x)
   
   class(x) = c(paste("osmose.config", what, sep = "."), class(x))
   

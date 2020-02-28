@@ -16,35 +16,6 @@ list_osmose_versions = function() {
 # }
 
 
-#' Write data in osmose format
-#'
-#' Write an array or dataframe in the Osmose format.
-#' The separator is ";", there are no quotes and a blank column is
-#' added for the row names column.
-#'
-#' @param x Object to be written (table or data frame)
-#' @param file Output file
-#' @param sep The field separator string. Values within each row of x are 
-#' separated by this string.
-#' @param col.names either a logical value indicating whether the column names 
-#' of x are to be written along with x, or a character vector of column names to 
-#' be written. See the section on ‘CSV files’ for the meaning of 
-#' \code{col.names = NA}.
-#' @param quote A \code{logical} value (\code{TRUE} or \code{FALSE}) or a 
-#' \code{numeric} vector.
-#' @param row.names either a logical value indicating whether the row names of x 
-#' are to be written along with x, or a character vector of row names to be 
-#' written.
-#' @param ... Extra arguments passed to \code{write.table} funtion.
-#' 
-#' @export
-write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE, 
-                        row.names = TRUE, ...){
-  write.table(x = x, file = file, sep = sep, col.names = col.names, quote = quote,
-              row.names = row.names, ...)
-}
-
-
 #' Read Osmose output file
 #'
 #' @param path Osmose output path
@@ -93,24 +64,6 @@ getmfrow = function(n){
   return(out)
 }
 
-# adjustcolor?
-# makeTransparent = function(..., alpha=0.5) {
-#   
-#   if(alpha<0 | alpha>1) stop("alpha must be between 0 and 1")
-#   
-#   alpha = floor(255*alpha)  
-#   newColor = col2rgb(col=unlist(list(...)), alpha=FALSE)
-#   
-#   .makeTransparent = function(col, alpha) {
-#     rgb(red=col[1], green=col[2], blue=col[3], alpha=alpha, maxColorValue=255)
-#   }
-#   
-#   newColor = apply(newColor, 2, .makeTransparent, alpha=alpha)
-#   
-#   return(newColor)
-#   
-# }
-
 writeOsmoseParameters = function(conf, file, sep=";") {
   .writeParameter = function(x) {
     out = paste(names(x),paste(x, collapse=sep), sep=sep)
@@ -135,4 +88,22 @@ getWhats = function(x){
   }
   
   return(x)
+}
+
+# Reads a csv file using COMA and SEMICOLON and select that what honor the 
+# ncol_condition
+readCSVGuessing <- function(file, ncol_condition = "> 1", ...){
+  x1 <- read.table(file = file, sep = ",", ...)
+  x2 <- read.table(file = file, sep = ";", ...)
+  
+  evalCondition <- sapply(paste0(c(ncol(x1), ncol(x2)), ncol_condition), 
+                          function(x) eval(parse(text = x)))
+  
+  if(all(!evalCondition)){
+    stop("The file doesn't match with the condition neither for ',' and ';'.")
+  }else if(all(evalCondition)){
+    stop("The file do match with the condition using both ',' and ';'. Improve the condition.")
+  }else{
+    return(get(paste0("x", which(evalCondition))))
+  }
 }

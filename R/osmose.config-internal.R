@@ -214,35 +214,36 @@ getSpeciesData = function(x, ...){
 getPredationData = function(x, object, ...) {
   
   # Accessibility
-  fileAccessibility = unlist(lapply(x$accessibility$file, FUN = "[[", 1))
-  pathAccessibility = attributes(x$accessibility$file)$path
-  accessibility     = list(data = read.csv(file = paste(pathAccessibility,
-                                                        fileAccessibility, sep = "/"), sep = ";"),
-                           stageStructure = as.vector(x$accessibility$stage$structure),
-                           stageThreshold = lapply(x$accessibility$stage$threshold, FUN = "[[", 1))
+  accesibilityFile <- file.path(attr(x = x$accessibility$file, which = "path"), 
+                                x$accessibility$file)
+  accessibility <- readCSVGuessing(file = accesibilityFile, header = TRUE, 
+                                   quote = "\"", dec = ".", fill = TRUE, comment.char = "")
+  accessibility <- list(data = accessibility,
+                        stageStructure = as.character(x$accessibility$stage$structure),
+                        stageThreshold = unlist(x$accessibility$stage$threshold))
   
   # Efficiency
-  efficiency   = list(critical = lapply(lapply(x$efficiency$critical, FUN = "[[", 1), as.numeric, 1))
+  efficiency   = list(critical = as.numeric(unlist(x$efficiency$critical)))
   
   # Ingestion
-  ingestion    = list(rateMax = lapply(lapply(x$ingestion$rate$max, FUN = "[[", 1), as.numeric, 1))
+  ingestion    = list(rateMax = as.numeric(unlist(x$ingestion$rate$max)))
   
-  # PredPrey
-  sizeRatioMax   = lapply(lapply(lapply(x$predprey$sizeratio$max, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  sizeRatioMin   = lapply(lapply(lapply(x$predprey$sizeratio$min, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  stageThreshold = lapply(lapply(lapply(x$predprey$stage$threshold, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  predPrey       = list(sizeRatioMax   = lapply(sizeRatioMax, FUN = as.numeric, 1),
-                        sizeRatioMin   = lapply(sizeRatioMin, FUN = as.numeric, 1),
-                        stageStructure = as.character(x$predprey$stage$structure),
-                        stageThreshold = suppressWarnings(lapply(stageThreshold, FUN = as.numeric, 1)))
+  # Pred-Prey
+  sizeRatioMax   = sapply(sapply(x$predprey$sizeratio$max, strsplit, split = ","), as.numeric)
+  sizeRatioMin   = sapply(sapply(x$predprey$sizeratio$min, strsplit, split = ","), as.numeric)
+  stageThreshold = sapply(x$predprey$stage$threshold, strsplit, split = ",")
+  predPrey       = list(sizeRatioMax   = sizeRatioMax,
+                        sizeRatioMin   = sizeRatioMin,
+                        stageStructure = accessibility$stageStructure,
+                        stageThreshold = suppressWarnings(sapply(stageThreshold, as.numeric)))
   
   # Data base
   dataBase = list(accessibility = accessibility,
                   efficiency    = efficiency,
                   ingestion     = ingestion,
                   predPrey      = predPrey,
-                  linf          = as.numeric(do.call(c, object$species$linf)),
-                  speciesNames  = as.character(do.call(c, object$species$name)))
+                  linf          = sapply(object$species$linf, as.numeric),
+                  speciesNames  = unlist(object$species$name))
   
   return(dataBase)
 }

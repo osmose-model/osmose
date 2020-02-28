@@ -26,8 +26,6 @@
 #' \code{x}.
 #' @param initialYear A \code{numeric} value. It specifies the first element 
 #' that is going to be used on the x axis for the plots.
-#' @param type A \code{numeric} value, indicating the type of plot to be used 
-#' (\code{type = 1}, by default). See Details.
 #' @param freq A \code{numeric} value to indicate the steps by year used in the 
 #' time series. Default values, see Details.
 #' @param xlim,ylim numeric vectors of length 2, giving the x and y coordinates 
@@ -38,8 +36,6 @@
 #' drawn on the plot. 
 #' @param legend \code{logical} do you want to show a legend of species? (valid
 #' only for those plot types TS-2)
-#' @param names.arg A vector of names to be plotted below each bar or group of 
-#' bars (check \code{\link{barplot}}).
 #' @param addElements A \code{character} vector indicating extra graphical 
 #' elements that can be included.
 #' @param n \code{numeric} value indicating the number of steps that are going
@@ -47,37 +43,49 @@
 #' is n, the more resolution the curve will have.
 #' @param ... Extra arguments of the function.
 #' 
-#' @details Describe types
+#' @details Plot types will depend on the class of \code{x}, which is defined
+#' by \code{what}. Thereby,
+#' \itemize{
+#'  \item{\code{what = reproduction}: }{Generates a single plots of seasonality of 
+#'  reproduction whether as lines (\code{type = 1}) or bars (\code{type = 2})}
+#'  \item{\code{what = species}: }{Generates a plot of growth curve following the
+#'  VB parameters defined on configuration files (\code{type = 1}).}
+#' }
 #' 
 #' \code{species} argument follows the indexation way of java: starting in zero,
 #' as osmose-java returns species outputs.
 #' 
 #' Default value for \code{freq} will be calculated from \code{x}: 
-#' \eqn{freq = 1/\code{x$model$start}}.
+#' \eqn{freq = 1/x$model$start}.
 #' 
-#' Extra arguments can be passed from \code{plot.default} using \code{...}: 
-#' \code{cex},  \code{cex.axis}, \code{border} (useful for \code{polygon}, 
-#' \code{boxplot}s and \code{barplot}s), etc.
+#' Extra arguments can be passed using \code{...} and depending on the type, you
+#' can modify arguments like: \code{cex},  \code{cex.axis}, \code{border} 
+#' (useful for \code{polygon} and \code{barplot}s), etc.
+#' 
+#' @note Ellipsis (\code{...}) must be used carefully, since it will pass the
+#' arguments to diferent generic plot funcions. For instance, \code{type = 2} of
+#' \code{osmose.config.reproduction} method will use \code{...} to pass arguments
+#' to \link{barplot}, so some arguments like \code{cex} may match with many 
+#' formal arguments (e.g. \code{cex.axis} and \code{cex.names}), so it may cause
+#' errors.
 #' 
 #' @author Criscely Lujan Paredes
 #' 
+#' @method plot osmose.config.reproduction
 #' @export
-plot.osmose.config.reproduction = function(x, type = 1, species = NULL, 
+plot.osmose.config.reproduction = function(x, type = 1, species = 0, 
                                            speciesNames = NULL, start = NULL, 
                                            end = NULL, initialYear = NULL,
                                            freq = 12, xlim = NULL, ylim = NULL,
-                                           col = "black", axes = TRUE, legend = TRUE,
-                                           names.arg = NULL, ...){
+                                           col = "black", axes = TRUE, 
+                                           legend = TRUE, ...){
   
   # species indexation
-  if(is.null(species)){
-    x = x[[1]] 
-  }else{
-    if(length(species) > 1) stop("The value of 'species' must be of length 1.")
-    if(min(species) < 0 || max(species) > (length(x) - 1)) stop("Incorrect value for 'species'.")
-    
-    x = x[[species + 1]]
-  }
+  if(is.null(species) || is.na(species)) stop("'species' argument must be specified.")
+  if(length(species) > 1) stop("The value of 'species' must be of length 1.")
+  if(min(species) < 0 || max(species) > (length(x) - 1)) stop("Incorrect value for 'species'.")
+  
+  x = x[[species + 1]]
   
   # Set default values for start and end
   if(is.null(start)) start = 1
@@ -107,8 +115,7 @@ plot.osmose.config.reproduction = function(x, type = 1, species = NULL,
                                      speciesNames = speciesNames, axes = axes,
                                      legend = legend, col = col, ...),
          "2" = plotReproductionType2(x = x, ylim = ylim, speciesNames = speciesNames,
-                                     axes = axes, legend = legend, names.arg = names.arg,
-                                     col = col, ...),
+                                     axes = axes, legend = legend, col = col, ...),
          stop("Not defined plot for 'type = ", type, "'."))
   
   return(invisible())
@@ -116,8 +123,9 @@ plot.osmose.config.reproduction = function(x, type = 1, species = NULL,
 
 
 #' @rdname plot.osmose.config
+#' @method plot osmose.config.species
 #' @export
-plot.osmose.config.species = function(x, n = 100, type = 1, species = NULL, speciesNames = NULL, 
+plot.osmose.config.species = function(x, n = 100, type = 1, species = 0, speciesNames = NULL, 
                                       addElements = c("segments", "points", "polygon", "text"),
                                       axes = TRUE, xlim = NULL, ylim = NULL, 
                                       legend = TRUE, col = "black", ...){
@@ -135,10 +143,11 @@ plot.osmose.config.species = function(x, n = 100, type = 1, species = NULL, spec
 
 
 #' @rdname plot.osmose.config
+#' @method plot osmose.config.predation
 #' @export
 plot.osmose.config.predation = function(x, type = 1, species = NULL, speciesNames = NULL, 
                                         addElements = c("segments", "points", "text"),
-                                        axes = TRUE, xlim = NULL, ylim = NULL, col = "black", 
+                                        axes = TRUE, xlim = NULL, ylim = NULL, col = "gray70", 
                                         legend = TRUE, ...){
   
   switch(type,

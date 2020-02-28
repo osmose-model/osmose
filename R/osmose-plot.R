@@ -1,14 +1,14 @@
 
 # Plot methods ------------------------------------------------------------
 
-#' @title Plot methods for osmose-like objects
+#' @title Plot methods for \code{osmose} objects
 #' 
 #' @rdname plot.osmose
 #' 
 #' @description This function implements a plot method for different osmose 
 #' classes.
 #' 
-#' @param x \code{osmose} like object. 
+#' @param x \code{osmose} object. 
 #' @param ts \code{logical} parameter. By default \code{ts = TRUE} and the plots 
 #' are going to be time series where the x-axis is the time. For plots where the 
 #' x-axis is not the time \code{ts = FALSE}.
@@ -59,18 +59,38 @@
 #' on top of the plot. If \code{NULL} (default), the value will depend on the
 #' class. For instance, if plot if about biomass or abundance, units will be set
 #' on 'tonnes' or 'individuals', respectively.
-#' @param ... Extra arguments of the function.
+#' @param ... Extra arguments of the function. See Details.
 #' 
-#' @details Describe types-ts
+#' @details Plot types can be changed using \code{type} and \code{ts} arguments.
+#' So, for \code{ts = TRUE}, user will select within:
+#' \itemize{
+#'  \item{\code{type = 1}: }{Generates a matrix plot of the selected variable 
+#'  plotted independently.}
+#'  \item{\code{type = 2}: }{Generates a single plot with overlaped time series.
+#'  You can include confidence interval shadow around lines.}
+#'  \item{\code{type = 3}: }{Generates a single plot with cumulated time series.
+#'  So, the method will sort and overlap the time series values for the selected 
+#'  variable}
+#'  \item{\code{type = 4}: }{ONLY valid for a single species. It generates a bar 
+#'  plot of the time series.}
+#' }
+#' 
+#' For \code{ts = FALSE}, user will select within:
+#' \itemize{
+#'  \item{\code{type = 1}: }{Generates a bar plot of the selected variable by 
+#'  species, including interval confidence bars.}
+#'  \item{\code{type = 2}: }{Generates a boxplot of the selected variable by 
+#'  species.}
+#' }
 #' 
 #' \code{species} argument follows the indexation way of java: starting in zero,
 #' as osmose-java returns species outputs.
 #' 
 #' Default value for \code{freq} will be calculated from \code{x}: 
-#' \eqn{freq = 1/\code{x$model$start}}.
+#' \eqn{freq = 1/x$model$start}.
 #' 
 #' Extra arguments can be passed from \code{plot.default} using \code{...}: 
-#' \code{cex},  \code{cex.axis}, \code{border} (useful for \code{polygon}, 
+#' \code{cex}, \code{cex.axis}, \code{border} (useful for \code{polygon}, 
 #' \code{boxplot}s and \code{barplot}s), etc.
 #' 
 #' @author Criscely Lujan Paredes

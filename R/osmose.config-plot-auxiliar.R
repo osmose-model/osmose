@@ -39,13 +39,12 @@ plotReproductionType1 = function(x, times, xlim, ylim, speciesNames, axes,
   return(invisible())
 }
 
-plotReproductionType2 = function(x, ylim, speciesNames, axes,  legend, names.arg, 
-                                 col, ...){
+plotReproductionType2 = function(x, ylim, speciesNames, axes, legend, col, ...){
   
   if(is.null(speciesNames)) speciesNames = colnames(x)[2]
   
-  barplot(height = x[,2], axes = FALSE, ylim = ylim, names.arg = names.arg, 
-          col = col, ...)
+  xValues <- as.numeric(barplot(height = x[,2], axes = FALSE, ylim = ylim, 
+                                col = col, ...))
   
   if(isTRUE(axes)){
     las <- list(...)$las
@@ -57,7 +56,8 @@ plotReproductionType2 = function(x, ylim, speciesNames, axes,  legend, names.arg
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
     
-    axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+    axis(side = 1, at = xValues, labels = NA, las = las, line = line, 
+         cex.axis = cex.axis)
     axis(side = 2, las = las, line = line, cex.axis = cex.axis)
     box()
   }
@@ -146,7 +146,7 @@ plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim,
   if(is.element("polygon", tolower(addElements))){
     polygon(x = c(usr[1], rep(params$thr, 2), usr[1]),
             y = rep(usr[3:4], each = 2),
-            col = adjustcolor(col = col, alpha.f = 0.5), border = NA)
+            col = adjustcolor(col = col, alpha.f = 0.3), border = NA)
   } 
   
   # Add text
@@ -176,6 +176,7 @@ plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim,
 getGrowthParameters = function(x, species){
   
   # Check species argument
+  if(is.null(species) || is.na(species)) stop("'species' argument must be specified.")
   if(length(species) > 1) stop("The value of 'species' must be of length 1.")
   if(min(species) < 0 || max(species) > (length(x) - 1)) stop("Incorrect value for 'species'.")
   
