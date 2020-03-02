@@ -11,11 +11,11 @@ plotReproductionType1 = function(x, times, xlim, ylim, speciesNames, axes,
        xlim = xlim, ylim = ylim, axes = FALSE, col = col, ...)
   
   if(isTRUE(axes)){
-    las <- list(...)$las
-    las <- ifelse(is.null(las), 1, las)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
     
-    line <- list(...)$line
-    line <- ifelse(is.null(line), NA, line)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
     
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
@@ -43,15 +43,15 @@ plotReproductionType2 = function(x, ylim, speciesNames, axes, legend, col, ...){
   
   if(is.null(speciesNames)) speciesNames = colnames(x)[2]
   
-  xValues <- as.numeric(barplot(height = x[,2], axes = FALSE, ylim = ylim, 
-                                col = col, ...))
+  xValues = as.numeric(barplot(height = x[,2], axes = FALSE, ylim = ylim, 
+                               col = col, ...))
   
   if(isTRUE(axes)){
-    las <- list(...)$las
-    las <- ifelse(is.null(las), 1, las)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
     
-    line <- list(...)$line
-    line <- ifelse(is.null(line), NA, line)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
     
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
@@ -111,11 +111,11 @@ plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim,
   
   # Add axes
   if(isTRUE(axes)){
-    las <- list(...)$las
-    las <- ifelse(is.null(las), 1, las)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
     
-    line <- list(...)$line
-    line <- ifelse(is.null(line), NA, line)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
     
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
@@ -125,7 +125,7 @@ plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim,
     box()
   }
   
-  usr <- par("usr")
+  usr = par("usr")
   
   # Add segments
   if(is.element("segments", tolower(addElements))){
@@ -234,12 +234,14 @@ osmoseGrowthInv = function(length, params) {
 plotPredationType1 = function(x, species, speciesNames, addElements, axes, 
                               xlim, ylim, col, legend, ...){
   
+  if(is.null(species)) stop("'species' argument must not be NULL.")
+  
   #get the predation parameters to plot
   params = getPredationParameter(x = x, species = species)
   
   #xlim and ylim
-  if(is.null(xlim)) xlim = c(0, tail(params$threshold, n = 1))
-  if(is.null(ylim)) ylim = c(0, max(params$threshold[1]/params$sizeRatioMax))
+  if(is.null(xlim)) xlim = c(0, tail(x = params$threshold, n = 1))
+  if(is.null(ylim)) ylim = c(0, max(params$threshold)/min(params$sizeRatioMax))
   
   # Draw an empty canvas
   xlab = list(...)[["xlab"]]
@@ -248,32 +250,41 @@ plotPredationType1 = function(x, species, speciesNames, addElements, axes,
   ylab = list(...)[["ylab"]]
   ylab = ifelse(is.null(ylab), "Prey size", ylab)
   
-  plot.new()
-  plot.window(xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab)
+  plot(1, 1, type = "n", axes = FALSE, xlab = xlab, ylab = ylab, 
+       xlim = xlim, ylim = ylim)
   
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 1, cex)
   
+  usr = par(no.readonly = TRUE)$usr
+  
   for(i in seq_along(params$threshold)){
-    xValues <- params$threshold[c(i, rep(i + 1, 2), i)]
-    yValues <- xValues/rep(c(params$sizeRatioMin[i], params$sizeRatioMax[i]), each = 1)
+    xValues = params$threshold[c(i, rep(i + 1, 2), i)]
+    yValues = xValues/rep(x = c(params$sizeRatioMin[i], params$sizeRatioMax[i]), 
+                          each = 2)
     
-    polygon(x = xValues, yValues, border = NA, col = col, ...)
+    polygon(x = xValues, yValues, col = col, ...)
     
     if(!is.element(i, c(1, length(params$threshold)))){
       
       # Add segments
       if(is.element("segments", tolower(addElements))){
-        segments(x0 = params$threshold[i], x1 = params$threshold[i],
-                 y0 = params$threshold[i]/params$sizeRatioMin[i],
+        segments(x0 = params$threshold[i], 
+                 x1 = params$threshold[i],
+                 y0 = usr[3],
                  y1 = max(params$threshold[-1]/params$sizeRatioMax),
-                 col = "black", ...)
+                 col = "black", lty = "dashed", )
       }
       
       # Add points
       if(is.element("points", tolower(addElements))){
+        
+        pch = list(...)[["pch"]]
+        if(is.null(pch)) pch = 16
+        
         points(x = params$threshold[i],
-               y = max(params$threshold[-1]/params$sizeRatioMax), ...)
+               y = max(params$threshold[-1]/params$sizeRatioMax),
+               pch = pch)
       } 
       
       # Add text
@@ -285,18 +296,18 @@ plotPredationType1 = function(x, species, speciesNames, addElements, axes,
         text(x = params$threshold[i],
              y = max(params$threshold[-1]/params$sizeRatioMax),
              labels = bquote(paste('S'['thr']*' = ', .(params$threshold[i]))),
-             pos = 3, cex = cex)
+             pos = 4, cex = cex)
       }
     }
   }
   
   # Add axes
   if(isTRUE(axes)){
-    las <- list(...)$las
-    las <- ifelse(is.null(las), 1, las)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
     
-    line <- list(...)$line
-    line <- ifelse(is.null(line), NA, line)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
     
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
@@ -318,7 +329,7 @@ plotPredationType1 = function(x, species, speciesNames, addElements, axes,
 
 getPredationParameter = function(x, species){
   
-  species <- species + 1
+  species = species + 1
   
   linf      = as.numeric(x$linf[species])
   threshold = c(0, x$predPrey$stageThreshold[[species]], linf)

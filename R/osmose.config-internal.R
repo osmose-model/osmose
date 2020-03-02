@@ -43,7 +43,7 @@ viewDataList = function(input, path=NULL) {
 ##Funciones internas
 
 .readOsmoseConfiguration = function(input, path=NULL, absolute=TRUE) {
-
+  
   if(isTRUE(absolute)) {
     if(is.null(path)) {
       path  = normalizePath(dirname(input))
@@ -214,13 +214,13 @@ getSpeciesData = function(x, ...){
 getPredationData = function(x, object, ...) {
   
   # Accessibility
-  accesibilityFile <- file.path(attr(x = x$accessibility$file, which = "path"), 
-                                x$accessibility$file)
-  accessibility <- readCSVGuessing(file = accesibilityFile, header = TRUE, 
-                                   quote = "\"", dec = ".", fill = TRUE, comment.char = "")
-  accessibility <- list(data = accessibility,
-                        stageStructure = as.character(x$accessibility$stage$structure),
-                        stageThreshold = unlist(x$accessibility$stage$threshold))
+  accesibilityFile = file.path(attr(x = x$accessibility$file, which = "path"), 
+                               x$accessibility$file)
+  accessibility = readCSVGuessing(file = accesibilityFile, header = TRUE, 
+                                  quote = "\"", dec = ".", fill = TRUE, comment.char = "")
+  accessibility = list(data = accessibility,
+                       stageStructure = as.character(x$accessibility$stage$structure),
+                       stageThreshold = unlist(x$accessibility$stage$threshold))
   
   # Efficiency
   efficiency   = list(critical = as.numeric(unlist(x$efficiency$critical)))

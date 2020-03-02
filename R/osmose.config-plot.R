@@ -46,6 +46,8 @@
 #' @details Plot types will depend on the class of \code{x}, which is defined
 #' by \code{what}. Thereby,
 #' \itemize{
+#' \item{\code{what = predation}: }{Generates a plot of size range as shadows
+#' for a selected species .}
 #'  \item{\code{what = reproduction}: }{Generates a single plots of seasonality of 
 #'  reproduction whether as lines (\code{type = 1}) or bars (\code{type = 2})}
 #'  \item{\code{what = species}: }{Generates a plot of growth curve following the
@@ -130,6 +132,10 @@ plot.osmose.config.species = function(x, n = 100, type = 1, species = 0, species
                                       axes = TRUE, xlim = NULL, ylim = NULL, 
                                       legend = TRUE, col = "black", ...){
   
+  if(is.null(species) || is.na(species)) stop("'species' argument must be specified.")
+  if(length(species) > 1) stop("The value of 'species' must be of length 1.")
+  if(min(species) < 0 || max(species) > (length(x) - 1)) stop("Incorrect value for 'species'.")
+  
   switch(type,
          "1" = plotGrowthType1(x = x, n = n, species = species, 
                                speciesNames = speciesNames, 
@@ -145,10 +151,14 @@ plot.osmose.config.species = function(x, n = 100, type = 1, species = 0, species
 #' @rdname plot.osmose.config
 #' @method plot osmose.config.predation
 #' @export
-plot.osmose.config.predation = function(x, type = 1, species = NULL, speciesNames = NULL, 
+plot.osmose.config.predation = function(x, type = 1, species = 0, speciesNames = NULL, 
                                         addElements = c("segments", "points", "text"),
                                         axes = TRUE, xlim = NULL, ylim = NULL, col = "gray70", 
                                         legend = TRUE, ...){
+  
+  if(is.null(species) || is.na(species)) stop("'species' argument must be specified.")
+  if(length(species) > 1) stop("The value of 'species' must be of length 1.")
+  if(min(species) < 0 || max(species) > (length(x$speciesNames) - 1)) stop("Incorrect value for 'species'.")
   
   switch(type,
          "1" = plotPredationType1(x = x, species = species, speciesNames = speciesNames, 

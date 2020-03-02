@@ -1,4 +1,4 @@
- 
+
 #' Returns the list of Osmose Java versions
 #'
 #' @return List of Osmose Java versions
@@ -92,12 +92,12 @@ getWhats = function(x){
 
 # Reads a csv file using COMA and SEMICOLON and select that what honor the 
 # ncol_condition
-readCSVGuessing <- function(file, ncol_condition = "> 1", ...){
-  x1 <- read.table(file = file, sep = ",", ...)
-  x2 <- read.table(file = file, sep = ";", ...)
+readCSVGuessing = function(file, ncol_condition = "> 1", ...){
+  x1 = read.table(file = file, sep = ",", ...)
+  x2 = read.table(file = file, sep = ";", ...)
   
-  evalCondition <- sapply(paste0(c(ncol(x1), ncol(x2)), ncol_condition), 
-                          function(x) eval(parse(text = x)))
+  evalCondition = sapply(paste0(c(ncol(x1), ncol(x2)), ncol_condition), 
+                         function(x) eval(parse(text = x)))
   
   if(all(!evalCondition)){
     stop("The file doesn't match with the condition neither for ',' and ';'.")

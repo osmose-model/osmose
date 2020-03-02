@@ -44,7 +44,7 @@
 \method{plot}{osmose.config.predation}(
   x,
   type = 1,
-  species = NULL,
+  species = 0,
   speciesNames = NULL,
   addElements = c("segments", "points", "text"),
   axes = TRUE,
@@ -119,6 +119,8 @@ classes.
 Plot types will depend on the class of \code{x}, which is defined
 by \code{what}. Thereby,
 \itemize{
+\item{\code{what = predation}: }{Generates a plot of size range as shadows
+for a selected species .}
  \item{\code{what = reproduction}: }{Generates a single plots of seasonality of 
  reproduction whether as lines (\code{type = 1}) or bars (\code{type = 2})}
  \item{\code{what = species}: }{Generates a plot of growth curve following the

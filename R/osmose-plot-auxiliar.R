@@ -53,13 +53,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   times = seq(from = initialYear + start/freq, by = 1/freq, 
               length.out = nrow(x))
   
-  if(is.null(xlim)) xlim = range(times)
-  
-  if(!(type %in% c(1:4))){
-    warning("The type argument selected is not correct. The value by default is used (type = 1)")
-    type = 1
-  } 
-  
+  msg = sprintf("Not defined method for ts = %s and type = %s", isTRUE(ts), type)
   if(isTRUE(ts)){
     
     switch(type,
@@ -83,19 +77,24 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                factor = factor, lty = lty, col = col, 
                                alpha = alpha, legend = legend, 
                                speciesNames = speciesNames, axes = axes, 
-                               units = units, ...))
+                               units = units, ...),
+           stop(msg))
   }else{
     
     switch(type,
            "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
                              factor = factor, speciesNames = speciesNames, 
-                             axes = axes, units = units, ...),
+                             xlim = xlim, ylim = ylim, axes = axes, units = units, 
+                             ...),
            "2" = plot2DType2(x, horizontal = horizontal, col = col, 
                              factor = factor, speciesNames = speciesNames, 
-                             axes = axes, units = units, ...),
+                             xlim = xlim, ylim = ylim, axes = axes, units = units, 
+                             ...),
            "3" = plot2DType3(x, horizontal = horizontal, col = col, 
                              factor = factor, speciesNames = speciesNames, 
-                             axes = axes, units = units, ...))
+                             xlim = xlim, ylim = ylim, axes = axes, units = units, 
+                             ...),
+           stop(msg))
   }
   
   return(invisible())
@@ -119,14 +118,14 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   
   # Define multiplot array if there're more than 1 species
   if(ncol(x) > 1){
-    mar <- rep(0, 4)
-    oma <- c(2, 3, 2, 3)
+    mar = rep(0, 4)
+    oma = c(3, 4, 3, 4)
     
     par(mar = mar, oma = oma)
     
-    mfrow <- getmfrow(ncol(x))
+    mfrow = getmfrow(ncol(x))
   }else{
-    mfrow <- c(1, 1)
+    mfrow = c(1, 1)
   }
   
   par(mfrow = mfrow)
@@ -139,10 +138,9 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 0.8, cex)
   
-  # Define ylim
-  if(is.null(ylim)){
-    ylim = range(as.numeric(x))*factor
-  }  #pending: ylim flexible for the users
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(times)
+  if(is.null(ylim)) ylim = range(as.numeric(x))*factor #pending: ylim flexible for the users
   
   # Generate plots by spp
   for(i in seq_len(ncol(x))){
@@ -170,11 +168,11 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
     
     # Add axis
     if(isTRUE(axes)){
-      las <- list(...)$las
-      las <- ifelse(is.null(las), 1, las)
+      las = list(...)$las
+      las = ifelse(is.null(las), 1, las)
       
-      line <- list(...)$line
-      line <- ifelse(is.null(line), NA, line)
+      line = list(...)$line
+      line = ifelse(is.null(line), NA, line)
       
       cex.axis = list(...)[["cex.axis"]]
       cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
@@ -184,13 +182,13 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
              cex.axis = cex.axis)  
       }
       
-      if(ncol(x) > 1 && is.element(i, seq(2, mfrow[2], 2))){
+      if(mfrow[2] > 1 && is.element(i, seq(2, mfrow[2], 2))){
         axis(side = 3, las = las, line = line, cex.axis = cex.axis)
       }
       
-      index <- c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
-                     to = prod(mfrow) - mfrow[2] + 1),
-                 seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
+      index = c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
+                    to = prod(mfrow) - mfrow[2] + 1),
+                seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
       if(is.element(i, index)){
         axis(side = 1, las = las, line = line, cex.axis = cex.axis)
       }
@@ -212,9 +210,9 @@ plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
     speciesNames = toupper(colnames(x))
   }
   
-  if(is.null(ylim)){
-    ylim = range(as.numeric(x))*factor
-  }
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(times)
+  if(is.null(ylim)) ylim = range(as.numeric(x))*factor
   
   # Extract args related with line customization
   col = if(is.null(col)) rainbow(n = ncol(x)) else rep(x = col, length.out = ncol(x))
@@ -244,11 +242,11 @@ plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   }
   
   if(isTRUE(axes)){
-    las <- list(...)$las
-    las <- ifelse(is.null(las), 1, las)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
     
-    line <- list(...)$line
-    line <- ifelse(is.null(line), NA, line)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
     
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
@@ -314,9 +312,9 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
   }
   colnames(dataSpecies) = colnames(x)
   
-  if(is.null(ylim)){
-    ylim = c(0.75, 1.25)*range(dataSpecies[, 1])
-  }
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(times)
+  if(is.null(ylim)) ylim = range(dataSpecies[, 1])
   
   if(is.null(speciesNames)){
     speciesNames = toupper(colnames(dataSpecies))
@@ -345,11 +343,11 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
   }
   
   if(isTRUE(axes)){
-    las <- list(...)$las
-    las <- ifelse(is.null(las), 1, las)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
     
-    line <- list(...)$line
-    line <- ifelse(is.null(line), NA, line)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
     
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
@@ -387,19 +385,20 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha,
   cex = ifelse(is.null(cex), 0.8, cex)
   
   x = apply(x, 1, mean, na.rm = TRUE)*factor
-  if(is.null(ylim)){
-    ylim =  c(0, 1.25)*range(x)
-  } 
+  
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(times)
+  if(is.null(ylim)) ylim = range(x)
   
   plot(x = times, y = x, col = adjustcolor(col = col, alpha.f = alpha), 
        lty = lty, type = "h", axes = FALSE, xlim = xlim, ylim = ylim, ...)
   
   if(isTRUE(axes)){
-    las <- list(...)$las
-    las <- ifelse(is.null(las), 1, las)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
     
-    line <- list(...)$line
-    line <- ifelse(is.null(line), NA, line)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
     
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
@@ -425,7 +424,7 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha,
 # Plot types with TS = FALSE ----------------------------------------------
 
 plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes, 
-                       units, ...){
+                       xlim, ylim, units, ...){
   
   if(is.null(speciesNames)){
     speciesNames = toupper(colnames(x))
@@ -436,23 +435,23 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 0.8, cex)
   
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
-  
   if(isTRUE(ci)){
     barplotCI(x, horizontal = horizontal, speciesNames = speciesNames, 
-              col = col, factor = factor, axes = axes, ...)
+              col = col, factor = factor, axes = axes, 
+              xlim = xlim, ylim = ylim, ...)
   }else{
     x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
     x = x * factor
-    if(!isTRUE(horizontal)){
-      ylim = c(0, 1.2*max(x))
-      xlim = NULL
+    
+    if(isTRUE(horizontal)){
+      if(is.null(xlim)){
+        xlim = c(0, max(x)*1.2)
+      }
     }else{
-      xlim = c(0, 1.2*max(x))
-      ylim = NULL
-    } 
+      if(is.null(ylim)){
+        ylim = c(0, max(x)*1.2)
+      }
+    }
     
     barplot(x, horiz = horizontal, names.arg = speciesNames, col = col,
             ylim = ylim, xlim = xlim, axes = axes, ...)
@@ -466,17 +465,20 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   return(invisible())
 }  
 
-barplotCI = function(x, horizontal, speciesNames, col, factor, axes, ...){
+barplotCI = function(x, horizontal, speciesNames, col, factor, axes, 
+                     xlim, ylim, ...){
   
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
   
-  if(!isTRUE(horizontal)){
-    ylim = c(0, 1.2*(max(y.mean)+1.96*max(y.sd)/10))
-    xlim = NULL
-  } else {
-    xlim = c(0, 1.2*(max(y.mean)+1.96*max(y.sd)/10))
-    ylim = NULL
+  if(isTRUE(horizontal)){
+    if(is.null(xlim)){
+      xlim = c(0, max(y.mean) + 1.96*max(y.sd)/10)*1.2
+    }
+  }else{
+    if(is.null(ylim)){
+      ylim = c(0, max(y.mean) + 1.96*max(y.sd)/10)*1.2
+    }
   }
   
   barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col,
@@ -505,7 +507,7 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, axes, ...){
 
 # boxplot with mean over the replicates
 plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
-                       units, ...){
+                       xlim, ylim, units, ...){
   
   if(is.null(speciesNames)){
     speciesNames = toupper(colnames(x))
@@ -520,8 +522,12 @@ plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
   
   x = apply(x*factor, c(1, 2), mean, na.rm = TRUE) #mean over the replicates
   
+  if(is.null(ylim)){
+    ylim = c(0, max(x)*1.2)
+  }
+  
   boxplot(x, horizontal = horizontal, names = speciesNames, col = col, 
-          axes = axes, ...)
+          axes = axes, xlim = xlim, ylim = ylim, ...)
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
@@ -531,8 +537,8 @@ plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
 }
 
 # boxplot with mean over the time
-plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes, units, 
-                       ...){
+plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes, 
+                       xlim, ylim, units, ...){
   
   if(is.null(speciesNames)){
     speciesNames = toupper(colnames(x))
@@ -547,10 +553,14 @@ plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes, units,
   op = par(no.readonly = TRUE)
   on.exit(par(op))
   
+  if(is.null(ylim)){
+    ylim = c(0, max(x)*1.2)
+  }
+  
   x = apply(x*factor, c(3, 2), mean, na.rm = TRUE) #mean over the time
   
-  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, 
-          axes = axes, ...)
+  boxplot(x, horiz = horizontal, names = speciesNames, col = col, 
+          axes = axes, xlim = xlim, ylim = ylim, ...)
   
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
