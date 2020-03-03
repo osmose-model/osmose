@@ -89,21 +89,3 @@ getWhats = function(x){
   
   return(x)
 }
-
-# Reads a csv file using COMA and SEMICOLON and select that what honor the 
-# ncol_condition
-readCSVGuessing = function(file, ncol_condition = "> 1", ...){
-  x1 = read.table(file = file, sep = ",", ...)
-  x2 = read.table(file = file, sep = ";", ...)
-  
-  evalCondition = sapply(paste0(c(ncol(x1), ncol(x2)), ncol_condition), 
-                         function(x) eval(parse(text = x)))
-  
-  if(all(!evalCondition)){
-    stop("The file doesn't match with the condition neither for ',' and ';'.")
-  }else if(all(evalCondition)){
-    stop("The file do match with the condition using both ',' and ';'. Improve the condition.")
-  }else{
-    return(get(paste0("x", which(evalCondition))))
-  }
-}

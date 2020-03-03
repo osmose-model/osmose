@@ -46,9 +46,11 @@
 #' ranges.
 #' @param col A vector with the color names for the plots. By default 
 #' \code{col = NULL} and the colors will be chosen by the function.  
-#' @param alpha factor modifying the opacity alpha (typically in [0,1], by 
-#' default 1) given to confidence interval shadow (check 
-#' \code{\link{adjustcolor}}).
+#' @param alpha factor modifying the opacity alpha given to confidence interval 
+#' (CI) polygons (check \code{\link{adjustcolor}}). By default (\code{NULL}), 
+#' its value will depend on the plot type. See Details.
+#' @param border the color to draw the border of CI polygons, bar plots and 
+#' box plots. The default value (\code{NULL}) will depend on the type, see Details.
 #' @param lty The line type (check \code{\link{par}}).
 #' @param lwd The line width (check \code{\link{par}}).
 #' @param axes a \code{logical} value indicating whether both axes should be 
@@ -83,6 +85,15 @@
 #'  species.}
 #' }
 #' 
+#' Both \code{alpha} and \code{border} will controls the opacity and the color
+#' of border, respectively, for polygons, bar plots and box plots. So depending
+#' on the \code{ts}-\code{type}, they will have different default values: 
+#' \itemize{
+#'  \item{\code{alpha = 0.3} & \code{border = NA} for }{\code{TS = TRUE} with 
+#'  \code{type = 1 or 2}.}
+#'  \item{\code{alpha = 1} & \code{border = TRUE} for }{Everything else.}
+#' }
+#' 
 #' \code{species} argument follows the indexation way of java: starting in zero,
 #' as osmose-java returns species outputs.
 #' 
@@ -101,8 +112,9 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL,
                                initialYear = NULL, replicates = TRUE, nrep = 3, 
                                freq = 12, horizontal = FALSE, conf = 0.95, 
                                factor = 1e-3, xlim = NULL, ylim = NULL, 
-                               col = NULL, alpha = 1, lty = 1, lwd = 1, 
-                               axes = TRUE, legend = TRUE, units = "tonnes", ...){
+                               col = NULL, alpha = NULL, border = NULL, 
+                               lty = 1, lwd = 1,  axes = TRUE, legend = TRUE, 
+                               units = "tonnes", ...){
   
   # Run the plot
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
@@ -111,8 +123,8 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL,
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
-                lty = lty, lwd = lwd, axes = axes, legend = legend,
-                units = units, ...)
+                border = border, lty = lty, lwd = lwd, axes = axes, 
+                legend = legend, units = units, ...)
   
   return(invisible())
 }
@@ -124,8 +136,9 @@ plot.osmose.abundance = function(x, species = NULL, speciesNames = NULL,
                                  initialYear = NULL, ts = TRUE, type = 1, 
                                  replicates = TRUE, nrep = 3, freq = 12, 
                                  horizontal = FALSE, conf = 0.95, factor = 1e-3, 
-                                 xlim = NULL, ylim = NULL, col = NULL, alpha = 1,
-                                 lty = 1, lwd = 1, axes = TRUE, legend = TRUE,
+                                 xlim = NULL, ylim = NULL, col = NULL, 
+                                 alpha = NULL, border = NA, lty = 1, lwd = 1, 
+                                 axes = TRUE,  legend = TRUE, 
                                  units = "individuals", ...){
   
   # Run the plot
@@ -135,8 +148,8 @@ plot.osmose.abundance = function(x, species = NULL, speciesNames = NULL,
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
-                lty = lty, lwd = lwd, axes = axes, legend = legend,
-                units = units, ...)
+                border = border, lty = lty, lwd = lwd, axes = axes, 
+                legend = legend, units = units, ...)
   
   return(invisible())
 }
@@ -148,9 +161,9 @@ plot.osmose.yield = function(x, species = NULL, speciesNames = NULL,
                              initialYear = NULL, ts = TRUE, type = 1, 
                              replicates = TRUE, nrep = 3, freq = 12, 
                              horizontal = FALSE, conf = 0.95, factor = 1e-3, 
-                             xlim = NULL, ylim = NULL, col = NULL, alpha = 1,
-                             lty = 1, lwd = 1, axes = TRUE, legend = TRUE, 
-                             units = "tonnes", ...){
+                             xlim = NULL, ylim = NULL, col = NULL, alpha = NULL, 
+                             border = NA, lty = 1, lwd = 1, axes = TRUE, 
+                             legend = TRUE, units = "tonnes", ...){
   
   # Run the plot
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
@@ -159,8 +172,8 @@ plot.osmose.yield = function(x, species = NULL, speciesNames = NULL,
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
-                lty = lty, lwd = lwd, axes = axes, legend = legend,
-                units = units, ...)
+                border = border, lty = lty, lwd = lwd, axes = axes, 
+                legend = legend, units = units, ...)
   
   return(invisible())
 }
@@ -172,9 +185,9 @@ plot.osmose.yieldN = function(x, species = NULL, speciesNames = NULL,
                               initialYear = NULL, ts = TRUE, type = 1, 
                               replicates = TRUE, nrep = 3, freq = 12, 
                               horizontal = FALSE, conf = 0.95, factor = 1e-3, 
-                              xlim = NULL, ylim = NULL, col = NULL, alpha = 1,
-                              lty = 1, lwd = 1, axes = TRUE, legend = TRUE, 
-                              units = "individuals", ...){
+                              xlim = NULL, ylim = NULL, col = NULL, alpha = NULL, 
+                              border = NA, lty = 1, lwd = 1, axes = TRUE, 
+                              legend = TRUE, units = "individuals", ...){
   
   # Run the plot
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
@@ -183,8 +196,8 @@ plot.osmose.yieldN = function(x, species = NULL, speciesNames = NULL,
                 replicates = replicates, nrep = nrep, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
-                lty = lty, lwd = lwd, axes = axes, legend = legend,
-                units = units, ...)
+                border = border, lty = lty, lwd = lwd, axes = axes, 
+                legend = legend, units = units, ...)
   
   return(invisible())
 }

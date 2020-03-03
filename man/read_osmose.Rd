@@ -24,12 +24,12 @@ read_osmose(
 \item{species.names}{Display names for species, overwrite the species names
 provided to the OSMOSE model. Used for plots and summaries.}
 
-\item{...}{Additional arguments}
+\item{...}{Additional arguments.}
 
-\item{input}{Path to a main osmose configuration file.}
+\item{input}{Path to a main OSMOSE configuration file.}
 
-\item{absolute}{Whether the path is absolute (TRUE) or relative (FALSE). Only used if
-input is not NULL}
+\item{absolute}{Whether the path is absolute (\code{TRUE}) or relative 
+(\code{FALSE}). Only used if input is not NULL.}
 }
 \description{
 This function create object of class \code{osmose} with the 

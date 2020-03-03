@@ -28,7 +28,8 @@
   xlim = NULL,
   ylim = NULL,
   col = NULL,
-  alpha = 1,
+  alpha = NULL,
+  border = NULL,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -55,7 +56,8 @@
   xlim = NULL,
   ylim = NULL,
   col = NULL,
-  alpha = 1,
+  alpha = NULL,
+  border = NA,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -82,7 +84,8 @@
   xlim = NULL,
   ylim = NULL,
   col = NULL,
-  alpha = 1,
+  alpha = NULL,
+  border = NA,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -109,7 +112,8 @@
   xlim = NULL,
   ylim = NULL,
   col = NULL,
-  alpha = 1,
+  alpha = NULL,
+  border = NA,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -178,9 +182,12 @@ ranges.}
 \item{col}{A vector with the color names for the plots. By default 
 \code{col = NULL} and the colors will be chosen by the function.}
 
-\item{alpha}{factor modifying the opacity alpha (typically in [0,1], by 
-default 1) given to confidence interval shadow (check 
-\code{\link{adjustcolor}}).}
+\item{alpha}{factor modifying the opacity alpha given to confidence interval 
+(CI) polygons (check \code{\link{adjustcolor}}). By default (\code{NULL}), 
+its value will depend on the plot type. See Details.}
+
+\item{border}{the color to draw the border of CI polygons, bar plots and 
+box plots. The default value (\code{NULL}) will depend on the type, see Details.}
 
 \item{lty}{The line type (check \code{\link{par}}).}
 
@@ -236,6 +243,15 @@ For \code{ts = FALSE}, user will select within:
  species, including interval confidence bars.}
  \item{\code{type = 2}: }{Generates a boxplot of the selected variable by 
  species.}
+}
+
+Both \code{alpha} and \code{border} will controls the opacity and the color
+of border, respectively, for polygons, bar plots and box plots. So depending
+on the \code{ts}-\code{type}, they will have different default values: 
+\itemize{
+ \item{\code{alpha = 0.3} & \code{border = NA} for }{\code{TS = TRUE} with 
+ \code{type = 1 or 2}.}
+ \item{\code{alpha = 1} & \code{border = TRUE} for }{Everything else.}
 }
 
 \code{species} argument follows the indexation way of java: starting in zero,

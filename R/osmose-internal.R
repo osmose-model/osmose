@@ -43,22 +43,28 @@
   if(!is.character(x)) return(x)
   
   att = attributes(x)
-  x = stringr::str_trim(strsplit(x, split=",")[[1]])  # because strsplit returns a list
+  x = stringr::str_trim(string = strsplit(x = x, split = ",")[[1]])
+  
   if(identical(tolower(x), "null")) return(NULL) 
+  
   asNum = suppressWarnings(as.numeric(x))
   isNumeric = !all(is.na(asNum))
-  x[x=="na"] = NA
+  x[x == "na"] = NA
   out = if(isNumeric) asNum else x  
+  
   attributes(out) = NULL
   if(keep.att) attributes(out) = att
+  
   return(out) 
 }
 
 # get a parameter from a name chain
 .getPar = function(x, ..., keep.att=FALSE) {
-  # chain = tolower(unlist(list(...)))
+  
   chain = unlist(list(...))
-  if(is.list(x)) x=do.call(.getPar, list(x=x[[chain[1]]], chain[-1]))
+  if(is.list(x)) 
+    x = do.call(.getPar, list(x = x[[chain[1]]], chain[-1]))
+  
   return(.guessType(x, keep.att = keep.att))
 }
 
@@ -73,35 +79,38 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
 }
 
 # Get species names. It matches the spX regular expression.
-#
-# @param x Named data
 .getSpecies = function(x)  {
   x = names(x)
-  x = grep(pattern="^sp[0-9]*$", x=x, value=TRUE)
+  x = grep(pattern = "^sp[0-9]*$", x = x, value = TRUE)
+  
   return(x)
 }
 
-.getBoolean = function(x, default=NULL) {
+.getBoolean = function(x, default = NULL){
   if(is.null(x)) return(default)
-  if(length(x)>1) stop("More than one value provided.")
+  
+  if(length(x) > 1) stop("More than one value provided.")
+  
   if(is.logical(x)) return(x)
+  
   x = tolower(x)
-  if(x=="true") return(TRUE)
-  if(x=="false") return(FALSE)
+  if(x == "true") return(TRUE)
+  if(x == "false") return(FALSE)
+  
   stop(sprintf("Invalid input, %s is not boolean.", x))
 }
 
-.readInputCsv = function(file) {
-  sep = .guessSeparator(readLines(file, n=1))
-  out = read.csv(file, sep=sep, row.names=1)
+.readInputCsv = function(file, ...){
+  sep = .guessSeparator(readLines(file, n = 1))
+  out = read.csv(file, sep = sep, ...)
 }
 
-.getFileAsVector = function(file) {
+.getFileAsVector = function(file){
   if(is.null(file)) return(NULL)
   path = attr(file, which="path")
   if(!is.null(path)) file=file.path(path, file)
   if(!file.exists(file)) stop(sprintf("File %s not found", file))
-  out = .readInputCsv(file=file)
+  out = .readInputCsv(file = file, row.names = 1)
   out = as.numeric(as.matrix(out))
   return(out)
 }
@@ -133,29 +142,18 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
   strsplit(dir(path=path, pattern="_biomass_")[1],"_")[[1]][1]
 }
 
-#' Read Osmose CSV files
-#'
-#' @param file File name
-#' @param sep Column separator 
-#' @param skip Number of line to skip
-#' @param row.names Index of the row names column
-#' @param na.strings List of NaN strings
-#' @param rm  ???? Not used
-#' @param ... Extra arguments passed to the method.
-#'
-#' @return A data frame
-.readOsmoseCsv = function(file, sep=",", skip=1, row.names=1, 
-                          na.strings=c("NA", "NaN"), rm=1, ...) {
-  out = read.csv(file=file, sep=sep, skip=skip, 
-                 row.names=row.names, na.strings=na.strings, check.names = FALSE, ...)
-  #   mat = as.matrix(out)
-  #   out[is.na(mat) & !is.nan(mat)] = Inf
-  #   out[is.na(mat) & is.nan(mat)] = NA
+# Read Osmose CSV files
+.readOsmoseCsv = function(file, sep = ",", skip = 1, row.names = 1, 
+                          na.strings = c("NA", "NaN"), ...) {
+  out = read.csv(file = file, sep = sep, skip = skip, 
+                 row.names = row.names, na.strings = na.strings, 
+                 check.names = FALSE, ...)
+  
   return(out)
 }
 
-.readMortalityCsv = function(file, sep=",", skip=1, row.names=1, 
-                             na.strings=c("NA", "NaN"), rm=1, ...) {
+.readMortalityCsv = function(file, sep = ",", skip = 1, row.names = 1, 
+                             na.strings = c("NA", "NaN"), ...) {
   
   x = readLines(file)
   .subSep = function(x) gsub(";", ",", x)

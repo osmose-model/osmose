@@ -91,13 +91,13 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #' @description This function create object of class \code{osmose} with the 
 #' outputs from OSMOSE in the \code{path} folder.  
 #' @param path Path to the directory containing OSMOSE outputs. 
-#' @param input Path to a main osmose configuration file.
+#' @param input Path to a main OSMOSE configuration file.
 #' @param version OSMOSE version used to run the model. 
 #' @param species.names Display names for species, overwrite the species names
 #' provided to the OSMOSE model. Used for plots and summaries.
-#' @param absolute Whether the path is absolute (TRUE) or relative (FALSE). Only used if
-#' input is not NULL
-#' @param ... Additional arguments
+#' @param absolute Whether the path is absolute (\code{TRUE}) or relative 
+#' (\code{FALSE}). Only used if input is not NULL.
+#' @param ... Additional arguments.
 #' @details A list of class \code{osmose} is created, individual elements can be
 #' extracted using the function \code{get_var}.
 #' @author Ricardo Oliveros-Ramos
@@ -176,9 +176,9 @@ get_var = function(object, what, how, ...){
 }
 
 
-#' Write data in osmose format
+#' @title Write data in osmose format
 #'
-#' Write an array or dataframe in the Osmose format.
+#' @description Write an array or dataframe in the Osmose format.
 #' The separator is ";", there are no quotes and a blank column is
 #' added for the row names column.
 #'

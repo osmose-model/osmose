@@ -85,10 +85,12 @@ viewDataList = function(input, path=NULL) {
   return(ValuesDef)
 }
 
-.guessSeparator = function(Line) {
-  SEPARATORS = c(equal="=", semicolon=";", coma=",", colon=":", tab="\t")
-  guess = which.min(nchar(lapply(str_split(Line,SEPARATORS), "[", i=1)))
-  separator  = SEPARATORS[guess]
+.guessSeparator = function(Line){
+  SEPARATORS = c(equal = "=", semicolon = ";", 
+                 coma = ",", colon = ":", tab = "\t")
+  guess = which.min(nchar(lapply(str_split(Line,SEPARATORS), "[", i = 1)))
+  separator = SEPARATORS[guess]
+  
   return(separator)
 }
 
@@ -216,8 +218,11 @@ getPredationData = function(x, object, ...) {
   # Accessibility
   accesibilityFile = file.path(attr(x = x$accessibility$file, which = "path"), 
                                x$accessibility$file)
-  accessibility = readCSVGuessing(file = accesibilityFile, header = TRUE, 
-                                  quote = "\"", dec = ".", fill = TRUE, comment.char = "")
+  
+  sep <- .guessSeparator(readLines(accesibilityFile, n = 1))
+  
+  accessibility = read.csv(file = accesibilityFile, header = TRUE, sep = sep, 
+                           quote = "\"", dec = ".", fill = TRUE, comment.char = "")
   accessibility = list(data = accessibility,
                        stageStructure = as.character(x$accessibility$stage$structure),
                        stageThreshold = unlist(x$accessibility$stage$threshold))

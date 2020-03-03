@@ -39,12 +39,13 @@ plotReproductionType1 = function(x, times, xlim, ylim, speciesNames, axes,
   return(invisible())
 }
 
-plotReproductionType2 = function(x, ylim, speciesNames, axes, legend, col, ...){
+plotReproductionType2 = function(x, ylim, speciesNames, axes, border, legend, 
+                                 col, ...){
   
   if(is.null(speciesNames)) speciesNames = colnames(x)[2]
   
   xValues = as.numeric(barplot(height = x[,2], axes = FALSE, ylim = ylim, 
-                               col = col, ...))
+                               col = col, border = border, ...))
   
   if(isTRUE(axes)){
     las = list(...)$las
@@ -80,7 +81,7 @@ plotReproductionType2 = function(x, ylim, speciesNames, axes, legend, col, ...){
 # Growth plot functions ---------------------------------------------------
 
 plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim, 
-                           legend, axes, col, ...) {
+                           legend, axes, border, col, ...) {
   
   # Get parameters to display Von Bertalanffy growth equation
   params = getGrowthParameters(x = x, species = species)
@@ -102,6 +103,13 @@ plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim,
   
   ylab = list(...)[["ylab"]]
   ylab = ifelse(is.null(ylab), "Length (cm)", ylab)
+  
+  # To keep the plot params as the beginning
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  # Remove initial and final spaces at axis
+  par(xaxs = "i", yaxs = "i")
   
   # Draw an empty canvas
   plot(1, 1, type = "n", axes = FALSE, xlab = xlab, ylab = ylab, 
@@ -131,10 +139,10 @@ plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim,
   if(is.element("segments", tolower(addElements))){
     segments(x0 = usr[1], x1 = ageInv, 
              y0 = lengthInv, y1 = lengthInv, 
-             col = "red", ...)
+             col = "red", lty = "dashed")
     segments(x0 = ageInv, x1 = ageInv, 
              y0 = usr[3], y1 = lengthInv, 
-             col = "red", ...)
+             col = "red", lty = "dashed")
   }
   
   # Add points
@@ -146,7 +154,7 @@ plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim,
   if(is.element("polygon", tolower(addElements))){
     polygon(x = c(usr[1], rep(params$thr, 2), usr[1]),
             y = rep(usr[3:4], each = 2),
-            col = adjustcolor(col = col, alpha.f = 0.3), border = NA)
+            col = adjustcolor(col = col, alpha.f = 0.3), border = border)
   } 
   
   # Add text
@@ -231,8 +239,8 @@ osmoseGrowthInv = function(length, params) {
 
 # Predation plot functions ------------------------------------------------
 
-plotPredationType1 = function(x, species, speciesNames, addElements, axes, 
-                              xlim, ylim, col, legend, ...){
+plotPredationType1 = function(x, species, speciesNames, addElements, axes,
+                              border, xlim, ylim, col, legend, ...){
   
   if(is.null(species)) stop("'species' argument must not be NULL.")
   
@@ -241,7 +249,7 @@ plotPredationType1 = function(x, species, speciesNames, addElements, axes,
   
   #xlim and ylim
   if(is.null(xlim)) xlim = c(0, tail(x = params$threshold, n = 1))
-  if(is.null(ylim)) ylim = c(0, max(params$threshold)/min(params$sizeRatioMax))
+  if(is.null(ylim)) ylim = c(0, max(params$threshold)/min(params$sizeRatioMax)*1.1)
   
   # Draw an empty canvas
   xlab = list(...)[["xlab"]]
@@ -250,20 +258,30 @@ plotPredationType1 = function(x, species, speciesNames, addElements, axes,
   ylab = list(...)[["ylab"]]
   ylab = ifelse(is.null(ylab), "Prey size", ylab)
   
-  plot(1, 1, type = "n", axes = FALSE, xlab = xlab, ylab = ylab, 
-       xlim = xlim, ylim = ylim)
-  
+  # Define default value for cex
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 1, cex)
   
   usr = par(no.readonly = TRUE)$usr
+  
+  # To keep the plot params as the beginning
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  # Remove initial and final spaces at axis
+  par(xaxs = "i", yaxs = "i")
+  
+  # Draw an empty canvas
+  plot(1, 1, type = "n", axes = FALSE, xlab = xlab, ylab = ylab, 
+       xlim = xlim, ylim = ylim)
   
   for(i in seq_along(params$threshold)){
     xValues = params$threshold[c(i, rep(i + 1, 2), i)]
     yValues = xValues/rep(x = c(params$sizeRatioMin[i], params$sizeRatioMax[i]), 
                           each = 2)
     
-    polygon(x = xValues, yValues, col = col, ...)
+    # Draw predation size ratio polygon
+    polygon(x = xValues, yValues, col = col, border = border, ...)
     
     if(!is.element(i, c(1, length(params$threshold)))){
       

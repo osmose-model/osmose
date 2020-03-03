@@ -22,6 +22,7 @@
   ylim = NULL,
   col = "black",
   axes = TRUE,
+  border = NA,
   legend = TRUE,
   ...
 )
@@ -34,6 +35,7 @@
   speciesNames = NULL,
   addElements = c("segments", "points", "polygon", "text"),
   axes = TRUE,
+  border = NA,
   xlim = NULL,
   ylim = NULL,
   legend = TRUE,
@@ -48,6 +50,7 @@
   speciesNames = NULL,
   addElements = c("segments", "points", "text"),
   axes = TRUE,
+  border = NA,
   xlim = NULL,
   ylim = NULL,
   col = "gray70",
@@ -98,6 +101,10 @@ ranges.}
 \item{axes}{a \code{logical} value indicating whether both axes should be 
 drawn on the plot.}
 
+\item{border}{the color to draw the border of CI polygons, bar plots and 
+box plots. By default, \code{border = NA}, which means that no border will be 
+drawn.}
+
 \item{legend}{\code{logical} do you want to show a legend of species? (valid
 only for those plot types TS-2)}
 
@@ -121,8 +128,8 @@ by \code{what}. Thereby,
 \itemize{
 \item{\code{what = predation}: }{Generates a plot of size range as shadows
 for a selected species .}
- \item{\code{what = reproduction}: }{Generates a single plots of seasonality of 
- reproduction whether as lines (\code{type = 1}) or bars (\code{type = 2})}
+ \item{\code{what = reproduction}: }{Generates a single plots of seasonality 
+ of reproduction whether as lines (\code{type = 1}) or bars (\code{type = 2})}
  \item{\code{what = species}: }{Generates a plot of growth curve following the
  VB parameters defined on configuration files (\code{type = 1}).}
 }
@@ -139,11 +146,11 @@ can modify arguments like: \code{cex},  \code{cex.axis}, \code{border}
 }
 \note{
 Ellipsis (\code{...}) must be used carefully, since it will pass the
-arguments to diferent generic plot funcions. For instance, \code{type = 2} of
-\code{osmose.config.reproduction} method will use \code{...} to pass arguments
-to \link{barplot}, so some arguments like \code{cex} may match with many 
-formal arguments (e.g. \code{cex.axis} and \code{cex.names}), so it may cause
-errors.
+arguments to different generic plot funcions. For instance, \code{type = 2} 
+of \code{osmose.config.reproduction} method will use \code{...} to pass 
+arguments to \link{barplot}, so some arguments like \code{cex} may match with 
+many formal arguments (e.g. \code{cex.axis} and \code{cex.names}), so it may 
+cause errors.
 }
 \author{
 Criscely Lujan Paredes

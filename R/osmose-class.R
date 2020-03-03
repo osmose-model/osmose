@@ -76,42 +76,50 @@ get_var.osmose = function(object, what, how = c("matrix", "list"),
 }
 
 
-#' Print informations about Osmose outputs
+#' Print information for an \code{osmose} object
 #'
-#' @param x Osmose outputs (see the \code{\link{read_osmose}} function)
+#' @param x \code{osmose} class object (see the \code{\link{read_osmose}} 
+#' function).
 #' @param ... Additional arguments for \code{print}.
+#' 
 #' @method print osmose
-#'
 #' @export
 print.osmose = function(x, ...) {
-  cat(paste0("OSMOSE v.", x$model$version,"\n"))
-  cat("Model", sQuote(x$model$model),"\n")
-  cat(x$model$sp, " species modeled (",x$model$simus,
-      " simulations):\n", sep="")
-  cat(paste(x$species, collapse=", "),".\n", sep="")
+  cat(paste0("OSMOSE v.", x$model$version, "\n"))
+  cat("Model", sQuote(x$model$model),"\n\n")
+  cat(sprintf("%s species modeled (%s simulations):", x$model$nsp, x$model$simus))
+  cat(sprintf("\n\t[sp%s] %s", seq(0, x$model$nsp - 1), x$species), "\n")
 }
 
-#' Summarizes informations about Osmose outputs
+#' @title \code{osmose} object summaries
 #'
-#' @param object Osmose outputs (see the \code{\link{read_osmose}} function)
+#' @param object \code{osmose} class object (see the \code{\link{read_osmose}} 
+#' function).
 #' @param ... Additional arguments for \code{summary}.
+#' @param digits \code{integer}, used for number formatting (by default, 
+#' \code{1L}). Check \link{summary.default}.
 #' 
 #' @method summary osmose
 #' @export
-summary.osmose = function(object, ...) {
+summary.osmose = function(object, ..., digits = 1L) {
   
-  output = object$model
+  # Catch model and species info from object
+  output = list(model = object$model)
   output$species = object$species
-  biomass = apply(object$biomass, 2, mean, na.rm=TRUE)
-  yieldN = apply(object$yieldN, 2, mean, na.rm=TRUE)
-  resumen = data.frame(biomass=biomass,
-                       yield = yieldN)
-  rownames(resumen) = object$species
+  
+  # Get biomass and yieldN info
+  biomass = apply(object$biomass, 2, mean, na.rm = TRUE)
+  yieldN = apply(object$yieldN, 2, mean, na.rm = TRUE)
+  
+  # Create a data frame with biomass and yield
+  resumen = data.frame(biomass = format(x = round(x = biomass, digits = digits)),
+                       yieldN  = format(x = round(x = yieldN, digits = digits)),
+                       row.names = object$species)
   output$resumen = resumen
   
+  # Generate output
   class(output) = "summary.osmose"
   return(output)
-  
 }
 
 #' Print the summary informations about Osmose outputs
@@ -122,28 +130,37 @@ summary.osmose = function(object, ...) {
 #'
 #' @export
 print.summary.osmose = function(x, ...) {
-  cat(paste0("OSMOSE v.", x$version,"\n"))
-  cat("Model", sQuote(x$model),"\n")
-  cat("Species modeled:\n")
-  cat(paste(x$species, collapse=", "),".\n", sep="")
-  cat("Main indicators:\n")
+  
+  # Replicate print(osmose)
+  cat(paste0("OSMOSE v.", x$model$version, "\n"))
+  cat("Model", sQuote(x$model$model),"\n\n")
+  cat(sprintf("%s species modeled (%s simulations):", x$model$nsp, x$model$simus))
+  cat(sprintf("\n\t[sp%s] %s", seq(0, x$model$nsp - 1), x$species), "\n")
+  
+  # Include extra info
+  cat("\nMain indicators:\n")
   print(x$resumen)
 }
 
-#' @title Report method for osmose objects
-#' @description Export a report of osmose objects.
+#' @title Report method for \code{osmose} objects
+#' @description Build and export a report of \code{osmose} objects using
+#' R markdown.
 #'
 #' @param x Object of \code{osmose} class.
-#' @param format The R Markdown output format to convert to (check \link[rmarkdown]{render}).
+#' @param format The R Markdown output format to convert to (check 
+#' \link[rmarkdown]{render}).
 #' @param output The output directory for the rendered the output file.
-#' @param tangle Boolean; whether to tangle the R code from the input file (check \link[rmarkdown]{render}).
-#' @param open Do you want to open the output file at the end? (Only for Windows envir).
+#' @param tangle Boolean; whether to tangle the R code from the input file 
+#' (check \link[rmarkdown]{render}).
+#' @param open Do you want to open the output file at the end? (only useful for 
+#' MS Windows environment).
 #' @param ... Extra arguments pased to \link[rmarkdown]{render}.
 #'
 #' @method report osmose
 #' 
 #' @export
-report.osmose = function(x, format = "pdf_document", output = NULL, tangle = FALSE, open = TRUE, ...) {
+report.osmose = function(x, format = "pdf_document", output = NULL, 
+                         tangle = FALSE, open = TRUE, ...) {
   
   if(is.null(output)) output = getwd()
   
@@ -158,7 +175,8 @@ report.osmose = function(x, format = "pdf_document", output = NULL, tangle = FAL
   }
   
   outputFile = paste0(outputName, "_output.pdf")
-  render(input = skeleton, output_format = format, output_file = outputFile, output_dir = output, encoding = "latin1", )
+  render(input = skeleton, output_format = format, output_file = outputFile, 
+         output_dir = output, encoding = "latin1", )
   
   if(Sys.info()['sysname'] == "Windows" && isTRUE(open)){
     shell.exec(file = file.path(output, outputFile, fsep = "\\"))

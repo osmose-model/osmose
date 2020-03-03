@@ -34,6 +34,9 @@
 #' \code{col = NULL} and the colors will be chosen by the function.  
 #' @param axes a \code{logical} value indicating whether both axes should be 
 #' drawn on the plot. 
+#' @param border the color to draw the border of CI polygons, bar plots and 
+#' box plots. By default, \code{border = NA}, which means that no border will be 
+#' drawn.
 #' @param legend \code{logical} do you want to show a legend of species? (valid
 #' only for those plot types TS-2)
 #' @param addElements A \code{character} vector indicating extra graphical 
@@ -48,8 +51,8 @@
 #' \itemize{
 #' \item{\code{what = predation}: }{Generates a plot of size range as shadows
 #' for a selected species .}
-#'  \item{\code{what = reproduction}: }{Generates a single plots of seasonality of 
-#'  reproduction whether as lines (\code{type = 1}) or bars (\code{type = 2})}
+#'  \item{\code{what = reproduction}: }{Generates a single plots of seasonality 
+#'  of reproduction whether as lines (\code{type = 1}) or bars (\code{type = 2})}
 #'  \item{\code{what = species}: }{Generates a plot of growth curve following the
 #'  VB parameters defined on configuration files (\code{type = 1}).}
 #' }
@@ -65,11 +68,11 @@
 #' (useful for \code{polygon} and \code{barplot}s), etc.
 #' 
 #' @note Ellipsis (\code{...}) must be used carefully, since it will pass the
-#' arguments to diferent generic plot funcions. For instance, \code{type = 2} of
-#' \code{osmose.config.reproduction} method will use \code{...} to pass arguments
-#' to \link{barplot}, so some arguments like \code{cex} may match with many 
-#' formal arguments (e.g. \code{cex.axis} and \code{cex.names}), so it may cause
-#' errors.
+#' arguments to different generic plot funcions. For instance, \code{type = 2} 
+#' of \code{osmose.config.reproduction} method will use \code{...} to pass 
+#' arguments to \link{barplot}, so some arguments like \code{cex} may match with 
+#' many formal arguments (e.g. \code{cex.axis} and \code{cex.names}), so it may 
+#' cause errors.
 #' 
 #' @author Criscely Lujan Paredes
 #' 
@@ -80,7 +83,7 @@ plot.osmose.config.reproduction = function(x, type = 1, species = 0,
                                            end = NULL, initialYear = NULL,
                                            freq = 12, xlim = NULL, ylim = NULL,
                                            col = "black", axes = TRUE, 
-                                           legend = TRUE, ...){
+                                           border = NA, legend = TRUE, ...){
   
   # species indexation
   if(is.null(species) || is.na(species)) stop("'species' argument must be specified.")
@@ -110,14 +113,16 @@ plot.osmose.config.reproduction = function(x, type = 1, species = 0,
   # Define default values for xlim and ylim
   if(is.null(xlim)) xlim = range(times)
   if(is.null(ylim)) ylim = c(0, max(x))
-  # ylim = if(is.null(ylim)) c(0, range(x[2])[2]*1.2)
   
   switch(type,
-         "1" = plotReproductionType1(x = x, times = times, xlim = xlim, ylim = ylim,
+         "1" = plotReproductionType1(x = x, times = times, 
+                                     xlim = xlim, ylim = ylim,
                                      speciesNames = speciesNames, axes = axes,
                                      legend = legend, col = col, ...),
-         "2" = plotReproductionType2(x = x, ylim = ylim, speciesNames = speciesNames,
-                                     axes = axes, legend = legend, col = col, ...),
+         "2" = plotReproductionType2(x = x, ylim = ylim, 
+                                     speciesNames = speciesNames,
+                                     axes = axes, border = border, 
+                                     legend = legend, col = col, ...),
          stop("Not defined plot for 'type = ", type, "'."))
   
   return(invisible())
@@ -127,9 +132,11 @@ plot.osmose.config.reproduction = function(x, type = 1, species = 0,
 #' @rdname plot.osmose.config
 #' @method plot osmose.config.species
 #' @export
-plot.osmose.config.species = function(x, n = 100, type = 1, species = 0, speciesNames = NULL, 
+plot.osmose.config.species = function(x, n = 100, type = 1, species = 0, 
+                                      speciesNames = NULL, 
                                       addElements = c("segments", "points", "polygon", "text"),
-                                      axes = TRUE, xlim = NULL, ylim = NULL, 
+                                      axes = TRUE, border = NA, 
+                                      xlim = NULL, ylim = NULL, 
                                       legend = TRUE, col = "black", ...){
   
   if(is.null(species) || is.na(species)) stop("'species' argument must be specified.")
@@ -140,8 +147,8 @@ plot.osmose.config.species = function(x, n = 100, type = 1, species = 0, species
          "1" = plotGrowthType1(x = x, n = n, species = species, 
                                speciesNames = speciesNames, 
                                addElements = addElements, axes = axes,
-                               xlim = xlim, ylim = ylim, legend = legend,
-                               col = col, ...),
+                               border = border, xlim = xlim, ylim = ylim, 
+                               legend = legend, col = col, ...),
          stop("Not defined plot for 'type = ", type, "'."))
   
   return(invisible())
@@ -151,9 +158,11 @@ plot.osmose.config.species = function(x, n = 100, type = 1, species = 0, species
 #' @rdname plot.osmose.config
 #' @method plot osmose.config.predation
 #' @export
-plot.osmose.config.predation = function(x, type = 1, species = 0, speciesNames = NULL, 
+plot.osmose.config.predation = function(x, type = 1, species = 0, 
+                                        speciesNames = NULL, 
                                         addElements = c("segments", "points", "text"),
-                                        axes = TRUE, xlim = NULL, ylim = NULL, col = "gray70", 
+                                        axes = TRUE, border = NA, 
+                                        xlim = NULL, ylim = NULL, col = "gray70", 
                                         legend = TRUE, ...){
   
   if(is.null(species) || is.na(species)) stop("'species' argument must be specified.")
@@ -161,9 +170,10 @@ plot.osmose.config.predation = function(x, type = 1, species = 0, speciesNames =
   if(min(species) < 0 || max(species) > (length(x$speciesNames) - 1)) stop("Incorrect value for 'species'.")
   
   switch(type,
-         "1" = plotPredationType1(x = x, species = species, speciesNames = speciesNames, 
+         "1" = plotPredationType1(x = x, species = species, 
+                                  speciesNames = speciesNames, 
                                   addElements = addElements, axes = axes, 
-                                  xlim = xlim, ylim = ylim, 
+                                  border = border, xlim = xlim, ylim = ylim, 
                                   col = col, legend = legend, ...),
          stop("Not defined plot for 'type = ", type, "'."))
   

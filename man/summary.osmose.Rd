@@ -2,15 +2,19 @@
 % Please edit documentation in R/osmose-class.R
 \name{summary.osmose}
 \alias{summary.osmose}
-\title{Summarizes informations about Osmose outputs}
+\title{\code{osmose} object summaries}
 \usage{
-\method{summary}{osmose}(object, ...)
+\method{summary}{osmose}(object, ..., digits = 1L)
 }
 \arguments{
-\item{object}{Osmose outputs (see the \code{\link{read_osmose}} function)}
+\item{object}{\code{osmose} class object (see the \code{\link{read_osmose}} 
+function).}
 
 \item{...}{Additional arguments for \code{summary}.}
+
+\item{digits}{\code{integer}, used for number formatting (by default, 
+\code{1L}). Check \link{summary.default}.}
 }
 \description{
-Summarizes informations about Osmose outputs
+\code{osmose} object summaries
 }
