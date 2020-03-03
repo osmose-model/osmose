@@ -2,7 +2,7 @@
 # Internal plot functions -------------------------------------------------
 
 osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts, 
-                         type, replicates, nrep, freq, horizontal, conf, factor, 
+                         type, replicates, freq, horizontal, conf, factor, 
                          xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
                          units, ci = TRUE, ...){
   
@@ -38,6 +38,10 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
     x = x[ , species + 1, , drop = FALSE]
   }
   
+  if(!is.null(speciesNames) && length(speciesNames) != ncol(x)){
+    stop("'speciesNames' has an incorrect length.")
+  }
+  
   # Check start and end args
   if(is.null(start)) start = 1
   if(is.null(end)) end = dim(x)[1]
@@ -57,13 +61,13 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   if(isTRUE(ts)){
     
     switch(type,
-           "1" = plot2DTsType1(x = x, replicates = replicates, nrep = nrep, 
+           "1" = plot2DTsType1(x = x, replicates = replicates, 
                                ci = ci, times = times, xlim = xlim, ylim = ylim,
                                conf = conf, factor = factor, col = col, 
                                alpha = alpha, speciesNames = speciesNames, 
                                lty = lty, lwd = lwd, axes = axes, units = units,
                                border = border, ...),
-           "2" = plot2DTsType2(x = x, replicates = replicates, nrep = nrep, 
+           "2" = plot2DTsType2(x = x, replicates = replicates, 
                                ci = ci, times = times, xlim = xlim, ylim = ylim,
                                conf = conf, factor = factor, col = col, 
                                alpha = alpha, speciesNames = speciesNames, 
@@ -75,7 +79,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                legend = legend, speciesNames = speciesNames, 
                                axes = axes, units = units, border = border, ...),
            "4" = plot2DTsType4(x = x, times = times, xlim = xlim, ylim = ylim, 
-                               factor = factor, lty = lty, col = col, 
+                               factor = factor, lty = lty, lwd = lwd, col = col, 
                                alpha = alpha, legend = legend, 
                                speciesNames = speciesNames, axes = axes, 
                                units = units, ...),
@@ -86,7 +90,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
            "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
                              factor = factor, speciesNames = speciesNames, 
                              xlim = xlim, ylim = ylim, axes = axes, units = units,
-                             border = border, ...),
+                             border = border, conf = conf, ...),
            "2" = plot2DType2(x, horizontal = horizontal, col = col, 
                              factor = factor, speciesNames = speciesNames, 
                              xlim = xlim, ylim = ylim, axes = axes, units = units, 
@@ -104,7 +108,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
 
 # Plot types with TS = TRUE -----------------------------------------------
 
-plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf, 
+plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf, 
                          factor, col, alpha, speciesNames, lty, lwd, axes, 
                          units, border, ...){
   
@@ -159,7 +163,7 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
     plot.window(xlim = xlim, ylim = ylim)
     
     # Draw the plot
-    plotCI(x = times, y = xsp, replicates = replicates, ci = ci, nrep = nrep, 
+    plotCI(x = times, y = xsp, replicates = replicates, ci = ci,  
            prob = 1 - conf, col = col[i], alpha = alpha, lty = lty[i], 
            lwd = lwd[i], border = border, ...)
     
@@ -208,8 +212,8 @@ plot2DTsType1 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   return(invisible())
 }
 
-plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf, 
-                         factor, col, alpha, speciesNames, lty, lwd, axes, cex, 
+plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf, 
+                         factor, col, alpha, speciesNames, lty, lwd, axes,  
                          legend, units, border, ...) {
   
   # Define name of species
@@ -249,11 +253,12 @@ plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
     xsp = factor*x[, sp, ,drop = FALSE]
     
     # Draw the plot
-    plotCI(x = times, y = xsp, replicates = replicates, ci = ci, nrep = nrep, 
+    plotCI(x = times, y = xsp, replicates = replicates, ci = ci, 
            prob = 1 - conf, col = col[sp], alpha = alpha, lty = lty[sp], 
            lwd = lwd[sp], border = border, ...)
   }
   
+  # Add axes
   if(isTRUE(axes)){
     las = list(...)$las
     las = ifelse(is.null(las), 1, las)
@@ -275,13 +280,13 @@ plot2DTsType2 = function(x, replicates, nrep, ci, times, xlim, ylim, conf,
   
   if(isTRUE(legend)){
     legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, 
-           lty = lty)
+           lty = lty, lwd = lwd)
   }
   
   return(invisible())
 }
 
-plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha, lty, lwd, border, 
+plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border, 
                   ...){
   
   if(dim(y)[3] == 1){
@@ -391,7 +396,7 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
 }
 
 #plot for only one species using bars
-plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha, 
+plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, lwd, col, alpha, 
                          speciesNames, legend, axes, units, ...){
   
   if(is.null(speciesNames)){
@@ -415,7 +420,7 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha,
   if(is.null(ylim)) ylim = range(x)
   
   plot(x = times, y = x, col = adjustcolor(col = col, alpha.f = alpha), 
-       lty = lty, type = "h", axes = FALSE, xlim = xlim, ylim = ylim, ...)
+       lty = lty, lwd = lwd, type = "h", axes = FALSE, xlim = xlim, ylim = ylim, ...)
   
   if(isTRUE(axes)){
     las = list(...)$las
@@ -438,7 +443,7 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha,
   
   if(isTRUE(legend)){
     legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, 
-           lty = lty)
+           lty = lty, lwd = lwd)
   }
   
   return(invisible())
@@ -448,7 +453,7 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, col, alpha,
 # Plot types with TS = FALSE ----------------------------------------------
 
 plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes, 
-                       xlim, ylim, units, border, ...){
+                       xlim, ylim, units, border, conf, ...){
   
   if(is.null(speciesNames)){
     speciesNames = toupper(colnames(x))
@@ -464,7 +469,7 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   
   if(isTRUE(ci)){
     barplotCI(x, horizontal = horizontal, speciesNames = speciesNames, 
-              col = col, factor = factor, axes = axes, 
+              col = col, factor = factor, axes = axes, conf = conf, 
               xlim = xlim, ylim = ylim, border = border, ...)
   }else{
     x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
@@ -492,19 +497,21 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   return(invisible())
 }  
 
-barplotCI = function(x, horizontal, speciesNames, col, factor, axes, 
+barplotCI = function(x, horizontal, speciesNames, col, factor, axes, conf, 
                      xlim, ylim, border, ...){
   
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
   
+  conf <- qnorm(conf/2 + 0.5)
+  
   if(isTRUE(horizontal)){
     if(is.null(xlim)){
-      xlim = c(0, max(y.mean) + 1.96*max(y.sd)/10)*1.1
+      xlim = c(0, max(y.mean) + conf*max(y.sd)/10)*1.1
     }
   }else{
     if(is.null(ylim)){
-      ylim = c(0, max(y.mean) + 1.96*max(y.sd)/10)*1.1
+      ylim = c(0, max(y.mean) + conf*max(y.sd)/10)*1.1
     }
   }
   
@@ -516,8 +523,8 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, axes,
   length  = ifelse(is.null(list(...)[["length"]]), 0.1, list(...)[["length"]])
   
   arrowLimits = list(x = as.numeric(barx),
-                     min = y.mean - 1.96*y.sd/10,
-                     max = y.mean + 1.96*y.sd/10)
+                     min = y.mean - conf*y.sd/10,
+                     max = y.mean + conf*y.sd/10)
   
   if(isTRUE(horizontal)){
     suppressWarnings(arrows(x0 = arrowLimits$min, y0 = arrowLimits$x, 
@@ -592,7 +599,7 @@ plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes,
     ylim = c(0, max(x)*1.1)
   }
   
-  boxplot(x, horiz = horizontal, names = speciesNames, col = col, 
+  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, 
           axes = axes, xlim = xlim, ylim = ylim, border = border, ...)
   
   legendFactor = -(log10(factor))

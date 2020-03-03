@@ -20,7 +20,6 @@
   end = NULL,
   initialYear = NULL,
   replicates = TRUE,
-  nrep = 3,
   freq = 12,
   horizontal = FALSE,
   conf = 0.95,
@@ -48,7 +47,6 @@
   ts = TRUE,
   type = 1,
   replicates = TRUE,
-  nrep = 3,
   freq = 12,
   horizontal = FALSE,
   conf = 0.95,
@@ -57,7 +55,7 @@
   ylim = NULL,
   col = NULL,
   alpha = NULL,
-  border = NA,
+  border = NULL,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -76,7 +74,6 @@
   ts = TRUE,
   type = 1,
   replicates = TRUE,
-  nrep = 3,
   freq = 12,
   horizontal = FALSE,
   conf = 0.95,
@@ -85,7 +82,7 @@
   ylim = NULL,
   col = NULL,
   alpha = NULL,
-  border = NA,
+  border = NULL,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -104,7 +101,6 @@
   ts = TRUE,
   type = 1,
   replicates = TRUE,
-  nrep = 3,
   freq = 12,
   horizontal = FALSE,
   conf = 0.95,
@@ -113,7 +109,7 @@
   ylim = NULL,
   col = NULL,
   alpha = NULL,
-  border = NA,
+  border = NULL,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -160,9 +156,6 @@ that is going to be used on the x axis for the plots.}
 \item{replicates}{\code{logical}. It controls to show whether the values in 
 each simulation (\code{TRUE}) or the median of the values along the time 
 (\code{FALSE}).}
-
-\item{nrep}{A \code{numeric} value. Indicate the number of replicates to show 
-on the plots. This parameter is used only when \code{replicates = TRUE}.}
 
 \item{freq}{A \code{numeric} value to indicate the steps by year used in the 
 time series. Default values, see Details.}

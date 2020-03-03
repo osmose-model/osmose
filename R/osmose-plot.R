@@ -32,8 +32,6 @@
 #' @param replicates \code{logical}. It controls to show whether the values in 
 #' each simulation (\code{TRUE}) or the median of the values along the time 
 #' (\code{FALSE}).
-#' @param nrep A \code{numeric} value. Indicate the number of replicates to show 
-#' on the plots. This parameter is used only when \code{replicates = TRUE}.
 #' @param freq A \code{numeric} value to indicate the steps by year used in the 
 #' time series. Default values, see Details.
 #' @param horizontal a \code{logical} value. If \code{FALSE}, plot types that do 
@@ -109,7 +107,7 @@
 #' @export
 plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL, 
                                speciesNames = NULL, start = NULL, end = NULL,  
-                               initialYear = NULL, replicates = TRUE, nrep = 3, 
+                               initialYear = NULL, replicates = TRUE, 
                                freq = 12, horizontal = FALSE, conf = 0.95, 
                                factor = 1e-3, xlim = NULL, ylim = NULL, 
                                col = NULL, alpha = NULL, border = NULL, 
@@ -120,7 +118,7 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL,
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
                 start = start, end = end, 
                 initialYear = initialYear, ts = ts, type = type, 
-                replicates = replicates, nrep = nrep, freq = freq, 
+                replicates = replicates, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
@@ -134,10 +132,10 @@ plot.osmose.biomass = function(x, ts = TRUE, type = 1, species = NULL,
 plot.osmose.abundance = function(x, species = NULL, speciesNames = NULL, 
                                  start = NULL, end = NULL, 
                                  initialYear = NULL, ts = TRUE, type = 1, 
-                                 replicates = TRUE, nrep = 3, freq = 12, 
+                                 replicates = TRUE, freq = 12, 
                                  horizontal = FALSE, conf = 0.95, factor = 1e-3, 
                                  xlim = NULL, ylim = NULL, col = NULL, 
-                                 alpha = NULL, border = NA, lty = 1, lwd = 1, 
+                                 alpha = NULL, border = NULL, lty = 1, lwd = 1, 
                                  axes = TRUE,  legend = TRUE, 
                                  units = "individuals", ...){
   
@@ -145,7 +143,7 @@ plot.osmose.abundance = function(x, species = NULL, speciesNames = NULL,
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
                 start = start, end = end, 
                 initialYear = initialYear, ts = ts, type = type, 
-                replicates = replicates, nrep = nrep, freq = freq, 
+                replicates = replicates, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
@@ -159,17 +157,17 @@ plot.osmose.abundance = function(x, species = NULL, speciesNames = NULL,
 plot.osmose.yield = function(x, species = NULL, speciesNames = NULL, 
                              start = NULL, end = NULL, 
                              initialYear = NULL, ts = TRUE, type = 1, 
-                             replicates = TRUE, nrep = 3, freq = 12, 
+                             replicates = TRUE, freq = 12, 
                              horizontal = FALSE, conf = 0.95, factor = 1e-3, 
                              xlim = NULL, ylim = NULL, col = NULL, alpha = NULL, 
-                             border = NA, lty = 1, lwd = 1, axes = TRUE, 
+                             border = NULL, lty = 1, lwd = 1, axes = TRUE, 
                              legend = TRUE, units = "tonnes", ...){
   
   # Run the plot
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
                 start = start, end = end, 
                 initialYear = initialYear, ts = ts, type = type, 
-                replicates = replicates, nrep = nrep, freq = freq, 
+                replicates = replicates, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
@@ -183,17 +181,17 @@ plot.osmose.yield = function(x, species = NULL, speciesNames = NULL,
 plot.osmose.yieldN = function(x, species = NULL, speciesNames = NULL, 
                               start = NULL, end = NULL, 
                               initialYear = NULL, ts = TRUE, type = 1, 
-                              replicates = TRUE, nrep = 3, freq = 12, 
+                              replicates = TRUE, freq = 12, 
                               horizontal = FALSE, conf = 0.95, factor = 1e-3, 
                               xlim = NULL, ylim = NULL, col = NULL, alpha = NULL, 
-                              border = NA, lty = 1, lwd = 1, axes = TRUE, 
+                              border = NULL, lty = 1, lwd = 1, axes = TRUE, 
                               legend = TRUE, units = "individuals", ...){
   
   # Run the plot
   osmosePlots2D(x = x, species = species, speciesNames = speciesNames, 
                 start = start, end = end, 
                 initialYear = initialYear, ts = ts, type = type, 
-                replicates = replicates, nrep = nrep, freq = freq, 
+                replicates = replicates, freq = freq, 
                 horizontal = horizontal, conf = conf, factor = factor,
                 xlim = xlim, ylim = ylim, col = col, alpha = alpha, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 

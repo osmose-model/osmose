@@ -13,4 +13,5 @@ NEWS.md
 ^inst/java/osmose_4\.1\.0\.jar$
 ^inst/java/osmose_4\.2\.1\.jar$
 ^R/osmose\.maps\.R$
-^R/osmose2R-inDevel\.R$
+^R/osmose2R\.R$
+^R/osmose-plot-inDevel\.R$

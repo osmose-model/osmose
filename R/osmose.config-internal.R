@@ -42,14 +42,14 @@ viewDataList = function(input, path=NULL) {
 
 ##Funciones internas
 
-.readOsmoseConfiguration = function(input, path=NULL, absolute=TRUE) {
+.readOsmoseConfiguration = function(input, path = NULL, absolute = TRUE) {
   
-  if(isTRUE(absolute)) {
-    if(is.null(path)) {
+  if(isTRUE(absolute)){
+    if(is.null(path)){
       path  = normalizePath(dirname(input))
       input = basename(input)
     }
-  } else {
+  }else{
     path = if(is.null(path)) {
       normalizePath(dirname(input))
     } else {
