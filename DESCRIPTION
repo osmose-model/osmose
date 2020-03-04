@@ -2,7 +2,7 @@ Package: osmose
 Type: Package
 Title: Object Oriented Simulator of Marine Ecosystems
 Version: 3.3.3.999
-Date: 2020-03-03
+Date: 2020-03-04
 Authors@R: 
     c(person(given = "Yunne-Jai",
              family = "Shin",
@@ -69,4 +69,5 @@ URL: http://www.osmose-model.org/
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
 SystemRequirements: Java (>= 8)
+VignetteBuilder: knitr
 RoxygenNote: 7.0.2

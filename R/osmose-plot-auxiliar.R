@@ -144,10 +144,10 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   cex = ifelse(is.null(cex), 0.8, cex)
   
   # Define default value for alpha
-  if(is.null(alpha)) alpha <- 0.3
+  if(is.null(alpha)) alpha = 0.3
   
   # Define default value for border
-  if(is.null(border)) border <- NA
+  if(is.null(border)) border = NA
   
   # Define xlim & ylim if NULL
   if(is.null(xlim)) xlim = range(times)
@@ -230,22 +230,26 @@ plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf,
   lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
   lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
   
+  # Set default values for cex
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 0.8, cex)
   
+  # Set default values for xaxs/yaxs
+  xaxs = list(...)[["xaxs"]]
+  if(is.null(xaxs)) xaxs = "r"
+  
+  yaxs = list(...)[["yaxs"]]
+  if(is.null(yaxs)) yaxs = "r"
+  
   # Define default value for alpha
-  if(is.null(alpha)) alpha <- 0.3
+  if(is.null(alpha)) alpha = 0.3
   
   # Define default value for border
-  if(is.null(border)) border <- NA
-  
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
+  if(is.null(border)) border = NA
   
   # Set an empty canvas
   plot.new()
-  plot.window(xlim = xlim, ylim = ylim)
+  plot.window(xlim = xlim, ylim = ylim, xaxs = xaxs, yaxs = yaxs)
   
   # Generate plots by spp
   for(sp in seq(ncol(x))) {
@@ -344,21 +348,26 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
   
   col = if(is.null(col)) rainbow(n = ncol(dataSpecies)) else rep(x = col, length.out = ncol(x))
   
+  # Set default value for cex
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 0.8, cex)
   
+  # Set default values for xaxs/yaxs
+  xaxs = list(...)[["xaxs"]]
+  if(is.null(xaxs)) xaxs = "r"
+  
+  yaxs = list(...)[["yaxs"]]
+  if(is.null(yaxs)) yaxs = "r"
+  
   # Define default value for alpha
-  if(is.null(alpha)) alpha <- 1
+  if(is.null(alpha)) alpha = 1
   
   # Define default value for border
-  if(is.null(border)) border <- TRUE
+  if(is.null(border)) border = TRUE
   
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
-  
+  # Draw an empty canvas
   plot.new()
-  plot.window(xlim=xlim, ylim=ylim)
+  plot.window(xlim = xlim, ylim = ylim, xaxs= xaxs, yaxs = yaxs)
   
   for(sp in seq(ncol(x))){
     x.pol = c(times, rev(times))
@@ -411,7 +420,7 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, lwd, col, alpha,
   cex = ifelse(is.null(cex), 0.8, cex)
   
   # Define default value for alpha
-  if(is.null(alpha)) alpha <- 1
+  if(is.null(alpha)) alpha = 1
   
   x = apply(x, 1, mean, na.rm = TRUE)*factor
   
@@ -465,7 +474,7 @@ plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes,
   cex = ifelse(is.null(cex), 0.8, cex)
   
   # Define default value for border
-  if(is.null(border)) border <- TRUE
+  if(is.null(border)) border = TRUE
   
   if(isTRUE(ci)){
     barplotCI(x, horizontal = horizontal, speciesNames = speciesNames, 
@@ -503,7 +512,7 @@ barplotCI = function(x, horizontal, speciesNames, col, factor, axes, conf,
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
   
-  conf <- qnorm(conf/2 + 0.5)
+  conf = qnorm(conf/2 + 0.5)
   
   if(isTRUE(horizontal)){
     if(is.null(xlim)){
@@ -551,13 +560,10 @@ plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
   cex = ifelse(is.null(cex), 0.8, cex) 
   
   # Define default value for border
-  if(is.null(border)) border <- TRUE
+  if(is.null(border)) border = TRUE
   
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
-  
-  x = apply(x*factor, c(1, 2), mean, na.rm = TRUE) #mean over the replicates
+  # Get the mean over the replicates
+  x = apply(x*factor, c(1, 2), mean, na.rm = TRUE)
   
   if(is.null(ylim)){
     ylim = c(0, max(x)*1.1)
@@ -587,13 +593,10 @@ plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes,
   cex = ifelse(is.null(cex), 0.8, cex)
   
   # Define default value for border
-  if(is.null(border)) border <- TRUE
+  if(is.null(border)) border = TRUE
   
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
-  
-  x = apply(x*factor, c(3, 2), mean, na.rm = TRUE) #mean over the time
+  # Get mean over the time
+  x = apply(x*factor, c(3, 2), mean, na.rm = TRUE)
   
   if(is.null(ylim)){
     ylim = c(0, max(x)*1.1)

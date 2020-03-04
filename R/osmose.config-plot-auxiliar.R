@@ -104,16 +104,9 @@ plotGrowthType1 = function(x, n, species, speciesNames, addElements, xlim, ylim,
   ylab = list(...)[["ylab"]]
   ylab = ifelse(is.null(ylab), "Length (cm)", ylab)
   
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
-  
-  # Remove initial and final spaces at axis
-  par(xaxs = "i", yaxs = "i")
-  
   # Draw an empty canvas
   plot(1, 1, type = "n", axes = FALSE, xlab = xlab, ylab = ylab, 
-       xlim = xlim, ylim = ylim)
+       xlim = xlim, ylim = ylim, xaxs = "i", yaxs = "i")
   
   lines(x = age, y = length, col = col, ...)
   
@@ -264,16 +257,9 @@ plotPredationType1 = function(x, species, speciesNames, addElements, axes,
   
   usr = par(no.readonly = TRUE)$usr
   
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
-  
-  # Remove initial and final spaces at axis
-  par(xaxs = "i", yaxs = "i")
-  
   # Draw an empty canvas
   plot(1, 1, type = "n", axes = FALSE, xlab = xlab, ylab = ylab, 
-       xlim = xlim, ylim = ylim)
+       xlim = xlim, ylim = ylim, xaxs = "i", yaxs = "i")
   
   for(i in seq_along(params$threshold)){
     xValues = params$threshold[c(i, rep(i + 1, 2), i)]

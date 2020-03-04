@@ -2,7 +2,7 @@
 % Please edit documentation in R/osmose-main.R
 \name{osmose_demo}
 \alias{osmose_demo}
-\title{Generates Osmose configuration files to run an Osmose demo.}
+\title{Generates required OSMOSE configuration files to run a demo.}
 \usage{
 osmose_demo(path = NULL, config = "gog")
 }
@@ -16,7 +16,7 @@ A list containing the configuration file to use (config_file) for running the co
 and the output directory to use when reading data.
 }
 \description{
-Generates Osmose configuration files to run an Osmose demo.
+Thins function
 }
 \note{
 So far, only one configuration is propose ("gog")

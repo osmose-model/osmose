@@ -4,16 +4,11 @@
 #' @return List of Osmose Java versions
 #'
 list_osmose_versions = function() {
-  dirin = system.file(package="osmose", "java")
-  output = list.files(path=dirin, pattern=".jar")
+  dirin = system.file(package = "osmose", "java")
+  output = list.files(path = dirin, pattern = ".jar")
+  
   return(output)
 }
-
-# 
-# isfalse = function(x) {
-#   output = !isTRUE(x)  
-#   return(output)
-# }
 
 
 #' Read Osmose output file
@@ -27,30 +22,29 @@ list_osmose_versions = function() {
 #' @return Output data frame
 readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", ...) {
   
-  xclass = paste("osmose", type, sep=".")
+  xclass = paste("osmose", type, sep = ".")
   
-  allFiles = dir(path=path, recursive=TRUE, include.dirs=FALSE)
-  extFiles = allFiles[grepl(paste0(".", ext), allFiles)]
+  allFiles = dir(path = path, recursive = TRUE, include.dirs = FALSE)
+  extFiles = allFiles[grepl(pattern = paste0(".", ext), x = allFiles)]
   
-  if(!isTRUE(bySpecies)) {
+  if(!isTRUE(bySpecies)){
     
     type_  = paste0(type, "_")
-    files  = extFiles[grepl(type_, extFiles)]
-    output = .readFilesList(files=files, path=path, type=type, ...)
+    files  = extFiles[grepl(pattern = type_, x = extFiles)]
+    output = .readFilesList(files = files, path = path, type = type, ...)
     
-  } else {
+  }else{
     
     type_  = paste0(type, "-")
-    files  = extFiles[grepl(type_, extFiles)]
-    files  = .bySpecies(files=files)
-    output = lapply(files, FUN=.readFilesList, path=path, type=type, ...)
+    files  = extFiles[grepl(pattern = type_, x = extFiles)]
+    files  = .bySpecies(files = files)
+    output = lapply(files, .readFilesList, path = path, type = type, ...)
     
   }
   
   if(!is.null(output)) class(output) = c(xclass, class(output))
   
   return(output)
-  
 }
 
 # Non-exported ------------------------------------------------------------

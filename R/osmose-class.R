@@ -117,6 +117,15 @@ summary.osmose = function(object, ..., digits = 1L) {
                        row.names = object$species)
   output$resumen = resumen
   
+  # Get levels with and without info
+  infoLevels <- sapply(object, function(x) if(is.array(x)) dim(x) else length(x))
+  infoLevels <- sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
+  infoLevels <- matrix(data = paste0(names(infoLevels), ifelse(infoLevels, " (*)", "")),
+                       ncol = 2)
+  dimnames(infoLevels) <- list(rep("", nrow(infoLevels)), rep("", ncol(infoLevels)))
+  
+  output$info_levels <- infoLevels
+  
   # Generate output
   class(output) = "summary.osmose"
   return(output)
@@ -137,9 +146,14 @@ print.summary.osmose = function(x, ...) {
   cat(sprintf("%s species modeled (%s simulations):", x$model$nsp, x$model$simus))
   cat(sprintf("\n\t[sp%s] %s", seq(0, x$model$nsp - 1), x$species), "\n")
   
-  # Include extra info
+  # Show extra info
   cat("\nMain indicators:\n")
   print(x$resumen)
+  
+  # Show available variables
+  cat("\nAvailable fields:\n")
+  print(x$info_levels)
+  cat("\n(*) Empty fields.\n")
 }
 
 #' @title Report method for \code{osmose} objects

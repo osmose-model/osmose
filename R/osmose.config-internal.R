@@ -219,7 +219,7 @@ getPredationData = function(x, object, ...) {
   accesibilityFile = file.path(attr(x = x$accessibility$file, which = "path"), 
                                x$accessibility$file)
   
-  sep <- .guessSeparator(readLines(accesibilityFile, n = 1))
+  sep = .guessSeparator(readLines(accesibilityFile, n = 1))
   
   accessibility = read.csv(file = accesibilityFile, header = TRUE, sep = sep, 
                            quote = "\"", dec = ".", fill = TRUE, comment.char = "")
