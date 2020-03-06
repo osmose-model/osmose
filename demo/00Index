@@ -1,2 +1,2 @@
-create_run_read     Creates a folder with basic files for a running. Then, run the model and read the outputs.
-basic_plots         Shows some basic plots for main osmose classes: osmose & osmose.config.
+osmose_class          Creates a folder with example files, run osmose model, read outputs and make some basic plots.
+osmose.config_class   Creates a folder with example configuration files, read them and make some basic plots.

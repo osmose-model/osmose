@@ -1,8 +1,8 @@
 Package: osmose
 Type: Package
 Title: Object Oriented Simulator of Marine Ecosystems
-Version: 3.3.3.999
-Date: 2020-03-04
+Version: 3.3.3.9001
+Date: 2020-03-06
 Authors@R: 
     c(person(given = "Yunne-Jai",
              family = "Shin",
@@ -53,7 +53,7 @@ Description: The multispecies and individual-based model (IBM) 'OSMOSE'
 License: CeCILL
 Encoding: UTF-8
 Depends: 
-  R (>= 3.0)
+  R (>= 3.5.0)
 Imports: 
   graphics,
   grDevices,

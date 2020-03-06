@@ -68,7 +68,7 @@
 #' (useful for \code{polygon} and \code{barplot}s), etc.
 #' 
 #' @note Ellipsis (\code{...}) must be used carefully, since it will pass the
-#' arguments to different generic plot funcions. For instance, \code{type = 2} 
+#' arguments to different generic plot functions. For instance, \code{type = 2} 
 #' of \code{osmose.config.reproduction} method will use \code{...} to pass 
 #' arguments to \link{barplot}, so some arguments like \code{cex} may match with 
 #' many formal arguments (e.g. \code{cex.axis} and \code{cex.names}), so it may 

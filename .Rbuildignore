@@ -16,3 +16,8 @@ NEWS.md
 ^R/osmose2R\.R$
 ^R/osmose-plot-inDevel\.R$
 ^vignettes/vignette_cache$
+^vignettes/*\.html$
+^vignettes/*\.R$
+^vignettes/osmose\.log$
+^vignettes/create_run_read_cache$
+^vignettes/create_run_read_files$

@@ -28,4 +28,9 @@ inst/extdata/plot_test.R
 inst/extdata/eec/make_netcdf_mask.R
 *.swp
 *.tmp
-/vignettes/vignette_cache
+vignettes/vignette_cache
+vignettes/osmose.log
+vignettes/*.R
+inst/doc
+/vignettes/create_run_read_files
+/vignettes/create_run_read_cache

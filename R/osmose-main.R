@@ -141,7 +141,7 @@ read_osmose = function(path = NULL, input = NULL, version = "3.3.3",
   # Check if path exists
   if(!dir.exists(path)) stop("The output directory does not exist.")
   
-  # Depending on the version, apply the correponding method
+  # Depending on the version, apply the corresponding method
   output = switch(output_version, 
                   v3r0 = osmose2R.v3r0(path = path, species.names = species.names, ...),
                   v3r1 = osmose2R.v3r1(path = path, species.names = species.names, ...),

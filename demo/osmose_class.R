@@ -19,12 +19,14 @@ print(list.files(path = dirname(demoPaths$config_file), recursive = TRUE))
 
 readline("Press any key to continue...")
 
+
 # Run OSMOSE --------------------------------------------------------------
 
 # Run an example using 'run_osmose' function
 run_osmose(input = demoPaths$config_file)
 
 readline("Press any key to continue...")
+
 
 # Read outputs ------------------------------------------------------------
 
@@ -41,3 +43,44 @@ readline("Press any key to continue...")
 
 # print.summary method
 print(summary(outputs))
+
+
+# Basic plots -------------------------------------------------------------
+
+# Check more basic forms by changing what, ts, type and (maybe) species
+
+# Create all combinations for this 4 arguments
+allTest <- expand.grid(what = c("biomass", "abundance", "yield", "yieldN"),
+                       ts = c(TRUE, FALSE),
+                       type = 1:4, 
+                       stringsAsFactors = FALSE)
+allTest <- allTest[with(allTest, order(what, ts, type)),]
+
+# Remove non-valid forms
+allTest <- allTest[-which(!allTest$ts & allTest$type == 4),]
+rownames(allTest) <- seq(nrow(allTest))
+
+# Show all lines to test
+print(allTest)
+
+readline("^--- Data frame with combination of parameters to plot (Press any key to continue).")
+
+# Loop over each example
+for(i in seq(nrow(allTest))){
+  
+  # Get argument values
+  what <- allTest$what[i]
+  ts <- allTest$ts[i]
+  type <- allTest$type[i]
+  species <- if(ts & type == 4) 0 else "NULL"
+  
+  # Build expression
+  evalExpr <- sprintf("plot(outputs, what = '%s', ts = %s, type = %s, species = %s)",
+                      what, ts, type, species)
+  
+  # Print expression
+  cat("\n", evalExpr, "\n")
+  
+  # Evaluate expression (make plot)
+  eval(parse(text = evalExpr))
+}
