@@ -412,16 +412,22 @@ plot.osmose.biomassDistribBySize = function(x, species=NULL, time.mean=TRUE, ...
 #' @param species Species name
 #' @param time.mean If true, time.mean biomass is plotted
 #' @param ...  Additional plot arguments
-#' 
+#' @method plot osmose.biomassDistribByAge
+#' @export
 plot.osmose.biomassDistribByAge = function(x, species=NULL, time.mean=TRUE, ...) {
   
-  if(is.null(species)) {
-    species = names(x)
-  }
+  osmosePlots3D(x, species, speciesNames, start, end, initialYear, ts, 
+                type, replicates, freq, horizontal, conf, factor, 
+                xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
+                units, ci = TRUE, ...)
   
-  for(spec in species) {
-    plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Age", ylab="Biomass", ...)
-  }
+  # if(is.null(species)) {
+  #   species = names(x)
+  # }
+  # 
+  # for(spec in species) {
+  #   plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Age", ylab="Biomass", ...)
+  # }
   
   return(invisible())
   
