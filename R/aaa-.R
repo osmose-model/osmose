@@ -20,6 +20,5 @@ NULL
 NULL
 #' @importFrom stats predict
 NULL
-
-#' @importFrom raster as.raster
+#' @importFrom raster raster plot
 NULL

@@ -202,40 +202,67 @@ plot3DType2 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
 
   nval = length(x)
   nel = length(x[[1]])
-  print(nval)
-  print(nel)
+
+  disclass = as.numeric(names(x[[1]]))
+
+  z = matrix(as.numeric(unlist(x)), nrow = nel, ncol = nval) # class / species
+  print(dim(z))  # 25 x 11 = class x species
+  z[z<= 0] = NA
+  z = log10(z)
+  z = apply(z, 2, rev)  # rev to put imshow in the proper place (equivalent to Python's origin=lower)
+  rownames(z) = disclass
+  colnames(z) = speciesNames
   
-  class = as.numeric(names(x[[1]]))
-  print(class)
-  
-  z = array(as.numeric(unlist(x)), dim=c(nel, nval)) # class / species
-  z = t(z)
-  #z[z<= 0] = NA
-  #z = log10(z)
-  print(min(z))
-  print(max(z))
-  colnames(z) = class
-  rownames(z) = speciesNames
-  
-  x = 1:nval
-  y = 1:nel
-  
-  z = as.raster(z, nrow=nval, ncol=nel, max=max(z))
-  
+  x = 1:nel  
+  y = 1:nval
   xlim = c(min(x), max(x))
   ylim = c(min(y), max(y))
   
-  print(z)
-  
-  plot.new()
-  plot(z, xlim=xlim, ylim=ylim, add=TRUE)
-  #axis(2, at=y, labels=colnames(z), las=2)
-  #axis(1, at=x, labels=rownames(z), las=2)
+  ras = raster(nrow=nel, ncol=nval, 
+               xmn=min(x) - 0.5, xmx=max(x) - 0.5, ymn=min(y) - 0.5, ymx=max(y) + 0.5)
+  ras[] = z
+  plot(ras, xlim=xlim, ylim=ylim, interpolate=FALSE, asp=NA)
+  axis(2, at=y, labels=colnames(z), las=2)
+  axis(1, at=x, labels=rownames(z), las=2)
   
   return(invisible())
   
 }
 
+# require(raster)
+# # ## set up the plot region:
+# op <- par(bg = "thistle")
+# x = matrix(1:15, ncol = 5, nrow = 3)
+# x = apply(x, 2, rev)
+# xlim = c(-40, 10)
+# ylim = c(10, 20)
+# image <- raster(ncol=5, nrow=3, xmn=min(xlim), xmx=max(xlim), ymn=min(ylim), ymx=max(ylim))
+# print(class(image))
+# image[] = x
+# class(image)
+# print(image)
+# plot(image, asp=NA)
 
-
-
+# 
+# # Copy configuration files into the proper directory
+# # run the osmose model
+# #run_osmose(demo$config_file, parameters=NULL, output=NULL, version="3.3.3",
+# #          options=NULL, verbose=TRUE, clean=TRUE)
+# 
+# # reads output data
+# data = read_osmose('/Users/Nicolas/Dropbox/test_osmose_plots/gog/output')
+# 
+# biom = get_var(data, what='abundance')
+# print(dim(biom))  # 120 = time-steps, 25=species, replicates=3
+# #plot(biom, axes=TRUE)
+# 
+# #species = get_var(data, what='species')
+# #print(species)
+# #print(length(species))
+# 
+# #names(data)
+# 
+# data = get_var(data, "biomassByAge")
+# print(colnames(data))
+# plot(data, type=2)
+# 
