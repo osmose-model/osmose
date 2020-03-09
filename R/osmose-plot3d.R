@@ -1,13 +1,9 @@
 ################################################################ Plots3D
-
-# Internal plot functions -------------------------------------------------
-
 osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts, 
                          type, replicates, freq, horizontal, conf, factor, 
                          xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
                          units, ci = TRUE, ...) {
 
-  print('#####################')
   # CHECK ARGUMENTS
   if(!is.null(species)){
     # Check species I
@@ -22,95 +18,224 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
     
     # Check species II
     if(is.numeric(species)){
-      if(any(species > ncol(x))){
+      if(any(species > length(x))){
         stop("'species' must be between 1 and ", ncol(x))  
       }
     }else if(is.character(species)){
-      if(is.null(dimnames(x))){
+      if(is.null(names(x))){
         stop("Is not possible to define species as character due to 'x' has not species names defined.")
       }
       
-      if(any(!is.element(species, colnames(x)))){
+      if(any(!is.element(species, names(x)))){
         stop("Some values of 'species' does not exist.")
       }
       
-      species = match(species, colnames(x))
+      species = match(species, names(x))
     }
-    
-    print('allalalalalal')
-    print(species)
-    print(names(x))
-    #x = x[ , species + 1, , drop = FALSE]
+
+    species = names(x)[species]
+
+    x = x[species]
     
   }
+
+  if(!is.null(speciesNames) && length(speciesNames) != length(x)){
+   stop("'speciesNames' has an incorrect length.")
+  }
   
-  print(names(x))
+  msg = sprintf("ts=TRUE for 3D fields is not implemented yet.")
+  if(isTRUE(ts)){
+    stop(msg) 
+  } 
   
-  # if(!is.null(speciesNames) && length(speciesNames) != ncol(x)){
-  #   stop("'speciesNames' has an incorrect length.")
-  # }
-  # 
-  # # Check start and end args
-  # if(is.null(start)) start = 1
-  # if(is.null(end)) end = dim(x)[1]
-  # 
-  # if(start < 1 | start > end) stop("Incorrect value for 'start' argument")
-  # if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
-  # 
-  # x = x[seq(start, end), , ,drop = FALSE]
-  # 
-  # # xlim 
-  # if(is.null(initialYear)) initialYear = 0
-  # 
-  # times = seq(from = initialYear + start/freq, by = 1/freq, 
-  #             length.out = nrow(x))
-  # 
-  # msg = sprintf("Not defined method for ts = %s and type = %s", isTRUE(ts), type)
-  # if(isTRUE(ts)){
-  #   
-  #   switch(type,
-  #          "1" = plot2DTsType1(x = x, replicates = replicates, 
-  #                              ci = ci, times = times, xlim = xlim, ylim = ylim,
-  #                              conf = conf, factor = factor, col = col, 
-  #                              alpha = alpha, speciesNames = speciesNames, 
-  #                              lty = lty, lwd = lwd, axes = axes, units = units,
-  #                              border = border, ...),
-  #          "2" = plot2DTsType2(x = x, replicates = replicates, 
-  #                              ci = ci, times = times, xlim = xlim, ylim = ylim,
-  #                              conf = conf, factor = factor, col = col, 
-  #                              alpha = alpha, speciesNames = speciesNames, 
-  #                              lty = lty, lwd = lwd, axes = axes, 
-  #                              legend = legend, units = units, border = border, 
-  #                              ...),
-  #          "3" = plot2DTsType3(x = x, times = times, xlim = xlim, ylim = ylim, 
-  #                              factor = factor, col = col, alpha = alpha, 
-  #                              legend = legend, speciesNames = speciesNames, 
-  #                              axes = axes, units = units, border = border, ...),
-  #          "4" = plot2DTsType4(x = x, times = times, xlim = xlim, ylim = ylim, 
-  #                              factor = factor, lty = lty, lwd = lwd, col = col, 
-  #                              alpha = alpha, legend = legend, 
-  #                              speciesNames = speciesNames, axes = axes, 
-  #                              units = units, ...),
-  #          stop(msg))
-  # }else{
-  #   
-  #   switch(type,
-  #          "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
-  #                            factor = factor, speciesNames = speciesNames, 
-  #                            xlim = xlim, ylim = ylim, axes = axes, units = units,
-  #                            border = border, conf = conf, ...),
-  #          "2" = plot2DType2(x, horizontal = horizontal, col = col, 
-  #                            factor = factor, speciesNames = speciesNames, 
-  #                            xlim = xlim, ylim = ylim, axes = axes, units = units, 
-  #                            border = border, ...),
-  #          "3" = plot2DType3(x, horizontal = horizontal, col = col, 
-  #                            factor = factor, speciesNames = speciesNames, 
-  #                            xlim = xlim, ylim = ylim, axes = axes, units = units, 
-  #                            border = border, ...),
-  #          stop(msg))
-  # }
-  # 
+  msg = sprintf("replicates=FALSE for 3D fields is not implemented yet.")
+  if(!isTRUE(replicates)) {
+    stop(msg) 
+  }
+  
+  # getting time array (not used so far)
+  index = .get_start_end(x[[1]], start, end)
+  start = index[1]
+  end = index[2]
+  
+  if(is.null(initialYear)) initialYear = 0
+  times = seq(from = initialYear + start/freq, by = 1/freq, 
+              length.out = nrow(x[[1]]))
+  
+  # apply processing on the time-series (so far, replicate and time-mean)
+  x = lapply(x, .process_3d_fields, start, end, ts, replicates, ...) 
+  
+  msg = sprintf("3D plot type %d is not implemented yet.", type)
+  switch(type,
+         "1" = plot3DType1(x, lty=lty, lwd=lwd, alpha=alpha, ci = ci, horizontal = horizontal, col = col,
+                           factor = factor, speciesNames = speciesNames,
+                           xlim = xlim, ylim = ylim, axes = axes, units = units,
+                           border = border, conf = conf, ...),
+         "2" = plot3DType2(x, lty=lty, lwd=lwd, alpha=alpha, ci = ci, horizontal = horizontal, col = col,
+                           factor = factor, speciesNames = speciesNames,
+                           xlim = xlim, ylim = ylim, axes = axes, units = units,
+                           border = border, conf = conf, ...),
+         stop(msg))
+
+  return(invisible())
+  
+}
+
+.get_start_end = function(x, start, end) {
+  
+  # Check start and end args
+  if(is.null(start)) start = 1
+  if(is.null(end)) end = dim(x)[1]
+  
+  if(start < 1 | start > end) stop("Incorrect value for 'start' argument")
+  if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
+  
+  return(c(start, end))
+  
+}
+
+.process_3d_fields = function(x, start, end, ts, replicates, ...) {
+  
+  index = .get_start_end(x, start, end)
+  start = index[1]
+  end = index[2]
+
+  x = x[seq(start, end), , , drop = FALSE]  # time, class, replicates
+
+  if(replicates & ts) {  # replicates mean + time series
+    x = apply(x, c(1, 2), mean, na.rm = TRUE)
+  } else if (replicates & !ts) {  # replicates nean + time_mean
+    x = apply(x, 2, mean, na.rm = TRUE)
+  } else {
+    stop('not implemented yet')
+  }
+
+}
+
+plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesNames, axes, 
+                       xlim, ylim, units, border, conf, ...){
+  
+  if(is.null(speciesNames)){
+    speciesNames = toupper(names(x))
+  }
+  
+  print(speciesNames)
+  
+  # To keep the plot params as the beginning
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+
+  # Define multiplot array if there're more than 1 species
+  if(length(x) > 1){
+    mar = rep(2.5, 4)  # bottom left top right
+    oma = rep(1, 4)
+    par(mar=mar, oma = oma)
+    mfrow = getmfrow(length(x))
+  } else {
+    mfrow = c(1, 1)
+  }
+  
+  par(mfrow = mfrow)
+  
+  # Extract args related with line customization
+  col = rep(x = if(is.null(col)) "black" else col, length.out = length(x))
+  lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = length(x))
+  lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = length(x))
+  
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 0.8, cex)
+  
+  # Define default value for alpha
+  if(is.null(alpha)) alpha = 0.3
+  
+  # Define default value for border
+  if(is.null(border)) border = NA
+
+  # recovering the size-class
+  colnames = as.numeric(names(x[[1]]))
+  
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(colnames)
+  if(is.null(ylim)) { 
+    ymin = Reduce(min, lapply(x, min)) * factor
+    ymax = Reduce(max, lapply(x, max)) * factor
+    ylim = c(ymin, ymax)
+  }
+  
+  # Generate plots by spp
+  i = 0
+  for(n in names(x)) {
+    
+    i = i + 1
+    
+    # Extract values for spp i
+    xsp = factor*x[[n]]
+    
+    # Set an empty canvas
+    # two lines below are commented out because it returns bad layout
+    #plot.new()  
+    #plot.window(xlim = xlim, ylim = ylim)
+    barplot(xsp, horiz = horizontal, names.arg = colnames, col = col,
+            ylim = ylim, xlim = xlim, axes = axes, border = border, ...)
+    mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 0.05, cex = cex)
+
+  }
   
   return(invisible())
   
 }
+
+plot3DType2 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesNames, axes, 
+                       xlim, ylim, units, border, conf, ...){
+  
+  if(is.null(speciesNames)){
+    speciesNames = toupper(names(x))
+  }
+  
+  print(speciesNames)
+  
+  # To keep the plot params as the beginning
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  par(oma=rep(4, 4))
+
+  nval = length(x)
+  nel = length(x[[1]])
+  print(nval)
+  print(nel)
+  
+  class = as.numeric(names(x[[1]]))
+  print(class)
+  
+  z = array(as.numeric(unlist(x)), dim=c(nel, nval)) # class / species
+  z = t(z)
+  #z[z<= 0] = NA
+  #z = log10(z)
+  print(min(z))
+  print(max(z))
+  colnames(z) = class
+  rownames(z) = speciesNames
+  
+  x = 1:nval
+  y = 1:nel
+  
+  z = as.raster(z, nrow=nval, ncol=nel, max=max(z))
+  
+  xlim = c(min(x), max(x))
+  ylim = c(min(y), max(y))
+  
+  print(z)
+  
+  plot.new()
+  plot(z, xlim=xlim, ylim=ylim, add=TRUE)
+  #axis(2, at=y, labels=colnames(z), las=2)
+  #axis(1, at=x, labels=rownames(z), las=2)
+  
+  return(invisible())
+  
+}
+
+
+
+
