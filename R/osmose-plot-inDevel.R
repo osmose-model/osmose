@@ -414,7 +414,14 @@ plot.osmose.biomassDistribBySize = function(x, species=NULL, time.mean=TRUE, ...
 #' @param ...  Additional plot arguments
 #' @method plot osmose.biomassDistribByAge
 #' @export
-plot.osmose.biomassDistribByAge = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.biomassDistribByAge = function(x, ts = FALSE, type = 1, species = NULL, 
+                                           speciesNames = NULL, start = NULL, end = NULL,  
+                                           initialYear = NULL, replicates = TRUE, 
+                                           freq = 12, horizontal = FALSE, conf = 0.95, 
+                                           factor = 1e-3, xlim = NULL, ylim = NULL, 
+                                           col = NULL, alpha = NULL, border = NULL, 
+                                           lty = 1, lwd = 1,  axes = TRUE, legend = TRUE, 
+                                           units = "tonnes", ...) {
   
   osmosePlots3D(x, species, speciesNames, start, end, initialYear, ts, 
                 type, replicates, freq, horizontal, conf, factor, 

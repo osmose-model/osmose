@@ -20,3 +20,6 @@ NULL
 NULL
 #' @importFrom stats predict
 NULL
+
+#' @importFrom raster as.raster
+NULL
