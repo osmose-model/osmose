@@ -20,5 +20,5 @@ NULL
 NULL
 #' @importFrom stats predict
 NULL
-#' @importFrom raster raster plot
+#' @importFrom fields image.plot
 NULL

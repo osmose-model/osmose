@@ -421,12 +421,12 @@ plot.osmose.biomassDistribByAge = function(x, ts = FALSE, type = 1, species = NU
                                            factor = 1e-3, xlim = NULL, ylim = NULL, 
                                            col = NULL, alpha = NULL, border = NULL, 
                                            lty = 1, lwd = 1,  axes = TRUE, legend = TRUE, 
-                                           units = "tonnes", ...) {
+                                           units = "tonnes", by="age", class_units='years', space=0.2, ...) {
   
   osmosePlots3D(x, species, speciesNames, start, end, initialYear, ts, 
                 type, replicates, freq, horizontal, conf, factor, 
                 xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
-                units, ci = TRUE, ...)
+                units, by=by, class_units=class_units, ci = TRUE, space=space, ...)
   
   # if(is.null(species)) {
   #   species = names(x)

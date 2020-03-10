@@ -2,7 +2,7 @@
 osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts, 
                          type, replicates, freq, horizontal, conf, factor, 
                          xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
-                         units, ci = TRUE, ...) {
+                         units, class_units, by, ci = TRUE, space, use_log10=TRUE, ...) {
 
   # CHECK ARGUMENTS
   if(!is.null(species)){
@@ -35,7 +35,7 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
 
     species = names(x)[species]
 
-    x = x[species]
+    x = x[species, drop=FALSE]
     
   }
 
@@ -66,15 +66,16 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
   x = lapply(x, .process_3d_fields, start, end, ts, replicates, ...) 
   
   msg = sprintf("3D plot type %d is not implemented yet.", type)
+
   switch(type,
          "1" = plot3DType1(x, lty=lty, lwd=lwd, alpha=alpha, ci = ci, horizontal = horizontal, col = col,
                            factor = factor, speciesNames = speciesNames,
                            xlim = xlim, ylim = ylim, axes = axes, units = units,
-                           border = border, conf = conf, ...),
+                           border = border, conf = conf, class_units=class_units, by=by, space=space, ...),
          "2" = plot3DType2(x, lty=lty, lwd=lwd, alpha=alpha, ci = ci, horizontal = horizontal, col = col,
                            factor = factor, speciesNames = speciesNames,
                            xlim = xlim, ylim = ylim, axes = axes, units = units,
-                           border = border, conf = conf, ...),
+                           border = border, conf = conf, class_units=class_units, by=by, use_log10=use_log10, ...),
          stop(msg))
 
   return(invisible())
@@ -94,26 +95,26 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
   
 }
 
+# Process 3D fields (fields by class). Computes replicates
+# or time means. Called through lapply (to loop over all the species)
 .process_3d_fields = function(x, start, end, ts, replicates, ...) {
   
   index = .get_start_end(x, start, end)
   start = index[1]
   end = index[2]
-
-  x = x[seq(start, end), , , drop = FALSE]  # time, class, replicates
-
-  if(replicates & ts) {  # replicates mean + time series
-    x = apply(x, c(1, 2), mean, na.rm = TRUE)
-  } else if (replicates & !ts) {  # replicates nean + time_mean
-    x = apply(x, 2, mean, na.rm = TRUE)
+  
+  if(length(dim(x)) == 3) { 
+    x = x[seq(start, end), , , drop = FALSE]  # time, class, replicates
   } else {
-    stop('not implemented yet')
+    x = x[seq(start, end), , drop = FALSE]  # time, class, replicates  
   }
-
+  x = apply(x, 2, mean, na.rm = TRUE)
+  
 }
 
+# Displays a histogram showing one plot per species.
 plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesNames, axes, 
-                       xlim, ylim, units, border, conf, ...){
+                       xlim, ylim, units, border, conf, class_units, by, space, ...){
   
   if(is.null(speciesNames)){
     speciesNames = toupper(names(x))
@@ -127,7 +128,7 @@ plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
 
   # Define multiplot array if there're more than 1 species
   if(length(x) > 1){
-    mar = rep(2.5, 4)  # bottom left top right
+    mar = rep(4, 4)  # bottom left top right
     oma = rep(1, 4)
     par(mar=mar, oma = oma)
     mfrow = getmfrow(length(x))
@@ -173,10 +174,10 @@ plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
     
     # Set an empty canvas
     # two lines below are commented out because it returns bad layout
-    #plot.new()  
-    #plot.window(xlim = xlim, ylim = ylim)
-    barplot(xsp, horiz = horizontal, names.arg = colnames, col = col,
-            ylim = ylim, xlim = xlim, axes = axes, border = border, ...)
+    xlab = paste0(by, '(', class_units, ')')
+    ylab = units
+    bp = barplot(xsp, horiz = horizontal, names.arg = colnames, col = col,
+            ylim = ylim, axes = axes, border = border, xlab=xlab, ylab=ylab, las=2, space=space, ...)
     mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 0.05, cex = cex)
 
   }
@@ -185,8 +186,9 @@ plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
   
 }
 
+# Showing biomass as a function of class as a raster file.
 plot3DType2 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesNames, axes, 
-                       xlim, ylim, units, border, conf, ...){
+                       xlim, ylim, units, border, conf, class_units, by, use_log10=TRUE, ...){
   
   if(is.null(speciesNames)){
     speciesNames = toupper(names(x))
@@ -206,63 +208,25 @@ plot3DType2 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
   disclass = as.numeric(names(x[[1]]))
 
   z = matrix(as.numeric(unlist(x)), nrow = nel, ncol = nval) # class / species
-  print(dim(z))  # 25 x 11 = class x species
-  z[z<= 0] = NA
-  z = log10(z)
-  z = apply(z, 2, rev)  # rev to put imshow in the proper place (equivalent to Python's origin=lower)
+  if(use_log10) { 
+    z[z<= 0] = NA
+    z = log10(z)
+  } 
+
   rownames(z) = disclass
   colnames(z) = speciesNames
   
-  x = 1:nel  
+  x = 1:nel
   y = 1:nval
-  xlim = c(min(x), max(x))
-  ylim = c(min(y), max(y))
   
-  ras = raster(nrow=nel, ncol=nval, 
-               xmn=min(x) - 0.5, xmx=max(x) - 0.5, ymn=min(y) - 0.5, ymx=max(y) + 0.5)
-  ras[] = z
-  plot(ras, xlim=xlim, ylim=ylim, interpolate=FALSE, asp=NA)
-  axis(2, at=y, labels=colnames(z), las=2)
-  axis(1, at=x, labels=rownames(z), las=2)
+  leglab = paste(units)
+  if(use_log10) leglab = paste('log10', leglab, sep=' ')
+  
+  xlab = paste0(by, '(', class_units, ')')
+  image.plot(x, y, z, legend.lab=leglab, xaxt='n', yaxt='n', xlab=xlab)  # plot=> x=species, y=class
+  axis(2, at=y, labels=colnames(z), las=2, cex.axis=0.5)  # left
+  axis(1, at=x, labels=rownames(z), las=2, cex.axis=0.5)  # below
   
   return(invisible())
   
 }
-
-# require(raster)
-# # ## set up the plot region:
-# op <- par(bg = "thistle")
-# x = matrix(1:15, ncol = 5, nrow = 3)
-# x = apply(x, 2, rev)
-# xlim = c(-40, 10)
-# ylim = c(10, 20)
-# image <- raster(ncol=5, nrow=3, xmn=min(xlim), xmx=max(xlim), ymn=min(ylim), ymx=max(ylim))
-# print(class(image))
-# image[] = x
-# class(image)
-# print(image)
-# plot(image, asp=NA)
-
-# 
-# # Copy configuration files into the proper directory
-# # run the osmose model
-# #run_osmose(demo$config_file, parameters=NULL, output=NULL, version="3.3.3",
-# #          options=NULL, verbose=TRUE, clean=TRUE)
-# 
-# # reads output data
-# data = read_osmose('/Users/Nicolas/Dropbox/test_osmose_plots/gog/output')
-# 
-# biom = get_var(data, what='abundance')
-# print(dim(biom))  # 120 = time-steps, 25=species, replicates=3
-# #plot(biom, axes=TRUE)
-# 
-# #species = get_var(data, what='species')
-# #print(species)
-# #print(length(species))
-# 
-# #names(data)
-# 
-# data = get_var(data, "biomassByAge")
-# print(colnames(data))
-# plot(data, type=2)
-# 
