@@ -120,8 +120,6 @@ plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
     speciesNames = toupper(names(x))
   }
   
-  print(speciesNames)
-  
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
   on.exit(par(op))
@@ -129,6 +127,7 @@ plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
   # Define multiplot array if there're more than 1 species
   if(length(x) > 1){
     mar = rep(4, 4)  # bottom left top right
+    mar = c(4, 4, 1, 4)
     oma = rep(1, 4)
     par(mar=mar, oma = oma)
     mfrow = getmfrow(length(x))
@@ -193,8 +192,6 @@ plot3DType2 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
   if(is.null(speciesNames)){
     speciesNames = toupper(names(x))
   }
-  
-  print(speciesNames)
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
