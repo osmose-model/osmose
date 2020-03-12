@@ -93,6 +93,7 @@ plotMortRateType1 = function(x, norm, speciesNames, ...) {
   
 }
 
+# Plots the mortality as pie charts. One plot per class (size, age or status)
 plotMortRateType2 = function(x, speciesNames, ...) { 
   
   # To keep the plot params as the beginning
@@ -168,16 +169,24 @@ plotMortRateType2 = function(x, speciesNames, ...) {
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
 #' 
-plot.mortalityRateDistrib = function(x, species=NULL, norm=TRUE, ...) {
+plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, ...) {
   
   # extract the values for a given list of species
   x = .extract_species_from_list(x, species)
-  x = lapply(x, .process_mort_rate_dis, norm)
+  x = lapply(x, .process_mort_rate_dis)
+  
+  if(!is.null(speciesNames) && length(speciesNames) != length(x)){
+    stop("'speciesNames' has an incorrect length.")
+  }
+  
+  if(is.null(speciesNames)){
+    speciesNames = toupper(names(x))
+  }
   
   msg = sprintf("3D plot type %d is not implemented yet.", type)
   switch(type,
-         "1" = plotMortRateType1(outlist, norm=norm, speciesNames=speciesNames, ...),
-         "2" = plotMortRateType2(outlist, speciesNames=speciesNames, ...),
+         "1" = plotMortRateType1(x, norm=norm, speciesNames=speciesNames, ...),
+         "2" = plotMortRateType2(x, speciesNames=speciesNames, ...),
          stop(msg))
   
   return(invisible())
@@ -185,7 +194,7 @@ plot.mortalityRateDistrib = function(x, species=NULL, norm=TRUE, ...) {
 }
 
 
-.process_mort_rate_dis = function(x, norm=TRUE) {
+.process_mort_rate_dis = function(x) {
   
   x = lapply(x, apply, mean, MARGIN=2, na.rm=TRUE) # computes the mean over replicates and time
   mort = do.call(cbind.data.frame, x)
@@ -197,11 +206,7 @@ plot.mortalityRateDistrib = function(x, species=NULL, norm=TRUE, ...) {
   # Extracts the size class with mortality > 0
   mort = mort[tot>0, ]
   tot = tot[tot>0]
-  
-  # If data should be normalized, then it is divided by the total
-  # mortality
-  if(norm) mort = (mort / tot) * 100
-  
+
   # Transpose the dataframe
   mort = as.data.frame(t(mort))
   

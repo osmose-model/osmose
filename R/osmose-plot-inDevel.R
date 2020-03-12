@@ -152,17 +152,11 @@ plot.osmose.predatorPressure = function(x, species=NULL, time.mean=TRUE, ...) {
 #' @param norm Wheter mortality should be normalized (only if time.mean=TRUE)
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
-#' 
-plot.osmose.mortalityRateDistribBySize = function(x, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...) {
+#' @method plot osmose.mortalityRateDistribBySize
+#' @export
+plot.osmose.mortalityRateDistribBySize = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, ...) {
   
-  if(is.null(species)) { 
-    species = names(x)
-  }
-  
-  for(spec in species) { 
-    mort = process.mortalityRate(x, species=species, time.mean=time.mean, norm=norm)
-    plot.mort.byclass.tmean(mort, species, norm, class="size")
-  }
+  plot.mortalityRateDistrib(x, species=species, norm=norm, type=type, speciesNames=speciesNames, ...)
   
   return(invisible())
   
@@ -178,17 +172,11 @@ plot.osmose.mortalityRateDistribBySize = function(x, species=NULL, time.mean=TRU
 #' @param norm Wheter mortality should be normalized (only if time.mean=TRUE)
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
-#' 
-plot.osmose.mortalityRateDistribByAge = function(x, species=NULL, time.mean=TRUE, norm=TRUE, mtype="Mtot", ...) {
+#' @method plot osmose.mortalityRateDistribByAge
+#' @export
+plot.osmose.mortalityRateDistribByAge = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, ...) {
   
-  if(is.null(species)) { 
-    species = names(x)
-  }
-  
-  for(spec in species) {
-    mort = process.mortalityRate(x, species=species, time.mean=time.mean, norm=norm)
-    plot.mort.byclass.tmean(mort, species, norm, class="Age")
-  }
+  plot.mortalityRateDistrib(x, species=species, norm=norm, type=type, speciesNames=speciesNames, ...)
   
   return(invisible())
   
