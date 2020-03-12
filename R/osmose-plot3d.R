@@ -4,43 +4,14 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
                          xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
                          units, class_units, by, ci = TRUE, space, use_log10=TRUE, ...) {
 
-  # CHECK ARGUMENTS
-  if(!is.null(species)){
-    # Check species I
-    message1 = "'species' must be whether a numeric or character vector without NA or duplicated values."
-    if(!is.vector(species) || # isn't it a vector?
-       all(!is.element(c("character", "numeric"), mode(species))) || # is it character or numeric?
-       length(species) < 1 || # its length is greater than 1?
-       sum(is.na(species)) > 0 || # is there any NA?
-       any(duplicated(species))){ # is there any duplicated value?
-       stop(message1)
-    }
-    
-    # Check species II
-    if(is.numeric(species)){
-      if(any(species > length(x))){
-        stop("'species' must be between 1 and ", ncol(x))  
-      }
-    }else if(is.character(species)){
-      if(is.null(names(x))){
-        stop("Is not possible to define species as character due to 'x' has not species names defined.")
-      }
-      
-      if(any(!is.element(species, names(x)))){
-        stop("Some values of 'species' does not exist.")
-      }
-      
-      species = match(species, names(x))
-    }
-
-    species = names(x)[species]
-
-    x = x[species, drop=FALSE]
-    
-  }
-
+  x = .extract_species_from_list(x, species)
+  
   if(!is.null(speciesNames) && length(speciesNames) != length(x)){
    stop("'speciesNames' has an incorrect length.")
+  }
+  
+  if(is.null(speciesNames)){
+    speciesNames = toupper(names(x))
   }
   
   msg = sprintf("ts=TRUE for 3D fields is not implemented yet.")
@@ -116,10 +87,7 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
 plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesNames, axes, 
                        xlim, ylim, units, border, conf, class_units, by, space, ...){
   
-  if(is.null(speciesNames)){
-    speciesNames = toupper(names(x))
-  }
-  
+
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
   on.exit(par(op))
@@ -188,10 +156,6 @@ plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
 # Showing biomass as a function of class as a raster file.
 plot3DType2 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesNames, axes, 
                        xlim, ylim, units, border, conf, class_units, by, use_log10=TRUE, ...){
-  
-  if(is.null(speciesNames)){
-    speciesNames = toupper(names(x))
-  }
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)

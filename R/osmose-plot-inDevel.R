@@ -202,7 +202,6 @@ plot.osmose.mortalityRateDistribByAge = function(x, species=NULL, time.mean=TRUE
 #' @param norm True if percentage is returned instead of raw mort. rates
 #' @param ... Additional parameters to the barplot/lines functions
 #'
-#' @export
 plot.osmose.mortalityRate = function(x, time.mean=TRUE, species=NULL, norm=TRUE, ...) {
   
   #  if species is not null, plot figure for each species
