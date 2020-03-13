@@ -154,9 +154,9 @@ plot.osmose.predatorPressure = function(x, species=NULL, time.mean=TRUE, ...) {
 #' @param ... Additional arguments of the function.
 #' @method plot osmose.mortalityRateDistribBySize
 #' @export
-plot.osmose.mortalityRateDistribBySize = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, ...) {
+plot.osmose.mortalityRateDistribBySize = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, ...) {
   
-  plot.mortalityRateDistrib(x, species=species, norm=norm, type=type, speciesNames=speciesNames, ...)
+  plot.mortalityRateDistrib(x, species=species, norm=norm, type=type, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...)
   
   return(invisible())
   
@@ -174,9 +174,9 @@ plot.osmose.mortalityRateDistribBySize = function(x, species=NULL, speciesNames=
 #' @param ... Additional arguments of the function.
 #' @method plot osmose.mortalityRateDistribByAge
 #' @export
-plot.osmose.mortalityRateDistribByAge = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, ...) {
+plot.osmose.mortalityRateDistribByAge = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, ...) {
   
-  plot.mortalityRateDistrib(x, species=species, norm=norm, type=type, speciesNames=speciesNames, ...)
+  plot.mortalityRateDistrib(x, species=species, norm=norm, type=type, speciesNames=speciesNames, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...)
   
   return(invisible())
   

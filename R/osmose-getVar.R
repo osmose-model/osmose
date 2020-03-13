@@ -3,17 +3,19 @@
 # @return An array or a list containing the data.
 process.dietMatrix = function(out, species = NULL, time.mean = TRUE, thres = 1, ...) {
   
-  .check_species(out, species)
-  
-  # extract the given specie
-  out = out[[species]]
+  # If a list, extracts species names
+  if(is.list(out)) { 
+    .check_species(out, species)
+    # extract the given specie
+    out = out[[species]]
+  }
   
   # Computes the mean over the replicates
   out = apply(out, c(1, 2), mean)
   
   # computes the time average
   data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # adding this to avoid NULL output in summary
-  keep = (data.time.mean > thres)  # keep values for which the max is greater than the threshold
+  keep = (data.time.mean >= thres)  # keep values for which the max is greater than the threshold
   
   if(time.mean) {
     # extracts the mean values above a given threshold
@@ -70,10 +72,13 @@ process.dietMatrix = function(out, species = NULL, time.mean = TRUE, thres = 1, 
 # @return An array or a list containing the data.
 process.mortalityRate = function(out, species=NULL, time.mean=TRUE, ...) {
   
-  .check_species(out, species)
-  
-  # extract the given specie
-  out = out[[species]]
+  # If list, extract value for one species
+  if(!is.null(species)) { 
+    .check_species(out, species)
+    
+    # extract the given specie
+    out = out[[species]]
+  }
   
   # computes the replicate mean: for each list element
   # computes the mean over the 4th dimension (replicate)
