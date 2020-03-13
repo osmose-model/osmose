@@ -112,7 +112,7 @@ plotMortRateType2 = function(x, speciesNames, draw_legend=TRUE, parargs=list(), 
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
 #' 
-plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  ...) {
+plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  draw_legend=TRUE, ...) {
   
   # extract the values for a given list of species
   x = .extract_species_from_list(x, species)
@@ -129,7 +129,7 @@ plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TR
   msg = sprintf("3D plot type %d is not implemented yet.", type)
   switch(type,
          "1" = plotMortRateType1(x, norm=norm, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, ...),
-         "2" = plotMortRateType2(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=TRUE, ...),
+         "2" = plotMortRateType2(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...),
          stop(msg))
   
   return(invisible())
@@ -137,6 +137,8 @@ plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TR
 }
 
 
+# Process the mortality rate distribution. Computes the mean over replicates
+# Removes the sizes where the mortality contains only 0.
 .process_mort_rate_dis = function(x) {
   
   x = lapply(x, apply, mean, MARGIN=2, na.rm=TRUE) # computes the mean over replicates and time
@@ -145,7 +147,7 @@ plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TR
   
   # Counts the total mortality rate for each size class
   tot = apply(mort, 1, sum, na.rm=TRUE)
-  
+
   # Extracts the size class with mortality > 0
   mort = mort[tot>0, ]
   tot = tot[tot>0]
