@@ -51,8 +51,10 @@ plotMortRateType1 = function(x, norm, speciesNames, parargs=list(), plotargs=lis
   # Loop over all the species
   for (data in x) {  
 
-    data = .norm_final(data, norm=norm)
-    
+    if(norm) {
+      data = apply(data, 2, norm_func)
+    }
+
     plotargs$args.legend = legargs
     plotargs$main = speciesNames[i]
 
@@ -78,9 +80,7 @@ plotMortRateType2 = function(x, speciesNames, draw_legend=TRUE, parargs=list(), 
   
   # loop over the species to extract 
   for (data in x) { 
-    
-    # normalise mortality and convert it into a common feature
-    data = .norm_final(data, norm=FALSE)  
+
     rnames = rownames(data)
     cnames = colnames(data)
     
@@ -88,7 +88,8 @@ plotMortRateType2 = function(x, speciesNames, draw_legend=TRUE, parargs=list(), 
     for (class in colnames(data)) {
       
       temp = data[, class] # extracts the data for the given species
-      plotargs$ x= temp
+      names(temp) = rnames
+      plotargs$x= temp
       plotargs$main = paste(speciesNames[i], class, sep=', ')
       
       .generic_pieplot(temp, draw_legend=draw_legend, plotargs=plotargs, legargs=legargs)
@@ -151,32 +152,6 @@ plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TR
 
   # Transpose the dataframe
   mort = as.data.frame(t(mort))
-  
-}
-
-# Final normalization. For all the mortality class (either string or values)
-# normalize if needed (extracts percentage).
-.norm_final = function(data, norm) {
-  
-  isdf = is.data.frame(data)  # check if data is data frame
-
-  # if data frame, recover the dimension names
-  dnames = NULL 
-  if(isdf) dnames = dimnames(data)
-  
-  # if normalize, display mortality rates into percentage instead of absolutes.
-  if(norm) {
-    # apply the normalize   function to all the elements of the list.
-    data = lapply(data, norm_func)
-  }
-
-  # convert the list into a matrix
-  data = do.call(cbind.data.frame, data)
-  data = as.matrix(data)
-
-  if(isdf) dimnames(data) = dnames
-  
-  return(data)
   
 }
 
@@ -267,13 +242,118 @@ plotDietType2 = function(outlist, speciesNames, parargs=parargs, plotargs=plotar
   
 }
 
+plot.dietDistrib = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  draw_legend=TRUE, ...) {
+  
+  # extract the values for a given list of species
+  x = .extract_species_from_list(x, species)
+  
+  .process_dietDis = function(x) { 
+    # computes the mean for all the prey
+    lapply(x, apply, 2, mean, na.rm=TRUE)  
+  }
+  
+  # computes the mean for all the preys
+  x = lapply(x, .process_dietDis)
+  
+  if(!is.null(speciesNames) && length(speciesNames) != length(x)){
+    stop("'speciesNames' has an incorrect length.")
+  }
+  
+  if(is.null(speciesNames)){
+    speciesNames = toupper(names(x))
+  }
+  
+  msg = sprintf("3D plot type %d is not implemented yet.", type)
+  switch(type,
+         "1" = plotDietDisType1(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, norm=norm, ...),
+         "2" = plotDietDisType2(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...),
+         stop(msg))
+  
+  return(invisible())
+  
+}
+
+# Plot diet distribution as a stacked plot.
+plotDietDisType1 = function(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, norm=norm, ...) { 
+  
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  do.call(par, parargs)
+  
+  i = 1
+  
+  # Loop over all the species
+  for (data in x) {  
+    
+    data = as.data.frame(data)  # class x prey
+    keep = apply(data, 1, sum, na.rm=TRUE) # remove class with only NAN values
+    data = data[keep > 0, ]
+
+    if(norm) {
+      data = apply(data, 1, norm_func)
+    }
+
+    plotargs$args.legend = legargs
+    plotargs$main = speciesNames[i]
+    
+    .generic_staked_barplot(data, plotargs=plotargs, axisargs=axisargs)
+    i = i + 1
+    
+  }
+  
+  return(invisible())
+  
+}
+
+# Plot diet distribution as a stacked plot.
+plotDietDisType2 = function(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=TRUE, ...) { 
+  
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  do.call(par, parargs)
+  
+  i = 1
+  
+  # Loop over all the species
+  for (data in x) {  
+    
+    data = as.matrix(as.data.frame(data))  # class x prey
+
+    keep = apply(data, 2, sum, na.rm=TRUE)  # prey 
+    data = data[, keep>0]  # remove prey columns with only 0s
+    
+    keep = apply(data, 1, sum, na.rm=TRUE)  # class
+    data = data[keep>0, ]  # remove class rows with only 0s
+    
+    data = t(data) 
+
+    # loop over the class (eggs, juveniles, adults)
+    for (class in colnames(data)) {
+      temp = data[, class] # extracts the data for the given species
+      plotargs$x= temp
+      plotargs$main = paste(speciesNames[i], class, sep=', ')
+      
+      .generic_pieplot(temp, draw_legend=draw_legend, plotargs=plotargs, legargs=legargs)
+      
+    } 
+    
+    i = i + 1
+    
+  }
+  
+  return(invisible())
+  
+}
+
+
 # Generic stacked plot function
 # outlist = data to plot. should have a names argument
 # parargs = additionnal arguments to the par function
 # plotargs = additionnal arguments to the pie function
 .generic_staked_barplot = function(data, plotargs=list(), axisargs=list()) {
   
-
   # prepare the arguments for the pie arguments
   plotargs$height = data
   plotargs$xaxt ="n"

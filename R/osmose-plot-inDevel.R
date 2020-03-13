@@ -281,16 +281,12 @@ plot.osmose.meanSize = function(x, species = NULL, start = NULL, end = NULL, ini
 #' @param x Data list
 #' @param species List of species name. If null, all species are plotted
 #' @param ... Extra arguments of the graphics barplot function
-plot.osmose.dietMatrixbySize = function(x, species=NULL, ...) {
-  
-  if(is.null(species)) { 
-    species = names(x)
-  }
-  
-  for (spec in species) {
-    .plot.osmose.dietMatrixbyDis(x, spec, "Size (cm)", "Diet Matrix", ...)
-  }
-  
+#' @method plot osmose.dietMatrixbySize
+#' @export 
+plot.osmose.dietMatrixbySize = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  draw_legend=TRUE, ...) {
+ 
+  plot.dietDistrib(x, species=species, speciesNames=speciesNames, norm=norm, type=type, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs,  draw_legend=draw_legend, ...) 
+ 
 }
 
 #' Plot diet matrix by size class
@@ -298,17 +294,14 @@ plot.osmose.dietMatrixbySize = function(x, species=NULL, ...) {
 #' @param x Data list
 #' @param species List of species name. If null, all species are plotted
 #' @param ... Extra arguments of the graphics barplot function
-plot.osmose.dietMatrixbyAge = function(x, species=NULL, ...) {
+#' @method plot osmose.dietMatrixbyAge
+#' @export 
+plot.osmose.dietMatrixbyAge = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  draw_legend=TRUE, ...) {
   
-  if(is.null(species)) { 
-    species = names(x)
-  }
-  
-  for (spec in species) {
-    .plot.osmose.dietMatrixbyDis(x, spec, "Age", "Diet Matrix", ...)
-  }
+  plot.dietDistrib(x, species=species, speciesNames=speciesNames, norm=norm, type=type, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs,  draw_legend=draw_legend, ...) 
   
 }
+
 
 #' Plot the dietMatrix output
 #'
