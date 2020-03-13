@@ -166,7 +166,7 @@ plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TR
 #' @param ... Additional parameters to the barplot/lines functions
 #' @method plot osmose.dietMatrix
 #' @export 
-plot.osmose.dietMatrix = function(x, species=NULL, speciesNames=NULL, type=1, thres=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, ...) {
+plot.osmose.dietMatrix = function(x, species=NULL, speciesNames=NULL, type=1, thres=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, norm=TRUE, ...) {
   
   # extract the values for a given list of species
   x = .extract_species_from_list(x, species)
@@ -189,7 +189,7 @@ plot.osmose.dietMatrix = function(x, species=NULL, speciesNames=NULL, type=1, th
   # draws plots 
   msg = sprintf("3D plot type %d is not implemented yet.", type)
   switch(type,
-         "1" = plotDietType1(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, ...),
+         "1" = plotDietType1(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, norm=norm, ...),
          "2" = plotDietType2(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...),
          stop(msg))
   
@@ -198,7 +198,7 @@ plot.osmose.dietMatrix = function(x, species=NULL, speciesNames=NULL, type=1, th
 }
 
 # Plots diet matrix as a stacked plot.
-plotDietType1 = function(outlist, speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, ... ) {
+plotDietType1 = function(outlist, speciesNames, parargs, plotargs, legargs, axisargs, norm, ... ) {
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
@@ -210,6 +210,11 @@ plotDietType1 = function(outlist, speciesNames, parargs=parargs, plotargs=plotar
   cnames = names(outlist)
   outlist = as.matrix(as.data.frame(outlist))
   colnames(outlist) = cnames
+  
+  if(norm) {
+    message('THe normalization is not implemented yet')
+    
+  }
   
   plotargs$args.legend = legargs
   
@@ -230,6 +235,8 @@ plotDietType2 = function(outlist, speciesNames, parargs=parargs, plotargs=plotar
   
   # loop over the species to extract 
   for (temp in outlist) { 
+    print('####################')
+    print(temp)
     
     plotargs$x= temp
     plotargs$main = paste(speciesNames[i])

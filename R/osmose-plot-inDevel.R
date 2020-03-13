@@ -134,16 +134,35 @@ plot.osmose.predatorPressureDistribByAge = function(x, species=NULL, speciesName
 #' sorted in decreasing order 
 #' @param species Species names
 #' @param ...  Additional plot arguments
-#' 
-plot.osmose.predatorPressure = function(x, species=NULL, time.mean=TRUE, ...) {
+#' @method plot osmose.predatorPressure
+#' @export
+#' @todo Thres > 0 does'nt work, since it returns negative values. To check what is going on.
+plot.osmose.predatorPressure = function(x, species=NULL, norm=TRUE, speciesNames=NULL, type=1, thres=0, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, ...) {
+
+  # extract the values for a given list of species
+  x = .extract_species_from_list(x, species)
   
-  if(is.null(species)) {
-    species = names(x)
+  if(!is.null(speciesNames) && length(speciesNames) != length(x)){
+    stop("'speciesNames' has an incorrect length.")
   }
   
-  for(spec in species) {
-    plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Trophic Level", ylab="Biomass", ...)
+  if(is.null(speciesNames)){
+    speciesNames = toupper(names(x))
   }
+  
+  if (type == 1) { 
+    thres = 0
+  }
+  
+  # computes the time and replicate mean for all the mortalities type class (eggs, juveniles, ...)
+  outlist = lapply(x, process.dietMatrix, time.mean=TRUE, species=NULL, thres=thres)
+  
+  # draws plots 
+  msg = sprintf("3D plot type %d is not implemented yet.", type)
+  switch(type,
+         "1" = plotDietType1(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, norm=norm, ...),
+         "2" = plotDietType2(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...),
+         stop(msg))
   
   return(invisible())
   
