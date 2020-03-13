@@ -89,16 +89,19 @@ plot.osmose.yieldByAge = function(x, species=NULL, time.mean=TRUE, ...) {
 #' @param x Data list
 #' @param species List of species name. If null, all species are plotted
 #' @param ... Extra arguments of the graphics barplot function
-#' 
-plot.osmose.predatorPressureDistribBySize = function(x, species=NULL, ...) {
+#' @export
+#' @method plot osmose.predatorPressureDistribBySize
+plot.osmose.predatorPressureDistribBySize = function(x, species=NULL, speciesNames=NULL, type=1, ...) {
   
-  if(is.null(species)) { 
-    species = names(x)
-  }
+  args = list(...)
+  if(is.null(args$draw_legend)) args$draw_legend = TRUE
+  if(is.null(args$norm)) args$norm = TRUE
+  if(is.null(args$parargs)) args$parargs = list()
+  if(is.null(args$plotargs)) args$plotargs = list()
+  if(is.null(args$legargs)) args$legargs = list()
+  if(is.null(args$axisargs)) args$axisargs = list()
   
-  for (spec in species) {
-    .plot.osmose.dietMatrixbyDis(x, spec, "Size (cm)", "Predator pressure", ...)
-  }
+  plot.dietDistrib(x, species=species, speciesNames=speciesNames, type=type, norm=args$norm, parargs=args$parargs, plotargs=args$plotargs, legargs=args$legargs, axisargs=args$axisargs, draw_legend=args$draw_legend) 
   
 }
 
@@ -107,18 +110,22 @@ plot.osmose.predatorPressureDistribBySize = function(x, species=NULL, ...) {
 #' @param x Data list
 #' @param species List of species name. If null, all species are plotted
 #' @param ... Extra arguments of the graphics barplot function
-#' 
-plot.osmose.predatorPressureDistribByAge = function(x, species=NULL, ...) {
+#' @export
+#' @method plot osmose.predatorPressureDistribByAge
+plot.osmose.predatorPressureDistribByAge = function(x, species=NULL, speciesNames=NULL, type=1, ...) {
   
-  if(is.null(species)) { 
-    species = names(x)
-  }
+  args = list(...)
+  if(is.null(args$draw_legend)) args$draw_legend = TRUE
+  if(is.null(args$norm)) args$norm = TRUE
+  if(is.null(args$parargs)) args$parargs = list()
+  if(is.null(args$plotargs)) args$plotargs = list()
+  if(is.null(args$legargs)) args$legargs = list()
+  if(is.null(args$axisargs)) args$axisargs = list()
   
-  for (spec in species) {
-    .plot.osmose.dietMatrixbyDis(x, spec, "Age", "Predator pressure", ...)
-  }
+  plot.dietDistrib(x, species=species, speciesNames=speciesNames, type=type, norm=args$norm, parargs=args$parargs, plotargs=args$plotargs, legargs=args$legargs, axisargs=args$axisargs, draw_legend=args$draw_legend) 
   
 }
+
 
 #' Plots predator pressure.
 #'
