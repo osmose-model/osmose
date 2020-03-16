@@ -20,3 +20,5 @@ NULL
 NULL
 #' @importFrom stats predict
 NULL
+#' @importFrom fields image.plot
+NULL

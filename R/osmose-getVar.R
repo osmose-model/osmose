@@ -3,17 +3,19 @@
 # @return An array or a list containing the data.
 process.dietMatrix = function(out, species = NULL, time.mean = TRUE, thres = 1, ...) {
   
-  .check_species(out, species)
-  
-  # extract the given specie
-  out = out[[species]]
+  # If a list, extracts species names
+  if(is.list(out)) { 
+    .check_species(out, species)
+    # extract the given specie
+    out = out[[species]]
+  }
   
   # Computes the mean over the replicates
   out = apply(out, c(1, 2), mean)
   
   # computes the time average
   data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # adding this to avoid NULL output in summary
-  keep = (data.time.mean > thres)  # keep values for which the max is greater than the threshold
+  keep = (data.time.mean >= thres)  # keep values for which the max is greater than the threshold
   
   if(time.mean) {
     # extracts the mean values above a given threshold
@@ -70,10 +72,13 @@ process.dietMatrix = function(out, species = NULL, time.mean = TRUE, thres = 1, 
 # @return An array or a list containing the data.
 process.mortalityRate = function(out, species=NULL, time.mean=TRUE, ...) {
   
-  .check_species(out, species)
-  
-  # extract the given specie
-  out = out[[species]]
+  # If list, extract value for one species
+  if(!is.null(species)) { 
+    .check_species(out, species)
+    
+    # extract the given specie
+    out = out[[species]]
+  }
   
   # computes the replicate mean: for each list element
   # computes the mean over the 4th dimension (replicate)
@@ -180,5 +185,43 @@ summary.osmose.meanTLCatch = function(object, ...) {
   return(data)
 }
 
-
-
+.extract_species_from_list = function(x, species, ...) {
+  
+  # CHECK ARGUMENTS
+  if(!is.null(species)){
+    # Check species I
+    message1 = "'species' must be whether a numeric or character vector without NA or duplicated values."
+    if(!is.vector(species) || # isn't it a vector?
+       all(!is.element(c("character", "numeric"), mode(species))) || # is it character or numeric?
+       length(species) < 1 || # its length is greater than 1?
+       sum(is.na(species)) > 0 || # is there any NA?
+       any(duplicated(species))){ # is there any duplicated value?
+       stop(message1)
+    }
+    
+    # Check species II
+    if(is.numeric(species)){
+      if(any(species > length(x))){
+        stop("'species' must be between 1 and ", ncol(x))  
+      }
+    }else if(is.character(species)){
+      if(is.null(names(x))){
+        stop("Is not possible to define species as character due to 'x' has not species names defined.")
+      }
+      
+      if(any(!is.element(species, names(x)))){
+        stop("Some values of 'species' does not exist.")
+      }
+      
+      species = match(species, names(x))
+    }
+    
+    species = names(x)[species]
+    
+    x = x[species, drop=FALSE]
+    
+  }
+  
+  return(x)
+  
+}

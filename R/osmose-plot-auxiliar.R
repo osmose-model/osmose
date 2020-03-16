@@ -617,6 +617,5 @@ plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes,
 # returns percentage instead of raw values
 norm_func = function(data) {
   output = 100 * data / (sum(data, na.rm=TRUE) + .Machine$double.xmin)
-  dimnames(output) = dimnames(data)
   return(output)
 }
