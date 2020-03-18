@@ -183,7 +183,10 @@ public class FishingGear extends AbstractMortality {
         FisheryFBase fBase = new FisheryFBase(fIndex);
         FisherySeason fSeason = new FisherySeason(fIndex);
         FisherySeasonality fSeasonality = new FisherySeasonality(fIndex);
-
+        fBase.init();
+        fSeason.init();
+        fSeasonality.init();
+        
         // fishery spatial maps
         fMapSet = new FishingMapSet(fIndex, "fishery.movement");
         fMapSet.init();
