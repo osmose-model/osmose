@@ -52,6 +52,7 @@
 package fr.ird.osmose.process.mortality.fishery;
 
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.util.ArrayList;
@@ -87,7 +88,7 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0 2013/09/01
  */
-public class FishingMapSet extends OsmoseLinker {
+public class FisheryMapSet extends OsmoseLinker {
 
     /**
      * Prefix of the series of maps in the configuration file. Parameter names
@@ -97,29 +98,31 @@ public class FishingMapSet extends OsmoseLinker {
     private final String prefix;
 
     /**
-     * Index of the species.
+     * Name of the fishery.
      */
-    private final int iFishery;
+    private final String fisheryName;
 
     /**
-     * Array of map indexes for every age class and simulation time step.
+     * Array of map indexes for every time step.
      * int[N_STEP_SIMU]
      */
     private int[] indexMaps;
+    
     /**
      * List of the maps.
      */
-    private FisheryGridMap[] maps;
+    private GridMap[] maps;
+    
     /**
      * List of the pathnames of the CSV files.
      */
     private String[] mapFile;
 
-    public FishingMapSet(int iFishery, String prefix) {
-        this.iFishery = iFishery;
+    public FisheryMapSet(String fisheryName, String prefix) {
+        this.fisheryName = fisheryName;
         this.prefix = prefix;  // should be fishery.movement
     }
-
+    
     public void init() {
 
         // Load the maps
@@ -127,7 +130,7 @@ public class FishingMapSet extends OsmoseLinker {
 
         // Check the map indexation
         if (!this.checkMapIndexation()) {
-            error("Missing map indexation for Fishery index " + iFishery + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+            error("Missing map indexation for Fishery index " + fisheryName + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
         }
 
         // Get rid of redundant map definitions
@@ -156,9 +159,11 @@ public class FishingMapSet extends OsmoseLinker {
 
     public void loadMaps() {
 
+        Configuration cfg = this.getConfiguration();
+        
         // Count the total number of fishery maps by looking for the
         // number of "fishery.map.index.map#" parameters 
-        int nmapmax = getConfiguration().findKeys(prefix + ".index.map*").size();
+        int nmapmax = getConfiguration().findKeys(prefix + ".fishery.map*").size();
   
         List<Integer> mapNumber = new ArrayList();
         int imap = 0;
@@ -166,17 +171,17 @@ public class FishingMapSet extends OsmoseLinker {
         for (int n = 0; n < nmapmax; n++) {
 
             // This is done if the indexing of fishering maps start with one for instance
-            while (!getConfiguration().canFind(prefix + ".index.map" + imap)) {
+            while (!getConfiguration().canFind(prefix + ".fishery.map" + imap)) {
                 imap++;
             }
 
             // Recovers the fisherie index associated with the current map.
             // If it matches the current fisherie, the map index is added to the list of
             // maps to be processed.
-            String key = prefix + ".index.map" + imap;
-            int fisheryIndex = getConfiguration().getInt(key);
+            String key = prefix + ".fishery.map" + imap;
+            String fisheryName = getConfiguration().getString(key);
 
-            if (fisheryIndex == iFishery) {
+            if (fisheryName.equals(this.fisheryName)) {
                 mapNumber.add(imap);
             }
 
@@ -184,11 +189,12 @@ public class FishingMapSet extends OsmoseLinker {
         }  // end of nmapmax loop
 
         // Initialize NSTEP arrays of gridmaps, and initialize their index to -1
-        maps = new FisheryGridMap[mapNumber.size()];
+        maps = new GridMap[mapNumber.size()];
         mapFile = new String[mapNumber.size()];
         int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
         indexMaps = new int[nSteps];
 
+        // Initialize the array of fisheries map index to -1 (i.e. no fishery)
         for (int iStep = 0; iStep < nSteps; iStep++) {
             indexMaps[iStep] = -1;
         }
@@ -212,19 +218,32 @@ public class FishingMapSet extends OsmoseLinker {
                     mapSeason[iStep] = iStep;
                 }
             }
-            /*
-             * Read year min and max concerned by this map
-             */
-            int yearMin = 0;
-            int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-            int yearMax = nyear;
-            if (!getConfiguration().isNull(prefix + ".year.min" + ".map" + imap)) {
-                yearMin = getConfiguration().getInt(prefix + ".year.min" + ".map" + imap);
-                yearMin = Math.max(yearMin, 0);
-            }
-            if (!getConfiguration().isNull(prefix + ".year.max" + ".map" + imap)) {
-                yearMax = getConfiguration().getInt(prefix + ".year.max" + ".map" + imap);
-                yearMax = Math.min(yearMax, nyear);
+            
+            int[] listOfYears;
+            
+            key = String.format("%s.years.map%d", prefix, imap);
+            if (this.getConfiguration().canFind(key)) {
+                listOfYears = cfg.getArrayInt(key);
+            } else {
+                int yearMin = 0;
+                int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
+                int yearMax = nyear;
+                if (!getConfiguration().isNull(prefix + ".initialYear.map" + imap)) {
+                    yearMin = getConfiguration().getInt(prefix + ".initialYear.map" + imap);
+                    yearMin = Math.max(yearMin, 0);
+                }
+                if (!getConfiguration().isNull(prefix + ".finalYear" + ".map" + imap)) {
+                    yearMax = getConfiguration().getInt(prefix + ".finalYear.map" + imap);
+                    yearMax = Math.min(yearMax, nyear);
+                }
+
+                int nyears = yearMax - yearMin;
+                listOfYears = new int[nyears];
+                int cpt = 0;
+                for (int y = yearMin; y < yearMax; y++) {
+                    listOfYears[cpt] = y;
+                    cpt++;
+                }
             }
 
             /*
@@ -234,13 +253,14 @@ public class FishingMapSet extends OsmoseLinker {
              */
             int nStepYear = getConfiguration().getNStepYear();
 
-            for (int iYear = yearMin; iYear < yearMax; iYear++) {
+            for (int iYear : listOfYears) {
                 for (int iSeason : mapSeason) {
                     int iStep = iYear * nStepYear + iSeason;
                     if (iStep < indexMaps.length) {
                         indexMaps[iStep] = n;   // can be viewed as an array of size [year][ndt]
                     } else {
-                        break;
+                        String msg = String.format("iStep=%d exceeed the given time period, %d", iStep, indexMaps.length);
+                        throw new ArrayIndexOutOfBoundsException(msg);
                     }
                 }
             }
@@ -252,12 +272,14 @@ public class FishingMapSet extends OsmoseLinker {
             if (!getConfiguration().isNull(prefix + ".file" + ".map" + imap)) {
                 String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
-                maps[n] = new FisheryGridMap(csvFile);
+                maps[n] = new GridMap(csvFile);
             } else {
+                mapFile[n] = null;
                 maps[n] = null;
             }
-        }
-    }
+            
+        } // end of loop on good map numbers
+    }  // end of method
 
     /**
      * Checks the map indexation. In the fishery,
@@ -275,8 +297,8 @@ public class FishingMapSet extends OsmoseLinker {
             if (indexMaps[iStep] < 0) {
                 int year = iStep / nStepYear;
                 int step = iStep % nStepYear;
-                warning("No map assigned for fishery {0} year {1} step {2}", new Object[]{iFishery, year, step});
-                warning("Fishery {0} will therefore be deactivated during year {1} and step {2}", new Object[]{iFishery, year, step});
+                warning("No map assigned for fishery {0} year {1} step {2}", new Object[]{this.fisheryName, year, step});
+                warning("Fishery {0} will therefore be deactivated during year {1} and step {2}", new Object[]{this.fisheryName, year, step});
             }
         }
 
@@ -368,19 +390,6 @@ public class FishingMapSet extends OsmoseLinker {
                 map.setValue(cell, map.getValue(cell) / K);
             }
         }
-
-        // Checks that the final map value has a weighted mean of 1.
-        // Loop over all the cells of the current grid
-        // and corrects the fishing coefficients.
-        double temp = 0;
-        for (Cell cell : getGrid().getCells()) {
-            if ((!cell.isLand()) && (isValueOk(map.getValue(cell)))) {
-                temp += map.getValue(cell) * cell.getSurface();
-            }
-        }
-
-        temp /= surftot;
-
     }
 
     /**
@@ -393,42 +402,21 @@ public class FishingMapSet extends OsmoseLinker {
         return (value >= 0) || (!Float.isNaN(value));
     }
 
-    /**
-     * Gets the surface of a given cell.
-     *
-     * @param cell
-     * @return
-     */
-    private double getSurface(Cell cell) {
-        float lat = cell.getLat();
-        float dlat = getGrid().getdLat();
-        float dlon = getGrid().getdLong();
+    public double getValue(int idt, Cell cell) {
 
-        // Earth radius in m
-        double Rt = 6371 * 1e3;
-        double surf = Rt * deg2rad(dlat) * Rt * deg2rad(dlon) * Math.cos(deg2rad(lat));
-        return surf;
+        int indexMap = this.getIndexMap(idt);
+        if (indexMap < 0) {
+            return 0;
+        }
 
-    }
-
-    /**
-     * Converts a degree angle into radian.
-     *
-     * @param value
-     * @return
-     */
-    private double deg2rad(double value) {
-        return value * Math.PI / 180.;
-    }
-
-    /**
-     * Converts a radian angle into degree.
-     *
-     * @param value
-     * @return
-     */
-    private double rad2deg(double value) {
-        return value * 180. / Math.PI;
+        GridMap map = this.getMap(indexMap);
+        double spatialSelect;
+        if (map != null) {
+            spatialSelect = Math.max(0, map.getValue(cell));  // this is done because if value is -999, then no fishery is applied here.
+        } else {
+            spatialSelect = 0.0;
+        }
+        return spatialSelect;
     }
 
 }

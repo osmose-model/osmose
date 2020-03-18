@@ -60,7 +60,7 @@ import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.fishery.FisheryFBase;
 import fr.ird.osmose.process.mortality.fishery.FisherySeason;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
-import fr.ird.osmose.process.mortality.fishery.FishingMapSet;
+import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
@@ -109,15 +109,12 @@ public class FisherySelectivity extends OsmoseLinker {
      */
     private SizeSelect select[];
 
-    // Index of the time-step.
-    int timestep;
-
     /**
      * Determines which function should be used to compute the selectivity.
      */
     private interface SizeSelect {
 
-        double getSelectivity(AbstractSchool school);
+        double getSelectivity(int index, AbstractSchool school);
     }
 
   
@@ -159,9 +156,9 @@ public class FisherySelectivity extends OsmoseLinker {
 
         // Init the size selectivity array
         select = new SizeSelect[3];
-        select[0] = (sch -> this.getKnifeEdgeSelectivity(sch));  // knife edge selectivity
-        select[1] = (sch -> this.getSigmoidSelectivity(sch));    // Sigmoid selectivity
-        select[2] = (sch -> this.getGaussianSelectivity(sch));   // Gaussian selectivity
+        select[0] = (index, sch) -> this.getKnifeEdgeSelectivity(index, sch);  // knife edge selectivity
+        select[1] = (index, sch) -> this.getSigmoidSelectivity(index, sch);    // Sigmoid selectivity
+        select[2] = (index, sch) -> this.getGaussianSelectivity(index, sch);   // Gaussian selectivity
 
     }
 
@@ -206,12 +203,10 @@ public class FisherySelectivity extends OsmoseLinker {
      * @param school
      * @return 
      */
-    public double getSelectivity(AbstractSchool school) {
+    public double getSelectivity(int index, AbstractSchool school) {
         
-        int index = this.getTimeStep();
-
         int selType = (int) this.selectType_array[index];
-        return (select[selType].getSelectivity(school));
+        return (select[selType].getSelectivity(index, school));
 
     }
 
@@ -221,9 +216,7 @@ public class FisherySelectivity extends OsmoseLinker {
      * @param school
      * @return
      */
-    public double getKnifeEdgeSelectivity(AbstractSchool school) {
-
-        int index = this.getTimeStep();
+    public double getKnifeEdgeSelectivity(int index, AbstractSchool school) {
 
         double l50 = this.l50_array[index];
 
@@ -237,9 +230,7 @@ public class FisherySelectivity extends OsmoseLinker {
      * @param school
      * @return
      */
-    public double getGaussianSelectivity(AbstractSchool school) {
-
-        int index = this.getTimeStep();
+    public double getGaussianSelectivity(int index, AbstractSchool school) {
 
         double l50 = this.l50_array[index];
         double l75 = this.l75_array[index];
@@ -270,9 +261,8 @@ public class FisherySelectivity extends OsmoseLinker {
      * @param school
      * @return
      */
-    public double getSigmoidSelectivity(AbstractSchool school) {
+    public double getSigmoidSelectivity(int index, AbstractSchool school) {
 
-        int index = this.getTimeStep();
         double l50 = this.l50_array[index];
         double l75 = this.l75_array[index];
 
@@ -291,14 +281,6 @@ public class FisherySelectivity extends OsmoseLinker {
 
     }
 
-    public void setTimeStep(int idt) {
-        this.timestep = idt;
-    }
-
-    public int getTimeStep() {
-        return this.timestep;
-    }
-    
     /** Init an array either from file (by dt) or shifts.
      * 
      * @param prefix
