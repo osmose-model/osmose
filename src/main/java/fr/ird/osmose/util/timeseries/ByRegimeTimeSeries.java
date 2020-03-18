@@ -49,10 +49,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fishery;
+package fr.ird.osmose.util.timeseries;
 
+import fr.ird.osmose.process.mortality.fishery.*;
 import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
 import java.io.IOException;
 
 /**
@@ -60,19 +60,22 @@ import java.io.IOException;
  *
  * @author nbarrier
  */
-public class FisheryFBase extends OsmoseLinker {
+public class ByRegimeTimeSeries extends OsmoseLinker {
 
-    int fisheryIndex;
-    public double[] fBase;
+    private double[] values;
+    private final String keyShift;
+    private final String keyVal;
 
     /**
-     * Public constructor. Initialize the FisheryMortality pointer.
+     * Public constructor.Initialize the FisheryMortality pointer.
      *
-     * @param fishery
+     * @param keyShift Key for shift values
+     * @param keyVal  Key for data values
      */
-    public FisheryFBase(int index) {
-        this.fisheryIndex = index;
-        fBase = new double[getConfiguration().getNStep()];
+    public ByRegimeTimeSeries(String keyShift, String keyVal) {
+        this.keyShift = keyShift;
+        this.keyVal = keyVal;
+        values = new double[getConfiguration().getNStep()];
     }
 
     /**
@@ -80,23 +83,66 @@ public class FisheryFBase extends OsmoseLinker {
      */
     public void init() {
 
-        int index = fisheryIndex;
         int nStep = this.getConfiguration().getNStep();
         int nStepYear = this.getConfiguration().getNStepYear();
 
         // If a fishing shift exists, take it to extract the fishing values
-        String keyShift = String.format("fisheries.rate.shift.fsh%d", index);
-        String keyVal = String.format("fisheries.rate.base.fsh%d", index);
+        // Shift is provided in years in the file
+        int[] tempshifts = getConfiguration().getArrayInt(this.keyShift);
 
-        if (getConfiguration().canFind(keyShift)) {
-            ByRegimeTimeSeries ts = new ByRegimeTimeSeries(keyShift, keyVal);
-            fBase = ts.getValues();
-        } else {
-            double cstFbase = this.getConfiguration().getDouble(keyVal);
-            for (int i = 0; i < nStep; i++) {
-                fBase[i] = cstFbase;
+        // converted into to time-step.
+        for (int i = 0; i < tempshifts.length; i++) {
+            tempshifts[i] *= nStepYear;
+        }
+
+        // Count the number of good shift values, i.e within simu. time period
+        int nShift = 0;
+        for (int i = 0; i < tempshifts.length; i++) {
+            if (tempshifts[i] < nStep) {  // tempshifts here is converted from years to time-step
+                nShift++;
             }
-        } // end of if statement on
+        }
+
+        // Initialize the final shift values, i.e after removing out of range ones.
+        int shifts[] = new int[nShift];
+        int cpt = 0;
+        for (int i = 0; i < tempshifts.length; i++) {
+            if (tempshifts[i] < nStep) {
+                shifts[cpt] = tempshifts[i];
+                cpt++;
+            }
+        }
+
+        // number of regimes is number of shifts + 1
+        int nRegime = nShift + 1;
+
+        // Get the fishing rates.
+        double[] rates = getConfiguration().getArrayDouble(this.keyVal);
+
+        if (rates.length < nRegime) {
+            error("You must provide at least " + nRegime + " fishing rates.", new IOException());
+        }
+
+        int irate = 0;   // current index in the rate array.
+        int ishift = 0;  // current index of the next shift array.
+        int sh = shifts[ishift];   // sets the value of the next shift (time step)
+        for (int i = 0; i < nStep; i++) {
+
+            // if the current array index is greater than shift,
+            // we update the ishift and irate array.
+            if (i >= sh) {
+                ishift++;
+                irate++;
+
+                // if the shift index is greater than bound array
+                // the last shift value is set as equal to nyear*ndt
+                sh = (ishift < shifts.length) ? shifts[ishift] : nStep;
+
+            }
+
+            values[i] = rates[irate];
+
+        } // end of i loop
     } // end of init method
 
     /**
@@ -105,8 +151,8 @@ public class FisheryFBase extends OsmoseLinker {
      * @param idt Time step
      * @return
      */
-    public double getFBase(int idt) {
-        return this.fBase[idt];
+    public double[] getValues() {
+        return this.values;
     }
 
 } // end of class
