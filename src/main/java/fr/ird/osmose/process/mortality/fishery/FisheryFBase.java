@@ -81,22 +81,14 @@ public class FisheryFBase extends OsmoseLinker {
     public void init() {
 
         int index = fisheryIndex;
-        int nStep = this.getConfiguration().getNStep();
-        int nStepYear = this.getConfiguration().getNStepYear();
 
         // If a fishing shift exists, take it to extract the fishing values
         String keyShift = String.format("fisheries.rate.shift.fsh%d", index);
         String keyVal = String.format("fisheries.rate.base.fsh%d", index);
 
-        if (getConfiguration().canFind(keyShift)) {
-            ByRegimeTimeSeries ts = new ByRegimeTimeSeries(keyShift, keyVal);
-            fBase = ts.getValues();
-        } else {
-            double cstFbase = this.getConfiguration().getDouble(keyVal);
-            for (int i = 0; i < nStep; i++) {
-                fBase[i] = cstFbase;
-            }
-        } // end of if statement on
+        ByRegimeTimeSeries ts = new ByRegimeTimeSeries(keyShift, keyVal);
+        fBase = ts.getValues();
+
     } // end of init method
 
     /**
