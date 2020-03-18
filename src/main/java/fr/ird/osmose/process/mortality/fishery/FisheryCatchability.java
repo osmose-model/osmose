@@ -51,14 +51,10 @@
  */
 package fr.ird.osmose.process.mortality.fishery;
 
-import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.OsmoseLinker;
-import java.io.FileReader;
+import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
 import java.io.IOException;
-import java.util.List;
 
 /**
  *
@@ -66,85 +62,70 @@ import java.util.List;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class AccessMatrix extends OsmoseLinker {
+public class FisheryCatchability extends OsmoseLinker {
 
     /**
-     * Accessibility (in percentage). Dimensions = [species][fisheries]
+     * Accessibility (in percentage). Dimensions = [step][species]
      */
     private double[][] values;
 
     /**
      * Number of Fisheries.
      */
-    private int nFishery;
-
-    /**
-     * Reads the fishery accessibility matrix. The return value is of
-     * dimensions [nFishery][nSpecies]
-     *
-     * @param filename
-     */
-    public void read(String filename) {
-
-        Configuration cfg = Osmose.getInstance().getConfiguration();
-
-        // recovers the number of species
-        int nSpecies = getConfiguration().getNSpecies();
-
-        // recovers the number of fisheries
-        nFishery = cfg.findKeys("fishery.selectivity.type.fsh*").size();
-
-        read(filename, nFishery, nSpecies);
+    private final int fisheryIndex;
+    
+    public FisheryCatchability(int index) {
+        this.fisheryIndex = index;
     }
-
-    /**
-     * Reads the fishery accessibility matrix. The return value is of
-     * dimensions [nFishery][nSpecies]
-     *
-     * @param filename
-     * @param nFishery
-     * @param nSpecies
-     */
-    public void read(String filename, int nFishery, int nSpecies) {
-
-        try {
-            // 1. Open the CSV file
-            CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator());
-            List<String[]> lines = reader.readAll();
-
-            // 2. Check the number of line and checks that it equal to nFisheries 
-            int nTimeSerie = lines.size() - 1;
-            if (nTimeSerie < nFishery) {
-                error("Found " + nTimeSerie + " lines in the file. It must contain " + nFishery + " lines.", new Exception());
-            }
-
-            // 3. Read the time serie
-            // Initialize the output array
-            values = new double[nFishery][nSpecies];
-
-            // Loop over the lines (skip header)
-            for (int t = 0; t < nFishery; t++) {
-                String[] line = lines.get(t + 1);
-
-                // Checks that the matrix contains nSpecies column (skip column index)
-                if (line.length != nSpecies + 1) {
-                    error("The number of column must be " + nSpecies, new IOException());
-                }
-
-                // Loop over the nSpecies colums
-                for (int k = 0; k < nSpecies; k++) {
-                    values[t][k] = Double.valueOf(line[k + 1]) / 100. ;  // barrier.n: multiplication by 1/100. to have values into [0, 1]
-                    // force the values between [0-1] 
-                    values[t][k] = Math.max(values[t][k], 0);  
-                    values[t][k] = Math.min(values[t][k], 1);  
-                }
-            }
-
-        } catch (IOException ex) {
-            error("Error reading CSV file " + filename, ex);
+      
+    public void init() throws IOException {
+        
+        String key;
+        Configuration cfg = this.getConfiguration();
+        
+        key = String.format("fisheries.catchability.file.fsh%d", fisheryIndex);
+        if(cfg.canFind(key)) {
+            BySpeciesTimeSeries ts = new BySpeciesTimeSeries();
+            values = ts.getValues();
         }
+        
+        else {
+            key = String.format("fisheries.catchability.fsh%d", fisheryIndex);
+            double[] array = cfg.getArrayDouble(key);
+            values = new double[cfg.getNStep()][];
+            for(int i = 0; i<values.length; i++) {
+                values[i] = array;
+            }
+        }     
+        
+        this.checkValues();
+        
     }
+    
+    private void checkValues() throws IOException { 
+        int nstep = values.length;
+        double min = Double.MAX_VALUE;
+        double max = Double.MIN_VALUE;
+        for (int i = 0; i < nstep; i++) {
+            int ncol = values[i].length;
+            for (int j = 0; j < ncol; j++) {
+                min = Math.min(min, values[i][j]);
+                max = Math.min(max, values[i][j]);
+            }
+        }
+        
+        if (max > 1) {
+            String error = String.format("Maximum access. for fishery %d should be 1, %f provided", this.fisheryIndex, max);
+            throw new IOException(error);
+        }
 
+        if (min < 0) {
+            String error = String.format("Minimum access. for fishery %d should be 0, %f provided", this.fisheryIndex, max);
+            throw new IOException(error);
+        }
+
+    }
+    
     /**
      * Returns the [nFishery, nSpecies] accessibility matrix.
      * @return 
@@ -159,8 +140,8 @@ public class AccessMatrix extends OsmoseLinker {
      * @param iFishery Fishery index
      * @return 
      */
-    public double[] getValues(int iFishery) {
-        return values[iFishery];
+    public double[] getValues(int istep) {
+        return values[istep];
     }
 
     /**
@@ -171,8 +152,8 @@ public class AccessMatrix extends OsmoseLinker {
      * @param iSpec Species index
      * @return 
      */
-    public double getValues(int iFishery, int iSpec) {
-        return values[iFishery][iSpec];
+    public double getValues(int istep, int iSpec) {
+        return values[istep][iSpec];
     }
 
 }
