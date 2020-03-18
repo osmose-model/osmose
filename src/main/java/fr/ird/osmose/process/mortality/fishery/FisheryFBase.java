@@ -59,7 +59,7 @@ import java.io.IOException;
  *
  * @author nbarrier
  */
-public class FishingFBase extends OsmoseLinker {
+public class FisheryFBase extends OsmoseLinker {
 
     int fisheryIndex;
     public double[] fBase;
@@ -69,7 +69,7 @@ public class FishingFBase extends OsmoseLinker {
      *
      * @param fishery
      */
-    public FishingFBase(int index) {
+    public FisheryFBase(int index) {
         this.fisheryIndex = index;
         fBase = new double[getConfiguration().getNStep()];
     }

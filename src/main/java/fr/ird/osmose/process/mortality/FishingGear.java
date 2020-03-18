@@ -56,8 +56,10 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.fishery.FisheryFBase;
+import fr.ird.osmose.process.mortality.fishery.FisherySeason;
+import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FishingMapSet;
-import fr.ird.osmose.process.mortality.fishery.TimeVariability;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
@@ -78,10 +80,10 @@ public class FishingGear extends AbstractMortality {
      */
     private final int fIndex;
 
-    /**
-     * Fishery time-variability.
-     */
-    private TimeVariability timeVar;
+    // Initialize the time varying array
+    private FisheryFBase fBase;
+    private FisherySeason fSeason;
+    private FisherySeasonality fSeasonality;
 
     /**
      * Fishery map set.
@@ -178,8 +180,9 @@ public class FishingGear extends AbstractMortality {
         }
 
         // Initialize the time varying array
-        timeVar = new TimeVariability(this);
-        timeVar.init();
+        FisheryFBase fBase = new FisheryFBase(fIndex);
+        FisherySeason fSeason = new FisherySeason(fIndex);
+        FisherySeasonality fSeasonality = new FisherySeasonality(fIndex);
 
         // fishery spatial maps
         fMapSet = new FishingMapSet(fIndex, "fishery.movement");
@@ -225,7 +228,10 @@ public class FishingGear extends AbstractMortality {
         Cell cell = school.getCell();
 
         // recovers the time varying rate of the fishing mortality
-        double timeSelect = timeVar.getTimeVar(index);
+        // as a product of FBase, FSeason and FSeasonality
+        double timeSelect = fBase.getFBase(index);
+        timeSelect *= this.fSeason.getSeasonFishMort(index) ;
+        timeSelect *= this.fSeasonality.getSeasonalityFishMort(index);
 
         int selectIndex = (int) this.selectType_array[index];
 
