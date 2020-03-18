@@ -70,7 +70,7 @@ public class ByRegimeTimeSeries extends OsmoseLinker {
      * Public constructor.Initialize the FisheryMortality pointer.
      *
      * @param keyShift Key for shift values
-     * @param keyVal  Key for data values
+     * @param keyVal Key for data values
      */
     public ByRegimeTimeSeries(String keyShift, String keyVal) {
         this.keyShift = keyShift;
@@ -86,63 +86,74 @@ public class ByRegimeTimeSeries extends OsmoseLinker {
         int nStep = this.getConfiguration().getNStep();
         int nStepYear = this.getConfiguration().getNStepYear();
 
-        // If a fishing shift exists, take it to extract the fishing values
-        // Shift is provided in years in the file
-        int[] tempshifts = getConfiguration().getArrayInt(this.keyShift);
-
-        // converted into to time-step.
-        for (int i = 0; i < tempshifts.length; i++) {
-            tempshifts[i] *= nStepYear;
-        }
-
-        // Count the number of good shift values, i.e within simu. time period
-        int nShift = 0;
-        for (int i = 0; i < tempshifts.length; i++) {
-            if (tempshifts[i] < nStep) {  // tempshifts here is converted from years to time-step
-                nShift++;
-            }
-        }
-
-        // Initialize the final shift values, i.e after removing out of range ones.
-        int shifts[] = new int[nShift];
-        int cpt = 0;
-        for (int i = 0; i < tempshifts.length; i++) {
-            if (tempshifts[i] < nStep) {
-                shifts[cpt] = tempshifts[i];
-                cpt++;
-            }
-        }
-
-        // number of regimes is number of shifts + 1
-        int nRegime = nShift + 1;
-
-        // Get the fishing rates.
-        double[] rates = getConfiguration().getArrayDouble(this.keyVal);
-
-        if (rates.length < nRegime) {
-            error("You must provide at least " + nRegime + " fishing rates.", new IOException());
-        }
-
-        int irate = 0;   // current index in the rate array.
-        int ishift = 0;  // current index of the next shift array.
-        int sh = shifts[ishift];   // sets the value of the next shift (time step)
-        for (int i = 0; i < nStep; i++) {
-
-            // if the current array index is greater than shift,
-            // we update the ishift and irate array.
-            if (i >= sh) {
-                ishift++;
-                irate++;
-
-                // if the shift index is greater than bound array
-                // the last shift value is set as equal to nyear*ndt
-                sh = (ishift < shifts.length) ? shifts[ishift] : nStep;
-
+        if (!this.getConfiguration().canFind(keyShift)) {
+            String warn = String.format("The %s argument was not found. Assumes one single value for all the simulation.", keyShift);
+            warning(warn);
+            double cstVal = getConfiguration().getDouble(this.keyVal);
+            for (int i = 0; i < nStep; i++) {
+                values[i] = cstVal;
             }
 
-            values[i] = rates[irate];
+        } else {
 
-        } // end of i loop
+            // If a fishing shift exists, take it to extract the fishing values
+            // Shift is provided in years in the file
+            int[] tempshifts = getConfiguration().getArrayInt(this.keyShift);
+
+            // converted into to time-step.
+            for (int i = 0; i < tempshifts.length; i++) {
+                tempshifts[i] *= nStepYear;
+            }
+
+            // Count the number of good shift values, i.e within simu. time period
+            int nShift = 0;
+            for (int i = 0; i < tempshifts.length; i++) {
+                if (tempshifts[i] < nStep) {  // tempshifts here is converted from years to time-step
+                    nShift++;
+                }
+            }
+
+            // Initialize the final shift values, i.e after removing out of range ones.
+            int shifts[] = new int[nShift];
+            int cpt = 0;
+            for (int i = 0; i < tempshifts.length; i++) {
+                if (tempshifts[i] < nStep) {
+                    shifts[cpt] = tempshifts[i];
+                    cpt++;
+                }
+            }
+
+            // number of regimes is number of shifts + 1
+            int nRegime = nShift + 1;
+
+            // Get the fishing rates.
+            double[] rates = getConfiguration().getArrayDouble(this.keyVal);
+
+            if (rates.length < nRegime) {
+                error("You must provide at least " + nRegime + " fishing rates.", new IOException());
+            }
+
+            int irate = 0;   // current index in the rate array.
+            int ishift = 0;  // current index of the next shift array.
+            int sh = shifts[ishift];   // sets the value of the next shift (time step)
+            for (int i = 0; i < nStep; i++) {
+
+                // if the current array index is greater than shift,
+                // we update the ishift and irate array.
+                if (i >= sh) {
+                    ishift++;
+                    irate++;
+
+                    // if the shift index is greater than bound array
+                    // the last shift value is set as equal to nyear*ndt
+                    sh = (ishift < shifts.length) ? shifts[ishift] : nStep;
+
+                }
+
+                values[i] = rates[irate];
+
+            } // end of i loop
+        }
     } // end of init method
 
     /**
