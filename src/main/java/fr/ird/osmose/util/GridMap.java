@@ -106,12 +106,12 @@ public class GridMap extends OsmoseLinker {
                 int j = ny - l - 1;
                 for (int i = 0; i < line.length; i++) {
                     try {
-                        float value = Float.valueOf(line[i]);
-                        // If value is greater than 0 or value is not NaN
-                        // set the value
-                        // else, value = 0
-                        if ((value > 0.f) || (!Float.isNaN(value))) {
-                            matrix[j][i] = value;
+                        String val = line[i].toLowerCase();
+                        if (val.equals("na") || val.equals("nan")) {
+                            this.matrix[j][i] = Float.NaN;
+                        } else {
+                            float value = Float.valueOf(line[i]);
+                            this.matrix[j][i] = value;
                         }
                     } catch (NumberFormatException ex) {
                         error("Error parsing CSV map " + csvFile + " row " + (l + 1) + " column " + (i + 1), ex);
