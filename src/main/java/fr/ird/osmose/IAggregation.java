@@ -137,5 +137,7 @@ public interface IAggregation extends IMarineOrganism {
      * @param fishedBiomass, fished biomass in tons
      */
     public void fishedBy(int fisheryIndex, double fishedBiomass);
+    
+    public void discardedBy(int fisheryIndex, double fishedBiomass);
 
 }

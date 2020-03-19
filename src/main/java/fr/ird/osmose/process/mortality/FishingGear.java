@@ -63,14 +63,9 @@ import fr.ird.osmose.process.mortality.fishery.FisherySeason;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
-import fr.ird.osmose.util.GridMap;
-import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
-import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.math3.distribution.NormalDistribution;
 
 
 /**
@@ -184,6 +179,19 @@ public class FishingGear extends AbstractMortality {
         double sizeSelect = selectivity.getSelectivity(index, school);
 
         return speciesCatchability * timeSelect * sizeSelect * spatialSelect;
+    }
+    
+    /**
+     * Get the percentage of discards for the given species and the given
+     * time-step.
+     *
+     * @param school
+     * @return
+     */
+    public double getDiscardRate(AbstractSchool school) {
+        int index = getSimulation().getIndexTimeSimu();
+        int speciesIndex = school.getSpeciesIndex();
+        return this.discards.getValues(index, speciesIndex);
     }
 
     /**

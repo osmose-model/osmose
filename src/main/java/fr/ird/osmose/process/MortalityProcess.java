@@ -536,7 +536,13 @@ public class MortalityProcess extends AbstractProcess {
                             int iFishery = seqFishery[i][indexFishery[i]];
                             double F = fisheriesMortality[iFishery].getRate(fishedSchool) / subdt;
                             nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
-                            fishedSchool.fishedBy(iFishery, school.abd2biom(nDead));
+                            
+                            // Percentage values of discarded fish. The remaining go to fishery.
+                            double discardRate = fisheriesMortality[iFishery].getDiscardRate(fishedSchool);
+                            
+                            fishedSchool.fishedBy(iFishery, school.abd2biom((1 - discardRate) * nDead));
+                            fishedSchool.discardedBy(iFishery, school.abd2biom(discardRate * nDead));
+                            
                             // make sure a different fishery is called every time
                             // it is just a trick since we do not have case FISHERY1,
                             // case FISHERY2, etc. like the other mortality sources.
