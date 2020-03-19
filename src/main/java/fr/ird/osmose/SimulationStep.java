@@ -178,7 +178,7 @@ public class SimulationStep extends SimulationLinker {
             school.init();
         });
 
-        // Update LTL biomass
+        // Update LTL + background biomass
         for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
             getResourceForcing(iRsc).update(iStepSimu);
         }
