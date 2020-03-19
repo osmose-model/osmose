@@ -51,112 +51,16 @@
  */
 package fr.ird.osmose.process.mortality.fishery;
 
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
-import java.io.IOException;
-
 /**
  *
  * @author Nicolas Barrier (nicolas.barrier@ird.fr)
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class FisheryCatchability extends OsmoseLinker {
+public class FisheryDiscards extends FisheryCatchability {
 
-    /**
-     * Accessibility (in percentage). Dimensions = [step][species]
-     */
-    private double[][] values;
-
-    /**
-     * Number of Fisheries.
-     */
-    private final int fisheryIndex;
-    
-    private final String prefix;
-    
-    public FisheryCatchability(int index, String prefix) {
-        this.fisheryIndex = index;
-        this.prefix = prefix;
-    }
-      
-    public void init() throws IOException {
-        
-        String key;
-        Configuration cfg = this.getConfiguration();
-        
-        key = String.format("%s.file.fsh%d", prefix, fisheryIndex);
-        if(cfg.canFind(key)) {
-            BySpeciesTimeSeries ts = new BySpeciesTimeSeries();
-            values = ts.getValues();
-        }
-        
-        else {
-            key = String.format("%s.fsh%d", prefix, fisheryIndex);
-            double[] array = cfg.getArrayDouble(key);
-            values = new double[cfg.getNStep()][];
-            for(int i = 0; i<values.length; i++) {
-                values[i] = array;
-            }
-        }     
-        
-        this.checkValues();
-        
-    }
-    
-    private void checkValues() throws IOException { 
-        int nstep = values.length;
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-        for (int i = 0; i < nstep; i++) {
-            int ncol = values[i].length;
-            for (int j = 0; j < ncol; j++) {
-                min = Math.min(min, values[i][j]);
-                max = Math.min(max, values[i][j]);
-            }
-        }
-        
-        if (max > 1) {
-            String error = String.format("Maximum access. for fishery %d should be 1, %f provided", this.fisheryIndex, max);
-            throw new IOException(error);
-        }
-
-        if (min < 0) {
-            String error = String.format("Minimum access. for fishery %d should be 0, %f provided", this.fisheryIndex, max);
-            throw new IOException(error);
-        }
-
-    }
-    
-    /**
-     * Returns the [nFishery, nSpecies] accessibility matrix.
-     * @return 
-     */
-    public double[][] getValues() {
-        return values;
-    }
-
-    /**
-     * Returns the [nSpecies] accessibility matrix for a given fisheries
-     *
-     * @param iFishery Fishery index
-     * @return 
-     */
-    public double[] getValues(int istep) {
-        return values[istep];
-    }
-
-    /**
-     * Returns the accessibility matrix for a given fisheries and a given
-     * specie.
-     *
-     * @param iFishery Fishery index
-     * @param iSpec Species index
-     * @return 
-     */
-    public double getValues(int istep, int iSpec) {
-        return values[istep][iSpec];
+    public FisheryDiscards(int index, String prefix) {
+        super(index, prefix);
     }
 
 }

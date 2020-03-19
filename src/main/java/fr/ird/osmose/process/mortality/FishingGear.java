@@ -57,6 +57,7 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.fishery.FisheryCatchability;
+import fr.ird.osmose.process.mortality.fishery.FisheryDiscards;
 import fr.ird.osmose.process.mortality.fishery.FisheryFBase;
 import fr.ird.osmose.process.mortality.fishery.FisherySeason;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
@@ -102,6 +103,8 @@ public class FishingGear extends AbstractMortality {
     private FisheryCatchability catchability;
     
     private FisherySelectivity selectivity;
+    
+    private FisheryDiscards discards;
 
 
     public FishingGear(int rank, int findex) {
@@ -125,7 +128,7 @@ public class FishingGear extends AbstractMortality {
         fSeasonality.init();
         
         // fishery spatial maps
-        fMapSet = new FisheryMapSet(name, "fishery.movement");
+        fMapSet = new FisheryMapSet(name, "fisheries.movement");
         fMapSet.init();
         
         selectivity = new FisherySelectivity(fIndex);
@@ -133,12 +136,14 @@ public class FishingGear extends AbstractMortality {
 
         // accessibility matrix
         // (it provides the percentage of fishes that are going to be captured)
-        catchability = new FisheryCatchability(fIndex);
+        catchability = new FisheryCatchability(fIndex, "fisheries.catchability");
         try {
             catchability.init();
         } catch (IOException ex) {
             Logger.getLogger(FishingGear.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        discards = new FisheryDiscards(fIndex, "fisheries.discards");
         
     }
 
