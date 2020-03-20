@@ -125,6 +125,7 @@ public class PredationAccessibility extends SimulationLinker {
             // recovers the indexes of the accessibility matrixes.
             int[] index = this.getConfiguration().findKeys("predation.accessibility.file.acc*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".acc") + 4))).toArray();
             for (int i : index) {
+                
                 String filename = getConfiguration().getFile("predation.accessibility.file.acc" + i);
                 AccessMatrix temp = new AccessMatrix(filename);
                 matrixAccess.put(i, temp);
@@ -132,22 +133,37 @@ public class PredationAccessibility extends SimulationLinker {
                 String key;
                 int ymax, ymin;
                 int season[];
+                int years[];
 
-                key = "predation.accessibility.ymin.acc" + i;
+                key = "predation.accessibility.years.acc" + i;
                 if (!conf.isNull(key)) {
-                    ymin = conf.getInt(key);
+                    years = conf.getArrayInt(key);
                 } else {
-                    ymin = 0;
+                    key = "predation.accessibility.initialYear.acc" + i;
+                    if (!conf.isNull(key)) {
+                        ymin = conf.getInt(key);
+                    } else {
+                        ymin = 0;
+                    }
+
+                    key = "predation.accessibility.lastYear.acc" + i;
+                    if (!conf.isNull(key)) {
+                        ymax = conf.getInt(key);
+                    } else {
+                        ymax = nyear;
+                    }
+                    
+                    int nyears = ymax - ymin;
+                    years = new int[nyears];
+                    int cpt = 0;
+                    for (int y=ymin; y<ymax; y++) {
+                        years[cpt] = y;
+                        cpt++;
+                    }
+                    
                 }
 
-                key = "predation.accessibility.ymax.acc" + i;
-                if (!conf.isNull(key)) {
-                    ymax = conf.getInt(key);
-                } else {
-                    ymax = nyear;
-                }
-
-                key = "predation.accessibility.season.acc" + i;
+                key = "predation.accessibility.steps.acc" + i;
                 if (!conf.isNull(key)) {
                     season = conf.getArrayInt(key);
                 } else {
@@ -157,7 +173,7 @@ public class PredationAccessibility extends SimulationLinker {
                     }
                 }
 
-                for (int y = ymin; y < ymax; y++) {
+                for (int y : years) {
                     for (int s : season) {
                         indexAccess[y][s] = i;
                     }

@@ -329,34 +329,48 @@ public class MapSet extends OsmoseLinker {
             /*
              * read age min and age max concerned by this map
              */
-            int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".age.min" + ".map" + imap) * getConfiguration().getNStepYear());
-            int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".age.max" + ".map" + imap) * getConfiguration().getNStepYear());
+            int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".initialAge" + ".map" + imap) * getConfiguration().getNStepYear());
+            int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + "lastAge" + ".map" + imap) * getConfiguration().getNStepYear());
             ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
 
             /*
              * read the time steps over the year concerned by this map
              */
-            int[] mapSeason = getConfiguration().getArrayInt(prefix + ".season" + ".map" + imap);
+            int[] mapSeason = getConfiguration().getArrayInt(prefix + ".steps" + ".map" + imap);
             /*
              * Read year min and max concerned by this map
              */
-            int yearMin = 0;
-            int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-            int yearMax = nyear;
-            if (!getConfiguration().isNull(prefix + ".year.min" + ".map" + imap)) {
-                yearMin = getConfiguration().getInt(prefix + ".year.min" + ".map" + imap);
-                yearMin = Math.max(yearMin, 0);
-            }
-            if (!getConfiguration().isNull(prefix + ".year.max" + ".map" + imap)) {
-                yearMax = getConfiguration().getInt(prefix + ".year.max" + ".map" + imap);
-                yearMax = Math.min(yearMax, nyear);
+            
+            int[] mapYears;
+            if (!getConfiguration().isNull(prefix + ".years.map" + imap)) {
+                mapYears = getConfiguration().getArrayInt(prefix + ".years.map" + imap);
+            } else {
+                int yearMin = 0;
+                int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
+                int yearMax = nyear;
+                if (!getConfiguration().isNull(prefix + ".initialYear.map" + imap)) {
+                    yearMin = getConfiguration().getInt(prefix + ".initialYear.map" + imap);
+                    yearMin = Math.max(yearMin, 0);
+                }
+                if (!getConfiguration().isNull(prefix + ".lastYear.map" + imap)) {
+                    yearMax = getConfiguration().getInt(prefix + ".lastYear.map" + imap);
+                    yearMax = Math.min(yearMax, nyear);
+                }
+                
+                int N = yearMax - yearMin;
+                mapYears = new int[N];
+                int cpt = 0;
+                for(int y=yearMin; y<yearMax; y++) {
+                    mapYears[cpt] = y;
+                }
+                
             }
             /*
              * Assign number of maps to numMap array
              */
             int nStepYear = getConfiguration().getNStepYear();
             for (int iAge = ageMin; iAge < ageMax; iAge++) {
-                for (int iYear = yearMin; iYear < yearMax; iYear++) {
+                for (int iYear : mapYears) {
                     for (int iSeason : mapSeason) {
                         int iStep = iYear * nStepYear + iSeason;
                         if (iStep < indexMaps[iAge].length) {

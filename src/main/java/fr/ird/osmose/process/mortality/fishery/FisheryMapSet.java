@@ -209,7 +209,7 @@ public class FisheryMapSet extends OsmoseLinker {
              * read the time steps over the year concerned by this map
              */
             int [] mapSeason;
-            String key = prefix + ".season" + ".map" + imap;
+            String key = prefix + ".steps.map" + imap;
             if (!getConfiguration().isNull(key)) {
                 mapSeason = getConfiguration().getArrayInt(key);
             } else {
