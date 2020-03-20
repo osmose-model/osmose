@@ -250,4 +250,9 @@ public class Resource extends OsmoseLinker implements IAggregation {
         return this.species.getName();
     }
 
+    @Override
+    public void discardedBy(int fisheryIndex, double fishedBiomass) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
