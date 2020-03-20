@@ -171,7 +171,7 @@ public class FisheryMapSet extends OsmoseLinker {
         for (int n = 0; n < nmapmax; n++) {
 
             // This is done if the indexing of fishering maps start with one for instance
-            while (!getConfiguration().canFind(prefix + ".fishery.map" + imap)) {
+            while (getConfiguration().isNull(prefix + ".fishery.map" + imap)) {
                 imap++;
             }
 
@@ -210,7 +210,7 @@ public class FisheryMapSet extends OsmoseLinker {
              */
             int [] mapSeason;
             String key = prefix + ".season" + ".map" + imap;
-            if (getConfiguration().canFind(key)) {
+            if (!getConfiguration().isNull(key)) {
                 mapSeason = getConfiguration().getArrayInt(key);
             } else {
                 mapSeason = new int[getConfiguration().getNStepYear()];
@@ -222,7 +222,7 @@ public class FisheryMapSet extends OsmoseLinker {
             int[] listOfYears;
             
             key = String.format("%s.years.map%d", prefix, imap);
-            if (this.getConfiguration().canFind(key)) {
+            if (!this.getConfiguration().isNull(key)) {
                 listOfYears = cfg.getArrayInt(key);
             } else {
                 int yearMin = 0;

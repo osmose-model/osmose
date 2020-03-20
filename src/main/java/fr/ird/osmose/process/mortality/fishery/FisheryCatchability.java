@@ -87,7 +87,7 @@ public class FisheryCatchability extends OsmoseLinker {
         Configuration cfg = this.getConfiguration();
         
         key = String.format("%s.file.fsh%d", prefix, fisheryIndex);
-        if(cfg.canFind(key)) {
+        if(!cfg.isNull(key)) {
             BySpeciesTimeSeries ts = new BySpeciesTimeSeries();
             values = ts.getValues();
         }

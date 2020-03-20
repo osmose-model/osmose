@@ -95,7 +95,7 @@ public class FisherySeasonality extends OsmoseLinker {
 
         // If a seaonaly vector exitsts
         key = String.format("fisheries.seasonality.fsh%d", this.fisheryIndex);
-        if (this.getConfiguration().canFind(key)) {
+        if (!this.getConfiguration().isNull(key)) {
 
             // Read the season array
             double[] seasonTmp = this.getConfiguration().getArrayDouble(key);

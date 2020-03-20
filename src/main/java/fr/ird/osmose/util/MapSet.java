@@ -190,7 +190,7 @@ public class MapSet extends OsmoseLinker {
         // If the movement.map.spX exists, maps are initialised by using NetCDF
         // else, classic definitions of maps.
         String key = prefix + ".map." + suffix + iSpecies;
-        if (getConfiguration().canFind(key)) {
+        if (!getConfiguration().isNull(key)) {
             info("Reding NetCDF file " + getConfiguration().getFile(key));
             loadMapsNc();
             // Check the map indexation

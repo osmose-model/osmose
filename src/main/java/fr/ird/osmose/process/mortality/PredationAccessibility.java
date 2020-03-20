@@ -134,21 +134,21 @@ public class PredationAccessibility extends SimulationLinker {
                 int season[];
 
                 key = "predation.accessibility.ymin.acc" + i;
-                if (conf.canFind(key)) {
+                if (!conf.isNull(key)) {
                     ymin = conf.getInt(key);
                 } else {
                     ymin = 0;
                 }
 
                 key = "predation.accessibility.ymax.acc" + i;
-                if (conf.canFind(key)) {
+                if (!conf.isNull(key)) {
                     ymax = conf.getInt(key);
                 } else {
                     ymax = nyear;
                 }
 
                 key = "predation.accessibility.season.acc" + i;
-                if (conf.canFind(key)) {
+                if (!conf.isNull(key)) {
                     season = conf.getArrayInt(key);
                 } else {
                     season = new int[nseason];

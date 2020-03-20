@@ -85,8 +85,8 @@ public class ByRegimeTimeSeries extends OsmoseLinker {
 
         int nStep = this.getConfiguration().getNStep();
         int nStepYear = this.getConfiguration().getNStepYear();
-
-        if (!this.getConfiguration().canFind(keyShift)) {
+        
+        if (this.getConfiguration().isNull(keyShift)) {
             String warn = String.format("The %s argument was not found. Assumes one single value for all the simulation.", keyShift);
             warning(warn);
             double cstVal = getConfiguration().getDouble(this.keyVal);

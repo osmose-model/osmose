@@ -142,11 +142,11 @@ public class FisherySelectivity extends OsmoseLinker {
         Configuration cfg = this.getConfiguration();
 
         // if tiny parameter exists, set tiny. Else, use default
-        if (cfg.canFind("fishery.selectivity.tiny.fsh" + fIndex)) {
+        if (!cfg.isNull("fishery.selectivity.tiny.fsh" + fIndex)) {
             this.tiny = cfg.getFloat("fishery.selectivity.tiny.fsh" + fIndex);
         }
 
-        if (cfg.canFind("fisheries.selectivity.a50.fsh" + fIndex)) {
+        if (!cfg.isNull("fisheries.selectivity.a50.fsh" + fIndex)) {
             varGetter = (school) -> (school.getAge());
             this.initByAge();
         } else {
