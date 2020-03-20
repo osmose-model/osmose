@@ -111,6 +111,9 @@ public class FishingGear extends AbstractMortality {
     public void init() {
         
         Configuration cfg = Osmose.getInstance().getConfiguration();
+        
+        // set-up the name of the fishery
+        name = cfg.getString("fisheries.name.fsh" + fIndex);
 
         // Initialize the time varying array
         fBase = new FisheryFBase(fIndex);
