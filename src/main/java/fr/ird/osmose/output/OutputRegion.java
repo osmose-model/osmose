@@ -96,8 +96,9 @@ public class OutputRegion extends OsmoseLinker {
         Arrays.sort(cells);
     }
     
-    /*
-    https://stackoverflow.com/questions/12083093/how-to-define-if-a-determinate-point-is-inside-a-region-lat-long
+    /** Implementation of the Point On Polygon algorithm.
+     *  In this implementation, infinite beams are oriented northward.
+     *  See https://stackoverflow.com/questions/12083093/how-to-define-if-a-determinate-point-is-inside-a-region-lat-long
      */
     private boolean isInside(double lat0, double lon0, double[] lat, double[] lon) {
         int i, j;
@@ -110,8 +111,8 @@ public class OutputRegion extends OsmoseLinker {
             double dxji = substract(lon[j], lon[i]);
             if ((((dxi0 >= 0) && (dxj0 < 0)) || ((dxj0 >= 0) && (dxi0 < 0)))
                     && (lat0 < ((lat[j] - lat[i]) * dxi0 / dxji + lat[i]))) {
-                inside = !inside;
-            }
+                inside = !inside;   
+            }   
         }
         return inside;
     }
