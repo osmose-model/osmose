@@ -129,7 +129,7 @@ public class FishingGear extends AbstractMortality {
         fMapSet = new FisheryMapSet(name, "fisheries.movement");
         fMapSet.init();
         
-        selectivity = new FisherySelectivity(fIndex);
+        selectivity = new FisherySelectivity(fIndex, "fishery.selectivity");
         selectivity.init();
 
         // accessibility matrix

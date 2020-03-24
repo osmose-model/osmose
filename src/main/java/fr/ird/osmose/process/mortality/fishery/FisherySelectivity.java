@@ -83,6 +83,9 @@ public class FisherySelectivity extends OsmoseLinker {
      * Fishery index.
      */
     private final int fIndex;
+    
+    /** Prefix used to define parameters. */
+    private String selPrefix;
 
     /**
      * Array of l50 values. One value per time step.
@@ -118,8 +121,9 @@ public class FisherySelectivity extends OsmoseLinker {
     }
 
   
-    public FisherySelectivity(int findex) {
+    public FisherySelectivity(int findex, String prefix) {
         fIndex = findex;
+        selPrefix = prefix;
     }
 
     /**
@@ -142,11 +146,11 @@ public class FisherySelectivity extends OsmoseLinker {
         Configuration cfg = this.getConfiguration();
 
         // if tiny parameter exists, set tiny. Else, use default
-        if (!cfg.isNull("fishery.selectivity.tiny.fsh" + fIndex)) {
-            this.tiny = cfg.getFloat("fishery.selectivity.tiny.fsh" + fIndex);
+        if (!cfg.isNull(selPrefix + ".tiny.fsh" + fIndex)) {
+            this.tiny = cfg.getFloat(selPrefix + ".tiny.fsh" + fIndex);
         }
 
-        if (!cfg.isNull("fisheries.selectivity.a50.fsh" + fIndex)) {
+        if (!cfg.isNull(selPrefix + ".a50.fsh" + fIndex)) {
             varGetter = (school) -> (school.getAge());
             this.initByAge();
         } else {
@@ -167,7 +171,7 @@ public class FisherySelectivity extends OsmoseLinker {
      */
     private void initByAge() {
 
-        String prefix = "fisheries.selectivity.a50";
+        String prefix = selPrefix + ".a50";
         this.l50_array = this.initArray(prefix);
 
         this.selectType_array = new double[l50_array.length];
@@ -180,10 +184,10 @@ public class FisherySelectivity extends OsmoseLinker {
 
         String prefix;
 
-        prefix = "fisheries.selectivity.l50";
+        prefix = selPrefix + ".l50";
         this.l50_array = this.initArray(prefix);
 
-        prefix = "fisheries.selectivity.type";
+        prefix = selPrefix + ".type";
         this.selectType_array = this.initArray(prefix);
 
         double sum = 0.;
@@ -192,7 +196,7 @@ public class FisherySelectivity extends OsmoseLinker {
         }
 
         if (sum != 0) {
-            prefix = "fisheries.selectivity.l75";
+            prefix = selPrefix + ".l75";
             this.l75_array = this.initArray(prefix);
         }
 
