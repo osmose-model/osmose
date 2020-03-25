@@ -51,26 +51,12 @@
  */
 package fr.ird.osmose.process.mortality.fishery;
 
-import fr.ird.osmose.process.mortality.*;
 import fr.ird.osmose.AbstractSchool;
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.fishery.FisheryFBase;
-import fr.ird.osmose.process.mortality.fishery.FisherySeason;
-import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
-import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
-import fr.ird.osmose.util.GridMap;
+
 import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
 import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
-import fr.ird.osmose.util.version.VersionManager;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.regex.Pattern;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
@@ -83,12 +69,14 @@ public class FisherySelectivity extends OsmoseLinker {
      * Fishery index.
      */
     private final int fIndex;
-    
-    /** Prefix used to define parameters. */
+
+    /**
+     * Prefix used to define parameters.
+     */
     private String selPrefix;
 
     private String selSuffix;
-    
+
     /**
      * Array of l50 values. One value per time step.
      */
@@ -122,7 +110,6 @@ public class FisherySelectivity extends OsmoseLinker {
         double getSelectivity(int index, AbstractSchool school);
     }
 
-  
     public FisherySelectivity(int findex, String prefix, String suffix) {
         this.fIndex = findex;
         this.selPrefix = prefix;
@@ -148,13 +135,13 @@ public class FisherySelectivity extends OsmoseLinker {
 
         Configuration cfg = this.getConfiguration();
         String key;
-        
+
         key = String.format("%s.tiny.%s%d", selPrefix, selSuffix, fIndex);
         // if tiny parameter exists, set tiny. Else, use default
         if (!cfg.isNull(key)) {
             this.tiny = cfg.getFloat(key);
         }
-        
+
         key = String.format("%s.a50.%s%d", selPrefix, selSuffix, fIndex);
         if (!cfg.isNull(key)) {
             varGetter = (school) -> (school.getAge());
@@ -172,8 +159,9 @@ public class FisherySelectivity extends OsmoseLinker {
 
     }
 
-    /** Init the variables need to compute age selectivity.
-     * Only knife-edge can be used with age.
+    /**
+     * Init the variables need to compute age selectivity. Only knife-edge can
+     * be used with age.
      */
     private void initByAge() {
 
@@ -208,13 +196,14 @@ public class FisherySelectivity extends OsmoseLinker {
 
     }
 
-    /** Computes the selectivity for a given school.
-     * 
+    /**
+     * Computes the selectivity for a given school.
+     *
      * @param school
-     * @return 
+     * @return
      */
     public double getSelectivity(int index, AbstractSchool school) {
-        
+
         int selType = (int) this.selectType_array[index];
         return (select[selType].getSelectivity(index, school));
 
@@ -291,17 +280,18 @@ public class FisherySelectivity extends OsmoseLinker {
 
     }
 
-    /** Init an array either from file (by dt) or shifts.
-     * 
+    /**
+     * Init an array either from file (by dt) or shifts.
+     *
      * @param prefix
-     * @return 
+     * @return
      */
     private double[] initArray(String prefix) {
-        
+
         String keyVal, keyShift;
         Configuration cfg = this.getConfiguration();
         double[] array;
-        
+
         keyVal = String.format("%s.file.%s%d", prefix, this.selSuffix, fIndex);
         if (cfg.canFind(keyVal)) {
             SingleTimeSeries ts = new SingleTimeSeries();
@@ -314,9 +304,9 @@ public class FisherySelectivity extends OsmoseLinker {
             rts.init();
             array = rts.getValues();
         }
-        
+
         return array;
-        
-    }
-        
+
+    }   
+
 } // end of class
