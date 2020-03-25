@@ -145,7 +145,7 @@ public class FishingGear extends AbstractMortality {
         }
 
         // If no discards parameter is provided, assumes everything goes to fishing.
-        this.useDiscards = (this.getConfiguration().findKeys("fisheries.discards*fsh").size() > 0);
+        this.useDiscards = (this.getConfiguration().findKeys("fisheries.discards*fsh" + fIndex).size() > 0);
         if (this.useDiscards) {
             discards = new FisheryDiscards(fIndex, "fisheries.discards");
             try {
