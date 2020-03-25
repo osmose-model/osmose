@@ -53,6 +53,8 @@ package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
+import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.util.Arrays;
@@ -66,12 +68,26 @@ public class OutputRegion extends OsmoseLinker {
     private final int index;
     private int[] cells;
     
+    private FisheryMapSet mapSet;
+    private FisherySelectivity selectivity;
+    
+    private String name;
+    
     public OutputRegion(int index) {
         this.index = index;
     }
     
     public void init() {
         
+         this.name = getConfiguration().getString("surveys.name.sur" + index);
+        
+         mapSet = new FisheryMapSet(this.name, "surveys.movement", "survey");
+         mapSet.init();
+         
+         selectivity = new FisherySelectivity(index, "surveys.selectivity", "sur");
+         selectivity.init();
+       
+        /*
         if (!getConfiguration().isNull("output.region.file.rg" + index)) {
             // region defined by a grid map
             String file = getConfiguration().getFile("output.region.file.rg" + index);
@@ -94,6 +110,7 @@ public class OutputRegion extends OsmoseLinker {
                     .toArray();
         }
         Arrays.sort(cells);
+        */
     }
     
     /** Implementation of the Point On Polygon algorithm.
