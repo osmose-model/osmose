@@ -157,9 +157,6 @@ public class FisheryCatchability extends OsmoseLinker {
      * @return 
      */
     public double getValues(int istep, int iSpec) {
-        System.out.println("------------------" + istep);
-        System.out.println("------------------" + iSpec);
-        System.out.println(values);
         return values[istep][iSpec];
     }
 
