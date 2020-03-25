@@ -53,6 +53,7 @@ package fr.ird.osmose.util.version;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.util.Separator;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -271,7 +272,7 @@ public class Releases {
                 // consistency of the tiem length can be done with value from NetCDF
                 // file, no need for overparametrisation.
                 deprecateParameter("ltl.nstep");
-                
+
                 // rename simulation.nplankton into simulation.nresource
                 updateKey("simulation.nplankton", "simulation.nresource");
 
@@ -324,7 +325,7 @@ public class Releases {
             void updateParameters() {
 
                 int nSpecies = getConfiguration().getInt("simulation.nspecies");
-                
+
                 // outputs
                 updateKey("output.mortality.natural.bySize.enabled", "output.mortality.additional.bySize.enabled");
                 updateKey("output.mortality.natural.byAge.enabled", "output.mortality.additional.byAge.enabled");
@@ -344,6 +345,19 @@ public class Releases {
                     updateKey("mortality.natural.spatial.distrib.file.sp" + i, "mortality.additional.spatial.distrib.file.sp" + i);
                 }
             }
+        },
+        new Release("4.2.6") {
+            @Override
+            void updateParameters() {
+                
+                Configuration cfg = this.getConfiguration();
+                         
+                cfg.findKeys("movement.age.min.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.age.min.map" + i, "movement.initialAge.map" + i));
+                cfg.findKeys("movement.age.max.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.age.max.map" + i, "movement.lastAge.map" + i));
+                cfg.findKeys("movement.season.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.season.map" + i, "movement.steps.map" + i));
+ 
+            }
         }
+
     };
 }
