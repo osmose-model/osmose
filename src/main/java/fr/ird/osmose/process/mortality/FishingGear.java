@@ -63,10 +63,12 @@ import fr.ird.osmose.process.mortality.fishery.FisherySeason;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 /**
  *
@@ -96,11 +98,12 @@ public class FishingGear extends AbstractMortality {
      * fishery. Function of time and species.
      */
     private FisheryCatchability catchability;
-    
-    private FisherySelectivity selectivity;
-    
-    private FisheryDiscards discards;
 
+    private FisherySelectivity selectivity;
+
+    private FisheryDiscards discards;
+    
+    private boolean useDiscards;
 
     public FishingGear(int rank, int findex) {
         super(rank);
@@ -109,27 +112,27 @@ public class FishingGear extends AbstractMortality {
 
     @Override
     public void init() {
-        
+
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        
+
         // set-up the name of the fishery
         name = cfg.getString("fisheries.name.fsh" + fIndex);
 
         // Initialize the time varying array
         fBase = new FisheryFBase(fIndex);
         fBase.init();
-        
+
         fSeason = new FisherySeason(fIndex);
         fSeason.init();
-        
-        fSeasonality = new FisherySeasonality(fIndex);       
+
+        fSeasonality = new FisherySeasonality(fIndex);
         fSeasonality.init();
-        
+
         // fishery spatial maps
         fMapSet = new FisheryMapSet(name, "fisheries.movement", "fishery");
         fMapSet.init();
-        
-        selectivity = new FisherySelectivity(fIndex, "fishery.selectivity", "fsh");
+
+        selectivity = new FisherySelectivity(fIndex, "fisheries.selectivity", "fsh");
         selectivity.init();
 
         // accessibility matrix
@@ -140,9 +143,24 @@ public class FishingGear extends AbstractMortality {
         } catch (IOException ex) {
             Logger.getLogger(FishingGear.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        discards = new FisheryDiscards(fIndex, "fisheries.discards");
-        
+
+        // If no discards parameter is provided, assumes everything goes to fishing.
+        this.useDiscards = (this.getConfiguration().findKeys("fisheries.discards*fsh").size() > 0);
+        if (this.useDiscards) {
+            discards = new FisheryDiscards(fIndex, "fisheries.discards");
+            try {
+                discards.init();
+            } catch (IOException ex) {
+                Logger.getLogger(FishingGear.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        try {       
+            this.writeFisheriesTimeSeries();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FishingGear.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     /**
@@ -156,12 +174,12 @@ public class FishingGear extends AbstractMortality {
     public double getRate(AbstractSchool school) throws Exception {
 
         int index = getSimulation().getIndexTimeSimu();
-        
+
         // Recovers the school cell (used to recover the map factor)
         Cell cell = school.getCell();
-        
+
         double spatialSelect = this.fMapSet.getValue(index, cell);
-        if(spatialSelect == 0.0) {
+        if (spatialSelect == 0.0) {
             return 0.0;
         }
 
@@ -175,7 +193,7 @@ public class FishingGear extends AbstractMortality {
         // recovers the time varying rate of the fishing mortality
         // as a product of FBase, FSeason and FSeasonality
         double timeSelect = fBase.getFBase(index);
-        timeSelect *= this.fSeason.getSeasonFishMort(index) ;
+        timeSelect *= this.fSeason.getSeasonFishMort(index);
         timeSelect *= this.fSeasonality.getSeasonalityFishMort(index);
 
         // Recovers the size/age fishery selectivity factor [0, 1]
@@ -183,7 +201,7 @@ public class FishingGear extends AbstractMortality {
 
         return speciesCatchability * timeSelect * sizeSelect * spatialSelect;
     }
-    
+
     /**
      * Get the percentage of discards for the given species and the given
      * time-step.
@@ -194,7 +212,7 @@ public class FishingGear extends AbstractMortality {
     public double getDiscardRate(AbstractSchool school) {
         int index = getSimulation().getIndexTimeSimu();
         int speciesIndex = school.getSpeciesIndex();
-        return this.discards.getValues(index, speciesIndex);
+        return this.useDiscards ? this.discards.getValues(index, speciesIndex) : 0;
     }
 
     /**
@@ -229,4 +247,68 @@ public class FishingGear extends AbstractMortality {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public void writeFisheriesTimeSeries() throws FileNotFoundException {
+
+        PrintWriter prw;
+        
+        // Create parent directory
+        File file = new File(getFilename());
+        
+        file.getParentFile().mkdirs();
+        try {
+            // Init stream
+            prw = new PrintWriter(file);
+        } catch (FileNotFoundException ex) {
+            error("Failed to create output file " + file.getAbsolutePath(), ex);
+            throw (ex);
+        }
+
+        String separator = getConfiguration().getOutputSeparator();
+        String[] headers = {"Time", "Fbase", "Fseason", "Fseaonality", "Ftot"};
+
+        // Write headers
+        for (String header : headers) {
+            prw.print(separator);
+            prw.print(header);
+        }
+        prw.println();
+       
+        for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
+
+            double fbase = this.fBase.getFBase(i);
+            double fseason = this.fSeason.getSeasonFishMort(i);
+            double fseasonality = this.fSeasonality.getSeasonalityFishMort(i);
+            double ftot = fbase * fseason * fseasonality;
+
+            prw.print(i);
+            prw.print(separator);
+
+            prw.print(fbase);
+            prw.print(separator);
+
+            prw.print(fseason);
+            prw.print(separator);
+
+            prw.print(fseasonality);
+            prw.print(separator);
+
+            prw.print(ftot);
+            prw.println();
+        }
+        
+        prw.close();
+
+    }
+
+    final String getFilename() {
+        StringBuilder filename = new StringBuilder();
+        String subfolder = "Fisheries_Checkout";
+        filename.append(subfolder).append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_").append(name).append("_Simu");
+        filename.append(getRank());
+        filename.append(".csv");
+        return filename.toString();
+
+    }
 }
