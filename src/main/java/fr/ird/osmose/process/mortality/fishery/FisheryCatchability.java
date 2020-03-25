@@ -89,6 +89,7 @@ public class FisheryCatchability extends OsmoseLinker {
         key = String.format("%s.file.fsh%d", prefix, fisheryIndex);
         if(!cfg.isNull(key)) {
             BySpeciesTimeSeries ts = new BySpeciesTimeSeries();
+            ts.read(cfg.getFile(key));
             values = ts.getValues();
         }
         
@@ -99,8 +100,8 @@ public class FisheryCatchability extends OsmoseLinker {
             for(int i = 0; i<values.length; i++) {
                 values[i] = array;
             }
-        }     
-        
+        }
+
         this.checkValues();
         
     }
@@ -156,6 +157,9 @@ public class FisheryCatchability extends OsmoseLinker {
      * @return 
      */
     public double getValues(int istep, int iSpec) {
+        System.out.println("------------------" + istep);
+        System.out.println("------------------" + iSpec);
+        System.out.println(values);
         return values[istep][iSpec];
     }
 
