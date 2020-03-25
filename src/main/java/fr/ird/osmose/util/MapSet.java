@@ -330,7 +330,7 @@ public class MapSet extends OsmoseLinker {
              * read age min and age max concerned by this map
              */
             int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".initialAge" + ".map" + imap) * getConfiguration().getNStepYear());
-            int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + "lastAge" + ".map" + imap) * getConfiguration().getNStepYear());
+            int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".lastAge" + ".map" + imap) * getConfiguration().getNStepYear());
             ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
 
             /*
