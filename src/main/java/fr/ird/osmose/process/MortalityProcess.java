@@ -200,7 +200,7 @@ public class MortalityProcess extends AbstractProcess {
             fisheriesMortality = new FishingGear[nfishery];
             int count = 0;
             for (int i = 0; i < nfishery; i++) {
-                while (!getConfiguration().canFind("fishery.name.fsh" + count)) {
+                while (!getConfiguration().canFind("fisheries.name.fsh" + count)) {
                     count++;
                 }
                 fisheriesMortality[i] = new FishingGear(getRank(), count);
