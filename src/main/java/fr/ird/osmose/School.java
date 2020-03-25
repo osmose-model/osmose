@@ -260,6 +260,7 @@ public class School extends AbstractSchool {
         preys = new HashMap();
         starvationRate = 0.d;
         fishedBiomass = new double[getConfiguration().getNFishery()];
+        discardedBiomass = new double[getConfiguration().getNFishery()];
         
     }
 
