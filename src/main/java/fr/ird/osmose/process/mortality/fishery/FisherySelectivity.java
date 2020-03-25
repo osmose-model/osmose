@@ -87,6 +87,8 @@ public class FisherySelectivity extends OsmoseLinker {
     /** Prefix used to define parameters. */
     private String selPrefix;
 
+    private String selSuffix;
+    
     /**
      * Array of l50 values. One value per time step.
      */
@@ -121,9 +123,10 @@ public class FisherySelectivity extends OsmoseLinker {
     }
 
   
-    public FisherySelectivity(int findex, String prefix) {
-        fIndex = findex;
-        selPrefix = prefix;
+    public FisherySelectivity(int findex, String prefix, String suffix) {
+        this.fIndex = findex;
+        this.selPrefix = prefix;
+        this.selSuffix = suffix;
     }
 
     /**
@@ -144,13 +147,16 @@ public class FisherySelectivity extends OsmoseLinker {
     public void init() {
 
         Configuration cfg = this.getConfiguration();
-
+        String key;
+        
+        key = String.format("%s.tiny.%s%d", selPrefix, selSuffix, fIndex);
         // if tiny parameter exists, set tiny. Else, use default
-        if (!cfg.isNull(selPrefix + ".tiny.fsh" + fIndex)) {
-            this.tiny = cfg.getFloat(selPrefix + ".tiny.fsh" + fIndex);
+        if (!cfg.isNull(key)) {
+            this.tiny = cfg.getFloat(key);
         }
-
-        if (!cfg.isNull(selPrefix + ".a50.fsh" + fIndex)) {
+        
+        key = String.format("%s.a50.%s%d", selPrefix, selSuffix, fIndex);
+        if (!cfg.isNull(key)) {
             varGetter = (school) -> (school.getAge());
             this.initByAge();
         } else {
@@ -296,14 +302,14 @@ public class FisherySelectivity extends OsmoseLinker {
         Configuration cfg = this.getConfiguration();
         double[] array;
         
-        keyVal = String.format("%s.file.fsh%d", prefix, fIndex);
+        keyVal = String.format("%s.file.%s%d", prefix, this.selSuffix, fIndex);
         if (cfg.canFind(keyVal)) {
             SingleTimeSeries ts = new SingleTimeSeries();
             ts.read(cfg.getFile(keyVal));
             array = ts.getValues();
         } else {
-            keyShift = String.format("%s.shift.fsh%d", prefix, fIndex);
-            keyVal = String.format("%s.fsh%d", prefix, fIndex);
+            keyShift = String.format("%s.shift.%s%d", prefix, this.selSuffix, fIndex);
+            keyVal = String.format("%s.%s%d", prefix, this.selSuffix, fIndex);
             ByRegimeTimeSeries rts = new ByRegimeTimeSeries(keyShift, keyVal);
             rts.init();
             array = rts.getValues();

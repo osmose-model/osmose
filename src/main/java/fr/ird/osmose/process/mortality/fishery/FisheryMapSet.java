@@ -96,6 +96,8 @@ public class FisheryMapSet extends OsmoseLinker {
      * '{$prefix}.map#.species' or '{$prefix}.map#.file', etc.
      */
     private final String prefix;
+    
+    private final String suffix;
 
     /**
      * Name of the fishery.
@@ -118,9 +120,10 @@ public class FisheryMapSet extends OsmoseLinker {
      */
     private String[] mapFile;
 
-    public FisheryMapSet(String fisheryName, String prefix) {
+    public FisheryMapSet(String fisheryName, String prefix, String suffix) {
         this.fisheryName = fisheryName;
         this.prefix = prefix;  // should be fishery.movement
+        this.suffix = suffix;
     }
     
     public void init() {
@@ -163,22 +166,27 @@ public class FisheryMapSet extends OsmoseLinker {
         
         // Count the total number of fishery maps by looking for the
         // number of "fishery.map.index.map#" parameters 
-        int nmapmax = getConfiguration().findKeys(prefix + ".fishery.map*").size();
+        String key;
+        
+        key = String.format("%s.%s.map*", prefix, suffix); 
+        int nmapmax = getConfiguration().findKeys(key).size();
   
         List<Integer> mapNumber = new ArrayList();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
 
-            // This is done if the indexing of fishering maps start with one for instance
-            while (getConfiguration().isNull(prefix + ".fishery.map" + imap)) {
+            key = String.format("%s.%s.map%d", prefix, suffix, imap); 
+            
+// This is done if the indexing of fishering maps start with one for instance
+            while (getConfiguration().isNull(key)) {
                 imap++;
+                key = String.format("%s.%s.map%d", prefix, suffix, imap); 
             }
 
             // Recovers the fisherie index associated with the current map.
             // If it matches the current fisherie, the map index is added to the list of
             // maps to be processed.
-            String key = prefix + ".fishery.map" + imap;
             String fisheryName = getConfiguration().getString(key);
 
             if (fisheryName.equals(this.fisheryName)) {
@@ -209,7 +217,7 @@ public class FisheryMapSet extends OsmoseLinker {
              * read the time steps over the year concerned by this map
              */
             int [] mapSeason;
-            String key = prefix + ".steps.map" + imap;
+            key = prefix + ".steps.map" + imap;
             if (!getConfiguration().isNull(key)) {
                 mapSeason = getConfiguration().getArrayInt(key);
             } else {

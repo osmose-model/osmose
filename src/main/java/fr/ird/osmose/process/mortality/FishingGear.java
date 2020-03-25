@@ -126,10 +126,10 @@ public class FishingGear extends AbstractMortality {
         fSeasonality.init();
         
         // fishery spatial maps
-        fMapSet = new FisheryMapSet(name, "fisheries.movement");
+        fMapSet = new FisheryMapSet(name, "fisheries.movement", "fishery");
         fMapSet.init();
         
-        selectivity = new FisherySelectivity(fIndex, "fishery.selectivity");
+        selectivity = new FisherySelectivity(fIndex, "fishery.selectivity", "fsh");
         selectivity.init();
 
         // accessibility matrix
