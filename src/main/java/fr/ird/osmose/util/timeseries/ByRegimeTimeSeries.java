@@ -104,7 +104,7 @@ public class ByRegimeTimeSeries extends OsmoseLinker {
             for (int i = 0; i < tempshifts.length; i++) {
                 tempshifts[i] *= nStepYear;
             }
-
+            
             // Count the number of good shift values, i.e within simu. time period
             int nShift = 0;
             for (int i = 0; i < tempshifts.length; i++) {
@@ -113,14 +113,20 @@ public class ByRegimeTimeSeries extends OsmoseLinker {
                 }
             }
 
-            // Initialize the final shift values, i.e after removing out of range ones.
-            int shifts[] = new int[nShift];
-            int cpt = 0;
-            for (int i = 0; i < tempshifts.length; i++) {
-                if (tempshifts[i] < nStep) {
-                    shifts[cpt] = tempshifts[i];
-                    cpt++;
+            int shifts[];
+            if (nShift > 0) {
+                // Initialize the final shift values, i.e after removing out of range ones.
+                shifts = new int[nShift];
+                int cpt = 0;
+                for (int i = 0; i < tempshifts.length; i++) {
+                    if (tempshifts[i] < nStep) {
+                        shifts[cpt] = tempshifts[i];
+                        cpt++;
+                    }
                 }
+            } else { 
+                shifts = new int[1];
+                shifts[0] = nStep;
             }
 
             // number of regimes is number of shifts + 1
