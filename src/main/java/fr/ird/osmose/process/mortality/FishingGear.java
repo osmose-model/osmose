@@ -264,13 +264,15 @@ public class FishingGear extends AbstractMortality {
         }
 
         String separator = getConfiguration().getOutputSeparator();
-        String[] headers = {"Time", "Fbase", "Fseason", "Fseaonality", "Ftot"};
+        String[] headers = {"Time", "Fbase", "Fseason", "Fseasonality", "Ftot"};
 
         // Write headers
-        for (String header : headers) {
+        for(int i = 0; i<headers.length - 1; i++) {
+            prw.print(headers[i]);
             prw.print(separator);
-            prw.print(header);
         }
+        
+        prw.print(headers[headers.length - 1]);
         prw.println();
        
         for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
@@ -302,7 +304,7 @@ public class FishingGear extends AbstractMortality {
 
     final String getFilename() {
         StringBuilder filename = new StringBuilder();
-        String subfolder = "Fisheries_Checkout";
+        String subfolder = "fisheries_checkout";
         filename.append(subfolder).append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
         filename.append("_").append(name).append("_Simu");
