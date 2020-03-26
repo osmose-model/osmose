@@ -108,6 +108,7 @@ public class FisherySeasonality extends OsmoseLinker {
             // Fills the final seasonality array
             for (int i = 0; i < nStep; i++) {
                 int k = (i - ioff) % seasonDuration;
+                k = (k < 0) ? -k : k;
                 this.seasonality[i] = seasonTmp[k];
             }
 
@@ -125,7 +126,7 @@ public class FisherySeasonality extends OsmoseLinker {
 
         // Then normalizes for all the given seasons.
         for (int i = ioff; i < nStep; i += seasonDuration) {
-            this.norm(ioff, ioff + seasonDuration);
+            this.norm(i, i + seasonDuration);
         }
     }
 
