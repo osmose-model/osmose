@@ -114,17 +114,27 @@ public class FisherySeason extends OsmoseLinker {
 
         key = String.format("fisheries.rate.bySeason.fsh%d", this.fisheryIndex);
         
-        double[] fishingSeason = this.getConfiguration().getArrayDouble(key); 
+        double[] fishingSeason = this.getConfiguration().getArrayDouble(key);
+        if (fishingSeason.length == 1) {
+            
+            // If fishing season given as a single value, then
+            // use it for all the season.
+            for (int i = 0; i < nStep; i++) {
+                fmortSeason[i] = fishingSeason[0];
+            }
 
-        // Check that the length of the fishing season is ok.
-        if(fishingSeason.length - 1 < fishIndex[nStep - 1]) { 
-            String msg = String.format("The %s parameter must have at least %d values. %d provided", key, fishIndex[nStep - 1] + 1, fishingSeason.length);
-            error(msg, new IOException());
-        }
-        
-        for(int i = 0; i< nStep; i++) { 
-            int k = fishIndex[i];
-            fmortSeason[i] = fishingSeason[k];
+        } else {
+
+            // Check that the length of the fishing season is ok.
+            if (fishingSeason.length - 1 < fishIndex[nStep - 1]) {
+                String msg = String.format("The %s parameter must have at least %d values. %d provided", key, fishIndex[nStep - 1] + 1, fishingSeason.length);
+                error(msg, new IOException());
+            }
+
+            for (int i = 0; i < nStep; i++) {
+                int k = fishIndex[i];
+                fmortSeason[i] = fishingSeason[k];
+            }
         }
         
     }
