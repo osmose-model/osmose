@@ -93,12 +93,18 @@ public class FisherySeasonality extends OsmoseLinker {
         // Season duration in time steps
         int seasonDuration = nStepYear / nSeasons;
 
-        // If a seaonaly vector exitsts
-        key = String.format("fisheries.seasonality.fsh%d", this.fisheryIndex);
-        if (!this.getConfiguration().isNull(key)) {
+        String keyval = String.format("fisheries.seasonality.fsh%d", this.fisheryIndex);      
+        String keyfile = String.format("fisheries.seasonality.file.fsh%d", this.fisheryIndex);
+        
+        if(this.getConfiguration().isNull(keyval) && this.getConfiguration().isNull(keyfile)) {
+            String msg = String.format("%s or %s must be defined.", keyval, keyfile);
+            error(msg, new IOException());
+        }
+        
+        if (!this.getConfiguration().isNull(keyval)) {
 
             // Read the season array
-            double[] seasonTmp = this.getConfiguration().getArrayDouble(key);
+            double[] seasonTmp = this.getConfiguration().getArrayDouble(keyval);
 
             // Checks that the array has the same size as the season duration
             if (seasonTmp.length != seasonDuration) {
@@ -113,20 +119,19 @@ public class FisherySeasonality extends OsmoseLinker {
             }
 
         } else {
-            key = String.format("fisheries.seasonality.file.fsh%d", this.fisheryIndex);
             SingleTimeSeries sts = new SingleTimeSeries();
-            String filename = getConfiguration().getFile(key);
+            String filename = getConfiguration().getFile(keyfile);
             // Seasonality must be at least one year, and at max the length of the simulation
             sts.read(filename);
             seasonality = sts.getValues();
         }
 
         // Normalizes between 0 and ioff (corresponding to F0)
-        this.norm(0, ioff);
+        this.checkNorm(0, ioff);
 
         // Then normalizes for all the given seasons.
         for (int i = ioff; i < nStep; i += seasonDuration) {
-            this.norm(i, i + seasonDuration);
+            this.checkNorm(i, i + seasonDuration);
         }
     }
 
@@ -136,25 +141,30 @@ public class FisherySeasonality extends OsmoseLinker {
      * @param istart First time step
      * @param iend Last time step
      */
-    public void norm(int istart, int iend) {
+    public void checkNorm(int istart, int iend) {
 
         double total = 0.d;
-        
+
         iend = Math.min(iend, this.getConfiguration().getNStep());
         istart = Math.min(istart, this.getConfiguration().getNStep());
-        
+
         for (int i = istart; i < iend; i++) {
             total += this.seasonality[i];
         }
-        
+
         if (total != 1.d) {
-            for (int i = istart; i < iend; i++) {
-                this.seasonality[i] = (total == 0) ? 1 / (iend - istart) : (this.seasonality[i] / total);
-            }
+            String msg = String.format("Fishery %d: the seasonality for steps %d to %d summed to %f.\n"
+                    + "Should sum to 1. Please verify that seasonality is properly set.", this.fisheryIndex, istart, iend, total);
+            StringBuilder stb = new StringBuilder();
+            stb.append("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+            stb.append(msg);
+            stb.append("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            warning(stb.toString());
+
         }
 
     }
-    
+
     /**
      * Returns the fishing seasonality mortality for a given time step.
      *
@@ -166,4 +176,3 @@ public class FisherySeasonality extends OsmoseLinker {
     }
 
 }
-
