@@ -96,6 +96,11 @@ public class FisheryCatchability extends OsmoseLinker {
         else {
             key = String.format("%s.fsh%d", prefix, fisheryIndex);
             double[] array = cfg.getArrayDouble(key);
+            if(array.length != cfg.getNBkgSpecies() + cfg.getNSpecies()) {
+                String msg = String.format("The %s param must have %d values (nspecies + nbackgrounds). %d given",
+                        key, cfg.getNBkgSpecies() + cfg.getNSpecies(), array.length);
+                error(msg, new IOException());
+            }
             values = new double[cfg.getNStep()][];
             for(int i = 0; i<values.length; i++) {
                 values[i] = array;

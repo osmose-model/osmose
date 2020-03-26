@@ -90,6 +90,12 @@ public class BySpeciesTimeSeries extends OsmoseLinker {
             for (int k = 0; k < names.length; k++) {
                 names[k] = String.valueOf(lineThreshold[k + 1]);
             }
+            
+            if(lineThreshold.length - 1 != this.getNBkgSpecies() + this.getNSpecies()) {
+                String msg = String.format("The %s file must have %d columns (nspecies + nbackgrounds). %d given",
+                        filename, this.getNBkgSpecies() + this.getNSpecies(), lineThreshold.length - 1);
+                error(msg, new IOException());
+            }
 
             // 3. Check the length of the time serie and inform the user about potential problems or inconsistencies
             int nTimeSerie = lines.size() - 1;
@@ -103,7 +109,7 @@ public class BySpeciesTimeSeries extends OsmoseLinker {
                 debug("Time serie in file {0} contains {1} steps out of {2}. Osmose will ignore the exceeding steps.", new Object[]{filename, nTimeSerie, nMax});
             }
             nTimeSerie = Math.min(nTimeSerie, nMax);
-
+              
             // 3. Read the mortality rates
             values = new double[nStepSimu][];
             for (int t = 0; t < nTimeSerie; t++) {
