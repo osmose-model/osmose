@@ -52,6 +52,7 @@
 package fr.ird.osmose.process.mortality.fishery;
 
 import fr.ird.osmose.util.OsmoseLinker;
+import java.io.IOException;
 
 /**
  *
@@ -60,7 +61,7 @@ import fr.ird.osmose.util.OsmoseLinker;
 public class FisherySeason extends OsmoseLinker {
     
     private final int fisheryIndex;
-    private double[] fmortSeason;
+    private final double[] fmortSeason;
     private int nSeasons;
     private double seasonOffset; 
     
@@ -94,7 +95,7 @@ public class FisherySeason extends OsmoseLinker {
         int ioff = (int) (seasonOffset * nStepYear);
         
         // Recovers the season duration (in number of time steps    )
-        int seasonDuration = nStep / this.nSeasons;
+        int seasonDuration = nStepYear / this.nSeasons;
         
         // 0 if no offset, else 1
         int do_offset = (ioff != 0) ? 1 : 0;
@@ -105,14 +106,22 @@ public class FisherySeason extends OsmoseLinker {
         for (int i = 0; i < ioff; i++) {
             fishIndex[i] = 0;
         }
-
+        
         for (int i = ioff; i < nStep; i++) {
             int k = (i - ioff) / (seasonDuration);
             fishIndex[i] = k + do_offset;
         }
 
         key = String.format("fisheries.rate.bySeason.fsh%d", this.fisheryIndex);
-        double[] fishingSeason = this.getConfiguration().getArrayDouble(key);
+        
+        double[] fishingSeason = this.getConfiguration().getArrayDouble(key); 
+
+        // Check that the length of the fishing season is ok.
+        if(fishingSeason.length - 1 < fishIndex[nStep - 1]) { 
+            String msg = String.format("The %s parameter must have at least %d values. %d provided", key, fishIndex[nStep - 1] + 1, fishingSeason.length);
+            error(msg, new IOException());
+        }
+        
         for(int i = 0; i< nStep; i++) { 
             int k = fishIndex[i];
             fmortSeason[i] = fishingSeason[k];
