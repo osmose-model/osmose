@@ -89,6 +89,28 @@ print.osmose = function(x, ...) {
   cat("Model", sQuote(x$model$model),"\n\n")
   cat(sprintf("%s species modeled (%s simulations):", x$model$nsp, x$model$simus))
   cat(sprintf("\n\t[sp%s] %s", seq(0, x$model$nsp - 1), x$species), "\n")
+  
+  # Get dimension (no vector classes) or length (vector classes) for each level
+  infoLevels <- sapply(x, function(x) if(is.array(x)) dim(x) else length(x))
+  
+  # Check which levels are empty (dim or length equal to zero)
+  infoLevels <- sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
+  
+  # Add a mark (*) for those empty level's' names
+  infoLevels <- paste0(names(infoLevels), ifelse(infoLevels, " (*)", ""))
+  
+  # If length of level (of names) vector is odd, add an empty value
+  infoLevels <- c(infoLevels, 
+                  if(length(infoLevels) %% 2 != 0) "---------" else NULL)
+  
+  # Sort vector (of names) as a 2 columns matrix
+  infoLevels <- matrix(data = infoLevels, ncol = 2)
+  dimnames(infoLevels) <- list(rep("", nrow(infoLevels)), rep("", ncol(infoLevels)))
+  
+  # Show available variables
+  cat("\nAvailable fields:\n")
+  print(infoLevels)
+  cat("\n(*) Empty fields.\n")
 }
 
 #' @title \code{osmose} object summaries
@@ -107,27 +129,25 @@ summary.osmose = function(object, ..., digits = 1L) {
   output = list(model = object$model)
   output$species = object$species
   
-  # Get biomass and yieldN info
-  biomass = apply(object$biomass, 2, mean, na.rm = TRUE)
-  yieldN = apply(object$yieldN, 2, mean, na.rm = TRUE)
+  # Define main outputs to show info
+  resumenVars <- c("biomass", "abundance", "yield", "yieldN")
   
-  # Create a data frame with biomass and yield
-  resumen = data.frame(biomass = format(x = round(x = biomass, digits = digits)),
-                       yieldN  = format(x = round(x = yieldN, digits = digits)),
-                       row.names = object$species)
-  output$resumen = resumen
+  # Get an index for those variables which are not NULL
+  index <- !sapply(object[resumenVars], is.null)
   
-  # Get levels with and without info
-  infoLevels <- sapply(object, function(x) if(is.array(x)) dim(x) else length(x))
-  infoLevels <- sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
-  infoLevels <- matrix(data = paste0(names(infoLevels), ifelse(infoLevels, " (*)", "")),
-                       ncol = 2)
-  dimnames(infoLevels) <- list(rep("", nrow(infoLevels)), rep("", ncol(infoLevels)))
-  
-  output$info_levels <- infoLevels
+  # Get summary info about selected variables
+  if(any(index)){
+    # Get summery values by spp
+    values <- sapply(object[resumenVars[index]], 
+                     function(x) apply(x, 2, mean, na.rm = TRUE))
+    
+    # Convert values to more readable number
+    output$resumen <- as.data.frame(apply(values, 2, function(x) format(round(x, digits = digits))))
+  }
   
   # Generate output
   class(output) = "summary.osmose"
+  
   return(output)
 }
 
@@ -147,13 +167,10 @@ print.summary.osmose = function(x, ...) {
   cat(sprintf("\n\t[sp%s] %s", seq(0, x$model$nsp - 1), x$species), "\n")
   
   # Show extra info
-  cat("\nMain indicators:\n")
-  print(x$resumen)
-  
-  # Show available variables
-  cat("\nAvailable fields:\n")
-  print(x$info_levels)
-  cat("\n(*) Empty fields.\n")
+  if(!is.null(x$resumen)){
+    cat("\nMain indicators:\n")
+    print(x$resumen)  
+  }
 }
 
 #' @title Report method for \code{osmose} objects

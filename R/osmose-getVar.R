@@ -213,15 +213,13 @@ summary.osmose.meanTLCatch = function(object, ...) {
         stop("Some values of 'species' does not exist.")
       }
       
-      species = match(species, names(x))
+      species = match(species, names(x)) - 1
     }
     
-    species = names(x)[species]
+    species = names(x)[species + 1]
     
-    x = x[species, drop=FALSE]
-    
+    x = x[species, drop = FALSE]
   }
   
   return(x)
-  
 }

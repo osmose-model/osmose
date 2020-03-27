@@ -20,5 +20,5 @@ NULL
 NULL
 #' @importFrom stats predict
 NULL
-#' @importFrom fields image.plot
+#' @importFrom fields image.plot tim.colors
 NULL

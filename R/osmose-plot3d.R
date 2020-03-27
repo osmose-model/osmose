@@ -1,8 +1,8 @@
 ################################################################ Plots3D
-osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts, 
-                         type, replicates, freq, horizontal, conf, factor, 
-                         xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
-                         units, class_units, by, ci = TRUE, space, use_log10=TRUE, ...) {
+osmosePlots3D = function(x, type, by, species, speciesNames, start, end, 
+                         initialYear, freq, horizontal, factor,
+                         xlim, ylim, col, border, lty, lwd, axes, legend, 
+                         units, ci, log, ...) {
 
   x = .extract_species_from_list(x, species)
   
@@ -12,16 +12,6 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
   
   if(is.null(speciesNames)){
     speciesNames = toupper(names(x))
-  }
-  
-  msg = sprintf("ts=TRUE for 3D fields is not implemented yet.")
-  if(isTRUE(ts)){
-    stop(msg) 
-  } 
-  
-  msg = sprintf("replicates=FALSE for 3D fields is not implemented yet.")
-  if(!isTRUE(replicates)) {
-    stop(msg) 
   }
   
   # getting time array (not used so far)
@@ -34,20 +24,17 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
               length.out = nrow(x[[1]]))
   
   # apply processing on the time-series (so far, replicate and time-mean)
-  x = lapply(x, .process_3d_fields, start, end, ts, replicates, ...) 
+  x = sapply(x, .process_3d_fields, start, end, ts, replicates, ...) 
   
-  msg = sprintf("3D plot type %d is not implemented yet.", type)
-
   switch(type,
-         "1" = plot3DType1(x, lty=lty, lwd=lwd, alpha=alpha, ci = ci, horizontal = horizontal, col = col,
+         "1" = plot3DType1(x, by = by, horizontal = horizontal, col = col,
                            factor = factor, speciesNames = speciesNames,
-                           xlim = xlim, ylim = ylim, axes = axes, units = units,
-                           border = border, conf = conf, class_units=class_units, by=by, space=space, ...),
-         "2" = plot3DType2(x, lty=lty, lwd=lwd, alpha=alpha, ci = ci, horizontal = horizontal, col = col,
-                           factor = factor, speciesNames = speciesNames,
-                           xlim = xlim, ylim = ylim, axes = axes, units = units,
-                           border = border, conf = conf, class_units=class_units, by=by, use_log10=use_log10, ...),
-         stop(msg))
+                           ylim = ylim, axes = axes, units = units,
+                           border = border, ...),
+         "2" = plot3DType2(x, by = by, col = col, factor = factor, 
+                           speciesNames = speciesNames,
+                           axes = axes, units = units, ...),
+         stop(sprintf("3D plot type %d is not implemented yet.", type)))
 
   return(invisible())
   
@@ -63,7 +50,6 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
   if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
   
   return(c(start, end))
-  
 }
 
 # Process 3D fields (fields by class). Computes replicates
@@ -84,8 +70,8 @@ osmosePlots3D = function(x, species, speciesNames, start, end, initialYear, ts,
 }
 
 # Displays a histogram showing one plot per species.
-plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesNames, axes, 
-                       xlim, ylim, units, border, conf, class_units, by, space, ...){
+plot3DType1 = function(x, by, horizontal, col, factor, 
+                       speciesNames, axes, ylim, units, border, ...){
   
 
   # To keep the plot params as the beginning
@@ -93,101 +79,129 @@ plot3DType1 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesN
   on.exit(par(op))
 
   # Define multiplot array if there're more than 1 species
-  if(length(x) > 1){
-    mar = rep(4, 4)  # bottom left top right
-    mar = c(4, 4, 1, 4)
-    oma = rep(1, 4)
-    par(mar=mar, oma = oma)
-    mfrow = getmfrow(length(x))
-  } else {
+  if(ncol(x) > 1){
+    # Modify oma & mar
+    mar = rep(0, 4)
+    oma = c(3, 4, 2, 4)
+    par(mar = mar, oma = oma)
+    
+    # Set pane distribution
+    mfrow = getmfrow(ncol(x))
+  }else{
     mfrow = c(1, 1)
   }
   
   par(mfrow = mfrow)
   
   # Extract args related with line customization
-  col = rep(x = if(is.null(col)) "black" else col, length.out = length(x))
-  lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = length(x))
-  lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = length(x))
+  col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
   
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 0.8, cex)
-  
-  # Define default value for alpha
-  if(is.null(alpha)) alpha = 0.3
   
   # Define default value for border
   if(is.null(border)) border = NA
 
   # recovering the size-class
-  colnames = as.numeric(names(x[[1]]))
+  byNames = rownames(x)
   
   # Define xlim & ylim if NULL
-  if(is.null(xlim)) xlim = range(colnames)
   if(is.null(ylim)) { 
     ymin = Reduce(min, lapply(x, min)) * factor
     ymax = Reduce(max, lapply(x, max)) * factor
-    ylim = c(ymin, ymax)
+    ylim = c(ymin, ymax*1.1)
   }
   
   # Generate plots by spp
-  i = 0
-  for(n in names(x)) {
-    
-    i = i + 1
+  for(i in seq(ncol(x))){
     
     # Extract values for spp i
-    xsp = factor*x[[n]]
+    xsp = factor*x[,i]
     
-    # Set an empty canvas
-    # two lines below are commented out because it returns bad layout
-    xlab = paste0(by, '(', class_units, ')')
-    ylab = units
-    bp = barplot(xsp, horiz = horizontal, names.arg = colnames, col = col,
-            ylim = ylim, axes = axes, border = border, xlab=xlab, ylab=ylab, las=2, space=space, ...)
-    mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 0.05, cex = cex)
-
+    # Draw barplot
+    bp <- barplot(xsp, horiz = horizontal, names.arg = rep(NA, nrow(x)), 
+            col = col, ylim = ylim, border = border, 
+            xlab = NA, ylab = NA, axes = FALSE, ...)
+    
+    bp <- as.numeric(bp)
+    
+    # Add label of factor
+    if(i == 1){
+      legendFactor = -log10(factor)
+      legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units$y))
+      mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)  
+    }
+    
+    # Add name of species
+    mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 1, cex = cex)
+    
+    # Add axis
+    if(isTRUE(axes)){
+      las = list(...)$las
+      las = ifelse(is.null(las), 1, las)
+      
+      line = list(...)$line
+      line = ifelse(is.null(line), NA, line)
+      
+      cex.axis = list(...)[["cex.axis"]]
+      cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+      
+      if(is.element(i %% (mfrow[2]*2), c(0, 1))){
+        axis(side = ifelse(i %% 2 == 1, 2, 4), las = las, line = line, 
+             cex.axis = cex.axis)  
+      }
+      
+      if(mfrow[2] > 1 && is.element(i, seq(2, mfrow[2], 2))){
+        axis(side = 3, at = bp, labels = byNames, las = las, line = line, 
+             cex.axis = cex.axis)
+      }
+      
+      index = c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
+                    to = prod(mfrow) - mfrow[2] + 1),
+                seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
+      if(is.element(i, index)){
+        axis(side = 1, at = bp, labels = byNames, las = las, line = line, 
+             cex.axis = cex.axis)
+      }
+      
+      box()
+      
+      if(i == 1){
+        mtext(text = paste0(by, ' (', units$x, ')'), side = 1, line = 2, 
+              outer = TRUE, cex = cex)
+      }
+    }
   }
   
   return(invisible())
-  
 }
 
 # Showing biomass as a function of class as a raster file.
-plot3DType2 = function(x, lwd, lty, alpha, ci, horizontal, col, factor, speciesNames, axes, 
-                       xlim, ylim, units, border, conf, class_units, by, use_log10=TRUE, ...){
+plot3DType2 = function(x, col, factor, speciesNames, axes, units, by, ...){
   
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
+  # List of the form x, y & z
+  x <- list(x = seq(nrow(x)),
+            y = seq(ncol(x)),
+            z = x*factor)
   
-  par(oma=rep(4, 4))
-
-  nval = length(x)
-  nel = length(x[[1]])
-
-  disclass = as.numeric(names(x[[1]]))
-
-  z = matrix(as.numeric(unlist(x)), nrow = nel, ncol = nval) # class / species
-  if(use_log10) { 
-    z[z<= 0] = NA
-    z = log10(z)
-  } 
-
-  rownames(z) = disclass
-  colnames(z) = speciesNames
+  # Modify margins to give space for species names
+  par(mar = c(3, 10, 1, 1))
   
-  x = 1:nel
-  y = 1:nval
+  # Define default color palette
+  if(is.null(col)) col <- tim.colors(1e3)
   
-  leglab = paste(units)
-  if(use_log10) leglab = paste('log10', leglab, sep=' ')
+  # Draw image plot
+  image.plot(x, axes = FALSE, legend.lab = units$y, col = col, ...)
   
-  xlab = paste0(by, '(', class_units, ')')
-  image.plot(x, y, z, legend.lab=leglab, xaxt='n', yaxt='n', xlab=xlab)  # plot=> x=species, y=class
-  axis(2, at=y, labels=colnames(z), las=2, cex.axis=0.5)  # left
-  axis(1, at=x, labels=rownames(z), las=2, cex.axis=0.5)  # below
+  # Add axis
+  if(isTRUE(axes)){
+    axis(side = 1, at = x$x, labels = rownames(x$z))
+    axis(side = 2, at = x$y, labels = colnames(x$z), las = 1)
+    
+    box()
+    
+    mtext(text = paste0(by, ' (', units$x, ')'), side = 1, line = 2)
+  }
   
   return(invisible())
-  
 }

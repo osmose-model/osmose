@@ -8,8 +8,10 @@
 #' @param type 1 if stacked barplot, 2 if pie chart
 #' @method plot osmose.mortalityRate
 #' @export 
-plot.osmose.mortalityRate = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, draw_legend=TRUE,  
-                                     plotargs=list(), parargs=list(), legargs=list(), axisargs=list(), ... ) {
+plot.osmose.mortalityRate = function(x, species = NULL, speciesNames = NULL,  
+                                     norm = TRUE, type = 1, draw_legend = TRUE,  
+                                     plotargs = list(), parargs = list(), 
+                                     legargs = list(), axisargs = list(), ... ) {
   
   # extract the values for a given list of species
   x = .extract_species_from_list(x, species)
@@ -29,8 +31,14 @@ plot.osmose.mortalityRate = function(x, species=NULL, speciesNames=NULL, norm=TR
   # draws plots
   msg = sprintf("3D plot type %d is not implemented yet.", type)
   switch(type,
-         "1" = plotMortRateType1(outlist, norm=norm, speciesNames=speciesNames, parargs=parargs, legargs=legargs, axisargs=axisargs, plotargs=plotargs, ...),
-         "2" = plotMortRateType2(outlist, speciesNames=speciesNames, parargs=parargs, legargs=legargs, axisargs=axisargs, plotargs=plotargs, draw_legend=draw_legend, ...),
+         "1" = plotMortRateType1(x = outlist, norm = norm, 
+                                 speciesNames = speciesNames, parargs = parargs, 
+                                 legargs = legargs, axisargs = axisargs, 
+                                 plotargs = plotargs, ...),
+         "2" = plotMortRateType2(outlist, speciesNames = speciesNames, 
+                                 parargs = parargs, legargs = legargs, 
+                                 axisargs = axisargs, plotargs = plotargs, 
+                                 draw_legend = draw_legend, ...),
          stop(msg))
   
   return(invisible())
@@ -38,7 +46,9 @@ plot.osmose.mortalityRate = function(x, species=NULL, speciesNames=NULL, norm=TR
 }
 
 # Plots the mortality rate as a stacked plot
-plotMortRateType1 = function(x, norm, speciesNames, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), ...) { 
+plotMortRateType1 = function(x, norm, speciesNames, parargs = list(), 
+                             plotargs = list(), legargs = list(), 
+                             axisargs = list(), ...) { 
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
@@ -68,7 +78,9 @@ plotMortRateType1 = function(x, norm, speciesNames, parargs=list(), plotargs=lis
 }
 
 # Plots the mortality as pie charts. One plot per class (size, age or status)
-plotMortRateType2 = function(x, speciesNames, draw_legend=TRUE, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), ...) { 
+plotMortRateType2 = function(x, speciesNames, draw_legend = TRUE, parargs = list(), 
+                             plotargs = list(), legargs = list(), axisargs = list(), 
+                             ...) { 
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
@@ -112,7 +124,10 @@ plotMortRateType2 = function(x, speciesNames, draw_legend=TRUE, parargs=list(), 
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
 #' 
-plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  draw_legend=TRUE, ...) {
+plot.mortalityRate = function(x, species = NULL, speciesNames = NULL, norm = TRUE, 
+                              type = 1, parargs = list(), plotargs = list(), 
+                              legargs = list(), axisargs = list(),  
+                              draw_legend = TRUE, ...) {
   
   # extract the values for a given list of species
   x = .extract_species_from_list(x, species)
@@ -128,8 +143,13 @@ plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TR
   
   msg = sprintf("3D plot type %d is not implemented yet.", type)
   switch(type,
-         "1" = plotMortRateType1(x, norm=norm, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, ...),
-         "2" = plotMortRateType2(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...),
+         "1" = plotMortRateType1(x, norm = norm, speciesNames = speciesNames, 
+                                 parargs = parargs, plotargs = plotargs, 
+                                 legargs = legargs, axisargs = axisargs, ...),
+         "2" = plotMortRateType2(x, speciesNames = speciesNames, parargs = parargs, 
+                                 plotargs = plotargs, legargs = legargs, 
+                                 axisargs = axisargs, draw_legend = draw_legend, 
+                                 ...),
          stop(msg))
   
   return(invisible())
@@ -166,7 +186,10 @@ plot.mortalityRateDistrib = function(x, species=NULL, speciesNames=NULL, norm=TR
 #' @param ... Additional parameters to the barplot/lines functions
 #' @method plot osmose.dietMatrix
 #' @export 
-plot.osmose.dietMatrix = function(x, species=NULL, speciesNames=NULL, type=1, thres=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, norm=TRUE, ...) {
+plot.osmose.dietMatrix = function(x, species = NULL, speciesNames = NULL, type = 1, 
+                                  thres = 1, parargs = list(), plotargs = list(), 
+                                  legargs = list(), axisargs = list(), 
+                                  draw_legend = TRUE, norm = TRUE, ...) {
   
   # extract the values for a given list of species
   x = .extract_species_from_list(x, species)
@@ -189,8 +212,14 @@ plot.osmose.dietMatrix = function(x, species=NULL, speciesNames=NULL, type=1, th
   # draws plots 
   msg = sprintf("3D plot type %d is not implemented yet.", type)
   switch(type,
-         "1" = plotDietType1(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, norm=norm, ...),
-         "2" = plotDietType2(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...),
+         "1" = plotDietType1(outlist = outlist, speciesNames = speciesNames, 
+                             parargs = parargs, plotargs = plotargs, 
+                             legargs = legargs, axisargs = axisargs, norm = norm, 
+                             ...),
+         "2" = plotDietType2(outlist = outlist, speciesNames = speciesNames, 
+                             parargs = parargs, plotargs = plotargs, 
+                             legargs = legargs, axisargs = axisargs, 
+                             draw_legend = draw_legend, ...),
          stop(msg))
   
   return(invisible())
@@ -198,7 +227,8 @@ plot.osmose.dietMatrix = function(x, species=NULL, speciesNames=NULL, type=1, th
 }
 
 # Plots diet matrix as a stacked plot.
-plotDietType1 = function(outlist, speciesNames, parargs, plotargs, legargs, axisargs, norm, ... ) {
+plotDietType1 = function(outlist, speciesNames, parargs, plotargs, legargs, 
+                         axisargs, norm, ... ) {
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
@@ -224,7 +254,8 @@ plotDietType1 = function(outlist, speciesNames, parargs, plotargs, legargs, axis
   
 }
 
-plotDietType2 = function(outlist, speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=TRUE, ...) {
+plotDietType2 = function(outlist, speciesNames, parargs, plotargs, legargs, 
+                         axisargs, draw_legend = TRUE, ...) {
   
   op = par(no.readonly = TRUE)
   on.exit(par(op))
@@ -241,7 +272,8 @@ plotDietType2 = function(outlist, speciesNames, parargs=parargs, plotargs=plotar
     plotargs$x= temp
     plotargs$main = paste(speciesNames[i])
     
-    .generic_pieplot(temp, draw_legend=draw_legend, plotargs=plotargs, legargs=legargs)
+    .generic_pieplot(temp, draw_legend = draw_legend, plotargs = plotargs, 
+                     legargs = legargs)
     
     i = i + 1
     
@@ -251,7 +283,9 @@ plotDietType2 = function(outlist, speciesNames, parargs=parargs, plotargs=plotar
   
 }
 
-plot.dietDistrib = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  draw_legend=TRUE, ...) {
+plot.diet = function(x, species = NULL, speciesNames = NULL, norm = TRUE, type = 1, 
+                     parargs = list(), plotargs = list(), legargs = list(), 
+                     axisargs = list(),  draw_legend = TRUE, ...) {
   
   # extract the values for a given list of species
   x = .extract_species_from_list(x, species)
@@ -274,8 +308,13 @@ plot.dietDistrib = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=
   
   msg = sprintf("3D plot type %d is not implemented yet.", type)
   switch(type,
-         "1" = plotDietDisType1(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, norm=norm, ...),
-         "2" = plotDietDisType2(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...),
+         "1" = plotDietDisType1(x = x, speciesNames = speciesNames, 
+                                parargs = parargs, plotargs = plotargs, 
+                                legargs = legargs, axisargs = axisargs, 
+                                norm = norm, ...),
+         "2" = plotDietDisType2(x, speciesNames = speciesNames, parargs = parargs, 
+                                plotargs = plotargs, legargs = legargs, 
+                                axisargs = axisargs, draw_legend = draw_legend, ...),
          stop(msg))
   
   return(invisible())
@@ -283,7 +322,9 @@ plot.dietDistrib = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=
 }
 
 # Plot diet distribution as a stacked plot.
-plotDietDisType1 = function(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, norm=norm, ...) { 
+plotDietDisType1 = function(x, speciesNames = speciesNames, parargs = parargs, 
+                            plotargs = plotargs, legargs = legargs, 
+                            axisargs = axisargs, norm = norm, ...) { 
   
   op = par(no.readonly = TRUE)
   on.exit(par(op))
@@ -306,7 +347,7 @@ plotDietDisType1 = function(x, speciesNames=speciesNames, parargs=parargs, plota
     plotargs$args.legend = legargs
     plotargs$main = speciesNames[i]
     
-    .generic_staked_barplot(data, plotargs=plotargs, axisargs=axisargs)
+    .generic_staked_barplot(data, plotargs = plotargs, axisargs = axisargs)
     i = i + 1
     
   }
@@ -316,7 +357,9 @@ plotDietDisType1 = function(x, speciesNames=speciesNames, parargs=parargs, plota
 }
 
 # Plot diet distribution as a stacked plot.
-plotDietDisType2 = function(x, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=TRUE, ...) { 
+plotDietDisType2 = function(x, speciesNames = speciesNames, parargs = parargs, 
+                            plotargs = plotargs, legargs = legargs, 
+                            axisargs = axisargs, draw_legend = TRUE, ...) { 
   
   op = par(no.readonly = TRUE)
   on.exit(par(op))
@@ -361,7 +404,7 @@ plotDietDisType2 = function(x, speciesNames=speciesNames, parargs=parargs, plota
 # outlist = data to plot. should have a names argument
 # parargs = additionnal arguments to the par function
 # plotargs = additionnal arguments to the pie function
-.generic_staked_barplot = function(data, plotargs=list(), axisargs=list()) {
+.generic_staked_barplot = function(data, plotargs = list(), axisargs = list()) {
   
   # prepare the arguments for the pie arguments
   plotargs$height = data
@@ -387,7 +430,8 @@ plotDietDisType2 = function(x, speciesNames=speciesNames, parargs=parargs, plota
 # legargs = additionnal arguments to the legend function
 # parargs = additionnal arguments to the par function
 # plotargs = additionnal arguments to the pie function
-.generic_pieplot = function(outlist, draw_legend=TRUE, legargs=list(), plotargs=list()) {
+.generic_pieplot = function(outlist, draw_legend = TRUE, legargs = list(), 
+                            plotargs = list()) {
   
   plotargs$x = outlist
   if(draw_legend) {
@@ -409,7 +453,4 @@ plotDietDisType2 = function(x, speciesNames=speciesNames, parargs=parargs, plota
   return(invisible())
   
 }
-
-
-
   

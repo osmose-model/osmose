@@ -7,14 +7,16 @@
 #' @param time.mean If true, time.mean abundance is plotted
 #' @param ... Extra arguments passed to the method.
 #'
-plot.osmose.yieldNBySize = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.yieldNBySize = function(x, species = NULL, time.mean = TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)
   }
   
-  for(spec in species) {
-    plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Yield Abundance", ...)
+  for(i in seq_along(species)) {
+    plot.osmose.output.ts.generic(x, species = species[i], time.mean = time.mean, 
+                                  legtitle = "Size (cm)", ylab = "Yield Abundance", 
+                                  ...)
   }
   
   return(invisible())
@@ -28,18 +30,18 @@ plot.osmose.yieldNBySize = function(x, species=NULL, time.mean=TRUE, ...) {
 #' @param time.mean If true, time.mean biomass is plotted
 #' @param ... Extra arguments passed to the method.
 #'
-plot.osmose.yieldNByAge = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.yieldNByAge = function(x, species = NULL, time.mean = TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)
   }
   
   for(spec in species) {
-    plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Age", ylab="Yield Abundance", ...)
+    plot.osmose.output.ts.generic(x, species = spec, time.mean = time.mean, 
+                                  legtitle = "Age", ylab = "Yield Abundance", ...)
   }
   
   return(invisible())
-  
 }
 
 #' Plots yield biomass by size class
@@ -49,14 +51,15 @@ plot.osmose.yieldNByAge = function(x, species=NULL, time.mean=TRUE, ...) {
 #' @param time.mean If true, time.mean biomass is plotted
 #' @param ... Extra arguments passed to the method.
 #'
-plot.osmose.yieldBySize = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.yieldBySize = function(x, species = NULL, time.mean = TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)
   }
   
   for(spec in species) {
-    plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Yield Biomass", ...)
+    plot.osmose.output.ts.generic(x, species = spec, time.mean = time.mean, 
+                                  legtitle = "Size (cm)", ylab = "Yield Biomass", ...)
   }
   
   return(invisible())
@@ -70,14 +73,15 @@ plot.osmose.yieldBySize = function(x, species=NULL, time.mean=TRUE, ...) {
 #' @param time.mean If true, time.mean biomass is plotted
 #' @param ... Extra arguments passed to the method.
 #'
-plot.osmose.yieldByAge = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.yieldByAge = function(x, species = NULL, time.mean = TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)
   }
   
   for(spec in species) {
-    plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Age", ylab="Yield Biomass", ...)
+    plot.osmose.output.ts.generic(x, species = spec, time.mean = time.mean, 
+                                  legtitle = "Age", ylab = "Yield Biomass", ...)
   }
   
   return(invisible())
@@ -90,8 +94,9 @@ plot.osmose.yieldByAge = function(x, species=NULL, time.mean=TRUE, ...) {
 #' @param species List of species name. If null, all species are plotted
 #' @param ... Extra arguments of the graphics barplot function
 #' @export
-#' @method plot osmose.predatorPressureDistribBySize
-plot.osmose.predatorPressureDistribBySize = function(x, species=NULL, speciesNames=NULL, type=1, ...) {
+#' @method plot osmose.predatorPressureBySize
+plot.osmose.predatorPressureBySize = function(x, species = NULL, speciesNames = NULL, 
+                                              type = 1, ...) {
   
   args = list(...)
   if(is.null(args$draw_legend)) args$draw_legend = TRUE
@@ -101,7 +106,10 @@ plot.osmose.predatorPressureDistribBySize = function(x, species=NULL, speciesNam
   if(is.null(args$legargs)) args$legargs = list()
   if(is.null(args$axisargs)) args$axisargs = list()
   
-  plot.dietDistrib(x, species=species, speciesNames=speciesNames, type=type, norm=args$norm, parargs=args$parargs, plotargs=args$plotargs, legargs=args$legargs, axisargs=args$axisargs, draw_legend=args$draw_legend) 
+  plot.diet(x, species = species, speciesNames = speciesNames, type = type, 
+            norm = args$norm, parargs = args$parargs, plotargs = args$plotargs, 
+            legargs = args$legargs, axisargs = args$axisargs, 
+            draw_legend = args$draw_legend) 
   
 }
 
@@ -111,8 +119,9 @@ plot.osmose.predatorPressureDistribBySize = function(x, species=NULL, speciesNam
 #' @param species List of species name. If null, all species are plotted
 #' @param ... Extra arguments of the graphics barplot function
 #' @export
-#' @method plot osmose.predatorPressureDistribByAge
-plot.osmose.predatorPressureDistribByAge = function(x, species=NULL, speciesNames=NULL, type=1, ...) {
+#' @method plot osmose.predatorPressureByAge
+plot.osmose.predatorPressureByAge = function(x, species = NULL, 
+                                             speciesNames = NULL, type = 1, ...){
   
   args = list(...)
   if(is.null(args$draw_legend)) args$draw_legend = TRUE
@@ -122,7 +131,10 @@ plot.osmose.predatorPressureDistribByAge = function(x, species=NULL, speciesName
   if(is.null(args$legargs)) args$legargs = list()
   if(is.null(args$axisargs)) args$axisargs = list()
   
-  plot.dietDistrib(x, species=species, speciesNames=speciesNames, type=type, norm=args$norm, parargs=args$parargs, plotargs=args$plotargs, legargs=args$legargs, axisargs=args$axisargs, draw_legend=args$draw_legend) 
+  plot.diet(x, species = species, speciesNames = speciesNames, type = type, 
+            norm = args$norm, parargs = args$parargs, plotargs = args$plotargs, 
+            legargs = args$legargs, axisargs = args$axisargs, 
+            draw_legend = args$draw_legend) 
   
 }
 
@@ -136,9 +148,13 @@ plot.osmose.predatorPressureDistribByAge = function(x, species=NULL, speciesName
 #' @param ...  Additional plot arguments
 #' @method plot osmose.predatorPressure
 #' @export
-#' @todo Thres > 0 does'nt work, since it returns negative values. To check what is going on.
-plot.osmose.predatorPressure = function(x, species=NULL, norm=TRUE, speciesNames=NULL, type=1, thres=0, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, ...) {
-
+#' @details Thres > 0 does'nt work, since it returns negative values. To check what is going on.
+plot.osmose.predatorPressure = function(x, species = NULL, norm = TRUE, 
+                                        speciesNames = NULL, type = 1, thres = 0, 
+                                        parargs = list(), plotargs = list(), 
+                                        legargs = list(), axisargs = list(), 
+                                        draw_legend = TRUE, ...) {
+  
   # extract the values for a given list of species
   x = .extract_species_from_list(x, species)
   
@@ -160,8 +176,14 @@ plot.osmose.predatorPressure = function(x, species=NULL, norm=TRUE, speciesNames
   # draws plots 
   msg = sprintf("3D plot type %d is not implemented yet.", type)
   switch(type,
-         "1" = plotDietType1(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, norm=norm, ...),
-         "2" = plotDietType2(outlist, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...),
+         "1" = plotDietType1(outlist, speciesNames = speciesNames, 
+                             parargs = parargs, plotargs = plotargs, 
+                             legargs = legargs, axisargs = axisargs, norm = norm, 
+                             ...),
+         "2" = plotDietType2(outlist, speciesNames = speciesNames, 
+                             parargs = parargs, plotargs = plotargs, 
+                             legargs = legargs, axisargs = axisargs, 
+                             draw_legend = draw_legend, ...),
          stop(msg))
   
   return(invisible())
@@ -178,11 +200,18 @@ plot.osmose.predatorPressure = function(x, species=NULL, norm=TRUE, speciesNames
 #' @param norm Wheter mortality should be normalized (only if time.mean=TRUE)
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
-#' @method plot osmose.mortalityRateDistribBySize
+#' @method plot osmose.mortalityRateBySize
 #' @export
-plot.osmose.mortalityRateDistribBySize = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, ...) {
+plot.osmose.mortalityRateBySize = function(x, species = NULL, speciesNames = NULL, 
+                                           norm = TRUE, type = 1, parargs = list(), 
+                                           plotargs = list(), legargs = list(), 
+                                           axisargs = list(), draw_legend = TRUE, 
+                                           ...) {
   
-  plot.mortalityRateDistrib(x, species=species, norm=norm, type=type, speciesNames=speciesNames, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...)
+  plot.mortalityRate(x, species = species, norm = norm, type = type, 
+                     speciesNames = speciesNames, parargs = parargs, 
+                     plotargs = plotargs, legargs = legargs, axisargs = axisargs, 
+                     draw_legend = draw_legend, ...)
   
   return(invisible())
   
@@ -198,11 +227,17 @@ plot.osmose.mortalityRateDistribBySize = function(x, species=NULL, speciesNames=
 #' @param norm Wheter mortality should be normalized (only if time.mean=TRUE)
 #' @param mtype Mortality type ("Mtot", Mpred", "Mstar", "Mnat", "F" or "Z")
 #' @param ... Additional arguments of the function.
-#' @method plot osmose.mortalityRateDistribByAge
+#' @method plot osmose.mortalityRateByAge
 #' @export
-plot.osmose.mortalityRateDistribByAge = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(), draw_legend=TRUE, ...) {
+plot.osmose.mortalityRateByAge = function(x, species = NULL, speciesNames = NULL, 
+                                          norm = TRUE, type = 1, parargs = list(), 
+                                          plotargs = list(), legargs = list(), 
+                                          axisargs = list(), draw_legend = TRUE, ...) {
   
-  plot.mortalityRateDistrib(x, species=species, norm=norm, type=type, speciesNames=speciesNames, plotargs=plotargs, legargs=legargs, axisargs=axisargs, draw_legend=draw_legend, ...)
+  plot.mortalityRate(x, species = species, norm = norm, type = type, 
+                     speciesNames = speciesNames, plotargs = plotargs, 
+                     legargs = legargs, axisargs = axisargs, 
+                     draw_legend = draw_legend, ...)
   
   return(invisible())
   
@@ -242,7 +277,9 @@ plot.osmose.meanTLBySize = function(x, species=NULL, time.mean=TRUE, ...) {
   }
   
   for(spec in species) {
-    plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Trophic level", ...)
+    plot.osmose.output.ts.generic(x, species = spec, time.mean = time.mean, 
+                                  legtitle = "Size (cm)", ylab = "Trophic level", 
+                                  ...)
   }
   
   return(invisible())
@@ -256,7 +293,7 @@ plot.osmose.meanTLBySize = function(x, species=NULL, time.mean=TRUE, ...) {
 #' @param time.mean If true, time.mean TL is plotted
 #' @param ... Extra arguments passed to the method.
 #' 
-plot.osmose.meanTLByAge = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.meanTLByAge = function(x, species = NULL, time.mean = TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)
@@ -309,10 +346,15 @@ plot.osmose.meanSize = function(x, species = NULL, start = NULL, end = NULL, ini
 #' @param ... Extra arguments of the graphics barplot function
 #' @method plot osmose.dietMatrixbySize
 #' @export 
-plot.osmose.dietMatrixbySize = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  draw_legend=TRUE, ...) {
- 
-  plot.dietDistrib(x, species=species, speciesNames=speciesNames, norm=norm, type=type, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs,  draw_legend=draw_legend, ...) 
- 
+plot.osmose.dietMatrixbySize = function(x, species = NULL, speciesNames = NULL, 
+                                        norm = TRUE, type = 1, parargs = list(), 
+                                        plotargs = list(), legargs = list(), 
+                                        axisargs = list(), draw_legend = TRUE, ...) {
+  
+  plot.diet(x, species = species, speciesNames = speciesNames, norm = norm, 
+            type = type, parargs = parargs, plotargs = plotargs, legargs = legargs, 
+            axisargs = axisargs, draw_legend = draw_legend, ...) 
+  
 }
 
 #' Plot diet matrix by size class
@@ -322,9 +364,15 @@ plot.osmose.dietMatrixbySize = function(x, species=NULL, speciesNames=NULL, norm
 #' @param ... Extra arguments of the graphics barplot function
 #' @method plot osmose.dietMatrixbyAge
 #' @export 
-plot.osmose.dietMatrixbyAge = function(x, species=NULL, speciesNames=NULL, norm=TRUE, type=1, parargs=list(), plotargs=list(), legargs=list(), axisargs=list(),  draw_legend=TRUE, ...) {
+plot.osmose.dietMatrixbyAge = function(x, species = NULL, speciesNames = NULL, 
+                                       norm = TRUE, type = 1, parargs = list(), 
+                                       plotargs = list(), legargs = list(), 
+                                       axisargs = list(), draw_legend = TRUE, 
+                                       ...) {
   
-  plot.dietDistrib(x, species=species, speciesNames=speciesNames, norm=norm, type=type, parargs=parargs, plotargs=plotargs, legargs=legargs, axisargs=axisargs,  draw_legend=draw_legend, ...) 
+  plot.diet(x, species = species, speciesNames = speciesNames, norm = norm, 
+            type = type, parargs = parargs, plotargs = plotargs, legargs = legargs, 
+            axisargs = axisargs, draw_legend = draw_legend, ...) 
   
 }
 
@@ -377,7 +425,7 @@ plot.osmose.biomassPredPreyIni = function(x, species = NULL, start = NULL, end =
 #' @param time.mean If TRUE, the time-mean biomass is plotted for each TL class
 #' @param ...  Additional plot arguments
 #' 
-plot.osmose.biomassDistribByTL = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.biomassByTL = function(x, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)
@@ -398,15 +446,21 @@ plot.osmose.biomassDistribByTL = function(x, species=NULL, time.mean=TRUE, ...) 
 #' @param time.mean If true, time.mean biomass is plotted
 #' @param ...  Additional plot arguments
 #' 
-plot.osmose.biomassDistribBySize = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.biomassBySize = function(x, ts = FALSE, type = 1, species = NULL, 
+                                     speciesNames = NULL, start = NULL, end = NULL,  
+                                     initialYear = NULL, replicates = TRUE, 
+                                     freq = 12, horizontal = FALSE, 
+                                     factor = 1e-3, xlim = NULL, ylim = NULL, 
+                                     col = NULL, border = NULL, 
+                                     lty = 1, lwd = 1,  axes = TRUE, legend = TRUE, 
+                                     units = list(x = "cm", y = "tonnes"), ...) {
   
-  if(is.null(species)) {
-    species = names(x)
-  }
-  
-  for(spec in species) {
-    plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Size (cm)", ylab="Biomass", ...)
-  }
+  osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
+                start = start, end = end, initialYear = initialYear, freq = freq, 
+                horizontal = horizontal, factor = factor,
+                xlim = xlim, ylim = ylim, col = col, 
+                border = border, lty = lty, lwd = lwd, axes = axes, 
+                legend = legend, units = units, ci = TRUE, by = "Size", ...)
   
   return(invisible())
   
@@ -414,33 +468,23 @@ plot.osmose.biomassDistribBySize = function(x, species=NULL, time.mean=TRUE, ...
 
 #' Plots biomass by age class
 #'
-#' @param x Biomass distribution by age
-#' @param species Species name
-#' @param time.mean If true, time.mean biomass is plotted
-#' @param ...  Additional plot arguments
-#' @method plot osmose.biomassDistribByAge
+#' @method plot osmose.biomassByAge
 #' @export
-plot.osmose.biomassDistribByAge = function(x, ts = FALSE, type = 1, species = NULL, 
-                                           speciesNames = NULL, start = NULL, end = NULL,  
-                                           initialYear = NULL, replicates = TRUE, 
-                                           freq = 12, horizontal = FALSE, conf = 0.95, 
-                                           factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                           col = NULL, alpha = NULL, border = NULL, 
-                                           lty = 1, lwd = 1,  axes = TRUE, legend = TRUE, 
-                                           units = "tonnes", by="age", class_units='years', space=0.2, ...) {
+plot.osmose.biomassByAge = function(x, ts = FALSE, type = 1, species = NULL, 
+                                    speciesNames = NULL, start = NULL, end = NULL,  
+                                    initialYear = NULL, replicates = TRUE, 
+                                    freq = 12, horizontal = FALSE, 
+                                    factor = 1e-3, xlim = NULL, ylim = NULL, 
+                                    col = NULL, border = NULL, 
+                                    lty = 1, lwd = 1,  axes = TRUE, legend = TRUE, 
+                                    units = list(x = "years", y = "tonnes"), ...){
   
-  osmosePlots3D(x, species, speciesNames, start, end, initialYear, ts, 
-                type, replicates, freq, horizontal, conf, factor, 
-                xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
-                units, by=by, class_units=class_units, ci = TRUE, space=space, ...)
-  
-  # if(is.null(species)) {
-  #   species = names(x)
-  # }
-  # 
-  # for(spec in species) {
-  #   plot.osmose.output.ts.generic(x, species=spec, time.mean=time.mean, legtitle="Age", ylab="Biomass", ...)
-  # }
+  osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
+                start = start, end = end, initialYear = initialYear, freq = freq, 
+                horizontal = horizontal, factor = factor,
+                xlim = xlim, ylim = ylim, col = col,  
+                border = border, lty = lty, lwd = lwd, axes = axes, 
+                legend = legend, units = units, ci = TRUE, by = "Age", ...)
   
   return(invisible())
   
@@ -453,7 +497,7 @@ plot.osmose.biomassDistribByAge = function(x, ts = FALSE, type = 1, species = NU
 #' @param time.mean If true, time.mean abundance is plotted
 #' @param ...  Additional plot arguments
 #' 
-plot.osmose.abundanceDistribByTL = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.abundanceByTL = function(x, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)
@@ -474,7 +518,7 @@ plot.osmose.abundanceDistribByTL = function(x, species=NULL, time.mean=TRUE, ...
 #' @param time.mean If true, time.mean abundance is plotted
 #' @param ... Additional plot arguments
 #' 
-plot.osmose.abundanceDistribBySize = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.abundanceBySize = function(x, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)
@@ -495,7 +539,7 @@ plot.osmose.abundanceDistribBySize = function(x, species=NULL, time.mean=TRUE, .
 #' @param time.mean If true, time.mean abundance is plotted
 #' @param ...  Additional plot arguments
 #' 
-plot.osmose.abundanceDistribByAge = function(x, species=NULL, time.mean=TRUE, ...) {
+plot.osmose.abundanceByAge = function(x, species=NULL, time.mean=TRUE, ...) {
   
   if(is.null(species)) {
     species = names(x)

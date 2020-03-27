@@ -22,26 +22,37 @@ list_osmose_versions = function() {
 #' @return Output data frame
 readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", ...) {
   
+  # Build the class name pasting osmose + type
   xclass = paste("osmose", type, sep = ".")
   
+  # If the class has a Distrib label, remove it
+  xclass <- gsub(x = xclass, pattern = "Distrib", replacement = "")
+  
+  # Get a vector with all files on the path
   allFiles = dir(path = path, recursive = TRUE, include.dirs = FALSE)
+  
+  # Get files with the selected extensio: ext
   extFiles = allFiles[grepl(pattern = paste0(".", ext), x = allFiles)]
   
-  if(!isTRUE(bySpecies)){
+  # Read files 
+  if(isTRUE(bySpecies)){
+    # Subset list of files
+    files  = extFiles[grepl(pattern = paste0(type, "-"), x = extFiles)]
     
-    type_  = paste0(type, "_")
-    files  = extFiles[grepl(pattern = type_, x = extFiles)]
-    output = .readFilesList(files = files, path = path, type = type, ...)
-    
-  }else{
-    
-    type_  = paste0(type, "-")
-    files  = extFiles[grepl(pattern = type_, x = extFiles)]
+    # Split path names by species 
     files  = .bySpecies(files = files)
-    output = lapply(files, .readFilesList, path = path, type = type, ...)
     
+    # Read files
+    output = lapply(files, .readFilesList, path = path, type = type, ...)
+  }else{
+    # Subset list of files
+    files  = extFiles[grepl(pattern = paste0(type, "_"), x = extFiles)]
+    
+    # Read files
+    output = .readFilesList(files = files, path = path, type = type, ...)
   }
   
+  # Define a class for output
   if(!is.null(output)) class(output) = c(xclass, class(output))
   
   return(output)

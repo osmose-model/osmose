@@ -138,7 +138,8 @@ osmose.stackedpcent = function(data, ...)
 }
 
 
-plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=TRUE, legtitle, ylab, ...) {
+plot.osmose.output.ts.generic = function(data, species = NULL, time.mean = TRUE, 
+                                         legtitle, ylab, ...) {
   
   .check_species(data, species)
   
