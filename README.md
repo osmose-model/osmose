@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="http://documentation.osmose-model.org/_images/logo-apecosm.svg">
+  <img src="http://documentation.osmose-model.org/_images/logo-osmose.svg">
 </div>
 
 OSMOSE: Modelling Marine Exploited Ecosystems
