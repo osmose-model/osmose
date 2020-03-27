@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="http://documentation.osmose-model.org/_images/logo-apecosm.svg">
+</div>
+
 OSMOSE: Modelling Marine Exploited Ecosystems
 =============================================
 
