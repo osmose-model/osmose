@@ -6,6 +6,16 @@
 \alias{plot.osmose.abundance}
 \alias{plot.osmose.yield}
 \alias{plot.osmose.yieldN}
+\alias{plot.osmose.biomassByTL}
+\alias{plot.osmose.biomassBySize}
+\alias{plot.osmose.biomassByAge}
+\alias{plot.osmose.abundanceByTL}
+\alias{plot.osmose.abundanceBySize}
+\alias{plot.osmose.abundanceByAge}
+\alias{plot.osmose.yieldNBySize}
+\alias{plot.osmose.yieldNByAge}
+\alias{plot.osmose.yieldBySize}
+\alias{plot.osmose.yieldByAge}
 \title{Plot method for osmose objects}
 \usage{
 \method{plot}{osmose}(x, what = "biomass", ...)
@@ -115,6 +125,246 @@
   axes = TRUE,
   legend = TRUE,
   units = "individuals",
+  ...
+)
+
+\method{plot}{osmose.biomassByTL}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 1,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "", y = "tonnes"),
+  ...
+)
+
+\method{plot}{osmose.biomassBySize}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "cm", y = "tonnes"),
+  ...
+)
+
+\method{plot}{osmose.biomassByAge}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "years", y = "tonnes"),
+  ...
+)
+
+\method{plot}{osmose.abundanceByTL}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 1,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "", y = "individuals"),
+  ...
+)
+
+\method{plot}{osmose.abundanceBySize}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "cm", y = "individuals"),
+  ...
+)
+
+\method{plot}{osmose.abundanceByAge}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "years", y = "individuals"),
+  ...
+)
+
+\method{plot}{osmose.yieldNBySize}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "cm", y = "individuals"),
+  ...
+)
+
+\method{plot}{osmose.yieldNByAge}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "years", y = "individuals"),
+  ...
+)
+
+\method{plot}{osmose.yieldBySize}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "cm", y = "tonnes"),
+  ...
+)
+
+\method{plot}{osmose.yieldByAge}(
+  x,
+  ts = FALSE,
+  type = 1,
+  species = NULL,
+  speciesNames = NULL,
+  start = NULL,
+  end = NULL,
+  initialYear = NULL,
+  replicates = TRUE,
+  freq = 12,
+  horizontal = FALSE,
+  factor = 0.001,
+  xlim = NULL,
+  ylim = NULL,
+  col = NULL,
+  border = NULL,
+  lty = 1,
+  lwd = 1,
+  axes = TRUE,
+  units = list(x = "years", y = "tonnes"),
   ...
 )
 }
@@ -252,6 +502,12 @@ as osmose-java returns species outputs.
 
 Default value for \code{freq} will be calculated from \code{x}: 
 \eqn{freq = 1/x$model$start}.
+
+\code{units} could be whether a single character vector (currently applied on
+classes \strong{without By}, e.g. \code{osmose.biomass}, 
+\code{osmose.yieldN}) or a list of length 2 specifying the units for x and y 
+(currently used with classes \strong{with By}, e.g. 
+\code{plot.osmose.biomassBySize}, \code{plot.osmose.yieldNByAge}).
 
 Extra arguments can be passed from \code{plot.default} using \code{...}: 
 \code{cex}, \code{cex.axis}, \code{border} (useful for \code{polygon}, 
