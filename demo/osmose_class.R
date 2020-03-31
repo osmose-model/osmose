@@ -1,5 +1,3 @@
-rm(list = ls()); gc(reset = TRUE)
-
 
 # Define location of files for example ------------------------------------
 
@@ -77,6 +75,36 @@ for(i in seq(nrow(allTest))){
   # Build expression
   evalExpr <- sprintf("plot(outputs, what = '%s', ts = %s, type = %s, species = %s)",
                       what, ts, type, species)
+  
+  # Print expression
+  cat("\n", evalExpr, "\n")
+  
+  # Evaluate expression (make plot)
+  eval(parse(text = evalExpr))
+}
+
+# Check classes with categorization of Size, Age or Trophic Level (TL)
+
+# Create all combinations for this 4 arguments
+allTest <- expand.grid(what = c("biomass", "abundance", "yield", "yieldN"),
+                       by = c("Size", "Age", "TL"),
+                       type = 1:2,
+                       stringsAsFactors = FALSE)
+allTest <- allTest[with(allTest, order(what, by, type)),]
+allTest$variable <- apply(allTest[,1:2], 1, function(x) paste(append(x, "By", 1), collapse = ""))
+
+# If the variable is empty, pass to the next variable
+index <- !summary(outputs)$is_empty
+index <- is.element(allTest$variable, rownames(index)[index[,1]])
+
+# Loop over each example
+for(i in seq(nrow(allTest))){
+  
+  if(!index[i]) next
+  
+  # Build expression
+  evalExpr <- sprintf("plot(outputs, what = '%s', type = %s)", 
+                      allTest$variable[i], allTest$type[i])
   
   # Print expression
   cat("\n", evalExpr, "\n")

@@ -21,3 +21,4 @@ NEWS.md
 ^vignettes/create_run_read_cache$
 ^vignettes/create_run_read_files$
 ^R/osmose-plot-inDevel\.R$
+^R/osmose-plot4d\.R$

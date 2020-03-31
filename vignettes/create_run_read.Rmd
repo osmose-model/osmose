@@ -23,11 +23,9 @@ knitr::opts_chunk$set(
 library(osmose)
 ```
 
-# osmose
+## Introduction
 
-*Object Oriented Simulator of Marine Ecosystems*
-
-The multispecies and individual-based model (IBM) 'OSMOSE' [@shin2001exploring; @shin2004using] focuses on fish species. This model assumes opportunistic predation based on spatial co-occurrence and size adequacy between a predator and its prey (size-based opportunistic predation). It represents fish individuals grouped into schools, which are characterized by their size, weight, age, taxonomy and geographical location (2D model), and which undergo major processes of fish life cycle (growth, explicit predation, natural and starvation mortalities, reproduction and migration) and fishing exploitation. The model needs basic biological parameters that are often available for a wide range of species, and which can be found in 'FishBase' for instance (see <http://www.fishbase.org/search.php>), and fish spatial distribution data. This package provides tools to build and run simulations using the 'OSMOSE' model.
+**osmose** (*Object Oriented Simulator of Marine Ecosystems*) is a multispecies and individual-based model (IBM) [@shin2001exploring; @shin2004using] focuses on fish species. This model assumes opportunistic predation based on spatial co-occurrence and size adequacy between a predator and its prey (size-based opportunistic predation). It represents fish individuals grouped into schools, which are characterized by their size, weight, age, taxonomy and geographical location (2D model), and which undergo major processes of fish life cycle (growth, explicit predation, natural and starvation mortalities, reproduction and migration) and fishing exploitation. The model needs basic biological parameters that are often available for a wide range of species, and which can be found in 'FishBase' for instance (see <http://www.fishbase.org/search.php>), and fish spatial distribution data. This package provides tools to build and run simulations using the 'OSMOSE' model.
 
 
 ## Installation
@@ -54,7 +52,7 @@ OSMOSE is a multispecies and Individual-based model (IBM) which focuses on fish 
 `osmose` includes a function that allows to create basic example files in a selected folder. The files corresponds to a case study provided by @Halouani2016. `osmose_demo` uses two main arguments: (1) `path` will be the folder path where the files will be copied and (2) `config` which indicates the configuration example to be copied. To indicate @Halouani2016 case study, `config = "gog"`.
 
 ```{r, cache=TRUE}
-# Define a folder to copy files
+# Define a folder to copy files (for the example: a temporary folder)
 exampleFolder <- tempdir()
 
 cat(exampleFolder)
@@ -106,7 +104,7 @@ class(config)
 print(outputs)
 ```
 
-```{r}
+```{r, echo=FALSE}
 osmose:::print.osmose(outputs)
 ```
 
@@ -115,26 +113,8 @@ osmose:::print.osmose(outputs)
 summary(outputs)
 ```
 
-```{r}
+```{r, echo=FALSE}
 osmose:::print.summary.osmose(osmose:::summary.osmose(outputs))
-```
-
-### Plot methods for `osmose` class
-
-```{r}
-plot(outputs, what = "biomass")
-plot(outputs, what = "biomass", type = 2)
-plot(outputs, what = "abundance", ts = FALSE, type = 1)
-plot(outputs, what = "yield", ts = FALSE, type = 2)
-```
-
-### Plot methods for `osmose.config` class
-
-```{r}
-plot(config, what = "species")
-plot(config, what = "predation")
-plot(config, what = "reproduction", type = 1)
-plot(config, what = "reproduction", type = 2)
 ```
 
 ## References

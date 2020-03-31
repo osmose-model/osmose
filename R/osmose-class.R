@@ -126,19 +126,29 @@ print.osmose = function(x, ...) {
 summary.osmose = function(object, ..., digits = 1L) {
   
   # Catch model and species info from object
-  output = list(model = object$model)
-  output$species = object$species
+  output = list(model = object$model,
+                species = object$species)
+  
+  # Get dimension (no vector classes) or length (vector classes) for each level
+  infoLevels <- sapply(object, function(x) if(is.array(x)) dim(x) else length(x))
+  
+  # Check which levels are empty (dim or length equal to zero)
+  infoLevels <- sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
+  
+  # Add vector indicating if level is empty or not
+  output$is_empty <- matrix(data = infoLevels, ncol = 1, 
+                            dimnames = list(names(infoLevels), "is_empty"))
   
   # Define main outputs to show info
   resumenVars <- c("biomass", "abundance", "yield", "yieldN")
   
   # Get an index for those variables which are not NULL
-  index <- !sapply(object[resumenVars], is.null)
+  resumenVars <- intersect(resumenVars, names(infoLevels)[!infoLevels])
   
   # Get summary info about selected variables
-  if(any(index)){
+  if(length(resumenVars) > 0){
     # Get summery values by spp
-    values <- sapply(object[resumenVars[index]], 
+    values <- sapply(object[resumenVars], 
                      function(x) apply(x, 2, mean, na.rm = TRUE))
     
     # Convert values to more readable number

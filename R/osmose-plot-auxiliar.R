@@ -647,7 +647,7 @@ osmosePlots3D = function(x, type, by, species, speciesNames, start, end,
               length.out = nrow(x[[1]]))
   
   # apply processing on the time-series (so far, replicate and time-mean)
-  x = sapply(x, .process_3d_fields, start, end, ts, replicates, ...) 
+  x = sapply(x, .process_3d_fields, start, end, ...) 
   
   switch(type,
          "1" = plot3DType1(x, by = by, horizontal = horizontal, col = col,
@@ -761,7 +761,8 @@ plot3DType1 = function(x, by, horizontal, col, factor,
       box()
       
       if(i == 1){
-        mtext(text = paste0(by, ' (', units$x, ')'), side = 1, line = 2, 
+        if(units$x != "") units$x <- paste(' (', units$x, ')')
+        mtext(text = paste0(by, units$x), side = 1, line = 2, 
               outer = TRUE, cex = cex)
       }
     }
@@ -794,7 +795,11 @@ plot3DType2 = function(x, col, factor, speciesNames, axes, units, by, ...){
     
     box()
     
-    mtext(text = paste0(by, ' (', units$x, ')'), side = 1, line = 2)
+    cex = list(...)[["cex"]]
+    cex = ifelse(is.null(cex), 1, cex)
+    
+    if(units$x != "") units$x <- paste(' (', units$x, ')')
+    mtext(text = paste0(by, units$x), side = 1, line = 2, cex = cex)
   }
   
   return(invisible())
@@ -814,7 +819,7 @@ plot3DType2 = function(x, col, factor, speciesNames, axes, units, by, ...){
 
 # Process 3D fields (fields by class). Computes replicates
 # or time means. Called through lapply (to loop over all the species)
-.process_3d_fields = function(x, start, end, ts, replicates, ...) {
+.process_3d_fields = function(x, start, end, ...) {
   
   index = .get_start_end(x, start, end)
   start = index[1]
@@ -825,6 +830,6 @@ plot3DType2 = function(x, col, factor, speciesNames, axes, units, by, ...){
   } else {
     x = x[seq(start, end), , drop = FALSE]  # time, class, replicates  
   }
-  x = apply(x, 2, mean, na.rm = TRUE)
   
+  return(apply(x, 2, mean, na.rm = TRUE))
 }
