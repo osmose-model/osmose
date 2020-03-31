@@ -128,7 +128,7 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
     
     par(mar = mar, oma = oma)
     
-    mfrow = getmfrow(length(x))
+    mfrow = getmfrow(ncol(x))
   }else{
     mfrow = c(1, 1)
   }
@@ -136,9 +136,9 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   par(mfrow = mfrow)
   
   # Extract args related with line customization
-  col = rep(x = if(is.null(col)) "black" else col, length.out = length(x))
-  lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = length(x))
-  lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = length(x))
+  col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
+  lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
+  lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
   
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 0.8, cex)
@@ -197,7 +197,7 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
         axis(side = 3, las = las, line = line, cex.axis = cex.axis)
       }
       
-      index = c(seq(from = length(x) - mfrow[2] + 1, by = 2, 
+      index = c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
                     to = prod(mfrow) - mfrow[2] + 1),
                 seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
       if(is.element(i, index)){
