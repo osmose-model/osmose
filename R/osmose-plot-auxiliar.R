@@ -77,7 +77,8 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
            "3" = plot2DTsType3(x = x, times = times, xlim = xlim, ylim = ylim, 
                                factor = factor, col = col, alpha = alpha, 
                                legend = legend, speciesNames = speciesNames, 
-                               axes = axes, units = units, border = border, ...),
+                               axes = axes, units = units, border = border,
+                               lty = lty, lwd = lwd, ...),
            "4" = plot2DTsType4(x = x, times = times, xlim = xlim, ylim = ylim, 
                                factor = factor, lty = lty, lwd = lwd, col = col, 
                                alpha = alpha, legend = legend, 
@@ -122,7 +123,7 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   on.exit(par(op))
   
   # Define multiplot array if there're more than 1 species
-  if(length(x) > 1){
+  if(ncol(x) > 1){
     mar = rep(0, 4)
     oma = c(3, 4, 3, 4)
     
@@ -318,7 +319,7 @@ plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border,
 }
 
 plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames, 
-                         legend, axes, units, border, ...){
+                         legend, axes, units, border, lty, lwd, ...){
   
   if(length(dim(x)) > 2){
     x = apply(x, c(1, 2), mean, na.rm = TRUE)
@@ -337,7 +338,7 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
   
   # Define xlim & ylim if NULL
   if(is.null(xlim)) xlim = range(times)
-  if(is.null(ylim)) ylim = range(dataSpecies[, 1])
+  if(is.null(ylim)) ylim = c(0, max(dataSpecies[, 1]))
   
   if(is.null(speciesNames)){
     speciesNames = toupper(colnames(dataSpecies))
@@ -373,7 +374,8 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
     y.pol = c(dataSpecies[, sp], rep(0, times = nrow(x)))
     
     polygon(x = x.pol, y = y.pol, border = border, 
-            col = adjustcolor(col = col[sp], alpha.f = alpha), ...)
+            col = adjustcolor(col = col[sp], alpha.f = alpha),
+            lty = lty, lwd = lwd, ...)
   }
   
   if(isTRUE(axes)){
@@ -713,11 +715,11 @@ plot3DType1 = function(x, by, horizontal, col, factor,
     xsp = factor*x[,i]
     
     # Draw barplot
-    bp <- barplot(xsp, horiz = horizontal, names.arg = rep(NA, nrow(x)), 
-                  col = col, ylim = ylim, border = border, 
-                  xlab = NA, ylab = NA, axes = FALSE, ...)
+    bp = barplot(xsp, horiz = horizontal, names.arg = rep(NA, nrow(x)), 
+                 col = col, ylim = ylim, border = border, 
+                 xlab = NA, ylab = NA, axes = FALSE, ...)
     
-    bp <- as.numeric(bp)
+    bp = as.numeric(bp)
     
     # Add label of factor
     if(i == 1){
@@ -761,7 +763,7 @@ plot3DType1 = function(x, by, horizontal, col, factor,
       box()
       
       if(i == 1){
-        if(units$x != "") units$x <- paste(' (', units$x, ')')
+        if(units$x != "") units$x = paste(' (', units$x, ')')
         mtext(text = paste0(by, units$x), side = 1, line = 2, 
               outer = TRUE, cex = cex)
       }
@@ -775,15 +777,15 @@ plot3DType1 = function(x, by, horizontal, col, factor,
 plot3DType2 = function(x, col, factor, speciesNames, axes, units, by, ...){
   
   # List of the form x, y & z
-  x <- list(x = seq(nrow(x)),
-            y = seq(ncol(x)),
-            z = x*factor)
+  x = list(x = seq(nrow(x)),
+           y = seq(ncol(x)),
+           z = x*factor)
   
   # Modify margins to give space for species names
   par(mar = c(3, 10, 1, 1))
   
   # Define default color palette
-  if(is.null(col)) col <- tim.colors(1e3)
+  if(is.null(col)) col = tim.colors(1e3)
   
   # Draw image plot
   image.plot(x, axes = FALSE, legend.lab = units$y, col = col, ...)
@@ -798,7 +800,7 @@ plot3DType2 = function(x, col, factor, speciesNames, axes, units, by, ...){
     cex = list(...)[["cex"]]
     cex = ifelse(is.null(cex), 1, cex)
     
-    if(units$x != "") units$x <- paste(' (', units$x, ')')
+    if(units$x != "") units$x = paste(' (', units$x, ')')
     mtext(text = paste0(by, units$x), side = 1, line = 2, cex = cex)
   }
   

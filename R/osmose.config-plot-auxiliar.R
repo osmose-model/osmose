@@ -44,7 +44,8 @@ plotReproductionType2 = function(x, ylim, speciesNames, axes, border, legend,
   
   if(is.null(speciesNames)) speciesNames = colnames(x)[2]
   
-  xValues = as.numeric(barplot(height = x[,2], axes = FALSE, ylim = ylim, 
+  xValues = structure(x[,2], .Names = rownames(x))
+  xValues = as.numeric(barplot(height = xValues, axes = FALSE, ylim = ylim, 
                                col = col, border = border, ...))
   
   if(isTRUE(axes)){
@@ -67,11 +68,11 @@ plotReproductionType2 = function(x, ylim, speciesNames, axes, border, legend,
     adj = list(...)[["adj"]]
     adj = ifelse(is.null(adj), 0.99, adj)
     
-    cex = list(...)[["cex"]]
-    cex = ifelse(is.null(cex), 1, cex)
+    cex.lab = list(...)[["cex.lab"]]
+    cex.lab = ifelse(is.null(cex.lab), 1, cex.lab)
     
     mtext(text = toupper(speciesNames), side = 3, line = -1.5, adj = adj, 
-          cex = cex, col = "black")
+          cex = cex.lab, col = "black")
   }
   
   return(invisible())

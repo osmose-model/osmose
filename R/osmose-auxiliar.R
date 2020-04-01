@@ -26,7 +26,7 @@ readOsmoseFiles = function(path, type, bySpecies=FALSE, ext="csv", ...) {
   xclass = paste("osmose", type, sep = ".")
   
   # If the class has a Distrib label, remove it
-  xclass <- gsub(x = xclass, pattern = "Distrib", replacement = "")
+  xclass = gsub(x = xclass, pattern = "Distrib", replacement = "")
   
   # Get a vector with all files on the path
   allFiles = dir(path = path, recursive = TRUE, include.dirs = FALSE)

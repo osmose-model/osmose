@@ -1,21 +1,21 @@
 
 # Define location of files for example ------------------------------------
 
-folder_location <- readline("Indicate a folder location where the files will be copied...: ")
+folder_location = readline("Indicate a folder location where the files will be copied...: ")
 
 
 # Creates basic files for a running ---------------------------------------
 
 # Remove extra quotes on folder_location
-folder_location <- gsub(x = folder_location, pattern = "\"", replacement = "")
+folder_location = gsub(x = folder_location, pattern = "\"", replacement = "")
 
 # Generates example files using 'osmose_demo' function
-demoPaths <- osmose_demo(path = folder_location, config = "gog")
+demoPaths = osmose_demo(path = folder_location, config = "gog")
 
 
 # Read osmose configuration files -----------------------------------------
 
-outputs <- read_osmose(input = demoPaths$config_file)
+outputs = read_osmose(input = demoPaths$config_file)
 
 # Check plot methods for osmose class -------------------------------------
 

@@ -91,21 +91,21 @@ print.osmose = function(x, ...) {
   cat(sprintf("\n\t[sp%s] %s", seq(0, x$model$nsp - 1), x$species), "\n")
   
   # Get dimension (no vector classes) or length (vector classes) for each level
-  infoLevels <- sapply(x, function(x) if(is.array(x)) dim(x) else length(x))
+  infoLevels = sapply(x, function(x) if(is.array(x)) dim(x) else length(x))
   
   # Check which levels are empty (dim or length equal to zero)
-  infoLevels <- sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
+  infoLevels = sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
   
   # Add a mark (*) for those empty level's' names
-  infoLevels <- paste0(names(infoLevels), ifelse(infoLevels, " (*)", ""))
+  infoLevels = paste0(names(infoLevels), ifelse(infoLevels, " (*)", ""))
   
   # If length of level (of names) vector is odd, add an empty value
-  infoLevels <- c(infoLevels, 
-                  if(length(infoLevels) %% 2 != 0) "---------" else NULL)
+  infoLevels = c(infoLevels, 
+                 if(length(infoLevels) %% 2 != 0) "---------" else NULL)
   
   # Sort vector (of names) as a 2 columns matrix
-  infoLevels <- matrix(data = infoLevels, ncol = 2)
-  dimnames(infoLevels) <- list(rep("", nrow(infoLevels)), rep("", ncol(infoLevels)))
+  infoLevels = matrix(data = infoLevels, ncol = 2)
+  dimnames(infoLevels) = list(rep("", nrow(infoLevels)), rep("", ncol(infoLevels)))
   
   # Show available variables
   cat("\nAvailable fields:\n")
@@ -130,29 +130,29 @@ summary.osmose = function(object, ..., digits = 1L) {
                 species = object$species)
   
   # Get dimension (no vector classes) or length (vector classes) for each level
-  infoLevels <- sapply(object, function(x) if(is.array(x)) dim(x) else length(x))
+  infoLevels = sapply(object, function(x) if(is.array(x)) dim(x) else length(x))
   
   # Check which levels are empty (dim or length equal to zero)
-  infoLevels <- sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
+  infoLevels = sapply(infoLevels, function(x) isTRUE(all.equal(x, 0)))
   
   # Add vector indicating if level is empty or not
-  output$is_empty <- matrix(data = infoLevels, ncol = 1, 
-                            dimnames = list(names(infoLevels), "is_empty"))
+  output$is_empty = matrix(data = infoLevels, ncol = 1, 
+                           dimnames = list(names(infoLevels), "is_empty"))
   
   # Define main outputs to show info
-  resumenVars <- c("biomass", "abundance", "yield", "yieldN")
+  resumenVars = c("biomass", "abundance", "yield", "yieldN")
   
   # Get an index for those variables which are not NULL
-  resumenVars <- intersect(resumenVars, names(infoLevels)[!infoLevels])
+  resumenVars = intersect(resumenVars, names(infoLevels)[!infoLevels])
   
   # Get summary info about selected variables
   if(length(resumenVars) > 0){
     # Get summery values by spp
-    values <- sapply(object[resumenVars], 
-                     function(x) apply(x, 2, mean, na.rm = TRUE))
+    values = sapply(object[resumenVars], 
+                    function(x) apply(x, 2, mean, na.rm = TRUE))
     
     # Convert values to more readable number
-    output$resumen <- as.data.frame(apply(values, 2, function(x) format(round(x, digits = digits))))
+    output$resumen = as.data.frame(apply(values, 2, function(x) format(round(x, digits = digits))))
   }
   
   # Generate output
