@@ -130,21 +130,19 @@
 
 \method{plot}{osmose.biomassByTL}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
-  factor = 1,
+  factor = 0.001,
   xlim = NULL,
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -154,14 +152,11 @@
 
 \method{plot}{osmose.biomassBySize}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
   factor = 0.001,
@@ -169,6 +164,7 @@
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -178,14 +174,11 @@
 
 \method{plot}{osmose.biomassByAge}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
   factor = 0.001,
@@ -193,6 +186,7 @@
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -202,21 +196,19 @@
 
 \method{plot}{osmose.abundanceByTL}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
-  factor = 1,
+  factor = 0.001,
   xlim = NULL,
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -226,14 +218,11 @@
 
 \method{plot}{osmose.abundanceBySize}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
   factor = 0.001,
@@ -241,6 +230,7 @@
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -250,14 +240,11 @@
 
 \method{plot}{osmose.abundanceByAge}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
   factor = 0.001,
@@ -265,6 +252,7 @@
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -274,14 +262,11 @@
 
 \method{plot}{osmose.yieldNBySize}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
   factor = 0.001,
@@ -289,6 +274,7 @@
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -298,14 +284,11 @@
 
 \method{plot}{osmose.yieldNByAge}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
   factor = 0.001,
@@ -313,6 +296,7 @@
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -322,14 +306,11 @@
 
 \method{plot}{osmose.yieldBySize}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
   factor = 0.001,
@@ -337,6 +318,7 @@
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -346,14 +328,11 @@
 
 \method{plot}{osmose.yieldByAge}(
   x,
-  ts = FALSE,
   type = 1,
   species = NULL,
   speciesNames = NULL,
   start = NULL,
   end = NULL,
-  initialYear = NULL,
-  replicates = TRUE,
   freq = 12,
   horizontal = FALSE,
   factor = 0.001,
@@ -361,6 +340,7 @@
   ylim = NULL,
   col = NULL,
   border = NULL,
+  legend = TRUE,
   lty = 1,
   lwd = 1,
   axes = TRUE,
@@ -444,8 +424,7 @@ only for those plot types TS-2)}
 
 \item{units}{String with units of the variable that defines the label set 
 on top of the plot. If \code{NULL} (default), the value will depend on the
-class. For instance, if plot if about biomass or abundance, units will be set
-on 'tonnes' or 'individuals', respectively.}
+class, see Details.}
 }
 \value{
 A graph of an \code{osmose} object.
@@ -466,8 +445,12 @@ classes.
  \item "yieldN" to plot the species yield (in numbers) (see \link{plot.osmose.yieldN})
 }
 
-Plot types can be changed using \code{type} and \code{ts} arguments.
-So, for \code{ts = TRUE}, user will select within:
+User can select within different plot types depending on the osmose
+class. So, for classes \code{biomass}, \code{abundance}, \code{yield} and 
+\code{yieldN} (\strong{Group 1}) the user must use \code{ts} and \code{type} 
+arguments to specify the type of plot to draw.
+
+So, for the \strong{Group 1} and \code{ts = TRUE}, user will select within:
 \itemize{
  \item{\code{type = 1}: }{Generates a matrix plot of the selected variable 
  plotted independently.}
@@ -480,7 +463,7 @@ So, for \code{ts = TRUE}, user will select within:
  plot of the time series.}
 }
 
-For \code{ts = FALSE}, user will select within:
+For the Group 1 and \code{ts = FALSE}, user will select within:
 \itemize{
  \item{\code{type = 1}: }{Generates a bar plot of the selected variable by 
  species, including interval confidence bars.}
@@ -488,9 +471,23 @@ For \code{ts = FALSE}, user will select within:
  species.}
 }
 
-Both \code{alpha} and \code{border} will controls the opacity and the color
-of border, respectively, for polygons, bar plots and box plots. So depending
-on the \code{ts}-\code{type}, they will have different default values: 
+The \strong{Group 2} refers classes of \strong{Group 1} with \strong{By} 
+specification (e.g. \code{yieldNBySize}, \code{abundanceByAge},
+\code{biomassByTL}). There are 2 available plot types:
+
+\itemize{
+ \item{\code{type = 1}: }{Generates a bar plot of the selected variable by 
+ species. The \code{...} will be passed to the internal \link{barplot} 
+ function.}
+ \item{\code{type = 2}: }{Generates a plot using \link{image.plot} function,
+ placing the species in the left axis, the By-variable (e.g. Size) on the 
+ bottom and the main variable (e.g. biomass) in a color scale. The \code{...}
+ will be passed to the internal \link{image.plot} function.}
+}
+
+Both \code{alpha} and \code{border} controls the opacity and the color of 
+border, respectively, for polygons, bar plots and box plots. So depending on 
+the \code{ts}-\code{type}, they will have different default values: 
 \itemize{
  \item{\code{alpha = 0.3} & \code{border = NA} for }{\code{TS = TRUE} with 
  \code{type = 1 or 2}.}
@@ -509,9 +506,14 @@ classes \strong{without By}, e.g. \code{osmose.biomass},
 (currently used with classes \strong{with By}, e.g. 
 \code{plot.osmose.biomassBySize}, \code{plot.osmose.yieldNByAge}).
 
-Extra arguments can be passed from \code{plot.default} using \code{...}: 
-\code{cex}, \code{cex.axis}, \code{border} (useful for \code{polygon}, 
-\code{boxplot}s and \code{barplot}s), etc.
+Extra arguments can be passed from \link{plot.default} using \code{...}: 
+\code{cex}, \code{cex.axis}, \code{border} (useful for \link{polygon}, 
+\link{boxplot}s and \link{barplot}s), etc. It is important to notice that,
+depending on where the ellipsys is passed, it allows and refuse the use of
+certain arguments. For instance, if the selected plot is a bar plot, the 
+\code{...} will be passed to the internal \code{barplot} call, so if 
+\code{cex} argument is used, it will create a conflict and an error (a 
+typical error of using \code{cex} in \link{barplot} function).
 }
 \author{
 Criscely Lujan Paredes

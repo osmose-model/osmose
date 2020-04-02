@@ -32,9 +32,11 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
         stop("Some values of 'species' does not exist.")
       }
       
+      # Get species index (adding 1 because numbering on osmose starts on zero)
       species = match(species, colnames(x)) - 1
     }
     
+    # Index selected species
     x = x[ , species + 1, , drop = FALSE]
   }
   
@@ -46,27 +48,31 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   if(is.null(start)) start = 1
   if(is.null(end)) end = dim(x)[1]
   
+  # Check start/end values
   if(start < 1 | start > end) stop("Incorrect value for 'start' argument")
   if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
   
+  # Subset x (colummns) by using start and end
   x = x[seq(start, end), , ,drop = FALSE]
   
-  # xlim 
+  # Define default values for initialYear
   if(is.null(initialYear)) initialYear = 0
   
+  # Define time vector
   times = seq(from = initialYear + start/freq, by = 1/freq, 
               length.out = nrow(x))
   
+  # Define error message
   msg = sprintf("Not defined method for ts = %s and type = %s", isTRUE(ts), type)
   if(isTRUE(ts)){
-    
-    switch(type,
+    # Plot types for ts = TRUE
+    switch(as.character(type),
            "1" = plot2DTsType1(x = x, replicates = replicates, 
                                ci = ci, times = times, xlim = xlim, ylim = ylim,
                                conf = conf, factor = factor, col = col, 
                                alpha = alpha, speciesNames = speciesNames, 
                                lty = lty, lwd = lwd, axes = axes, units = units,
-                               border = border, ...),
+                               border = border, legend = legend, ...),
            "2" = plot2DTsType2(x = x, replicates = replicates, 
                                ci = ci, times = times, xlim = xlim, ylim = ylim,
                                conf = conf, factor = factor, col = col, 
@@ -86,8 +92,8 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                units = units, ...),
            stop(msg))
   }else{
-    
-    switch(type,
+    # Plot types for ts = FALSE    
+    switch(as.character(type),
            "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
                              factor = factor, speciesNames = speciesNames, 
                              xlim = xlim, ylim = ylim, axes = axes, units = units,
@@ -111,7 +117,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
 
 plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf, 
                          factor, col, alpha, speciesNames, lty, lwd, axes, 
-                         units, border, ...){
+                         units, border, legend, ...){
   
   # Define name of species
   if(is.null(speciesNames)){
@@ -124,16 +130,23 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   
   # Define multiplot array if there're more than 1 species
   if(ncol(x) > 1){
+    # Internal margins
     mar = rep(0, 4)
+    
+    # External margins
     oma = c(3, 4, 3, 4)
     
+    # Define new margins
     par(mar = mar, oma = oma)
     
+    # Get array of plots
     mfrow = getmfrow(ncol(x))
   }else{
+    # Get array of plots
     mfrow = c(1, 1)
   }
   
+  # Define array of plots
   par(mfrow = mfrow)
   
   # Extract args related with line customization
@@ -141,6 +154,7 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
   lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
   
+  # Define default value for cex (size of species and factor labels)
   cex = list(...)[["cex"]]
   cex = ifelse(is.null(cex), 0.8, cex)
   
@@ -168,8 +182,10 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
            prob = 1 - conf, col = col[i], alpha = alpha, lty = lty[i], 
            lwd = lwd[i], border = border, ...)
     
-    # Add spp names
-    mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 0.05, cex = cex)
+    # Add species names
+    if(isTRUE(legend)){
+      mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 0.05, cex = cex)  
+    }
     
     # Add factor label at topleft
     if(i == 1){
@@ -180,24 +196,30 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
     
     # Add axis
     if(isTRUE(axes)){
+      # Define default value for las (direction of axis labels)
       las = list(...)$las
       las = ifelse(is.null(las), 1, las)
       
+      # Define default value for line (space between axis labels and box)
       line = list(...)$line
       line = ifelse(is.null(line), NA, line)
       
+      # Define default value for cex.axis (size of axis labels)
       cex.axis = list(...)[["cex.axis"]]
       cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
       
+      # Draw left axis (if correspond)
       if(is.element(i %% (mfrow[2]*2), c(0, 1))){
         axis(side = ifelse(i %% 2 == 1, 2, 4), las = las, line = line, 
              cex.axis = cex.axis)  
       }
       
+      # Draw upper axis (if correspond)
       if(mfrow[2] > 1 && is.element(i, seq(2, mfrow[2], 2))){
         axis(side = 3, las = las, line = line, cex.axis = cex.axis)
       }
       
+      # Draw bottom axis (if correspond)
       index = c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
                     to = prod(mfrow) - mfrow[2] + 1),
                 seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
@@ -264,24 +286,30 @@ plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf,
   
   # Add axes
   if(isTRUE(axes)){
+    # Define default value for las (direction of axis labels)
     las = list(...)$las
     las = ifelse(is.null(las), 1, las)
     
+    # Define default value for line (space between axis labels and box)
     line = list(...)$line
     line = ifelse(is.null(line), NA, line)
     
+    # Define default value for cex.axis (size of axis labels)
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
     
+    # Draw axis and box
     axis(side = 1, las = las, line = line, cex.axis = cex.axis)
     axis(side = 2, las = las, line = line, cex.axis = cex.axis)
     box()
   }
   
+  # Add factor label
   legendFactor = -(log10(factor))
   legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
   mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
+  # Add legend (species names)
   if(isTRUE(legend)){
     legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, 
            lty = lty, lwd = lwd)
@@ -293,6 +321,7 @@ plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf,
 plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border, 
                   ...){
   
+  # If there is just one replicate, plot it directly 
   if(dim(y)[3] == 1){
     lines(x = x, y = apply(y, 1, median, na.rm = TRUE), col = col, lty = lty, 
           lwd = lwd)
@@ -300,19 +329,22 @@ plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border,
     return(invisible())
   }
   
-  x.50  = apply(y, 1, median)
-  
   if(isTRUE(replicates)) {
+    # Calculate upper and lower quantiles
     x.inf = apply(y, 1, quantile, prob = prob/2)
     x.sup = apply(y, 1, quantile, prob = 1 - prob/2)
     
+    # Calculate polygon limits
     x.pol = c(x, rev(x), x[1])
     y.pol = c(x.inf, rev(x.sup), x.inf[1])
     
+    # Draw polygon
     polygon(x = x.pol, y = y.pol, col = adjustcolor(col = col, alpha.f = alpha),
             border = border, ...)
   }
   
+  # Calculate and add median value
+  x.50  = apply(y, 1, median)
   lines(x = x, y = x.50, col = col, lty = lty, lwd = lwd)
   
   return(invisible())
@@ -321,17 +353,21 @@ plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border,
 plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames, 
                          legend, axes, units, border, lty, lwd, ...){
   
+  # Calculate mean of values
   if(length(dim(x)) > 2){
     x = apply(x, c(1, 2), mean, na.rm = TRUE)
   }
   
+  # Multiply by factor value
   x = factor*x
+  
+  # Sort values in decreasing
   orderData = order(apply(x, 2, sum, na.rm = TRUE), decreasing = FALSE)
   x = x[, orderData]
   
   dataSpecies = NULL
-  for (sp in seq(ncol(x))){
-    xsp  = apply(as.data.frame(x[, c(sp:(dim(x))[2])]), 1, sum, na.rm = TRUE)
+  for(sp in seq(ncol(x))){
+    xsp  = apply(as.data.frame(x[, seq(sp, dim(x)[2])]), 1, sum, na.rm = TRUE)
     dataSpecies = cbind(dataSpecies, xsp)
   }
   colnames(dataSpecies) = colnames(x)
@@ -346,6 +382,7 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
     speciesNames = speciesNames[orderData]
   }
   
+  # Define color vector palette
   col = if(is.null(col)) rainbow(n = ncol(dataSpecies)) else rep(x = col, length.out = ncol(x))
   
   # Set default value for cex
@@ -379,12 +416,15 @@ plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames,
   }
   
   if(isTRUE(axes)){
+    # Define default value for las (direction of axis labels)
     las = list(...)$las
     las = ifelse(is.null(las), 1, las)
     
+    # Define default value for line (space between axis labels and box)
     line = list(...)$line
     line = ifelse(is.null(line), NA, line)
     
+    # Define default value for cex.axis (size of axis labels)
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
     
@@ -433,12 +473,15 @@ plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, lwd, col, alpha,
        lty = lty, lwd = lwd, type = "h", axes = FALSE, xlim = xlim, ylim = ylim, ...)
   
   if(isTRUE(axes)){
+    # Define default value for las (direction of axis labels)
     las = list(...)$las
     las = ifelse(is.null(las), 1, las)
     
+    # Define default value for line (space between axis labels and box)
     line = list(...)$line
     line = ifelse(is.null(line), NA, line)
     
+    # Define default value for cex.axis (size of axis labels)
     cex.axis = list(...)[["cex.axis"]]
     cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
     
@@ -558,7 +601,7 @@ plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
   }
   
   cex = list(...)[["cex"]]
-  cex = ifelse(is.null(cex), 0.8, cex) 
+  cex = ifelse(is.null(cex), 0.8, NA) 
   
   # Define default value for border
   if(is.null(border)) border = TRUE
@@ -625,9 +668,9 @@ norm_func = function(data) {
 # PLOT 3D -----------------------------------------------------------------
 
 osmosePlots3D = function(x, type, by, species, speciesNames, start, end, 
-                         initialYear, freq, horizontal, factor,
+                         freq, horizontal, factor, legend,
                          xlim, ylim, col, border, lty, lwd, axes, 
-                         units, ci, log, ...) {
+                         units, ...) {
   
   x = .extract_species_from_list(x, species)
   
@@ -635,8 +678,16 @@ osmosePlots3D = function(x, type, by, species, speciesNames, start, end,
     stop("'speciesNames' has an incorrect length.")
   }
   
+  # Check speciesNames argument
   if(is.null(speciesNames)){
     speciesNames = toupper(names(x))
+  }
+  
+  # Check units argument
+  if(!is.list(units) || 
+     length(units) != 2 || 
+     !all(is.element(c("x", "y"), names(units)))){
+    stop("'units' must be a list of length 2 and with levels 'x' and 'y'. See ?plot.osmose.")
   }
   
   # getting time array (not used so far)
@@ -644,22 +695,18 @@ osmosePlots3D = function(x, type, by, species, speciesNames, start, end,
   start = index[1]
   end = index[2]
   
-  if(is.null(initialYear)) initialYear = 0
-  times = seq(from = initialYear + start/freq, by = 1/freq, 
-              length.out = nrow(x[[1]]))
-  
   # apply processing on the time-series (so far, replicate and time-mean)
   x = sapply(x, .process_3d_fields, start, end, ...) 
   
-  switch(type,
+  switch(as.character(type),
          "1" = plot3DType1(x, by = by, horizontal = horizontal, col = col,
                            factor = factor, speciesNames = speciesNames,
                            ylim = ylim, axes = axes, units = units,
-                           border = border, ...),
+                           border = border, legend = legend, ...),
          "2" = plot3DType2(x, by = by, col = col, factor = factor, 
                            speciesNames = speciesNames,
                            axes = axes, units = units, ...),
-         stop(sprintf("3D plot type %d is not implemented yet.", type)))
+         stop(sprintf("3D plot type %s is not implemented yet.", type)))
   
   return(invisible())
   
@@ -667,7 +714,7 @@ osmosePlots3D = function(x, type, by, species, speciesNames, start, end,
 
 # Displays a histogram showing one plot per species.
 plot3DType1 = function(x, by, horizontal, col, factor, 
-                       speciesNames, axes, ylim, units, border, ...){
+                       speciesNames, axes, ylim, units, border, legend, ...){
   
   
   # To keep the plot params as the beginning
@@ -692,8 +739,8 @@ plot3DType1 = function(x, by, horizontal, col, factor,
   # Extract args related with line customization
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
   
-  cex = list(...)[["cex"]]
-  cex = ifelse(is.null(cex), 0.8, cex)
+  cex.lab = list(...)[["cex.lab"]]
+  cex.lab = ifelse(is.null(cex.lab), 0.8, cex.lab)
   
   # Define default value for border
   if(is.null(border)) border = NA
@@ -725,20 +772,25 @@ plot3DType1 = function(x, by, horizontal, col, factor,
     if(i == 1){
       legendFactor = -log10(factor)
       legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units$y))
-      mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)  
+      mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex.lab)  
     }
     
     # Add name of species
-    mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 1, cex = cex)
+    if(isTRUE(legend)){
+      mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 1, cex = cex.lab)  
+    }
     
     # Add axis
     if(isTRUE(axes)){
+      # Define default value for las (direction of axis labels)
       las = list(...)$las
       las = ifelse(is.null(las), 1, las)
       
+      # Define default value for line (space between axis labels and box)
       line = list(...)$line
       line = ifelse(is.null(line), NA, line)
       
+      # Define default value for cex.axis (size of axis labels)
       cex.axis = list(...)[["cex.axis"]]
       cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
       
@@ -763,9 +815,9 @@ plot3DType1 = function(x, by, horizontal, col, factor,
       box()
       
       if(i == 1){
-        if(units$x != "") units$x = paste(' (', units$x, ')')
+        if(units$x != "") units$x = paste0(' (', units$x, ')')
         mtext(text = paste0(by, units$x), side = 1, line = 2, 
-              outer = TRUE, cex = cex)
+              outer = TRUE, cex = cex.lab)
       }
     }
   }
@@ -781,26 +833,36 @@ plot3DType2 = function(x, col, factor, speciesNames, axes, units, by, ...){
            y = seq(ncol(x)),
            z = x*factor)
   
-  # Modify margins to give space for species names
-  par(mar = c(3, 10, 1, 1))
-  
   # Define default color palette
   if(is.null(col)) col = tim.colors(1e3)
+  
+  # To keep the plot params as the beginning
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  # Modify margins to give space for species names
+  par(mar = c(3, 10, 1, 1))
   
   # Draw image plot
   image.plot(x, axes = FALSE, legend.lab = units$y, col = col, ...)
   
   # Add axis
   if(isTRUE(axes)){
-    axis(side = 1, at = x$x, labels = rownames(x$z))
-    axis(side = 2, at = x$y, labels = colnames(x$z), las = 1)
     
+    # Define default values for Y axis labels
+    if(is.null(speciesNames)) speciesNames = colnames(x$z)
+    
+    # Draw axis
+    axis(side = 1, at = x$x, labels = rownames(x$z))
+    axis(side = 2, at = x$y, labels = speciesNames, las = 1)
+    
+    # Drax vox
     box()
     
     cex = list(...)[["cex"]]
     cex = ifelse(is.null(cex), 1, cex)
     
-    if(units$x != "") units$x = paste(' (', units$x, ')')
+    if(units$x != "") units$x = paste0(' (', units$x, ')')
     mtext(text = paste0(by, units$x), side = 1, line = 2, cex = cex)
   }
   

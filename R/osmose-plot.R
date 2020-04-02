@@ -57,12 +57,15 @@
 #' only for those plot types TS-2)
 #' @param units String with units of the variable that defines the label set 
 #' on top of the plot. If \code{NULL} (default), the value will depend on the
-#' class. For instance, if plot if about biomass or abundance, units will be set
-#' on 'tonnes' or 'individuals', respectively.
+#' class, see Details.
 #' @param ... Extra arguments of the function. See Details.
 #' 
-#' @details Plot types can be changed using \code{type} and \code{ts} arguments.
-#' So, for \code{ts = TRUE}, user will select within:
+#' @details User can select within different plot types depending on the osmose
+#' class. So, for classes \code{biomass}, \code{abundance}, \code{yield} and 
+#' \code{yieldN} (\strong{Group 1}) the user must use \code{ts} and \code{type} 
+#' arguments to specify the type of plot to draw.
+#' 
+#' So, for the \strong{Group 1} and \code{ts = TRUE}, user will select within:
 #' \itemize{
 #'  \item{\code{type = 1}: }{Generates a matrix plot of the selected variable 
 #'  plotted independently.}
@@ -75,7 +78,7 @@
 #'  plot of the time series.}
 #' }
 #' 
-#' For \code{ts = FALSE}, user will select within:
+#' For the Group 1 and \code{ts = FALSE}, user will select within:
 #' \itemize{
 #'  \item{\code{type = 1}: }{Generates a bar plot of the selected variable by 
 #'  species, including interval confidence bars.}
@@ -83,9 +86,23 @@
 #'  species.}
 #' }
 #' 
-#' Both \code{alpha} and \code{border} will controls the opacity and the color
-#' of border, respectively, for polygons, bar plots and box plots. So depending
-#' on the \code{ts}-\code{type}, they will have different default values: 
+#' The \strong{Group 2} refers classes of \strong{Group 1} with \strong{By} 
+#' specification (e.g. \code{yieldNBySize}, \code{abundanceByAge},
+#' \code{biomassByTL}). There are 2 available plot types:
+#' 
+#' \itemize{
+#'  \item{\code{type = 1}: }{Generates a bar plot of the selected variable by 
+#'  species. The \code{...} will be passed to the internal \link{barplot} 
+#'  function.}
+#'  \item{\code{type = 2}: }{Generates a plot using \link{image.plot} function,
+#'  placing the species in the left axis, the By-variable (e.g. Size) on the 
+#'  bottom and the main variable (e.g. biomass) in a color scale. The \code{...}
+#'  will be passed to the internal \link{image.plot} function.}
+#' }
+#' 
+#' Both \code{alpha} and \code{border} controls the opacity and the color of 
+#' border, respectively, for polygons, bar plots and box plots. So depending on 
+#' the \code{ts}-\code{type}, they will have different default values: 
 #' \itemize{
 #'  \item{\code{alpha = 0.3} & \code{border = NA} for }{\code{TS = TRUE} with 
 #'  \code{type = 1 or 2}.}
@@ -104,9 +121,14 @@
 #' (currently used with classes \strong{with By}, e.g. 
 #' \code{plot.osmose.biomassBySize}, \code{plot.osmose.yieldNByAge}).
 #' 
-#' Extra arguments can be passed from \code{plot.default} using \code{...}: 
-#' \code{cex}, \code{cex.axis}, \code{border} (useful for \code{polygon}, 
-#' \code{boxplot}s and \code{barplot}s), etc.
+#' Extra arguments can be passed from \link{plot.default} using \code{...}: 
+#' \code{cex}, \code{cex.axis}, \code{border} (useful for \link{polygon}, 
+#' \link{boxplot}s and \link{barplot}s), etc. It is important to notice that,
+#' depending on where the ellipsys is passed, it allows and refuse the use of
+#' certain arguments. For instance, if the selected plot is a bar plot, the 
+#' \code{...} will be passed to the internal \code{barplot} call, so if 
+#' \code{cex} argument is used, it will create a conflict and an error (a 
+#' typical error of using \code{cex} in \link{barplot} function).
 #' 
 #' @author Criscely Lujan Paredes
 #' 
@@ -209,18 +231,17 @@ plot.osmose.yieldN = function(x, species = NULL, speciesNames = NULL,
 
 #' @rdname plot.osmose
 #' @method plot osmose.biomassByTL
-plot.osmose.biomassByTL = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.biomassByTL = function(x, type = 1, species = NULL, 
                                    speciesNames = NULL, start = NULL, end = NULL,  
-                                   initialYear = NULL, replicates = TRUE, 
                                    freq = 12, horizontal = FALSE, 
-                                   factor = 1, xlim = NULL, ylim = NULL, 
-                                   col = NULL, border = NULL, 
-                                   lty = 1, lwd = 1,  axes = TRUE, 
+                                   factor = 1e-3, xlim = NULL, ylim = NULL, 
+                                   col = NULL, border = NULL, legend = TRUE, 
+                                   lty = 1, lwd = 1,  axes = TRUE,
                                    units = list(x = "", y = "tonnes"), ...) {
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
                 xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
                 units = units, ci = TRUE, by = "Trophic Level", ...)
@@ -229,21 +250,20 @@ plot.osmose.biomassByTL = function(x, ts = FALSE, type = 1, species = NULL,
 
 #' @rdname plot.osmose
 #' @method plot osmose.biomassBySize
-plot.osmose.biomassBySize = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.biomassBySize = function(x, type = 1, species = NULL, 
                                      speciesNames = NULL, start = NULL, end = NULL,  
-                                     initialYear = NULL, replicates = TRUE, 
                                      freq = 12, horizontal = FALSE, 
                                      factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                     col = NULL, border = NULL, 
+                                     col = NULL, border = NULL, legend = TRUE, 
                                      lty = 1, lwd = 1,  axes = TRUE,  
                                      units = list(x = "cm", y = "tonnes"), ...) {
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
                 xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Size", ...)
+                units = units, by = "Size", ...)
   
   return(invisible())
   
@@ -251,21 +271,20 @@ plot.osmose.biomassBySize = function(x, ts = FALSE, type = 1, species = NULL,
 
 #' @rdname plot.osmose
 #' @method plot osmose.biomassByAge
-plot.osmose.biomassByAge = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.biomassByAge = function(x, type = 1, species = NULL, 
                                     speciesNames = NULL, start = NULL, end = NULL,  
-                                    initialYear = NULL, replicates = TRUE, 
                                     freq = 12, horizontal = FALSE, 
                                     factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                    col = NULL, border = NULL, 
-                                    lty = 1, lwd = 1,  axes = TRUE, 
+                                    col = NULL, border = NULL, legend = TRUE, 
+                                    lty = 1, lwd = 1,  axes = TRUE,
                                     units = list(x = "years", y = "tonnes"), ...){
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
-                xlim = xlim, ylim = ylim, col = col,  
-                border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Age", ...)
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
+                xlim = xlim, ylim = ylim, col = col, 
+                border = border, lty = lty, lwd = lwd, axes = axes,  
+                units = units, by = "Age", ...)
   
   return(invisible())
   
@@ -273,84 +292,80 @@ plot.osmose.biomassByAge = function(x, ts = FALSE, type = 1, species = NULL,
 
 #' @rdname plot.osmose
 #' @method plot osmose.abundanceByTL
-plot.osmose.abundanceByTL = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.abundanceByTL = function(x, type = 1, species = NULL, 
                                      speciesNames = NULL, start = NULL, end = NULL,  
-                                     initialYear = NULL, replicates = TRUE, 
                                      freq = 12, horizontal = FALSE, 
-                                     factor = 1, xlim = NULL, ylim = NULL, 
-                                     col = NULL, border = NULL, 
-                                     lty = 1, lwd = 1,  axes = TRUE,  
+                                     factor = 1e-3, xlim = NULL, ylim = NULL, 
+                                     col = NULL, border = NULL, legend = TRUE, 
+                                     lty = 1, lwd = 1,  axes = TRUE,
                                      units = list(x = "", y = "individuals"), ...){
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
-                xlim = xlim, ylim = ylim, col = col,  
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
+                xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Trophic Level", ...)
+                units = units, by = "Trophic Level", ...)
   
   return(invisible())
 }
 
 #' @rdname plot.osmose
 #' @method plot osmose.abundanceBySize
-plot.osmose.abundanceBySize = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.abundanceBySize = function(x, type = 1, species = NULL, 
                                        speciesNames = NULL, start = NULL, end = NULL,  
-                                       initialYear = NULL, replicates = TRUE, 
                                        freq = 12, horizontal = FALSE, 
                                        factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                       col = NULL, border = NULL, 
-                                       lty = 1, lwd = 1,  axes = TRUE, 
+                                       col = NULL, border = NULL, legend = TRUE, 
+                                       lty = 1, lwd = 1,  axes = TRUE,
                                        units = list(x = "cm", y = "individuals"), ...){
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
-                xlim = xlim, ylim = ylim, col = col,  
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
+                xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Size", ...)
+                units = units, by = "Size", ...)
   
   return(invisible())
 }
 
 #' @rdname plot.osmose
 #' @method plot osmose.abundanceByAge
-plot.osmose.abundanceByAge = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.abundanceByAge = function(x, type = 1, species = NULL, 
                                       speciesNames = NULL, start = NULL, end = NULL,  
-                                      initialYear = NULL, replicates = TRUE, 
                                       freq = 12, horizontal = FALSE, 
                                       factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                      col = NULL, border = NULL, 
-                                      lty = 1, lwd = 1,  axes = TRUE, 
+                                      col = NULL, border = NULL, legend = TRUE, 
+                                      lty = 1, lwd = 1,  axes = TRUE,
                                       units = list(x = "years", y = "individuals"), ...){
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
-                xlim = xlim, ylim = ylim, col = col,  
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
+                xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Age", ...)
+                units = units, by = "Age", ...)
   
   return(invisible())
 }
 
 #' @rdname plot.osmose
 #' @method plot osmose.yieldNBySize
-plot.osmose.yieldNBySize = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.yieldNBySize = function(x, type = 1, species = NULL, 
                                     speciesNames = NULL, start = NULL, end = NULL,  
-                                    initialYear = NULL, replicates = TRUE, 
                                     freq = 12, horizontal = FALSE, 
                                     factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                    col = NULL, border = NULL, 
-                                    lty = 1, lwd = 1,  axes = TRUE, 
+                                    col = NULL, border = NULL, legend = TRUE, 
+                                    lty = 1, lwd = 1,  axes = TRUE,
                                     units = list(x = "cm", y = "individuals"), ...){
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
-                xlim = xlim, ylim = ylim, col = col,  
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
+                xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Size", ...)
+                units = units, by = "Size", ...)
   
   return(invisible())
 }
@@ -358,63 +373,60 @@ plot.osmose.yieldNBySize = function(x, ts = FALSE, type = 1, species = NULL,
 
 #' @rdname plot.osmose
 #' @method plot osmose.yieldNByAge
-plot.osmose.yieldNByAge = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.yieldNByAge = function(x, type = 1, species = NULL, 
                                    speciesNames = NULL, start = NULL, end = NULL,  
-                                   initialYear = NULL, replicates = TRUE, 
                                    freq = 12, horizontal = FALSE, 
                                    factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                   col = NULL, border = NULL, 
-                                   lty = 1, lwd = 1,  axes = TRUE, 
+                                   col = NULL, border = NULL, legend = TRUE, 
+                                   lty = 1, lwd = 1,  axes = TRUE,
                                    units = list(x = "years", y = "individuals"), ...){
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
-                xlim = xlim, ylim = ylim, col = col,  
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
+                xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Age", ...)
+                units = units, by = "Age", ...)
   
   return(invisible())
 }
 
 #' @rdname plot.osmose
 #' @method plot osmose.yieldBySize
-plot.osmose.yieldBySize = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.yieldBySize = function(x, type = 1, species = NULL, 
                                    speciesNames = NULL, start = NULL, end = NULL,  
-                                   initialYear = NULL, replicates = TRUE, 
                                    freq = 12, horizontal = FALSE, 
                                    factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                   col = NULL, border = NULL, 
-                                   lty = 1, lwd = 1,  axes = TRUE, 
+                                   col = NULL, border = NULL, legend = TRUE, 
+                                   lty = 1, lwd = 1,  axes = TRUE,
                                    units = list(x = "cm", y = "tonnes"), ...){
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
-                xlim = xlim, ylim = ylim, col = col,  
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
+                xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Size", ...)
+                units = units, by = "Size", ...)
   
   return(invisible())
 }
 
 #' @rdname plot.osmose
 #' @method plot osmose.yieldByAge
-plot.osmose.yieldByAge = function(x, ts = FALSE, type = 1, species = NULL, 
+plot.osmose.yieldByAge = function(x, type = 1, species = NULL, 
                                   speciesNames = NULL, start = NULL, end = NULL,  
-                                  initialYear = NULL, replicates = TRUE, 
                                   freq = 12, horizontal = FALSE, 
                                   factor = 1e-3, xlim = NULL, ylim = NULL, 
-                                  col = NULL, border = NULL, 
-                                  lty = 1, lwd = 1,  axes = TRUE, 
+                                  col = NULL, border = NULL, legend = TRUE, 
+                                  lty = 1, lwd = 1,  axes = TRUE,
                                   units = list(x = "years", y = "tonnes"), ...){
   
   osmosePlots3D(x = x, type = type, species = species, speciesNames = speciesNames, 
-                start = start, end = end, initialYear = initialYear, freq = freq, 
-                horizontal = horizontal, factor = factor,
-                xlim = xlim, ylim = ylim, col = col,  
+                start = start, end = end, freq = freq, horizontal = horizontal, 
+                factor = factor, legend = legend,
+                xlim = xlim, ylim = ylim, col = col, 
                 border = border, lty = lty, lwd = lwd, axes = axes, 
-                units = units, ci = TRUE, by = "Age", ...)
+                units = units, by = "Age", ...)
   
   return(invisible())
 }
