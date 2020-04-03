@@ -1,3 +1,26 @@
+# version 3.3.3
+
+** round 1 ** 
+
+>  Package has FOSS license, installs .class/.jar but has no 'java' directory.
+>
+>  Found the following (possibly) invalid URLs:
+>    URL: http://cran.r-project.org/package=osmose
+>      From: README.md
+>      CRAN URL not in canonical form
+>    URL: http://cran.rstudio.com/web/packages/osmose/index.html
+>      From: README.md
+>      Status: 200
+>      Message: OK
+>      CRAN URL not in canonical form
+>    Canonical CRAN.R-project.org URLs use https.
+>
+>  Size of tarball: 32817276 bytes
+>
+>Not more than 5 MB for a CRAN package, please.
+>
+>Please fix and resubmit. 
+
 # version 0.1.2
 
 Adding more plot functions

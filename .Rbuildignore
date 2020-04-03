@@ -7,10 +7,12 @@ cran-comments.md
 ^inst/extdata/gog_v4/*.*
 ^inst/extdata/eec/*.*
 ^inst/extdata/data_fishing.csv
-^java$
 ^inst/java/osmose_4\.0\.0\.jar$
 ^inst/java/osmose_4\.1\.0\.jar$
 ^inst/java/osmose_4\.2\.1\.jar$
+^java/osmose_4\.0\.0\.zip$
+^java/osmose_4\.1\.0\.zip$
+^/java/osmose_4\.2\.1\.zip$
 ^vignettes/vignette_cache$
 ^vignettes/*\.html$
 ^vignettes/*\.R$
