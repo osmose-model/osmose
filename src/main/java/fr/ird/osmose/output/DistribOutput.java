@@ -93,14 +93,16 @@ public class DistribOutput extends AbstractOutput {
 
     @Override
     public void update() {
+        int timeStep = this.getSimulation().getIndexTimeSimu();
         getSchoolSet().getAliveSchools().forEach(school -> {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
                 double var = variable.getVariable(school);
                 int irg = 0;
-                for (OutputRegion region : getOutputRegions()) {
-                    if (region.contains(school)) {
-                        values[irg][school.getSpeciesIndex()][getClass(school)] += var;
+                for (AbstractOutputRegion region : getOutputRegions()) {
+                    if (region.contains(timeStep, school)) {
+                        double sel = region.getSelectivity(timeStep, school);
+                        values[irg][school.getSpeciesIndex()][getClass(school)] += sel * var;
                     }
                     irg++;
                 }

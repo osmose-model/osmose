@@ -823,5 +823,5 @@ public class School extends AbstractSchool {
     public boolean isLarva() { 
         return (this.getAgeDt() < this.getSpecies().getThresAge());
     }
-    
+        
 }

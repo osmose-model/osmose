@@ -55,7 +55,9 @@ import fr.ird.osmose.resource.ResourceSpecies;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.AbstractGrid;
+import fr.ird.osmose.output.AbstractOutputRegion;
 import fr.ird.osmose.output.OutputRegion;
+import fr.ird.osmose.output.Surveys;
 import fr.ird.osmose.output.OutputWholeRegion;
 import fr.ird.osmose.util.Separator;
 import fr.ird.osmose.util.logging.OLogger;
@@ -264,7 +266,7 @@ public class Configuration extends OLogger {
      */
     private int nFishery;
 
-    private List<OutputRegion> outputRegions;
+    private List<AbstractOutputRegion> outputRegions;
 
     /**
      * Species index for focal, background and resource indexes.
@@ -472,22 +474,53 @@ public class Configuration extends OLogger {
         }
         // list output regions
         HashSet<Integer> rg = new HashSet(
-                findKeys("output.region.*.rg*").stream()
+                findKeys("output.regions.*.rg*").stream()
                         .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rg") + 3)))
                         .collect(Collectors.toList())
         );
+                
         // remove rg0 (whole domain) that is handled separately
         rg.remove(0);
+        
+        // list output surveys
+        HashSet<Integer> surveysIndex = new HashSet(
+                findKeys("surveys.*.sur*").stream()
+                        .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sur") + 4)))
+                        .collect(Collectors.toList())
+        );
+        
+        // Do some test in order to insure that surveys and output
+        // regions have no duplicate indexes
+        HashSet<Integer> total = new HashSet();
+        total.addAll(rg);
+        total.addAll(surveysIndex);
+        if(total.size() != surveysIndex.size() + rg.size()) { 
+            String msg = String.format("The surveys and output regions must have different indexes.");
+            throw new IllegalArgumentException(msg);
+        }
+         
+        // Initialize output regions from indexes
         rg.forEach(index -> {
-            if (!canFind("output.region.enabled.rg" + index)
-                    || getBoolean("output.region.enabled.rg" + index)) {
+            if (!canFind("output.regions.enabled.rg" + index)
+                    || getBoolean("output.regions.enabled.rg" + index)) {
                 outputRegions.add(new OutputRegion(index));
             }
         });
+        
+        // Initialize surveys regions from indexes
+        surveysIndex.forEach(index -> {
+            if (!canFind("surveys.enabled.sur" + index)
+                    || getBoolean("surveys.enabled.sur" + index)) {
+                outputRegions.add(new Surveys(index));
+            }
+        });
+        
+        
         if (outputRegions.size() <= 0) {
             // phv 20191203, should throw an error instead?
             warning("No output region defined");
         }
+        
         // init output regions
         outputRegions.forEach(region -> {
             region.init();
@@ -495,7 +528,7 @@ public class Configuration extends OLogger {
 
     }
 
-    public List<OutputRegion> getOutputRegions() {
+    public List<AbstractOutputRegion> getOutputRegions() {
         return outputRegions;
     }
 

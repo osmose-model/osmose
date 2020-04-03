@@ -73,6 +73,7 @@ public class WeightedDistribOutput extends DistribOutput {
 
     @Override
     public void update() {
+        int timeStep = this.getSimulation().getIndexTimeSimu();
         getSchoolSet().getAliveSchools().forEach(school -> {
             int classSchool = getClass(school);
             int iSpec = school.getSpeciesIndex();
@@ -80,8 +81,8 @@ public class WeightedDistribOutput extends DistribOutput {
                 double w = weight.getVariable(school);
                 double wvar = w * variable.getVariable(school);
                 int irg = 0;
-                for (OutputRegion region : getOutputRegions()) {
-                    if (region.contains(school)) {
+                for (AbstractOutputRegion region : getOutputRegions()) {
+                    if (region.contains(timeStep, school)) {
                         values[irg][school.getSpeciesIndex()][getClass(school)] += wvar;
                         denominator[irg][iSpec][classSchool] += w;
                     }

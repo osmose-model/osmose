@@ -97,7 +97,7 @@ public class OutputManager extends SimulationLinker {
      */
     final private SchoolSetSnapshot snapshot;
     /**
-     * Record frequency for writing restart files, in number of time step.
+     * Record frequency fclor writing restart files, in number of time step.
      */
     private int restartFrequency;
     /**

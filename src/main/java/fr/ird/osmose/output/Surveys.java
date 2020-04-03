@@ -52,20 +52,19 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.AbstractSchool;
-
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
+import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
 
 /**
  *
  * @author pverley
  */
-public class OutputRegion extends AbstractOutputRegion {
+public class Surveys extends AbstractOutputRegion {
 
     private FisheryMapSet mapSet;
-    private boolean cutoffEnabled;
-    private float[] cutoffAge;
+    private FisherySelectivity selectivity;
 
-    public OutputRegion(int index) {
+    public Surveys(int index) {
         super(index);
     }
 
@@ -76,19 +75,13 @@ public class OutputRegion extends AbstractOutputRegion {
         int index = this.getIndex();
 
         // Setting the name of the Survey region.
-        this.setName(getConfiguration().getString("output.regions.name.rg" + index));
+        this.setName(getConfiguration().getString("surveys.name.sur" + index));
 
-        mapSet = new FisheryMapSet(this.getName(), "output.regions.movement", "region");
+        mapSet = new FisheryMapSet(this.getName(), "surveys.movement", "survey");
         mapSet.init();
 
-        // Cutoff
-        cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
-        cutoffAge = new float[getNSpecies()];
-        if (cutoffEnabled) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
-            }
-        }
+        selectivity = new FisherySelectivity(index, "surveys.selectivity", "sur");
+        selectivity.init();
 
         /*
         if (!getConfiguration().isNull("output.region.file.rg" + index)) {
@@ -165,17 +158,12 @@ public class OutputRegion extends AbstractOutputRegion {
 
     @Override
     public String toString() {
-        return "Output Region " + this.getIndex();
+        return "Survey " + this.getIndex();
     }
 
     @Override
     public double getSelectivity(int timeStep, AbstractSchool school) {
-        double sel = this.include(school) ? 1 : 0;
-        return sel;
-    }
-
-    boolean include(AbstractSchool school) {
-        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getSpeciesIndex()]));
+        return this.selectivity.getSelectivity(timeStep, school);
     }
 
 }

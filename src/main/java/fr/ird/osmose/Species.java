@@ -120,7 +120,7 @@ public class Species {
      * time steps.
      */
     private final int lar2ad_thres;
-    
+       
 //////////////
 // Constructor
 //////////////
@@ -138,7 +138,7 @@ public class Species {
         name = cfg.getString("species.name.sp" + index);
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
-       
+          
         if (!cfg.isBioenEnabled()) {
             
             // If not bioen, initialize age at maturity 

@@ -135,7 +135,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         return nOutputRegion;
     }
 
-    public List<OutputRegion> getOutputRegions() {
+    public List<AbstractOutputRegion> getOutputRegions() {
         return getConfiguration().getOutputRegions();
     }
 
@@ -156,11 +156,11 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
         File path = new File(getConfiguration().getOutputPathname());
 
         // Creation of the regional output files for each region.
-        List<OutputRegion> regions = getConfiguration().getOutputRegions();
+        List<AbstractOutputRegion> regions = getConfiguration().getOutputRegions();
         prw = new PrintWriter[regions.size()];
 
         int i = 0;
-        for (OutputRegion region : getOutputRegions()) {
+        for (AbstractOutputRegion region : getOutputRegions()) {
             File file = new File(path, getFilename(region.getIndex()));
             boolean fileExists = file.exists();
             file.getParentFile().mkdirs();
@@ -184,10 +184,6 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             i++;
         }
 
-    }
-
-    boolean includeClassZero() {
-        return !cutoffEnabled;
     }
 
     boolean include(School school) {

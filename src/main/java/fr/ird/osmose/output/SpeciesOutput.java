@@ -88,14 +88,14 @@ public class SpeciesOutput extends AbstractOutput {
 
     @Override
     public void update() {
-
+        int timeStep = this.getSimulation().getIndexTimeSimu();
         getSchoolSet().getAliveSchools().stream()
-                .filter(school -> include(school))
                 .forEach(school -> {
                     int irg = 0;
-                    for (OutputRegion region : getOutputRegions()) {
-                        if (region.contains(school)) {
-                            value[irg][school.getSpeciesIndex()] += schoolVariable.getVariable(school);
+                    for (AbstractOutputRegion region : getOutputRegions()) {
+                        if (region.contains(timeStep, school)) {
+                            double select = region.getSelectivity(timeStep, school);
+                            value[irg][school.getSpeciesIndex()] += select * schoolVariable.getVariable(school);
                         }
                         irg++;
                     }

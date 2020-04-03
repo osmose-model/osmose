@@ -99,14 +99,15 @@ public class WeightedSpeciesOutput extends AbstractOutput {
     @Override
     public void update() {
 
+        int timeStep = this.getSimulation().getIndexTimeSimu();
         getSchoolSet().getAliveSchools().stream()
                 .filter(predicate)
                 .forEach(school -> {
                     double w = weight.getVariable(school);
                     double wvar = variable.getVariable(school) * w;
                     int irg = 0;
-                    for (OutputRegion region : getOutputRegions()) {
-                        if (region.contains(school)) {
+                    for (AbstractOutputRegion region : getOutputRegions()) {
+                        if (region.contains(timeStep, school)) {
                             numerator[irg][school.getSpeciesIndex()] += wvar;
                             denumerator[irg][school.getSpeciesIndex()] += w;
                         }

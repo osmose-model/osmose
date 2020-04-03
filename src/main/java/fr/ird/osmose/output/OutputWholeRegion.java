@@ -51,6 +51,7 @@
  */
 package fr.ird.osmose.output;
 
+import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.School;
 
 /**
@@ -69,7 +70,7 @@ public class OutputWholeRegion extends OutputRegion {
     }
 
     @Override
-    public boolean contains(School school) {
+    public boolean contains(int timeStep, AbstractSchool school) {
         return true;
     }
     
@@ -77,5 +78,4 @@ public class OutputWholeRegion extends OutputRegion {
     public String toString() {
         return "Region " + getIndex() + ", " + getConfiguration().getGrid().getNOceanCell() + " cells";
     }
-
 }
