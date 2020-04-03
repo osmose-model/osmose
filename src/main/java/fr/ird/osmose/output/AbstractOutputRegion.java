@@ -52,12 +52,13 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.AbstractSchool;
+import fr.ird.osmose.util.OsmoseLinker;
 
 /**
  *
  * @author Nicolas
  */
-public abstract class AbstractOutputRegion {
+public abstract class AbstractOutputRegion extends OsmoseLinker {
     
     private String name;
     private final int index;
@@ -74,7 +75,7 @@ public abstract class AbstractOutputRegion {
         return this.name;
     }
     
-    public void getName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
     
