@@ -68,16 +68,6 @@
   return(.guessType(x, keep.att = keep.att))
 }
 
-#' Check if a parameter exists
-#' @param par Output of the \code{link{read_osmose}} function
-#' @param ... String arguments 
-#' @param keep.att Whether parameter attributes should be kept
-existOsmoseParameter = function(par, ..., keep.att=FALSE) {
-  chain = unlist(list(...))
-  x = .getPar(par, ..., keep.att=TRUE)
-  if(is.null(x)) return(0) else return(1)
-}
-
 # Get species names. It matches the spX regular expression.
 .getSpecies = function(x)  {
   x = names(x)

@@ -12,8 +12,6 @@ NEWS.md
 ^inst/java/osmose_4\.0\.0\.jar$
 ^inst/java/osmose_4\.1\.0\.jar$
 ^inst/java/osmose_4\.2\.1\.jar$
-^R/osmose\.maps\.R$
-^R/osmose2R\.R$
 ^vignettes/vignette_cache$
 ^vignettes/*\.html$
 ^vignettes/*\.R$
@@ -22,3 +20,8 @@ NEWS.md
 ^vignettes/create_run_read_files$
 ^R/osmose-plot-inDevel\.R$
 ^R/osmose-plot4d\.R$
+^R/ex_osmose-plot\.R$
+^R/osmose\.netcdf\.R$
+^R/update_config\.R$
+^R/osmose\.maps\.R$
+^R/osmose2R\.R$

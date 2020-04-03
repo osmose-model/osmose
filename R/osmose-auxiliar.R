@@ -1,16 +1,4 @@
 
-#' Returns the list of Osmose Java versions
-#'
-#' @return List of Osmose Java versions
-#'
-list_osmose_versions = function() {
-  dirin = system.file(package = "osmose", "java")
-  output = list.files(path = dirin, pattern = ".jar")
-  
-  return(output)
-}
-
-
 #' Read Osmose output file
 #'
 #' @param path Osmose output path
