@@ -2,14 +2,34 @@
 % Please edit documentation in R/osmose-class.R
 \name{report.osmose}
 \alias{report.osmose}
-\title{Report method for osmose objects}
+\title{Report method for \code{osmose} objects}
 \usage{
-\method{report}{osmose}(x, format = "latex", tangle = FALSE,
-  output = NULL, open = TRUE)
+\method{report}{osmose}(
+  x,
+  format = "pdf_document",
+  output = NULL,
+  tangle = FALSE,
+  open = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{Object of \code{osmose} class.}
+
+\item{format}{The R Markdown output format to convert to (check 
+\link[rmarkdown]{render}).}
+
+\item{output}{The output directory for the rendered the output file.}
+
+\item{tangle}{Boolean; whether to tangle the R code from the input file 
+(check \link[rmarkdown]{render}).}
+
+\item{open}{Do you want to open the output file at the end? (only useful for 
+MS Windows environment).}
+
+\item{...}{Extra arguments pased to \link[rmarkdown]{render}.}
 }
 \description{
-Export a report of osmose objects.
+Build and export a report of \code{osmose} objects using
+R markdown.
 }

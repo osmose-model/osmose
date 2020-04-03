@@ -1,387 +1,899 @@
 
-# Internal plot functions -------------------------------------------------
+# PLOT 2D -----------------------------------------------------------------
 
-osmosePlots2D = function(x, species, start, end, initialYear, ts, type,
-                         replicates, nrep, ci, freq, horizontal, conf,
-                         factor, xlim, ylim, col, alpha, speciesNames, axes, ...) {
+osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts, 
+                         type, replicates, freq, horizontal, conf, factor, 
+                         xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
+                         units, ci = TRUE, ...){
   
-  # species indexation
-  if(!is.null(species)) {
-    if(max(species)+1 > dim(x)[2]) stop("error on species indexation, incorrect value in the parameter called species")
-    x = x[ , (species + 1) , , drop = FALSE]
+  # CHECK ARGUMENTS
+  if(!is.null(species)){
+    # Check species I
+    message1 = "'species' must be whether a numeric or character vector without NA or duplicated values."
+    if(!is.vector(species) || # isn't it a vector?
+       all(!is.element(c("character", "numeric"), mode(species))) || # is it character or numeric?
+       length(species) < 1 || # its length is greater than 1?
+       sum(is.na(species)) > 0 || # is there any NA?
+       any(duplicated(species))){ # is there any duplicated value?
+      stop(message1)
     }
+    
+    # Check species II
+    if(is.numeric(species)){
+      if(any(species > ncol(x))){
+        stop("'species' must be between 1 and ", ncol(x))  
+      }
+    }else if(is.character(species)){
+      if(is.null(dimnames(x))){
+        stop("Is not possible to define species as character due to 'x' has not species names defined.")
+      }
+      
+      if(any(!is.element(species, colnames(x)))){
+        stop("Some values of 'species' does not exist.")
+      }
+      
+      # Get species index (adding 1 because numbering on osmose starts on zero)
+      species = match(species, colnames(x)) - 1
+    }
+    
+    # Index selected species
+    x = x[ , species + 1, , drop = FALSE]
+  }
   
-  # time indexation
-  if(is.null(start)) start = 1 else start = start
-  if(is.null(end)) end = dim(x)[1] else end = end
-  if(!(start > 0) | !(start < end)) stop("error on time indexation, incorrect value the parameter called start")
-  if(!(end > 0) | !(end > start)) stop("error on time indexation, incorrect value in the parameter called")
-  x = x[c(start:end), , ,drop = FALSE]
+  if(!is.null(speciesNames) && length(speciesNames) != ncol(x)){
+    stop("'speciesNames' has an incorrect length.")
+  }
   
-  # xlim 
-  initialYear   = if(is.null(initialYear)) as.numeric(rownames(x)[1]) else initialYear
-  times   = seq(from=initialYear + 0.5/freq, by=1/freq, len=nrow(x))
-  xlim = if(is.null(xlim)) range(times)
+  # Check start and end args
+  if(is.null(start)) start = 1
+  if(is.null(end)) end = dim(x)[1]
   
-  # opar = par(no.readonly = TRUE)
-  # on.exit(par(opar))
+  # Check start/end values
+  if(start < 1 | start > end) stop("Incorrect value for 'start' argument")
+  if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
   
-  if(!(type %in% c(1:4))){
-    warning("The type argument selected is not correct. The value by default is used (type = 1)")
-    type = 1
+  # Subset x (colummns) by using start and end
+  x = x[seq(start, end), , ,drop = FALSE]
+  
+  # Define default values for initialYear
+  if(is.null(initialYear)) initialYear = 0
+  
+  # Define time vector
+  times = seq(from = initialYear + start/freq, by = 1/freq, 
+              length.out = nrow(x))
+  
+  # Define error message
+  msg = sprintf("Not defined method for ts = %s and type = %s", isTRUE(ts), type)
+  if(isTRUE(ts)){
+    # Plot types for ts = TRUE
+    switch(as.character(type),
+           "1" = plot2DTsType1(x = x, replicates = replicates, 
+                               ci = ci, times = times, xlim = xlim, ylim = ylim,
+                               conf = conf, factor = factor, col = col, 
+                               alpha = alpha, speciesNames = speciesNames, 
+                               lty = lty, lwd = lwd, axes = axes, units = units,
+                               border = border, legend = legend, ...),
+           "2" = plot2DTsType2(x = x, replicates = replicates, 
+                               ci = ci, times = times, xlim = xlim, ylim = ylim,
+                               conf = conf, factor = factor, col = col, 
+                               alpha = alpha, speciesNames = speciesNames, 
+                               lty = lty, lwd = lwd, axes = axes, 
+                               legend = legend, units = units, border = border, 
+                               ...),
+           "3" = plot2DTsType3(x = x, times = times, xlim = xlim, ylim = ylim, 
+                               factor = factor, col = col, alpha = alpha, 
+                               legend = legend, speciesNames = speciesNames, 
+                               axes = axes, units = units, border = border,
+                               lty = lty, lwd = lwd, ...),
+           "4" = plot2DTsType4(x = x, times = times, xlim = xlim, ylim = ylim, 
+                               factor = factor, lty = lty, lwd = lwd, col = col, 
+                               alpha = alpha, legend = legend, 
+                               speciesNames = speciesNames, axes = axes, 
+                               units = units, ...),
+           stop(msg))
+  }else{
+    # Plot types for ts = FALSE    
+    switch(as.character(type),
+           "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
+                             factor = factor, speciesNames = speciesNames, 
+                             xlim = xlim, ylim = ylim, axes = axes, units = units,
+                             border = border, conf = conf, ...),
+           "2" = plot2DType2(x, horizontal = horizontal, col = col, 
+                             factor = factor, speciesNames = speciesNames, 
+                             xlim = xlim, ylim = ylim, axes = axes, units = units, 
+                             border = border, ...),
+           "3" = plot2DType3(x, horizontal = horizontal, col = col, 
+                             factor = factor, speciesNames = speciesNames, 
+                             xlim = xlim, ylim = ylim, axes = axes, units = units, 
+                             border = border, ...),
+           stop(msg))
+  }
+  
+  return(invisible())
+}
+
+
+# Plot types with TS = TRUE -----------------------------------------------
+
+plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf, 
+                         factor, col, alpha, speciesNames, lty, lwd, axes, 
+                         units, border, legend, ...){
+  
+  # Define name of species
+  if(is.null(speciesNames)){
+    speciesNames = toupper(colnames(x))
   } 
   
-  if(isTRUE(ts)){
+  # To keep the plot params as the beginning
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  # Define multiplot array if there're more than 1 species
+  if(ncol(x) > 1){
+    # Internal margins
+    mar = rep(0, 4)
     
-    if(type == 1) { plot2DTsType1(x = x, replicates = replicates, nrep = nrep, ci = ci,
-                                times = times, xlim = xlim, ylim = ylim,
-                                conf = conf, factor = factor, col = col, alpha = alpha,
-                                speciesNames = speciesNames, axes = axes, ...) }
+    # External margins
+    oma = c(3, 4, 3, 4)
     
-    if(type == 2) { plot2DTsType2(x = x, replicates = replicates, nrep = nrep, ci = ci,
-                                times = times, xlim = xlim, ylim = ylim,
-                                conf = conf, factor = factor, col = col, alpha = alpha,
-                                speciesNames = speciesNames, axes = axes, ...) }
+    # Define new margins
+    par(mar = mar, oma = oma)
     
-    if(type == 3) { plot2DTsType3(x = x, times = times,
-                                xlim = xlim, ylim = ylim, factor = factor, 
-                                col = col, speciesNames = speciesNames, axes = axes, ...) }
-    
-    if(type == 4) { plot2DTsType4(x = x, times = times,
-                                xlim = xlim, ylim = ylim, factor = factor,
-                                col = col, speciesNames = speciesNames, axes = axes, ...) } 
-      
-  } else {
-    
-    if(type == 1) { plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
-                              factor = factor, speciesNames = speciesNames, axes = axes, ...) }
-    
-    if(type == 2) { plot2DType2(x, horizontal = horizontal, col = col, 
-                              factor = factor, speciesNames = speciesNames, axes = axes, ...) }
-    
-    if(type == 3) { plot2DType3(x, horizontal = horizontal, col = col, 
-                              factor = factor, speciesNames = speciesNames, axes = axes, ...) }
+    # Get array of plots
+    mfrow = getmfrow(ncol(x))
+  }else{
+    # Get array of plots
+    mfrow = c(1, 1)
   }
   
-  return(invisible())
-}
-
-# Plot types --------------------------------------------------------------
-
-plot2DTsType1 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                         times, xlim, ylim = NULL,
-                         conf = 0.95, factor = 1e-3, col = NULL, alpha = 0.5,
-                         speciesNames = NULL, lty = NULL, cex = 0.8, border = NA, axes = TRUE, ...) {
+  # Define array of plots
+  par(mfrow = mfrow)
   
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
+  # Extract args related with line customization
+  col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
+  lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
+  lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
   
-  if(ncol(x)!=1) {
-    par(oma = c(1,1,1,1), mar = c(3,3,1,1))
-    par(mfrow = getmfrow(ncol(x)))
-  }
+  # Define default value for cex (size of species and factor labels)
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 0.8, cex)
   
-  if(is.null(col)) col = .recycleArguments("black",dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
-  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
+  # Define default value for alpha
+  if(is.null(alpha)) alpha = 0.3
   
-  prob = 1 - conf
+  # Define default value for border
+  if(is.null(border)) border = NA
   
-  for(sp in seq_len(ncol(x))) {
-    xsp   = factor*x[, sp, ,drop = FALSE]
-    if(is.null(ylim)) ylim = c(0.75, 1.25)*range(xsp) #pending: ylim flexible for the users 
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(times)
+  if(is.null(ylim)) ylim = range(as.numeric(x))*factor #pending: ylim flexible for the users
+  
+  # Generate plots by spp
+  for(i in seq_len(ncol(x))){
+    # Extract values for spp i
+    xsp = factor*x[, i, ,drop = FALSE]
     
+    # Set an empty canvas
     plot.new()
-    plot.window(xlim=xlim, ylim=ylim)
-    plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], border = border, ...)
+    plot.window(xlim = xlim, ylim = ylim)
     
-    if(isTRUE(axes)){
-      axis(1, ...)
-      axis(2, las=2, ...)
-      box()
+    # Draw the plot
+    plotCI(x = times, y = xsp, replicates = replicates, ci = ci,  
+           prob = 1 - conf, col = col[i], alpha = alpha, lty = lty[i], 
+           lwd = lwd[i], border = border, ...)
+    
+    # Add species names
+    if(isTRUE(legend)){
+      mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 0.05, cex = cex)  
     }
     
-    mtext(speciesNames[sp], 3, line = -1.5, adj = 0.05, cex = cex)
-    legendFactor = -(log10(factor))
-    legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-    mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
+    # Add factor label at topleft
+    if(i == 1){
+      legendFactor = -log10(factor)
+      legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
+      mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)  
+    }
     
-    ylim = NULL 
+    # Add axis
+    if(isTRUE(axes)){
+      # Define default value for las (direction of axis labels)
+      las = list(...)$las
+      las = ifelse(is.null(las), 1, las)
+      
+      # Define default value for line (space between axis labels and box)
+      line = list(...)$line
+      line = ifelse(is.null(line), NA, line)
+      
+      # Define default value for cex.axis (size of axis labels)
+      cex.axis = list(...)[["cex.axis"]]
+      cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+      
+      # Draw left axis (if correspond)
+      if(is.element(i %% (mfrow[2]*2), c(0, 1))){
+        axis(side = ifelse(i %% 2 == 1, 2, 4), las = las, line = line, 
+             cex.axis = cex.axis)  
+      }
+      
+      # Draw upper axis (if correspond)
+      if(mfrow[2] > 1 && is.element(i, seq(2, mfrow[2], 2))){
+        axis(side = 3, las = las, line = line, cex.axis = cex.axis)
+      }
+      
+      # Draw bottom axis (if correspond)
+      index = c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
+                    to = prod(mfrow) - mfrow[2] + 1),
+                seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
+      if(is.element(i, index)){
+        axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+      }
+      
+      box()
+    }
   }
   
   return(invisible())
 }
 
-plotCI = function(x, y, replicates, ci, nrep, prob, col, alpha = 0.1, border, lty, ...) {
+plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf, 
+                         factor, col, alpha, speciesNames, lty, lwd, axes,  
+                         legend, units, border, ...) {
   
-  if(dim(x)[3] == 1){
-    lines(x = y, y = apply(x, 1, mean, na.rm = TRUE), col = col, lty = lty, ...)
-    return(invisible())
+  # Define name of species
+  if(is.null(speciesNames)){
+    speciesNames = toupper(colnames(x))
   }
   
-  x.inf = apply(x, 1, quantile, prob=prob/2)
-  x.sup = apply(x, 1, quantile, prob=1-prob/2)
-  x.50  = apply(x, 1, median)
-  x.pol = c(y, rev(y), y[1])
-  y.pol = c(x.inf, rev(x.sup), x.inf[1])
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(times)
+  if(is.null(ylim)) ylim = range(as.numeric(x))*factor
   
-  if(isTRUE(replicates)) {
-    polygon(x.pol, y.pol, col=makeTransparent(col=col, alpha=alpha), border = border, ...)
-    nrep = max(min(nrep, dim(x)[3]),2)
-    # matplot(y, x[,,seq_len(nrep)], add=TRUE, type="l", lty = lty, 
-    #         col=makeTransparent(col=col, alpha=(alpha + 2)/3))
-  }
-  lines(y, x.50, col = col, lty = lty, ...)
+  # Extract args related with line customization
+  col = if(is.null(col)) rainbow(n = ncol(x)) else rep(x = col, length.out = ncol(x))
+  lty = rep(x = if(is.null(lty)) "solid" else lty, length.out = ncol(x))
+  lwd = rep(x = if(is.null(lwd)) 1 else lwd, length.out = ncol(x))
   
-  return(invisible())
-}
-
-plot2DTsType2 = function(x, replicates = TRUE, nrep = 3, ci = TRUE,
-                         times, xlim, ylim=NULL, 
-                         conf=0.95, factor=1e-3, col = NULL, alpha = 0.5, 
-                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, border = NA, axes = TRUE, ...) {
+  # Set default values for cex
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 0.8, cex)
   
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
-  if(is.null(ylim)){
-    ylim    = c(0.75, 1.25)*c(min(apply(x, 2, min))*factor, max(apply(x, 2, max))*factor)
-  } else {
-    ylim = ylim
-  }
+  # Set default values for xaxs/yaxs
+  xaxs = list(...)[["xaxs"]]
+  if(is.null(xaxs)) xaxs = "r"
   
-  # par(oma = c(1,1,1,1), mar = c(2,2,1,0.5))
-  if(is.null(col)) col = .recycleArguments(rainbow(dim(x)[2]),dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
-  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
+  yaxs = list(...)[["yaxs"]]
+  if(is.null(yaxs)) yaxs = "r"
   
-  prob = 1 - conf
+  # Define default value for alpha
+  if(is.null(alpha)) alpha = 0.3
+  
+  # Define default value for border
+  if(is.null(border)) border = NA
+  
+  # Set an empty canvas
   plot.new()
-  plot.window(xlim=xlim, ylim=ylim)
+  plot.window(xlim = xlim, ylim = ylim, xaxs = xaxs, yaxs = yaxs)
   
-  for(sp in seq_len(ncol(x))) {
-    xsp   = factor*x[, sp, ,drop = FALSE]
+  # Generate plots by spp
+  for(sp in seq(ncol(x))) {
+    # Extract values for spp i
+    xsp = factor*x[, sp, ,drop = FALSE]
     
-    plotCI(x = xsp, y = times, replicates = replicates, ci = ci, nrep = nrep,
-           prob = prob, col = col[sp], alpha = alpha, lty = lty[sp], border = border, ...)
+    # Draw the plot
+    plotCI(x = times, y = xsp, replicates = replicates, ci = ci, 
+           prob = 1 - conf, col = col[sp], alpha = alpha, lty = lty[sp], 
+           lwd = lwd[sp], border = border, ...)
   }
   
+  # Add axes
   if(isTRUE(axes)){
-    axis(1, ...)
-    axis(2, las=2, ...)
+    # Define default value for las (direction of axis labels)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
+    
+    # Define default value for line (space between axis labels and box)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
+    
+    # Define default value for cex.axis (size of axis labels)
+    cex.axis = list(...)[["cex.axis"]]
+    cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+    
+    # Draw axis and box
+    axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+    axis(side = 2, las = las, line = line, cex.axis = cex.axis)
     box()
   }
   
+  # Add factor label
   legendFactor = -(log10(factor))
-  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
   mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
+  # Add legend (species names)
   if(isTRUE(legend)){
-    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
+    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, 
+           lty = lty, lwd = lwd)
   }
   
   return(invisible())
 }
 
-plot2DTsType3 = function(x, times, xlim, ylim=NULL, factor=1e-3,
-                         col = NULL, speciesNames = NULL, legend = TRUE, axes = TRUE, cex = 0.8, ...) {
+plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border, 
+                  ...){
   
-  if(length(dim(x)) == 3){x = apply(x, c(1,2), mean, na.rm = TRUE)}
+  # If there is just one replicate, plot it directly 
+  if(dim(y)[3] == 1){
+    lines(x = x, y = apply(y, 1, median, na.rm = TRUE), col = col, lty = lty, 
+          lwd = lwd)
+    
+    return(invisible())
+  }
   
+  if(isTRUE(replicates)) {
+    # Calculate upper and lower quantiles
+    x.inf = apply(y, 1, quantile, prob = prob/2)
+    x.sup = apply(y, 1, quantile, prob = 1 - prob/2)
+    
+    # Calculate polygon limits
+    x.pol = c(x, rev(x), x[1])
+    y.pol = c(x.inf, rev(x.sup), x.inf[1])
+    
+    # Draw polygon
+    polygon(x = x.pol, y = y.pol, col = adjustcolor(col = col, alpha.f = alpha),
+            border = border, ...)
+  }
+  
+  # Calculate and add median value
+  x.50  = apply(y, 1, median)
+  lines(x = x, y = x.50, col = col, lty = lty, lwd = lwd)
+  
+  return(invisible())
+}
+
+plot2DTsType3 = function(x, times, xlim, ylim, factor, col, alpha, speciesNames, 
+                         legend, axes, units, border, lty, lwd, ...){
+  
+  # Calculate mean of values
+  if(length(dim(x)) > 2){
+    x = apply(x, c(1, 2), mean, na.rm = TRUE)
+  }
+  
+  # Multiply by factor value
   x = factor*x
+  
+  # Sort values in decreasing
   orderData = order(apply(x, 2, sum, na.rm = TRUE), decreasing = FALSE)
   x = x[, orderData]
   
   dataSpecies = NULL
-  for (sp in seq_len(ncol(x))) {
-    xsp  = apply(as.data.frame(x[, c(sp:(dim(x))[2])]), 1, sum, na.rm = TRUE)
+  for(sp in seq(ncol(x))){
+    xsp  = apply(as.data.frame(x[, seq(sp, dim(x)[2])]), 1, sum, na.rm = TRUE)
     dataSpecies = cbind(dataSpecies, xsp)
   }
   colnames(dataSpecies) = colnames(x)
   
-  if(is.null(ylim)){ylim = c(0.75, 1.25)*range(dataSpecies[, 1])} else {ylim = ylim}
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(dataSpecies)) else speciesNames = speciesNames[orderData]
-  if(is.null(col)) {
-    col = .recycleArguments(rainbow(ncol(dataSpecies)), ncol(dataSpecies))
-  } else {
-    col = .recycleArguments(col, ncol(dataSpecies))
-    col = col[orderData]
-  } 
-  #if(is.null(col)) col = rainbow(n = ncol(dataSpecies)) else col = col
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(times)
+  if(is.null(ylim)) ylim = c(0, max(dataSpecies[, 1]))
   
-  par(oma = c(1,1,1,1), mar = c(2,2,1,0.5), xaxs = "i", yaxs = "i")
-  plot.new()
-  plot.window(xlim=xlim, ylim=ylim)
-  
-  for(sp in seq_len(ncol(x))) {
-    #lines(times, dataSpecies[, sp])
-    x.pol = c(times, rev(times))
-    y.pol = c(dataSpecies[, sp], rep(0, times = nrow(x)))
-    polygon(x.pol, y.pol, border=NA, col = col[sp], ...)
+  if(is.null(speciesNames)){
+    speciesNames = toupper(colnames(dataSpecies))
+  }else{
+    speciesNames = speciesNames[orderData]
   }
   
-  if(isTRUE(axes)) {
-    axis(1, ...)
-    axis(2, las=2, ...)
+  # Define color vector palette
+  col = if(is.null(col)) rainbow(n = ncol(dataSpecies)) else rep(x = col, length.out = ncol(x))
+  
+  # Set default value for cex
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 0.8, cex)
+  
+  # Set default values for xaxs/yaxs
+  xaxs = list(...)[["xaxs"]]
+  if(is.null(xaxs)) xaxs = "r"
+  
+  yaxs = list(...)[["yaxs"]]
+  if(is.null(yaxs)) yaxs = "r"
+  
+  # Define default value for alpha
+  if(is.null(alpha)) alpha = 1
+  
+  # Define default value for border
+  if(is.null(border)) border = TRUE
+  
+  # Draw an empty canvas
+  plot.new()
+  plot.window(xlim = xlim, ylim = ylim, xaxs= xaxs, yaxs = yaxs)
+  
+  for(sp in seq(ncol(x))){
+    x.pol = c(times, rev(times))
+    y.pol = c(dataSpecies[, sp], rep(0, times = nrow(x)))
+    
+    polygon(x = x.pol, y = y.pol, border = border, 
+            col = adjustcolor(col = col[sp], alpha.f = alpha),
+            lty = lty, lwd = lwd, ...)
+  }
+  
+  if(isTRUE(axes)){
+    # Define default value for las (direction of axis labels)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
+    
+    # Define default value for line (space between axis labels and box)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
+    
+    # Define default value for cex.axis (size of axis labels)
+    cex.axis = list(...)[["cex.axis"]]
+    cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+    
+    axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+    axis(side = 2, las = las, line = line, cex.axis = cex.axis)
     box()
   }
   
-  
   legendFactor = -(log10(factor))
-  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
   mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   if(isTRUE(legend)){
-    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = 1)
+    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, 
+           lty = 1)
   }
   
   return(invisible())
 }
 
 #plot for only one species using bars
-plot2DTsType4 = function(x, times, xlim, ylim = NULL,
-                         factor = 1e-3, col = NULL, 
-                         speciesNames = NULL, lty = NULL, cex = 0.8, legend = TRUE, axes = TRUE, ...) {
+plot2DTsType4 = function(x, times, xlim, ylim, factor, lty, lwd, col, alpha, 
+                         speciesNames, legend, axes, units, ...){
   
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
-  if(dim(x)[2]>1) stop("Plot ts = TRUE and type = 4 is only for one species")
-  if(is.null(col)) col = .recycleArguments("black",dim(x)[2]) else col = .recycleArguments(col,dim(x)[2])
-  if(is.null(lty)) lty = .recycleArguments(1, dim(x)[2]) else lty = .recycleArguments(lty, dim(x)[2])
- 
+  if(is.null(speciesNames)){
+    speciesNames = toupper(colnames(x))
+  } 
+  
+  if(ncol(x) > 1) stop("Plot ts = TRUE and type = 4 is only for one species")
+  
+  col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
+  
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 0.8, cex)
+  
+  # Define default value for alpha
+  if(is.null(alpha)) alpha = 1
+  
   x = apply(x, 1, mean, na.rm = TRUE)*factor
-  if(is.null(ylim)){ylim =  c(0, 1.25)*range(x)} else {ylim = ylim}
   
-  plot(x = times, y = x, col = col, lty = lty, type = "h", axes = FALSE, xlab = "", ylab = "",
-       xlim = xlim, ylim = ylim, ...)
+  # Define xlim & ylim if NULL
+  if(is.null(xlim)) xlim = range(times)
+  if(is.null(ylim)) ylim = range(x)
+  
+  plot(x = times, y = x, col = adjustcolor(col = col, alpha.f = alpha), 
+       lty = lty, lwd = lwd, type = "h", axes = FALSE, xlim = xlim, ylim = ylim, ...)
   
   if(isTRUE(axes)){
-    axis(1, ...)
-    axis(2, las=2, ...)
+    # Define default value for las (direction of axis labels)
+    las = list(...)$las
+    las = ifelse(is.null(las), 1, las)
+    
+    # Define default value for line (space between axis labels and box)
+    line = list(...)$line
+    line = ifelse(is.null(line), NA, line)
+    
+    # Define default value for cex.axis (size of axis labels)
+    cex.axis = list(...)[["cex.axis"]]
+    cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+    
+    axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+    axis(side = 2, las = las, line = line, cex.axis = cex.axis)
     box()
   }
   
   legendFactor = -(log10(factor))
-  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
   mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   if(isTRUE(legend)){
-    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, lty = lty)
+    legend("topleft", legend = speciesNames, col = col, bty = "n", cex = cex, 
+           lty = lty, lwd = lwd)
   }
   
   return(invisible())
 }
 
 
-plot2DType1 = function(x, ci = TRUE, horizontal = FALSE, col = NULL,
-                       factor = 1e-3, speciesNames = NULL, border = NA,
-                       cex.names = 0.8, cex = 0.9, axes = TRUE, ...) {
+# Plot types with TS = FALSE ----------------------------------------------
+
+plot2DType1 = function(x, ci, horizontal, col, factor, speciesNames, axes, 
+                       xlim, ylim, units, border, conf, ...){
   
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
-  if(is.null(col)) col="gray"
+  if(is.null(speciesNames)){
+    speciesNames = toupper(colnames(x))
+  }
   
-  if(!isTRUE(ci)){
+  if(is.null(col)) col = "gray"
+  
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 0.8, cex)
+  
+  # Define default value for border
+  if(is.null(border)) border = TRUE
+  
+  if(isTRUE(ci)){
+    barplotCI(x, horizontal = horizontal, speciesNames = speciesNames, 
+              col = col, factor = factor, axes = axes, conf = conf, 
+              xlim = xlim, ylim = ylim, border = border, ...)
+  }else{
     x = apply(x, 2, mean, na.rm = TRUE) #mean over the replicates
     x = x * factor
-    if(!isTRUE(horizontal)){
-      mar = c(2.5,2,1,0.3)
-      ylim = c(0, 1.2*max(x))
-      xlim = NULL
-    } else {
-      mar = c(2,5.5,1,0.3)
-      xlim = c(0, 1.2*max(x))
-      ylim = NULL
-    } 
     
-    par(oma = c(1,1,1,1), mar = mar, las = 1)
+    if(isTRUE(horizontal)){
+      if(is.null(xlim)){
+        xlim = c(0, max(x)*1.1)
+      }
+    }else{
+      if(is.null(ylim)){
+        ylim = c(0, max(x)*1.1)
+      }
+    }
+    
     barplot(x, horiz = horizontal, names.arg = speciesNames, col = col,
-            ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, axes = axes, ...)
-    
-  } else {
-    barplotCI(x, horizontal = horizontal, speciesNames = speciesNames, col = col,
-              factor = factor, border = border, cex.names = cex.names, axes = axes, ...)
+            ylim = ylim, xlim = xlim, axes = axes, border = border, ...)
   }
   
   box()
   legendFactor = -(log10(factor))
-  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
   mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   return(invisible())
-  
 }  
 
-barplotCI = function(x, horizontal, speciesNames, col, factor, border, cex.names = 0.8,
-                     angle = 90, code = 3, length = 0.10, axes, ...) {
+barplotCI = function(x, horizontal, speciesNames, col, factor, axes, conf, 
+                     xlim, ylim, border, ...){
   
   y.mean = apply(x*factor, 2, mean, na.rm = TRUE)
   y.sd   = apply(x*factor, 2, sd, na.rm = TRUE)
   
-  if(!isTRUE(horizontal)){
-    mar = c(2.5,2,1,0.3)
-    ylim = c(0, 1.2*(max(y.mean)+1.96*max(y.sd)/10))
-    xlim = NULL
-  } else {
-    mar = c(2,5.5,1,0.3)
-    xlim = c(0, 1.2*(max(y.mean)+1.96*max(y.sd)/10))
-    ylim = NULL
+  conf = qnorm(conf/2 + 0.5)
+  
+  if(isTRUE(horizontal)){
+    if(is.null(xlim)){
+      xlim = c(0, max(y.mean) + conf*max(y.sd)/10)*1.1
+    }
+  }else{
+    if(is.null(ylim)){
+      ylim = c(0, max(y.mean) + conf*max(y.sd)/10)*1.1
+    }
   }
   
-  par(oma = c(1,1,1,1), mar = mar, las = 1)
   barx = barplot(y.mean, horiz = horizontal, names.arg = speciesNames, col = col,
-                 ylim = ylim, xlim = xlim, cex.names = cex.names, border = border, axes = axes, ...)
+                 ylim = ylim, xlim = xlim, axes = axes, border = border, ...)
   
-  if(!isTRUE(horizontal)){
-    arrows(barx, y.mean + 1.96*y.sd/10, barx, y.mean - 1.96*y.sd/10, angle = angle, code = code, length = length, ...)
-  } else {
-    arrows(y.mean - 1.96*y.sd/10, barx, y.mean + 1.96*y.sd/10, barx, angle = angle, code = code, length = length, ...)
+  angle   = ifelse(is.null(list(...)[["angle"]]), 90, list(...)[["angle"]]) 
+  code    = ifelse(is.null(list(...)[["code"]]), 3, list(...)[["code"]])
+  length  = ifelse(is.null(list(...)[["length"]]), 0.1, list(...)[["length"]])
+  
+  arrowLimits = list(x = as.numeric(barx),
+                     min = y.mean - conf*y.sd/10,
+                     max = y.mean + conf*y.sd/10)
+  
+  if(isTRUE(horizontal)){
+    suppressWarnings(arrows(x0 = arrowLimits$min, y0 = arrowLimits$x, 
+                            x1 = arrowLimits$max, y1 = arrowLimits$x, 
+                            angle = angle, code = code, length = length))
+  }else{
+    suppressWarnings(arrows(x0 = arrowLimits$x, y0 = arrowLimits$min, 
+                            x1 = arrowLimits$x, y1 = arrowLimits$max, 
+                            angle = angle, code = code, length = length))
   }
-  
-  
-}
-
-#boxplot with mean over the replicates
-plot2DType2 = function(x, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, cex = 0.8, axes = TRUE, ...) {
-  
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
-  if(is.null(col)) col="gray"
-  
-  if(!isTRUE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1, ...)
-  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1, ...)}
-  
-  x = apply(x*factor, c(1,2), mean, na.rm = TRUE) #mean over the replicates
-  
-  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, axes = axes, ...)
-  
-  legendFactor = -(log10(factor))
-  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
-  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   return(invisible())
 }
 
-.recycleArguments = function(x, length) {
+# boxplot with mean over the replicates
+plot2DType2 = function(x, horizontal, col, factor, speciesNames, axes,
+                       xlim, ylim, units, border, ...){
   
-  if(length(x) < length(1:length)) {x = rep(x, length.out = length)}
-  if(length(x) == length(1:length)) {x = x}
-  if(length(x) > length(1:length)) {x = x[c(1:length(1:length))]}
+  if(is.null(speciesNames)){
+    speciesNames = toupper(colnames(x))
+  }
   
-  return(x)
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 0.8, NA) 
+  
+  # Define default value for border
+  if(is.null(border)) border = TRUE
+  
+  # Get the mean over the replicates
+  x = apply(x*factor, c(1, 2), mean, na.rm = TRUE)
+  
+  if(is.null(ylim)){
+    ylim = c(0, max(x)*1.1)
+  }
+  
+  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, 
+          axes = axes, xlim = xlim, ylim = ylim, border = border, ...)
+  
+  legendFactor = -(log10(factor))
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
+  mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
+  
+  return(invisible())
 }
 
 # boxplot with mean over the time
-plot2DType3 = function(x, horizontal = FALSE, col = NULL, 
-                       factor = 1e-3, speciesNames = NULL, cex = 0.8, axes = TRUE, ...) {
+plot2DType3 = function(x, horizontal, col, factor, speciesNames, axes, 
+                       xlim, ylim, units, border, ...){
   
-  if(is.null(speciesNames)) speciesNames = toupper(colnames(x)) else speciesNames = speciesNames
-  if(is.null(col)) col="gray"
+  if(is.null(speciesNames)){
+    speciesNames = toupper(colnames(x))
+  }
   
-  if(!isTRUE(horizontal)){par(oma = c(1,1,1,1), mar = c(2.5,2,1,0.3), las = 1, ...)
-  } else {par(oma = c(1,1,1,1), mar = c(2,5.5,1,0.3), las = 1, ...)}
+  if(is.null(col)) col = "gray"
   
-  x = apply(x*factor, c(3,2), mean, na.rm = TRUE) #mean over the time
+  cex = list(...)[["cex"]]
+  cex = ifelse(is.null(cex), 0.8, cex)
   
-  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, axes = axes, ...)
+  # Define default value for border
+  if(is.null(border)) border = TRUE
+  
+  # Get mean over the time
+  x = apply(x*factor, c(3, 2), mean, na.rm = TRUE)
+  
+  if(is.null(ylim)){
+    ylim = c(0, max(x)*1.1)
+  }
+  
+  boxplot(x, horizontal = horizontal, names = speciesNames, col = col, 
+          axes = axes, xlim = xlim, ylim = ylim, border = border, ...)
   
   legendFactor = -(log10(factor))
-  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ "tonnes")
+  legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units))
   mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex)
   
   return(invisible())
+}
+
+
+# normalize function. 
+# returns percentage instead of raw values
+norm_func = function(data) {
+  output = 100 * data / (sum(data, na.rm=TRUE) + .Machine$double.xmin)
+  return(output)
+}
+
+
+# PLOT 3D -----------------------------------------------------------------
+
+osmosePlots3D = function(x, type, by, species, speciesNames, start, end, 
+                         freq, horizontal, factor, legend,
+                         xlim, ylim, col, border, lty, lwd, axes, 
+                         units, ...) {
+  
+  x = .extract_species_from_list(x, species)
+  
+  if(!is.null(speciesNames) && length(speciesNames) != length(x)){
+    stop("'speciesNames' has an incorrect length.")
+  }
+  
+  # Check speciesNames argument
+  if(is.null(speciesNames)){
+    speciesNames = toupper(names(x))
+  }
+  
+  # Check units argument
+  if(!is.list(units) || 
+     length(units) != 2 || 
+     !all(is.element(c("x", "y"), names(units)))){
+    stop("'units' must be a list of length 2 and with levels 'x' and 'y'. See ?plot.osmose.")
+  }
+  
+  # getting time array (not used so far)
+  index = .get_start_end(x[[1]], start, end)
+  start = index[1]
+  end = index[2]
+  
+  # apply processing on the time-series (so far, replicate and time-mean)
+  x = sapply(x, .process_3d_fields, start, end, ...) 
+  
+  switch(as.character(type),
+         "1" = plot3DType1(x, by = by, horizontal = horizontal, col = col,
+                           factor = factor, speciesNames = speciesNames,
+                           ylim = ylim, axes = axes, units = units,
+                           border = border, legend = legend, ...),
+         "2" = plot3DType2(x, by = by, col = col, factor = factor, 
+                           speciesNames = speciesNames,
+                           axes = axes, units = units, ...),
+         stop(sprintf("3D plot type %s is not implemented yet.", type)))
+  
+  return(invisible())
+  
+}
+
+# Displays a histogram showing one plot per species.
+plot3DType1 = function(x, by, horizontal, col, factor, 
+                       speciesNames, axes, ylim, units, border, legend, ...){
+  
+  
+  # To keep the plot params as the beginning
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  # Define multiplot array if there're more than 1 species
+  if(ncol(x) > 1){
+    # Modify oma & mar
+    mar = rep(0, 4)
+    oma = c(3, 4, 2, 4)
+    par(mar = mar, oma = oma)
+    
+    # Set pane distribution
+    mfrow = getmfrow(ncol(x))
+  }else{
+    mfrow = c(1, 1)
+  }
+  
+  par(mfrow = mfrow)
+  
+  # Extract args related with line customization
+  col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
+  
+  cex.lab = list(...)[["cex.lab"]]
+  cex.lab = ifelse(is.null(cex.lab), 0.8, cex.lab)
+  
+  # Define default value for border
+  if(is.null(border)) border = NA
+  
+  # recovering the size-class
+  byNames = rownames(x)
+  
+  # Define xlim & ylim if NULL
+  if(is.null(ylim)) { 
+    ymin = Reduce(min, lapply(x, min)) * factor
+    ymax = Reduce(max, lapply(x, max)) * factor
+    ylim = c(ymin, ymax*1.1)
+  }
+  
+  # Generate plots by spp
+  for(i in seq(ncol(x))){
+    
+    # Extract values for spp i
+    xsp = factor*x[,i]
+    
+    # Draw barplot
+    bp = barplot(xsp, horiz = horizontal, names.arg = rep(NA, nrow(x)), 
+                 col = col, ylim = ylim, border = border, 
+                 xlab = NA, ylab = NA, axes = FALSE, ...)
+    
+    bp = as.numeric(bp)
+    
+    # Add label of factor
+    if(i == 1){
+      legendFactor = -log10(factor)
+      legendFactor = bquote("x" ~ 10^.(legendFactor) ~ .(units$y))
+      mtext(text = legendFactor, side = 3, line = 0, adj = 0, cex = cex.lab)  
+    }
+    
+    # Add name of species
+    if(isTRUE(legend)){
+      mtext(text = speciesNames[i], side = 3, line = -1.5, adj = 1, cex = cex.lab)  
+    }
+    
+    # Add axis
+    if(isTRUE(axes)){
+      # Define default value for las (direction of axis labels)
+      las = list(...)$las
+      las = ifelse(is.null(las), 1, las)
+      
+      # Define default value for line (space between axis labels and box)
+      line = list(...)$line
+      line = ifelse(is.null(line), NA, line)
+      
+      # Define default value for cex.axis (size of axis labels)
+      cex.axis = list(...)[["cex.axis"]]
+      cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
+      
+      if(is.element(i %% (mfrow[2]*2), c(0, 1))){
+        axis(side = ifelse(i %% 2 == 1, 2, 4), las = las, line = line, 
+             cex.axis = cex.axis)  
+      }
+      
+      if(mfrow[2] > 1 && is.element(i, seq(2, mfrow[2], 2))){
+        axis(side = 3, at = bp, labels = byNames, las = las, line = line, 
+             cex.axis = cex.axis)
+      }
+      
+      index = c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
+                    to = prod(mfrow) - mfrow[2] + 1),
+                seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
+      if(is.element(i, index)){
+        axis(side = 1, at = bp, labels = byNames, las = las, line = line, 
+             cex.axis = cex.axis)
+      }
+      
+      box()
+      
+      if(i == 1){
+        if(units$x != "") units$x = paste0(' (', units$x, ')')
+        mtext(text = paste0(by, units$x), side = 1, line = 2, 
+              outer = TRUE, cex = cex.lab)
+      }
+    }
+  }
+  
+  return(invisible())
+}
+
+# Showing biomass as a function of class as a raster file.
+plot3DType2 = function(x, col, factor, speciesNames, axes, units, by, ...){
+  
+  # List of the form x, y & z
+  x = list(x = seq(nrow(x)),
+           y = seq(ncol(x)),
+           z = x*factor)
+  
+  # Define default color palette
+  if(is.null(col)) col = tim.colors(1e3)
+  
+  # To keep the plot params as the beginning
+  op = par(no.readonly = TRUE)
+  on.exit(par(op))
+  
+  # Modify margins to give space for species names
+  par(mar = c(3, 10, 1, 1))
+  
+  # Draw image plot
+  image.plot(x, axes = FALSE, legend.lab = units$y, col = col, ...)
+  
+  # Add axis
+  if(isTRUE(axes)){
+    
+    # Define default values for Y axis labels
+    if(is.null(speciesNames)) speciesNames = colnames(x$z)
+    
+    # Draw axis
+    axis(side = 1, at = x$x, labels = rownames(x$z))
+    axis(side = 2, at = x$y, labels = speciesNames, las = 1)
+    
+    # Drax vox
+    box()
+    
+    cex = list(...)[["cex"]]
+    cex = ifelse(is.null(cex), 1, cex)
+    
+    if(units$x != "") units$x = paste0(' (', units$x, ')')
+    mtext(text = paste0(by, units$x), side = 1, line = 2, cex = cex)
+  }
+  
+  return(invisible())
+}
+
+.get_start_end = function(x, start, end) {
+  
+  # Check start and end args
+  if(is.null(start)) start = 1
+  if(is.null(end)) end = dim(x)[1]
+  
+  if(start < 1 | start > end) stop("Incorrect value for 'start' argument")
+  if(end > dim(x)[1] | end < start) stop("Incorrect value for 'end' argument")
+  
+  return(c(start, end))
+}
+
+# Process 3D fields (fields by class). Computes replicates
+# or time means. Called through lapply (to loop over all the species)
+.process_3d_fields = function(x, start, end, ...) {
+  
+  index = .get_start_end(x, start, end)
+  start = index[1]
+  end = index[2]
+  
+  if(length(dim(x)) == 3) { 
+    x = x[seq(start, end), , , drop = FALSE]  # time, class, replicates
+  } else {
+    x = x[seq(start, end), , drop = FALSE]  # time, class, replicates  
+  }
+  
+  return(apply(x, 2, mean, na.rm = TRUE))
 }

@@ -4,16 +4,14 @@
 \alias{summary.osmose.mortalityRate}
 \title{Title}
 \usage{
-\method{summary}{osmose.mortalityRate}(data, species = NULL, ...)
+\method{summary}{osmose.mortalityRate}(object, species = NULL, ...)
 }
 \arguments{
-\item{data}{}
+\item{object}{an object of class \code{osmose.mortalityRate} for which a summary is desired.}
 
-\item{species}{}
+\item{species}{Name of the species to get a summary.}
 
-\item{...}{}
-
-\item{thres}{}
+\item{...}{Extra arguments passed to the method.}
 }
 \description{
 Title

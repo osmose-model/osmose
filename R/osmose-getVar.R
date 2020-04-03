@@ -1,26 +1,28 @@
 # @param ... Additional arguments of the function.
 # @export
 # @return An array or a list containing the data.
-process.dietMatrix = function(out, species=NULL, time.mean=TRUE, thres=1, ...) {
+process.dietMatrix = function(out, species = NULL, time.mean = TRUE, thres = 1, ...) {
   
-  .check_species(out, species)
-  
-  # extract the given specie
-  out = out[[species]]
+  # If a list, extracts species names
+  if(is.list(out)) { 
+    .check_species(out, species)
+    # extract the given specie
+    out = out[[species]]
+  }
   
   # Computes the mean over the replicates
   out = apply(out, c(1, 2), mean)
   
   # computes the time average
-  data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # barrier.n: adding this to avoid NULL output in summary
-  keep = (data.time.mean > thres)  # keep values for which the max is greater than the threshold
+  data.time.mean = apply(out, 2, mean, na.rm=TRUE)   # adding this to avoid NULL output in summary
+  keep = (data.time.mean >= thres)  # keep values for which the max is greater than the threshold
   
   if(time.mean) {
     # extracts the mean values above a given threshold
     data.time.mean = data.time.mean[keep]
     Nvalues = length(data.time.mean)
     
-    if(thres>0) {
+    if(thres > 0) {
       # If thresholds is greater than 0, then the negligible species are binned together.
       
       # compute the proportion of negligible species
@@ -70,10 +72,13 @@ process.dietMatrix = function(out, species=NULL, time.mean=TRUE, thres=1, ...) {
 # @return An array or a list containing the data.
 process.mortalityRate = function(out, species=NULL, time.mean=TRUE, ...) {
   
-  .check_species(out, species)
-  
-  # extract the given specie
-  out = out[[species]]
+  # If list, extract value for one species
+  if(!is.null(species)) { 
+    .check_species(out, species)
+    
+    # extract the given specie
+    out = out[[species]]
+  }
   
   # computes the replicate mean: for each list element
   # computes the mean over the 4th dimension (replicate)
@@ -125,61 +130,96 @@ process.mortalityRate = function(out, species=NULL, time.mean=TRUE, ...) {
 
 #' Title
 #'
-#' @param data 
-#' @param species 
-#' @param thres 
-#' @param ... 
+#' @param object an object of class \code{osmose.mortalityRate} for which a summary is desired.
+#' @param species Name of the species to get a summary. 
+#' @param thres Threshold which is used to keep values of species matrix.
+#' @param ... Extra arguments passed to the method.
 #'
 #' @export
 #' @method summary osmose.dietMatrix
-summary.osmose.dietMatrix = function(data, species=NULL, thres=1, ...) {
+summary.osmose.dietMatrix = function(object, species = NULL, thres = 1, ...) {
   
-  dietMatrix = process.dietMatrix(data, species=species, time.mean=TRUE, thres=thres, ...)
+  dietMatrix = process.dietMatrix(object, species = species, time.mean = TRUE, thres = thres, ...)
   dietMatrix = as.data.frame(dietMatrix)
   colnames(dietMatrix) = 'Predation rate (%)'
+  
   #class(dietMatrix) = c("summary.osmose.output.dietMatrix", class(temp))
   return(dietMatrix)
-  
 }
 
 #' Title
 #'
-#' @param data 
-#' @param species 
-#' @param thres 
-#' @param ... 
+#' @param object an object of class \code{osmose.mortalityRate} for which a summary is desired.
+#' @param species Name of the species to get a summary. 
+#' @param ... Extra arguments passed to the method.
 #
 #' @export
 #' @method summary osmose.mortalityRate
-summary.osmose.mortalityRate = function(data, species=NULL, ...) {
-  data = process.mortalityRate(data, species=species, time.mean=TRUE)
+summary.osmose.mortalityRate = function(object, species = NULL, ...) {
+  data = process.mortalityRate(object, species = species, time.mean = TRUE)
   return(as.data.frame(data))  
 }
 
 #' @export
 #' @method summary osmose.biomass
-summary.osmose.biomass = function(data) {
-  return(.summary.generic(data))
+summary.osmose.biomass = function(object, ...) {
+  return(.summary.generic(object))
 }
 
 #' @export
 #' @method summary osmose.meanTL
-summary.osmose.meanTL = function(data) {
-  return(.summary.generic(data))
+summary.osmose.meanTL = function(object, ...) {
+  return(.summary.generic(object))
 }
 
 #' @export
 #' @method summary osmose.meanTLCatch
-summary.osmose.meanTLCatch = function(data) {
-  return(.summary.generic(data))
+summary.osmose.meanTLCatch = function(object, ...) {
+  return(.summary.generic(object))
 }
 
-.summary.generic = function(data) {
-  data = apply(data, 2, mean, na.rm=TRUE)
+.summary.generic = function(object) {
+  data = apply(object, 2, mean, na.rm=TRUE)
   data = sort(data, decreasing=TRUE)
   data = as.data.frame(data)
   return(data)
 }
 
-
-
+.extract_species_from_list = function(x, species, ...) {
+  
+  # CHECK ARGUMENTS
+  if(!is.null(species)){
+    # Check species I
+    message1 = "'species' must be whether a numeric or character vector without NA or duplicated values."
+    if(!is.vector(species) || # isn't it a vector?
+       all(!is.element(c("character", "numeric"), mode(species))) || # is it character or numeric?
+       length(species) < 1 || # its length is greater than 1?
+       sum(is.na(species)) > 0 || # is there any NA?
+       any(duplicated(species))){ # is there any duplicated value?
+       stop(message1)
+    }
+    
+    # Check species II
+    if(is.numeric(species)){
+      if(any(species > length(x))){
+        stop("'species' must be between 1 and ", ncol(x))  
+      }
+    }else if(is.character(species)){
+      if(is.null(names(x))){
+        stop("Is not possible to define species as character due to 'x' has not species names defined.")
+      }
+      
+      if(any(!is.element(species, names(x)))){
+        stop("Some values of 'species' does not exist.")
+      }
+      
+      species = match(species, names(x)) - 1
+    }
+    
+    species = names(x)[species + 1]
+    
+    x = x[species, drop = FALSE]
+  }
+  
+  return(x)
+}

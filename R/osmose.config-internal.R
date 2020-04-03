@@ -42,14 +42,14 @@ viewDataList = function(input, path=NULL) {
 
 ##Funciones internas
 
-.readOsmoseConfiguration = function(input, path=NULL, absolute=TRUE) {
-
-  if(isTRUE(absolute)) {
-    if(is.null(path)) {
+.readOsmoseConfiguration = function(input, path = NULL, absolute = TRUE) {
+  
+  if(isTRUE(absolute)){
+    if(is.null(path)){
       path  = normalizePath(dirname(input))
       input = basename(input)
     }
-  } else {
+  }else{
     path = if(is.null(path)) {
       normalizePath(dirname(input))
     } else {
@@ -85,10 +85,12 @@ viewDataList = function(input, path=NULL) {
   return(ValuesDef)
 }
 
-.guessSeparator = function(Line) {
-  SEPARATORS = c(equal="=", semicolon=";", coma=",", colon=":", tab="\t")
-  guess = which.min(nchar(lapply(str_split(Line,SEPARATORS), "[", i=1)))
-  separator  = SEPARATORS[guess]
+.guessSeparator = function(Line){
+  SEPARATORS = c(equal = "=", semicolon = ";", 
+                 coma = ",", colon = ":", tab = "\t")
+  guess = which.min(nchar(lapply(str_split(Line,SEPARATORS), "[", i = 1)))
+  separator = SEPARATORS[guess]
+  
   return(separator)
 }
 
@@ -145,7 +147,7 @@ addAttr = function(x, which, value) {
 
 # GetData functions -------------------------------------------------------
 
-getReproductionData = function(x, var = season.file){
+getReproductionData = function(x, var = "season.file", ...){
   
   # index on the list using the var
   listIndex = paste0("x = x",
@@ -171,7 +173,7 @@ getReproductionData = function(x, var = season.file){
 }
 
 
-getSpeciesData = function(x) {
+getSpeciesData = function(x, ...){
   
   # species name in configuration file
   speciesCode = names(x$name)
@@ -211,43 +213,42 @@ getSpeciesData = function(x) {
 }
 
 
-getPredationData = function(x, object, extraWhat = FALSE) {
+getPredationData = function(x, object, ...) {
   
   # Accessibility
-  fileAccessibility = unlist(lapply(x$accessibility$file, FUN = "[[", 1))
-  pathAccessibility = attributes(x$accessibility$file)$path
-  accessibility     = list(data = read.csv(file = paste(pathAccessibility,
-                                                        fileAccessibility, sep = "/"), sep = ";"),
-                           stageStructure = as.vector(x$accessibility$stage$structure),
-                           stageThreshold = lapply(x$accessibility$stage$threshold, FUN = "[[", 1))
+  accesibilityFile = file.path(attr(x = x$accessibility$file, which = "path"), 
+                               x$accessibility$file)
+  
+  sep = .guessSeparator(readLines(accesibilityFile, n = 1))
+  
+  accessibility = read.csv(file = accesibilityFile, header = TRUE, sep = sep, 
+                           quote = "\"", dec = ".", fill = TRUE, comment.char = "")
+  accessibility = list(data = accessibility,
+                       stageStructure = as.character(x$accessibility$stage$structure),
+                       stageThreshold = unlist(x$accessibility$stage$threshold))
   
   # Efficiency
-  efficiency   = list(critical = lapply(lapply(x$efficiency$critical, FUN = "[[", 1), as.numeric, 1))
+  efficiency   = list(critical = as.numeric(unlist(x$efficiency$critical)))
   
   # Ingestion
-  ingestion    = list(rateMax = lapply(lapply(x$ingestion$rate$max, FUN = "[[", 1), as.numeric, 1))
+  ingestion    = list(rateMax = as.numeric(unlist(x$ingestion$rate$max)))
   
-  # PredPrey
-  sizeRatioMax   = lapply(lapply(lapply(x$predprey$sizeratio$max, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  sizeRatioMin   = lapply(lapply(lapply(x$predprey$sizeratio$min, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  stageThreshold = lapply(lapply(lapply(x$predprey$stage$threshold, FUN = "[[", 1), FUN = strsplit, ","), FUN = unlist, 1)
-  predPrey       = list(sizeRatioMax   = lapply(sizeRatioMax, FUN = as.numeric, 1),
-                        sizeRatioMin   = lapply(sizeRatioMin, FUN = as.numeric, 1),
-                        stageStructure = as.character(x$predprey$stage$structure),
-                        stageThreshold = suppressWarnings(lapply(stageThreshold, FUN = as.numeric, 1)))
+  # Pred-Prey
+  sizeRatioMax   = sapply(sapply(x$predprey$sizeratio$max, strsplit, split = ","), as.numeric)
+  sizeRatioMin   = sapply(sapply(x$predprey$sizeratio$min, strsplit, split = ","), as.numeric)
+  stageThreshold = sapply(x$predprey$stage$threshold, strsplit, split = ",")
+  predPrey       = list(sizeRatioMax   = sizeRatioMax,
+                        sizeRatioMin   = sizeRatioMin,
+                        stageStructure = accessibility$stageStructure,
+                        stageThreshold = suppressWarnings(sapply(stageThreshold, as.numeric)))
   
   # Data base
   dataBase = list(accessibility = accessibility,
                   efficiency    = efficiency,
                   ingestion     = ingestion,
-                  predPrey      = predPrey)
-  
-  if(isTRUE(extraWhat)){
-    linf = lapply(lapply(object[["species"]][["linf"]], FUN = "[[", 1), as.numeric, 1)
-    speciesNames = lapply(object$species$name, FUN = "[[", 1)
-    dataBase$linf = linf
-    dataBase$speciesNames = speciesNames
-  } 
+                  predPrey      = predPrey,
+                  linf          = sapply(object$species$linf, as.numeric),
+                  speciesNames  = unlist(object$species$name))
   
   return(dataBase)
 }

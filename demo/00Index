@@ -1,0 +1,2 @@
+osmose_class          Creates a folder with example files, run osmose model, read outputs and make some basic plots.
+osmose.config_class   Creates a folder with example configuration files, read them and make some basic plots.

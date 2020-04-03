@@ -33,7 +33,7 @@
 #' @param add_text True if text should be added.
 #' @param color Color of the barplot
 #' @param ... Additional arguments to the barplot function (color, etc.)
-.osmose.barplot = function(x, add_text=TRUE, color=NULL, ...) {
+.osmose.barplot = function(x, add_text = TRUE, color=NULL, ...) {
   
   # format the data so that at the end we have
   # a table of dim [N. 1]
@@ -41,7 +41,7 @@
   x = as.table(x)
   names = rownames(x)
   N = length(names)
-  dim(x) <- c(length(x), 1)
+  dim(x) = c(length(x), 1)
 
   # recover the arguments of varplot 
   # and modify xlim and legend pos.
@@ -124,21 +124,22 @@ osmose.stackedpcent = function(data, ...)
   lwd = args[['lwd']]
   
   # Create a list of 22 colors to use for the lines.
-  cl <- rainbow(ncol(y))
+  cl = rainbow(ncol(y))
   plotcol = 1:ncol(y)
   
   # Now fill plot with the log transformed coverage data from the
   # files one by one.
   for(i in 1:ncol(y)) {
     lines(y[,i], col=cl[i], ...)
-    plotcol[i] <- cl[i]
+    plotcol[i] = cl[i]
   }
   
   legend("topright", legend=colnames(y), col = plotcol, lwd=lwd, cex=0.7, title=legtitle, ncol=nlegend)
 }
 
 
-plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=TRUE, legtitle, ylab, ...) {
+plot.osmose.output.ts.generic = function(data, species = NULL, time.mean = TRUE, 
+                                         legtitle, ylab, ...) {
   
   .check_species(data, species)
   
@@ -162,10 +163,10 @@ plot.osmose.output.ts.generic = function(data, species=NULL, time.mean=TRUE, leg
 
 
 # Geric function to plot mortality time mean as a function of class (size or age)
-plot.mort.byclass.tmean = function(mort, species, norm, class="size") {
+plot.mort.byclass.tmean = function(x, species, norm, class="size") {
   
   # converts into matrix
-  mort = do.call(cbind.data.frame, mort)
+  mort = do.call(cbind.data.frame, x)
   mort = as.matrix(mort)
   
   # Counts the total mortality rate for each size class
@@ -198,7 +199,7 @@ plot.mort.byclass.tmean = function(mort, species, norm, class="size") {
 
 .plot.osmose.dietMatrixbyDis = function(data, spec, xlab, ylab, ...) {
   
-  .check_species(data, species)    
+  .check_species(data, spec)    
   
   # recover the diet Matrix for the given species
   # data has one list element per prey
@@ -216,9 +217,125 @@ plot.mort.byclass.tmean = function(mort, species, norm, class="size") {
   barplot(data, legend=rownames(data), col=col, xlab=xlab, ylab=ylab, ...)
 }
 
+# Plot mortality rates for a given species.
+.plot_osmose_mortalityRate = function(data, species=NULL, time.mean=TRUE, norm=TRUE, ...) {
+  
+  data = process.mortalityRate(data, species=species, time.mean=time.mean, ...)
+  
+  message = "You must provide a life stade among 'eggs', 'juveniles' or 'adults'"
+  
+  if(time.mean==FALSE)  {
+    
+    par(mfrow=c(3, 1))
+    for (stade in names(data)) {
+      datatmp = data[[stade]]
+      
+      if(norm) { 
+        datatmp = apply(datatmp, 1, norm_func)
+        datatmp = t(datatmp)
+      }
+      
+      cnames = colnames(datatmp)
+      time = as.numeric(rownames(datatmp))
+      
+      xlim = c(min(time, na.rm=TRUE), max(time, na.rm=TRUE) * (1 + 0.5))
+      ylim = c(min(datatmp, na.rm=TRUE), max(datatmp, na.rm=TRUE))
+      
+      ncolors = length(cnames)
+      cl = rainbow(ncolors)
+      plot(0, 0, xlim=xlim, ylim=ylim, type='n', main=paste0(species, ", ", stade),  
+           xlab='Time', ylab='Predation rate', 
+           cex.axis=0.5, cex.main=0.5, cex.lab=0.5)
+      
+      cpt = 1
+      for (cpt in 1:ncolors) {
+        temp = datatmp[, cpt]
+        lines(time, temp, type='l', col=cl[cpt], ...)
+        cpt = cpt + 1
+      }
+      
+      legend("topright", legend=cnames, col=cl, lty=1, cex=0.5)
+      
+    }
+    
+    return(invisible())
+    
+  }
+  
+  # if normalize, display mortality rates into percentage instead of absolutes.
+  if(norm) {
+    # apply the normalize function to all the elements of the list.
+    data = lapply(data, norm_func)
+  }
+  
+  # convert the list into a matrix
+  data = do.call(cbind.data.frame, data)
+  data = as.matrix(data)
+  
+  xlabel = "Stage"
+  if(norm) {
+    ylabel = "Mortality rate (%)"
+  } else {
+    ylabel = "Mortality rate"
+  }
+  
+  osmose.stackedpcent(data, xlab=xlabel, main=species, ylab=ylabel, ...)
+  return(invisible())
+  
+}
 
-
-
-
-
-
+#' Plots diet matrix
+#'
+#' @param x Diet matrix
+#' @param time.mean If TRUE, the time mean diet matrix is computed is displayed.
+#' @param species Species name
+#' @param thres Thresholds (in percentage). Time-average predation rates below this threashold 
+#' are binned together ("other" column).
+#' @param color Color of the barplot.
+#' @param add_text \code{TRUE} if text should be added.
+#' @param plot_name Label for ylab in diet matrix plot.
+#' @param legsize Size of the legend (default 1), if time.mean is \code{FALSE}.
+#' @param ... Additional plot arguments passed to barplot.
+#'
+#' @return None
+.plot_osmose_dietMatrix = function(x, time.mean, species, thres, color, add_text, plot_name,
+                                   legsize = 1, ...) {
+  
+  x = process.dietMatrix(x, species=species, time.mean=time.mean, thres=thres)
+  
+  if(time.mean) {
+    # If using a time-averaged diet matrix, then 
+    # a barplot is drawn.
+    temp = as.vector(x)
+    names(temp) = names(x)
+    .osmose.barplot(temp, xlab="", ylab=plot_name, main=species, 
+                    add_text = add_text, color=color, ...)
+    return(invisible())
+  } 
+  
+  
+  # format the diet matrix to have stacked format for ggplot2
+  time = rownames(x)
+  time = as.numeric(time)
+  cnames = colnames(x)
+  xlim = c(min(time, na.rm=TRUE), max(time, na.rm=TRUE) * (1 + 0.5))
+  ylim = c(min(x, na.rm=TRUE), max(x, na.rm=TRUE))
+  
+  ncolors = length(cnames)
+  cl = rainbow(ncolors)
+  
+  x = apply(x, c(1, 2), mean, na.rm=TRUE)
+  plot(0, 0, xlim=xlim, ylim=ylim, type='n', main=species, xlab='Time', ylab=plot_name, 
+       cex.axis=0.5, cex.main=0.5, cex.lab=0.5)
+  
+  cpt = 1
+  for (cpt in 1:ncolors) {
+    temp = x[, cpt]
+    lines(time, temp, type='l', col=cl[cpt])
+    cpt = cpt + 1
+  }
+  
+  legend("topright", legend=cnames, col=cl, cex=legsize, lty=1)
+  
+  return(invisible())
+}

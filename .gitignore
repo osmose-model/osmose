@@ -22,6 +22,15 @@ vignettes/*.pdf
 
 *~
 
-man/*Rd
 inst/extdata/Rplots.pdf
 inst/extdata/plot_test.R
+
+inst/extdata/eec/make_netcdf_mask.R
+*.swp
+*.tmp
+vignettes/osmose.log
+vignettes/*.R
+inst/doc
+/vignettes/plot_method_files
+/vignettes/plot_method_cache
+/vignettes/create_run_read_cache

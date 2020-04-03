@@ -4,17 +4,16 @@
 \alias{summary.osmose.dietMatrix}
 \title{Title}
 \usage{
-\method{summary}{osmose.dietMatrix}(data, species = NULL, thres = 1,
-  ...)
+\method{summary}{osmose.dietMatrix}(object, species = NULL, thres = 1, ...)
 }
 \arguments{
-\item{data}{}
+\item{object}{an object of class \code{osmose.mortalityRate} for which a summary is desired.}
 
-\item{species}{}
+\item{species}{Name of the species to get a summary.}
 
-\item{thres}{}
+\item{thres}{Threshold which is used to keep values of species matrix.}
 
-\item{...}{}
+\item{...}{Extra arguments passed to the method.}
 }
 \description{
 Title

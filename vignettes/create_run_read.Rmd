@@ -1,0 +1,120 @@
+---
+title: "Creates a folder with basic files for a running. Then, run the model and read the outputs."
+author: "Yunne-Jai Shin, Travers Morgane, Verley Philippe, Ricardo Oliveros-Ramos & Laure Velez (2020)"
+date: "`r Sys.Date()`"
+output:
+  knitr:::html_vignette:
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{Creates a folder with basic files for a running. Then, run the model and read the outputs.}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: bibliography.bib
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include=FALSE}
+library(osmose)
+```
+
+## Introduction
+
+**osmose** (*Object Oriented Simulator of Marine Ecosystems*) is a multispecies and individual-based model (IBM) [@shin2001exploring; @shin2004using] focuses on fish species. This model assumes opportunistic predation based on spatial co-occurrence and size adequacy between a predator and its prey (size-based opportunistic predation). It represents fish individuals grouped into schools, which are characterized by their size, weight, age, taxonomy and geographical location (2D model), and which undergo major processes of fish life cycle (growth, explicit predation, natural and starvation mortalities, reproduction and migration) and fishing exploitation. The model needs basic biological parameters that are often available for a wide range of species, and which can be found in 'FishBase' for instance (see <http://www.fishbase.org/search.php>), and fish spatial distribution data. This package provides tools to build and run simulations using the 'OSMOSE' model.
+
+
+## Installation
+
+For installing `osmose`, as follows:
+
+```{r, eval=FALSE}
+# From CRAN
+install.packages("osmose")
+
+# From Github
+devtools::install_github("osmose-model/osmose")
+```
+
+## About OSMOSE
+OSMOSE is a multispecies and Individual-based model (IBM) which focuses on fish species. This model assumes opportunistic predation based on spatial co-occurrence and size adequacy between a predator and its prey (size-based opportunistic predation). It represents fish individuals grouped into schools, which are characterized by their size, weight, age, taxonomy and geographical location (2D model), and which undergo major processes of fish life cycle (growth, explicit predation, natural and starvation mortalities, reproduction and migration) and a fishing mortality distinct for each species [@shin2001exploring; @shin2004using]. OSMOSE, uncoupled version, has been first applied to the Benguela upwelling ecosystem for which 12 fish species have been specified, from small pelagic fish to large demersal species [@shin2004using; @travers2006simulating]. The model needs basic parameters that are often available for a wide range of species, and which can be found in FishBase for instance.
+
+
+## Main functions
+
+`osmose` package performs three main functions (`read_osmose`, `run_osmose` and `get_var`) and several methods for the outputs (`plot`, `print`, `summary` and `report`). 
+
+### Create example files
+`osmose` includes a function that allows to create basic example files in a selected folder. The files corresponds to a case study provided by @Halouani2016. `osmose_demo` uses two main arguments: (1) `path` will be the folder path where the files will be copied and (2) `config` which indicates the configuration example to be copied. To indicate @Halouani2016 case study, `config = "gog"`.
+
+```{r, cache=TRUE}
+# Define a folder to copy files (for the example: a temporary folder)
+exampleFolder <- tempdir()
+
+cat(exampleFolder)
+```
+
+```{r, cache=TRUE}
+# Copy files
+demoPaths <- osmose_demo(path = exampleFolder, config = "gog")
+```
+
+```{r, echo=FALSE}
+# Show copied files
+cat("Copied files:\n")
+print(list.files(path = dirname(demoPaths$config_file), recursive = TRUE))
+```
+
+### Running an example
+Next step involves the running of the model itself. The function `run_osmose` facilitates this action asking for the required arguments to achieve a successful running. `run_osmose` uses and require a .jar file, corresponding to the java executable that is going to be used. However, `osmose` package includes some versions of java executables inside, so it is only necessary to indicates the version.
+
+```{r}
+# Run an example using 'run_osmose' function (it will take less than 1 min)
+run_osmose(input = demoPaths$config_file)
+```
+
+### Read configuration and outputs
+Once we have run an example, it is important to know what we have and the main function to do this is `read_osmose`. This function will ask for the path folder of outputs and the configuration file. `read_osmose` will return a list of fields with the information of whether an OSMOSE running or the configuration that is going to be used in a running, so if neither of them are indicated, the user will get an error. Output class will depend on the read info: if `path` is specified, output class will be `osmose`; otherwise, if ONLY `input` is given, the class will be `osmose.config`. If both are specified, the `osmose` class output will content inside a field called `config` of class `osmose.config`.
+
+```{r, cache=TRUE}
+# Read outputs using 'read_osmose' function
+outputs <- read_osmose(path = demoPaths$output_dir, 
+                       input = demoPaths$config_file)
+
+# Check class
+class(outputs)
+
+# Check class of config level
+class(outputs$config)
+
+# Read ONLY configuration files
+config <- read_osmose(input = demoPaths$config_file)
+
+# Check class
+class(config)
+```
+
+### Print & Summary methods for `osmose` class
+```{r, eval=FALSE}
+# Print method
+print(outputs)
+```
+
+```{r, echo=FALSE}
+osmose:::print.osmose(outputs)
+```
+
+```{r, eval=FALSE}
+# Summary method
+summary(outputs)
+```
+
+```{r, echo=FALSE}
+osmose:::print.summary.osmose(osmose:::summary.osmose(outputs))
+```
+
+## References

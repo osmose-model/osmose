@@ -1,0 +1,70 @@
+---
+title: "Plot method demonstration"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Plot method demonstration}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(osmose)
+```
+
+### Create, run and read an example
+
+Define a folder for copy example files:
+```{r, cache=TRUE}
+exampleFolder <- tempdir()
+
+# Show the temporary folder
+cat(exampleFolder)
+
+# Copy files
+demoPaths <- osmose_demo(path = exampleFolder, config = "gog")
+```
+
+Run the example using `run_osmose` function (it will take less than 1 min):
+```{r}
+run_osmose(input = demoPaths$config_file)
+```
+
+Read outputs and config using `read_osmose` function
+```{r}
+outputs <- read_osmose(path = demoPaths$output_dir, 
+                       input = demoPaths$config_file)
+
+# Print osmose outputs
+print(outputs)
+```
+
+### Plot methods for `osmose` class
+
+```{r, fig.width=5.7, fig.height=4.75}
+plot(outputs, what = "biomass")
+plot(outputs, what = "biomass", type = 2)
+plot(outputs, what = "abundance", ts = FALSE, type = 1)
+plot(outputs, what = "yield", ts = FALSE, type = 2)
+
+plot(outputs, what = "abundanceByAge")
+plot(outputs, what = "biomassBySize", type = 2)
+plot(outputs, what = "biomassByTL", type = 1)
+plot(outputs, what = "yieldBySize", type = 2)
+```
+
+### Plot methods for `osmose.config` class
+It is important to remember that config info has already been read in `outputs` object and you can access just by indexing `outputs$config`.
+
+```{r, fig.width=5.7, fig.height=4.75}
+plot(outputs$config, what = "species")
+plot(outputs$config, what = "predation")
+plot(outputs$config, what = "reproduction", type = 1)
+plot(outputs$config, what = "reproduction", type = 2)
+```

@@ -7,13 +7,13 @@
 report(x, format, output, ...)
 }
 \arguments{
+\item{x}{Object of class \code{osmose}.}
+
 \item{format}{The format to export the report.}
 
 \item{output}{Folder where the report will be saved.}
 
 \item{...}{Extra arguments passed to \code{\link{report}} function.}
-
-\item{object}{Object of class \code{osmose}.}
 }
 \value{
 A report on specific format.

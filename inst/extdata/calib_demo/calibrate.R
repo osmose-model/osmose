@@ -44,7 +44,7 @@ objfn = createObjectiveFunction(runModel=runModel,
 control = list()
 # control$maxgen = c(2, 2, 2, 2)   # maximum number of generations (former gen.max parameter)
 control$maxgen = 2   # maximum number of generations (former gen.max parameter)
-control$master = "gog_v4" # directory that will be copied
+control$master = "gog" # directory that will be copied
 control$run = "RUN"   # run directory
 control$restart.file = "calib_restart"   # name of the restart file
 control$REPORT = 1    # number of generations to run before saving a restart
