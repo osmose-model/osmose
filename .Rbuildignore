@@ -1,9 +1,8 @@
 ^.*\.Rproj$
+^.*\.RData$
 ^\.Rproj\.user$
 TO_DO.txt
 cran-comments.md
-README.md
-NEWS.md
 ^\docs$
 ^inst/extdata/gog_v4/*.*
 ^inst/extdata/eec/*.*
