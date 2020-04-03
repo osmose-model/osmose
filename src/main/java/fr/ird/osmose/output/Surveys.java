@@ -75,12 +75,12 @@ public class Surveys extends AbstractOutputRegion {
         int index = this.getIndex();
 
         // Setting the name of the Survey region.
-        this.setName(getConfiguration().getString("surveys.name.sur" + index));
+        this.setName(getConfiguration().getString("surveys.name.sr" + index));
 
         mapSet = new FisheryMapSet(this.getName(), "surveys.movement", "survey");
         mapSet.init();
 
-        selectivity = new FisherySelectivity(index, "surveys.selectivity", "sur");
+        selectivity = new FisherySelectivity(index, "surveys.selectivity", "sr");
         selectivity.init();
 
         /*
