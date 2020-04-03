@@ -1123,3 +1123,77 @@ F_msy = function(sp, input.file, restart=FALSE,
   return(Res)
   
 } # end of Fmsy
+
+#' Check if a parameter exists
+#' @param par Output of the \code{link{read_osmose}} function
+#' @param ... String arguments 
+#' @param keep.att Whether parameter attributes should be kept
+existOsmoseParameter = function(par, ..., keep.att=FALSE) {
+  chain = unlist(list(...))
+  x = .getPar(par, ..., keep.att=TRUE)
+  if(is.null(x)) return(0) else return(1)
+}
+
+#' Returns the list of Osmose Java versions
+#'
+#' @return List of Osmose Java versions
+#'
+list_osmose_versions = function() {
+  dirin = system.file(package = "osmose", "java")
+  output = list.files(path = dirin, pattern = ".jar")
+  
+  return(output)
+}
+
+# Demo --------------------------------------------------------------------
+#' Generates Osmose configuration files to run an Osmose demo.
+#' 
+#' @param path Path where to put the Osmose configuration file.
+#' @note So far, only one configuration is propose ("gog")
+#' 
+#' @return A list containing the configuration file to use (config_file) for running the code
+#' and the output directory to use when reading data.
+#' 
+#' @examples
+#' \dontrun{
+#' rm(list=ls())
+#'
+#'library("osmose")
+#'
+#'# Copy configuration files into the proper directory
+#'demo = osmose_demo(path="../", config="gog")
+#'
+#'# run the osmose model
+#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="3.3.3", 
+#'           options=NULL, verbose=TRUE, clean=TRUE)
+#'
+#'# reads output data
+#'data = read_osmose(demo$output_dir)
+#'
+#'# summarize output data
+#'summary(data)
+#'
+#'# plot output data
+#'plot(data)
+#'}
+osmose_calib_demo = function(path = NULL) {
+  
+  # if no path has been provided, create a path from the working dir.
+  if(is.null(path)) path = getwd()
+  
+  # if the directory does not exist, then create it
+  if(!dir.exists(path)) dir.create(path = path, showWarnings = FALSE, recursive = TRUE)
+  
+  # copy the calibration data into the path directory
+  input_dir = system.file(package = "osmose", "extdata", "calib_demo")
+  file.copy(from = input_dir, to = path, recursive = TRUE, overwrite = TRUE)
+  
+  # Copy the reference gog configuration in the calibration folder
+  input_dir = system.file(package = "osmose", "extdata", "gog")
+  file.copy(from = input_dir, to = file.path(path, "calib_demo"), recursive = TRUE, overwrite = TRUE)
+  
+  demo = list(path = file.path(path, "calib_demo"))
+  demo$file = "calibrate.R"
+  
+  return(demo)
+}
