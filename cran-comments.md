@@ -21,6 +21,12 @@
 >
 >Please fix and resubmit. 
 
+The "java" directory has been added and put to .Rinstignore.
+
+The CRAN URLs have been corrected.
+
+However, we were not able to reduce the size of the package, since its heavy size is mainly due to an external Java library needed to run the package (netcdfAll-4.6.6.jar) and to external data needed to run the demo scripts (NetCDF forcings).
+
 # version 0.1.2
 
 Adding more plot functions
