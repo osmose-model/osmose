@@ -87,3 +87,23 @@ plot(outputs, what="biomass", ts = FALSE, type=2, col = "green")
 plot(outputs, what="biomass", ts = FALSE, type=3, col = "blue")
 ```
 
+\pagebreak
+
+## Total biomass by size for all species (with replicates): type = 1 - individual plots by species
+
+### plot(outputs, what = "biomassBySize", type = 1, col = "red",cex.axis = 1.4)
+
+
+```{r, echo=FALSE, message=FALSE, fig.height=7, fig.width=8}
+plot(outputs, what = "biomassBySize", type = 1, col = "red",cex.axis = 1.4)
+```
+
+\pagebreak
+
+## Total biomass by size for all species (with replicates): type = 2 - single plot for all species
+
+### plot(outputs, what = "biomassBySize", type = 2)
+
+```{r, echo=FALSE, message=FALSE, fig.height=5, fig.width=7}
+plot(outputs, what = "biomassBySize", type = 2)
+```
