@@ -187,9 +187,9 @@ public class FisheryMapSet extends OsmoseLinker {
             // Recovers the fisherie index associated with the current map.
             // If it matches the current fisherie, the map index is added to the list of
             // maps to be processed.
-            String fisheryName = getConfiguration().getString(key);
+            String name = getConfiguration().getString(key);
 
-            if (fisheryName.equals(this.fisheryName)) {
+            if (name.equals(this.fisheryName)) {
                 mapNumber.add(imap);
             }
 
