@@ -382,7 +382,7 @@ public class Configuration extends OLogger {
         nSpecies = (int) this.findKeys("species.name.sp*").stream().count();
         nResource = (int) this.findKeys("resource.name.rsc*").stream().count();
         nBackground = (int) this.findKeys("species.name.bkg*").stream().count();
-        
+
         // Extract the species indexes for the the 
         this.focalIndex = this.findKeys("species.name.sp*").stream()
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
@@ -390,7 +390,7 @@ public class Configuration extends OLogger {
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".bkg") + 4))).toArray();
         this.rscIndex = this.findKeys("resource.name.rsc*").stream()
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rsc") + 4))).toArray();
-        
+
         nSpecies = getInt("simulation.nspecies");
         nResource = getInt("simulation.nresource");
         nSimulation = getInt("simulation.nsimulation");
@@ -453,7 +453,7 @@ public class Configuration extends OLogger {
         bkgSpecies = new HashMap();
         for (int p : this.bkgIndex) {
             bkgSpecies.put(p, new BackgroundSpecies(p));
-             if (!bkgSpecies.get(p).getName().matches("^[a-zA-Z0-9]*$")) {
+            if (!bkgSpecies.get(p).getName().matches("^[a-zA-Z0-9]*$")) {
                 error("Background species name must contain alphanumeric characters only. Please rename " + bkgSpecies.get(p).getName(), null);
             }
         }
@@ -478,27 +478,27 @@ public class Configuration extends OLogger {
                         .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rg") + 3)))
                         .collect(Collectors.toList())
         );
-                
+
         // remove rg0 (whole domain) that is handled separately
         rg.remove(0);
-        
+
         // list output surveys
         HashSet<Integer> surveysIndex = new HashSet(
-                findKeys("surveys.*.sur*").stream()
-                        .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sur") + 4)))
+                findKeys("surveys.*.sr*").stream()
+                        .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sr") + 3)))
                         .collect(Collectors.toList())
         );
-        
+
         // Do some test in order to insure that surveys and output
         // regions have no duplicate indexes
         HashSet<Integer> total = new HashSet();
         total.addAll(rg);
         total.addAll(surveysIndex);
-        if(total.size() != surveysIndex.size() + rg.size()) { 
+        if (total.size() != surveysIndex.size() + rg.size()) {
             String msg = String.format("The surveys and output regions must have different indexes.");
             throw new IllegalArgumentException(msg);
         }
-         
+
         // Initialize output regions from indexes
         rg.forEach(index -> {
             if (!canFind("output.regions.enabled.rg" + index)
@@ -506,21 +506,20 @@ public class Configuration extends OLogger {
                 outputRegions.add(new OutputRegion(index));
             }
         });
-        
+
         // Initialize surveys regions from indexes
         surveysIndex.forEach(index -> {
-            if (!canFind("surveys.enabled.sur" + index)
-                    || getBoolean("surveys.enabled.sur" + index)) {
+            if (!canFind("surveys.enabled.sr" + index)
+                    || getBoolean("surveys.enabled.sr" + index)) {
                 outputRegions.add(new Surveys(index));
             }
         });
-        
-        
+
         if (outputRegions.size() <= 0) {
             // phv 20191203, should throw an error instead?
             warning("No output region defined");
         }
-        
+
         // init output regions
         outputRegions.forEach(region -> {
             region.init();
