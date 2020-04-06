@@ -1,4 +1,28 @@
-# version 3.3.3
+#e version 3.3.3
+
+** round 2 ** 
+
+`
+  Found the following (possibly) invalid URLs:
+    URL: https://cran.rstudio.com/web/packages/osmose/index.html
+      From: README.md
+      Status: 200
+      Message: OK
+      CRAN URL not in canonical form
+
+    Canonical: https://CRAN.R-project.org/package=osmose
+
+  Size of tarball: 33864553 bytes
+
+Not more than 5 MB for a CRAN package, please. 
+`
+
+The URL has been corrected as suggested.
+
+Regarding the size of the package, as we said in our previous message, we were not able to reduce the size of the package, since its heavy size is mainly due to an external Java library needed to run the package (netcdfAll-4.6.6.jar) and to external data needed to run the demo scripts (NetCDF forcings).
+
+We therefore have no possibility to reduce the size of the package. Since there are already packages on the CRAN (geomapdata for instance is 26 Mo), we therefore ask for the possibility to submit the package with its actual size.
+
 
 ** round 1 ** 
 
