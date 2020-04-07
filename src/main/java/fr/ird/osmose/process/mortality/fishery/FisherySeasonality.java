@@ -54,6 +54,9 @@ package fr.ird.osmose.process.mortality.fishery;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 /**
  *
@@ -107,8 +110,10 @@ public class FisherySeasonality extends OsmoseLinker {
             double[] seasonTmp = this.getConfiguration().getArrayDouble(keyval);
 
             // Checks that the array has the same size as the season duration
-            if (seasonTmp.length != seasonDuration) {
-                error("Seasonality array should have the same size as season duration", new IOException());
+            if (seasonTmp.length < seasonDuration) {
+                String error = String.format("Seasonality array length should have a minimum size "
+                        + "of season duration (%d). %d provided", seasonDuration, seasonTmp.length);
+                error(error, new IOException());
             }
 
             // Fills the final seasonality array
@@ -127,7 +132,10 @@ public class FisherySeasonality extends OsmoseLinker {
         }
 
         // Normalizes between 0 and ioff (corresponding to F0)
-        this.checkNorm(0, ioff);
+        // Only if ioff different from 0.
+        if (ioff != 0) {
+            this.checkNorm(0, ioff);
+        }
 
         // Then normalizes for all the given seasons.
         for (int i = ioff; i < nStep; i += seasonDuration) {
@@ -151,6 +159,9 @@ public class FisherySeasonality extends OsmoseLinker {
         for (int i = istart; i < iend; i++) {
             total += this.seasonality[i];
         }
+        
+        BigDecimal bd = new BigDecimal(total).setScale(3, RoundingMode.HALF_EVEN);
+        total = bd.doubleValue();
 
         if (total != 1.d) {
             String msg = String.format("Fishery %d: the seasonality for steps %d to %d summed to %f.\n"
