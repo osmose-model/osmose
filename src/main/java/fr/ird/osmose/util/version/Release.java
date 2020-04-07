@@ -52,6 +52,7 @@
 package fr.ird.osmose.util.version;
 
 import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.Separator;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -159,7 +160,10 @@ public abstract class Release extends OsmoseLinker {
         int iline = -1;
         String keyLC = key.toLowerCase();
         for (int i = 0; i < parameters.size(); i++) {
-            if (parameters.get(i).toLowerCase().startsWith(keyLC)) {
+            String paramLine = parameters.get(i).toLowerCase();
+            Separator sep = Separator.guess(paramLine, Separator.EQUALS);
+            String paramKey = paramLine.split(sep.toString())[0];
+            if (paramKey.equals(keyLC)) {
                 iline = i;
                 break;
             }
