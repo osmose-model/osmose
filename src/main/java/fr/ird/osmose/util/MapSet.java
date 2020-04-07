@@ -362,9 +362,9 @@ public class MapSet extends OsmoseLinker {
                 int cpt = 0;
                 for(int y=yearMin; y<yearMax; y++) {
                     mapYears[cpt] = y;
-                }
-                
-            }
+                    cpt += 1;
+                }               
+            }            
             /*
              * Assign number of maps to numMap array
              */
