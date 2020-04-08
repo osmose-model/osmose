@@ -118,6 +118,8 @@ public class Species {
      */
     private final int lar2ad_thres;
 
+    private boolean bioenEnabled;
+
 //////////////
 // Constructor
 //////////////
@@ -142,7 +144,11 @@ public class Species {
             ageMaturity = cfg.getFloat("species.maturity.age.sp" + index);
             sizeMaturity = Float.MAX_VALUE;
         }
-        eggSize = cfg.getFloat("species.egg.size.sp" + index);
+        if (!cfg.useBioen()) {
+            eggSize = cfg.getFloat("species.egg.size.sp" + index);
+        } else {
+            eggSize = Float.MAX_VALUE;
+        }
         eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
         float agemax = cfg.getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
@@ -238,7 +244,9 @@ public class Species {
      * @return the size of an egg in centimeter
      */
     public float getEggSize() {
-        return eggSize;
+        Configuration cfg = Osmose.getInstance().getConfiguration();
+        float output = cfg.useBioen() ? this.computeLength(eggWeight) : this.eggSize;
+        return output;
     }
 
     /**
