@@ -55,6 +55,7 @@ import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.resource.ResourceForcing;
+import java.util.HashMap;
 
 /**
  *
@@ -82,6 +83,10 @@ public class SimulationLinker extends OsmoseLinker {
 
     public ResourceForcing getResourceForcing(int index) {
         return getOsmose().getSimulation(rank).getResourceForcing(index);
+    }
+    
+    public HashMap<Integer, ResourceForcing> getResourceForcing() {
+        return getOsmose().getSimulation(rank).getResourceForcing();
     }
     
     
