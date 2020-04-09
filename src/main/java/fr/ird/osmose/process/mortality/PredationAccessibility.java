@@ -51,33 +51,23 @@
  */
 package fr.ird.osmose.process.mortality;
 
-import au.com.bytecode.opencsv.CSVReader;
-import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
-import fr.ird.osmose.stage.AccessibilityStage;
-import fr.ird.osmose.stage.IStage;
-import fr.ird.osmose.stage.PredPreyStage;
-import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.Separator;
+import fr.ird.osmose.output.SchoolVariableGetter;
+import fr.ird.osmose.stage.ClassGetter;
 import fr.ird.osmose.util.SimulationLinker;
-import java.io.FileReader;
-import java.io.IOException;
+
 import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- *
+ * Class that manages the time-variability of accessibility matrix.
+ * 
+ * It is strongly inspired on the way species movements are parameterized.
+ * 
  * @author Nicolas Barrier
  */
 public class PredationAccessibility extends SimulationLinker {
-
-    /*
-     * Accessibility stages
-     */
-    private IStage accessStage;
 
     /**
      * HashMaps of accessibility matrixes. -1 is when only one matrix is used.
@@ -88,13 +78,13 @@ public class PredationAccessibility extends SimulationLinker {
      * Provides the accessibility matrix to use as a function of the time-step.
      */
     private int[][] indexAccess;
-
+        
     public PredationAccessibility(int rank) {
         super(rank);
     }
 
     public void init() {
-
+       
         int nseason = getConfiguration().getNStepYear();
         int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
 
@@ -106,28 +96,45 @@ public class PredationAccessibility extends SimulationLinker {
             }
         }
 
-        // Accessibility stages
-        accessStage = new AccessibilityStage();
-        accessStage.init();
-
         matrixAccess = new HashMap<>();
 
         Configuration conf = this.getConfiguration();
+         String metrics = null;
+        try {
+            metrics = getConfiguration().getString("predation.accessibility.stage.structure");
+            if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
+                metrics = null;
+            }
+        } catch (NullPointerException ex) {
+        }
+        
+        // Init class getter with getAge(default)
+        ClassGetter classGetter = (school -> school.getAge());
 
+        if (null != metrics) {
+            if (metrics.equalsIgnoreCase("size")) {
+                classGetter = (school -> school.getLength());
+            } else if (metrics.equalsIgnoreCase("age")) {
+                classGetter = (school -> school.getAge());
+            }
+        } else {
+            warning("Could not find parameter 'predation.accessibility.stage.structure' (or unsupported value, must be either 'age' or 'size'). Osmose assumes it is age-based threshold.");
+        }
+        
         // If only one file is provided (old way)
         if (!getConfiguration().isNull("predation.accessibility.file")) {
             // accessibility matrix
             String filename = getConfiguration().getFile("predation.accessibility.file");
-            AccessMatrix temp = new AccessMatrix(filename);
+            AccessMatrix temp = new AccessMatrix(filename, classGetter);
             matrixAccess.put(-1, temp);
         } else {
             // If several access files are defined.
             // recovers the indexes of the accessibility matrixes.
             int[] index = this.getConfiguration().findKeys("predation.accessibility.file.acc*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".acc") + 4))).toArray();
             for (int i : index) {
-                
+
                 String filename = getConfiguration().getFile("predation.accessibility.file.acc" + i);
-                AccessMatrix temp = new AccessMatrix(filename);
+                AccessMatrix temp = new AccessMatrix(filename, classGetter);
                 matrixAccess.put(i, temp);
 
                 String key;
@@ -139,6 +146,7 @@ public class PredationAccessibility extends SimulationLinker {
                 if (!conf.isNull(key)) {
                     years = conf.getArrayInt(key);
                 } else {
+                    
                     key = "predation.accessibility.initialYear.acc" + i;
                     if (!conf.isNull(key)) {
                         ymin = conf.getInt(key);
@@ -152,15 +160,15 @@ public class PredationAccessibility extends SimulationLinker {
                     } else {
                         ymax = nyear;
                     }
-                    
+
                     int nyears = ymax - ymin;
                     years = new int[nyears];
                     int cpt = 0;
-                    for (int y=ymin; y<ymax; y++) {
+                    for (int y = ymin; y < ymax; y++) {
                         years[cpt] = y;
                         cpt++;
                     }
-                    
+
                 }
 
                 key = "predation.accessibility.steps.acc" + i;
@@ -226,70 +234,16 @@ public class PredationAccessibility extends SimulationLinker {
         }
     }
 
-    public IStage getStage() {
-        return this.accessStage;
-    }
-
-    public double[][][][] getAccessMatrix() {
+    /** Returns the accesibility matrix for the given time-step.
+     * 
+     * @return 
+     */
+    public AccessMatrix getAccessMatrix() {
 
         int year = this.getSimulation().getYear();
         int season = this.getSimulation().getIndexTimeYear();
         int mapIndex = this.indexAccess[year][season];
-        return this.matrixAccess.get(mapIndex).getAccessMatrix();
-
-    }
-
-    private class AccessMatrix {
-
-        private double[][][][] accessibilityMatrix;
-        private final String filename;
-
-        private AccessMatrix(String filename) {
-            this.filename = filename;
-            this.read();
-        }
-
-        private double[][][][] getAccessMatrix() {
-            return this.accessibilityMatrix;
-        }
-
-        private void read() {
-
-            int nsp = getNSpecies();
-            int nrsc = getConfiguration().getNRscSpecies();
-            int nbkg = getConfiguration().getNBkgSpecies();
-
-            try (CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator())) {
-                List<String[]> lines = reader.readAll();
-                int l = 1;
-                accessibilityMatrix = new double[nsp + nbkg + nrsc][][][];   // lines are preys (order: focal, bkg, rsc)
-                for (int i = 0; i < nsp + nrsc + nbkg; i++) {
-                    int nStagePrey = accessStage.getNStage(i);
-                    accessibilityMatrix[i] = new double[nStagePrey][][];
-                    for (int j = 0; j < nStagePrey; j++) {
-                        String[] line = lines.get(l);
-                        int ll = 1;
-                        accessibilityMatrix[i][j] = new double[nsp + nbkg][];      // columns are preds (order: focal, bkg)
-                        for (int k = 0; k < nsp + nbkg; k++) {
-                            int nStagePred = accessStage.getNStage(k);
-                            accessibilityMatrix[i][j][k] = new double[nStagePred];
-                            for (int m = 0; m < nStagePred; m++) {
-                                double value = Double.valueOf(line[ll]);
-                                accessibilityMatrix[i][j][k][m] = value;
-                                ll++;
-                            }
-                        }
-                        l++;
-                    }
-                }
-            } catch (IOException ex) {
-                error("Error loading accessibility matrix from file " + filename, ex);
-            }
-        }
-
-        private String getFile() {
-            return this.filename;
-        }
+        return this.matrixAccess.get(mapIndex);
 
     }
 }
