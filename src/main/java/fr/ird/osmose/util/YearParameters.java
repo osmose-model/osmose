@@ -126,7 +126,6 @@ public class YearParameters extends OsmoseLinker {
         int cpt = 0;
         for (int y : years) {
             if (y < nyear) {
-                System.out.println("");
                 years[cpt] = y;
                 cpt++;
             }
