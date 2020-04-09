@@ -63,6 +63,7 @@ import fr.ird.osmose.util.SimulationLinker;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import fr.ird.osmose.resource.ResourceForcing;
 
 /**
  *
@@ -178,9 +179,8 @@ public class SimulationStep extends SimulationLinker {
             school.init();
         });
 
-        // Update LTL + background biomass
-        for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
-            getResourceForcing(iRsc).update(iStepSimu);
+        for(ResourceForcing resource : getResourceForcing().values()) {
+            resource.update(iStepSimu);
         }
 
         // Some indicators might need a snapshot of the population
