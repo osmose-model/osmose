@@ -416,6 +416,17 @@ public class Simulation extends OsmoseLinker {
     public ResourceForcing getResourceForcing(int index) {
         return resourceForcing.get(index);
     }
+    
+    /**
+     * Returns the {@code ResourceForcing} instance for specified resource.
+     *
+     * @param index, the index of the resource
+     * @return the {@code ResourceForcing} instance for specified resource.
+     */
+    public HashMap<Integer, ResourceForcing> getResourceForcing() {
+        return resourceForcing;
+    }
+    
 
     /**
      * Returns the ith evolving trait for the given simulation.
