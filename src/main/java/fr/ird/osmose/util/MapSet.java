@@ -332,39 +332,19 @@ public class MapSet extends OsmoseLinker {
             int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".initialAge" + ".map" + imap) * getConfiguration().getNStepYear());
             int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".lastAge" + ".map" + imap) * getConfiguration().getNStepYear());
             ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
-
+            
             /*
              * read the time steps over the year concerned by this map
              */
-            int[] mapSeason = getConfiguration().getArrayInt(prefix + ".steps" + ".map" + imap);
+            StepParameters seasonParam = new StepParameters(prefix, "map" + imap);
+            int[] mapSeason = seasonParam.getSeasons();
+            
             /*
              * Read year min and max concerned by this map
              */
-            
-            int[] mapYears;
-            if (!getConfiguration().isNull(prefix + ".years.map" + imap)) {
-                mapYears = getConfiguration().getArrayInt(prefix + ".years.map" + imap);
-            } else {
-                int yearMin = 0;
-                int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-                int yearMax = nyear;
-                if (!getConfiguration().isNull(prefix + ".initialYear.map" + imap)) {
-                    yearMin = getConfiguration().getInt(prefix + ".initialYear.map" + imap);
-                    yearMin = Math.max(yearMin, 0);
-                }
-                if (!getConfiguration().isNull(prefix + ".lastYear.map" + imap)) {
-                    yearMax = getConfiguration().getInt(prefix + ".lastYear.map" + imap);
-                    yearMax = Math.min(yearMax, nyear);
-                }
-                
-                int N = yearMax - yearMin;
-                mapYears = new int[N];
-                int cpt = 0;
-                for(int y=yearMin; y<yearMax; y++) {
-                    mapYears[cpt] = y;
-                    cpt += 1;
-                }               
-            }            
+            YearParameters yearParam = new YearParameters(prefix, "map" + imap);            
+            int[] mapYears = yearParam.getYears();
+                                    
             /*
              * Assign number of maps to numMap array
              */

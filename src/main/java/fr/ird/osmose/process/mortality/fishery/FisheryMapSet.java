@@ -55,6 +55,8 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.YearParameters;
+import fr.ird.osmose.util.StepParameters;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,7 +98,7 @@ public class FisheryMapSet extends OsmoseLinker {
      * '{$prefix}.map#.species' or '{$prefix}.map#.file', etc.
      */
     private final String prefix;
-    
+
     private final String suffix;
 
     /**
@@ -105,16 +107,15 @@ public class FisheryMapSet extends OsmoseLinker {
     private final String fisheryName;
 
     /**
-     * Array of map indexes for every time step.
-     * int[N_STEP_SIMU]
+     * Array of map indexes for every time step. int[N_STEP_SIMU]
      */
     private int[] indexMaps;
-    
+
     /**
      * List of the maps.
      */
     private GridMap[] maps;
-    
+
     /**
      * List of the pathnames of the CSV files.
      */
@@ -125,7 +126,7 @@ public class FisheryMapSet extends OsmoseLinker {
         this.prefix = prefix;  // should be fishery.movement
         this.suffix = suffix;
     }
-    
+
     public void init() {
 
         // Load the maps
@@ -163,25 +164,25 @@ public class FisheryMapSet extends OsmoseLinker {
     public void loadMaps() {
 
         Configuration cfg = this.getConfiguration();
-        
+
         // Count the total number of fishery maps by looking for the
         // number of "fishery.map.index.map#" parameters 
         String key;
-        
-        key = String.format("%s.%s.map*", prefix, suffix); 
+
+        key = String.format("%s.%s.map*", prefix, suffix);
         int nmapmax = getConfiguration().findKeys(key).size();
-  
+
         List<Integer> mapNumber = new ArrayList();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
 
-            key = String.format("%s.%s.map%d", prefix, suffix, imap); 
-            
+            key = String.format("%s.%s.map%d", prefix, suffix, imap);
+
 // This is done if the indexing of fishering maps start with one for instance
             while (getConfiguration().isNull(key)) {
                 imap++;
-                key = String.format("%s.%s.map%d", prefix, suffix, imap); 
+                key = String.format("%s.%s.map%d", prefix, suffix, imap);
             }
 
             // Recovers the fisherie index associated with the current map.
@@ -213,47 +214,12 @@ public class FisheryMapSet extends OsmoseLinker {
             // Recovers the index of the map.
             imap = mapNumber.get(n);
 
-            /*
-             * read the time steps over the year concerned by this map
-             */
-            int [] mapSeason;
-            key = prefix + ".steps.map" + imap;
-            if (!getConfiguration().isNull(key)) {
-                mapSeason = getConfiguration().getArrayInt(key);
-            } else {
-                mapSeason = new int[getConfiguration().getNStepYear()];
-                for (int iStep = 0; iStep < getConfiguration().getNStepYear(); iStep++) {
-                    mapSeason[iStep] = iStep;
-                }
-            }
+            StepParameters seasonParam = new StepParameters(prefix, "map" + imap);
+            int[] mapSeason = seasonParam.getSeasons();
+                   
+            YearParameters yearParam = new YearParameters(prefix, "map" + imap);
+            int[] listOfYears = yearParam.getYears();
             
-            int[] listOfYears;
-            
-            key = String.format("%s.years.map%d", prefix, imap);
-            if (!this.getConfiguration().isNull(key)) {
-                listOfYears = cfg.getArrayInt(key);
-            } else {
-                int yearMin = 0;
-                int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-                int yearMax = nyear;
-                if (!getConfiguration().isNull(prefix + ".initialYear.map" + imap)) {
-                    yearMin = getConfiguration().getInt(prefix + ".initialYear.map" + imap);
-                    yearMin = Math.max(yearMin, 0);
-                }
-                if (!getConfiguration().isNull(prefix + ".finalYear" + ".map" + imap)) {
-                    yearMax = getConfiguration().getInt(prefix + ".finalYear.map" + imap);
-                    yearMax = Math.min(yearMax, nyear);
-                }
-
-                int nyears = yearMax - yearMin;
-                listOfYears = new int[nyears];
-                int cpt = 0;
-                for (int y = yearMin; y < yearMax; y++) {
-                    listOfYears[cpt] = y;
-                    cpt++;
-                }
-            }
-
             /*
              * Assign number of maps to numMap array.
              * indexMaps is the index of the map associated with the current fisherie
@@ -285,14 +251,13 @@ public class FisheryMapSet extends OsmoseLinker {
                 mapFile[n] = null;
                 maps[n] = null;
             }
-            
+
         } // end of loop on good map numbers
     }  // end of method
 
     /**
-     * Checks the map indexation. In the fishery,
-     * if a map is not provided for the current specie, it
-     * is assumed that fishing mortality is null.
+     * Checks the map indexation. In the fishery, if a map is not provided for
+     * the current specie, it is assumed that fishing mortality is null.
      *
      * @return True or False
      */
@@ -342,7 +307,9 @@ public class FisheryMapSet extends OsmoseLinker {
         // Loop over all the time steps
         for (int iStep = 0; iStep < indexMaps.length; iStep++) {
             int indexMap = indexMaps[iStep];   // recover the old map index
-            if(indexMap >=0) indexMaps[iStep] = mapIndexNoTwin[indexMap];    // replace it by the new one.
+            if (indexMap >= 0) {
+                indexMaps[iStep] = mapIndexNoTwin[indexMap];    // replace it by the new one.
+            }
         }
     }
 
@@ -368,7 +335,7 @@ public class FisheryMapSet extends OsmoseLinker {
      * @param map
      */
     private void normalize_map(GridMap map) {
-        
+
         // If the map is null, nothing is done.
         if (map == null) {
             return;
@@ -388,9 +355,9 @@ public class FisheryMapSet extends OsmoseLinker {
                 surftot += cell.getSurface();
             }
         }
-      
+
         float K = mean / surftot;
-        
+
         // Loop over all the cells of the current grid
         // and corrects the fishing coefficients.
         for (Cell cell : getGrid().getCells()) {
