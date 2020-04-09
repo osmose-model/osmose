@@ -143,7 +143,6 @@ public class AccessMatrix extends OsmoseLinker {
 
             // extracts the number of pred (nheaders minus first element)
             nPred = header.length - 1;
-            System.out.println("###############" + nPred);
 
             classPred = new float[nPred];
             namesPred = new String[nPred];
