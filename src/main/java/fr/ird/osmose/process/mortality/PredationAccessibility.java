@@ -52,19 +52,18 @@
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.Configuration;
-import fr.ird.osmose.IAggregation;
-import fr.ird.osmose.School;
-import fr.ird.osmose.output.SchoolVariableGetter;
 import fr.ird.osmose.stage.ClassGetter;
+import fr.ird.osmose.util.StepParameters;
 import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.YearParameters;
 
 import java.util.HashMap;
 
 /**
  * Class that manages the time-variability of accessibility matrix.
- * 
+ *
  * It is strongly inspired on the way species movements are parameterized.
- * 
+ *
  * @author Nicolas Barrier
  */
 public class PredationAccessibility extends SimulationLinker {
@@ -78,13 +77,13 @@ public class PredationAccessibility extends SimulationLinker {
      * Provides the accessibility matrix to use as a function of the time-step.
      */
     private int[][] indexAccess;
-        
+
     public PredationAccessibility(int rank) {
         super(rank);
     }
 
     public void init() {
-       
+
         int nseason = getConfiguration().getNStepYear();
         int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
 
@@ -99,7 +98,7 @@ public class PredationAccessibility extends SimulationLinker {
         matrixAccess = new HashMap<>();
 
         Configuration conf = this.getConfiguration();
-         String metrics = null;
+        String metrics = null;
         try {
             metrics = getConfiguration().getString("predation.accessibility.stage.structure");
             if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
@@ -107,7 +106,7 @@ public class PredationAccessibility extends SimulationLinker {
             }
         } catch (NullPointerException ex) {
         }
-        
+
         // Init class getter with getAge(default)
         ClassGetter classGetter = (school -> school.getAge());
 
@@ -120,13 +119,14 @@ public class PredationAccessibility extends SimulationLinker {
         } else {
             warning("Could not find parameter 'predation.accessibility.stage.structure' (or unsupported value, must be either 'age' or 'size'). Osmose assumes it is age-based threshold.");
         }
-        
+
         // If only one file is provided (old way)
         if (!getConfiguration().isNull("predation.accessibility.file")) {
             // accessibility matrix
             String filename = getConfiguration().getFile("predation.accessibility.file");
             AccessMatrix temp = new AccessMatrix(filename, classGetter);
             matrixAccess.put(-1, temp);
+
         } else {
             // If several access files are defined.
             // recovers the indexes of the accessibility matrixes.
@@ -137,49 +137,13 @@ public class PredationAccessibility extends SimulationLinker {
                 AccessMatrix temp = new AccessMatrix(filename, classGetter);
                 matrixAccess.put(i, temp);
 
-                String key;
-                int ymax, ymin;
-                int season[];
-                int years[];
+                // Reconstruct the years to be used with this map
+                YearParameters yearParam = new YearParameters("predation.accessibility", "acc" + i);
+                int[] years = yearParam.getYears();
 
-                key = "predation.accessibility.years.acc" + i;
-                if (!conf.isNull(key)) {
-                    years = conf.getArrayInt(key);
-                } else {
-                    
-                    key = "predation.accessibility.initialYear.acc" + i;
-                    if (!conf.isNull(key)) {
-                        ymin = conf.getInt(key);
-                    } else {
-                        ymin = 0;
-                    }
-
-                    key = "predation.accessibility.lastYear.acc" + i;
-                    if (!conf.isNull(key)) {
-                        ymax = conf.getInt(key);
-                    } else {
-                        ymax = nyear;
-                    }
-
-                    int nyears = ymax - ymin;
-                    years = new int[nyears];
-                    int cpt = 0;
-                    for (int y = ymin; y < ymax; y++) {
-                        years[cpt] = y;
-                        cpt++;
-                    }
-
-                }
-
-                key = "predation.accessibility.steps.acc" + i;
-                if (!conf.isNull(key)) {
-                    season = conf.getArrayInt(key);
-                } else {
-                    season = new int[nseason];
-                    for (int s = 0; s < nseason; s++) {
-                        season[s] = s;
-                    }
-                }
+                // Reconstruct the steps to be used with this map
+                StepParameters seasonParam = new StepParameters("predation.accessibility", "acc" + i);
+                int[] season = seasonParam.getSeasons();
 
                 for (int y : years) {
                     for (int s : season) {
@@ -234,9 +198,10 @@ public class PredationAccessibility extends SimulationLinker {
         }
     }
 
-    /** Returns the accesibility matrix for the given time-step.
-     * 
-     * @return 
+    /**
+     * Returns the accesibility matrix for the given time-step.
+     *
+     * @return
      */
     public AccessMatrix getAccessMatrix() {
 
