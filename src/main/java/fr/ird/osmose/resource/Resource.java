@@ -187,12 +187,12 @@ public class Resource extends OsmoseLinker implements IAggregation {
 
     @Override
     public float getAge() {
-        return Float.NaN;
+        return 0;
     }
 
     @Override
     public float getLength() {
-        return Float.NaN;
+        return 0;
     }
 
     @Override
@@ -217,7 +217,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
 
     @Override
     public int getAgeDt() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return 0;
     }
 
     @Override
