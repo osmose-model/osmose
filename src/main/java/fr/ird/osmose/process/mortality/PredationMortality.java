@@ -51,16 +51,11 @@
  */
 package fr.ird.osmose.process.mortality;
 
-import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
-import fr.ird.osmose.stage.AccessibilityStage;
 import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.stage.PredPreyStage;
-import fr.ird.osmose.util.Separator;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -246,35 +241,33 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
         
-        double[][][][] accessibilityMatrix = predationAccess.getAccessMatrix();
-
+        AccessMatrix accessibilityMatrix = predationAccess.getAccessMatrix();
+        int iAccessPred = accessibilityMatrix.getIndexPred(predator);
+        
         double[] accessibility = new double[preys.size()];
         int iSpecPred = predator.getSpeciesIndex();
         int iPredPreyStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iSpecPred][iPredPreyStage];
         double[] percentResource = getPercentResource(predator);
-        int iStagePred = predationAccess.getStage().getStage(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
             int iSpecPrey = preys.get(iPrey).getSpeciesIndex();
-            int iStagePrey;
+            IAggregation prey = (IAggregation) preys.get(iPrey);
+            int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
             // The prey is an other school
             if (preys.get(iPrey) instanceof AbstractSchool) {
-                IAggregation prey = (IAggregation) preys.get(iPrey);
                 if (prey.equals(predator)) {
                     continue;
-                }
-                if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
-                    iStagePrey = predationAccess.getStage().getStage(prey);
-                    accessibility[iPrey] = accessibilityMatrix[iSpecPrey][iStagePrey][iSpecPred][iStagePred];
+                }                
+                if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {                    
+                    accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
                 } else {
                     accessibility[iPrey] = 0.d; //no need to do it since initialization already set it to zero
                 }
             } else {
                 // The prey is a resource group
-                iStagePrey = 0;
-                accessibility[iPrey] = accessibilityMatrix[iSpecPrey][iStagePrey][iSpecPred][iStagePred]
+                accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
                         * percentResource[iSpecPrey - getConfiguration().getNSpecies() - getConfiguration().getNBkgSpecies()];
             }
         }
