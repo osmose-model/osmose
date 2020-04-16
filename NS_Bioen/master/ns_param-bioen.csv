@@ -141,7 +141,7 @@ bioen.arrh.ct2.sp15,5614
 bioen.damage.k_dam.sp0,0.012876179
 bioen.damage.k_dam.sp1,0.014526848
 bioen.damage.k_dam.sp2,0.024255192
-bioen.damage.k_dam.sp3,0.021350755
+bioen.damage.k_dam.sp3,0.018
 bioen.damage.k_dam.sp4,0.015160703
 bioen.damage.k_dam.sp5,0.017663706
 bioen.damage.k_dam.sp6,0.015631771
@@ -151,27 +151,27 @@ bioen.damage.k_dam.sp9,0.012793889
 bioen.damage.k_dam.sp10,0.011824834
 bioen.damage.k_dam.sp11,0.012647489
 bioen.damage.k_dam.sp12,0.015980013
-bioen.damage.k_dam.sp13,0.014677524
+bioen.damage.k_dam.sp13,0.011
 bioen.damage.k_dam.sp14,0.012788145
 bioen.damage.k_dam.sp15,0.020579837
 ,
 ############### alpha values (no unity),
-species.alpha.sp0,0.75
-species.alpha.sp1,0.75
-species.alpha.sp2,0.75
-species.alpha.sp3,0.75
-species.alpha.sp4,0.75
-species.alpha.sp5,0.75
-species.alpha.sp6,0.75
-species.alpha.sp7,0.75
-species.alpha.sp8,0.75
-species.alpha.sp9,0.75
-species.alpha.sp10,0.75
-species.alpha.sp11,0.75
-species.alpha.sp12,0.75
-species.alpha.sp13,0.75
-species.alpha.sp14,0.75
-species.alpha.sp15,0.75
+species.beta.sp0,0.75
+species.beta.sp1,0.75
+species.beta.sp2,0.75
+species.beta.sp3,0.75
+species.beta.sp4,0.75
+species.beta.sp5,0.75
+species.beta.sp6,0.75
+species.beta.sp7,0.75
+species.beta.sp8,0.75
+species.beta.sp9,0.75
+species.beta.sp10,0.75
+species.beta.sp11,0.75
+species.beta.sp12,0.75
+species.beta.sp13,0.75
+species.beta.sp14,0.75
+species.beta.sp15,0.75
 ,
 ############# energy SMR (g.g^-alpha),
 bioen.maint.energy.csmr.sp0,3.173781
@@ -245,7 +245,7 @@ bioen.maturity.m1.sp11,21.72357681
 bioen.maturity.m1.sp12,19.02561593
 bioen.maturity.m1.sp13,28.89412443
 bioen.maturity.m1.sp14,34.14893257
-bioen.maturity.m1.sp15,4.5
+bioen.maturity.m1.sp15,5
 ,
 ############### oxygen,
 # units here = mg.L,
@@ -321,7 +321,7 @@ species.larvae.growth.threshold.age.sp15,1
 ,
 predation.ingestion.rate.max.larvae.bioen.sp0,2.6809
 predation.ingestion.rate.max.larvae.bioen.sp1,3.083295
-predation.ingestion.rate.max.larvae.bioen.sp2,12.5
+predation.ingestion.rate.max.larvae.bioen.sp2,8
 predation.ingestion.rate.max.larvae.bioen.sp3,3.714333
 predation.ingestion.rate.max.larvae.bioen.sp4,2.98944
 predation.ingestion.rate.max.larvae.bioen.sp5,3.544025

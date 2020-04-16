@@ -808,9 +808,10 @@ public class School extends AbstractSchool {
         this.e_net += d;
     }
 
-    @Override
-    public double getAlphaBioen() {
-        return this.getSpecies().getAlphaBioen();
+    @Override 
+    
+    public double getBetaBioen() {
+        return this.getSpecies().getBetaBioen();
     }
     
     public Genotype getGenotype() {

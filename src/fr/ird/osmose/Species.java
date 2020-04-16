@@ -110,7 +110,7 @@ public class Species {
 
     private int zlayer = 0;
 
-    private double alpha_bioen;
+    private double beta_bioen;
 
     /**
      * Threshold (number of time-steps) at which a species move from larva to
@@ -156,8 +156,8 @@ public class Species {
         // barrier.n: added for bioenergetic purposes.
         if (cfg.useBioen()) {
             zlayer = cfg.getInt("species.zlayer.sp" + index);
-            String key = String.format("species.alpha.sp%d", index);
-            alpha_bioen = cfg.getDouble(key);
+            String key = String.format("species.beta.sp%d", index);
+            beta_bioen = cfg.getDouble(key);
         }
 
         // If the key is found, then the age switch in years is converted into
@@ -177,8 +177,8 @@ public class Species {
         return this.lar2ad_thres;
     }
 
-    public double getAlphaBioen() {
-        return this.alpha_bioen;
+    public double getBetaBioen() {
+        return this.beta_bioen;
     }
 
     public int getDepthLayer() {

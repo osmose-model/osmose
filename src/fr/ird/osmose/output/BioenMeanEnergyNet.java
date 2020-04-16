@@ -81,7 +81,7 @@ public class BioenMeanEnergyNet extends AbstractOutput {
         for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
             if (1 <= school.getAge()){
-                meanEnet[i] += school.getENet() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
+                meanEnet[i] += school.getENet() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
                 abundance[i] += 1;
             }
                       
@@ -115,7 +115,7 @@ public class BioenMeanEnergyNet extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "Mean energy net rate (grams.grams^-alpha) (grams net usable per gram of predator)";
+        return "Mean energy net rate (grams.grams^-beta) (grams net usable per gram of predator)";
     }
 
     @Override

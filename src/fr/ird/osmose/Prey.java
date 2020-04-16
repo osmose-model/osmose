@@ -230,7 +230,7 @@ public class Prey implements IMarineOrganism {
     }
 
     @Override
-    public double getAlphaBioen() {
+    public double getBetaBioen() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

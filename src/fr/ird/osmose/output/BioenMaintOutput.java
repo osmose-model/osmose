@@ -80,7 +80,7 @@ public class BioenMaintOutput extends AbstractOutput {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             int i = school.getSpeciesIndex();
-            maintenance[i] += school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
+            maintenance[i] += school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
             abundance[i] += 1;
         }
     }
@@ -112,7 +112,7 @@ public class BioenMaintOutput extends AbstractOutput {
 
     @Override
     String getDescription() {
-        return "Maintenance rate (grams.grams^-alpha)";
+        return "Maintenance rate (grams.grams^-beta)";
     }
 
     @Override

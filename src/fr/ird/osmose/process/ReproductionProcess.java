@@ -57,7 +57,7 @@ import java.util.List;
  * This class controls the reproduction process in the simulated domain. The
  * user defines the spawning season (a CSV file per Species) either annual or
  * interannual, the percentage of female in the population (sex ratio) and the
- * number of eggs per gramme of mature female (alpha) for every species. Osmose
+ * number of eggs per gramme of mature female (beta) for every species. Osmose
  * estimates the spawning stock biomass (SSB) and calculates the number of eggs
  * to be released in the system at every time steps.<br />
  * During the spin-up of the simulation (duration of spin-up either set by the
@@ -79,7 +79,7 @@ public class ReproductionProcess extends AbstractProcess {
     /*
      * Number of eggs per gram of mature female
      */
-    private double[] alpha;
+    private double[] beta;
     /*
      * Seeding biomass in tonne
      */
@@ -98,7 +98,7 @@ public class ReproductionProcess extends AbstractProcess {
 
         int nSpecies = getNSpecies();
         sexRatio = new double[nSpecies];
-        alpha = new double[nSpecies];
+        beta = new double[nSpecies];
         seasonSpawning = new double[nSpecies][];
         for (int i = 0; i < nSpecies; i++) {
             if (!getConfiguration().isNull("reproduction.season.file.sp" + i)) {
@@ -118,7 +118,7 @@ public class ReproductionProcess extends AbstractProcess {
             }
             if (sum > 0) {
                 sexRatio[i] = getConfiguration().getDouble("species.sexratio.sp" + i);
-                alpha[i] = getConfiguration().getDouble("species.relativefecundity.sp" + i);
+                beta[i] = getConfiguration().getDouble("species.relativefecundity.sp" + i);
             }
         }
 
@@ -148,7 +148,7 @@ public class ReproductionProcess extends AbstractProcess {
         // check whether the species do reproduce or not
         boolean[] reproduce = new boolean[getConfiguration().getNSpecies()];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            reproduce[i] = (sexRatio[i] > 0.d && alpha[i] > 0.d);
+            reproduce[i] = (sexRatio[i] > 0.d && beta[i] > 0.d);
         }
 
         // loop over all the schools to compute SSB
@@ -175,7 +175,7 @@ public class ReproductionProcess extends AbstractProcess {
             }
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
-            double nEgg = sexRatio[i] * alpha[i] * season * SSB[i] * 1000000;
+            double nEgg = sexRatio[i] * beta[i] * season * SSB[i] * 1000000;
             // lay age class zero
             int nSchool = getConfiguration().getNSchool(i);
             // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
@@ -221,8 +221,8 @@ public class ReproductionProcess extends AbstractProcess {
         return this.yearMaxSeeding;
     }
 
-    public double getAlpha(int i) {
-        return this.alpha[i];
+    public double getBeta(int i) {
+        return this.beta[i];
     }
     
     

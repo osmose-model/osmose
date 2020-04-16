@@ -128,6 +128,6 @@ public interface IMarineOrganism {
     
     public Cell getCell();
     
-    public double getAlphaBioen();
+    public double getBetaBioen();
     
 }
