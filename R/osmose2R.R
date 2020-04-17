@@ -10,8 +10,7 @@
 #'
 #' @return An array
 #' @examples{
-#' dirin = system.file("extdata", package="osmose")
-#' outdir = paste(dirin, "/outputs", sep="")
+#' outdir = cacheManager('outputs')
 #' data = read_osmose(outdir)
 #' mortality_df = data$mortality
 #' mort = getAverageMortality(mortality_df, stage="juveniles", freq=12)
@@ -120,8 +119,7 @@ getFishingMortality = function(sp, fishing, T, ndt) {
 #' The latter is computed as the sum of all mortality types
 #' @return A mortality array
 #' @examples{
-#' dirin = system.file("extdata", package="osmose")
-#' outdir = paste(dirin, "/outputs", sep="")
+#' outdir = cacheManager('outputs')
 #' data = read_osmose(outdir)
 #' mortality_df = data$mortality
 #' mort = getMortality(mortality_df, stage="juveniles", type="total")
@@ -157,8 +155,7 @@ getMortality = function(x, stage="adults", type="total") {
 #'
 #' @return An array
 #' @examples{
-#' dirin = system.file("extdata", package="osmose")
-#' outdir = paste(dirin, "/outputs", sep="")
+#' outdir = cacheManager('outdir')
 #' data = read_osmose(outdir)
 #' mortality_df = data$mortality
 #' mortdev = getMortalityDeviation(mortality_df, stage="juveniles", type="total")
@@ -179,7 +176,8 @@ getMortalityDeviation = function(x, stage, type, pars=NULL) {
 #' @param ... String arguments 
 #' @param keep.att Whether parameter attributes should be kept
 #' @examples{
-#'    filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
+#'    path = cacheManager('gog')
+#'    filename = file.path(path, "osm_all-parameters.csv")
 #'    par = readOsmoseConfiguration(filename)
 #'    getOsmoseParameter(par, "population", "seeding", "year", "max", keep.att=FALSE)
 #' }
@@ -199,8 +197,9 @@ getOsmoseParameter = function(par, ..., keep.att=FALSE) {
 #'
 #' @return A 3D array (time, length, species)
 #' @examples{
-#' dirin = system.file("extdata", package="osmose")
-#' file = paste(dirin, "/outputs/SizeIndicators/gogosm_yieldDistribBySize_Simu0.csv", sep="")
+#' 
+#' dirin = cacheManager('outputs')
+#' file = file.path(dirin, "SizeIndicators", "gogosm_yieldDistribBySize_Simu0.csv")
 #' size = getSizeSpectrum(file)
 #' }
 getSizeSpectrum = function(file, sep=",", ...) {
@@ -1138,12 +1137,12 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
 #'
 #' @return List of Osmose Java versions
 #'
-list_osmose_versions = function() {
-  dirin = system.file(package = "osmose", "java")
-  output = list.files(path = dirin, pattern = ".jar")
-  
-  return(output)
-}
+#list_osmose_versions = function() {
+#  dirin = system.file(package = "osmose", "java")
+#  output = list.files(path = dirin, pattern = ".jar")
+#  
+#  return(output)
+#}
 
 # Demo --------------------------------------------------------------------
 #' Generates Osmose configuration files to run an Osmose demo.

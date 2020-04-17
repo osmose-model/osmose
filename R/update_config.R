@@ -18,8 +18,11 @@ update_osmose = function(input, log = "osmose.log",
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
   
   # update to provide by release executables
-  if(is.null(osmose)) osmose = system.file(sprintf("java/osmose_%s.jar", version),
-                                           package="osmose", mustWork = TRUE)
+  if(is.null(osmose)){
+    osmose_name = sprintf("osmose_%s.jar", version)
+    lib = cacheManager("lib")
+    osmose = cacheManager(osmose_name)
+  }
   
   args = paste("-jar", osmose, "-update", input)
   
