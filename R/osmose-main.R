@@ -42,7 +42,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
   if(is.null(osmose)){
     osmose_name = sprintf("osmose_%s.jar", version)
     lib = cacheManager("lib")
-    osmose = cacheManager(osmose_name)
+    osmose = shQuote(cacheManager(osmose_name))
   }
   
   # If output path were specified, remove it

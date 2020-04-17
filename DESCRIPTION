@@ -66,6 +66,7 @@ Imports:
   utils,
   ncdf4,
   mgcv,
+  rappdirs,
   fields
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE

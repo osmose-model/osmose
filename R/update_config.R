@@ -21,7 +21,7 @@ update_osmose = function(input, log = "osmose.log",
   if(is.null(osmose)){
     osmose_name = sprintf("osmose_%s.jar", version)
     lib = cacheManager("lib")
-    osmose = cacheManager(osmose_name)
+    osmose = shQuote(cacheManager(osmose_name))
   }
   
   args = paste("-jar", osmose, "-update", input)
