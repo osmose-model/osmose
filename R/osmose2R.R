@@ -1185,11 +1185,11 @@ osmose_calib_demo = function(path = NULL) {
   if(!dir.exists(path)) dir.create(path = path, showWarnings = FALSE, recursive = TRUE)
   
   # copy the calibration data into the path directory
-  input_dir = system.file(package = "osmose", "extdata", "calib_demo")
+  input_dir = cacheManager("calib_demo")
   file.copy(from = input_dir, to = path, recursive = TRUE, overwrite = TRUE)
   
   # Copy the reference gog configuration in the calibration folder
-  input_dir = system.file(package = "osmose", "extdata", "gog")
+  input_dir = cacheManager("gog")
   file.copy(from = input_dir, to = file.path(path, "calib_demo"), recursive = TRUE, overwrite = TRUE)
   
   demo = list(path = file.path(path, "calib_demo"))

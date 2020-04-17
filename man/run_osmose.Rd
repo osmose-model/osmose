@@ -66,7 +66,8 @@ but it is required for configuration using interannual inputs or fishing selecti
 \examples{
 {
   \dontrun{
-    filename = system.file("extdata", "gog/osm_all-parameters.csv", package="osmose")
+    path = cacheManager("gog")
+    filename = file.path(path, "osm_all-parameters.csv")
     run_osmose(filename)
   }
 }
