@@ -20,5 +20,5 @@ cran-comments.md
 ^R/update_config\.R$
 ^R/osmose\.maps\.R$
 ^R/osmose2R\.R$
-^\data-raw$
-^\java$
+^data-raw$
+^java$
