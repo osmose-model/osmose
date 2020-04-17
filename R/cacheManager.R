@@ -10,7 +10,7 @@
 #'   - On Windows 7 up to 10 : `C:\\Users\\<username>\\AppData\\Local\\R\\BIOMASS\\R\\osmose`
 #'   - On Windows XP : `C:\\Documents and Settings\\<username>\\Data\\R\\BIOMASS\\R\\osmose`
 #'
-#' See this function for more information : [rappdirs::user_data_dir()][BIOMASS::cacheManager(nameFile)]
+#' See this function for more information : [rappdirs::user_data_dir()] [BIOMASS::cacheManager(nameFile)]
 #'
 #' @param nameFile the name of the file or folder
 #'
@@ -31,10 +31,10 @@ cacheManager <- function(nameFile) {
   if (!dir.exists(basePath)) dir.create(basePath, recursive = T, showWarnings = F)
   
   path <- cachePath(nameFile)
-  
+
   ############# if the folder exists in the designed cache folder
   file_exists <- file.exists(path)
-  
+
   ############# if the folder exists in the working directory, move it to the cache directory
   if (file.exists(nameFile) && !file_exists) {
     file.copy(nameFile, basePath, recursive = T)
@@ -44,26 +44,16 @@ cacheManager <- function(nameFile) {
   }
   
   # if the file is empty
-  if (file_exists && length(dir(path)) == 0) {
-    file.remove(path)
-    file_exists <- F
-  }
-  
-  #if (!getOption("BIOMASS.ignore_update", TRUE)) {
-  #  checkTime()
+  #if (file_exists && length(dir(path)) == 0) {
+  #  file.remove(path)
+  #  file_exists <- F
   #}
   
   ############# if the folder does not exist anywhere
   if (!file_exists) {
     updateCache(nameFile)
   }
-  
-  # give the full path expect for the wc2-5 file who have two files we need.
-  #path <- switch(nameFile,
-  #  "wc2-5" = file.path(path, c("bio4.bil", "bio15.bil")),
-  #  file.path(path, paste0(nameFile, ".bil"))
-  #)
-  
+
   return(path)
 }
 
@@ -78,34 +68,6 @@ cachePath <- function(path = NULL) {
   }
   basePath
 }
-
-
-#' #' @keywords Internal
-#' checkTime <- function() {
-#'   # Check if it's time to update
-#'   if (!file.exists(cachePath("last_check.txt"))) {
-#'     writeLines(as.character(Sys.Date()), cachePath("last_check.txt"))
-#'   } else {
-#'     check_interval <- 1830 # this message will appear every 5 years
-#'     
-#'     last_check <- as.Date(readLines(cachePath("last_check.txt")))
-#'     if ((Sys.Date() - last_check) > check_interval) {
-#'       message(
-#'         "You can verify if the cache is updated by using this function\n",
-#'         "\t\tupdateCache()\n",
-#'         "Be careful, all the environement variable will be deleted and updated.\n",
-#'         "You can ignore this message, and can prevent this message to appear again by using\n",
-#'         "\t\toptions(BIOMASS.ignore_update=TRUE)"
-#'       )
-#'       
-#'       # update the flag
-#'       writeLines(as.character(Sys.Date()), cachePath("last_check.txt"))
-#'     }
-#'   }
-#'   
-#'   return()
-#' }
-
 
 #' @keywords  Internal
 flushCache <- function() {
@@ -140,16 +102,16 @@ updateCache <- function(nameFile) {
   
   # the url of the differents zip to download
   zip_urls <- list(
-    "gog" = "https://github.com/osmose-model/osmose/tree/master/inst/extdata/gog",
-    "calib_demo" =  "https://github.com/osmose-model/osmose/tree/master/inst/extdatacalib_demo",
-    "outputs" = "https://github.com/osmose-model/osmose/tree/master/inst/extdata/outputs.zip",
-    "osmose_3.3.1.jar" = "https://github.com/osmose-model/osmose/tree/master/inst/java/osmose_3.3.1.jar",
-    "osmose_3.3.2.jar" = "https://github.com/osmose-model/osmose/tree/master/inst/java/osmose_3.3.2.jar",
-    "osmose_3.3.3.jar" = "https://github.com/osmose-model/osmose/tree/master/inst/java/osmose_3.3.3.jar",
-    "osmose_4.0.0.jar" = "https://github.com/osmose-model/osmose/tree/master/inst/java/osmose_4.0.0.jar",
-    "osmose_4.1.0.jar" = "https://github.com/osmose-model/osmose/tree/master/inst/java/osmose_4.1.0.jar",
-    "osmose_4.2.1.jar" = "https://github.com/osmose-model/osmose/tree/master/inst/java/osmose_4.2.1.jar",
-    "lib" = "https://github.com/osmose-model/osmose/tree/master/inst/java/lib"
+    "gog" = "https://github.com/osmose-model/osmose/raw/master/data-raw/gog.zip",
+    "calib_demo" =  "https://github.com/osmose-model/osmose/raw/master/data-raw/calib_demo.zip",
+    "outputs" = "https://github.com/osmose-model/osmose/raw/master/data-raw/outputs.zip",
+    "osmose_3.3.1.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_3.3.1.jar",
+    "osmose_3.3.2.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_3.3.2.jar",
+    "osmose_3.3.3.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_3.3.3.jar",
+    "osmose_4.0.0.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_4.0.0.jar",
+    "osmose_4.1.0.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_4.1.0.jar",
+    "osmose_4.2.1.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_4.2.1.jar",
+    "lib" = "https://github.com/osmose-model/osmose/raw/master/java/lib.zip"
   )
   
   # dowload and unzip the files
@@ -160,7 +122,7 @@ updateCache <- function(nameFile) {
     
     # If URL ends with .zip, unzip the file
     if(endsWith(basename(zip_url), ".zip")) { 
-      unzip(tmp, exdir = path)
+      unzip(tmp, exdir = dirname(path))
     } else { 
       file.copy(from=tmp, to=path)
     }

@@ -24,7 +24,7 @@ The localisation of the folder is :
   - On Windows 7 up to 10 : `C:\\Users\\<username>\\AppData\\Local\\R\\BIOMASS\\R\\osmose`
   - On Windows XP : `C:\\Documents and Settings\\<username>\\Data\\R\\BIOMASS\\R\\osmose`
 
-See this function for more information : [rappdirs::user_data_dir()][BIOMASS::cacheManager(nameFile)]
+See this function for more information : [rappdirs::user_data_dir()] [BIOMASS::cacheManager(nameFile)]
 }
 
 \seealso{
