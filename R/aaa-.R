@@ -22,3 +22,5 @@ NULL
 NULL
 #' @importFrom fields image.plot tim.colors
 NULL
+#' @importFrom rappdirs user_data_dir
+NULL
