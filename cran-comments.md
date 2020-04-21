@@ -1,5 +1,10 @@
 # version 3.3.3
 
+**round 5**
+
+The cache flushing of the Java executables is forced in the vignettes. This is to
+force the flushing of the corrupted JAR file that may have remained on CRAN cache directory.
+
 **round 4** 
 
 Jar files are now downloaded through Zip files. Direct downloading of the `jar` files caused
