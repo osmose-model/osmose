@@ -105,13 +105,13 @@ updateCache <- function(nameFile) {
     "gog" = "https://github.com/osmose-model/osmose/raw/master/data-raw/gog.zip",
     "calib_demo" =  "https://github.com/osmose-model/osmose/raw/master/data-raw/calib_demo.zip",
     "outputs" = "https://github.com/osmose-model/osmose/raw/master/data-raw/outputs.zip",
-    "osmose_3.3.1.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_3.3.1.jar",
-    "osmose_3.3.2.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_3.3.2.jar",
-    "osmose_3.3.3.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_3.3.3.jar",
-    "osmose_4.0.0.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_4.0.0.jar",
-    "osmose_4.1.0.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_4.1.0.jar",
-    "osmose_4.2.1.jar" = "https://github.com/osmose-model/osmose/raw/master/java/osmose_4.2.1.jar",
-    "lib" = "https://github.com/osmose-model/osmose/raw/master/java/lib.zip"
+    "osmose_3.3.1.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_3.3.1.zip",
+    "osmose_3.3.2.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_3.3.2.zip",
+    "osmose_3.3.3.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_3.3.3.zip",
+    "osmose_4.0.0.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_4.0.0.zip",
+    "osmose_4.1.0.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_4.1.0.zip",
+    "osmose_4.2.1.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_4.2.1.zip",
+    "lib" = "https://github.com/osmose-model/osmose/raw/master/inst/java/lib.zip"
   )
   
   # dowload and unzip the files
