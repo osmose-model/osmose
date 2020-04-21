@@ -31,10 +31,10 @@ cacheManager <- function(nameFile) {
   if (!dir.exists(basePath)) dir.create(basePath, recursive = T, showWarnings = F)
   
   path <- cachePath(nameFile)
-
+  
   ############# if the folder exists in the designed cache folder
   file_exists <- file.exists(path)
-
+  
   ############# if the folder exists in the working directory, move it to the cache directory
   if (file.exists(nameFile) && !file_exists) {
     file.copy(nameFile, basePath, recursive = T)
@@ -53,7 +53,7 @@ cacheManager <- function(nameFile) {
   if (!file_exists) {
     updateCache(nameFile)
   }
-
+  
   return(path)
 }
 
@@ -70,11 +70,13 @@ cachePath <- function(path = NULL) {
 }
 
 #' @keywords  Internal
-flushCache <- function() {
+flushCache <- function(filename=NULL) {
   
-  basePath <- cachePath()
-  
-  if (dir.exists(basePath)) unlink(basePath, recursive = T, force = F)
+  basePath = ifelse(is.null(filename), cachePath(), cachePath(filename))
+  if (dir.exists(basePath) || file.exists(basePath)) {
+    message(basePath, " has been cleaned.")
+    unlink(basePath, recursive = T, force = F)
+  }
 }
 
 
@@ -89,8 +91,6 @@ flushCache <- function() {
 #' @param nameFile The name of the file you want to update. If it's `NULL` the function will update all the files.
 #'
 #' @return NULL
-#' @export
-#'
 #' @author Arthur PERE
 #'
 #' @importFrom utils download.file unzip
