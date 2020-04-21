@@ -62,7 +62,7 @@ cacheManager <- function(nameFile) {
 #' @keywords Internal
 cachePath <- function(path = NULL) {
   # give the path of the cache
-  basePath <- user_data_dir("R/osmose")
+  basePath <- user_data_dir(file.path("R", "osmose"))
   if (!is.null(path)) {
     basePath <- file.path(basePath, path)
   }
