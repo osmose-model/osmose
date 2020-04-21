@@ -21,4 +21,4 @@ cran-comments.md
 ^R/osmose\.maps\.R$
 ^R/osmose2R\.R$
 ^data-raw$
-^java$
+^inst/java$

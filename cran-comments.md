@@ -1,4 +1,13 @@
-#e version 3.3.3
+# version 3.3.3
+
+**round 4** 
+
+Jar files are now downloaded through Zip files. Direct downloading of the `jar` files caused
+errors in Windows.
+
+**round 3**
+
+Size has been reduced by removing the heavy data files and Java libraries. These are downloaded into the user cache file, following what is done in the BIOMASS package.
 
 ** round 2 ** 
 
