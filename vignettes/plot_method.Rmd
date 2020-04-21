@@ -18,6 +18,11 @@ knitr::opts_chunk$set(
 library(osmose)
 ```
 
+```{r, include = FALSE}
+# Remove the .jar file if exits.
+osmose:::flushCache("osmose_3.3.3.jar")
+```
+
 ### Create, run and read an example
 
 Define a folder for copy example files:
