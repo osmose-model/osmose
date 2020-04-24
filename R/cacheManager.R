@@ -7,7 +7,7 @@
 #' The localisation of the folder is defined in the `.Renviron` file, by setting the `OSMOSE_DIR`
 #' environment variable:
 #'   - On Linux/Mac Os X : `OSMOSE_DIR=/Users/Nicolas/Desktop/OSMOSE_TEST/R`
-#'   - On Windows: `OSMOSE_DIR=C:
+#'   - On Windows: `OSMOSE_DIR=C:\\Users\\Nicolas\\Desktop\\OSMOSE_TEST\\R`
 #'
 #' If this variable is not set, the files will be downloaded into a temporary directory. 
 #'
