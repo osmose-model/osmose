@@ -1,6 +1,6 @@
 ---
 title: "Creates a folder with basic files for a running. Then, run the model and read the outputs."
-author: "Yunne-Jai Shin, Travers Morgane, Verley Philippe, Ricardo Oliveros-Ramos & Laure Velez (2020)"
+author: "Yunne-Jai Shin, Criscely Lujan, Wencheng Lau-Maudrano, Philippe Verley, Ricardo Oliveros-Ramos, Nicolas Barrier & Laure Velez (2020)"
 date: "`r Sys.Date()`"
 output:
   knitr:::html_vignette:
