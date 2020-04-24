@@ -56,7 +56,6 @@ cacheManager <- function(nameFile) {
 }
 
 
-#' @importFrom rappdirs user_data_dir
 #' @keywords Internal
 cachePath <- function(path = NULL) {
   
