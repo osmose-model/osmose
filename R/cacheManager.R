@@ -4,13 +4,12 @@
 #' placed in this folder.
 #'
 #' @section Localisation:
-#' The localisation of the folder is :
-#'   - On Linux : `~/.local/share/R/osmose`
-#'   - On Mac OS X : `~/Library/Application Support/R/osmose`
-#'   - On Windows 7 up to 10 : `C:\\Users\\<username>\\AppData\\Local\\R\\BIOMASS\\R\\osmose`
-#'   - On Windows XP : `C:\\Documents and Settings\\<username>\\Data\\R\\BIOMASS\\R\\osmose`
+#' The localisation of the folder is defined in the `.Renviron` file, by setting the `OSMOSE_DIR`
+#' environment variable:
+#'   - On Linux/Mac Os X : `OSMOSE_DIR=/Users/Nicolas/Desktop/OSMOSE_TEST/R`
+#'   - On Windows: `OSMOSE_DIR=C:\\Users\\Nicolas\\Desktop\\OSMOSE_TEST\\R`
 #'
-#' See this function for more information : [rappdirs::user_data_dir()] [BIOMASS::cacheManager(nameFile)]
+#' If this variable is not set, the files will be downloaded into a temporary directory. 
 #'
 #' @param nameFile the name of the file or folder
 #'
@@ -18,7 +17,6 @@
 #'
 #' @author Arthur PERE
 #' @author Nicolas BARRIER
-#' @seealso [rappdirs::user_data_dir()][BIOMASS::cacheManager(nameFile)]
 #'
 #' @keywords Internal
 #' @export
@@ -58,16 +56,29 @@ cacheManager <- function(nameFile) {
 }
 
 
-#' @importFrom rappdirs user_data_dir
 #' @keywords Internal
 cachePath <- function(path = NULL) {
-  # give the path of the cache
-  basePath <- user_data_dir(file.path("R", "osmose"))
+  
+  # give the path of OSMOSE_DIR
+  # If variable is not set, then points to a temporary directory.
+  if(Sys.getenv("OSMOSE_DIR") == "") {
+    tdir = tempdir()
+    Sys.setenv(OSMOSE_DIR=tdir)
+    message("The OSMOSE_DIR Renviron variable was set to ", tdir)
+  }
+  
+  # Recover the paths to the OSMOSE_DIR and creates
+  # it if needed
+  basePath = Sys.getenv("OSMOSE_DIR")
+
   if (!is.null(path)) {
     basePath <- file.path(basePath, path)
   }
+  
   basePath
+
 }
+
 
 #' @keywords  Internal
 flushCache <- function(filename=NULL) {
