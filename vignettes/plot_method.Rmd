@@ -52,7 +52,7 @@ print(outputs)
 
 ### Plot methods for `osmose` class
 
-```{r, fig.width=5.7, fig.height=4.75}
+```{r, fig.width=5.7, fig.height=4.75, warning=FALSE}
 plot(outputs, what = "biomass")
 plot(outputs, what = "biomass", type = 2)
 plot(outputs, what = "abundance", ts = FALSE, type = 1)
