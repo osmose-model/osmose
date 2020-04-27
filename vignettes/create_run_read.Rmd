@@ -45,18 +45,30 @@ install.packages("osmose")
 devtools::install_github("osmose-model/osmose")
 ```
 
-In order to set the location of the JAR and demo files, which will be automatically downloaded, you will need to set up the `OSMOSE_DIR` environment variable. 
-This is done by editing the `.Renviron` file, as shown [here](https://cran.r-project.org/web/packages/startup/vignettes/startup-intro.html). 
+Jar files will be automatically downloaded in a temporary directory. However in order to set its location you will need to set up the `OSMOSE_DIR` environment variable. This is done by editing the `.Renviron` file, as shown [here](https://cran.r-project.org/web/packages/startup/vignettes/startup-intro.html).
+
+Other way to edit the `.Renviron` file is by using the `usethis` package and the following code:
+
+```{r, eval=FALSE}
+# To open the .Renviron file
+usethis::edit_r_environ()
+
+# Then you should copy the directory where Jar files will be donwloaded. For example:
+OSMOSE_DIR = Copy/a/path/here  #Don't use quotation marks
+
+# Then save and close the .Renviron file
+```
 
 Note that in Linux/Mac OS X, the file
-must be put into the `${HOME}` directory, while in Windows, it must be in the user's `Documents` folder. Below is provided an example on `.Renviron` file for Linux/Mac Os X and Windows:
+must be put into the `${HOME}` directory, while in Windows, it must be in the user's `Documents` folder. Below is provided an example of `OSMOSE_DIR` for Linux/Mac Os X and Windows:
 
 - On Linux/Mac Os X : `OSMOSE_DIR=/Users/Nicolas/Desktop/OSMOSE_TEST/R`
 - On Windows: `OSMOSE_DIR=C:\\Users\\Nicolas\\Desktop\\OSMOSE_TEST\\R`
 
+If you set upped `OSMOSE_DIR` variable you can re-use the same directory to download the files related to the demostration of the package.
+
 ## About OSMOSE
 OSMOSE is a multispecies and Individual-based model (IBM) which focuses on fish species. This model assumes opportunistic predation based on spatial co-occurrence and size adequacy between a predator and its prey (size-based opportunistic predation). It represents fish individuals grouped into schools, which are characterized by their size, weight, age, taxonomy and geographical location (2D model), and which undergo major processes of fish life cycle (growth, explicit predation, natural and starvation mortalities, reproduction and migration) and a fishing mortality distinct for each species [@shin2001exploring; @shin2004using]. OSMOSE, uncoupled version, has been first applied to the Benguela upwelling ecosystem for which 12 fish species have been specified, from small pelagic fish to large demersal species [@shin2004using; @travers2006simulating]. The model needs basic parameters that are often available for a wide range of species, and which can be found in FishBase for instance.
-
 
 ## Main functions
 
@@ -67,6 +79,7 @@ OSMOSE is a multispecies and Individual-based model (IBM) which focuses on fish 
 
 ```{r, cache=TRUE}
 # Define a folder to copy files (for the example: a temporary folder)
+# Here you can also select the same directory than in OSMOSE_DIR 
 exampleFolder <- tempdir()
 
 cat(exampleFolder)
