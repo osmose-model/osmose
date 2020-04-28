@@ -45,7 +45,7 @@ install.packages("osmose")
 devtools::install_github("osmose-model/osmose")
 ```
 
-Jar files will be automatically downloaded in a temporary directory. However in order to set its location you will need to set up the `OSMOSE_DIR` environment variable. This is done by editing the `.Renviron` file, as shown [here](https://cran.r-project.org/package=startup/vignette/startup-intro.html).
+Jar files will be automatically downloaded in a temporary directory. However in order to set its location you will need to set up the `OSMOSE_DIR` environment variable. This is done by editing the `.Renviron` file, as shown [here](https://cran.r-project.org/package=startup).
 
 Other way to edit the `.Renviron` file is by using the `usethis` package and the following code:
 
