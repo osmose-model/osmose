@@ -1,5 +1,9 @@
 # version 3.3.4
 
+**round 2**
+
+Make URL for `startup` canonical
+
 **round 1** 
 
 No more use of the user cache dir, which is contrary to CRAN policies and prevents a built for Mac Os X. Instead, 
