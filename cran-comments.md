@@ -1,5 +1,9 @@
 # version 3.3.4
 
+**round 3**
+
+Remove reference to vignette, leave only package URL
+
 **round 2**
 
 Make URL for `startup` canonical
