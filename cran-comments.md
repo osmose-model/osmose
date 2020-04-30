@@ -1,3 +1,19 @@
+# version 3.3.4
+
+**round 3**
+
+Remove reference to vignette, leave only package URL
+
+**round 2**
+
+Make URL for `startup` canonical
+
+**round 1** 
+
+No more use of the user cache dir, which is contrary to CRAN policies and prevents a built for Mac Os X. Instead, 
+data are either downloaded on a temporary directory or in the one defined in the `OSMOSE_DIR` directory (set from
+`.Renviron` file.
+
 # version 3.3.3
 
 **round 5**
