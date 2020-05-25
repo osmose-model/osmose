@@ -45,8 +45,8 @@ public enum MortalityCause {
      */
     OUT(4),
     
-    /** Oxidation mortality (bioenergetic module) */
-    OXIDATIVE(5);
+    /** Foraging mortality (bioenergetic module) */
+    FORAGING(5);
     
     /**
      * Index of the mortality cause

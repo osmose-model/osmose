@@ -66,8 +66,8 @@ public class StochasticMortalityProcess extends AbstractProcess {
     /* barrier.n: bioenergetic starvation mortality */
     private BioenStarvationMortality starvationMortality;
 
-    /* PhV, bioenergetic oxidative mortality */
-    private OxidativeMortality oxidativeMortality;
+    /* PhV, bioenergetic foraging mortality */
+    private ForagingMortality foragingMortality;
 
     /**
      * The set of plankton swarms
@@ -146,9 +146,9 @@ public class StochasticMortalityProcess extends AbstractProcess {
             // starvation mortality
             starvationMortality = new BioenStarvationMortality(getRank());
             starvationMortality.init();
-            // oxidative mortality
-            oxidativeMortality = new OxidativeMortality(getRank());
-            oxidativeMortality.init();
+            // foraging mortality
+            foragingMortality = new ForagingMortality(getRank());
+            foragingMortality.init();
         }
 
     }
@@ -285,7 +285,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         Integer[] seqFish = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqNat = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqStarv = Arrays.copyOf(seqPred, ns + nBkg);
-        Integer[] seqOxy = Arrays.copyOf(seqPred, ns + nBkg);
+        Integer[] seqFor = Arrays.copyOf(seqPred, ns + nBkg);
         MortalityCause[] mortalityCauses = MortalityCause.values();
 
         // Initialisation of list of predators, which contains both
@@ -299,7 +299,7 @@ public class StochasticMortalityProcess extends AbstractProcess {
         shuffleArray(seqFish);
         shuffleArray(seqNat);
         shuffleArray(seqStarv);
-        shuffleArray(seqOxy);
+        shuffleArray(seqFor);
 
         boolean keepRecord = getSimulation().isPreyRecord();
         for (int i = 0; i < ns + nBkg; i++) {               // loop over all the school (focal and bkg) as predators.
@@ -310,17 +310,20 @@ public class StochasticMortalityProcess extends AbstractProcess {
                 switch (cause) {
 
                     // barrier.n: adding the 
-                    case OXIDATIVE:
-                        if ((seqOxy[i] >= ns) || (!getConfiguration().useBioen())) {
-                            // oxidative mortality for bion module and focal species only
+                    case FORAGING:
+                        if ((seqFor[i] >= ns) || (!getConfiguration().useBioen())) {
+                            // foraging mortality for bion module and focal species only
                             break;
                         }
-                        school = schools.get(seqOxy[i]);
-                        // oxidative mortality rate at current sub time step                      
-                        double Mo = oxidativeMortality.getRate(school) / subdt;
+                        school = schools.get(seqFor[i]);
+                        // foraging mortality rate at current sub time step                      
+                        double Mo = foragingMortality.getRate(school) / subdt;
+                        // during the egg stage, there is no foraging, and then no foraging mortality                     
+                        if (school.getAgeDt() > 0) {
                         if (Mo > 0.d) {
                             nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-Mo));
-                            school.incrementNdead(MortalityCause.OXIDATIVE, nDead);
+                            school.incrementNdead(MortalityCause.FORAGING, nDead);
+                        }
                         }
                         break;
                     case PREDATION:

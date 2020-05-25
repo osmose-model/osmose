@@ -13,22 +13,22 @@ import java.util.logging.Logger;
  *
  * @author pverley
  */
-public class OxidativeMortality extends AbstractMortality {
+public class ForagingMortality extends AbstractMortality {
 
-    private double[] k_dam;
+    private double[] k_for;
     private double[] I_max;
 
-    public OxidativeMortality(int rank) {
+    public ForagingMortality(int rank) {
         super(rank);
     }
 
     @Override
     public void init() {
         int nspec = this.getNSpecies();
-        k_dam = new double[nspec];
+        k_for = new double[nspec];
         I_max = new double[nspec];
         for (int i=0;i<nspec;i++){
-            k_dam[i] = getConfiguration().getDouble("bioen.damage.k_dam.sp" + i);
+            k_for[i] = getConfiguration().getDouble("bioen.forage.k_for.sp" + i);
             I_max[i] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
         }
     }
@@ -38,7 +38,7 @@ public class OxidativeMortality extends AbstractMortality {
 
         // This mortality increase with individual ingestion --> division by abundance
 
-//        return k_dam[school.getSpeciesIndex()]*school.getIngestion()*1000000 / school.getInstantaneousAbundance()/(Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
+//        return k_for[school.getSpeciesIndex()]*school.getIngestion()*1000000 / school.getInstantaneousAbundance()/(Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
         
         // calcul de la mortalité en lien avec Imax
         double output = 0 ;
@@ -46,12 +46,12 @@ public class OxidativeMortality extends AbstractMortality {
             String key = "imax";
         
             try {
-                output = school.getTrait(key) * this.k_dam[school.getSpeciesIndex()]/24;
+                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()]/24;
             } catch (Exception ex) {
-                Logger.getLogger(OxidativeMortality.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ForagingMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
         }else{
-            output =  I_max[school.getSpeciesIndex()] * this.k_dam[school.getSpeciesIndex()]/24;;
+            output =  I_max[school.getSpeciesIndex()] * this.k_for[school.getSpeciesIndex()]/24;;
         }
         if (output<0) {
             output = 0;

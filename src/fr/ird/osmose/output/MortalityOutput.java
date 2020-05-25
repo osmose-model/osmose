@@ -246,7 +246,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                 }
                 for (int i = 0; i < STAGES; i++) {
                     prw[iSpecies].print(separator);
-                    prw[iSpecies].print(quote("Moxy"));
+                    prw[iSpecies].print(quote("Mfor"));
                 }
                 prw[iSpecies].println();
                 for (MortalityCause cause : MortalityCause.values()) {
