@@ -122,7 +122,7 @@ public class TempFunction extends AbstractProcess {
         double temp = this.getTemp(school);
         int i = school.getSpeciesIndex();
 
-        return Math.exp(this.c_t[i] * (1 / (temp + 273.15) - 1 / this.Tr[i]));
+        return Math.exp(this.c_t[i] * (1 / this.Tr[i]  - 1 / (temp + 273.15)));
 
     }
 
