@@ -23,6 +23,7 @@ public class EnergyBudget extends AbstractProcess {
 
     private final TempFunction temp_function;
 
+    private final OxygenFunction oxygen_function;
     /**
      * Parameters for the kappa function.
      */
@@ -34,8 +35,13 @@ public class EnergyBudget extends AbstractProcess {
         super(rank);
         temp_function = new TempFunction(rank);
         temp_function.init();
+        
+
+        oxygen_function = new OxygenFunction(rank);
+        oxygen_function.init();
 
     }
+    
 
     @Override
     public void init() {
@@ -142,7 +148,7 @@ public class EnergyBudget extends AbstractProcess {
      * @return
      */
     public void get_egross(School school) {
-        school.setEGross(school.getIngestion() * temp_function.get_phiT(school));
+        school.setEGross(school.getIngestion() * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
         //System.out.println(school.getIngestion() + ", " + temp_function.get_phiT(school));
     }
 

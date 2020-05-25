@@ -17,8 +17,7 @@ import java.io.IOException;
 public class OxygenFunction extends AbstractProcess {
     
     /** Variables used to compute f02 function. */
-    private double [] o2_crit;
-    private double c1, c2;
+    private double []  c1, c2;
 
     PhysicalData o2_input;
     
@@ -36,21 +35,17 @@ public class OxygenFunction extends AbstractProcess {
     public void init() {
         String key;
         
-        // Initialisation of an array of O2 crit values (one
+        // Recovering the values of C1 and C2 used for fO2 function (one
         // per focal species)
-        o2_crit = new double[this.getNSpecies()];
+        c1 = new double[this.getNSpecies()];
+        c2 = new double[this.getNSpecies()];
         for(int i=0; i<this.getNSpecies(); i++) {
-            key = String.format("species.o2_crit.sp%d", i);
-            o2_crit[i] = getConfiguration().getDouble(key); 
-        }
-        
-        // Recovering the values of C1 and C2 used for fO2 function
-        key = "bioen.fo2.c1";
-        c1 = getConfiguration().getDouble(key);
-
-        key = "bioen.fo2.c2";
-        c2 = getConfiguration().getDouble(key);
-        
+            key = String.format("species.c1.sp%d", i);
+            c1[i] = getConfiguration().getDouble(key); 
+            
+            key = String.format("species.c2.sp%d", i);
+            c2[i] = getConfiguration().getDouble(key); 
+        }       
     }
 
     @Override
@@ -65,12 +60,10 @@ public class OxygenFunction extends AbstractProcess {
      */
     public double compute_fO2(School school) {
         
-        int k = school.getSpecies().getDepthLayer();
-        double spec_o2crit = o2_crit[school.getSpecies().getIndex()];
-        
+        int k = school.getSpecies().getDepthLayer();       
         // computation of the
         double o2 = o2_input.getValue(k, school.getCell());
-        double output = (o2 <= spec_o2crit) ? 0 : (c1 * (o2 - spec_o2crit) / ((o2 - spec_o2crit) + c2));
+        double output = c1[school.getSpecies().getIndex()] * o2/ (o2 + c2[school.getSpecies().getIndex()]);
         
         return output;
     }   

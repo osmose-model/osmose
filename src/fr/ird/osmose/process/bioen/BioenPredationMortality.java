@@ -147,9 +147,6 @@ public class BioenPredationMortality extends PredationMortality {
             // this is the maximum biomass that the predator can ingest.
             // to be modified to fit equation (1).
             // max = predation rate * biomass^beta 
-            double fo2 = (predator instanceof School) ? this.bioen_ingest.compute_fO2((School) predator) : 1;
-            // barrier.n: @@@@@@@@@@@@@@@@@@@@@@@ fo2 is at this time undefined for bkg species. to see how this can be done later on.
-            
             // maximum biomass that a single fish can eat during the time step subdt
             // barrier.n: weight is converted into g here
             // this is the (Imax * w^beta) variable 
@@ -178,7 +175,7 @@ public class BioenPredationMortality extends PredationMortality {
                 for (int i = 0; i < preys.size(); i++) {
                     // ratio of prey i (among available preys) preyed upon by predator
                     double ratio = accessibleBiomass[i] / biomAccessibleTot;
-                    preyUpon[i] = ratio * biomassToPredate * fo2;
+                    preyUpon[i] = ratio * biomassToPredate;
                     cumPreyUpon += preyUpon[i];   // biomass in ton.
                 }
                 // Increments the total ingestion of preys within the system
