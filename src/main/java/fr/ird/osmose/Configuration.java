@@ -1373,4 +1373,34 @@ public class Configuration extends OLogger {
         return this.rscIndex[i];
     }
 
+    /**
+     * Returns the index of the focal species.
+     *
+     * @param i Index of the focal species
+     * @return The species index of the ith focal species.
+     */
+    public int[] getFocalIndex() {
+        return this.focalIndex;
+    }
+
+    /**
+     * Returns the index of the background species.
+     *
+     * @param i Index of the background species
+     * @return The species index of the ith background species.
+     */
+    public int[] getBkgIndex() {
+        return this.bkgIndex;
+    }
+
+    /**
+     * Returns the index of the resource species.
+     *
+     * @param i Index of the resource species
+     * @return The species index of the ith resource species.
+     */
+    public int[] getRscIndex() {
+        return this.rscIndex;
+    }
+
 }
