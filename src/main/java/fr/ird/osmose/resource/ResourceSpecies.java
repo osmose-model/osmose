@@ -63,13 +63,13 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * Resources are therefore the forcing of the model. A resource species is
  * defined by :
  * <ul>
- * <li>a trophic level, parameter <i>resource.TL.rsc#</i></li>
- * <li>a size min and max, parameters <i>resource.size.min.rsc#</i> and
- * <i>resource.size.max.rsc#</i></li>
+ * <li>a trophic level, parameter <i>species.TL.sp#</i></li>
+ * <li>a size min and max, parameters <i>species.size.min.sp#</i> and
+ * <i>species.size.max.sp#</i></li>
  * <li>a conversion factor to wet weight [ton/km2], parameter
- * <i>resource.conversion2tons.rsc#</i></li>
+ * <i>species.conversion2tons.sp#</i></li>
  * <li>an accessibility coefficient, the percent of resource available to the
- * fish, parameter <i>resource.accessibility2fish.rsc</i></li>
+ * fish, parameter <i>species.accessibility2fish.sp</i></li>
  * </ul>
  *
  * @author P.Verley (philippe.verley@ird.fr)
@@ -85,23 +85,23 @@ public class ResourceSpecies {
      */
     private final int index;
     /**
-     * Trophic level of the resource group. Parameter <i>resource.TL.rsc#</i>
+     * Trophic level of the resource group. Parameter <i>species.TL.sp#</i>
      */
     private final float trophicLevel;
     /**
      * Size range, in centimeter, of the resource group. Parameters
-     * <i>resource.size.min.rsc#</i> and
-     * <i>resource.size.max.rsc#</i>
+     * <i>species.size.min.sp#</i> and
+     * <i>species.size.max.sp#</i>
      */
     private final double sizeMin, sizeMax;
     /**
      * Name of the resource group. (e.g. phytoplankton, diatoms, copepods).
-     * Parameter <i>resource.name.rsc#</i>
+     * Parameter <i>species.name.sp#</i>
      */
     private final String name;
     /**
      * Fraction of the resource biomass available to the fish, ranging [0, 1].
-     * Parameter <i>resource.accessibility2fish.rsc#</i>
+     * Parameter <i>species.accessibility2fish.sp#</i>
      */
     private final double[] accessibilityCoeff;
     /**
@@ -125,16 +125,16 @@ public class ResourceSpecies {
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
         // Initialisation of parameters
-        name = cfg.getString("resource.name.rsc" + index);
-        sizeMin = cfg.getDouble("resource.size.min.rsc" + index);
-        sizeMax = cfg.getDouble("resource.size.max.rsc" + index);
-        trophicLevel = cfg.getFloat("resource.tl.rsc" + index);
-        if (!cfg.isNull("resource.accessibility2fish.file.rsc" + index)) {
+        name = cfg.getString("species.name.sp" + index);
+        sizeMin = cfg.getDouble("species.size.min.sp" + index);
+        sizeMax = cfg.getDouble("species.size.max.sp" + index);
+        trophicLevel = cfg.getFloat("species.tl.sp" + index);
+        if (!cfg.isNull("species.accessibility2fish.file.sp" + index)) {
             SingleTimeSeries ts = new SingleTimeSeries();
-            ts.read(cfg.getFile("resource.accessibility2fish.file.rsc" + index));
+            ts.read(cfg.getFile("species.accessibility2fish.file.sp" + index));
             accessibilityCoeff = ts.getValues();
         } else {
-            double accessibility = cfg.getDouble("resource.accessibility2fish.rsc" + index);
+            double accessibility = cfg.getDouble("species.accessibility2fish.sp" + index);
             accessibilityCoeff = new double[cfg.getNStep()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
@@ -171,7 +171,7 @@ public class ResourceSpecies {
 
     /**
      * Returns the maximal size of the organisms in the resource group.
-     * Parameter <i>resource.size.max.rsc#</i>
+     * Parameter <i>species.size.max.sp#</i>
      *
      * @return the maximal size, in centimeter, of the organisms in the resource
      * group
@@ -182,7 +182,7 @@ public class ResourceSpecies {
 
     /**
      * Returns the minimal size of the organisms in the resource group.
-     * Parameter <i>resource.size.min.rsc#</i>
+     * Parameter <i>species.size.min.sp#</i>
      *
      * @return the minimal size, in centimeter, of the organisms in the resource
      * group
@@ -193,7 +193,7 @@ public class ResourceSpecies {
 
     /**
      * Returns the name of the resource group. Parameter
-     * <i>resource.name.rsc#</i>
+     * <i>species.name.sp#</i>
      *
      * @return the name of the resource group
      */
@@ -223,7 +223,7 @@ public class ResourceSpecies {
 
     /**
      * Returns the averaged trophic level of the resource group. Parameter
-     * <i>resource.TL.rsc#</i>
+     * <i>species.TL.sp#</i>
      *
      * @return the averaged trophic level of the resource group
      */

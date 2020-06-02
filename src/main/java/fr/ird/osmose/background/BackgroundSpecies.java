@@ -109,16 +109,16 @@ public class BackgroundSpecies extends OsmoseLinker {
         this.index = index;
 
         // Initialization of parameters
-        name = cfg.getString("species.name.bkg" + index);
+        name = cfg.getString("species.name.sp" + index);
 
         // Reads allometric variables to obtain weight from size
-        c = cfg.getFloat("species.length2weight.condition.factor.bkg" + index);
-        bPower = cfg.getFloat("species.length2weight.allometric.power.bkg" + index);
+        c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
+        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
         
-        //trophicLevel = cfg.getFloat("species.trophiclevel.bkg" + index);
-        trophicLevel = cfg.getFloat("species.trophiclevel.bkg" + index);
+        //trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
+        trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
         
-        length = cfg.getFloat("species.length.bkg" + index);
+        length = cfg.getFloat("species.length.sp" + index);
         
     }
 

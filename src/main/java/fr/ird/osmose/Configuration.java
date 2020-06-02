@@ -67,6 +67,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +76,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import ucar.ma2.InvalidRangeException;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * This class handles the Osmose configuration. It knows how to read Osmose
@@ -379,21 +381,37 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: new way to count the number of species, resource and background based on types.
-        nSpecies = (int) this.findKeys("species.name.sp*").stream().count();
-        nResource = (int) this.findKeys("resource.name.rsc*").stream().count();
-        nBackground = (int) this.findKeys("species.name.bkg*").stream().count();
+        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((k) -> (getString(k).equals("focal"))).count();
+        nResource = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("resource")).count();
+        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("background")).count();
 
         // Extract the species indexes for the the 
-        this.focalIndex = this.findKeys("species.name.sp*").stream()
+        this.focalIndex = this.findKeys("species.type.sp*").stream()
+                .filter(k -> getString(k).equals("focal"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
-        this.bkgIndex = this.findKeys("species.name.bkg*").stream()
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".bkg") + 4))).toArray();
-        this.rscIndex = this.findKeys("resource.name.rsc*").stream()
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rsc") + 4))).toArray();
 
-        nSpecies = getInt("simulation.nspecies");
-        nResource = getInt("simulation.nresource");
+        this.bkgIndex = this.findKeys("species.type.sp*").stream()
+                .filter(k -> getString(k).equals("background"))
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
+
+        this.rscIndex = this.findKeys("species.type.sp*").stream()
+                .filter(k -> getString(k).equals("resource"))
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
+
+        int nSpecies_test = getInt("simulation.nspecies");
+        if (nSpecies_test != nSpecies) {
+            String errorMsg = String.format("Focal species may be badly defined. simulation.species=%d, number of focal types=%d", nSpecies_test, nSpecies);
+            error(errorMsg, null);
+        }
+
+        int nResource_test = getInt("simulation.nresource");
+        if (nResource_test != nResource) {
+            String errorMsg = String.format("Resource species may be badly defined. simulation.nresource=%d, number of resource types=%d", nResource_test, nSpecies);
+            error(errorMsg, null);
+        }
+
         nSimulation = getInt("simulation.nsimulation");
+
         nStepYear = getInt("simulation.time.ndtperyear");
         // PhV 20160203, new parameter simulation.time.nstep
         if (canFind("simulation.time.nstep")) {
@@ -402,6 +420,7 @@ public class Configuration extends OLogger {
             // if simulation.time.nstep not defined, use old parameter simulation.time.nyear
             nStep = nStepYear * getInt("simulation.time.nyear");
         }
+
         nSchool = new int[nSpecies];
         if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
             for (int i = 0; i < nSpecies; i++) {
@@ -444,9 +463,14 @@ public class Configuration extends OLogger {
 
         // barrier.n: add number of background species
         key = "simulation.nbackground";
-        nBackground = 0;
+        int nBackground_test = 0;
         if (canFind(key)) {
-            nBackground = getInt(key);
+            nBackground_test = getInt(key);
+        }
+
+        if (nBackground_test != nBackground) {
+            String errorMsg = String.format("Background species may be badly defined. simulation.nbackground=%d, number of background types=%d", nBackground_test, nBackground);
+            error(errorMsg, null);
         }
 
         // Initialisation of the Background array.
@@ -457,6 +481,8 @@ public class Configuration extends OLogger {
                 error("Background species name must contain alphanumeric characters only. Please rename " + bkgSpecies.get(p).getName(), null);
             }
         }
+
+        System.exit(0);
 
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
@@ -646,9 +672,13 @@ public class Configuration extends OLogger {
                     Parameter entry = new Parameter(iline, filename);
                     entry.parse(line);
                     if (parameters.containsKey(entry.key)) {
-                        warning("{0}Osmose will ignore parameter {1}", new Object[]{space, entry});
-                        warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
-
+                        if (entry.key.contains("species.name") || entry.key.contains("species.type")) {
+                            String errorMsg = String.format("%s has already been defined.", entry.key);
+                            error(errorMsg, null);
+                        } else {
+                            warning("{0}Osmose will ignore parameter {1}", new Object[]{space, entry});
+                            warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
+                        }  // end of test on parameter name
                     } else {
                         parameters.put(entry.key, entry);
                         debug(space + entry.toString());
