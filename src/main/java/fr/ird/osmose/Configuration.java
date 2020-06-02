@@ -482,8 +482,6 @@ public class Configuration extends OLogger {
             }
         }
 
-        System.exit(0);
-
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
         nFishery = fisheryEnabled ? findKeys("fisheries.name.fsh*").size() : 0;
