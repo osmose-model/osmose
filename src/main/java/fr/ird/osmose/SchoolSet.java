@@ -143,7 +143,7 @@ public class SchoolSet extends OsmoseLinker {
                 it.remove();
             }
         }
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+        for (int i : getConfiguration().getFocalIndex()) {
             hasSpeciesChanged.put(i, true);
         }
     }
