@@ -99,15 +99,15 @@ public class SchoolSet extends OsmoseLinker {
      * Array of boolean that indicates whether the list of schools per species
      * has changed.
      */
-    private final boolean[] hasSpeciesChanged;
+    private final HashMap<Integer, Boolean> hasSpeciesChanged;
 
     SchoolSet() {
         schoolset = new FilteredSet();
         schoolBySpecies = new HashMap();
         schoolByCell = new HashMap();
-        hasSpeciesChanged = new boolean[getConfiguration().getNSpecies()];
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            hasSpeciesChanged[i] = true;
+        hasSpeciesChanged = new HashMap();
+        for (int i : getConfiguration().getFocalIndex()) {
+            hasSpeciesChanged.put(i, true);
         }
     }
 
@@ -144,7 +144,7 @@ public class SchoolSet extends OsmoseLinker {
             }
         }
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
-            hasSpeciesChanged[i] = true;
+            hasSpeciesChanged.put(i, true);
         }
     }
 
@@ -166,9 +166,9 @@ public class SchoolSet extends OsmoseLinker {
      * @return a list of schools of this {@code species}
      */
     public List<School> getSchools(Species species, boolean update) {
-        if (update || hasSpeciesChanged[species.getIndex()]) {
+        if (update || hasSpeciesChanged.get(species.getIndex())) {
             schoolBySpecies.put(species.getIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()}));
-            hasSpeciesChanged[species.getIndex()] = false;
+            hasSpeciesChanged.put(species.getIndex(), false);
         }
         return schoolBySpecies.get(species.getIndex());
     }
@@ -192,9 +192,9 @@ public class SchoolSet extends OsmoseLinker {
      * @return a list of schools of this {@code species}
      */
     public List<School> getSchoolsAll(Species species, boolean update) {
-        if (update || hasSpeciesChanged[species.getIndex()]) {
+        if (update || hasSpeciesChanged.get(species.getIndex())) {
             schoolBySpecies.put(species.getIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getIndex())}));
-            hasSpeciesChanged[species.getIndex()] = false;
+            hasSpeciesChanged.put(species.getIndex(), false);
         }
         return schoolBySpecies.get(species.getIndex());
     }
