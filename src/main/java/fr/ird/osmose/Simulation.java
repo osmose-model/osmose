@@ -59,6 +59,7 @@ import fr.ird.osmose.resource.ResourceForcing;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import ucar.nc2.NetcdfFile;
@@ -286,30 +287,20 @@ public class Simulation extends OsmoseLinker {
         resourceForcing = new HashMap();
         
         // Init resources for background species
-        this.getConfiguration().findKeys("species.name.bkg*").stream()
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".bkg") + 4)))
-                .forEach(i -> {
-                    ResourceForcing resForcing = new ResourceForcing(i);
-                    resForcing.init();
-                    resourceForcing.put(i, resForcing);
-                    // Name must contain only alphanumerical characters
-                });
+        Arrays.stream(this.getConfiguration().getBkgIndex()).forEach(i -> {
+            ResourceForcing resForcing = new ResourceForcing(i);
+            resForcing.init();
+            resourceForcing.put(i, resForcing);
+            // Name must contain only alphanumerical characters
+        });
 
-        this.getConfiguration().findKeys("resource.name.rsc*").stream()
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rsc") + 4)))
-                .forEach(i -> {
-                    ResourceForcing resForcing = new ResourceForcing(i);
-                    resForcing.init();
-                    resourceForcing.put(i, resForcing);
-                    // Name must contain only alphanumerical characters
-                });
+        Arrays.stream(this.getConfiguration().getRscIndex()).forEach(i -> {
+            ResourceForcing resForcing = new ResourceForcing(i);
+            resForcing.init();
+            resourceForcing.put(i, resForcing);
+            // Name must contain only alphanumerical characters
+        });
 
-//        int nRsc = getConfiguration().getNRscSpecies();
-//        resourceForcing = new ResourceForcing[nRsc];
-//        for (int iRsc = 0; iRsc < nRsc; iRsc++) {
-//            resourceForcing[iRsc] = new ResourceForcing(iRsc);
-//            resourceForcing[iRsc].init();
-//        }
     }
 
     /**

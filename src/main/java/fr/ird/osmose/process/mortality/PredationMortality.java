@@ -56,6 +56,7 @@ import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.stage.PredPreyStage;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -67,11 +68,11 @@ public class PredationMortality extends AbstractMortality {
     /**
      * Predator/prey size ratio
      */
-    private double[][] predPreySizesMax, predPreySizesMin;
+    private HashMap<Integer, double[]> predPreySizesMax, predPreySizesMin;
     /**
      * Maximum ingestion rate
      */
-    private double[] predationRate;
+    private HashMap<Integer, Double> predationRate;
    
     /*
      * Feeding stages
@@ -93,24 +94,15 @@ public class PredationMortality extends AbstractMortality {
         int nsp = getNSpecies();
         int nrsc = getConfiguration().getNRscSpecies();
         int nbkg = getConfiguration().getNBkgSpecies();
-        predPreySizesMax = new double[nsp + nbkg][];
-        predPreySizesMin = new double[nsp + nbkg][];
-        predationRate = new double[nsp + nbkg];
+        predPreySizesMax = new HashMap();
+        predPreySizesMin = new HashMap();
+        predationRate = new HashMap();
 
-        for (int i = 0; i < nsp; i++) {
-            predPreySizesMax[i] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + i);
-            predPreySizesMin[i] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.sp" + i);
+        for (int i : getConfiguration().getFishIndex()) {
+            predPreySizesMax.put(i, getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + i));
+            predPreySizesMin.put(i, getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.sp" + i));
             if (!getConfiguration().isBioenEnabled()) {
-                predationRate[i] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i);
-            }
-        }
-
-        // Recovering predation parameters for background species
-        for (int i = 0; i < nbkg; i++) {
-            predPreySizesMax[i + nsp] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.bkg" + i);
-            predPreySizesMin[i + nsp] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.bkg" + i);
-            if (!getConfiguration().isBioenEnabled()) {
-                predationRate[i + nsp] = getConfiguration().getDouble("predation.ingestion.rate.max.bkg" + i);
+                predationRate.put(i, getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i));
             }
         }
                        
@@ -205,8 +197,8 @@ public class PredationMortality extends AbstractMortality {
         double[] percentResource = new double[getConfiguration().getNRscSpecies()];
         int iPred = predator.getSpeciesIndex();
         int iStage = predPreyStage.getStage(predator);
-        double preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
-        double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
+        double preySizeMax = predator.getLength() / predPreySizesMax.get(iPred)[iStage];
+        double preySizeMin = predator.getLength() / predPreySizesMin.get(iPred)[iStage];
         for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
             if ((preySizeMin > getConfiguration().getResourceSpecies(i).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(i).getSizeMin())) {
                 percentResource[i] = 0.0d;
@@ -227,7 +219,7 @@ public class PredationMortality extends AbstractMortality {
         if(getConfiguration().isBioenEnabled()) {
             error("The getMaxPredationRate method of PredationMortality not suitable in Osmose-PHYSIO", new Exception());
         }
-        return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
+        return predationRate.get(predator.getSpeciesIndex()) / getConfiguration().getNStepYear();
     }
 
     /**
@@ -247,8 +239,8 @@ public class PredationMortality extends AbstractMortality {
         double[] accessibility = new double[preys.size()];
         int iSpecPred = predator.getSpeciesIndex();
         int iPredPreyStage = predPreyStage.getStage(predator);
-        double preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
-        double preySizeMin = predator.getLength() / predPreySizesMin[iSpecPred][iPredPreyStage];
+        double preySizeMax = predator.getLength() / predPreySizesMax.get(iSpecPred)[iPredPreyStage];
+        double preySizeMin = predator.getLength() / predPreySizesMin.get(iSpecPred)[iPredPreyStage];
         double[] percentResource = getPercentResource(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {

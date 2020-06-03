@@ -95,7 +95,7 @@ public class ResourceForcing extends OsmoseLinker {
 
     /**
      * The constant biomass, in tonne, in a cell of the model. Parameter
-     * 'resource.biomass.total.rsc#' provides the total biomass of a given
+     * 'species.biomass.total.sp#' provides the total biomass of a given
      * resource group in the system for every time step. This feature allows to
      * consider a resource group with a constant biomass uniformly distributed
      * over the grid of the model and over time. This feature has been added as
@@ -107,7 +107,7 @@ public class ResourceForcing extends OsmoseLinker {
     private double uBiomass;
 
     /**
-     * Multiplier of the resource biomass. Parameter 'resource.multiplier.rsc#'
+     * Multiplier of the resource biomass. Parameter 'species.multiplier.sp#'
      * for virtually increasing or decreasing resource biomass.
      */
     private double multiplier;
@@ -132,18 +132,18 @@ public class ResourceForcing extends OsmoseLinker {
      */
     public void init() {
 
-        if (!getConfiguration().isNull("resource.biomass.total.rsc" + index)) {
+        if (!getConfiguration().isNull("species.biomass.total.sp" + index)) {
             // uniform biomass
-            uBiomass = getConfiguration().getDouble("resource.biomass.total.rsc" + index) / getGrid().getNOceanCell();
+            uBiomass = getConfiguration().getDouble("species.biomass.total.sp" + index) / getGrid().getNOceanCell();
 
-        } else if (!getConfiguration().isNull("resource.file.rsc" + index)) {
+        } else if (!getConfiguration().isNull("species.file.sp" + index)) {
             // biomass provided from NetCDF file
             // set negative value to uniform biomass
             uBiomass = -1.d;
 
             // check resource is properly defined in the NetCDF file
-            String name = getConfiguration().getString("resource.name.rsc" + index);
-            String ncFile = getConfiguration().getFile("resource.file.rsc" + index);
+            String name = getConfiguration().getString("species.name.sp" + index);
+            String ncFile = getConfiguration().getFile("species.file.sp" + index);
 
             if (!new File(ncFile).exists()) {
                 error("Error reading forcing parameters for resource group " + index, new FileNotFoundException("NetCDF file " + ncFile + " does not exist."));
@@ -166,12 +166,12 @@ public class ResourceForcing extends OsmoseLinker {
             }
 
             // user-defined caching mode
-            if (!getConfiguration().isNull("resource.file.caching.rsc" + index)) {
-                caching = ResourceCaching.valueOf(getConfiguration().getString("resource.file.caching.rsc" + index).toUpperCase());
+            if (!getConfiguration().isNull("species.file.caching.sp" + index)) {
+                caching = ResourceCaching.valueOf(getConfiguration().getString("species.file.caching.sp" + index).toUpperCase());
             }
 
         } else {
-            error("No input file is provided for resource " + getConfiguration().getString("resource.name.rsc" + index), new IOException("Cannot initialize resource group " + index));
+            error("No input file is provided for resource " + getConfiguration().getString("species.name.sp" + index), new IOException("Cannot initialize resource group " + index));
         }
 
         // prevent irrelevant caching mode : incremental caching requested but 
@@ -186,9 +186,9 @@ public class ResourceForcing extends OsmoseLinker {
         }
 
         // biomass multiplier
-        if (!getConfiguration().isNull("resource.multiplier.rsc" + index)) {
-            multiplier = getConfiguration().getFloat("resource.multiplier.rsc" + index);
-            warning("Resource biomass for resource group " + index + " will be multiplied by " + multiplier + " accordingly to parameter " + getConfiguration().printParameter("resource.multiplier.rsc" + index));
+        if (!getConfiguration().isNull("species.multiplier.sp" + index)) {
+            multiplier = getConfiguration().getFloat("species.multiplier.sp" + index);
+            warning("Resource biomass for resource group " + index + " will be multiplied by " + multiplier + " accordingly to parameter " + getConfiguration().printParameter("species.multiplier.sp" + index));
         } else {
             multiplier = 1.d;
         }
@@ -249,8 +249,8 @@ public class ResourceForcing extends OsmoseLinker {
 
         double[][] rscbiomass = new double[ny][nx];
 
-        String name = getConfiguration().getString("resource.name.rsc" + index);
-        String ncFile = getConfiguration().getFile("resource.file.rsc" + index);
+        String name = getConfiguration().getString("species.name.sp" + index);
+        String ncFile = getConfiguration().getFile("species.file.sp" + index);
         try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
             Variable variable = nc.findVariable(name);
             Array ncbiomass = variable.read(new int[]{iStepNc, 0, 0}, new int[]{1, ny, nx}).reduce();

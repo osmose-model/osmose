@@ -1402,5 +1402,19 @@ public class Configuration extends OLogger {
     public int[] getRscIndex() {
         return this.rscIndex;
     }
+    
+    /** Recovers the indexes of the species that can be fished. 
+     *
+     * Returns the concatenated array of focal and background species indexes.
+     * 
+     * @return 
+     */
+    public int[] getFishIndex() {
+        return(ArrayUtils.addAll(this.focalIndex, this.bkgIndex));
+    }
+    
+    public int[] getAllIndex() {
+        return (ArrayUtils.addAll(ArrayUtils.addAll(this.focalIndex, this.bkgIndex), this.rscIndex));
+    }
 
 }
