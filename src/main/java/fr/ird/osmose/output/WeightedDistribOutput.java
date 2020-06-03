@@ -52,6 +52,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.output.distribution.AbstractDistribution;
+import java.util.HashMap;
 
 /**
  *
@@ -60,7 +61,8 @@ import fr.ird.osmose.output.distribution.AbstractDistribution;
 public class WeightedDistribOutput extends DistribOutput {
 
     // Denumerator distributed by species and by class
-    private double[][][] denominator;
+    private HashMap<Integer, double[][]> denominator;
+    
     // school variable getter
     private final SchoolVariableGetter weight;
 
@@ -83,8 +85,8 @@ public class WeightedDistribOutput extends DistribOutput {
                 int irg = 0;
                 for (AbstractOutputRegion region : getOutputRegions()) {
                     if (region.contains(timeStep, school)) {
-                        values[irg][school.getSpeciesIndex()][getClass(school)] += wvar;
-                        denominator[irg][iSpec][classSchool] += w;
+                        values.get(iSpec)[irg][getClass(school)] += wvar;
+                        denominator.get(iSpec)[irg][classSchool] += w;
                     }
                     irg++;
                 }
@@ -95,7 +97,10 @@ public class WeightedDistribOutput extends DistribOutput {
     @Override
     public void reset() {
         super.reset();
-        denominator = new double[getNOutputRegion()][getNSpecies()][getNClass()];
+        denominator.clear();
+        for (int i : getConfiguration().getFocalIndex()) {
+            denominator.put(i, new double[getNOutputRegion()][getNClass()]);
+        }
     }
 
     @Override
@@ -105,12 +110,13 @@ public class WeightedDistribOutput extends DistribOutput {
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
             double[][] array = new double[nClass][getNSpecies() + 1];
             for (int iClass = 0; iClass < nClass; iClass++) {
-                array[iClass][0] = getClassThreshold(iClass);
-                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                    if (denominator[irg][iSpec][iClass] != 0) {
-                        array[iClass][iSpec + 1] = values[irg][iSpec][iClass] / denominator[irg][iSpec][iClass];
+                int cpt = 0;
+                array[iClass][cpt++] = getClassThreshold(iClass);
+                for (int iSpec : getConfiguration().getFocalIndex()) {
+                    if (denominator.get(iSpec)[irg][iClass] != 0) {
+                        array[iClass][cpt++] = values.get(iSpec)[irg][iClass] / denominator.get(iSpec)[irg][iClass];
                     } else {
-                        array[iClass][iSpec + 1] = Double.NaN;
+                        array[iClass][cpt++] = Double.NaN;
                     }
                 }
             }

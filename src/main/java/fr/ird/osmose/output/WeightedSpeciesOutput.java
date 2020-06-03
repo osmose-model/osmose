@@ -52,6 +52,7 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import java.util.HashMap;
 import java.util.function.Predicate;
 
 /**
@@ -59,9 +60,10 @@ import java.util.function.Predicate;
  * @author pverley
  */
 public class WeightedSpeciesOutput extends AbstractOutput {
-
-    protected double[][] numerator;
-    protected double[][] denumerator;
+    
+    protected HashMap<Integer, double[]> numerator;
+    protected HashMap<Integer, double[]> denumerator;
+    
     private final String description;
     private final Predicate<School> predicate;
     private final SchoolVariableGetter variable;
@@ -91,9 +93,12 @@ public class WeightedSpeciesOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        numerator = new double[getNOutputRegion()][getNSpecies()];
-        denumerator = new double[getNOutputRegion()][getNSpecies()];
-
+        numerator.clear();
+        denumerator.clear();
+        for (int i : getConfiguration().getFocalIndex()) { 
+            numerator.put(i, new double[getNOutputRegion()]);
+            numerator.put(i, new double[getNOutputRegion()]);
+        }
     }
 
     @Override
@@ -106,10 +111,11 @@ public class WeightedSpeciesOutput extends AbstractOutput {
                     double w = weight.getVariable(school);
                     double wvar = variable.getVariable(school) * w;
                     int irg = 0;
+                    int iSpec = school.getSpeciesIndex();
                     for (AbstractOutputRegion region : getOutputRegions()) {
                         if (region.contains(timeStep, school)) {
-                            numerator[irg][school.getSpeciesIndex()] += wvar;
-                            denumerator[irg][school.getSpeciesIndex()] += w;
+                            numerator.get(iSpec)[irg] += wvar;
+                            denumerator.get(iSpec)[irg] += w;
                         }
                         irg++;
                     }
@@ -121,10 +127,12 @@ public class WeightedSpeciesOutput extends AbstractOutput {
 
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
             double[] result = new double[getNSpecies()];
-            for (int isp = 0; isp < numerator.length; isp++) {
-                result[isp] = (0 != denumerator[irg][isp])
-                        ? numerator[irg][isp] / denumerator[irg][isp]
+            int cpt = 0;
+            for (int isp : getConfiguration().getFocalIndex()) {
+                result[cpt] = (0 != denumerator.get(isp)[irg])
+                        ? numerator.get(isp)[irg] / denumerator.get(isp)[irg]
                         : Double.NaN;
+                cpt++;
             }
             writeVariable(irg, time, result);
         }

@@ -164,7 +164,8 @@ public class ReproductionProcess extends AbstractProcess {
             int i = school.getSpeciesIndex();
             // increment spawning stock biomass
             if (reproduce.get(i) && school.getSpecies().isSexuallyMature(school)) {
-                SSB.put(i, SSB.get(i) + school.getInstantaneousBiomass());
+                double value = (SSB.get(i) == null) ? school.getInstantaneousBiomass() : SSB.get(i) + school.getInstantaneousBiomass();
+                SSB.put(i, value);
             }
             // increment age
             school.incrementAge();

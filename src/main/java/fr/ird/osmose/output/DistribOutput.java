@@ -55,6 +55,7 @@ import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
+import java.util.HashMap;
 
 /**
  *
@@ -63,7 +64,8 @@ import fr.ird.osmose.output.distribution.DistributionType;
 public class DistribOutput extends AbstractOutput {
 
     // Output values distributed by species and by class
-    double[][][] values;
+    HashMap<Integer, double[][]> values = new HashMap();
+    
     // Distribution 
     private final AbstractDistribution distrib;
     // school variable getter
@@ -88,7 +90,10 @@ public class DistribOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        values = new double[getNOutputRegion()][getNSpecies()][distrib.getNClass()];
+        values.clear();
+        for(int i : getConfiguration().getFocalIndex()) { 
+            values.put(i, new double[getNOutputRegion()][distrib.getNClass()]);
+        }
     }
 
     @Override
@@ -102,7 +107,7 @@ public class DistribOutput extends AbstractOutput {
                 for (AbstractOutputRegion region : getOutputRegions()) {
                     if (region.contains(timeStep, school)) {
                         double sel = region.getSelectivity(timeStep, school);
-                        values[irg][school.getSpeciesIndex()][getClass(school)] += sel * var;
+                        values.get(school.getSpeciesIndex())[irg][getClass(school)] += sel * var;
                     }
                     irg++;
                 }
@@ -136,9 +141,10 @@ public class DistribOutput extends AbstractOutput {
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
             double[][] array = new double[nClass][getNSpecies() + 1];
             for (int iClass = 0; iClass < nClass; iClass++) {
-                array[iClass][0] = distrib.getThreshold(iClass);
-                for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                    array[iClass][iSpec + 1] = values[irg][iSpec][iClass] / nsteps;
+                int cpt = 0;
+                array[iClass][cpt++] = distrib.getThreshold(iClass);
+                for (int iSpec : getConfiguration().getFocalIndex()) {
+                    array[iClass][cpt++] = values.get(iSpec)[irg][iClass] / nsteps;
                 }
             }
             writeVariable(irg, time, array);
@@ -148,9 +154,10 @@ public class DistribOutput extends AbstractOutput {
     @Override
     String[] getHeaders() {
         String[] headers = new String[getNSpecies() + 1];
-        headers[0] = distrib.getType().toString();
-        for (int i = 0; i < getNSpecies(); i++) {
-            headers[i + 1] = getSpecies(i).getName();
+        int cpt = 0;
+        headers[cpt++] = distrib.getType().toString();
+        for (int i : getConfiguration().getFocalIndex()) {
+            headers[cpt++] = getSpecies(i).getName();
         }
         return headers;
     }
