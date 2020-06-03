@@ -51,13 +51,15 @@
  */
 package fr.ird.osmose.output;
 
+import java.util.HashMap;
+
 /**
  *
  * @author nbarrier
  */
 public class SpeciesOutput extends AbstractOutput {
 
-    protected double[][] value;
+    protected HashMap<Integer, double[]> value = new HashMap();
     private final String description;
     private final SchoolVariableGetter schoolVariable;
     public final boolean computeAverage;
@@ -83,7 +85,10 @@ public class SpeciesOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        value = new double[getNOutputRegion()][getNSpecies()];
+        value.clear();
+        for (int i : this.getConfiguration().getFocalIndex()) {
+            value.put(i, new double[getNOutputRegion()]);
+        }
     }
 
     @Override
@@ -95,7 +100,7 @@ public class SpeciesOutput extends AbstractOutput {
                     for (AbstractOutputRegion region : getOutputRegions()) {
                         if (region.contains(timeStep, school)) {
                             double select = region.getSelectivity(timeStep, school);
-                            value[irg][school.getSpeciesIndex()] += select * schoolVariable.getVariable(school);
+                            value.get(school.getSpeciesIndex())[irg] += select * schoolVariable.getVariable(school);
                         }
                         irg++;
                     }
@@ -106,23 +111,31 @@ public class SpeciesOutput extends AbstractOutput {
     public void write(float time) {
 
         double nsteps = getRecordFrequency();
+        
+        // Loop over the output regions 
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
-            if (this.computeAverage) {
-                // If the average should be computed, then divides by the number
-                // of time steps.
-                for (int isp = 0; isp < value.length; isp++) {
-                    value[irg][isp] /= nsteps;
+            int cpt = 0;
+            double[] output = new double[this.getNSpecies()];
+            cpt = 0;
+            for (int i : getConfiguration().getFocalIndex()) {
+                output[cpt] = value.get(i)[irg];
+                if (this.computeAverage) {
+                    // If the average should be computed, then divides by the number
+                    // of time steps.
+                    output[cpt] /= nsteps;
                 }
+                cpt += 1;
             }
-            writeVariable(irg, time, value[irg]);
+            writeVariable(irg, time, output);
         }
     }
 
     @Override
     final String[] getHeaders() {
         String[] species = new String[getNSpecies()];
-        for (int i = 0; i < species.length; i++) {
-            species[i] = getSpecies(i).getName();
+        int cpt = 0;
+        for (int i : getConfiguration().getFocalIndex()) {
+            species[cpt++] = getSpecies(i).getName();
         }
         return species;
     }
