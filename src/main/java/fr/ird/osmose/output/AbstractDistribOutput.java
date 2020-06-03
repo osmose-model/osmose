@@ -55,6 +55,7 @@ import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
+import java.util.HashMap;
 
 /**
  *
@@ -63,7 +64,8 @@ import fr.ird.osmose.output.distribution.DistributionType;
 public abstract class AbstractDistribOutput extends AbstractOutput {
 
     // Output values distributed by species and by class
-    double[][] values;
+    HashMap <Integer, double[]> values = new HashMap();
+    
     // Distribution 
     private final AbstractDistribution distrib;
 
@@ -78,7 +80,10 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        values = new double[getNSpecies()][distrib.getNClass()];
+        values.clear();
+        for(int i  : getConfiguration().getFocalIndex()) {
+            values.put(i, new double[distrib.getNClass()]);
+        }
     }
 
     int getClass(IMarineOrganism school) {
@@ -88,12 +93,13 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
     @Override
     public void write(float time) {
 
+        int cpt = 0;
         int nClass = distrib.getNClass();
         double[][] array = new double[nClass][getNSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
-            array[iClass][0] = distrib.getThreshold(iClass);
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
+            array[iClass][cpt++] = distrib.getThreshold(iClass);
+            for (int iSpec : getConfiguration().getFocalIndex()) {
+                array[iClass][cpt++] = values.get(iSpec)[iClass] / getRecordFrequency();
             }
         }
         writeVariable(time, array);

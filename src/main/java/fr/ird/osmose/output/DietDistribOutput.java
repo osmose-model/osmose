@@ -70,7 +70,10 @@ public class DietDistribOutput extends AbstractDistribOutput {
 
     @Override
     public void reset() {
-        values = new double[getNSpecies() + getConfiguration().getNRscSpecies()][getNClass()];
+        values.clear();
+        for (int i : getConfiguration().getFocalIndex()) {
+            values.put(i, new double[getNClass()]);
+        }
     }
 
     @Override
@@ -86,13 +89,22 @@ public class DietDistribOutput extends AbstractDistribOutput {
 
     @Override
     String[] getHeaders() {
-        String[] headers = new String[getNSpecies() + getConfiguration().getNRscSpecies() + 1];
+        String[] headers = new String[getNSpecies() + getConfiguration().getNRscSpecies() + getConfiguration().getNBkgSpecies() + 1];  
         headers[0] = getType().toString();
-        for (int i = 0; i < getNSpecies(); i++) {
-            headers[i + 1] = getSpecies(i).getName();
+        int cpt = 1;
+        for (int i : getConfiguration().getFocalIndex()) {
+            headers[cpt] = getSpecies(i).getName();
+            cpt++;
         }
-        for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
-            headers[i + getNSpecies() + 1] = getConfiguration().getResourceSpecies(i).getName();
+        
+        for (int i : getConfiguration().getBkgIndex()) {
+            headers[cpt] = this.getBkgSpecies(i).getName();
+            cpt++;
+        }
+        
+        for (int i : getConfiguration().getRscIndex()) {
+            headers[cpt] = getConfiguration().getResourceSpecies(i).getName();
+            cpt++;
         }
         return headers;
     }
@@ -106,7 +118,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
                     predator.getPreys().forEach(prey -> {
                         int classPredator = getClass(predator);
                         if (classPredator >= 0) {
-                            values[prey.getSpeciesIndex()][classPredator] += prey.getBiomass();
+                            values.get(prey.getSpeciesIndex())[classPredator] += prey.getBiomass();
                         }
                     });
                 });
@@ -121,11 +133,12 @@ public class DietDistribOutput extends AbstractDistribOutput {
     public void write(float time) {
         // values = new double[getNSpecies() + getConfiguration().getNResource()][getNClass()];
         int nClass = this.getNClass();
+        int cpt = 0;
         double[][] array = new double[nClass][getNSpecies() + getConfiguration().getNRscSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
-            array[iClass][0] = this.getClassThreshold(iClass);
-            for (int iSpec = 0; iSpec < getNSpecies() + getConfiguration().getNRscSpecies(); iSpec++) {
-                array[iClass][iSpec + 1] = values[iSpec][iClass] / getRecordFrequency();
+            array[iClass][cpt++] = this.getClassThreshold(iClass);
+            for (int iSpec : this.getConfiguration().getAllIndex()) {
+                array[iClass][cpt++] = values.get(iSpec)[iClass] / getRecordFrequency();
             }
         }
         writeVariable(time, array);
