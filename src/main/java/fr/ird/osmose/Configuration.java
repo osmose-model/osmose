@@ -1413,6 +1413,10 @@ public class Configuration extends OLogger {
         return(ArrayUtils.addAll(this.focalIndex, this.bkgIndex));
     }
     
+    public int[] getPreyIndex() {
+        return(ArrayUtils.addAll(this.bkgIndex, this.rscIndex));
+    }
+    
     public int[] getAllIndex() {
         return (ArrayUtils.addAll(ArrayUtils.addAll(this.focalIndex, this.bkgIndex), this.rscIndex));
     }
