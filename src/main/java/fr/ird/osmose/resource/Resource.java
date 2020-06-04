@@ -92,7 +92,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
     public Resource(ResourceSpecies species, Cell cell) {
         this.species = species;
         this.cell = cell;
-        this.index = species.getIndex() + getNSpecies() + this.getNBkgSpecies();
+        this.index = species.getIndex();
     }
 
     /**

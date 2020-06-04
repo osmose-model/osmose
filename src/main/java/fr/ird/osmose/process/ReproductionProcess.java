@@ -152,7 +152,10 @@ public class ReproductionProcess extends AbstractProcess {
 
         // spawning stock biomass per species
         HashMap<Integer, Double> SSB = new HashMap();
-
+        for(int i : getConfiguration().getFocalIndex()) {
+            SSB.put(i, 0.);
+        }
+    
         // check whether the species do reproduce or not
         HashMap<Integer, Boolean> reproduce = new HashMap();
         for (int i : getConfiguration().getFocalIndex()) {
@@ -164,7 +167,7 @@ public class ReproductionProcess extends AbstractProcess {
             int i = school.getSpeciesIndex();
             // increment spawning stock biomass
             if (reproduce.get(i) && school.getSpecies().isSexuallyMature(school)) {
-                double value = (SSB.get(i) == null) ? school.getInstantaneousBiomass() : SSB.get(i) + school.getInstantaneousBiomass();
+                double value = SSB.get(i) + school.getInstantaneousBiomass();
                 SSB.put(i, value);
             }
             // increment age

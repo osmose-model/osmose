@@ -61,7 +61,7 @@ import java.util.HashMap;
 public class WeightedDistribOutput extends DistribOutput {
 
     // Denumerator distributed by species and by class
-    private HashMap<Integer, double[][]> denominator;
+    private HashMap<Integer, double[][]> denominator = new HashMap();
     
     // school variable getter
     private final SchoolVariableGetter weight;

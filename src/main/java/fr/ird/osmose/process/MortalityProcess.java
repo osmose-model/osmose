@@ -293,7 +293,7 @@ public class MortalityProcess extends AbstractProcess {
         int iStepSimu = getSimulation().getIndexTimeSimu();
         for (List<Resource> resources : resourcesSet.values()) {    // loop over the cells
             for (Resource resource : resources) {    // loop over the resources
-                int iRsc = resource.getSpeciesIndex() - this.getNSpecies();
+                int iRsc = resource.getSpeciesIndex();
                 double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
                         * getResourceForcing(iRsc).getBiomass(resource.getCell());
                 resource.setBiomass(accessibleBiom);
@@ -575,7 +575,7 @@ public class MortalityProcess extends AbstractProcess {
     private List<Resource> getResources(Cell cell) {
         if (!resourcesSet.containsKey(cell.getIndex())) {
             List<Resource> resources = new ArrayList();
-            for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
+            for (int iRsc : getConfiguration().getRscIndex()) {
                 resources.add(new Resource(getConfiguration().getResourceSpecies(iRsc), cell));
             }
             resourcesSet.put(cell.getIndex(), resources);
@@ -745,8 +745,7 @@ public class MortalityProcess extends AbstractProcess {
     private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
         if (!bkgSet.containsKey(cell.getIndex())) {
             List<BackgroundSchool> bkgSchools = new ArrayList();  // list of all the background species within the cell
-            for (int i = 0; i < getConfiguration().getNBkgSpecies(); i++) {
-                int ibkg = this.getConfiguration().getBkgIndex(i);
+            for (int ibkg : this.getConfiguration().getBkgIndex()) {
                 bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg)));
             }
             bkgSet.put(cell.getIndex(), bkgSchools);

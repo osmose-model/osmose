@@ -61,8 +61,8 @@ import java.util.function.Predicate;
  */
 public class WeightedSpeciesOutput extends AbstractOutput {
     
-    protected HashMap<Integer, double[]> numerator;
-    protected HashMap<Integer, double[]> denumerator;
+    protected HashMap<Integer, double[]> numerator = new HashMap();
+    protected HashMap<Integer, double[]> denumerator = new HashMap();
     
     private final String description;
     private final Predicate<School> predicate;
