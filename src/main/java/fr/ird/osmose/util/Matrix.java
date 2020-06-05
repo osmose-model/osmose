@@ -49,8 +49,10 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality;
+package fr.ird.osmose.util;
 
+import fr.ird.osmose.process.mortality.fishery.*;
+import fr.ird.osmose.process.mortality.*;
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.stage.ClassGetter;
@@ -65,10 +67,7 @@ import java.util.List;
  *
  * @author Nicolas Barrier
  */
-public class AccessMatrix extends OsmoseLinker {
-
-    /** Interface to the recovery of class variable (age or size). */
-    private final ClassGetter classGetter;
+public abstract class Matrix extends OsmoseLinker {
 
     /**
      * Number of preys (lines in the file).
@@ -109,29 +108,35 @@ public class AccessMatrix extends OsmoseLinker {
      * Names of the predators.
      */
     private String[] namesPred;
+    
+    public abstract int getIndexPred(String namePred);
+
+    public abstract int getIndexPrey(String namePrey);
+
+    public abstract int getIndexPrey(IAggregation pred);
+
+    public abstract int getIndexPred(IAggregation prey);
 
     /**
      * Class constructor. The reading of the file is done here
      *
      * @param filename
      */
-    AccessMatrix(String filename, ClassGetter classGetter) {
+    public Matrix(String filename) {
         this.filename = filename;
-        this.classGetter = classGetter;
-        this.read();
     }
 
     /**
      * Reads the accessibility file. The first column and the header are now
      * used to reconstruct the upper size class
      */
-    private void read() {
+    public void read() {
 
         try (CSVReader reader = new CSVReader(new FileReader(filename), Separator.guess(filename).getSeparator())) {
 
             // Read all the lines
             List<String[]> lines = reader.readAll();
-            
+
             // extract the  number of preys (removing the header)
             nPreys = lines.size() - 1;
 
@@ -174,7 +179,7 @@ public class AccessMatrix extends OsmoseLinker {
                 int index = preyString.lastIndexOf('<');
                 if (index < 0) {
                     classPrey[iprey - 1] = Float.MAX_VALUE;
-                    namesPrey[iprey - 1] = preyString;
+                    namesPrey[iprey - 1] = preyString.trim();
                 } else {
                     namesPrey[iprey - 1] = preyString.substring(0, index - 1).trim();
                     classPrey[iprey - 1] = Float.valueOf(preyString.substring(index + 1, preyString.length()));
@@ -191,47 +196,39 @@ public class AccessMatrix extends OsmoseLinker {
         }
     }
 
-    /** Recovers the name of the accessibility file. */
+    /**
+     * Recovers the name of the accessibility file.
+     */
     public String getFile() {
         return this.filename;
     }
 
-    /** Extracts the matrix column for the given predator.
-     * 
-     * Based on full correspondance of the name (class < thres).
-     * 
-     * @param pred
-     * @return 
-     */
-    public int getIndexPred(IAggregation pred) {        
-        for (int i = 0; i < this.nPred; i++) {
-            if (pred.getSpeciesName().equals(this.namesPred[i]) && (classGetter.getVariable(pred) < this.classPred[i])) {
-                return i;
-            }
-        }
-        String message = String.format("No accessibility found for predator %s class %f", pred.getSpeciesName(), classGetter.getVariable(pred));
-        throw new IllegalArgumentException(message);
-    }
-
-    /** Extracts the matrix column for the given prey.
-     * 
-     * Based on full correspondance of the name (class < thres).
-     * 
-     * @param prey
-     * @return 
-     */
-    public int getIndexPrey(IAggregation prey) {
-        for (int i = 0; i < this.nPred; i++) {
-            if (prey.getSpeciesName().equals(this.namesPrey[i]) && (classGetter.getVariable(prey) < this.classPrey[i])) {
-                return i;
-            }
-        }
-        String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(), classGetter.getVariable(prey));
-        throw new IllegalArgumentException(message);
-    }
-
     public double getValue(int iprey, int ipred) {
         return this.accessibilityMatrix[iprey][ipred];
+    }
+
+    public int getNPred() {
+        return this.nPred;
+    }
+
+    public int getNPrey() {
+        return this.nPreys;
+    }
+
+    public String getPreyName(int i) {
+        return namesPrey[i];
+    }
+
+    public String getPredName(int i) {
+        return namesPred[i];
+    }
+
+    public double getPreyClass(int i) {
+        return classPrey[i];
+    }
+
+    public double getPredClass(int i) {
+        return classPred[i];
     }
 
 }
