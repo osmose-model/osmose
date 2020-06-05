@@ -66,7 +66,7 @@ public class BackgroundSchool extends AbstractSchool {
     final private BackgroundSpecies bkgSpecies;
     
     /** Size class index. */
-    private final int classIndex = 0;
+    private final int classIndex;
 
     /**
      * Public constructor. Initialisation from background species, class index
@@ -75,10 +75,13 @@ public class BackgroundSchool extends AbstractSchool {
      * @param species
      * @param iClass
      */
-    public BackgroundSchool(BackgroundSpecies species) {
+    public BackgroundSchool(BackgroundSpecies species, int classIndex) {
         this.bkgSpecies = species;
         abundanceHasChanged = false;
         preys = new HashMap();
+        fishedBiomass = new double[getConfiguration().getNFishery()];
+        discardedBiomass = new double[getConfiguration().getNFishery()];
+        this.classIndex = classIndex;
     }
 
     /**
@@ -91,6 +94,7 @@ public class BackgroundSchool extends AbstractSchool {
         preys.clear();
         preyedBiomass = 0.d;
         predSuccessRate = 0.f;
+        reset(fishedBiomass);
     }
 
     /**
