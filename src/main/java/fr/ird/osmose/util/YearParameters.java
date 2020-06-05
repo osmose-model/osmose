@@ -86,6 +86,7 @@ public class YearParameters extends OsmoseLinker {
 
         int nseason = getConfiguration().getNStepYear();
         int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
+        System.out.println("Nyear = " + nyear);
 
         key = String.format("%s.years.%s", this.prefix, this.suffix);
         if (!conf.isNull(key)) {
@@ -124,7 +125,7 @@ public class YearParameters extends OsmoseLinker {
 
         years = new int[goodyear];
         int cpt = 0;
-        for (int y : years) {
+        for (int y : tempYears) {
             if (y < nyear) {
                 years[cpt] = y;
                 cpt++;
