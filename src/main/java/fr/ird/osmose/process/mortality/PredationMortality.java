@@ -56,6 +56,7 @@ import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.stage.PredPreyStage;
+import fr.ird.osmose.util.Matrix;
 import java.util.HashMap;
 import java.util.List;
 
@@ -88,7 +89,7 @@ public class PredationMortality extends AbstractMortality {
     @Override
     public void init() {
 
-        predationAccess = new PredationAccessibility(this.getRank());
+        predationAccess = new PredationAccessibility(this.getRank(), "predation.accessibility", "acc");
         predationAccess.init();
 
         int nsp = getNSpecies();
@@ -233,7 +234,7 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
-        AccessMatrix accessibilityMatrix = predationAccess.getAccessMatrix();
+        AccessMatrix accessibilityMatrix = (AccessMatrix) predationAccess.getAccessMatrix();
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         double[] accessibility = new double[preys.size()];

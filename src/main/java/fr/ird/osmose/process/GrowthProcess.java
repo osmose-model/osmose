@@ -91,7 +91,6 @@ public class GrowthProcess extends AbstractProcess {
         lmax = new HashMap();
 
         for (int i : getConfiguration().getFocalIndex()) {
-            System.out.println("i = " + i);
             // Initialize growth function
             String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + i)
                     ? "fr.ird.osmose.process.growth.VonBertalanffyGrowth"
