@@ -71,9 +71,6 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
     @Override
     public void init() {
 
-        int nSp = getNSpecies();
-        int nRsc = getConfiguration().getNRscSpecies();
-        int nBkg = getConfiguration().getNBkgSpecies();
         thresholds = new HashMap();
         
         // Set values for focal and background species species.

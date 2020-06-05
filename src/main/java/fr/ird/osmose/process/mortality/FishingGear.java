@@ -56,17 +56,16 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.fishery.FisheryCatchability;
-import fr.ird.osmose.process.mortality.fishery.FisheryDiscards;
 import fr.ird.osmose.process.mortality.fishery.FisheryFBase;
 import fr.ird.osmose.process.mortality.fishery.FisherySeason;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
+import fr.ird.osmose.util.Matrix;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,18 +92,11 @@ public class FishingGear extends AbstractMortality {
      */
     private FisheryMapSet fMapSet;
 
-    /**
-     * Fishery accessibility file. Provides the catchability for the given
-     * fishery. Function of time and species.
-     */
-    private FisheryCatchability catchability;
+    private HashMap<Integer, Double> catchability;
+    private HashMap<Integer, Double> discards;
 
     private FisherySelectivity selectivity;
-
-    private FisheryDiscards discards;
     
-    private boolean useDiscards;
-
     public FishingGear(int rank, int findex) {
         super(rank);
         fIndex = findex;
@@ -115,6 +107,9 @@ public class FishingGear extends AbstractMortality {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
 
+        catchability = new HashMap();
+        discards = new HashMap();
+        
         // set-up the name of the fishery
         name = cfg.getString("fisheries.name.fsh" + fIndex);
 
@@ -134,26 +129,6 @@ public class FishingGear extends AbstractMortality {
 
         selectivity = new FisherySelectivity(fIndex, "fisheries.selectivity", "fsh");
         selectivity.init();
-
-        // accessibility matrix
-        // (it provides the percentage of fishes that are going to be captured)
-        catchability = new FisheryCatchability(fIndex, "fisheries.catchability");
-        try {
-            catchability.init();
-        } catch (IOException ex) {
-            Logger.getLogger(FishingGear.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // If no discards parameter is provided, assumes everything goes to fishing.
-        this.useDiscards = (this.getConfiguration().findKeys("fisheries.discards*fsh" + fIndex).size() > 0);
-        if (this.useDiscards) {
-            discards = new FisheryDiscards(fIndex, "fisheries.discards");
-            try {
-                discards.init();
-            } catch (IOException ex) {
-                Logger.getLogger(FishingGear.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
 
         try {       
             this.writeFisheriesTimeSeries();
@@ -185,7 +160,7 @@ public class FishingGear extends AbstractMortality {
 
         int speciesIndex = school.getSpeciesIndex();
 
-        double speciesCatchability = this.catchability.getValues(index, speciesIndex);
+        double speciesCatchability = this.catchability.get(speciesIndex);
         if (speciesCatchability == 0.d) {
             return 0.d;
         }
@@ -210,9 +185,8 @@ public class FishingGear extends AbstractMortality {
      * @return
      */
     public double getDiscardRate(AbstractSchool school) {
-        int index = getSimulation().getIndexTimeSimu();
         int speciesIndex = school.getSpeciesIndex();
-        return this.useDiscards ? this.discards.getValues(index, speciesIndex) : 0;
+        return this.discards.get(speciesIndex);
     }
 
     /**
@@ -312,5 +286,42 @@ public class FishingGear extends AbstractMortality {
         filename.append(".csv");
         return filename.toString();
 
+    } 
+    
+    public void setCatchability(Matrix matrix) {
+        
+        int fishIndex = matrix.getIndexPred(this.name);
+        
+        for(int i : this.getConfiguration().getFocalIndex()) {
+            String speciesName = getConfiguration().getSpecies(i).getName();
+            int speciesIndex = matrix.getIndexPrey(speciesName);
+            catchability.put(i, matrix.getValue(speciesIndex, fishIndex)); 
+        }
+        
+        for(int i : this.getConfiguration().getBkgIndex()) {
+            String speciesName = getConfiguration().getBkgSpecies(i).getName();
+            int speciesIndex = matrix.getIndexPrey(speciesName);
+            catchability.put(i, matrix.getValue(speciesIndex, fishIndex)); 
+        }
+            
     }
+    
+    public void setDiscards(Matrix matrix) {
+
+        int fishIndex = matrix.getIndexPred(this.name);
+
+        for (int i : this.getConfiguration().getFocalIndex()) {
+            String speciesName = getConfiguration().getSpecies(i).getName();
+            int speciesIndex = matrix.getIndexPrey(speciesName);
+            discards.put(i, matrix.getValue(speciesIndex, fishIndex));
+        }
+
+        for (int i : this.getConfiguration().getBkgIndex()) {
+            String speciesName = getConfiguration().getBkgSpecies(i).getName();
+            int speciesIndex = matrix.getIndexPrey(speciesName);
+            discards.put(i, matrix.getValue(speciesIndex, fishIndex));
+        }
+
+    }
+    
 }

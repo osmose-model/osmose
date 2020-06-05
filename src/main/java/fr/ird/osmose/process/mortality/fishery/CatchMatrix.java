@@ -49,88 +49,75 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality.fishery.sizeselect;
+package fr.ird.osmose.process.mortality.fishery;
 
-import fr.ird.osmose.AbstractSchool;
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.Osmose;
-import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.FishingGear;
-import org.apache.commons.math3.distribution.NormalDistribution;
+import fr.ird.osmose.IAggregation;
+import fr.ird.osmose.util.Matrix;
 
 /**
+ * Class that manages the reading and use of accesibility matrix.
  *
- * @todo Eventually Move the selectivity into Interface, with three different
- * classes (Step, Gaussian and Sigmo)
- * @author nbarrier
+ * @author Nicolas Barrier
  */
-public class GaussSelectivity extends SizeSelectivity {
+public class CatchMatrix extends Matrix {
 
     /**
-     * L75 size. If < 0, consider that the old formulation is used
-     */
-    private double l75 = -999;
-
-    /**
-     * Exponential factors. Used only in GAUSS selectivities.
-     */
-    private double b;
-
-    /**
-     * Maximum value. Use only in the case of guaussian distribution for
-     * normalisation purposes
-     */
-    private NormalDistribution distrib;
-
-    /**
-     * Public constructor. Initialize the FisheryMortality pointer.
+     * Class constructor. The reading of the file is done here
      *
-     * @param fmort
+     * @param filename
      */
-    public GaussSelectivity(FishingGear fmort) {
-        super(fmort);
+    public CatchMatrix(String filename) {
+        super(filename);
+        this.read();
     }
 
-    /**
-     * Initializes the selectivity class. The selectivity parameters are
-     * initialized from the configuration file. The number of parameters depends
-     * on the selectivity curve.
-     */
-    @Override
-    public void init() {
 
-        int index = this.getGear().getFIndex();
-        Configuration cfg = Osmose.getInstance().getConfiguration();
-
-        this.l75 = cfg.getFloat("fishery.selectivity.l75.fsh" + index);
-        // Normal distribution for init qnorm(0.75)
-        NormalDistribution norm = new NormalDistribution();
-        double sd = (this.l75 - this.getL50()) / norm.inverseCumulativeProbability(0.75);  // this is the qnorm function
-        // initialisation of the distribution used in selectity calculation
-        this.distrib = new NormalDistribution(this.getL50(), sd);
-    }
-
-    /**
-     * Returns a selectivity value. It depends on the size of the specieand on
-     * the selectivity curve and parameters. Output value is between 0 and 1.
+    /** *  Extracts the matrix column for the given predator.Based on full correspondance of the name (class < thres).
+     * 
      *
-     * @param size Specie size
-     * @return A selectivity value (0<output<1)
+     * @param name 
+     * @param pred
+     * @return 
      */
     @Override
-    public double getSelectivity(AbstractSchool school) {
-
-        double output;
-        // calculation of selectivity. Normalisation by the maximum value 
-        // (i.e. the value computed with x = mean).
-        // If L75 > 0, assumes Ricardo Formulation should be used
-        output = this.distrib.density(school.getLength()) / this.distrib.density(this.getL50());
-
-        if (output < this.getTiny()) {
-            output = 0.0;
+    public int getIndexPred(String name) { 
+        for (int i = 0; i < this.getNPred(); i++) {
+            if (name.equals(this.getPredName(i))) {
+                return i;
+            }
         }
-
-        return output;
-
+        String message = String.format("No catchability found for fishery %s", name);
+        error(message, new IllegalArgumentException());       
+        return -1;
     }
+
+    /** *  Extracts the matrix column for the given prey.Based on full correspondance of the name (class < thres).
+     * 
+     *
+     * @param name 
+     * @param prey
+     * @return 
+     */
+    @Override
+    public int getIndexPrey(String name) {
+        for (int i = 0; i < this.getNPrey(); i++) {
+            if (name.equals(this.getPreyName(i))) {
+                return i;
+            }
+        }
+        String message = String.format("No catchability found for prey %s", name);
+        error(message, new IllegalArgumentException());       
+        return -1;
+    }
+
+    @Override
+    public int getIndexPred(IAggregation ia) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getIndexPrey(IAggregation ia) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
 }

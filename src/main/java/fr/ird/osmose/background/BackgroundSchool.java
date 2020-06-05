@@ -64,18 +64,24 @@ public class BackgroundSchool extends AbstractSchool {
      * Backgroud species associated with the background School.
      */
     final private BackgroundSpecies bkgSpecies;
+    
+    /** Size class index. */
+    private final int classIndex;
 
     /**
-     * Public constructor. Initialisation from background species, class index
-     * and time step.
+     * Public constructor.Initialisation from background species, class index
+ and time step.
      *
      * @param species
-     * @param iClass
+     * @param classIndex
      */
-    public BackgroundSchool(BackgroundSpecies species) {
+    public BackgroundSchool(BackgroundSpecies species, int classIndex) {
         this.bkgSpecies = species;
         abundanceHasChanged = false;
         preys = new HashMap();
+        fishedBiomass = new double[getConfiguration().getNFishery()];
+        discardedBiomass = new double[getConfiguration().getNFishery()];
+        this.classIndex = classIndex;
     }
 
     /**
@@ -88,6 +94,8 @@ public class BackgroundSchool extends AbstractSchool {
         preys.clear();
         preyedBiomass = 0.d;
         predSuccessRate = 0.f;
+        reset(fishedBiomass);
+        reset(discardedBiomass);
     }
 
     /**
@@ -140,18 +148,18 @@ public class BackgroundSchool extends AbstractSchool {
     
     @Override
     public float getAge() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+       return this.bkgSpecies.getAge(classIndex);
     }
 
     @Override
     public float getLength() {
         //return (float) this.bkgSpecies.getTimeSeries().getClass(iClass);
-        return this.bkgSpecies.getLength();
+        return this.bkgSpecies.getLength(classIndex);
     }
 
     @Override
     public float getTrophicLevel() {
-        return this.bkgSpecies.getTrophicLevel();
+        return this.bkgSpecies.getTrophicLevel(classIndex);
     }
 
     @Override
@@ -166,12 +174,7 @@ public class BackgroundSchool extends AbstractSchool {
      */
     @Override
     public int getAgeDt() {
-        // Note: here, age is virtually set as equal to 1
-        // in order to be sure that the statement for predation
-        // (computePredation in PredationMortality) is always true.
-        // if (predator.getAgeDt() > 0) {
-        // i.e. bkg species will always feed.
-        return 1;
+        return this.bkgSpecies.getAgeDt(classIndex);
     }
 
     @Override
@@ -189,8 +192,12 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getName();
     }
     
+    public float getProportion() {
+        return this.bkgSpecies.getProportion(this.classIndex);
+    }
+    
     public void setBiomass(double biomass) {
-        this.biomass = biomass;
+        this.biomass = biomass * this.getProportion();
     }
     
 }

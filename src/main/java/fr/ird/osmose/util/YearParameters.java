@@ -124,7 +124,7 @@ public class YearParameters extends OsmoseLinker {
 
         years = new int[goodyear];
         int cpt = 0;
-        for (int y : years) {
+        for (int y : tempYears) {
             if (y < nyear) {
                 years[cpt] = y;
                 cpt++;

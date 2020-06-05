@@ -53,9 +53,11 @@ package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.stage.ClassGetter;
+import fr.ird.osmose.util.Matrix;
 import fr.ird.osmose.util.StepParameters;
 import fr.ird.osmose.util.SimulationLinker;
 import fr.ird.osmose.util.YearParameters;
+import java.io.IOException;
 
 import java.util.HashMap;
 
@@ -71,15 +73,20 @@ public class PredationAccessibility extends SimulationLinker {
     /**
      * HashMaps of accessibility matrixes. -1 is when only one matrix is used.
      */
-    private HashMap<Integer, AccessMatrix> matrixAccess;
-
+    private HashMap<Integer, Matrix> matrixAccess;
+    
+    private String prefix;
+    private String suffix;
+    
     /**
      * Provides the accessibility matrix to use as a function of the time-step.
      */
     private int[][] indexAccess;
 
-    public PredationAccessibility(int rank) {
+    public PredationAccessibility(int rank, String prefix, String suffix) {
         super(rank);
+        this.prefix = prefix;
+        this.suffix = suffix;
     }
 
     public void init() {
@@ -100,7 +107,7 @@ public class PredationAccessibility extends SimulationLinker {
         Configuration conf = this.getConfiguration();
         String metrics = null;
         try {
-            metrics = getConfiguration().getString("predation.accessibility.stage.structure");
+            metrics = getConfiguration().getString(this.prefix + ".stage.structure");
             if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
                 metrics = null;
             }
@@ -121,28 +128,29 @@ public class PredationAccessibility extends SimulationLinker {
         }
 
         // If only one file is provided (old way)
-        if (!getConfiguration().isNull("predation.accessibility.file")) {
+        
+        if (!getConfiguration().isNull(this.prefix + ".file")) {
             // accessibility matrix
-            String filename = getConfiguration().getFile("predation.accessibility.file");
+            String filename = getConfiguration().getFile(this.prefix + ".file");
             AccessMatrix temp = new AccessMatrix(filename, classGetter);
             matrixAccess.put(-1, temp);
 
         } else {
             // If several access files are defined.
             // recovers the indexes of the accessibility matrixes.
-            int[] index = this.getConfiguration().findKeys("predation.accessibility.file.acc*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".acc") + 4))).toArray();
+            int[] index = this.getConfiguration().findKeys(this.prefix + ".file." + this.suffix + "*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".acc") + 4))).toArray();
             for (int i : index) {
 
-                String filename = getConfiguration().getFile("predation.accessibility.file.acc" + i);
+                String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix +  + i);
                 AccessMatrix temp = new AccessMatrix(filename, classGetter);
                 matrixAccess.put(i, temp);
 
                 // Reconstruct the years to be used with this map
-                YearParameters yearParam = new YearParameters("predation.accessibility", "acc" + i);
+                YearParameters yearParam = new YearParameters(this.prefix, this.suffix + i);
                 int[] years = yearParam.getYears();
 
                 // Reconstruct the steps to be used with this map
-                StepParameters seasonParam = new StepParameters("predation.accessibility", "acc" + i);
+                StepParameters seasonParam = new StepParameters(this.prefix, this.suffix + i);
                 int[] season = seasonParam.getSeasons();
 
                 for (int y : years) {
@@ -155,7 +163,7 @@ public class PredationAccessibility extends SimulationLinker {
             for (int y = 0; y < nyear; y++) {
                 for (int s = 0; s < nseason; s++) {
                     if (indexAccess[y][s] == - 1) {
-                        error("Missing accessibility indexation for year " + y + " and season " + s, null);
+                        error("Missing accessibility indexation for year " + y + " and season " + s, new IOException());
                     }
                 }
             }
@@ -203,7 +211,7 @@ public class PredationAccessibility extends SimulationLinker {
      *
      * @return
      */
-    public AccessMatrix getAccessMatrix() {
+    public Matrix getAccessMatrix() {
 
         int year = this.getSimulation().getYear();
         int season = this.getSimulation().getIndexTimeYear();

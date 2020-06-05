@@ -51,118 +51,146 @@
  */
 package fr.ird.osmose.process.mortality.fishery;
 
-import fr.ird.osmose.Configuration;
-import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.timeseries.BySpeciesTimeSeries;
+import fr.ird.osmose.util.Matrix;
+import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.StepParameters;
+import fr.ird.osmose.util.YearParameters;
 import java.io.IOException;
+import java.util.HashMap;
+
 
 /**
+ * Class that manages the time-variability of accessibility matrix.
  *
- * @author Nicolas Barrier (nicolas.barrier@ird.fr)
- * @author P.Verley (philippe.verley@ird.fr)
- * @version 3.0b 2013/09/01
+ * It is strongly inspired on the way species movements are parameterized.
+ *
+ * @author Nicolas Barrier
  */
-public class FisheryCatchability extends OsmoseLinker {
+public class FisheryCatchability extends SimulationLinker {
 
     /**
-     * Accessibility (in percentage). Dimensions = [step][species]
+     * HashMaps of accessibility matrixes. -1 is when only one matrix is used.
      */
-    private double[][] values;
-
-    /**
-     * Number of Fisheries.
-     */
-    private final int fisheryIndex;
+    private HashMap<Integer, Matrix> matrixAccess;
     
     private final String prefix;
+    private final String suffix;
     
-    public FisheryCatchability(int index, String prefix) {
-        this.fisheryIndex = index;
+    /**
+     * Provides the accessibility matrix to use as a function of the time-step.
+     */
+    private int[][] indexAccess;
+
+    public FisheryCatchability(int rank, String prefix, String suffix) {
+        super(rank);
         this.prefix = prefix;
+        this.suffix = suffix;
     }
-      
-    public void init() throws IOException {
-        
-        String key;
-        Configuration cfg = this.getConfiguration();
-        
-        key = String.format("%s.file.fsh%d", prefix, fisheryIndex);
-        if(!cfg.isNull(key)) {
-            BySpeciesTimeSeries ts = new BySpeciesTimeSeries();
-            ts.read(cfg.getFile(key));
-            values = ts.getValues();
-        }
-        
-        else {
-            key = String.format("%s.fsh%d", prefix, fisheryIndex);
-            double[] array = cfg.getArrayDouble(key);
-            if(array.length != cfg.getNBkgSpecies() + cfg.getNSpecies()) {
-                String msg = String.format("The %s param must have %d values (nspecies + nbackgrounds). %d given",
-                        key, cfg.getNBkgSpecies() + cfg.getNSpecies(), array.length);
-                error(msg, new IOException());
-            }
-            values = new double[cfg.getNStep()][];
-            for(int i = 0; i<values.length; i++) {
-                values[i] = array;
+
+    public void init() {
+
+        int nseason = getConfiguration().getNStepYear();
+        int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
+
+        // Mapping of the year and season value
+        indexAccess = new int[nyear][nseason];
+        for (int i = 0; i < nyear; i++) {
+            for (int j = 0; j < nseason; j++) {
+                indexAccess[i][j] = -1;
             }
         }
 
-        this.checkValues();
-        
-    }
-    
-    private void checkValues() throws IOException { 
-        int nstep = values.length;
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-        for (int i = 0; i < nstep; i++) {
-            int ncol = values[i].length;
-            for (int j = 0; j < ncol; j++) {
-                min = Math.min(min, values[i][j]);
-                max = Math.min(max, values[i][j]);
+        matrixAccess = new HashMap<>();
+
+        // If only one file is provided (old way)
+        if (!getConfiguration().isNull(this.prefix + ".file")) {
+            // accessibility matrix
+            String filename = getConfiguration().getFile(this.prefix + ".file");
+            CatchMatrix temp = new CatchMatrix(filename);
+            matrixAccess.put(-1, temp);
+
+        } else {
+            // If several access files are defined.
+            // recovers the indexes of the accessibility matrixes.
+            int[] index = this.getConfiguration().findKeys(this.prefix + ".file." + this.suffix + "*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".acc") + 4))).toArray();
+            for (int i : index) {
+
+                String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix +  + i);
+                CatchMatrix temp = new CatchMatrix(filename);
+                matrixAccess.put(i, temp);
+
+                // Reconstruct the years to be used with this map
+                YearParameters yearParam = new YearParameters(this.prefix, this.suffix + i);
+                int[] years = yearParam.getYears();
+
+                // Reconstruct the steps to be used with this map
+                StepParameters seasonParam = new StepParameters(this.prefix, this.suffix + i);
+                int[] season = seasonParam.getSeasons();
+
+                for (int y : years) {
+                    for (int s : season) {
+                        indexAccess[y][s] = i;
+                    }
+                }
+            }  // end of loop on access files
+
+            for (int y = 0; y < nyear; y++) {
+                for (int s = 0; s < nseason; s++) {
+                    if (indexAccess[y][s] == - 1) {
+                        error("Missing catchability or discard indexation for year " + y + " and season " + s, new IOException());
+                    }
+                }
+            }
+
+            this.eliminateTwinAccess();
+
+        }  // end of test for multiple access files
+
+    }  // end of init
+
+    private void eliminateTwinAccess() {
+
+        // recover the sorted indexes of the access. objects;
+        int[] index = (int[]) this.matrixAccess.keySet().stream().sorted().mapToInt(key -> key).toArray();
+        int nmaps = index.length;
+
+        int[] mapIndexNoTwin = new int[nmaps];
+
+        for (int k = 0; k < nmaps; k++) {
+            String file = this.matrixAccess.get(index[k]).getFile();
+            mapIndexNoTwin[k] = k;
+            for (int l = k - 1; l >= 0; l--) {
+                if (file.equals(this.matrixAccess.get(index[l]).getFile())) {
+                    mapIndexNoTwin[k] = mapIndexNoTwin[l];
+                    // Delete twin maps
+                    this.matrixAccess.remove(k);
+                    break;
+                }
             }
         }
-        
-        if (max > 1) {
-            String error = String.format("Maximum access. for fishery %d should be 1, %f provided", this.fisheryIndex, max);
-            throw new IOException(error);
-        }
 
-        if (min < 0) {
-            String error = String.format("Minimum access. for fishery %d should be 0, %f provided", this.fisheryIndex, max);
-            throw new IOException(error);
-        }
+        int nseason = getConfiguration().getNStepYear();
+        int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
 
+        for (int y = 0; y < nyear; y++) {
+            for (int s = 0; s < nseason; s++) {
+                int indexMap = indexAccess[y][s];
+                indexAccess[y][s] = mapIndexNoTwin[indexMap];
+            }
+        }
     }
-    
+
     /**
-     * Returns the [nFishery, nSpecies] accessibility matrix.
-     * @return 
-     */
-    public double[][] getValues() {
-        return values;
-    }
-
-    /**
-     * Returns the [nSpecies] accessibility matrix for a given fisheries
+     * Returns the accesibility matrix for the given time-step.
      *
-     * @param iFishery Fishery index
-     * @return 
+     * @return
      */
-    public double[] getValues(int istep) {
-        return values[istep];
-    }
+    public Matrix getAccessMatrix() {
 
-    /**
-     * Returns the accessibility matrix for a given fisheries and a given
-     * specie.
-     *
-     * @param iFishery Fishery index
-     * @param iSpec Species index
-     * @return 
-     */
-    public double getValues(int istep, int iSpec) {
-        return values[istep][iSpec];
-    }
+        int year = this.getSimulation().getYear();
+        int season = this.getSimulation().getIndexTimeYear();
+        int mapIndex = this.indexAccess[year][season];
+        return this.matrixAccess.get(mapIndex);
 
+    }
 }
