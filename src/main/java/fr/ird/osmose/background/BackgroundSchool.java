@@ -69,11 +69,11 @@ public class BackgroundSchool extends AbstractSchool {
     private final int classIndex;
 
     /**
-     * Public constructor. Initialisation from background species, class index
-     * and time step.
+     * Public constructor.Initialisation from background species, class index
+ and time step.
      *
      * @param species
-     * @param iClass
+     * @param classIndex
      */
     public BackgroundSchool(BackgroundSpecies species, int classIndex) {
         this.bkgSpecies = species;

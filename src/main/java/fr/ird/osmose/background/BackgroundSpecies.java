@@ -135,17 +135,6 @@ public class BackgroundSpecies extends OsmoseLinker {
             ageDt[i] = (int) age[i] * getConfiguration().getNStepYear();
         }
 
-        // check that the classProportion sums to 1.
-        float sum = 0.f;
-        for (int i = 0; i < classProportion.length; i++) {
-            sum += classProportion[i];
-        }
-
-        if (sum != 1.f) {
-            String errormsg = String.format("species.size.proportion.sp%d must sum to 1.0", index);
-            error(errormsg, null);
-        }
-
         // Get the array of species length
         length = cfg.getArrayFloat("species.length.sp" + index);
 
@@ -173,6 +162,17 @@ public class BackgroundSpecies extends OsmoseLinker {
         if (length.length != nClass) {
             message = String.format("Length of species.length.sp%d is "
                     + "not consistent with species.nclass.cp%d", index, index);
+            isOk = false;
+        }
+        
+        // check that the classProportion sums to 1.
+        float sum = 0.f;
+        for (int i = 0; i < classProportion.length; i++) {
+            sum += classProportion[i];
+        }
+
+        if (sum != 1.f) {
+            message = String.format("species.size.proportion.sp%d must sum to 1.0", index);
             isOk = false;
         }
         
