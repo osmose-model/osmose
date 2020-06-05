@@ -95,6 +95,7 @@ public class BackgroundSchool extends AbstractSchool {
         preyedBiomass = 0.d;
         predSuccessRate = 0.f;
         reset(fishedBiomass);
+        reset(discardedBiomass);
     }
 
     /**

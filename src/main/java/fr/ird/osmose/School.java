@@ -291,6 +291,7 @@ public class School extends AbstractSchool {
         ingestion = 0.d;
         // reset fished biomass
         reset(fishedBiomass);
+        reset(this.discardedBiomass);
     }
     
     /**
