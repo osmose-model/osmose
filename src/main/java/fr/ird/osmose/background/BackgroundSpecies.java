@@ -90,10 +90,16 @@ public class BackgroundSpecies extends OsmoseLinker {
      *
      * @todo Use TL by stage instead?
      */
-    private final float trophicLevel;
+    private final float[] trophicLevel;
     
-    private final float length;
+    private final float[] length;
 
+    private final float[] classProportion;
+    
+    private final float[] age;
+    
+    private final int[] ageDt;
+    
     /**
      * Constructor of background species.
      *
@@ -116,9 +122,31 @@ public class BackgroundSpecies extends OsmoseLinker {
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
         
         //trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
-        trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
+        trophicLevel = cfg.getArrayFloat("species.trophic.level.sp" + index);
         
-        length = cfg.getFloat("species.length.sp" + index);
+        // Proportion of the different size classes
+        classProportion = cfg.getArrayFloat("species.size.proportion.sp" + index);
+        
+        
+        age = cfg.getArrayFloat("species.age.sp" + index);
+        ageDt = new int[age.length];
+        for(int i = 0; i<age.length; i++) {
+            ageDt[i] = (int) age[i] * getConfiguration().getNStepYear();
+        }
+        
+        // check that the classProportion sums to 1.
+        float sum = 0.f;
+        for (int i = 0; i < classProportion.length; i++) {
+            sum += classProportion[i];
+        }
+        
+        if(sum != 1.f) {
+            String errormsg = String.format("species.size.proportion.sp%d must sum to 1.0", index);
+            error(errormsg, null);
+        }
+        
+        // Get the array of species length
+        length = cfg.getArrayFloat("species.length.sp" + index);
         
     }
 
@@ -132,8 +160,8 @@ public class BackgroundSpecies extends OsmoseLinker {
      * @todo Do this by class?
      * @return 
      */
-    public float getTrophicLevel() {
-        return this.trophicLevel;
+    public float getTrophicLevel(int iClass) {
+        return this.trophicLevel[iClass];
     }
 
     /**
@@ -153,7 +181,20 @@ public class BackgroundSpecies extends OsmoseLinker {
         return name;
     }
     
-    public float getLength() {
-        return this.length;
+    public float getLength(int iClass) {
+        return this.length[iClass];
     }
+    
+    public float getProportion(int iClass) { 
+        return this.classProportion[iClass];
+    }
+    
+    public float getAge(int iClass) { 
+        return this.age[iClass];
+    }
+    
+    public int getAgeDt(int iClass) { 
+        return this.ageDt[iClass];
+    }
+    
 }
