@@ -780,7 +780,9 @@ public class MortalityProcess extends AbstractProcess {
         if (!bkgSet.containsKey(cell.getIndex())) {
             List<BackgroundSchool> bkgSchools = new ArrayList();  // list of all the background species within the cell
             for (int ibkg : this.getConfiguration().getBkgIndex()) {
-                bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg)));
+                int nClass = this.getConfiguration().getBkgSpecies(ibkg).getNClass();
+                for(int cl = 0; cl<nClass; cl++)
+                bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg), cl));
             }
             bkgSet.put(cell.getIndex(), bkgSchools);
         }

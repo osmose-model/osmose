@@ -51,11 +51,9 @@
  */
 package fr.ird.osmose.background;
 
-import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
+import fr.ird.osmose.util.OsmoseLinker;     
 import java.io.IOException;
 import ucar.ma2.InvalidRangeException;
 
@@ -84,22 +82,24 @@ public class BackgroundSpecies extends OsmoseLinker {
      * <i>species.length2weight.allometric.power.sp#</i>
      */
     private final float c, bPower;
- 
+
     /**
      * Trophic Level.
      *
      * @todo Use TL by stage instead?
      */
     private final float[] trophicLevel;
-    
+
     private final float[] length;
 
     private final float[] classProportion;
-    
+
     private final float[] age;
-    
+
     private final int[] ageDt;
-    
+
+    private final int nClass;
+
     /**
      * Constructor of background species.
      *
@@ -117,48 +117,85 @@ public class BackgroundSpecies extends OsmoseLinker {
         // Initialization of parameters
         name = cfg.getString("species.name.sp" + index);
 
+        nClass = cfg.getInt("species.nclass.sp" + index);
+
         // Reads allometric variables to obtain weight from size
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
-        
+
         //trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
         trophicLevel = cfg.getArrayFloat("species.trophic.level.sp" + index);
-        
+
         // Proportion of the different size classes
         classProportion = cfg.getArrayFloat("species.size.proportion.sp" + index);
-        
-        
+
         age = cfg.getArrayFloat("species.age.sp" + index);
         ageDt = new int[age.length];
-        for(int i = 0; i<age.length; i++) {
+        for (int i = 0; i < age.length; i++) {
             ageDt[i] = (int) age[i] * getConfiguration().getNStepYear();
         }
-        
+
         // check that the classProportion sums to 1.
         float sum = 0.f;
         for (int i = 0; i < classProportion.length; i++) {
             sum += classProportion[i];
         }
-        
-        if(sum != 1.f) {
+
+        if (sum != 1.f) {
             String errormsg = String.format("species.size.proportion.sp%d must sum to 1.0", index);
             error(errormsg, null);
         }
-        
+
         // Get the array of species length
         length = cfg.getArrayFloat("species.length.sp" + index);
+
+        boolean isOk = true;
+        String message = "";
+
+        if (trophicLevel.length != nClass) {
+            message = String.format("Length of species.trophic.level.sp%d is "
+                    + "not consistent with species.nclass.cp%d", index, index);
+            isOk = false;
+        }
+
+        if (age.length != nClass) {
+            message = String.format("Length of species.age.sp%d is "
+                    + "not consistent with species.nclass.cp%d", index, index);
+            isOk = false;
+        }
+
+        if (classProportion.length != nClass) {
+            message = String.format("Length of species.size.proportion.sp%d is "
+                    + "not consistent with species.nclass.cp%d", index, index);
+            isOk = false;
+        }
+
+        if (length.length != nClass) {
+            message = String.format("Length of species.length.sp%d is "
+                    + "not consistent with species.nclass.cp%d", index, index);
+            isOk = false;
+        }
         
+        if(!isOk) {
+            error(message, new IOException());
+        }
+
     }
 
-    /** Returns the index of the background species.
-     * @return  */
+    /**
+     * Returns the index of the background species.
+     *
+     * @return
+     */
     public int getIndex() {
         return this.index;
     }
 
-    /** Returns the trophic level of the current background species.
+    /**
+     * Returns the trophic level of the current background species.
+     *
      * @todo Do this by class?
-     * @return 
+     * @return
      */
     public float getTrophicLevel(int iClass) {
         return this.trophicLevel[iClass];
@@ -175,26 +212,33 @@ public class BackgroundSpecies extends OsmoseLinker {
         return (float) (c * (Math.pow(length, bPower)));
     }
 
-    /** Returns the name of the background species.
-     * @return  The species name*/
+    /**
+     * Returns the name of the background species.
+     *
+     * @return The species name
+     */
     public String getName() {
         return name;
     }
-    
+
     public float getLength(int iClass) {
         return this.length[iClass];
     }
-    
-    public float getProportion(int iClass) { 
+
+    public float getProportion(int iClass) {
         return this.classProportion[iClass];
     }
-    
-    public float getAge(int iClass) { 
+
+    public float getAge(int iClass) {
         return this.age[iClass];
     }
-    
-    public int getAgeDt(int iClass) { 
+
+    public int getAgeDt(int iClass) {
         return this.ageDt[iClass];
     }
     
+    public int getNClass() {
+        return this.nClass;
+    }
+
 }
