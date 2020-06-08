@@ -175,7 +175,8 @@ public class NcGrid extends AbstractGrid {
                     latIndex.set(j, i);
                 }
                 maskIndex.set(j, i);
-                boolean land = (arrMask.getDouble(maskIndex) <= 0);
+                double maskVal = arrMask.getDouble(maskIndex); 
+                boolean land = (maskVal <= 0)  || (Double.isNaN(maskVal));
                 double tmpLat = arrLat.getDouble(latIndex);
                 double tmpLon = arrLon.getDouble(lonIndex);
                 grid[j][i] = new Cell((j * nx + i), i, j, (float) tmpLat, (float) tmpLon, land);
