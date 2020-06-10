@@ -388,16 +388,16 @@ public class Configuration extends OLogger {
         // Extract the species indexes for the the 
         this.focalIndex = this.findKeys("species.type.sp*").stream()
                 .filter(k -> getString(k).equals("focal"))
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
         this.bkgIndex = this.findKeys("species.type.sp*").stream()
                 .filter(k -> getString(k).equals("background"))
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
         this.rscIndex = this.findKeys("species.type.sp*").stream()
                 .filter(k -> getString(k).equals("resource"))
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).toArray();
-
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
+        
         int nSpecies_test = getInt("simulation.nspecies");
         if (nSpecies_test != nSpecies) {
             String errorMsg = String.format("Focal species may be badly defined. simulation.species=%d, number of focal types=%d", nSpecies_test, nSpecies);

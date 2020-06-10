@@ -62,6 +62,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -283,20 +285,28 @@ public class Simulation extends OsmoseLinker {
      * Initializes resources forcing.
      */
     private void initResourceForcing() {
-       
+
         resourceForcing = new HashMap();
-        
-        // Init resources for background species
-        Arrays.stream(this.getConfiguration().getBkgIndex()).forEach(i -> {
+
+        Arrays.stream(this.getConfiguration().getRscIndex()).forEach(i -> {
             ResourceForcing resForcing = new ResourceForcing(i);
-            resForcing.init();
+            try {
+                resForcing.init();
+            } catch (IOException ex) {
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+            }
             resourceForcing.put(i, resForcing);
             // Name must contain only alphanumerical characters
         });
 
-        Arrays.stream(this.getConfiguration().getRscIndex()).forEach(i -> {
+        // Init resources for background species
+        Arrays.stream(this.getConfiguration().getBkgIndex()).forEach(i -> {
             ResourceForcing resForcing = new ResourceForcing(i);
-            resForcing.init();
+            try {
+                resForcing.init();
+            } catch (IOException ex) {
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+            }
             resourceForcing.put(i, resForcing);
             // Name must contain only alphanumerical characters
         });
@@ -407,7 +417,7 @@ public class Simulation extends OsmoseLinker {
     public ResourceForcing getResourceForcing(int index) {
         return resourceForcing.get(index);
     }
-    
+
     /**
      * Returns the {@code ResourceForcing} instance for specified resource.
      *
@@ -417,7 +427,6 @@ public class Simulation extends OsmoseLinker {
     public HashMap<Integer, ResourceForcing> getResourceForcing() {
         return resourceForcing;
     }
-    
 
     /**
      * Returns the ith evolving trait for the given simulation.

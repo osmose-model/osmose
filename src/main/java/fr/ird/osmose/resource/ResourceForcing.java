@@ -56,7 +56,9 @@ import fr.ird.osmose.util.OsmoseLinker;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -116,7 +118,25 @@ public class ResourceForcing extends OsmoseLinker {
      * Length of the NetCDF time series.
      */
     private int timeLength;
-
+    
+    /** List of resource file names. */
+    private String[] fileNames;
+    
+    /** Number of time-steps stored in each file. */
+    private int[] nSteps;
+    
+    /** Number of files. */
+    private int nFiles;
+    
+    /** Index of the file to read for each time step. */
+    private int[] fileMapping;
+    
+    /** Index of the time step to each for each simulated time step. **
+     *
+     * @param index 
+     */
+    private int[] stepMapping;
+    
 //////////////
 // Constructor
 //////////////
@@ -130,7 +150,9 @@ public class ResourceForcing extends OsmoseLinker {
     /**
      * Reads and checks parameters from configuration file.
      */
-    public void init() {
+    public void init() throws IOException {
+
+        List<String> listFiles = new ArrayList<>();
 
         if (!getConfiguration().isNull("species.biomass.total.sp" + index)) {
             // uniform biomass
@@ -145,24 +167,48 @@ public class ResourceForcing extends OsmoseLinker {
             String name = getConfiguration().getString("species.name.sp" + index);
             String ncFile = getConfiguration().getFile("species.file.sp" + index);
 
-            if (!new File(ncFile).exists()) {
-                error("Error reading forcing parameters for resource group " + index, new FileNotFoundException("NetCDF file " + ncFile + " does not exist."));
-            }
+            // Recover the file pattern to match
+            String pattern = new File(ncFile).getName();
 
-            try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
-                Variable variable = nc.findVariable(name);
-                int[] shape = variable.getShape();
-                // check time length
-                if ((shape[0] < getConfiguration().getNStep()) && (shape[0] % getConfiguration().getNStepYear() != 0)) {
-                    throw new IOException("Time dimension of the NetCDF resource group " + index + " must be a multiple of the number of time steps per year");
+            File directory = new File(ncFile).getParentFile();
+            String[] fileList = directory.list();
+            for (String f : fileList) {
+                if (f.matches(pattern)) {
+                    listFiles.add(f);
                 }
-                timeLength = shape[0];
-                // check grid dimension
-                if (getGrid().get_ny() != shape[1] | getGrid().get_nx() != shape[2]) {
-                    throw new IOException("NetCDF grid dimensions of resource group " + index + " does not match Osmose grid dimensions");
+            }
+            
+            Object[] tempObj = listFiles.stream().sorted().toArray();
+            fileNames = new String[tempObj.length];
+            for(int k=0; k<tempObj.length; k++) { 
+                fileNames[k] = (String) tempObj[k];   
+            }
+            
+            this.nFiles = fileNames.length;
+            this.nSteps = new int[this.nFiles];
+            int cpt = 0;
+
+            for (String temp : fileNames) {
+
+                ncFile = new File(directory, temp).getAbsolutePath();
+                
+                if (!new File(ncFile).exists()) {
+                    error("Error reading forcing parameters for resource group " + index, new FileNotFoundException("NetCDF file " + ncFile + " does not exist."));
                 }
-            } catch (IOException ex) {
-                error("NetCDF file " + ncFile + ", variable " + name + "cannot be read", ex);
+
+                try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
+                    Variable variable = nc.findVariable(name);
+                    int[] shape = variable.getShape();
+                    // check time length
+                    nSteps[cpt] = shape[0];
+                    cpt++;
+                    // check grid dimension
+                    if (getGrid().get_ny() != shape[1] | getGrid().get_nx() != shape[2]) {
+                        throw new IOException("NetCDF grid dimensions of resource group " + index + " does not match Osmose grid dimensions");
+                    }
+                } catch (IOException ex) {
+                    error("NetCDF file " + ncFile + ", variable " + name + "cannot be read", ex);
+                }
             }
 
             // user-defined caching mode
@@ -173,6 +219,8 @@ public class ResourceForcing extends OsmoseLinker {
         } else {
             error("No input file is provided for resource " + getConfiguration().getString("species.name.sp" + index), new IOException("Cannot initialize resource group " + index));
         }
+                        
+        this.initTimeMapping();
 
         // prevent irrelevant caching mode : incremental caching requested but 
         // NetCDF time series as long as simulation time
@@ -191,8 +239,33 @@ public class ResourceForcing extends OsmoseLinker {
             warning("Resource biomass for resource group " + index + " will be multiplied by " + multiplier + " accordingly to parameter " + getConfiguration().printParameter("species.multiplier.sp" + index));
         } else {
             multiplier = 1.d;
-        }
+        }       
     }
+    
+    public void initTimeMapping() throws IOException { 
+        
+        timeLength = 0;
+        for (int c : this.nSteps) {
+            timeLength += c;
+        }
+
+        if ((timeLength < getConfiguration().getNStep()) && (timeLength % getConfiguration().getNStepYear() != 0)) {
+            throw new IOException("Time dimension of the NetCDF resource group " + index + " must be a multiple of the number of time steps per year");
+        }
+                     
+        this.fileMapping = new int[timeLength];
+        this.stepMapping = new int[timeLength];
+        
+        int cpt = 0;
+        for (int ifile=0; ifile < this.nFiles; ifile++) {
+            for(int istep=0; istep < this.nSteps[ifile]; istep++) {
+                fileMapping[cpt] = ifile;
+                stepMapping[cpt] = istep;
+                cpt++;
+            }
+        }    
+    }
+    
 
     /**
      * Updates the biomass of the resource groups at the current time step of
@@ -246,14 +319,21 @@ public class ResourceForcing extends OsmoseLinker {
 
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
-
+        
+        int iFile = this.fileMapping[iStepNc];
+        int iStep = this.stepMapping[iStepNc];
+       
+        String ncFile = this.fileNames[iFile];
+       
         double[][] rscbiomass = new double[ny][nx];
 
         String name = getConfiguration().getString("species.name.sp" + index);
-        String ncFile = getConfiguration().getFile("species.file.sp" + index);
+        //String ncFile = getConfiguration().getFile("species.file.sp" + index);
         try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
+            String message = String.format("Step=%d ==> Reading %s from %s, step=%d", iStepNc, name, ncFile, iStep);
+            this.getLogger().info(message);
             Variable variable = nc.findVariable(name);
-            Array ncbiomass = variable.read(new int[]{iStepNc, 0, 0}, new int[]{1, ny, nx}).reduce();
+            Array ncbiomass = variable.read(new int[]{iStep, 0, 0}, new int[]{1, ny, nx}).reduce();
             Index index = ncbiomass.getIndex();
             getGrid().getCells().stream().filter((cell) -> (!cell.isLand())).forEach((cell) -> {
                 int i = cell.get_igrid();
