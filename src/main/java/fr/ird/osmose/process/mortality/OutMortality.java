@@ -52,6 +52,7 @@
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.School;
+import java.util.HashMap;
 
 /**
  * This class controls mortality for schools that are temporarily outside the
@@ -62,7 +63,7 @@ public class OutMortality extends AbstractMortality {
     /*
      * Out mortality rate [dt-1]
      */
-    private double[] Zout;
+    private HashMap<Integer, Double> Zout;
 
     public OutMortality(int rank) {
         super(rank);
@@ -73,16 +74,16 @@ public class OutMortality extends AbstractMortality {
 
         int nSpecies = getConfiguration().getNSpecies();
         int nStepYear = getConfiguration().getNStepYear();
-        Zout = new double[nSpecies];
+        Zout = new HashMap();
         for (int i = 0; i < nSpecies; i++) {
             if (!getConfiguration().isNull("mortality.out.rate.sp" + i)) {
-                Zout[i] = getConfiguration().getDouble("mortality.out.rate.sp" + i) / nStepYear;
+                Zout.put(i, getConfiguration().getDouble("mortality.out.rate.sp" + i) / nStepYear);
             }
         }
     }
 
     @Override
     public double getRate(School school) {
-        return Zout[school.getSpeciesIndex()];
+        return Zout.get(school.getSpeciesIndex());
     }
 }

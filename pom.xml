@@ -58,7 +58,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
     <artifactId>osmose</artifactId>
     <version>4.2.6</version>
     <packaging>jar</packaging>
-    <name>Osmose Stable 4</name>
+    <name>Osmose develop</name>
     <description></description>
     
     <!-- Project properties -->

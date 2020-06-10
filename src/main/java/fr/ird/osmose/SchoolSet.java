@@ -135,7 +135,7 @@ public class SchoolSet extends OsmoseLinker {
     /**
      * Remove dead schools from the set
      */
-    public void removeDeadSchools() {
+     public void removeDeadSchools() {
 
         Iterator<School> it = schoolset.iterator();
         while (it.hasNext()) {

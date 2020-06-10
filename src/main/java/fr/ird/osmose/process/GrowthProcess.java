@@ -169,7 +169,7 @@ public class GrowthProcess extends AbstractProcess {
         int iSpec = school.getSpeciesIndex();
         //calculation of lengths according to predation efficiency
         if (school.getPredSuccessRate() >= criticalPredSuccess.get(iSpec)) {
-            double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess.get(iSpec)) / (1 - criticalPredSuccess.get(iSpec))));
+                double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess.get(iSpec)) / (1 - criticalPredSuccess.get(iSpec))));
             school.incrementLength((float) dlength);
         }
     }
@@ -178,3 +178,4 @@ public class GrowthProcess extends AbstractProcess {
         return growth.get(indexSpecies);
     }
 }
+    
