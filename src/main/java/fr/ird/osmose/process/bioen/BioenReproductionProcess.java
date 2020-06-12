@@ -61,7 +61,7 @@ import java.util.List;
  * This class controls the reproduction process in the simulated domain. The
  * user defines the spawning season (a CSV file per Species) either annual or
  * interannual, the percentage of female in the population (sex ratio) and the
- * number of eggs per gramme of mature female (alpha) for every species. Osmose
+ * number of eggs per gramme of mature female (beta) for every species. Osmose
  * estimates the spawning stock biomass (SSB) and calculates the number of eggs
  * to be released in the system at every time steps.<br />
  * During the spin-up of the simulation (duration of spin-up either set by the
@@ -115,7 +115,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
                 // if seeding biomass is 0 (no mature indivials, release eggs in the
                 // old fashioned way.
                 SSB[i] = this.getSeedingBiomass(i);
-                double nEgg = this.getSexRatio(i) * this.getAlpha(i) * season * SSB[i] * 1000000;
+                double nEgg = this.getSexRatio(i) * this.getBeta(i) * season * SSB[i] * 1000000;
 
                 // in this case, weight_rand is never used.
                 this.create_reproduction_schools(i, nEgg, true, weight_rand);

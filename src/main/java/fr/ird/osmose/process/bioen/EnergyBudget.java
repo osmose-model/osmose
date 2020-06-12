@@ -69,6 +69,7 @@ public class EnergyBudget extends AbstractProcess {
 
     private final TempFunction temp_function;
 
+    private final OxygenFunction oxygen_function;
     /**
      * Parameters for the kappa function.
      */
@@ -80,47 +81,52 @@ public class EnergyBudget extends AbstractProcess {
         super(rank);
         temp_function = new TempFunction(rank);
         temp_function.init();
+        
+
+        oxygen_function = new OxygenFunction(rank);
+        oxygen_function.init();
 
     }
+    
 
     @Override
     public void init() {
 
         String key;
 
-        // Redundant with the alpha of the BioenPredationMortality class.
+        // Redundant with the beta of the BioenPredationMortality class.
         int nBack = this.getNBkgSpecies();
         int nspec = this.getNSpecies();
 
-        // Recovers the alpha coefficient for focal + background species
+        // Recovers the beta coefficient for focal + background species
         r = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             key = String.format("bioen.maturity.r.sp%d", i);
             r[i] = this.getConfiguration().getDouble(key);
         }
 
-        // Recovers the alpha coefficient for focal + background species
+        // Recovers the beta coefficient for focal + background species
         m0 = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             key = String.format("bioen.maturity.m0.sp%d", i);
             m0[i] = this.getConfiguration().getDouble(key);   // barrier.n: conversion from mm to cm
         }
 
-        // Recovers the alpha coefficient for focal + background species
+        // Recovers the beta coefficient for focal + background species
         m1 = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             key = String.format("bioen.maturity.m1.sp%d", i);
             m1[i] = this.getConfiguration().getDouble(key);  // barrier.n: conversion from mm to cm
         }
 
-        // Recovers the alpha coefficient for focal + background species
+        // Recovers the beta coefficient for focal + background species
         csmr = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             key = String.format("bioen.maint.energy.csmr.sp%d", i);
             csmr[i] = this.getConfiguration().getDouble(key);
         }
 
-        // Recovers the alpha coefficient for focal + background species
+        // Recovers the beta coefficient for focal + background species
         Imax = new double[nspec];
         for (int i = 0; i < this.getNSpecies(); i++) {
             key = String.format("predation.ingestion.rate.max.bioen.sp%d", i);
@@ -139,6 +145,7 @@ public class EnergyBudget extends AbstractProcess {
         for (School school : getSchoolSet().getAliveSchools()) {
             this.get_egross(school);   // computes E_gross, stored in the attribute.
             this.get_maintenance(school);   // computes E_maintanance
+            school.updateIngestionTot(school.getIngestion(),school.getInstantaneousAbundance());
 
             try {
                 this.get_maturation(school);   // computes maturation properties for the species.
@@ -170,7 +177,7 @@ public class EnergyBudget extends AbstractProcess {
 
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
-        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()) * temp_function.get_Arrhenius(school);
+        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
 
         // multiply the maintenance flow by the number of fish in the school
@@ -187,7 +194,7 @@ public class EnergyBudget extends AbstractProcess {
      * @return
      */
     public void get_egross(School school) {
-        school.setEGross(school.getIngestion() * temp_function.get_phiT(school));
+        school.setEGross(school.getIngestion() * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
         //System.out.println(school.getIngestion() + ", " + temp_function.get_phiT(school));
     }
 
@@ -284,7 +291,7 @@ public class EnergyBudget extends AbstractProcess {
 
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - (r_temp / (imax_temp - csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - school.getAlphaBioen()); //Function in two parts according to maturity state
+        double kappa = (!school.isMature()) ? 1 : 1 - (r_temp / (imax_temp - csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen()); //Function in two parts according to maturity state
         kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
         kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
 

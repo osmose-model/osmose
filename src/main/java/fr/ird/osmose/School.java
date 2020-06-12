@@ -56,6 +56,7 @@ import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
 import java.util.Collection;
 import java.util.HashMap;
+import ucar.ma2.ArrayFloat;
 
 /**
  * This class represents a school of fish, it is the individual of the
@@ -169,6 +170,8 @@ public class School extends AbstractSchool {
     private double e_net;      // net energy (gross - maintenance)
     private double ingestion;   // total ingestion
     private double kappa;    // kappa value
+    double ingestionTot = 0; // sum of all the food ingested during life of the 
+                             // school
     
     /** Mortality rates associated with the bioen module. */
     private double mort_oxy_rate = 0;
@@ -179,6 +182,7 @@ public class School extends AbstractSchool {
     private double ageMature = 0;
     private double sizeMature = 0;
     private boolean isMature = false;
+    
     
 ///////////////
 // Constructors
@@ -593,6 +597,16 @@ public class School extends AbstractSchool {
     public double getIngestion() {
         return this.ingestion;
     }
+    
+    
+    // Calculate the total ingestion of food during life of the school 
+    public double getIngestionTot(){
+        return this.ingestionTot;
+    }
+    
+    public void updateIngestionTot(double ingestion, double abundance) {
+        this.ingestionTot += (ingestion/abundance);
+    }
 
     /**
      * The gonadic weight of the fish (not the whole school), in tonne.
@@ -735,7 +749,7 @@ public class School extends AbstractSchool {
     }
     
     /**
-     * Gets the value of maintenance energy (ingestion x phiT, equation 5).
+     * Gets the value of kappa 
      */
     public double getKappa() {
         return this.kappa;
@@ -790,9 +804,10 @@ public class School extends AbstractSchool {
         this.e_net += d;
     }
 
-    @Override
-    public double getAlphaBioen() {
-        return this.getSpecies().getAlphaBioen();
+    @Override 
+    
+    public double getBetaBioen() {
+        return this.getSpecies().getBetaBioen();
     }
     
     public Genotype getGenotype() {
@@ -824,5 +839,34 @@ public class School extends AbstractSchool {
     public boolean isLarva() { 
         return (this.getAgeDt() < this.getSpecies().getThresAge());
     }
+    
+    /** Reads the genotype from restart file. 
+     * 
+     * @param rank Simulation rank
+     * @param index School index
+     * @param genArray Netcdf Array (school, itrait, ilocus, 2)
+     * @param envNoise
+     */
+    public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray, ArrayFloat.D2 envNoise) {
         
+        // Instanciate (i.e. init arrays) genotype for the current school
+        this.instance_genotype(rank);
+        
+        // Sets the genotype values from NetCDF files
+        int ntrait = this.getGenotype().getNEvolvingTraits();
+        for(int itrait=0; itrait<ntrait; itrait++) {
+            int nlocus = this.getGenotype().getNLocus(itrait);
+            for(int iloc=0; iloc<nlocus; iloc++) {
+                // Recovers the NetCDF values
+                double val0 = genArray.get(index, itrait, iloc, 0);
+                double val1 = genArray.get(index, itrait, iloc, 1);
+                this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
+                
+                // Sets the value for the environmental noise
+                double envnoise = envNoise.get(index, itrait);
+                this.getGenotype().setEnvNoise(itrait, envnoise);
+            }
+        }   
+    }
+
 }

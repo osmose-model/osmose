@@ -65,7 +65,7 @@ import fr.ird.osmose.process.mortality.AdditionalMortality;
 import fr.ird.osmose.process.mortality.FishingMortality;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.process.mortality.OutMortality;
-import fr.ird.osmose.process.mortality.OxidativeMortality;
+import fr.ird.osmose.process.mortality.ForagingMortality;
 import fr.ird.osmose.process.mortality.PredationMortality;
 import fr.ird.osmose.process.mortality.StarvationMortality;
 import fr.ird.osmose.process.mortality.FishingGear;
@@ -126,7 +126,7 @@ public class MortalityProcess extends AbstractProcess {
     /*
      * Private instance of bioenergetic oxidative mortality
      */
-    private OxidativeMortality oxidativeMortality;
+    private ForagingMortality foragingMortality;
 
     private FisheryCatchability fisheryCatchability;
     private FisheryCatchability fisheryDiscards;
@@ -238,8 +238,8 @@ public class MortalityProcess extends AbstractProcess {
             bioenStarvationMortality = new BioenStarvationMortality(getRank());
             bioenStarvationMortality.init();
             // oxidative mortality
-            oxidativeMortality = new OxidativeMortality(getRank());
-            oxidativeMortality.init();
+            foragingMortality = new ForagingMortality(getRank());
+            foragingMortality.init();
         }
 
         // Mortality that occurs outside the simulated domain is handled separatly
@@ -416,7 +416,7 @@ public class MortalityProcess extends AbstractProcess {
         Integer[] seqFish = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqNat = Arrays.copyOf(seqPred, ns + nBkg);
         Integer[] seqStarv = Arrays.copyOf(seqPred, ns + nBkg);
-        Integer[] seqOxy = Arrays.copyOf(seqPred, ns + nBkg);
+        Integer[] seqFor = Arrays.copyOf(seqPred, ns + nBkg);
 
         // init a list of mortality causes, containing all the original mortality causes
         List<MortalityCause> causes = new ArrayList();
@@ -473,7 +473,7 @@ public class MortalityProcess extends AbstractProcess {
         shuffleArray(seqFish);
         shuffleArray(seqNat);
         shuffleArray(seqStarv);
-        shuffleArray(seqOxy);
+        shuffleArray(seqFor);
 
         boolean keepRecord = getSimulation().isPreyRecord();
         for (int i = 0; i < ns + nBkg; i++) {               // loop over all the school (focal and bkg) as predators.
@@ -484,17 +484,17 @@ public class MortalityProcess extends AbstractProcess {
                 switch (cause) {
 
                     // barrier.n: adding the 
-                    case OXIDATIVE:
-                        if ((seqOxy[i] >= ns) || (!getConfiguration().isBioenEnabled())) {
+                    case FORAGING:
+                        if ((seqFor[i] >= ns) || (!getConfiguration().isBioenEnabled())) {
                             // oxidative mortality for bion module and focal species only
                             break;
                         }
-                        school = schools.get(seqOxy[i]);
+                        school = schools.get(seqFor[i]);
                         // oxidative mortality rate at current sub time step                      
-                        double Mo = oxidativeMortality.getRate(school) / subdt;
+                        double Mo = foragingMortality.getRate(school) / subdt;
                         if (Mo > 0.d) {
                             nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-Mo));
-                            school.incrementNdead(MortalityCause.OXIDATIVE, nDead);
+                            school.incrementNdead(MortalityCause.FORAGING, nDead);
                         }
                         break;
                     case PREDATION:

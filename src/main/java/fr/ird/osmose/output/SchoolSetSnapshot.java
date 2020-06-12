@@ -52,9 +52,14 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.genet.Genotype;
+import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
@@ -72,13 +77,18 @@ import ucar.nc2.Variable;
 public class SchoolSetSnapshot extends SimulationLinker {
     
     private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
-
+    private Variable genetVar, traitVarVar;
+    private int nTrait=0;
+    private int nMaxLoci;
+    
     public SchoolSetSnapshot(int rank) {
         super(rank);
     }
 
     public void makeSnapshot(int iStepSimu) {
-
+        boolean useGenet = this.getConfiguration().isGeneticEnabled();
+        ArrayFloat.D4 genotype = null;
+        ArrayFloat.D2 traitnoise = null;
         NetcdfFileWriter nc = createNCFile(iStepSimu);
         int nSchool = getSchoolSet().getSchools().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
@@ -89,6 +99,13 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 length = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 weight = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 trophiclevel = new ArrayFloat.D1(nSchool);
+        
+        // if use genetic, initialize the output of the genotype (nschool x ntrait x nloci x 2)
+        if (useGenet) {
+            genotype = new ArrayFloat.D4(nSchool, this.nTrait, this.nMaxLoci, 2);
+            traitnoise = new ArrayFloat.D2(nSchool, this.nTrait);
+        }
+        
         int s = 0;
         // fill up the arrays
         for (School school : getSchoolSet().getSchools()) {
@@ -100,6 +117,20 @@ public class SchoolSetSnapshot extends SimulationLinker {
             length.set(s, school.getLength());
             weight.set(s, school.getWeight() * 1e6f);
             trophiclevel.set(s, school.getTrophicLevel());
+            
+            if(useGenet) {
+                // If use genetic module, save the list of loci pairs for each trait.
+                Genotype gen = school.getGenotype();
+                for(int iTrait=0; iTrait<nTrait; iTrait++) {
+                    traitnoise.set(s, iTrait, (float) gen.getEnvNoise(iTrait));
+                    int nLoci = gen.getNLocus(iTrait);
+                    for(int iLoci = 0; iLoci < nLoci; iLoci++) {
+                       genotype.set(s, iTrait, iLoci, 0, (float) gen.getLocus(iTrait, iLoci).getValue(0)); 
+                       genotype.set(s, iTrait, iLoci, 1, (float) gen.getLocus(iTrait, iLoci).getValue(1)); 
+                    }
+                }
+            }
+            // writes genotype for each school
             s++;
         }
         // write the arrays in the NetCDF file
@@ -112,6 +143,10 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.write(this.lengthVar, length);
             nc.write(this.weightVar, weight);
             nc.write(this.tlVar, trophiclevel);
+            if(useGenet) { 
+                nc.write(this.genetVar, genotype);
+                nc.write(this.traitVarVar, traitnoise);
+            }
             nc.close();
             //close(nc);
         } catch (IOException ex) {
@@ -130,7 +165,6 @@ public class SchoolSetSnapshot extends SimulationLinker {
          * Create NetCDF file
          */
         try {
-          
             File path = new File(getConfiguration().getOutputPathname());
             file = new File(path, getFilename(iStepSimu));
             file.getParentFile().mkdirs();
@@ -141,7 +175,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         /*
          * Create dimensions
          */
-        Dimension nSchool = nc.addDimension(null, "nschool", getSchoolSet().getSchools().size());
+        Dimension schoolDim = nc.addDimension(null, "nschool", getSchoolSet().getSchools().size());
         /*
          * Add variables
          */
@@ -175,6 +209,26 @@ public class SchoolSetSnapshot extends SimulationLinker {
         tlVar = nc.addVariable(null, "trophiclevel", DataType.FLOAT, "nschool");
         tlVar.addAttribute(new Attribute("units", "scalar"));
         tlVar.addAttribute(new Attribute("description", "trophiclevel of the fish in the school"));
+        
+        if(this.getConfiguration().isGeneticEnabled()) {
+            // Determines the maximum number of Loci that codes a trait
+            nTrait = this.getSimulation().getNEvolvingTraits();
+            for (int iTrait = 0; iTrait < nTrait; iTrait++) {
+                Trait trait = this.getEvolvingTrait(iTrait);
+                for (int iSpec = 0; iSpec < this.getConfiguration().getNSpecies(); iSpec++) {
+                    nMaxLoci = Math.max(trait.getNLocus(iSpec), nMaxLoci);
+                }   
+            }
+            
+           //Dimension[] dimOut = new Dimension[3] {
+           Dimension traitDim = nc.addDimension(null, "trait", nTrait);
+           Dimension lociDim = nc.addDimension(null, "loci", nMaxLoci);        
+           Dimension locValDim = nc.addDimension(null, "loci_val",  2);
+           
+           genetVar = nc.addVariable(null, "genotype", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim, lociDim, locValDim)));
+           
+        }
+        
         /*
          * Add global attributes
          */
@@ -186,7 +240,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
             str.append(getSpecies(i).getName());
             str.append(" ");
         }
+        
         nc.addGroupAttribute(null, new Attribute("species", str.toString()));
+        
         try {
             /*
              * Validates the structure of the NetCDF file.
