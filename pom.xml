@@ -56,7 +56,7 @@ knowledge of the CeCILL-B license and that you accept its terms.
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.ird</groupId>
     <artifactId>osmose</artifactId>
-    <version>4.2.6</version>
+    <version>4.3.0</version>
     <packaging>jar</packaging>
     <name>Osmose develop</name>
     <description></description>
