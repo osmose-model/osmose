@@ -65,7 +65,7 @@ import java.util.List;
  * @author pverley
  */
 public class Releases {
-
+    
     final public static Release[] ALL = new Release[]{
         // 2014/06/01
         new Release("3.1") {
@@ -139,7 +139,7 @@ public class Releases {
 
                 // Deprecated flux.incoming.season.file
                 deprecateParameter("flux.incoming.season.file");
-
+                
                 for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                     // Deprecated flux.incoming.season.file.sp#
                     deprecateParameter("flux.incoming.season.file.sp" + iSpec);
@@ -236,27 +236,27 @@ public class Releases {
         new Release("3.3.3") {
             @Override
             void updateParameters() {
-
+                
                 this.updateKey("grid.ncolumn", "grid.nlon");
                 this.updateKey("grid.nline", "grid.nlat");
-
+                
             }
         },
         // 2019/09/19
         new Release("4.2.1") {
             @Override
             void updateParameters() {
-
-                updateKey("output.yield.abundance.enabled", "output.yieldN.enabled");
-                updateKey("output.yield.biomass.enabled", "output.yield.enabled");
-
+                
+                updateKey("output.yieldN.enabled", "output.yield.abundance.enabled");
+                updateKey("output.yield.enabled", "output.yield.biomass.enabled");
+                
             }
         },
         // 2019/10/11
         new Release("4.2.2") {
             @Override
             void updateParameters() {
-
+                
                 updateKey("simulation.use.bioen", "simulation.bioen.enabled");
 
                 // got rid of iterative mortality process, so only one mortality algorithm left
@@ -309,7 +309,7 @@ public class Releases {
                 for (int t = 0; t < getConfiguration().findKeys("ltl.netcdf.file.t*").size(); t++) {
                     deprecateParameter("ltl.netcdf.file.t" + t);
                 }
-
+                
             }
         },
         // 2019/11/25
@@ -323,7 +323,7 @@ public class Releases {
         new Release("4.2.5") {
             @Override
             void updateParameters() {
-
+                
                 int nSpecies = getConfiguration().getInt("simulation.nspecies");
 
                 // outputs
@@ -351,13 +351,28 @@ public class Releases {
             void updateParameters() {
                 
                 Configuration cfg = this.getConfiguration();
-                         
+                
                 cfg.findKeys("movement.age.min.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.age.min.map" + i, "movement.initialAge.map" + i));
                 cfg.findKeys("movement.age.max.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.age.max.map" + i, "movement.lastAge.map" + i));
                 cfg.findKeys("movement.season.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.season.map" + i, "movement.steps.map" + i));
- 
+                
             }
-        }
-
-    };
-}
+        },
+        new Release("4.3.0") {
+            @Override
+            void updateParameters() {
+                
+                Configuration cfg = this.getConfiguration();
+                cfg.findKeys("plankton.conversion2tons*").stream().forEach(key -> deprecateParameter(key));
+                
+                if (cfg.findKeys("predation.accessibility.stage.threshold*").size() > 0) {
+                    String message = "The accessibility stage are now set directly from the accessibility matrix";
+                    this.getLogger().info(message);
+                    cfg.findKeys("predation.accessibility.stage.threshold*").stream().forEach(key -> deprecateParameter(key));
+                }
+                
+            } // end of update parameters
+        } // end of release constructor
+    
+    };  // end of ALL array
+}  // end of class

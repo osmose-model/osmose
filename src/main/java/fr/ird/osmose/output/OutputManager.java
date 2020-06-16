@@ -139,7 +139,7 @@ public class OutputManager extends SimulationLinker {
             String pattern = getConfiguration().getString("output.file.prefix") + "*_Simu" + rank + "*";
             IOTools.deleteRecursively(getConfiguration().getOutputPathname(), pattern);
         }
-
+        
         AbstractDistribution sizeDistrib = new SizeDistribution();
         sizeDistrib.init();
         AbstractDistribution ageDistrib = new AgeDistribution();
