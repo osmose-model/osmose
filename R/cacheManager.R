@@ -122,6 +122,7 @@ updateCache <- function(nameFile) {
     "osmose_4.0.0.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_4.0.0.zip",
     "osmose_4.1.0.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_4.1.0.zip",
     "osmose_4.2.1.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose_4.2.1.zip",
+    "osmose_4.3.0.jar" = "https://github.com/osmose-model/osmose/raw/master/inst/java/osmose-4.3.0.zip",
     "lib" = "https://github.com/osmose-model/osmose/raw/master/inst/java/lib.zip"
   )
   
