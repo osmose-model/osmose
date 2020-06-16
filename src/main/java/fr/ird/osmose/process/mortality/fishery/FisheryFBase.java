@@ -85,11 +85,22 @@ public class FisheryFBase extends OsmoseLinker {
         // If a fishing shift exists, take it to extract the fishing values
         String keyShift = String.format("fisheries.rate.base.shift.fsh%d", index);
         String keyVal = String.format("fisheries.rate.base.fsh%d", index);
+        
+        boolean useLog10 = getConfiguration().getBoolean("fisheries.rate.base.log.enabled.fsh" + index);
 
         ByRegimeTimeSeries ts = new ByRegimeTimeSeries(keyShift, keyVal);
         ts.init();
 
         fBase = ts.getValues();
+        if(useLog10) {
+            for (int i = 0; i < fBase.length; i++) {
+                if(fBase[i] > 0) {
+                    String message = String.format("Fishing mortality rate exponent for fishery %d is positive", index);
+                    error(message, new IllegalArgumentException());
+                }
+                fBase[i] = Math.exp(fBase[i]);
+            }
+        }
 
     } // end of init method
 

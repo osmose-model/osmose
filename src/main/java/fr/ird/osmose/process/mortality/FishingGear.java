@@ -57,7 +57,7 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.mortality.fishery.FisheryFBase;
-import fr.ird.osmose.process.mortality.fishery.FisherySeason;
+import fr.ird.osmose.process.mortality.fishery.FisheryPeriod;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
@@ -85,7 +85,7 @@ public class FishingGear extends AbstractMortality {
 
     // Initialize the time varying array
     private FisheryFBase fBase;
-    private FisherySeason fSeason;
+    private FisheryPeriod fPeriod;
     private FisherySeasonality fSeasonality;
 
     /**
@@ -121,8 +121,8 @@ public class FishingGear extends AbstractMortality {
         fBase = new FisheryFBase(fIndex);
         fBase.init();
 
-        fSeason = new FisherySeason(fIndex);
-        fSeason.init();
+        fPeriod = new FisheryPeriod(fIndex);
+        fPeriod.init();
 
         fSeasonality = new FisherySeasonality(fIndex);
         fSeasonality.init();
@@ -174,7 +174,7 @@ public class FishingGear extends AbstractMortality {
         // recovers the time varying rate of the fishing mortality
         // as a product of FBase, FSeason and FSeasonality
         double timeSelect = fBase.getFBase(index);
-        timeSelect *= this.fSeason.getSeasonFishMort(index);
+        timeSelect *= this.fPeriod.getSeasonFishMort(index);
         timeSelect *= this.fSeasonality.getSeasonalityFishMort(index);
 
         // Recovers the size/age fishery selectivity factor [0, 1]
@@ -257,7 +257,7 @@ public class FishingGear extends AbstractMortality {
         for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
 
             double fbase = this.fBase.getFBase(i);
-            double fseason = this.fSeason.getSeasonFishMort(i);
+            double fseason = this.fPeriod.getSeasonFishMort(i);
             double fseasonality = this.fSeasonality.getSeasonalityFishMort(i);
             double ftot = fbase * fseason * fseasonality;
 

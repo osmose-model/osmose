@@ -58,7 +58,7 @@ import java.io.IOException;
  *
  * @author Nicolas
  */
-public class FisherySeason extends OsmoseLinker {
+public class FisheryPeriod extends OsmoseLinker {
     
     private final int fisheryIndex;
     private final double[] fmortSeason;
@@ -66,7 +66,7 @@ public class FisherySeason extends OsmoseLinker {
     private double seasonOffset; 
     
     
-    public FisherySeason(int fisheryIndex) {
+    public FisheryPeriod(int fisheryIndex) {
 
         this.fisheryIndex = fisheryIndex;
         this.fmortSeason = new double[this.getConfiguration().getNStep()];
