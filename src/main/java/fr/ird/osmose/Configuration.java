@@ -343,6 +343,7 @@ public class Configuration extends OLogger {
         // the bioen module should be used.
         // String keybioen = "simulation.use.bioen";
         String keybioen = "simulation.bioen.enabled";
+        
         this.bioenEnabled = this.getBoolean(keybioen);
 
         String key = "simulation.genetic.enabled";
@@ -581,7 +582,7 @@ public class Configuration extends OLogger {
     public boolean isGeneticEnabled() {
         return this.geneticEnabled;
     }
-
+    
     /**
      * Get a species
      *

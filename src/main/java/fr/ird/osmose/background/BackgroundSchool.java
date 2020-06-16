@@ -183,11 +183,6 @@ public class BackgroundSchool extends AbstractSchool {
     }
 
     @Override
-    public double getAlphaBioen() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public String getSpeciesName() {
         return this.bkgSpecies.getName();
     }
@@ -198,6 +193,11 @@ public class BackgroundSchool extends AbstractSchool {
     
     public void setBiomass(double biomass) {
         this.biomass = biomass * this.getProportion();
+    }
+
+    @Override
+    public double getBetaBioen() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

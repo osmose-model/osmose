@@ -1,4 +1,4 @@
-/* 
+/*
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
@@ -7,10 +7,7 @@
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
  * This software is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
@@ -19,7 +16,7 @@
  * and size adequacy between a predator and its prey. It represents fish
  * individuals grouped into schools, which are characterized by their size,
  * weight, age, taxonomy and geographical location, and which undergo major
- * processes of fish life cycle (growth, explicit predation, additional and
+ * processes of fish life cycle (growth, explicit predation, natural and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
@@ -49,65 +46,61 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality;
+package fr.ird.osmose.output;
+
+import fr.ird.osmose.School;
+import java.io.File;
 
 /**
- * A list of mortality causes.
+ *
+ * @author amorell
  */
-public enum MortalityCause {
+public class AbundanceOutput_age1 extends AbstractOutput {
 
-    /**
-     * Predation mortality
-     *
-     * @see fr.ird.osmose.process.PredationProcess
-     *//**
-     * Predation mortality
-     *
-     * @see fr.ird.osmose.process.PredationProcess
-     */
-    PREDATION(0),
-    /**
-     * Starvation mortality
-     *
-     * @see fr.ird.osmose.process.StarvationProcess
-     */
-    STARVATION(1),
-    /**
-     * Additional mortality
-     *
-     * @see fr.ird.osmose.process.AdditionalMortality
-     */
-    ADDITIONAL(2),
-    /**
-     * Fishing mortality
-     *
-     * @see fr.ird.osmose.process.FishingProcess
-     */
-    FISHING(3),
-    /**
-     * Out of domain mortality
-     *
-     * @see fr.ird.osmose.process.OutMortalityProcess
-     */
-    OUT(4),
-    
-    /** Oxidation mortality (bioenergetic module) */
-    FORAGING(5),
-    
-    /** Mortality due to discards. */
-    DISCARDS(6);
-    
-    /**
-     * Index of the mortality cause
-     */
-    public final int index;
+    public double[] abund_age1;
+    public double ageSchool;
 
-    /**
-     * Initialises a mortality cause with a given index.
-     *
-     * @param index, the index of the mortality cause
-     */
-    private MortalityCause(int index) {
-        this.index = index;
+    public AbundanceOutput_age1(int rank, String subfolder, String name) {
+        super(rank, subfolder, name);
+    }
+
+    @Override
+    public void initStep() {
+    
+    }
+
+    @Override
+    public void reset() {
+        // Do nothing
+        abund_age1 = new double[this.getNSpecies()];
+    }
+
+    @Override
+    public void update() {
+        for (School school : getSchoolSet().getAliveSchools()) {
+            ageSchool = school.getAgeDt();
+            if (ageSchool == 24) {
+                abund_age1[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+            }
+        }
+     }
+    
+    @Override
+    public void write(float time) {
+        writeVariable(time, abund_age1);
+    }
+
+    @Override
+    String getDescription() {
+        return "Abundance at age 1 (number of individuals)";
+    }
+
+    @Override
+    String[] getHeaders() {
+        String[] species = new String[getNSpecies()];
+        for (int i = 0; i < species.length; i++) {
+            species[i] = getSpecies(i).getName();
+        }
+        return species;
     }
 }

@@ -1,4 +1,4 @@
-/* 
+/*
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
@@ -7,10 +7,7 @@
  * Contributor(s):
  * Yunne SHIN (yunne.shin@ird.fr),
  * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
  * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
  * This software is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
@@ -19,7 +16,7 @@
  * and size adequacy between a predator and its prey. It represents fish
  * individuals grouped into schools, which are characterized by their size,
  * weight, age, taxonomy and geographical location, and which undergo major
- * processes of fish life cycle (growth, explicit predation, additional and
+ * processes of fish life cycle (growth, explicit predation, natural and
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
@@ -49,37 +46,70 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality;
+package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
+import java.io.File;
 
 /**
  *
  * @author pverley
  */
-public class OxidativeMortality extends AbstractMortality {
+public class BioenMaintOutput extends AbstractOutput {
 
-    private double k_dam;
+    public double[] maintenance;
+    public double[] abundance;
 
-    public OxidativeMortality(int rank) {
-        super(rank);
+    public BioenMaintOutput(int rank, String subfolder, String name) {
+        super(rank, subfolder, name);
     }
 
     @Override
-    public void init() {
+    public void initStep() {
+        // Nothing to do
+    }
 
-        k_dam = 0.d;
-        String key = "bioen.damage.k_dam";
-        if (!getConfiguration().isNull(key)) {
-            k_dam = getConfiguration().getDouble(key);
+    @Override
+    public void reset() {
+        maintenance = new double[getNSpecies()];
+        abundance = new double[getNSpecies()];
+
+    }
+
+    @Override
+    public void update() {
+        for (School school : getSchoolSet().getAliveSchools()) {
+            int i = school.getSpeciesIndex();
+            maintenance[i] += school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+            abundance[i] += 1;
         }
-
+    }
+       
+    @Override
+    public void write(float time) {
+        
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            if (abundance[i] > 0) {
+                maintenance[i] = (float) (maintenance[i] / abundance[i]);
+            } else {
+                maintenance[i] = Double.NaN;
+            }
+        }
+        
+        writeVariable(time, maintenance);
     }
 
     @Override
-    public double getRate(School school) {
-        // calculation of PhiT
-        return this.k_dam * school.getEGross();
+    String getDescription() {
+        return "Maintenance rate (grams.grams^-beta)";
     }
 
+    @Override
+    String[] getHeaders() {
+        String[] species = new String[getNSpecies()];
+        for (int i = 0; i < species.length; i++) {
+            species[i] = getSpecies(i).getName();
+        }
+        return species;
+    }
 }

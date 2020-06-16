@@ -311,6 +311,9 @@ public class OutputManager extends SimulationLinker {
                     (school) -> school.getInstantaneousAbundance())
             );
         }
+        if (getConfiguration().getBoolean("output.abundance.age1.enabled")) {
+            outputs.add(new AbundanceOutput_age1(rank, "Bioen", "AbundAge1"));
+        }       
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "abundance",
                     "Distribution of fish abundance (number of fish)",
@@ -604,15 +607,19 @@ public class OutputManager extends SimulationLinker {
             if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
                 outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "ingestion",
                         "Ingestion rate (grams.grams^-alpha)",
-                        school -> school.getEGross() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen())),
+                        school -> school.getEGross() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
                         nshool -> 1.d
                 ));
+            }
+            
+            if (getConfiguration().getBoolean("output.bioen.ingesttot.enabled", NO_WARNING)) {
+                outputs.add(new BioenIngestTotOutput(rank, "Bioen", "ingestionTot"));
             }
 
             if (getConfiguration().getBoolean("output.bioen.maint.enabled", NO_WARNING)) {
                 outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "maintenance",
                         "Maintenance rate (grams.grams^-alpha)",
-                        school -> school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen())),
+                        school -> school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
                         nshool -> 1.d
                 ));
             }
@@ -620,9 +627,13 @@ public class OutputManager extends SimulationLinker {
             if (getConfiguration().getBoolean("output.bioen.growthpot.enabled", NO_WARNING)) {
                 outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "potentialGrowthRate",
                         "Potential net growth rate (grams.grams^-alpha) (grams net usable per gram of predator)",
-                        school -> school.getENet() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen())),
+                        school -> school.getENet() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
                         nshool -> 1.d
                 ));
+            }
+            
+            if (getConfiguration().getBoolean("output.bioen.enet.enabled", NO_WARNING)) {
+                outputs.add(new BioenMeanEnergyNet(rank, "Bioen", "meanEnet"));
             }
 
             if (getConfiguration().getBoolean("output.bioen.sizeInf.enabled", NO_WARNING)) {
@@ -637,7 +648,7 @@ public class OutputManager extends SimulationLinker {
                 ));
             }
         }
-
+        
         // warning: simulation init is called after output init.
         //List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
         if (this.getConfiguration().isGeneticEnabled()) {

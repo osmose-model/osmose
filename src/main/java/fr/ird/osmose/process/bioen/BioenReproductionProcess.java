@@ -54,6 +54,7 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.process.*;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import java.util.HashMap;
 
 import java.util.List;
 
@@ -61,7 +62,7 @@ import java.util.List;
  * This class controls the reproduction process in the simulated domain. The
  * user defines the spawning season (a CSV file per Species) either annual or
  * interannual, the percentage of female in the population (sex ratio) and the
- * number of eggs per gramme of mature female (alpha) for every species. Osmose
+ * number of eggs per gramme of mature female (beta) for every species. Osmose
  * estimates the spawning stock biomass (SSB) and calculates the number of eggs
  * to be released in the system at every time steps.<br />
  * During the spin-up of the simulation (duration of spin-up either set by the
@@ -83,24 +84,27 @@ public class BioenReproductionProcess extends ReproductionProcess {
 
     @Override
     public void run() {
-
+        
         // spawning stock biomass per species
-        // used only for collasping species.
-        double[] SSB = new double[getConfiguration().getNSpecies()];
+        HashMap<Integer, Double> SSB = new HashMap();
+        for (int i : getConfiguration().getFocalIndex()) {
+            SSB.put(i, 0.);
+        }
 
         // loop over all the schools to compute 
         for (School school : getSchoolSet().getSchools()) {
 
             int i = school.getSpeciesIndex();
             if (school.isMature()) {
-                SSB[i] += school.getInstantaneousBiomass();
+                double value = SSB.get(i) + school.getInstantaneousBiomass();
+                SSB.put(i, value);
             }
             // increment age
             school.incrementAge();
         }
 
         // loop over the species to lay cohort at age class 0
-        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+        for (int i : getConfiguration().getFocalIndex()) {
 
             // Recover the species object and all the schools of the given species
             Species species = getSpecies(i);
@@ -110,12 +114,12 @@ public class BioenReproductionProcess extends ReproductionProcess {
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
 
-            if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB[i] == 0.) {
+            if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB.get(i) == 0.) {
                 // seeding process for collapsed species
                 // if seeding biomass is 0 (no mature indivials, release eggs in the
                 // old fashioned way.
-                SSB[i] = this.getSeedingBiomass(i);
-                double nEgg = this.getSexRatio(i) * this.getAlpha(i) * season * SSB[i] * 1000000;
+                SSB.put(i, this.getSeedingBiomass(i));
+                double nEgg = this.getSexRatio(i) * this.getBeta(i) * season * SSB.get(i) * 1000000;
 
                 // in this case, weight_rand is never used.
                 this.create_reproduction_schools(i, nEgg, true, weight_rand);

@@ -131,8 +131,8 @@ public interface IMarineOrganism {
     
     public Cell getCell();
     
-    public double getAlphaBioen();
-
     public String getSpeciesName();
+   
+    public double getBetaBioen();
     
 }

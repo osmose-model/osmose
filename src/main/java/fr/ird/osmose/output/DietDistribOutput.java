@@ -143,5 +143,4 @@ public class DietDistribOutput extends AbstractDistribOutput {
         }
         writeVariable(time, array);
     }
-
 }

@@ -121,6 +121,10 @@ public class Species {
      */
     private final int lar2ad_thres;
        
+    private double beta_bioen;
+
+    private boolean bioenEnabled;
+
 //////////////
 // Constructor
 //////////////
@@ -159,7 +163,7 @@ public class Species {
             ageMaturity = Float.MAX_VALUE;
             eggSize = Float.MAX_VALUE;
         }
-        
+
         eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
         float agemax = cfg.getFloat("species.lifespan.sp" + index);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
@@ -167,8 +171,8 @@ public class Species {
         // barrier.n: added for bioenergetic purposes.
         if (cfg.isBioenEnabled()) {
             zlayer = cfg.getInt("species.zlayer.sp" + index);
-            String key = String.format("species.alpha.sp%d", index);
-            alpha_bioen = cfg.getDouble(key);
+            String key = String.format("species.beta.sp%d", index);
+            beta_bioen = cfg.getDouble(key);
         }
         
         // If the key is found, then the age switch in years is converted into
@@ -186,9 +190,9 @@ public class Species {
     public int getThresAge() {
         return this.lar2ad_thres;
     }
-    
-    public double getAlphaBioen() {
-        return this.alpha_bioen;
+
+    public double getBetaBioen() {
+        return this.beta_bioen;
     }
 
     public int getDepthLayer() {
@@ -208,7 +212,7 @@ public class Species {
     public float computeWeight(float length) {
         return (float) (c * (Math.pow(length, bPower)));
     }
-    
+
     /**
      * Computes the length, in centimetre, corresponding to the given weight, in
      * gram.
@@ -217,9 +221,8 @@ public class Species {
      * @return the length in centimetre for this {@code weight}
      */
     public float computeLength(float weight) {
-        return (float) (Math.pow(weight/c, (1/bPower)));
+        return (float) (Math.pow(weight / c, (1 / bPower)));
     }
-
 
     /**
      * Returns the lifespan of the species. Parameter
@@ -255,11 +258,9 @@ public class Species {
      * @return the size of an egg in centimeter
      */
     public float getEggSize() {
-        if (Osmose.getInstance().getConfiguration().isBioenEnabled()) {
-            throw new UnsupportedOperationException("getEggSize not supported in Osmose-PHYSIO");
-        } else {
-            return eggSize;
-        }
+        Configuration cfg = Osmose.getInstance().getConfiguration();
+        float output = cfg.isBioenEnabled() ? this.computeLength(eggWeight) : this.eggSize;
+        return output;
     }
     
     /**
@@ -291,7 +292,7 @@ public class Species {
         double Sv = 1.d;
         return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
     }
-    
+
     public double getBPower() {
         return this.bPower;
     }
