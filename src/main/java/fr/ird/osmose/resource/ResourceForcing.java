@@ -330,8 +330,8 @@ public class ResourceForcing extends OsmoseLinker {
         String name = getConfiguration().getString("species.name.sp" + index);
         //String ncFile = getConfiguration().getFile("species.file.sp" + index);
         try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
-            String message = String.format("Step=%d ==> Reading %s from %s, step=%d", iStepNc, name, ncFile, iStep);
-            this.getLogger().info(message);
+            //String message = String.format("Step=%d ==> Reading %s from %s, step=%d", iStepNc, name, ncFile, iStep);
+            //this.getLogger().info(message);
             Variable variable = nc.findVariable(name);
             Array ncbiomass = variable.read(new int[]{iStep, 0, 0}, new int[]{1, ny, nx}).reduce();
             Index index = ncbiomass.getIndex();
