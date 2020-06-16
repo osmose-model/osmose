@@ -1163,7 +1163,7 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
 #'demo = osmose_demo(path="../", config="gog")
 #'
 #'# run the osmose model
-#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="3.3.3", 
+#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.0", 
 #'           options=NULL, verbose=TRUE, clean=TRUE)
 #'
 #'# reads output data
