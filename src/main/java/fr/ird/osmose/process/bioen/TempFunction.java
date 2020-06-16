@@ -54,6 +54,7 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Class that handles the ingestion in the Bioenergetic model
@@ -62,13 +63,12 @@ import java.io.IOException;
  */
 public class TempFunction extends AbstractProcess {
 
-    private double[] km,gamma;
-
+    private HashMap<Integer, Double> km, gamma;
 
     /**
      * Parameters for the energy maintenance.
      */
-    private double[] c_t, Tr;
+    private HashMap<Integer, Double> c_t, Tr;
 
     PhysicalData temperature_input;
 
@@ -85,38 +85,36 @@ public class TempFunction extends AbstractProcess {
     @Override
     public void init() {
 
-        km = new double[this.getNSpecies()];
-        gamma = new double[this.getNSpecies()];
-        c_t = new double[this.getNSpecies()];
-        Tr = new double[this.getNSpecies()];
+        km = new HashMap();
+        gamma = new HashMap();
+        c_t = new HashMap();
+        Tr =new HashMap();
 
         String key;
 
         key = "bioen.gross.energy.km";
-        for (int i = 0; i < this.getNSpecies(); i++) {
+        for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            km[i] = getConfiguration().getDouble(keytmp);
+            km.put(i, getConfiguration().getDouble(keytmp));
         }
 
         key = "bioen.gross.energy.gamma";
-        for (int i = 0; i < this.getNSpecies(); i++) {
+        for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            gamma[i] = getConfiguration().getDouble(keytmp);
+            gamma.put(i, getConfiguration().getDouble(keytmp));
         }
 
-        
         key = "bioen.arrh.ct";
-        for (int i = 0; i < this.getNSpecies(); i++) {
+        for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            c_t[i] = getConfiguration().getDouble(keytmp);
+            c_t.put(i, getConfiguration().getDouble(keytmp));
         }
 
         key = "bioen.maint.energy.Tr";
-        for (int i = 0; i < this.getNSpecies(); i++) {
+        for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            Tr[i] = getConfiguration().getDouble(keytmp);
+            Tr.put(i, getConfiguration().getDouble(keytmp));
         }
-
 
     }
 
@@ -128,7 +126,6 @@ public class TempFunction extends AbstractProcess {
     /**
      * Computes the phiT coefficients function for gross energy. Equation 4
      */
-    
     /**
      * Returns the temperature for a given school.
      */
@@ -150,7 +147,7 @@ public class TempFunction extends AbstractProcess {
         double temp = temperature_input.getValue(school);
         int i = school.getSpeciesIndex();
 
-        double output = (temp-this.gamma[i])/(temp-this.gamma[i]+this.km[i]);
+        double output = (temp - this.gamma.get(i)) / (temp - this.gamma.get(i) + this.km.get(i));
         return output;
 
     }
@@ -168,7 +165,7 @@ public class TempFunction extends AbstractProcess {
         double temp = this.getTemp(school);
         int i = school.getSpeciesIndex();
 
-        return Math.exp(this.c_t[i] * (1 / this.Tr[i]  - 1 / (temp + 273.15)));
+        return Math.exp(this.c_t.get(i) * (1 / this.Tr.get(i) - 1 / (temp + 273.15)));
 
     }
 

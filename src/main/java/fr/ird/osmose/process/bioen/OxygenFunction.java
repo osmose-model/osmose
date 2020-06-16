@@ -8,6 +8,7 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
+import java.util.HashMap;
 
 /** 
  * Class that handles the ingestion in the Bioenergetic model
@@ -17,7 +18,7 @@ import java.io.IOException;
 public class OxygenFunction extends AbstractProcess {
     
     /** Variables used to compute f02 function. */
-    private double []  c1, c2;
+    private HashMap<Integer, Double>  c1, c2;
 
     PhysicalData o2_input;
     
@@ -37,14 +38,14 @@ public class OxygenFunction extends AbstractProcess {
         
         // Recovering the values of C1 and C2 used for fO2 function (one
         // per focal species)
-        c1 = new double[this.getNSpecies()];
-        c2 = new double[this.getNSpecies()];
-        for(int i=0; i<this.getNSpecies(); i++) {
+        c1 = new HashMap();
+        c2 = new HashMap();
+        for(int i : getConfiguration().getFocalIndex()) {
             key = String.format("species.c1.sp%d", i);
-            c1[i] = getConfiguration().getDouble(key); 
+            c1.put(i, getConfiguration().getDouble(key)); 
             
             key = String.format("species.c2.sp%d", i);
-            c2[i] = getConfiguration().getDouble(key); 
+            c2.put(i, getConfiguration().getDouble(key)); 
         }       
     }
 
@@ -63,7 +64,7 @@ public class OxygenFunction extends AbstractProcess {
         int k = school.getSpecies().getDepthLayer();       
         // computation of the
         double o2 = o2_input.getValue(k, school.getCell());
-        double output = c1[school.getSpecies().getIndex()] * o2/ (o2 + c2[school.getSpecies().getIndex()]);
+        double output = c1.get(school.getSpecies().getIndex()) * o2/ (o2 + c2.get(school.getSpecies().getIndex()));
         
         return output;
     }   
