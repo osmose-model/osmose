@@ -99,18 +99,18 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
 
     public FisheryOutput(int rank) {
         super(rank);
-        
+
     }
 
     @Override
     public void init() {
-        
+
         // initializes the number of fisheries
         nFishery = getConfiguration().getNFishery();
-        
+
         biomass = new HashMap();
-        for(int i : getConfiguration().getFishIndex()) {
-           biomass.put(i, new float[nFishery]);
+        for (int i : getConfiguration().getFishIndex()) {
+            biomass.put(i, new float[nFishery]);
         }
 
         /*
@@ -129,6 +129,9 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         Dimension speciesDim = nc.addDimension(null, "species", getNSpecies() + this.getNBkgSpecies());
         Dimension fisheriesDim = nc.addDimension(null, "fishery", nFishery);
         Dimension timeDim = nc.addUnlimitedDimension("time");
+
+        String attr = this.getSpeciesNames();
+   
         /*
          * Add variables
          */
@@ -141,6 +144,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         biomassVar.addAttribute(new Attribute("units", "ton"));
         biomassVar.addAttribute(new Attribute("description", "biomass, in tons, per species and per cell"));
         biomassVar.addAttribute(new Attribute("_FillValue", -99.f));
+        biomassVar.addAttribute(new Attribute("species_names", attr));
 
         try {
             /*
@@ -180,8 +184,8 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
      */
     @Override
     public void reset() {
-        for(int i : getConfiguration().getFishIndex()) { 
-        biomass.put(i, new float[nFishery]);
+        for (int i : getConfiguration().getFishIndex()) {
+            biomass.put(i, new float[nFishery]);
         }
     }
 
@@ -190,12 +194,12 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
 
         getSchoolSet().getAliveSchools().forEach((school) -> {
             int iSpecies = school.getSpeciesIndex();
-            for (int iFishery = 0; iFishery < nFishery; iFishery++) {                
+            for (int iFishery = 0; iFishery < nFishery; iFishery++) {
                 double value = biomass.get(iSpecies)[iFishery] + school.getFishedBiomass(iFishery);
                 biomass.get(iSpecies)[iFishery] = (float) value;
             }
         });
-        
+
         this.getBkgSchoolSet().getAllSchools().forEach((bkgSch) -> {
             int iSpecies = bkgSch.getSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
@@ -204,7 +208,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
             }
         }
         );
-        
+
     }
 
     @Override
@@ -214,7 +218,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         int nSpecies = getNSpecies();
         int nBackground = this.getNBkgSpecies();
         ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
-        int cpt = 0; 
+        int cpt = 0;
         for (int iSpecies : getConfiguration().getFishIndex()) {
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
                 arrBiomass.set(0, cpt, iFishery, biomass.get(iSpecies)[iFishery]);
@@ -250,5 +254,33 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
     public boolean isTimeToWrite(int iStepSimu) {
         // Always true, every time step should be written in the NetCDF file.
         return true;
+    }
+
+    /**
+     * Get species names for attributes.
+     *
+     * @return
+     */
+    private String getSpeciesNames() {
+        StringBuilder strBuild = new StringBuilder();
+
+        for (int i : this.getConfiguration().getFocalIndex()) {
+            strBuild.append(getSpecies(i).getName());
+            strBuild.append(", ");
+        }
+
+        for (int i : this.getConfiguration().getBkgIndex()) {
+            strBuild.append(getBkgSpecies(i).getName());
+            strBuild.append(", ");
+        }
+
+        String output = strBuild.toString().trim();
+        if (output.endsWith(",")) {
+            int comIndex = output.lastIndexOf(",");
+            output = output.substring(0, comIndex);
+        }
+
+        return output;
+
     }
 }
