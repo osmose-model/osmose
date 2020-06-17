@@ -1,4 +1,4 @@
-/* 
+/*
  * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
  * http://www.osmose-model.org
  * 
@@ -49,65 +49,75 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.util;
+package fr.ird.osmose.background;
 
-import fr.ird.osmose.SchoolSet;
-import fr.ird.osmose.Simulation;
-import fr.ird.osmose.process.genet.Trait;
-import fr.ird.osmose.resource.ResourceForcing;
+import fr.ird.osmose.Cell;
+import fr.ird.osmose.util.OsmoseLinker;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import fr.ird.osmose.background.BackgroundSchoolSet;
+import java.util.List;
 
 /**
  *
- * @author pverley
+ * @author barrier
  */
-public class SimulationLinker extends OsmoseLinker {
+public class BackgroundSchoolSet extends OsmoseLinker {
 
-    private final int rank;
-
-    public SimulationLinker(int rank) {
-        this.rank = rank;
-    }
-
-    final public int getRank() {
-        return rank;
-    }
-
-    public Simulation getSimulation() {
-        return getOsmose().getSimulation(rank);
-    }
-
-    public SchoolSet getSchoolSet() {
-        return getOsmose().getSimulation(rank).getSchoolSet();
-    }
-    
-    public BackgroundSchoolSet getBkgSchoolSet() {
-        return getOsmose().getSimulation(rank).getBkgSchoolSet();
-    }
-
-    public ResourceForcing getResourceForcing(int index) {
-        return getOsmose().getSimulation(rank).getResourceForcing(index);
-    }
-    
-    public HashMap<Integer, ResourceForcing> getResourceForcing() {
-        return getOsmose().getSimulation(rank).getResourceForcing();
-    }
-    
-    
-    /** Returns the ith trait for the given simulation.
-     * @param i
-     * @return 
+    /**
+     * The set of background species schools. Structure is (cell index, list of
+     * schools). The list contains one school per species per size class.
+     *
      */
-    public Trait getEvolvingTrait(int i) {
-        return getOsmose().getSimulation(rank).getEvolvingTrait(i);
+    private HashMap<Integer, List<BackgroundSchool>> bkgSet;
+
+    public void init() {
+        bkgSet = new HashMap();
     }
 
-    /** Returns the total number of evolving traits for the given simulation
-     * 
-     * @return 
+    /**
+     * Return the whole list of background schools at the given cell.
+     *
+     * If the HashMap is empty at the given cell, the HashMap is updated from a
+     * list of new schools.
+     *
+     * @param cell
+     * @return
      */
-    public int getNEvolvingTraits() {
-        return getOsmose().getSimulation(rank).getNEvolvingTraits();
+    public List<BackgroundSchool> getBackgroundSchool(Cell cell) {
+        if (!bkgSet.containsKey(cell.getIndex())) {
+            List<BackgroundSchool> bkgSchools = new ArrayList();  // list of all the background species within the cell
+            for (int ibkg : this.getConfiguration().getBkgIndex()) {
+                int nClass = this.getConfiguration().getBkgSpecies(ibkg).getNClass();
+                for (int cl = 0; cl < nClass; cl++) {
+                    bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg), cl));
+                }
+            }
+            bkgSet.put(cell.getIndex(), bkgSchools);
+        }
+        return bkgSet.get(cell.getIndex());
+    }
+
+    /**
+     * Returns the list of list of background schools.
+     *
+     * @return
+     */
+    public Collection<List<BackgroundSchool>> getValues() {
+        return this.bkgSet.values();
+    }
+
+    /**
+     * Returns all the background schools. From all cell, all species and all
+     * size classes.
+     *
+     * @return
+     */
+    public List<BackgroundSchool> getAllSchools() {
+        ArrayList<BackgroundSchool> list = new ArrayList();
+        if (!bkgSet.isEmpty()) {
+            this.bkgSet.values().forEach(l -> list.addAll(l));
+        }
+        return list;
     }
 }

@@ -57,6 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
@@ -94,7 +95,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
      * Array containing the fisheries catches by species and by fisheries.
      * Output has (species, fisheries) dimensions.
      */
-    private float[][] biomass;
+    private HashMap<Integer, float[]> biomass;
 
     public FisheryOutput(int rank) {
         super(rank);
@@ -106,6 +107,11 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         
         // initializes the number of fisheries
         nFishery = getConfiguration().getNFishery();
+        
+        biomass = new HashMap();
+        for(int i : getConfiguration().getFishIndex()) {
+           biomass.put(i, new float[nFishery]);
+        }
 
         /*
          * Create NetCDF file
@@ -120,7 +126,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         /*
          * Create dimensions
          */
-        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
+        Dimension speciesDim = nc.addDimension(null, "species", getNSpecies() + this.getNBkgSpecies());
         Dimension fisheriesDim = nc.addDimension(null, "fishery", nFishery);
         Dimension timeDim = nc.addUnlimitedDimension("time");
         /*
@@ -174,7 +180,9 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
      */
     @Override
     public void reset() {
-        biomass = new float[getNSpecies()][nFishery];
+        for(int i : getConfiguration().getFishIndex()) { 
+        biomass.put(i, new float[nFishery]);
+        }
     }
 
     @Override
@@ -182,11 +190,21 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
 
         getSchoolSet().getAliveSchools().forEach((school) -> {
             int iSpecies = school.getSpeciesIndex();
-            for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                biomass[iSpecies][iFishery] += school.getFishedBiomass(iFishery);
+            for (int iFishery = 0; iFishery < nFishery; iFishery++) {                
+                double value = biomass.get(iSpecies)[iFishery] + school.getFishedBiomass(iFishery);
+                biomass.get(iSpecies)[iFishery] = (float) value;
             }
         });
-
+        
+        this.getBkgSchoolSet().getAllSchools().forEach((bkgSch) -> {
+            int iSpecies = bkgSch.getSpeciesIndex();
+            for (int iFishery = 0; iFishery < nFishery; iFishery++) {
+                double value = biomass.get(iSpecies)[iFishery] + bkgSch.getFishedBiomass(iFishery);
+                biomass.get(iSpecies)[iFishery] = (float) value;
+            }
+        }
+        );
+        
     }
 
     @Override
@@ -194,11 +212,14 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
 
         // Write into NetCDF file
         int nSpecies = getNSpecies();
-        ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies, nFishery);
-        for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
+        int nBackground = this.getNBkgSpecies();
+        ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
+        int cpt = 0; 
+        for (int iSpecies : getConfiguration().getFishIndex()) {
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                arrBiomass.set(0, iSpecies, iFishery, biomass[iSpecies][iFishery]);
+                arrBiomass.set(0, cpt, iFishery, biomass.get(iSpecies)[iFishery]);
             }
+            cpt++;
         }
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);

@@ -188,16 +188,18 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         }
 
         // Write into NetCDF file
+        int cpt = 0;
         ArrayFloat.D4 arrRsc0 = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
         ArrayFloat.D4 arrRsc1 = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
         int nl = getGrid().get_ny() - 1;
         for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    arrRsc0.set(0, iRsc, j, i, (float) rscBiomass0.get(iRsc)[j][i]);
-                    arrRsc1.set(0, iRsc, j, i, (float) rscBiomass1.get(iRsc)[j][i]);
+                    arrRsc0.set(0, cpt, j, i, (float) rscBiomass0.get(iRsc)[j][i]);
+                    arrRsc1.set(0, cpt, j, i, (float) rscBiomass1.get(iRsc)[j][i]);
                 }
             }
+            cpt++;
         }
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);

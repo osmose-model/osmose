@@ -57,6 +57,7 @@ import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
 import fr.ird.osmose.background.BackgroundSchool;
+import fr.ird.osmose.background.BackgroundSchoolSet;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.process.bioen.BioenPredationMortality;
 import fr.ird.osmose.process.bioen.BioenStarvationMortality;
@@ -152,11 +153,6 @@ public class MortalityProcess extends AbstractProcess {
      * The set of resource aggregations
      */
     private HashMap<Integer, List<Resource>> resourcesSet;
-    /*
-     * The set of background species schools. Structure is (cell index, list of
-     * schools)
-     */
-    private HashMap<Integer, List<BackgroundSchool>> bkgSet;
 
     public MortalityProcess(int rank) {
         super(rank);
@@ -227,10 +223,6 @@ public class MortalityProcess extends AbstractProcess {
 
         // Create a new resources set, empty at the moment
         resourcesSet = new HashMap();
-
-        // Create a new bkg set, emty for the moment
-        // Structure 
-        bkgSet = new HashMap();
 
         // barrier.n: init the bioenergetic module
         if (this.getConfiguration().isBioenEnabled()) {
@@ -314,10 +306,11 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         // Init the biomass of background species by using the ResourceForcing class
-        for (List<BackgroundSchool> bkgSchoolList : bkgSet.values()) {    // loop over the cells
+        for (List<BackgroundSchool> bkgSchoolList : this.getBkgSchoolSet().getValues()) {    // loop over the cells
             for (BackgroundSchool bkg : bkgSchoolList) {    // loop over the resources
                 int ibkg = bkg.getSpeciesIndex();
                 double accessibleBiom = getResourceForcing(ibkg).getBiomass(bkg.getCell());
+                // note that here, the multiplication by proportion value is made in the setbiomass method
                 bkg.setBiomass(accessibleBiom);
                 bkg.init();  // reset ndead prior predation
             }
@@ -777,16 +770,6 @@ public class MortalityProcess extends AbstractProcess {
      * @return
      */
     private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
-        if (!bkgSet.containsKey(cell.getIndex())) {
-            List<BackgroundSchool> bkgSchools = new ArrayList();  // list of all the background species within the cell
-            for (int ibkg : this.getConfiguration().getBkgIndex()) {
-                int nClass = this.getConfiguration().getBkgSpecies(ibkg).getNClass();
-                for(int cl = 0; cl<nClass; cl++)
-                bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg), cl));
-            }
-            bkgSet.put(cell.getIndex(), bkgSchools);
-        }
-        return bkgSet.get(cell.getIndex());
+        return this.getBkgSchoolSet().getBackgroundSchool(cell);
     }
-
 }

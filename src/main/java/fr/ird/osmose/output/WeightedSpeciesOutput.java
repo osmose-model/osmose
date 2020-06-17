@@ -97,7 +97,7 @@ public class WeightedSpeciesOutput extends AbstractOutput {
         denumerator.clear();
         for (int i : getConfiguration().getFocalIndex()) { 
             numerator.put(i, new double[getNOutputRegion()]);
-            numerator.put(i, new double[getNOutputRegion()]);
+            denumerator.put(i, new double[getNOutputRegion()]);
         }
     }
 

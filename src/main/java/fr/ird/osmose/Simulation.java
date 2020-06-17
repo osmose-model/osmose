@@ -51,6 +51,7 @@
  */
 package fr.ird.osmose;
 
+import fr.ird.osmose.background.BackgroundSchoolSet;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
@@ -94,6 +95,9 @@ public class Simulation extends OsmoseLinker {
      * The set of schools.
      */
     private SchoolSet schoolSet;
+    
+    private BackgroundSchoolSet backSchoolSet;
+    
     /**
      * The low trophic level forcing class.
      */
@@ -187,6 +191,10 @@ public class Simulation extends OsmoseLinker {
 
         // Create a new school set, empty at the moment
         schoolSet = new SchoolSet();
+        
+        // barrier.n: init a set of background schools (used to save fisheries and discards)
+        this.backSchoolSet = new BackgroundSchoolSet();
+        this.backSchoolSet.init();
 
         // Option for running only one time step and stops
         boolean oneStep = false;
@@ -445,6 +453,10 @@ public class Simulation extends OsmoseLinker {
      */
     public int getNEvolvingTraits() {
         return this.n_evolving_trait;
+    }
+    
+    public BackgroundSchoolSet getBkgSchoolSet() {
+        return this.backSchoolSet;
     }
 
 }
