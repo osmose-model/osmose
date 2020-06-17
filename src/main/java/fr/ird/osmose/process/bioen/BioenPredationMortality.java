@@ -99,9 +99,6 @@ public class BioenPredationMortality extends PredationMortality {
         // Initialisation of the PredationMortality class.
         super.init();
 
-        int nBack = this.getNBkgSpecies();
-        int nspec = this.getNSpecies();
-
         // Recovers the max predation rate for bioen config (not the same unit as in
         // the standard code
         for (int i : this.getConfiguration().getFishIndex()) {
