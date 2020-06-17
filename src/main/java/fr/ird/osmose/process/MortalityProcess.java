@@ -57,8 +57,6 @@ import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Prey;
 import fr.ird.osmose.background.BackgroundSchool;
-import fr.ird.osmose.background.BackgroundSchoolSet;
-import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.process.bioen.BioenPredationMortality;
 import fr.ird.osmose.process.bioen.BioenStarvationMortality;
 import fr.ird.osmose.process.mortality.AbstractMortality;
@@ -70,8 +68,8 @@ import fr.ird.osmose.process.mortality.ForagingMortality;
 import fr.ird.osmose.process.mortality.PredationMortality;
 import fr.ird.osmose.process.mortality.StarvationMortality;
 import fr.ird.osmose.process.mortality.FishingGear;
-import fr.ird.osmose.process.mortality.fishery.FisheryCatchability;
 import fr.ird.osmose.resource.Resource;
+import fr.ird.osmose.util.AccessibilityManager;
 import fr.ird.osmose.util.Matrix;
 import fr.ird.osmose.util.XSRandom;
 import java.io.IOException;
@@ -129,8 +127,11 @@ public class MortalityProcess extends AbstractProcess {
      */
     private ForagingMortality foragingMortality;
 
-    private FisheryCatchability fisheryCatchability;
-    private FisheryCatchability fisheryDiscards;
+    /** Variables to manage fishery catchabilities. */
+    private AccessibilityManager fisheryCatchability;
+    
+    /** Variables to manage fishery discards. */
+    private AccessibilityManager fisheryDiscards;
 
     /**
      * Whether the Osmose v4 fishery implementation is enabled
@@ -210,10 +211,10 @@ public class MortalityProcess extends AbstractProcess {
                 count++;
             }
 
-            fisheryCatchability = new FisheryCatchability(getRank(), "fisheries.catchability", "cat");
+            fisheryCatchability = new AccessibilityManager(getRank(), "fisheries.catchability", "cat", null);
             fisheryCatchability.init();
 
-            fisheryDiscards = new FisheryCatchability(getRank(), "fisheries.discards", "dis");
+            fisheryDiscards = new AccessibilityManager(getRank(), "fisheries.discards", "dis", null);
             fisheryDiscards.init();
 
         } else {
@@ -427,12 +428,12 @@ public class MortalityProcess extends AbstractProcess {
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
 
         if (fisheryEnabled) {
-            Matrix matrix = this.fisheryCatchability.getAccessMatrix();
+            Matrix catchability = this.fisheryCatchability.getMatrix();
             for (FishingGear gear : this.fisheriesMortality) {
-                gear.setCatchability(matrix);
+                gear.setCatchability(catchability);
             }
 
-            Matrix discards = this.fisheryDiscards.getAccessMatrix();
+            Matrix discards = this.fisheryDiscards.getMatrix();
             for (FishingGear gear : this.fisheriesMortality) {
                 gear.setDiscards(discards);
             }
