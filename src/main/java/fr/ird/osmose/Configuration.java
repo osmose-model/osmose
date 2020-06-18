@@ -1027,7 +1027,7 @@ public class Configuration extends OLogger {
      * @param relativeTo, the path against the file must be resolved
      * @return the resolved file path
      */
-    private String resolve(String filename, String relativeTo) {
+    public String resolve(String filename, String relativeTo) {
         String pathname = filename;
         try {
             File file = new File(relativeTo);
