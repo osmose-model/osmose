@@ -176,7 +176,7 @@ getMortalityDeviation = function(x, stage, type, pars=NULL) {
 #' @param ... String arguments 
 #' @param keep.att Whether parameter attributes should be kept
 #' @examples{
-#'    path = cacheManager('gog')
+#'    path = cacheManager('eec_4.3.0')
 #'    filename = file.path(path, "osm_all-parameters.csv")
 #'    par = readOsmoseConfiguration(filename)
 #'    getOsmoseParameter(par, "population", "seeding", "year", "max", keep.att=FALSE)
@@ -1148,7 +1148,7 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
 #' Generates Osmose configuration files to run an Osmose demo.
 #' 
 #' @param path Path where to put the Osmose configuration file.
-#' @note So far, only one configuration is propose ("gog")
+#' @note So far, only one configuration is propose ("eec_4.3.0")
 #' 
 #' @return A list containing the configuration file to use (config_file) for running the code
 #' and the output directory to use when reading data.
@@ -1160,7 +1160,7 @@ existOsmoseParameter = function(par, ..., keep.att=FALSE) {
 #'library("osmose")
 #'
 #'# Copy configuration files into the proper directory
-#'demo = osmose_demo(path="../", config="gog")
+#'demo = osmose_demo(path="../", config="eec_4.3.0")
 #'
 #'# run the osmose model
 #'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.0", 

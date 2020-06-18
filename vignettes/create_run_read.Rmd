@@ -75,7 +75,7 @@ OSMOSE is a multispecies and Individual-based model (IBM) which focuses on fish 
 `osmose` package performs three main functions (`read_osmose`, `run_osmose` and `get_var`) and several methods for the outputs (`plot`, `print`, `summary` and `report`). 
 
 ### Create example files
-`osmose` includes a function that allows to create basic example files in a selected folder. The files corresponds to a case study provided by @Halouani2016. `osmose_demo` uses two main arguments: (1) `path` will be the folder path where the files will be copied and (2) `config` which indicates the configuration example to be copied. To indicate @Halouani2016 case study, `config = "gog"`.
+`osmose` includes a function that allows to create basic example files in a selected folder. The files corresponds to a case study provided by @Halouani2016. `osmose_demo` uses two main arguments: (1) `path` will be the folder path where the files will be copied and (2) `config` which indicates the configuration example to be copied. To indicate @Halouani2016 case study, `config = "eec_4.3.0"`.
 
 ```{r, cache=TRUE}
 # Define a folder to copy files (for the example: a temporary folder)
@@ -87,7 +87,7 @@ cat(exampleFolder)
 
 ```{r, cache=TRUE}
 # Copy files
-demoPaths <- osmose_demo(path = exampleFolder, config = "gog")
+demoPaths <- osmose_demo(path = exampleFolder, config = "eec_4.3.0")
 ```
 
 ```{r, echo=FALSE}
