@@ -56,12 +56,12 @@ print(outputs)
 plot(outputs, what = "biomass")
 plot(outputs, what = "biomass", type = 2)
 plot(outputs, what = "abundance", ts = FALSE, type = 1)
-plot(outputs, what = "yield", ts = FALSE, type = 2)
+plot(outputs, what = "abundance", ts = FALSE, type = 2)
 
-plot(outputs, what = "abundanceByAge")
+plot(outputs, what = "biomassByAge")
 plot(outputs, what = "biomassBySize", type = 2)
 plot(outputs, what = "biomassByTL", type = 1)
-plot(outputs, what = "yieldBySize", type = 2)
+plot(outputs, what = "biomassBySize", type = 2)
 ```
 
 ### Plot methods for `osmose.config` class
