@@ -280,13 +280,19 @@ osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0")){
                        stop(paste("There is not reference for", config))
   )
   
+  output_dir = switch(config, 
+                      gog = "output",
+                      eec_4.3.0 = "output-PAPIER-trophic",
+                      stop(paste("There is not reference for", config))
+  )
+  
   file.copy(from = input_dir, to = path, recursive = TRUE, overwrite = FALSE)
   config = basename(path = input_dir)
   
   demo = list()
   config_file = file.path(path, config, config_file)
   demo$config_file = config_file
-  demo$output_dir = file.path(dirname(path = config_file), "output")
+  demo$output_dir = file.path(dirname(path = config_file), output_dir)
   
   return(demo)
 }
