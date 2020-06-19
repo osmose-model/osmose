@@ -109,21 +109,6 @@ public class PhysicalData extends SimulationLinker {
 
         String key;
 
-        // Recovering the name of the NetCDF variable (temperature.varname)
-        key = String.format("%s.varname", this.variable_name);
-        this.netcdf_variable_name = getConfiguration().getString(key);
-
-        // Recovering the conversion factors and offsets (temperature.factor, temperature.offset)
-        key = String.format("%s.factor", this.variable_name);
-        if (getConfiguration().canFind(key)) {
-            factor = getConfiguration().getDouble(key);
-        }
-
-        key = String.format("%s.offset", this.variable_name);
-        if (getConfiguration().canFind(key)) {
-            offset = getConfiguration().getDouble(key);
-        }
-
         // Recovering the key temperature.filename
         key = String.format("%s.value", this.variable_name);
         if (getConfiguration().canFind(key)) {
@@ -134,6 +119,21 @@ public class PhysicalData extends SimulationLinker {
         } else {
             // if no constant value is provided, ask for a netcdf file.
             this.useConstantVal = false;
+            
+            // Recovering the conversion factors and offsets (temperature.factor, temperature.offset)
+            key = String.format("%s.factor", this.variable_name);
+            if (getConfiguration().canFind(key)) {
+                factor = getConfiguration().getDouble(key);
+            }
+
+            key = String.format("%s.offset", this.variable_name);
+            if (getConfiguration().canFind(key)) {
+                offset = getConfiguration().getDouble(key);
+            }
+
+            // Recovering the name of the NetCDF variable (temperature.varname)
+            key = String.format("%s.varname", this.variable_name);
+            this.netcdf_variable_name = getConfiguration().getString(key);
 
             // Recovering the key temperature.filename
             key = String.format("%s.filename", this.variable_name);

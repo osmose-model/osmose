@@ -323,8 +323,8 @@ public class ResourceForcing extends OsmoseLinker {
         int iFile = this.fileMapping[iStepNc];
         int iStep = this.stepMapping[iStepNc];
        
-        String ncFile = this.fileNames[iFile];
-       
+        String ncFile = getConfiguration().resolve(this.fileNames[iFile], getConfiguration().getMainFile());
+
         double[][] rscbiomass = new double[ny][nx];
 
         String name = getConfiguration().getString("species.name.sp" + index);

@@ -20,7 +20,8 @@ library(osmose)
 
 ```{r, include = FALSE}
 # Remove the .jar file if exits.
-osmose:::flushCache("osmose_3.3.3.jar")
+osmose:::flushCache("osmose_4.3.0.jar")
+osmose:::flushCache("eec_4.3.0")
 ```
 
 ### Create, run and read an example
@@ -33,7 +34,7 @@ exampleFolder <- tempdir()
 cat(exampleFolder)
 
 # Copy files
-demoPaths <- osmose_demo(path = exampleFolder, config = "gog")
+demoPaths <- osmose_demo(path = exampleFolder, config = "eec_4.3.0")
 ```
 
 Run the example using `run_osmose` function (it will take less than 1 min):
@@ -56,12 +57,12 @@ print(outputs)
 plot(outputs, what = "biomass")
 plot(outputs, what = "biomass", type = 2)
 plot(outputs, what = "abundance", ts = FALSE, type = 1)
-plot(outputs, what = "yield", ts = FALSE, type = 2)
+plot(outputs, what = "abundance", ts = FALSE, type = 2)
 
-plot(outputs, what = "abundanceByAge")
+plot(outputs, what = "biomassByAge")
 plot(outputs, what = "biomassBySize", type = 2)
 plot(outputs, what = "biomassByTL", type = 1)
-plot(outputs, what = "yieldBySize", type = 2)
+plot(outputs, what = "biomassBySize", type = 2)
 ```
 
 ### Plot methods for `osmose.config` class

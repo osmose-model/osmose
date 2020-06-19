@@ -51,13 +51,9 @@
  */
 package fr.ird.osmose.util;
 
-import fr.ird.osmose.process.mortality.fishery.*;
-import fr.ird.osmose.process.mortality.*;
 import au.com.bytecode.opencsv.CSVReader;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.stage.ClassGetter;
-import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.Separator;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
@@ -67,7 +63,7 @@ import java.util.List;
  *
  * @author Nicolas Barrier
  */
-public abstract class Matrix extends OsmoseLinker {
+public class Matrix extends OsmoseLinker {
 
     /**
      * Number of preys (lines in the file).
@@ -108,22 +104,27 @@ public abstract class Matrix extends OsmoseLinker {
      * Names of the predators.
      */
     private String[] namesPred;
-    
-    public abstract int getIndexPred(String namePred);
+
+    private final ClassGetter classGetter;
+
+    /*public abstract int getIndexPred(String namePred);
 
     public abstract int getIndexPrey(String namePrey);
 
     public abstract int getIndexPrey(IAggregation pred);
 
     public abstract int getIndexPred(IAggregation prey);
-
+     */
     /**
-     * Class constructor. The reading of the file is done here
+     * Class constructor.The reading of the file is done here
      *
      * @param filename
+     * @param classGetter
      */
-    public Matrix(String filename) {
+    public Matrix(String filename, ClassGetter classGetter) {
         this.filename = filename;
+        this.classGetter = classGetter;
+        this.read();
     }
 
     /**
@@ -229,6 +230,98 @@ public abstract class Matrix extends OsmoseLinker {
 
     public double getPredClass(int i) {
         return classPred[i];
+    }
+
+    /**
+     * Extracts the matrix column for the given predator.
+     *
+     * Based on full correspondance of the name (class < thres).
+     *
+     * @param pred
+     * @return
+     */
+    public int getIndexPred(IAggregation pred) {
+
+        if (this.classGetter == null) {
+            for (int i = 0; i < this.getNPred(); i++) {
+                if (pred.getSpeciesName().equals(this.getPredName(i))) {
+                    return i;
+                }
+            }
+        } else {
+            for (int i = 0; i < this.getNPred(); i++) {
+                if (pred.getSpeciesName().equals(this.getPredName(i)) && (classGetter.getVariable(pred) < this.getPredClass(i))) {
+                    return i;
+                }
+            }
+        }
+        String message = String.format("No accessibility found for predator %s class %f", pred.getSpeciesName(), classGetter.getVariable(pred));
+        error(message, new IllegalArgumentException());
+        return -1;
+    }
+
+    /**
+     * Extracts the matrix column for the given prey.
+     *
+     * Based on full correspondance of the name (class < thres).
+     *
+     * @param prey
+     * @return
+     */
+    public int getIndexPrey(IAggregation prey) {
+
+        if (this.classGetter == null) {
+            for (int i = 0; i < this.getNPred(); i++) {
+                if (prey.getSpeciesName().equals(this.getPredName(i))) {
+                    return i;
+                }
+            }
+        } else {
+            for (int i = 0; i < this.getNPrey(); i++) {
+                if (prey.getSpeciesName().equals(this.getPreyName(i)) && (classGetter.getVariable(prey) < this.getPreyClass(i))) {
+                    return i;
+                }
+            }
+        }
+        String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(), classGetter.getVariable(prey));
+        error(message, new IllegalArgumentException());
+        return -1;
+    }
+    
+    /** *  Extracts the matrix column for the given predator.Based on full correspondance of the name (class < thres).
+     * 
+     *
+     * @param name 
+     * @param pred
+     * @return 
+     */
+    public int getIndexPred(String name) { 
+        for (int i = 0; i < this.getNPred(); i++) {
+            if (name.equals(this.getPredName(i))) {
+                return i;
+            }
+        }
+        String message = String.format("No catchability found for fishery %s", name);
+        error(message, new IllegalArgumentException());       
+        return -1;
+    }
+
+    /** *  Extracts the matrix column for the given prey.Based on full correspondance of the name (class < thres).
+     * 
+     *
+     * @param name 
+     * @param prey
+     * @return 
+     */
+    public int getIndexPrey(String name) {
+        for (int i = 0; i < this.getNPrey(); i++) {
+            if (name.equals(this.getPreyName(i))) {
+                return i;
+            }
+        }
+        String message = String.format("No catchability found for prey %s", name);
+        error(message, new IllegalArgumentException());       
+        return -1;
     }
 
 }

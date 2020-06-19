@@ -61,8 +61,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  *
@@ -93,17 +96,20 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
 
     @Override
     public void reset() {
+        int[] focalIndex =  this.getConfiguration().getFocalIndex();
+        int[] fishIndex = this.getConfiguration().getFishIndex();
+        int[] preyIndex = this.getConfiguration().getAllIndex();
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNRscSpecies();
+        int nPrey = nSpec + getConfiguration().getNRscSpecies() + this.getNBkgSpecies();
         predatorPressure = new double[nSpec][][][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            int nStage = dietOutputStage.getNStage(iSpec);
+            int nStage = dietOutputStage.getNStage(focalIndex[iSpec]);
             predatorPressure[iSpec] = new double[nStage][][];
             for (int s = 0; s < nStage; s++) {
                 predatorPressure[iSpec][s] = new double[nPrey][];
                 for (int iPrey = 0; iPrey < nPrey; iPrey++) {
-                    if (iPrey < nSpec) {
-                        predatorPressure[iSpec][s][iPrey] = new double[dietOutputStage.getNStage(iPrey)];
+                    if (ArrayUtils.contains(fishIndex, preyIndex[iPrey])) {
+                        predatorPressure[iSpec][s][iPrey] = new double[dietOutputStage.getNStage(preyIndex[iPrey])];
                     } else {
                         predatorPressure[iSpec][s][iPrey] = new double[1];
                     }
@@ -114,24 +120,34 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
 
     @Override
     public void update() {
+        int[] allIndex = this.getConfiguration().getAllIndex();
         for (School school : getSchoolSet().getAliveSchools()) {
             int iSpec = school.getSpeciesIndex();
+            int iSpecBis = Arrays.stream(this.getConfiguration().getFocalIndex()).boxed().collect(Collectors.toList()).indexOf(iSpec);
             int stage = dietOutputStage.getStage(school);
             for (Prey prey : school.getPreys()) {
-                predatorPressure[iSpec][stage][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += prey.getBiomass();
+                int iPreyBis = Arrays.stream(allIndex).boxed().collect(Collectors.toList()).indexOf(prey.getSpeciesIndex());
+                predatorPressure[iSpecBis][stage][iPreyBis][dietOutputStage.getStage(prey)] += prey.getBiomass();
             }
         }
     }
 
     @Override
     public void write(float time) {
+        
+        int[] focalIndex = this.getConfiguration().getFocalIndex();
+        int[] fishIndex = this.getConfiguration().getFishIndex();
+        int[] preyIndex = this.getConfiguration().getAllIndex();
 
         int nSpec = getNSpecies();
+        int nBkg = this.getNBkgSpecies();
         int dtRecord = getConfiguration().getInt("output.recordfrequency.ndt");
-        for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSpecies(iSpec).getName();
-            float[] threshold = dietOutputStage.getThresholds(iSpec);
-            int nStagePred = dietOutputStage.getNStage(iSpec);
+        for (int iSpec = 0; iSpec < nSpec + nBkg; iSpec++) {
+            // iSpec = species index as prey
+            int iSpecBis = fishIndex[iSpec];
+            String name = getSpecies(iSpecBis).getName();
+            float[] threshold = dietOutputStage.getThresholds(iSpecBis);
+            int nStagePred = dietOutputStage.getNStage(iSpecBis);
             for (int iStage = 0; iStage < nStagePred; iStage++) {
                 prw.print(time);
                 prw.print(separator);
@@ -146,7 +162,8 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
                 }
                 prw.print(separator);
                 for (int i = 0; i < nSpec; i++) {
-                    int nStage = dietOutputStage.getNStage(i);
+                    int iBis = focalIndex[i];
+                    int nStage = dietOutputStage.getNStage(iBis);
                     for (int s = 0; s < nStage; s++) {
                         float val = (float) (predatorPressure[i][s][iSpec][iStage] / dtRecord);
                         String sval = Float.isInfinite(val)
@@ -161,13 +178,15 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
                 prw.println();
             }
         }
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
+
+        for (int j = 0; j < getConfiguration().getNRscSpecies(); j++) {
             prw.print(time);
             prw.print(separator);
-            prw.print(getConfiguration().getResourceSpecies(j - nSpec));
+            prw.print(getConfiguration().getResourceSpecies(getConfiguration().getRscIndex(j)));
             prw.print(separator);
             for (int i = 0; i < nSpec; i++) {
-                int nStage = dietOutputStage.getNStage(i);
+                int iBis = focalIndex[i];
+                int nStage = dietOutputStage.getNStage(iBis);
                 for (int s = 0; s < nStage; s++) {
                     prw.print((float) (predatorPressure[i][s][j][0] / dtRecord));
                     if (i < nSpec - 1 || s < nStage - 1) {

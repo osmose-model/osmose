@@ -49,85 +49,64 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality;
+package fr.ird.osmose.process.bioen;
 
-import au.com.bytecode.opencsv.CSVReader;
-import fr.ird.osmose.IAggregation;
-import fr.ird.osmose.stage.ClassGetter;
-import fr.ird.osmose.util.Matrix;
-import fr.ird.osmose.util.OsmoseLinker;
-import fr.ird.osmose.util.Separator;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
+import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.AbstractMortality;
 
 /**
- * Class that manages the reading and use of accesibility matrix.
  *
- * @author Nicolas Barrier
+ * @author nbarrier
  */
-public class AccessMatrix extends Matrix {
+public class BioenStarvationMortality extends AbstractMortality {
 
-    /** Interface to the recovery of class variable (age or size). */
-    private final ClassGetter classGetter;
-
-    /**
-     * Class constructor.The reading of the file is done here
-     *
-     * @param filename
-     * @param classGetter
-     */
-    public AccessMatrix(String filename, ClassGetter classGetter) {
-        super(filename);
-        this.classGetter = classGetter;
-        this.read();
+    public BioenStarvationMortality(int rank) {
+        super(rank);
     }
 
-    /** Extracts the matrix column for the given predator.
-     * 
-     * Based on full correspondance of the name (class < thres).
-     * 
-     * @param pred
-     * @return 
-     */
     @Override
-    public int getIndexPred(IAggregation pred) {        
-        for (int i = 0; i < this.getNPred(); i++) {
-            if (pred.getSpeciesName().equals(this.getPredName(i)) && (classGetter.getVariable(pred) < this.getPredClass(i))) {
-                return i;
-            }
+    public void init() {
+        // nothing to do
+        // Bioen starvation mortality does not directly rely on user-defined parameters
+    }
+
+    public double computeStarvation(School school, int subdt) {
+
+        if (school.getENet() >= 0) {
+            // If Enet > 0, maintenance needs have been paid, no starvation mortality
+            return 0.d;
         }
-        String message = String.format("No accessibility found for predator %s class %f", pred.getSpeciesName(), classGetter.getVariable(pred));
-        error(message, new IllegalArgumentException());       
-        return -1;
-    }
 
-    /** Extracts the matrix column for the given prey.
-     * 
-     * Based on full correspondance of the name (class < thres).
-     * 
-     * @param prey
-     * @return 
-     */
-    @Override
-    public int getIndexPrey(IAggregation prey) {
-        for (int i = 0; i < this.getNPrey(); i++) {
-            if (prey.getSpeciesName().equals(this.getPreyName(i)) && (classGetter.getVariable(prey) < this.getPreyClass(i))) {
-                return i;
-            }
+        // dead individuals (zero by default)
+        double ndead = 0.d;
+
+        // fraction of ENet deficit at current sub time step (turned into positive value)
+        double eNetSubDt = Math.abs(school.getENet()) / subdt;
+
+        // check whether ENet deficit can be compensated with gonadic energy
+        if (school.getGonadWeight() >= eNetSubDt) {
+            // 1. enough gonadic energy
+            // pay maintenance with gonadic energy and decrease gonadic energy accordingly
+            school.incrementGonadWeight((float) -eNetSubDt);
+            school.incrementEnet(eNetSubDt);
+        } else {
+            // 2. not enough gonadic energy
+            // flush gonadic energy
+            school.incrementGonadWeight(-school.getGonadWeight());
+            // partially repay ENet with available gonadic energy
+            school.incrementEnet(school.getGonadWeight());
+            // starvation occurs, as a fraction of energy deficit
+            double deathToll = eNetSubDt - school.getGonadWeight();
+            ndead = deathToll / school.getWeight();
         }
-        String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(), classGetter.getVariable(prey));
-        error(message, new IllegalArgumentException());       
-        return -1;
+
+        // return number of dead fish in school at current sub time step
+        return ndead;
     }
 
     @Override
-    public int getIndexPred(String string) {
+    public double getRate(School school) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public int getIndexPrey(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

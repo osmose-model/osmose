@@ -52,10 +52,13 @@
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.AbstractSchool;
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
+import fr.ird.osmose.stage.ClassGetter;
 import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.stage.PredPreyStage;
+import fr.ird.osmose.util.AccessibilityManager;
 import fr.ird.osmose.util.Matrix;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +83,7 @@ public class PredationMortality extends AbstractMortality {
      */
     private IStage predPreyStage;
 
-    private PredationAccessibility predationAccess;
+    private AccessibilityManager predationAccess;
 
     public PredationMortality(int rank) {
         super(rank);
@@ -88,13 +91,32 @@ public class PredationMortality extends AbstractMortality {
 
     @Override
     public void init() {
+        
+        String prefix = "predation.accessibility";
+        
+        Configuration conf = this.getConfiguration();
+        String metrics = getConfiguration().getString(prefix + ".stage.structure");
+        
+        if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
+            metrics = null;
+        }
+        
+        if(metrics == null) {
+            String message = String.format("The %s parameter must either be \"age\" or \"size\". ", prefix + ".stage.structure");
+            error(message, new IllegalArgumentException());
+        }
 
-        predationAccess = new PredationAccessibility(this.getRank(), "predation.accessibility", "acc");
+        ClassGetter classGetter = null;
+
+        if (metrics.equalsIgnoreCase("size")) {
+            classGetter = (school -> school.getLength());
+        } else if (metrics.equalsIgnoreCase("age")) {
+            classGetter = (school -> school.getAge());
+        }
+
+        predationAccess = new AccessibilityManager(this.getRank(), "predation.accessibility", "acc", classGetter);
         predationAccess.init();
 
-        int nsp = getNSpecies();
-        int nrsc = getConfiguration().getNRscSpecies();
-        int nbkg = getConfiguration().getNBkgSpecies();
         predPreySizesMax = new HashMap();
         predPreySizesMin = new HashMap();
         predationRate = new HashMap();
@@ -234,7 +256,7 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
-        AccessMatrix accessibilityMatrix = (AccessMatrix) predationAccess.getAccessMatrix();
+        Matrix accessibilityMatrix = predationAccess.getMatrix();
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         double[] accessibility = new double[preys.size()];

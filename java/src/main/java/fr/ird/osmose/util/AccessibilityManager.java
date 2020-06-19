@@ -49,7 +49,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.ird.osmose.process.mortality;
+package fr.ird.osmose.util;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.stage.ClassGetter;
@@ -68,25 +68,28 @@ import java.util.HashMap;
  *
  * @author Nicolas Barrier
  */
-public class PredationAccessibility extends SimulationLinker {
+public class AccessibilityManager extends SimulationLinker {
 
     /**
      * HashMaps of accessibility matrixes. -1 is when only one matrix is used.
      */
     private HashMap<Integer, Matrix> matrixAccess;
     
-    private String prefix;
-    private String suffix;
+    private final String prefix;
+    private final String suffix;
+    
+    private final ClassGetter classGetter;
     
     /**
      * Provides the accessibility matrix to use as a function of the time-step.
      */
     private int[][] indexAccess;
 
-    public PredationAccessibility(int rank, String prefix, String suffix) {
+    public AccessibilityManager(int rank, String prefix, String suffix, ClassGetter classGetter) {
         super(rank);
         this.prefix = prefix;
         this.suffix = suffix;
+        this.classGetter = classGetter;
     }
 
     public void init() {
@@ -104,37 +107,13 @@ public class PredationAccessibility extends SimulationLinker {
 
         matrixAccess = new HashMap<>();
 
-        Configuration conf = this.getConfiguration();
-        String metrics = null;
-        try {
-            metrics = getConfiguration().getString(this.prefix + ".stage.structure");
-            if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
-                metrics = null;
-            }
-        } catch (NullPointerException ex) {
-        }
-
-        // Init class getter with getAge(default)
-        ClassGetter classGetter = (school -> school.getAge());
-
-        if (null != metrics) {
-            if (metrics.equalsIgnoreCase("size")) {
-                classGetter = (school -> school.getLength());
-            } else if (metrics.equalsIgnoreCase("age")) {
-                classGetter = (school -> school.getAge());
-            }
-        } else {
-            warning("Could not find parameter 'predation.accessibility.stage.structure' (or unsupported value, must be either 'age' or 'size'). Osmose assumes it is age-based threshold.");
-        }
-
         // If only one file is provided (old way)
         
         if (!getConfiguration().isNull(this.prefix + ".file")) {
             // accessibility matrix
             String filename = getConfiguration().getFile(this.prefix + ".file");
-            AccessMatrix temp = new AccessMatrix(filename, classGetter);
+            Matrix temp = new Matrix(filename, classGetter);   
             matrixAccess.put(-1, temp);
-
         } else {
             // If several access files are defined.
             // recovers the indexes of the accessibility matrixes.
@@ -142,7 +121,7 @@ public class PredationAccessibility extends SimulationLinker {
             for (int i : index) {
 
                 String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix +  + i);
-                AccessMatrix temp = new AccessMatrix(filename, classGetter);
+                Matrix temp = new Matrix(filename, classGetter);
                 matrixAccess.put(i, temp);
 
                 // Reconstruct the years to be used with this map
@@ -211,7 +190,7 @@ public class PredationAccessibility extends SimulationLinker {
      *
      * @return
      */
-    public Matrix getAccessMatrix() {
+    public Matrix getMatrix() {
 
         int year = this.getSimulation().getYear();
         int season = this.getSimulation().getIndexTimeYear();
