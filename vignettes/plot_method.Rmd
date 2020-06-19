@@ -21,6 +21,7 @@ library(osmose)
 ```{r, include = FALSE}
 # Remove the .jar file if exits.
 osmose:::flushCache("osmose_4.3.0.jar")
+osmose:::flushCache("eec_4.3.0")
 ```
 
 ### Create, run and read an example
