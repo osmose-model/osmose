@@ -1,5 +1,20 @@
 # OSMOSE Release Notes
 
+## Osmose 4.3,3
+
+### New features
+
+- New parameterization of fisheries (fishing period, discards, catchability matrix)
+- Standardized parameterization of resource and background species forcings (netcdf file containing biomass)
+- New parameterization of background and resource species (species.XXX.sp instead of plankton.YYY.plk for instance)
+- Removing of iterative mortality processes (no more used)
+- Removing of all grid types except NCGrid
+- Possibility to read file using regular expressions (in order to use multiple files).
+- New parameterization of accessibility matrixes (thres. read from files, no more as parameters).
+- All species (focal, background and resource) must have different indexes
+- Extensive use of HashMaps in order to allow easy switch of a species from one type to another
+
+
 ## Changes from Osmose 3 Update 1 to Osmose 3 Update 2
 
 This new release is an update of  Osmose 3 and,  as such,  does not  lead to major changes in the parameters. This document  highlights the most  important  changes from Osmose 3 Update 1 to Osmose 3 Update 2, and lists all the changes, additions and deprecations.
