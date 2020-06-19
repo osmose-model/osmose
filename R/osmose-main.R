@@ -25,14 +25,14 @@
 #' @author Ricardo Oliveros-Ramos
 #' @examples{
 #'   \dontrun{
-#'     path = cacheManager("gog")
+#'     path = cacheManager("eec-4.3.0")
 #'     filename = file.path(path, "osm_all-parameters.csv")
 #'     run_osmose(filename)
 #'   }
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
-                      version = "3.3.3", osmose = NULL, java = "java",
+                      version = "4.3.0", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE){
   
   # Print message with version
@@ -122,7 +122,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #' read_osmose(path = outdir)
 #'   
 #' @aliases osmose2R
-read_osmose = function(path = NULL, input = NULL, version = "3.3.3", 
+read_osmose = function(path = NULL, input = NULL, version = "4.3.0", 
                        species.names = NULL, absolute = TRUE, ...){
   
   # If both path and input are NULL, then show an error message
@@ -241,7 +241,7 @@ write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE,
 #'demo = osmose_demo(path="../", config="gog")
 #'
 #'# run the osmose model
-#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="3.3.3", 
+#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.0", 
 #'           options=NULL, verbose=TRUE, clean=TRUE)
 #'
 #'# reads output data
@@ -253,7 +253,7 @@ write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE,
 #'# plot output data
 #'plot(data)
 #'}
-osmose_demo = function(path = NULL, config = "gog"){
+osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0")){
   
   config = match.arg(config)
   
@@ -269,13 +269,21 @@ osmose_demo = function(path = NULL, config = "gog"){
   # Switch for the configuration directory
   input_dir = switch(config, 
                      gog = cacheManager("gog"),
+                     eec_4.3.0 = cacheManager("eec_4.3.0"),
                      stop(paste("There is not reference for", config))
   )
   
   # swith for the configuration directory and defines the configuration file
   config_file = switch(config, 
                        gog = "osm_all-parameters.csv",
+                       eec_4.3.0 = "eec_all-parameters.csv",
                        stop(paste("There is not reference for", config))
+  )
+  
+  output_dir = switch(config, 
+                      gog = "output",
+                      eec_4.3.0 = "output-PAPIER-trophic",
+                      stop(paste("There is not reference for", config))
   )
   
   file.copy(from = input_dir, to = path, recursive = TRUE, overwrite = FALSE)
@@ -284,7 +292,7 @@ osmose_demo = function(path = NULL, config = "gog"){
   demo = list()
   config_file = file.path(path, config, config_file)
   demo$config_file = config_file
-  demo$output_dir = file.path(dirname(path = config_file), "output")
+  demo$output_dir = file.path(dirname(path = config_file), output_dir)
   
   return(demo)
 }

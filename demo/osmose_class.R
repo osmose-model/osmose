@@ -10,7 +10,7 @@ folder_location = readline("Indicate a folder location where the files will be c
 folder_location = gsub(x = folder_location, pattern = "\"", replacement = "")
 
 # Generates example files using 'osmose_demo' function
-demoPaths = osmose_demo(path = folder_location, config = "gog")
+demoPaths = osmose_demo(path = folder_location, config = "eec_4.3.0")
 
 # Show created files 
 print(list.files(path = dirname(demoPaths$config_file), recursive = TRUE))

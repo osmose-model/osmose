@@ -34,3 +34,7 @@ inst/doc
 /vignettes/plot_method_files
 /vignettes/plot_method_cache
 /vignettes/create_run_read_cache
+
+target
+**sh
+**.html

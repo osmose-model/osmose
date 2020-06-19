@@ -23,7 +23,7 @@ run_osmose(
   parameters = NULL,
   output = NULL,
   log = "osmose.log",
-  version = "3.3.3",
+  version = "4.3.0",
   osmose = NULL,
   java = "java",
   options = NULL,
@@ -66,7 +66,7 @@ but it is required for configuration using interannual inputs or fishing selecti
 \examples{
 {
   \dontrun{
-    path = cacheManager("gog")
+    path = cacheManager("eec-4.3.0")
     filename = file.path(path, "osm_all-parameters.csv")
     run_osmose(filename)
   }
