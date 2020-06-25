@@ -223,8 +223,8 @@ write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE,
 #' @description Thins function 
 #' 
 #' @param path Path where to put the Osmose configuration file.
-#' @param config Reference configuration to run ("gog"). 
-#' @note So far, only one configuration is propose ("gog")
+#' @param config Reference configuration to run ("eec_4.3.0"). 
+#' @note So far, only one configuration is propose ("eec_4.3.0")
 #' 
 #'
 #' @return A list containing the configuration file to use (config_file) for running the code
@@ -238,7 +238,7 @@ write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE,
 #'library("osmose")
 #'
 #'# Copy configuration files into the proper directory
-#'demo = osmose_demo(path="../", config="gog")
+#'demo = osmose_demo(path="../", config="eec_4.3.0")
 #'
 #'# run the osmose model
 #'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.0", 
