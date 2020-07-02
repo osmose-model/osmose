@@ -98,7 +98,7 @@ public class FisherySelectivity extends OsmoseLinker {
     private double[] selectType_array;
 
     /**
-     * Array of selectivity methods. 0 = knife edge. 1 = Sigmoid 2 = Guaussian
+     * Array of selectivity methods. 0 = knife edge. 1 = Sigmoid 2 = Gaussian 3 = logNormal
      */
     private SizeSelect select[];
 
@@ -156,6 +156,7 @@ public class FisherySelectivity extends OsmoseLinker {
         select[0] = (index, sch) -> this.getKnifeEdgeSelectivity(index, sch);  // knife edge selectivity
         select[1] = (index, sch) -> this.getSigmoidSelectivity(index, sch);    // Sigmoid selectivity
         select[2] = (index, sch) -> this.getGaussianSelectivity(index, sch);   // Gaussian selectivity
+        select[3] = (index, sch) -> this.getLogNormalSelectivity(index, sch);   // Log-normal selectivity
 
     }
 
@@ -233,10 +234,12 @@ public class FisherySelectivity extends OsmoseLinker {
 
         double l50 = this.l50_array[index];
         double l75 = this.l75_array[index];
+        double q75 = 0.674489750196082; // declare constant to save time
+        // this is the qnorm(0.75)
+        
+        //NormalDistribution norm = new NormalDistribution();
 
-        NormalDistribution norm = new NormalDistribution();
-
-        double sd = (l75 - l50) / norm.inverseCumulativeProbability(0.75);  // this is the qnorm function
+        double sd = (l75 - l50) / q75;  // this is the qnorm function
         // initialisation of the distribution used in selectity calculation
         NormalDistribution distrib = new NormalDistribution(l50, sd);
 
@@ -253,6 +256,39 @@ public class FisherySelectivity extends OsmoseLinker {
         return output;
 
     }
+    
+    /**
+     * Computes the Log-normal selectivity.
+     *
+     * @param school
+     * @return
+     */
+  public double getLogNormalSelectivity(int index, AbstractSchool school) {
+    
+    double l50 = this.l50_array[index];
+    double l75 = this.l75_array[index];
+    double q75 = 0.674489750196082; // declare constant to save time
+    // this is the qnorm(0.75), qnorm has to be used here
+    
+    double mean = Math.log(l50);
+    double sd   = Math.log(l75/l50) / q75;  
+    
+    // initialisation of the distribution used in selectity calculation
+    LogNormalDistribution distrib = new LogNormalDistribution(mean, sd);
+    
+    double output;
+    // calculation of selectivity. Normalisation by the maximum value 
+    // (i.e. the value computed with x = mode = exp(mean - sd^2).
+    double mode = Math.exp(mean - Math.pow(sd, 2));
+    output = distrib.density(varGetter.getVariable(school)) / distrib.density(mode);
+    
+    if (output < tiny) {
+      output = 0.0;
+    }
+    
+    return output;
+    
+  }
 
     /**
      * Computes the sigmoid selectivity.
