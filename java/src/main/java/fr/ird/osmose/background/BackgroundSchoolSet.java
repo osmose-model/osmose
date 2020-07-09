@@ -90,7 +90,7 @@ public class BackgroundSchoolSet extends OsmoseLinker {
             for (int ibkg : this.getConfiguration().getBkgIndex()) {
                 int nClass = this.getConfiguration().getBkgSpecies(ibkg).getNClass();
                 for (int cl = 0; cl < nClass; cl++) {
-                    bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg), cl));
+                    bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg), cl, cell));
                 }
             }
             bkgSet.put(cell.getIndex(), bkgSchools);
