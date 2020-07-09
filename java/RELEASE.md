@@ -1,6 +1,12 @@
 # OSMOSE Release Notes
 
-## Osmose 4.3,3
+## Osmose 4.3.1
+
+### Bugfix
+
+- Correction of a bug in the position of background species. Position was not init. so all the schools were at cell (0, 0)
+
+## Osmose 4.3.0
 
 ### New features
 
@@ -13,7 +19,6 @@
 - New parameterization of accessibility matrixes (thres. read from files, no more as parameters).
 - All species (focal, background and resource) must have different indexes
 - Extensive use of HashMaps in order to allow easy switch of a species from one type to another
-
 
 ## Changes from Osmose 3 Update 1 to Osmose 3 Update 2
 
