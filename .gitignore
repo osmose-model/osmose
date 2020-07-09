@@ -38,3 +38,6 @@ inst/doc
 target
 **sh
 **.html
+build
+dist
+nbproject

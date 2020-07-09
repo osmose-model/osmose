@@ -1,5 +1,11 @@
 # OSMOSE Release Notes
 
+## Osmose 4.3.1
+
+### Bugfix
+
+- Correction of a bug in the position of background species. Position was not init. so all the schools were at cell (0, 0)
+
 ## Changes from Osmose 3 Update 1 to Osmose 3 Update 2
 
 This new release is an update of  Osmose 3 and,  as such,  does not  lead to major changes in the parameters. This document  highlights the most  important  changes from Osmose 3 Update 1 to Osmose 3 Update 2, and lists all the changes, additions and deprecations.

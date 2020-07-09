@@ -52,6 +52,7 @@
 package fr.ird.osmose.background;
 
 import fr.ird.osmose.AbstractSchool;
+import fr.ird.osmose.Cell;
 import java.util.HashMap;
 
 /**
@@ -74,14 +75,16 @@ public class BackgroundSchool extends AbstractSchool {
      *
      * @param species
      * @param classIndex
+     * @param cell
      */
-    public BackgroundSchool(BackgroundSpecies species, int classIndex) {
+    public BackgroundSchool(BackgroundSpecies species, int classIndex, Cell cell) {
         this.bkgSpecies = species;
         abundanceHasChanged = false;
         preys = new HashMap();
         fishedBiomass = new double[getConfiguration().getNFishery()];
         discardedBiomass = new double[getConfiguration().getNFishery()];
         this.classIndex = classIndex;
+        this.moveToCell(cell);
     }
 
     /**
