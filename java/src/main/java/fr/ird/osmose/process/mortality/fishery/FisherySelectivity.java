@@ -57,6 +57,7 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
+import org.apache.commons.math3.distribution.LogNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
