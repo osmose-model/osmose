@@ -1,6 +1,6 @@
 /* 
  * 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
  * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020

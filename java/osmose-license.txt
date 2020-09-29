@@ -2,7 +2,7 @@
 ${licenseFirst}
 </#if>
 ${licensePrefix}
-${licensePrefix}OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+${licensePrefix}OSMOSE (Object-oriented Simulator of Marine Ecosystems)
 ${licensePrefix}http://www.osmose-model.org
 ${licensePrefix}
 ${licensePrefix}Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-${date?date?string("yyyy")}
