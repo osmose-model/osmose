@@ -22,7 +22,8 @@ jobs:
         uses: r-lib/actions/setup-r@master
 
       - name: Create R libs directories
-        run: mkdir -p ~/R_osmose
+        run: |
+            mkdir -p ~/R_osmose
 
       - name: Cache R dependencies
         id: r-dep
@@ -38,14 +39,20 @@ jobs:
         run: |
             install.packages(c("rlist", "knitr", "rmarkdown",
                                "stringr", "ncdf4","mgcv",
-                               "fields"), repos="http://cran.us.r-project.org", lib="~/R_osmose")
+                               "fields"), repos="http://cran.us.r-project.org")
+        env: 
+            R_LIBS_USER: "~/R_osmose/"
         shell: Rscript {0}
 
       - name: Build Osmose without vignettes
-        run: R CMD build --no-build-vignettes .
+        run: |
+            ls ~/R_osmose/
+            R CMD build --no-build-vignettes .
 
       - name: Check Osmose without vignettes
         run: |
             file=`ls *tar.gz`
+            echo $file
             R CMD check --as-cran --ignore-vignettes ${file} 
-            ls ~/R_osmose/
+        env: 
+            R_LIBS_USER: "~/R_osmose/"
