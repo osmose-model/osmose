@@ -21,14 +21,30 @@ jobs:
       - name: R install
         uses: r-lib/actions/setup-r@master
 
+      - name: Create R libs directories
+        run: mkdir -p ~/R_osmose
+
+      - name: Cache R dependencies
+        id: r-dep
+        uses: actions/cache@v2
+        env:
+            cache-name: r-dep-modules
+        with:
+            path: ~/R_osmose/R/lib
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/DESCRIPTION') }}
+
       - name: Install Osmose dependencies
+        if: steps.r-dep.outputs.cache-hit != 'true'
         run: |
             install.packages(c("rlist", "knitr", "rmarkdown",
                                "stringr", "ncdf4","mgcv",
-                               "fields"), repos="http://cran.us.r-project.org")
+                               "fields"), repos="http://cran.us.r-project.org", lib="~/R_osmose")
         shell: Rscript {0}
 
       - name: Build Osmose without vignettes
         run: R CMD build --no-build-vignettes .
+      
+      - name: Test R directory
+        run: ls ~/R_osmose
 
 
