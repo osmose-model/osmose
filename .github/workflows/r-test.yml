@@ -24,6 +24,9 @@ jobs:
       - name: Create R libs directories
         run: |
             mkdir -p ~/R_osmose
+            
+      - name: Install NetCDF
+        run:  sudo apt-get install libnetcdf-dev
 
       - name: Cache R dependencies
         id: r-dep
