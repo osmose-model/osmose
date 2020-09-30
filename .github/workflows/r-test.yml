@@ -48,3 +48,4 @@ jobs:
         run: |
             file=`ls *tar.gz`
             R CMD check --as-cran --ignore-vignettes ${file} 
+            ls ~/R_osmose/
