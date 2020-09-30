@@ -51,7 +51,7 @@ Description: The multispecies and individual-based model (IBM) 'OSMOSE'
   for instance (see <http://www.fishbase.org/search.php>), and fish spatial 
   distribution data. This package provides tools to build and run simulations 
   using the 'OSMOSE' model.
-License: CeCILL
+License: GPL-3
 Encoding: UTF-8
 Depends: 
   R (>= 3.5.0)
