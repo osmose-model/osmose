@@ -31,15 +31,13 @@ jobs:
         env:
             cache-name: r-dep-modules
         with:
-            path: ~/R_osmose/R/lib
+            path: ~/R_osmose/
             key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/DESCRIPTION') }}
 
       - name: Install Osmose dependencies
         if: steps.r-dep.outputs.cache-hit != 'true'
         run: |
-            install.packages(c("rlist", "knitr", "rmarkdown",
-                               "stringr", "ncdf4","mgcv",
-                               "fields"), repos="http://cran.us.r-project.org")
+            install.packages(c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "fields"), repos="http://cran.us.r-project.org")
         env: 
             R_LIBS_USER: "~/R_osmose/"
         shell: Rscript {0}
