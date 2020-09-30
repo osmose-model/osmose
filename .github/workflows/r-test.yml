@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Java compilation test
+name: R test
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -18,10 +18,17 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: r-install
+      - name: R install
         uses: r-lib/actions/setup-r@master
 
-      - name: check R
-        run: which R
+      - name: Install Osmose dependencies
+        run: |
+            install.packages(c("rlist", "knitr", "rmarkdown",
+                               "stringr", "ncdf4","mgcv",
+                               "fields"), repos="http://cran.us.r-project.org")
+        shell: Rscript {0}
+
+      - name: Build Osmose without vignettes
+        run: R CMD build --no-build-vignettes .
 
 
