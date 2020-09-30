@@ -45,6 +45,6 @@ jobs:
         run: R CMD build --no-build-vignettes .
       
       - name: Test R directory
-        run: ls ~/R_osmose
+        run: ls ~/R_osmose/**/DESCRIPTION
 
 
