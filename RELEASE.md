@@ -2,6 +2,10 @@
 
 ## Osmose 4.3.1
 
+### New features
+
+- Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
+
 ### Bugfix
 
 - Correction of a bug in the position of background species. Position was not init. so all the schools were at cell (0, 0)
@@ -406,3 +410,18 @@ Updated ReproductionProcess.java and IncomingFluxProcess.java so that the season
 
 reproduction.season.file.sp#
 flux.incoming.season.file.sp#
+
+# Release notes of Osmose-R
+
+From now on, Osmose R and Osmose Java are one, so everything is merged in a single release note
+
+## osmose 3.3.3
+* Several improvements on methods: print, summary, plot, report.
+* Improved documentation: help files, demo scripts, vignettes.
+* Bug corrections.
+
+## osmose 0.1.0
+* First release to CRAN
+
+## osmose 3.3.3
+* Corrections and modifications in order to submit to CRAN.

@@ -41,3 +41,6 @@ target
 build
 dist
 nbproject
+
+**.tar.gz
+**.Rcheck

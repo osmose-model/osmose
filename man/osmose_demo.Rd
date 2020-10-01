@@ -9,7 +9,7 @@ osmose_demo(path = NULL, config = c("gog", "eec_4.3.0"))
 \arguments{
 \item{path}{Path where to put the Osmose configuration file.}
 
-\item{config}{Reference configuration to run ("gog").}
+\item{config}{Reference configuration to run ("eec_4.3.0").}
 }
 \value{
 A list containing the configuration file to use (config_file) for running the code
@@ -19,7 +19,7 @@ and the output directory to use when reading data.
 Thins function
 }
 \note{
-So far, only one configuration is propose ("gog")
+So far, only one configuration is propose ("eec_4.3.0")
 }
 \examples{
 \dontrun{
@@ -28,10 +28,10 @@ rm(list=ls())
 library("osmose")
 
 # Copy configuration files into the proper directory
-demo = osmose_demo(path="../", config="gog")
+demo = osmose_demo(path="../", config="eec_4.3.0")
 
 # run the osmose model
-run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.0", 
+run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.1", 
           options=NULL, verbose=TRUE, clean=TRUE)
 
 # reads output data

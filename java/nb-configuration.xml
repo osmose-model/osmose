@@ -39,8 +39,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
-
-
 <project-shared-configuration>
     <!--
 This file contains additional configuration written by modules in the NetBeans IDE.
@@ -56,5 +54,6 @@ That way multiple projects can share the same settings (useful for formatting ru
 Any value defined here will override the pom.xml file value but is only applicable to the current project.
 -->
         <netbeans.hint.licensePath>${project.basedir}/osmose-license.txt</netbeans.hint.licensePath>
+        <netbeans.compile.on.save>none</netbeans.compile.on.save>
     </properties>
 </project-shared-configuration>
