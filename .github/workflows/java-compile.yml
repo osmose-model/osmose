@@ -38,5 +38,6 @@ jobs:
 
       - name: Compile Java code
         run:  | 
-            cd java && mvn build-helper:remove-project-artifact
-            cd java && mvn -B package
+            cd java 
+            mvn build-helper:remove-project-artifact
+            mvn -B package
