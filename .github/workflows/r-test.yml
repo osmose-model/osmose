@@ -20,13 +20,9 @@ jobs:
 
       - name: R install
         uses: r-lib/actions/setup-r@master
-
-      - name: Create R libs directories
-        run: |
-            mkdir -p ~/R_osmose
             
       - name: Install NetCDF and Latex
-        run:  sudo apt-get install libnetcdf-dev texlive-latex-base
+        run:  sudo apt-get install libnetcdf-dev texlive-latex-base texlive-fonts-recommended
 
       - name: Cache R dependencies
         id: r-dep
@@ -34,26 +30,23 @@ jobs:
         env:
             cache-name: r-dep-modules
         with:
-            path: ~/R_osmose/
+            path: /home/runner/work/_temp/Library
             key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/DESCRIPTION') }}
+            restore-keys: | 
+                ${{ runner.os }}-build-${{ env.cache-name }}-
+                ${{ runner.os }}-build-
+                ${{ runner.os }}-
 
       - name: Install Osmose dependencies
         if: steps.r-dep.outputs.cache-hit != 'true'
-        run: |
-            install.packages(c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "fields"), repos="http://cran.us.r-project.org")
-        env: 
-            R_LIBS_USER: "~/R_osmose/"
+        run: install.packages(c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "fields"), repos="http://cran.us.r-project.org")
         shell: Rscript {0}
 
       - name: Build Osmose without vignettes
-        run: |
-            ls ~/R_osmose/
-            R CMD build --no-build-vignettes .
+        run: R CMD build --no-build-vignettes .
 
       - name: Check Osmose without vignettes
         run: |
             file=`ls *tar.gz`
             echo $file
             R CMD check --as-cran --ignore-vignettes ${file} 
-        env: 
-            R_LIBS_USER: "~/R_osmose/"
