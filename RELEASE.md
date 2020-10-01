@@ -2,6 +2,10 @@
 
 ## Osmose 4.3.1
 
+### New features
+
+- Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
+
 ### Bugfix
 
 - Correction of a bug in the position of background species. Position was not init. so all the schools were at cell (0, 0)
