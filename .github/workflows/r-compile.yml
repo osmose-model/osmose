@@ -28,11 +28,7 @@ jobs:
             cache-name: apt-dep-modules
         with:
             path: "~/aptlib"
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('*') }}
-            restore-keys: |
-                ${{ runner.os }}-build-${{ env.cache-name }}-
-                ${{ runner.os }}-build-
-                ${{ runner.os }}-
+            key: libnetcdf-dev
             
       - name: Install NetCDF and Latex
         env: 
@@ -44,7 +40,7 @@ jobs:
               sudo apt-get update && sudo apt-get install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
               mkdir -p ~/aptlib
               for dep in libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra; do
-                  dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/aptlib/
+                  dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp -v --parents --target-directory ~/aptlib/
               done
             fi
 
