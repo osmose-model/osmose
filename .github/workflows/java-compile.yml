@@ -24,4 +24,4 @@ jobs:
           java-version: 1.8
 
       - name: Compile Java code
-        run:  cd java && mvn install
+        run:  cd java && mvn -B package
