@@ -23,7 +23,7 @@ run_osmose(
   parameters = NULL,
   output = NULL,
   log = "osmose.log",
-  version = "4.3.0",
+  version = "4.3.1",
   osmose = NULL,
   java = "java",
   options = NULL,
