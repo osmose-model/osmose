@@ -127,6 +127,8 @@ public class ResourceForcing extends OsmoseLinker {
      */
     private int[] stepMapping;
     
+    private int ncPerYear;
+    
 //////////////
 // Constructor
 //////////////
@@ -143,6 +145,12 @@ public class ResourceForcing extends OsmoseLinker {
     public void init() throws IOException {
         
         List<String> listFiles = new ArrayList<>();
+        
+        if(!getConfiguration().isNull("species.biomass.nsteps.year.sp" + index)) {
+            ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year.sp" + index);
+        } else { 
+            ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year");
+        }
 
         if (!getConfiguration().isNull("species.biomass.total.sp" + index)) {
             // uniform biomass
@@ -271,7 +279,8 @@ public class ResourceForcing extends OsmoseLinker {
             return;
         }
 
-        int iStepNc = iStepSimu % timeLength;
+        int ndt = this.getConfiguration().getNStepYear();
+        int iStepNc = (iStepSimu / (ndt / this.ncPerYear)) % timeLength;
 
         switch (caching) {
             case ALL:
