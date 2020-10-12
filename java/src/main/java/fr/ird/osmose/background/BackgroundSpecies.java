@@ -41,19 +41,19 @@
 
 package fr.ird.osmose.background;
 
-import fr.ird.osmose.AbstractSpecies;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;     
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 import java.io.IOException;
 import ucar.ma2.InvalidRangeException;
+import fr.ird.osmose.ISpecies;
 
 /**
  *
  * @author nbarrier
  */
-public class BackgroundSpecies extends OsmoseLinker implements AbstractSpecies {
+public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
 ///////////////////////////////
 // Declaration of the variables

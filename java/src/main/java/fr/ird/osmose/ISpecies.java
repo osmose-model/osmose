@@ -44,7 +44,7 @@ package fr.ird.osmose;
  *
  * @author barrier
  */
-public interface AbstractSpecies {
+public interface ISpecies {
     
     public String getName();
     
