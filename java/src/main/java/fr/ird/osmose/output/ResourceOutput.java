@@ -94,6 +94,8 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void init() {
+        this.rscBiomass0 = new HashMap<>();
+        this.rscBiomass1 = new HashMap<>();
         String filename = getFilename();
         IOTools.makeDirectories(filename);
         createNCFile(filename);
@@ -138,6 +140,10 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
             if (!(cell.isLand())) {
                 // Preyed biomass for every resource group in current cell
                 HashMap<Integer, Double> preyedResources = new HashMap();
+                for(int i : this.getConfiguration().getRscIndex()) { 
+                    preyedResources.put(i, 0.0);
+                }
+                
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         for (Prey prey : school.getPreys()) {
@@ -171,8 +177,9 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
             // Set _FillValue on land cells
             if (cell.isLand()) {
                 for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
-                    rscBiomass0.get(iRsc)[j][i] = FILLVALUE;
-                    rscBiomass1.get(iRsc)[j][i] = FILLVALUE;
+                    int iRscFinal = this.getConfiguration().getRscIndex(iRsc);
+                    rscBiomass0.get(iRscFinal)[j][i] = FILLVALUE;
+                    rscBiomass1.get(iRscFinal)[j][i] = FILLVALUE;
                 }
             }
         }
@@ -185,8 +192,9 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    arrRsc0.set(0, cpt, j, i, (float) rscBiomass0.get(iRsc)[j][i]);
-                    arrRsc1.set(0, cpt, j, i, (float) rscBiomass1.get(iRsc)[j][i]);
+                    int iRscFinal = this.getConfiguration().getRscIndex(iRsc);
+                    arrRsc0.set(0, cpt, j, i, (float) rscBiomass0.get(iRscFinal)[j][i]);
+                    arrRsc1.set(0, cpt, j, i, (float) rscBiomass1.get(iRscFinal)[j][i]);
                 }
             }
             cpt++;
