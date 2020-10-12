@@ -302,7 +302,7 @@ public class MortalityProcess extends AbstractProcess {
                 int ibkg = bkg.getSpeciesIndex();
                 double accessibleBiom = getResourceForcing(ibkg).getBiomass(bkg.getCell());
                 // note that here, the multiplication by proportion value is made in the setbiomass method
-                bkg.setBiomass(accessibleBiom);
+                bkg.setBiomass(accessibleBiom, iStepSimu);
                 bkg.init();  // reset ndead prior predation
             }
         }
