@@ -5,10 +5,14 @@
 ### New features
 
 - Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
+- Adding possibility to use ByClass time series for proportion in background species
 
 ### Bugfix
 
 - Correction of a bug in the position of background species. Position was not init. so all the schools were at cell (0, 0)
+- Correction of a bug in the saving of SpatialOutputs for LTL (problem with indexing)
+- Correction of bugs in the reading of resources: problem with file path reconstruction
+- Correction of a bug in the ResourceOutput class. Variables were not initialized
 
 ## Osmose 4.3.0
 
