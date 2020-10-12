@@ -55,7 +55,7 @@ package fr.ird.osmose;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Species {
+public class Species implements AbstractSpecies {
 
 ///////////////////////////////
 // Declaration of the variables

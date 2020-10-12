@@ -41,6 +41,7 @@
 
 package fr.ird.osmose.background;
 
+import fr.ird.osmose.AbstractSpecies;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;     
@@ -52,7 +53,7 @@ import ucar.ma2.InvalidRangeException;
  *
  * @author nbarrier
  */
-public class BackgroundSpecies extends OsmoseLinker {
+public class BackgroundSpecies extends OsmoseLinker implements AbstractSpecies {
 
 ///////////////////////////////
 // Declaration of the variables
