@@ -83,10 +83,10 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
     @Override
     public void write(float time) {
 
-        int cpt = 0;
         int nClass = distrib.getNClass();
         double[][] array = new double[nClass][getNSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
+            int cpt = 0;
             array[iClass][cpt++] = distrib.getThreshold(iClass);
             for (int iSpec : getConfiguration().getFocalIndex()) {
                 array[iClass][cpt++] = values.get(iSpec)[iClass] / getRecordFrequency();
