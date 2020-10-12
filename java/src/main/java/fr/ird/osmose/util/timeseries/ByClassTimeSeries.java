@@ -141,7 +141,11 @@ public class ByClassTimeSeries extends OsmoseLinker {
     public double getValue(int step, float school) {
         return values[step][classOf(school)];
     }
-
+ 
+    public double getValue(int step, int index) {
+        return values[step][index];
+    }
+    
     public int getNClass() {
         return classes.length;
     }
