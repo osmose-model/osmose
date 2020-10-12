@@ -44,6 +44,7 @@ package fr.ird.osmose.background;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.OsmoseLinker;     
+import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 import java.io.IOException;
 import ucar.ma2.InvalidRangeException;
 
@@ -89,6 +90,8 @@ public class BackgroundSpecies extends OsmoseLinker {
     private final int[] ageDt;
 
     private final int nClass;
+    
+    private final ByClassTimeSeries timeSeries;
 
     /**
      * Constructor of background species.
@@ -100,6 +103,9 @@ public class BackgroundSpecies extends OsmoseLinker {
     public BackgroundSpecies(int index) throws IOException, InvalidRangeException {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
+        
+        boolean isOk = true;
+        String message = "";
 
         // Initialiaze the index of the Background species
         this.index = index;
@@ -116,20 +122,47 @@ public class BackgroundSpecies extends OsmoseLinker {
         //trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
         trophicLevel = cfg.getArrayFloat("species.trophic.level.sp" + index);
 
-        // Proportion of the different size classes
-        classProportion = cfg.getArrayFloat("species.size.proportion.sp" + index);
-
         age = cfg.getArrayFloat("species.age.sp" + index);
         ageDt = new int[age.length];
         for (int i = 0; i < age.length; i++) {
             ageDt[i] = (int) age[i] * getConfiguration().getNStepYear();
         }
+        
+        if (cfg.canFind("species.size.proportion.file.sp" + index)) {
+            
+            String filename = cfg.getFile("species.size.proportion.file.sp" + index);
+            this.timeSeries = new ByClassTimeSeries();
+            this.timeSeries.read(filename);
+            length = this.timeSeries.getClasses();
+            this.classProportion = null;
+            
+        } else {
+            
+            this.timeSeries = null;
+            
+            // Proportion of the different size classes
+            classProportion = cfg.getArrayFloat("species.size.proportion.sp" + index);
+            // Get the array of species length
+            length = cfg.getArrayFloat("species.length.sp" + index);
 
-        // Get the array of species length
-        length = cfg.getArrayFloat("species.length.sp" + index);
+            if (classProportion.length != nClass) {
+                message = String.format("Length of species.size.proportion.sp%d is "
+                        + "not consistent with species.nclass.cp%d", index, index);
+                isOk = false;
+            }
+            
+            // check that the classProportion sums to 1.
+            float sum = 0.f;
+            for (int i = 0; i < classProportion.length; i++) {
+                sum += classProportion[i];
+            }
 
-        boolean isOk = true;
-        String message = "";
+            if (sum != 1.f) {
+                message = String.format("species.size.proportion.sp%d must sum to 1.0", index);
+                isOk = false;
+            }
+        
+        }
 
         if (trophicLevel.length != nClass) {
             message = String.format("Length of species.trophic.level.sp%d is "
@@ -143,26 +176,9 @@ public class BackgroundSpecies extends OsmoseLinker {
             isOk = false;
         }
 
-        if (classProportion.length != nClass) {
-            message = String.format("Length of species.size.proportion.sp%d is "
-                    + "not consistent with species.nclass.cp%d", index, index);
-            isOk = false;
-        }
-
         if (length.length != nClass) {
             message = String.format("Length of species.length.sp%d is "
                     + "not consistent with species.nclass.cp%d", index, index);
-            isOk = false;
-        }
-        
-        // check that the classProportion sums to 1.
-        float sum = 0.f;
-        for (int i = 0; i < classProportion.length; i++) {
-            sum += classProportion[i];
-        }
-
-        if (sum != 1.f) {
-            message = String.format("species.size.proportion.sp%d must sum to 1.0", index);
             isOk = false;
         }
         
@@ -215,8 +231,12 @@ public class BackgroundSpecies extends OsmoseLinker {
         return this.length[iClass];
     }
 
-    public float getProportion(int iClass) {
-        return this.classProportion[iClass];
+    public double getProportion(int iClass, int step) {
+        if (this.classProportion == null) {
+            return this.timeSeries.getValue(step, iClass);
+        } else {
+            return this.classProportion[iClass];
+        }
     }
 
     public float getAge(int iClass) {
