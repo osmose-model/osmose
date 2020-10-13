@@ -143,7 +143,7 @@ public class FisherySelectivity extends OsmoseLinker {
         }
 
         // Init the size selectivity array
-        select = new SizeSelect[3];
+        select = new SizeSelect[4];
         select[0] = (index, sch) -> this.getKnifeEdgeSelectivity(index, sch);  // knife edge selectivity
         select[1] = (index, sch) -> this.getSigmoidSelectivity(index, sch);    // Sigmoid selectivity
         select[2] = (index, sch) -> this.getGaussianSelectivity(index, sch);   // Gaussian selectivity
