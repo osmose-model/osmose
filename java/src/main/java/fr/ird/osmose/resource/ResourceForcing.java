@@ -215,12 +215,12 @@ public class ResourceForcing extends OsmoseLinker {
                 caching = ResourceCaching.valueOf(getConfiguration().getString("species.file.caching.sp" + index).toUpperCase());
             }
 
+            this.initTimeMapping();
+
         } else {
             error("No input file is provided for resource " + getConfiguration().getString("species.name.sp" + index), new IOException("Cannot initialize resource group " + index));
         }
                         
-        this.initTimeMapping();
-
         // prevent irrelevant caching mode : incremental caching requested but 
         // NetCDF time series as long as simulation time
         if (caching.equals(ResourceCaching.INCREMENTAL) && (timeLength == getConfiguration().getNStep())) {
