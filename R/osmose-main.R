@@ -333,3 +333,59 @@ osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0")){
   
   return(demo)
 }
+
+
+# Demo --------------------------------------------------------------------
+#' Generates Osmose configuration files to run an Osmose demo.
+#' 
+#' @param path Path where to put the Osmose configuration file.
+#' @note So far, only one configuration is propose ("eec_4.3.0")
+#' 
+#' @return A list containing the configuration file to use (config_file) for running the code
+#' and the output directory to use when reading data.
+#' 
+#' @export
+#' @examples
+#' \dontrun{
+#' rm(list=ls())
+#'
+#'library("osmose")
+#'
+#'# Copy configuration files into the proper directory
+#'demo = osmose_demo(path="../", config="eec_4.3.0")
+#'
+#'# run the osmose model
+#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.1", 
+#'           options=NULL, verbose=TRUE, clean=TRUE)
+#'
+#'# reads output data
+#'data = read_osmose(demo$output_dir)
+#'
+#'# summarize output data
+#'summary(data)
+#'
+#'# plot output data
+#'plot(data)
+#'}
+osmose_calib_demo = function(path = NULL) {
+  
+  # if no path has been provided, create a path from the working dir.
+  if(is.null(path)) path = getwd()
+  
+  # if the directory does not exist, then create it
+  if(!dir.exists(path)) dir.create(path = path, showWarnings = FALSE, recursive = TRUE)
+  
+  # copy the calibration data into the path directory
+  input_dir = cacheManager("calib_demo")
+  file.copy(from = input_dir, to = path, recursive = TRUE, overwrite = TRUE)
+  
+  # Copy the reference gog configuration in the calibration folder
+  input_dir = cacheManager("gog")
+  file.copy(from = input_dir, to = file.path(path, "calib_demo"), recursive = TRUE, overwrite = TRUE)
+  
+  demo = list(path = file.path(path, "calib_demo"))
+  demo$file = "calibrate.R"
+  
+  return(demo)
+}
+
