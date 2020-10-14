@@ -18,6 +18,7 @@
 - Correction of a bug in the DietOutput class: bkg species were not included in the preys
 - Correction of a bug in DietDistribOutput: bkg species were not counted in the preys + bad init. of cpt value in write (leads to outofbound errors)
 - Correction of a bug in the init. of fishery selectivities array
+- Yields biomass and abundance are **integrated** instead of being **averaged**
 
 ## Osmose 4.3.0
 
