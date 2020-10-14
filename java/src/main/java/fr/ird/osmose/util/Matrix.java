@@ -232,15 +232,18 @@ public class Matrix extends OsmoseLinker {
      */
     public int getIndexPred(IAggregation pred) {
 
+        String predname = pred.getSpeciesName();
+
         if (this.classGetter == null) {
             for (int i = 0; i < this.getNPred(); i++) {
-                if (pred.getSpeciesName().equals(this.getPredName(i))) {
+                if (predname.equals(this.getPredName(i))) {
                     return i;
                 }
             }
         } else {
+            double classVal = classGetter.getVariable(pred);
             for (int i = 0; i < this.getNPred(); i++) {
-                if (pred.getSpeciesName().equals(this.getPredName(i)) && (classGetter.getVariable(pred) < this.getPredClass(i))) {
+                if (predname.equals(this.getPredName(i)) && (classVal < this.getPredClass(i))) {
                     return i;
                 }
             }
@@ -259,16 +262,19 @@ public class Matrix extends OsmoseLinker {
      * @return
      */
     public int getIndexPrey(IAggregation prey) {
-
+        
+        String preyname = prey.getSpeciesName();
+        
         if (this.classGetter == null) {
-            for (int i = 0; i < this.getNPred(); i++) {
-                if (prey.getSpeciesName().equals(this.getPredName(i))) {
+            for (int i = 0; i < this.getNPrey(); i++) {
+                if (preyname.equals(this.getPreyName(i))) {
                     return i;
                 }
             }
         } else {
+            double classVal = classGetter.getVariable(prey);
             for (int i = 0; i < this.getNPrey(); i++) {
-                if (prey.getSpeciesName().equals(this.getPreyName(i)) && (classGetter.getVariable(prey) < this.getPreyClass(i))) {
+                if (preyname.equals(this.getPreyName(i)) && (classVal < this.getPreyClass(i))) {
                     return i;
                 }
             }
@@ -276,6 +282,7 @@ public class Matrix extends OsmoseLinker {
         String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(), classGetter.getVariable(prey));
         error(message, new IllegalArgumentException());
         return -1;
+
     }
     
     /** *  Extracts the matrix column for the given predator.Based on full correspondance of the name (class < thres).
