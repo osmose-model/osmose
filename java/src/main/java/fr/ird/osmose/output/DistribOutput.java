@@ -63,19 +63,48 @@ public class DistribOutput extends AbstractOutput {
     // description
     private final String description;
 
+    private final boolean computeAverage;
+    
+    /**
+     * Default constructor, in which temporal average is computed.
+     */
     public DistribOutput(int rank, String subfolder,
             String name, String description,
             Species species,
             SchoolVariableGetter variable,
             AbstractDistribution distrib) {
+
+        this(rank, subfolder, name, description, species, variable, distrib, true);
+
+    }
+
+    /**
+     * Full constructor. Contains species and computeAverage arguments.
+     */
+    public DistribOutput(int rank, String subfolder,
+            String name, String description,
+            Species species,
+            SchoolVariableGetter variable,
+            AbstractDistribution distrib, boolean computeAverage) {
         super(rank, subfolder, name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""));
         this.distrib = distrib;
         this.variable = variable;
         this.description = description;
+        this.computeAverage = computeAverage;
     }
 
+    /**
+     * Constructor with compute average but not species.
+     */
+    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib, boolean computeAverage) {
+        this(rank, subfolder, name, description, null, schoolVariable, distrib, computeAverage);
+    }
+
+    /**
+     * Constructor without species and compute_average.
+     */
     public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib) {
-        this(rank, subfolder, name, description, null, schoolVariable, distrib);
+        this(rank, subfolder, name, description, null, schoolVariable, distrib, true);
     }
 
     @Override
@@ -133,8 +162,14 @@ public class DistribOutput extends AbstractOutput {
             for (int iClass = 0; iClass < nClass; iClass++) {
                 int cpt = 0;
                 array[iClass][cpt++] = distrib.getThreshold(iClass);
-                for (int iSpec : getConfiguration().getFocalIndex()) {
-                    array[iClass][cpt++] = values.get(iSpec)[irg][iClass] / nsteps;
+                if (this.computeAverage) {
+                    for (int iSpec : getConfiguration().getFocalIndex()) {
+                        array[iClass][cpt++] = values.get(iSpec)[irg][iClass] / nsteps;
+                    }
+                } else {
+                    for (int iSpec : getConfiguration().getFocalIndex()) {
+                        array[iClass][cpt++] = values.get(iSpec)[irg][iClass];
+                    }
                 }
             }
             writeVariable(irg, time, array);
