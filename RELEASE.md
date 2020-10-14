@@ -1,6 +1,6 @@
 # OSMOSE Release Notes
 
-## Osmose 4.3.1
+## Osmose 4.3.2
 
 ### New features
 
@@ -10,7 +10,6 @@
 
 ### Bugfix
 
-- Correction of a bug in the position of background species. Position was not init. so all the schools were at cell (0, 0)
 - Correction of a bug in the saving of SpatialOutputs for LTL (problem with indexing)
 - Correction of bugs in the reading of resources: problem with file path reconstruction
 - Correction of bugs in the reading of resources: bad recovery of the nc indes. Corrected by adding a parameter (ncstep / year)
@@ -19,6 +18,14 @@
 - Correction of a bug in DietDistribOutput: bkg species were not counted in the preys + bad init. of cpt value in write (leads to outofbound errors)
 - Correction of a bug in the init. of fishery selectivities array
 - Yields biomass and abundance are **integrated** instead of being **averaged**
+- Put the `initTimeMapping` method of `ResourceForcing.java` inside the condition. Caused an error if no NetCDF used.
+- Correct a bug in the accessibility recovery (mixing preys and predators)
+
+## Osmose 4.3.1
+
+### Bugfix
+
+- Correction of a bug in the position of background species. Position was not init. so all the schools were at cell (0, 0)
 
 ## Osmose 4.3.0
 
