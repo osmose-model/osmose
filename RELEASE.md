@@ -6,6 +6,7 @@
 
 - Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
 - Adding possibility to use ByClass time series for proportion in background species
+- Adding an `osmose_calib_demo` function in the R package
 
 ### Bugfix
 
@@ -16,6 +17,7 @@
 - Correction of a bug in the ResourceOutput class. Variables were not initialized
 - Correction of a bug in the DietOutput class: bkg species were not included in the preys
 - Correction of a bug in DietDistribOutput: bkg species were not counted in the preys + bad init. of cpt value in write (leads to outofbound errors)
+- Correction of a bug in the init. of fishery selectivities array
 
 ## Osmose 4.3.0
 
