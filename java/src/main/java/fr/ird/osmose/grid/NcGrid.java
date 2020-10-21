@@ -136,8 +136,10 @@ public class NcGrid extends AbstractGrid {
         }
 
         isCoord1D = (arrLon.getRank() == 1);
-        int ny = arrMask.getShape()[0];
-        int nx = arrMask.getShape()[1];
+        
+        int ndims = arrMask.getRank();
+        int ny = arrMask.getShape()[ndims - 2];
+        int nx = arrMask.getShape()[ndims - 1];
            
         if(this.isReadSurf()) {
             try {
@@ -164,9 +166,35 @@ public class NcGrid extends AbstractGrid {
                     lonIndex.set(j, i);
                     latIndex.set(j, i);
                 }
-                maskIndex.set(j, i);
-                double maskVal = arrMask.getDouble(maskIndex); 
-                boolean land = (maskVal <= 0)  || (Double.isNaN(maskVal));
+
+                boolean land = false;
+                double maskVal;
+                switch (ndims) {
+                    case 2:
+                        // if the mask is 2D (lat, lon)
+                        maskIndex.set(j, i);
+                        maskVal = arrMask.getDouble(maskIndex);
+                        land = (maskVal <= 0) || (Double.isNaN(maskVal));
+                        break;
+                    case 3:
+                        // if the mask is 3D (time, lat, lon)
+                        land = false;
+                        int nz = arrMask.getShape()[0];
+                        for (int k = 0; k < nz; k++) {
+                            maskIndex.set(k, j, i);
+                            maskVal = arrMask.getDouble(maskIndex);
+                            land = land || (maskVal <= 0) || (Double.isNaN(maskVal));
+                            if(land) { 
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        IOException ex = new IOException("Mask variable must either be 2D or 3D, not " + ndims + "D");
+                        Logger.getLogger(NcGrid.class.getName()).log(Level.SEVERE, null, ex);
+                        
+                }
+                
                 double tmpLat = arrLat.getDouble(latIndex);
                 double tmpLon = arrLon.getDouble(lonIndex);
                 grid[j][i] = new Cell((j * nx + i), i, j, (float) tmpLat, (float) tmpLon, land);
