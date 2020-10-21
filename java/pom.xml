@@ -129,6 +129,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     </repositories>
     
     <build>
+        <finalName>${project.artifactId}_${project.version}</finalName>
         <plugins>
             <!-- Execute the jar file on "Run Project" -->
             <plugin>
