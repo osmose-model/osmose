@@ -164,7 +164,6 @@ public class ResourceForcing extends OsmoseLinker {
             // check resource is properly defined in the NetCDF file
             String name = getConfiguration().getString("species.name.sp" + index);
             String ncFile = getConfiguration().getFile("species.file.sp" + index);
-
             // Recover the file pattern to match
             String pattern = new File(ncFile).getName();
 
@@ -186,7 +185,14 @@ public class ResourceForcing extends OsmoseLinker {
             this.nFiles = fileNames.length;
             this.nSteps = new int[this.nFiles];
             int cpt = 0;
-
+            
+            if(this.nFiles == 0) {
+                StringBuilder msg = new StringBuilder();
+                msg.append("No forcing file has been found for species index " + index + "\n");
+                msg.append("The program will stop");
+                error("Error reading resource file", new IOException(msg.toString()));                
+            }
+            
             for (String temp : fileNames) {
 
                 ncFile = new File(temp).getAbsolutePath();
