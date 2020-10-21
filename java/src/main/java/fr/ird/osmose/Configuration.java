@@ -45,6 +45,7 @@ import fr.ird.osmose.resource.ResourceSpecies;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.AbstractGrid;
+import fr.ird.osmose.grid.NcGrid;
 import fr.ird.osmose.output.AbstractOutputRegion;
 import fr.ird.osmose.output.OutputRegion;
 import fr.ird.osmose.output.Surveys;
@@ -600,15 +601,11 @@ public class Configuration extends OLogger {
      */
     public void initGrid() {
 
-        String gridClassName = getString("grid.java.classname");
-        try {
-            info("Grid: " + gridClassName);
-            grid = (AbstractGrid) Class.forName(gridClassName).newInstance();
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
-            error("Failed to create new grid instance. " + ex.getMessage(), ex);
-        }
-        // Init the grid
+        // barrier.n
+        // Only NetCDF grid remaining
+        grid = new NcGrid();
         grid.init();
+        
     }
 
     /**
