@@ -31,6 +31,7 @@
 
 ### New features
 
+- Moving Java compilation to Maven
 - New parameterization of fisheries (fishing period, discards, catchability matrix)
 - Standardized parameterization of resource and background species forcings (netcdf file containing biomass)
 - New parameterization of background and resource species (species.XXX.sp instead of plankton.YYY.plk for instance)
@@ -40,6 +41,8 @@
 - New parameterization of accessibility matrixes (thres. read from files, no more as parameters).
 - All species (focal, background and resource) must have different indexes
 - Extensive use of HashMaps in order to allow easy switch of a species from one type to another
+
+# Older versions
 
 ## Changes from Osmose 3 Update 1 to Osmose 3 Update 2
 
