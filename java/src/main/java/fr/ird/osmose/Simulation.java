@@ -286,7 +286,7 @@ public class Simulation extends OsmoseLinker {
 
         resourceForcing = new HashMap();
 
-        Arrays.stream(this.getConfiguration().getRscIndex()).forEach(i -> {
+        Arrays.stream(this.getConfiguration().getResourceIndex()).forEach(i -> {
             ResourceForcing resForcing = new ResourceForcing(i);
             try {
                 resForcing.init();
@@ -298,7 +298,7 @@ public class Simulation extends OsmoseLinker {
         });
 
         // Init resources for background species
-        Arrays.stream(this.getConfiguration().getBkgIndex()).forEach(i -> {
+        Arrays.stream(this.getConfiguration().getBackgroundIndex()).forEach(i -> {
             ResourceForcing resForcing = new ResourceForcing(i);
             try {
                 resForcing.init();

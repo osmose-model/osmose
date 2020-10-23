@@ -88,12 +88,12 @@ public class DietDistribOutput extends AbstractDistribOutput {
             cpt++;
         }
         
-        for (int i : getConfiguration().getBkgIndex()) {
+        for (int i : getConfiguration().getBackgroundIndex()) {
             headers[cpt] = this.getBkgSpecies(i).getName();
             cpt++;
         }
         
-        for (int i : getConfiguration().getRscIndex()) {
+        for (int i : getConfiguration().getResourceIndex()) {
             headers[cpt] = getConfiguration().getResourceSpecies(i).getName();
             cpt++;
         }

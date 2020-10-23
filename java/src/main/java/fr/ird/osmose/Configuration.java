@@ -1377,7 +1377,7 @@ public class Configuration extends OLogger {
      * @param i Index of the background species
      * @return The species index of the ith background species.
      */
-    public int[] getBkgIndex() {
+    public int[] getBackgroundIndex() {
         return this.bkgIndex;
     }
 
@@ -1387,7 +1387,7 @@ public class Configuration extends OLogger {
      * @param i Index of the resource species
      * @return The species index of the ith resource species.
      */
-    public int[] getRscIndex() {
+    public int[] getResourceIndex() {
         return this.rscIndex;
     }
     
@@ -1397,7 +1397,7 @@ public class Configuration extends OLogger {
      * 
      * @return 
      */
-    public int[] getFishIndex() {
+    public int[] getPredatorIndex() {
         return(ArrayUtils.addAll(this.focalIndex, this.bkgIndex));
     }
     
