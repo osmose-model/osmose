@@ -95,6 +95,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     private final ByClassTimeSeries timeSeries;
     
     private final int globalindex;
+    private final int offset;
 
     /**
      * Constructor of background species.
@@ -110,7 +111,8 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         boolean isOk = true;
         String message = "";
 
-        this.globalindex = globalindex;
+        this.offset = cfg.getNSpecies();
+        this.globalindex = globalindex + this.offset;
         
         // Initialiaze the index of the Background species
         this.index = index;
@@ -207,8 +209,17 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      *
      * @return
      */
-    public int getGlobalSpeciesIndex() {
+    public int getGlobalSpeciesIndex(boolean applyOffset) {
+        if(applyOffset) {
         return this.globalindex;
+        } else {
+            return this.globalindex - this.offset;
+        }
+    }
+    
+    @Override
+    public int getGlobalSpeciesIndex() {
+        return this.getGlobalSpeciesIndex(true);
     }
     
     /**

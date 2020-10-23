@@ -62,11 +62,11 @@ public class PredationMortality extends AbstractMortality {
     /**
      * Predator/prey size ratio
      */
-    private HashMap<Integer, double[]> predPreySizesMax, predPreySizesMin;
+    private double[][] predPreySizesMax, predPreySizesMin;
     /**
      * Maximum ingestion rate
      */
-    private HashMap<Integer, Double> predationRate;
+    private double[] predationRate;
 
     /*
      * Feeding stages
@@ -107,16 +107,20 @@ public class PredationMortality extends AbstractMortality {
         predationAccess = new AccessibilityManager(this.getRank(), "predation.accessibility", "acc", classGetter);
         predationAccess.init();
 
-        predPreySizesMax = new HashMap();
-        predPreySizesMin = new HashMap();
-        predationRate = new HashMap();
+        int nSpecies = getConfiguration().getNSpecies();
+        int nBackground = getConfiguration().getNSpecies();
+        predPreySizesMax = new double[nSpecies + nBackground][];
+        predPreySizesMin = new double[nSpecies + nBackground][];
+        predationRate = new double[nSpecies + nBackground];
 
+        int cpt = 0;
         for (int i : getConfiguration().getPredatorIndex()) {
-            predPreySizesMax.put(i, getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + i));
-            predPreySizesMin.put(i, getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.sp" + i));
+            predPreySizesMax[cpt] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + i);
+            predPreySizesMin[cpt] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.sp" + i);
             if (!getConfiguration().isBioenEnabled()) {
-                predationRate.put(i, getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i));
+                predationRate[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + i);
             }
+            cpt++;
         }
 
         // Feeding stages (i.e. classes for Lmin/LMax ratios
@@ -206,17 +210,18 @@ public class PredationMortality extends AbstractMortality {
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
     }
 
-    private HashMap<Integer, Double> getPercentResource(IAggregation predator) {
-        HashMap<Integer, Double> percentResource = new HashMap();
-        int iPred = predator.getSpeciesIndex();
+    private double[] getPercentResource(IAggregation predator) {
+        double[] percentResource = new double[this.getConfiguration().getNRscSpecies()];
+        int iPred = predator.getGlobalSpeciesIndex();
         int iStage = predPreyStage.getStage(predator);
-        double preySizeMax = predator.getLength() / predPreySizesMax.get(iPred)[iStage];
-        double preySizeMin = predator.getLength() / predPreySizesMin.get(iPred)[iStage];
+        double preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
+        double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
+        int cpt = 0;
         for (int i : getConfiguration().getResourceIndex()) {
             if ((preySizeMin > getConfiguration().getResourceSpecies(i).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(i).getSizeMin())) {
-                percentResource.put(i, 0.0d);
+                percentResource[cpt] = 0.0d;
             } else {
-                percentResource.put(i, getConfiguration().getResourceSpecies(i).computePercent(preySizeMin, preySizeMax));
+                percentResource[cpt] = getConfiguration().getResourceSpecies(i).computePercent(preySizeMin, preySizeMax);
             }
         }
         return percentResource;
@@ -232,7 +237,7 @@ public class PredationMortality extends AbstractMortality {
         if (getConfiguration().isBioenEnabled()) {
             error("The getMaxPredationRate method of PredationMortality not suitable in Osmose-PHYSIO", new Exception());
         }
-        return predationRate.get(predator.getSpeciesIndex()) / getConfiguration().getNStepYear();
+        return predationRate[predator.getGlobalSpeciesIndex()] / getConfiguration().getNStepYear();
     }
 
     /**
@@ -250,14 +255,14 @@ public class PredationMortality extends AbstractMortality {
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         double[] accessibility = new double[preys.size()];
-        int iSpecPred = predator.getSpeciesIndex();
+        int iSpecPred = predator.getGlobalSpeciesIndex();
         int iPredPreyStage = predPreyStage.getStage(predator);
-        double preySizeMax = predator.getLength() / predPreySizesMax.get(iSpecPred)[iPredPreyStage];
-        double preySizeMin = predator.getLength() / predPreySizesMin.get(iSpecPred)[iPredPreyStage];
-        HashMap<Integer, Double> percentResource = getPercentResource(predator);
+        double preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
+        double preySizeMin = predator.getLength() / predPreySizesMin[iSpecPred][iPredPreyStage];
+        double[] percentResource = getPercentResource(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
-            int iSpecPrey = preys.get(iPrey).getSpeciesIndex();
+            int iSpecPrey = preys.get(iPrey).getGlobalSpeciesIndex(false);
             IAggregation prey = (IAggregation) preys.get(iPrey);
             int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
             // The prey is an other school
@@ -273,7 +278,7 @@ public class PredationMortality extends AbstractMortality {
             } else {
                 // The prey is a resource group
                 accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
-                        * percentResource.get(iSpecPrey);
+                        * percentResource[iSpecPrey];
             }
         }
         return accessibility;

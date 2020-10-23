@@ -389,16 +389,6 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     }
     
     /**
-     * Returns the index of the species
-     *
-     * @return the index of the species
-     */
-    @Override
-    public int getGlobalSpeciesIndex() {
-        return globalindex;
-    }
-
-    /**
      * Returns the number of dead fish for a given mortality cause.
      *
      * @see MortalityCause
