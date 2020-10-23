@@ -100,12 +100,12 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         nFishery = getConfiguration().getNFishery();
 
         biomass = new HashMap();
-        for (int i : getConfiguration().getFishIndex()) {
+        for (int i : getConfiguration().getPredatorIndex()) {
             biomass.put(i, new float[nFishery]);
         }
 
         discards = new HashMap();
-        for (int i : getConfiguration().getFishIndex()) {
+        for (int i : getConfiguration().getPredatorIndex()) {
             discards.put(i, new float[nFishery]);
         }
         
@@ -187,11 +187,11 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
     @Override
     public void reset() {
 
-        for (int i : getConfiguration().getFishIndex()) {
+        for (int i : getConfiguration().getPredatorIndex()) {
             biomass.put(i, new float[nFishery]);
         }
 
-        for (int i : getConfiguration().getFishIndex()) {
+        for (int i : getConfiguration().getPredatorIndex()) {
             discards.put(i, new float[nFishery]);
         }
     }
@@ -233,7 +233,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
         ArrayFloat.D3 arrDiscards = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
         int cpt = 0;
-        for (int iSpecies : getConfiguration().getFishIndex()) {
+        for (int iSpecies : getConfiguration().getPredatorIndex()) {
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
                 arrBiomass.set(0, cpt, iFishery, biomass.get(iSpecies)[iFishery]);
                 arrDiscards.set(0, cpt, iFishery, discards.get(iSpecies)[iFishery]);
@@ -285,7 +285,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
             strBuild.append(", ");
         }
 
-        for (int i : this.getConfiguration().getBkgIndex()) {
+        for (int i : this.getConfiguration().getBackgroundIndex()) {
             strBuild.append(getBkgSpecies(i).getName());
             strBuild.append(", ");
         }
