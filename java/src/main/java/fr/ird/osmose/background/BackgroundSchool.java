@@ -180,12 +180,12 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getName();
     }
     
-    public float getProportion() {
-        return this.bkgSpecies.getProportion(this.classIndex);
+    public double getProportion(int step) {
+        return this.bkgSpecies.getProportion(this.classIndex, step);
     }
     
-    public void setBiomass(double biomass) {
-        this.biomass = biomass * this.getProportion();
+    public void setBiomass(double biomass, int step) {
+        this.biomass = biomass * this.getProportion(step);
     }
 
     @Override

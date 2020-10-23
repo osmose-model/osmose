@@ -374,13 +374,13 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.yield.biomass.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yield",
                     "cumulative catch (tons per time step of saving). ex: if time step of saving is the year, then annual catches are saved",
-                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)))
+                    school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), false)
             );
         }
         if (getConfiguration().getBoolean("output.yield.abundance.enabled")) {
             outputs.add(new SpeciesOutput(rank, null, "yieldN",
                     "cumulative catch (number of fish caught per time step of saving). ex: if time step of saving is the year, then annual catches in fish numbers are saved",
-                    school -> school.getNdead(MortalityCause.FISHING))
+                    school -> school.getNdead(MortalityCause.FISHING), false)
             );
         }
         // Size
@@ -413,14 +413,14 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
                     school -> school.getNdead(MortalityCause.FISHING),
-                    sizeDistrib
+                    sizeDistrib, false
             ));
         }
         if (getConfiguration().getBoolean("output.yield.biomass.bySize.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)),
-                    sizeDistrib
+                    sizeDistrib, false
             ));
         }
         if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
@@ -437,14 +437,14 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
                     school -> school.getNdead(MortalityCause.FISHING),
-                    ageDistrib
+                    ageDistrib, false
             ));
         }
         if (getConfiguration().getBoolean("output.yield.biomass.byAge.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)),
-                    ageDistrib
+                    ageDistrib, false
             ));
         }
         // TL

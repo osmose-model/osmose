@@ -1,10 +1,27 @@
 # OSMOSE Release Notes
 
-## Osmose 4.3.1
+## Osmose 4.3.2
 
 ### New features
 
 - Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
+- Adding possibility to use ByClass time series for proportion in background species
+- Adding an `osmose_calib_demo` function in the R package
+
+### Bugfix
+
+- Correction of a bug in the saving of SpatialOutputs for LTL (problem with indexing)
+- Correction of bugs in the reading of resources: problem with file path reconstruction
+- Correction of bugs in the reading of resources: bad recovery of the nc indes. Corrected by adding a parameter (ncstep / year)
+- Correction of a bug in the ResourceOutput class. Variables were not initialized
+- Correction of a bug in the DietOutput class: bkg species were not included in the preys
+- Correction of a bug in DietDistribOutput: bkg species were not counted in the preys + bad init. of cpt value in write (leads to outofbound errors)
+- Correction of a bug in the init. of fishery selectivities array
+- Yields biomass and abundance are **integrated** instead of being **averaged**
+- Put the `initTimeMapping` method of `ResourceForcing.java` inside the condition. Caused an error if no NetCDF used.
+- Correct a bug in the accessibility recovery (mixing preys and predators)
+
+## Osmose 4.3.1
 
 ### Bugfix
 
@@ -14,6 +31,7 @@
 
 ### New features
 
+- Moving Java compilation to Maven
 - New parameterization of fisheries (fishing period, discards, catchability matrix)
 - Standardized parameterization of resource and background species forcings (netcdf file containing biomass)
 - New parameterization of background and resource species (species.XXX.sp instead of plankton.YYY.plk for instance)
@@ -23,6 +41,8 @@
 - New parameterization of accessibility matrixes (thres. read from files, no more as parameters).
 - All species (focal, background and resource) must have different indexes
 - Extensive use of HashMaps in order to allow easy switch of a species from one type to another
+
+# Older versions
 
 ## Changes from Osmose 3 Update 1 to Osmose 3 Update 2
 

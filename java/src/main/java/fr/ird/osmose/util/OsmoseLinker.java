@@ -47,6 +47,9 @@ import fr.ird.osmose.Species;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.logging.OLogger;
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import fr.ird.osmose.ISpecies;
 
 /**
  *
@@ -61,8 +64,21 @@ public class OsmoseLinker extends OLogger {
     final public Configuration getConfiguration() {
         return getOsmose().getConfiguration();
     }
-
+    
     final public Species getSpecies(int index) {
+        return getConfiguration().getSpecies(index);
+    }
+
+    final public ISpecies getFishSpecies(int index) {
+        
+        if (IntStream.of(this.getConfiguration().getFocalIndex()).anyMatch(x -> x == index)) {
+            return getConfiguration().getSpecies(index);
+        }
+
+        if (IntStream.of(this.getConfiguration().getBkgIndex()).anyMatch(x -> x == index)) {
+            return getConfiguration().getBkgSpecies(index);
+        }
+
         return getConfiguration().getSpecies(index);
     }
 

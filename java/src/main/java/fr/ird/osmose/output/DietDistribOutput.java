@@ -61,7 +61,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
     @Override
     public void reset() {
         values.clear();
-        for (int i : getConfiguration().getFocalIndex()) {
+        for (int i : getConfiguration().getAllIndex()) {
             values.put(i, new double[getNClass()]);
         }
     }
@@ -82,6 +82,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
         String[] headers = new String[getNSpecies() + getConfiguration().getNRscSpecies() + getConfiguration().getNBkgSpecies() + 1];  
         headers[0] = getType().toString();
         int cpt = 1;
+        
         for (int i : getConfiguration().getFocalIndex()) {
             headers[cpt] = getSpecies(i).getName();
             cpt++;
@@ -123,9 +124,9 @@ public class DietDistribOutput extends AbstractDistribOutput {
     public void write(float time) {
         // values = new double[getNSpecies() + getConfiguration().getNResource()][getNClass()];
         int nClass = this.getNClass();
-        int cpt = 0;
-        double[][] array = new double[nClass][getNSpecies() + getConfiguration().getNRscSpecies() + 1];
+        double[][] array = new double[nClass][getNSpecies() + getConfiguration().getNRscSpecies() + getConfiguration().getNBkgSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
+            int cpt = 0;
             array[iClass][cpt++] = this.getClassThreshold(iClass);
             for (int iSpec : this.getConfiguration().getAllIndex()) {
                 array[iClass][cpt++] = values.get(iSpec)[iClass] / getRecordFrequency();

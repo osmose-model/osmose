@@ -348,6 +348,7 @@ public class Releases {
                 
             }
         },
+        
         new Release("4.3.0") {
             @Override
             void updateParameters() {
@@ -361,6 +362,46 @@ public class Releases {
                     cfg.findKeys("predation.accessibility.stage.threshold*").stream().forEach(key -> deprecateParameter(key));
                 }
                 
+                int nspecies = cfg.getInt("simulation.nspecies");
+                int nresources = cfg.getInt("simulation.nresource");
+
+                int nbackground;
+                if (cfg.canFind("simulation.nbackground")) {
+                    nbackground = cfg.getInt("simulation.nbackground");
+                } else {
+                    nbackground = 0;
+                }
+                
+                // Add the parameters relative to species types
+                for(int i = 0; i<nspecies; i++) {
+                    this.addParameter("species.type.sp" + i, "focal");
+                }
+                
+                for (int i = 0; i < nbackground; i++) {
+                    this.addParameter("species.type.sp" + (i + nspecies), "background");
+                }
+
+                for (int i = 0; i < nresources; i++) {
+                    this.addParameter("species.type.sp" + (i + nspecies + nbackground), "resource");
+                }
+                
+                for (int index = 0; index < nresources; index++) {
+                    int newindex = index + nspecies + nbackground;
+                    updateKey("resource.name.rsc" + index, "species.name.sp" + newindex);
+                    updateKey("resource.TL.rsc" + index, "species.TL.sp" + newindex);
+                    updateKey("resource.size.min.rsc" + index, "species.size.min.sp" + newindex);
+                    updateKey("resource.size.max.rsc" + index, "species.size.max.sp" + newindex);
+                    updateKey("resource.accessibility2fish.file.rsc" + index, "species.accessibility2fish.file.sp" + newindex);
+                    updateKey("resource.accessibility2fish.rsc" + index, "species.accessibility2fish.sp" + newindex);
+                    updateKey("resource.biomass.total.rsc" + index, "species.biomass.total.sp" + newindex);
+                    updateKey("resource.file.rsc" + index, "species.file.sp" + newindex);
+                    updateKey("resource.multiplier.rsc" + index, "species.multiplier.sp" + newindex);
+                }
+                
+                this.deprecateParameter("grid.java.classname");
+                
+                
+                                        
             } // end of update parameters
         } // end of release constructor
     

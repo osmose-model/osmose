@@ -127,6 +127,8 @@ public class ResourceForcing extends OsmoseLinker {
      */
     private int[] stepMapping;
     
+    private int ncPerYear;
+    
 //////////////
 // Constructor
 //////////////
@@ -141,8 +143,14 @@ public class ResourceForcing extends OsmoseLinker {
      * Reads and checks parameters from configuration file.
      */
     public void init() throws IOException {
-
+        
         List<String> listFiles = new ArrayList<>();
+        
+        if(!getConfiguration().isNull("species.biomass.nsteps.year.sp" + index)) {
+            ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year.sp" + index);
+        } else { 
+            ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year");
+        }
 
         if (!getConfiguration().isNull("species.biomass.total.sp" + index)) {
             // uniform biomass
@@ -156,7 +164,6 @@ public class ResourceForcing extends OsmoseLinker {
             // check resource is properly defined in the NetCDF file
             String name = getConfiguration().getString("species.name.sp" + index);
             String ncFile = getConfiguration().getFile("species.file.sp" + index);
-
             // Recover the file pattern to match
             String pattern = new File(ncFile).getName();
 
@@ -164,7 +171,8 @@ public class ResourceForcing extends OsmoseLinker {
             String[] fileList = directory.list();
             for (String f : fileList) {
                 if (f.matches(pattern)) {
-                    listFiles.add(f);
+                    File tempfile = new File(directory, f);
+                    listFiles.add(tempfile.getAbsolutePath());
                 }
             }
             
@@ -177,10 +185,17 @@ public class ResourceForcing extends OsmoseLinker {
             this.nFiles = fileNames.length;
             this.nSteps = new int[this.nFiles];
             int cpt = 0;
-
+            
+            if(this.nFiles == 0) {
+                StringBuilder msg = new StringBuilder();
+                msg.append("No forcing file has been found for species index " + index + "\n");
+                msg.append("The program will stop");
+                error("Error reading resource file", new IOException(msg.toString()));                
+            }
+            
             for (String temp : fileNames) {
 
-                ncFile = new File(directory, temp).getAbsolutePath();
+                ncFile = new File(temp).getAbsolutePath();
                 
                 if (!new File(ncFile).exists()) {
                     error("Error reading forcing parameters for resource group " + index, new FileNotFoundException("NetCDF file " + ncFile + " does not exist."));
@@ -206,12 +221,12 @@ public class ResourceForcing extends OsmoseLinker {
                 caching = ResourceCaching.valueOf(getConfiguration().getString("species.file.caching.sp" + index).toUpperCase());
             }
 
+            this.initTimeMapping();
+
         } else {
             error("No input file is provided for resource " + getConfiguration().getString("species.name.sp" + index), new IOException("Cannot initialize resource group " + index));
         }
                         
-        this.initTimeMapping();
-
         // prevent irrelevant caching mode : incremental caching requested but 
         // NetCDF time series as long as simulation time
         if (caching.equals(ResourceCaching.INCREMENTAL) && (timeLength == getConfiguration().getNStep())) {
@@ -270,7 +285,8 @@ public class ResourceForcing extends OsmoseLinker {
             return;
         }
 
-        int iStepNc = iStepSimu % timeLength;
+        int ndt = this.getConfiguration().getNStepYear();
+        int iStepNc = (iStepSimu / (ndt / this.ncPerYear)) % timeLength;
 
         switch (caching) {
             case ALL:
@@ -312,8 +328,9 @@ public class ResourceForcing extends OsmoseLinker {
         
         int iFile = this.fileMapping[iStepNc];
         int iStep = this.stepMapping[iStepNc];
-       
-        String ncFile = getConfiguration().resolve(this.fileNames[iFile], getConfiguration().getMainFile());
+               
+        //String ncFile = getConfiguration().resolve(this.fileNames[iFile], getConfiguration().getMainFile());
+        String ncFile = this.fileNames[iFile];
 
         double[][] rscbiomass = new double[ny][nx];
 
@@ -324,12 +341,12 @@ public class ResourceForcing extends OsmoseLinker {
             //this.getLogger().info(message);
             Variable variable = nc.findVariable(name);
             Array ncbiomass = variable.read(new int[]{iStep, 0, 0}, new int[]{1, ny, nx}).reduce();
-            Index index = ncbiomass.getIndex();
+            Index ncindex = ncbiomass.getIndex();
             getGrid().getCells().stream().filter((cell) -> (!cell.isLand())).forEach((cell) -> {
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                index.set(j, i);
-                rscbiomass[j][i] = ncbiomass.getDouble(index);
+                ncindex.set(j, i);
+                rscbiomass[j][i] = ncbiomass.getDouble(ncindex);
             });
         } catch (IOException | InvalidRangeException ex) {
             error("File " + ncFile + ", variable " + name + "cannot be read", ex);

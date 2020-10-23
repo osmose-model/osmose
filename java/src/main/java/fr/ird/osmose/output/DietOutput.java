@@ -84,7 +84,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
     @Override
     public void reset() {
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNRscSpecies();
+        int nPrey = nSpec + getConfiguration().getNRscSpecies() + this.getConfiguration().getNBkgSpecies();
         diet = new double[nSpec][][][];
         abundanceStage = new double[nSpec][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
