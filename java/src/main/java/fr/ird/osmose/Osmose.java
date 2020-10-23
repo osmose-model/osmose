@@ -90,6 +90,11 @@ public class Osmose extends OLogger {
      * Whether to update the configuration files
      */
     private boolean updateConfiguration = false;
+    
+    /** Whether the model should be run even if configuration and 
+     * jar version differs.
+     */
+    private boolean forceConfiguration = false;
 
     /**
      * Read input arguments. If no argument are provided, Osmose assumes that it
@@ -111,10 +116,12 @@ public class Osmose extends OLogger {
         // Set 1: Osmose configuration files are listed from a file
         opt.addSet("Usage1", 0)
                 .addOption("F", Separator.BLANK)
-                .addOption("update", Multiplicity.ZERO_OR_ONE);
+                .addOption("update", Multiplicity.ZERO_OR_ONE)
+                .addOption("force", Multiplicity.ZERO_OR_ONE);
         // Set 2: Osmose configuration files are given as arguments
         opt.addSet("Usage2", 1, Integer.MAX_VALUE)
-                .addOption("update", Multiplicity.ZERO_OR_ONE);
+                .addOption("update", Multiplicity.ZERO_OR_ONE)
+                .addOption("force", Multiplicity.ZERO_OR_ONE);
         // Set 3: Set up Indiseas simulations
         opt.addSet("Usage3", 0)
                 .addOption("indiseas", Separator.BLANK);
@@ -154,6 +161,11 @@ public class Osmose extends OLogger {
                     error("Invalid command line options.", new IllegalArgumentException("-update and -P options are mutually exclusive."));
                 }
             }
+            
+            if (set.isSet("force")) { 
+                this.forceConfiguration = true;
+            }
+            
         }
 
         // Initialises the set of command line options
@@ -281,9 +293,15 @@ public class Osmose extends OLogger {
         configuration = new Configuration(configurationFile, cmd);
         if (!configuration.load()) {
             StringBuilder msg = new StringBuilder();
-            msg.append("Your configuration file must be updated. Please run osmose with the -update option.\n");
-            msg.append("Example: java -jar osmose.jar -update config.csv");
-            error(msg.toString(), null);
+            if (this.forceConfiguration) {
+                msg.append("Your configuration file must be updated. However you decided to force the configuration.");
+                msg.append("**Do it at your own risks!!!");
+                warning(msg.toString());
+            } else {
+                msg.append("Your configuration file must be updated. Please run osmose with the -update option.\n");
+                msg.append("Example: java -jar osmose.jar -update config.csv");
+                error(msg.toString(), null);
+            }
         }
         configuration.init();
 

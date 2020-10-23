@@ -28,7 +28,8 @@ run_osmose(
   java = "java",
   options = NULL,
   verbose = TRUE,
-  clean = TRUE
+  clean = TRUE,
+  force = TRUE
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ on the search path.}
 \item{verbose}{Show messages? (output in the log file if FALSE).}
 
 \item{clean}{TRUE if the output directory should be cleaned before running OSMOSE.}
+
+\item{force}{TRUE if an outdated configuration can be run without being updated.}
 }
 \description{
 This function create a valid configuration by several input files

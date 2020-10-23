@@ -146,12 +146,6 @@ public class ResourceForcing extends OsmoseLinker {
         
         List<String> listFiles = new ArrayList<>();
         
-        if(!getConfiguration().isNull("species.biomass.nsteps.year.sp" + index)) {
-            ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year.sp" + index);
-        } else { 
-            ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year");
-        }
-
         if (!getConfiguration().isNull("species.biomass.total.sp" + index)) {
             // uniform biomass
             uBiomass = getConfiguration().getDouble("species.biomass.total.sp" + index) / getGrid().getNOceanCell();
@@ -214,7 +208,7 @@ public class ResourceForcing extends OsmoseLinker {
                 } catch (IOException ex) {
                     error("NetCDF file " + ncFile + ", variable " + name + "cannot be read", ex);
                 }
-            }
+            }  // end of loop over files
 
             // user-defined caching mode
             if (!getConfiguration().isNull("species.file.caching.sp" + index)) {
@@ -222,10 +216,31 @@ public class ResourceForcing extends OsmoseLinker {
             }
 
             this.initTimeMapping();
+            
+            if (!getConfiguration().isNull("species.biomass.nsteps.year.sp" + index)) {
+                ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year.sp" + index);
+            } else {
+                if (!getConfiguration().isNull("species.biomass.nsteps.year")) {
+                    ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year");
+                } else {
+                    // If parameter is not set, 
+                    String message;
+                    if (this.getConfiguration().getNStepYear() == this.timeLength) {
+                        warning("Number of steps in the NetCDF file equals ndt/year for species " + index);
+                        warning("Assumes ncPerYear = ndt/year");
+                        this.ncPerYear = this.timeLength;
+                    } else {
+                        StringBuilder errmsg = new StringBuilder();
+                        errmsg.append("No species.biomass.nsteps.year or species.biomass.nsteps.year.sp ").append(index).append(" parameter found.\n");
+                        errmsg.append("Program will stop");
+                        error(errmsg.toString(), null);        
+                    }
+                }
+            }
 
         } else {
             error("No input file is provided for resource " + getConfiguration().getString("species.name.sp" + index), new IOException("Cannot initialize resource group " + index));
-        }
+        }  // end of statement to check if file or constant value should be used.
                         
         // prevent irrelevant caching mode : incremental caching requested but 
         // NetCDF time series as long as simulation time
@@ -244,7 +259,7 @@ public class ResourceForcing extends OsmoseLinker {
             warning("Resource biomass for resource group " + index + " will be multiplied by " + multiplier + " accordingly to parameter " + getConfiguration().printParameter("species.multiplier.sp" + index));
         } else {
             multiplier = 1.d;
-        }       
+        }        
     }
     
     public void initTimeMapping() throws IOException { 
