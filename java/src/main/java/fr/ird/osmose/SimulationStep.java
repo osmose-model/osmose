@@ -169,7 +169,7 @@ public class SimulationStep extends SimulationLinker {
             school.init();
         });
 
-        for(ResourceForcing resource : getResourceForcing().values()) {
+        for(ResourceForcing resource : getResourceForcing()) {
             resource.update(iStepSimu);
         }
 
