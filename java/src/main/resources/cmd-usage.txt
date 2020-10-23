@@ -1,9 +1,10 @@
 Command line usage:
-Usage1: java -jar osmose.jar -F FILE [-update] [-P<key>=<value> [...]]
-Usage2: java -jar osmose.jar [-update] [-P<key>=<value> [...]] FILE1 [FILE2] [...]
+Usage1: java -jar osmose.jar -F FILE [-force] [-update] [-P<key>=<value> [...]]
+Usage2: java -jar osmose.jar [-update] [-force] [-P<key>=<value> [...]] FILE1 [FILE2] [...]
 Options summary:
  -F     Path of a text file that lists Osmose configuration files.
  -update    Update the configuration file(s).
+ -force  Force a configuration to run even if out-to-date
  -P<key>=<value>    Set Osmose parameters that will have precedence over the parameters from the configuration file.
    key must be the exact name of the Osmose parameter as it is in the configuration file
    value must be the value of the Osmose parameter, without any blank.
