@@ -594,7 +594,7 @@ public class MortalityProcess extends AbstractProcess {
     private List<Resource> getResources(Cell cell) {
         if (!resourcesSet.containsKey(cell.getIndex())) {
             List<Resource> resources = new ArrayList();
-            for (int iRsc : getConfiguration().getRscIndex()) {
+            for (int iRsc : getConfiguration().getResourceIndex()) {
                 resources.add(new Resource(getConfiguration().getResourceSpecies(iRsc), cell));
             }
             resourcesSet.put(cell.getIndex(), resources);

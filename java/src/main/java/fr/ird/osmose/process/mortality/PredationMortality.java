@@ -111,7 +111,7 @@ public class PredationMortality extends AbstractMortality {
         predPreySizesMin = new HashMap();
         predationRate = new HashMap();
 
-        for (int i : getConfiguration().getFishIndex()) {
+        for (int i : getConfiguration().getPredatorIndex()) {
             predPreySizesMax.put(i, getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + i));
             predPreySizesMin.put(i, getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.sp" + i));
             if (!getConfiguration().isBioenEnabled()) {
@@ -212,7 +212,7 @@ public class PredationMortality extends AbstractMortality {
         int iStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax.get(iPred)[iStage];
         double preySizeMin = predator.getLength() / predPreySizesMin.get(iPred)[iStage];
-        for (int i : getConfiguration().getRscIndex()) {
+        for (int i : getConfiguration().getResourceIndex()) {
             if ((preySizeMin > getConfiguration().getResourceSpecies(i).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(i).getSizeMin())) {
                 percentResource.put(i, 0.0d);
             } else {

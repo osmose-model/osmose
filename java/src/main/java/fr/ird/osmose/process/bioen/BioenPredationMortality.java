@@ -91,7 +91,7 @@ public class BioenPredationMortality extends PredationMortality {
 
         // Recovers the max predation rate for bioen config (not the same unit as in
         // the standard code
-        for (int i : this.getConfiguration().getFishIndex()) {
+        for (int i : this.getConfiguration().getPredatorIndex()) {
             predationRateBioen.put(i, getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i));
             larvaePredationRateBioen.put(i, getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i));
             c_rateBioen.put(i, getConfiguration().getDouble("predation.c.bioen.sp" + i));

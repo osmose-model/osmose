@@ -293,7 +293,7 @@ public class FishingGear extends AbstractMortality {
             catchability.put(i, matrix.getValue(speciesIndex, fishIndex));
         }
 
-        for (int i : this.getConfiguration().getBkgIndex()) {
+        for (int i : this.getConfiguration().getBackgroundIndex()) {
             String speciesName = getConfiguration().getBkgSpecies(i).getName();
             int speciesIndex = matrix.getIndexPrey(speciesName);
             catchability.put(i, matrix.getValue(speciesIndex, fishIndex));
@@ -311,7 +311,7 @@ public class FishingGear extends AbstractMortality {
             discards.put(i, matrix.getValue(speciesIndex, fishIndex));
         }
 
-        for (int i : this.getConfiguration().getBkgIndex()) {
+        for (int i : this.getConfiguration().getBackgroundIndex()) {
             String speciesName = getConfiguration().getBkgSpecies(i).getName();
             int speciesIndex = matrix.getIndexPrey(speciesName);
             discards.put(i, matrix.getValue(speciesIndex, fishIndex));

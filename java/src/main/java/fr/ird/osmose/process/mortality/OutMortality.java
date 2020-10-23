@@ -69,7 +69,7 @@ public class OutMortality extends AbstractMortality {
             if (!getConfiguration().isNull("mortality.out.rate.sp" + i)) {
                 Zout.put(i, getConfiguration().getDouble("mortality.out.rate.sp" + i) / nStepYear);
             } else {
-                Zout.put(i, 0.);    
+                Zout.put(i, 0.);
             }
         }
     }
