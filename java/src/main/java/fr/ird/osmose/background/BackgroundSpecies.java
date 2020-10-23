@@ -207,8 +207,8 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      *
      * @return
      */
-    public int getGlobalIndex() {
-        return index;
+    public int getGlobalSpeciesIndex() {
+        return this.globalindex;
     }
     
     /**
