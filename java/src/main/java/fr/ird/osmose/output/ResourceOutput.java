@@ -126,7 +126,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         int ny = getGrid().get_ny();
         rscBiomass0.clear();
         rscBiomass1.clear();
-        for (int i : getConfiguration().getRscIndex()) {
+        for (int i : getConfiguration().getResourceIndex()) {
             rscBiomass0.put(i, new double[ny][nx]);
             rscBiomass1.put(i, new double[ny][nx]);
         }
@@ -140,7 +140,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
             if (!(cell.isLand())) {
                 // Preyed biomass for every resource group in current cell
                 HashMap<Integer, Double> preyedResources = new HashMap();
-                for(int i : this.getConfiguration().getRscIndex()) { 
+                for(int i : this.getConfiguration().getResourceIndex()) { 
                     preyedResources.put(i, 0.0);
                 }
                 
@@ -148,7 +148,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         for (Prey prey : school.getPreys()) {
                             int iRsc = prey.getSpeciesIndex();                           
-                            if (ArrayUtils.contains(this.getConfiguration().getRscIndex(), iRsc)) {
+                            if (ArrayUtils.contains(this.getConfiguration().getResourceIndex(), iRsc)) {
                                 double val = (null ==  preyedResources.get(iRsc)) ? prey.getBiomass() : preyedResources.get(iRsc) + prey.getBiomass();
                                 preyedResources.put(iRsc, val);
                             }
@@ -158,7 +158,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                 
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                for (int iRsc : getConfiguration().getRscIndex()) {
+                for (int iRsc : getConfiguration().getResourceIndex()) {
                     // rscBiomass0 is the resource biomass at the beginning of the time step
                     rscBiomass0.get(iRsc)[j][i] = getSimulation().getResourceForcing(iRsc).getBiomass(cell);
                     // rscBiomass1 is the resource biomass remaining in the water column after the predation process

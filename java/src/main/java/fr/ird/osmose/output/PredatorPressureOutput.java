@@ -87,7 +87,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     @Override
     public void reset() {
         int[] focalIndex =  this.getConfiguration().getFocalIndex();
-        int[] fishIndex = this.getConfiguration().getFishIndex();
+        int[] fishIndex = this.getConfiguration().getPredatorIndex();
         int[] preyIndex = this.getConfiguration().getAllIndex();
         int nSpec = getNSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies() + this.getNBkgSpecies();
@@ -126,7 +126,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     public void write(float time) {
         
         int[] focalIndex = this.getConfiguration().getFocalIndex();
-        int[] fishIndex = this.getConfiguration().getFishIndex();
+        int[] fishIndex = this.getConfiguration().getPredatorIndex();
         int[] preyIndex = this.getConfiguration().getAllIndex();
 
         int nSpec = getNSpecies();
