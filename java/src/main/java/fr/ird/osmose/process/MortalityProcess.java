@@ -494,7 +494,7 @@ public class MortalityProcess extends AbstractProcess {
                                 IAggregation prey = preys.get(ipr);
                                 nDead = prey.biom2abd(preyUpon[ipr]);   // total biomass that has been eaten
                                 prey.incrementNdead(MortalityCause.PREDATION, nDead);
-                                predator.preyedUpon(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
+                                predator.preyedUpon(prey.getGlobalSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
                             }
                         }
                         break;
