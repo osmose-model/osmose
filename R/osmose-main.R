@@ -56,6 +56,7 @@
 #' @param options Java options (e.g. -Xmx2048m to increase memory limit).
 #' @param verbose Show messages? (output in the log file if FALSE).
 #' @param clean TRUE if the output directory should be cleaned before running OSMOSE.
+#' @param force TRUE if an outdated configuration can be run without being updated.
 #'
 #' @details Basic configurations may not need the use of \code{buildConfiguration},
 #' but it is required for configuration using interannual inputs or fishing selectivity.
@@ -70,7 +71,7 @@
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
                       version = "4.3.1", osmose = NULL, java = "java",
-                      options = NULL, verbose = TRUE, clean = TRUE){
+                      options = NULL, verbose = TRUE, clean = TRUE, force = FALSE){
   
   # Print message with version
   if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
@@ -107,6 +108,10 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
       # changes for version 4 or higher
       outDir = paste0("-Poutput.dir.path=", output)
     }
+  }
+  
+  if(force) { 
+    parameters = paste(parameters, "-force")
   }
   
   # If R is running in an interactive mode, use log (if TRUE)
