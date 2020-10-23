@@ -73,13 +73,15 @@ public class OsmoseLinker extends OLogger {
         
         if (IntStream.of(this.getConfiguration().getFocalIndex()).anyMatch(x -> x == index)) {
             return getConfiguration().getSpecies(index);
-        }
-
-        if (IntStream.of(this.getConfiguration().getBkgIndex()).anyMatch(x -> x == index)) {
+        } else  if (IntStream.of(this.getConfiguration().getBackgroundIndex()).anyMatch(x -> x == index)) {
             return getConfiguration().getBkgSpecies(index);
+        } else {
+            StringBuilder msg = new StringBuilder();
+            msg.append("No fish species corresponds to index ").append(index);
+            error(msg.toString(), null);
         }
 
-        return getConfiguration().getSpecies(index);
+        return null;
     }
 
     final public Species getSpecies(String name) {
@@ -121,5 +123,59 @@ public class OsmoseLinker extends OLogger {
         return null;
     }
 
+    /** Converts from new species index to "old" species index. 
+     * 
+     * @param index New species index (can exceed nspecies) 
+     * @return The index in the old format.
+     */
+    final public int newToOldIndex(int index) {
 
+        int output = 0;
+       
+        // If focal species, index is the position with FocalIndex
+        if (IntStream.of(this.getConfiguration().getFocalIndex()).anyMatch(x -> x == index)) {
+            output = IntStream.of(this.getConfiguration().getFocalIndex()).filter(x -> x == index).findFirst().getAsInt();
+        } else if (IntStream.of(this.getConfiguration().getBackgroundIndex()).anyMatch(x -> x == index)) {
+            output = IntStream.of(this.getConfiguration().getBackgroundIndex()).filter(x -> x == index).findFirst().getAsInt();
+            output += this.getNSpecies();
+        } else if (IntStream.of(this.getConfiguration().getResourceIndex()).anyMatch(x -> x == index)) {
+            output = IntStream.of(this.getConfiguration().getResourceIndex()).filter(x -> x == index).findFirst().getAsInt();
+            output += this.getNSpecies() + this.getNBkgSpecies();
+        } else {
+            StringBuilder mess = new StringBuilder();
+            mess.append("Index ").append(index).append(" cannot be converted into saving index");
+            error(mess.toString(), null);
+        }
+
+        return output;
+
+    }
+
+    /**
+     * Converts from new species index to "old" species index.
+     *
+     * @param index New species index (can exceed nspecies)
+     * @return The index in the old format.
+     */
+    final public int oldToNewIndex(int index) {
+
+        if (index < this.getNSpecies()) {
+            return this.getConfiguration().getFocalIndex(index);
+        } else if (index < this.getNSpecies() + this.getNBkgSpecies()) {
+            return this.getConfiguration().getBkgIndex(index - getNSpecies());
+        } else {
+            return this.getConfiguration().getRscIndex(index - this.getNSpecies() - this.getNBkgSpecies());
+        }
+    }
+
+
+    // Function to find the index of an element 
+    public static int findIndex(int arr[], int t) {
+        int len = arr.length;
+        return IntStream.range(0, len)
+                .filter(i -> t == arr[i])
+                .findFirst() // first occurrence 
+                .orElse(-1); // No element found 
+    }
+    
 }
