@@ -48,6 +48,6 @@ public interface ISpecies {
     
     public String getName();
     public int getIndex();
-    public int getGlobalIndex();
+    public int getGlobalSpeciesIndex();
     
 }

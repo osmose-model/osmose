@@ -245,7 +245,7 @@ public class Species implements ISpecies {
      * 
      * @return 
      */
-    public int getGlobalIndex() { 
+    public int getGlobalSpeciesIndex() { 
         return globalindex;
     }
             
