@@ -10,6 +10,7 @@
 
 ### Bugfix
 
+- Correction of a bug in the extraction of OutMortality (problem due to hashmap init).
 - Correction of a bug in the saving of SpatialOutputs for LTL (problem with indexing)
 - Correction of bugs in the reading of resources: problem with file path reconstruction
 - Correction of bugs in the reading of resources: bad recovery of the nc indes. Corrected by adding a parameter (ncstep / year)
