@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.util.version;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -55,7 +54,7 @@ import java.util.List;
  * @author pverley
  */
 public class Releases {
-    
+
     final public static Release[] ALL = new Release[]{
         // 2014/06/01
         new Release("3.1") {
@@ -129,7 +128,7 @@ public class Releases {
 
                 // Deprecated flux.incoming.season.file
                 deprecateParameter("flux.incoming.season.file");
-                
+
                 for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                     // Deprecated flux.incoming.season.file.sp#
                     deprecateParameter("flux.incoming.season.file.sp" + iSpec);
@@ -172,13 +171,13 @@ public class Releases {
                         String absNewname = absFilename.substring(0, absFilename.lastIndexOf(".")) + "-sp";
                         String relFilename = getConfiguration().getString("reproduction.season.file");
                         String relNewname = relFilename.substring(0, relFilename.lastIndexOf(".")) + "-sp";
-                        try (CSVReader reader = new CSVReader(new FileReader(absFilename), Separator.guess(absFilename).getSeparator())) {
+                        try ( CSVReader reader = new CSVReader(new FileReader(absFilename), Separator.guess(absFilename).getSeparator())) {
                             // Read the 'flux.incoming.season.file' CSV
 
                             List<String[]> lines = reader.readAll();
                             for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                                 String csvfile = absNewname + String.valueOf(iSpec) + ".csv";
-                                try (CSVWriter writer = new CSVWriter(new FileWriter(csvfile), ';')) {
+                                try ( CSVWriter writer = new CSVWriter(new FileWriter(csvfile), ';')) {
                                     for (String[] line : lines) {
                                         String[] newline = new String[]{line[0], line[iSpec + 1]};
                                         writer.writeNext(newline);
@@ -226,27 +225,27 @@ public class Releases {
         new Release("3.3.3") {
             @Override
             void updateParameters() {
-                
+
                 this.updateKey("grid.ncolumn", "grid.nlon");
                 this.updateKey("grid.nline", "grid.nlat");
-                
+
             }
         },
         // 2019/09/19
         new Release("4.2.1") {
             @Override
             void updateParameters() {
-                
+
                 updateKey("output.yieldN.enabled", "output.yield.abundance.enabled");
                 updateKey("output.yield.enabled", "output.yield.biomass.enabled");
-                
+
             }
         },
         // 2019/10/11
         new Release("4.2.2") {
             @Override
             void updateParameters() {
-                
+
                 updateKey("simulation.use.bioen", "simulation.bioen.enabled");
 
                 // got rid of iterative mortality process, so only one mortality algorithm left
@@ -299,7 +298,7 @@ public class Releases {
                 for (int t = 0; t < getConfiguration().findKeys("ltl.netcdf.file.t*").size(); t++) {
                     deprecateParameter("ltl.netcdf.file.t" + t);
                 }
-                
+
             }
         },
         // 2019/11/25
@@ -313,7 +312,7 @@ public class Releases {
         new Release("4.2.5") {
             @Override
             void updateParameters() {
-                
+
                 int nSpecies = getConfiguration().getInt("simulation.nspecies");
 
                 // outputs
@@ -339,29 +338,28 @@ public class Releases {
         new Release("4.2.6") {
             @Override
             void updateParameters() {
-                
+
                 Configuration cfg = this.getConfiguration();
-                
+
                 cfg.findKeys("movement.age.min.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.age.min.map" + i, "movement.initialAge.map" + i));
                 cfg.findKeys("movement.age.max.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.age.max.map" + i, "movement.lastAge.map" + i));
                 cfg.findKeys("movement.season.map*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".map") + 4))).forEach(i -> updateKey("movement.season.map" + i, "movement.steps.map" + i));
-                
+
             }
         },
-        
         new Release("4.3.0") {
             @Override
             void updateParameters() {
-                
+
                 Configuration cfg = this.getConfiguration();
                 cfg.findKeys("plankton.conversion2tons*").stream().forEach(key -> deprecateParameter(key));
-                
+
                 if (cfg.findKeys("predation.accessibility.stage.threshold*").size() > 0) {
                     String message = "The accessibility stage are now set directly from the accessibility matrix";
                     this.getLogger().info(message);
                     cfg.findKeys("predation.accessibility.stage.threshold*").stream().forEach(key -> deprecateParameter(key));
                 }
-                
+
                 int nspecies = cfg.getInt("simulation.nspecies");
                 int nresources = cfg.getInt("simulation.nresource");
 
@@ -371,12 +369,12 @@ public class Releases {
                 } else {
                     nbackground = 0;
                 }
-                
+
                 // Add the parameters relative to species types
-                for(int i = 0; i<nspecies; i++) {
+                for (int i = 0; i < nspecies; i++) {
                     this.addParameter("species.type.sp" + i, "focal");
                 }
-                
+
                 for (int i = 0; i < nbackground; i++) {
                     this.addParameter("species.type.sp" + (i + nspecies), "background");
                 }
@@ -384,7 +382,7 @@ public class Releases {
                 for (int i = 0; i < nresources; i++) {
                     this.addParameter("species.type.sp" + (i + nspecies + nbackground), "resource");
                 }
-                
+
                 for (int index = 0; index < nresources; index++) {
                     int newindex = index + nspecies + nbackground;
                     updateKey("resource.name.rsc" + index, "species.name.sp" + newindex);
@@ -397,13 +395,21 @@ public class Releases {
                     updateKey("resource.file.rsc" + index, "species.file.sp" + newindex);
                     updateKey("resource.multiplier.rsc" + index, "species.multiplier.sp" + newindex);
                 }
-                
+
                 this.deprecateParameter("grid.java.classname");
-                
-                
-                                        
+
             } // end of update parameters
-        } // end of release constructor
-    
+        }, // end of release constructor
+
+        new Release("4.3.1") {
+            @Override
+            void updateParameters() {
+            }
+        },
+        new Release("4.3.2") {
+            @Override
+            void updateParameters() {
+            }
+        }
     };  // end of ALL array
 }  // end of class
