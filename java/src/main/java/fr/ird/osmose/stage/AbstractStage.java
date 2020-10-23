@@ -64,7 +64,7 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
         thresholds = new HashMap();
         
         // Set values for focal and background species species.
-        for (int i : getConfiguration().getFishIndex()) {
+        for (int i : getConfiguration().getPredatorIndex()) {
             int nStage = !getConfiguration().isNull(key + i)
                     ? getConfiguration().getArrayString(key + i).length + 1
                     : 1;
@@ -76,7 +76,7 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
         }
         
         // Set values for resource species.
-        for (int i : getConfiguration().getRscIndex()) {
+        for (int i : getConfiguration().getResourceIndex()) {
             thresholds.put(i, new float[0]);
         }
         
