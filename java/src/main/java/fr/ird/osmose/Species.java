@@ -60,6 +60,12 @@ public class Species implements ISpecies {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
+    
+    /** 
+     * 
+     */
+    private final int globalindex;
+    
     /**
      * Trophic level of an egg.
      */
@@ -124,7 +130,9 @@ public class Species implements ISpecies {
      * @param index, an integer, the index of the species
      * {@code [0, nbTotSpecies - 1]}
      */
-    public Species(int index) {
+    public Species(int index, int globalindex) {
+        
+        this.globalindex = globalindex;
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
@@ -232,6 +240,15 @@ public class Species implements ISpecies {
     public int getIndex() {
         return index;
     }
+    
+    /** Return the global index of the species. 
+     * 
+     * @return 
+     */
+    public int getGlobalIndex() { 
+        return globalindex;
+    }
+            
 
     /**
      * Returns the name of the species. Parameter <i>species.name.sp#</i>

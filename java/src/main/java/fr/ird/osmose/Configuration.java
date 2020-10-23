@@ -223,11 +223,11 @@ public class Configuration extends OLogger {
     /**
      * Array of the species of the simulation.
      */
-    private HashMap<Integer, Species> species;
+    private Species[] species;
     /**
      * Array of the resource species of the simulation.
      */
-    private HashMap<Integer, ResourceSpecies> rscSpecies;
+    private ResourceSpecies[] rscSpecies;
 
     /**
      * Number of species that are not explicitely modelled. Parameter
@@ -238,7 +238,7 @@ public class Configuration extends OLogger {
     /**
      * Array of background species.
      */
-    private HashMap<Integer, BackgroundSpecies> bkgSpecies; // barrier.n
+    private BackgroundSpecies[] bkgSpecies; // barrier.n
 
     /**
      * True if the bioenergetic module should be activated.
@@ -433,24 +433,28 @@ public class Configuration extends OLogger {
         initGrid();
 
         // Create the species
-        species = new HashMap();
+        int cpt = 0;
+        species = new Species[nSpecies];
         for (int i : this.focalIndex) {
-            species.put(i, new Species(i));
+            species[cpt] = new Species(i, cpt);
             // Name must contain only alphanumerical characters
-            if (!species.get(i).getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Species name must contain alphanumeric characters only. Please rename " + species.get(i).getName(), null);
+            if (!species[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Species name must contain alphanumeric characters only. Please rename " + species[cpt].getName(), null);
             }
+            cpt++;
         }
 
         // Init resource groups
         //rscSpecies = new ResourceSpecies[nResource];
-        rscSpecies = new HashMap();
+        rscSpecies = new ResourceSpecies[nResource];
+        cpt = 0;
         for (int rsc : this.rscIndex) {
-            rscSpecies.put(rsc, new ResourceSpecies(rsc));
+            rscSpecies[cpt] = new ResourceSpecies(rsc, cpt);
             // Name must contain only alphanumerical characters
-            if (!rscSpecies.get(rsc).getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Resource name must contain alphanumeric characters only. Please rename " + rscSpecies.get(rsc).getName(), null);
+            if (!rscSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Resource name must contain alphanumeric characters only. Please rename " + rscSpecies[cpt].getName(), null);
             }
+            cpt++;
         }
 
         // barrier.n: add number of background species
@@ -466,11 +470,12 @@ public class Configuration extends OLogger {
         }
 
         // Initialisation of the Background array.
-        bkgSpecies = new HashMap();
+        cpt = 0;
+        bkgSpecies = new BackgroundSpecies[nBackground];
         for (int p : this.bkgIndex) {
-            bkgSpecies.put(p, new BackgroundSpecies(p));
-            if (!bkgSpecies.get(p).getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Background species name must contain alphanumeric characters only. Please rename " + bkgSpecies.get(p).getName(), null);
+            bkgSpecies[cpt] = new BackgroundSpecies(p, cpt);
+            if (!bkgSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Background species name must contain alphanumeric characters only. Please rename " + bkgSpecies[cpt].getName(), null);
             }
         }
 
@@ -581,7 +586,7 @@ public class Configuration extends OLogger {
      * @return the species at index {@code index}
      */
     public Species getSpecies(int index) {
-        return species.get(index);
+        return species[index];
     }
 
     /**
@@ -591,7 +596,7 @@ public class Configuration extends OLogger {
      * @return the resource group with given index
      */
     public ResourceSpecies getResourceSpecies(int index) {
-        return rscSpecies.get(index);
+        return rscSpecies[index];
     }
 
     /**
@@ -1178,7 +1183,7 @@ public class Configuration extends OLogger {
      * @return the species at index {@code index}
      */
     public BackgroundSpecies getBkgSpecies(int index) {
-        return bkgSpecies.get(index);
+        return bkgSpecies[index];
     }
 
     /**

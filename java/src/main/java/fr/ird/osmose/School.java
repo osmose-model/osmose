@@ -356,15 +356,6 @@ public class School extends AbstractSchool {
         this.trophicLevel = trophicLevel;
     }
 
-    /**
-     * Returns the index of the species
-     *
-     * @return the index of the species
-     */
-    @Override
-    public int getSpeciesIndex() {
-        return index;
-    }
 
     /**
      * Sets the number of dead fish for a given mortality cause.

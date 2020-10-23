@@ -80,7 +80,7 @@ public class SimulationLinker extends OsmoseLinker {
         return getOsmose().getSimulation(rank).getResourceForcing(index);
     }
     
-    public HashMap<Integer, ResourceForcing> getResourceForcing() {
+    public ResourceForcing[] getResourceForcing() {
         return getOsmose().getSimulation(rank).getResourceForcing();
     }
     
