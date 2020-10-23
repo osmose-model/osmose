@@ -55,7 +55,6 @@ import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.MPA;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 /**

@@ -840,5 +840,25 @@ public class School extends AbstractSchool {
             }
         }   
     }
+    
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getGlobalSpeciesIndex() {
+        return this.species.getGlobalSpeciesIndex();
+    }
+
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getGlobalSpeciesIndex(boolean off) {
+        return this.species.getGlobalSpeciesIndex(off);
+    }
 
 }

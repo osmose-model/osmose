@@ -103,6 +103,7 @@ public class ResourceSpecies implements ISpecies {
     private final double accessMax = 0.99d;
     
     private final int globalindex;
+    private final int offset;
 
 ///////////////
 // Constructors
@@ -114,11 +115,11 @@ public class ResourceSpecies implements ISpecies {
      * @param index, index of the resource group
      */
     public ResourceSpecies(int index, int globalindex) {
-
-        this.globalindex = globalindex;
         
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
+        this.offset = cfg.getNBkgSpecies() + cfg.getNSpecies();
+        this.globalindex = globalindex + this.offset;
         // Initialisation of parameters
         name = cfg.getString("species.name.sp" + index);
         sizeMin = cfg.getDouble("species.size.min.sp" + index);
@@ -224,8 +225,16 @@ public class ResourceSpecies implements ISpecies {
      */
     @Override
     public int getGlobalSpeciesIndex() {
-        return globalindex;
+        return getGlobalSpeciesIndex(true);
     }
+    
+    public int getGlobalSpeciesIndex(boolean applyOffset) { 
+        if(applyOffset) { 
+            return globalindex;
+        } else {
+            return globalindex - this.offset; 
+        }
+    } 
 
     /**
      * Returns the averaged trophic level of the resource group. Parameter

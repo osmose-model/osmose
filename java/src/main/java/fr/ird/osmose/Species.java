@@ -248,7 +248,10 @@ public class Species implements ISpecies {
     public int getGlobalSpeciesIndex() { 
         return globalindex;
     }
-            
+    
+    public int getGlobalSpeciesIndex(boolean applyOff) {
+        return globalindex;
+    }
 
     /**
      * Returns the name of the species. Parameter <i>species.name.sp#</i>
