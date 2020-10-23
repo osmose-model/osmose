@@ -572,7 +572,7 @@ public class MortalityProcess extends AbstractProcess {
                             school = schools.get(seqFish[i]);
 
                             // Osmose 3 fishing Mortality
-                            switch (fishingMortality.getType(school.getSpeciesIndex())) {
+                            switch (fishingMortality.getType(school.getGlobalSpeciesIndex())) {
                                 case RATE:
                                     double F = fishingMortality.getRate(school) / subdt;
                                     nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));

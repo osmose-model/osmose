@@ -122,7 +122,10 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     protected double[] fishedBiomass;
     
     protected double[] discardedBiomass;
-
+    
+    protected int index;
+    protected int globalindex;
+    
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] += nDead;
@@ -375,6 +378,26 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
         return uuid;
     }
     
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getSpeciesIndex() {
+        return index;
+    }
+    
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getGlobalSpeciesIndex() {
+        return globalindex;
+    }
+
     /**
      * Returns the number of dead fish for a given mortality cause.
      *

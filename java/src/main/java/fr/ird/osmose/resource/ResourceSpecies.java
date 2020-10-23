@@ -42,6 +42,7 @@
 package fr.ird.osmose.resource;
 
 import fr.ird.osmose.Configuration;
+import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
@@ -65,7 +66,7 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 4.2 2019/11/25
  */
-public class ResourceSpecies {
+public class ResourceSpecies implements ISpecies {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -100,6 +101,8 @@ public class ResourceSpecies {
      * double.
      */
     private final double accessMax = 0.99d;
+    
+    private final int globalindex;
 
 ///////////////
 // Constructors
@@ -110,8 +113,10 @@ public class ResourceSpecies {
      *
      * @param index, index of the resource group
      */
-    public ResourceSpecies(int index) {
+    public ResourceSpecies(int index, int globalindex) {
 
+        this.globalindex = globalindex;
+        
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
         // Initialisation of parameters
@@ -209,6 +214,15 @@ public class ResourceSpecies {
      */
     public int getIndex() {
         return index;
+    }
+    
+        /**
+     * Returns the index of the resource group.
+     *
+     * @return the index of the resource group
+     */
+    public int getGlobalIndex() {
+        return globalindex;
     }
 
     /**
