@@ -429,15 +429,6 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Returns a list of the prey records at current time step.
-     *
-     * @return a list of the prey records at current time step.
-     */
-    public Collection<Prey> getPreys() {
-        return preys.values();
-    }
-
-    /**
      * Sets the school out of the simulated domain.
      */
     public void out() {
