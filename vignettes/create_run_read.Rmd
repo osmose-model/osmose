@@ -101,7 +101,7 @@ Next step involves the running of the model itself. The function `run_osmose` fa
 
 ```{r}
 # Run an example using 'run_osmose' function (it will take less than 1 min)
-run_osmose(input = demoPaths$config_file)
+run_osmose(input = demoPaths$config_file, force=TRUE)
 ```
 
 ### Read configuration and outputs

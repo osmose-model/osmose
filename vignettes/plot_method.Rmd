@@ -39,7 +39,7 @@ demoPaths <- osmose_demo(path = exampleFolder, config = "eec_4.3.0")
 
 Run the example using `run_osmose` function (it will take less than 1 min):
 ```{r}
-run_osmose(input = demoPaths$config_file)
+run_osmose(input = demoPaths$config_file, force=TRUE)
 ```
 
 Read outputs and config using `read_osmose` function
