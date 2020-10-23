@@ -5,25 +5,29 @@
 ### New features
 
 - Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
-# - Adding possibility to use ByClass time series for proportion in background species
+- Addint the possibility to use plankton variables of dims (time, lat, lon) to init mask variable. Masked if variable is NaN or <= 0
+- Adding the possibility to use `ByClassTimeSeries` for proportion in background species. 
 - Adding an `osmose_calib_demo` function in the R package`
-- Change of LICENSE (move from CECILL to GPL-3) for future connection with Zenodo + change in License Java headers
-- Adding options to force the model to run an outdated configuration
+- Adding options to force the model to run an outdated configuration. It avoids running creating a new configuration version for minor releases
 - **Remove the use of `grid.java.classname` and force the use of `NcGrid.java` class**
+- Adding a species interface (`ISpecies`) to recover some variables that are shared among species (name for instance). 
+- Adding of all species (preys + background + focal) in the `DietDistribOutput` file.
+- Adding of background species in the `DietOutput` and `PredatorPressure` file.
+- Adding of lognormal distribution for fishery selectivity (Ricardo)
+- Adding some tools to help converting parameter names to version 4.3.0 (i.e adding `species.type`, replace `plankton.plk` by `species.sp`, etc)
+
 
 ### Bugfix
 
-#- Correction of a bug in the extraction of OutMortality (problem due to hashmap init).
+- Correction of a bug in the saving of fisheries: mean instead of cumulated sum was saved. Revealed by Ghassen.
+- Correction of a bug in the `AbstractDistribOutput` and `DietDistribOutput` (`cpt` increment not initialized in the right place).
+- Correction of a bug in the extraction of OutMortality (problem due to hashmap init).
 #- Correction of a bug in the saving of SpatialOutputs for LTL (problem with indexing)
-#- Correction of bugs in the reading of resources: problem with file path reconstruction
-#- Correction of bugs in the reading of resources: bad recovery of the nc indes. Corrected by adding a parameter (ncstep / year)
-#- Correction of a bug in the ResourceOutput class. Variables were not initialized
-#- Correction of a bug in the DietOutput class: bkg species were not included in the preys
-#- Correction of a bug in DietDistribOutput: bkg species were not counted in the preys + bad init. of cpt value in write (leads to outofbound errors)
-#- Correction of a bug in the init. of fishery selectivities array
-#- Yields biomass and abundance are **integrated** instead of being **averaged**
-#- Put the `initTimeMapping` method of `ResourceForcing.java` inside the condition. Caused an error if no NetCDF used.
-#- Correct a bug in the accessibility recovery (mixing preys and predators)
+- Correction of bugs in the reading of resources: problem with file path reconstruction
+- Correction of bugs in the reading of resources: bad recovery of the nc indes. Corrected by adding a parameter (ncstep / year). Revealed by Ekin.
+- Correction of a bug in the ResourceOutput class. HashMap variables were not initialized + problem of indexing
+- Put the `initTimeMapping` method of `ResourceForcing.java` inside the condition. Caused an error if no NetCDF used.
+- Correct a bug in the accessibility recovery (mixing preys and predators)
 - Set the `compile.on.save` Netbeans parameter to `false`. When `true`, compilation may work even if code is bugged.
 
 ### Misc.
@@ -31,6 +35,7 @@
 - Correction of ref. config in the R comments.
 - Update of README to add vignettes
 - Change build name from osmose**-**X.Y.Z.jar to osmose**_**X.Y.Z.jar
+- Change of LICENSE (move from CECILL to GPL-3) for future connection with Zenodo + change in License Java headers
 
 ## Osmose 4.3.1
 
