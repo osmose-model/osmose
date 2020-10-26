@@ -5,7 +5,7 @@
 ### New features
 
 - Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
-- Addint the possibility to use plankton variables of dims (time, lat, lon) to init mask variable. Masked if variable is NaN or <= 0
+- Adding the possibility to use plankton variables of dims (time, lat, lon) to init mask variable. Masked if variable is NaN or <= 0
 - Adding the possibility to use `ByClassTimeSeries` for proportion in background species. 
 - Adding an `osmose_calib_demo` function in the R package`
 - Adding options to force the model to run an outdated configuration. It avoids running creating a new configuration version for minor releases
