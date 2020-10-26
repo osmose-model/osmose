@@ -57,7 +57,7 @@ public class AgeStage extends AbstractStage {
     @Override
     public int getStage(IMarineOrganism school) {
         int stage = 0;
-        int iSpec = school.getSpeciesIndex();
+        int iSpec = school.getGlobalSpeciesIndex();
 
         // If processing a focal species, age is considered as expected
         if (iSpec < getConfiguration().getNSpecies()) {
