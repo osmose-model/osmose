@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.util;
 
 import fr.ird.osmose.Configuration;
@@ -50,13 +49,14 @@ import fr.ird.osmose.util.logging.OLogger;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import fr.ird.osmose.ISpecies;
+import fr.ird.osmose.resource.ResourceSpecies;
 
 /**
  *
  * @author pverley
  */
 public class OsmoseLinker extends OLogger {
-    
+
     final public Osmose getOsmose() {
         return Osmose.getInstance();
     }
@@ -64,24 +64,26 @@ public class OsmoseLinker extends OLogger {
     final public Configuration getConfiguration() {
         return getOsmose().getConfiguration();
     }
-    
+
     final public Species getSpecies(int index) {
         return getConfiguration().getSpecies(index);
     }
 
-    final public ISpecies getFishSpecies(int index) {
-        
-        if (IntStream.of(this.getConfiguration().getFocalIndex()).anyMatch(x -> x == index)) {
-            return getConfiguration().getSpecies(index);
-        } else  if (IntStream.of(this.getConfiguration().getBackgroundIndex()).anyMatch(x -> x == index)) {
-            return getConfiguration().getBkgSpecies(index);
+    final public ResourceSpecies getRscSpecies(int index) {
+        return getConfiguration().getResourceSpecies(index);
+    }
+
+    final public ISpecies getISpecies(int index) {
+        int nSpecies = this.getNSpecies();
+        int nBkg = this.getNBkgSpecies();
+        if (index < nSpecies) {
+            return this.getSpecies(index);
+        } else if (index < nSpecies + nBkg) {
+            return this.getBkgSpecies(index - nSpecies);
         } else {
-            StringBuilder msg = new StringBuilder();
-            msg.append("No fish species corresponds to index ").append(index);
-            error(msg.toString(), null);
+            return this.getRscSpecies(index - nSpecies - nBkg);
         }
 
-        return null;
     }
 
     final public Species getSpecies(String name) {
@@ -92,7 +94,7 @@ public class OsmoseLinker extends OLogger {
         }
         return null;
     }
-    
+
     /**
      * The number of simulated species
      *
@@ -105,19 +107,19 @@ public class OsmoseLinker extends OLogger {
     final public AbstractGrid getGrid() {
         return getOsmose().getConfiguration().getGrid();
     }
-    
+
     final public int getNBkgSpecies() {
         return getConfiguration().getNBkgSpecies();
     }
-    
+
     final public int getNRscSpecies() {
         return getConfiguration().getNRscSpecies();
     }
-    
+
     final public BackgroundSpecies getBkgSpecies(int index) {
         return getConfiguration().getBkgSpecies(index);
     }
-    
+
     final public BackgroundSpecies getBkgSpecies(String name) {
         for (int i = 0; i < getNBkgSpecies(); i++) {
             if (getBkgSpecies(i).getName().equalsIgnoreCase(name)) {
@@ -127,15 +129,16 @@ public class OsmoseLinker extends OLogger {
         return null;
     }
 
-    /** Converts from new species index to "old" species index. 
-     * 
-     * @param index New species index (can exceed nspecies) 
+    /**
+     * Converts from new species index to "old" species index.
+     *
+     * @param index New species index (can exceed nspecies)
      * @return The index in the old format.
      */
     final public int newToOldIndex(int index) {
 
         int output = 0;
-       
+
         // If focal species, index is the position with FocalIndex
         if (IntStream.of(this.getConfiguration().getFocalIndex()).anyMatch(x -> x == index)) {
             output = IntStream.of(this.getConfiguration().getFocalIndex()).filter(x -> x == index).findFirst().getAsInt();
@@ -172,7 +175,6 @@ public class OsmoseLinker extends OLogger {
         }
     }
 
-
     // Function to find the index of an element 
     public static int findIndex(int arr[], int t) {
         int len = arr.length;
@@ -181,5 +183,5 @@ public class OsmoseLinker extends OLogger {
                 .findFirst() // first occurrence 
                 .orElse(-1); // No element found 
     }
-    
+
 }
