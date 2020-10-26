@@ -155,7 +155,7 @@ public class IncomingFluxProcess extends AbstractProcess {
                 lengthIn[cpt] = new float[timeSerieByAge.getNClass()];
                 for (int iAge = 0; iAge < ageIn[cpt].length; iAge++) {
                     double age = ageIn[cpt][iAge] / (double) getConfiguration().getNStepYear();
-                    lengthIn[cpt][iAge] = (float) growthProcess.getGrowth(iSpec).ageToLength(age);   
+                    lengthIn[cpt][iAge] = (float) growthProcess.getGrowth(cpt).ageToLength(age);   
                 }
             } else if (!getConfiguration().isNull("flux.incoming.byDt.bySize.file.sp" + iSpec)) {
                 ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
@@ -172,7 +172,7 @@ public class IncomingFluxProcess extends AbstractProcess {
                 // Compute corresponding age in with Von Bertallanfy
                 ageIn[cpt] = new int[timeSerieBySize.getNClass()];
                 for (int iLength = 0; iLength < ageIn[cpt].length; iLength++) {
-                    double age = growthProcess.getGrowth(iSpec).lengthToAge(lengthIn[cpt][iLength]);
+                    double age = growthProcess.getGrowth(cpt).lengthToAge(lengthIn[cpt][iLength]);
                     ageIn[cpt][iLength] = (int) (age * getConfiguration().getNStepYear());
                 }
             } else {

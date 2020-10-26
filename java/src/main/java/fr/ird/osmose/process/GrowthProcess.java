@@ -54,16 +54,16 @@ import java.util.HashMap;
  */
 public class GrowthProcess extends AbstractProcess {
 
-    private HashMap<Integer, AbstractGrowth> growth;
-    private HashMap<Integer, double[]> minDelta;
-    private HashMap<Integer, double[]> maxDelta;
-    private HashMap<Integer, double[]> deltaMeanLength;
-    private HashMap<Integer, Double> criticalPredSuccess;
+    private AbstractGrowth[] growth;
+    private double[][] minDelta;
+    private double[][] maxDelta;
+    private double[][]deltaMeanLength;
+    private double[] criticalPredSuccess;
     /**
      * Maximum length for every species. Infinity by default. Parameter
      * species.lmax.sp#
      */
-    private HashMap<Integer, Float> lmax;
+    private float[] lmax;
 
     public GrowthProcess(int rank) {
         super(rank);
@@ -73,13 +73,14 @@ public class GrowthProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getConfiguration().getNSpecies();
-        growth = new HashMap();
-        criticalPredSuccess = new HashMap();
-        minDelta = new HashMap();
-        maxDelta = new HashMap();
-        deltaMeanLength = new HashMap();
-        lmax = new HashMap();
+        growth = new AbstractGrowth[nSpecies];
+        criticalPredSuccess = new double[nSpecies];
+        minDelta = new double[nSpecies][];
+        maxDelta = new double[nSpecies][];
+        deltaMeanLength = new double[nSpecies][];
+        lmax = new float[nSpecies];
 
+        int cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             // Initialize growth function
             String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + i)
@@ -87,7 +88,7 @@ public class GrowthProcess extends AbstractProcess {
                     : getConfiguration().getString("growth.java.classname.sp" + i);
             String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(i).getName();
             try {
-                growth.put(i, (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(i)));
+                growth[cpt] = (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(i));
             } catch (InstantiationException ex) {
                 error(errMsg, ex);
             } catch (IllegalAccessException ex) {
@@ -104,51 +105,54 @@ public class GrowthProcess extends AbstractProcess {
                 error(errMsg, ex);
             }
             // Initializes Growth function
-            growth.get(i).init();
+            growth[cpt].init();
 
-            criticalPredSuccess.put(i, getConfiguration().getDouble("predation.efficiency.critical.sp" + i));
-            Species species = getSpecies(i);
+            criticalPredSuccess[cpt] = getConfiguration().getDouble("predation.efficiency.critical.sp" + i);
+            Species species = getSpecies(cpt);
             int lifespan = species.getLifespanDt();
-            minDelta.put(i, new double[lifespan]);
-            maxDelta.put(i, new double[lifespan]);
-            deltaMeanLength.put(i, new double[lifespan]);
+            minDelta[cpt] = new double[lifespan];
+            maxDelta[cpt] = new double[lifespan];
+            deltaMeanLength[cpt] = new double[lifespan];
                 
             // barrier.n: patch for Fabien to limit the maximum grow rate
             double delta_lmax_factor = (getConfiguration().isNull("species.delta.lmax.factor.sp" + i)) ? 2 : getConfiguration().getDouble("species.delta.lmax.factor.sp" + i); 
             
-            double meanLength1 = growth.get(i).ageToLength(0);
+            double meanLength1 = growth[cpt].ageToLength(0);
             for (int ageDt = 0; ageDt < lifespan - 1; ageDt++) {
                 double meanLength0 = meanLength1;
-                meanLength1 = growth.get(i).ageToLength((ageDt + 1) / (double) getConfiguration().getNStepYear());
-                deltaMeanLength.get(i)[ageDt] = meanLength1 - meanLength0;
+                meanLength1 = growth[cpt].ageToLength((ageDt + 1) / (double) getConfiguration().getNStepYear());
+                deltaMeanLength[cpt][ageDt] = meanLength1 - meanLength0;
 
                 // barrier.n: patch for Fabien to limit the maximum grow rate
                 //maxDelta[i][ageDt] = deltaMeanLength[i][ageDt] + deltaMeanLength[i][ageDt];
-                minDelta.get(i)[ageDt] = deltaMeanLength.get(i)[ageDt] - deltaMeanLength.get(i)[ageDt];
-                maxDelta.get(i)[ageDt] = delta_lmax_factor * deltaMeanLength.get(i)[ageDt];
+                minDelta[cpt][ageDt] = deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
+                maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanLength[cpt][ageDt];
             }
             // Read maximal length
             if (!getConfiguration().isNull("species.lmax.sp" + i)) {
-                lmax.put(i, getConfiguration().getFloat("species.lmax.sp" + i));
+                lmax[cpt] = getConfiguration().getFloat("species.lmax.sp" + i);
             } else {
-                lmax.put(i, Float.POSITIVE_INFINITY);
+                lmax[cpt] =  Float.POSITIVE_INFINITY;
             }
-        }
+            
+            cpt++;
+            
+        }  // end of loop on focal species
     }
 
     @Override
     public void run() {
         for (School school : getSchoolSet().getAliveSchools()) {
             Species species = school.getSpecies();
-            int i = species.getSpeciesIndex();
+            int i = species.getGlobalSpeciesIndex();
             int age = school.getAgeDt();
             if ((age == 0) || school.isUnlocated()) {
                 // Linear growth for eggs and migrating schools
-                school.incrementLength((float) deltaMeanLength.get(i)[age]);
+                school.incrementLength((float) deltaMeanLength[i][age]);
             } else {
                 // Growth based on predation success
-                if (school.getLength() < lmax.get(i)) {
-                    grow(school, minDelta.get(i)[age], maxDelta.get(i)[age]);
+                if (school.getLength() < lmax[i]) {
+                    grow(school, minDelta[i][age], maxDelta[i][age]);
                 }
             }
         }
@@ -156,16 +160,16 @@ public class GrowthProcess extends AbstractProcess {
 
     private void grow(School school, double minDelta, double maxDelta) {
 
-        int iSpec = school.getSpeciesIndex();
+        int iSpec = school.getGlobalSpeciesIndex();
         //calculation of lengths according to predation efficiency
-        if (school.getPredSuccessRate() >= criticalPredSuccess.get(iSpec)) {
-                double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess.get(iSpec)) / (1 - criticalPredSuccess.get(iSpec))));
+        if (school.getPredSuccessRate() >= criticalPredSuccess[iSpec]) {
+                double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));
             school.incrementLength((float) dlength);
         }
     }
 
     public AbstractGrowth getGrowth(int indexSpecies) {
-        return growth.get(indexSpecies);
+        return growth[indexSpecies];
     }
 }
     
