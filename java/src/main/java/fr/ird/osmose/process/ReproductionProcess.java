@@ -188,7 +188,7 @@ public class ReproductionProcess extends AbstractProcess {
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
             double nEgg = sexRatio[cpt] * beta[cpt] * season * SSB[cpt] * 1000000;
             // lay age class zero
-            int nSchool = getConfiguration().getNSchool(i);
+            int nSchool = getConfiguration().getNSchool(cpt);
             // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
             //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
             if (nEgg == 0.d) {
