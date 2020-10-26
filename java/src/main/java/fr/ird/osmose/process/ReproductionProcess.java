@@ -38,14 +38,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class controls the reproduction process in the simulated domain. The
@@ -65,19 +62,19 @@ public class ReproductionProcess extends AbstractProcess {
     /**
      * Distribution of the spawning throughout the year
      */
-    private HashMap<Integer, double[]> seasonSpawning;
+    private double[][] seasonSpawning;
     /*
      * Percentage of female in the population
      */
-    private HashMap<Integer, Double> sexRatio;
+    private double[] sexRatio;
     /*
      * Number of eggs per gram of mature female
      */
-    private HashMap<Integer, Double> beta;
+    private double[] beta;
     /*
      * Seeding biomass in tonne
      */
-    private HashMap<Integer, Double> seedingBiomass;
+    private double[] seedingBiomass;
     /*
      * Year max for seeding collapsed species, in number of time steps 
      */
@@ -91,35 +88,40 @@ public class ReproductionProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getNSpecies();
-        sexRatio = new HashMap();
-        beta = new HashMap();
-        seasonSpawning = new HashMap();
+        sexRatio = new double[nSpecies];
+        beta = new double[nSpecies];
+        seasonSpawning = new double[nSpecies][];
+        int cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             if (!getConfiguration().isNull("reproduction.season.file.sp" + i)) {
                 SingleTimeSeries ts = new SingleTimeSeries();
                 ts.read(getConfiguration().getFile("reproduction.season.file.sp" + i));
-                seasonSpawning.put(i, ts.getValues());
+                seasonSpawning[cpt] = ts.getValues();
             } else {
                 // Even spawning season throughout the year
-                seasonSpawning.put(i, new double[]{1.d / getConfiguration().getNStepYear()});
+                seasonSpawning[cpt] = new double[]{1.d / getConfiguration().getNStepYear()};
             }
+            cpt += 0;
         }
 
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             float sum = 0;
-            for (double d : seasonSpawning.get(i)) {
+            for (double d : seasonSpawning[cpt]) {
                 sum += d;
             }
             if (sum > 0) {
-                sexRatio.put(i, getConfiguration().getDouble("species.sexratio.sp" + i));
-                beta.put(i, getConfiguration().getDouble("species.relativefecundity.sp" + i));
+                sexRatio[cpt] = getConfiguration().getDouble("species.sexratio.sp" + i);
+                beta[cpt] = getConfiguration().getDouble("species.relativefecundity.sp" + i);
             }
+            cpt++;
         }
 
         // Seeding biomass
-        seedingBiomass = new HashMap();
+        seedingBiomass = new double[nSpecies];
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            seedingBiomass.put(i, getConfiguration().getDouble("population.seeding.biomass.sp" + i));
+            seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + i);
         }
         // Seeding duration (expressed in number of time steps)
         yearMaxSeeding = 0;
@@ -136,48 +138,55 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void run() {
 
+        int cpt;
+
         if (getConfiguration().isBioenEnabled()) {
             error("ReproductionProcess run method not usable in Osmose-PHYSIO", new Exception());
         }
 
+        int nSpecies = this.getNSpecies();
+
         // spawning stock biomass per species
-        HashMap<Integer, Double> SSB = new HashMap();
-        for(int i : getConfiguration().getFocalIndex()) {
-            SSB.put(i, 0.);
-        }
-    
+        double[] SSB = new double[nSpecies];
+
         // check whether the species do reproduce or not
-        HashMap<Integer, Boolean> reproduce = new HashMap();
+        boolean[] reproduce = new boolean[nSpecies];
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            reproduce.put(i, (sexRatio.get(i) > 0.d && beta.get(i) > 0.d));
+            reproduce[cpt] = (sexRatio[cpt] > 0.d && beta[cpt] > 0.d);
+            cpt++;
         }
 
         // loop over all the schools to compute SSB
         for (School school : getSchoolSet().getSchools()) {
-            int i = school.getSpeciesIndex();
+            int i = school.getGlobalSpeciesIndex();
             // increment spawning stock biomass
-            if (reproduce.get(i) && school.getSpecies().isSexuallyMature(school)) {
-                double value = SSB.get(i) + school.getInstantaneousBiomass();
-                SSB.put(i, value);
+            if (reproduce[i] && school.getSpecies().isSexuallyMature(school)) {
+                SSB[i] += school.getInstantaneousBiomass();
             }
             // increment age
             school.incrementAge();
         }
 
         // loop over the species to lay cohort at age class 0
+        cpt = -1;
         for (int i : getConfiguration().getFocalIndex()) {
+            
+            cpt++;
+            
             // ignore species that do not reproduce
-            if (!reproduce.get(i)) {
+            if (!reproduce[cpt]) {
                 continue;
             }
-            Species species = getSpecies(i);
+
+            Species species = getSpecies(cpt);
             // seeding process for collapsed species
-            if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB.get(i) == 0.) {
-                SSB.put(i, seedingBiomass.get(i));
+            if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB[cpt] == 0.) {
+                SSB[cpt] = seedingBiomass[cpt];
             }
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
-            double nEgg = sexRatio.get(i) * beta.get(i) * season * SSB.get(i) * 1000000;
+            double nEgg = sexRatio[cpt] * beta[cpt] * season * SSB[cpt] * 1000000;
             // lay age class zero
             int nSchool = getConfiguration().getNSchool(i);
             // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
@@ -193,13 +202,13 @@ public class ReproductionProcess extends AbstractProcess {
                     getSchoolSet().add(school0);
                 }
             }
-        }
+        }  // end of focal species loop
     }
 
     protected double getSeason(int iStepSimu, Species species) {
 
-        int iSpec = species.getIndex();
-        int length = seasonSpawning.get(iSpec).length;
+        int iSpec = species.getGlobalSpeciesIndex();
+        int length = seasonSpawning[iSpec].length;
         int iStep;
         if (length > getConfiguration().getNStepYear()) {
             iStep = iStepSimu;
@@ -208,15 +217,15 @@ public class ReproductionProcess extends AbstractProcess {
         } else {
             iStep = getSimulation().getIndexTimeYear();
         }
-        return seasonSpawning.get(iSpec)[iStep];
+        return seasonSpawning[iSpec][iStep];
     }
 
     public double getSeedingBiomass(int i) {
-        return this.seedingBiomass.get(i);
+        return this.seedingBiomass[i];
     }
 
     public double getSexRatio(int i) {
-        return this.sexRatio.get(i);
+        return this.sexRatio[i];
     }
 
     public int getYearSeading() {
@@ -224,7 +233,7 @@ public class ReproductionProcess extends AbstractProcess {
     }
 
     public double getBeta(int i) {
-        return this.beta.get(i);
+        return this.beta[i];
     }
 
 }

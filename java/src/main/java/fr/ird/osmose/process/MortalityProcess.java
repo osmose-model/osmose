@@ -730,7 +730,7 @@ public class MortalityProcess extends AbstractProcess {
 //     * @return
 //     */
 //    private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
-//        if (!bkgSet.containsKey(cell.getIndex())) {
+//        if (!bkgSet.containsKey(cell.getSpeciesIndex())) {
 //            // If the cell does not contain any background school
 //            // initialisation of a list of cells.
 //            List<BackgroundSchool> output = new ArrayList<>();
@@ -748,9 +748,9 @@ public class MortalityProcess extends AbstractProcess {
 //                }   // end of iClass loop
 //            }   // end of bkg loop
 //            // add the list to the hash map
-//            bkgSet.put(cell.getIndex(), output);
+//            bkgSet.put(cell.getSpeciesIndex(), output);
 //        }   // end of contains test
-//        return bkgSet.get(cell.getIndex());
+//        return bkgSet.get(cell.getSpeciesIndex());
 //    }   // end of function
     /**
      * Recovers the list of background schools for the current cell. If the

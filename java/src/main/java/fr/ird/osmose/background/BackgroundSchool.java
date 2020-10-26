@@ -136,7 +136,7 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public int getSpeciesIndex() {
-        return this.bkgSpecies.getIndex();
+        return this.bkgSpecies.getSpeciesIndex();
     }
     
     @Override
