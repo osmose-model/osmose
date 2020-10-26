@@ -73,7 +73,7 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
 
         getSchoolSet().getAliveSchools().forEach(predator -> {
             predator.getPreys().stream()
-                    .filter(prey -> (prey.getSpeciesIndex() == species.getIndex()))
+                    .filter(prey -> (prey.getSpeciesIndex() == species.getSpeciesIndex()))
                     .forEach(prey -> {
                         int classPrey = getClass(prey);
                         if (classPrey >= 0) {

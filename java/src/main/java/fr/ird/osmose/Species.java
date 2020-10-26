@@ -237,7 +237,7 @@ public class Species implements ISpecies {
      *
      * @return the index of the species
      */
-    public int getIndex() {
+    public int getSpeciesIndex() {
         return index;
     }
     

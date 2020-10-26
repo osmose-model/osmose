@@ -415,8 +415,10 @@ public class Configuration extends OLogger {
 
         nSchool = new int[nSpecies];
         if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
-            for (int i = 0; i < nSpecies; i++) {
-                nSchool[i] = getInt("simulation.nschool.sp" + i);
+            int cpt = 0;
+            for (int i : this.focalIndex) {
+                nSchool[cpt] = getInt("simulation.nschool.sp" + i);
+                cpt++;
             }
         } else if (canFind("simulation.nschool")) {
             int n = getInt("simulation.nschool");

@@ -100,7 +100,7 @@ public class OxygenFunction extends AbstractProcess {
         int k = school.getSpecies().getDepthLayer();       
         // computation of the
         double o2 = o2_input.getValue(k, school.getCell());
-        double output = c1.get(school.getSpecies().getIndex()) * o2/ (o2 + c2.get(school.getSpecies().getIndex()));
+        double output = c1.get(school.getSpecies().getSpeciesIndex()) * o2/ (o2 + c2.get(school.getSpecies().getSpeciesIndex()));
         
         return output;
     }   
