@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.School;
@@ -53,12 +52,12 @@ import java.util.HashMap;
  */
 public class TempFunction extends AbstractProcess {
 
-    private HashMap<Integer, Double> km, gamma;
+    private double[] km, gamma;
 
     /**
      * Parameters for the energy maintenance.
      */
-    private HashMap<Integer, Double> c_t, Tr;
+    private double[] c_t, Tr;
 
     PhysicalData temperature_input;
 
@@ -75,35 +74,45 @@ public class TempFunction extends AbstractProcess {
     @Override
     public void init() {
 
-        km = new HashMap();
-        gamma = new HashMap();
-        c_t = new HashMap();
-        Tr =new HashMap();
+        int cpt;
+        int nSpecies = this.getNSpecies();
+
+        km = new double[nSpecies];
+        gamma = new double[nSpecies];
+        c_t = new double[nSpecies];
+        Tr = new double[nSpecies];
 
         String key;
-
         key = "bioen.gross.energy.km";
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            km.put(i, getConfiguration().getDouble(keytmp));
+            km[cpt] = getConfiguration().getDouble(keytmp);
+            cpt++;
         }
 
         key = "bioen.gross.energy.gamma";
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            gamma.put(i, getConfiguration().getDouble(keytmp));
+            gamma[cpt] = getConfiguration().getDouble(keytmp);
+            cpt++;
         }
 
         key = "bioen.arrh.ct";
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            c_t.put(i, getConfiguration().getDouble(keytmp));
+            c_t[cpt] = getConfiguration().getDouble(keytmp);
+            cpt++;
         }
 
         key = "bioen.maint.energy.Tr";
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            Tr.put(i, getConfiguration().getDouble(keytmp));
+            Tr[cpt] = getConfiguration().getDouble(keytmp);
+            cpt++;
         }
 
     }
@@ -135,9 +144,9 @@ public class TempFunction extends AbstractProcess {
 
         // Recovers the temperature of the school cell
         double temp = temperature_input.getValue(school);
-        int i = school.getSpeciesIndex();
+        int i = school.getGlobalSpeciesIndex();
 
-        double output = (temp - this.gamma.get(i)) / (temp - this.gamma.get(i) + this.km.get(i));
+        double output = (temp - this.gamma[i]) / (temp - this.gamma[i] + this.km[i]);
         return output;
 
     }
@@ -153,9 +162,9 @@ public class TempFunction extends AbstractProcess {
         // Recovers the temperature of the school cell
         // Autre formulation de Arrhénius : la plus récente des deux 
         double temp = this.getTemp(school);
-        int i = school.getSpeciesIndex();
+        int i = school.getGlobalSpeciesIndex();
 
-        return Math.exp(this.c_t.get(i) * (1 / this.Tr.get(i) - 1 / (temp + 273.15)));
+        return Math.exp(this.c_t[i] * (1 / this.Tr[i] - 1 / (temp + 273.15)));
 
     }
 
