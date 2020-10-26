@@ -77,12 +77,16 @@ public class BackgroundSchoolSet extends OsmoseLinker {
     public List<BackgroundSchool> getBackgroundSchool(Cell cell) {
         if (!bkgSet.containsKey(cell.getIndex())) {
             List<BackgroundSchool> bkgSchools = new ArrayList();  // list of all the background species within the cell
+            int cpt = 0;
             for (int ibkg : this.getConfiguration().getBackgroundIndex()) {
-                int nClass = this.getConfiguration().getBkgSpecies(ibkg).getNClass();
+                int nClass = this.getConfiguration().getBkgSpecies(cpt).getNClass();
                 for (int cl = 0; cl < nClass; cl++) {
-                    bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(ibkg), cl, cell));
+                    bkgSchools.add(new BackgroundSchool(getConfiguration().getBkgSpecies(cpt), cl, cell));
                 }
-            }
+                
+                cpt++;
+                
+            } // end of species loop
             bkgSet.put(cell.getIndex(), bkgSchools);
         }
         return bkgSet.get(cell.getIndex());
