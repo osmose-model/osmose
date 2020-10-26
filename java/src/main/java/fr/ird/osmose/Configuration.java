@@ -479,6 +479,7 @@ public class Configuration extends OLogger {
             if (!bkgSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
                 error("Background species name must contain alphanumeric characters only. Please rename " + bkgSpecies[cpt].getName(), null);
             }
+            cpt++;
         }
 
         // Fisheries
