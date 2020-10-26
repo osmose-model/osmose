@@ -60,12 +60,12 @@ import java.util.List;
  */
 public class AdditionalMortality extends AbstractMortality {
 
-    private HashMap<Integer, AbstractMortalitySpecies> larvaAdditionalMortality;
-    private HashMap<Integer, AbstractMortalitySpecies> additionalMortality;
+    private AbstractMortalitySpecies[] larvaAdditionalMortality;
+    private AbstractMortalitySpecies[] additionalMortality;
     /**
      * Spatial factor for additional mortality [0, 1]
      */
-    private HashMap<Integer, GridMap> spatialD;
+    private GridMap[] spatialD;
 
     public AdditionalMortality(int rank) {
         super(rank);
@@ -75,57 +75,65 @@ public class AdditionalMortality extends AbstractMortality {
     public void init() {
 
         int rank = getRank();
-        larvaAdditionalMortality = new HashMap();
-        additionalMortality = new HashMap();
+        int nSpecies = this.getConfiguration().getNSpecies();
+        larvaAdditionalMortality = new AbstractMortalitySpecies[nSpecies];
+        additionalMortality = new AbstractMortalitySpecies[nSpecies];
 
         // Find and initialises larva and adult Additional Mortality scenario for every species
+        int cpt = 0;
         for (int iSpec : getConfiguration().getFocalIndex()) {
-            Species species = getSpecies(iSpec);
+            Species species = getSpecies(cpt);
             // Find Larva Additional Mortality scenario
             ScenarioLarva scenarioLarva = findScenarioLarva(iSpec);
             debug("Larva Additional Mortality scenario for " + species.getName() + " set to " + scenarioLarva.toString());
             switch (scenarioLarva) {
                 case CONSTANT:
-                    larvaAdditionalMortality.put(iSpec, new ConstantLarvaMortality(rank, species));
+                    larvaAdditionalMortality[cpt] = new ConstantLarvaMortality(rank, species);
                     break;
                 case BY_DT:
-                    larvaAdditionalMortality.put(iSpec, new ByDtLarvaMortality(rank, species));
+                    larvaAdditionalMortality[cpt] = new ByDtLarvaMortality(rank, species);
                     break;
             }
             // Initialises Larva Additional Mortality scenario
-            larvaAdditionalMortality.get(iSpec).init();
+            larvaAdditionalMortality[cpt].init();
             
             // Find Additional Mortality scenario
             Scenario scenario = findScenario(iSpec);
+            cpt = 0;
             debug("Additional Mortality scenario for " + species.getName() + " set to " + scenario.toString());
             switch (scenario) {
                 case ANNUAL:
-                    additionalMortality.put(iSpec, new AnnualAdditionalMortality(rank, species));
+                    additionalMortality[cpt] = new AnnualAdditionalMortality(rank, species);
                     break;
                 case BY_DT:
-                    additionalMortality.put(iSpec, new ByDtAdditionalMortality(rank, species));
+                    additionalMortality[cpt] = new ByDtAdditionalMortality(rank, species);
                     break;
                 case BY_DT_BY_AGE:
-                    additionalMortality.put(iSpec, new ByDtByClassAdditionalMortality(rank, species));
+                    additionalMortality[cpt] = new ByDtByClassAdditionalMortality(rank, species);
                     break;
                 case BY_DT_BY_SIZE:
-                    additionalMortality.put(iSpec, new ByDtByClassAdditionalMortality(rank, species));
+                    additionalMortality[cpt] = new ByDtByClassAdditionalMortality(rank, species);
                     break;
             }
             // Initialises Additional Mortality scenario
-            additionalMortality.get(iSpec).init();
-        }
+            additionalMortality[cpt].init();
+            
+            cpt++;
+            
+        }  // end of loop over focal species
 
         // Patch for Ricardo to include space variability in additional mortality
         // Need to think of a better parametrization before including it
         // formally in Osmose
-        spatialD = new HashMap();
+        spatialD = new GridMap[nSpecies];
         List<String> keys = getConfiguration().findKeys("mortality.additional.spatial.distrib.file.sp*");
         if (keys != null && !keys.isEmpty()) {
+             cpt = 0;
             for (int iSpec : getConfiguration().getFocalIndex()) {
                 if (!getConfiguration().isNull("mortality.additional.spatial.distrib.file.sp" + iSpec)) {
-                    spatialD.put(iSpec, new GridMap(getConfiguration().getFile("mortality.additional.spatial.distrib.file.sp" + iSpec)));
+                    spatialD[cpt] = new GridMap(getConfiguration().getFile("mortality.additional.spatial.distrib.file.sp" + iSpec));
                 }
+                cpt++;
             }
         }
     }
@@ -143,14 +151,15 @@ public class AdditionalMortality extends AbstractMortality {
     public double getRate(School school) {
         double D;
         Species spec = school.getSpecies();
+        int ispec = school.getGlobalSpeciesIndex();
         if (school.isLarva()) {
             // Egg stage
-            D = larvaAdditionalMortality.get(school.getSpeciesIndex()).getRate(school);
+            D = larvaAdditionalMortality[ispec].getRate(school);
         } else {
-            if (null != spatialD.get(school.getSpeciesIndex()) && !school.isUnlocated()) {
-                D = (spatialD.get(school.getSpeciesIndex()).getValue(school.getCell()) * additionalMortality.get(school.getSpeciesIndex()).getRate(school));
+            if (null != spatialD[ispec] && !school.isUnlocated()) {
+                D = (spatialD[ispec].getValue(school.getCell()) * additionalMortality[ispec].getRate(school));
             } else {
-                D = additionalMortality.get(school.getSpeciesIndex()).getRate(school);
+                D = additionalMortality[ispec].getRate(school);
             }
         }
         return D;
