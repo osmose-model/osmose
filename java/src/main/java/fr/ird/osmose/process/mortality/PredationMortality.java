@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.AbstractSchool;
@@ -81,17 +80,17 @@ public class PredationMortality extends AbstractMortality {
 
     @Override
     public void init() {
-        
+
         String prefix = "predation.accessibility";
-        
+
         Configuration conf = this.getConfiguration();
         String metrics = getConfiguration().getString(prefix + ".stage.structure");
-        
+
         if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
             metrics = null;
         }
-        
-        if(metrics == null) {
+
+        if (metrics == null) {
             String message = String.format("The %s parameter must either be \"age\" or \"size\". ", prefix + ".stage.structure");
             error(message, new IllegalArgumentException());
         }
@@ -108,7 +107,7 @@ public class PredationMortality extends AbstractMortality {
         predationAccess.init();
 
         int nSpecies = getConfiguration().getNSpecies();
-        int nBackground = getConfiguration().getNSpecies();
+        int nBackground = getConfiguration().getNBkgSpecies();
         predPreySizesMax = new double[nSpecies + nBackground][];
         predPreySizesMin = new double[nSpecies + nBackground][];
         predationRate = new double[nSpecies + nBackground];
