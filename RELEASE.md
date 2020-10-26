@@ -15,6 +15,7 @@
 - Adding of background species in the `DietOutput` and `PredatorPressure` file.
 - Adding of lognormal distribution for fishery selectivity (Ricardo)
 - Adding some tools to help converting parameter names to version 4.3.0 (i.e adding `species.type`, replace `plankton.plk` by `species.sp`, etc)
+- Replace use of hashmaps (costly) by use of arrays, as done before.
 
 
 ### Bugfix
