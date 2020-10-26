@@ -236,7 +236,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
             prw.print(quote("Prey"));
             int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
             for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
-                String name = getSpecies(iSpec).getName();
+                String name = getISpecies(iSpec).getName();
                 float[] threshold = dietOutputStage.getThresholds(iSpec);
                 int nStage = dietOutputStage.getNStage(iSpec);
                 for (int iStage = 0; iStage < nStage; iStage++) {
