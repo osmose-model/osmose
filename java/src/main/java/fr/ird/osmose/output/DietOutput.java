@@ -83,7 +83,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void reset() {
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + this.getConfiguration().getNBkgSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies() + this.getConfiguration().getNBkgSpecies();
         diet = new double[nSpec][][][];
         abundanceStage = new double[nSpec][];
@@ -99,9 +99,9 @@ public class DietOutput extends SimulationLinker implements IOutput {
                     } else {
                         diet[iSpec][iStage][iPrey] = new double[1];
                     }
-                }
+                }  /// end of loop over preys
             }
-        }
+        }  // end of loop over predators
     }
 
     @Override
@@ -109,11 +109,12 @@ public class DietOutput extends SimulationLinker implements IOutput {
 
         for (School school : getSchoolSet().getPresentSchools()) {
             double preyedBiomass = school.getPreyedBiomass();
-            int iSpec = school.getSpeciesIndex();
+            int iSpec = school.getGlobalSpeciesIndex();
             if (preyedBiomass > 0) {
                 abundanceStage[iSpec][dietOutputStage.getStage(school)] += school.getAbundance();
                 for (Prey prey : school.getPreys()) {
-                    diet[iSpec][dietOutputStage.getStage(school)][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
+                    int iPrey = prey.getGlobalSpeciesIndex();
+                    diet[iSpec][dietOutputStage.getStage(school)][iPrey][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
                 }
             }
         }
@@ -122,7 +123,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
     @Override
     public void write(float time) {
 
-        int nSpec = getConfiguration().getNSpecies();
+        int nSpec = getConfiguration().getNSpecies() + this.getNBkgSpecies();
 //        double[][] sum = new double[getNSpecies()][];
 //        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
 //            sum[iSpec] = new double[nDietStage[iSpec]];
@@ -159,14 +160,16 @@ public class DietOutput extends SimulationLinker implements IOutput {
                             prw.print(separator);
                         }
                     }
-                }
+                }  // end of loop over focal/bkg species as preds.
                 prw.println();
             }
-        }
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
+        }  // loop of focal/background species as prey. 
+        
+        // Loop over the resource species, only as prey
+        for (int j = 0; j < getConfiguration().getNRscSpecies(); j++) {
             prw.print(time);
             prw.print(separator);
-            prw.print(getConfiguration().getResourceSpecies(j - nSpec));
+            prw.print(getConfiguration().getResourceSpecies(j).getName());
             prw.print(separator);
             for (int i = 0; i < nSpec; i++) {
                 int nStagePred = dietOutputStage.getNStage(i);
@@ -185,7 +188,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
                         prw.print(separator);
                     }
                 }
-            }
+            }  // loop over background + focal species as pred.
             prw.println();
         }
 //        prw.print(";sum;");
@@ -231,7 +234,8 @@ public class DietOutput extends SimulationLinker implements IOutput {
             prw.print(quote("Time"));
             prw.print(separator);
             prw.print(quote("Prey"));
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+            for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                 String name = getSpecies(iSpec).getName();
                 float[] threshold = dietOutputStage.getThresholds(iSpec);
                 int nStage = dietOutputStage.getNStage(iSpec);
@@ -246,10 +250,10 @@ public class DietOutput extends SimulationLinker implements IOutput {
                             prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name predators
                         }
                     }
-                }
-            }
+                }   // end of loop over stage
+            }  // loop over predators (focal + bkg)
             prw.println();
-        }
+        }  // end of file existence test
     }
 
     @Override

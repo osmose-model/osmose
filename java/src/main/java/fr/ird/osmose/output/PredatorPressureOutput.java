@@ -135,7 +135,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         for (int iSpec = 0; iSpec < nSpec + nBkg; iSpec++) {
             // iSpec = species index as prey
             int iSpecBis = fishIndex[iSpec];
-            String name = getFishSpecies(iSpecBis).getName();
+            String name = getISpecies(iSpecBis).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpecBis);
             int nStagePred = dietOutputStage.getNStage(iSpecBis);
             for (int iStage = 0; iStage < nStagePred; iStage++) {
