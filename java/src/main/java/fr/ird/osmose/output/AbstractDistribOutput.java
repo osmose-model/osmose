@@ -54,7 +54,7 @@ import java.util.HashMap;
 public abstract class AbstractDistribOutput extends AbstractOutput {
 
     // Output values distributed by species and by class
-    HashMap <Integer, double[]> values = new HashMap();
+    protected double[][] values;
     
     // Distribution 
     private final AbstractDistribution distrib;
@@ -70,9 +70,10 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        values.clear();
-        for(int i  : getConfiguration().getFocalIndex()) {
-            values.put(i, new double[distrib.getNClass()]);
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+        values = new double[nSpecies][];
+        for (int i = 0; i < nSpecies; i++) {
+            values[i] = new double[distrib.getNClass()];
         }
     }
 
@@ -84,12 +85,12 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
     public void write(float time) {
 
         int nClass = distrib.getNClass();
-        double[][] array = new double[nClass][getNSpecies() + 1];
+        double[][] array = new double[nClass][getNSpecies() + this.getNBkgSpecies() +  1];
         for (int iClass = 0; iClass < nClass; iClass++) {
             int cpt = 0;
             array[iClass][cpt++] = distrib.getThreshold(iClass);
-            for (int iSpec : getConfiguration().getFocalIndex()) {
-                array[iClass][cpt++] = values.get(iSpec)[iClass] / getRecordFrequency();
+            for (int iSpec = 0; iSpec < this.getNBkgSpecies() + this.getNSpecies(); iSpec++) {
+                array[iClass][cpt++] = values[iSpec][iClass] / getRecordFrequency();
             }
         }
         writeVariable(time, array);
@@ -99,8 +100,8 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
     String[] getHeaders() {
         String[] headers = new String[getNSpecies() + 1];
         headers[0] = distrib.getType().toString();
-        for (int i = 0; i < getNSpecies(); i++) {
-            headers[i + 1] = getSpecies(i).getName();
+        for (int i = 0; i < this.getNSpecies() + this.getNBkgSpecies(); i++) {
+            headers[i + 1] = getISpecies(i).getName();
         }
         return headers;
     }

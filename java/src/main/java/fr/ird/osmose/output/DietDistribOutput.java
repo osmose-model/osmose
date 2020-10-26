@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Species;
@@ -59,14 +58,6 @@ public class DietDistribOutput extends AbstractDistribOutput {
     }
 
     @Override
-    public void reset() {
-        values.clear();
-        for (int i : getConfiguration().getAllIndex()) {
-            values.put(i, new double[getNClass()]);
-        }
-    }
-
-    @Override
     String getDescription() {
         StringBuilder description = new StringBuilder();
         description.append("Distribution of the biomass (tonne) of prey species (in columns) in the diet of ");
@@ -79,24 +70,14 @@ public class DietDistribOutput extends AbstractDistribOutput {
 
     @Override
     String[] getHeaders() {
-        String[] headers = new String[getNSpecies() + getConfiguration().getNRscSpecies() + getConfiguration().getNBkgSpecies() + 1];  
+
+        int nPreys = getNSpecies() + getConfiguration().getNRscSpecies() + getConfiguration().getNBkgSpecies();
+        String[] headers = new String[nPreys + 1];
         headers[0] = getType().toString();
-        int cpt = 1;
-        
-        for (int i : getConfiguration().getFocalIndex()) {
-            headers[cpt] = getSpecies(i).getName();
-            cpt++;
+        for (int i = 0; i < nPreys; i++) {
+            headers[i + 1] = getISpecies(i).getName();
         }
-        
-        for (int i : getConfiguration().getBackgroundIndex()) {
-            headers[cpt] = this.getBkgSpecies(i).getName();
-            cpt++;
-        }
-        
-        for (int i : getConfiguration().getResourceIndex()) {
-            headers[cpt] = getConfiguration().getResourceSpecies(i).getName();
-            cpt++;
-        }
+
         return headers;
     }
 
@@ -109,7 +90,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
                     predator.getPreys().forEach(prey -> {
                         int classPredator = getClass(predator);
                         if (classPredator >= 0) {
-                            values.get(prey.getSpeciesIndex())[classPredator] += prey.getBiomass();
+                            values[prey.getGlobalSpeciesIndex()][classPredator] += prey.getBiomass();
                         }
                     });
                 });
@@ -129,7 +110,8 @@ public class DietDistribOutput extends AbstractDistribOutput {
             int cpt = 0;
             array[iClass][cpt++] = this.getClassThreshold(iClass);
             for (int iSpec : this.getConfiguration().getAllIndex()) {
-                array[iClass][cpt++] = values.get(iSpec)[iClass] / getRecordFrequency();
+                array[iClass][cpt] = values[cpt][iClass] / getRecordFrequency();
+                cpt++;
             }
         }
         writeVariable(time, array);
