@@ -62,17 +62,17 @@ public class BioenPredationMortality extends PredationMortality {
     /**
      * Maximum ingestion rate
      */
-    private HashMap<Integer, Double> predationRateBioen = new HashMap();
+    private double[] predationRateBioen;
 
     /**
      * Maximum ingestion rate use to calcul max ingestion for larvae.
      */
-    private HashMap<Integer, Double> larvaePredationRateBioen = new HashMap();
+    private double[] larvaePredationRateBioen;
 
     /**
      * Mean enet rate for larvae.
      */
-    private HashMap<Integer, Double> c_rateBioen = new HashMap();
+    private double[] c_rateBioen;
 
     public BioenPredationMortality(int rank) throws IOException {
 
@@ -88,13 +88,18 @@ public class BioenPredationMortality extends PredationMortality {
 
         // Initialisation of the PredationMortality class.
         super.init();
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+        predationRateBioen = new double[nSpecies];
+        larvaePredationRateBioen = new double[nSpecies];
+        c_rateBioen = new double[nSpecies];
 
         // Recovers the max predation rate for bioen config (not the same unit as in
         // the standard code
+        int cpt = 0;
         for (int i : this.getConfiguration().getPredatorIndex()) {
-            predationRateBioen.put(i, getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i));
-            larvaePredationRateBioen.put(i, getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i));
-            c_rateBioen.put(i, getConfiguration().getDouble("predation.c.bioen.sp" + i));
+            predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
+            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i);
+            c_rateBioen[cpt] = getConfiguration().getDouble("predation.c.bioen.sp" + i);
         }
 
     }
@@ -185,7 +190,13 @@ public class BioenPredationMortality extends PredationMortality {
     public double getMaxPredationRate(IAggregation predator) {
 
         // recovers the species index
-        int speciesIndex = predator.getSpeciesIndex();
+        int speciesIndex = predator.getGlobalSpeciesIndex();
+        
+        if(speciesIndex >= this.getNSpecies()) {
+            // If species is a background one, return parameter
+            // to check with Alaia
+            return  predationRateBioen[speciesIndex];
+        }
 
         // recovers the thresshold age (stored on Dt)
         int thresAge = this.getSpecies(speciesIndex).getThresAge();
@@ -193,7 +204,7 @@ public class BioenPredationMortality extends PredationMortality {
         double factor = 1;
 
         try {
-            factor = (predator.getAgeDt() < thresAge) ? larvaePredationRateBioen.get(speciesIndex) : 1;
+            factor = (predator.getAgeDt() < thresAge) ? larvaePredationRateBioen[speciesIndex] : 1;
         } catch (NullPointerException ex) {
             String message = "Cannot find larvaePredationRateBioen for species " + speciesIndex;
             error(message, ex);
@@ -204,14 +215,14 @@ public class BioenPredationMortality extends PredationMortality {
         if (predator instanceof School) {
             String key = "imax";
             try {
-                output = ((School) predator).existsTrait(key) ? ((School) predator).getTrait(key) : predationRateBioen.get(predator.getSpeciesIndex());
+                output = ((School) predator).existsTrait(key) ? ((School) predator).getTrait(key) : predationRateBioen[speciesIndex];
             } catch (Exception ex) {
                 Logger.getLogger(BioenPredationMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            output = predationRateBioen.get(speciesIndex);
+            output = predationRateBioen[speciesIndex];
         }
 
-        return ((output + (factor - 1) * c_rateBioen.get(speciesIndex)) / getConfiguration().getNStepYear());
+        return ((output + (factor - 1) * c_rateBioen[speciesIndex]) / getConfiguration().getNStepYear());
     }
 }
