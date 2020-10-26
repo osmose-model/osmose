@@ -56,7 +56,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
     /*
      * Biomass per diet stages [SPECIES][DIET_STAGES]
      */
-    private HashMap<Integer, double[]> biomassStage = new HashMap();
+    private double[][] biomassStage;
 
     private IStage dietOutputStage;
 
@@ -73,8 +73,10 @@ public class BiomassDietStageOutput extends AbstractOutput {
         nColumns = 0;
         
         // Sum-up diet stages
-        for (int iSpec : getConfiguration().getPredatorIndex()) {
-            nColumns += dietOutputStage.getNStage(iSpec);
+        int cpt = 0;
+        for (int iSpec : getConfiguration().getAllIndex()) {
+            nColumns += dietOutputStage.getNStage(cpt);
+            cpt++;
         }
 
         nColumns += getConfiguration().getNRscSpecies();
@@ -92,10 +94,11 @@ public class BiomassDietStageOutput extends AbstractOutput {
 
         int k = 0;
         String[] headers = new String[nColumns];
-        for (int iSpec : getConfiguration().getFocalIndex()) {
-            String name = getSpecies(iSpec).getName();
-            float[] threshold = dietOutputStage.getThresholds(iSpec);
-            int nStage = dietOutputStage.getNStage(iSpec);
+        int cpt = 0;
+        for (int iSpec : getConfiguration().getAllIndex()) {
+            String name = getISpecies(cpt).getName();
+            float[] threshold = dietOutputStage.getThresholds(cpt);
+            int nStage = dietOutputStage.getNStage(cpt);
             for (int s = 0; s < nStage; s++) {
                 if (nStage == 1) {
                     headers[k] = name;    // Name predators
@@ -108,31 +111,11 @@ public class BiomassDietStageOutput extends AbstractOutput {
                 }
                 k++;
             }
-        }
+            
+            cpt++;
+            
+        } // end of species loop
 
-        for (int iSpec : getConfiguration().getBackgroundIndex()) {
-            String name = getBkgSpecies(iSpec).getName();
-            float[] threshold = dietOutputStage.getThresholds(iSpec);
-            int nStage = dietOutputStage.getNStage(iSpec);
-            for (int s = 0; s < nStage; s++) {
-                if (nStage == 1) {
-                    headers[k] = name;    // Name predators
-                } else {
-                    if (s == 0) {
-                        headers[k] = name + " < " + threshold[s];    // Name predators
-                    } else {
-                        headers[k] = name + " >=" + threshold[s - 1];    // Name predators
-                    }
-                }
-                k++;
-            }
-        }
-
-
-        for (int iSpec : getConfiguration().getResourceIndex()) {
-            headers[k] = getConfiguration().getResourceSpecies(iSpec).getName();
-            k++;
-        }
         return headers;
     }
 
@@ -140,15 +123,18 @@ public class BiomassDietStageOutput extends AbstractOutput {
     public void initStep() {
 
         getSchoolSet().getPresentSchools().forEach(school -> {
-            biomassStage.get(school.getSpeciesIndex())[dietOutputStage.getStage(school)] += school.getBiomass();
+            biomassStage[school.getGlobalSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
         this.getBkgSchoolSet().getAllSchools().forEach(school -> {
-            biomassStage.get(school.getSpeciesIndex())[dietOutputStage.getStage(school)] += school.getBiomass();
+            biomassStage[school.getGlobalSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
+        int cpt = 0;
+        int offset = this.getNBkgSpecies() + this.getNSpecies();        
         for (int iRsc : getConfiguration().getResourceIndex()) {
-            biomassStage.get(iRsc)[0] += getTotalBiomass(iRsc);
+            biomassStage[offset + cpt][0] += getTotalBiomass(cpt);
+            cpt++;
         }
 
     }
@@ -156,15 +142,15 @@ public class BiomassDietStageOutput extends AbstractOutput {
     @Override
     public void reset() {
         
-        biomassStage.clear();
+        int nSpecies = this.getNSpecies();
+        int nBkg = this.getNBkgSpecies();
+        int nRsc = this.getNRscSpecies();
+        biomassStage = new double[nSpecies + nBkg + nRsc][];
         
-        for (int iSpec : getConfiguration().getPredatorIndex()) {
-            biomassStage.put(iSpec, new double[dietOutputStage.getNStage(iSpec)]);
-        }
-        
-        for (int i : getConfiguration().getPreyIndex()) {
-            // we consider just 1 stage per resource group
-            biomassStage.put(i, new double[1]);
+        int cpt = 0;
+        for (int iSpec : getConfiguration().getAllIndex()) {
+            biomassStage[cpt] = new double[dietOutputStage.getNStage(cpt)];
+            cpt++;
         }
     }
 
@@ -178,16 +164,12 @@ public class BiomassDietStageOutput extends AbstractOutput {
         double[] biomass = new double[nColumns];
         double nsteps = getRecordFrequency();
         int k = 0;
-        for (int iSpec : getConfiguration().getPredatorIndex()) {
-            for (int s = 0; s < dietOutputStage.getNStage(iSpec); s++) {
-                biomass[k] = biomassStage.get(iSpec)[s] / nsteps;
-                k++;
+        for (int iSpec : getConfiguration().getAllIndex()) {
+            for (int s = 0; s < dietOutputStage.getNStage(k); s++) {
+                biomass[k] = biomassStage[k][s] / nsteps;
             }
-        }
-        for (int j : getConfiguration().getResourceIndex()) {
-            biomass[k] = biomassStage.get(j)[0] / nsteps;
             k++;
-        }
+        } // end of species loop
         writeVariable(time, biomass);
     }
 

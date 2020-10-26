@@ -84,7 +84,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
     @Override
     public void reset() {
         int nSpec = getNSpecies() + this.getConfiguration().getNBkgSpecies();
-        int nPrey = nSpec + getConfiguration().getNRscSpecies() + this.getConfiguration().getNBkgSpecies();
+        int nPrey = nSpec + getConfiguration().getNRscSpecies();
         diet = new double[nSpec][][][];
         abundanceStage = new double[nSpec][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
@@ -131,7 +131,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
 
         // Write the step in the file
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStagePred = dietOutputStage.getNStage(iSpec);
             for (int st = 0; st < nStagePred; st++) {
@@ -175,7 +175,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
                 int nStagePred = dietOutputStage.getNStage(i);
                 for (int s = 0; s < nStagePred; s++) {
                     if (abundanceStage[i][s] > 0) {
-                        float val = (float) (100.d * diet[i][s][j][0] / abundanceStage[i][s]);
+                        float val = (float) (100.d * diet[i][s][j + nSpec][0] / abundanceStage[i][s]);
                         String sval = Float.isInfinite(val)
                                 ? "Inf"
                                 : Float.toString(val);
