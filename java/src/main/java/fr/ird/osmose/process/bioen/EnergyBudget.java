@@ -54,9 +54,9 @@ import java.util.logging.Logger;
  */
 public class EnergyBudget extends AbstractProcess {
 
-    private HashMap<Integer, Double> csmr;
+    private double[] csmr;
 
-    private HashMap<Integer, Double> m0, m1;
+    private double[] m0, m1;
 
     private final TempFunction temp_function;
 
@@ -64,8 +64,8 @@ public class EnergyBudget extends AbstractProcess {
     /**
      * Parameters for the kappa function.
      */
-    private HashMap<Integer, Double> r;
-    private HashMap<Integer, Double> Imax;
+    private double[] r;
+    private double[] Imax;
 
     public EnergyBudget(int rank) throws IOException {
 
@@ -84,44 +84,55 @@ public class EnergyBudget extends AbstractProcess {
     public void init() {
 
         String key;
-
+        int cpt;
         // Redundant with the beta of the BioenPredationMortality class.
         int nBack = this.getNBkgSpecies();
-        int nspec = this.getNSpecies();
+        int nSpecies = this.getNSpecies();
 
         // Recovers the beta coefficient for focal + background species
-        r = new HashMap();
+        cpt = 0;
+        r = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("bioen.maturity.r.sp%d", i);
-            r.put(i, this.getConfiguration().getDouble(key));
+            r[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
         }
 
         // Recovers the beta coefficient for focal + background species
-        m0 = new HashMap();
+        cpt = 0;
+        m0 = new double[nSpecies
+        ];
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("bioen.maturity.m0.sp%d", i);
-            m0.put(i, this.getConfiguration().getDouble(key));   // barrier.n: conversion from mm to cm
+            m0[cpt] = this.getConfiguration().getDouble(key);   // barrier.n: conversion from mm to cm
+            cpt++;
         }
 
         // Recovers the beta coefficient for focal + background species
-        m1 = new  HashMap();
+        m1 = new double[nSpecies];
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("bioen.maturity.m1.sp%d", i);
-            m1.put(i, this.getConfiguration().getDouble(key));  // barrier.n: conversion from mm to cm
+            m1[cpt] = this.getConfiguration().getDouble(key);  // barrier.n: conversion from mm to cm
+            cpt++;
         }
 
         // Recovers the beta coefficient for focal + background species
-        csmr = new  HashMap();
+        csmr = new double[nSpecies];
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("bioen.maint.energy.csmr.sp%d", i);
-            csmr.put(i, this.getConfiguration().getDouble(key));
+            csmr[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
         }
 
         // Recovers the beta coefficient for focal + background species
-        Imax = new HashMap();
+        Imax = new double[nSpecies];
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("predation.ingestion.rate.max.bioen.sp%d", i);
-            Imax.put(i, this.getConfiguration().getDouble(key));
+            Imax[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
         }
     }
 
@@ -164,11 +175,11 @@ public class EnergyBudget extends AbstractProcess {
      */
     public void get_maintenance(School school) {
 
-        int ispec = school.getSpeciesIndex();
+        int ispec = school.getGlobalSpeciesIndex();
 
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
-        double output = this.csmr.get(ispec) * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
+        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
 
         // multiply the maintenance flow by the number of fish in the school
@@ -202,13 +213,13 @@ public class EnergyBudget extends AbstractProcess {
             return 1;
         }
 
-        int ispec = school.getSpeciesIndex();
+        int ispec = school.getGlobalSpeciesIndex();
 
         String key = "m0";
-        double m0_temp = school.existsTrait(key) ? school.getTrait(key) : m0.get(ispec);
+        double m0_temp = school.existsTrait(key) ? school.getTrait(key) : m0[ispec];
 
         key = "m1";
-        double m1_temp = school.existsTrait(key) ? school.getTrait(key) : m1.get(ispec);
+        double m1_temp = school.existsTrait(key) ? school.getTrait(key) : m1[ispec];
 
         // If the school is not mature yet, maturation is computed following equation 8
         double age = school.getAge();  // returns the age in years
@@ -272,17 +283,17 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      */
     public void get_kappa(School school) throws Exception {
-        int ispec = school.getSpeciesIndex();
+        int ispec = school.getGlobalSpeciesIndex();
 
         String key = "r";
-        double r_temp = school.existsTrait(key) ? school.getTrait(key) : r.get(ispec);
+        double r_temp = school.existsTrait(key) ? school.getTrait(key) : r[ispec];
 
         key = "imax";
-        double imax_temp = school.existsTrait(key) ? school.getTrait(key) : Imax.get(ispec);
+        double imax_temp = school.existsTrait(key) ? school.getTrait(key) : Imax[ispec];
 
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - (r_temp / (imax_temp - csmr.get(ispec))) * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen()); //Function in two parts according to maturity state
+        double kappa = (!school.isMature()) ? 1 : 1 - (r_temp / (imax_temp - csmr[ispec])) * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen()); //Function in two parts according to maturity state
         kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
         kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
 
