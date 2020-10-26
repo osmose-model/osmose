@@ -129,11 +129,14 @@ public class ResourceForcing extends OsmoseLinker {
     
     private int ncPerYear;
     
+    private int globalindex;
+    
 //////////////
 // Constructor
 //////////////
-    public ResourceForcing(int index) {
+    public ResourceForcing(int index, int globalindex) {
         this.index = index;
+        this.globalindex = globalindex;
     }
 
 ////////////////////////////
