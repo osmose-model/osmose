@@ -88,7 +88,7 @@ public class Prey implements IMarineOrganism {
     /**
      * Creates a new prey.
      *
-     * @param index of the prey
+     * @param index of the prey. In this case, global index is used.
      * @param trophicLevel of the prey
      * @param age of the prey
      * @param length of the prey
@@ -235,7 +235,7 @@ public class Prey implements IMarineOrganism {
 
     @Override
     public int getGlobalSpeciesIndex() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return index;
     }
 
     @Override
