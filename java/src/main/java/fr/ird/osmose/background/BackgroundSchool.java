@@ -136,7 +136,7 @@ public class BackgroundSchool extends AbstractSchool {
 
     @Override
     public int getSpeciesIndex() {
-        return this.bkgSpecies.getIndex();
+        return this.bkgSpecies.getSpeciesIndex();
     }
     
     @Override
@@ -193,4 +193,23 @@ public class BackgroundSchool extends AbstractSchool {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getGlobalSpeciesIndex() {
+        return this.bkgSpecies.getGlobalSpeciesIndex();
+    }
+
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getGlobalSpeciesIndex(boolean off) {
+        return this.bkgSpecies.getGlobalSpeciesIndex(off);
+    }
 }

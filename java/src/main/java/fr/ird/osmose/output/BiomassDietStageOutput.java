@@ -73,7 +73,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         nColumns = 0;
         
         // Sum-up diet stages
-        for (int iSpec : getConfiguration().getFishIndex()) {
+        for (int iSpec : getConfiguration().getPredatorIndex()) {
             nColumns += dietOutputStage.getNStage(iSpec);
         }
 
@@ -110,7 +110,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
             }
         }
 
-        for (int iSpec : getConfiguration().getBkgIndex()) {
+        for (int iSpec : getConfiguration().getBackgroundIndex()) {
             String name = getBkgSpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
@@ -129,7 +129,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         }
 
 
-        for (int iSpec : getConfiguration().getRscIndex()) {
+        for (int iSpec : getConfiguration().getResourceIndex()) {
             headers[k] = getConfiguration().getResourceSpecies(iSpec).getName();
             k++;
         }
@@ -147,7 +147,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
             biomassStage.get(school.getSpeciesIndex())[dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
-        for (int iRsc : getConfiguration().getRscIndex()) {
+        for (int iRsc : getConfiguration().getResourceIndex()) {
             biomassStage.get(iRsc)[0] += getTotalBiomass(iRsc);
         }
 
@@ -158,7 +158,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
         
         biomassStage.clear();
         
-        for (int iSpec : getConfiguration().getFishIndex()) {
+        for (int iSpec : getConfiguration().getPredatorIndex()) {
             biomassStage.put(iSpec, new double[dietOutputStage.getNStage(iSpec)]);
         }
         
@@ -178,13 +178,13 @@ public class BiomassDietStageOutput extends AbstractOutput {
         double[] biomass = new double[nColumns];
         double nsteps = getRecordFrequency();
         int k = 0;
-        for (int iSpec : getConfiguration().getFishIndex()) {
+        for (int iSpec : getConfiguration().getPredatorIndex()) {
             for (int s = 0; s < dietOutputStage.getNStage(iSpec); s++) {
                 biomass[k] = biomassStage.get(iSpec)[s] / nsteps;
                 k++;
             }
         }
-        for (int j : getConfiguration().getRscIndex()) {
+        for (int j : getConfiguration().getResourceIndex()) {
             biomass[k] = biomassStage.get(j)[0] / nsteps;
             k++;
         }

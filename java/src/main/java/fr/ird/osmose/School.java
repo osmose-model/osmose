@@ -232,7 +232,7 @@ public class School extends AbstractSchool {
      * @param trophicLevel, the trophic level of the fish
      */
     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
-        this.index = species.getIndex();
+        this.index = species.getSpeciesIndex();
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
@@ -356,15 +356,6 @@ public class School extends AbstractSchool {
         this.trophicLevel = trophicLevel;
     }
 
-    /**
-     * Returns the index of the species
-     *
-     * @return the index of the species
-     */
-    @Override
-    public int getSpeciesIndex() {
-        return index;
-    }
 
     /**
      * Sets the number of dead fish for a given mortality cause.
@@ -426,15 +417,6 @@ public class School extends AbstractSchool {
 
     public void setWeight(float weight) {
         this.weight = weight;
-    }
-
-    /**
-     * Returns a list of the prey records at current time step.
-     *
-     * @return a list of the prey records at current time step.
-     */
-    public Collection<Prey> getPreys() {
-        return preys.values();
     }
 
     /**
@@ -857,6 +839,26 @@ public class School extends AbstractSchool {
                 this.getGenotype().setEnvNoise(itrait, envnoise);
             }
         }   
+    }
+    
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getGlobalSpeciesIndex() {
+        return this.species.getGlobalSpeciesIndex();
+    }
+
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getGlobalSpeciesIndex(boolean off) {
+        return this.species.getGlobalSpeciesIndex(off);
     }
 
 }

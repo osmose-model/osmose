@@ -54,7 +54,7 @@ import java.util.HashMap;
 public class OxygenFunction extends AbstractProcess {
     
     /** Variables used to compute f02 function. */
-    private HashMap<Integer, Double>  c1, c2;
+    private double[] c1, c2;
 
     PhysicalData o2_input;
     
@@ -74,14 +74,17 @@ public class OxygenFunction extends AbstractProcess {
         
         // Recovering the values of C1 and C2 used for fO2 function (one
         // per focal species)
-        c1 = new HashMap();
-        c2 = new HashMap();
+        int nSpecies = this.getNSpecies();
+        c1 = new double[nSpecies];
+        c2 = new double[nSpecies];
+        int cpt = 0;
         for(int i : getConfiguration().getFocalIndex()) {
             key = String.format("species.c1.sp%d", i);
-            c1.put(i, getConfiguration().getDouble(key)); 
+            c1[cpt] = getConfiguration().getDouble(key); 
             
             key = String.format("species.c2.sp%d", i);
-            c2.put(i, getConfiguration().getDouble(key)); 
+            c2[cpt] = getConfiguration().getDouble(key); 
+            cpt++;
         }       
     }
 
@@ -97,10 +100,11 @@ public class OxygenFunction extends AbstractProcess {
      */
     public double compute_fO2(School school) {
         
-        int k = school.getSpecies().getDepthLayer();       
+        int k = school.getSpecies().getDepthLayer();
+        int iSpecies = school.getGlobalSpeciesIndex();
         // computation of the
         double o2 = o2_input.getValue(k, school.getCell());
-        double output = c1.get(school.getSpecies().getIndex()) * o2/ (o2 + c2.get(school.getSpecies().getIndex()));
+        double output = c1[iSpecies] * o2/ (o2 + c2[iSpecies]);
         
         return output;
     }   

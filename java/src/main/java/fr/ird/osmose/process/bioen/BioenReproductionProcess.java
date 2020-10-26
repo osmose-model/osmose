@@ -75,44 +75,44 @@ public class BioenReproductionProcess extends ReproductionProcess {
     @Override
     public void run() {
         
+        int nSpecies = this.getNSpecies();
+        
         // spawning stock biomass per species
-        HashMap<Integer, Double> SSB = new HashMap();
-        for (int i : getConfiguration().getFocalIndex()) {
-            SSB.put(i, 0.);
-        }
-
+        double[] SSB = new double[nSpecies];
+    
         // loop over all the schools to compute 
         for (School school : getSchoolSet().getSchools()) {
 
-            int i = school.getSpeciesIndex();
+            int i = school.getGlobalSpeciesIndex();
             if (school.isMature()) {
-                double value = SSB.get(i) + school.getInstantaneousBiomass();
-                SSB.put(i, value);
+               SSB[i] += school.getInstantaneousBiomass();
             }
             // increment age
             school.incrementAge();
         }
 
+        int cpt = 0;
         // loop over the species to lay cohort at age class 0
         for (int i : getConfiguration().getFocalIndex()) {
-
+            
             // Recover the species object and all the schools of the given species
-            Species species = getSpecies(i);
+            Species species = getSpecies(cpt);
+            
             List<School> schoolset = getSchoolSet().getSchools(species);
             WeightedRandomDraft weight_rand = new WeightedRandomDraft();
             
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
 
-            if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB.get(i) == 0.) {
+            if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB[i] == 0.) {
                 // seeding process for collapsed species
                 // if seeding biomass is 0 (no mature indivials, release eggs in the
                 // old fashioned way.
-                SSB.put(i, this.getSeedingBiomass(i));
-                double nEgg = this.getSexRatio(i) * this.getBeta(i) * season * SSB.get(i) * 1000000;
+                SSB[cpt] = this.getSeedingBiomass(i);
+                double nEgg = this.getSexRatio(cpt) * this.getBeta(cpt) * season * SSB[cpt] * 1000000;
 
                 // in this case, weight_rand is never used.
-                this.create_reproduction_schools(i, nEgg, true, weight_rand);
+                this.create_reproduction_schools(cpt, nEgg, true, weight_rand);
 
             } else {
 
@@ -137,14 +137,17 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     // divided by the egg weight.
                     // barrier.n: change in conversion from tone to gram
                     // since EggWeight is in g.
-                    double nEgg = wEgg * this.getSexRatio(i) / species.getEggWeight() * 1000000 * school.getInstantaneousAbundance();
+                    double nEgg = wEgg * this.getSexRatio(cpt) / species.getEggWeight() * 1000000 * school.getInstantaneousAbundance();
                     negg_tot += nEgg;
                     weight_rand.add(nEgg, school);
                 }  // end of loop over the school that belong to species i    
 
-                this.create_reproduction_schools(i, negg_tot, false, weight_rand);
+                this.create_reproduction_schools(cpt, negg_tot, false, weight_rand);
                 
             }  // end of SSB statement
+            
+            cpt++;
+            
         }  // end of species loop
     }
 

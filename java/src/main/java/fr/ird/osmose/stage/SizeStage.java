@@ -57,7 +57,7 @@ public class SizeStage extends AbstractStage {
     @Override
     public int getStage(IMarineOrganism school) {
         int stage = 0;
-        int iSpec = school.getSpeciesIndex();
+        int iSpec = school.getGlobalSpeciesIndex();
         for (float threshold : this.getThresholds(iSpec)) {
             if (school.getLength() >= threshold) {
                 stage++;

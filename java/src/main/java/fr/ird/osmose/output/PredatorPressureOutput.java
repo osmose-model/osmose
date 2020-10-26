@@ -87,7 +87,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     @Override
     public void reset() {
         int[] focalIndex =  this.getConfiguration().getFocalIndex();
-        int[] fishIndex = this.getConfiguration().getFishIndex();
+        int[] fishIndex = this.getConfiguration().getPredatorIndex();
         int[] preyIndex = this.getConfiguration().getAllIndex();
         int nSpec = getNSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies() + this.getNBkgSpecies();
@@ -126,7 +126,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     public void write(float time) {
         
         int[] focalIndex = this.getConfiguration().getFocalIndex();
-        int[] fishIndex = this.getConfiguration().getFishIndex();
+        int[] fishIndex = this.getConfiguration().getPredatorIndex();
         int[] preyIndex = this.getConfiguration().getAllIndex();
 
         int nSpec = getNSpecies();
@@ -135,7 +135,7 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
         for (int iSpec = 0; iSpec < nSpec + nBkg; iSpec++) {
             // iSpec = species index as prey
             int iSpecBis = fishIndex[iSpec];
-            String name = getFishSpecies(iSpecBis).getName();
+            String name = getISpecies(iSpecBis).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpecBis);
             int nStagePred = dietOutputStage.getNStage(iSpecBis);
             for (int iStage = 0; iStage < nStagePred; iStage++) {

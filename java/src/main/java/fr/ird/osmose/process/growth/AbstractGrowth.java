@@ -56,7 +56,7 @@ public abstract class AbstractGrowth extends SimulationLinker {
     public AbstractGrowth(int rank, Species species) {
         super(rank);
         this.species = species;
-        this.indexSpecies = species.getIndex();
+        this.indexSpecies = species.getSpeciesIndex();
     }
 
     public int getIndexSpecies() {

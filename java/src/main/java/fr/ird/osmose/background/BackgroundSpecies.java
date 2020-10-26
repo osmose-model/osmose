@@ -93,6 +93,9 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     private final int nClass;
     
     private final ByClassTimeSeries timeSeries;
+    
+    private final int globalindex;
+    private final int offset;
 
     /**
      * Constructor of background species.
@@ -101,13 +104,16 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
-    public BackgroundSpecies(int index) throws IOException, InvalidRangeException {
+    public BackgroundSpecies(int index, int globalindex) throws IOException, InvalidRangeException {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
         boolean isOk = true;
         String message = "";
 
+        this.offset = cfg.getNSpecies();
+        this.globalindex = globalindex + this.offset;
+        
         // Initialiaze the index of the Background species
         this.index = index;
 
@@ -194,10 +200,28 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      *
      * @return
      */
-    public int getIndex() {
+    public int getSpeciesIndex() {
         return this.index;
     }
 
+    /**
+     * Return the global index of the species.
+     *
+     * @return
+     */
+    public int getGlobalSpeciesIndex(boolean applyOffset) {
+        if (applyOffset) {
+            return this.globalindex;
+        } else {
+            return this.globalindex - this.offset;
+        }
+    }
+    
+    @Override
+    public int getGlobalSpeciesIndex() {
+        return this.getGlobalSpeciesIndex(true);
+    }
+    
     /**
      * Returns the trophic level of the current background species.
      *

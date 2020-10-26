@@ -494,7 +494,7 @@ public class MortalityProcess extends AbstractProcess {
                                 IAggregation prey = preys.get(ipr);
                                 nDead = prey.biom2abd(preyUpon[ipr]);   // total biomass that has been eaten
                                 prey.incrementNdead(MortalityCause.PREDATION, nDead);
-                                predator.preyedUpon(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
+                                predator.preyedUpon(prey.getGlobalSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
                             }
                         }
                         break;
@@ -572,7 +572,7 @@ public class MortalityProcess extends AbstractProcess {
                             school = schools.get(seqFish[i]);
 
                             // Osmose 3 fishing Mortality
-                            switch (fishingMortality.getType(school.getSpeciesIndex())) {
+                            switch (fishingMortality.getType(school.getGlobalSpeciesIndex())) {
                                 case RATE:
                                     double F = fishingMortality.getRate(school) / subdt;
                                     nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
@@ -594,7 +594,7 @@ public class MortalityProcess extends AbstractProcess {
     private List<Resource> getResources(Cell cell) {
         if (!resourcesSet.containsKey(cell.getIndex())) {
             List<Resource> resources = new ArrayList();
-            for (int iRsc : getConfiguration().getRscIndex()) {
+            for (int iRsc : getConfiguration().getResourceIndex()) {
                 resources.add(new Resource(getConfiguration().getResourceSpecies(iRsc), cell));
             }
             resourcesSet.put(cell.getIndex(), resources);
@@ -730,7 +730,7 @@ public class MortalityProcess extends AbstractProcess {
 //     * @return
 //     */
 //    private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
-//        if (!bkgSet.containsKey(cell.getIndex())) {
+//        if (!bkgSet.containsKey(cell.getSpeciesIndex())) {
 //            // If the cell does not contain any background school
 //            // initialisation of a list of cells.
 //            List<BackgroundSchool> output = new ArrayList<>();
@@ -748,9 +748,9 @@ public class MortalityProcess extends AbstractProcess {
 //                }   // end of iClass loop
 //            }   // end of bkg loop
 //            // add the list to the hash map
-//            bkgSet.put(cell.getIndex(), output);
+//            bkgSet.put(cell.getSpeciesIndex(), output);
 //        }   // end of contains test
-//        return bkgSet.get(cell.getIndex());
+//        return bkgSet.get(cell.getSpeciesIndex());
 //    }   // end of function
     /**
      * Recovers the list of background schools for the current cell. If the

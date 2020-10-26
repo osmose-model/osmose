@@ -50,7 +50,7 @@ import java.util.HashMap;
  */
 abstract class AbstractStage extends OsmoseLinker implements IStage {
 
-    private HashMap<Integer, float[]> thresholds;
+    private float[][] thresholds;
 
     private final String key;
 
@@ -61,34 +61,42 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
     @Override
     public void init() {
 
-        thresholds = new HashMap();
+        int nSpecies = this.getNSpecies();
+        int nBkgSpecies = this.getNBkgSpecies();
+        int nResources = this.getNRscSpecies();
+        int nTot = nSpecies + nBkgSpecies + nResources;
+        thresholds = new float[nTot][];
         
         // Set values for focal and background species species.
-        for (int i : getConfiguration().getFishIndex()) {
+        int cpt = 0;
+        for (int i : getConfiguration().getPredatorIndex()) {
             int nStage = !getConfiguration().isNull(key + i)
                     ? getConfiguration().getArrayString(key + i).length + 1
                     : 1;
             if (nStage > 1) {
-                thresholds.put(i, getConfiguration().getArrayFloat(key + i));
+                thresholds[cpt] = getConfiguration().getArrayFloat(key + i);
             } else {
-                thresholds.put(i, new float[0]);
+                thresholds[cpt] = new float[0];
             }
+            
+            cpt++;
+            
         }
         
         // Set values for resource species.
-        for (int i : getConfiguration().getRscIndex()) {
-            thresholds.put(i, new float[0]);
+        for (int i : getConfiguration().getResourceIndex()) {
+            thresholds[cpt] = new float[0];
         }
         
     }
 
     @Override
     public int getNStage(int iSpecies) {
-        return thresholds.get(iSpecies).length + 1;
+        return thresholds[iSpecies].length + 1;
     }
 
     @Override
     public float[] getThresholds(int iSpecies) {
-        return thresholds.get(iSpecies);
+        return thresholds[iSpecies];
     }
 }

@@ -53,7 +53,7 @@ public class OutMortality extends AbstractMortality {
     /*
      * Out mortality rate [dt-1]
      */
-    private HashMap<Integer, Double> Zout;
+    private double[] Zout;
 
     public OutMortality(int rank) {
         super(rank);
@@ -64,18 +64,17 @@ public class OutMortality extends AbstractMortality {
 
         int nSpecies = getConfiguration().getNSpecies();
         int nStepYear = getConfiguration().getNStepYear();
-        Zout = new HashMap();
-        for (int i = 0; i < nSpecies; i++) {
+        Zout = new double[nSpecies];
+        int cpt = 0;
+        for (int i : this.getConfiguration().getFocalIndex()) {
             if (!getConfiguration().isNull("mortality.out.rate.sp" + i)) {
-                Zout.put(i, getConfiguration().getDouble("mortality.out.rate.sp" + i) / nStepYear);
-            } else {
-                Zout.put(i, 0.);    
+                Zout[cpt] = getConfiguration().getDouble("mortality.out.rate.sp" + i) / nStepYear;
             }
         }
     }
 
     @Override
     public double getRate(School school) {
-        return Zout.get(school.getSpeciesIndex());
+        return Zout[school.getGlobalSpeciesIndex()];
     }
 }

@@ -91,7 +91,7 @@ public class Simulation extends OsmoseLinker {
     /**
      * The low trophic level forcing class.
      */
-    private HashMap<Integer, ResourceForcing> resourceForcing;
+    private ResourceForcing[] resourceForcing;
     /**
      * Current year of the simulation.
      */
@@ -280,34 +280,40 @@ public class Simulation extends OsmoseLinker {
     }
 
     /**
-     * Initializes resources forcing.
+     * Initializes resources forcing. The ResourceForcing array contains first
+     * the background species, then the resource species.
      */
     private void initResourceForcing() {
 
-        resourceForcing = new HashMap();
-
-        Arrays.stream(this.getConfiguration().getRscIndex()).forEach(i -> {
-            ResourceForcing resForcing = new ResourceForcing(i);
-            try {
-                resForcing.init();
-            } catch (IOException ex) {
-                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            resourceForcing.put(i, resForcing);
-            // Name must contain only alphanumerical characters
-        });
-
+        int nTot = this.getNBkgSpecies() + this.getConfiguration().getNRscSpecies();
+        resourceForcing = new ResourceForcing[nTot];
+        
+        int cpt = 0;
+        
         // Init resources for background species
-        Arrays.stream(this.getConfiguration().getBkgIndex()).forEach(i -> {
+        for(int i : this.getConfiguration().getBackgroundIndex()) { 
             ResourceForcing resForcing = new ResourceForcing(i);
             try {
                 resForcing.init();
             } catch (IOException ex) {
                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
             }
-            resourceForcing.put(i, resForcing);
+            resourceForcing[cpt] = resForcing;
+            cpt++;
             // Name must contain only alphanumerical characters
-        });
+        }
+
+        for (int i : this.getConfiguration().getResourceIndex()) {
+            ResourceForcing resForcing = new ResourceForcing(i);
+            try {
+                resForcing.init();
+            } catch (IOException ex) {
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            resourceForcing[cpt] = resForcing;
+            cpt++;
+            // Name must contain only alphanumerical characters
+        }
 
     }
 
@@ -413,7 +419,7 @@ public class Simulation extends OsmoseLinker {
      * @return the {@code ResourceForcing} instance for specified resource.
      */
     public ResourceForcing getResourceForcing(int index) {
-        return resourceForcing.get(index);
+        return resourceForcing[index];
     }
 
     /**
@@ -422,7 +428,7 @@ public class Simulation extends OsmoseLinker {
      * @param index, the index of the resource
      * @return the {@code ResourceForcing} instance for specified resource.
      */
-    public HashMap<Integer, ResourceForcing> getResourceForcing() {
+    public ResourceForcing[] getResourceForcing() {
         return resourceForcing;
     }
 

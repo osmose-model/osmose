@@ -70,6 +70,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
      * Species index of the swarm, which ranges from nSpecies to nSpecis + nLTL
      */
     final private int index;
+    
     /**
      * Number of organisms in the swarm at the beginning of the time step
      */
@@ -82,7 +83,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
     public Resource(ResourceSpecies species, Cell cell) {
         this.species = species;
         this.cell = cell;
-        this.index = species.getIndex();
+        this.index = species.getSpeciesIndex();
     }
 
     /**
@@ -172,7 +173,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
 
     @Override
     public int getSpeciesIndex() {
-        return index;
+        return this.species.getSpeciesIndex();
     }
 
     @Override
@@ -243,6 +244,16 @@ public class Resource extends OsmoseLinker implements IAggregation {
     @Override
     public void discardedBy(int fisheryIndex, double fishedBiomass) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getGlobalSpeciesIndex() {
+        return this.species.getGlobalSpeciesIndex();
+    }
+    
+    @Override
+    public int getGlobalSpeciesIndex(boolean off) {
+        return this.species.getGlobalSpeciesIndex(off);
     }
 
 }

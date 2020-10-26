@@ -43,6 +43,7 @@ package fr.ird.osmose;
 
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -121,7 +122,10 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     protected double[] fishedBiomass;
     
     protected double[] discardedBiomass;
-
+    
+    protected int index;
+    protected int globalindex;
+    
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] += nDead;
@@ -200,6 +204,15 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     @Override
     public void discardedBy(int fisheryIndex, double fishedBiomass) {
         this.discardedBiomass[fisheryIndex] += fishedBiomass;
+    }
+    
+    /**
+     * Returns a list of the prey records at current time step.
+     *
+     * @return a list of the prey records at current time step.
+     */
+    public Collection<Prey> getPreys() {
+        return preys.values();
     }
     
     /**
@@ -363,6 +376,16 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
     
     public UUID getID() {
         return uuid;
+    }
+    
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getSpeciesIndex() {
+        return index;
     }
     
     /**

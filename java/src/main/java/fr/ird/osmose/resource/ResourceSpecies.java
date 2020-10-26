@@ -42,6 +42,7 @@
 package fr.ird.osmose.resource;
 
 import fr.ird.osmose.Configuration;
+import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
@@ -65,7 +66,7 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 4.2 2019/11/25
  */
-public class ResourceSpecies {
+public class ResourceSpecies implements ISpecies {
 
 ///////////////////////////////
 // Declaration of the variables
@@ -100,6 +101,9 @@ public class ResourceSpecies {
      * double.
      */
     private final double accessMax = 0.99d;
+    
+    private final int globalindex;
+    private final int offset;
 
 ///////////////
 // Constructors
@@ -110,10 +114,12 @@ public class ResourceSpecies {
      *
      * @param index, index of the resource group
      */
-    public ResourceSpecies(int index) {
-
+    public ResourceSpecies(int index, int globalindex) {
+        
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.index = index;
+        this.offset = cfg.getNBkgSpecies() + cfg.getNSpecies();
+        this.globalindex = globalindex + this.offset;
         // Initialisation of parameters
         name = cfg.getString("species.name.sp" + index);
         sizeMin = cfg.getDouble("species.size.min.sp" + index);
@@ -207,9 +213,28 @@ public class ResourceSpecies {
      *
      * @return the index of the resource group
      */
-    public int getIndex() {
+    @Override
+    public int getSpeciesIndex() {
         return index;
     }
+    
+        /**
+     * Returns the index of the resource group.
+     *
+     * @return the index of the resource group
+     */
+    @Override
+    public int getGlobalSpeciesIndex() {
+        return getGlobalSpeciesIndex(true);
+    }
+    
+    public int getGlobalSpeciesIndex(boolean applyOffset) { 
+        if(applyOffset) { 
+            return globalindex;
+        } else {
+            return globalindex - this.offset; 
+        }
+    } 
 
     /**
      * Returns the averaged trophic level of the resource group. Parameter
