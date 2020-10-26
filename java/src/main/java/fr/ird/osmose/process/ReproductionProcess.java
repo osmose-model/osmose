@@ -101,7 +101,7 @@ public class ReproductionProcess extends AbstractProcess {
                 // Even spawning season throughout the year
                 seasonSpawning[cpt] = new double[]{1.d / getConfiguration().getNStepYear()};
             }
-            cpt += 0;
+            cpt++;
         }
 
         cpt = 0;

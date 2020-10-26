@@ -288,3 +288,4 @@ public class PredationMortality extends AbstractMortality {
         throw new UnsupportedOperationException("Predation mortality is handled explicitly in Osmose.");
     }
 }
+    
