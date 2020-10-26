@@ -217,10 +217,10 @@ public class PredationMortality extends AbstractMortality {
         double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
         int cpt = 0;
         for (int i : getConfiguration().getResourceIndex()) {
-            if ((preySizeMin > getConfiguration().getResourceSpecies(i).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(i).getSizeMin())) {
+            if ((preySizeMin > getConfiguration().getResourceSpecies(cpt).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(cpt).getSizeMin())) {
                 percentResource[cpt] = 0.0d;
             } else {
-                percentResource[cpt] = getConfiguration().getResourceSpecies(i).computePercent(preySizeMin, preySizeMax);
+                percentResource[cpt] = getConfiguration().getResourceSpecies(cpt).computePercent(preySizeMin, preySizeMax);
             }
         }
         return percentResource;
