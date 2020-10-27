@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.IMarineOrganism;
@@ -55,7 +54,7 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
 
     // Output values distributed by species and by class
     protected double[][] values;
-    
+
     // Distribution 
     private final AbstractDistribution distrib;
 
@@ -63,14 +62,14 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
         super(rank, subfolder, name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""));
         this.distrib = distrib;
     }
-    
+
     public AbstractDistribOutput(int rank, String subfolder, String name, AbstractDistribution distrib) {
         this(rank, subfolder, name, null, distrib);
     }
 
     @Override
     public void reset() {
-        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies() + this.getNRscSpecies();
         values = new double[nSpecies][];
         for (int i = 0; i < nSpecies; i++) {
             values[i] = new double[distrib.getNClass()];
@@ -84,12 +83,13 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
     @Override
     public void write(float time) {
 
+        int nSpecies = getNSpecies() + this.getNBkgSpecies() + this.getNRscSpecies();
         int nClass = distrib.getNClass();
-        double[][] array = new double[nClass][getNSpecies() + this.getNBkgSpecies() +  1];
+        double[][] array = new double[nClass][nSpecies + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
             int cpt = 0;
             array[iClass][cpt++] = distrib.getThreshold(iClass);
-            for (int iSpec = 0; iSpec < this.getNBkgSpecies() + this.getNSpecies(); iSpec++) {
+            for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
                 array[iClass][cpt++] = values[iSpec][iClass] / getRecordFrequency();
             }
         }
@@ -98,9 +98,10 @@ public abstract class AbstractDistribOutput extends AbstractOutput {
 
     @Override
     String[] getHeaders() {
-        String[] headers = new String[getNSpecies() + 1];
+        int nSpecies = getNSpecies() + this.getNBkgSpecies() + this.getNRscSpecies();
+        String[] headers = new String[nSpecies + 1];
         headers[0] = distrib.getType().toString();
-        for (int i = 0; i < this.getNSpecies() + this.getNBkgSpecies(); i++) {
+        for (int i = 0; i < nSpecies; i++) {
             headers[i + 1] = getISpecies(i).getName();
         }
         return headers;

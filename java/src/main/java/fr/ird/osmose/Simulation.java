@@ -292,7 +292,7 @@ public class Simulation extends OsmoseLinker {
         
         // Init resources for background species
         for(int i : this.getConfiguration().getBackgroundIndex()) { 
-            ResourceForcing resForcing = new ResourceForcing(i);
+            ResourceForcing resForcing = new ResourceForcing(i, cpt);
             try {
                 resForcing.init();
             } catch (IOException ex) {
@@ -304,7 +304,7 @@ public class Simulation extends OsmoseLinker {
         }
 
         for (int i : this.getConfiguration().getResourceIndex()) {
-            ResourceForcing resForcing = new ResourceForcing(i);
+            ResourceForcing resForcing = new ResourceForcing(i, cpt);
             try {
                 resForcing.init();
             } catch (IOException ex) {

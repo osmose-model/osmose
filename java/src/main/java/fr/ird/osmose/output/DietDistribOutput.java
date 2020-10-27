@@ -107,10 +107,10 @@ public class DietDistribOutput extends AbstractDistribOutput {
         int nClass = this.getNClass();
         double[][] array = new double[nClass][getNSpecies() + getConfiguration().getNRscSpecies() + getConfiguration().getNBkgSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
+            array[iClass][0] = this.getClassThreshold(iClass);
             int cpt = 0;
-            array[iClass][cpt++] = this.getClassThreshold(iClass);
             for (int iSpec : this.getConfiguration().getAllIndex()) {
-                array[iClass][cpt] = values[cpt][iClass] / getRecordFrequency();
+                array[iClass][cpt + 1] = values[cpt][iClass] / getRecordFrequency();
                 cpt++;
             }
         }

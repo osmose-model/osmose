@@ -110,8 +110,10 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
         cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
         cutoffAge = new float[getNSpecies()];
         if (cutoffEnabled) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+            int cpt = 0;
+            for (int iSpec : this.getConfiguration().getFocalIndex()) {
+                cutoffAge[cpt] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+                cpt++;
             }
         }
 
@@ -263,11 +265,11 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getGlobalSpeciesIndex()]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
-                            int iSpec = school.getSpeciesIndex();
+                            int iSpec = school.getGlobalSpeciesIndex();
                             biomass[iSpec][j][i] += school.getInstantaneousBiomass();
                             abundance[iSpec][j][i] += school.getInstantaneousAbundance();
                             mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
@@ -276,9 +278,10 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                         }
                     }
                 }
+                
+                int offset = this.getNBkgSpecies();
                 for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
-                    int finalindex = this.getConfiguration().getRscIndex(iRsc);
-                    ltlbiomass[iRsc][j][i] = (float) getSimulation().getResourceForcing(finalindex).getBiomass(cell);
+                    ltlbiomass[iRsc][j][i] = (float) getSimulation().getResourceForcing(iRsc + offset).getBiomass(cell);
                 }
             }
         }

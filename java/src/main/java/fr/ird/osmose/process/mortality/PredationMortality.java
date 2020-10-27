@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.AbstractSchool;
@@ -81,17 +80,17 @@ public class PredationMortality extends AbstractMortality {
 
     @Override
     public void init() {
-        
+
         String prefix = "predation.accessibility";
-        
+
         Configuration conf = this.getConfiguration();
         String metrics = getConfiguration().getString(prefix + ".stage.structure");
-        
+
         if (!(metrics.equalsIgnoreCase("size") || metrics.equalsIgnoreCase("age"))) {
             metrics = null;
         }
-        
-        if(metrics == null) {
+
+        if (metrics == null) {
             String message = String.format("The %s parameter must either be \"age\" or \"size\". ", prefix + ".stage.structure");
             error(message, new IllegalArgumentException());
         }
@@ -108,7 +107,7 @@ public class PredationMortality extends AbstractMortality {
         predationAccess.init();
 
         int nSpecies = getConfiguration().getNSpecies();
-        int nBackground = getConfiguration().getNSpecies();
+        int nBackground = getConfiguration().getNBkgSpecies();
         predPreySizesMax = new double[nSpecies + nBackground][];
         predPreySizesMin = new double[nSpecies + nBackground][];
         predationRate = new double[nSpecies + nBackground];
@@ -218,10 +217,10 @@ public class PredationMortality extends AbstractMortality {
         double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
         int cpt = 0;
         for (int i : getConfiguration().getResourceIndex()) {
-            if ((preySizeMin > getConfiguration().getResourceSpecies(i).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(i).getSizeMin())) {
+            if ((preySizeMin > getConfiguration().getResourceSpecies(cpt).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(cpt).getSizeMin())) {
                 percentResource[cpt] = 0.0d;
             } else {
-                percentResource[cpt] = getConfiguration().getResourceSpecies(i).computePercent(preySizeMin, preySizeMax);
+                percentResource[cpt] = getConfiguration().getResourceSpecies(cpt).computePercent(preySizeMin, preySizeMax);
             }
         }
         return percentResource;
@@ -289,3 +288,4 @@ public class PredationMortality extends AbstractMortality {
         throw new UnsupportedOperationException("Predation mortality is handled explicitly in Osmose.");
     }
 }
+    

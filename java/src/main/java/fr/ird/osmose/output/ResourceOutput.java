@@ -79,11 +79,11 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
     /**
      * Resource biomass array at the beginning of the time step.
      */
-    private HashMap<Integer, double[][]> rscBiomass0;
+    private double[][][] rscBiomass0;
     /**
      * Resource biomass array after predation process.
      */
-    private HashMap<Integer, double[][]> rscBiomass1;
+    private double[][][] rscBiomass1;
     
     private int index;
     private Variable timeVar, rscBiomVar, rscBiomPredVar, lonVar, latVar;
@@ -94,8 +94,9 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void init() {
-        this.rscBiomass0 = new HashMap<>();
-        this.rscBiomass1 = new HashMap<>();
+        int nRsc = this.getNRscSpecies();
+        this.rscBiomass0 = new double[nRsc][][];
+        this.rscBiomass1 = new double[nRsc][][];
         String filename = getFilename();
         IOTools.makeDirectories(filename);
         createNCFile(filename);
@@ -122,47 +123,51 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void reset() {
+        int nRsc = this.getNRscSpecies();
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
-        rscBiomass0.clear();
-        rscBiomass1.clear();
+        this.rscBiomass0 = new double[nRsc][][];
+        this.rscBiomass1 = new double[nRsc][][];
+        int cpt = 0;
         for (int i : getConfiguration().getResourceIndex()) {
-            rscBiomass0.put(i, new double[ny][nx]);
-            rscBiomass1.put(i, new double[ny][nx]);
+            rscBiomass0[cpt] = new double[ny][nx];
+            rscBiomass1[cpt] = new double[ny][nx];
+            cpt++;
         }
     }
 
     @Override
     public void update() {
-
+        int nRsc = this.getNRscSpecies();
+        int nSpecies = this.getNSpecies();
+        int nBkg = this.getNBkgSpecies();
+        int offset = nBkg + nSpecies;
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!(cell.isLand())) {
                 // Preyed biomass for every resource group in current cell
-                HashMap<Integer, Double> preyedResources = new HashMap();
-                for(int i : this.getConfiguration().getResourceIndex()) { 
-                    preyedResources.put(i, 0.0);
-                }
-                
+                double[] preyedResources = new double[nRsc];
+
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         for (Prey prey : school.getPreys()) {
-                            int iRsc = prey.getSpeciesIndex();                           
-                            if (ArrayUtils.contains(this.getConfiguration().getResourceIndex(), iRsc)) {
-                                double val = (null ==  preyedResources.get(iRsc)) ? prey.getBiomass() : preyedResources.get(iRsc) + prey.getBiomass();
-                                preyedResources.put(iRsc, val);
+                            int iRsc = prey.getGlobalSpeciesIndex();
+                            if (iRsc >= offset) {
+                                preyedResources[iRsc - offset] += prey.getBiomass();
                             }
                         }
                     }
                 }
-                
+
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
+                int cpt = 0;
                 for (int iRsc : getConfiguration().getResourceIndex()) {
                     // rscBiomass0 is the resource biomass at the beginning of the time step
-                    rscBiomass0.get(iRsc)[j][i] = getSimulation().getResourceForcing(iRsc).getBiomass(cell);
+                    rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt).getBiomass(cell);
                     // rscBiomass1 is the resource biomass remaining in the water column after the predation process
-                    rscBiomass1.get(iRsc)[j][i] = rscBiomass0.get(iRsc)[j][i] - preyedResources.get(iRsc);
+                    rscBiomass1[cpt][j][i] = rscBiomass0[cpt][j][i] - preyedResources[cpt];
+                    cpt++;
                 }
             }
         }
@@ -177,9 +182,8 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
             // Set _FillValue on land cells
             if (cell.isLand()) {
                 for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
-                    int iRscFinal = this.getConfiguration().getRscIndex(iRsc);
-                    rscBiomass0.get(iRscFinal)[j][i] = FILLVALUE;
-                    rscBiomass1.get(iRscFinal)[j][i] = FILLVALUE;
+                    rscBiomass0[iRsc][j][i] = FILLVALUE;
+                    rscBiomass1[iRsc][j][i] = FILLVALUE;
                 }
             }
         }
@@ -192,9 +196,8 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    int iRscFinal = this.getConfiguration().getRscIndex(iRsc);
-                    arrRsc0.set(0, cpt, j, i, (float) rscBiomass0.get(iRscFinal)[j][i]);
-                    arrRsc1.set(0, cpt, j, i, (float) rscBiomass1.get(iRscFinal)[j][i]);
+                    arrRsc0.set(0, cpt, j, i, (float) rscBiomass0[iRsc][j][i]);
+                    arrRsc1.set(0, cpt, j, i, (float) rscBiomass1[iRsc][j][i]);
                 }
             }
             cpt++;
