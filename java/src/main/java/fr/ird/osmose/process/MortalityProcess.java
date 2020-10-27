@@ -286,11 +286,13 @@ public class MortalityProcess extends AbstractProcess {
         } // end of cell loop
 
         int iStepSimu = getSimulation().getIndexTimeSimu();
+        int nSpecies = this.getNSpecies();
+        int nBkg = this.getNBkgSpecies();
 
         // Init the biomass of background species by using the ResourceForcing class
         for (List<BackgroundSchool> bkgSchoolList : this.getBkgSchoolSet().getValues()) {    // loop over the cells
             for (BackgroundSchool bkg : bkgSchoolList) {    // loop over the resources
-                int ibkg = bkg.getSpeciesIndex();
+                int ibkg = bkg.getGlobalSpeciesIndex() - nSpecies;   // bkg index: [0, nbkg - 1]
                 double accessibleBiom = getResourceForcing(ibkg).getBiomass(bkg.getCell());
                 // note that here, the multiplication by proportion value is made in the setbiomass method
                 bkg.setBiomass(accessibleBiom, iStepSimu);
@@ -302,7 +304,7 @@ public class MortalityProcess extends AbstractProcess {
         int offset = this.getNBkgSpecies();
         for (List<Resource> resources : resourcesSet.values()) {    // loop over the cells
             for (Resource resource : resources) {    // loop over the resources
-                int iRsc = resource.getSpeciesIndex();
+                int iRsc = resource.getGlobalSpeciesIndex() - nSpecies - nBkg;  // [0, nrsc - 1]
                 double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
                         * getResourceForcing(iRsc + offset).getBiomass(resource.getCell());
                 resource.setBiomass(accessibleBiom);
