@@ -595,16 +595,21 @@ public class OutputManager extends SimulationLinker {
                 ));
             }
 
+            // Correct the output of bioen ingestion
             if (getConfiguration().getBoolean("output.bioen.ingest.enabled", NO_WARNING)) {
                 outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "ingestion",
-                        "Ingestion rate (grams.grams^-alpha)",
-                        school -> school.getEGross() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
-                        nshool -> 1.d
+                        "Ingestion rate (grams.grams^-alpha)", (school -> (school.getAgeDt() >= school.getSpecies().getThresAge())),
+                        school -> school.getIngestion() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())),
+                        school -> school.getInstantaneousAbundance()
                 ));
             }
-            
+
             if (getConfiguration().getBoolean("output.bioen.ingesttot.enabled", NO_WARNING)) {
-                outputs.add(new BioenIngestTotOutput(rank, "Bioen", "ingestionTot"));
+                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "ingestionTot",
+                        "Cumulated ingestion (grams)", 
+                        school -> school.getIngestionTot() * 1e6f,
+                        school -> school.getInstantaneousAbundance()
+                ));
             }
 
             if (getConfiguration().getBoolean("output.bioen.maint.enabled", NO_WARNING)) {
@@ -725,7 +730,7 @@ public class OutputManager extends SimulationLinker {
                         sizeDistrib
                 ));
             }
-
+            
         }
         
         // warning: simulation init is called after output init.
