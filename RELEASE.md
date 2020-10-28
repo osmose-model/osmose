@@ -22,6 +22,7 @@
 
 ### Bugfix
 
+- Correction of a bug in the saving of ingestion (egross was saved instead of energy)
 - Correction of a bug in the saving of fisheries: mean instead of cumulated sum was saved. Revealed by Ghassen.
 - Correction of a bug in the `AbstractDistribOutput` and `DietDistribOutput` (`cpt` increment not initialized in the right place).
 - Correction of a bug in the extraction of OutMortality (problem due to hashmap init).
