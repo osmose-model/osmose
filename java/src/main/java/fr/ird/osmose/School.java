@@ -173,6 +173,7 @@ public class School extends AbstractSchool {
     private double sizeMature = 0;
     private boolean isMature = false;
     
+    private double e_net_faced; // mean net energy faced during life
     
 ///////////////
 // Constructors
@@ -408,7 +409,7 @@ public class School extends AbstractSchool {
     /**
      * The weight of the fish (not the whole school), in tonne.
      *
-     * @return the weight on the fish, in tonne.
+     * @return the weight of the fish, in tonne.
      */
     @Override
     public float getWeight() {
@@ -425,6 +426,14 @@ public class School extends AbstractSchool {
     public void out() {
         out = true;
         setOffGrid();
+    }
+    
+    public double get_enet_faced() {
+        return this.e_net_faced;
+    }
+
+    public void set_enet_faced(double enet_faced) {
+        this.e_net_faced = enet_faced;
     }
 
     /**

@@ -4,6 +4,8 @@
 
 ### New features
 
+- Adding new parameter in bioenergetic module (assimilation)
+- Use of life-integrated Enet in the computation of reproduction instead of instantaneous Enet, in order to prevent irrealistic growth.
 - Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
 - Adding the possibility to use plankton variables of dims (time, lat, lon) to init mask variable. Masked if variable is NaN or <= 0
 - Adding the possibility to use `ByClassTimeSeries` for proportion in background species. 
@@ -20,6 +22,7 @@
 
 ### Bugfix
 
+- Correction of a bug in the saving of ingestion (egross was saved instead of energy)
 - Correction of a bug in the saving of fisheries: mean instead of cumulated sum was saved. Revealed by Ghassen.
 - Correction of a bug in the `AbstractDistribOutput` and `DietDistribOutput` (`cpt` increment not initialized in the right place).
 - Correction of a bug in the extraction of OutMortality (problem due to hashmap init).

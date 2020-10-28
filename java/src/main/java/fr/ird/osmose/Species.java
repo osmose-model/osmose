@@ -182,7 +182,7 @@ public class Species implements ISpecies {
         } else {
             // if no parameter exists, species become larva when ageDt = 1
             this.lar2ad_thres = 1;
-        }       
+        }
     }
     
     public int getThresAge() {
