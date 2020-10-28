@@ -65,6 +65,8 @@ public class EnergyBudget extends AbstractProcess {
      */
     private double[] r;
     private double[] larvaePredationRateBioen;
+    
+       private double[] assimilation;
 
     public EnergyBudget(int rank) throws IOException {
 
@@ -130,6 +132,15 @@ public class EnergyBudget extends AbstractProcess {
             larvaePredationRateBioen[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
+        
+        assimilation = new double[nSpecies];
+        cpt = 0;
+        for (int i : getConfiguration().getFocalIndex()) {
+            key = String.format("bioen.assimilation.sp%d", i);
+            assimilation[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
+        }
+        
     }
 
     /**
@@ -193,8 +204,8 @@ public class EnergyBudget extends AbstractProcess {
      * @return
      */
     public void getEgross(School school) {
-        school.setEGross(school.getIngestion() * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
-        //System.out.println(school.getIngestion() + ", " + temp_function.get_phiT(school));
+        int ispec = school.getGlobalSpeciesIndex();
+        school.setEGross(school.getIngestion() * this.assimilation[ispec] * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
     }
 
     /**
