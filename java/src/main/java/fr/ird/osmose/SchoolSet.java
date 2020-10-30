@@ -89,15 +89,15 @@ public class SchoolSet extends OsmoseLinker {
      * Array of boolean that indicates whether the list of schools per species
      * has changed.
      */
-    private final HashMap<Integer, Boolean> hasSpeciesChanged;
+    private final boolean[] hasSpeciesChanged;
 
     SchoolSet() {
         schoolset = new FilteredSet();
         schoolBySpecies = new HashMap();
         schoolByCell = new HashMap();
-        hasSpeciesChanged = new HashMap();
-        for (int i : getConfiguration().getFocalIndex()) {
-            hasSpeciesChanged.put(i, true);
+        hasSpeciesChanged = new boolean[getConfiguration().getNSpecies()];
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            hasSpeciesChanged[i] = true;
         }
     }
 
@@ -125,7 +125,7 @@ public class SchoolSet extends OsmoseLinker {
     /**
      * Remove dead schools from the set
      */
-     public void removeDeadSchools() {
+    public void removeDeadSchools() {
 
         Iterator<School> it = schoolset.iterator();
         while (it.hasNext()) {
@@ -133,8 +133,8 @@ public class SchoolSet extends OsmoseLinker {
                 it.remove();
             }
         }
-        for (int i : getConfiguration().getFocalIndex()) {
-            hasSpeciesChanged.put(i, true);
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            hasSpeciesChanged[i] = true;
         }
     }
 
@@ -156,11 +156,11 @@ public class SchoolSet extends OsmoseLinker {
      * @return a list of schools of this {@code species}
      */
     public List<School> getSchools(Species species, boolean update) {
-        if (update || hasSpeciesChanged.get(species.getSpeciesIndex())) {
-            schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getSpeciesIndex()), new AliveSchoolFilter()}));
-            hasSpeciesChanged.put(species.getSpeciesIndex(), false);
+        if (update || hasSpeciesChanged[species.getGlobalSpeciesIndex()]) {
+            schoolBySpecies.put(species.getGlobalSpeciesIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getGlobalSpeciesIndex()), new AliveSchoolFilter()}));
+            hasSpeciesChanged[species.getGlobalSpeciesIndex()] = false;
         }
-        return schoolBySpecies.get(species.getSpeciesIndex());
+        return schoolBySpecies.get(species.getGlobalSpeciesIndex());
     }
 
     /**
@@ -182,11 +182,11 @@ public class SchoolSet extends OsmoseLinker {
      * @return a list of schools of this {@code species}
      */
     public List<School> getSchoolsAll(Species species, boolean update) {
-        if (update || hasSpeciesChanged.get(species.getSpeciesIndex())) {
-            schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getSpeciesIndex())}));
-            hasSpeciesChanged.put(species.getSpeciesIndex(), false);
+        if (update || hasSpeciesChanged[species.getGlobalSpeciesIndex()]) {
+            schoolBySpecies.put(species.getGlobalSpeciesIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getGlobalSpeciesIndex())}));
+            hasSpeciesChanged[species.getGlobalSpeciesIndex()] = false;
         }
-        return schoolBySpecies.get(species.getSpeciesIndex());
+        return schoolBySpecies.get(species.getGlobalSpeciesIndex());
     }
 
     /**

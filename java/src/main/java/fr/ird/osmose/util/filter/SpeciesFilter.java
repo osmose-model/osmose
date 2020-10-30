@@ -57,6 +57,6 @@ import fr.ird.osmose.School;
 
         @Override
         public boolean accept(School school) {
-            return speciesIndex == school.getSpeciesIndex();
+            return speciesIndex == school.getGlobalSpeciesIndex();
         }
     }
