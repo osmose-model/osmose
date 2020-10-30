@@ -85,8 +85,8 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
      * Array containing the fisheries catches by species and by fisheries.
      * Output has (species, fisheries) dimensions.
      */
-    private HashMap<Integer, float[]> biomass;
-    private HashMap<Integer, float[]> discards;
+    private double[][] biomass;
+    private double[][] discards;
 
     public FisheryOutput(int rank) {
         super(rank);
@@ -98,17 +98,10 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
 
         // initializes the number of fisheries
         nFishery = getConfiguration().getNFishery();
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+        biomass = new double[nSpecies][nFishery];
+        discards = new double[nSpecies][nFishery];
 
-        biomass = new HashMap();
-        for (int i : getConfiguration().getPredatorIndex()) {
-            biomass.put(i, new float[nFishery]);
-        }
-
-        discards = new HashMap();
-        for (int i : getConfiguration().getPredatorIndex()) {
-            discards.put(i, new float[nFishery]);
-        }
-        
         /*
          * Create NetCDF file
          */
@@ -186,41 +179,30 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
      */
     @Override
     public void reset() {
-
-        for (int i : getConfiguration().getPredatorIndex()) {
-            biomass.put(i, new float[nFishery]);
-        }
-
-        for (int i : getConfiguration().getPredatorIndex()) {
-            discards.put(i, new float[nFishery]);
-        }
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+        biomass = new double[nSpecies][nFishery];
+        discards = new double[nSpecies][nFishery];
     }
 
     @Override
     public void update() {
 
         getSchoolSet().getAliveSchools().forEach((school) -> {
-            int iSpecies = school.getSpeciesIndex();
+            int iSpecies = school.getGlobalSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                double value = biomass.get(iSpecies)[iFishery] + school.getFishedBiomass(iFishery);
-                biomass.get(iSpecies)[iFishery] = (float) value;
-                                
-                value = discards.get(iSpecies)[iFishery] + school.getDiscardedBiomass(iFishery);
-                discards.get(iSpecies)[iFishery] = (float) value;
+                biomass[iSpecies][iFishery] += school.getFishedBiomass(iFishery);                                
+                discards[iSpecies][iFishery] += school.getDiscardedBiomass(iFishery);
             }
         });
 
         this.getBkgSchoolSet().getAllSchools().forEach((bkgSch) -> {
-            int iSpecies = bkgSch.getSpeciesIndex();
+            int iSpecies = bkgSch.getGlobalSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                double value = biomass.get(iSpecies)[iFishery] + bkgSch.getFishedBiomass(iFishery);
-                biomass.get(iSpecies)[iFishery] = (float) value;
-                
-                value = discards.get(iSpecies)[iFishery] + bkgSch.getDiscardedBiomass(iFishery);
-                discards.get(iSpecies)[iFishery] = (float) value;
-                
+                biomass[iSpecies][iFishery] += bkgSch.getFishedBiomass(iFishery);
+                discards[iSpecies][iFishery] += bkgSch.getDiscardedBiomass(iFishery);
             }
-        });
+        }
+        );
 
     }
 
@@ -233,10 +215,10 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
         ArrayFloat.D3 arrDiscards = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
         int cpt = 0;
-        for (int iSpecies : getConfiguration().getPredatorIndex()) {
+        for (int iSpecies = 0; iSpecies < nSpecies + nBackground; iSpecies++) {
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                arrBiomass.set(0, cpt, iFishery, biomass.get(iSpecies)[iFishery]);
-                arrDiscards.set(0, cpt, iFishery, discards.get(iSpecies)[iFishery]);
+                arrBiomass.set(0, iSpecies, iFishery, (float) biomass[iSpecies][iFishery]);
+                arrDiscards.set(0, iSpecies, iFishery, (float) discards[iSpecies][iFishery]);
             }
             cpt++;
         }
@@ -280,13 +262,15 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
     private String getSpeciesNames() {
         StringBuilder strBuild = new StringBuilder();
 
+        int cpt = 0;
         for (int i : this.getConfiguration().getFocalIndex()) {
-            strBuild.append(getSpecies(i).getName());
+            strBuild.append(getSpecies(cpt++).getName());
             strBuild.append(", ");
         }
-
+        
+        cpt = 0;
         for (int i : this.getConfiguration().getBackgroundIndex()) {
-            strBuild.append(getBkgSpecies(i).getName());
+            strBuild.append(getBkgSpecies(cpt++).getName());
             strBuild.append(", ");
         }
 
