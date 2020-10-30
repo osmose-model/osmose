@@ -73,9 +73,6 @@ public class ForagingMortality extends AbstractMortality {
     @Override
     public double getRate(School school) {
 
-        // This mortality increase with individual ingestion --> division by abundance
-//        return k_for[school.getSpeciesIndex()]*school.getIngestion()*1000000 / school.getInstantaneousAbundance()/(Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
-        // calcul de la mortalité en lien avec Imax
         double output = 0;
         if (this.getConfiguration().isGeneticEnabled()) {
             String key = "imax";

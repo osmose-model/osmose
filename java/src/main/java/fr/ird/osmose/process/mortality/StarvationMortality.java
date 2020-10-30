@@ -61,9 +61,11 @@ public class StarvationMortality extends AbstractMortality {
         int nspec = getNSpecies();
         starvMaxRate = new double[nspec];
         criticalPredSuccess = new double[nspec];
-        for (int i = 0; i < nspec; i++) {
-            starvMaxRate[i] = getConfiguration().getDouble("mortality.starvation.rate.max.sp" + i);
-            criticalPredSuccess[i] = getConfiguration().getDouble("predation.efficiency.critical.sp" + i);
+        int cpt = 0;
+        for (int i : getFocalIndex()) {
+            starvMaxRate[cpt] = getConfiguration().getDouble("mortality.starvation.rate.max.sp" + i);
+            criticalPredSuccess[cpt] = getConfiguration().getDouble("predation.efficiency.critical.sp" + i);
+            cpt++;
         }
     }
 
@@ -75,7 +77,7 @@ public class StarvationMortality extends AbstractMortality {
             return 0.d;
         }
 
-        int iSpec = school.getSpeciesIndex();
+        int iSpec = school.getGlobalSpeciesIndex();
         // Compute the predation mortality rate
         double mortalityRate = 0;
         if (school.getPredSuccessRate() <= criticalPredSuccess[iSpec]) {

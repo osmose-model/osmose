@@ -316,7 +316,7 @@ public class EnergyBudget extends AbstractProcess {
 //        school.setKappa(kappa);
 //    }
     public void computeEnetFaced(School school) {
-        int ispec = school.getSpeciesIndex();
+        int ispec = school.getGlobalSpeciesIndex();
         double output;
         if (school.getAgeDt() == 0) {
 
