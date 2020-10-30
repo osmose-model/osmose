@@ -140,9 +140,10 @@ public class OutputManager extends SimulationLinker {
 
         cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
         cutoffAge = new float[getNSpecies()];
+        int cpt = 0;
         if (cutoff) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+            for (int iSpec : this.getFocalIndex()) {
+                cutoffAge[cpt++] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
             }
         }
 
@@ -388,7 +389,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.size.enabled")) {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanSize",
                     "Mean size of fish species in cm, weighted by fish numbers, and " + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()],
+                    school -> school.getAge() >= cutoffAge[school.getGlobalSpeciesIndex()],
                     school -> school.getLength(),
                     school -> school.getInstantaneousAbundance()
             ));
@@ -397,7 +398,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.weight.enabled")) {
             outputs.add(new WeightedSpeciesOutput(rank, "SizeIndicators", "meanWeight",
                     "Mean weight of fish species in kilogram, weighted by fish numbers, and " + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()],
+                    school -> school.getAge() >= cutoffAge[school.getGlobalSpeciesIndex()],
                     school -> 1E-3 * school.getWeight(),
                     school -> school.getInstantaneousAbundance()
             ));
@@ -453,7 +454,7 @@ public class OutputManager extends SimulationLinker {
             getSimulation().requestPreyRecord();
             outputs.add(new WeightedSpeciesOutput(rank, "Trophic", "meanTL",
                     "Mean Trophic Level of fish species, weighted by fish biomass, and " + (cutoff ? "excluding" : "including") + " first ages specified in input",
-                    school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()],
+                    school -> school.getAge() >= cutoffAge[school.getGlobalSpeciesIndex()],
                     school -> school.getTrophicLevel(),
                     school -> school.getInstantaneousBiomass()
             ));
