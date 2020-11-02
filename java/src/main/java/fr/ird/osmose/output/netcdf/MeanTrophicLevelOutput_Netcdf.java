@@ -72,7 +72,7 @@ public class MeanTrophicLevelOutput_Netcdf extends AbstractOutput_Netcdf {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             if (include(school)) {
-                int i = school.getFileSpeciesIndex();
+                int i = school.getSpeciesIndex();
                 meanTL[i] += school.getInstantaneousBiomass() * school.getTrophicLevel();
                 biomass[i] += school.getInstantaneousBiomass();
             }
