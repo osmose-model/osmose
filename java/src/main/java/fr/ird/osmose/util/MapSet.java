@@ -301,7 +301,7 @@ public class MapSet extends OsmoseLinker {
             String key = prefix + ".species" + ".map" + imap;
             Species species = getSpecies(getConfiguration().getString(key));
             if (null != species) {
-                if (species.getSpeciesIndex() == iSpecies) {
+                if (species.getFileSpeciesIndex() == iSpecies) {
                     mapNumber.add(imap);
                 }
             } else {

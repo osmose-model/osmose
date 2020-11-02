@@ -116,7 +116,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
 
     public void init() {
         // Get the age of recruitment
-        int iSpecies = this.species.getSpeciesIndex();
+        int iSpecies = this.species.getFileSpeciesIndex();
         if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpecies)) {
             float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpecies);
             recruitmentAge = Math.round(age * getConfiguration().getNStepYear());

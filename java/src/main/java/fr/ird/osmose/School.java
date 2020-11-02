@@ -233,7 +233,7 @@ public class School extends AbstractSchool {
      * @param trophicLevel, the trophic level of the fish
      */
     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
-        this.index = species.getSpeciesIndex();
+        this.index = species.getFileSpeciesIndex();
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
@@ -857,7 +857,7 @@ public class School extends AbstractSchool {
      */
     @Override
     public int getSpeciesIndex() {
-        return this.species.getGlobalSpeciesIndex();
+        return this.species.getSpeciesIndex();
     }
 
     /**

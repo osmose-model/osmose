@@ -207,7 +207,7 @@ public class ReproductionProcess extends AbstractProcess {
 
     protected double getSeason(int iStepSimu, Species species) {
 
-        int iSpec = species.getGlobalSpeciesIndex();
+        int iSpec = species.getSpeciesIndex();
         int length = seasonSpawning[iSpec].length;
         int iStep;
         if (length > getConfiguration().getNStepYear()) {

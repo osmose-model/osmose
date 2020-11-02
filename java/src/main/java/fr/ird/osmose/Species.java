@@ -237,7 +237,7 @@ public class Species implements ISpecies {
      *
      * @return the index of the species
      */
-    public int getSpeciesIndex() {
+    public int getFileSpeciesIndex() {
         return index;
     }
     
@@ -245,7 +245,7 @@ public class Species implements ISpecies {
      * 
      * @return 
      */
-    public int getGlobalSpeciesIndex() { 
+    public int getSpeciesIndex() { 
         return globalindex;
     }
     

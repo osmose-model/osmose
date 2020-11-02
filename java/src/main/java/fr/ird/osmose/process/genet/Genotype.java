@@ -75,7 +75,7 @@ public class Genotype extends SimulationLinker {
 
         super(rank);
         genotype = new ArrayList<>();
-        this.spec_index = species.getSpeciesIndex();
+        this.spec_index = species.getFileSpeciesIndex();
 
     }
 

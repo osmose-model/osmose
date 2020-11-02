@@ -144,7 +144,7 @@ public class GrowthProcess extends AbstractProcess {
     public void run() {
         for (School school : getSchoolSet().getAliveSchools()) {
             Species species = school.getSpecies();
-            int i = species.getGlobalSpeciesIndex();
+            int i = species.getSpeciesIndex();
             int age = school.getAgeDt();
             if ((age == 0) || school.isUnlocated()) {
                 // Linear growth for eggs and migrating schools

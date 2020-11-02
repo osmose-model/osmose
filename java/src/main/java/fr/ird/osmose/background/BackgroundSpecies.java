@@ -200,7 +200,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      *
      * @return
      */
-    public int getSpeciesIndex() {
+    public int getFileSpeciesIndex() {
         return this.index;
     }
 
@@ -218,7 +218,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     }
     
     @Override
-    public int getGlobalSpeciesIndex() {
+    public int getSpeciesIndex() {
         return this.getGlobalSpeciesIndex(true);
     }
     

@@ -214,7 +214,7 @@ public class ResourceSpecies implements ISpecies {
      * @return the index of the resource group
      */
     @Override
-    public int getSpeciesIndex() {
+    public int getFileSpeciesIndex() {
         return index;
     }
     
@@ -224,7 +224,7 @@ public class ResourceSpecies implements ISpecies {
      * @return the index of the resource group
      */
     @Override
-    public int getGlobalSpeciesIndex() {
+    public int getSpeciesIndex() {
         return getGlobalSpeciesIndex(true);
     }
     

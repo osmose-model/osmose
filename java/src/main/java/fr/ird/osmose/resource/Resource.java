@@ -83,7 +83,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
     public Resource(ResourceSpecies species, Cell cell) {
         this.species = species;
         this.cell = cell;
-        this.index = species.getSpeciesIndex();
+        this.index = species.getFileSpeciesIndex();
     }
 
     /**
@@ -173,7 +173,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
 
     @Override
     public int getFileSpeciesIndex() {
-        return this.species.getSpeciesIndex();
+        return this.species.getFileSpeciesIndex();
     }
 
     @Override
@@ -248,7 +248,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
 
     @Override
     public int getSpeciesIndex() {
-        return this.species.getGlobalSpeciesIndex();
+        return this.species.getSpeciesIndex();
     }
     
     @Override

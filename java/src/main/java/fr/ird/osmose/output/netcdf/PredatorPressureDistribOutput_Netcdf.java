@@ -92,7 +92,7 @@ public class PredatorPressureDistribOutput_Netcdf extends AbstractDistribOutput_
 
         for (School predator : getSchoolSet().getAliveSchools()) {
             for (Prey prey : predator.getPreys()) {
-                if (prey.getFileSpeciesIndex() == species.getSpeciesIndex()) {
+                if (prey.getFileSpeciesIndex() == species.getFileSpeciesIndex()) {
                     int classPrey = getClass(prey);
                     if (classPrey >= 0) {
                         values[predator.getFileSpeciesIndex()][classPrey] += prey.getBiomass();

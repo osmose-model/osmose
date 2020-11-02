@@ -60,7 +60,7 @@ public abstract class AbstractMortalitySpecies extends AbstractMortality {
     public AbstractMortalitySpecies(int rank, Species species) {
         super(rank);
         this.species = species;
-        this.indexSpecies = species.getSpeciesIndex();
+        this.indexSpecies = species.getFileSpeciesIndex();
     }
 
     public int getIndexSpecies() {
