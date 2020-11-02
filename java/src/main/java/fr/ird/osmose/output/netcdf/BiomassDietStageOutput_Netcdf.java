@@ -112,7 +112,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void initStep() {
         for (School school : getSchoolSet().getPresentSchools()) {
-            biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
+            biomassStage[school.getFileSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         }
         int nSpec = getNSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies();

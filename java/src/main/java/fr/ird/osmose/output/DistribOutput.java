@@ -126,7 +126,7 @@ public class DistribOutput extends AbstractOutput {
                 for (AbstractOutputRegion region : getOutputRegions()) {
                     if (region.contains(timeStep, school)) {
                         double sel = region.getSelectivity(timeStep, school);
-                        values.get(school.getSpeciesIndex())[irg][getClass(school)] += sel * var;
+                        values.get(school.getFileSpeciesIndex())[irg][getClass(school)] += sel * var;
                     }
                     irg++;
                 }

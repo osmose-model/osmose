@@ -156,7 +156,7 @@ public class FishingGear extends AbstractMortality {
             return 0.0;
         }
 
-        int speciesIndex = school.getGlobalSpeciesIndex();
+        int speciesIndex = school.getSpeciesIndex();
 
         double speciesCatchability = this.catchability[speciesIndex];
         if (speciesCatchability == 0.d) {
@@ -183,7 +183,7 @@ public class FishingGear extends AbstractMortality {
      * @return
      */
     public double getDiscardRate(AbstractSchool school) {
-        int speciesIndex = school.getGlobalSpeciesIndex();
+        int speciesIndex = school.getSpeciesIndex();
         return this.discards[speciesIndex];
     }
 

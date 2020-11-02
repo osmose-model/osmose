@@ -384,7 +384,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * @return the index of the species
      */
     @Override
-    public int getSpeciesIndex() {
+    public int getFileSpeciesIndex() {
         return index;
     }
     

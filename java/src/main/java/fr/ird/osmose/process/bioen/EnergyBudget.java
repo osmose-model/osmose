@@ -183,7 +183,7 @@ public class EnergyBudget extends AbstractProcess {
      */
     public void getMaintenance(School school) {
 
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
 
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
@@ -204,7 +204,7 @@ public class EnergyBudget extends AbstractProcess {
      * @return
      */
     public void getEgross(School school) {
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
         school.setEGross(school.getIngestion() * this.assimilation[ispec] * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
     }
 
@@ -221,7 +221,7 @@ public class EnergyBudget extends AbstractProcess {
             return 1;
         }
 
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
 
         String key = "m0";
         double m0_temp = school.existsTrait(key) ? school.getTrait(key) : m0[ispec];
@@ -292,7 +292,7 @@ public class EnergyBudget extends AbstractProcess {
      * @throws java.lang.Exception
      */
     public void getKappa(School school) throws Exception {
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
 
         String key = "r";
         double r_temp = school.existsTrait(key) ? school.getTrait(key) : r[ispec];
@@ -307,7 +307,7 @@ public class EnergyBudget extends AbstractProcess {
     }
 
 //    public void getKappa(School school) {
-//        // int ispec = school.getSpeciesIndex();
+//        // int ispec = school.getFileSpeciesIndex();
 //        // If the organism is imature, all the net energy goes to the somatic growth.
 //        // else, only a kappa fraction goes to somatic growth
 //        double kappa = (!school.isMature()) ? 1 : 0; //Function in two parts according to maturity state
@@ -316,7 +316,7 @@ public class EnergyBudget extends AbstractProcess {
 //        school.setKappa(kappa);
 //    }
     public void computeEnetFaced(School school) {
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
         double output;
         if (school.getAgeDt() == 0) {
 

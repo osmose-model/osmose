@@ -135,7 +135,7 @@ public class Prey implements IMarineOrganism {
      * @return the index of the prey
      */
     @Override
-    public int getSpeciesIndex() {
+    public int getFileSpeciesIndex() {
         return index;
     }
 
@@ -234,12 +234,12 @@ public class Prey implements IMarineOrganism {
     }
 
     @Override
-    public int getGlobalSpeciesIndex() {
+    public int getSpeciesIndex() {
         return index;
     }
 
     @Override
-    public int getGlobalSpeciesIndex(boolean applyOff) {
+    public int getSpeciesIndex(boolean applyOff) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

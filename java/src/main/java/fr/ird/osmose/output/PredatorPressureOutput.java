@@ -104,10 +104,10 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int iSpec = school.getGlobalSpeciesIndex();
+            int iSpec = school.getSpeciesIndex();
             int stage = dietOutputStage.getStage(school);
             for (Prey prey : school.getPreys()) {
-                int iPrey = prey.getGlobalSpeciesIndex();
+                int iPrey = prey.getSpeciesIndex();
                 predatorPressure[iSpec][stage][iPrey][dietOutputStage.getStage(prey)] += prey.getBiomass();
             }
         }

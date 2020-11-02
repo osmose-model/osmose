@@ -90,7 +90,7 @@ public class SpeciesOutput extends AbstractOutput {
                     for (AbstractOutputRegion region : getOutputRegions()) {
                         if (region.contains(timeStep, school)) {
                             double select = region.getSelectivity(timeStep, school);
-                            value.get(school.getSpeciesIndex())[irg] += select * schoolVariable.getVariable(school);
+                            value.get(school.getFileSpeciesIndex())[irg] += select * schoolVariable.getVariable(school);
                         }
                         irg++;
                     }

@@ -83,7 +83,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
         // loop over all the schools to compute 
         for (School school : getSchoolSet().getSchools()) {
 
-            int i = school.getGlobalSpeciesIndex();
+            int i = school.getSpeciesIndex();
             if (school.isMature()) {
                SSB[i] += school.getInstantaneousBiomass();
             }

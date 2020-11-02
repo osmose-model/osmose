@@ -71,7 +71,7 @@ public class YieldNOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            yieldN[school.getSpeciesIndex()] += school.getNdead(MortalityCause.FISHING);
+            yieldN[school.getFileSpeciesIndex()] += school.getNdead(MortalityCause.FISHING);
         }
     }
 

@@ -73,7 +73,7 @@ public class SpatialAbundanceOutput extends AbstractSpatialOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        int iSpec = school.getGlobalSpeciesIndex();
+                        int iSpec = school.getSpeciesIndex();
                         if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
                             continue;
                         }

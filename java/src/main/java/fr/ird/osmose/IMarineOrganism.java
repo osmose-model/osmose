@@ -74,10 +74,10 @@ public interface IMarineOrganism {
      *
      * @return the index of the species.
      */
-    public int getSpeciesIndex();
+    public int getFileSpeciesIndex();
 
-    public int getGlobalSpeciesIndex();
-    public int getGlobalSpeciesIndex(boolean applyOff);
+    public int getSpeciesIndex();
+    public int getSpeciesIndex(boolean applyOff);
     
     /**
      * Age of the organism in year.

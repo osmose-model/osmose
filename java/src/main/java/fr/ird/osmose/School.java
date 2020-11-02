@@ -856,7 +856,7 @@ public class School extends AbstractSchool {
      * @return the index of the species
      */
     @Override
-    public int getGlobalSpeciesIndex() {
+    public int getSpeciesIndex() {
         return this.species.getGlobalSpeciesIndex();
     }
 
@@ -866,7 +866,7 @@ public class School extends AbstractSchool {
      * @return the index of the species
      */
     @Override
-    public int getGlobalSpeciesIndex(boolean off) {
+    public int getSpeciesIndex(boolean off) {
         return this.species.getGlobalSpeciesIndex(off);
     }
 

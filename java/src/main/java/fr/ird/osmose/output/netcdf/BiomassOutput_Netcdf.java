@@ -70,7 +70,7 @@ public class BiomassOutput_Netcdf extends AbstractOutput_Netcdf {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             if (include(school)) {
-                biomass[school.getSpeciesIndex()] += school.getInstantaneousBiomass();
+                biomass[school.getFileSpeciesIndex()] += school.getInstantaneousBiomass();
             }
         }
     }

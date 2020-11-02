@@ -211,7 +211,7 @@ public class PredationMortality extends AbstractMortality {
 
     private double[] getPercentResource(IAggregation predator) {
         double[] percentResource = new double[this.getConfiguration().getNRscSpecies()];
-        int iPred = predator.getGlobalSpeciesIndex();
+        int iPred = predator.getSpeciesIndex();
         int iStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
@@ -236,7 +236,7 @@ public class PredationMortality extends AbstractMortality {
         if (getConfiguration().isBioenEnabled()) {
             error("The getMaxPredationRate method of PredationMortality not suitable in Osmose-PHYSIO", new Exception());
         }
-        return predationRate[predator.getGlobalSpeciesIndex()] / getConfiguration().getNStepYear();
+        return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
     }
 
     /**
@@ -254,14 +254,14 @@ public class PredationMortality extends AbstractMortality {
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         double[] accessibility = new double[preys.size()];
-        int iSpecPred = predator.getGlobalSpeciesIndex();
+        int iSpecPred = predator.getSpeciesIndex();
         int iPredPreyStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax[iSpecPred][iPredPreyStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iSpecPred][iPredPreyStage];
         double[] percentResource = getPercentResource(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
-            int iSpecPrey = preys.get(iPrey).getGlobalSpeciesIndex(false);
+            int iSpecPrey = preys.get(iPrey).getSpeciesIndex(false);
             IAggregation prey = (IAggregation) preys.get(iPrey);
             int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
             // The prey is an other school

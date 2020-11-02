@@ -71,7 +71,7 @@ public class NDeadSchoolOutput extends AbstractOutput {
         getSchoolSet().getSchools().stream()
                 .filter(school -> !school.isAlive())
                 .forEach(school -> {
-                    nDeadSchool[school.getSpeciesIndex()] += 1;
+                    nDeadSchool[school.getFileSpeciesIndex()] += 1;
                 });
     }
 

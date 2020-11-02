@@ -135,7 +135,7 @@ public class BackgroundSchool extends AbstractSchool {
     }
 
     @Override
-    public int getSpeciesIndex() {
+    public int getFileSpeciesIndex() {
         return this.bkgSpecies.getSpeciesIndex();
     }
     
@@ -199,7 +199,7 @@ public class BackgroundSchool extends AbstractSchool {
      * @return the index of the species
      */
     @Override
-    public int getGlobalSpeciesIndex() {
+    public int getSpeciesIndex() {
         return this.bkgSpecies.getGlobalSpeciesIndex();
     }
 
@@ -209,7 +209,7 @@ public class BackgroundSchool extends AbstractSchool {
      * @return the index of the species
      */
     @Override
-    public int getGlobalSpeciesIndex(boolean off) {
+    public int getSpeciesIndex(boolean off) {
         return this.bkgSpecies.getGlobalSpeciesIndex(off);
     }
 }

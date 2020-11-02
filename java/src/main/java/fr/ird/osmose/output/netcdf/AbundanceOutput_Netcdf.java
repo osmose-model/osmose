@@ -77,7 +77,7 @@ public class AbundanceOutput_Netcdf extends AbstractOutput_Netcdf {
 
         for (School school : getSchoolSet().getAliveSchools()) {
             if (include(school)) {
-                abundance[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+                abundance[school.getFileSpeciesIndex()] += school.getInstantaneousAbundance();
             }
         }
     }

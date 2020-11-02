@@ -71,10 +71,10 @@ public class PredSuccessOutput_Netcdf extends AbstractOutput_Netcdf {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
 //            if (school.getPredSuccessRate() >= 0.57) {
-//                predSuccess[school.getSpeciesIndex()] += 1;
+//                predSuccess[school.getFileSpeciesIndex()] += 1;
 //            }
-            predSuccess[school.getSpeciesIndex()] += school.getPredSuccessRate();
-            nschool[school.getSpeciesIndex()] += 1;
+            predSuccess[school.getFileSpeciesIndex()] += school.getPredSuccessRate();
+            nschool[school.getFileSpeciesIndex()] += 1;
         }
     }
 

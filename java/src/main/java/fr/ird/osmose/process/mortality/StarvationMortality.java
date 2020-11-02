@@ -77,7 +77,7 @@ public class StarvationMortality extends AbstractMortality {
             return 0.d;
         }
 
-        int iSpec = school.getGlobalSpeciesIndex();
+        int iSpec = school.getSpeciesIndex();
         // Compute the predation mortality rate
         double mortalityRate = 0;
         if (school.getPredSuccessRate() <= criticalPredSuccess[iSpec]) {

@@ -85,7 +85,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
         double[][] nDead = new double[nCause][getNClass()];
         // Loop on all the schools to be sure we don't discard dead schools
         for (School school : getSchoolSet().getSchools()) {
-            if (school.getSpeciesIndex() != species.getSpeciesIndex()) {
+            if (school.getFileSpeciesIndex() != species.getSpeciesIndex()) {
                 continue;
             }
             iClass = getClass(school);

@@ -188,7 +188,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
     public void update() {
 
         getSchoolSet().getAliveSchools().forEach((school) -> {
-            int iSpecies = school.getGlobalSpeciesIndex();
+            int iSpecies = school.getSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
                 biomass[iSpecies][iFishery] += school.getFishedBiomass(iFishery);                                
                 discards[iSpecies][iFishery] += school.getDiscardedBiomass(iFishery);
@@ -196,7 +196,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         });
 
         this.getBkgSchoolSet().getAllSchools().forEach((bkgSch) -> {
-            int iSpecies = bkgSch.getGlobalSpeciesIndex();
+            int iSpecies = bkgSch.getSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
                 biomass[iSpecies][iFishery] += bkgSch.getFishedBiomass(iFishery);
                 discards[iSpecies][iFishery] += bkgSch.getDiscardedBiomass(iFishery);

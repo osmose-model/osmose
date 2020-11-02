@@ -292,7 +292,7 @@ public class MortalityProcess extends AbstractProcess {
         // Init the biomass of background species by using the ResourceForcing class
         for (List<BackgroundSchool> bkgSchoolList : this.getBkgSchoolSet().getValues()) {    // loop over the cells
             for (BackgroundSchool bkg : bkgSchoolList) {    // loop over the resources
-                int ibkg = bkg.getGlobalSpeciesIndex() - nSpecies;   // bkg index: [0, nbkg - 1]
+                int ibkg = bkg.getSpeciesIndex() - nSpecies;   // bkg index: [0, nbkg - 1]
                 double accessibleBiom = getResourceForcing(ibkg).getBiomass(bkg.getCell());
                 // note that here, the multiplication by proportion value is made in the setbiomass method
                 bkg.setBiomass(accessibleBiom, iStepSimu);
@@ -304,7 +304,7 @@ public class MortalityProcess extends AbstractProcess {
         int offset = this.getNBkgSpecies();
         for (List<Resource> resources : resourcesSet.values()) {    // loop over the cells
             for (Resource resource : resources) {    // loop over the resources
-                int iRsc = resource.getGlobalSpeciesIndex() - nSpecies - nBkg;  // [0, nrsc - 1]
+                int iRsc = resource.getSpeciesIndex() - nSpecies - nBkg;  // [0, nrsc - 1]
                 double accessibleBiom = getConfiguration().getResourceSpecies(iRsc).getAccessibility(iStepSimu)
                         * getResourceForcing(iRsc + offset).getBiomass(resource.getCell());
                 resource.setBiomass(accessibleBiom);
@@ -498,7 +498,7 @@ public class MortalityProcess extends AbstractProcess {
                                 IAggregation prey = preys.get(ipr);
                                 nDead = prey.biom2abd(preyUpon[ipr]);   // total biomass that has been eaten
                                 prey.incrementNdead(MortalityCause.PREDATION, nDead);
-                                predator.preyedUpon(prey.getGlobalSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
+                                predator.preyedUpon(prey.getSpeciesIndex(), prey.getTrophicLevel(), prey.getAge(), prey.getLength(), preyUpon[ipr], keepRecord);
                             }
                         }
                         break;
@@ -576,7 +576,7 @@ public class MortalityProcess extends AbstractProcess {
                             school = schools.get(seqFish[i]);
 
                             // Osmose 3 fishing Mortality
-                            switch (fishingMortality.getType(school.getGlobalSpeciesIndex())) {
+                            switch (fishingMortality.getType(school.getSpeciesIndex())) {
                                 case RATE:
                                     double F = fishingMortality.getRate(school) / subdt;
                                     nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
@@ -736,7 +736,7 @@ public class MortalityProcess extends AbstractProcess {
 //     * @return
 //     */
 //    private List<BackgroundSchool> getBackgroundSchool(Cell cell) {
-//        if (!bkgSet.containsKey(cell.getSpeciesIndex())) {
+//        if (!bkgSet.containsKey(cell.getFileSpeciesIndex())) {
 //            // If the cell does not contain any background school
 //            // initialisation of a list of cells.
 //            List<BackgroundSchool> output = new ArrayList<>();
@@ -754,9 +754,9 @@ public class MortalityProcess extends AbstractProcess {
 //                }   // end of iClass loop
 //            }   // end of bkg loop
 //            // add the list to the hash map
-//            bkgSet.put(cell.getSpeciesIndex(), output);
+//            bkgSet.put(cell.getFileSpeciesIndex(), output);
 //        }   // end of contains test
-//        return bkgSet.get(cell.getSpeciesIndex());
+//        return bkgSet.get(cell.getFileSpeciesIndex());
 //    }   // end of function
     /**
      * Recovers the list of background schools for the current cell. If the

@@ -160,7 +160,7 @@ public class GrowthProcess extends AbstractProcess {
 
     private void grow(School school, double minDelta, double maxDelta) {
 
-        int iSpec = school.getGlobalSpeciesIndex();
+        int iSpec = school.getSpeciesIndex();
         //calculation of lengths according to predation efficiency
         if (school.getPredSuccessRate() >= criticalPredSuccess[iSpec]) {
                 double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));

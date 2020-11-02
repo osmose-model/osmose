@@ -73,7 +73,7 @@ public class AbundanceOutput_age1 extends AbstractOutput {
         for (School school : getSchoolSet().getAliveSchools()) {
             ageSchool = school.getAgeDt();
             if (ageSchool == 24) {
-                abund_age1[school.getSpeciesIndex()] += school.getInstantaneousAbundance();
+                abund_age1[school.getFileSpeciesIndex()] += school.getInstantaneousAbundance();
             }
         }
      }

@@ -68,7 +68,7 @@ public class WeightedDistribOutput extends DistribOutput {
         int timeStep = this.getSimulation().getIndexTimeSimu();
         getSchoolSet().getAliveSchools().forEach(school -> {
             int classSchool = getClass(school);
-            int iSpec = school.getSpeciesIndex();
+            int iSpec = school.getFileSpeciesIndex();
             if (classSchool >= 0) {
                 double w = weight.getVariable(school);
                 double wvar = w * variable.getVariable(school);

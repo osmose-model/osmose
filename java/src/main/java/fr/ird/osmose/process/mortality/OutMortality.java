@@ -75,6 +75,6 @@ public class OutMortality extends AbstractMortality {
 
     @Override
     public double getRate(School school) {
-        return Zout[school.getGlobalSpeciesIndex()];
+        return Zout[school.getSpeciesIndex()];
     }
 }

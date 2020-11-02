@@ -102,7 +102,7 @@ public class WeightedSpeciesOutput extends AbstractOutput {
                     double w = weight.getVariable(school);
                     double wvar = variable.getVariable(school) * w;
                     int irg = 0;
-                    int iSpec = school.getGlobalSpeciesIndex();
+                    int iSpec = school.getSpeciesIndex();
                     for (AbstractOutputRegion region : getOutputRegions()) {
                         if (region.contains(timeStep, school)) {
                             numerator[iSpec][irg] += wvar;

@@ -165,7 +165,7 @@ public class OutputRegion extends AbstractOutputRegion {
     }
 
     boolean include(AbstractSchool school) {
-        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getSpeciesIndex()]));
+        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getFileSpeciesIndex()]));
     }
 
 }

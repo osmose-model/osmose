@@ -72,7 +72,7 @@ public class MeanTrophicLevelCatchOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getSpeciesIndex();
+            int i = school.getFileSpeciesIndex();
             meanTLCatch[i] += school.getTrophicLevel() * school.abd2biom(school.getNdead(MortalityCause.FISHING));
             yield[i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
         }

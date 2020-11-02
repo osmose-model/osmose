@@ -159,7 +159,7 @@ public class ReproductionProcess extends AbstractProcess {
 
         // loop over all the schools to compute SSB
         for (School school : getSchoolSet().getSchools()) {
-            int i = school.getGlobalSpeciesIndex();
+            int i = school.getSpeciesIndex();
             // increment spawning stock biomass
             if (reproduce[i] && school.getSpecies().isSexuallyMature(school)) {
                 SSB[i] += school.getInstantaneousBiomass();

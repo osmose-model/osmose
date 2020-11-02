@@ -151,7 +151,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         for (Prey prey : school.getPreys()) {
-                            int iRsc = prey.getGlobalSpeciesIndex();
+                            int iRsc = prey.getSpeciesIndex();
                             if (iRsc >= offset) {
                                 preyedResources[iRsc - offset] += prey.getBiomass();
                             }

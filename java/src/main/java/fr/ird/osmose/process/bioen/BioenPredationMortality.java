@@ -190,7 +190,7 @@ public class BioenPredationMortality extends PredationMortality {
     public double getMaxPredationRate(IAggregation predator) {
 
         // recovers the species index
-        int speciesIndex = predator.getGlobalSpeciesIndex();
+        int speciesIndex = predator.getSpeciesIndex();
         
         if(speciesIndex >= this.getNSpecies()) {
             // If species is a background one, return parameter

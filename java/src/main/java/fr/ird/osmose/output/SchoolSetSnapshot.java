@@ -99,7 +99,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         int s = 0;
         // fill up the arrays
         for (School school : getSchoolSet().getSchools()) {
-            species.set(s, school.getSpeciesIndex());
+            species.set(s, school.getFileSpeciesIndex());
             x.set(s, school.getX());
             y.set(s, school.getY());
             abundance.set(s, school.getInstantaneousAbundance());
