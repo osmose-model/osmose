@@ -249,7 +249,7 @@ public class Species implements ISpecies {
         return globalindex;
     }
     
-    public int getGlobalSpeciesIndex(boolean applyOff) {
+    public int getSpeciesIndex(boolean applyOff) {
         return globalindex;
     }
 
