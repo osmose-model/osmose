@@ -88,12 +88,12 @@ public class SpatialTLOutput extends AbstractSpatialOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        int iSpec = school.getGlobalSpeciesIndex();
+                        if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
                             // here, data is TK weighted by the biomass
-                            int iSpec = school.getSpeciesIndex();
                             temp[iSpec][j][i] += school.getTrophicLevel() * school.getInstantaneousBiomass();
                             biomass[iSpec][j][i] += school.getInstantaneousBiomass();
                         }
