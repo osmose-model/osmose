@@ -156,8 +156,8 @@ public class PredatorPressureOutput extends SimulationLinker implements IOutput 
             }
         }
 
-        int offset = nSpec + nSpec;
-        for (int j = 0; j < getConfiguration().getNRscSpecies(); j++) {
+        int offset = nSpec + nBkg;
+        for (int j = 0; j < nRsc; j++) {
             prw.print(time);
             prw.print(separator);
             prw.print(getConfiguration().getResourceSpecies(j));
