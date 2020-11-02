@@ -77,7 +77,7 @@ public class PredatorPressureDistribOutput extends AbstractDistribOutput {
                     .forEach(prey -> {
                         int classPrey = getClass(prey);
                         if (classPrey >= 0) {
-                            values[predator.getFileSpeciesIndex()][classPrey] += prey.getBiomass();
+                            values[predator.getSpeciesIndex()][classPrey] += prey.getBiomass();
                         }
                     });
         });

@@ -225,10 +225,10 @@ public class ResourceSpecies implements ISpecies {
      */
     @Override
     public int getSpeciesIndex() {
-        return getGlobalSpeciesIndex(true);
+        return getSpeciesIndex(true);
     }
     
-    public int getGlobalSpeciesIndex(boolean applyOffset) { 
+    public int getSpeciesIndex(boolean applyOffset) { 
         if(applyOffset) { 
             return globalindex;
         } else {

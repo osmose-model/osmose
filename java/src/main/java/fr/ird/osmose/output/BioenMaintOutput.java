@@ -72,7 +72,7 @@ public class BioenMaintOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getFileSpeciesIndex();
+            int i = school.getSpeciesIndex();
             maintenance[i] += school.getEMaint() / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
             abundance[i] += 1;
         }

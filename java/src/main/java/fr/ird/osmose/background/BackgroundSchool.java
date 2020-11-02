@@ -210,6 +210,6 @@ public class BackgroundSchool extends AbstractSchool {
      */
     @Override
     public int getSpeciesIndex(boolean off) {
-        return this.bkgSpecies.getGlobalSpeciesIndex(off);
+        return this.bkgSpecies.getSpeciesIndex(off);
     }
 }
