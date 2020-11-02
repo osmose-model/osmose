@@ -75,8 +75,9 @@ public class OutputRegion extends AbstractOutputRegion {
         cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
         cutoffAge = new float[getNSpecies()];
         if (cutoffEnabled) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+            int cpt = 0;
+            for (int iSpec : getFocalIndex()) {
+                cutoffAge[cpt++] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
             }
         }
 
@@ -165,7 +166,7 @@ public class OutputRegion extends AbstractOutputRegion {
     }
 
     boolean include(AbstractSchool school) {
-        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getFileSpeciesIndex()]));
+        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getSpeciesIndex()]));
     }
 
 }

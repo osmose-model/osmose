@@ -114,7 +114,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         for (School school : getSchoolSet().getSchools()) {
             int stage = getStage(school);
             stage_init[cpt] = stage;
-            abundanceStage[school.getFileSpeciesIndex()][stage] += school.getAbundance();
+            abundanceStage[school.getSpeciesIndex()][stage] += school.getAbundance();
             cpt += 1;
         }
     }
@@ -134,7 +134,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         for (School school : getSchoolSet().getSchools()) {
             //iStage = getStage(school);
             iStage = stage_init[cpt];
-            int iSpecies = school.getFileSpeciesIndex();
+            int iSpecies = school.getSpeciesIndex();
             // Update number of deads
             for (MortalityCause cause : MortalityCause.values()) {
                 nDead[iSpecies][cause.index][iStage] += school.getNdead(cause);
@@ -295,8 +295,8 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                 // Eggss
                 iStage = EGG;
 
-            } else if (school.getAgeDt() < recruitmentAge[school.getFileSpeciesIndex()]
-                    || school.getLength() < recruitmentSize[school.getFileSpeciesIndex()]) {
+            } else if (school.getAgeDt() < recruitmentAge[school.getSpeciesIndex()]
+                    || school.getLength() < recruitmentSize[school.getSpeciesIndex()]) {
                 // Pre-recruits
                 iStage = PRE_RECRUIT;
 

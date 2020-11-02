@@ -171,7 +171,7 @@ public class DiscardOutput extends SimulationLinker implements IOutput {
     public void update() {
 
         getSchoolSet().getAliveSchools().forEach((school) -> {
-            int iSpecies = school.getFileSpeciesIndex();
+            int iSpecies = school.getSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
                 biomass[iSpecies][iFishery] += school.getDiscardedBiomass(iFishery);
             }

@@ -72,7 +72,7 @@ public class BioenKappaOutput extends AbstractOutput {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getFileSpeciesIndex();
+            int i = school.getSpeciesIndex();
                 kappa[i] += school.getKappa() * school.getInstantaneousAbundance();
                 abundance[i] += school.getInstantaneousAbundance();
         }
