@@ -177,7 +177,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
     }
 
     boolean include(School school) {
-        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getSpeciesIndex()]));
+        return ((!cutoffEnabled) || (school.getAge() >= cutoffAge[school.getGlobalSpeciesIndex()]));
     }
 
     @Override

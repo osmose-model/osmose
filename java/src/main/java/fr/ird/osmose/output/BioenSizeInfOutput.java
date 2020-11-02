@@ -68,7 +68,7 @@ public class BioenSizeInfOutput extends AbstractOutput {
     public void update() {
 
         getSchoolSet().getAliveSchools().forEach(school -> {
-            int ispec = school.getSpeciesIndex();
+            int ispec = school.getGlobalSpeciesIndex();
             sizeMax[ispec] = Math.max(sizeMax[ispec], school.getLength());
         });
     }
