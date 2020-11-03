@@ -131,9 +131,10 @@ public class BiomassDietStageOutput extends AbstractOutput {
         });
 
         int cpt = 0;
-        int offset = this.getNBkgSpecies() + this.getNSpecies();        
+        int nSpecies = this.getNSpecies();
+        int nBkg = this.getNBkgSpecies();
         for (int iRsc : getConfiguration().getResourceIndex()) {
-            biomassStage[offset + cpt][0] += getTotalBiomass(cpt);
+            biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt + nBkg);
             cpt++;
         }
 
@@ -175,7 +176,8 @@ public class BiomassDietStageOutput extends AbstractOutput {
 
     /**
      * Gets the total biomass of the resource groups over the grid.
-     *
+     * Note that the index in the argument is offseted, since 
+     * resource forcing starts with background species.
      * @return the cumulated biomass over the domain in tonne
      */
     private double getTotalBiomass(int iRsc) {
