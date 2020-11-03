@@ -29,7 +29,7 @@ run_osmose(
   options = NULL,
   verbose = TRUE,
   clean = TRUE,
-  force = TRUE
+  force = FALSE
 )
 }
 \arguments{

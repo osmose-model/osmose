@@ -122,13 +122,14 @@ public class ReproductionProcess extends AbstractProcess {
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + i);
+            cpt++;
         }
         // Seeding duration (expressed in number of time steps)
         yearMaxSeeding = 0;
         if (!getConfiguration().isNull("population.seeding.year.max")) {
             yearMaxSeeding = getConfiguration().getInt("population.seeding.year.max") * getConfiguration().getNStepYear();
         } else {
-            for (int i : getConfiguration().getFocalIndex()) {
+            for (int i = 0; i < nSpecies; i++) {
                 yearMaxSeeding = Math.max(yearMaxSeeding, getSpecies(i).getLifespanDt());
             }
             warning("Did not find parameter population.seeding.year.max. Osmose set it to " + ((float) yearMaxSeeding / getConfiguration().getNStepYear()) + " years, the lifespan of the longest-lived species.");

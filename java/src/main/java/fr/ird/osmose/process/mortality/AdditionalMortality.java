@@ -99,7 +99,6 @@ public class AdditionalMortality extends AbstractMortality {
             
             // Find Additional Mortality scenario
             Scenario scenario = findScenario(iSpec);
-            cpt = 0;
             debug("Additional Mortality scenario for " + species.getName() + " set to " + scenario.toString());
             switch (scenario) {
                 case ANNUAL:
