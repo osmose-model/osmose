@@ -73,7 +73,7 @@ public class ByDtByClassAdditionalMortality extends AbstractMortalitySpecies {
 
     @Override
     public void init() {
-        int iSpec = getIndexSpecies();
+        int iSpec = getFileSpeciesIndex();
         if (!getConfiguration().isNull("mortality.additional.rate.byDt.byAge.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
             timeSerieByAge.read(getConfiguration().getFile("mortality.additional.rate.byDt.byAge.file.sp" + iSpec));

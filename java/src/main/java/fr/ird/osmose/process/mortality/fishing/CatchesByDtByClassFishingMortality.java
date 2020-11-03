@@ -79,7 +79,7 @@ public class CatchesByDtByClassFishingMortality extends AbstractFishingMortality
 
     @Override
     public void readParameters() {
-        int iSpec = getIndexSpecies();
+        int iSpec = getFileSpeciesIndex();
         if (!getConfiguration().isNull("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec)) {
             ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
             timeSerieByAge.read(getConfiguration().getFile("mortality.fishing.catches.byDt.byAge.file.sp" + iSpec));

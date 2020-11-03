@@ -85,7 +85,7 @@ public class FishingMortality extends AbstractMortality {
         int cpt = 0;
         for (int iSpec : getConfiguration().getFocalIndex()) {
             int rank = getRank();
-            Species species = getSpecies(iSpec);
+            Species species = getSpecies(cpt);
             // Find fishing scenario
             Scenario scenario = findScenario(iSpec);
             debug("Fishing scenario for " + species.getName() + " set to " + scenario.toString());
@@ -247,6 +247,7 @@ public class FishingMortality extends AbstractMortality {
         int cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             catches[cpt] = (Type.CATCHES == fishingMortality[cpt].getType());
+            cpt++;
         }
 
         // loop over all the schools

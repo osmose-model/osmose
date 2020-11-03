@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.AbstractSchool;
@@ -100,7 +99,7 @@ public class FishingGear extends AbstractMortality {
         Configuration cfg = Osmose.getInstance().getConfiguration();
         int nspecies = cfg.getNSpecies();
         int nbackground = cfg.getNBkgSpecies();
-        
+
         catchability = new double[nspecies + nbackground];
         discards = new double[nspecies + nbackground];
 
@@ -288,10 +287,10 @@ public class FishingGear extends AbstractMortality {
     public void setCatchability(Matrix matrix) {
 
         int fishIndex = matrix.getIndexPred(this.name);
-        int cpt = 0;
+        int nTot = this.getNSpecies() + this.getNBkgSpecies();
 
-        for (int i : this.getConfiguration().getPredatorIndex()) {
-            String speciesName = getConfiguration().getSpecies(i).getName();
+        for (int cpt = 0; cpt < nTot; cpt++) {
+            String speciesName = getISpecies(cpt).getName();
             int speciesIndex = matrix.getIndexPrey(speciesName);
             catchability[cpt] = matrix.getValue(speciesIndex, fishIndex);
             cpt++;
@@ -301,10 +300,10 @@ public class FishingGear extends AbstractMortality {
     public void setDiscards(Matrix matrix) {
 
         int fishIndex = matrix.getIndexPred(this.name);
-        int cpt = 0;
+        int nTot = this.getNSpecies() + this.getNBkgSpecies();
 
-        for (int i : this.getConfiguration().getPredatorIndex()) {
-            String speciesName = getConfiguration().getSpecies(i).getName();
+        for (int cpt = 0; cpt < nTot; cpt++) {
+            String speciesName = getISpecies(cpt).getName();
             int speciesIndex = matrix.getIndexPrey(speciesName);
             discards[cpt] = matrix.getValue(speciesIndex, fishIndex);
             cpt++;

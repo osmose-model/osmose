@@ -62,7 +62,7 @@ public class AnnualAdditionalMortality extends AbstractMortalitySpecies {
     @Override
     public void init() {
         int nStepYear = getConfiguration().getNStepYear();
-        int iSpec = getIndexSpecies();
+        int iSpec = getFileSpeciesIndex();
         instantaneousD = getConfiguration().getDouble("mortality.additional.rate.sp" + iSpec) / nStepYear;
        
     }
