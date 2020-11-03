@@ -61,6 +61,7 @@ import ucar.ma2.InvalidRangeException;
 public class MapDistribution extends AbstractDistribution {
 
     private final int iSpecies;
+    private final int iSpeciesFile;
     private Random rd1, rd2, rd3;
     private MapSet maps;
     private float[] maxProbaPresence;
@@ -69,8 +70,9 @@ public class MapDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public MapDistribution(int species) {
-        this.iSpecies = species;
+    public MapDistribution(int iSpeciesFile, int iSpecies) {
+        this.iSpeciesFile = iSpeciesFile;
+        this.iSpecies = iSpecies;
     }
 
     @Override
@@ -91,7 +93,7 @@ public class MapDistribution extends AbstractDistribution {
             rd3 = new Random();
         }
 
-        maps = new MapSet(iSpecies, "movement");
+        maps = new MapSet(iSpeciesFile, iSpecies, "movement");
         try {
             maps.init();
         } catch (IOException | InvalidRangeException ex) {
@@ -106,8 +108,8 @@ public class MapDistribution extends AbstractDistribution {
             }
         }
 
-        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpecies)) {
-            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpecies);
+        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpeciesFile)) {
+            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpeciesFile);
         } else {
             range = 1;
         }
