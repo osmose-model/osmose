@@ -66,10 +66,6 @@ public class Resource extends OsmoseLinker implements IAggregation {
      * Pointer to the cell where this swarm is located
      */
     final private Cell cell;
-    /**
-     * Species index of the swarm, which ranges from nSpecies to nSpecis + nLTL
-     */
-    final private int index;
     
     /**
      * Number of organisms in the swarm at the beginning of the time step
@@ -83,7 +79,6 @@ public class Resource extends OsmoseLinker implements IAggregation {
     public Resource(ResourceSpecies species, Cell cell) {
         this.species = species;
         this.cell = cell;
-        this.index = species.getFileSpeciesIndex();
     }
 
     /**
@@ -212,7 +207,7 @@ public class Resource extends OsmoseLinker implements IAggregation {
     }
 
     @Override
-    public void preyedUpon(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
+    public void preyedUpon(int indexPrey, int globalPreyIndex,float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

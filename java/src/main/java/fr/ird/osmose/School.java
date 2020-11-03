@@ -96,11 +96,6 @@ public class School extends AbstractSchool {
     private Genotype genotype;
     
     /**
-     * The index of the species. From [0; nSpec-1] for fish and from [nSpec;
-     * nSpec+nLTL-1] for resource.
-     */
-    private final int index;
-    /**
      * Weight of the fish in tonne. The unit has been set to tonne just because
      * it saves computation time for converting the biomass from gramme to tonne
      */
@@ -233,7 +228,6 @@ public class School extends AbstractSchool {
      * @param trophicLevel, the trophic level of the fish
      */
     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
-        this.index = species.getFileSpeciesIndex();
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
@@ -633,6 +627,7 @@ public class School extends AbstractSchool {
 
     /**
      * Returns true if the individual is sexually mature.
+     * @return 
      */
     public boolean isMature() {
         return this.isMature;
@@ -647,6 +642,7 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the age at maturity (only used for outputs).
+     * @return 
      */
     public double getAgeMat() {
         return this.ageMature;
@@ -654,6 +650,7 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the age at maturity (only used for outputs).
+     * @return 
      */
     public double getSizeMat() {
         return this.sizeMature;
@@ -661,6 +658,7 @@ public class School extends AbstractSchool {
     
     /**
      * Sets the age at maturity (only used for outputs).
+     * @param agemature
      */
     public void setAgeMat(double agemature) {
         this.ageMature = agemature;
@@ -668,6 +666,7 @@ public class School extends AbstractSchool {
     
     /**
      * Sets the age at maturity (only used for outputs).
+     * @param sizemat
      */
     public void setSizeMat(double sizemat) {
         this.sizeMature = sizemat;
@@ -675,6 +674,7 @@ public class School extends AbstractSchool {
 
     /**
      * Sets the value of assimilated energy (ingestion x phiT, equation 3).
+     * @param value
      */
     public void setEGross(double value) {
         this.e_gross = value;
@@ -682,6 +682,7 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the value of assimilated energy (ingestion x phiT, equation 3).
+     * @return 
      */
     public double getEGross() {
         return this.e_gross;
@@ -868,6 +869,11 @@ public class School extends AbstractSchool {
     @Override
     public int getSpeciesIndex(boolean off) {
         return this.species.getSpeciesIndex(off);
+    }
+
+    @Override
+    public int getFileSpeciesIndex() {
+        return this.species.getFileSpeciesIndex();
     }
 
 }

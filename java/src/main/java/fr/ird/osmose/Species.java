@@ -129,6 +129,7 @@ public class Species implements ISpecies {
      *
      * @param index, an integer, the index of the species
      * {@code [0, nbTotSpecies - 1]}
+     * @param globalindex
      */
     public Species(int index, int globalindex) {
         
@@ -237,6 +238,7 @@ public class Species implements ISpecies {
      *
      * @return the index of the species
      */
+    @Override
     public int getFileSpeciesIndex() {
         return index;
     }
@@ -245,10 +247,12 @@ public class Species implements ISpecies {
      * 
      * @return 
      */
+    @Override
     public int getSpeciesIndex() { 
         return globalindex;
     }
     
+    @Override
     public int getSpeciesIndex(boolean applyOff) {
         return globalindex;
     }
@@ -258,6 +262,7 @@ public class Species implements ISpecies {
      *
      * @return the name of the species
      */
+    @Override
     public String getName() {
         return name;
     }
