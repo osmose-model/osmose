@@ -64,7 +64,7 @@ public class GompertzGrowth extends AbstractGrowth {
     @Override
     public void init() {
 
-        int iSpec = getIndexSpecies();
+        int iSpec = this.getFileSpeciesIndex();
         lStart = getConfiguration().getDouble("growth.exponential.lstart.sp" + iSpec);
         Ke = getConfiguration().getDouble("growth.exponential.ke.sp" + iSpec);
         lInf = getConfiguration().getDouble("growth.gompertz.linf.sp" + iSpec);

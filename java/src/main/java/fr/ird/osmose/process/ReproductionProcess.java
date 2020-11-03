@@ -174,7 +174,7 @@ public class ReproductionProcess extends AbstractProcess {
         for (int i : getConfiguration().getFocalIndex()) {
             
             cpt++;
-            
+
             // ignore species that do not reproduce
             if (!reproduce[cpt]) {
                 continue;

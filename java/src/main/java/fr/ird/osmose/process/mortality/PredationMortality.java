@@ -222,6 +222,7 @@ public class PredationMortality extends AbstractMortality {
             } else {
                 percentResource[cpt] = getConfiguration().getResourceSpecies(cpt).computePercent(preySizeMin, preySizeMax);
             }
+            cpt++;
         }
         return percentResource;
     }

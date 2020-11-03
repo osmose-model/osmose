@@ -69,7 +69,7 @@ public class VonBertalanffyGrowth extends AbstractGrowth {
     @Override
     public void init() {
         
-        int index = getIndexSpecies();
+        int index = getFileSpeciesIndex();
         lInf = getConfiguration().getDouble("species.linf.sp" + index);
         K = getConfiguration().getDouble("species.k.sp" + index);
         t0 = getConfiguration().getDouble("species.t0.sp" + index);

@@ -200,6 +200,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      *
      * @return
      */
+    @Override
     public int getFileSpeciesIndex() {
         return this.fileindex;
     }
@@ -207,8 +208,10 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     /**
      * Return the global index of the species.
      *
+     * @param applyOffset
      * @return
      */
+    @Override
     public int getSpeciesIndex(boolean applyOffset) {
         if (applyOffset) {
             return this.index;
@@ -225,6 +228,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     /**
      * Returns the trophic level of the current background species.
      *
+     * @param iClass
      * @todo Do this by class?
      * @return
      */
@@ -248,6 +252,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      *
      * @return The species name
      */
+    @Override
     public String getName() {
         return name;
     }
