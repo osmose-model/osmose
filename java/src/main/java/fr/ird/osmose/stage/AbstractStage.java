@@ -42,8 +42,6 @@
 package fr.ird.osmose.stage;
 
 import fr.ird.osmose.util.OsmoseLinker;
-import java.util.HashMap;
-
 /**
  *
  * @author pverley

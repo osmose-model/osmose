@@ -47,7 +47,8 @@ package fr.ird.osmose;
 public interface ISpecies {
     
     public String getName();
+    public int getFileSpeciesIndex();
     public int getSpeciesIndex();
-    public int getGlobalSpeciesIndex();
+    public int getSpeciesIndex(boolean off);
     
 }

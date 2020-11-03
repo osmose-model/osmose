@@ -51,22 +51,23 @@ import fr.ird.osmose.util.SimulationLinker;
 public abstract class AbstractGrowth extends SimulationLinker {
 
     final private Species species;
-    final private int indexSpecies;
 
     public AbstractGrowth(int rank, Species species) {
         super(rank);
         this.species = species;
-        this.indexSpecies = species.getSpeciesIndex();
-    }
-
-    public int getIndexSpecies() {
-        return indexSpecies;
     }
 
     public Species getSpecies() {
         return species;
     }
-
+    
+    public int getSpeciesIndex() { 
+        return this.species.getSpeciesIndex();
+    }
+    
+    public int getFileSpeciesIndex() { 
+        return this.species.getFileSpeciesIndex();
+    }
     /**
      * Initialisation of the mortality. This function should loads the
      * appropriate parameters from the configuration files.

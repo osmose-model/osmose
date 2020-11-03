@@ -109,11 +109,11 @@ public class DietOutput extends SimulationLinker implements IOutput {
 
         for (School school : getSchoolSet().getPresentSchools()) {
             double preyedBiomass = school.getPreyedBiomass();
-            int iSpec = school.getGlobalSpeciesIndex();
+            int iSpec = school.getSpeciesIndex();
             if (preyedBiomass > 0) {
                 abundanceStage[iSpec][dietOutputStage.getStage(school)] += school.getAbundance();
                 for (Prey prey : school.getPreys()) {
-                    int iPrey = prey.getGlobalSpeciesIndex();
+                    int iPrey = prey.getSpeciesIndex();
                     diet[iSpec][dietOutputStage.getStage(school)][iPrey][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
                 }
             }

@@ -60,7 +60,7 @@ public class AbundanceDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf 
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][classSchool] += school.getInstantaneousAbundance();
+                values[school.getFileSpeciesIndex()][classSchool] += school.getInstantaneousAbundance();
             }
         }
     }

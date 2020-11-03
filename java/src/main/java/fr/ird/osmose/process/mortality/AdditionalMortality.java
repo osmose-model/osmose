@@ -99,7 +99,6 @@ public class AdditionalMortality extends AbstractMortality {
             
             // Find Additional Mortality scenario
             Scenario scenario = findScenario(iSpec);
-            cpt = 0;
             debug("Additional Mortality scenario for " + species.getName() + " set to " + scenario.toString());
             switch (scenario) {
                 case ANNUAL:
@@ -151,7 +150,7 @@ public class AdditionalMortality extends AbstractMortality {
     public double getRate(School school) {
         double D;
         Species spec = school.getSpecies();
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
         if (school.isLarva()) {
             // Egg stage
             D = larvaAdditionalMortality[ispec].getRate(school);

@@ -61,7 +61,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     /**
      * Index of the species. [0 : number of background - 1]
      */
-    private final int index;
+    private final int fileindex;
 
     /**
      * Name of the species. Parameter <i>species.name.sp#</i>
@@ -94,17 +94,17 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     
     private final ByClassTimeSeries timeSeries;
     
-    private final int globalindex;
+    private final int index;
     private final int offset;
 
     /**
      * Constructor of background species.
      *
-     * @param index
+     * @param fileindex
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
-    public BackgroundSpecies(int index, int globalindex) throws IOException, InvalidRangeException {
+    public BackgroundSpecies(int fileindex, int index) throws IOException, InvalidRangeException {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
         
@@ -112,32 +112,32 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         String message = "";
 
         this.offset = cfg.getNSpecies();
-        this.globalindex = globalindex + this.offset;
+        this.index = index + this.offset;
         
         // Initialiaze the index of the Background species
-        this.index = index;
+        this.fileindex = fileindex;
 
         // Initialization of parameters
-        name = cfg.getString("species.name.sp" + index);
+        name = cfg.getString("species.name.sp" + fileindex);
 
-        nClass = cfg.getInt("species.nclass.sp" + index);
+        nClass = cfg.getInt("species.nclass.sp" + fileindex);
 
         // Reads allometric variables to obtain weight from size
-        c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
-        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
+        c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileindex);
+        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileindex);
 
         //trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
-        trophicLevel = cfg.getArrayFloat("species.trophic.level.sp" + index);
+        trophicLevel = cfg.getArrayFloat("species.trophic.level.sp" + fileindex);
 
-        age = cfg.getArrayFloat("species.age.sp" + index);
+        age = cfg.getArrayFloat("species.age.sp" + fileindex);
         ageDt = new int[age.length];
         for (int i = 0; i < age.length; i++) {
             ageDt[i] = (int) age[i] * getConfiguration().getNStepYear();
         }
         
-        if (cfg.canFind("species.size.proportion.file.sp" + index)) {
+        if (cfg.canFind("species.size.proportion.file.sp" + fileindex)) {
             
-            String filename = cfg.getFile("species.size.proportion.file.sp" + index);
+            String filename = cfg.getFile("species.size.proportion.file.sp" + fileindex);
             this.timeSeries = new ByClassTimeSeries();
             this.timeSeries.read(filename);
             length = this.timeSeries.getClasses();
@@ -148,13 +148,13 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             this.timeSeries = null;
             
             // Proportion of the different size classes
-            classProportion = cfg.getArrayFloat("species.size.proportion.sp" + index);
+            classProportion = cfg.getArrayFloat("species.size.proportion.sp" + fileindex);
             // Get the array of species length
-            length = cfg.getArrayFloat("species.length.sp" + index);
+            length = cfg.getArrayFloat("species.length.sp" + fileindex);
 
             if (classProportion.length != nClass) {
                 message = String.format("Length of species.size.proportion.sp%d is "
-                        + "not consistent with species.nclass.cp%d", index, index);
+                        + "not consistent with species.nclass.cp%d", fileindex, fileindex);
                 isOk = false;
             }
             
@@ -165,7 +165,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
             }
 
             if (sum != 1.f) {
-                message = String.format("species.size.proportion.sp%d must sum to 1.0", index);
+                message = String.format("species.size.proportion.sp%d must sum to 1.0", fileindex);
                 isOk = false;
             }
         
@@ -173,19 +173,19 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
         if (trophicLevel.length != nClass) {
             message = String.format("Length of species.trophic.level.sp%d is "
-                    + "not consistent with species.nclass.cp%d", index, index);
+                    + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (age.length != nClass) {
             message = String.format("Length of species.age.sp%d is "
-                    + "not consistent with species.nclass.cp%d", index, index);
+                    + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (length.length != nClass) {
             message = String.format("Length of species.length.sp%d is "
-                    + "not consistent with species.nclass.cp%d", index, index);
+                    + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
         
@@ -200,31 +200,35 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      *
      * @return
      */
-    public int getSpeciesIndex() {
-        return this.index;
+    @Override
+    public int getFileSpeciesIndex() {
+        return this.fileindex;
     }
 
     /**
      * Return the global index of the species.
      *
+     * @param applyOffset
      * @return
      */
-    public int getGlobalSpeciesIndex(boolean applyOffset) {
+    @Override
+    public int getSpeciesIndex(boolean applyOffset) {
         if (applyOffset) {
-            return this.globalindex;
+            return this.index;
         } else {
-            return this.globalindex - this.offset;
+            return this.index - this.offset;
         }
     }
     
     @Override
-    public int getGlobalSpeciesIndex() {
-        return this.getGlobalSpeciesIndex(true);
+    public int getSpeciesIndex() {
+        return this.getSpeciesIndex(true);
     }
     
     /**
      * Returns the trophic level of the current background species.
      *
+     * @param iClass
      * @todo Do this by class?
      * @return
      */
@@ -248,6 +252,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      *
      * @return The species name
      */
+    @Override
     public String getName() {
         return name;
     }

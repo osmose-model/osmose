@@ -38,38 +38,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.output.spatial;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
-        
+
 /**
  *
  * @author pverley
  */
 public class SpatialAbundanceOutput extends AbstractSpatialOutput {
 
-    public SpatialAbundanceOutput(int rank){
+    public SpatialAbundanceOutput(int rank) {
         super(rank);
     }
-    
-    public String getVarName()
-    {
+
+    public String getVarName() {
         return "Abundance";
     }
-    
-    public String getDesc()
-    {
+
+    public String getDesc() {
         return "Number of fish per species and per cell (ton)";
     }
-    
+
     @Override
-    public void update(){ 
-           
+    public void update() {
+
         this.common_update();
-     
-        
+
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
@@ -77,15 +73,15 @@ public class SpatialAbundanceOutput extends AbstractSpatialOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        int iSpec = school.getSpeciesIndex();
+                        if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
-                            int iSpec = school.getSpeciesIndex();
                             data[iSpec][j][i] += school.getInstantaneousAbundance();
                         }
                     }
-                }                
+                }
             }
         }
     }

@@ -112,10 +112,10 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int iSpec = school.getSpeciesIndex();
+            int iSpec = school.getFileSpeciesIndex();
             int stage = dietOutputStage.getStage(school);
             for (Prey prey : school.getPreys()) {
-                predatorPressure[iSpec][stage][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += prey.getBiomass();
+                predatorPressure[iSpec][stage][prey.getFileSpeciesIndex()][dietOutputStage.getStage(prey)] += prey.getBiomass();
             }
         }
     }

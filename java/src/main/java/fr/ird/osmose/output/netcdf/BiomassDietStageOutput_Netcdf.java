@@ -41,8 +41,10 @@
 
 package fr.ird.osmose.output.netcdf;
 
+import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.background.BackgroundSchool;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
 import java.io.File;
@@ -84,7 +86,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
 
         nColumns = 0;
         // Sum-up diet stages
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+        for (int iSpec = 0; iSpec < getNSpecies() + getNBkgSpecies(); iSpec++) {
             nColumns += dietOutputStage.getNStage(iSpec);
         }
         nColumns += getConfiguration().getNRscSpecies();
@@ -111,28 +113,39 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void initStep() {
+        
+        // Init step for all the focal schools
         for (School school : getSchoolSet().getPresentSchools()) {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         }
+        
+        // Init step for all the background schools
+        for (BackgroundSchool school : this.getBkgSchoolSet().getAllSchools()) {
+            biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
+        }
+        
+        int nBkg = getNBkgSpecies();
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNRscSpecies();
-        for (int i = nSpec; i < nPrey; i++) {
-            int iRsc = i - nSpec;
-            biomassStage[i][0] += getTotalBiomass(iRsc);
+        int nRsc = getConfiguration().getNRscSpecies();
+        for (int i = 0; i < nRsc; i++) {
+            int iRsc = i + nBkg + nSpec;  // index from a species prospective (focal, back, res)
+            biomassStage[iRsc][0] += getTotalBiomass(nBkg + i);  // index from a resource perspective (back, res)
         }
     }
 
     @Override
     public void reset() {
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies();
         biomassStage = new double[nPrey][];
+        int cpt = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            biomassStage[iSpec] = new double[dietOutputStage.getNStage(iSpec)];
+            biomassStage[cpt++] = new double[dietOutputStage.getNStage(iSpec)];
         }
-        for (int i = nSpec; i < nPrey; i++) {
+        
+        for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
             // we consider just 1 stage per resource group
-            biomassStage[i] = new double[1];
+            biomassStage[cpt++] = new double[1];
         }
     }
 
@@ -145,16 +158,18 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     public void write(float time) {
         double[] biomass = new double[nColumns];
         double nsteps = getRecordFrequency();
+        int nSpecies = getNSpecies();
+        int nBkg = getNBkgSpecies();
+        int nRsc = getNRscSpecies();
         int k = 0;
-        int nSpec = getNSpecies();
-        for (int iSpec = 0; iSpec < nSpec; iSpec++) {
+        for (int iSpec = 0; iSpec < nSpecies + nBkg; iSpec++) {
             for (int s = 0; s < dietOutputStage.getNStage(iSpec); s++) {
                 biomass[k] = biomassStage[iSpec][s] / nsteps;
                 k++;
             }
         }
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
-            biomass[k] = biomassStage[j][0] / nsteps;
+        for (int j = 0; j < nRsc; j++) {
+            biomass[k] = biomassStage[j + nBkg + nSpecies][0] / nsteps;
             k++;
         }
         writeVariable(time, biomass);
@@ -198,7 +213,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
         getNc().addVariable(null, "class_prey", DataType.FLOAT, "class_prey");
         this.setDims(new ArrayList(Arrays.asList(getTimeDim(), classDim)));
         
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies() + getNRscSpecies();
         int k = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
             String name = getSpecies(iSpec).getName();

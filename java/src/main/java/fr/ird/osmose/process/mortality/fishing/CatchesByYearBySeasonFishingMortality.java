@@ -63,7 +63,7 @@ public class CatchesByYearBySeasonFishingMortality extends AbstractFishingMortal
     @Override
     public void readParameters() {
         int nStepYear = getConfiguration().getNStepYear();
-        int iSpec = getIndexSpecies();
+        int iSpec = getFileSpeciesIndex();
 
         String filename;
         ByYearTimeSeries yts;

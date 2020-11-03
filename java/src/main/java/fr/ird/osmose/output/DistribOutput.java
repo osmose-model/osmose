@@ -45,7 +45,6 @@ import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
-import java.util.HashMap;
 
 /**
  *
@@ -54,7 +53,7 @@ import java.util.HashMap;
 public class DistribOutput extends AbstractOutput {
 
     // Output values distributed by species and by class
-    HashMap<Integer, double[][]> values = new HashMap();
+    double[][][] values;
     
     // Distribution 
     private final AbstractDistribution distrib;
@@ -65,8 +64,15 @@ public class DistribOutput extends AbstractOutput {
 
     private final boolean computeAverage;
     
-    /**
-     * Default constructor, in which temporal average is computed.
+    /** Default constructor, in which temporal average is computed.
+     * 
+     * @param rank
+     * @param subfolder
+     * @param name
+     * @param description
+     * @param species
+     * @param variable
+     * @param distrib 
      */
     public DistribOutput(int rank, String subfolder,
             String name, String description,
@@ -79,7 +85,16 @@ public class DistribOutput extends AbstractOutput {
     }
 
     /**
-     * Full constructor. Contains species and computeAverage arguments.
+     * Full constructor, contains species and computeAverage arguments.
+     *
+     * @param rank
+     * @param subfolder
+     * @param name
+     * @param description
+     * @param species
+     * @param variable
+     * @param distrib
+     * @param computeAverage
      */
     public DistribOutput(int rank, String subfolder,
             String name, String description,
@@ -93,15 +108,28 @@ public class DistribOutput extends AbstractOutput {
         this.computeAverage = computeAverage;
     }
 
-    /**
-     * Constructor with compute average but not species.
+    /** Constructor with compute average but not species.
+     * 
+     * @param rank
+     * @param subfolder
+     * @param name
+     * @param description
+     * @param schoolVariable
+     * @param distrib
+     * @param computeAverage 
      */
     public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib, boolean computeAverage) {
         this(rank, subfolder, name, description, null, schoolVariable, distrib, computeAverage);
     }
 
-    /**
-     * Constructor without species and compute_average.
+    /** Constructor without species and compute_average.
+     * 
+     * @param rank
+     * @param subfolder
+     * @param name
+     * @param description
+     * @param schoolVariable
+     * @param distrib 
      */
     public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib) {
         this(rank, subfolder, name, description, null, schoolVariable, distrib, true);
@@ -109,9 +137,10 @@ public class DistribOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        values.clear();
-        for(int i : getConfiguration().getFocalIndex()) { 
-            values.put(i, new double[getNOutputRegion()][distrib.getNClass()]);
+        int nSpecies = this.getNSpecies();
+        values = new double[nSpecies][][];
+        for(int i = 0; i<nSpecies; i++) { 
+            values[i] = new double[getNOutputRegion()][distrib.getNClass()];
         }
     }
 
@@ -126,7 +155,7 @@ public class DistribOutput extends AbstractOutput {
                 for (AbstractOutputRegion region : getOutputRegions()) {
                     if (region.contains(timeStep, school)) {
                         double sel = region.getSelectivity(timeStep, school);
-                        values.get(school.getSpeciesIndex())[irg][getClass(school)] += sel * var;
+                        values[school.getSpeciesIndex()][irg][getClass(school)] += sel * var;
                     }
                     irg++;
                 }
@@ -155,6 +184,7 @@ public class DistribOutput extends AbstractOutput {
     @Override
     public void write(float time) {
 
+        int nSpecies = this.getNSpecies();
         int nClass = distrib.getNClass();
         double nsteps = getRecordFrequency();
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
@@ -163,12 +193,12 @@ public class DistribOutput extends AbstractOutput {
                 int cpt = 0;
                 array[iClass][cpt++] = distrib.getThreshold(iClass);
                 if (this.computeAverage) {
-                    for (int iSpec : getConfiguration().getFocalIndex()) {
-                        array[iClass][cpt++] = values.get(iSpec)[irg][iClass] / nsteps;
+                    for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                        array[iClass][cpt++] = values[iSpec][irg][iClass] / nsteps;
                     }
                 } else {
-                    for (int iSpec : getConfiguration().getFocalIndex()) {
-                        array[iClass][cpt++] = values.get(iSpec)[irg][iClass];
+                    for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                        array[iClass][cpt++] = values[iSpec][irg][iClass];
                     }
                 }
             }

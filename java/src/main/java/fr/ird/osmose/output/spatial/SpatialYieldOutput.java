@@ -76,7 +76,7 @@ public class SpatialYieldOutput extends AbstractSpatialOutput {
     public void update(){ 
            
         this.common_update();
-     
+
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
@@ -84,15 +84,15 @@ public class SpatialYieldOutput extends AbstractSpatialOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        int iSpec = school.getSpeciesIndex();
+                        if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
-                            int iSpec = school.getSpeciesIndex();
                             data[iSpec][j][i] += school.abd2biom(school.getNdead(MortalityCause.FISHING));
                         }
                     }
-                }                
+                }
             }
         }
     }

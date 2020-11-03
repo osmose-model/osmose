@@ -62,18 +62,18 @@ public class Species implements ISpecies {
 ///////////////////////////////
     
     /** 
-     * 
+     * Index of the species. From 0 to Nspecies - 1 for focal species
      */
-    private final int globalindex;
+    private final int index;
     
     /**
      * Trophic level of an egg.
      */
     public static final float TL_EGG = 3f;
     /**
-     * Index of the species. [0 : numberTotalSpecies - 1]
+     * Index of the species in the configuration file.
      */
-    private final int index;
+    private final int fileIndex;
     /**
      * Name of the species. Parameter <i>species.name.sp#</i>
      */
@@ -108,9 +108,7 @@ public class Species implements ISpecies {
     private final float eggWeight;
 
     private int zlayer = 0;
-    
-    private double alpha_bioen;
-    
+        
     /** Threshold (number of time-steps) at which
      * a species move from larva to adults. Expressed in
      * time steps.
@@ -119,42 +117,42 @@ public class Species implements ISpecies {
        
     private double beta_bioen;
 
-    private boolean bioenEnabled;
-
 //////////////
 // Constructor
 //////////////
     /**
      * Create a new species
      *
-     * @param index, an integer, the index of the species
+     * @param fileIndex, an integer, the index of the species
      * {@code [0, nbTotSpecies - 1]}
+     * @param index
      */
-    public Species(int index, int globalindex) {
+    public Species(int fileIndex ,int index) {
         
-        this.globalindex = globalindex;
+        this.index = index;
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        this.index = index;
+        this.fileIndex = fileIndex;
+        
         // Initialization of parameters
-        name = cfg.getString("species.name.sp" + index);
-        c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
-        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
+        name = cfg.getString("species.name.sp" + fileIndex);
+        c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileIndex);
+        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileIndex);
           
         if (!cfg.isBioenEnabled()) {
             
             // If not bioen, initialize age at maturity 
             // used for reproduction process and egg size
             // used for growth
-            if (!cfg.isNull("species.maturity.size.sp" + index)) {
-                sizeMaturity = cfg.getFloat("species.maturity.size.sp" + index);
+            if (!cfg.isNull("species.maturity.size.sp" + fileIndex)) {
+                sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
                 ageMaturity = Float.MAX_VALUE;
             } else {
-                ageMaturity = cfg.getFloat("species.maturity.age.sp" + index);
+                ageMaturity = cfg.getFloat("species.maturity.age.sp" + fileIndex);
                 sizeMaturity = Float.MAX_VALUE;
             }
 
-            eggSize = cfg.getFloat("species.egg.size.sp" + index);
+            eggSize = cfg.getFloat("species.egg.size.sp" + fileIndex);
 
         } else {
             sizeMaturity = Float.MAX_VALUE;
@@ -162,20 +160,20 @@ public class Species implements ISpecies {
             eggSize = Float.MAX_VALUE;
         }
 
-        eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
-        float agemax = cfg.getFloat("species.lifespan.sp" + index);
+        eggWeight = cfg.getFloat("species.egg.weight.sp" + fileIndex);
+        float agemax = cfg.getFloat("species.lifespan.sp" + fileIndex);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
 
         // barrier.n: added for bioenergetic purposes.
         if (cfg.isBioenEnabled()) {
-            zlayer = cfg.getInt("species.zlayer.sp" + index);
-            String key = String.format("species.beta.sp%d", index);
+            zlayer = cfg.getInt("species.zlayer.sp" + fileIndex);
+            String key = String.format("species.beta.sp%d", fileIndex);
             beta_bioen = cfg.getDouble(key);
         }
         
         // If the key is found, then the age switch in years is converted into
         // time-step.
-        String key = "species.larva2adults.agethres.sp" + index;
+        String key = "species.larva2adults.agethres.sp" + fileIndex;
         if(cfg.canFind(key)) {
             float age_adult = cfg.getFloat(key);
             this.lar2ad_thres = (int) Math.round(age_adult * cfg.getNStepYear());
@@ -237,20 +235,23 @@ public class Species implements ISpecies {
      *
      * @return the index of the species
      */
-    public int getSpeciesIndex() {
-        return index;
+    @Override
+    public int getFileSpeciesIndex() {
+        return fileIndex;
     }
     
     /** Return the global index of the species. 
      * 
      * @return 
      */
-    public int getGlobalSpeciesIndex() { 
-        return globalindex;
+    @Override
+    public int getSpeciesIndex() { 
+        return index;
     }
     
-    public int getGlobalSpeciesIndex(boolean applyOff) {
-        return globalindex;
+    @Override
+    public int getSpeciesIndex(boolean applyOff) {
+        return index;
     }
 
     /**
@@ -258,6 +259,7 @@ public class Species implements ISpecies {
      *
      * @return the name of the species
      */
+    @Override
     public String getName() {
         return name;
     }

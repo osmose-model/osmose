@@ -43,7 +43,6 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,7 +84,6 @@ public class EnergyBudget extends AbstractProcess {
         String key;
         int cpt;
         // Redundant with the beta of the BioenPredationMortality class.
-        int nBack = this.getNBkgSpecies();
         int nSpecies = this.getNSpecies();
 
         // Recovers the beta coefficient for focal + background species
@@ -183,7 +181,7 @@ public class EnergyBudget extends AbstractProcess {
      */
     public void getMaintenance(School school) {
 
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
 
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
@@ -204,7 +202,7 @@ public class EnergyBudget extends AbstractProcess {
      * @return
      */
     public void getEgross(School school) {
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
         school.setEGross(school.getIngestion() * this.assimilation[ispec] * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
     }
 
@@ -221,7 +219,7 @@ public class EnergyBudget extends AbstractProcess {
             return 1;
         }
 
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
 
         String key = "m0";
         double m0_temp = school.existsTrait(key) ? school.getTrait(key) : m0[ispec];
@@ -292,7 +290,7 @@ public class EnergyBudget extends AbstractProcess {
      * @throws java.lang.Exception
      */
     public void getKappa(School school) throws Exception {
-        int ispec = school.getGlobalSpeciesIndex();
+        int ispec = school.getSpeciesIndex();
 
         String key = "r";
         double r_temp = school.existsTrait(key) ? school.getTrait(key) : r[ispec];
@@ -307,7 +305,7 @@ public class EnergyBudget extends AbstractProcess {
     }
 
 //    public void getKappa(School school) {
-//        // int ispec = school.getSpeciesIndex();
+//        // int ispec = school.getFileSpeciesIndex();
 //        // If the organism is imature, all the net energy goes to the somatic growth.
 //        // else, only a kappa fraction goes to somatic growth
 //        double kappa = (!school.isMature()) ? 1 : 0; //Function in two parts according to maturity state

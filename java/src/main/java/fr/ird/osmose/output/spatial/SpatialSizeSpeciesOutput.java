@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.output.spatial;
 
 import fr.ird.osmose.Cell;
@@ -71,13 +70,15 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
      * _FillValue attribute for cells on land
      */
     private final float FILLVALUE = -99.f;
-    
-    /** Size/Age distribution. */
+
+    /**
+     * Size/Age distribution.
+     */
     private final AbstractDistribution distrib;
-    
+
     private double timeOut;
     private int counter;
-    
+
     /**
      * Object for creating/writing netCDF files.
      */
@@ -92,9 +93,9 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
      * Parameter <i>output.cutoff.age.sp#</i>
      */
     private float[] cutoffAge;
-    
+
     private int recordFrequency;
-    
+
     private int ncindex;
     private Variable timeVar, abunVar, classVar, latVar, lonVar;
 
@@ -103,22 +104,18 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
         this.distrib = distrib;
     }
 
-    private boolean includeClassZero() {
-        return !cutoffEnabled;
-    }
-
     @Override
     public void init() {
-        
-                
+
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
 
         // cutoff for egg, larvae and juveniles
         cutoffEnabled = getConfiguration().getBoolean("output.cutoff.enabled");
         cutoffAge = new float[getNSpecies()];
         if (cutoffEnabled) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+            int cpt = 0;
+            for (int iSpec : this.getFocalIndex()) {
+                cutoffAge[cpt++] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
             }
         }
 
@@ -147,25 +144,25 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
         timeVar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
         timeVar.addAttribute(new Attribute("calendar", "360_day"));
         timeVar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
-      
+
         abunVar = nc.addVariable(null, "abundance", DataType.FLOAT, new ArrayList<>(Arrays.asList(timeDim, ltlDim, speciesDim, linesDim, columnsDim)));
         abunVar.addAttribute(new Attribute("units", "number of fish"));
         abunVar.addAttribute(new Attribute("description", "Number of fish per species and per cell"));
         abunVar.addAttribute(new Attribute("_FillValue", -99.f));
-        
+
         classVar = nc.addVariable(null, "class", DataType.FLOAT, "class");
         /*nc.addVariableAttribute("class", "units", "number of fish");
         nc.addVariableAttribute("class", "description", "Number of fish per species and per cell");
         nc.addVariableAttribute("class", "_FillValue", -99.f);*/
-        
+
         latVar = nc.addVariable(null, "latitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
         latVar.addAttribute(new Attribute("units", "degree"));
         latVar.addAttribute(new Attribute("description", "latitude of the center of the cell"));
-        
+
         lonVar = nc.addVariable(null, "longitude", DataType.FLOAT, new ArrayList<>(Arrays.asList(linesDim, columnsDim)));
         lonVar.addAttribute(new Attribute("units", "degree"));
         lonVar.addAttribute(new Attribute("description", "longitude of the center of the cell"));
-        
+
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -180,13 +177,13 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
                 arrLon.set(cell.get_jgrid(), cell.get_igrid(), cell.getLon());
                 arrLat.set(cell.get_jgrid(), cell.get_igrid(), cell.getLat());
             }
-            
+
             /* Writes out the class array. */
             ArrayFloat.D1 arrClass = new ArrayFloat.D1(this.distrib.getNClass());
-            for (int iclass=0; iclass< this.distrib.getNClass(); iclass++){
+            for (int iclass = 0; iclass < this.distrib.getNClass(); iclass++) {
                 arrClass.set(iclass, this.distrib.getThreshold(iclass));
             }
-            
+
             nc.write(classVar, arrClass);
             nc.write(lonVar, arrLon);
             nc.write(latVar, arrLat);
@@ -220,7 +217,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
 
     @Override
     public void update() {
-        
+
         int iStepSimu = getSimulation().getIndexTimeSimu();
         if (this.isTimeToReset(iStepSimu)) {
             int nSpecies = getNSpecies();
@@ -233,7 +230,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
 
         this.timeOut += (float) (iStepSimu + 1) / getConfiguration().getNStepYear();
         this.counter += 1;
-        
+
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!cell.isLand()) {
@@ -241,13 +238,13 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        int iSpec = school.getSpeciesIndex();
+                        if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
                             //System.out.println("+++ cutoff ");
                             continue;
                         }
                         if (!school.isUnlocated()) {
                             //System.out.println("+++ unlocated ");
-                            int iSpec = school.getSpeciesIndex();
                             int classSchool = this.distrib.getClass(school);
                             if (classSchool >= 0) {
                                 abundance[classSchool][iSpec][j][i] += school.getInstantaneousAbundance();
@@ -262,12 +259,11 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
     public boolean isTimeToReset(int iStepSimu) {
         return (((iStepSimu) % recordFrequency) == 0);
     }
-    
-    private int getNClass()
-    {
+
+    private int getNClass() {
         return this.distrib.getNClass();
     }
-    
+
     @Override
     public void write(float time) {
 
@@ -288,28 +284,27 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
         // Write into NetCDF file
         int nSpecies = getNSpecies();
         ArrayFloat.D5 arrAbundance = new ArrayFloat.D5(1, this.distrib.getNClass(), nSpecies, getGrid().get_ny(), getGrid().get_nx());
-       
+
         for (int iclass = 0; iclass < this.distrib.getNClass(); iclass++) {
             for (int kspec = 0; kspec < nSpecies; kspec++) {
                 for (int j = 0; j < getGrid().get_ny(); j++) {
                     for (int i = 0; i < getGrid().get_nx(); i++) {
                         if (!getGrid().getCell(i, j).isLand()) {
-                             arrAbundance.set(0, iclass, kspec, j, i, abundance[iclass][kspec][j][i] / (float) this.counter);
+                            arrAbundance.set(0, iclass, kspec, j, i, abundance[iclass][kspec][j][i] / (float) this.counter);
                         } else {
                             arrAbundance.set(0, iclass, kspec, j, i, abundance[iclass][kspec][j][i]);
-                        }      
+                        }
                     }
                 }
             }
         }
-        
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
         arrTime.set(0, (float) this.timeOut * 360 / (float) this.counter);
 
         //System.out.println("NetCDF saving time " + index + " - " + time);
         try {
-            nc.write(timeVar, new int[]{ncindex}, arrTime);        
+            nc.write(timeVar, new int[]{ncindex}, arrTime);
             nc.write(this.abunVar, new int[]{ncindex, 0, 0, 0, 0}, arrAbundance);
             ncindex++;
         } catch (IOException | InvalidRangeException ex) {

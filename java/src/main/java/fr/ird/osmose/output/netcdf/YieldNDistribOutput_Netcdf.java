@@ -61,7 +61,7 @@ public class YieldNDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.getNdead(MortalityCause.FISHING);
+                values[school.getFileSpeciesIndex()][getClass(school)] += school.getNdead(MortalityCause.FISHING);
             }
         }
     }

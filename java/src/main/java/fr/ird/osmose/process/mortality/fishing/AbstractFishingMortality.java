@@ -84,7 +84,7 @@ public abstract class AbstractFishingMortality extends AbstractMortalitySpecies 
         readParameters();
 
         int nStepYear = getConfiguration().getNStepYear();
-        int iSpec = getIndexSpecies();
+        int iSpec = getFileSpeciesIndex();
 
         if (!getConfiguration().isNull("mortality.fishing.recruitment.age.sp" + iSpec)) {
             float age = getConfiguration().getFloat("mortality.fishing.recruitment.age.sp" + iSpec);

@@ -53,7 +53,9 @@ import java.util.List;
  */
 public class RandomDistribution extends AbstractDistribution {
 
+    private final int iSpeciesFile;
     private final int iSpecies;
+    
     private int areaSize;
     private List<Cell> randomMap;
     /*
@@ -61,23 +63,24 @@ public class RandomDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public RandomDistribution(int species) {
+    public RandomDistribution(int speciesFile, int species) {
+        this.iSpeciesFile = speciesFile;
         this.iSpecies = species;
     }
 
     @Override
     public void init() {
 
-        if (!getConfiguration().isNull("movement.distribution.ncell.sp" + iSpecies)) {
-            areaSize = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpecies);
+        if (!getConfiguration().isNull("movement.distribution.ncell.sp" + iSpeciesFile)) {
+            areaSize = getConfiguration().getInt("movement.distribution.ncell.sp" + iSpeciesFile);
         } else {
             areaSize = getGrid().getNOceanCell();
-            warning("Could not find parameter movement.distribution.ncell.sp" + iSpecies + ". Osmose assumes that schools of " + getSpecies(iSpecies).getName() + " are distrubuted over the whole domain.");
+            warning("Could not find parameter movement.distribution.ncell.sp" + iSpeciesFile + ". Osmose assumes that schools of " + getSpecies(iSpecies).getName() + " are distrubuted over the whole domain.");
         }
         createRandomMap();
         
-        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpecies)) {
-            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpecies);
+        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpeciesFile)) {
+            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpeciesFile);
         } else {
             range = 1;
         }

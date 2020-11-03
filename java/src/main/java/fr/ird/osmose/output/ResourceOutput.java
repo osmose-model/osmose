@@ -151,8 +151,9 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         for (Prey prey : school.getPreys()) {
-                            int iRsc = prey.getGlobalSpeciesIndex();
+                            int iRsc = prey.getSpeciesIndex();
                             if (iRsc >= offset) {
+                                // check that we are attacking a resource species
                                 preyedResources[iRsc - offset] += prey.getBiomass();
                             }
                         }
@@ -162,9 +163,11 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
                 int cpt = 0;
+                int nBackground = this.getNBkgSpecies();
                 for (int iRsc : getConfiguration().getResourceIndex()) {
                     // rscBiomass0 is the resource biomass at the beginning of the time step
-                    rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt).getBiomass(cell);
+                    // adding an offset, since resourceForcing starts with bkgSpecies
+                    rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt + nBackground).getBiomass(cell);
                     // rscBiomass1 is the resource biomass remaining in the water column after the predation process
                     rscBiomass1[cpt][j][i] = rscBiomass0[cpt][j][i] - preyedResources[cpt];
                     cpt++;

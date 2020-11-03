@@ -70,11 +70,12 @@ public class OutMortality extends AbstractMortality {
             if (!getConfiguration().isNull("mortality.out.rate.sp" + i)) {
                 Zout[cpt] = getConfiguration().getDouble("mortality.out.rate.sp" + i) / nStepYear;
             }
+            cpt++;
         }
     }
 
     @Override
     public double getRate(School school) {
-        return Zout[school.getGlobalSpeciesIndex()];
+        return Zout[school.getSpeciesIndex()];
     }
 }

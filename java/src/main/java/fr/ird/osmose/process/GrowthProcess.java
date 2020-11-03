@@ -86,22 +86,10 @@ public class GrowthProcess extends AbstractProcess {
             String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + i)
                     ? "fr.ird.osmose.process.growth.VonBertalanffyGrowth"
                     : getConfiguration().getString("growth.java.classname.sp" + i);
-            String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(i).getName();
+            String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(cpt).getName();
             try {
                 growth[cpt] = (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(i));
-            } catch (InstantiationException ex) {
-                error(errMsg, ex);
-            } catch (IllegalAccessException ex) {
-                error(errMsg, ex);
-            } catch (IllegalArgumentException ex) {
-                error(errMsg, ex);
-            } catch (InvocationTargetException ex) {
-                error(errMsg, ex);
-            } catch (NoSuchMethodException ex) {
-                error(errMsg, ex);
-            } catch (SecurityException ex) {
-                error(errMsg, ex);
-            } catch (ClassNotFoundException ex) {
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException ex) {
                 error(errMsg, ex);
             }
             // Initializes Growth function
@@ -144,7 +132,7 @@ public class GrowthProcess extends AbstractProcess {
     public void run() {
         for (School school : getSchoolSet().getAliveSchools()) {
             Species species = school.getSpecies();
-            int i = species.getGlobalSpeciesIndex();
+            int i = species.getSpeciesIndex();
             int age = school.getAgeDt();
             if ((age == 0) || school.isUnlocated()) {
                 // Linear growth for eggs and migrating schools
@@ -160,7 +148,7 @@ public class GrowthProcess extends AbstractProcess {
 
     private void grow(School school, double minDelta, double maxDelta) {
 
-        int iSpec = school.getGlobalSpeciesIndex();
+        int iSpec = school.getSpeciesIndex();
         //calculation of lengths according to predation efficiency
         if (school.getPredSuccessRate() >= criticalPredSuccess[iSpec]) {
                 double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));

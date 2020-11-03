@@ -83,11 +83,11 @@ public class SpatialYieldNOutput extends AbstractSpatialOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        int iSpec = school.getSpeciesIndex();
+                        if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
-                            int iSpec = school.getSpeciesIndex();
                             data[iSpec][j][i] += school.getNdead(MortalityCause.FISHING);
                         }
                     }

@@ -62,7 +62,7 @@ public class RateBySeasonFishingMortality extends AbstractFishingMortality {
     @Override
     public void readParameters() {
         int nStepYear = getConfiguration().getNStepYear();
-        int iSpec = getIndexSpecies();
+        int iSpec = getFileSpeciesIndex();
         annualF = getConfiguration().getDouble("mortality.fishing.rate.sp" + iSpec);
 
         // Fishing seasonality

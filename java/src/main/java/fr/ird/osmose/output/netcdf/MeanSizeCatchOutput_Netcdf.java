@@ -72,7 +72,7 @@ public class MeanSizeCatchOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int i = school.getSpeciesIndex();
+            int i = school.getFileSpeciesIndex();
             meanSizeCatch[i] += school.getNdead(MortalityCause.FISHING) * school.getLength();
             yieldN[i] += school.getNdead(MortalityCause.FISHING);
         }

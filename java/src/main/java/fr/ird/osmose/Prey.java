@@ -76,6 +76,9 @@ public class Prey implements IMarineOrganism {
      * an instance of {@code ResourceSpecies}
      */
     private final int index;
+    
+    private final int globalindex;
+    
     /**
      * The age of the prey, in year.
      */
@@ -94,8 +97,9 @@ public class Prey implements IMarineOrganism {
      * @param length of the prey
      * @param biomass, the preyed biomass, in tonne
      */
-    Prey(int index, float trophicLevel, float age, float length, double biomass) {
+    Prey(int index, int globalindex, float trophicLevel, float age, float length, double biomass) {
         this.index = index;
+        this.globalindex = globalindex;
         this.trophicLevel = trophicLevel;
         this.biomass = biomass;
         this.age = age;
@@ -135,8 +139,8 @@ public class Prey implements IMarineOrganism {
      * @return the index of the prey
      */
     @Override
-    public int getSpeciesIndex() {
-        return index;
+    public int getFileSpeciesIndex() {
+        return globalindex;
     }
 
     @Override
@@ -214,7 +218,7 @@ public class Prey implements IMarineOrganism {
     }
 
     @Override
-    public void preyedUpon(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
+    public void preyedUpon(int indexPrey, int globalIndex, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -234,13 +238,14 @@ public class Prey implements IMarineOrganism {
     }
 
     @Override
-    public int getGlobalSpeciesIndex() {
+    public int getSpeciesIndex() {
         return index;
     }
 
     @Override
-    public int getGlobalSpeciesIndex(boolean applyOff) {
+    public int getSpeciesIndex(boolean applyOff) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
     
 }

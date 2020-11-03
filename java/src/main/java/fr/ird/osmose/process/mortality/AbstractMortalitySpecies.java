@@ -55,16 +55,14 @@ import fr.ird.osmose.Species;
 public abstract class AbstractMortalitySpecies extends AbstractMortality {
 
     final private Species species;
-    final private int indexSpecies;
 
     public AbstractMortalitySpecies(int rank, Species species) {
         super(rank);
         this.species = species;
-        this.indexSpecies = species.getSpeciesIndex();
     }
 
-    public int getIndexSpecies() {
-        return indexSpecies;
+    public int getFileSpeciesIndex() {
+        return species.getFileSpeciesIndex();
     }
 
     public Species getSpecies() {

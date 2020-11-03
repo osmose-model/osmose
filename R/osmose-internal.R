@@ -261,13 +261,13 @@
            yieldDistribBySize             = .read_2D(files=files, path=path, ...),
            yieldNDistribBySize            = .read_2D(files=files, path=path, ...),
            abundanceDistribByAge          = .read_2D(files=files, path=path, ...),
-           biomassDistribByAge             = .read_2D(files=files, path=path, ...),
+           biomassDistribByAge            = .read_2D(files=files, path=path, ...),
            meanSizeDistribByAge           = .read_2D(files=files, path=path, ...),
            naturalMortalityDistribByAge   = .read_2D(files=files, path=path, ...),
            naturalMortalityNDistribByAge  = .read_2D(files=files, path=path, ...),
            yieldDistribByAge              = .read_2D(files=files, path=path, ...),
            yieldNDistribByAge             = .read_2D(files=files, path=path, ...),
-           biomassDistribByTL              = .read_2D(files=files, path=path, ...),
+           biomassDistribByTL             = .read_2D(files=files, path=path, ...),
            #            dietMatrixbyAge                = .read_2D_ByAgeorSize(files=files, path=path, ...),
            #            dietMatrixbySize               = .read_2D_ByAgeorSize(files=files, path=path, ...),
            dietMatrixbyAge                = .read_2D(files=files, path=path, ...),
@@ -509,7 +509,7 @@
 # @return A list of list containing the output functions
 #
 osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
-  
+
   # Output data
   outputData = list(biomass = readOsmoseFiles(path = path, type = "biomass"),  
                     abundance = readOsmoseFiles(path = path, type = "abundance"),  

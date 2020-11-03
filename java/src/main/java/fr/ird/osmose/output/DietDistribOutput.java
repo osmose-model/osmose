@@ -90,7 +90,7 @@ public class DietDistribOutput extends AbstractDistribOutput {
                     predator.getPreys().forEach(prey -> {
                         int classPredator = getClass(predator);
                         if (classPredator >= 0) {
-                            values[prey.getGlobalSpeciesIndex()][classPredator] += prey.getBiomass();
+                            values[prey.getSpeciesIndex()][classPredator] += prey.getBiomass();
                         }
                     });
                 });

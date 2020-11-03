@@ -85,7 +85,7 @@ public class MeanTrophicLevelDistribOutput_Netcdf extends AbstractMeanDistribOut
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int iSpec = school.getSpeciesIndex();
+            int iSpec = school.getFileSpeciesIndex();
             int iClass = getClass(school);
             if (iClass >= 0) {
                 values[iSpec][iClass] += school.getInstantaneousBiomass() * school.getTrophicLevel();

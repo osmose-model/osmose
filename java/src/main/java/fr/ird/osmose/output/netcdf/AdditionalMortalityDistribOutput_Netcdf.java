@@ -61,7 +61,7 @@ public class AdditionalMortalityDistribOutput_Netcdf extends AbstractDistribOutp
         for (School school : getSchoolSet().getAliveSchools()) {
             int classSchool = getClass(school);
             if (classSchool >= 0) {
-                values[school.getSpeciesIndex()][getClass(school)] += school.abd2biom(school.getNdead(MortalityCause.ADDITIONAL));
+                values[school.getFileSpeciesIndex()][getClass(school)] += school.abd2biom(school.getNdead(MortalityCause.ADDITIONAL));
             }
         }
     }

@@ -110,11 +110,11 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
 
         for (School school : getSchoolSet().getPresentSchools()) {
             double preyedBiomass = school.getPreyedBiomass();
-            int iSpec = school.getSpeciesIndex();
+            int iSpec = school.getFileSpeciesIndex();
             if (preyedBiomass > 0) {
                 abundanceStage[iSpec][dietOutputStage.getStage(school)] += school.getAbundance();
                 for (Prey prey : school.getPreys()) {
-                    diet[iSpec][dietOutputStage.getStage(school)][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
+                    diet[iSpec][dietOutputStage.getStage(school)][prey.getFileSpeciesIndex()][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
                 }
             }
         }

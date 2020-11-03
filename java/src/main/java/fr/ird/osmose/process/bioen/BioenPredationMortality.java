@@ -100,6 +100,7 @@ public class BioenPredationMortality extends PredationMortality {
             predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
             larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i);
             c_rateBioen[cpt] = getConfiguration().getDouble("predation.c.bioen.sp" + i);
+            cpt++;
         }
 
     }
@@ -190,7 +191,7 @@ public class BioenPredationMortality extends PredationMortality {
     public double getMaxPredationRate(IAggregation predator) {
 
         // recovers the species index
-        int speciesIndex = predator.getGlobalSpeciesIndex();
+        int speciesIndex = predator.getSpeciesIndex();
         
         if(speciesIndex >= this.getNSpecies()) {
             // If species is a background one, return parameter

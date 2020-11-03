@@ -72,9 +72,9 @@ public class ResourceSpecies implements ISpecies {
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Index of the resource group
+     * Index of the resource group within the configuration file.
      */
-    private final int index;
+    private final int fileindex;
     /**
      * Trophic level of the resource group. Parameter <i>species.TL.sp#</i>
      */
@@ -102,7 +102,7 @@ public class ResourceSpecies implements ISpecies {
      */
     private final double accessMax = 0.99d;
     
-    private final int globalindex;
+    private final int index;
     private final int offset;
 
 ///////////////
@@ -112,25 +112,26 @@ public class ResourceSpecies implements ISpecies {
      * Initializes a new resource species with characteristics given as
      * parameters.
      *
-     * @param index, index of the resource group
+     * @param fileindex, index of the resource group
+     * @param index
      */
-    public ResourceSpecies(int index, int globalindex) {
+    public ResourceSpecies(int fileindex, int index) {
         
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        this.index = index;
+        this.fileindex = fileindex;
         this.offset = cfg.getNBkgSpecies() + cfg.getNSpecies();
-        this.globalindex = globalindex + this.offset;
+        this.index = index + this.offset;
         // Initialisation of parameters
-        name = cfg.getString("species.name.sp" + index);
-        sizeMin = cfg.getDouble("species.size.min.sp" + index);
-        sizeMax = cfg.getDouble("species.size.max.sp" + index);
-        trophicLevel = cfg.getFloat("species.tl.sp" + index);
-        if (!cfg.isNull("species.accessibility2fish.file.sp" + index)) {
+        name = cfg.getString("species.name.sp" + fileindex);
+        sizeMin = cfg.getDouble("species.size.min.sp" + fileindex);
+        sizeMax = cfg.getDouble("species.size.max.sp" + fileindex);
+        trophicLevel = cfg.getFloat("species.tl.sp" + fileindex);
+        if (!cfg.isNull("species.accessibility2fish.file.sp" + fileindex)) {
             SingleTimeSeries ts = new SingleTimeSeries();
-            ts.read(cfg.getFile("species.accessibility2fish.file.sp" + index));
+            ts.read(cfg.getFile("species.accessibility2fish.file.sp" + fileindex));
             accessibilityCoeff = ts.getValues();
         } else {
-            double accessibility = cfg.getDouble("species.accessibility2fish.sp" + index);
+            double accessibility = cfg.getDouble("species.accessibility2fish.sp" + fileindex);
             accessibilityCoeff = new double[cfg.getNStep()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
@@ -214,8 +215,8 @@ public class ResourceSpecies implements ISpecies {
      * @return the index of the resource group
      */
     @Override
-    public int getSpeciesIndex() {
-        return index;
+    public int getFileSpeciesIndex() {
+        return fileindex;
     }
     
         /**
@@ -224,15 +225,16 @@ public class ResourceSpecies implements ISpecies {
      * @return the index of the resource group
      */
     @Override
-    public int getGlobalSpeciesIndex() {
-        return getGlobalSpeciesIndex(true);
+    public int getSpeciesIndex() {
+        return getSpeciesIndex(true);
     }
     
-    public int getGlobalSpeciesIndex(boolean applyOffset) { 
+    @Override
+    public int getSpeciesIndex(boolean applyOffset) { 
         if(applyOffset) { 
-            return globalindex;
+            return index;
         } else {
-            return globalindex - this.offset; 
+            return index - this.offset; 
         }
     } 
 

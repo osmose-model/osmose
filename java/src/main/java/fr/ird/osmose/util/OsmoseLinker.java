@@ -115,7 +115,19 @@ public class OsmoseLinker extends OLogger {
     final public int getNRscSpecies() {
         return getConfiguration().getNRscSpecies();
     }
+    
+    final public int[] getFocalIndex() {
+        return getConfiguration().getFocalIndex();
+    }
 
+    final public int[] getBackgroundIndex() {
+        return getConfiguration().getBackgroundIndex();
+    }
+
+    final public int[] getResourceIndex() {
+        return getConfiguration().getResourceIndex();
+    }
+        
     final public BackgroundSpecies getBkgSpecies(int index) {
         return getConfiguration().getBkgSpecies(index);
     }

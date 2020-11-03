@@ -74,10 +74,9 @@ public interface IMarineOrganism {
      *
      * @return the index of the species.
      */
+    public int getFileSpeciesIndex();
     public int getSpeciesIndex();
-
-    public int getGlobalSpeciesIndex();
-    public int getGlobalSpeciesIndex(boolean applyOff);
+    public int getSpeciesIndex(boolean applyOff);
     
     /**
      * Age of the organism in year.
@@ -120,7 +119,7 @@ public interface IMarineOrganism {
 
     public double[] getAccessibility();
 
-    public void preyedUpon(int indexPrey, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord);
+    public void preyedUpon(int indexPrey, int globalindex, float trophicLevel, float age, float length, double preyedBiomass, boolean keepRecord);
     
     public Cell getCell();
     

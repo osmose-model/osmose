@@ -83,7 +83,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
         // loop over all the schools to compute 
         for (School school : getSchoolSet().getSchools()) {
 
-            int i = school.getGlobalSpeciesIndex();
+            int i = school.getSpeciesIndex();
             if (school.isMature()) {
                SSB[i] += school.getInstantaneousBiomass();
             }
@@ -108,7 +108,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
                 // seeding process for collapsed species
                 // if seeding biomass is 0 (no mature indivials, release eggs in the
                 // old fashioned way.
-                SSB[cpt] = this.getSeedingBiomass(i);
+                SSB[cpt] = this.getSeedingBiomass(cpt);
                 double nEgg = this.getSexRatio(cpt) * this.getBeta(cpt) * season * SSB[cpt] * 1000000;
 
                 // in this case, weight_rand is never used.

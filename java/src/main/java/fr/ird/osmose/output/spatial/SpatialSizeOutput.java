@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.output.spatial;
 
 import fr.ird.osmose.Cell;
@@ -49,35 +48,32 @@ import fr.ird.osmose.School;
  * @author pverley
  */
 public class SpatialSizeOutput extends AbstractSpatialOutput {
-    
-    public SpatialSizeOutput(int rank){
+
+    public SpatialSizeOutput(int rank) {
         super(rank);
     }
-    
+
     @Override
-    public String getVarName()
-    {
+    public String getVarName() {
         return "Size";
     }
-    
+
     @Override
-    public String getDesc()
-    {
+    public String getDesc() {
         return "mean size, in centimeter, per species and per cell";
     }
-    
+
     @Override
     public void update() {
-        
+
         // In this case, a weighted mean is applied on the TL, with
         // weights being provided by the biomass
-
         this.common_update();
-        
+
         int nSpecies = getNSpecies();
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
-        
+
         // temporary variable containing the total abundance within one cell
         float abundance[][][];
         abundance = new float[nSpecies][ny][nx];
@@ -91,39 +87,38 @@ public class SpatialSizeOutput extends AbstractSpatialOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        int iSpec = school.getSpeciesIndex();
+                        if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
                             // here, data is TK weighted by the biomass
-                            int iSpec = school.getSpeciesIndex();
                             temp[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
                             abundance[iSpec][j][i] += school.getInstantaneousAbundance();
                         }
-                    } 
-                }      
+                    }
+                }
             }
         }
-        
+
         // Computation of the Weighted Mean for the TL
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
+                for (int i = 0; i < nx; i++) {
                     if (abundance[iSpec][j][i] > 0) {
                         temp[iSpec][j][i] /= abundance[iSpec][j][i];
                     }
                 }
             }
         }
-        
-        
-         // Update of the TL array
+
+        // Update of the TL array
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                        data[iSpec][j][i] += temp[iSpec][j][i];
+                    data[iSpec][j][i] += temp[iSpec][j][i];
                 }
             }
-        }   
+        }
     }
 }

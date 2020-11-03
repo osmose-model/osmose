@@ -51,8 +51,8 @@ import java.util.function.Predicate;
  */
 public class WeightedSpeciesOutput extends AbstractOutput {
     
-    protected HashMap<Integer, double[]> numerator = new HashMap();
-    protected HashMap<Integer, double[]> denumerator = new HashMap();
+    protected double[][] numerator;
+    protected double[][] denumerator;
     
     private final String description;
     private final Predicate<School> predicate;
@@ -83,11 +83,12 @@ public class WeightedSpeciesOutput extends AbstractOutput {
 
     @Override
     public void reset() {
-        numerator.clear();
-        denumerator.clear();
-        for (int i : getConfiguration().getFocalIndex()) { 
-            numerator.put(i, new double[getNOutputRegion()]);
-            denumerator.put(i, new double[getNOutputRegion()]);
+        int nSpecies = getNSpecies();
+        numerator = new double[nSpecies][];
+        denumerator = new double[nSpecies][];
+        for (int i = 0; i < nSpecies; i++) { 
+            numerator[i] = new double[getNOutputRegion()];
+            denumerator[i] = new double[getNOutputRegion()];
         }
     }
 
@@ -104,8 +105,8 @@ public class WeightedSpeciesOutput extends AbstractOutput {
                     int iSpec = school.getSpeciesIndex();
                     for (AbstractOutputRegion region : getOutputRegions()) {
                         if (region.contains(timeStep, school)) {
-                            numerator.get(iSpec)[irg] += wvar;
-                            denumerator.get(iSpec)[irg] += w;
+                            numerator[iSpec][irg] += wvar;
+                            denumerator[iSpec][irg] += w;
                         }
                         irg++;
                     }
@@ -115,14 +116,14 @@ public class WeightedSpeciesOutput extends AbstractOutput {
     @Override
     public void write(float time) {
 
+        int nSpecies = getNSpecies();
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
-            double[] result = new double[getNSpecies()];
-            int cpt = 0;
-            for (int isp : getConfiguration().getFocalIndex()) {
-                result[cpt] = (0 != denumerator.get(isp)[irg])
-                        ? numerator.get(isp)[irg] / denumerator.get(isp)[irg]
+            double[] result = new double[nSpecies];
+            for (int isp = 0; isp < nSpecies; isp++) {
+                result[isp] = (0 != denumerator[isp][irg])
+                        ? numerator[isp][irg] / denumerator[isp][irg]
                         : Double.NaN;
-                cpt++;
+    
             }
             writeVariable(irg, time, result);
         }

@@ -140,9 +140,10 @@ public class OutputManager extends SimulationLinker {
 
         cutoff = getConfiguration().getBoolean("output.cutoff.enabled");
         cutoffAge = new float[getNSpecies()];
+        int cpt = 0;
         if (cutoff) {
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                cutoffAge[iSpec] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
+            for (int iSpec : this.getFocalIndex()) {
+                cutoffAge[cpt++] = getConfiguration().getFloat("output.cutoff.age.sp" + iSpec);
             }
         }
 

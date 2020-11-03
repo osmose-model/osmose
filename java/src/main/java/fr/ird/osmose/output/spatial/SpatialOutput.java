@@ -265,11 +265,11 @@ public class SpatialOutput extends SimulationLinker implements IOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getGlobalSpeciesIndex()]) {
+                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
-                            int iSpec = school.getGlobalSpeciesIndex();
+                            int iSpec = school.getSpeciesIndex();
                             biomass[iSpec][j][i] += school.getInstantaneousBiomass();
                             abundance[iSpec][j][i] += school.getInstantaneousAbundance();
                             mean_size[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();

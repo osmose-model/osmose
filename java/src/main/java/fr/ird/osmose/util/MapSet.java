@@ -95,6 +95,7 @@ public class MapSet extends OsmoseLinker {
      * Index of the species.
      */
     protected final int iSpecies;
+    protected final int iSpeciesFile;
     
     /**
      * Array of map indexes for every age class and simulation time step.
@@ -112,11 +113,12 @@ public class MapSet extends OsmoseLinker {
      */
     protected String[] mapFile;
 
-    public MapSet(int iSpecies, String prefix) {
-        this(iSpecies, prefix, "sp");
+    public MapSet(int iSpeciesFile, int iSpecies, String prefix) {
+        this(iSpeciesFile, iSpecies, prefix, "sp");
     }
 
-    public MapSet(int iSpecies, String prefix, String suffix) {
+    public MapSet(int iSpeciesFile, int iSpecies, String prefix, String suffix) {
+        this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
         this.prefix = prefix;
         this.suffix = suffix;
@@ -179,7 +181,7 @@ public class MapSet extends OsmoseLinker {
 
         // If the movement.map.spX exists, maps are initialised by using NetCDF
         // else, classic definitions of maps.
-        String key = prefix + ".map." + suffix + iSpecies;
+        String key = prefix + ".map." + suffix + iSpeciesFile;
         if (!getConfiguration().isNull(key)) {
             info("Reding NetCDF file " + getConfiguration().getFile(key));
             loadMapsNc();
@@ -210,7 +212,7 @@ public class MapSet extends OsmoseLinker {
      */
     public void loadMapsNc() throws IOException, InvalidRangeException {
 
-        String key = prefix + ".map." + suffix + iSpecies;
+        String key = prefix + ".map." + suffix + iSpeciesFile;
         String ncFile = getConfiguration().getFile(key);
 
         // Open the NetCDF file

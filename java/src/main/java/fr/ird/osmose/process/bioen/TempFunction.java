@@ -144,7 +144,7 @@ public class TempFunction extends AbstractProcess {
 
         // Recovers the temperature of the school cell
         double temp = temperature_input.getValue(school);
-        int i = school.getGlobalSpeciesIndex();
+        int i = school.getSpeciesIndex();
 
         double output = (temp - this.gamma[i]) / (temp - this.gamma[i] + this.km[i]);
         return output;
@@ -162,7 +162,7 @@ public class TempFunction extends AbstractProcess {
         // Recovers the temperature of the school cell
         // Autre formulation de Arrhénius : la plus récente des deux 
         double temp = this.getTemp(school);
-        int i = school.getGlobalSpeciesIndex();
+        int i = school.getSpeciesIndex();
 
         return Math.exp(this.c_t[i] * (1 / this.Tr[i] - 1 / (temp + 273.15)));
 

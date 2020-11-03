@@ -85,7 +85,7 @@ public class FishingMortality extends AbstractMortality {
         int cpt = 0;
         for (int iSpec : getConfiguration().getFocalIndex()) {
             int rank = getRank();
-            Species species = getSpecies(iSpec);
+            Species species = getSpecies(cpt);
             // Find fishing scenario
             Scenario scenario = findScenario(iSpec);
             debug("Fishing scenario for " + species.getName() + " set to " + scenario.toString());
@@ -247,11 +247,12 @@ public class FishingMortality extends AbstractMortality {
         int cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             catches[cpt] = (Type.CATCHES == fishingMortality[cpt].getType());
+            cpt++;
         }
 
         // loop over all the schools
         for (School school : getSchoolSet().getSchools()) {
-            int i = school.getGlobalSpeciesIndex();
+            int i = school.getSpeciesIndex();
             if (catches[i]) {
                 // increment fishable biomass
                 if (!school.isUnlocated() && fishingMortality[i].isFishable(school)) {
@@ -271,7 +272,7 @@ public class FishingMortality extends AbstractMortality {
      */
     @Override
     public double getRate(School school) {
-        int iSpec = school.getGlobalSpeciesIndex();
+        int iSpec = school.getSpeciesIndex();
         if (null != spatialFactor[iSpec]) {
             return fishingMortality[iSpec].getRate(school)
                     * mpaFactor.getValue(school.getCell())
@@ -291,7 +292,7 @@ public class FishingMortality extends AbstractMortality {
      * current time step of the simulation
      */
     public double getCatches(School school) {
-        int iSpec = school.getGlobalSpeciesIndex();
+        int iSpec = school.getSpeciesIndex();
         double catches;
         if (null != spatialFactor[iSpec]){
             catches = fishingMortality[iSpec].getCatches(school)

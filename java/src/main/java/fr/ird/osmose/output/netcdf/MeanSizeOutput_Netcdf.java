@@ -73,7 +73,7 @@ public class MeanSizeOutput_Netcdf extends AbstractOutput_Netcdf {
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
             if (include(school)) {
-                int i = school.getSpeciesIndex();
+                int i = school.getFileSpeciesIndex();
                 meanSize[i] += school.getInstantaneousAbundance() * school.getLength();
                 abundance[i] += school.getInstantaneousAbundance();
             }

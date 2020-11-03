@@ -58,7 +58,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -333,8 +332,7 @@ public class Configuration extends OLogger {
         // barrier.n: reads the parameter that defines whether
         // the bioen module should be used.
         // String keybioen = "simulation.use.bioen";
-        String keybioen = "simulation.bioen.enabled";
-        
+        String keybioen = "simulation.bioen.enabled";     
         this.bioenEnabled = this.getBoolean(keybioen);
 
         String key = "simulation.genetic.enabled";
@@ -401,7 +399,7 @@ public class Configuration extends OLogger {
             String errorMsg = String.format("Resource species may be badly defined. simulation.nresource=%d, number of resource types=%d", nResource_test, nSpecies);
             error(errorMsg, null);
         }
-
+        
         nSimulation = getInt("simulation.nsimulation");
 
         nStepYear = getInt("simulation.time.ndtperyear");

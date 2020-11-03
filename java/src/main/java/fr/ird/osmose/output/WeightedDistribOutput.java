@@ -51,7 +51,7 @@ import java.util.HashMap;
 public class WeightedDistribOutput extends DistribOutput {
 
     // Denumerator distributed by species and by class
-    private HashMap<Integer, double[][]> denominator = new HashMap();
+    private double[][][] denominator;
     
     // school variable getter
     private final SchoolVariableGetter weight;
@@ -75,8 +75,8 @@ public class WeightedDistribOutput extends DistribOutput {
                 int irg = 0;
                 for (AbstractOutputRegion region : getOutputRegions()) {
                     if (region.contains(timeStep, school)) {
-                        values.get(iSpec)[irg][getClass(school)] += wvar;
-                        denominator.get(iSpec)[irg][classSchool] += w;
+                        values[iSpec][irg][getClass(school)] += wvar;
+                        denominator[iSpec][irg][classSchool] += w;
                     }
                     irg++;
                 }
@@ -87,24 +87,26 @@ public class WeightedDistribOutput extends DistribOutput {
     @Override
     public void reset() {
         super.reset();
-        denominator.clear();
-        for (int i : getConfiguration().getFocalIndex()) {
-            denominator.put(i, new double[getNOutputRegion()][getNClass()]);
+        int nSpecies = this.getNSpecies();
+        denominator = new double[nSpecies][][];
+        for (int i = 0; i < nSpecies; i++) {
+            denominator[i] = new double[getNOutputRegion()][this.getNClass()];
         }
     }
 
     @Override
     public void write(float time) {
 
+        int nSpecies = this.getNSpecies();
         int nClass = getNClass();
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
             double[][] array = new double[nClass][getNSpecies() + 1];
             for (int iClass = 0; iClass < nClass; iClass++) {
                 int cpt = 0;
                 array[iClass][cpt++] = getClassThreshold(iClass);
-                for (int iSpec : getConfiguration().getFocalIndex()) {
-                    if (denominator.get(iSpec)[irg][iClass] != 0) {
-                        array[iClass][cpt++] = values.get(iSpec)[irg][iClass] / denominator.get(iSpec)[irg][iClass];
+                for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                    if (denominator[iSpec][irg][iClass] != 0) {
+                        array[iClass][cpt++] = values[iSpec][irg][iClass] / denominator[iSpec][irg][iClass];
                     } else {
                         array[iClass][cpt++] = Double.NaN;
                     }

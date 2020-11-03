@@ -115,7 +115,7 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
                 for (Prey prey : predator.getPreys()) {
                     int classPredator = getClass(predator);
                     if (classPredator >= 0) {
-                        values[prey.getSpeciesIndex()][classPredator] += prey.getBiomass();
+                        values[prey.getFileSpeciesIndex()][classPredator] += prey.getBiomass();
                     }
                 }
             }
