@@ -153,6 +153,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
                         for (Prey prey : school.getPreys()) {
                             int iRsc = prey.getSpeciesIndex();
                             if (iRsc >= offset) {
+                                // check that we are attacking a resource species
                                 preyedResources[iRsc - offset] += prey.getBiomass();
                             }
                         }

@@ -179,9 +179,9 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * memory.
      */
     @Override
-    public void preyedUpon(int indexPrey, int globalIndexPrey, float trophicLevel, float age, float length, double preyedBiom, boolean keepRecord) {
+    public void preyedUpon(int indexPrey, int fileIndexPrey, float trophicLevel, float age, float length, double preyedBiom, boolean keepRecord) {
         if (keepRecord) {
-            Prey prey = new Prey(indexPrey, globalIndexPrey, trophicLevel, age, length, preyedBiom);
+            Prey prey = new Prey(indexPrey, fileIndexPrey, trophicLevel, age, length, preyedBiom);
             int hash = prey.hashCode();
             if (preys.containsKey(hash)) {
                 preys.get(hash).incrementBiomass(prey.getBiomass());
