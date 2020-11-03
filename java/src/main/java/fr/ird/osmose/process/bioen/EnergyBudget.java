@@ -43,7 +43,6 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,7 +84,6 @@ public class EnergyBudget extends AbstractProcess {
         String key;
         int cpt;
         // Redundant with the beta of the BioenPredationMortality class.
-        int nBack = this.getNBkgSpecies();
         int nSpecies = this.getNSpecies();
 
         // Recovers the beta coefficient for focal + background species

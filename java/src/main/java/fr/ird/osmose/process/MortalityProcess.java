@@ -431,7 +431,6 @@ public class MortalityProcess extends AbstractProcess {
             for (FishingGear gear : this.fisheriesMortality) {
                 gear.setDiscards(discards);
             }
-
         }
 
         // distinct random fishery sequences for every school
