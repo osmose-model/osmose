@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.Cell;
@@ -76,44 +75,44 @@ public class FishingMortality extends AbstractMortality {
 
     @Override
     public void init() {
-        
+
         int nSpecies = this.getNSpecies();
         fishingMortality = new AbstractFishingMortality[nSpecies];
         fishingType = new FishingMortality.Type[nSpecies];
         // Find type of fishing scenario
 
         int cpt = 0;
-        for (int iSpec : getConfiguration().getFocalIndex()) {
+        for (int fileSpeciesIndex : getConfiguration().getFocalIndex()) {
             int rank = getRank();
             Species species = getSpecies(cpt);
             // Find fishing scenario
-            Scenario scenario = findScenario(iSpec);
+            Scenario scenario = findScenario(fileSpeciesIndex);
             debug("Fishing scenario for " + species.getName() + " set to " + scenario.toString());
             fishingType[cpt] = scenario.type;
             switch (scenario) {
                 case RATE_ANNUAL:
-                    fishingMortality[cpt]  =new RateBySeasonFishingMortality(rank, species);
+                    fishingMortality[cpt] = new RateBySeasonFishingMortality(rank, species);
                     break;
                 case RATE_BY_YEAR:
-                    fishingMortality[cpt]  =new RateByYearBySeasonFishingMortality(rank, species);
+                    fishingMortality[cpt] = new RateByYearBySeasonFishingMortality(rank, species);
                     break;
                 case RATE_BY_DT_BY_AGE:
-                    fishingMortality[cpt]  =new RateByDtByClassFishingMortality(rank, species);
+                    fishingMortality[cpt] = new RateByDtByClassFishingMortality(rank, species);
                     break;
                 case RATE_BY_DT_BY_SIZE:
-                    fishingMortality[cpt]  =new RateByDtByClassFishingMortality(rank, species);
+                    fishingMortality[cpt] = new RateByDtByClassFishingMortality(rank, species);
                     break;
                 case CATCHES_ANNUAL:
-                    fishingMortality[cpt]  =new CatchesBySeasonFishingMortality(rank, species);
+                    fishingMortality[cpt] = new CatchesBySeasonFishingMortality(rank, species);
                     break;
                 case CATCHES_BY_YEAR:
-                    fishingMortality[cpt]  =new CatchesByYearBySeasonFishingMortality(rank, species);
+                    fishingMortality[cpt] = new CatchesByYearBySeasonFishingMortality(rank, species);
                     break;
                 case CATCHES_BY_DT_BY_AGE:
-                    fishingMortality[cpt]  =new CatchesByDtByClassFishingMortality(rank, species);
+                    fishingMortality[cpt] = new CatchesByDtByClassFishingMortality(rank, species);
                     break;
                 case CATCHES_BY_DT_BY_SIZE:
-                    fishingMortality[cpt]  =new CatchesByDtByClassFishingMortality(rank, species);
+                    fishingMortality[cpt] = new CatchesByDtByClassFishingMortality(rank, species);
                     break;
             }
             // Initialize fishing scenario
@@ -139,9 +138,9 @@ public class FishingMortality extends AbstractMortality {
         List<String> keys = getConfiguration().findKeys("mortality.fishing.spatial.distrib.file.sp*");
         if (keys != null && !keys.isEmpty()) {
             cpt = 0;
-            for (int iSpec : getConfiguration().getFocalIndex()) {
-                if (!getConfiguration().isNull("mortality.fishing.spatial.distrib.file.sp" + iSpec)) {
-                    spatialFactor[cpt] = new GridMap(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + iSpec));
+            for (int fileSpeciesIndex : getConfiguration().getFocalIndex()) {
+                if (!getConfiguration().isNull("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex)) {
+                    spatialFactor[cpt] = new GridMap(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
                     // Make sure the sum of the values in ocean cells is equal to one
                     double sum = 0.d;
                     for (Cell cell : getGrid().getCells()) {
@@ -152,14 +151,14 @@ public class FishingMortality extends AbstractMortality {
                     if (Math.abs(sum - 1.d) > 1e-2) {
                         StringBuilder msg = new StringBuilder();
                         msg.append("The sum of the factors in spatial fishing distribution file ");
-                        msg.append(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + iSpec));
+                        msg.append(getConfiguration().getFile("mortality.fishing.spatial.distrib.file.sp" + fileSpeciesIndex));
                         msg.append(" must be equal to one.");
                         error(msg.toString(), null);
                     }
                 }  // end of existence test
-                
+
                 cpt++;
-                
+
             }  // end of loop on species
         }
 
@@ -170,15 +169,15 @@ public class FishingMortality extends AbstractMortality {
      * exactly one fishing scenario. The function throws an error if no scenario
      * or several scenarios are defined.
      *
-     * @param iSpecies, the index of the species
+     * @param fileSpeciesIndex, the index of the species
      * @return the fishing scenario for this species
      */
-    private Scenario findScenario(int iSpecies) {
+    private Scenario findScenario(int fileSpeciesIndex) {
 
         List<Scenario> scenarios = new ArrayList();
         // List the fishing scenarios listed in the current configuration file
         for (Scenario scenario : Scenario.values()) {
-            if (!getConfiguration().isNull(scenario.key + iSpecies)) {
+            if (!getConfiguration().isNull(scenario.key + fileSpeciesIndex)) {
                 scenarios.add(scenario);
             }
         }
@@ -188,14 +187,14 @@ public class FishingMortality extends AbstractMortality {
             StringBuilder msg = new StringBuilder();
             msg.append("Set a fishing scenario among ");
             msg.append(Arrays.toString(Scenario.values()));
-            error("No fishing scenario has been defined for species " + getSpecies(iSpecies).getName(), new NullPointerException(msg.toString()));
+            error("No fishing scenario has been defined for species " + fileSpeciesIndex, new NullPointerException(msg.toString()));
         }
 
         // Several fishing scenarios have been defined
         if (scenarios.size() > 1) {
             StringBuilder msg = new StringBuilder();
             msg.append("Osmose found several fishing scenarios defined for species ");
-            msg.append(getSpecies(iSpecies).getName());
+            msg.append(fileSpeciesIndex);
             msg.append(": ");
             msg.append(Arrays.toString(scenarios.toArray()));
             error(msg.toString(), new UnsupportedOperationException("Only one fishing scenario per species can be defined."));
@@ -294,7 +293,7 @@ public class FishingMortality extends AbstractMortality {
     public double getCatches(School school) {
         int iSpec = school.getSpeciesIndex();
         double catches;
-        if (null != spatialFactor[iSpec]){
+        if (null != spatialFactor[iSpec]) {
             catches = fishingMortality[iSpec].getCatches(school)
                     * mpaFactor.getValue(school.getCell())
                     * spatialFactor[iSpec].getValue(school.getCell());
