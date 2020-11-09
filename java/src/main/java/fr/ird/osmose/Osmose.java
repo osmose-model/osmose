@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose;
 
 import fr.ird.osmose.util.logging.OLogger;
@@ -90,9 +89,10 @@ public class Osmose extends OLogger {
      * Whether to update the configuration files
      */
     private boolean updateConfiguration = false;
-    
-    /** Whether the model should be run even if configuration and 
-     * jar version differs.
+
+    /**
+     * Whether the model should be run even if configuration and jar version
+     * differs.
      */
     private boolean forceConfiguration = false;
 
@@ -161,11 +161,11 @@ public class Osmose extends OLogger {
                     error("Invalid command line options.", new IllegalArgumentException("-update and -P options are mutually exclusive."));
                 }
             }
-            
-            if (set.isSet("force")) { 
+
+            if (set.isSet("force")) {
                 this.forceConfiguration = true;
             }
-            
+
         }
 
         // Initialises the set of command line options
@@ -231,12 +231,11 @@ public class Osmose extends OLogger {
      * Either update the configuration files, generate lists of Indiseas
      * simulations or run the simulations, depending on the command line
      * arguments.
+     *
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
     public void run() throws IOException, InvalidRangeException {
-        
-        
 
         if (updateConfiguration) {
             for (String configurationFile : configurationFiles) {
@@ -295,7 +294,7 @@ public class Osmose extends OLogger {
             StringBuilder msg = new StringBuilder();
             if (this.forceConfiguration) {
                 msg.append("Your configuration file must be updated. However you decided to force the configuration.");
-                msg.append("**Do it at your own risks!!!");
+                msg.append("**Do it at your own risks!!!**");
                 warning(msg.toString());
             } else {
                 msg.append("Your configuration file must be updated. Please run osmose with the -update option.\n");

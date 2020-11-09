@@ -242,6 +242,9 @@ public class Species implements ISpecies {
     
     /** Return the global index of the species. 
      * 
+     * Index between [0, Nspec - 1].
+     * 
+     * 
      * @return 
      */
     @Override
@@ -249,6 +252,14 @@ public class Species implements ISpecies {
         return index;
     }
     
+    /**
+     * Return the global index of the species.
+     *
+     * Index between [0, Nspec - 1].
+     *
+     * @param applyOff True if offset should be applied.
+     * @return
+     */
     @Override
     public int getSpeciesIndex(boolean applyOff) {
         return index;

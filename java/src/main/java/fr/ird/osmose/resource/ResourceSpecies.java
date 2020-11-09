@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.resource;
 
 import fr.ird.osmose.Configuration;
@@ -101,7 +100,7 @@ public class ResourceSpecies implements ISpecies {
      * double.
      */
     private final double accessMax = 0.99d;
-    
+
     private final int index;
     private final int offset;
 
@@ -116,7 +115,7 @@ public class ResourceSpecies implements ISpecies {
      * @param index
      */
     public ResourceSpecies(int fileindex, int index) {
-        
+
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.fileindex = fileindex;
         this.offset = cfg.getNBkgSpecies() + cfg.getNSpecies();
@@ -194,6 +193,7 @@ public class ResourceSpecies implements ISpecies {
      *
      * @return the name of the resource group
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -218,25 +218,38 @@ public class ResourceSpecies implements ISpecies {
     public int getFileSpeciesIndex() {
         return fileindex;
     }
-    
-        /**
-     * Returns the index of the resource group.
+
+    /**
+     * Return the global index of the species.
      *
-     * @return the index of the resource group
+     * Index between [Nsp + Nbk, Nsp + Nbkg + Nrsc - 1]
+     *
+     *
+     * @return
      */
     @Override
     public int getSpeciesIndex() {
         return getSpeciesIndex(true);
     }
-    
+
+    /**
+     * Return the global index of the species.
+     *
+     * Index between [0, Nrsc - 1] if applyOffset is False Index between [Nsp +
+     * Nbk, Nsp + Nbkg + Nrsc - 1] if applyOffset is True
+     *
+     *
+     * @param applyOffset True if offset of index is applied or not.
+     * @return
+     */
     @Override
-    public int getSpeciesIndex(boolean applyOffset) { 
-        if(applyOffset) { 
+    public int getSpeciesIndex(boolean applyOffset) {
+        if (applyOffset) {
             return index;
         } else {
-            return index - this.offset; 
+            return index - this.offset;
         }
-    } 
+    }
 
     /**
      * Returns the averaged trophic level of the resource group. Parameter
