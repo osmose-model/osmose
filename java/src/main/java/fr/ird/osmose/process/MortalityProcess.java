@@ -190,17 +190,25 @@ public class MortalityProcess extends AbstractProcess {
 
         // fishery (Osmose 4) vs fishing mortality (Osmose 3)
         if (fisheryEnabled) {
+            
             fisheriesMortality = new FishingGear[nfishery];
-            int count = 0;
-            for (int i = 0; i < nfishery; i++) {
-                while (!getConfiguration().canFind("fisheries.name.fsh" + count)) {
-                    count++;
-                }
-                fisheriesMortality[i] = new FishingGear(getRank(), count);
-                fisheriesMortality[i].init();
-                count++;
+            
+            // Recovers the index of fisheries
+            int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
+                    .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted().toArray();      
+ 
+            if(fisheryIndex.length != nfishery) { 
+                String message = "The number of fishery is not consistant with the number of fisheries name.";
+                error(message, new Exception());
             }
-
+                       
+            int cpt = 0;
+            for (int index : fisheryIndex) {
+                fisheriesMortality[cpt] = new FishingGear(getRank(), index);
+                fisheriesMortality[cpt].init();
+                cpt++;
+            }
+            
             fisheryCatchability = new AccessibilityManager(getRank(), "fisheries.catchability", "cat", null);
             fisheryCatchability.init();
 
