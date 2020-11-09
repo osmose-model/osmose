@@ -95,6 +95,7 @@ public class AccessibilityManager extends SimulationLinker {
         }
 
         matrixAccess = new HashMap<>();
+        int nCharSuf = suffix.length();
 
         // If only one file is provided (old way)
         if (!getConfiguration().isNull(this.prefix + ".file")) {
@@ -103,9 +104,11 @@ public class AccessibilityManager extends SimulationLinker {
             Matrix temp = new Matrix(filename, classGetter);
             matrixAccess.put(-1, temp);
         } else {
+            
             // If several access files are defined.
             // recovers the indexes of the accessibility matrixes.
-            int[] index = this.getConfiguration().findKeys(this.prefix + ".file." + this.suffix + "*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".acc") + 4))).toArray();
+            int[] index = this.getConfiguration().findKeys(this.prefix + ".file." + this.suffix + "*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf("." + suffix) + nCharSuf + 1))).toArray();
+            
             for (int i : index) {
 
                 String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix + i);
