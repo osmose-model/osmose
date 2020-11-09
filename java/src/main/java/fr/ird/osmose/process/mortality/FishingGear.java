@@ -165,8 +165,8 @@ public class FishingGear extends AbstractMortality {
         // recovers the time varying rate of the fishing mortality
         // as a product of FBase, FSeason and FSeasonality
         double timeSelect = fishingBase.getFisheryBase(index);
-        timeSelect *= this.fishingPeriod.getSeasonFishMort(index);
-        timeSelect *= this.fishingSeasonality.getSeasonalityFishMort(index);
+        timeSelect *= this.fishingPeriod.getFisheryPeriod(index);
+        timeSelect *= this.fishingSeasonality.getFisherySeasonality(index);
 
         // Recovers the size/age fishery selectivity factor [0, 1]
         double sizeSelect = selectivity.getSelectivity(index, school);
@@ -248,8 +248,8 @@ public class FishingGear extends AbstractMortality {
         for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
 
             double fbase = this.fishingBase.getFisheryBase(i);
-            double fseason = this.fishingPeriod.getSeasonFishMort(i);
-            double fseasonality = this.fishingSeasonality.getSeasonalityFishMort(i);
+            double fseason = this.fishingPeriod.getFisheryPeriod(i);
+            double fseasonality = this.fishingSeasonality.getFisherySeasonality(i);
             double ftot = fbase * fseason * fseasonality;
 
             prw.print(i);

@@ -55,12 +55,12 @@ import java.text.DecimalFormat;
 public class FisherySeasonality extends OsmoseLinker {
 
     private final int fisheryIndex;
-    private double[] seasonality;
+    private double[] fisherySeasonality;
 
     public FisherySeasonality(int fisheryIndex) {
 
         this.fisheryIndex = fisheryIndex;
-        this.seasonality = new double[this.getConfiguration().getNStep()];
+        this.fisherySeasonality = new double[this.getConfiguration().getNStep()];
 
     }
 
@@ -110,7 +110,7 @@ public class FisherySeasonality extends OsmoseLinker {
             for (int i = 0; i < nStep; i++) {
                 int k = (i - ioff) % seasonDuration;
                 k = (k < 0) ? -k : k;
-                this.seasonality[i] = seasonTmp[k];
+                this.fisherySeasonality[i] = seasonTmp[k];
             }
 
         } else {
@@ -118,7 +118,7 @@ public class FisherySeasonality extends OsmoseLinker {
             String filename = getConfiguration().getFile(keyfile);
             // Seasonality must be at least one year, and at max the length of the simulation
             sts.read(filename);
-            seasonality = sts.getValues();
+            fisherySeasonality = sts.getValues();
         }
 
         // Normalizes between 0 and ioff (corresponding to F0)
@@ -147,7 +147,7 @@ public class FisherySeasonality extends OsmoseLinker {
         istart = Math.min(istart, this.getConfiguration().getNStep());
 
         for (int i = istart; i < iend; i++) {
-            total += this.seasonality[i];
+            total += this.fisherySeasonality[i];
         }
         
         BigDecimal bd = new BigDecimal(total).setScale(3, RoundingMode.HALF_EVEN);
@@ -172,8 +172,8 @@ public class FisherySeasonality extends OsmoseLinker {
      * @param idt Time step
      * @return Fishing mortality
      */
-    public double getSeasonalityFishMort(int idt) {
-        return this.seasonality[idt];
+    public double getFisherySeasonality(int idt) {
+        return this.fisherySeasonality[idt];
     }
 
 }
