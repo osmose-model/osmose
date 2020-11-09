@@ -203,13 +203,4 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getSpeciesIndex();
     }
 
-    /**
-     * Returns the index of the species
-     *
-     * @return the index of the species
-     */
-    @Override
-    public int getSpeciesIndex(boolean off) {
-        return this.bkgSpecies.getSpeciesIndex(off);
-    }
 }

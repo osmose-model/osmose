@@ -218,32 +218,13 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     /**
      * Return the global index of the species.
      *
-     * Index between [0, Nbkg - 1] if applyOffset is False. Index between [Nsp,
-     * Nbkg - 1] if applyOffset is True
-     *
-     *
-     * @param applyOffset True if offset of index is applied or not.
-     * @return
-     */
-    @Override
-    public int getSpeciesIndex(boolean applyOffset) {
-        if (applyOffset) {
-            return this.index;
-        } else {
-            return this.index - this.offset;
-        }
-    }
-
-    /**
-     * Return the global index of the species.
-     *
      * Index between [Nsp, Nbkg - 1] if applyOffset is True
      *
      * @return
      */
     @Override
     public int getSpeciesIndex() {
-        return this.getSpeciesIndex(true);
+        return this.index;
     }
 
     /**

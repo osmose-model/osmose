@@ -179,14 +179,13 @@ public class Matrix extends OsmoseLinker {
                 for (int ipred = 0; ipred < lineStr.length - 1; ipred++) {
                     this.accessibilityMatrix[iprey][ipred] = Double.valueOf(lineStr[ipred + 1]);
                 }
-
             }
 
         } catch (IOException ex) {
             error("Error loading accessibility matrix from file " + filename, ex);
-        }
+        }        
     }
-
+    
     /**
      * Recovers the name of the accessibility file.
      * @return 

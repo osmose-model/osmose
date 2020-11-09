@@ -171,6 +171,7 @@ public abstract class AbstractSchool extends GridPoint implements IAggregation {
      * length) otherwise it only increments the preyed biomass.
      *
      * @param indexPrey, the index of the prey
+     * @param fileIndexPrey
      * @param trophicLevel, the trophic level of the prey
      * @param preyedBiom, the biomass preyed on this prey
      * @param age, the age of the prey

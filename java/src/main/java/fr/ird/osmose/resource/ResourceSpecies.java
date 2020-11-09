@@ -229,26 +229,7 @@ public class ResourceSpecies implements ISpecies {
      */
     @Override
     public int getSpeciesIndex() {
-        return getSpeciesIndex(true);
-    }
-
-    /**
-     * Return the global index of the species.
-     *
-     * Index between [0, Nrsc - 1] if applyOffset is False. Index between [Nsp +
-     * Nbk, Nsp + Nbkg + Nrsc - 1] if applyOffset is True
-     *
-     *
-     * @param applyOffset True if offset of index is applied or not.
-     * @return
-     */
-    @Override
-    public int getSpeciesIndex(boolean applyOffset) {
-        if (applyOffset) {
-            return index;
-        } else {
-            return index - this.offset;
-        }
+        return this.index;
     }
 
     /**

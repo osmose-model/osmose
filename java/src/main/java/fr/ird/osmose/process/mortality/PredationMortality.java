@@ -251,6 +251,8 @@ public class PredationMortality extends AbstractMortality {
 
         Matrix accessibilityMatrix = predationAccess.getMatrix();
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
+        
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
 
         double[] accessibility = new double[preys.size()];
         int iSpecPred = predator.getSpeciesIndex();
@@ -260,7 +262,7 @@ public class PredationMortality extends AbstractMortality {
         double[] percentResource = getPercentResource(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
-            int iSpecPrey = preys.get(iPrey).getSpeciesIndex(false);
+            int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index without 
             IAggregation prey = (IAggregation) preys.get(iPrey);
             int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
             // The prey is an other school
@@ -276,7 +278,7 @@ public class PredationMortality extends AbstractMortality {
             } else {
                 // The prey is a resource group
                 accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred)
-                        * percentResource[iSpecPrey];
+                        * percentResource[iSpecPrey - nSpecies];
             }
         }
         return accessibility;
