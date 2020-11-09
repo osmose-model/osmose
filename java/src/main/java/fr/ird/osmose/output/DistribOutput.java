@@ -211,7 +211,7 @@ public class DistribOutput extends AbstractOutput {
         String[] headers = new String[getNSpecies() + 1];
         int cpt = 0;
         headers[cpt++] = distrib.getType().toString();
-        for (int i : getConfiguration().getFocalIndex()) {
+        for (int i  = 0; i < getNSpecies(); i++) {
             headers[cpt++] = getSpecies(i).getName();
         }
         return headers;

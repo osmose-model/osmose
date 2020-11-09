@@ -122,9 +122,9 @@ public class SpeciesOutput extends AbstractOutput {
     @Override
     final String[] getHeaders() {
         String[] species = new String[getNSpecies()];
-        int cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
-            species[cpt++] = getSpecies(i).getName();
+        for (int cpt = 0; cpt < getNSpecies(); cpt++) {
+            species[cpt] = getSpecies(cpt).getName();
+            cpt++;
         }
         return species;
     }
