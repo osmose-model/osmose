@@ -22,6 +22,7 @@
 
 ### Bugfix
 
+- Correction of a bug in the init. of accessibility manager when varying over time. The index array was hardcoded to `acc` instead of suffix
 - Correction of bugs in the init. and use of some arrays (mixing hashmap and indices). **Has no effect if configurations are setup in the old way (focal ranging from 0 to N)**
 - Correction of a bug in the saving of ingestion (egross was saved instead of energy)
 - Correction of a bug in the saving of fisheries: mean instead of cumulated sum was saved. Revealed by Ghassen.
