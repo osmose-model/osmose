@@ -110,7 +110,7 @@ public class AccessibilityManager extends SimulationLinker {
             int[] index = this.getConfiguration().findKeys(this.prefix + ".file." + this.suffix + "*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf("." + suffix) + nCharSuf + 1))).toArray();
             
             for (int i : index) {
-
+                
                 String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix + i);
                 Matrix temp = new Matrix(filename, classGetter);
                 matrixAccess.put(i, temp);
@@ -127,7 +127,7 @@ public class AccessibilityManager extends SimulationLinker {
                     for (int s : season) {
                         indexAccess[y][s] = i;
                     }
-                }
+                }                
             }  // end of loop on access files
 
             for (int y = 0; y < nyear; y++) {
@@ -147,7 +147,7 @@ public class AccessibilityManager extends SimulationLinker {
     private void eliminateTwinAccess() {
 
         // recover the sorted indexes of the access. objects;
-        int[] index = (int[]) this.matrixAccess.keySet().stream().sorted().mapToInt(key -> key).toArray();
+        int[] index = (int[]) this.matrixAccess.keySet().stream().mapToInt(key -> key).toArray();
         int nmaps = index.length;
 
         int[] mapIndexNoTwin = new int[nmaps];
@@ -167,11 +167,16 @@ public class AccessibilityManager extends SimulationLinker {
 
         int nseason = getConfiguration().getNStepYear();
         int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
-
-        for (int y = 0; y < nyear; y++) {
-            for (int s = 0; s < nseason; s++) {
-                int indexMap = indexAccess[y][s];
-                indexAccess[y][s] = mapIndexNoTwin[indexMap];
+        
+        for (int iMap = 0; iMap < nmaps; iMap++) {
+            // Recover the original mapIndex
+            int oldIndex = index[iMap];
+            for (int y = 0; y < nyear; y++) {
+                for (int s = 0; s < nseason; s++) {
+                    if (indexAccess[y][s] == oldIndex) {
+                        indexAccess[y][s] = mapIndexNoTwin[iMap];
+                    }
+                }
             }
         }
     }
