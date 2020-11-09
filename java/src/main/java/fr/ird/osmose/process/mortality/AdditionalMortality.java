@@ -81,10 +81,10 @@ public class AdditionalMortality extends AbstractMortality {
 
         // Find and initialises larva and adult Additional Mortality scenario for every species
         int cpt = 0;
-        for (int iSpec : getConfiguration().getFocalIndex()) {
+        for (int fileSpeciesIndex : getConfiguration().getFocalIndex()) {
             Species species = getSpecies(cpt);
             // Find Larva Additional Mortality scenario
-            ScenarioLarva scenarioLarva = findScenarioLarva(iSpec);
+            ScenarioLarva scenarioLarva = findScenarioLarva(fileSpeciesIndex);
             debug("Larva Additional Mortality scenario for " + species.getName() + " set to " + scenarioLarva.toString());
             switch (scenarioLarva) {
                 case CONSTANT:
@@ -98,7 +98,7 @@ public class AdditionalMortality extends AbstractMortality {
             larvaAdditionalMortality[cpt].init();
             
             // Find Additional Mortality scenario
-            Scenario scenario = findScenario(iSpec);
+            Scenario scenario = findScenario(fileSpeciesIndex);
             debug("Additional Mortality scenario for " + species.getName() + " set to " + scenario.toString());
             switch (scenario) {
                 case ANNUAL:
@@ -127,10 +127,10 @@ public class AdditionalMortality extends AbstractMortality {
         spatialD = new GridMap[nSpecies];
         List<String> keys = getConfiguration().findKeys("mortality.additional.spatial.distrib.file.sp*");
         if (keys != null && !keys.isEmpty()) {
-             cpt = 0;
-            for (int iSpec : getConfiguration().getFocalIndex()) {
-                if (!getConfiguration().isNull("mortality.additional.spatial.distrib.file.sp" + iSpec)) {
-                    spatialD[cpt] = new GridMap(getConfiguration().getFile("mortality.additional.spatial.distrib.file.sp" + iSpec));
+            cpt = 0;
+            for (int fileSpeciesIndex : getConfiguration().getFocalIndex()) {
+                if (!getConfiguration().isNull("mortality.additional.spatial.distrib.file.sp" + fileSpeciesIndex)) {
+                    spatialD[cpt] = new GridMap(getConfiguration().getFile("mortality.additional.spatial.distrib.file.sp" + fileSpeciesIndex));
                 }
                 cpt++;
             }
@@ -169,15 +169,15 @@ public class AdditionalMortality extends AbstractMortality {
      * Osmose accepts exactly one scenario. The function throws an error if no
      * scenario or several scenarios are defined.
      *
-     * @param iSpecies, the index of the species
+     * @param fileSpeciesIndex, the index of the species
      * @return the Additional Mortality scenario for this species
      */
-    private Scenario findScenario(int iSpecies) {
+    private Scenario findScenario(int fileSpeciesIndex) {
 
         List<Scenario> scenarios = new ArrayList();
         // List the scenarios listed in the current configuration file
         for (Scenario scenario : Scenario.values()) {
-            if (!getConfiguration().isNull(scenario.key + iSpecies)) {
+            if (!getConfiguration().isNull(scenario.key + fileSpeciesIndex)) {
                 scenarios.add(scenario);
             }
         }
@@ -187,14 +187,14 @@ public class AdditionalMortality extends AbstractMortality {
             StringBuilder msg = new StringBuilder();
             msg.append("Set an Additional Mortality scenario among ");
             msg.append(Arrays.toString(Scenario.values()));
-            error("No Additional Mortality scenario has been defined for species " + getSpecies(iSpecies).getName(), new NullPointerException(msg.toString()));
+            error("No Additional Mortality scenario has been defined for species " + fileSpeciesIndex, new NullPointerException(msg.toString()));
         }
 
         // Several scenarios have been defined
         if (scenarios.size() > 1) {
             StringBuilder msg = new StringBuilder();
             msg.append("Osmose found several Additional Mortality scenarios defined for species ");
-            msg.append(getSpecies(iSpecies).getName());
+            msg.append(fileSpeciesIndex);
             msg.append(": ");
             msg.append(Arrays.toString(scenarios.toArray()));
             error(msg.toString(), new UnsupportedOperationException("Only one Additional Mortality scenario per species can be defined."));
@@ -209,15 +209,15 @@ public class AdditionalMortality extends AbstractMortality {
      * species. Osmose accepts exactly one scenario. The function throws an
      * error if no scenario or several scenarios are defined.
      *
-     * @param iSpecies, the index of the species
+     * @param fileSpeciesIndex, the index of the species
      * @return the Larva Additional Mortality scenario for this species
      */
-    private ScenarioLarva findScenarioLarva(int iSpecies) {
+    private ScenarioLarva findScenarioLarva(int fileSpeciesIndex) {
 
         List<ScenarioLarva> scenarios = new ArrayList();
         // List the scenarios listed in the current configuration file
         for (ScenarioLarva scenario : ScenarioLarva.values()) {
-            if (!getConfiguration().isNull(scenario.key + iSpecies)) {
+            if (!getConfiguration().isNull(scenario.key + fileSpeciesIndex)) {
                 scenarios.add(scenario);
             }
         }
@@ -227,14 +227,14 @@ public class AdditionalMortality extends AbstractMortality {
             StringBuilder msg = new StringBuilder();
             msg.append("Set a Larva Additional Mortality scenario among ");
             msg.append(Arrays.toString(Scenario.values()));
-            error("No Larva Additional Mortality scenario has been defined for species " + getSpecies(iSpecies).getName(), new NullPointerException(msg.toString()));
+            error("No Larva Additional Mortality scenario has been defined for species " + fileSpeciesIndex, new NullPointerException(msg.toString()));
         }
 
         // Several scenarios have been defined
         if (scenarios.size() > 1) {
             StringBuilder msg = new StringBuilder();
             msg.append("Osmose found several Larva Additional Mortality scenarios defined for species ");
-            msg.append(getSpecies(iSpecies).getName());
+            msg.append(fileSpeciesIndex);
             msg.append(": ");
             msg.append(Arrays.toString(scenarios.toArray()));
             error(msg.toString(), new UnsupportedOperationException("Only one Larva Additional Mortality scenario per species can be defined."));

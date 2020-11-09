@@ -120,8 +120,8 @@ public class ReproductionProcess extends AbstractProcess {
         // Seeding biomass
         seedingBiomass = new double[nSpecies];
         cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
-            seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + i);
+        for (int fileIndex : getConfiguration().getFocalIndex()) {
+            seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + fileIndex);
             cpt++;
         }
         // Seeding duration (expressed in number of time steps)
@@ -170,6 +170,7 @@ public class ReproductionProcess extends AbstractProcess {
         }
 
         // loop over the species to lay cohort at age class 0
+        // cpt starts at -1 since it is increment at the beginning of the loop
         cpt = -1;
         for (int i : getConfiguration().getFocalIndex()) {
             

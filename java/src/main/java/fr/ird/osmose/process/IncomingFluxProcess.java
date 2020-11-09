@@ -138,10 +138,10 @@ public class IncomingFluxProcess extends AbstractProcess {
         GrowthProcess growthProcess = new GrowthProcess(getRank());
         growthProcess.init();
         int cpt  = 0;
-        for (int iSpec : getConfiguration().getFocalIndex()) {
-            if (!getConfiguration().isNull("flux.incoming.byDt.byAge.file.sp" + iSpec)) {
+        for (int fileIndex : getConfiguration().getFocalIndex()) {
+            if (!getConfiguration().isNull("flux.incoming.byDt.byAge.file.sp" + fileIndex)) {
                 ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
-                timeSerieByAge.read(getConfiguration().getFile("flux.incoming.byDt.byAge.file.sp" + iSpec));
+                timeSerieByAge.read(getConfiguration().getFile("flux.incoming.byDt.byAge.file.sp" + fileIndex));
                 biomassIn[cpt] = timeSerieByAge.getValues();
                 // Read age from file, and set ageIn as the middle of the age classes
                 ageIn[cpt] =  new int[timeSerieByAge.getNClass()];
@@ -157,9 +157,9 @@ public class IncomingFluxProcess extends AbstractProcess {
                     double age = ageIn[cpt][iAge] / (double) getConfiguration().getNStepYear();
                     lengthIn[cpt][iAge] = (float) growthProcess.getGrowth(cpt).ageToLength(age);   
                 }
-            } else if (!getConfiguration().isNull("flux.incoming.byDt.bySize.file.sp" + iSpec)) {
+            } else if (!getConfiguration().isNull("flux.incoming.byDt.bySize.file.sp" + fileIndex)) {
                 ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
-                timeSerieBySize.read(getConfiguration().getFile("flux.incoming.byDt.bySize.file.sp" + iSpec));
+                timeSerieBySize.read(getConfiguration().getFile("flux.incoming.byDt.bySize.file.sp" + fileIndex));
                 biomassIn[cpt] = timeSerieBySize.getValues();
                 // Read length from file and set lengthIn as middle of the length classes
                 lengthIn[cpt] = new float[timeSerieBySize.getNClass()];
@@ -167,7 +167,7 @@ public class IncomingFluxProcess extends AbstractProcess {
                     lengthIn[cpt][iLength] = (float) (0.5 * (timeSerieBySize.getClass(iLength) + timeSerieBySize.getClass(iLength + 1)));
                 }
                 // Last lengthIn as the middle of interval between last class and length infinity
-                float lInf = getConfiguration().getFloat("species.linf.sp" + iSpec);
+                float lInf = getConfiguration().getFloat("species.linf.sp" + fileIndex);
                 lengthIn[cpt][lengthIn[cpt].length - 1] = (float) (0.5 * (timeSerieBySize.getClass(lengthIn[cpt].length - 1) + lInf));
                 // Compute corresponding age in with Von Bertallanfy
                 ageIn[cpt] = new int[timeSerieBySize.getNClass()];
@@ -187,15 +187,18 @@ public class IncomingFluxProcess extends AbstractProcess {
     @Override
     public void run() {
         int iTime = getSimulation().getIndexTimeSimu();
+        
+        // cpt starts at -1 since incremented at the beginning of the loop
         int cpt = -1;
         for (int iSpec : getConfiguration().getFocalIndex()) {
-            
+
             cpt++;
-            
+
             // No incoming flux for this species, skip
             if (biomassIn[cpt] == null) {
                 continue;
             }
+            
             Species species = getSpecies(cpt);
             // number of school gets a peculiar meaning here: it is the number
             // of school created per age/size class

@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
@@ -72,18 +71,18 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
      * _FillValue attribute for cells on land
      */
     private final float FILLVALUE = -99.f;
-        
+
     /**
      * Object for creating/writing netCDF files.
      */
     private NetcdfFileWriter nc;
-    
+
     // spatial indicators
     private float[][] trait_mean;
     private float[] abundance;
-    
+
     private int recordFrequency;
-    
+
     // index of the record index (iterating at each write event)
     private int record_index;
 
@@ -93,7 +92,7 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void init() {
-        
+
         record_index = 0;
         recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
         /*
@@ -113,16 +112,16 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
         Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
         Dimension traitDim = nc.addDimension(null, "trait", this.getSimulation().getNEvolvingTraits());
         Dimension timeDim = nc.addUnlimitedDimension("time");
-        
+
         /*
          * Add variables
-         */    
+         */
         // Creating coordinate time variable 
         Variable tvar = nc.addVariable(null, "time", DataType.FLOAT, "time");
         tvar.addAttribute(new Attribute("units", "days since 0-1-1 0:0:0"));
         tvar.addAttribute(new Attribute("calendar", "360_day"));
         tvar.addAttribute(new Attribute("description", "time ellapsed, in days, since the beginning of the simulation"));
-        
+
         // Creation of the output variable
         ArrayList<Dimension> outdim_l = new ArrayList<>();
         outdim_l.add(timeDim);
@@ -132,19 +131,19 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
         trait_mean_var.addAttribute(new Attribute("units", ""));
         trait_mean_var.addAttribute(new Attribute("description", "Mean value of the trait"));
         trait_mean_var.addAttribute(new Attribute("_FillValue", -99.f));
-        
+
         // Writting coordinate species variable + attributes
-        Variable specvar = nc.addVariable(null, "species", DataType.INT, "species");        
-        for(int i = 0; i<this.getNSpecies(); i++) {
+        Variable specvar = nc.addVariable(null, "species", DataType.INT, "species");
+        for (int i = 0; i < this.getNSpecies(); i++) {
             specvar.addAttribute(new Attribute(String.format("species%d", i), this.getSpecies(i).getName()));
         }
-       
+
         // Writting coordinate trait variable + attributes
-        Variable traitvar = nc.addVariable(null, "trait", DataType.INT, "trait"); 
+        Variable traitvar = nc.addVariable(null, "trait", DataType.INT, "trait");
         for (int i = 0; i < this.getNEvolvingTraits(); i++) {
             traitvar.addAttribute(new Attribute(String.format("trait%d", i), this.getEvolvingTrait(i).getName()));
         }
-         
+
         try {
             /*
              * Validates the structure of the NetCDF file.
@@ -155,19 +154,19 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
              */
             ArrayInt.D1 arrTrait = new ArrayInt.D1(this.getSimulation().getNEvolvingTraits());
             ArrayInt.D1 arrSpecies = new ArrayInt.D1(this.getNSpecies());
-            
-            for(int i = 0; i < this.getNSpecies(); i++) { 
+
+            for (int i = 0; i < this.getNSpecies(); i++) {
                 arrSpecies.set(i, i);
             }
-            
+
             for (int i = 0; i < this.getSimulation().getNEvolvingTraits(); i++) {
                 arrTrait.set(i, i);
             }
-            
+
             Variable varspec = nc.findVariable("species");
             nc.write(varspec, arrSpecies);
-            
-            Variable vartrait = nc.findVariable("trait");            
+
+            Variable vartrait = nc.findVariable("trait");
             nc.write(vartrait, arrTrait);
 
         } catch (IOException ex) {
@@ -210,8 +209,8 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
             Species species = this.getSpecies(i);
 
             // listing all the schools that belong to the given species
-            List<School> listSchool = this.getSchoolSet().getSchools(species);         
-            
+            List<School> listSchool = this.getSchoolSet().getSchools(species);
+
             // Loop over all the traits
             for (School sch : listSchool) {
                 this.abundance[i] += sch.getInstantaneousAbundance();
@@ -254,10 +253,10 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
         } catch (InvalidRangeException | IOException ex) {
             Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         // increments the record index.
         record_index += 1;
-        
+
     }
 
     private String getFilename() {
@@ -275,5 +274,5 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
     public boolean isTimeToWrite(int iStepSimu) {
         // Always true, every time step should be written in the NetCDF file.
         return (((iStepSimu + 1) % recordFrequency) == 0);
-    }    
+    }
 }
