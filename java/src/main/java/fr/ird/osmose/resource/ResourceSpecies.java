@@ -235,7 +235,7 @@ public class ResourceSpecies implements ISpecies {
     /**
      * Return the global index of the species.
      *
-     * Index between [0, Nrsc - 1] if applyOffset is False Index between [Nsp +
+     * Index between [0, Nrsc - 1] if applyOffset is False. Index between [Nsp +
      * Nbk, Nsp + Nbkg + Nrsc - 1] if applyOffset is True
      *
      *

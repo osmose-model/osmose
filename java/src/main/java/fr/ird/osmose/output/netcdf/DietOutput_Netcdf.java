@@ -84,7 +84,7 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void reset() {
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies();
         diet = new double[nSpec][][][];
         abundanceStage = new double[nSpec][];
@@ -110,11 +110,11 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
 
         for (School school : getSchoolSet().getPresentSchools()) {
             double preyedBiomass = school.getPreyedBiomass();
-            int iSpec = school.getFileSpeciesIndex();
+            int iSpec = school.getSpeciesIndex();
             if (preyedBiomass > 0) {
                 abundanceStage[iSpec][dietOutputStage.getStage(school)] += school.getAbundance();
                 for (Prey prey : school.getPreys()) {
-                    diet[iSpec][dietOutputStage.getStage(school)][prey.getFileSpeciesIndex()][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
+                    diet[iSpec][dietOutputStage.getStage(school)][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
                 }
             }
         }
@@ -123,7 +123,7 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void write(float time) {
 
-        int nSpec = getConfiguration().getNSpecies();
+        int nSpec = getConfiguration().getNSpecies() + getNBkgSpecies();
 //        double[][] sum = new double[getNSpecies()][];
 //        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
 //            sum[iSpec] = new double[nDietStage[iSpec]];
@@ -194,14 +194,14 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     void init_nc_dims_coords() {
 
-        int nSpec = this.getNSpecies();
+        int nSpec = this.getNSpecies() + this.getNBkgSpecies();
 
         this.nPred = 0;
         List<String> listPred = new ArrayList<>();
         List<String> listPrey = new ArrayList<>();
         // Init the predator coordinates
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             for (int iStage = 0; iStage < nStage; iStage++) {
@@ -243,7 +243,7 @@ public class DietOutput_Netcdf extends AbstractOutput_Netcdf {
             cpt++;
         }
 
-        this.setDims(new ArrayList<Dimension>(Arrays.asList(this.getTimeDim(), predDim, preyDim)));
+        this.setDims(new ArrayList<>(Arrays.asList(this.getTimeDim(), predDim, preyDim)));
 
     }
 
