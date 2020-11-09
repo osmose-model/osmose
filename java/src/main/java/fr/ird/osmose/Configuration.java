@@ -494,6 +494,7 @@ public class Configuration extends OLogger {
             }
             outputRegions.add(new OutputWholeRegion(0));
         }
+        
         // list output regions
         HashSet<Integer> rg = new HashSet(
                 findKeys("output.regions.*.rg*").stream()
