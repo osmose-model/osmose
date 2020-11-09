@@ -262,7 +262,7 @@ public class PredationMortality extends AbstractMortality {
         double[] percentResource = getPercentResource(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
-            int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index without 
+            int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index with offset 
             IAggregation prey = (IAggregation) preys.get(iPrey);
             int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
             // The prey is an other school

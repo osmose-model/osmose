@@ -64,19 +64,19 @@ public class FisherySelectivity extends OsmoseLinker {
     /**
      * Prefix used to define parameters.
      */
-    private String selPrefix;
+    private final String selPrefix;
 
-    private String selSuffix;
+    private final String selSuffix;
 
     /**
      * Array of l50 values. One value per time step.
      */
-    private double[] l50_array;
+    private double[] l50Array;
 
     /**
      * Array of l75 values. One value per time step.
      */
-    private double[] l75_array;
+    private double[] l75Array;
 
     /**
      * Value below which selectivity is forced to 0.
@@ -86,12 +86,12 @@ public class FisherySelectivity extends OsmoseLinker {
     /**
      * Array of seelectivity types. One value per time step.
      */
-    private double[] selectType_array;
+    private double[] selectTypeArray;
 
     /**
      * Array of selectivity methods. 0 = knife edge. 1 = Sigmoid 2 = Gaussian 3 = logNormal
      */
-    private SizeSelect select[];
+    private SizeSelect sizeSelectMethods[];
 
     /**
      * Determines which function should be used to compute the selectivity.
@@ -143,11 +143,11 @@ public class FisherySelectivity extends OsmoseLinker {
         }
 
         // Init the size selectivity array
-        select = new SizeSelect[4];
-        select[0] = (index, sch) -> this.getKnifeEdgeSelectivity(index, sch);  // knife edge selectivity
-        select[1] = (index, sch) -> this.getSigmoidSelectivity(index, sch);    // Sigmoid selectivity
-        select[2] = (index, sch) -> this.getGaussianSelectivity(index, sch);   // Gaussian selectivity
-        select[3] = (index, sch) -> this.getLogNormalSelectivity(index, sch);   // Log-normal selectivity
+        sizeSelectMethods = new SizeSelect[4];
+        sizeSelectMethods[0] = (index, sch) -> this.getKnifeEdgeSelectivity(index, sch);  // knife edge selectivity
+        sizeSelectMethods[1] = (index, sch) -> this.getSigmoidSelectivity(index, sch);    // Sigmoid selectivity
+        sizeSelectMethods[2] = (index, sch) -> this.getGaussianSelectivity(index, sch);   // Gaussian selectivity
+        sizeSelectMethods[3] = (index, sch) -> this.getLogNormalSelectivity(index, sch);   // Log-normal selectivity
 
     }
 
@@ -158,11 +158,11 @@ public class FisherySelectivity extends OsmoseLinker {
     private void initByAge() {
 
         String prefix = selPrefix + ".a50";
-        this.l50_array = this.initArray(prefix);
+        this.l50Array = this.initArray(prefix);
 
-        this.selectType_array = new double[l50_array.length];
-        for (int i = 0; i < selectType_array.length; i++) {
-            selectType_array[i] = 0.d;
+        this.selectTypeArray = new double[l50Array.length];
+        for (int i = 0; i < selectTypeArray.length; i++) {
+            selectTypeArray[i] = 0.d;
         }
     }
 
@@ -171,19 +171,19 @@ public class FisherySelectivity extends OsmoseLinker {
         String prefix;
 
         prefix = selPrefix + ".l50";
-        this.l50_array = this.initArray(prefix);
+        this.l50Array = this.initArray(prefix);
 
         prefix = selPrefix + ".type";
-        this.selectType_array = this.initArray(prefix);
+        this.selectTypeArray = this.initArray(prefix);
 
         double sum = 0.;
-        for (double v : this.selectType_array) {
+        for (double v : this.selectTypeArray) {
             sum += v;
         }
 
         if (sum != 0) {
             prefix = selPrefix + ".l75";
-            this.l75_array = this.initArray(prefix);
+            this.l75Array = this.initArray(prefix);
         }
 
     }
@@ -196,8 +196,8 @@ public class FisherySelectivity extends OsmoseLinker {
      */
     public double getSelectivity(int index, AbstractSchool school) {
 
-        int selType = (int) this.selectType_array[index];
-        return (select[selType].getSelectivity(index, school));
+        int selType = (int) this.selectTypeArray[index];
+        return (sizeSelectMethods[selType].getSelectivity(index, school));
 
     }
 
@@ -209,7 +209,7 @@ public class FisherySelectivity extends OsmoseLinker {
      */
     public double getKnifeEdgeSelectivity(int index, AbstractSchool school) {
 
-        double l50 = this.l50_array[index];
+        double l50 = this.l50Array[index];
 
         double output = (varGetter.getVariable(school) < l50) ? 0 : 1;
         return output;
@@ -223,8 +223,8 @@ public class FisherySelectivity extends OsmoseLinker {
      */
     public double getGaussianSelectivity(int index, AbstractSchool school) {
 
-        double l50 = this.l50_array[index];
-        double l75 = this.l75_array[index];
+        double l50 = this.l50Array[index];
+        double l75 = this.l75Array[index];
         double q75 = 0.674489750196082; // declare constant to save time
         // this is the qnorm(0.75)
         
@@ -256,8 +256,8 @@ public class FisherySelectivity extends OsmoseLinker {
      */
   public double getLogNormalSelectivity(int index, AbstractSchool school) {
     
-    double l50 = this.l50_array[index];
-    double l75 = this.l75_array[index];
+    double l50 = this.l50Array[index];
+    double l75 = this.l75Array[index];
     double q75 = 0.674489750196082; // declare constant to save time
     // this is the qnorm(0.75), qnorm has to be used here
     
@@ -289,8 +289,8 @@ public class FisherySelectivity extends OsmoseLinker {
      */
     public double getSigmoidSelectivity(int index, AbstractSchool school) {
 
-        double l50 = this.l50_array[index];
-        double l75 = this.l75_array[index];
+        double l50 = this.l50Array[index];
+        double l75 = this.l75Array[index];
 
         double s1 = (l50 * Math.log(3)) / (l75 - l50);
         double s2 = s1 / l50;

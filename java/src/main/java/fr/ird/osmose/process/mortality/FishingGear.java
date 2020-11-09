@@ -45,7 +45,7 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.fishery.FisheryFBase;
+import fr.ird.osmose.process.mortality.fishery.FisheryBase;
 import fr.ird.osmose.process.mortality.fishery.FisheryPeriod;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
@@ -73,7 +73,7 @@ public class FishingGear extends AbstractMortality {
     private final int fisheryIndex;
 
     // Initialize the time varying array
-    private FisheryFBase fishingBase;
+    private FisheryBase fishingBase;
     private FisheryPeriod fishingPeriod;
     private FisherySeasonality fishingSeasonality;
 
@@ -109,7 +109,7 @@ public class FishingGear extends AbstractMortality {
         checkFisheryEnabled = cfg.getBoolean("fisheries.check.enabled");
 
         // Initialize the time varying array
-        fishingBase = new FisheryFBase(fisheryIndex);
+        fishingBase = new FisheryBase(fisheryIndex);
         fishingBase.init();
 
         fishingPeriod = new FisheryPeriod(fisheryIndex);
@@ -164,7 +164,7 @@ public class FishingGear extends AbstractMortality {
 
         // recovers the time varying rate of the fishing mortality
         // as a product of FBase, FSeason and FSeasonality
-        double timeSelect = fishingBase.getFBase(index);
+        double timeSelect = fishingBase.getFisheryBase(index);
         timeSelect *= this.fishingPeriod.getSeasonFishMort(index);
         timeSelect *= this.fishingSeasonality.getSeasonalityFishMort(index);
 
@@ -191,7 +191,7 @@ public class FishingGear extends AbstractMortality {
      *
      * @return the fishery index
      */
-    public int getFIndex() {
+    public int getFisheryIndex() {
         return this.fisheryIndex;
     }
 
@@ -247,7 +247,7 @@ public class FishingGear extends AbstractMortality {
 
         for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
 
-            double fbase = this.fishingBase.getFBase(i);
+            double fbase = this.fishingBase.getFisheryBase(i);
             double fseason = this.fishingPeriod.getSeasonFishMort(i);
             double fseasonality = this.fishingSeasonality.getSeasonalityFishMort(i);
             double ftot = fbase * fseason * fseasonality;
