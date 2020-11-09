@@ -70,17 +70,17 @@ public class FishingGear extends AbstractMortality {
     /**
      * Fishery index.
      */
-    private final int fIndex;
+    private final int fisheryIndex;
 
     // Initialize the time varying array
-    private FisheryFBase fBase;
-    private FisheryPeriod fPeriod;
-    private FisherySeasonality fSeasonality;
+    private FisheryFBase fishingBase;
+    private FisheryPeriod fishingPeriod;
+    private FisherySeasonality fishingSeasonality;
 
     /**
      * Fishery map set.
      */
-    private FisheryMapSet fMapSet;
+    private FisheryMapSet fisheryMapSet;
 
     private double[] catchability;
     private double[] discards;
@@ -88,9 +88,9 @@ public class FishingGear extends AbstractMortality {
     private FisherySelectivity selectivity;
     private boolean checkFisheryEnabled;
 
-    public FishingGear(int rank, int findex) {
+    public FishingGear(int rank, int fisheryIndex) {
         super(rank);
-        fIndex = findex;
+        this.fisheryIndex = fisheryIndex;
     }
 
     @Override
@@ -104,25 +104,25 @@ public class FishingGear extends AbstractMortality {
         discards = new double[nspecies + nbackground];
 
         // set-up the name of the fishery
-        name = cfg.getString("fisheries.name.fsh" + fIndex);
+        name = cfg.getString("fisheries.name.fsh" + fisheryIndex);
 
         checkFisheryEnabled = cfg.getBoolean("fisheries.check.enabled");
 
         // Initialize the time varying array
-        fBase = new FisheryFBase(fIndex);
-        fBase.init();
+        fishingBase = new FisheryFBase(fisheryIndex);
+        fishingBase.init();
 
-        fPeriod = new FisheryPeriod(fIndex);
-        fPeriod.init();
+        fishingPeriod = new FisheryPeriod(fisheryIndex);
+        fishingPeriod.init();
 
-        fSeasonality = new FisherySeasonality(fIndex);
-        fSeasonality.init();
+        fishingSeasonality = new FisherySeasonality(fisheryIndex);
+        fishingSeasonality.init();
 
         // fishery spatial maps
-        fMapSet = new FisheryMapSet(name, "fisheries.movement", "fishery");
-        fMapSet.init();
+        fisheryMapSet = new FisheryMapSet(name, "fisheries.movement", "fishery");
+        fisheryMapSet.init();
 
-        selectivity = new FisherySelectivity(fIndex, "fisheries.selectivity", "fsh");
+        selectivity = new FisherySelectivity(fisheryIndex, "fisheries.selectivity", "fsh");
         selectivity.init();
 
         if (checkFisheryEnabled) {
@@ -150,7 +150,7 @@ public class FishingGear extends AbstractMortality {
         // Recovers the school cell (used to recover the map factor)
         Cell cell = school.getCell();
 
-        double spatialSelect = this.fMapSet.getValue(index, cell);
+        double spatialSelect = this.fisheryMapSet.getValue(index, cell);
         if (spatialSelect == 0.0) {
             return 0.0;
         }
@@ -164,9 +164,9 @@ public class FishingGear extends AbstractMortality {
 
         // recovers the time varying rate of the fishing mortality
         // as a product of FBase, FSeason and FSeasonality
-        double timeSelect = fBase.getFBase(index);
-        timeSelect *= this.fPeriod.getSeasonFishMort(index);
-        timeSelect *= this.fSeasonality.getSeasonalityFishMort(index);
+        double timeSelect = fishingBase.getFBase(index);
+        timeSelect *= this.fishingPeriod.getSeasonFishMort(index);
+        timeSelect *= this.fishingSeasonality.getSeasonalityFishMort(index);
 
         // Recovers the size/age fishery selectivity factor [0, 1]
         double sizeSelect = selectivity.getSelectivity(index, school);
@@ -192,7 +192,7 @@ public class FishingGear extends AbstractMortality {
      * @return the fishery index
      */
     public int getFIndex() {
-        return this.fIndex;
+        return this.fisheryIndex;
     }
 
     /**
@@ -247,9 +247,9 @@ public class FishingGear extends AbstractMortality {
 
         for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
 
-            double fbase = this.fBase.getFBase(i);
-            double fseason = this.fPeriod.getSeasonFishMort(i);
-            double fseasonality = this.fSeasonality.getSeasonalityFishMort(i);
+            double fbase = this.fishingBase.getFBase(i);
+            double fseason = this.fishingPeriod.getSeasonFishMort(i);
+            double fseasonality = this.fishingSeasonality.getSeasonalityFishMort(i);
             double ftot = fbase * fseason * fseasonality;
 
             prw.print(i);
