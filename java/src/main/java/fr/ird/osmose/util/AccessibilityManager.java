@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.util;
 
 import fr.ird.osmose.Configuration;
@@ -64,12 +63,12 @@ public class AccessibilityManager extends SimulationLinker {
      * HashMaps of accessibility matrixes. -1 is when only one matrix is used.
      */
     private HashMap<Integer, Matrix> matrixAccess;
-    
+
     private final String prefix;
     private final String suffix;
-    
+
     private final ClassGetter classGetter;
-    
+
     /**
      * Provides the accessibility matrix to use as a function of the time-step.
      */
@@ -98,11 +97,10 @@ public class AccessibilityManager extends SimulationLinker {
         matrixAccess = new HashMap<>();
 
         // If only one file is provided (old way)
-        
         if (!getConfiguration().isNull(this.prefix + ".file")) {
             // accessibility matrix
             String filename = getConfiguration().getFile(this.prefix + ".file");
-            Matrix temp = new Matrix(filename, classGetter);   
+            Matrix temp = new Matrix(filename, classGetter);
             matrixAccess.put(-1, temp);
         } else {
             // If several access files are defined.
@@ -110,7 +108,7 @@ public class AccessibilityManager extends SimulationLinker {
             int[] index = this.getConfiguration().findKeys(this.prefix + ".file." + this.suffix + "*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".acc") + 4))).toArray();
             for (int i : index) {
 
-                String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix +  + i);
+                String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix + i);
                 Matrix temp = new Matrix(filename, classGetter);
                 matrixAccess.put(i, temp);
 

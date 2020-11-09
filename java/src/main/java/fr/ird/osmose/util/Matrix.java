@@ -144,15 +144,15 @@ public class Matrix extends OsmoseLinker {
             namesPred = new String[nPred];
 
             // Process the header to extract the properties of predator (class, etc.)
-            for (int ipred = 1; ipred < header.length; ipred++) {
-                String predString = header[ipred];
+            for (int ipred = 0; ipred < header.length - 1; ipred++) {
+                String predString = header[ipred + 1];
                 int index = predString.lastIndexOf('<');
                 if (index < 0) {
-                    classPred[ipred - 1] = Float.MAX_VALUE;
-                    namesPred[ipred - 1] = predString.trim();
+                    classPred[ipred] = Float.MAX_VALUE;
+                    namesPred[ipred] = predString.trim();
                 } else {
-                    namesPred[ipred - 1] = predString.substring(0, index - 1).trim();
-                    classPred[ipred - 1] = Float.valueOf(predString.substring(index + 1, predString.length()));
+                    namesPred[ipred] = predString.substring(0, index - 1).trim();
+                    classPred[ipred] = Float.valueOf(predString.substring(index + 1, predString.length()));
                 }
             }
 
@@ -160,24 +160,24 @@ public class Matrix extends OsmoseLinker {
             this.accessibilityMatrix = new double[nPreys][nPred];
 
             // Loop over all the lines of the file, avoiding header
-            for (int iprey = 1; iprey < lines.size(); iprey++) {
+            for (int iprey = 0; iprey < lines.size() - 1; iprey++) {
 
                 // Read the line for the given prey
-                String[] lineStr = lines.get(iprey);
+                String[] lineStr = lines.get(iprey + 1);
 
                 // Recovering the column name to get prey names and class
                 String preyString = lineStr[0];
                 int index = preyString.lastIndexOf('<');
                 if (index < 0) {
-                    classPrey[iprey - 1] = Float.MAX_VALUE;
-                    namesPrey[iprey - 1] = preyString.trim();
+                    classPrey[iprey] = Float.MAX_VALUE;
+                    namesPrey[iprey] = preyString.trim();
                 } else {
-                    namesPrey[iprey - 1] = preyString.substring(0, index - 1).trim();
-                    classPrey[iprey - 1] = Float.valueOf(preyString.substring(index + 1, preyString.length()));
+                    namesPrey[iprey] = preyString.substring(0, index - 1).trim();
+                    classPrey[iprey] = Float.valueOf(preyString.substring(index + 1, preyString.length()));
                 }
 
-                for (int ipred = 1; ipred < lineStr.length; ipred++) {
-                    this.accessibilityMatrix[iprey - 1][ipred - 1] = Double.valueOf(lineStr[ipred]);
+                for (int ipred = 0; ipred < lineStr.length - 1; ipred++) {
+                    this.accessibilityMatrix[iprey][ipred] = Double.valueOf(lineStr[ipred + 1]);
                 }
 
             }
@@ -189,6 +189,7 @@ public class Matrix extends OsmoseLinker {
 
     /**
      * Recovers the name of the accessibility file.
+     * @return 
      */
     public String getFile() {
         return this.filename;
