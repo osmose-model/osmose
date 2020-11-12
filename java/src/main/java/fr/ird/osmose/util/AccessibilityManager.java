@@ -39,13 +39,7 @@
  * 
  */
 package fr.ird.osmose.util;
-
-import fr.ird.osmose.Configuration;
 import fr.ird.osmose.stage.ClassGetter;
-import fr.ird.osmose.util.Matrix;
-import fr.ird.osmose.util.StepParameters;
-import fr.ird.osmose.util.SimulationLinker;
-import fr.ird.osmose.util.YearParameters;
 import java.io.IOException;
 
 import java.util.HashMap;
@@ -151,15 +145,15 @@ public class AccessibilityManager extends SimulationLinker {
         int nmaps = index.length;
 
         int[] mapIndexNoTwin = new int[nmaps];
-
+        
         for (int k = 0; k < nmaps; k++) {
             String file = this.matrixAccess.get(index[k]).getFile();
-            mapIndexNoTwin[k] = k;
+            mapIndexNoTwin[k] = index[k];
             for (int l = k - 1; l >= 0; l--) {
                 if (file.equals(this.matrixAccess.get(index[l]).getFile())) {
                     mapIndexNoTwin[k] = mapIndexNoTwin[l];
                     // Delete twin maps
-                    this.matrixAccess.remove(k);
+                    this.matrixAccess.remove(index[k]);
                     break;
                 }
             }

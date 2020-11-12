@@ -46,6 +46,7 @@ import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.stage.ClassGetter;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -66,7 +67,7 @@ public class Matrix extends OsmoseLinker {
     private int nPred;
 
     /**
-     * Accessibility values of dimension (nprey, nclass).
+     * Accessibility values of dimension (npreys, npred).
      */
     private double[][] accessibilityMatrix;
 
@@ -183,7 +184,10 @@ public class Matrix extends OsmoseLinker {
 
         } catch (IOException ex) {
             error("Error loading accessibility matrix from file " + filename, ex);
-        }        
+        } 
+        
+        this.sortMatrix();
+
     }
     
     /**
@@ -319,6 +323,169 @@ public class Matrix extends OsmoseLinker {
         String message = String.format("No catchability found for prey %s", name);
         error(message, new IllegalArgumentException());       
         return -1;
+    }
+
+    /** Sort the matrix. 
+     * 
+     * Rows and columns are sorted in alphabetical order. Then in increasing class order.
+     * 
+     */
+    private void sortMatrix() {
+        
+        // Copy the accessibility matrix
+        double[][] accessMatrixTemp = Arrays.copyOf(this.accessibilityMatrix, accessibilityMatrix.length);
+        
+        // copy the input arrays of pred names and class;
+        float[] classPredTemp = Arrays.copyOf(classPred, nPred);
+        String[] namesPredTemp = Arrays.copyOf(namesPred, nPred);
+        
+        // Sort the predators matrix by growing name and class order
+        MatrixSorter[] predSorter = new MatrixSorter[this.nPred];
+        for (int iPred = 0; iPred < nPred; iPred++) {
+            predSorter[iPred] = new MatrixSorter(namesPredTemp[iPred], classPredTemp[iPred]);
+        }
+        Arrays.sort(predSorter, (MatrixSorter m1, MatrixSorter m2) -> m1.compareTo(m2));
+         
+        // Copy the input arrays  of prey names and class
+        float[] classPreyTemp = Arrays.copyOf(classPrey, nPreys);
+        String[] namesPreyTemp = Arrays.copyOf(namesPrey, nPreys);
+        
+        // Sort the preys matrix by growing name and class order
+        MatrixSorter[] preySorter = new MatrixSorter[this.nPreys];
+        for (int iPrey = 0; iPrey < nPreys; iPrey++) {
+            preySorter[iPrey] = new MatrixSorter(namesPreyTemp[iPrey], classPreyTemp[iPrey]);
+        }
+        
+        Arrays.sort(preySorter, (MatrixSorter m1, MatrixSorter m2) -> m1.compareTo(m2));
+        
+        // Loop over the sorted Prey accessibility
+        int iPrey = 0;
+        for(MatrixSorter preyMat : preySorter) { 
+            
+            String preyName = preyMat.getName();
+            float preyClass = preyMat.getClassVal();
+            int oldPreyIndex = this.findIndex(preyName, preyClass, namesPreyTemp, classPreyTemp);
+            namesPrey[iPrey] = preyName;
+            classPrey[iPrey] = preyClass;
+            
+            int iPred = 0;
+            for (MatrixSorter predMat : predSorter) {
+
+                String predName = predMat.getName();
+                float predClass = predMat.getClassVal();
+                int oldPredIndex = this.findIndex(predName, predClass, namesPredTemp, classPredTemp);
+                namesPred[iPred] = predName;
+                classPred[iPred] = predClass;
+                
+                accessibilityMatrix[iPrey][iPred] = accessMatrixTemp[oldPreyIndex][oldPredIndex];
+                iPred++;
+                 
+            }
+                
+            iPrey++;
+            
+        }
+        
+    }
+    
+    /** Find the index of a (name, class) tuple within a list of names and class.
+     * 
+     * @param name
+     * @param classVal
+     * @param listNames
+     * @param listClassVal
+     * @return 
+     */
+    private int findIndex(String name, float classVal, String[] listNames, float[] listClassVal) { 
+        
+        int NVal = listNames.length;
+        for(int i = 0; i < NVal; i++) {
+            if((name == listNames[i]) && (classVal == listClassVal[i])) {
+                return i;
+            }
+        }
+        
+        return -1;
+        
+    }
+    
+    
+    /** Converts Matrix to string. */
+    @Override
+    public String toString() {
+        String output;
+        StringBuilder bld = new StringBuilder(";");
+        for(int iPred = 0; iPred < this.nPred; iPred++) {
+            System.out.println(classPred[iPred]);
+            output = String.format("%s < %f", namesPred[iPred], classPred[iPred]);
+            bld.append(output).append(";");
+        }
+        bld.append("\n");
+
+        for (int iPrey = 0; iPrey < this.nPreys; iPrey++) {
+            output = String.format("%s < %f", namesPrey[iPrey], classPrey[iPrey]);
+            bld.append(output).append(";");
+            for (int iPred = 0; iPred < this.nPred; iPred++) {
+                bld.append(this.accessibilityMatrix[iPrey][iPred]).append(";");
+            } 
+            bld.append("\n");
+        }
+        
+        return bld.toString();
+                
+    } 
+    
+    /**
+     * Class to sort Accessibility Matrix.
+     * Sorts columns/rows based on names and class.
+     *
+     * @author barrier
+     */
+    private class MatrixSorter {
+
+        private final String names;
+        private final float classVal;
+
+        public MatrixSorter(String names, float classVal) {
+            this.names = names;
+            this.classVal = classVal;
+        }
+
+        /** Comparator.
+         * 
+         * First compares the names, then the class.
+         * 
+         * @param otherelement
+         * @return 
+         */
+        public int compareTo(MatrixSorter otherelement) {
+            if (this.names != otherelement.names) {
+                return this.names.compareToIgnoreCase(otherelement.names);
+            }
+
+            if (classVal != otherelement.classVal) {
+                return Float.compare(classVal, otherelement.classVal);
+            }
+
+            return 0;
+        }
+
+        /** Returns the class value.
+         * 
+         * @return 
+         */
+        public float getClassVal() {
+            return this.classVal;
+        }
+
+        /** Returns the name.
+         * 
+         * @return 
+         */
+        public String getName() {
+            return this.names;
+        }
+
     }
 
 }
