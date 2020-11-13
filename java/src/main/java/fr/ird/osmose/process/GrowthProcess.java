@@ -43,10 +43,8 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.growth.AbstractGrowth;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 
 /**
  *

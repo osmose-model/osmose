@@ -197,7 +197,7 @@ public class MapDistribution extends AbstractDistribution {
             str.append("It is not in the geographical area it is supposed to be...");
             warning(str.toString());
         }
-        List<Cell> accessibleCells = new ArrayList();
+        List<Cell> accessibleCells = new ArrayList<>();
         // 1. Get all surrounding cells
         Iterator<Cell> neighbours = getGrid().getNeighbourCells(cell, range).iterator();
         while (neighbours.hasNext()) {

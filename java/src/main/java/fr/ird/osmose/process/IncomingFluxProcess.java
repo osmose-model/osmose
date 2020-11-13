@@ -44,7 +44,6 @@ package fr.ird.osmose.process;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
-import java.util.HashMap;
 
 /**
  * This class simulates a flux of individuals (biomass) of given age and length
@@ -189,10 +188,7 @@ public class IncomingFluxProcess extends AbstractProcess {
         int iTime = getSimulation().getIndexTimeSimu();
         
         // cpt starts at -1 since incremented at the beginning of the loop
-        int cpt = -1;
-        for (int iSpec : getConfiguration().getFocalIndex()) {
-
-            cpt++;
+        for (int cpt = 0; cpt < this.getNSpecies(); cpt++) {
 
             // No incoming flux for this species, skip
             if (biomassIn[cpt] == null) {
