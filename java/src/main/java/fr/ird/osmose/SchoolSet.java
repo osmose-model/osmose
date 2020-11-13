@@ -92,9 +92,9 @@ public class SchoolSet extends OsmoseLinker {
     private final boolean[] hasSpeciesChanged;
 
     SchoolSet() {
-        schoolset = new FilteredSet();
-        schoolBySpecies = new HashMap();
-        schoolByCell = new HashMap();
+        schoolset = new FilteredSet<>();
+        schoolBySpecies = new HashMap<>();
+        schoolByCell = new HashMap<>();
         hasSpeciesChanged = new boolean[getConfiguration().getNSpecies()];
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             hasSpeciesChanged[i] = true;
@@ -266,7 +266,7 @@ public class SchoolSet extends OsmoseLinker {
             if (!school.isUnlocated()) {
                 int iCell = school.getCell().getIndex();
                 if (!schoolByCell.containsKey(iCell)) {
-                    schoolByCell.put(iCell, new ArrayList());
+                    schoolByCell.put(iCell, new ArrayList<>());
                 }
                 schoolByCell.get(iCell).add(school);
             }

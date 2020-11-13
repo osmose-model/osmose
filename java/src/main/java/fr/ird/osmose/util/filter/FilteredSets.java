@@ -72,14 +72,14 @@ public class FilteredSets {
 
     public static <T> FilteredSet<T> intersect(FilteredSet<T> subset1, FilteredSet<T> subset2) {
 
-        HashSet<T> set = new HashSet();
+        HashSet<T> set = new HashSet<>();
         set.addAll(subset1);
         set.addAll(subset2);
 
-        FilteredSet<T> merged = new FilteredSet();
+        FilteredSet<T> merged = new FilteredSet<>();
         merged.addAll(set);
 
-        HashSet<IFilter<? super T>> filters = new HashSet();
+        HashSet<IFilter<? super T>> filters = new HashSet<>();
         filters.addAll(Arrays.asList(subset1.getFilters()));
         filters.addAll(Arrays.asList(subset2.getFilters()));
 
