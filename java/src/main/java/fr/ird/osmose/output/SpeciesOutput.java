@@ -41,8 +41,6 @@
 
 package fr.ird.osmose.output;
 
-import java.util.HashMap;
-
 /**
  *
  * @author nbarrier
