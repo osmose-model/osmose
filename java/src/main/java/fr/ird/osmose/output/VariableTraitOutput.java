@@ -55,8 +55,6 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriter;
-import ucar.ma2.ArrayString;
-import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayInt;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
@@ -70,7 +68,7 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
     /**
      * _FillValue attribute for cells on land
      */
-    private final float FILLVALUE = -99.f;
+    // private final float FILLVALUE = -99.f;
 
     /**
      * Object for creating/writing netCDF files.
