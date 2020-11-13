@@ -43,7 +43,6 @@ package fr.ird.osmose;
 import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
-import java.util.Collection;
 import java.util.HashMap;
 import ucar.ma2.ArrayFloat;
 
@@ -249,7 +248,7 @@ public class School extends AbstractSchool {
         this.ageDt = ageDt;
         this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
-        preys = new HashMap();
+        preys = new HashMap<>();
         starvationRate = 0.d;
         fishedBiomass = new double[getConfiguration().getNFishery()];
         discardedBiomass = new double[getConfiguration().getNFishery()];

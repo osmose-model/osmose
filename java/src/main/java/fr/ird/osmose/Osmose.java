@@ -140,7 +140,7 @@ public class Osmose extends OLogger {
             error("Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
         }
 
-        configurationFiles = new ArrayList();
+        configurationFiles = new ArrayList<>();
 
         // Usage1 & Usage2, OSMOSE
         if (set.getSetName().equals("Usage1")) {
@@ -169,7 +169,7 @@ public class Osmose extends OLogger {
         }
 
         // Initialises the set of command line options
-        cmd = new HashMap();
+        cmd = new HashMap<>();
 
         // Parameters option -Pkey=value
         if (set.isSet("P")) {
@@ -426,7 +426,7 @@ public class Osmose extends OLogger {
         info("Listing configuration files from " + filename);
         BufferedReader bfIn = new BufferedReader(new InputStreamReader(filepath));
         String line;
-        List<String> cfgFiles = new ArrayList();
+        List<String> cfgFiles = new ArrayList<>();
         try {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
