@@ -1179,6 +1179,24 @@ public class Configuration extends OLogger {
     }
 
     /**
+     * Returns the number of all species. Parameter <i>simulation.nspecies</i>
+     *
+     * @return the number of species.
+     */
+    public int getNAllSpecies() {
+        return this.nBackground + this.nSpecies + this.nResource;
+    }
+
+        /**
+     * Returns the number of all species. Parameter <i>simulation.nspecies</i>
+     *
+     * @return the number of species.
+     */
+    public int getNPredSpecies() {
+        return this.nBackground + this.nSpecies;
+    }
+
+    /**
      * Get a species
      *
      * @param index, the index of the species

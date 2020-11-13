@@ -214,13 +214,11 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         int nBackground = this.getNBkgSpecies();
         ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
         ArrayFloat.D3 arrDiscards = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
-        int cpt = 0;
         for (int iSpecies = 0; iSpecies < nSpecies + nBackground; iSpecies++) {
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
                 arrBiomass.set(0, iSpecies, iFishery, (float) biomass[iSpecies][iFishery]);
                 arrDiscards.set(0, iSpecies, iFishery, (float) discards[iSpecies][iFishery]);
             }
-            cpt++;
         }
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
@@ -263,14 +261,14 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         StringBuilder strBuild = new StringBuilder();
 
         int cpt = 0;
-        for (int i : this.getConfiguration().getFocalIndex()) {
-            strBuild.append(getSpecies(cpt++).getName());
+        for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
+            strBuild.append(getSpecies(cpt).getName());
             strBuild.append(", ");
         }
         
         cpt = 0;
-        for (int i : this.getConfiguration().getBackgroundIndex()) {
-            strBuild.append(getBkgSpecies(cpt++).getName());
+        for (cpt = 0; cpt < this.getNBkgSpecies(); cpt++) {
+            strBuild.append(getBkgSpecies(cpt).getName());
             strBuild.append(", ");
         }
 

@@ -105,13 +105,11 @@ public class DietDistribOutput extends AbstractDistribOutput {
     public void write(float time) {
         // values = new double[getNSpecies() + getConfiguration().getNResource()][getNClass()];
         int nClass = this.getNClass();
-        double[][] array = new double[nClass][getNSpecies() + getConfiguration().getNRscSpecies() + getConfiguration().getNBkgSpecies() + 1];
+        double[][] array = new double[nClass][getNAllSpecies() + 1];
         for (int iClass = 0; iClass < nClass; iClass++) {
             array[iClass][0] = this.getClassThreshold(iClass);
-            int cpt = 0;
-            for (int iSpec : this.getConfiguration().getAllIndex()) {
+            for (int cpt = 0; cpt < this.getNAllSpecies(); cpt++) {
                 array[iClass][cpt + 1] = values[cpt][iClass] / getRecordFrequency();
-                cpt++;
             }
         }
         writeVariable(time, array);

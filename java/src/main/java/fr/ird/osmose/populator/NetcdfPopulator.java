@@ -42,14 +42,10 @@
 package fr.ird.osmose.populator;
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.Species;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
-import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 

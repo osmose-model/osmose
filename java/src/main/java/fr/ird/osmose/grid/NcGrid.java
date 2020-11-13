@@ -48,7 +48,6 @@ import java.util.logging.Logger;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  * This class creates the Osmose grid from a NetCDF grid file. It is the

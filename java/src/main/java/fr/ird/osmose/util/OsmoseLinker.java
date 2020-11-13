@@ -104,6 +104,25 @@ public class OsmoseLinker extends OLogger {
         return getConfiguration().getNSpecies();
     }
 
+    /**
+     * The number of simulated species
+     *
+     * @return the number of simulated species
+     */
+    final public int getNAllSpecies() {
+        return getConfiguration().getNAllSpecies();
+    }
+
+    /**
+     * The number of simulated species
+     *
+     * @return the number of simulated species
+     */
+    final public int getNPredSpecies() {
+        return getConfiguration().getNPredSpecies();
+    }
+
+
     final public AbstractGrid getGrid() {
         return getOsmose().getConfiguration().getGrid();
     }

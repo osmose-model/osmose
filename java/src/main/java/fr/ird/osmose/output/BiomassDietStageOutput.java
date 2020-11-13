@@ -44,7 +44,6 @@ package fr.ird.osmose.output;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
-import java.util.HashMap;
 
 /**
  *
@@ -71,12 +70,12 @@ public class BiomassDietStageOutput extends AbstractOutput {
         dietOutputStage.init();
 
         nColumns = 0;
+
+        int nAll = this.getNBkgSpecies() + this.getNSpecies() + this.getNRscSpecies();
         
         // Sum-up diet stages
-        int cpt = 0;
-        for (int iSpec : getConfiguration().getAllIndex()) {
+        for (int cpt = 0; cpt < nAll; cpt++) {
             nColumns += dietOutputStage.getNStage(cpt);
-            cpt++;
         }
 
         nColumns += getConfiguration().getNRscSpecies();
@@ -92,10 +91,11 @@ public class BiomassDietStageOutput extends AbstractOutput {
     @Override
     String[] getHeaders() {
 
+        int nAll = this.getNBkgSpecies() + this.getNSpecies() + this.getNRscSpecies();
+
         int k = 0;
         String[] headers = new String[nColumns];
-        int cpt = 0;
-        for (int iSpec : getConfiguration().getAllIndex()) {
+        for (int cpt = 0; cpt < nAll; cpt++) {
             String name = getISpecies(cpt).getName();
             float[] threshold = dietOutputStage.getThresholds(cpt);
             int nStage = dietOutputStage.getNStage(cpt);
@@ -110,10 +110,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
                     }
                 }
                 k++;
-            }
-            
-            cpt++;
-            
+            }  
         } // end of species loop
 
         return headers;
@@ -130,12 +127,10 @@ public class BiomassDietStageOutput extends AbstractOutput {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
-        int cpt = 0;
         int nSpecies = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
-        for (int iRsc : getConfiguration().getResourceIndex()) {
+        for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
             biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt + nBkg);
-            cpt++;
         }
 
     }
@@ -146,12 +141,11 @@ public class BiomassDietStageOutput extends AbstractOutput {
         int nSpecies = this.getNSpecies();
         int nBkg = this.getNBkgSpecies();
         int nRsc = this.getNRscSpecies();
-        biomassStage = new double[nSpecies + nBkg + nRsc][];
+        int nAll = nSpecies + nBkg + nRsc;
+        biomassStage = new double[nAll][];
         
-        int cpt = 0;
-        for (int iSpec : getConfiguration().getAllIndex()) {
+        for (int cpt = 0; cpt < nAll; cpt++) {
             biomassStage[cpt] = new double[dietOutputStage.getNStage(cpt)];
-            cpt++;
         }
     }
 
@@ -164,12 +158,10 @@ public class BiomassDietStageOutput extends AbstractOutput {
     public void write(float time) {
         double[] biomass = new double[nColumns];
         double nsteps = getRecordFrequency();
-        int k = 0;
-        for (int iSpec : getConfiguration().getAllIndex()) {
+        for (int k = 0; k < this.getNAllSpecies(); k++) {
             for (int s = 0; s < dietOutputStage.getNStage(k); s++) {
                 biomass[k] = biomassStage[k][s] / nsteps;
             }
-            k++;
         } // end of species loop
         writeVariable(time, biomass);
     }
