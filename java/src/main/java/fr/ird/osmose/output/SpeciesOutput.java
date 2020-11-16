@@ -122,7 +122,6 @@ public class SpeciesOutput extends AbstractOutput {
         String[] species = new String[getNSpecies()];
         for (int cpt = 0; cpt < getNSpecies(); cpt++) {
             species[cpt] = getSpecies(cpt).getName();
-            cpt++;
         }
         return species;
     }
