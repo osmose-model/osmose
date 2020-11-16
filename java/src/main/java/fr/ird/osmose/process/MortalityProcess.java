@@ -562,12 +562,11 @@ public class MortalityProcess extends AbstractProcess {
 
                             // Percentage values of discarded fish. The remaining go to fishery.
                             double discardRate = fisheriesMortality[iFishery].getDiscardRate(fishedSchool);
+                            double nFished = (1 - discardRate) * nDead;
+                            double nDiscared = discardRate * nDead;
 
-                            double nFished = fishedSchool.abd2biom((1 - discardRate) * nDead);
-                            double nDiscared = fishedSchool.abd2biom(discardRate * nDead);
-
-                            fishedSchool.fishedBy(iFishery, nFished);
-                            fishedSchool.discardedBy(iFishery, nDiscared);
+                            fishedSchool.fishedBy(iFishery, fishedSchool.abd2biom(nFished));
+                            fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscared));
 
                             fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
                             fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscared);
