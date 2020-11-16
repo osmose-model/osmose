@@ -161,8 +161,8 @@ public abstract class AbstractGrid extends OsmoseLinker {
             }
         }
         // List of cells and ocean cells
-        cells = new ArrayList(ny * nx);
-        oceanCells = new ArrayList(nOceanCell);
+        cells = new ArrayList<>(ny * nx);
+        oceanCells = new ArrayList<>(nOceanCell);
         for (int j = ny; j-- > 0;) {
             for (int i = nx; i-- > 0;) {
                 cells.add(matrix[j][i]);
@@ -246,7 +246,7 @@ public abstract class AbstractGrid extends OsmoseLinker {
         int jm1 = Math.max(cell.get_jgrid() - range, 0);
         int jp1 = Math.min(cell.get_jgrid() + range, get_ny() - 1);
 
-        ArrayList<Cell> neighbours = new ArrayList();
+        ArrayList<Cell> neighbours = new ArrayList<>();
 
         for (int i = im1; i <= ip1; i++) {
             for (int j = jm1; j <= jp1; j++) {

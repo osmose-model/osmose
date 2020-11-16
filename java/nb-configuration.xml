@@ -55,5 +55,6 @@ Any value defined here will override the pom.xml file value but is only applicab
 -->
         <netbeans.hint.licensePath>${project.basedir}/osmose-license.txt</netbeans.hint.licensePath>
         <netbeans.compile.on.save>none</netbeans.compile.on.save>
+        <netbeans.hint.jdkPlatform>JDK_15</netbeans.hint.jdkPlatform>
     </properties>
 </project-shared-configuration>

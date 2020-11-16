@@ -172,7 +172,7 @@ public class IOTools {
     }
 
     public static List<File> listFiles(File folder) {
-        List<File> listf = new ArrayList();
+        List<File> listf = new ArrayList<>();
         File[] list = folder.listFiles();
         if (list != null) {
             for (File f : list) {
@@ -187,7 +187,7 @@ public class IOTools {
     }
 
     public static List<File> relativize(List<File> list, URI againstURI) {
-        List<File> listrel = new ArrayList(list.size());
+        List<File> listrel = new ArrayList<>(list.size());
         for (File f : list) {
             listrel.add(new File(againstURI.relativize(f.toURI()).toString()));
         }

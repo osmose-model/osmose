@@ -38,12 +38,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.background;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.util.OsmoseLinker;     
+import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 import java.io.IOException;
 import ucar.ma2.InvalidRangeException;
@@ -58,6 +57,15 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
+    
+    private interface Proportion {
+        double getProportion(int iClass, int step);
+    }
+    
+    
+    private final Proportion proportion;
+       
+    
     /**
      * Index of the species. [0 : number of background - 1]
      */
@@ -91,9 +99,9 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     private final int[] ageDt;
 
     private final int nClass;
-    
+
     private final ByClassTimeSeries timeSeries;
-    
+
     private final int index;
     private final int offset;
 
@@ -101,19 +109,20 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
      * Constructor of background species.
      *
      * @param fileindex
+     * @param index
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
     public BackgroundSpecies(int fileindex, int index) throws IOException, InvalidRangeException {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        
+
         boolean isOk = true;
         String message = "";
 
         this.offset = cfg.getNSpecies();
         this.index = index + this.offset;
-        
+
         // Initialiaze the index of the Background species
         this.fileindex = fileindex;
 
@@ -126,7 +135,6 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileindex);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileindex);
 
-        //trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
         trophicLevel = cfg.getArrayFloat("species.trophic.level.sp" + fileindex);
 
         age = cfg.getArrayFloat("species.age.sp" + fileindex);
@@ -134,19 +142,20 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         for (int i = 0; i < age.length; i++) {
             ageDt[i] = (int) age[i] * getConfiguration().getNStepYear();
         }
-        
+
         if (cfg.canFind("species.size.proportion.file.sp" + fileindex)) {
-            
+
             String filename = cfg.getFile("species.size.proportion.file.sp" + fileindex);
             this.timeSeries = new ByClassTimeSeries();
             this.timeSeries.read(filename);
             length = this.timeSeries.getClasses();
             this.classProportion = null;
-            
+            proportion = (iClass, i) -> this.proportionFile(iClass, i);
+
         } else {
-            
+
             this.timeSeries = null;
-            
+
             // Proportion of the different size classes
             classProportion = cfg.getArrayFloat("species.size.proportion.sp" + fileindex);
             // Get the array of species length
@@ -157,7 +166,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
                         + "not consistent with species.nclass.cp%d", fileindex, fileindex);
                 isOk = false;
             }
-            
+
             // check that the classProportion sums to 1.
             float sum = 0.f;
             for (int i = 0; i < classProportion.length; i++) {
@@ -168,7 +177,9 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
                 message = String.format("species.size.proportion.sp%d must sum to 1.0", fileindex);
                 isOk = false;
             }
-        
+            
+            proportion = (iClass, i) -> this.proportionConst(iClass, i);
+
         }
 
         if (trophicLevel.length != nClass) {
@@ -188,17 +199,16 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
                     + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
-        
-        if(!isOk) {
+
+        if (!isOk) {
             error(message, new IOException());
         }
 
     }
 
-    /**
-     * Returns the index of the background species.
-     *
-     * @return
+    /** Get the species index as defined in the file.
+     * 
+     * @return 
      */
     @Override
     public int getFileSpeciesIndex() {
@@ -208,23 +218,15 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     /**
      * Return the global index of the species.
      *
-     * @param applyOffset
+     * Index between [Nsp, Nbkg - 1] if applyOffset is True
+     *
      * @return
      */
     @Override
-    public int getSpeciesIndex(boolean applyOffset) {
-        if (applyOffset) {
-            return this.index;
-        } else {
-            return this.index - this.offset;
-        }
-    }
-    
-    @Override
     public int getSpeciesIndex() {
-        return this.getSpeciesIndex(true);
+        return this.index;
     }
-    
+
     /**
      * Returns the trophic level of the current background species.
      *
@@ -261,12 +263,41 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
         return this.length[iClass];
     }
 
+    /** Get the class proportion of a given class at 
+     * a given step.
+     * 
+     * Call a different method depending on whether constant
+     * of by-class time series are provided.
+     * 
+     * @param iClass
+     * @param step
+     * @return 
+     */
     public double getProportion(int iClass, int step) {
-        if (this.classProportion == null) {
-            return this.timeSeries.getValue(step, iClass);
-        } else {
-            return this.classProportion[iClass];
-        }
+        return proportion.getProportion(iClass, step);
+    }
+    
+    /**
+     * Returns the proportion of a given class if varying over time.
+     * 
+     * Must be defined in a {@link ByClassTimeSeries()} object.
+     *
+     * @param iClass
+     * @param step Time step (not used)
+     * @return
+     */
+    private double proportionFile(int iClass, int step) {
+        return this.timeSeries.getValue(step, iClass);
+    }
+
+    /** Returns the proportion of a given class if constant over time.
+     * 
+     * @param iClass
+     * @param step Time step (not used)
+     * @return 
+     */
+    private double proportionConst(int iClass, int step) {
+        return this.classProportion[iClass];
     }
 
     public float getAge(int iClass) {
@@ -276,7 +307,7 @@ public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
     public int getAgeDt(int iClass) {
         return this.ageDt[iClass];
     }
-    
+
     public int getNClass() {
         return this.nClass;
     }

@@ -296,7 +296,7 @@ public abstract class Release extends OsmoseLinker {
     }
 
     protected ArrayList<String> getLines(String file) {
-        ArrayList<String> lines = new ArrayList();
+        ArrayList<String> lines = new ArrayList<>();
         try {
             BufferedReader bfr = new BufferedReader(new FileReader(file));
             String line = null;

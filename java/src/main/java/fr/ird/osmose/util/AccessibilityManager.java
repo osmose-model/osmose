@@ -38,15 +38,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose.util;
-
-import fr.ird.osmose.Configuration;
 import fr.ird.osmose.stage.ClassGetter;
-import fr.ird.osmose.util.Matrix;
-import fr.ird.osmose.util.StepParameters;
-import fr.ird.osmose.util.SimulationLinker;
-import fr.ird.osmose.util.YearParameters;
 import java.io.IOException;
 
 import java.util.HashMap;
@@ -64,12 +57,12 @@ public class AccessibilityManager extends SimulationLinker {
      * HashMaps of accessibility matrixes. -1 is when only one matrix is used.
      */
     private HashMap<Integer, Matrix> matrixAccess;
-    
+
     private final String prefix;
     private final String suffix;
-    
+
     private final ClassGetter classGetter;
-    
+
     /**
      * Provides the accessibility matrix to use as a function of the time-step.
      */
@@ -96,21 +89,23 @@ public class AccessibilityManager extends SimulationLinker {
         }
 
         matrixAccess = new HashMap<>();
+        int nCharSuf = suffix.length();
 
         // If only one file is provided (old way)
-        
         if (!getConfiguration().isNull(this.prefix + ".file")) {
             // accessibility matrix
             String filename = getConfiguration().getFile(this.prefix + ".file");
-            Matrix temp = new Matrix(filename, classGetter);   
+            Matrix temp = new Matrix(filename, classGetter);
             matrixAccess.put(-1, temp);
         } else {
+            
             // If several access files are defined.
             // recovers the indexes of the accessibility matrixes.
-            int[] index = this.getConfiguration().findKeys(this.prefix + ".file." + this.suffix + "*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".acc") + 4))).toArray();
+            int[] index = this.getConfiguration().findKeys(this.prefix + ".file." + this.suffix + "*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf("." + suffix) + nCharSuf + 1))).toArray();
+            
             for (int i : index) {
-
-                String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix +  + i);
+                
+                String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix + i);
                 Matrix temp = new Matrix(filename, classGetter);
                 matrixAccess.put(i, temp);
 
@@ -126,7 +121,7 @@ public class AccessibilityManager extends SimulationLinker {
                     for (int s : season) {
                         indexAccess[y][s] = i;
                     }
-                }
+                }                
             }  // end of loop on access files
 
             for (int y = 0; y < nyear; y++) {
@@ -146,19 +141,19 @@ public class AccessibilityManager extends SimulationLinker {
     private void eliminateTwinAccess() {
 
         // recover the sorted indexes of the access. objects;
-        int[] index = (int[]) this.matrixAccess.keySet().stream().sorted().mapToInt(key -> key).toArray();
+        int[] index = (int[]) this.matrixAccess.keySet().stream().mapToInt(key -> key).toArray();
         int nmaps = index.length;
 
         int[] mapIndexNoTwin = new int[nmaps];
-
+        
         for (int k = 0; k < nmaps; k++) {
             String file = this.matrixAccess.get(index[k]).getFile();
-            mapIndexNoTwin[k] = k;
+            mapIndexNoTwin[k] = index[k];
             for (int l = k - 1; l >= 0; l--) {
                 if (file.equals(this.matrixAccess.get(index[l]).getFile())) {
                     mapIndexNoTwin[k] = mapIndexNoTwin[l];
                     // Delete twin maps
-                    this.matrixAccess.remove(k);
+                    this.matrixAccess.remove(index[k]);
                     break;
                 }
             }
@@ -166,11 +161,16 @@ public class AccessibilityManager extends SimulationLinker {
 
         int nseason = getConfiguration().getNStepYear();
         int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
-
-        for (int y = 0; y < nyear; y++) {
-            for (int s = 0; s < nseason; s++) {
-                int indexMap = indexAccess[y][s];
-                indexAccess[y][s] = mapIndexNoTwin[indexMap];
+        
+        for (int iMap = 0; iMap < nmaps; iMap++) {
+            // Recover the original mapIndex
+            int oldIndex = index[iMap];
+            for (int y = 0; y < nyear; y++) {
+                for (int s = 0; s < nseason; s++) {
+                    if (indexAccess[y][s] == oldIndex) {
+                        indexAccess[y][s] = mapIndexNoTwin[iMap];
+                    }
+                }
             }
         }
     }

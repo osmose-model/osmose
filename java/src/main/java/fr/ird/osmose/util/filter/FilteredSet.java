@@ -41,6 +41,8 @@
 
 package fr.ird.osmose.util.filter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
@@ -50,26 +52,30 @@ import java.util.LinkedList;
  */
 public class FilteredSet<E> extends LinkedList<E> {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -902394384593226281L;
     final private FilteredSet<E> parent;
-    final private IFilter<E>[] filters;
+    final private ArrayList<IFilter<? super E>> filters;
     final private int level;
 
-    public FilteredSet(FilteredSet<E> parent, IFilter<E>[] filters, int level) {
+    public FilteredSet(FilteredSet<E> parent, ArrayList<IFilter<? super E>> filters, int level) {
         this.parent = parent;
         this.filters = filters;
         this.level = level;
     }
 
      public FilteredSet(FilteredSet<E> parent, IFilter<E> filter, int level) {
-        this(parent, new IFilter[]{filter}, level);
+        this(parent, new ArrayList<>(Arrays.asList(filter)), level);
     }
 
-    public FilteredSet(FilteredSet<E> parent, IFilter<E>[] filters) {
+    public FilteredSet(FilteredSet<E> parent, ArrayList<IFilter<? super E>> filters) {
         this(parent, filters, parent.getLevel());
     }
 
     public FilteredSet(FilteredSet<E> parent, IFilter<E> filter) {
-        this(parent, new IFilter[]{filter});
+        this(parent, new ArrayList<>(Arrays.asList(filter)));
     }
 
     public FilteredSet() {
@@ -82,7 +88,7 @@ public class FilteredSet<E> extends LinkedList<E> {
         return parent;
     }
 
-    public IFilter<E>[] getFilters() {
+    public ArrayList<IFilter<? super E>> getFilters() {
         return filters;
     }
 

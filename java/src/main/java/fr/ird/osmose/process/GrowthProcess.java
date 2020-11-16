@@ -43,10 +43,8 @@ package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.growth.AbstractGrowth;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 
 /**
  *
@@ -81,21 +79,21 @@ public class GrowthProcess extends AbstractProcess {
         lmax = new float[nSpecies];
 
         int cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
+        for (int fileIndex : getConfiguration().getFocalIndex()) {
             // Initialize growth function
-            String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + i)
+            String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + fileIndex)
                     ? "fr.ird.osmose.process.growth.VonBertalanffyGrowth"
-                    : getConfiguration().getString("growth.java.classname.sp" + i);
+                    : getConfiguration().getString("growth.java.classname.sp" + fileIndex);
             String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(cpt).getName();
             try {
-                growth[cpt] = (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(i));
+                growth[cpt] = (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(cpt));
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException ex) {
                 error(errMsg, ex);
             }
             // Initializes Growth function
             growth[cpt].init();
 
-            criticalPredSuccess[cpt] = getConfiguration().getDouble("predation.efficiency.critical.sp" + i);
+            criticalPredSuccess[cpt] = getConfiguration().getDouble("predation.efficiency.critical.sp" + fileIndex);
             Species species = getSpecies(cpt);
             int lifespan = species.getLifespanDt();
             minDelta[cpt] = new double[lifespan];
@@ -103,7 +101,7 @@ public class GrowthProcess extends AbstractProcess {
             deltaMeanLength[cpt] = new double[lifespan];
                 
             // barrier.n: patch for Fabien to limit the maximum grow rate
-            double delta_lmax_factor = (getConfiguration().isNull("species.delta.lmax.factor.sp" + i)) ? 2 : getConfiguration().getDouble("species.delta.lmax.factor.sp" + i); 
+            double delta_lmax_factor = (getConfiguration().isNull("species.delta.lmax.factor.sp" + fileIndex)) ? 2 : getConfiguration().getDouble("species.delta.lmax.factor.sp" + fileIndex); 
             
             double meanLength1 = growth[cpt].ageToLength(0);
             for (int ageDt = 0; ageDt < lifespan - 1; ageDt++) {
@@ -117,8 +115,8 @@ public class GrowthProcess extends AbstractProcess {
                 maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanLength[cpt][ageDt];
             }
             // Read maximal length
-            if (!getConfiguration().isNull("species.lmax.sp" + i)) {
-                lmax[cpt] = getConfiguration().getFloat("species.lmax.sp" + i);
+            if (!getConfiguration().isNull("species.lmax.sp" + fileIndex)) {
+                lmax[cpt] = getConfiguration().getFloat("species.lmax.sp" + fileIndex);
             } else {
                 lmax[cpt] =  Float.POSITIVE_INFINITY;
             }

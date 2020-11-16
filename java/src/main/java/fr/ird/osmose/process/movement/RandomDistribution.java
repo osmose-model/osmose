@@ -105,7 +105,7 @@ public class RandomDistribution extends AbstractDistribution {
              */
             areaSize = nbCasesDispos;
 
-            randomMap = new ArrayList(areaSize);
+            randomMap = new ArrayList<>(areaSize);
             for (int l = 0; l < getGrid().get_ny(); l++) {
                 for (int m = 0; m < getGrid().get_nx(); m++) {
                     if (!getGrid().getCell(l, m).isLand()) {
@@ -118,7 +118,7 @@ public class RandomDistribution extends AbstractDistribution {
              * Random patch of connex cells
              */
             int nCells = areaSize;
-            randomMap = new ArrayList(nCells);
+            randomMap = new ArrayList<>(nCells);
             boolean[][] alreadyChoosen = new boolean[getGrid().get_ny()][getGrid().get_nx()];
             //Cell[] tabCellsArea = new Cell[speciesAreasSizeTab[numSerie][iSpecies]];
             int i, j;
@@ -177,7 +177,7 @@ public class RandomDistribution extends AbstractDistribution {
     private List<Cell> getAccessibleCells(School school) {
 
         Cell cell = school.getCell();
-        List<Cell> accessibleCells = new ArrayList();
+        List<Cell> accessibleCells = new ArrayList<>();
         Iterator<Cell> neighbors = getGrid().getNeighbourCells(cell, range).iterator();
         while (neighbors.hasNext()) {
             Cell neighbor = neighbors.next();

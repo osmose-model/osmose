@@ -51,7 +51,7 @@ import java.io.IOException;
 public class FisheryPeriod extends OsmoseLinker {
     
     private final int fisheryIndex;
-    private final double[] fmortSeason;
+    private final double[] fisheryPeriod;
     private int nSeasons;
     private double seasonOffset; 
     
@@ -59,7 +59,7 @@ public class FisheryPeriod extends OsmoseLinker {
     public FisheryPeriod(int fisheryIndex) {
 
         this.fisheryIndex = fisheryIndex;
-        this.fmortSeason = new double[this.getConfiguration().getNStep()];
+        this.fisheryPeriod = new double[this.getConfiguration().getNStep()];
         
     }
     
@@ -110,7 +110,7 @@ public class FisheryPeriod extends OsmoseLinker {
             // If fishing season given as a single value, then
             // use it for all the season.
             for (int i = 0; i < nStep; i++) {
-                fmortSeason[i] = fishingSeason[0];
+                fisheryPeriod[i] = fishingSeason[0];
             }
 
         } else {
@@ -123,7 +123,7 @@ public class FisheryPeriod extends OsmoseLinker {
 
             for (int i = 0; i < nStep; i++) {
                 int k = fishIndex[i];
-                fmortSeason[i] = fishingSeason[k];
+                fisheryPeriod[i] = fishingSeason[k];
             }
         }
         
@@ -134,8 +134,8 @@ public class FisheryPeriod extends OsmoseLinker {
      * @param idt Time step
      * @return Fishing mortality
      */
-    public double getSeasonFishMort(int idt) { 
-        return fmortSeason[idt];
+    public double getFisheryPeriod(int idt) { 
+        return fisheryPeriod[idt];
     }
     
 }

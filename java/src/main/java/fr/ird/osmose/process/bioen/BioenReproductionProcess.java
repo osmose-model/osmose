@@ -44,8 +44,6 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.process.*;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import java.util.HashMap;
-
 import java.util.List;
 
 /**
@@ -99,7 +97,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
             Species species = getSpecies(cpt);
             
             List<School> schoolset = getSchoolSet().getSchools(species);
-            WeightedRandomDraft weight_rand = new WeightedRandomDraft();
+            WeightedRandomDraft<School> weight_rand = new WeightedRandomDraft<>();
             
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
@@ -151,7 +149,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
         }  // end of species loop
     }
 
-    private void create_reproduction_schools(int i, double nEgg, boolean init_genotype, WeightedRandomDraft rand_draft) {
+    private void create_reproduction_schools(int speciesIndex, double nEgg, boolean init_genotype, WeightedRandomDraft<School> rand_draft) {
         // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
         //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
 
@@ -161,8 +159,8 @@ public class BioenReproductionProcess extends ReproductionProcess {
         }
 
         // lay age class zero
-        int nSchool = getConfiguration().getNSchool(i);
-        Species species = getSpecies(i);
+        int nSchool = getConfiguration().getNSchool(speciesIndex);
+        Species species = getSpecies(speciesIndex);
 
         // do nothing, zero school
         if (nEgg < nSchool) {
@@ -172,8 +170,8 @@ public class BioenReproductionProcess extends ReproductionProcess {
             if (init_genotype) {
                 school0.getGenotype().init_genotype();
             } else {
-                School parent_a = (School) rand_draft.next();
-                School parent_b = (School) rand_draft.next();
+                School parent_a = rand_draft.next();
+                School parent_b = rand_draft.next();
                 school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
             }
             getSchoolSet().add(school0);
@@ -185,8 +183,8 @@ public class BioenReproductionProcess extends ReproductionProcess {
                 if (init_genotype) {
                     school0.getGenotype().init_genotype();
                 } else {
-                    School parent_a = (School) rand_draft.next();
-                    School parent_b = (School) rand_draft.next();
+                    School parent_a = rand_draft.next();
+                    School parent_b = rand_draft.next();
                     school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
                 }
                 getSchoolSet().add(school0);

@@ -41,17 +41,8 @@
 
 package fr.ird.osmose.netcdf;
 
-import fr.ird.osmose.IAggregation;
-import fr.ird.osmose.School;
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import ucar.ma2.ArrayDouble;
-import ucar.nc2.Attribute;
-import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 /**
  *

@@ -44,16 +44,11 @@ package fr.ird.osmose.output.netcdf;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.process.mortality.MortalityCause;
-import fr.ird.osmose.util.SimulationLinker;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayInt;
@@ -69,9 +64,6 @@ import ucar.nc2.Variable;
  */
 public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    // IO
-    private FileOutputStream[] fos;
-    private PrintWriter[] prw;
     private int recordFrequency;
     private final Species species;
 
@@ -99,11 +91,6 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
      */
     private float recruitmentSize;
     /**
-     * CSV separator
-     */
-    private final String separator;
-
-    /**
      * Stage of the schools at the beginning of the time step.
      */
     private int[] stage_init;
@@ -111,7 +98,7 @@ public class MortalityOutput_Netcdf extends AbstractOutput_Netcdf {
     public MortalityOutput_Netcdf(int rank, Species species) {
         super(rank);
         this.species = species;
-        separator = getConfiguration().getOutputSeparator();
+        getConfiguration().getOutputSeparator();
     }
 
     public void init() {

@@ -49,7 +49,11 @@ import java.util.Random;
  */
 
 public class XSRandom extends Random {
- private long seed;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -6399195986898305228L;
+    private long seed;
 
  public XSRandom(long seed) {
   this.seed = seed;

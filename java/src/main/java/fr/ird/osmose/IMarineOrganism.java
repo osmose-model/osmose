@@ -76,7 +76,6 @@ public interface IMarineOrganism {
      */
     public int getFileSpeciesIndex();
     public int getSpeciesIndex();
-    public int getSpeciesIndex(boolean applyOff);
     
     /**
      * Age of the organism in year.

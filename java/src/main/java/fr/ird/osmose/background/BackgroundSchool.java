@@ -70,7 +70,7 @@ public class BackgroundSchool extends AbstractSchool {
     public BackgroundSchool(BackgroundSpecies species, int classIndex, Cell cell) {
         this.bkgSpecies = species;
         abundanceHasChanged = false;
-        preys = new HashMap();
+        preys = new HashMap<>();
         fishedBiomass = new double[getConfiguration().getNFishery()];
         discardedBiomass = new double[getConfiguration().getNFishery()];
         this.classIndex = classIndex;
@@ -203,13 +203,4 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getSpeciesIndex();
     }
 
-    /**
-     * Returns the index of the species
-     *
-     * @return the index of the species
-     */
-    @Override
-    public int getSpeciesIndex(boolean off) {
-        return this.bkgSpecies.getSpeciesIndex(off);
-    }
 }

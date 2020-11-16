@@ -114,7 +114,7 @@ public class OutputManager extends SimulationLinker {
 
     public OutputManager(int rank) {
         super(rank);
-        outputs = new ArrayList();
+        outputs = new ArrayList<>();
         snapshot = new SchoolSetSnapshot(rank);
     }
 

@@ -245,10 +245,6 @@ public class Resource extends OsmoseLinker implements IAggregation {
     public int getSpeciesIndex() {
         return this.species.getSpeciesIndex();
     }
-    
-    @Override
-    public int getSpeciesIndex(boolean off) {
-        return this.species.getSpeciesIndex(off);
-    }
+
 
 }

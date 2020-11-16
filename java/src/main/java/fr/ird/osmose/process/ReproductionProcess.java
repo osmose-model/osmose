@@ -120,8 +120,8 @@ public class ReproductionProcess extends AbstractProcess {
         // Seeding biomass
         seedingBiomass = new double[nSpecies];
         cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
-            seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + i);
+        for (int fileIndex : getConfiguration().getFocalIndex()) {
+            seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + fileIndex);
             cpt++;
         }
         // Seeding duration (expressed in number of time steps)
@@ -152,10 +152,8 @@ public class ReproductionProcess extends AbstractProcess {
 
         // check whether the species do reproduce or not
         boolean[] reproduce = new boolean[nSpecies];
-        cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
+        for (cpt = 0; cpt < this.getNSpecies(); cpt++) { 
             reproduce[cpt] = (sexRatio[cpt] > 0.d && beta[cpt] > 0.d);
-            cpt++;
         }
 
         // loop over all the schools to compute SSB
@@ -169,12 +167,9 @@ public class ReproductionProcess extends AbstractProcess {
             school.incrementAge();
         }
 
-        // loop over the species to lay cohort at age class 0
-        cpt = -1;
-        for (int i : getConfiguration().getFocalIndex()) {
+        // Loop over all species
+        for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
             
-            cpt++;
-
             // ignore species that do not reproduce
             if (!reproduce[cpt]) {
                 continue;

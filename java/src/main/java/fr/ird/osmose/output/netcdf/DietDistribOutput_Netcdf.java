@@ -131,7 +131,6 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
         // Defines the prey dimension and coordinate. 
         Dimension preyDim = getNc().addDimension(null, "prey_index", getNSpecies() + getConfiguration().getNRscSpecies());
-        StringBuilder bld = new StringBuilder();
 
         Variable preyvar = getNc().addVariable(null, "prey_index", DataType.FLOAT, preyDim.getFullName());
         int k = 0;
@@ -149,9 +148,8 @@ public class DietDistribOutput_Netcdf extends AbstractDistribOutput_Netcdf {
 
         // Defines the prey dimension and coordinate. 
         Dimension classDim = getNc().addDimension(null, this.getDisName(), this.getNClass());
-        Variable disvar = getNc().addVariable(null, this.getDisName(), DataType.FLOAT, classDim.getFullName());
       
-        this.setDims(new ArrayList(Arrays.asList(getTimeDim(), classDim, preyDim)));
+        this.setDims(new ArrayList<>(Arrays.asList(getTimeDim(), classDim, preyDim)));
 
         getNc().addGroupAttribute(null, new Attribute("Species: ", this.species.getName()));
         

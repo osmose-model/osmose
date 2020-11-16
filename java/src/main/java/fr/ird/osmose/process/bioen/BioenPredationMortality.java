@@ -45,9 +45,7 @@ import fr.ird.osmose.process.mortality.*;
 import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.School;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

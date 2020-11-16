@@ -41,8 +41,6 @@
 
 package fr.ird.osmose.output;
 
-import fr.ird.osmose.School;
-
 /**
  *
  * @author pverley

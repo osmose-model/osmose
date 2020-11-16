@@ -293,7 +293,7 @@ public class MapSet extends OsmoseLinker {
 
         int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
 
-        List<Integer> mapNumber = new ArrayList();
+        List<Integer> mapNumber = new ArrayList<>();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
@@ -377,10 +377,9 @@ public class MapSet extends OsmoseLinker {
             for (int iStep = 0; iStep < nSteps; iStep++) {
                 if (indexMaps[iAge][iStep] < 0) {
                     isMapOK = false;
-                    float age = (float) iAge / nStepYear;
                     int year = iStep / nStepYear;
                     int step = iStep % nStepYear;
-                    warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), iAge, year, step});
+                    warning("No map assigned for {0} age (dt) {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), iAge, year, step});
                 }
             }
         }

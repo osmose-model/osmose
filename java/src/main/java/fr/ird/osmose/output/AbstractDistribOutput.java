@@ -44,7 +44,6 @@ import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
-import java.util.HashMap;
 
 /**
  *

@@ -49,6 +49,5 @@ public interface ISpecies {
     public String getName();
     public int getFileSpeciesIndex();
     public int getSpeciesIndex();
-    public int getSpeciesIndex(boolean off);
     
 }

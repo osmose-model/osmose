@@ -42,7 +42,6 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
-import java.io.File;
 
 /**
  *

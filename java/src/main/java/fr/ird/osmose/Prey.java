@@ -38,7 +38,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose;
 
 /**
@@ -76,9 +75,9 @@ public class Prey implements IMarineOrganism {
      * an instance of {@code ResourceSpecies}
      */
     private final int index;
-    
-    private final int globalindex;
-    
+
+    private final int fileindex;
+
     /**
      * The age of the prey, in year.
      */
@@ -97,9 +96,9 @@ public class Prey implements IMarineOrganism {
      * @param length of the prey
      * @param biomass, the preyed biomass, in tonne
      */
-    Prey(int index, int globalindex, float trophicLevel, float age, float length, double biomass) {
+    Prey(int index, int fileindex, float trophicLevel, float age, float length, double biomass) {
         this.index = index;
-        this.globalindex = globalindex;
+        this.fileindex = fileindex;
         this.trophicLevel = trophicLevel;
         this.biomass = biomass;
         this.age = age;
@@ -140,7 +139,7 @@ public class Prey implements IMarineOrganism {
      */
     @Override
     public int getFileSpeciesIndex() {
-        return globalindex;
+        return fileindex;
     }
 
     @Override
@@ -231,7 +230,7 @@ public class Prey implements IMarineOrganism {
     public double getBetaBioen() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     @Override
     public String getSpeciesName() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -242,10 +241,4 @@ public class Prey implements IMarineOrganism {
         return index;
     }
 
-    @Override
-    public int getSpeciesIndex(boolean applyOff) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    
 }

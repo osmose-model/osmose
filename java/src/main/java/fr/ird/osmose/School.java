@@ -38,13 +38,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  * 
  */
-
 package fr.ird.osmose;
 
 import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
-import java.util.Collection;
 import java.util.HashMap;
 import ucar.ma2.ArrayFloat;
 
@@ -91,10 +89,12 @@ public class School extends AbstractSchool {
      * {@link Species} of the fish.
      */
     final private Species species;
-    
-    /** Genotype variable. */
+
+    /**
+     * Genotype variable.
+     */
     private Genotype genotype;
-    
+
     /**
      * Weight of the fish in tonne. The unit has been set to tonne just because
      * it saves computation time for converting the biomass from gramme to tonne
@@ -156,9 +156,11 @@ public class School extends AbstractSchool {
     private double ingestion;   // total ingestion
     private double kappa;    // kappa value
     double ingestionTot = 0; // sum of all the food ingested during life of the 
-                             // school
-    
-    /** Mortality rates associated with the bioen module. */
+    // school
+
+    /**
+     * Mortality rates associated with the bioen module.
+     */
     private double mort_oxy_rate = 0;
     private double mort_starv_rate = 0;
 
@@ -167,9 +169,9 @@ public class School extends AbstractSchool {
     private double ageMature = 0;
     private double sizeMature = 0;
     private boolean isMature = false;
-    
+
     private double e_net_faced; // mean net energy faced during life
-    
+
 ///////////////
 // Constructors
 ///////////////
@@ -246,11 +248,11 @@ public class School extends AbstractSchool {
         this.ageDt = ageDt;
         this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
-        preys = new HashMap();
+        preys = new HashMap<>();
         starvationRate = 0.d;
         fishedBiomass = new double[getConfiguration().getNFishery()];
         discardedBiomass = new double[getConfiguration().getNFishery()];
-        
+
     }
 
 ////////////////////////////
@@ -282,7 +284,7 @@ public class School extends AbstractSchool {
         reset(fishedBiomass);
         reset(this.discardedBiomass);
     }
-    
+
     /**
      * Make some more eggs accessible. This function assumes that the initial
      * abundance of egg at the beginning of the predation process (abundance -
@@ -351,7 +353,6 @@ public class School extends AbstractSchool {
         this.trophicLevel = trophicLevel;
     }
 
-
     /**
      * Sets the number of dead fish for a given mortality cause.
      *
@@ -361,7 +362,7 @@ public class School extends AbstractSchool {
      */
     public void setNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] = nDead;
-                
+
         double factor = 1;
         if (this.getInstantaneousAbundance() != 0) {
             factor = (this.getInstantaneousAbundance() - nDead) / this.getInstantaneousAbundance();
@@ -369,16 +370,16 @@ public class School extends AbstractSchool {
 
         this.ingestion *= factor;
         this.e_net *= factor;
-        
+
         abundanceHasChanged = true;
     }
 
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {
-        
+
         this.nDead[cause.index] += nDead;
         double factor = 1;
-        
+
         if (this.getInstantaneousAbundance() != 0) {
             factor = (this.getInstantaneousAbundance() - nDead) / this.getInstantaneousAbundance();
         }
@@ -421,7 +422,7 @@ public class School extends AbstractSchool {
         out = true;
         setOffGrid();
     }
-    
+
     public double get_enet_faced() {
         return this.e_net_faced;
     }
@@ -563,7 +564,7 @@ public class School extends AbstractSchool {
             instantaneousAbundance = 0.d;
         }
         instantaneousBiomass = instantaneousAbundance * weight;
-        abundanceHasChanged = false; 
+        abundanceHasChanged = false;
     }
 
     /**
@@ -572,15 +573,14 @@ public class School extends AbstractSchool {
     public double getIngestion() {
         return this.ingestion;
     }
-    
-    
+
     // Calculate the total ingestion of food during life of the school 
-    public double getIngestionTot(){
+    public double getIngestionTot() {
         return this.ingestionTot;
     }
-    
+
     public void updateIngestionTot(double ingestion, double abundance) {
-        this.ingestionTot += (ingestion/abundance);
+        this.ingestionTot += (ingestion / abundance);
     }
 
     /**
@@ -620,14 +620,15 @@ public class School extends AbstractSchool {
      */
     public void incrementGonadWeight(float dg) {
         this.gonadWeight += dg;
-        if(this.gonadWeight < 0.d) { 
+        if (this.gonadWeight < 0.d) {
             warning("Gonad weight is negative");
         }
     }
 
     /**
      * Returns true if the individual is sexually mature.
-     * @return 
+     *
+     * @return
      */
     public boolean isMature() {
         return this.isMature;
@@ -642,7 +643,8 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the age at maturity (only used for outputs).
-     * @return 
+     *
+     * @return
      */
     public double getAgeMat() {
         return this.ageMature;
@@ -650,22 +652,25 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the age at maturity (only used for outputs).
-     * @return 
+     *
+     * @return
      */
     public double getSizeMat() {
         return this.sizeMature;
     }
-    
+
     /**
      * Sets the age at maturity (only used for outputs).
+     *
      * @param agemature
      */
     public void setAgeMat(double agemature) {
         this.ageMature = agemature;
     }
-    
+
     /**
      * Sets the age at maturity (only used for outputs).
+     *
      * @param sizemat
      */
     public void setSizeMat(double sizemat) {
@@ -674,6 +679,7 @@ public class School extends AbstractSchool {
 
     /**
      * Sets the value of assimilated energy (ingestion x phiT, equation 3).
+     *
      * @param value
      */
     public void setEGross(double value) {
@@ -682,7 +688,8 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the value of assimilated energy (ingestion x phiT, equation 3).
-     * @return 
+     *
+     * @return
      */
     public double getEGross() {
         return this.e_gross;
@@ -712,7 +719,7 @@ public class School extends AbstractSchool {
         return this.e_net;
     }
 
-     /**
+    /**
      * Returns the net energy, which is the difference between gross and
      * maintenance energy.
      *
@@ -721,7 +728,7 @@ public class School extends AbstractSchool {
     public void setENet(double enet) {
         this.e_net = enet;
     }
-    
+
     /**
      * Increments the ingested energy.
      */
@@ -729,9 +736,9 @@ public class School extends AbstractSchool {
     public void incrementIngestion(double cumPreyUpon) {
         this.ingestion += cumPreyUpon;
     }
-    
+
     /**
-     * Gets the value of kappa 
+     * Gets the value of kappa
      */
     public double getKappa() {
         return this.kappa;
@@ -746,7 +753,7 @@ public class School extends AbstractSchool {
     public void setKappa(double value) {
         this.kappa = value;
     }
-    
+
     /**
      * Gets the value of maintenance energy (ingestion x phiT, equation 5).
      */
@@ -786,12 +793,12 @@ public class School extends AbstractSchool {
         this.e_net += d;
     }
 
-    @Override 
-    
+    @Override
+
     public double getBetaBioen() {
         return this.getSpecies().getBetaBioen();
     }
-    
+
     public Genotype getGenotype() {
         return this.genotype;
     }
@@ -800,11 +807,11 @@ public class School extends AbstractSchool {
         genotype = new Genotype(rank, this.getSpecies());
         genotype.init();
     }
-    
-    public double getTrait(String key) throws Exception { 
+
+    public double getTrait(String key) throws Exception {
         return this.getGenotype().getTrait(key);
     }
-    
+
     public boolean existsTrait(String key) throws Exception {
         return this.getGenotype().existsTrait(key);
     }
@@ -813,52 +820,45 @@ public class School extends AbstractSchool {
     public String getSpeciesName() {
         return this.species.getName();
     }
-    
-    /** Returns true if the school is considered as a larva. 
-     * Based on the comparison of ageDt with threshold age by dt (default 1).
+
+    /**
+     * Returns true if the school is considered as a larva. Based on the
+     * comparison of ageDt with threshold age by dt (default 1).
+     *
      * @return True if larva, False if adult
      */
-    public boolean isLarva() { 
+    public boolean isLarva() {
         return (this.getAgeDt() < this.getSpecies().getThresAge());
     }
-    
-    /** Reads the genotype from restart file. 
-     * 
+
+    /**
+     * Reads the genotype from restart file.
+     *
      * @param rank Simulation rank
      * @param index School index
      * @param genArray Netcdf Array (school, itrait, ilocus, 2)
      * @param envNoise
      */
     public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray, ArrayFloat.D2 envNoise) {
-        
+
         // Instanciate (i.e. init arrays) genotype for the current school
         this.instance_genotype(rank);
-        
+
         // Sets the genotype values from NetCDF files
         int ntrait = this.getGenotype().getNEvolvingTraits();
-        for(int itrait=0; itrait<ntrait; itrait++) {
+        for (int itrait = 0; itrait < ntrait; itrait++) {
             int nlocus = this.getGenotype().getNLocus(itrait);
-            for(int iloc=0; iloc<nlocus; iloc++) {
+            for (int iloc = 0; iloc < nlocus; iloc++) {
                 // Recovers the NetCDF values
                 double val0 = genArray.get(index, itrait, iloc, 0);
                 double val1 = genArray.get(index, itrait, iloc, 1);
                 this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
-                
+
                 // Sets the value for the environmental noise
                 double envnoise = envNoise.get(index, itrait);
                 this.getGenotype().setEnvNoise(itrait, envnoise);
             }
-        }   
-    }
-    
-    /**
-     * Returns the index of the species
-     *
-     * @return the index of the species
-     */
-    @Override
-    public int getSpeciesIndex() {
-        return this.species.getSpeciesIndex();
+        }
     }
 
     /**
@@ -867,8 +867,8 @@ public class School extends AbstractSchool {
      * @return the index of the species
      */
     @Override
-    public int getSpeciesIndex(boolean off) {
-        return this.species.getSpeciesIndex(off);
+    public int getSpeciesIndex() {
+        return this.species.getSpeciesIndex();
     }
 
     @Override

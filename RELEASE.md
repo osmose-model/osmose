@@ -22,18 +22,21 @@
 
 ### Bugfix
 
+- Correction of a bug in the init. of accessibility manager when varying over time. The index array was hardcoded to `acc` instead of suffix
 - Correction of bugs in the init. and use of some arrays (mixing hashmap and indices). **Has no effect if configurations are setup in the old way (focal ranging from 0 to N)**
 - Correction of a bug in the saving of ingestion (egross was saved instead of energy)
 - Correction of a bug in the saving of fisheries: mean instead of cumulated sum was saved. Revealed by Ghassen.
 - Correction of a bug in the `AbstractDistribOutput` and `DietDistribOutput` (`cpt` increment not initialized in the right place).
 - Correction of a bug in the extraction of OutMortality (problem due to hashmap init).
-#- Correction of a bug in the saving of SpatialOutputs for LTL (problem with indexing)
+- Correction of a bug in the saving of SpatialOutputs for LTL (problem with indexing)
 - Correction of bugs in the reading of resources: problem with file path reconstruction
 - Correction of bugs in the reading of resources: bad recovery of the nc indes. Corrected by adding a parameter (ncstep / year). Revealed by Ekin.
 - Correction of a bug in the ResourceOutput class. HashMap variables were not initialized + problem of indexing
 - Put the `initTimeMapping` method of `ResourceForcing.java` inside the condition. Caused an error if no NetCDF used.
 - Correct a bug in the accessibility recovery (mixing preys and predators)
 - Set the `compile.on.save` Netbeans parameter to `false`. When `true`, compilation may work even if code is bugged.
+- Correct a potential bug in `eliminateTwinAccess` for `AccessibilityManager.java`. Did work only for index ranging from [0, N-1]. Now should work for all indexing
+
 
 ### Misc.
 

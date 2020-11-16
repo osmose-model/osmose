@@ -50,10 +50,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.ArrayUtils;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -128,11 +126,9 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         int ny = getGrid().get_ny();
         this.rscBiomass0 = new double[nRsc][][];
         this.rscBiomass1 = new double[nRsc][][];
-        int cpt = 0;
-        for (int i : getConfiguration().getResourceIndex()) {
+        for (int cpt = 0; cpt < nRsc; cpt++) {
             rscBiomass0[cpt] = new double[ny][nx];
             rscBiomass1[cpt] = new double[ny][nx];
-            cpt++;
         }
     }
 
@@ -162,15 +158,13 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                int cpt = 0;
                 int nBackground = this.getNBkgSpecies();
-                for (int iRsc : getConfiguration().getResourceIndex()) {
+                for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
                     // rscBiomass0 is the resource biomass at the beginning of the time step
                     // adding an offset, since resourceForcing starts with bkgSpecies
                     rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt + nBackground).getBiomass(cell);
                     // rscBiomass1 is the resource biomass remaining in the water column after the predation process
                     rscBiomass1[cpt][j][i] = rscBiomass0[cpt][j][i] - preyedResources[cpt];
-                    cpt++;
                 }
             }
         }
@@ -192,18 +186,15 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
         }
 
         // Write into NetCDF file
-        int cpt = 0;
         ArrayFloat.D4 arrRsc0 = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
         ArrayFloat.D4 arrRsc1 = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
-        int nl = getGrid().get_ny() - 1;
         for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    arrRsc0.set(0, cpt, j, i, (float) rscBiomass0[iRsc][j][i]);
-                    arrRsc1.set(0, cpt, j, i, (float) rscBiomass1[iRsc][j][i]);
+                    arrRsc0.set(0, iRsc, j, i, (float) rscBiomass0[iRsc][j][i]);
+                    arrRsc1.set(0, iRsc, j, i, (float) rscBiomass1[iRsc][j][i]);
                 }
             }
-            cpt++;
         }
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);

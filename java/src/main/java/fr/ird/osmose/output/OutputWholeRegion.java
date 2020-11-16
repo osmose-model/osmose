@@ -42,7 +42,6 @@
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.AbstractSchool;
-import fr.ird.osmose.School;
 
 /**
  *

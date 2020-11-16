@@ -227,7 +227,6 @@ public class ResourceForcing extends OsmoseLinker {
                     ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year");
                 } else {
                     // If parameter is not set, 
-                    String message;
                     if (this.getConfiguration().getNStepYear() == this.timeLength) {
                         warning("Number of steps in the NetCDF file equals ndt/year for species " + fileindex);
                         warning("Assumes ncPerYear = ndt/year");
@@ -253,7 +252,7 @@ public class ResourceForcing extends OsmoseLinker {
 
         // initializes the biomass cache
         if (!caching.equals(ResourceCaching.NONE) && (uBiomass < 0)) {
-            cachedBiomass = new HashMap();
+            cachedBiomass = new HashMap<>();
         }
 
         // biomass multiplier
@@ -370,6 +369,14 @@ public class ResourceForcing extends OsmoseLinker {
             error("File " + ncFile + ", variable " + name + "cannot be read", ex);
         }
         return rscbiomass;
+    }
+
+    public int getIndex() {
+        return this.index;
+    }
+
+    public int getFileIndex() { 
+        return this.fileindex;
     }
 
 }

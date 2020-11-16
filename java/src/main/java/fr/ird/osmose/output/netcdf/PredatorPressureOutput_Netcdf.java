@@ -46,9 +46,7 @@ import fr.ird.osmose.Prey;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,10 +66,6 @@ import ucar.nc2.Variable;
  */
 public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    // IO
-    private FileOutputStream fos;
-    private PrintWriter prw;
-
     //
     private double[][][][] predatorPressure;
     // Diet output stage
@@ -90,7 +84,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void reset() {
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies();
         predatorPressure = new double[nSpec][][][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
@@ -112,10 +106,10 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     public void update() {
         for (School school : getSchoolSet().getAliveSchools()) {
-            int iSpec = school.getFileSpeciesIndex();
+            int iSpec = school.getSpeciesIndex();
             int stage = dietOutputStage.getStage(school);
             for (Prey prey : school.getPreys()) {
-                predatorPressure[iSpec][stage][prey.getFileSpeciesIndex()][dietOutputStage.getStage(prey)] += prey.getBiomass();
+                predatorPressure[iSpec][stage][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += prey.getBiomass();
             }
         }
     }
@@ -132,7 +126,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
         arrTime.set(0, time);
         ArrayFloat.D3 arrOut = new ArrayFloat.D3(1, this.nPred, this.nPreys);
 
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies();
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
             int nStagePred = dietOutputStage.getNStage(iSpec);
             for (int iStage = 0; iStage < nStagePred; iStage++) {
@@ -213,14 +207,14 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     void init_nc_dims_coords() {
 
-        int nSpec = this.getNSpecies();
+        int nSpec = this.getNSpecies() + this.getNBkgSpecies();
 
         this.nPred = 0;
         List<String> listPred = new ArrayList<>();
         List<String> listPrey = new ArrayList<>();
         // Init the predator coordinates
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             for (int iStage = 0; iStage < nStage; iStage++) {

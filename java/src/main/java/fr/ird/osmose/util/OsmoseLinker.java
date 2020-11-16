@@ -46,7 +46,6 @@ import fr.ird.osmose.Species;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.logging.OLogger;
-import java.util.Arrays;
 import java.util.stream.IntStream;
 import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.resource.ResourceSpecies;
@@ -103,6 +102,25 @@ public class OsmoseLinker extends OLogger {
     final public int getNSpecies() {
         return getConfiguration().getNSpecies();
     }
+
+    /**
+     * The number of simulated species
+     *
+     * @return the number of simulated species
+     */
+    final public int getNAllSpecies() {
+        return getConfiguration().getNAllSpecies();
+    }
+
+    /**
+     * The number of simulated species
+     *
+     * @return the number of simulated species
+     */
+    final public int getNPredSpecies() {
+        return getConfiguration().getNPredSpecies();
+    }
+
 
     final public AbstractGrid getGrid() {
         return getOsmose().getConfiguration().getGrid();

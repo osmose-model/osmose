@@ -242,6 +242,9 @@ public class Species implements ISpecies {
     
     /** Return the global index of the species. 
      * 
+     * Index between [0, Nspec - 1].
+     * 
+     * 
      * @return 
      */
     @Override
@@ -249,11 +252,6 @@ public class Species implements ISpecies {
         return index;
     }
     
-    @Override
-    public int getSpeciesIndex(boolean applyOff) {
-        return index;
-    }
-
     /**
      * Returns the name of the species. Parameter <i>species.name.sp#</i>
      *
@@ -299,11 +297,13 @@ public class Species implements ISpecies {
      * @param biomass
      * @return
      */
+    /*
     private boolean isVulnerable(double biomass) {
         double Bv = 0.d;
         double Sv = 1.d;
         return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
     }
+    */
 
     public double getBPower() {
         return this.bPower;

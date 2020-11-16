@@ -49,7 +49,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -242,7 +241,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     prw[iSpecies].print(quote("Mfor"));
                 }
                 prw[iSpecies].println();
-                for (MortalityCause cause : MortalityCause.values()) {
+                for (int cpt = 0; cpt < MortalityCause.values().length; cpt++) {
                     prw[iSpecies].print(separator);
                     prw[iSpecies].print("Eggs");
                     prw[iSpecies].print(separator);

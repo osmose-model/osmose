@@ -278,7 +278,7 @@ public class Configuration extends OLogger {
 
         this.mainFilename = new File(mainFilename).getAbsolutePath();
 
-        parameters = new HashMap();
+        parameters = new HashMap<>();
 
         if (null != cmd) {
             // Add the parameters from the command line
@@ -336,7 +336,7 @@ public class Configuration extends OLogger {
         this.bioenEnabled = this.getBoolean(keybioen);
 
         String key = "simulation.genetic.enabled";
-        geneticEnabled = this.getBoolean(key);
+        this.geneticEnabled = this.getBoolean(key);
 
         String keyincom = "simulation.incoming.flux.enabled";
         this.incomingFluxEnabled = this.getBoolean(keyincom);
@@ -485,7 +485,7 @@ public class Configuration extends OLogger {
         nFishery = fisheryEnabled ? findKeys("fisheries.name.fsh*").size() : 0;
 
         // Output regions
-        outputRegions = new ArrayList();
+        outputRegions = new ArrayList<>();
         // special case region0, the whole domain
         if (!canFind("output.region.enabled.rg0")
                 || getBoolean("output.region.enabled.rg0")) {
@@ -494,8 +494,9 @@ public class Configuration extends OLogger {
             }
             outputRegions.add(new OutputWholeRegion(0));
         }
+        
         // list output regions
-        HashSet<Integer> rg = new HashSet(
+        HashSet<Integer> rg = new HashSet<>(
                 findKeys("output.regions.*.rg*").stream()
                         .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rg") + 3)))
                         .collect(Collectors.toList())
@@ -505,7 +506,7 @@ public class Configuration extends OLogger {
         rg.remove(0);
 
         // list output surveys
-        HashSet<Integer> surveysIndex = new HashSet(
+        HashSet<Integer> surveysIndex = new HashSet<>(
                 findKeys("surveys.*.sr*").stream()
                         .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sr") + 3)))
                         .collect(Collectors.toList())
@@ -513,7 +514,7 @@ public class Configuration extends OLogger {
 
         // Do some test in order to insure that surveys and output
         // regions have no duplicate indexes
-        HashSet<Integer> total = new HashSet();
+        HashSet<Integer> total = new HashSet<>();
         total.addAll(rg);
         total.addAll(surveysIndex);
         if (total.size() != surveysIndex.size() + rg.size()) {
@@ -760,7 +761,7 @@ public class Configuration extends OLogger {
         regexpPattern = regexpPattern.replaceAll("\\?", ".");
 
         // List the keys and select the ones that match the filter
-        List<String> filteredKeys = new ArrayList();
+        List<String> filteredKeys = new ArrayList<>();
         for (String key : parameters.keySet()) {
             if (key.matches(regexpPattern)) {
                 filteredKeys.add(key);
@@ -1175,6 +1176,24 @@ public class Configuration extends OLogger {
      */
     public int getNBkgSpecies() {
         return nBackground;
+    }
+
+    /**
+     * Returns the number of all species. Parameter <i>simulation.nspecies</i>
+     *
+     * @return the number of species.
+     */
+    public int getNAllSpecies() {
+        return this.nBackground + this.nSpecies + this.nResource;
+    }
+
+        /**
+     * Returns the number of all species. Parameter <i>simulation.nspecies</i>
+     *
+     * @return the number of species.
+     */
+    public int getNPredSpecies() {
+        return this.nBackground + this.nSpecies;
     }
 
     /**

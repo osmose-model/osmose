@@ -43,7 +43,6 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * Class that handles the ingestion in the Bioenergetic model
