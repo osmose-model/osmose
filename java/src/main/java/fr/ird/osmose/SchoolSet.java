@@ -45,12 +45,12 @@ import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.filter.AliveSchoolFilter;
 import fr.ird.osmose.util.filter.FilteredSet;
 import fr.ird.osmose.util.filter.FilteredSets;
-import fr.ird.osmose.util.filter.IFilter;
 import fr.ird.osmose.util.filter.OldSchoolFilter;
 import fr.ird.osmose.util.filter.OutSchoolFilter;
 import fr.ird.osmose.util.filter.PresentSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -157,7 +157,7 @@ public class SchoolSet extends OsmoseLinker {
      */
     public List<School> getSchools(Species species, boolean update) {
         if (update || hasSpeciesChanged[species.getSpeciesIndex()]) {
-            schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getSpeciesIndex()), new AliveSchoolFilter()}));
+            schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new ArrayList<>(Arrays.asList(new SpeciesFilter(species.getSpeciesIndex()), new AliveSchoolFilter()))));
             hasSpeciesChanged[species.getSpeciesIndex()] = false;
         }
         return schoolBySpecies.get(species.getSpeciesIndex());
@@ -183,7 +183,7 @@ public class SchoolSet extends OsmoseLinker {
      */
     public List<School> getSchoolsAll(Species species, boolean update) {
         if (update || hasSpeciesChanged[species.getSpeciesIndex()]) {
-            schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getSpeciesIndex())}));
+            schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new ArrayList<>(Arrays.asList(new SpeciesFilter(species.getSpeciesIndex())))));
             hasSpeciesChanged[species.getSpeciesIndex()] = false;
         }
         return schoolBySpecies.get(species.getSpeciesIndex());

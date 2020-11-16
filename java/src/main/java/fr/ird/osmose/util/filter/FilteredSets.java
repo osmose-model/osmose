@@ -41,6 +41,7 @@
 
 package fr.ird.osmose.util.filter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -54,35 +55,35 @@ public class FilteredSets {
      * Given a subset, the extract method creates a sub subset thanks to
      * the CommunityFilter.
      * 
-     * @param <T>
+     * @param <E>
      * @param set
      * @param filters
      * @return
      */
-    public static <T> FilteredSet<T> subset(FilteredSet<T> set, IFilter<? super T>[] filters) {
+    public static <E> FilteredSet<E> subset(FilteredSet<E> set, ArrayList<IFilter<? super E>> filters) {
 
-        FilteredSet<T> subset = new FilteredSet(set, filters);
+        FilteredSet<E> subset = new FilteredSet<>(set, filters);
         subset.refresh();
         return subset;
     }
 
-    public static <T> FilteredSet<T> subset(FilteredSet<T> set, IFilter<? super T> filter) {
-        return subset(set, new IFilter[]{filter});
+    public static <E> FilteredSet<E> subset(FilteredSet<E> set, IFilter<? super E> filter) {
+        return subset(set, new ArrayList<>(Arrays.asList(filter)));
     }
 
-    public static <T> FilteredSet<T> intersect(FilteredSet<T> subset1, FilteredSet<T> subset2) {
+    public static <E> FilteredSet<E> intersect(FilteredSet<E> subset1, FilteredSet<E> subset2) {
 
-        HashSet<T> set = new HashSet<>();
+        HashSet<E> set = new HashSet<>();
         set.addAll(subset1);
         set.addAll(subset2);
 
-        FilteredSet<T> merged = new FilteredSet<>();
+        FilteredSet<E> merged = new FilteredSet<>();
         merged.addAll(set);
 
-        HashSet<IFilter<? super T>> filters = new HashSet<>();
-        filters.addAll(Arrays.asList(subset1.getFilters()));
-        filters.addAll(Arrays.asList(subset2.getFilters()));
+        ArrayList<IFilter<? super E>> filters = new ArrayList<>();
+        filters.addAll(subset1.getFilters());
+        filters.addAll(subset2.getFilters());
 
-        return FilteredSets.subset(merged, filters.toArray(new IFilter[filters.size()]));
+        return FilteredSets.subset(merged, filters);
     }
 }
