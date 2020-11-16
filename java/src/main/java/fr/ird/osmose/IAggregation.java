@@ -116,7 +116,7 @@ public interface IAggregation extends IMarineOrganism {
      * @param biomass of the aggregation in tonne
      * @return the corresponding abundance.
      */
-    public double abd2biom(double biomass);
+    public double abd2biom(double abundance);
 
     public void incrementIngestion(double cumPreyUpon);
 
