@@ -49,7 +49,6 @@ import fr.ird.osmose.stage.IStage;
 import fr.ird.osmose.stage.PredPreyStage;
 import fr.ird.osmose.util.AccessibilityManager;
 import fr.ird.osmose.util.Matrix;
-import java.util.HashMap;
 import java.util.List;
 
 /**

@@ -51,7 +51,6 @@ import fr.ird.osmose.process.mortality.additional.ConstantLarvaMortality;
 import fr.ird.osmose.util.GridMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -149,7 +148,6 @@ public class AdditionalMortality extends AbstractMortality {
     @Override
     public double getRate(School school) {
         double D;
-        Species spec = school.getSpecies();
         int ispec = school.getSpeciesIndex();
         if (school.isLarva()) {
             // Egg stage
@@ -174,7 +172,7 @@ public class AdditionalMortality extends AbstractMortality {
      */
     private Scenario findScenario(int fileSpeciesIndex) {
 
-        List<Scenario> scenarios = new ArrayList();
+        List<Scenario> scenarios = new ArrayList<>();
         // List the scenarios listed in the current configuration file
         for (Scenario scenario : Scenario.values()) {
             if (!getConfiguration().isNull(scenario.key + fileSpeciesIndex)) {
@@ -214,7 +212,7 @@ public class AdditionalMortality extends AbstractMortality {
      */
     private ScenarioLarva findScenarioLarva(int fileSpeciesIndex) {
 
-        List<ScenarioLarva> scenarios = new ArrayList();
+        List<ScenarioLarva> scenarios = new ArrayList<>();
         // List the scenarios listed in the current configuration file
         for (ScenarioLarva scenario : ScenarioLarva.values()) {
             if (!getConfiguration().isNull(scenario.key + fileSpeciesIndex)) {

@@ -46,9 +46,7 @@ import fr.ird.osmose.Prey;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,10 +65,6 @@ import ucar.nc2.Variable;
  * @author pverley
  */
 public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
-
-    // IO
-    private FileOutputStream fos;
-    private PrintWriter prw;
 
     //
     private double[][][][] predatorPressure;

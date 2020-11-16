@@ -42,7 +42,6 @@
 package fr.ird.osmose.process.mortality;
 
 import fr.ird.osmose.School;
-import java.util.HashMap;
 
 /**
  * This class controls mortality for schools that are temporarily outside the

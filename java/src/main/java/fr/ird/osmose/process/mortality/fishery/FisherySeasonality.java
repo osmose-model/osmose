@@ -46,7 +46,6 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
 /**
  *

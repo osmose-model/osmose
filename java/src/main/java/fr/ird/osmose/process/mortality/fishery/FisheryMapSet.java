@@ -161,7 +161,7 @@ public class FisheryMapSet extends OsmoseLinker {
         key = String.format("%s.%s.map*", prefix, suffix);
         int nmapmax = cfg.findKeys(key).size();
 
-        List<Integer> mapNumber = new ArrayList();
+        List<Integer> mapNumber = new ArrayList<>();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {

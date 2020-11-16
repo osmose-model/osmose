@@ -41,7 +41,6 @@
 
 package fr.ird.osmose.output.netcdf;
 
-import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.background.BackgroundSchool;
@@ -208,10 +207,9 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     void init_nc_dims_coords() {
 
         Dimension classDim = getNc().addDimension(null, "class_prey", nColumns);
-        StringBuilder bld = new StringBuilder();
         
         getNc().addVariable(null, "class_prey", DataType.FLOAT, "class_prey");
-        this.setDims(new ArrayList(Arrays.asList(getTimeDim(), classDim)));
+        this.setDims(new ArrayList<>(Arrays.asList(getTimeDim(), classDim)));
         
         int nSpec = getNSpecies() + getNBkgSpecies() + getNRscSpecies();
         int k = 0;

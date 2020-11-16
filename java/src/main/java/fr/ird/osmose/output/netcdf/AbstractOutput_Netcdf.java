@@ -89,7 +89,6 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
      * Parameter <i>output.cutoff.age.sp#</i>
      */
     private float[] cutoffAge;
-    private final String separator;
     private List<Dimension> outDims;
 
     /**
@@ -109,7 +108,6 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
 
     AbstractOutput_Netcdf(int rank) {
         super(rank);
-        separator = getConfiguration().getOutputSeparator();
     }
 
     @Override
@@ -275,7 +273,6 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
     void init_nc_dims_coords() {
 
         Dimension speciesDim = nc.addDimension(null, "species", getNSpecies());
-        Variable varspec = nc.addVariable(null, "species", DataType.INT, "species");
         this.createSpeciesAttr();
         outDims = new ArrayList<>();
         outDims.add(timeDim);

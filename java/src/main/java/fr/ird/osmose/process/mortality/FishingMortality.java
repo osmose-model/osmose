@@ -122,7 +122,7 @@ public class FishingMortality extends AbstractMortality {
 
         // Loads the MPAs
         int nMPA = getConfiguration().findKeys("mpa.file.mpa*").size();
-        mpas = new ArrayList(nMPA);
+        mpas = new ArrayList<>(nMPA);
         for (int iMPA = 0; iMPA < nMPA; iMPA++) {
             mpas.add(new MPA(getRank(), iMPA));
         }
@@ -174,7 +174,7 @@ public class FishingMortality extends AbstractMortality {
      */
     private Scenario findScenario(int fileSpeciesIndex) {
 
-        List<Scenario> scenarios = new ArrayList();
+        List<Scenario> scenarios = new ArrayList<>();
         // List the fishing scenarios listed in the current configuration file
         for (Scenario scenario : Scenario.values()) {
             if (!getConfiguration().isNull(scenario.key + fileSpeciesIndex)) {
@@ -243,10 +243,8 @@ public class FishingMortality extends AbstractMortality {
 
         // fishable biomass only has to be updated for catches
         Boolean catches[] = new Boolean[this.getNSpecies()];
-        int cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
+        for (int cpt = 0; cpt < this.getNSpecies(); cpt++) { 
             catches[cpt] = (Type.CATCHES == fishingMortality[cpt].getType());
-            cpt++;
         }
 
         // loop over all the schools
