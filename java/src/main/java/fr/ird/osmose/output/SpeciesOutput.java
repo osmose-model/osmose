@@ -75,7 +75,7 @@ public class SpeciesOutput extends AbstractOutput {
     public void reset() {
         int nSpecies = this.getNSpecies();
         value = new double[nSpecies][];
-        for (int i : this.getConfiguration().getFocalIndex()) {
+        for (int i = 0; i < nSpecies; i++) {
             value[i] = new double[getNOutputRegion()];
         }
     }
