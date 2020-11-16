@@ -45,7 +45,6 @@ import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.process.genet.Trait;
 import fr.ird.osmose.resource.ResourceForcing;
-import java.util.HashMap;
 import fr.ird.osmose.background.BackgroundSchoolSet;
 
 /**

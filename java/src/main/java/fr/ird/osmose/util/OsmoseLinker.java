@@ -46,7 +46,6 @@ import fr.ird.osmose.Species;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.grid.AbstractGrid;
 import fr.ird.osmose.util.logging.OLogger;
-import java.util.Arrays;
 import java.util.stream.IntStream;
 import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.resource.ResourceSpecies;

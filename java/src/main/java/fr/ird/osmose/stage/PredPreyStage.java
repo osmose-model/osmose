@@ -41,7 +41,6 @@
 
 package fr.ird.osmose.stage;
 
-import fr.ird.osmose.Osmose;
 import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.util.OsmoseLinker;
 

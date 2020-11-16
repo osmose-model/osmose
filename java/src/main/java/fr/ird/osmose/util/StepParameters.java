@@ -65,10 +65,7 @@ public class StepParameters extends OsmoseLinker {
     }
 
     public void init() {
-        
-        int ymax, ymin;
-        int[] tempYears;
-
+   
         Configuration conf = this.getConfiguration();
 
         int nseason = getConfiguration().getNStepYear();

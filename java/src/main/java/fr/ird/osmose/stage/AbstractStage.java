@@ -82,9 +82,8 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
         }
         
         // Set values for resource species.
-        for (int i : getConfiguration().getResourceIndex()) {
-            thresholds[cpt] = new float[0];
-            cpt++;
+        for (cpt = 0; cpt < getConfiguration().getNRscSpecies(); cpt++) {
+            thresholds[cpt + nSpecies + nBkgSpecies] = new float[0];
         }
         
     }

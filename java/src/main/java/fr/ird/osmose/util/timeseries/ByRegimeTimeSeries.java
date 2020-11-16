@@ -41,7 +41,6 @@
 
 package fr.ird.osmose.util.timeseries;
 
-import fr.ird.osmose.process.mortality.fishery.*;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
 

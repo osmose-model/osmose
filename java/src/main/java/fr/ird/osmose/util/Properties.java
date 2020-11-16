@@ -54,6 +54,11 @@ import java.util.logging.Logger;
  */
 public class Properties extends java.util.Properties {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 8819974349797686775L;
+
     @Override
     public String getProperty(String key) {
         String value = super.getProperty(key);
@@ -93,8 +98,8 @@ public class Properties extends java.util.Properties {
         /*
          * List the keys and select the ones that match the filter
          */
-        List<String> filteredKeys = new ArrayList();
-        Enumeration keys = this.keys();
+        List<String> filteredKeys = new ArrayList<>();
+        Enumeration<Object> keys = this.keys();
         while(keys.hasMoreElements()) {
             String key = String.valueOf(keys.nextElement());
             if (key.matches(regexpPattern)) {

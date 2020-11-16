@@ -129,12 +129,18 @@ public class VersionNumber implements Comparable<VersionNumber> {
     private static class VersionNumberFormatException extends IllegalArgumentException {
 
         /**
+         *
+         */
+        private static final long serialVersionUID = 6543003129025100357L;
+
+        /**
          * Constructs a <code>VersionNumberFormatException</code> with no detail
          * message.
          */
-        public VersionNumberFormatException() {
+        /*public VersionNumberFormatException() {
             super();
         }
+        */
 
         /**
          * Constructs a <code>VersionNumberFormatException</code> with the

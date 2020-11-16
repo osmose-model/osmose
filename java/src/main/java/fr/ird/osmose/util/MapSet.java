@@ -293,7 +293,7 @@ public class MapSet extends OsmoseLinker {
 
         int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
 
-        List<Integer> mapNumber = new ArrayList();
+        List<Integer> mapNumber = new ArrayList<>();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {

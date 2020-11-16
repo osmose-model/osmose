@@ -90,7 +90,7 @@ public class MPA extends OsmoseLinker {
      */
     public void init() {
 
-        cells = new ArrayList();
+        cells = new ArrayList<>();
         if (!getConfiguration().isNull("mpa.file.mpa" + index)) {
             loadMPA(getConfiguration().getFile("mpa.file.mpa" + index));
             start = getConfiguration().getInt("mpa.start.year.mpa" + index);
