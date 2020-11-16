@@ -89,9 +89,8 @@ public class BioenReproductionProcess extends ReproductionProcess {
             school.incrementAge();
         }
 
-        int cpt = 0;
         // loop over the species to lay cohort at age class 0
-        for (int i : getConfiguration().getFocalIndex()) {
+        for (int cpt = 0; cpt < this.getNSpecies(); cpt++) {
             
             // Recover the species object and all the schools of the given species
             Species species = getSpecies(cpt);
@@ -102,7 +101,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
 
-            if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB[i] == 0.) {
+            if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB[cpt] == 0.) {
                 // seeding process for collapsed species
                 // if seeding biomass is 0 (no mature indivials, release eggs in the
                 // old fashioned way.
@@ -143,8 +142,6 @@ public class BioenReproductionProcess extends ReproductionProcess {
                 this.create_reproduction_schools(cpt, negg_tot, false, weight_rand);
                 
             }  // end of SSB statement
-            
-            cpt++;
             
         }  // end of species loop
     }
