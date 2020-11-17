@@ -50,7 +50,7 @@ public class BioenSizeInfOutput extends AbstractOutput {
     public double[] sizeMax;
 
     public BioenSizeInfOutput(int rank) {
-        super(rank, "Bioen", "SizeInf");
+        super(rank, "Bioen", "sizeInf");
     }
 
     @Override
