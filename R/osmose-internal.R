@@ -248,6 +248,7 @@
            maint = .read_1D(files=files, path=path, ...),
            SizeInf = .read_1D(files=files, path=path, ...),
            SizeMature = .read_1D(files=files, path=path, ...),
+           AbundAge1 = .read_1d(files=files, path=path, ...)
            
            # osmose 3r1
            #            mortalityRateByAge = .read_MortStagebyAgeorSize(files=files, path=path, ...),
@@ -277,6 +278,8 @@
            predatorPressureDistribByAge   = .read_2D(files=files, path=path, ...),
            predatorPressureDistribBySize  = .read_2D(files=files, path=path, ...),
            abundanceDistribByTL            = .read_2D(files=files, path=path, ...),
+           
+           
            .warningReadingOutputs(type)), 
     error = .errorReadingOutputs)
   
@@ -509,7 +512,7 @@
 # @return A list of list containing the output functions
 #
 osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
-
+  
   # Output data
   outputData = list(biomass = readOsmoseFiles(path = path, type = "biomass"),  
                     abundance = readOsmoseFiles(path = path, type = "abundance"),  
@@ -536,10 +539,9 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     mortalityByAge = readOsmoseFiles(path = path, type = "mortalityRateDistribByAge", bySpecies = TRUE),
                     dietMatrixByAge = readOsmoseFiles(path = path, type = "dietMatrixDistribByAge", bySpecies = TRUE),  
                     predatorPressureByAge = readOsmoseFiles(path = path, type = "predatorPressureDistribByAge", bySpecies = TRUE), 
-                    abundanceByTL = readOsmoseFiles(path = path, type = "abundanceDistribByTL"),  
+                    abundanceByTL = readOsmoseFiles(path = path, type = "abundanceDistribByTL"),
                     
                     # Fisheries outputs
-                    
                     yieldByFishery = readOsmoseFiles(path = path, type = "fisheriesOutput", ext="nc"),
                     yield = readOsmoseFiles(path = path, type = "yield"), 
                     yieldN = readOsmoseFiles(path = path, type = "yieldN"), 
@@ -548,14 +550,14 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     yieldByAge = readOsmoseFiles(path = path, type = "yieldDistribByAge"),  
                     yieldNByAge = readOsmoseFiles(path = path, type = "yieldNDistribByAge"),  
                     
-                    
                     # bioen variables
                     ageMature = readOsmoseFiles(path = path, type = "AgeMature"),
                     growthPotential = readOsmoseFiles(path = path, type = "growthpot"),
                     ingestion = readOsmoseFiles(path = path, type = "ingestion"),
                     maintenance = readOsmoseFiles(path = path, type = "maint"),
                     sizeInf = readOsmoseFiles(path = path, type = "SizeInf"),
-                    sizeMature = readOsmoseFiles(path = path, type = "SizeMature")
+                    sizeMature = readOsmoseFiles(path = path, type = "SizeMature"),
+                    abundAge1 = readOsmoseFiles(path=path, type="AbundAge1"),
                     
   )
   
