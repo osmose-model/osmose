@@ -250,15 +250,15 @@
            meanEnet = .read_1D(files=files, path=path, ...),
            sizeInf = .read_1D(files=files, path=path, ...),
            kappa = .read_1D(files=files, path=path, ...),
-           AbundAge1 = .read_1d(files=files, path=path, ...),
-           meanIngestDistribByAge = .read_2d(files=files, path=path),
-           meanIngestDistribBySize = .read_2d(files=files, path=path),
-           meanKappaDistribByAge = .read_2d(files=files, path=path),
-           meanKappaDistribBySize = .read_2d(files=files, path=path),
-           meanEnetDistribByAge = .read_2d(files=files, path=path),
-           meanEnetDistribBySize = .read_2d(files=files, path=path),
-           meanMaintDistribByAge = .read_2d(files=files, path=path),
-           meanMaintDistribBySize = .read_2d(files=files, path=path),
+           AbundAge1 = .read_1D(files=files, path=path, ...),
+           meanIngestDistribByAge = .read_2D(files=files, path=path),
+           meanIngestDistribBySize = .read_2D(files=files, path=path),
+           meanKappaDistribByAge = .read_2D(files=files, path=path),
+           meanKappaDistribBySize = .read_2D(files=files, path=path),
+           meanEnetDistribByAge = .read_2D(files=files, path=path),
+           meanEnetDistribBySize = .read_2D(files=files, path=path),
+           meanMaintDistribByAge = .read_2D(files=files, path=path),
+           meanMaintDistribBySize = .read_2D(files=files, path=path),
            
            
            
@@ -579,7 +579,7 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     enetByAge = readOsmoseFiles(path=path, type="meanEnetDistribByAge"),
                     enetBySize = readOsmoseFiles(path=path, type="meanEnetDistribBySize"),
                     maintenanceByAge = readOsmoseFiles(path=path, type="meanMaintDistribByAge"),
-                    maintenanceBySize = readOsmoseFiles(path=path, type="meanMaintDistribBySize"),
+                    maintenanceBySize = readOsmoseFiles(path=path, type="meanMaintDistribBySize")
   )
   
   if(!is.null(outputData$yieldByFishery)) {
