@@ -25,4 +25,4 @@ cran-comments.md
 ^R/osmose2R\.R$
 ^data-raw$
 ^inst/java$
-target
+java/target
