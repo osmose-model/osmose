@@ -242,12 +242,25 @@
            fisheriesOutput = .read_osmose_ncdf(files=files, path=path, ...),
            
            #bioen
-           AgeMature  = .read_1D(files=files, path=path, ...),
-           growthpot  = .read_1D(files=files, path=path, ...),
+           sizeMature = .read_1D(files=files, path=path, ...),
+           ageMature  = .read_1D(files=files, path=path, ...),
            ingestion = .read_1D(files=files, path=path, ...),
-           maint = .read_1D(files=files, path=path, ...),
-           SizeInf = .read_1D(files=files, path=path, ...),
-           SizeMature = .read_1D(files=files, path=path, ...),
+           ingestionTot  = .read_1D(files=files, path=path, ...),
+           maintenance = .read_1D(files=files, path=path, ...),
+           meanEnet = .read_1D(files=files, path=path, ...),
+           sizeInf = .read_1D(files=files, path=path, ...),
+           kappa = .read_1D(files=files, path=path, ...),
+           AbundAge1 = .read_1D(files=files, path=path, ...),
+           meanIngestDistribByAge = .read_2D(files=files, path=path),
+           meanIngestDistribBySize = .read_2D(files=files, path=path),
+           meanKappaDistribByAge = .read_2D(files=files, path=path),
+           meanKappaDistribBySize = .read_2D(files=files, path=path),
+           meanEnetDistribByAge = .read_2D(files=files, path=path),
+           meanEnetDistribBySize = .read_2D(files=files, path=path),
+           meanMaintDistribByAge = .read_2D(files=files, path=path),
+           meanMaintDistribBySize = .read_2D(files=files, path=path),
+           
+           
            
            # osmose 3r1
            #            mortalityRateByAge = .read_MortStagebyAgeorSize(files=files, path=path, ...),
@@ -277,6 +290,8 @@
            predatorPressureDistribByAge   = .read_2D(files=files, path=path, ...),
            predatorPressureDistribBySize  = .read_2D(files=files, path=path, ...),
            abundanceDistribByTL            = .read_2D(files=files, path=path, ...),
+           
+           
            .warningReadingOutputs(type)), 
     error = .errorReadingOutputs)
   
@@ -509,7 +524,7 @@
 # @return A list of list containing the output functions
 #
 osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
-
+  
   # Output data
   outputData = list(biomass = readOsmoseFiles(path = path, type = "biomass"),  
                     abundance = readOsmoseFiles(path = path, type = "abundance"),  
@@ -536,10 +551,9 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     mortalityByAge = readOsmoseFiles(path = path, type = "mortalityRateDistribByAge", bySpecies = TRUE),
                     dietMatrixByAge = readOsmoseFiles(path = path, type = "dietMatrixDistribByAge", bySpecies = TRUE),  
                     predatorPressureByAge = readOsmoseFiles(path = path, type = "predatorPressureDistribByAge", bySpecies = TRUE), 
-                    abundanceByTL = readOsmoseFiles(path = path, type = "abundanceDistribByTL"),  
+                    abundanceByTL = readOsmoseFiles(path = path, type = "abundanceDistribByTL"),
                     
                     # Fisheries outputs
-                    
                     yieldByFishery = readOsmoseFiles(path = path, type = "fisheriesOutput", ext="nc"),
                     yield = readOsmoseFiles(path = path, type = "yield"), 
                     yieldN = readOsmoseFiles(path = path, type = "yieldN"), 
@@ -548,15 +562,24 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     yieldByAge = readOsmoseFiles(path = path, type = "yieldDistribByAge"),  
                     yieldNByAge = readOsmoseFiles(path = path, type = "yieldNDistribByAge"),  
                     
-                    
                     # bioen variables
-                    ageMature = readOsmoseFiles(path = path, type = "AgeMature"),
-                    growthPotential = readOsmoseFiles(path = path, type = "growthpot"),
+                    sizeMature = readOsmoseFiles(path = path, type = "sizeMature"),
+                    ageMature = readOsmoseFiles(path = path, type = "ageMature"),
                     ingestion = readOsmoseFiles(path = path, type = "ingestion"),
-                    maintenance = readOsmoseFiles(path = path, type = "maint"),
-                    sizeInf = readOsmoseFiles(path = path, type = "SizeInf"),
-                    sizeMature = readOsmoseFiles(path = path, type = "SizeMature")
-                    
+                    ingestionTot = readOsmoseFiles(path = path, type = "ingestionTot"),
+                    maintenance = readOsmoseFiles(path = path, type = "maintenance"),
+                    meanEnet = readOsmoseFiles(path=path, type="meanEnet"),
+                    sizeInf = readOsmoseFiles(path = path, type = "sizeInf"),
+                    kappa = readOsmoseFiles(path = path, type = "kappa"),
+                    abundAge1 = readOsmoseFiles(path=path, type="AbundAge1"),
+                    ingestByAge = readOsmoseFiles(path=path, type="meanIngestDistribByAge"),
+                    ingestBySize = readOsmoseFiles(path=path, type="meanIngestDistribBySize"),
+                    kappaByAge = readOsmoseFiles(path=path, type="meanKappaDistribByAge"),
+                    kappaBySize = readOsmoseFiles(path=path, type="meanKappaDistribBySize"),
+                    enetByAge = readOsmoseFiles(path=path, type="meanEnetDistribByAge"),
+                    enetBySize = readOsmoseFiles(path=path, type="meanEnetDistribBySize"),
+                    maintenanceByAge = readOsmoseFiles(path=path, type="meanMaintDistribByAge"),
+                    maintenanceBySize = readOsmoseFiles(path=path, type="meanMaintDistribBySize")
   )
   
   if(!is.null(outputData$yieldByFishery)) {
