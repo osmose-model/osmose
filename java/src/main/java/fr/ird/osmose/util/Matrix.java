@@ -187,6 +187,7 @@ public class Matrix extends OsmoseLinker {
         } 
         
         this.sortMatrix();
+        debug(this.toString());
 
     }
     
@@ -385,7 +386,6 @@ public class Matrix extends OsmoseLinker {
             iPrey++;
             
         }
-        
     }
     
     /** Find the index of a (name, class) tuple within a list of names and class.
@@ -416,7 +416,6 @@ public class Matrix extends OsmoseLinker {
         String output;
         StringBuilder bld = new StringBuilder(";");
         for(int iPred = 0; iPred < this.nPred; iPred++) {
-            System.out.println(classPred[iPred]);
             output = String.format("%s < %f", namesPred[iPred], classPred[iPred]);
             bld.append(output).append(";");
         }
