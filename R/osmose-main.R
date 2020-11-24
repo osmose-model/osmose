@@ -70,7 +70,7 @@
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
-                      version = "4.3.1", osmose = NULL, java = "java",
+                      version = "4.3.2", osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE, force = FALSE){
   
   # Print message with version
@@ -164,7 +164,7 @@ run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log
 #' read_osmose(path = outdir)
 #'   
 #' @aliases osmose2R
-read_osmose = function(path = NULL, input = NULL, version = "4.3.1", 
+read_osmose = function(path = NULL, input = NULL, version = "4.3.2", 
                        species.names = NULL, absolute = TRUE, ...){
   
   # If both path and input are NULL, then show an error message
@@ -283,7 +283,7 @@ write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE,
 #'demo = osmose_demo(path="../", config="eec_4.3.0")
 #'
 #'# run the osmose model
-#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.1", 
+#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.2", 
 #'           options=NULL, verbose=TRUE, clean=TRUE)
 #'
 #'# reads output data
@@ -360,7 +360,7 @@ osmose_demo = function(path = NULL, config = c("gog", "eec_4.3.0")){
 #'demo = osmose_demo(path="../", config="eec_4.3.0")
 #'
 #'# run the osmose model
-#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.1", 
+#'run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.2", 
 #'           options=NULL, verbose=TRUE, clean=TRUE)
 #'
 #'# reads output data

@@ -29,7 +29,7 @@ library("osmose")
 demo = osmose_demo(path="../", config="eec_4.3.0")
 
 # run the osmose model
-run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.1", 
+run_osmose(demo$config_file, parameters=NULL, output=NULL, version="4.3.2", 
           options=NULL, verbose=TRUE, clean=TRUE)
 
 # reads output data

@@ -90,7 +90,8 @@ public class PredationMortality extends AbstractMortality {
         }
 
         if (metrics == null) {
-            String message = String.format("The %s parameter must either be \"age\" or \"size\". ", prefix + ".stage.structure");
+            String message = String.format("The %s parameter must either be \"age\" or \"size\". ",
+                    prefix + ".stage.structure");
             error(message, new IllegalArgumentException());
         }
 
@@ -113,8 +114,10 @@ public class PredationMortality extends AbstractMortality {
 
         int cpt = 0;
         for (int fileSpeciesIndex : getConfiguration().getPredatorIndex()) {
-            predPreySizesMax[cpt] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex);
-            predPreySizesMin[cpt] = getConfiguration().getArrayDouble("predation.predPrey.sizeRatio.min.sp" + fileSpeciesIndex);
+            predPreySizesMax[cpt] = getConfiguration()
+                    .getArrayDouble("predation.predPrey.sizeRatio.max.sp" + fileSpeciesIndex);
+            predPreySizesMin[cpt] = getConfiguration()
+                    .getArrayDouble("predation.predPrey.sizeRatio.min.sp" + fileSpeciesIndex);
             if (!getConfiguration().isBioenEnabled()) {
                 predationRate[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.sp" + fileSpeciesIndex);
             }
@@ -128,8 +131,8 @@ public class PredationMortality extends AbstractMortality {
     }
 
     /**
-     * Computes the biomass preyed by predator upon the list of preys. The
-     * function considers instantaneous biomass for both preys and predator.
+     * Computes the biomass preyed by predator upon the list of preys. The function
+     * considers instantaneous biomass for both preys and predator.
      *
      * @param predator
      * @param preys
@@ -137,7 +140,8 @@ public class PredationMortality extends AbstractMortality {
      * @param subdt
      * @return the array of biomass preyed by the predator upon the preys
      */
-    public double[] computePredation(IAggregation predator, List<IAggregation> preys, double[] accessibility, int subdt) {
+    public double[] computePredation(IAggregation predator, List<IAggregation> preys, double[] accessibility,
+            int subdt) {
 
         double[] preyUpon = new double[preys.size()];
         double cumPreyUpon = 0.d;
@@ -199,7 +203,7 @@ public class PredationMortality extends AbstractMortality {
      * Compute the rate of predation success.
      *
      * @param biomassToPredate, the max biomass [ton] that a school can prey.
-     * @param preyedBiomass, the biomass [ton] effectively preyed.
+     * @param preyedBiomass,    the biomass [ton] effectively preyed.
      * @return
      */
     public float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
@@ -214,11 +218,13 @@ public class PredationMortality extends AbstractMortality {
         int iStage = predPreyStage.getStage(predator);
         double preySizeMax = predator.getLength() / predPreySizesMax[iPred][iStage];
         double preySizeMin = predator.getLength() / predPreySizesMin[iPred][iStage];
-        for (int resourceIndex = 0; resourceIndex <  this.getConfiguration().getNRscSpecies(); resourceIndex++) {
-            if ((preySizeMin > getConfiguration().getResourceSpecies(resourceIndex).getSizeMax()) || (preySizeMax < getConfiguration().getResourceSpecies(resourceIndex).getSizeMin())) {
+        for (int resourceIndex = 0; resourceIndex < this.getConfiguration().getNRscSpecies(); resourceIndex++) {
+            if ((preySizeMin > getConfiguration().getResourceSpecies(resourceIndex).getSizeMax())
+                    || (preySizeMax < getConfiguration().getResourceSpecies(resourceIndex).getSizeMin())) {
                 percentResource[resourceIndex] = 0.0d;
             } else {
-                percentResource[resourceIndex] = getConfiguration().getResourceSpecies(resourceIndex).computePercent(preySizeMin, preySizeMax);
+                percentResource[resourceIndex] = getConfiguration().getResourceSpecies(resourceIndex)
+                        .computePercent(preySizeMin, preySizeMax);
             }
         }
         return percentResource;
@@ -232,25 +238,27 @@ public class PredationMortality extends AbstractMortality {
      */
     public double getMaxPredationRate(IAggregation predator) {
         if (getConfiguration().isBioenEnabled()) {
-            error("The getMaxPredationRate method of PredationMortality not suitable in Osmose-PHYSIO", new Exception());
+            error("The getMaxPredationRate method of PredationMortality not suitable in Osmose-PHYSIO",
+                    new Exception());
         }
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
     }
 
     /**
      * Get the accessibility of a list of preys for a given predator. Zero means
-     * that the prey is not accessible to this predator. Accessibility ranges
-     * from zero to one.
+     * that the prey is not accessible to this predator. Accessibility ranges from
+     * zero to one.
      *
      * @param predator, the predator in a cell
-     * @param preys a list of preys that are in the same cell that the predator
+     * @param preys     a list of preys that are in the same cell that the predator
      * @return an array of accessibility of the preys to this predator.
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
         Matrix accessibilityMatrix = predationAccess.getMatrix();
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
-        
+
+        // Number of predators species. Used to offeset resource percentage index
         int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
 
         double[] accessibility = new double[preys.size()];
@@ -261,7 +269,7 @@ public class PredationMortality extends AbstractMortality {
         double[] percentResource = getPercentResource(predator);
 
         for (int iPrey = 0; iPrey < preys.size(); iPrey++) {
-            int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index with offset 
+            int iSpecPrey = preys.get(iPrey).getSpeciesIndex(); // get species index with offset
             IAggregation prey = (IAggregation) preys.get(iPrey);
             int iAccessPrey = accessibilityMatrix.getIndexPrey(prey);
             // The prey is an other school
@@ -272,7 +280,7 @@ public class PredationMortality extends AbstractMortality {
                 if (prey.getLength() >= preySizeMin && prey.getLength() < preySizeMax) {
                     accessibility[iPrey] = accessibilityMatrix.getValue(iAccessPrey, iAccessPred);
                 } else {
-                    accessibility[iPrey] = 0.d; //no need to do it since initialization already set it to zero
+                    accessibility[iPrey] = 0.d; // no need to do it since initialization already set it to zero
                 }
             } else {
                 // The prey is a resource group
@@ -288,4 +296,3 @@ public class PredationMortality extends AbstractMortality {
         throw new UnsupportedOperationException("Predation mortality is handled explicitly in Osmose.");
     }
 }
-    

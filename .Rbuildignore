@@ -26,3 +26,5 @@ cran-comments.md
 ^data-raw$
 ^inst/java$
 java/target
+java/.classpath
+java/.vscode

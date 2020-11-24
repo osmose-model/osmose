@@ -50,7 +50,7 @@ import java.io.IOException;
  */
 public class FisheryPeriod extends OsmoseLinker {
     
-    private final int fisheryIndex;
+    private final int fileFisheryIndex;
     private final double[] fisheryPeriod;
     private int nSeasons;
     private double seasonOffset; 
@@ -58,7 +58,7 @@ public class FisheryPeriod extends OsmoseLinker {
     
     public FisheryPeriod(int fisheryIndex) {
 
-        this.fisheryIndex = fisheryIndex;
+        this.fileFisheryIndex = fisheryIndex;
         this.fisheryPeriod = new double[this.getConfiguration().getNStep()];
         
     }
@@ -74,11 +74,11 @@ public class FisheryPeriod extends OsmoseLinker {
         int nStep = this.getConfiguration().getNStep();
                 
         // Init the number of seasons;
-        key = String.format("fisheries.season.number.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.season.number.fsh%d", this.fileFisheryIndex);
         this.nSeasons = this.getConfiguration().getInt(key);
         
         // Init the season offset (in fraction of years)
-        key = String.format("fisheries.season.start.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.season.start.fsh%d", this.fileFisheryIndex);
         this.seasonOffset = this.getConfiguration().getDouble(key);
         
         // Gets the season offset in number of time steps
@@ -102,7 +102,7 @@ public class FisheryPeriod extends OsmoseLinker {
             fishIndex[i] = k + do_offset;
         }
 
-        key = String.format("fisheries.rate.bySeason.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.rate.bySeason.fsh%d", this.fileFisheryIndex);
         
         double[] fishingSeason = this.getConfiguration().getArrayDouble(key);
         if (fishingSeason.length == 1) {

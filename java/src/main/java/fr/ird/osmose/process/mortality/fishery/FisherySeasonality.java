@@ -53,12 +53,12 @@ import java.math.RoundingMode;
  */
 public class FisherySeasonality extends OsmoseLinker {
 
-    private final int fisheryIndex;
+    private final int fileFisheryIndex;
     private double[] fisherySeasonality;
 
     public FisherySeasonality(int fisheryIndex) {
 
-        this.fisheryIndex = fisheryIndex;
+        this.fileFisheryIndex = fisheryIndex;
         this.fisherySeasonality = new double[this.getConfiguration().getNStep()];
 
     }
@@ -72,11 +72,11 @@ public class FisherySeasonality extends OsmoseLinker {
         String key;
 
         // Init the number of seasons;
-        key = String.format("fisheries.season.number.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.season.number.fsh%d", this.fileFisheryIndex);
         int nSeasons = this.getConfiguration().getInt(key);
 
         // Init the season offset (in fraction of years)
-        key = String.format("fisheries.season.start.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.season.start.fsh%d", this.fileFisheryIndex);
         double seasonOffset = this.getConfiguration().getDouble(key);
 
         // Season offset in time steps
@@ -85,8 +85,8 @@ public class FisherySeasonality extends OsmoseLinker {
         // Season duration in time steps
         int seasonDuration = nStepYear / nSeasons;
 
-        String keyval = String.format("fisheries.seasonality.fsh%d", this.fisheryIndex);      
-        String keyfile = String.format("fisheries.seasonality.file.fsh%d", this.fisheryIndex);
+        String keyval = String.format("fisheries.seasonality.fsh%d", this.fileFisheryIndex);      
+        String keyfile = String.format("fisheries.seasonality.file.fsh%d", this.fileFisheryIndex);
         
         if(this.getConfiguration().isNull(keyval) && this.getConfiguration().isNull(keyfile)) {
             String msg = String.format("%s or %s must be defined.", keyval, keyfile);
@@ -154,7 +154,7 @@ public class FisherySeasonality extends OsmoseLinker {
 
         if (total != 1.d) {
             String msg = String.format("Fishery %d: the seasonality for steps %d to %d summed to %f.\n"
-                    + "Should sum to 1. Please verify that seasonality is properly set.", this.fisheryIndex, istart, iend, total);
+                    + "Should sum to 1. Please verify that seasonality is properly set.", this.fileFisheryIndex, istart, iend, total);
             StringBuilder stb = new StringBuilder();
             stb.append("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
             stb.append(msg);
