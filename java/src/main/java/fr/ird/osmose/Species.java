@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose;
 
 /**
@@ -65,26 +55,32 @@ package fr.ird.osmose;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
-public class Species {
+public class Species implements ISpecies {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
+    ///////////////////////////////
+    // Declaration of the variables
+    ///////////////////////////////
+
+    /**
+     * Index of the species. From 0 to Nspecies - 1 for focal species
+     */
+    private final int index;
+
     /**
      * Trophic level of an egg.
      */
     public static final float TL_EGG = 3f;
     /**
-     * Index of the species. [0 : numberTotalSpecies - 1]
+     * Index of the species in the configuration file.
      */
-    private final int index;
+    private final int fileIndex;
     /**
      * Name of the species. Parameter <i>species.name.sp#</i>
      */
     private final String name;
     /**
-     * Lifespan expressed in number of time step. A lifespan of 5 years means
-     * that a fish will die as soon as it turns 5 years old. Parameter
+     * Lifespan expressed in number of time step. A lifespan of 5 years means that a
+     * fish will die as soon as it turns 5 years old. Parameter
      * <i>species.lifespan.sp#</i>
      */
     private final int lifespan;
@@ -112,81 +108,82 @@ public class Species {
     private final float eggWeight;
 
     private int zlayer = 0;
-    
-    private double alpha_bioen;
-    
-    /** Threshold (number of time-steps) at which
-     * a species move from larva to adults. Expressed in
-     * time steps.
+
+    /**
+     * Threshold (number of time-steps) at which a species move from larva to
+     * adults. Expressed in time steps.
      */
     private final int lar2ad_thres;
-       
+
     private double beta_bioen;
 
-    private boolean bioenEnabled;
-
-//////////////
-// Constructor
-//////////////
+    //////////////
+    // Constructor
+    //////////////
     /**
      * Create a new species
      *
-     * @param index, an integer, the index of the species
-     * {@code [0, nbTotSpecies - 1]}
+     * @param fileIndex, an integer, the index of the species
+     *                   {@code [0, nbTotSpecies - 1]}
+     * @param index
      */
-    public Species(int index) {
+    public Species(int fileIndex, int index) {
+
+        this.index = index;
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        this.index = index;
+        this.fileIndex = fileIndex;
+
         // Initialization of parameters
-        name = cfg.getString("species.name.sp" + index);
-        c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
-        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
-          
+        name = cfg.getString("species.name.sp" + fileIndex);
+        c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileIndex);
+        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileIndex);
+
         if (!cfg.isBioenEnabled()) {
-            
-            // If not bioen, initialize age at maturity 
+
+            // If not bioen, initialize age at maturity
             // used for reproduction process and egg size
             // used for growth
-            if (!cfg.isNull("species.maturity.size.sp" + index)) {
-                sizeMaturity = cfg.getFloat("species.maturity.size.sp" + index);
+            if (!cfg.isNull("species.maturity.size.sp" + fileIndex)) {
+                sizeMaturity = cfg.getFloat("species.maturity.size.sp" + fileIndex);
                 ageMaturity = Float.MAX_VALUE;
             } else {
-                ageMaturity = cfg.getFloat("species.maturity.age.sp" + index);
+                ageMaturity = cfg.getFloat("species.maturity.age.sp" + fileIndex);
                 sizeMaturity = Float.MAX_VALUE;
             }
 
-            eggSize = cfg.getFloat("species.egg.size.sp" + index);
+            eggSize = cfg.getFloat("species.egg.size.sp" + fileIndex);
 
         } else {
+            // if Bioen module enabled, use maximum values
             sizeMaturity = Float.MAX_VALUE;
             ageMaturity = Float.MAX_VALUE;
             eggSize = Float.MAX_VALUE;
         }
 
-        eggWeight = cfg.getFloat("species.egg.weight.sp" + index);
-        float agemax = cfg.getFloat("species.lifespan.sp" + index);
+        eggWeight = cfg.getFloat("species.egg.weight.sp" + fileIndex);
+        float agemax = cfg.getFloat("species.lifespan.sp" + fileIndex);
         lifespan = (int) Math.round(agemax * cfg.getNStepYear());
 
         // barrier.n: added for bioenergetic purposes.
         if (cfg.isBioenEnabled()) {
-            zlayer = cfg.getInt("species.zlayer.sp" + index);
-            String key = String.format("species.beta.sp%d", index);
+            zlayer = cfg.getInt("species.zlayer.sp" + fileIndex);
+            String key = String.format("species.beta.sp%d", fileIndex);
             beta_bioen = cfg.getDouble(key);
         }
-        
+
         // If the key is found, then the age switch in years is converted into
         // time-step.
-        String key = "species.larva2adults.agethres.sp" + index;
-        if(cfg.canFind(key)) {
+        String key = "species.larva2adults.agethres.sp" + fileIndex;
+        if (cfg.canFind(key)) {
             float age_adult = cfg.getFloat(key);
             this.lar2ad_thres = (int) Math.round(age_adult * cfg.getNStepYear());
         } else {
             // if no parameter exists, species become larva when ageDt = 1
             this.lar2ad_thres = 1;
-        }       
+        }
     }
-    
+
     public int getThresAge() {
         return this.lar2ad_thres;
     }
@@ -198,10 +195,10 @@ public class Species {
     public int getDepthLayer() {
         return this.zlayer;
     }
-    
-//////////////////////////////
-// Definition of the functions
-//////////////////////////////
+
+    //////////////////////////////
+    // Definition of the functions
+    //////////////////////////////
     /**
      * Computes the weight, in gram, corresponding to the given length, in
      * centimetre.
@@ -214,7 +211,7 @@ public class Species {
     }
 
     /**
-     * Computes the length, in centimetre, corresponding to the given weight, in
+     * Computes the length, in centimeter, corresponding to the given weight, in
      * gram.
      *
      * @param weight, the weight in gram
@@ -225,8 +222,7 @@ public class Species {
     }
 
     /**
-     * Returns the lifespan of the species. Parameter
-     * <i>species.lifespan.sp#</i>
+     * Returns the lifespan of the species. Parameter <i>species.lifespan.sp#</i>
      *
      * @return the lifespan, in number of time step
      */
@@ -239,7 +235,21 @@ public class Species {
      *
      * @return the index of the species
      */
-    public int getIndex() {
+    @Override
+    public int getFileSpeciesIndex() {
+        return fileIndex;
+    }
+
+    /**
+     * Return the global index of the species.
+     * 
+     * Index between [0, Nspec - 1].
+     * 
+     * 
+     * @return
+     */
+    @Override
+    public int getSpeciesIndex() {
         return index;
     }
 
@@ -248,6 +258,7 @@ public class Species {
      *
      * @return the name of the species
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -262,10 +273,9 @@ public class Species {
         float output = cfg.isBioenEnabled() ? this.computeLength(eggWeight) : this.eggSize;
         return output;
     }
-    
+
     /**
-     * Returns the weight of an egg in gram. Parameter
-     * <i>species.egg.weight.sp#</i>
+     * Returns the weight of an egg in gram. Parameter <i>species.egg.weight.sp#</i>
      *
      * @return the weight of an egg in gram
      */
@@ -287,13 +297,10 @@ public class Species {
      * @param biomass
      * @return
      */
-    private boolean isVulnerable(double biomass) {
-        double Bv = 0.d;
-        double Sv = 1.d;
-        return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
-    }
+    /*
+     * private boolean isVulnerable(double biomass) { double Bv = 0.d; double Sv =
+     * 1.d; return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
+     * }
+     */
 
-    public double getBPower() {
-        return this.bPower;
-    }
 }

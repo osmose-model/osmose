@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,36 +16,32 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import java.util.HashMap;
 
 /**
  *
@@ -61,7 +50,7 @@ import java.util.HashMap;
 public class WeightedDistribOutput extends DistribOutput {
 
     // Denumerator distributed by species and by class
-    private HashMap<Integer, double[][]> denominator = new HashMap();
+    private double[][][] denominator;
     
     // school variable getter
     private final SchoolVariableGetter weight;
@@ -85,8 +74,8 @@ public class WeightedDistribOutput extends DistribOutput {
                 int irg = 0;
                 for (AbstractOutputRegion region : getOutputRegions()) {
                     if (region.contains(timeStep, school)) {
-                        values.get(iSpec)[irg][getClass(school)] += wvar;
-                        denominator.get(iSpec)[irg][classSchool] += w;
+                        values[iSpec][irg][getClass(school)] += wvar;
+                        denominator[iSpec][irg][classSchool] += w;
                     }
                     irg++;
                 }
@@ -97,24 +86,26 @@ public class WeightedDistribOutput extends DistribOutput {
     @Override
     public void reset() {
         super.reset();
-        denominator.clear();
-        for (int i : getConfiguration().getFocalIndex()) {
-            denominator.put(i, new double[getNOutputRegion()][getNClass()]);
+        int nSpecies = this.getNSpecies();
+        denominator = new double[nSpecies][][];
+        for (int i = 0; i < nSpecies; i++) {
+            denominator[i] = new double[getNOutputRegion()][this.getNClass()];
         }
     }
 
     @Override
     public void write(float time) {
 
+        int nSpecies = this.getNSpecies();
         int nClass = getNClass();
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
             double[][] array = new double[nClass][getNSpecies() + 1];
             for (int iClass = 0; iClass < nClass; iClass++) {
                 int cpt = 0;
                 array[iClass][cpt++] = getClassThreshold(iClass);
-                for (int iSpec : getConfiguration().getFocalIndex()) {
-                    if (denominator.get(iSpec)[irg][iClass] != 0) {
-                        array[iClass][cpt++] = values.get(iSpec)[irg][iClass] / denominator.get(iSpec)[irg][iClass];
+                for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                    if (denominator[iSpec][irg][iClass] != 0) {
+                        array[iClass][cpt++] = values[iSpec][irg][iClass] / denominator[iSpec][irg][iClass];
                     } else {
                         array[iClass][cpt++] = Double.NaN;
                     }

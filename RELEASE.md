@@ -1,10 +1,72 @@
 # OSMOSE Release Notes
 
+## Osmose 4.3.2
+
+### New features
+
+- Adding new parameter in bioenergetic module (assimilation)
+- Use of life-integrated Enet in the computation of reproduction instead of instantaneous Enet, in order to prevent irrealistic growth.
+- Automatic testing of R package (build and check) and Java code (Maven build) using GitHub actions
+- Adding the possibility to use plankton variables of dims (time, lat, lon) to init mask variable. Masked if variable is NaN or <= 0
+- Adding the possibility to use `ByClassTimeSeries` for proportion in background species. 
+- Adding an `osmose_calib_demo` function in the R package`
+- Adding options to force the model to run an outdated configuration. It avoids running creating a new configuration version for minor releases
+- **Remove the use of `grid.java.classname` and force the use of `NcGrid.java` class**
+- Adding a species interface (`ISpecies`) to recover some variables that are shared among species (name for instance). 
+- Adding of all species (preys + background + focal) in the `DietDistribOutput` file.
+- Adding of background species in the `DietOutput` and `PredatorPressure` file.
+- Adding of lognormal distribution for fishery selectivity (Ricardo)
+- Adding some tools to help converting parameter names to version 4.3.0 (i.e adding `species.type`, replace `plankton.plk` by `species.sp`, etc)
+- Replace use of hashmaps (costly) by use of arrays, as done before.
+
+
+### Bugfix
+
+- Correction of a bug in the init. of accessibility manager when varying over time. The index array was hardcoded to `acc` instead of suffix
+- Correction of bugs in the init. and use of some arrays (mixing hashmap and indices). **Has no effect if configurations are setup in the old way (focal ranging from 0 to N)**
+- Correction of a bug in the saving of ingestion (egross was saved instead of energy)
+- Correction of a bug in the saving of fisheries: mean instead of cumulated sum was saved. Revealed by Ghassen.
+- Correction of a bug in the `AbstractDistribOutput` and `DietDistribOutput` (`cpt` increment not initialized in the right place).
+- Correction of a bug in the extraction of OutMortality (problem due to hashmap init).
+- Correction of a bug in the saving of SpatialOutputs for LTL (problem with indexing)
+- Correction of bugs in the reading of resources: problem with file path reconstruction
+- Correction of bugs in the reading of resources: bad recovery of the nc indes. Corrected by adding a parameter (ncstep / year). Revealed by Ekin.
+- Correction of a bug in the ResourceOutput class. HashMap variables were not initialized + problem of indexing
+- Put the `initTimeMapping` method of `ResourceForcing.java` inside the condition. Caused an error if no NetCDF used.
+- Correct a bug in the accessibility recovery (mixing preys and predators)
+- Set the `compile.on.save` Netbeans parameter to `false`. When `true`, compilation may work even if code is bugged.
+- Correct a potential bug in `eliminateTwinAccess` for `AccessibilityManager.java`. Did work only for index ranging from [0, N-1]. Now should work for all indexing
+
+
+### Misc.
+
+- Correction of ref. config in the R comments.
+- Update of README to add vignettes
+- Change build name from osmose**-**X.Y.Z.jar to osmose**_**X.Y.Z.jar
+- Change of LICENSE (move from CECILL to GPL-3) for future connection with Zenodo + change in License Java headers
+
 ## Osmose 4.3.1
 
 ### Bugfix
 
 - Correction of a bug in the position of background species. Position was not init. so all the schools were at cell (0, 0)
+
+## Osmose 4.3.0
+
+### New features
+
+- Moving Java compilation to Maven
+- New parameterization of fisheries (fishing period, discards, catchability matrix)
+- Standardized parameterization of resource and background species forcings (netcdf file containing biomass)
+- New parameterization of background and resource species (species.XXX.sp instead of plankton.YYY.plk for instance)
+- Removing of iterative mortality processes (no more used)
+- Removing of all grid types except NCGrid
+- Possibility to read file using regular expressions (in order to use multiple files).
+- New parameterization of accessibility matrixes (thres. read from files, no more as parameters).
+- All species (focal, background and resource) must have different indexes
+- Extensive use of HashMaps in order to allow easy switch of a species from one type to another
+
+# Older versions
 
 ## Changes from Osmose 3 Update 1 to Osmose 3 Update 2
 
@@ -392,3 +454,18 @@ Updated ReproductionProcess.java and IncomingFluxProcess.java so that the season
 
 reproduction.season.file.sp#
 flux.incoming.season.file.sp#
+
+# Release notes of Osmose-R
+
+From now on, Osmose R and Osmose Java are one, so everything is merged in a single release note
+
+## osmose 3.3.3
+* Several improvements on methods: print, summary, plot, report.
+* Improved documentation: help files, demo scripts, vignettes.
+* Bug corrections.
+
+## osmose 0.1.0
+* First release to CRAN
+
+## osmose 3.3.3
+* Corrections and modifications in order to submit to CRAN.

@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,44 +16,41 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose;
 
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.filter.AliveSchoolFilter;
 import fr.ird.osmose.util.filter.FilteredSet;
 import fr.ird.osmose.util.filter.FilteredSets;
-import fr.ird.osmose.util.filter.IFilter;
 import fr.ird.osmose.util.filter.OldSchoolFilter;
 import fr.ird.osmose.util.filter.OutSchoolFilter;
 import fr.ird.osmose.util.filter.PresentSchoolFilter;
 import fr.ird.osmose.util.filter.SpeciesFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -99,15 +89,15 @@ public class SchoolSet extends OsmoseLinker {
      * Array of boolean that indicates whether the list of schools per species
      * has changed.
      */
-    private final HashMap<Integer, Boolean> hasSpeciesChanged;
+    private final boolean[] hasSpeciesChanged;
 
     SchoolSet() {
-        schoolset = new FilteredSet();
-        schoolBySpecies = new HashMap();
-        schoolByCell = new HashMap();
-        hasSpeciesChanged = new HashMap();
-        for (int i : getConfiguration().getFocalIndex()) {
-            hasSpeciesChanged.put(i, true);
+        schoolset = new FilteredSet<>();
+        schoolBySpecies = new HashMap<>();
+        schoolByCell = new HashMap<>();
+        hasSpeciesChanged = new boolean[getConfiguration().getNSpecies()];
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            hasSpeciesChanged[i] = true;
         }
     }
 
@@ -135,7 +125,7 @@ public class SchoolSet extends OsmoseLinker {
     /**
      * Remove dead schools from the set
      */
-     public void removeDeadSchools() {
+    public void removeDeadSchools() {
 
         Iterator<School> it = schoolset.iterator();
         while (it.hasNext()) {
@@ -143,8 +133,8 @@ public class SchoolSet extends OsmoseLinker {
                 it.remove();
             }
         }
-        for (int i : getConfiguration().getFocalIndex()) {
-            hasSpeciesChanged.put(i, true);
+        for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
+            hasSpeciesChanged[i] = true;
         }
     }
 
@@ -166,11 +156,11 @@ public class SchoolSet extends OsmoseLinker {
      * @return a list of schools of this {@code species}
      */
     public List<School> getSchools(Species species, boolean update) {
-        if (update || hasSpeciesChanged.get(species.getIndex())) {
-            schoolBySpecies.put(species.getIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getIndex()), new AliveSchoolFilter()}));
-            hasSpeciesChanged.put(species.getIndex(), false);
+        if (update || hasSpeciesChanged[species.getSpeciesIndex()]) {
+            schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new ArrayList<>(Arrays.asList(new SpeciesFilter(species.getSpeciesIndex()), new AliveSchoolFilter()))));
+            hasSpeciesChanged[species.getSpeciesIndex()] = false;
         }
-        return schoolBySpecies.get(species.getIndex());
+        return schoolBySpecies.get(species.getSpeciesIndex());
     }
 
     /**
@@ -192,11 +182,11 @@ public class SchoolSet extends OsmoseLinker {
      * @return a list of schools of this {@code species}
      */
     public List<School> getSchoolsAll(Species species, boolean update) {
-        if (update || hasSpeciesChanged.get(species.getIndex())) {
-            schoolBySpecies.put(species.getIndex(), FilteredSets.subset(schoolset, new IFilter[]{new SpeciesFilter(species.getIndex())}));
-            hasSpeciesChanged.put(species.getIndex(), false);
+        if (update || hasSpeciesChanged[species.getSpeciesIndex()]) {
+            schoolBySpecies.put(species.getSpeciesIndex(), FilteredSets.subset(schoolset, new ArrayList<>(Arrays.asList(new SpeciesFilter(species.getSpeciesIndex())))));
+            hasSpeciesChanged[species.getSpeciesIndex()] = false;
         }
-        return schoolBySpecies.get(species.getIndex());
+        return schoolBySpecies.get(species.getSpeciesIndex());
     }
 
     /**
@@ -276,7 +266,7 @@ public class SchoolSet extends OsmoseLinker {
             if (!school.isUnlocated()) {
                 int iCell = school.getCell().getIndex();
                 if (!schoolByCell.containsKey(iCell)) {
-                    schoolByCell.put(iCell, new ArrayList());
+                    schoolByCell.put(iCell, new ArrayList<>());
                 }
                 schoolByCell.get(iCell).add(school);
             }

@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,36 +16,34 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
+import fr.ird.osmose.background.BackgroundSchool;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
 import java.io.File;
@@ -94,7 +85,7 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
 
         nColumns = 0;
         // Sum-up diet stages
-        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+        for (int iSpec = 0; iSpec < getNSpecies() + getNBkgSpecies(); iSpec++) {
             nColumns += dietOutputStage.getNStage(iSpec);
         }
         nColumns += getConfiguration().getNRscSpecies();
@@ -121,28 +112,39 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void initStep() {
+        
+        // Init step for all the focal schools
         for (School school : getSchoolSet().getPresentSchools()) {
             biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         }
+        
+        // Init step for all the background schools
+        for (BackgroundSchool school : this.getBkgSchoolSet().getAllSchools()) {
+            biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
+        }
+        
+        int nBkg = getNBkgSpecies();
         int nSpec = getNSpecies();
-        int nPrey = nSpec + getConfiguration().getNRscSpecies();
-        for (int i = nSpec; i < nPrey; i++) {
-            int iRsc = i - nSpec;
-            biomassStage[i][0] += getTotalBiomass(iRsc);
+        int nRsc = getConfiguration().getNRscSpecies();
+        for (int i = 0; i < nRsc; i++) {
+            int iRsc = i + nBkg + nSpec;  // index from a species prospective (focal, back, res)
+            biomassStage[iRsc][0] += getTotalBiomass(nBkg + i);  // index from a resource perspective (back, res)
         }
     }
 
     @Override
     public void reset() {
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies();
         biomassStage = new double[nPrey][];
+        int cpt = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            biomassStage[iSpec] = new double[dietOutputStage.getNStage(iSpec)];
+            biomassStage[cpt++] = new double[dietOutputStage.getNStage(iSpec)];
         }
-        for (int i = nSpec; i < nPrey; i++) {
+        
+        for (int i = 0; i < getConfiguration().getNRscSpecies(); i++) {
             // we consider just 1 stage per resource group
-            biomassStage[i] = new double[1];
+            biomassStage[cpt++] = new double[1];
         }
     }
 
@@ -155,16 +157,18 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     public void write(float time) {
         double[] biomass = new double[nColumns];
         double nsteps = getRecordFrequency();
+        int nSpecies = getNSpecies();
+        int nBkg = getNBkgSpecies();
+        int nRsc = getNRscSpecies();
         int k = 0;
-        int nSpec = getNSpecies();
-        for (int iSpec = 0; iSpec < nSpec; iSpec++) {
+        for (int iSpec = 0; iSpec < nSpecies + nBkg; iSpec++) {
             for (int s = 0; s < dietOutputStage.getNStage(iSpec); s++) {
                 biomass[k] = biomassStage[iSpec][s] / nsteps;
                 k++;
             }
         }
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
-            biomass[k] = biomassStage[j][0] / nsteps;
+        for (int j = 0; j < nRsc; j++) {
+            biomass[k] = biomassStage[j + nBkg + nSpecies][0] / nsteps;
             k++;
         }
         writeVariable(time, biomass);
@@ -203,12 +207,11 @@ public class BiomassDietStageOutput_Netcdf extends AbstractOutput_Netcdf {
     void init_nc_dims_coords() {
 
         Dimension classDim = getNc().addDimension(null, "class_prey", nColumns);
-        StringBuilder bld = new StringBuilder();
         
         getNc().addVariable(null, "class_prey", DataType.FLOAT, "class_prey");
-        this.setDims(new ArrayList(Arrays.asList(getTimeDim(), classDim)));
+        this.setDims(new ArrayList<>(Arrays.asList(getTimeDim(), classDim)));
         
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies() + getNRscSpecies();
         int k = 0;
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
             String name = getSpecies(iSpec).getName();

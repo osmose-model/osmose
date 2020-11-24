@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,38 +16,33 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose;
 
 import fr.ird.osmose.process.genet.Genotype;
 import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.GridPoint;
-import java.util.Collection;
 import java.util.HashMap;
 import ucar.ma2.ArrayFloat;
 
@@ -101,15 +89,12 @@ public class School extends AbstractSchool {
      * {@link Species} of the fish.
      */
     final private Species species;
-    
-    /** Genotype variable. */
-    private Genotype genotype;
-    
+
     /**
-     * The index of the species. From [0; nSpec-1] for fish and from [nSpec;
-     * nSpec+nLTL-1] for resource.
+     * Genotype variable.
      */
-    private final int index;
+    private Genotype genotype;
+
     /**
      * Weight of the fish in tonne. The unit has been set to tonne just because
      * it saves computation time for converting the biomass from gramme to tonne
@@ -171,9 +156,11 @@ public class School extends AbstractSchool {
     private double ingestion;   // total ingestion
     private double kappa;    // kappa value
     double ingestionTot = 0; // sum of all the food ingested during life of the 
-                             // school
-    
-    /** Mortality rates associated with the bioen module. */
+    // school
+
+    /**
+     * Mortality rates associated with the bioen module.
+     */
     private double mort_oxy_rate = 0;
     private double mort_starv_rate = 0;
 
@@ -182,8 +169,9 @@ public class School extends AbstractSchool {
     private double ageMature = 0;
     private double sizeMature = 0;
     private boolean isMature = false;
-    
-    
+
+    private double e_net_faced; // mean net energy faced during life
+
 ///////////////
 // Constructors
 ///////////////
@@ -242,7 +230,6 @@ public class School extends AbstractSchool {
      * @param trophicLevel, the trophic level of the fish
      */
     public School(Species species, float x, float y, double abundance, float length, float weight, int ageDt, float trophicLevel, float gonadWeight) {
-        this.index = species.getIndex();
         this.abundance = abundance;
         instantaneousAbundance = abundance;
         this.weight = weight * 1.e-6f;
@@ -261,11 +248,11 @@ public class School extends AbstractSchool {
         this.ageDt = ageDt;
         this.age = ageDt / (float) getConfiguration().getNStepYear();
         out = false;
-        preys = new HashMap();
+        preys = new HashMap<>();
         starvationRate = 0.d;
         fishedBiomass = new double[getConfiguration().getNFishery()];
         discardedBiomass = new double[getConfiguration().getNFishery()];
-        
+
     }
 
 ////////////////////////////
@@ -297,7 +284,7 @@ public class School extends AbstractSchool {
         reset(fishedBiomass);
         reset(this.discardedBiomass);
     }
-    
+
     /**
      * Make some more eggs accessible. This function assumes that the initial
      * abundance of egg at the beginning of the predation process (abundance -
@@ -367,16 +354,6 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Returns the index of the species
-     *
-     * @return the index of the species
-     */
-    @Override
-    public int getSpeciesIndex() {
-        return index;
-    }
-
-    /**
      * Sets the number of dead fish for a given mortality cause.
      *
      * @see MortalityCause
@@ -385,7 +362,7 @@ public class School extends AbstractSchool {
      */
     public void setNdead(MortalityCause cause, double nDead) {
         this.nDead[cause.index] = nDead;
-                
+
         double factor = 1;
         if (this.getInstantaneousAbundance() != 0) {
             factor = (this.getInstantaneousAbundance() - nDead) / this.getInstantaneousAbundance();
@@ -393,16 +370,16 @@ public class School extends AbstractSchool {
 
         this.ingestion *= factor;
         this.e_net *= factor;
-        
+
         abundanceHasChanged = true;
     }
 
     @Override
     public void incrementNdead(MortalityCause cause, double nDead) {
-        
+
         this.nDead[cause.index] += nDead;
         double factor = 1;
-        
+
         if (this.getInstantaneousAbundance() != 0) {
             factor = (this.getInstantaneousAbundance() - nDead) / this.getInstantaneousAbundance();
         }
@@ -427,7 +404,7 @@ public class School extends AbstractSchool {
     /**
      * The weight of the fish (not the whole school), in tonne.
      *
-     * @return the weight on the fish, in tonne.
+     * @return the weight of the fish, in tonne.
      */
     @Override
     public float getWeight() {
@@ -439,20 +416,19 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Returns a list of the prey records at current time step.
-     *
-     * @return a list of the prey records at current time step.
-     */
-    public Collection<Prey> getPreys() {
-        return preys.values();
-    }
-
-    /**
      * Sets the school out of the simulated domain.
      */
     public void out() {
         out = true;
         setOffGrid();
+    }
+
+    public double get_enet_faced() {
+        return this.e_net_faced;
+    }
+
+    public void set_enet_faced(double enet_faced) {
+        this.e_net_faced = enet_faced;
     }
 
     /**
@@ -588,7 +564,7 @@ public class School extends AbstractSchool {
             instantaneousAbundance = 0.d;
         }
         instantaneousBiomass = instantaneousAbundance * weight;
-        abundanceHasChanged = false; 
+        abundanceHasChanged = false;
     }
 
     /**
@@ -597,15 +573,14 @@ public class School extends AbstractSchool {
     public double getIngestion() {
         return this.ingestion;
     }
-    
-    
+
     // Calculate the total ingestion of food during life of the school 
-    public double getIngestionTot(){
+    public double getIngestionTot() {
         return this.ingestionTot;
     }
-    
+
     public void updateIngestionTot(double ingestion, double abundance) {
-        this.ingestionTot += (ingestion/abundance);
+        this.ingestionTot += (ingestion / abundance);
     }
 
     /**
@@ -645,13 +620,15 @@ public class School extends AbstractSchool {
      */
     public void incrementGonadWeight(float dg) {
         this.gonadWeight += dg;
-        if(this.gonadWeight < 0.d) { 
+        if (this.gonadWeight < 0.d) {
             warning("Gonad weight is negative");
         }
     }
 
     /**
      * Returns true if the individual is sexually mature.
+     *
+     * @return
      */
     public boolean isMature() {
         return this.isMature;
@@ -666,6 +643,8 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the age at maturity (only used for outputs).
+     *
+     * @return
      */
     public double getAgeMat() {
         return this.ageMature;
@@ -673,20 +652,26 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the age at maturity (only used for outputs).
+     *
+     * @return
      */
     public double getSizeMat() {
         return this.sizeMature;
     }
-    
+
     /**
      * Sets the age at maturity (only used for outputs).
+     *
+     * @param agemature
      */
     public void setAgeMat(double agemature) {
         this.ageMature = agemature;
     }
-    
+
     /**
      * Sets the age at maturity (only used for outputs).
+     *
+     * @param sizemat
      */
     public void setSizeMat(double sizemat) {
         this.sizeMature = sizemat;
@@ -694,6 +679,8 @@ public class School extends AbstractSchool {
 
     /**
      * Sets the value of assimilated energy (ingestion x phiT, equation 3).
+     *
+     * @param value
      */
     public void setEGross(double value) {
         this.e_gross = value;
@@ -701,6 +688,8 @@ public class School extends AbstractSchool {
 
     /**
      * Returns the value of assimilated energy (ingestion x phiT, equation 3).
+     *
+     * @return
      */
     public double getEGross() {
         return this.e_gross;
@@ -730,7 +719,7 @@ public class School extends AbstractSchool {
         return this.e_net;
     }
 
-     /**
+    /**
      * Returns the net energy, which is the difference between gross and
      * maintenance energy.
      *
@@ -739,7 +728,7 @@ public class School extends AbstractSchool {
     public void setENet(double enet) {
         this.e_net = enet;
     }
-    
+
     /**
      * Increments the ingested energy.
      */
@@ -747,9 +736,9 @@ public class School extends AbstractSchool {
     public void incrementIngestion(double cumPreyUpon) {
         this.ingestion += cumPreyUpon;
     }
-    
+
     /**
-     * Gets the value of kappa 
+     * Gets the value of kappa
      */
     public double getKappa() {
         return this.kappa;
@@ -764,7 +753,7 @@ public class School extends AbstractSchool {
     public void setKappa(double value) {
         this.kappa = value;
     }
-    
+
     /**
      * Gets the value of maintenance energy (ingestion x phiT, equation 5).
      */
@@ -804,12 +793,12 @@ public class School extends AbstractSchool {
         this.e_net += d;
     }
 
-    @Override 
-    
+    @Override
+
     public double getBetaBioen() {
         return this.getSpecies().getBetaBioen();
     }
-    
+
     public Genotype getGenotype() {
         return this.genotype;
     }
@@ -818,11 +807,11 @@ public class School extends AbstractSchool {
         genotype = new Genotype(rank, this.getSpecies());
         genotype.init();
     }
-    
-    public double getTrait(String key) throws Exception { 
+
+    public double getTrait(String key) throws Exception {
         return this.getGenotype().getTrait(key);
     }
-    
+
     public boolean existsTrait(String key) throws Exception {
         return this.getGenotype().existsTrait(key);
     }
@@ -831,42 +820,60 @@ public class School extends AbstractSchool {
     public String getSpeciesName() {
         return this.species.getName();
     }
-    
-    /** Returns true if the school is considered as a larva. 
-     * Based on the comparison of ageDt with threshold age by dt (default 1).
+
+    /**
+     * Returns true if the school is considered as a larva. Based on the
+     * comparison of ageDt with threshold age by dt (default 1).
+     *
      * @return True if larva, False if adult
      */
-    public boolean isLarva() { 
+    public boolean isLarva() {
         return (this.getAgeDt() < this.getSpecies().getThresAge());
     }
-    
-    /** Reads the genotype from restart file. 
-     * 
+
+    /**
+     * Reads the genotype from restart file.
+     *
      * @param rank Simulation rank
      * @param index School index
      * @param genArray Netcdf Array (school, itrait, ilocus, 2)
      * @param envNoise
      */
     public void restartGenotype(int rank, int index, ArrayFloat.D4 genArray, ArrayFloat.D2 envNoise) {
-        
+
         // Instanciate (i.e. init arrays) genotype for the current school
         this.instance_genotype(rank);
-        
+
         // Sets the genotype values from NetCDF files
         int ntrait = this.getGenotype().getNEvolvingTraits();
-        for(int itrait=0; itrait<ntrait; itrait++) {
+        for (int itrait = 0; itrait < ntrait; itrait++) {
             int nlocus = this.getGenotype().getNLocus(itrait);
-            for(int iloc=0; iloc<nlocus; iloc++) {
+            for (int iloc = 0; iloc < nlocus; iloc++) {
                 // Recovers the NetCDF values
                 double val0 = genArray.get(index, itrait, iloc, 0);
                 double val1 = genArray.get(index, itrait, iloc, 1);
                 this.getGenotype().setLocusVal(itrait, iloc, val0, val1);
-                
+
                 // Sets the value for the environmental noise
                 double envnoise = envNoise.get(index, itrait);
                 this.getGenotype().setEnvNoise(itrait, envnoise);
             }
-        }   
+        }
+    }
+
+    /**
+     * Returns the index of the species
+     *
+     * @return the index of the species
+     */
+    @Override
+    public int getSpeciesIndex() {
+        return this.species.getSpeciesIndex();
+    }
+
+    @Override
+    public int getFileSpeciesIndex() {
+        return this.species.getFileSpeciesIndex();
     }
 
 }

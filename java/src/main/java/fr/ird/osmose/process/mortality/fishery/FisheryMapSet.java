@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,31 +16,27 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose.process.mortality.fishery;
 
@@ -141,7 +130,7 @@ public class FisheryMapSet extends OsmoseLinker {
         this.eliminateTwinMap();
 
         // Normalize all maps
-        this.normalize_all_maps();
+        this.normalizeAllMaps();
 
     }
 
@@ -170,9 +159,9 @@ public class FisheryMapSet extends OsmoseLinker {
         String key;
 
         key = String.format("%s.%s.map*", prefix, suffix);
-        int nmapmax = getConfiguration().findKeys(key).size();
+        int nmapmax = cfg.findKeys(key).size();
 
-        List<Integer> mapNumber = new ArrayList();
+        List<Integer> mapNumber = new ArrayList<>();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
@@ -180,7 +169,7 @@ public class FisheryMapSet extends OsmoseLinker {
             key = String.format("%s.%s.map%d", prefix, suffix, imap);
 
 // This is done if the indexing of fishering maps start with one for instance
-            while (getConfiguration().isNull(key)) {
+            while (cfg.isNull(key)) {
                 imap++;
                 key = String.format("%s.%s.map%d", prefix, suffix, imap);
             }
@@ -188,7 +177,7 @@ public class FisheryMapSet extends OsmoseLinker {
             // Recovers the fisherie index associated with the current map.
             // If it matches the current fisherie, the map index is added to the list of
             // maps to be processed.
-            String name = getConfiguration().getString(key);
+            String name = cfg.getString(key);
 
             if (name.equals(this.fisheryName)) {
                 mapNumber.add(imap);
@@ -200,7 +189,7 @@ public class FisheryMapSet extends OsmoseLinker {
         // Initialize NSTEP arrays of gridmaps, and initialize their index to -1
         maps = new GridMap[mapNumber.size()];
         mapFile = new String[mapNumber.size()];
-        int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
+        int nSteps = Math.max(cfg.getNStep(), cfg.getNStepYear());
         indexMaps = new int[nSteps];
 
         // Initialize the array of fisheries map index to -1 (i.e. no fishery)
@@ -216,16 +205,16 @@ public class FisheryMapSet extends OsmoseLinker {
 
             StepParameters seasonParam = new StepParameters(prefix, "map" + imap);
             int[] mapSeason = seasonParam.getSeasons();
-                   
+
             YearParameters yearParam = new YearParameters(prefix, "map" + imap);
             int[] listOfYears = yearParam.getYears();
-            
+
             /*
              * Assign number of maps to numMap array.
              * indexMaps is the index of the map associated with the current fisherie
              * (i.e within all the maps with find of the current fisherie).
              */
-            int nStepYear = getConfiguration().getNStepYear();
+            int nStepYear = cfg.getNStepYear();
 
             for (int iYear : listOfYears) {
                 for (int iSeason : mapSeason) {
@@ -243,8 +232,8 @@ public class FisheryMapSet extends OsmoseLinker {
              * read the name of the CSV file and load the map. If name = "null"
              * it means there is no map defined at these age-class and time-step
              */
-            if (!getConfiguration().isNull(prefix + ".file" + ".map" + imap)) {
-                String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
+            if (!cfg.isNull(prefix + ".file" + ".map" + imap)) {
+                String csvFile = cfg.getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
                 maps[n] = new GridMap(csvFile);
             } else {
@@ -262,9 +251,9 @@ public class FisheryMapSet extends OsmoseLinker {
      * @return True or False
      */
     private boolean checkMapIndexation() {
-
-        int nSteps = getConfiguration().getNStep();
-        int nStepYear = getConfiguration().getNStepYear();
+        Configuration cfg = this.getConfiguration();
+        int nSteps = cfg.getNStep();
+        int nStepYear = cfg.getNStepYear();
 
         for (int iStep = 0; iStep < nSteps; iStep++) {
             if (indexMaps[iStep] < 0) {
@@ -316,7 +305,7 @@ public class FisheryMapSet extends OsmoseLinker {
     /**
      * Normalize the map values for each map. The sum of coeff * surf = 1
      */
-    private void normalize_all_maps() {
+    private void normalizeAllMaps() {
         // Loop over all the map files files (looping over map indexes).
         for (GridMap map : maps) {
             normalize_map(map);

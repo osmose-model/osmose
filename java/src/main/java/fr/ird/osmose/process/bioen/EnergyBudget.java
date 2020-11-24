@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,38 +16,33 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.process.AbstractProcess;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,9 +52,9 @@ import java.util.logging.Logger;
  */
 public class EnergyBudget extends AbstractProcess {
 
-    private HashMap<Integer, Double> csmr;
+    private double[] csmr;
 
-    private HashMap<Integer, Double> m0, m1;
+    private double[] m0, m1;
 
     private final TempFunction temp_function;
 
@@ -74,65 +62,83 @@ public class EnergyBudget extends AbstractProcess {
     /**
      * Parameters for the kappa function.
      */
-    private HashMap<Integer, Double> r;
-    private HashMap<Integer, Double> Imax;
+    private double[] r;
+    private double[] larvaePredationRateBioen;
+    
+       private double[] assimilation;
 
     public EnergyBudget(int rank) throws IOException {
 
         super(rank);
         temp_function = new TempFunction(rank);
         temp_function.init();
-        
 
         oxygen_function = new OxygenFunction(rank);
         oxygen_function.init();
 
     }
-    
 
     @Override
     public void init() {
 
         String key;
-
+        int cpt;
         // Redundant with the beta of the BioenPredationMortality class.
-        int nBack = this.getNBkgSpecies();
-        int nspec = this.getNSpecies();
+        int nSpecies = this.getNSpecies();
 
         // Recovers the beta coefficient for focal + background species
-        r = new HashMap();
+        cpt = 0;
+        r = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("bioen.maturity.r.sp%d", i);
-            r.put(i, this.getConfiguration().getDouble(key));
+            r[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
         }
 
         // Recovers the beta coefficient for focal + background species
-        m0 = new HashMap();
+        cpt = 0;
+        m0 = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("bioen.maturity.m0.sp%d", i);
-            m0.put(i, this.getConfiguration().getDouble(key));   // barrier.n: conversion from mm to cm
+            m0[cpt] = this.getConfiguration().getDouble(key);   // barrier.n: conversion from mm to cm
+            cpt++;
         }
 
         // Recovers the beta coefficient for focal + background species
-        m1 = new  HashMap();
+        m1 = new double[nSpecies];
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("bioen.maturity.m1.sp%d", i);
-            m1.put(i, this.getConfiguration().getDouble(key));  // barrier.n: conversion from mm to cm
+            m1[cpt] = this.getConfiguration().getDouble(key);  // barrier.n: conversion from mm to cm
+            cpt++;
         }
 
         // Recovers the beta coefficient for focal + background species
-        csmr = new  HashMap();
+        csmr = new double[nSpecies];
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             key = String.format("bioen.maint.energy.csmr.sp%d", i);
-            csmr.put(i, this.getConfiguration().getDouble(key));
+            csmr[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
         }
 
         // Recovers the beta coefficient for focal + background species
-        Imax = new HashMap();
+        cpt = 0;
+        larvaePredationRateBioen = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("predation.ingestion.rate.max.bioen.sp%d", i);
-            Imax.put(i, this.getConfiguration().getDouble(key));
+            key = String.format("predation.ingestion.rate.max.larvae.bioen.sp%d", i);
+            larvaePredationRateBioen[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
         }
+        
+        assimilation = new double[nSpecies];
+        cpt = 0;
+        for (int i : getConfiguration().getFocalIndex()) {
+            key = String.format("bioen.assimilation.sp%d", i);
+            assimilation[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
+        }
+        
     }
 
     /**
@@ -144,25 +150,26 @@ public class EnergyBudget extends AbstractProcess {
         //System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         // Loop over all the alive schools
         for (School school : getSchoolSet().getAliveSchools()) {
-            this.get_egross(school);   // computes E_gross, stored in the attribute.
-            this.get_maintenance(school);   // computes E_maintanance
-            school.updateIngestionTot(school.getIngestion(),school.getInstantaneousAbundance());
+            this.getEgross(school);   // computes E_gross, stored in the attribute.
+            this.getMaintenance(school);   // computes E_maintanance
+            school.updateIngestionTot(school.getIngestion(), school.getInstantaneousAbundance());
 
             try {
-                this.get_maturation(school);   // computes maturation properties for the species.
+                this.getMaturation(school);   // computes maturation properties for the species.
             } catch (Exception ex) {
                 Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             school.setENet(school.getEGross() - school.getEMaint());
+            this.computeEnetFaced(school);
             try {
-                this.get_kappa(school);   // computes the kappa function
+                this.getKappa(school);   // computes the kappa function
             } catch (Exception ex) {
                 Logger.getLogger(EnergyBudget.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            this.get_dw(school);   // computes E_growth (somatic growth)
-            this.get_dg(school);   // computes the increase in gonadic weight
+            this.getDw(school);   // computes E_growth (somatic growth)
+            this.getDg(school);   // computes the increase in gonadic weight
         }
     }
 
@@ -172,13 +179,13 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public void get_maintenance(School school) {
+    public void getMaintenance(School school) {
 
         int ispec = school.getSpeciesIndex();
 
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
-        double output = this.csmr.get(ispec) * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
+        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
 
         // multiply the maintenance flow by the number of fish in the school
@@ -194,9 +201,9 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public void get_egross(School school) {
-        school.setEGross(school.getIngestion() * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
-        //System.out.println(school.getIngestion() + ", " + temp_function.get_phiT(school));
+    public void getEgross(School school) {
+        int ispec = school.getSpeciesIndex();
+        school.setEGross(school.getIngestion() * this.assimilation[ispec] * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
     }
 
     /**
@@ -205,7 +212,7 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public int get_maturation(School school) throws Exception {
+    public int getMaturation(School school) throws Exception {
 
         // If the school is mature, nothing is done and returns 1
         if (school.isMature()) {
@@ -215,10 +222,10 @@ public class EnergyBudget extends AbstractProcess {
         int ispec = school.getSpeciesIndex();
 
         String key = "m0";
-        double m0_temp = school.existsTrait(key) ? school.getTrait(key) : m0.get(ispec);
+        double m0_temp = school.existsTrait(key) ? school.getTrait(key) : m0[ispec];
 
         key = "m1";
-        double m1_temp = school.existsTrait(key) ? school.getTrait(key) : m1.get(ispec);
+        double m1_temp = school.existsTrait(key) ? school.getTrait(key) : m1[ispec];
 
         // If the school is not mature yet, maturation is computed following equation 8
         double age = school.getAge();  // returns the age in years
@@ -242,7 +249,7 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @return
      */
-    public void get_dw(School school) {
+    public void getDw(School school) {
 
         // computes the trend in structure weight dw/dt
         // note: dw should be in ton
@@ -263,7 +270,7 @@ public class EnergyBudget extends AbstractProcess {
      *
      * @param school
      */
-    public void get_dg(School school) {
+    public void getDg(School school) {
 
         double output = 0;
         double enet = school.getENet();
@@ -280,27 +287,25 @@ public class EnergyBudget extends AbstractProcess {
      * (equation 10').
      *
      * @param school
+     * @throws java.lang.Exception
      */
-    public void get_kappa(School school) throws Exception {
+    public void getKappa(School school) throws Exception {
         int ispec = school.getSpeciesIndex();
 
         String key = "r";
-        double r_temp = school.existsTrait(key) ? school.getTrait(key) : r.get(ispec);
-
-        key = "imax";
-        double imax_temp = school.existsTrait(key) ? school.getTrait(key) : Imax.get(ispec);
+        double r_temp = school.existsTrait(key) ? school.getTrait(key) : r[ispec];
 
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - (r_temp / (imax_temp - csmr.get(ispec))) * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen()); //Function in two parts according to maturity state
+        double kappa = (!school.isMature()) ? 1 : 1 - r_temp / school.get_enet_faced() * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
         kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
         kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
 
         school.setKappa(kappa);
     }
 
-//    public void get_kappa(School school) {
-//        // int ispec = school.getSpeciesIndex();
+//    public void getKappa(School school) {
+//        // int ispec = school.getFileSpeciesIndex();
 //        // If the organism is imature, all the net energy goes to the somatic growth.
 //        // else, only a kappa fraction goes to somatic growth
 //        double kappa = (!school.isMature()) ? 1 : 0; //Function in two parts according to maturity state
@@ -308,4 +313,22 @@ public class EnergyBudget extends AbstractProcess {
 //        
 //        school.setKappa(kappa);
 //    }
+    public void computeEnetFaced(School school) {
+        int ispec = school.getSpeciesIndex();
+        double output;
+        if (school.getAgeDt() == 0) {
+
+            output = school.getENet() * 24 / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+        } else if (school.getAge() < 1 & school.getAgeDt() > 0) {
+            double enet = school.getENet() / larvaePredationRateBioen[ispec] * 24 / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
+        } else {
+
+            double enet = school.getENet() * 24 / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
+
+        }
+        school.set_enet_faced(output);
+    }
+
 }

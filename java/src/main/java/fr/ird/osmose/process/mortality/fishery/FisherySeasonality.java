@@ -1,18 +1,11 @@
-/*
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+/* 
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.process.mortality.fishery;
 
 import fr.ird.osmose.util.OsmoseLinker;
@@ -56,7 +46,6 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 
 /**
  *
@@ -64,13 +53,13 @@ import java.text.DecimalFormat;
  */
 public class FisherySeasonality extends OsmoseLinker {
 
-    private final int fisheryIndex;
-    private double[] seasonality;
+    private final int fileFisheryIndex;
+    private double[] fisherySeasonality;
 
     public FisherySeasonality(int fisheryIndex) {
 
-        this.fisheryIndex = fisheryIndex;
-        this.seasonality = new double[this.getConfiguration().getNStep()];
+        this.fileFisheryIndex = fisheryIndex;
+        this.fisherySeasonality = new double[this.getConfiguration().getNStep()];
 
     }
 
@@ -83,11 +72,11 @@ public class FisherySeasonality extends OsmoseLinker {
         String key;
 
         // Init the number of seasons;
-        key = String.format("fisheries.season.number.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.season.number.fsh%d", this.fileFisheryIndex);
         int nSeasons = this.getConfiguration().getInt(key);
 
         // Init the season offset (in fraction of years)
-        key = String.format("fisheries.season.start.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.season.start.fsh%d", this.fileFisheryIndex);
         double seasonOffset = this.getConfiguration().getDouble(key);
 
         // Season offset in time steps
@@ -96,8 +85,8 @@ public class FisherySeasonality extends OsmoseLinker {
         // Season duration in time steps
         int seasonDuration = nStepYear / nSeasons;
 
-        String keyval = String.format("fisheries.seasonality.fsh%d", this.fisheryIndex);      
-        String keyfile = String.format("fisheries.seasonality.file.fsh%d", this.fisheryIndex);
+        String keyval = String.format("fisheries.seasonality.fsh%d", this.fileFisheryIndex);      
+        String keyfile = String.format("fisheries.seasonality.file.fsh%d", this.fileFisheryIndex);
         
         if(this.getConfiguration().isNull(keyval) && this.getConfiguration().isNull(keyfile)) {
             String msg = String.format("%s or %s must be defined.", keyval, keyfile);
@@ -120,7 +109,7 @@ public class FisherySeasonality extends OsmoseLinker {
             for (int i = 0; i < nStep; i++) {
                 int k = (i - ioff) % seasonDuration;
                 k = (k < 0) ? -k : k;
-                this.seasonality[i] = seasonTmp[k];
+                this.fisherySeasonality[i] = seasonTmp[k];
             }
 
         } else {
@@ -128,7 +117,7 @@ public class FisherySeasonality extends OsmoseLinker {
             String filename = getConfiguration().getFile(keyfile);
             // Seasonality must be at least one year, and at max the length of the simulation
             sts.read(filename);
-            seasonality = sts.getValues();
+            fisherySeasonality = sts.getValues();
         }
 
         // Normalizes between 0 and ioff (corresponding to F0)
@@ -157,7 +146,7 @@ public class FisherySeasonality extends OsmoseLinker {
         istart = Math.min(istart, this.getConfiguration().getNStep());
 
         for (int i = istart; i < iend; i++) {
-            total += this.seasonality[i];
+            total += this.fisherySeasonality[i];
         }
         
         BigDecimal bd = new BigDecimal(total).setScale(3, RoundingMode.HALF_EVEN);
@@ -165,7 +154,7 @@ public class FisherySeasonality extends OsmoseLinker {
 
         if (total != 1.d) {
             String msg = String.format("Fishery %d: the seasonality for steps %d to %d summed to %f.\n"
-                    + "Should sum to 1. Please verify that seasonality is properly set.", this.fisheryIndex, istart, iend, total);
+                    + "Should sum to 1. Please verify that seasonality is properly set.", this.fileFisheryIndex, istart, iend, total);
             StringBuilder stb = new StringBuilder();
             stb.append("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
             stb.append(msg);
@@ -182,8 +171,8 @@ public class FisherySeasonality extends OsmoseLinker {
      * @param idt Time step
      * @return Fishing mortality
      */
-    public double getSeasonalityFishMort(int idt) {
-        return this.seasonality[idt];
+    public double getFisherySeasonality(int idt) {
+        return this.fisherySeasonality[idt];
     }
 
 }

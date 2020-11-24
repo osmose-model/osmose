@@ -1,20 +1,13 @@
 <#if licenseFirst??>
 ${licenseFirst}
 </#if>
-${licensePrefix}OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+${licensePrefix}
+${licensePrefix}OSMOSE (Object-oriented Simulator of Marine Ecosystems)
 ${licensePrefix}http://www.osmose-model.org
 ${licensePrefix}
-${licensePrefix}Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+${licensePrefix}Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-${date?date?string("yyyy")}
 ${licensePrefix}
-${licensePrefix}Contributor(s):
-${licensePrefix}Yunne SHIN (yunne.shin@ird.fr),
-${licensePrefix}Morgane TRAVERS (morgane.travers@ifremer.fr)
-${licensePrefix}Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
-${licensePrefix}Philippe VERLEY (philippe.verley@ird.fr)
-${licensePrefix}Laure VELEZ (laure.velez@ird.fr)
-${licensePrefix}Nicolas Barrier (nicolas.barrier@ird.fr)
-${licensePrefix}
-${licensePrefix}This software is a computer program whose purpose is to simulate fish
+${licensePrefix}Osmose is a computer program whose purpose is to simulate fish
 ${licensePrefix}populations and their interactions with their biotic and abiotic environment.
 ${licensePrefix}OSMOSE is a spatial, multispecies and individual-based model which assumes
 ${licensePrefix}size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -25,31 +18,28 @@ ${licensePrefix}processes of fish life cycle (growth, explicit predation, additi
 ${licensePrefix}starvation mortalities, reproduction and migration) and fishing mortalities
 ${licensePrefix}(Shin and Cury 2001, 2004).
 ${licensePrefix}
-${licensePrefix}This software is governed by the CeCILL-B license under French law and
-${licensePrefix}abiding by the rules of distribution of free software.  You can  use, 
-${licensePrefix}modify and/ or redistribute the software under the terms of the CeCILL-B
-${licensePrefix}license as circulated by CEA, CNRS and INRIA at the following URL
-${licensePrefix}"http://www.cecill.info". 
+${licensePrefix}Contributor(s):
+${licensePrefix}Yunne SHIN (yunne.shin@ird.fr),
+${licensePrefix}Morgane TRAVERS (morgane.travers@ifremer.fr)
+${licensePrefix}Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+${licensePrefix}Philippe VERLEY (philippe.verley@ird.fr)
+${licensePrefix}Laure VELEZ (laure.velez@ird.fr)
+${licensePrefix}Nicolas Barrier (nicolas.barrier@ird.fr)
 ${licensePrefix}
-${licensePrefix}As a counterpart to the access to the source code and  rights to copy,
-${licensePrefix}modify and redistribute granted by the license, users are provided only
-${licensePrefix}with a limited warranty  and the software's author,  the holder of the
-${licensePrefix}economic rights,  and the successive licensors  have only  limited
-${licensePrefix}liability. 
+${licensePrefix}This program is free software: you can redistribute it and/or modify
+${licensePrefix}it under the terms of the GNU General Public License as published by
+${licensePrefix}the Free Software Foundation (version 3 of the License). Full description
+${licensePrefix}is provided on the LICENSE file.
 ${licensePrefix}
-${licensePrefix}In this respect, the user's attention is drawn to the risks associated
-${licensePrefix}with loading,  using,  modifying and/or developing or reproducing the
-${licensePrefix}software by the user in light of its specific status of free software,
-${licensePrefix}that may mean  that it is complicated to manipulate,  and  that  also
-${licensePrefix}therefore means  that it is reserved for developers  and  experienced
-${licensePrefix}professionals having in-depth computer knowledge. Users are therefore
-${licensePrefix}encouraged to load and test the software's suitability as regards their
-${licensePrefix}requirements in conditions enabling the security of their systems and/or 
-${licensePrefix}data to be ensured and,  more generally, to use and operate it in the 
-${licensePrefix}same conditions as regards security. 
+${licensePrefix}This program is distributed in the hope that it will be useful,
+${licensePrefix}but WITHOUT ANY WARRANTY; without even the implied warranty of
+${licensePrefix}MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+${licensePrefix}GNU General Public License for more details.
 ${licensePrefix}
-${licensePrefix}The fact that you are presently reading this means that you have had
-${licensePrefix}knowledge of the CeCILL-B license and that you accept its terms.
+${licensePrefix}You should have received a copy of the GNU General Public License
+${licensePrefix}along with this program.  If not, see <https://www.gnu.org/licenses/>.
+${licensePrefix}
 <#if licenseLast??>
 ${licenseLast}
 </#if>
+

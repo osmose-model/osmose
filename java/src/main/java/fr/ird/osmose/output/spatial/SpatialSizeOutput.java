@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,31 +16,27 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose.output.spatial;
 
@@ -59,35 +48,32 @@ import fr.ird.osmose.School;
  * @author pverley
  */
 public class SpatialSizeOutput extends AbstractSpatialOutput {
-    
-    public SpatialSizeOutput(int rank){
+
+    public SpatialSizeOutput(int rank) {
         super(rank);
     }
-    
+
     @Override
-    public String getVarName()
-    {
+    public String getVarName() {
         return "Size";
     }
-    
+
     @Override
-    public String getDesc()
-    {
+    public String getDesc() {
         return "mean size, in centimeter, per species and per cell";
     }
-    
+
     @Override
     public void update() {
-        
+
         // In this case, a weighted mean is applied on the TL, with
         // weights being provided by the biomass
-
         this.common_update();
-        
+
         int nSpecies = getNSpecies();
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
-        
+
         // temporary variable containing the total abundance within one cell
         float abundance[][][];
         abundance = new float[nSpecies][ny][nx];
@@ -101,39 +87,38 @@ public class SpatialSizeOutput extends AbstractSpatialOutput {
                 int j = cell.get_jgrid();
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
-                        if (cutoffEnabled && school.getAge() < cutoffAge[school.getSpeciesIndex()]) {
+                        int iSpec = school.getSpeciesIndex();
+                        if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
                             continue;
                         }
                         if (!school.isUnlocated()) {
                             // here, data is TK weighted by the biomass
-                            int iSpec = school.getSpeciesIndex();
                             temp[iSpec][j][i] += school.getLength() * school.getInstantaneousAbundance();
                             abundance[iSpec][j][i] += school.getInstantaneousAbundance();
                         }
-                    } 
-                }      
+                    }
+                }
             }
         }
-        
+
         // Computation of the Weighted Mean for the TL
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             for (int j = 0; j < ny; j++) {
-                    for (int i = 0; i < nx; i++) {
+                for (int i = 0; i < nx; i++) {
                     if (abundance[iSpec][j][i] > 0) {
                         temp[iSpec][j][i] /= abundance[iSpec][j][i];
                     }
                 }
             }
         }
-        
-        
-         // Update of the TL array
+
+        // Update of the TL array
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                        data[iSpec][j][i] += temp[iSpec][j][i];
+                    data[iSpec][j][i] += temp[iSpec][j][i];
                 }
             }
-        }   
+        }
     }
 }

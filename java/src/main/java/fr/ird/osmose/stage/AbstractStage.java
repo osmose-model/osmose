@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,44 +16,39 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.stage;
 
 import fr.ird.osmose.util.OsmoseLinker;
-import java.util.HashMap;
-
 /**
  *
  * @author pverley
  */
 abstract class AbstractStage extends OsmoseLinker implements IStage {
 
-    private HashMap<Integer, float[]> thresholds;
+    private float[][] thresholds;
 
     private final String key;
 
@@ -71,34 +59,42 @@ abstract class AbstractStage extends OsmoseLinker implements IStage {
     @Override
     public void init() {
 
-        thresholds = new HashMap();
+        int nSpecies = this.getNSpecies();
+        int nBkgSpecies = this.getNBkgSpecies();
+        int nResources = this.getNRscSpecies();
+        int nTot = nSpecies + nBkgSpecies + nResources;
+        thresholds = new float[nTot][];
         
         // Set values for focal and background species species.
-        for (int i : getConfiguration().getFishIndex()) {
+        int cpt = 0;
+        for (int i : getConfiguration().getPredatorIndex()) {
             int nStage = !getConfiguration().isNull(key + i)
                     ? getConfiguration().getArrayString(key + i).length + 1
                     : 1;
             if (nStage > 1) {
-                thresholds.put(i, getConfiguration().getArrayFloat(key + i));
+                thresholds[cpt] = getConfiguration().getArrayFloat(key + i);
             } else {
-                thresholds.put(i, new float[0]);
+                thresholds[cpt] = new float[0];
             }
+            
+            cpt++;
+            
         }
         
         // Set values for resource species.
-        for (int i : getConfiguration().getRscIndex()) {
-            thresholds.put(i, new float[0]);
+        for (cpt = 0; cpt < getConfiguration().getNRscSpecies(); cpt++) {
+            thresholds[cpt + nSpecies + nBkgSpecies] = new float[0];
         }
         
     }
 
     @Override
     public int getNStage(int iSpecies) {
-        return thresholds.get(iSpecies).length + 1;
+        return thresholds[iSpecies].length + 1;
     }
 
     @Override
     public float[] getThresholds(int iSpecies) {
-        return thresholds.get(iSpecies);
+        return thresholds[iSpecies];
     }
 }

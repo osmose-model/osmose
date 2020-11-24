@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.util;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -56,6 +46,7 @@ import fr.ird.osmose.IAggregation;
 import fr.ird.osmose.stage.ClassGetter;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -76,7 +67,7 @@ public class Matrix extends OsmoseLinker {
     private int nPred;
 
     /**
-     * Accessibility values of dimension (nprey, nclass).
+     * Accessibility values of dimension (npreys, npred).
      */
     private double[][] accessibilityMatrix;
 
@@ -154,15 +145,15 @@ public class Matrix extends OsmoseLinker {
             namesPred = new String[nPred];
 
             // Process the header to extract the properties of predator (class, etc.)
-            for (int ipred = 1; ipred < header.length; ipred++) {
-                String predString = header[ipred];
+            for (int ipred = 0; ipred < header.length - 1; ipred++) {
+                String predString = header[ipred + 1];
                 int index = predString.lastIndexOf('<');
                 if (index < 0) {
-                    classPred[ipred - 1] = Float.MAX_VALUE;
-                    namesPred[ipred - 1] = predString.trim();
+                    classPred[ipred] = Float.MAX_VALUE;
+                    namesPred[ipred] = predString.trim();
                 } else {
-                    namesPred[ipred - 1] = predString.substring(0, index - 1).trim();
-                    classPred[ipred - 1] = Float.valueOf(predString.substring(index + 1, predString.length()));
+                    namesPred[ipred] = predString.substring(0, index - 1).trim();
+                    classPred[ipred] = Float.valueOf(predString.substring(index + 1, predString.length()));
                 }
             }
 
@@ -170,35 +161,39 @@ public class Matrix extends OsmoseLinker {
             this.accessibilityMatrix = new double[nPreys][nPred];
 
             // Loop over all the lines of the file, avoiding header
-            for (int iprey = 1; iprey < lines.size(); iprey++) {
+            for (int iprey = 0; iprey < lines.size() - 1; iprey++) {
 
                 // Read the line for the given prey
-                String[] lineStr = lines.get(iprey);
+                String[] lineStr = lines.get(iprey + 1);
 
                 // Recovering the column name to get prey names and class
                 String preyString = lineStr[0];
                 int index = preyString.lastIndexOf('<');
                 if (index < 0) {
-                    classPrey[iprey - 1] = Float.MAX_VALUE;
-                    namesPrey[iprey - 1] = preyString.trim();
+                    classPrey[iprey] = Float.MAX_VALUE;
+                    namesPrey[iprey] = preyString.trim();
                 } else {
-                    namesPrey[iprey - 1] = preyString.substring(0, index - 1).trim();
-                    classPrey[iprey - 1] = Float.valueOf(preyString.substring(index + 1, preyString.length()));
+                    namesPrey[iprey] = preyString.substring(0, index - 1).trim();
+                    classPrey[iprey] = Float.valueOf(preyString.substring(index + 1, preyString.length()));
                 }
 
-                for (int ipred = 1; ipred < lineStr.length; ipred++) {
-                    this.accessibilityMatrix[iprey - 1][ipred - 1] = Double.valueOf(lineStr[ipred]);
+                for (int ipred = 0; ipred < lineStr.length - 1; ipred++) {
+                    this.accessibilityMatrix[iprey][ipred] = Double.valueOf(lineStr[ipred + 1]);
                 }
-
             }
 
         } catch (IOException ex) {
             error("Error loading accessibility matrix from file " + filename, ex);
-        }
+        } 
+        
+        this.sortMatrix();
+        debug(this.toString());
+        
     }
-
+    
     /**
      * Recovers the name of the accessibility file.
+     * @return 
      */
     public String getFile() {
         return this.filename;
@@ -242,15 +237,18 @@ public class Matrix extends OsmoseLinker {
      */
     public int getIndexPred(IAggregation pred) {
 
+        String predname = pred.getSpeciesName();
+
         if (this.classGetter == null) {
             for (int i = 0; i < this.getNPred(); i++) {
-                if (pred.getSpeciesName().equals(this.getPredName(i))) {
+                if (predname.equals(this.getPredName(i))) {
                     return i;
                 }
             }
         } else {
+            double classVal = classGetter.getVariable(pred);
             for (int i = 0; i < this.getNPred(); i++) {
-                if (pred.getSpeciesName().equals(this.getPredName(i)) && (classGetter.getVariable(pred) < this.getPredClass(i))) {
+                if (predname.equals(this.getPredName(i)) && (classVal < this.getPredClass(i))) {
                     return i;
                 }
             }
@@ -269,16 +267,19 @@ public class Matrix extends OsmoseLinker {
      * @return
      */
     public int getIndexPrey(IAggregation prey) {
-
+        
+        String preyname = prey.getSpeciesName();
+        
         if (this.classGetter == null) {
-            for (int i = 0; i < this.getNPred(); i++) {
-                if (prey.getSpeciesName().equals(this.getPredName(i))) {
+            for (int i = 0; i < this.getNPrey(); i++) {
+                if (preyname.equals(this.getPreyName(i))) {
                     return i;
                 }
             }
         } else {
+            double classVal = classGetter.getVariable(prey);
             for (int i = 0; i < this.getNPrey(); i++) {
-                if (prey.getSpeciesName().equals(this.getPreyName(i)) && (classGetter.getVariable(prey) < this.getPreyClass(i))) {
+                if (preyname.equals(this.getPreyName(i)) && (classVal < this.getPreyClass(i))) {
                     return i;
                 }
             }
@@ -286,6 +287,7 @@ public class Matrix extends OsmoseLinker {
         String message = String.format("No accessibility found for prey %s class %f", prey.getSpeciesName(), classGetter.getVariable(prey));
         error(message, new IllegalArgumentException());
         return -1;
+
     }
     
     /** *  Extracts the matrix column for the given predator.Based on full correspondance of the name (class < thres).
@@ -322,6 +324,176 @@ public class Matrix extends OsmoseLinker {
         String message = String.format("No catchability found for prey %s", name);
         error(message, new IllegalArgumentException());       
         return -1;
+    }
+
+    /** Sort the matrix. 
+     * 
+     * Rows and columns are sorted in alphabetical order. Then in increasing class order.
+     * 
+     */
+    private void sortMatrix() {
+        
+        // Copy the accessibility matrix
+        double[][] accessMatrixTemp = new double[nPreys][nPred];
+        for(int i = 0; i < nPreys; i++) {
+            for(int j = 0; j < nPred; j++) { 
+                accessMatrixTemp[i][j] = this.accessibilityMatrix[i][j];
+            }
+        }
+        
+        // copy the input arrays of pred names and class;
+        float[] classPredTemp = Arrays.copyOf(classPred, nPred);
+        String[] namesPredTemp = Arrays.copyOf(namesPred, nPred);
+        
+        // Sort the predators matrix by growing name and class order
+        MatrixSorter[] predSorter = new MatrixSorter[this.nPred];
+        for (int iPred = 0; iPred < nPred; iPred++) {
+            predSorter[iPred] = new MatrixSorter(namesPredTemp[iPred], classPredTemp[iPred]);
+        }
+        Arrays.sort(predSorter, (MatrixSorter m1, MatrixSorter m2) -> m1.compareTo(m2));
+         
+        // Copy the input arrays  of prey names and class
+        float[] classPreyTemp = Arrays.copyOf(classPrey, nPreys);
+        String[] namesPreyTemp = Arrays.copyOf(namesPrey, nPreys);
+        
+        // Sort the preys matrix by growing name and class order
+        MatrixSorter[] preySorter = new MatrixSorter[this.nPreys];
+        for (int iPrey = 0; iPrey < nPreys; iPrey++) {
+            preySorter[iPrey] = new MatrixSorter(namesPreyTemp[iPrey], classPreyTemp[iPrey]);
+        }
+        
+        Arrays.sort(preySorter, (MatrixSorter m1, MatrixSorter m2) -> m1.compareTo(m2));
+        
+        // Loop over the sorted Prey accessibility
+        int iPrey = 0;
+        for(MatrixSorter preyMat : preySorter) { 
+            
+            String preyName = preyMat.getName();
+            float preyClass = preyMat.getClassVal();
+            int oldPreyIndex = this.findIndex(preyName, preyClass, namesPreyTemp, classPreyTemp);
+            namesPrey[iPrey] = preyName;
+            classPrey[iPrey] = preyClass;
+            
+            int iPred = 0;
+            for (MatrixSorter predMat : predSorter) {
+
+                String predName = predMat.getName();
+                float predClass = predMat.getClassVal();
+                int oldPredIndex = this.findIndex(predName, predClass, namesPredTemp, classPredTemp);
+                namesPred[iPred] = predName;
+                classPred[iPred] = predClass;
+                
+                accessibilityMatrix[iPrey][iPred] = accessMatrixTemp[oldPreyIndex][oldPredIndex];
+                iPred++;
+                 
+            }
+                
+            iPrey++;
+            
+        }
+    }
+    
+    /** Find the index of a (name, class) tuple within a list of names and class.
+     * 
+     * @param name
+     * @param classVal
+     * @param listNames
+     * @param listClassVal
+     * @return 
+     */
+    private int findIndex(String name, float classVal, String[] listNames, float[] listClassVal) { 
+        
+        int NVal = listNames.length;
+        for(int i = 0; i < NVal; i++) {
+            if((name == listNames[i]) && (classVal == listClassVal[i])) {
+                return i;
+            }
+        }
+        
+        return -1;
+        
+    }
+    
+    
+    /** Converts Matrix to string. */
+    @Override
+    public String toString() {
+        String output;
+        StringBuilder bld = new StringBuilder(";");
+        for(int iPred = 0; iPred < this.nPred; iPred++) {
+            output = String.format("%s < %f", namesPred[iPred], classPred[iPred]);
+            bld.append(output).append(";");
+        }
+        bld.append("\n");
+
+        for (int iPrey = 0; iPrey < this.nPreys; iPrey++) {
+            output = String.format("%s < %f", namesPrey[iPrey], classPrey[iPrey]);
+            bld.append(output).append(";");
+            for (int iPred = 0; iPred < this.nPred; iPred++) {
+                bld.append(this.accessibilityMatrix[iPrey][iPred]).append(";");
+            } 
+            bld.append("\n");
+        }
+        
+        // Remove infinite class from string output
+        output =  bld.toString();
+        String toRemove = String.format("< %f", Float.MAX_VALUE);
+        output = output.replaceAll(toRemove, "");
+        return output;
+                
+    } 
+    
+    /**
+     * Class to sort Accessibility Matrix.
+     * Sorts columns/rows based on names and class.
+     *
+     * @author barrier
+     */
+    private class MatrixSorter {
+
+        private final String names;
+        private final float classVal;
+
+        public MatrixSorter(String names, float classVal) {
+            this.names = names;
+            this.classVal = classVal;
+        }
+
+        /** Comparator.
+         * 
+         * First compares the names, then the class.
+         * 
+         * @param otherelement
+         * @return 
+         */
+        public int compareTo(MatrixSorter otherelement) {
+            if (this.names != otherelement.names) {
+                return this.names.compareToIgnoreCase(otherelement.names);
+            }
+
+            if (classVal != otherelement.classVal) {
+                return Float.compare(classVal, otherelement.classVal);
+            }
+
+            return 0;
+        }
+
+        /** Returns the class value.
+         * 
+         * @return 
+         */
+        public float getClassVal() {
+            return this.classVal;
+        }
+
+        /** Returns the name.
+         * 
+         * @return 
+         */
+        public String getName() {
+            return this.names;
+        }
+
     }
 
 }

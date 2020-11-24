@@ -1,18 +1,11 @@
-/*
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+/* 
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.process.mortality.fishery;
 
 import fr.ird.osmose.util.OsmoseLinker;
@@ -60,16 +50,16 @@ import java.io.IOException;
  */
 public class FisheryPeriod extends OsmoseLinker {
     
-    private final int fisheryIndex;
-    private final double[] fmortSeason;
+    private final int fileFisheryIndex;
+    private final double[] fisheryPeriod;
     private int nSeasons;
     private double seasonOffset; 
     
     
     public FisheryPeriod(int fisheryIndex) {
 
-        this.fisheryIndex = fisheryIndex;
-        this.fmortSeason = new double[this.getConfiguration().getNStep()];
+        this.fileFisheryIndex = fisheryIndex;
+        this.fisheryPeriod = new double[this.getConfiguration().getNStep()];
         
     }
     
@@ -84,11 +74,11 @@ public class FisheryPeriod extends OsmoseLinker {
         int nStep = this.getConfiguration().getNStep();
                 
         // Init the number of seasons;
-        key = String.format("fisheries.season.number.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.season.number.fsh%d", this.fileFisheryIndex);
         this.nSeasons = this.getConfiguration().getInt(key);
         
         // Init the season offset (in fraction of years)
-        key = String.format("fisheries.season.start.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.season.start.fsh%d", this.fileFisheryIndex);
         this.seasonOffset = this.getConfiguration().getDouble(key);
         
         // Gets the season offset in number of time steps
@@ -112,7 +102,7 @@ public class FisheryPeriod extends OsmoseLinker {
             fishIndex[i] = k + do_offset;
         }
 
-        key = String.format("fisheries.rate.bySeason.fsh%d", this.fisheryIndex);
+        key = String.format("fisheries.rate.bySeason.fsh%d", this.fileFisheryIndex);
         
         double[] fishingSeason = this.getConfiguration().getArrayDouble(key);
         if (fishingSeason.length == 1) {
@@ -120,7 +110,7 @@ public class FisheryPeriod extends OsmoseLinker {
             // If fishing season given as a single value, then
             // use it for all the season.
             for (int i = 0; i < nStep; i++) {
-                fmortSeason[i] = fishingSeason[0];
+                fisheryPeriod[i] = fishingSeason[0];
             }
 
         } else {
@@ -133,7 +123,7 @@ public class FisheryPeriod extends OsmoseLinker {
 
             for (int i = 0; i < nStep; i++) {
                 int k = fishIndex[i];
-                fmortSeason[i] = fishingSeason[k];
+                fisheryPeriod[i] = fishingSeason[k];
             }
         }
         
@@ -144,8 +134,8 @@ public class FisheryPeriod extends OsmoseLinker {
      * @param idt Time step
      * @return Fishing mortality
      */
-    public double getSeasonFishMort(int idt) { 
-        return fmortSeason[idt];
+    public double getFisheryPeriod(int idt) { 
+        return fisheryPeriod[idt];
     }
     
 }

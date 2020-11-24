@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,39 +16,35 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
 import fr.ird.osmose.output.distribution.DistributionType;
-import java.util.HashMap;
 
 /**
  *
@@ -64,7 +53,7 @@ import java.util.HashMap;
 public class DistribOutput extends AbstractOutput {
 
     // Output values distributed by species and by class
-    HashMap<Integer, double[][]> values = new HashMap();
+    double[][][] values;
     
     // Distribution 
     private final AbstractDistribution distrib;
@@ -73,26 +62,85 @@ public class DistribOutput extends AbstractOutput {
     // description
     private final String description;
 
+    private final boolean computeAverage;
+    
+    /** Default constructor, in which temporal average is computed.
+     * 
+     * @param rank
+     * @param subfolder
+     * @param name
+     * @param description
+     * @param species
+     * @param variable
+     * @param distrib 
+     */
     public DistribOutput(int rank, String subfolder,
             String name, String description,
             Species species,
             SchoolVariableGetter variable,
             AbstractDistribution distrib) {
+
+        this(rank, subfolder, name, description, species, variable, distrib, true);
+
+    }
+
+    /**
+     * Full constructor, contains species and computeAverage arguments.
+     *
+     * @param rank
+     * @param subfolder
+     * @param name
+     * @param description
+     * @param species
+     * @param variable
+     * @param distrib
+     * @param computeAverage
+     */
+    public DistribOutput(int rank, String subfolder,
+            String name, String description,
+            Species species,
+            SchoolVariableGetter variable,
+            AbstractDistribution distrib, boolean computeAverage) {
         super(rank, subfolder, name + "DistribBy" + distrib.getType() + (null != species ? "-" + species.getName() : ""));
         this.distrib = distrib;
         this.variable = variable;
         this.description = description;
+        this.computeAverage = computeAverage;
     }
 
+    /** Constructor with compute average but not species.
+     * 
+     * @param rank
+     * @param subfolder
+     * @param name
+     * @param description
+     * @param schoolVariable
+     * @param distrib
+     * @param computeAverage 
+     */
+    public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib, boolean computeAverage) {
+        this(rank, subfolder, name, description, null, schoolVariable, distrib, computeAverage);
+    }
+
+    /** Constructor without species and compute_average.
+     * 
+     * @param rank
+     * @param subfolder
+     * @param name
+     * @param description
+     * @param schoolVariable
+     * @param distrib 
+     */
     public DistribOutput(int rank, String subfolder, String name, String description, SchoolVariableGetter schoolVariable, AbstractDistribution distrib) {
-        this(rank, subfolder, name, description, null, schoolVariable, distrib);
+        this(rank, subfolder, name, description, null, schoolVariable, distrib, true);
     }
 
     @Override
     public void reset() {
-        values.clear();
-        for(int i : getConfiguration().getFocalIndex()) { 
-            values.put(i, new double[getNOutputRegion()][distrib.getNClass()]);
+        int nSpecies = this.getNSpecies();
+        values = new double[nSpecies][][];
+        for(int i = 0; i<nSpecies; i++) { 
+            values[i] = new double[getNOutputRegion()][distrib.getNClass()];
         }
     }
 
@@ -107,7 +155,7 @@ public class DistribOutput extends AbstractOutput {
                 for (AbstractOutputRegion region : getOutputRegions()) {
                     if (region.contains(timeStep, school)) {
                         double sel = region.getSelectivity(timeStep, school);
-                        values.get(school.getSpeciesIndex())[irg][getClass(school)] += sel * var;
+                        values[school.getSpeciesIndex()][irg][getClass(school)] += sel * var;
                     }
                     irg++;
                 }
@@ -136,6 +184,7 @@ public class DistribOutput extends AbstractOutput {
     @Override
     public void write(float time) {
 
+        int nSpecies = this.getNSpecies();
         int nClass = distrib.getNClass();
         double nsteps = getRecordFrequency();
         for (int irg = 0; irg < getNOutputRegion(); irg++) {
@@ -143,8 +192,14 @@ public class DistribOutput extends AbstractOutput {
             for (int iClass = 0; iClass < nClass; iClass++) {
                 int cpt = 0;
                 array[iClass][cpt++] = distrib.getThreshold(iClass);
-                for (int iSpec : getConfiguration().getFocalIndex()) {
-                    array[iClass][cpt++] = values.get(iSpec)[irg][iClass] / nsteps;
+                if (this.computeAverage) {
+                    for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                        array[iClass][cpt++] = values[iSpec][irg][iClass] / nsteps;
+                    }
+                } else {
+                    for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                        array[iClass][cpt++] = values[iSpec][irg][iClass];
+                    }
                 }
             }
             writeVariable(irg, time, array);
@@ -156,7 +211,7 @@ public class DistribOutput extends AbstractOutput {
         String[] headers = new String[getNSpecies() + 1];
         int cpt = 0;
         headers[cpt++] = distrib.getType().toString();
-        for (int i : getConfiguration().getFocalIndex()) {
+        for (int i  = 0; i < getNSpecies(); i++) {
             headers[cpt++] = getSpecies(i).getName();
         }
         return headers;

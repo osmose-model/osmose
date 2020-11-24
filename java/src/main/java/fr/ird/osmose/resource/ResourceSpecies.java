@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,35 +16,32 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose.resource;
 
 import fr.ird.osmose.Configuration;
+import fr.ird.osmose.ISpecies;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
@@ -75,15 +65,15 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 4.2 2019/11/25
  */
-public class ResourceSpecies {
+public class ResourceSpecies implements ISpecies {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
     /**
-     * Index of the resource group
+     * Index of the resource group within the configuration file.
      */
-    private final int index;
+    private final int fileindex;
     /**
      * Trophic level of the resource group. Parameter <i>species.TL.sp#</i>
      */
@@ -111,6 +101,9 @@ public class ResourceSpecies {
      */
     private final double accessMax = 0.99d;
 
+    private final int index;
+    private final int offset;
+
 ///////////////
 // Constructors
 ///////////////
@@ -118,23 +111,26 @@ public class ResourceSpecies {
      * Initializes a new resource species with characteristics given as
      * parameters.
      *
-     * @param index, index of the resource group
+     * @param fileindex, index of the resource group
+     * @param index
      */
-    public ResourceSpecies(int index) {
+    public ResourceSpecies(int fileindex, int index) {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
-        this.index = index;
+        this.fileindex = fileindex;
+        this.offset = cfg.getNBkgSpecies() + cfg.getNSpecies();
+        this.index = index + this.offset;
         // Initialisation of parameters
-        name = cfg.getString("species.name.sp" + index);
-        sizeMin = cfg.getDouble("species.size.min.sp" + index);
-        sizeMax = cfg.getDouble("species.size.max.sp" + index);
-        trophicLevel = cfg.getFloat("species.tl.sp" + index);
-        if (!cfg.isNull("species.accessibility2fish.file.sp" + index)) {
+        name = cfg.getString("species.name.sp" + fileindex);
+        sizeMin = cfg.getDouble("species.size.min.sp" + fileindex);
+        sizeMax = cfg.getDouble("species.size.max.sp" + fileindex);
+        trophicLevel = cfg.getFloat("species.tl.sp" + fileindex);
+        if (!cfg.isNull("species.accessibility2fish.file.sp" + fileindex)) {
             SingleTimeSeries ts = new SingleTimeSeries();
-            ts.read(cfg.getFile("species.accessibility2fish.file.sp" + index));
+            ts.read(cfg.getFile("species.accessibility2fish.file.sp" + fileindex));
             accessibilityCoeff = ts.getValues();
         } else {
-            double accessibility = cfg.getDouble("species.accessibility2fish.sp" + index);
+            double accessibility = cfg.getDouble("species.accessibility2fish.sp" + fileindex);
             accessibilityCoeff = new double[cfg.getNStep()];
             for (int i = 0; i < accessibilityCoeff.length; i++) {
                 accessibilityCoeff[i] = (accessibility >= 1) ? accessMax : accessibility;
@@ -197,6 +193,7 @@ public class ResourceSpecies {
      *
      * @return the name of the resource group
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -217,8 +214,22 @@ public class ResourceSpecies {
      *
      * @return the index of the resource group
      */
-    public int getIndex() {
-        return index;
+    @Override
+    public int getFileSpeciesIndex() {
+        return fileindex;
+    }
+
+    /**
+     * Return the global index of the species.
+     *
+     * Index between [Nsp + Nbk, Nsp + Nbkg + Nrsc - 1]
+     *
+     *
+     * @return
+     */
+    @Override
+    public int getSpeciesIndex() {
+        return this.index;
     }
 
     /**

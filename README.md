@@ -6,8 +6,10 @@ OSMOSE: Modelling Marine Exploited Ecosystems
 =============================================
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/osmose)](https://cran.r-project.org/package=osmose)
-[![Github Issues](https://github.com/osmose-model/osmose/issues)](https://github.com/osmose-model/osmose/issues)
-[![](https://CRAN.R-project.org/package=osmose)](https://CRAN.R-project.org/package=osmose)
+[![Latest Release](https://img.shields.io/github/release/osmose-model/osmose.svg)](https://github.com/osmose-model/osmose/releases)
+[![R Build Status](https://github.com/osmose-model/osmose-private/workflows/r-build/badge.svg)](https://github.com/osmose-model/osmose-private/actions)
+[![Java Build Status](https://github.com/osmose-model/osmose-private/workflows/java-build/badge.svg)](https://github.com/osmose-model/osmose-private/actions)
+[![GitHub issues](https://img.shields.io/github/issues/osmose-model/osmose.svg)](https://github.com/osmose-model/osmose/issues)
 
 ## Overview
 

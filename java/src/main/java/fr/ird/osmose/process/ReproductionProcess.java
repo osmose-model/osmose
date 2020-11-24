@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,39 +16,33 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class controls the reproduction process in the simulated domain. The
@@ -75,19 +62,19 @@ public class ReproductionProcess extends AbstractProcess {
     /**
      * Distribution of the spawning throughout the year
      */
-    private HashMap<Integer, double[]> seasonSpawning;
+    private double[][] seasonSpawning;
     /*
      * Percentage of female in the population
      */
-    private HashMap<Integer, Double> sexRatio;
+    private double[] sexRatio;
     /*
      * Number of eggs per gram of mature female
      */
-    private HashMap<Integer, Double> beta;
+    private double[] beta;
     /*
      * Seeding biomass in tonne
      */
-    private HashMap<Integer, Double> seedingBiomass;
+    private double[] seedingBiomass;
     /*
      * Year max for seeding collapsed species, in number of time steps 
      */
@@ -101,42 +88,48 @@ public class ReproductionProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getNSpecies();
-        sexRatio = new HashMap();
-        beta = new HashMap();
-        seasonSpawning = new HashMap();
+        sexRatio = new double[nSpecies];
+        beta = new double[nSpecies];
+        seasonSpawning = new double[nSpecies][];
+        int cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             if (!getConfiguration().isNull("reproduction.season.file.sp" + i)) {
                 SingleTimeSeries ts = new SingleTimeSeries();
                 ts.read(getConfiguration().getFile("reproduction.season.file.sp" + i));
-                seasonSpawning.put(i, ts.getValues());
+                seasonSpawning[cpt] = ts.getValues();
             } else {
                 // Even spawning season throughout the year
-                seasonSpawning.put(i, new double[]{1.d / getConfiguration().getNStepYear()});
+                seasonSpawning[cpt] = new double[]{1.d / getConfiguration().getNStepYear()};
             }
+            cpt++;
         }
 
+        cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             float sum = 0;
-            for (double d : seasonSpawning.get(i)) {
+            for (double d : seasonSpawning[cpt]) {
                 sum += d;
             }
             if (sum > 0) {
-                sexRatio.put(i, getConfiguration().getDouble("species.sexratio.sp" + i));
-                beta.put(i, getConfiguration().getDouble("species.relativefecundity.sp" + i));
+                sexRatio[cpt] = getConfiguration().getDouble("species.sexratio.sp" + i);
+                beta[cpt] = getConfiguration().getDouble("species.relativefecundity.sp" + i);
             }
+            cpt++;
         }
 
         // Seeding biomass
-        seedingBiomass = new HashMap();
-        for (int i : getConfiguration().getFocalIndex()) {
-            seedingBiomass.put(i, getConfiguration().getDouble("population.seeding.biomass.sp" + i));
+        seedingBiomass = new double[nSpecies];
+        cpt = 0;
+        for (int fileIndex : getConfiguration().getFocalIndex()) {
+            seedingBiomass[cpt] = getConfiguration().getDouble("population.seeding.biomass.sp" + fileIndex);
+            cpt++;
         }
         // Seeding duration (expressed in number of time steps)
         yearMaxSeeding = 0;
         if (!getConfiguration().isNull("population.seeding.year.max")) {
             yearMaxSeeding = getConfiguration().getInt("population.seeding.year.max") * getConfiguration().getNStepYear();
         } else {
-            for (int i : getConfiguration().getFocalIndex()) {
+            for (int i = 0; i < nSpecies; i++) {
                 yearMaxSeeding = Math.max(yearMaxSeeding, getSpecies(i).getLifespanDt());
             }
             warning("Did not find parameter population.seeding.year.max. Osmose set it to " + ((float) yearMaxSeeding / getConfiguration().getNStepYear()) + " years, the lifespan of the longest-lived species.");
@@ -146,50 +139,52 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void run() {
 
+        int cpt;
+
         if (getConfiguration().isBioenEnabled()) {
             error("ReproductionProcess run method not usable in Osmose-PHYSIO", new Exception());
         }
 
+        int nSpecies = this.getNSpecies();
+
         // spawning stock biomass per species
-        HashMap<Integer, Double> SSB = new HashMap();
-        for(int i : getConfiguration().getFocalIndex()) {
-            SSB.put(i, 0.);
-        }
-    
+        double[] SSB = new double[nSpecies];
+
         // check whether the species do reproduce or not
-        HashMap<Integer, Boolean> reproduce = new HashMap();
-        for (int i : getConfiguration().getFocalIndex()) {
-            reproduce.put(i, (sexRatio.get(i) > 0.d && beta.get(i) > 0.d));
+        boolean[] reproduce = new boolean[nSpecies];
+        for (cpt = 0; cpt < this.getNSpecies(); cpt++) { 
+            reproduce[cpt] = (sexRatio[cpt] > 0.d && beta[cpt] > 0.d);
         }
 
         // loop over all the schools to compute SSB
         for (School school : getSchoolSet().getSchools()) {
             int i = school.getSpeciesIndex();
             // increment spawning stock biomass
-            if (reproduce.get(i) && school.getSpecies().isSexuallyMature(school)) {
-                double value = SSB.get(i) + school.getInstantaneousBiomass();
-                SSB.put(i, value);
+            if (reproduce[i] && school.getSpecies().isSexuallyMature(school)) {
+                SSB[i] += school.getInstantaneousBiomass();
             }
             // increment age
             school.incrementAge();
         }
 
-        // loop over the species to lay cohort at age class 0
-        for (int i : getConfiguration().getFocalIndex()) {
+        // Loop over all species
+        for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
+            
             // ignore species that do not reproduce
-            if (!reproduce.get(i)) {
+            if (!reproduce[cpt]) {
                 continue;
             }
-            Species species = getSpecies(i);
+
+            Species species = getSpecies(cpt);
             // seeding process for collapsed species
-            if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB.get(i) == 0.) {
-                SSB.put(i, seedingBiomass.get(i));
+            if (getSimulation().getIndexTimeSimu() < yearMaxSeeding && SSB[cpt] == 0.) {
+                SSB[cpt] = seedingBiomass[cpt];
             }
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
-            double nEgg = sexRatio.get(i) * beta.get(i) * season * SSB.get(i) * 1000000;
+            double nEgg = sexRatio[cpt] * beta[cpt] * season * SSB[cpt] * 1000000;
             // lay age class zero
-            int nSchool = getConfiguration().getNSchool(i);
+            int nSchool = getConfiguration().getNSchool(cpt);
             // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
             //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
             if (nEgg == 0.d) {
@@ -203,13 +198,13 @@ public class ReproductionProcess extends AbstractProcess {
                     getSchoolSet().add(school0);
                 }
             }
-        }
+        }  // end of focal species loop
     }
 
     protected double getSeason(int iStepSimu, Species species) {
 
-        int iSpec = species.getIndex();
-        int length = seasonSpawning.get(iSpec).length;
+        int iSpec = species.getSpeciesIndex();
+        int length = seasonSpawning[iSpec].length;
         int iStep;
         if (length > getConfiguration().getNStepYear()) {
             iStep = iStepSimu;
@@ -218,15 +213,15 @@ public class ReproductionProcess extends AbstractProcess {
         } else {
             iStep = getSimulation().getIndexTimeYear();
         }
-        return seasonSpawning.get(iSpec)[iStep];
+        return seasonSpawning[iSpec][iStep];
     }
 
     public double getSeedingBiomass(int i) {
-        return this.seedingBiomass.get(i);
+        return this.seedingBiomass[i];
     }
 
     public double getSexRatio(int i) {
-        return this.sexRatio.get(i);
+        return this.sexRatio[i];
     }
 
     public int getYearSeading() {
@@ -234,7 +229,7 @@ public class ReproductionProcess extends AbstractProcess {
     }
 
     public double getBeta(int i) {
-        return this.beta.get(i);
+        return this.beta[i];
     }
 
 }

@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
@@ -60,10 +50,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.ArrayUtils;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -89,11 +77,11 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
     /**
      * Resource biomass array at the beginning of the time step.
      */
-    private HashMap<Integer, double[][]> rscBiomass0;
+    private double[][][] rscBiomass0;
     /**
      * Resource biomass array after predation process.
      */
-    private HashMap<Integer, double[][]> rscBiomass1;
+    private double[][][] rscBiomass1;
     
     private int index;
     private Variable timeVar, rscBiomVar, rscBiomPredVar, lonVar, latVar;
@@ -104,6 +92,9 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void init() {
+        int nRsc = this.getNRscSpecies();
+        this.rscBiomass0 = new double[nRsc][][];
+        this.rscBiomass1 = new double[nRsc][][];
         String filename = getFilename();
         IOTools.makeDirectories(filename);
         createNCFile(filename);
@@ -130,43 +121,50 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void reset() {
+        int nRsc = this.getNRscSpecies();
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
-        rscBiomass0.clear();
-        rscBiomass1.clear();
-        for (int i : getConfiguration().getRscIndex()) {
-            rscBiomass0.put(i, new double[ny][nx]);
-            rscBiomass1.put(i, new double[ny][nx]);
+        this.rscBiomass0 = new double[nRsc][][];
+        this.rscBiomass1 = new double[nRsc][][];
+        for (int cpt = 0; cpt < nRsc; cpt++) {
+            rscBiomass0[cpt] = new double[ny][nx];
+            rscBiomass1[cpt] = new double[ny][nx];
         }
     }
 
     @Override
     public void update() {
-
+        int nRsc = this.getNRscSpecies();
+        int nSpecies = this.getNSpecies();
+        int nBkg = this.getNBkgSpecies();
+        int offset = nBkg + nSpecies;
         // Loop over the cells
         for (Cell cell : getGrid().getCells()) {
             if (!(cell.isLand())) {
                 // Preyed biomass for every resource group in current cell
-                HashMap<Integer, Double> preyedResources = new HashMap();
+                double[] preyedResources = new double[nRsc];
+
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         for (Prey prey : school.getPreys()) {
-                            int iRsc = prey.getSpeciesIndex();                           
-                            if (ArrayUtils.contains(this.getConfiguration().getRscIndex(), iRsc)) {
-                                double val = (null ==  preyedResources.get(iRsc)) ? prey.getBiomass() : preyedResources.get(iRsc) + prey.getBiomass();
-                                preyedResources.put(iRsc, val);
+                            int iRsc = prey.getSpeciesIndex();
+                            if (iRsc >= offset) {
+                                // check that we are attacking a resource species
+                                preyedResources[iRsc - offset] += prey.getBiomass();
                             }
                         }
                     }
                 }
-                
+
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                for (int iRsc : getConfiguration().getRscIndex()) {
+                int nBackground = this.getNBkgSpecies();
+                for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
                     // rscBiomass0 is the resource biomass at the beginning of the time step
-                    rscBiomass0.get(iRsc)[j][i] = getSimulation().getResourceForcing(iRsc).getBiomass(cell);
+                    // adding an offset, since resourceForcing starts with bkgSpecies
+                    rscBiomass0[cpt][j][i] = getSimulation().getResourceForcing(cpt + nBackground).getBiomass(cell);
                     // rscBiomass1 is the resource biomass remaining in the water column after the predation process
-                    rscBiomass1.get(iRsc)[j][i] = rscBiomass0.get(iRsc)[j][i] - preyedResources.get(iRsc);
+                    rscBiomass1[cpt][j][i] = rscBiomass0[cpt][j][i] - preyedResources[cpt];
                 }
             }
         }
@@ -181,25 +179,22 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
             // Set _FillValue on land cells
             if (cell.isLand()) {
                 for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
-                    rscBiomass0.get(iRsc)[j][i] = FILLVALUE;
-                    rscBiomass1.get(iRsc)[j][i] = FILLVALUE;
+                    rscBiomass0[iRsc][j][i] = FILLVALUE;
+                    rscBiomass1[iRsc][j][i] = FILLVALUE;
                 }
             }
         }
 
         // Write into NetCDF file
-        int cpt = 0;
         ArrayFloat.D4 arrRsc0 = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
         ArrayFloat.D4 arrRsc1 = new ArrayFloat.D4(1, getConfiguration().getNRscSpecies(), getGrid().get_ny(), getGrid().get_nx());
-        int nl = getGrid().get_ny() - 1;
         for (int iRsc = 0; iRsc < getConfiguration().getNRscSpecies(); iRsc++) {
             for (int j = 0; j < getGrid().get_ny(); j++) {
                 for (int i = 0; i < getGrid().get_nx(); i++) {
-                    arrRsc0.set(0, cpt, j, i, (float) rscBiomass0.get(iRsc)[j][i]);
-                    arrRsc1.set(0, cpt, j, i, (float) rscBiomass1.get(iRsc)[j][i]);
+                    arrRsc0.set(0, iRsc, j, i, (float) rscBiomass0[iRsc][j][i]);
+                    arrRsc1.set(0, iRsc, j, i, (float) rscBiomass1[iRsc][j][i]);
                 }
             }
-            cpt++;
         }
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);

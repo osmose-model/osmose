@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,31 +16,27 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose.process.mortality;
 
@@ -56,7 +45,7 @@ import fr.ird.osmose.Cell;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
 import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.fishery.FisheryFBase;
+import fr.ird.osmose.process.mortality.fishery.FisheryBase;
 import fr.ird.osmose.process.mortality.fishery.FisheryPeriod;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
@@ -64,9 +53,7 @@ import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
 import fr.ird.osmose.util.Matrix;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,57 +68,59 @@ public class FishingGear extends AbstractMortality {
     /**
      * Fishery index.
      */
-    private final int fIndex;
+    private final int fileFisheryIndex;
 
     // Initialize the time varying array
-    private FisheryFBase fBase;
-    private FisheryPeriod fPeriod;
-    private FisherySeasonality fSeasonality;
+    private FisheryBase fishingBase;
+    private FisheryPeriod fishingPeriod;
+    private FisherySeasonality fishingSeasonality;
 
     /**
      * Fishery map set.
      */
-    private FisheryMapSet fMapSet;
+    private FisheryMapSet fisheryMapSet;
 
-    private HashMap<Integer, Double> catchability;
-    private HashMap<Integer, Double> discards;
+    private double[] catchability;
+    private double[] discards;
 
     private FisherySelectivity selectivity;
     private boolean checkFisheryEnabled;
 
-    public FishingGear(int rank, int findex) {
+    public FishingGear(int rank, int fisheryIndex) {
         super(rank);
-        fIndex = findex;
+        this.fileFisheryIndex = fisheryIndex;
     }
 
     @Override
     public void init() {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
+        int nspecies = cfg.getNSpecies();
+        int nbackground = cfg.getNBkgSpecies();
 
-        catchability = new HashMap();
-        discards = new HashMap();
+        catchability = new double[nspecies + nbackground];
+        discards = new double[nspecies + nbackground];
 
         // set-up the name of the fishery
-        name = cfg.getString("fisheries.name.fsh" + fIndex);
+        name = cfg.getString("fisheries.name.fsh" + fileFisheryIndex);
 
         checkFisheryEnabled = cfg.getBoolean("fisheries.check.enabled");
 
         // Initialize the time varying array
-        fBase = new FisheryFBase(fIndex);
-        fBase.init();
+        fishingBase = new FisheryBase(fileFisheryIndex);
+        fishingBase.init();
 
-        fPeriod = new FisheryPeriod(fIndex);
-        fPeriod.init();
+        fishingPeriod = new FisheryPeriod(fileFisheryIndex);
+        fishingPeriod.init();
 
-        fSeasonality = new FisherySeasonality(fIndex);
-        fSeasonality.init();
+        fishingSeasonality = new FisherySeasonality(fileFisheryIndex);
+        fishingSeasonality.init();
 
         // fishery spatial maps
-        fMapSet = new FisheryMapSet(name, "fisheries.movement", "fishery");
-        fMapSet.init();
+        fisheryMapSet = new FisheryMapSet(name, "fisheries.movement", "fishery");
+        fisheryMapSet.init();
 
-        selectivity = new FisherySelectivity(fIndex, "fisheries.selectivity", "fsh");
+        selectivity = new FisherySelectivity(fileFisheryIndex, "fisheries.selectivity", "fsh");
         selectivity.init();
 
         if (checkFisheryEnabled) {
@@ -159,23 +148,23 @@ public class FishingGear extends AbstractMortality {
         // Recovers the school cell (used to recover the map factor)
         Cell cell = school.getCell();
 
-        double spatialSelect = this.fMapSet.getValue(index, cell);
+        double spatialSelect = this.fisheryMapSet.getValue(index, cell);
         if (spatialSelect == 0.0) {
             return 0.0;
         }
 
         int speciesIndex = school.getSpeciesIndex();
 
-        double speciesCatchability = this.catchability.get(speciesIndex);
+        double speciesCatchability = this.catchability[speciesIndex];
         if (speciesCatchability == 0.d) {
             return 0.d;
         }
 
         // recovers the time varying rate of the fishing mortality
         // as a product of FBase, FSeason and FSeasonality
-        double timeSelect = fBase.getFBase(index);
-        timeSelect *= this.fPeriod.getSeasonFishMort(index);
-        timeSelect *= this.fSeasonality.getSeasonalityFishMort(index);
+        double timeSelect = fishingBase.getFisheryBase(index);
+        timeSelect *= this.fishingPeriod.getFisheryPeriod(index);
+        timeSelect *= this.fishingSeasonality.getFisherySeasonality(index);
 
         // Recovers the size/age fishery selectivity factor [0, 1]
         double sizeSelect = selectivity.getSelectivity(index, school);
@@ -192,7 +181,7 @@ public class FishingGear extends AbstractMortality {
      */
     public double getDiscardRate(AbstractSchool school) {
         int speciesIndex = school.getSpeciesIndex();
-        return this.discards.get(speciesIndex);
+        return this.discards[speciesIndex];
     }
 
     /**
@@ -200,8 +189,8 @@ public class FishingGear extends AbstractMortality {
      *
      * @return the fishery index
      */
-    public int getFIndex() {
-        return this.fIndex;
+    public int getFisheryIndex() {
+        return this.fileFisheryIndex;
     }
 
     /**
@@ -256,9 +245,9 @@ public class FishingGear extends AbstractMortality {
 
         for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
 
-            double fbase = this.fBase.getFBase(i);
-            double fseason = this.fPeriod.getSeasonFishMort(i);
-            double fseasonality = this.fSeasonality.getSeasonalityFishMort(i);
+            double fbase = this.fishingBase.getFisheryBase(i);
+            double fseason = this.fishingPeriod.getFisheryPeriod(i);
+            double fseasonality = this.fishingSeasonality.getFisherySeasonality(i);
             double ftot = fbase * fseason * fseasonality;
 
             prw.print(i);
@@ -296,37 +285,23 @@ public class FishingGear extends AbstractMortality {
     public void setCatchability(Matrix matrix) {
 
         int fishIndex = matrix.getIndexPred(this.name);
-
-        for (int i : this.getConfiguration().getFocalIndex()) {
-            String speciesName = getConfiguration().getSpecies(i).getName();
+        int nTot = this.getNSpecies() + this.getNBkgSpecies();
+        for (int cpt = 0; cpt < nTot; cpt++) {
+            String speciesName = getISpecies(cpt).getName();
             int speciesIndex = matrix.getIndexPrey(speciesName);
-            catchability.put(i, matrix.getValue(speciesIndex, fishIndex));
+            catchability[cpt] = matrix.getValue(speciesIndex, fishIndex);
         }
-
-        for (int i : this.getConfiguration().getBkgIndex()) {
-            String speciesName = getConfiguration().getBkgSpecies(i).getName();
-            int speciesIndex = matrix.getIndexPrey(speciesName);
-            catchability.put(i, matrix.getValue(speciesIndex, fishIndex));
-        }
-
     }
 
     public void setDiscards(Matrix matrix) {
 
         int fishIndex = matrix.getIndexPred(this.name);
-
-        for (int i : this.getConfiguration().getFocalIndex()) {
-            String speciesName = getConfiguration().getSpecies(i).getName();
+        int nTot = this.getNSpecies() + this.getNBkgSpecies();
+        for (int cpt = 0; cpt < nTot; cpt++) {
+            String speciesName = getISpecies(cpt).getName();
             int speciesIndex = matrix.getIndexPrey(speciesName);
-            discards.put(i, matrix.getValue(speciesIndex, fishIndex));
+            discards[cpt] = matrix.getValue(speciesIndex, fishIndex);
         }
-
-        for (int i : this.getConfiguration().getBkgIndex()) {
-            String speciesName = getConfiguration().getBkgSpecies(i).getName();
-            int speciesIndex = matrix.getIndexPrey(speciesName);
-            discards.put(i, matrix.getValue(speciesIndex, fishIndex));
-        }
-
     }
 
 }

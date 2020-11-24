@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,53 +16,60 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose.background;
 
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.Osmose;
-import fr.ird.osmose.util.OsmoseLinker;     
+import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
 import java.io.IOException;
 import ucar.ma2.InvalidRangeException;
+import fr.ird.osmose.ISpecies;
 
 /**
  *
  * @author nbarrier
  */
-public class BackgroundSpecies extends OsmoseLinker {
+public class BackgroundSpecies extends OsmoseLinker implements ISpecies {
 
 ///////////////////////////////
 // Declaration of the variables
 ///////////////////////////////
+    
+    private interface Proportion {
+        double getProportion(int iClass, int step);
+    }
+    
+    
+    private final Proportion proportion;
+       
+    
     /**
      * Index of the species. [0 : number of background - 1]
      */
-    private final int index;
+    private final int fileindex;
 
     /**
      * Name of the species. Parameter <i>species.name.sp#</i>
@@ -100,100 +100,137 @@ public class BackgroundSpecies extends OsmoseLinker {
 
     private final int nClass;
 
+    private final ByClassTimeSeries timeSeries;
+
+    private final int index;
+    private final int offset;
+
     /**
      * Constructor of background species.
      *
+     * @param fileindex
      * @param index
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
-    public BackgroundSpecies(int index) throws IOException, InvalidRangeException {
+    public BackgroundSpecies(int fileindex, int index) throws IOException, InvalidRangeException {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
 
+        boolean isOk = true;
+        String message = "";
+
+        this.offset = cfg.getNSpecies();
+        this.index = index + this.offset;
+
         // Initialiaze the index of the Background species
-        this.index = index;
+        this.fileindex = fileindex;
 
         // Initialization of parameters
-        name = cfg.getString("species.name.sp" + index);
+        name = cfg.getString("species.name.sp" + fileindex);
 
-        nClass = cfg.getInt("species.nclass.sp" + index);
+        nClass = cfg.getInt("species.nclass.sp" + fileindex);
 
         // Reads allometric variables to obtain weight from size
-        c = cfg.getFloat("species.length2weight.condition.factor.sp" + index);
-        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + index);
+        c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileindex);
+        bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileindex);
 
-        //trophicLevel = cfg.getFloat("species.trophiclevel.sp" + index);
-        trophicLevel = cfg.getArrayFloat("species.trophic.level.sp" + index);
+        trophicLevel = cfg.getArrayFloat("species.trophic.level.sp" + fileindex);
 
-        // Proportion of the different size classes
-        classProportion = cfg.getArrayFloat("species.size.proportion.sp" + index);
-
-        age = cfg.getArrayFloat("species.age.sp" + index);
+        age = cfg.getArrayFloat("species.age.sp" + fileindex);
         ageDt = new int[age.length];
         for (int i = 0; i < age.length; i++) {
             ageDt[i] = (int) age[i] * getConfiguration().getNStepYear();
         }
 
-        // Get the array of species length
-        length = cfg.getArrayFloat("species.length.sp" + index);
+        if (cfg.canFind("species.size.proportion.file.sp" + fileindex)) {
 
-        boolean isOk = true;
-        String message = "";
+            String filename = cfg.getFile("species.size.proportion.file.sp" + fileindex);
+            this.timeSeries = new ByClassTimeSeries();
+            this.timeSeries.read(filename);
+            length = this.timeSeries.getClasses();
+            this.classProportion = null;
+            proportion = (iClass, i) -> this.proportionFile(iClass, i);
+
+        } else {
+
+            this.timeSeries = null;
+
+            // Proportion of the different size classes
+            classProportion = cfg.getArrayFloat("species.size.proportion.sp" + fileindex);
+            // Get the array of species length
+            length = cfg.getArrayFloat("species.length.sp" + fileindex);
+
+            if (classProportion.length != nClass) {
+                message = String.format("Length of species.size.proportion.sp%d is "
+                        + "not consistent with species.nclass.cp%d", fileindex, fileindex);
+                isOk = false;
+            }
+
+            // check that the classProportion sums to 1.
+            float sum = 0.f;
+            for (int i = 0; i < classProportion.length; i++) {
+                sum += classProportion[i];
+            }
+
+            if (sum != 1.f) {
+                message = String.format("species.size.proportion.sp%d must sum to 1.0", fileindex);
+                isOk = false;
+            }
+            
+            proportion = (iClass, i) -> this.proportionConst(iClass, i);
+
+        }
 
         if (trophicLevel.length != nClass) {
             message = String.format("Length of species.trophic.level.sp%d is "
-                    + "not consistent with species.nclass.cp%d", index, index);
+                    + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (age.length != nClass) {
             message = String.format("Length of species.age.sp%d is "
-                    + "not consistent with species.nclass.cp%d", index, index);
-            isOk = false;
-        }
-
-        if (classProportion.length != nClass) {
-            message = String.format("Length of species.size.proportion.sp%d is "
-                    + "not consistent with species.nclass.cp%d", index, index);
+                    + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
         }
 
         if (length.length != nClass) {
             message = String.format("Length of species.length.sp%d is "
-                    + "not consistent with species.nclass.cp%d", index, index);
+                    + "not consistent with species.nclass.cp%d", fileindex, fileindex);
             isOk = false;
-        }
-        
-        // check that the classProportion sums to 1.
-        float sum = 0.f;
-        for (int i = 0; i < classProportion.length; i++) {
-            sum += classProportion[i];
         }
 
-        if (sum != 1.f) {
-            message = String.format("species.size.proportion.sp%d must sum to 1.0", index);
-            isOk = false;
-        }
-        
-        if(!isOk) {
+        if (!isOk) {
             error(message, new IOException());
         }
 
     }
 
+    /** Get the species index as defined in the file.
+     * 
+     * @return 
+     */
+    @Override
+    public int getFileSpeciesIndex() {
+        return this.fileindex;
+    }
+
     /**
-     * Returns the index of the background species.
+     * Return the global index of the species.
+     *
+     * Index between [Nsp, Nbkg - 1] if applyOffset is True
      *
      * @return
      */
-    public int getIndex() {
+    @Override
+    public int getSpeciesIndex() {
         return this.index;
     }
 
     /**
      * Returns the trophic level of the current background species.
      *
+     * @param iClass
      * @todo Do this by class?
      * @return
      */
@@ -217,6 +254,7 @@ public class BackgroundSpecies extends OsmoseLinker {
      *
      * @return The species name
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -225,7 +263,40 @@ public class BackgroundSpecies extends OsmoseLinker {
         return this.length[iClass];
     }
 
-    public float getProportion(int iClass) {
+    /** Get the class proportion of a given class at 
+     * a given step.
+     * 
+     * Call a different method depending on whether constant
+     * of by-class time series are provided.
+     * 
+     * @param iClass
+     * @param step
+     * @return 
+     */
+    public double getProportion(int iClass, int step) {
+        return proportion.getProportion(iClass, step);
+    }
+    
+    /**
+     * Returns the proportion of a given class if varying over time.
+     * 
+     * Must be defined in a {@link ByClassTimeSeries()} object.
+     *
+     * @param iClass
+     * @param step Time step (not used)
+     * @return
+     */
+    private double proportionFile(int iClass, int step) {
+        return this.timeSeries.getValue(step, iClass);
+    }
+
+    /** Returns the proportion of a given class if constant over time.
+     * 
+     * @param iClass
+     * @param step Time step (not used)
+     * @return 
+     */
+    private double proportionConst(int iClass, int step) {
         return this.classProportion[iClass];
     }
 
@@ -236,7 +307,7 @@ public class BackgroundSpecies extends OsmoseLinker {
     public int getAgeDt(int iClass) {
         return this.ageDt[iClass];
     }
-    
+
     public int getNClass() {
         return this.nClass;
     }

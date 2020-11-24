@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.util.io.IOTools;
@@ -57,7 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.ArrayFloat;
@@ -95,8 +84,8 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
      * Array containing the fisheries catches by species and by fisheries.
      * Output has (species, fisheries) dimensions.
      */
-    private HashMap<Integer, float[]> biomass;
-    private HashMap<Integer, float[]> discards;
+    private double[][] biomass;
+    private double[][] discards;
 
     public FisheryOutput(int rank) {
         super(rank);
@@ -108,17 +97,10 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
 
         // initializes the number of fisheries
         nFishery = getConfiguration().getNFishery();
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+        biomass = new double[nSpecies][nFishery];
+        discards = new double[nSpecies][nFishery];
 
-        biomass = new HashMap();
-        for (int i : getConfiguration().getFishIndex()) {
-            biomass.put(i, new float[nFishery]);
-        }
-
-        discards = new HashMap();
-        for (int i : getConfiguration().getFishIndex()) {
-            discards.put(i, new float[nFishery]);
-        }
-        
         /*
          * Create NetCDF file
          */
@@ -196,14 +178,9 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
      */
     @Override
     public void reset() {
-
-        for (int i : getConfiguration().getFishIndex()) {
-            biomass.put(i, new float[nFishery]);
-        }
-
-        for (int i : getConfiguration().getFishIndex()) {
-            discards.put(i, new float[nFishery]);
-        }
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+        biomass = new double[nSpecies][nFishery];
+        discards = new double[nSpecies][nFishery];
     }
 
     @Override
@@ -212,25 +189,19 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         getSchoolSet().getAliveSchools().forEach((school) -> {
             int iSpecies = school.getSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                double value = biomass.get(iSpecies)[iFishery] + school.getFishedBiomass(iFishery);
-                biomass.get(iSpecies)[iFishery] = (float) value;
-                                
-                value = discards.get(iSpecies)[iFishery] + school.getDiscardedBiomass(iFishery);
-                discards.get(iSpecies)[iFishery] = (float) value;
+                biomass[iSpecies][iFishery] += school.getFishedBiomass(iFishery);                                
+                discards[iSpecies][iFishery] += school.getDiscardedBiomass(iFishery);
             }
         });
 
         this.getBkgSchoolSet().getAllSchools().forEach((bkgSch) -> {
             int iSpecies = bkgSch.getSpeciesIndex();
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                double value = biomass.get(iSpecies)[iFishery] + bkgSch.getFishedBiomass(iFishery);
-                biomass.get(iSpecies)[iFishery] = (float) value;
-                
-                value = discards.get(iSpecies)[iFishery] + bkgSch.getDiscardedBiomass(iFishery);
-                discards.get(iSpecies)[iFishery] = (float) value;
-                
+                biomass[iSpecies][iFishery] += bkgSch.getFishedBiomass(iFishery);
+                discards[iSpecies][iFishery] += bkgSch.getDiscardedBiomass(iFishery);
             }
-        });
+        }
+        );
 
     }
 
@@ -242,13 +213,11 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         int nBackground = this.getNBkgSpecies();
         ArrayFloat.D3 arrBiomass = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
         ArrayFloat.D3 arrDiscards = new ArrayFloat.D3(1, nSpecies + nBackground, nFishery);
-        int cpt = 0;
-        for (int iSpecies : getConfiguration().getFishIndex()) {
+        for (int iSpecies = 0; iSpecies < nSpecies + nBackground; iSpecies++) {
             for (int iFishery = 0; iFishery < nFishery; iFishery++) {
-                arrBiomass.set(0, cpt, iFishery, biomass.get(iSpecies)[iFishery]);
-                arrDiscards.set(0, cpt, iFishery, discards.get(iSpecies)[iFishery]);
+                arrBiomass.set(0, iSpecies, iFishery, (float) biomass[iSpecies][iFishery]);
+                arrDiscards.set(0, iSpecies, iFishery, (float) discards[iSpecies][iFishery]);
             }
-            cpt++;
         }
 
         ArrayFloat.D1 arrTime = new ArrayFloat.D1(1);
@@ -290,13 +259,15 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
     private String getSpeciesNames() {
         StringBuilder strBuild = new StringBuilder();
 
-        for (int i : this.getConfiguration().getFocalIndex()) {
-            strBuild.append(getSpecies(i).getName());
+        int cpt = 0;
+        for (cpt = 0; cpt < this.getNSpecies(); cpt++) {
+            strBuild.append(getSpecies(cpt).getName());
             strBuild.append(", ");
         }
-
-        for (int i : this.getConfiguration().getBkgIndex()) {
-            strBuild.append(getBkgSpecies(i).getName());
+        
+        cpt = 0;
+        for (cpt = 0; cpt < this.getNBkgSpecies(); cpt++) {
+            strBuild.append(getBkgSpecies(cpt).getName());
             strBuild.append(", ");
         }
 

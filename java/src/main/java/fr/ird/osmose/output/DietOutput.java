@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.School;
@@ -93,7 +83,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
 
     @Override
     public void reset() {
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + this.getConfiguration().getNBkgSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies();
         diet = new double[nSpec][][][];
         abundanceStage = new double[nSpec][];
@@ -109,9 +99,9 @@ public class DietOutput extends SimulationLinker implements IOutput {
                     } else {
                         diet[iSpec][iStage][iPrey] = new double[1];
                     }
-                }
+                }  /// end of loop over preys
             }
-        }
+        }  // end of loop over predators
     }
 
     @Override
@@ -123,7 +113,8 @@ public class DietOutput extends SimulationLinker implements IOutput {
             if (preyedBiomass > 0) {
                 abundanceStage[iSpec][dietOutputStage.getStage(school)] += school.getAbundance();
                 for (Prey prey : school.getPreys()) {
-                    diet[iSpec][dietOutputStage.getStage(school)][prey.getSpeciesIndex()][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
+                    int iPrey = prey.getSpeciesIndex();
+                    diet[iSpec][dietOutputStage.getStage(school)][iPrey][dietOutputStage.getStage(prey)] += school.getAbundance() * prey.getBiomass() / preyedBiomass;
                 }
             }
         }
@@ -132,7 +123,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
     @Override
     public void write(float time) {
 
-        int nSpec = getConfiguration().getNSpecies();
+        int nSpec = getConfiguration().getNSpecies() + this.getNBkgSpecies();
 //        double[][] sum = new double[getNSpecies()][];
 //        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
 //            sum[iSpec] = new double[nDietStage[iSpec]];
@@ -140,7 +131,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
 
         // Write the step in the file
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStagePred = dietOutputStage.getNStage(iSpec);
             for (int st = 0; st < nStagePred; st++) {
@@ -169,20 +160,22 @@ public class DietOutput extends SimulationLinker implements IOutput {
                             prw.print(separator);
                         }
                     }
-                }
+                }  // end of loop over focal/bkg species as preds.
                 prw.println();
             }
-        }
-        for (int j = nSpec; j < (nSpec + getConfiguration().getNRscSpecies()); j++) {
+        }  // loop of focal/background species as prey. 
+        
+        // Loop over the resource species, only as prey
+        for (int j = 0; j < getConfiguration().getNRscSpecies(); j++) {
             prw.print(time);
             prw.print(separator);
-            prw.print(getConfiguration().getResourceSpecies(j - nSpec));
+            prw.print(getConfiguration().getResourceSpecies(j).getName());
             prw.print(separator);
             for (int i = 0; i < nSpec; i++) {
                 int nStagePred = dietOutputStage.getNStage(i);
                 for (int s = 0; s < nStagePred; s++) {
                     if (abundanceStage[i][s] > 0) {
-                        float val = (float) (100.d * diet[i][s][j][0] / abundanceStage[i][s]);
+                        float val = (float) (100.d * diet[i][s][j + nSpec][0] / abundanceStage[i][s]);
                         String sval = Float.isInfinite(val)
                                 ? "Inf"
                                 : Float.toString(val);
@@ -195,7 +188,7 @@ public class DietOutput extends SimulationLinker implements IOutput {
                         prw.print(separator);
                     }
                 }
-            }
+            }  // loop over background + focal species as pred.
             prw.println();
         }
 //        prw.print(";sum;");
@@ -241,8 +234,9 @@ public class DietOutput extends SimulationLinker implements IOutput {
             prw.print(quote("Time"));
             prw.print(separator);
             prw.print(quote("Prey"));
-            for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-                String name = getSpecies(iSpec).getName();
+            int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+            for (int iSpec = 0; iSpec < nSpecies; iSpec++) {
+                String name = getISpecies(iSpec).getName();
                 float[] threshold = dietOutputStage.getThresholds(iSpec);
                 int nStage = dietOutputStage.getNStage(iSpec);
                 for (int iStage = 0; iStage < nStage; iStage++) {
@@ -256,10 +250,10 @@ public class DietOutput extends SimulationLinker implements IOutput {
                             prw.print(quote(name + " >=" + threshold[iStage - 1]));    // Name predators
                         }
                     }
-                }
-            }
+                }   // end of loop over stage
+            }  // loop over predators (focal + bkg)
             prw.println();
-        }
+        }  // end of file existence test
     }
 
     @Override

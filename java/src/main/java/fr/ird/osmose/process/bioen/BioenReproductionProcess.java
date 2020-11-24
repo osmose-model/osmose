@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,39 +16,34 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.process.bioen;
 
 import fr.ird.osmose.process.*;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import java.util.HashMap;
-
 import java.util.List;
 
 /**
@@ -85,44 +73,43 @@ public class BioenReproductionProcess extends ReproductionProcess {
     @Override
     public void run() {
         
+        int nSpecies = this.getNSpecies();
+        
         // spawning stock biomass per species
-        HashMap<Integer, Double> SSB = new HashMap();
-        for (int i : getConfiguration().getFocalIndex()) {
-            SSB.put(i, 0.);
-        }
-
+        double[] SSB = new double[nSpecies];
+    
         // loop over all the schools to compute 
         for (School school : getSchoolSet().getSchools()) {
 
             int i = school.getSpeciesIndex();
             if (school.isMature()) {
-                double value = SSB.get(i) + school.getInstantaneousBiomass();
-                SSB.put(i, value);
+               SSB[i] += school.getInstantaneousBiomass();
             }
             // increment age
             school.incrementAge();
         }
 
         // loop over the species to lay cohort at age class 0
-        for (int i : getConfiguration().getFocalIndex()) {
-
+        for (int cpt = 0; cpt < this.getNSpecies(); cpt++) {
+            
             // Recover the species object and all the schools of the given species
-            Species species = getSpecies(i);
+            Species species = getSpecies(cpt);
+            
             List<School> schoolset = getSchoolSet().getSchools(species);
-            WeightedRandomDraft weight_rand = new WeightedRandomDraft();
+            WeightedRandomDraft<School> weight_rand = new WeightedRandomDraft<>();
             
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
 
-            if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB.get(i) == 0.) {
+            if (getSimulation().getIndexTimeSimu() < this.getYearSeading() && SSB[cpt] == 0.) {
                 // seeding process for collapsed species
                 // if seeding biomass is 0 (no mature indivials, release eggs in the
                 // old fashioned way.
-                SSB.put(i, this.getSeedingBiomass(i));
-                double nEgg = this.getSexRatio(i) * this.getBeta(i) * season * SSB.get(i) * 1000000;
+                SSB[cpt] = this.getSeedingBiomass(cpt);
+                double nEgg = this.getSexRatio(cpt) * this.getBeta(cpt) * season * SSB[cpt] * 1000000;
 
                 // in this case, weight_rand is never used.
-                this.create_reproduction_schools(i, nEgg, true, weight_rand);
+                this.create_reproduction_schools(cpt, nEgg, true, weight_rand);
 
             } else {
 
@@ -147,18 +134,19 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     // divided by the egg weight.
                     // barrier.n: change in conversion from tone to gram
                     // since EggWeight is in g.
-                    double nEgg = wEgg * this.getSexRatio(i) / species.getEggWeight() * 1000000 * school.getInstantaneousAbundance();
+                    double nEgg = wEgg * this.getSexRatio(cpt) / species.getEggWeight() * 1000000 * school.getInstantaneousAbundance();
                     negg_tot += nEgg;
                     weight_rand.add(nEgg, school);
                 }  // end of loop over the school that belong to species i    
 
-                this.create_reproduction_schools(i, negg_tot, false, weight_rand);
+                this.create_reproduction_schools(cpt, negg_tot, false, weight_rand);
                 
             }  // end of SSB statement
+            
         }  // end of species loop
     }
 
-    private void create_reproduction_schools(int i, double nEgg, boolean init_genotype, WeightedRandomDraft rand_draft) {
+    private void create_reproduction_schools(int speciesIndex, double nEgg, boolean init_genotype, WeightedRandomDraft<School> rand_draft) {
         // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
         //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
 
@@ -168,8 +156,8 @@ public class BioenReproductionProcess extends ReproductionProcess {
         }
 
         // lay age class zero
-        int nSchool = getConfiguration().getNSchool(i);
-        Species species = getSpecies(i);
+        int nSchool = getConfiguration().getNSchool(speciesIndex);
+        Species species = getSpecies(speciesIndex);
 
         // do nothing, zero school
         if (nEgg < nSchool) {
@@ -179,8 +167,8 @@ public class BioenReproductionProcess extends ReproductionProcess {
             if (init_genotype) {
                 school0.getGenotype().init_genotype();
             } else {
-                School parent_a = (School) rand_draft.next();
-                School parent_b = (School) rand_draft.next();
+                School parent_a = rand_draft.next();
+                School parent_b = rand_draft.next();
                 school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
             }
             getSchoolSet().add(school0);
@@ -192,8 +180,8 @@ public class BioenReproductionProcess extends ReproductionProcess {
                 if (init_genotype) {
                     school0.getGenotype().init_genotype();
                 } else {
-                    School parent_a = (School) rand_draft.next();
-                    School parent_b = (School) rand_draft.next();
+                    School parent_a = rand_draft.next();
+                    School parent_b = rand_draft.next();
                     school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
                 }
                 getSchoolSet().add(school0);

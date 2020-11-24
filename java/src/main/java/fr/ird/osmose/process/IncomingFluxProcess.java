@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,38 +16,34 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
-import java.util.HashMap;
 
 /**
  * This class simulates a flux of individuals (biomass) of given age and length
@@ -123,15 +112,15 @@ public class IncomingFluxProcess extends AbstractProcess {
     /*
      * Flux of incoming biomass in tonne, by dt and by age/size class
      */
-    private HashMap<Integer, double[][]> biomassIn;
+    private double[][][] biomassIn;
     /*
      * Length of incomimg fish, in centimeter, per species and by size/age class
      */
-    private HashMap<Integer, float[]> lengthIn;
+    private float[][] lengthIn;
     /*
      * Age of incoming fish, in number of time steps, per species and by size/age class
      */
-    private  HashMap<Integer,int[]> ageIn;
+    private int[][] ageIn;
 
     public IncomingFluxProcess(int rank) {
         super(rank);
@@ -141,80 +130,88 @@ public class IncomingFluxProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getConfiguration().getNSpecies();
-        biomassIn = new HashMap();
-        lengthIn = new HashMap();
-        ageIn = new HashMap();
+        biomassIn = new double[nSpecies][][];
+        lengthIn = new float[nSpecies][];
+        ageIn = new int[nSpecies][];
         // Call the growth process to be able to calculate meanAgeIn or meanLengthIn
         GrowthProcess growthProcess = new GrowthProcess(getRank());
         growthProcess.init();
-        for (int iSpec : getConfiguration().getFocalIndex()) {
-            if (!getConfiguration().isNull("flux.incoming.byDt.byAge.file.sp" + iSpec)) {
+        int cpt  = 0;
+        for (int fileIndex : getConfiguration().getFocalIndex()) {
+            if (!getConfiguration().isNull("flux.incoming.byDt.byAge.file.sp" + fileIndex)) {
                 ByClassTimeSeries timeSerieByAge = new ByClassTimeSeries();
-                timeSerieByAge.read(getConfiguration().getFile("flux.incoming.byDt.byAge.file.sp" + iSpec));
-                biomassIn.put(iSpec, timeSerieByAge.getValues());
+                timeSerieByAge.read(getConfiguration().getFile("flux.incoming.byDt.byAge.file.sp" + fileIndex));
+                biomassIn[cpt] = timeSerieByAge.getValues();
                 // Read age from file, and set ageIn as the middle of the age classes
-                ageIn.put(iSpec, new int[timeSerieByAge.getNClass()]);
-                for (int iAge = 0; iAge < ageIn.get(iSpec).length - 1; iAge++) {
-                    ageIn.get(iSpec)[iAge] = (int) (getConfiguration().getNStepYear() * (0.5 * (timeSerieByAge.getClass(iAge) + timeSerieByAge.getClass(iAge + 1))));
+                ageIn[cpt] =  new int[timeSerieByAge.getNClass()];
+                for (int iAge = 0; iAge < ageIn[cpt].length - 1; iAge++) {
+                    ageIn[cpt][iAge] = (int) (getConfiguration().getNStepYear() * (0.5 * (timeSerieByAge.getClass(iAge) + timeSerieByAge.getClass(iAge + 1))));
                 }
                 // Last ageIn as the middle of interval between last class and lifespan
-                int lifespan = getSpecies(iSpec).getLifespanDt();
-                ageIn.get(iSpec)[ageIn.get(iSpec).length - 1] = (int) (0.5 * (getConfiguration().getNStepYear() * timeSerieByAge.getClass(ageIn.get(iSpec).length - 1) + lifespan));
+                int lifespan = getSpecies(cpt).getLifespanDt();
+                ageIn[cpt][ageIn[cpt].length - 1] = (int) (0.5 * (getConfiguration().getNStepYear() * timeSerieByAge.getClass(ageIn[cpt].length - 1) + lifespan));
                 // Compute corresponding length in with Von Bertallanfy
-                lengthIn.put(iSpec, new float[timeSerieByAge.getNClass()]);
-                for (int iAge = 0; iAge < ageIn.get(iSpec).length; iAge++) {
-                    double age = ageIn.get(iSpec)[iAge] / (double) getConfiguration().getNStepYear();
-                    lengthIn.get(iSpec)[iAge] = (float) growthProcess.getGrowth(iSpec).ageToLength(age);   
+                lengthIn[cpt] = new float[timeSerieByAge.getNClass()];
+                for (int iAge = 0; iAge < ageIn[cpt].length; iAge++) {
+                    double age = ageIn[cpt][iAge] / (double) getConfiguration().getNStepYear();
+                    lengthIn[cpt][iAge] = (float) growthProcess.getGrowth(cpt).ageToLength(age);   
                 }
-            } else if (!getConfiguration().isNull("flux.incoming.byDt.bySize.file.sp" + iSpec)) {
+            } else if (!getConfiguration().isNull("flux.incoming.byDt.bySize.file.sp" + fileIndex)) {
                 ByClassTimeSeries timeSerieBySize = new ByClassTimeSeries();
-                timeSerieBySize.read(getConfiguration().getFile("flux.incoming.byDt.bySize.file.sp" + iSpec));
-                biomassIn.put(iSpec, timeSerieBySize.getValues());
+                timeSerieBySize.read(getConfiguration().getFile("flux.incoming.byDt.bySize.file.sp" + fileIndex));
+                biomassIn[cpt] = timeSerieBySize.getValues();
                 // Read length from file and set lengthIn as middle of the length classes
-                lengthIn.put(iSpec, new float[timeSerieBySize.getNClass()]);
-                for (int iLength = 0; iLength < lengthIn.get(iSpec).length - 1; iLength++) {
-                    lengthIn.get(iSpec)[iLength] = (float) (0.5 * (timeSerieBySize.getClass(iLength) + timeSerieBySize.getClass(iLength + 1)));
+                lengthIn[cpt] = new float[timeSerieBySize.getNClass()];
+                for (int iLength = 0; iLength < lengthIn[cpt].length - 1; iLength++) {
+                    lengthIn[cpt][iLength] = (float) (0.5 * (timeSerieBySize.getClass(iLength) + timeSerieBySize.getClass(iLength + 1)));
                 }
                 // Last lengthIn as the middle of interval between last class and length infinity
-                float lInf = getConfiguration().getFloat("species.linf.sp" + iSpec);
-                lengthIn.get(iSpec)[lengthIn.get(iSpec).length - 1] = (float) (0.5 * (timeSerieBySize.getClass(lengthIn.get(iSpec).length - 1) + lInf));
+                float lInf = getConfiguration().getFloat("species.linf.sp" + fileIndex);
+                lengthIn[cpt][lengthIn[cpt].length - 1] = (float) (0.5 * (timeSerieBySize.getClass(lengthIn[cpt].length - 1) + lInf));
                 // Compute corresponding age in with Von Bertallanfy
-                ageIn.put(iSpec, new int[timeSerieBySize.getNClass()]);
-                for (int iLength = 0; iLength < ageIn.get(iSpec).length; iLength++) {
-                    double age = growthProcess.getGrowth(iSpec).lengthToAge(lengthIn.get(iSpec)[iLength]);
-                    ageIn.get(iSpec)[iLength] = (int) (age * getConfiguration().getNStepYear());
+                ageIn[cpt] = new int[timeSerieBySize.getNClass()];
+                for (int iLength = 0; iLength < ageIn[cpt].length; iLength++) {
+                    double age = growthProcess.getGrowth(cpt).lengthToAge(lengthIn[cpt][iLength]);
+                    ageIn[cpt][iLength] = (int) (age * getConfiguration().getNStepYear());
                 }
             } else {
                 // Nothing to do, means there is no incoming flux for this species
             }
-        }
+            
+            cpt++;
+            
+        }  // end of species loop
     }
 
     @Override
     public void run() {
         int iTime = getSimulation().getIndexTimeSimu();
-        for (int iSpec : getConfiguration().getFocalIndex()) {
+        
+        // cpt starts at -1 since incremented at the beginning of the loop
+        for (int cpt = 0; cpt < this.getNSpecies(); cpt++) {
+
             // No incoming flux for this species, skip
-            if (biomassIn.get(iSpec) == null) {
+            if (biomassIn[cpt] == null) {
                 continue;
             }
-            Species species = getSpecies(iSpec);
+            
+            Species species = getSpecies(cpt);
             // number of school gets a peculiar meaning here: it is the number
             // of school created per age/size class
             // Should be changed in future to match original meaning
-            int nSchool = getConfiguration().getNSchool(iSpec);
+            int nSchool = getConfiguration().getNSchool(cpt);
             // Loop over age/size class
-            for (int iClass = 0; iClass < biomassIn.get(iSpec)[iTime].length; iClass++) {
+            for (int iClass = 0; iClass < biomassIn[cpt][iTime].length; iClass++) {
                 // Compute corresponding weight to estimate abundance from biomassIn
-                float meanWeigthIn = (float) species.computeWeight(lengthIn.get(iSpec)[iClass]);
-                long abundanceIn = (long) Math.round(biomassIn.get(iSpec)[iTime][iClass] * 1000000.d / meanWeigthIn);
+                float meanWeigthIn = (float) species.computeWeight(lengthIn[cpt][iClass]);
+                long abundanceIn = (long) Math.round(biomassIn[cpt][iTime][iClass] * 1000000.d / meanWeigthIn);
                 // Abundance smaller than number of schools, then create only one school
                 if (abundanceIn > 0 && abundanceIn < nSchool) {
-                    getSchoolSet().add(new School(species, abundanceIn, lengthIn.get(iSpec)[iClass], meanWeigthIn, ageIn.get(iSpec)[iClass]));
+                    getSchoolSet().add(new School(species, abundanceIn, lengthIn[cpt][iClass], meanWeigthIn, ageIn[cpt][iClass]));
                 } else if (abundanceIn >= nSchool) {
                     double abdSchool = abundanceIn / nSchool;
                     for (int s = 0; s < nSchool; s++) {
-                        getSchoolSet().add(new School(species, abdSchool, lengthIn.get(iSpec)[iClass], meanWeigthIn, ageIn.get(iSpec)[iClass]));
+                        getSchoolSet().add(new School(species, abdSchool, lengthIn[cpt][iClass], meanWeigthIn, ageIn[cpt][iClass]));
                     }
                 }
             }

@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.process.movement;
 
 import fr.ird.osmose.Cell;
@@ -71,6 +61,7 @@ import ucar.ma2.InvalidRangeException;
 public class MapDistribution extends AbstractDistribution {
 
     private final int iSpecies;
+    private final int iSpeciesFile;
     private Random rd1, rd2, rd3;
     private MapSet maps;
     private float[] maxProbaPresence;
@@ -79,8 +70,9 @@ public class MapDistribution extends AbstractDistribution {
      */
     private int range;
 
-    public MapDistribution(int species) {
-        this.iSpecies = species;
+    public MapDistribution(int iSpeciesFile, int iSpecies) {
+        this.iSpeciesFile = iSpeciesFile;
+        this.iSpecies = iSpecies;
     }
 
     @Override
@@ -101,7 +93,7 @@ public class MapDistribution extends AbstractDistribution {
             rd3 = new Random();
         }
 
-        maps = new MapSet(iSpecies, "movement");
+        maps = new MapSet(iSpeciesFile, iSpecies, "movement");
         try {
             maps.init();
         } catch (IOException | InvalidRangeException ex) {
@@ -116,8 +108,8 @@ public class MapDistribution extends AbstractDistribution {
             }
         }
 
-        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpecies)) {
-            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpecies);
+        if (!getConfiguration().isNull("movement.randomwalk.range.sp" + iSpeciesFile)) {
+            range = getConfiguration().getInt("movement.randomwalk.range.sp" + iSpeciesFile);
         } else {
             range = 1;
         }
@@ -205,7 +197,7 @@ public class MapDistribution extends AbstractDistribution {
             str.append("It is not in the geographical area it is supposed to be...");
             warning(str.toString());
         }
-        List<Cell> accessibleCells = new ArrayList();
+        List<Cell> accessibleCells = new ArrayList<>();
         // 1. Get all surrounding cells
         Iterator<Cell> neighbours = getGrid().getNeighbourCells(cell, range).iterator();
         while (neighbours.hasNext()) {

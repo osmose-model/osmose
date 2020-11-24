@@ -1,3 +1,6 @@
+^.*\.sh$
+^.*\.tar\.gz$
+^\.github$
 ^.*\.Rproj$
 ^.*\.RData$
 ^\.Rproj\.user$
@@ -22,4 +25,6 @@ cran-comments.md
 ^R/osmose2R\.R$
 ^data-raw$
 ^inst/java$
-target
+java/target
+java/.classpath
+java/.vscode

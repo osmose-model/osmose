@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,40 +16,35 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.process;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
-import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.process.growth.AbstractGrowth;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 
 /**
  *
@@ -64,16 +52,16 @@ import java.util.HashMap;
  */
 public class GrowthProcess extends AbstractProcess {
 
-    private HashMap<Integer, AbstractGrowth> growth;
-    private HashMap<Integer, double[]> minDelta;
-    private HashMap<Integer, double[]> maxDelta;
-    private HashMap<Integer, double[]> deltaMeanLength;
-    private HashMap<Integer, Double> criticalPredSuccess;
+    private AbstractGrowth[] growth;
+    private double[][] minDelta;
+    private double[][] maxDelta;
+    private double[][]deltaMeanLength;
+    private double[] criticalPredSuccess;
     /**
      * Maximum length for every species. Infinity by default. Parameter
      * species.lmax.sp#
      */
-    private HashMap<Integer, Float> lmax;
+    private float[] lmax;
 
     public GrowthProcess(int rank) {
         super(rank);
@@ -83,82 +71,74 @@ public class GrowthProcess extends AbstractProcess {
     public void init() {
 
         int nSpecies = getConfiguration().getNSpecies();
-        growth = new HashMap();
-        criticalPredSuccess = new HashMap();
-        minDelta = new HashMap();
-        maxDelta = new HashMap();
-        deltaMeanLength = new HashMap();
-        lmax = new HashMap();
+        growth = new AbstractGrowth[nSpecies];
+        criticalPredSuccess = new double[nSpecies];
+        minDelta = new double[nSpecies][];
+        maxDelta = new double[nSpecies][];
+        deltaMeanLength = new double[nSpecies][];
+        lmax = new float[nSpecies];
 
-        for (int i : getConfiguration().getFocalIndex()) {
+        int cpt = 0;
+        for (int fileIndex : getConfiguration().getFocalIndex()) {
             // Initialize growth function
-            String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + i)
+            String growthClassName = getConfiguration().isNull("growth.java.classname.sp" + fileIndex)
                     ? "fr.ird.osmose.process.growth.VonBertalanffyGrowth"
-                    : getConfiguration().getString("growth.java.classname.sp" + i);
-            String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(i).getName();
+                    : getConfiguration().getString("growth.java.classname.sp" + fileIndex);
+            String errMsg = "Failed to instantiate Growth function " + growthClassName + " for species " + getSpecies(cpt).getName();
             try {
-                growth.put(i, (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(i)));
-            } catch (InstantiationException ex) {
-                error(errMsg, ex);
-            } catch (IllegalAccessException ex) {
-                error(errMsg, ex);
-            } catch (IllegalArgumentException ex) {
-                error(errMsg, ex);
-            } catch (InvocationTargetException ex) {
-                error(errMsg, ex);
-            } catch (NoSuchMethodException ex) {
-                error(errMsg, ex);
-            } catch (SecurityException ex) {
-                error(errMsg, ex);
-            } catch (ClassNotFoundException ex) {
+                growth[cpt] = (AbstractGrowth) Class.forName(growthClassName).getConstructor(Integer.TYPE, Species.class).newInstance(getRank(), getSpecies(cpt));
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException ex) {
                 error(errMsg, ex);
             }
             // Initializes Growth function
-            growth.get(i).init();
+            growth[cpt].init();
 
-            criticalPredSuccess.put(i, getConfiguration().getDouble("predation.efficiency.critical.sp" + i));
-            Species species = getSpecies(i);
+            criticalPredSuccess[cpt] = getConfiguration().getDouble("predation.efficiency.critical.sp" + fileIndex);
+            Species species = getSpecies(cpt);
             int lifespan = species.getLifespanDt();
-            minDelta.put(i, new double[lifespan]);
-            maxDelta.put(i, new double[lifespan]);
-            deltaMeanLength.put(i, new double[lifespan]);
+            minDelta[cpt] = new double[lifespan];
+            maxDelta[cpt] = new double[lifespan];
+            deltaMeanLength[cpt] = new double[lifespan];
                 
             // barrier.n: patch for Fabien to limit the maximum grow rate
-            double delta_lmax_factor = (getConfiguration().isNull("species.delta.lmax.factor.sp" + i)) ? 2 : getConfiguration().getDouble("species.delta.lmax.factor.sp" + i); 
+            double delta_lmax_factor = (getConfiguration().isNull("species.delta.lmax.factor.sp" + fileIndex)) ? 2 : getConfiguration().getDouble("species.delta.lmax.factor.sp" + fileIndex); 
             
-            double meanLength1 = growth.get(i).ageToLength(0);
+            double meanLength1 = growth[cpt].ageToLength(0);
             for (int ageDt = 0; ageDt < lifespan - 1; ageDt++) {
                 double meanLength0 = meanLength1;
-                meanLength1 = growth.get(i).ageToLength((ageDt + 1) / (double) getConfiguration().getNStepYear());
-                deltaMeanLength.get(i)[ageDt] = meanLength1 - meanLength0;
+                meanLength1 = growth[cpt].ageToLength((ageDt + 1) / (double) getConfiguration().getNStepYear());
+                deltaMeanLength[cpt][ageDt] = meanLength1 - meanLength0;
 
                 // barrier.n: patch for Fabien to limit the maximum grow rate
                 //maxDelta[i][ageDt] = deltaMeanLength[i][ageDt] + deltaMeanLength[i][ageDt];
-                minDelta.get(i)[ageDt] = deltaMeanLength.get(i)[ageDt] - deltaMeanLength.get(i)[ageDt];
-                maxDelta.get(i)[ageDt] = delta_lmax_factor * deltaMeanLength.get(i)[ageDt];
+                minDelta[cpt][ageDt] = deltaMeanLength[cpt][ageDt] - deltaMeanLength[cpt][ageDt];
+                maxDelta[cpt][ageDt] = delta_lmax_factor * deltaMeanLength[cpt][ageDt];
             }
             // Read maximal length
-            if (!getConfiguration().isNull("species.lmax.sp" + i)) {
-                lmax.put(i, getConfiguration().getFloat("species.lmax.sp" + i));
+            if (!getConfiguration().isNull("species.lmax.sp" + fileIndex)) {
+                lmax[cpt] = getConfiguration().getFloat("species.lmax.sp" + fileIndex);
             } else {
-                lmax.put(i, Float.POSITIVE_INFINITY);
+                lmax[cpt] =  Float.POSITIVE_INFINITY;
             }
-        }
+            
+            cpt++;
+            
+        }  // end of loop on focal species
     }
 
     @Override
     public void run() {
         for (School school : getSchoolSet().getAliveSchools()) {
             Species species = school.getSpecies();
-            int i = species.getIndex();
+            int i = species.getSpeciesIndex();
             int age = school.getAgeDt();
             if ((age == 0) || school.isUnlocated()) {
                 // Linear growth for eggs and migrating schools
-                school.incrementLength((float) deltaMeanLength.get(i)[age]);
+                school.incrementLength((float) deltaMeanLength[i][age]);
             } else {
                 // Growth based on predation success
-                if (school.getLength() < lmax.get(i)) {
-                    grow(school, minDelta.get(i)[age], maxDelta.get(i)[age]);
+                if (school.getLength() < lmax[i]) {
+                    grow(school, minDelta[i][age], maxDelta[i][age]);
                 }
             }
         }
@@ -168,14 +148,14 @@ public class GrowthProcess extends AbstractProcess {
 
         int iSpec = school.getSpeciesIndex();
         //calculation of lengths according to predation efficiency
-        if (school.getPredSuccessRate() >= criticalPredSuccess.get(iSpec)) {
-                double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess.get(iSpec)) / (1 - criticalPredSuccess.get(iSpec))));
+        if (school.getPredSuccessRate() >= criticalPredSuccess[iSpec]) {
+                double dlength = (minDelta + (maxDelta - minDelta) * ((school.getPredSuccessRate() - criticalPredSuccess[iSpec]) / (1 - criticalPredSuccess[iSpec])));
             school.incrementLength((float) dlength);
         }
     }
 
     public AbstractGrowth getGrowth(int indexSpecies) {
-        return growth.get(indexSpecies);
+        return growth[indexSpecies];
     }
 }
     

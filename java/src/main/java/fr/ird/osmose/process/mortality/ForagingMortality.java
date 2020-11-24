@@ -1,7 +1,42 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
+ * http://www.osmose-model.org
+ * 
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
+ * 
+ * Osmose is a computer program whose purpose is to simulate fish
+ * populations and their interactions with their biotic and abiotic environment.
+ * OSMOSE is a spatial, multispecies and individual-based model which assumes
+ * size-based opportunistic predation based on spatio-temporal co-occurrence
+ * and size adequacy between a predator and its prey. It represents fish
+ * individuals grouped into schools, which are characterized by their size,
+ * weight, age, taxonomy and geographical location, and which undergo major
+ * processes of fish life cycle (growth, explicit predation, additional and
+ * starvation mortalities, reproduction and migration) and fishing mortalities
+ * (Shin and Cury 2001, 2004).
+ * 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose.process.mortality;
 
@@ -27,36 +62,33 @@ public class ForagingMortality extends AbstractMortality {
         int nspec = this.getNSpecies();
         k_for = new double[nspec];
         I_max = new double[nspec];
-        for (int i=0;i<nspec;i++){
-            k_for[i] = getConfiguration().getDouble("bioen.forage.k_for.sp" + i);
-            I_max[i] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
+        int cpt = 0;
+        for (int i : getFocalIndex()) {
+            k_for[cpt] = getConfiguration().getDouble("bioen.forage.k_for.sp" + i);
+            I_max[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
+            cpt++;
         }
     }
 
     @Override
     public double getRate(School school) {
 
-        // This mortality increase with individual ingestion --> division by abundance
-
-//        return k_for[school.getSpeciesIndex()]*school.getIngestion()*1000000 / school.getInstantaneousAbundance()/(Math.pow(school.getWeight() * 1e6f, school.getAlphaBioen()));
-        
-        // calcul de la mortalité en lien avec Imax
-        double output = 0 ;
+        double output = 0;
         if (this.getConfiguration().isGeneticEnabled()) {
             String key = "imax";
-        
+
             try {
-                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()]/24;
+                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()] / 24;
             } catch (Exception ex) {
                 Logger.getLogger(ForagingMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }else{
-            output =  I_max[school.getSpeciesIndex()] * this.k_for[school.getSpeciesIndex()]/24;;
+        } else {
+            output = I_max[school.getSpeciesIndex()] * this.k_for[school.getSpeciesIndex()] / 24;;
         }
-        if (output<0) {
+        if (output < 0) {
             output = 0;
-                    }
+        }
         return output;
     }
-   
+
 }

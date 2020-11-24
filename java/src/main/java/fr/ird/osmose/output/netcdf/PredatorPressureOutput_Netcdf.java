@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.output.netcdf;
 
 import fr.ird.osmose.School;
@@ -56,9 +46,7 @@ import fr.ird.osmose.Prey;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,10 +66,6 @@ import ucar.nc2.Variable;
  */
 public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
 
-    // IO
-    private FileOutputStream fos;
-    private PrintWriter prw;
-
     //
     private double[][][][] predatorPressure;
     // Diet output stage
@@ -100,7 +84,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
 
     @Override
     public void reset() {
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies();
         int nPrey = nSpec + getConfiguration().getNRscSpecies();
         predatorPressure = new double[nSpec][][][];
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
@@ -142,7 +126,7 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
         arrTime.set(0, time);
         ArrayFloat.D3 arrOut = new ArrayFloat.D3(1, this.nPred, this.nPreys);
 
-        int nSpec = getNSpecies();
+        int nSpec = getNSpecies() + getNBkgSpecies();
         for (int iSpec = 0; iSpec < nSpec; iSpec++) {
             int nStagePred = dietOutputStage.getNStage(iSpec);
             for (int iStage = 0; iStage < nStagePred; iStage++) {
@@ -223,14 +207,14 @@ public class PredatorPressureOutput_Netcdf extends AbstractOutput_Netcdf {
     @Override
     void init_nc_dims_coords() {
 
-        int nSpec = this.getNSpecies();
+        int nSpec = this.getNSpecies() + this.getNBkgSpecies();
 
         this.nPred = 0;
         List<String> listPred = new ArrayList<>();
         List<String> listPrey = new ArrayList<>();
         // Init the predator coordinates
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
-            String name = getSpecies(iSpec).getName();
+            String name = getISpecies(iSpec).getName();
             float[] threshold = dietOutputStage.getThresholds(iSpec);
             int nStage = dietOutputStage.getNStage(iSpec);
             for (int iStage = 0; iStage < nStage; iStage++) {

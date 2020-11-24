@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.util;
 
 import fr.ird.osmose.School;
@@ -105,6 +95,7 @@ public class MapSet extends OsmoseLinker {
      * Index of the species.
      */
     protected final int iSpecies;
+    protected final int iSpeciesFile;
     
     /**
      * Array of map indexes for every age class and simulation time step.
@@ -122,11 +113,12 @@ public class MapSet extends OsmoseLinker {
      */
     protected String[] mapFile;
 
-    public MapSet(int iSpecies, String prefix) {
-        this(iSpecies, prefix, "sp");
+    public MapSet(int iSpeciesFile, int iSpecies, String prefix) {
+        this(iSpeciesFile, iSpecies, prefix, "sp");
     }
 
-    public MapSet(int iSpecies, String prefix, String suffix) {
+    public MapSet(int iSpeciesFile, int iSpecies, String prefix, String suffix) {
+        this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
         this.prefix = prefix;
         this.suffix = suffix;
@@ -189,7 +181,7 @@ public class MapSet extends OsmoseLinker {
 
         // If the movement.map.spX exists, maps are initialised by using NetCDF
         // else, classic definitions of maps.
-        String key = prefix + ".map." + suffix + iSpecies;
+        String key = prefix + ".map." + suffix + iSpeciesFile;
         if (!getConfiguration().isNull(key)) {
             info("Reding NetCDF file " + getConfiguration().getFile(key));
             loadMapsNc();
@@ -220,7 +212,7 @@ public class MapSet extends OsmoseLinker {
      */
     public void loadMapsNc() throws IOException, InvalidRangeException {
 
-        String key = prefix + ".map." + suffix + iSpecies;
+        String key = prefix + ".map." + suffix + iSpeciesFile;
         String ncFile = getConfiguration().getFile(key);
 
         // Open the NetCDF file
@@ -301,7 +293,7 @@ public class MapSet extends OsmoseLinker {
 
         int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
 
-        List<Integer> mapNumber = new ArrayList();
+        List<Integer> mapNumber = new ArrayList<>();
         int imap = 0;
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
@@ -311,7 +303,7 @@ public class MapSet extends OsmoseLinker {
             String key = prefix + ".species" + ".map" + imap;
             Species species = getSpecies(getConfiguration().getString(key));
             if (null != species) {
-                if (species.getIndex() == iSpecies) {
+                if (species.getSpeciesIndex() == iSpecies) {
                     mapNumber.add(imap);
                 }
             } else {
@@ -385,10 +377,9 @@ public class MapSet extends OsmoseLinker {
             for (int iStep = 0; iStep < nSteps; iStep++) {
                 if (indexMaps[iAge][iStep] < 0) {
                     isMapOK = false;
-                    float age = (float) iAge / nStepYear;
                     int year = iStep / nStepYear;
                     int step = iStep % nStepYear;
-                    warning("No map assigned for {0} age {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), iAge, year, step});
+                    warning("No map assigned for {0} age (dt) {1} year {2} step {3}", new Object[]{getSpecies(iSpecies).getName(), iAge, year, step});
                 }
             }
         }

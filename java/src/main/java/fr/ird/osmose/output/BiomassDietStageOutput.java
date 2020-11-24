@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,38 +16,34 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.output;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.stage.DietOutputStage;
 import fr.ird.osmose.stage.IStage;
-import java.util.HashMap;
 
 /**
  *
@@ -66,7 +55,7 @@ public class BiomassDietStageOutput extends AbstractOutput {
     /*
      * Biomass per diet stages [SPECIES][DIET_STAGES]
      */
-    private HashMap<Integer, double[]> biomassStage = new HashMap();
+    private double[][] biomassStage;
 
     private IStage dietOutputStage;
 
@@ -81,10 +70,12 @@ public class BiomassDietStageOutput extends AbstractOutput {
         dietOutputStage.init();
 
         nColumns = 0;
+
+        int nAll = this.getNBkgSpecies() + this.getNSpecies() + this.getNRscSpecies();
         
         // Sum-up diet stages
-        for (int iSpec : getConfiguration().getFishIndex()) {
-            nColumns += dietOutputStage.getNStage(iSpec);
+        for (int cpt = 0; cpt < nAll; cpt++) {
+            nColumns += dietOutputStage.getNStage(cpt);
         }
 
         nColumns += getConfiguration().getNRscSpecies();
@@ -100,12 +91,14 @@ public class BiomassDietStageOutput extends AbstractOutput {
     @Override
     String[] getHeaders() {
 
+        int nAll = this.getNBkgSpecies() + this.getNSpecies() + this.getNRscSpecies();
+
         int k = 0;
         String[] headers = new String[nColumns];
-        for (int iSpec : getConfiguration().getFocalIndex()) {
-            String name = getSpecies(iSpec).getName();
-            float[] threshold = dietOutputStage.getThresholds(iSpec);
-            int nStage = dietOutputStage.getNStage(iSpec);
+        for (int cpt = 0; cpt < nAll; cpt++) {
+            String name = getISpecies(cpt).getName();
+            float[] threshold = dietOutputStage.getThresholds(cpt);
+            int nStage = dietOutputStage.getNStage(cpt);
             for (int s = 0; s < nStage; s++) {
                 if (nStage == 1) {
                     headers[k] = name;    // Name predators
@@ -117,32 +110,9 @@ public class BiomassDietStageOutput extends AbstractOutput {
                     }
                 }
                 k++;
-            }
-        }
+            }  
+        } // end of species loop
 
-        for (int iSpec : getConfiguration().getBkgIndex()) {
-            String name = getBkgSpecies(iSpec).getName();
-            float[] threshold = dietOutputStage.getThresholds(iSpec);
-            int nStage = dietOutputStage.getNStage(iSpec);
-            for (int s = 0; s < nStage; s++) {
-                if (nStage == 1) {
-                    headers[k] = name;    // Name predators
-                } else {
-                    if (s == 0) {
-                        headers[k] = name + " < " + threshold[s];    // Name predators
-                    } else {
-                        headers[k] = name + " >=" + threshold[s - 1];    // Name predators
-                    }
-                }
-                k++;
-            }
-        }
-
-
-        for (int iSpec : getConfiguration().getRscIndex()) {
-            headers[k] = getConfiguration().getResourceSpecies(iSpec).getName();
-            k++;
-        }
         return headers;
     }
 
@@ -150,15 +120,17 @@ public class BiomassDietStageOutput extends AbstractOutput {
     public void initStep() {
 
         getSchoolSet().getPresentSchools().forEach(school -> {
-            biomassStage.get(school.getSpeciesIndex())[dietOutputStage.getStage(school)] += school.getBiomass();
+            biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
         this.getBkgSchoolSet().getAllSchools().forEach(school -> {
-            biomassStage.get(school.getSpeciesIndex())[dietOutputStage.getStage(school)] += school.getBiomass();
+            biomassStage[school.getSpeciesIndex()][dietOutputStage.getStage(school)] += school.getBiomass();
         });
 
-        for (int iRsc : getConfiguration().getRscIndex()) {
-            biomassStage.get(iRsc)[0] += getTotalBiomass(iRsc);
+        int nSpecies = this.getNSpecies();
+        int nBkg = this.getNBkgSpecies();
+        for (int cpt = 0; cpt < this.getNRscSpecies(); cpt++) {
+            biomassStage[nSpecies + nBkg + cpt][0] += getTotalBiomass(cpt + nBkg);
         }
 
     }
@@ -166,15 +138,14 @@ public class BiomassDietStageOutput extends AbstractOutput {
     @Override
     public void reset() {
         
-        biomassStage.clear();
+        int nSpecies = this.getNSpecies();
+        int nBkg = this.getNBkgSpecies();
+        int nRsc = this.getNRscSpecies();
+        int nAll = nSpecies + nBkg + nRsc;
+        biomassStage = new double[nAll][];
         
-        for (int iSpec : getConfiguration().getFishIndex()) {
-            biomassStage.put(iSpec, new double[dietOutputStage.getNStage(iSpec)]);
-        }
-        
-        for (int i : getConfiguration().getPreyIndex()) {
-            // we consider just 1 stage per resource group
-            biomassStage.put(i, new double[1]);
+        for (int cpt = 0; cpt < nAll; cpt++) {
+            biomassStage[cpt] = new double[dietOutputStage.getNStage(cpt)];
         }
     }
 
@@ -187,23 +158,18 @@ public class BiomassDietStageOutput extends AbstractOutput {
     public void write(float time) {
         double[] biomass = new double[nColumns];
         double nsteps = getRecordFrequency();
-        int k = 0;
-        for (int iSpec : getConfiguration().getFishIndex()) {
-            for (int s = 0; s < dietOutputStage.getNStage(iSpec); s++) {
-                biomass[k] = biomassStage.get(iSpec)[s] / nsteps;
-                k++;
+        for (int k = 0; k < this.getNAllSpecies(); k++) {
+            for (int s = 0; s < dietOutputStage.getNStage(k); s++) {
+                biomass[k] = biomassStage[k][s] / nsteps;
             }
-        }
-        for (int j : getConfiguration().getRscIndex()) {
-            biomass[k] = biomassStage.get(j)[0] / nsteps;
-            k++;
-        }
+        } // end of species loop
         writeVariable(time, biomass);
     }
 
     /**
      * Gets the total biomass of the resource groups over the grid.
-     *
+     * Note that the index in the argument is offseted, since 
+     * resource forcing starts with background species.
      * @return the cumulated biomass over the domain in tonne
      */
     private double getTotalBiomass(int iRsc) {

@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,38 +16,36 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose;
 
 import fr.ird.osmose.resource.ResourceSpecies;
 import fr.ird.osmose.background.BackgroundSpecies;
 import fr.ird.osmose.util.version.VersionManager;
 import fr.ird.osmose.grid.AbstractGrid;
+import fr.ird.osmose.grid.NcGrid;
 import fr.ird.osmose.output.AbstractOutputRegion;
 import fr.ird.osmose.output.OutputRegion;
 import fr.ird.osmose.output.Surveys;
@@ -67,7 +58,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -93,24 +83,21 @@ import org.apache.commons.lang3.ArrayUtils;
  * </ul>
  * For comments, it is recommended to start the line with {@code #} or
  * {@code //}.<br>
- * A parameter is formed by the juxtaposition of three elements:
- * <b>key</b>,
- * <b>separator</b>
- * and <b>value</b>.<br>
+ * A parameter is formed by the juxtaposition of three elements: <b>key</b>,
+ * <b>separator</b> and <b>value</b>.<br>
  * The key can be any sequence of characters, without blank or any special
  * characters (dot, hyphen and underscore are accepted). Example of keys:
  * <i>simulation.ncpu</i> or <i>predation.ingestion.rate.max.sp6</i>. Osmose
- * makes no difference between upper and lower case:
- * <i>simulation.ncpu</i>, <i>simulation.Ncpu</i>,
- * <i>Simulation.nCPU</i>, <i>SIMULATION.NCPU</i> designate the same key. Keys
- * starting with <i>osmose.configuration.*</i> (* being any sequence of
- * characters that follow the same rules than any other key) has a special
- * meaning to {@code Configuration}. It means the value of this parameter is the
- * path of an other Osmose configuration file and the parameters of this file
- * are to be loaded in the current configuration. That way, instead of having
- * one big configuration file with all the parameters, it is possible to split
- * the parameters in as many files as the user wishes. This process works
- * recursively: one file contains one or several parameters
+ * makes no difference between upper and lower case: <i>simulation.ncpu</i>,
+ * <i>simulation.Ncpu</i>, <i>Simulation.nCPU</i>, <i>SIMULATION.NCPU</i>
+ * designate the same key. Keys starting with <i>osmose.configuration.*</i> (*
+ * being any sequence of characters that follow the same rules than any other
+ * key) has a special meaning to {@code Configuration}. It means the value of
+ * this parameter is the path of an other Osmose configuration file and the
+ * parameters of this file are to be loaded in the current configuration. That
+ * way, instead of having one big configuration file with all the parameters, it
+ * is possible to split the parameters in as many files as the user wishes. This
+ * process works recursively: one file contains one or several parameters
  * <i>osmose.configuration.*</i> that point to configuration files that may
  * contains one or several parameters <i>osmose.configuration.*</i>, and so on.
  * The <b>main configuration file</b> designates the one that is listed in the
@@ -160,9 +147,9 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class Configuration extends OLogger {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
+    ///////////////////////////////
+    // Declaration of the variables
+    ///////////////////////////////
     /**
      * List of all the parameters
      */
@@ -201,8 +188,8 @@ public class Configuration extends OLogger {
      */
     private int nResource;
     /**
-     * Number of replicated simulations. It is the number of simulation to be
-     * run with the same set of parameters. Parameter <i>simulation.nsimu</i>
+     * Number of replicated simulations. It is the number of simulation to be run
+     * with the same set of parameters. Parameter <i>simulation.nsimu</i>
      */
     private int nSimulation;
     /**
@@ -216,27 +203,26 @@ public class Configuration extends OLogger {
      */
     private int nStepYear;
     /**
-     * The number of new schools, per species, that are created every
-     * reproductive event. {@code nSchool = new int[nSpecies]}. Parameter
+     * The number of new schools, per species, that are created every reproductive
+     * event. {@code nSchool = new int[nSpecies]}. Parameter
      * <i>simulation.nschool</i> or <i>simulation.nschool.sp#</i>. This is a key
      * parameter of the IBM as it controls the number of individuals in the
-     * population for each species. The bigger the better but the bigger the
-     * most time consuming is the simulation.
+     * population for each species. The bigger the better but the bigger the most
+     * time consuming is the simulation.
      */
     private int[] nSchool;
     /**
-     * The spatial grid of the simulation,
-     * {@link fr.ird.osmose.grid.AbstractGrid}.
+     * The spatial grid of the simulation, {@link fr.ird.osmose.grid.AbstractGrid}.
      */
     private AbstractGrid grid;
     /**
      * Array of the species of the simulation.
      */
-    private HashMap<Integer, Species> species;
+    private Species[] species;
     /**
      * Array of the resource species of the simulation.
      */
-    private HashMap<Integer, ResourceSpecies> rscSpecies;
+    private ResourceSpecies[] rscSpecies;
 
     /**
      * Number of species that are not explicitely modelled. Parameter
@@ -247,7 +233,7 @@ public class Configuration extends OLogger {
     /**
      * Array of background species.
      */
-    private HashMap<Integer, BackgroundSpecies> bkgSpecies; // barrier.n
+    private BackgroundSpecies[] bkgSpecies; // barrier.n
 
     /**
      * True if the bioenergetic module should be activated.
@@ -275,20 +261,20 @@ public class Configuration extends OLogger {
      */
     private int[] focalIndex, bkgIndex, rscIndex;
 
-///////////////
-// Constructors
-///////////////
+    ///////////////
+    // Constructors
+    ///////////////
     /**
      * Creates a new {@code Configuration}.
      *
      * @param mainFilename, the main configuration file
-     * @param cmd, the list of options/parameters set in command line
+     * @param cmd,          the list of options/parameters set in command line
      */
     Configuration(String mainFilename, HashMap<String, String> cmd) {
 
         this.mainFilename = new File(mainFilename).getAbsolutePath();
 
-        parameters = new HashMap();
+        parameters = new HashMap<>();
 
         if (null != cmd) {
             // Add the parameters from the command line
@@ -310,12 +296,12 @@ public class Configuration extends OLogger {
         this(mainFilename, null);
     }
 
-////////////////////////////
-// Definition of the methods
-////////////////////////////
+    ////////////////////////////
+    // Definition of the methods
+    ////////////////////////////
     /**
-     * Load the parameters from the main configuration file and check whether
-     * the configuration is up to date.
+     * Load the parameters from the main configuration file and check whether the
+     * configuration is up to date.
      *
      * @return {@code TRUE} if the configuration is up to date.
      */
@@ -331,8 +317,8 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Initialises the current configuration. Sets the values of the main
-     * variables and creates the grid.
+     * Initialises the current configuration. Sets the values of the main variables
+     * and creates the grid.
      *
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
@@ -343,20 +329,18 @@ public class Configuration extends OLogger {
         // the bioen module should be used.
         // String keybioen = "simulation.use.bioen";
         String keybioen = "simulation.bioen.enabled";
-        
         this.bioenEnabled = this.getBoolean(keybioen);
 
         String key = "simulation.genetic.enabled";
-        geneticEnabled = this.getBoolean(key);
+        this.geneticEnabled = this.getBoolean(key);
 
         String keyincom = "simulation.incoming.flux.enabled";
         this.incomingFluxEnabled = this.getBoolean(keyincom);
 
         // Output path
         outputPathname = getFile("output.dir.path");
-        // barrier.n: outputPathname has been set unresolved,
-        // so that outputs are not saved in the input directory.
-        //outputPathname = getString("output.dir.path");
+
+        // Show the output folder
         info("Output folder set to " + outputPathname);
 
         // Read Output CSV separator
@@ -365,7 +349,8 @@ public class Configuration extends OLogger {
             try {
                 separator = Separator.valueOf(getString("output.csv.separator").toUpperCase());
             } catch (IllegalArgumentException ex) {
-                warning("Failed to parse parameter output.csv.separator = " + getString("output.csv.separator") + ". It must be either " + Separator.asList());
+                warning("Failed to parse parameter output.csv.separator = " + getString("output.csv.separator")
+                        + ". It must be either " + Separator.asList());
                 separator = Separator.COMA;
             }
         }
@@ -381,33 +366,40 @@ public class Configuration extends OLogger {
             nCpu = 1;
         }
 
-        // barrier.n: new way to count the number of species, resource and background based on types.
-        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((k) -> (getString(k).equals("focal"))).count();
-        nResource = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("resource")).count();
-        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("background")).count();
+        // barrier.n: new way to count the number of species, resource and background
+        // based on types.
+        nSpecies = (int) this.findKeys("species.type.sp*").stream().filter((k) -> (getString(k).equals("focal")))
+                .count();
+        nResource = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("resource"))
+                .count();
+        nBackground = (int) this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("background"))
+                .count();
 
-        // Extract the species indexes for the the 
-        this.focalIndex = this.findKeys("species.type.sp*").stream()
-                .filter(k -> getString(k).equals("focal"))
+        // Extract the species indexes for the focal, backgroud and resource species.
+        this.focalIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("focal"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
-        this.bkgIndex = this.findKeys("species.type.sp*").stream()
-                .filter(k -> getString(k).equals("background"))
+        this.bkgIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("background"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
 
-        this.rscIndex = this.findKeys("species.type.sp*").stream()
-                .filter(k -> getString(k).equals("resource"))
+        this.rscIndex = this.findKeys("species.type.sp*").stream().filter(k -> getString(k).equals("resource"))
                 .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sp") + 3))).sorted().toArray();
-        
+
+        // Check that the number of focal species match the number of focal types
         int nSpecies_test = getInt("simulation.nspecies");
         if (nSpecies_test != nSpecies) {
-            String errorMsg = String.format("Focal species may be badly defined. simulation.species=%d, number of focal types=%d", nSpecies_test, nSpecies);
+            String errorMsg = String.format(
+                    "Focal species may be badly defined. simulation.species=%d, number of focal types=%d",
+                    nSpecies_test, nSpecies);
             error(errorMsg, null);
         }
 
+        // Check that the number of resource species match the number of resource types
         int nResource_test = getInt("simulation.nresource");
         if (nResource_test != nResource) {
-            String errorMsg = String.format("Resource species may be badly defined. simulation.nresource=%d, number of resource types=%d", nResource_test, nSpecies);
+            String errorMsg = String.format(
+                    "Resource species may be badly defined. simulation.nresource=%d, number of resource types=%d",
+                    nResource_test, nSpecies);
             error(errorMsg, null);
         }
 
@@ -424,8 +416,10 @@ public class Configuration extends OLogger {
 
         nSchool = new int[nSpecies];
         if (findKeys("simulation.nschool.sp*").size() == nSpecies) {
-            for (int i = 0; i < nSpecies; i++) {
-                nSchool[i] = getInt("simulation.nschool.sp" + i);
+            int cpt = 0;
+            for (int i : this.focalIndex) {
+                nSchool[cpt] = getInt("simulation.nschool.sp" + i);
+                cpt++;
             }
         } else if (canFind("simulation.nschool")) {
             int n = getInt("simulation.nschool");
@@ -442,24 +436,33 @@ public class Configuration extends OLogger {
         initGrid();
 
         // Create the species
-        species = new HashMap();
-        for (int i : this.focalIndex) {
-            species.put(i, new Species(i));
+        int cpt = 0;
+        species = new Species[nSpecies];
+        for (int fileIndex : this.focalIndex) {
+            // Species are now instanciated from the fileIndex and the species index (cpt in
+            // [0, nSpecies])
+            species[cpt] = new Species(fileIndex, cpt);
             // Name must contain only alphanumerical characters
-            if (!species.get(i).getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Species name must contain alphanumeric characters only. Please rename " + species.get(i).getName(), null);
+            if (!species[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Species name must contain alphanumeric characters only. Please rename " + species[cpt].getName(),
+                        null);
             }
+            cpt++;
         }
 
         // Init resource groups
-        //rscSpecies = new ResourceSpecies[nResource];
-        rscSpecies = new HashMap();
-        for (int rsc : this.rscIndex) {
-            rscSpecies.put(rsc, new ResourceSpecies(rsc));
+        rscSpecies = new ResourceSpecies[nResource];
+        cpt = 0;
+        for (int fileIndex : this.rscIndex) {
+            // ResourceSpecies are now instanciated from the fileIndex (fileIndex) and the
+            // species index (cpt in [0, nResources])
+            rscSpecies[cpt] = new ResourceSpecies(fileIndex, cpt);
             // Name must contain only alphanumerical characters
-            if (!rscSpecies.get(rsc).getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Resource name must contain alphanumeric characters only. Please rename " + rscSpecies.get(rsc).getName(), null);
+            if (!rscSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Resource name must contain alphanumeric characters only. Please rename "
+                        + rscSpecies[cpt].getName(), null);
             }
+            cpt++;
         }
 
         // barrier.n: add number of background species
@@ -469,54 +472,70 @@ public class Configuration extends OLogger {
             nBackground_test = getInt(key);
         }
 
+        // check that the number of background species is consistent with the number of
+        // background types
         if (nBackground_test != nBackground) {
-            String errorMsg = String.format("Background species may be badly defined. simulation.nbackground=%d, number of background types=%d", nBackground_test, nBackground);
+            String errorMsg = String.format(
+                    "Background species may be badly defined. simulation.nbackground=%d, number of background types=%d",
+                    nBackground_test, nBackground);
             error(errorMsg, null);
         }
 
         // Initialisation of the Background array.
-        bkgSpecies = new HashMap();
-        for (int p : this.bkgIndex) {
-            bkgSpecies.put(p, new BackgroundSpecies(p));
-            if (!bkgSpecies.get(p).getName().matches("^[a-zA-Z0-9]*$")) {
-                error("Background species name must contain alphanumeric characters only. Please rename " + bkgSpecies.get(p).getName(), null);
+        cpt = 0;
+        bkgSpecies = new BackgroundSpecies[nBackground];
+        for (int fileIndex : this.bkgIndex) {
+            // BackgroundSpecies are now instanciated from the fileIndex (fileIndex) and the
+            // species index (cpt in [0, nResources])
+            bkgSpecies[cpt] = new BackgroundSpecies(fileIndex, cpt);
+            if (!bkgSpecies[cpt].getName().matches("^[a-zA-Z0-9]*$")) {
+                error("Background species name must contain alphanumeric characters only. Please rename "
+                        + bkgSpecies[cpt].getName(), null);
             }
+            cpt++;
         }
 
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
-        nFishery = fisheryEnabled ? findKeys("fisheries.name.fsh*").size() : 0;
+        nFishery = findKeys("fisheries.name.fsh*").size();
+
+        // Display warning message if new fishery enabled but no fishers
+        if (fisheryEnabled && (nFishery == 0)) {
+            warning("***************************************************");
+            warning("The new fishery implementation is enabled, but no fisheries ('fisheries.name.fsh*' parameters) has been found");
+            warning("***************************************************");
+        }
 
         // Output regions
-        outputRegions = new ArrayList();
+        outputRegions = new ArrayList<>();
         // special case region0, the whole domain
-        if (!canFind("output.region.enabled.rg0")
-                || getBoolean("output.region.enabled.rg0")) {
+        // in the following, we assume that if !canFind,
+        // assumes that enabled by default.
+        // If found, then we use its value to activate or not.
+        if (!canFind("output.region.enabled.rg0") || getBoolean("output.region.enabled.rg0")) {
             if (findKeys("output.region.*.rg0").size() > 1) {
-                error("Output region 0 corresponds to the whole grid and cannot be redefined.", new IllegalArgumentException("Region0 cannot be overwritten"));
+                error("Output region 0 corresponds to the whole grid and cannot be redefined.",
+                        new IllegalArgumentException("Region0 cannot be overwritten"));
             }
             outputRegions.add(new OutputWholeRegion(0));
         }
+
         // list output regions
-        HashSet<Integer> rg = new HashSet(
-                findKeys("output.regions.*.rg*").stream()
-                        .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rg") + 3)))
-                        .collect(Collectors.toList())
-        );
+        HashSet<Integer> rg = new HashSet<>(findKeys("output.regions.*.rg*").stream()
+                .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".rg") + 3)))
+                .collect(Collectors.toList()));
 
         // remove rg0 (whole domain) that is handled separately
         rg.remove(0);
 
         // list output surveys
-        HashSet<Integer> surveysIndex = new HashSet(
-                findKeys("surveys.*.sr*").stream()
-                        .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sr") + 3)))
-                        .collect(Collectors.toList())
-        );
+        HashSet<Integer> surveysIndex = new HashSet<>(findKeys("surveys.*.sr*").stream()
+                .map(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".sr") + 3)))
+                .collect(Collectors.toList()));
 
         // Do some test in order to insure that surveys and output
         // regions have no duplicate indexes
-        HashSet<Integer> total = new HashSet();
+        HashSet<Integer> total = new HashSet<>();
         total.addAll(rg);
         total.addAll(surveysIndex);
         if (total.size() != surveysIndex.size() + rg.size()) {
@@ -526,16 +545,14 @@ public class Configuration extends OLogger {
 
         // Initialize output regions from indexes
         rg.forEach(index -> {
-            if (!canFind("output.regions.enabled.rg" + index)
-                    || getBoolean("output.regions.enabled.rg" + index)) {
+            if (!canFind("output.regions.enabled.rg" + index) || getBoolean("output.regions.enabled.rg" + index)) {
                 outputRegions.add(new OutputRegion(index));
             }
         });
 
         // Initialize surveys regions from indexes
         surveysIndex.forEach(index -> {
-            if (!canFind("surveys.enabled.sr" + index)
-                    || getBoolean("surveys.enabled.sr" + index)) {
+            if (!canFind("surveys.enabled.sr" + index) || getBoolean("surveys.enabled.sr" + index)) {
                 outputRegions.add(new Surveys(index));
             }
         });
@@ -582,7 +599,7 @@ public class Configuration extends OLogger {
     public boolean isGeneticEnabled() {
         return this.geneticEnabled;
     }
-    
+
     /**
      * Get a species
      *
@@ -590,7 +607,7 @@ public class Configuration extends OLogger {
      * @return the species at index {@code index}
      */
     public Species getSpecies(int index) {
-        return species.get(index);
+        return species[index];
     }
 
     /**
@@ -600,7 +617,7 @@ public class Configuration extends OLogger {
      * @return the resource group with given index
      */
     public ResourceSpecies getResourceSpecies(int index) {
-        return rscSpecies.get(index);
+        return rscSpecies[index];
     }
 
     /**
@@ -610,35 +627,31 @@ public class Configuration extends OLogger {
      */
     public void initGrid() {
 
-        String gridClassName = getString("grid.java.classname");
-        try {
-            info("Grid: " + gridClassName);
-            grid = (AbstractGrid) Class.forName(gridClassName).newInstance();
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
-            error("Failed to create new grid instance. " + ex.getMessage(), ex);
-        }
-        // Init the grid
+        // barrier.n
+        // Only NetCDF grid remaining
+        grid = new NcGrid();
         grid.init();
+
     }
 
     /**
-     * Loads recursively the parameters from the configuration file. The
-     * function scans one by one the lines of the configuration file. A line is
-     * discarded when it matches any of these criteria: it is empty, it contains
-     * only blank and/or tab characters, it starts with a punctuation character
-     * (punctuation: One of {@code !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~})<br>
+     * Loads recursively the parameters from the configuration file. The function
+     * scans one by one the lines of the configuration file. A line is discarded
+     * when it matches any of these criteria: it is empty, it contains only blank
+     * and/or tab characters, it starts with a punctuation character (punctuation:
+     * One of {@code !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~})<br>
      * Any other lines are expected to be parameters formed as <i>key separator
      * value</i>. Refer to the documentation at the beginning of the class for
      * details about the parameters.<br>
-     * A parameter whose key start with <i>osmose.configuration.</i> means the
-     * value designate an other configuration file that has to be loaded in the
-     * current {@code Configuration}. The function {@code loadProperties} is
-     * called recursively.
+     * A parameter whose key start with <i>osmose.configuration.</i> means the value
+     * designate an other configuration file that has to be loaded in the current
+     * {@code Configuration}. The function {@code loadProperties} is called
+     * recursively.
      *
      * @param filename, the configuration file to be loaded
-     * @param depth, an integer that reflects the level of recursivity of the
-     * function. Zero for the main configuration file, one for a file loaded
-     * from the main configuration file, etc.
+     * @param depth,    an integer that reflects the level of recursivity of the
+     *                  function. Zero for the main configuration file, one for a
+     *                  file loaded from the main configuration file, etc.
      */
     private void loadParameters(String filename, int depth) {
 
@@ -675,9 +688,10 @@ public class Configuration extends OLogger {
                             String errorMsg = String.format("%s has already been defined.", entry.key);
                             error(errorMsg, null);
                         } else {
-                            warning("{0}Osmose will ignore parameter {1}", new Object[]{space, entry});
-                            warning("{0}Parameter already defined {1}", new Object[]{space, parameters.get(entry.key)});
-                        }  // end of test on parameter name
+                            warning("{0}Osmose will ignore parameter {1}", new Object[] { space, entry });
+                            warning("{0}Parameter already defined {1}",
+                                    new Object[] { space, parameters.get(entry.key) });
+                        } // end of test on parameter name
                     } else {
                         parameters.put(entry.key, entry);
                         debug(space + entry.toString());
@@ -710,7 +724,7 @@ public class Configuration extends OLogger {
      *
      * @param value, the {@code String} to be checked
      * @return true if {@code value} starts with one of
-     * {@code !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~}
+     *         {@code !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~}
      */
     private boolean startsWithSymbol(String value) {
         if (value == null || value.isEmpty()) {
@@ -723,18 +737,15 @@ public class Configuration extends OLogger {
 
     /**
      * Check whether parameter 'key' has 'null' value. The function returns
-     * {@code true} in several cases: the parameter does not exist, the value of
-     * the parameter is empty or the value of the parameter is set to "null".
+     * {@code true} in several cases: the parameter does not exist, the value of the
+     * parameter is empty or the value of the parameter is set to "null".
      *
      * @param key, the key of the parameter
-     * @return {@code true} if the parameter is either null, empty or does not
-     * exist
+     * @return {@code true} if the parameter is either null, empty or does not exist
      */
     public boolean isNull(String key) {
         Parameter param = parameters.get(key.toLowerCase());
-        return (null == param)
-                || param.value.isEmpty()
-                || param.value.equalsIgnoreCase("null");
+        return (null == param) || param.value.isEmpty() || param.value.equalsIgnoreCase("null");
     }
 
     /**
@@ -748,12 +759,12 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Find all the parameters whose key matches the filter given as argument.
-     * The filter accepts the following meta-character: "?" for any single
-     * character and "*" for any String.
+     * Find all the parameters whose key matches the filter given as argument. The
+     * filter accepts the following meta-character: "?" for any single character and
+     * "*" for any String.
      *
      * @see fr.ird.osmose.util.Properties#getKeys(java.lang.String) for details
-     * about how the filter works.
+     *      about how the filter works.
      * @param filter
      * @return
      */
@@ -767,7 +778,7 @@ public class Configuration extends OLogger {
         regexpPattern = regexpPattern.replaceAll("\\?", ".");
 
         // List the keys and select the ones that match the filter
-        List<String> filteredKeys = new ArrayList();
+        List<String> filteredKeys = new ArrayList<>();
         for (String key : parameters.keySet()) {
             if (key.matches(regexpPattern)) {
                 filteredKeys.add(key);
@@ -823,9 +834,9 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as a path resolved again the path of the
      * configuration file that defined the parameter.
      *
-     * @param key, the key of the parameter
-     * @return, the parameter as a path resolved again the path of the
-     * configuration file that defined the parameter.
+     * @param key, the key of the parameter @return, the parameter as a path
+     *             resolved again the path of the configuration file that defined
+     *             the parameter.
      */
     public String getFile(String key) {
         return resolve(getString(key), getSource(key));
@@ -850,8 +861,8 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as an integer.
      *
      * @param key, the key of the parameter
-     * @throws NumberFormatException if the value of the parameter cannot be
-     * parsed as an integer.
+     * @throws NumberFormatException if the value of the parameter cannot be parsed
+     *                               as an integer.
      * @return the parameter as an integer
      */
     public int getInt(String key) {
@@ -868,8 +879,8 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as a float.
      *
      * @param key, the key of the parameter
-     * @throws NumberFormatException if the value of the parameter cannot be
-     * parsed as a float.
+     * @throws NumberFormatException if the value of the parameter cannot be parsed
+     *                               as a float.
      * @return the parameter as a float
      */
     public float getFloat(String key) {
@@ -886,8 +897,8 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as a double.
      *
      * @param key, the key of the parameter
-     * @throws NumberFormatException if the value of the parameter cannot be
-     * parsed as a double.
+     * @throws NumberFormatException if the value of the parameter cannot be parsed
+     *                               as a double.
      * @return the parameter as a double
      */
     public double getDouble(String key) {
@@ -904,8 +915,8 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as a double.
      *
      * @param key, the key of the parameter
-     * @throws NumberFormatException if the value of the parameter cannot be
-     * parsed as a double.
+     * @throws NumberFormatException if the value of the parameter cannot be parsed
+     *                               as a double.
      * @return the parameter as a double
      */
     public long getLong(String key) {
@@ -921,10 +932,10 @@ public class Configuration extends OLogger {
     /**
      * Returns the specified parameter as a boolean.
      *
-     * @param key, the key of the parameter
+     * @param key,     the key of the parameter
      * @param warning, send a warning if the key cannot be found
-     * @throws NumberFormatException if the value of the parameter cannot be
-     * parsed as a boolean.
+     * @throws NumberFormatException if the value of the parameter cannot be parsed
+     *                               as a boolean.
      * @return the parameter as a boolean
      */
     public boolean getBoolean(String key, boolean warning) {
@@ -945,8 +956,8 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as a boolean.
      *
      * @param key, the key of the parameter
-     * @throws NumberFormatException if the value of the parameter cannot be
-     * parsed as a boolean.
+     * @throws NumberFormatException if the value of the parameter cannot be parsed
+     *                               as a boolean.
      * @return the parameter as a boolean
      */
     public boolean getBoolean(String key) {
@@ -957,8 +968,8 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as an array of integers, {@code int[]}.
      *
      * @param key, the key of the parameter
-     * @throws NumberFormatException if the values of the parameter cannot be
-     * parsed as an integer.
+     * @throws NumberFormatException if the values of the parameter cannot be parsed
+     *                               as an integer.
      * @return the parameter as a {@code int[]}
      */
     public int[] getArrayInt(String key) {
@@ -979,8 +990,8 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as an array of floats, {@code float[]}.
      *
      * @param key, the key of the parameter
-     * @throws NumberFormatException if the values of the parameter cannot be
-     * parsed as a float.
+     * @throws NumberFormatException if the values of the parameter cannot be parsed
+     *                               as a float.
      * @return the parameter as a {@code float[]}
      */
     public float[] getArrayFloat(String key) {
@@ -1001,8 +1012,8 @@ public class Configuration extends OLogger {
      * Returns the specified parameter as an array of doubles, {@code double[]}.
      *
      * @param key, the key of the parameter
-     * @throws NumberFormatException if the values of the parameter cannot be
-     * parsed as a double.
+     * @throws NumberFormatException if the values of the parameter cannot be parsed
+     *                               as a double.
      * @return the parameter as a {@code double[]}
      */
     public double[] getArrayDouble(String key) {
@@ -1023,7 +1034,7 @@ public class Configuration extends OLogger {
      * Resolves a file path against the the provided path. If filename is a
      * directory the function ensures the path ends with a separator.
      *
-     * @param filename, the file path to resolve
+     * @param filename,   the file path to resolve
      * @param relativeTo, the path against the file must be resolved
      * @return the resolved file path
      */
@@ -1042,8 +1053,8 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the output path. Parameter <i>output.dir.path</i> or second
-     * argument of the command line option.
+     * Returns the output path. Parameter <i>output.dir.path</i> or second argument
+     * of the command line option.
      *
      * @return the output path
      */
@@ -1063,8 +1074,7 @@ public class Configuration extends OLogger {
      * Returns the number of CPUs allocated for running the simulations
      * concurrently. Parameter<i>simulation.ncpu</i>
      *
-     * @return the number of CPUs allocated for running the simulations
-     * concurrently
+     * @return the number of CPUs allocated for running the simulations concurrently
      */
     public int getNCpu() {
         return nCpu;
@@ -1080,8 +1090,7 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the number of resource species. Parameter
-     * <i>simulation.nresource</i>
+     * Returns the number of resource species. Parameter <i>simulation.nresource</i>
      *
      * @return the number of resource groups.
      */
@@ -1090,8 +1099,8 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Returns the number of replicated simulations. (i.e. simulations with same
-     * set of parameters). Parameter <i>simulation.nsimu</i>
+     * Returns the number of replicated simulations. (i.e. simulations with same set
+     * of parameters). Parameter <i>simulation.nsimu</i>
      *
      * @return the nSimulation
      */
@@ -1126,7 +1135,7 @@ public class Configuration extends OLogger {
      *
      * @param iSpecies, the index of the species
      * @return the number of new schools that are created at every reproductive
-     * event for species at index {@code iSpecies}
+     *         event for species at index {@code iSpecies}
      */
     public int getNSchool(int iSpecies) {
         return nSchool[iSpecies];
@@ -1142,11 +1151,11 @@ public class Configuration extends OLogger {
     }
 
     /**
-     * Guess the default parameter separator (between key and value) in the set
-     * of configuration files. Osmose takes as default separator the one that is
-     * the most widely used in the current configuration. The function scans all
-     * the parameters, counts the occurrences of every type of separator and
-     * returns the one that with the highest count.
+     * Guess the default parameter separator (between key and value) in the set of
+     * configuration files. Osmose takes as default separator the one that is the
+     * most widely used in the current configuration. The function scans all the
+     * parameters, counts the occurrences of every type of separator and returns the
+     * one that with the highest count.
      *
      * @return the default parameter separator.
      */
@@ -1185,13 +1194,31 @@ public class Configuration extends OLogger {
     }
 
     /**
+     * Returns the number of all species. Parameter <i>simulation.nspecies</i>
+     *
+     * @return the number of species.
+     */
+    public int getNAllSpecies() {
+        return this.nBackground + this.nSpecies + this.nResource;
+    }
+
+    /**
+     * Returns the number of all species. Parameter <i>simulation.nspecies</i>
+     *
+     * @return the number of species.
+     */
+    public int getNPredSpecies() {
+        return this.nBackground + this.nSpecies;
+    }
+
+    /**
      * Get a species
      *
      * @param index, the index of the species
      * @return the species at index {@code index}
      */
     public BackgroundSpecies getBkgSpecies(int index) {
-        return bkgSpecies.get(index);
+        return bkgSpecies[index];
     }
 
     /**
@@ -1205,13 +1232,12 @@ public class Configuration extends OLogger {
 
     /**
      * Inner class that represents a parameter in the configuration file.
-     * {@code Configuration} parses the configuration file line by line. When
-     * the line is not discarded (refer to function
-     * {@link #loadParameters(java.lang.String, int)} for details about
-     * discarded lines), it assumes it is a parameter (formed as <i>key
-     * separator value</i> or <i>key separator1 value1 separator2 value2
-     * separator2 value3 separator2 value4</i>) and creates a new
-     * {@code Parameter} object.
+     * {@code Configuration} parses the configuration file line by line. When the
+     * line is not discarded (refer to function
+     * {@link #loadParameters(java.lang.String, int)} for details about discarded
+     * lines), it assumes it is a parameter (formed as <i>key separator value</i> or
+     * <i>key separator1 value1 separator2 value2 separator2 value3 separator2
+     * value4</i>) and creates a new {@code Parameter} object.
      */
     private class Parameter {
 
@@ -1236,15 +1262,15 @@ public class Configuration extends OLogger {
          */
         private String keySeparator;
         /**
-         * The separator between the values of the parameter. <i>key
-         * keySeparator value1 valueSeparator value2 valueSeparator value3</i>
+         * The separator between the values of the parameter. <i>key keySeparator value1
+         * valueSeparator value2 valueSeparator value3</i>
          */
         private String valueSeparator;
 
         /**
          * Create a new parameter out of the given line.
          *
-         * @param iline, the line of the parameter in the configuration file
+         * @param iline,  the line of the parameter in the configuration file
          * @param source, the path of the configuration file
          */
         Parameter(int iline, String source) {
@@ -1255,7 +1281,7 @@ public class Configuration extends OLogger {
         /**
          * Create a new parameter from the command line
          *
-         * @param key, the key of the parameter
+         * @param key,   the key of the parameter
          * @param value, the value of the parameter
          */
         Parameter(String key, String value) {
@@ -1266,10 +1292,9 @@ public class Configuration extends OLogger {
         }
 
         /**
-         * Parse the line as a parameter. It follows the following steps: guess
-         * the separator between key and value. Splits the line into a key and a
-         * value. Guess the value separator in case it is actually an array of
-         * values.
+         * Parse the line as a parameter. It follows the following steps: guess the
+         * separator between key and value. Splits the line into a key and a value.
+         * Guess the value separator in case it is actually an array of values.
          *
          * @param line, the line to be parsed as a parameter
          */
@@ -1282,12 +1307,11 @@ public class Configuration extends OLogger {
         }
 
         /**
-         * Cleans the value of the parameter. Trims the value (removes leading
-         * and trailing blank characters), and removes any trailing separators.
+         * Cleans the value of the parameter. Trims the value (removes leading and
+         * trailing blank characters), and removes any trailing separators.
          *
          * @param value, the value to be cleaned
-         * @return a copy of the value, trimmed and without any trailing
-         * separator.
+         * @return a copy of the value, trimmed and without any trailing separator.
          */
         private String clean(String value) {
             String cleanedValue = value.trim();
@@ -1300,9 +1324,8 @@ public class Configuration extends OLogger {
         }
 
         /**
-         * Splits the given line into a key and a value, using the
-         * {@code keySeparator}. Sends and error message if the line cannot be
-         * split.
+         * Splits the given line into a key and a value, using the {@code keySeparator}.
+         * Sends and error message if the line cannot be split.
          *
          * @param line, the line to be split into a key and a value.
          */
@@ -1310,7 +1333,8 @@ public class Configuration extends OLogger {
 
             // make sure the line contains at least one semi-colon (key;value)
             if (!line.contains(keySeparator)) {
-                error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source + ")", null);
+                error("Failed to split line " + iline + " " + line + " as key" + keySeparator + "value (from " + source
+                        + ")", null);
             }
             // extract the key
             key = line.substring(0, line.indexOf(keySeparator)).toLowerCase().trim();
@@ -1390,7 +1414,7 @@ public class Configuration extends OLogger {
      * @param i Index of the background species
      * @return The species index of the ith background species.
      */
-    public int[] getBkgIndex() {
+    public int[] getBackgroundIndex() {
         return this.bkgIndex;
     }
 
@@ -1400,24 +1424,25 @@ public class Configuration extends OLogger {
      * @param i Index of the resource species
      * @return The species index of the ith resource species.
      */
-    public int[] getRscIndex() {
+    public int[] getResourceIndex() {
         return this.rscIndex;
     }
-    
-    /** Recovers the indexes of the species that can be fished. 
+
+    /**
+     * Recovers the indexes of the species that can be fished.
      *
      * Returns the concatenated array of focal and background species indexes.
      * 
-     * @return 
+     * @return
      */
-    public int[] getFishIndex() {
-        return(ArrayUtils.addAll(this.focalIndex, this.bkgIndex));
+    public int[] getPredatorIndex() {
+        return (ArrayUtils.addAll(this.focalIndex, this.bkgIndex));
     }
-    
+
     public int[] getPreyIndex() {
-        return(ArrayUtils.addAll(this.bkgIndex, this.rscIndex));
+        return (ArrayUtils.addAll(this.bkgIndex, this.rscIndex));
     }
-    
+
     public int[] getAllIndex() {
         return (ArrayUtils.addAll(ArrayUtils.addAll(this.focalIndex, this.bkgIndex), this.rscIndex));
     }

@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,31 +16,27 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
 package fr.ird.osmose;
 
@@ -80,8 +69,8 @@ public class Osmose extends OLogger {
      */
     private final static Osmose OSMOSE = new Osmose();
     /**
-     * Set of simulations with the same set of parameters (replicates).
-     * Controlled by parameter <i>simulation.nsimu</i>
+     * Set of simulations with the same set of parameters (replicates). Controlled
+     * by parameter <i>simulation.nsimu</i>
      */
     private Simulation[] simulation;
     /**
@@ -102,15 +91,21 @@ public class Osmose extends OLogger {
     private boolean updateConfiguration = false;
 
     /**
+     * Whether the model should be run even if configuration and jar version
+     * differs.
+     */
+    private boolean forceConfiguration = false;
+
+    /**
      * Read input arguments. If no argument are provided, Osmose assumes that it
      * will find in the current directory a file called <i>filepath.txt</i> that
-     * provides the list of configuration files (refer to
-     * {@link #readFilepath()}). The first argument is a path to a configuration
-     * file. The second argument is the path for writing the output files. If
-     * not provided Osmose assumes it will be given in the configuration file by
-     * parameter <i>output.dir.path</i>. Providing input arguments to Osmose
-     * allows you to run only one configuration. If you were to run several
-     * configurations you should use the <i>filepath.txt</i>.
+     * provides the list of configuration files (refer to {@link #readFilepath()}).
+     * The first argument is a path to a configuration file. The second argument is
+     * the path for writing the output files. If not provided Osmose assumes it will
+     * be given in the configuration file by parameter <i>output.dir.path</i>.
+     * Providing input arguments to Osmose allows you to run only one configuration.
+     * If you were to run several configurations you should use the
+     * <i>filepath.txt</i>.
      *
      * @param args, arguments from {@link #main(java.lang.String...)}.
      */
@@ -119,15 +114,13 @@ public class Osmose extends OLogger {
         // Sets of command line options
         Options opt = new Options(args);
         // Set 1: Osmose configuration files are listed from a file
-        opt.addSet("Usage1", 0)
-                .addOption("F", Separator.BLANK)
-                .addOption("update", Multiplicity.ZERO_OR_ONE);
+        opt.addSet("Usage1", 0).addOption("F", Separator.BLANK).addOption("update", Multiplicity.ZERO_OR_ONE)
+                .addOption("force", Multiplicity.ZERO_OR_ONE);
         // Set 2: Osmose configuration files are given as arguments
-        opt.addSet("Usage2", 1, Integer.MAX_VALUE)
-                .addOption("update", Multiplicity.ZERO_OR_ONE);
+        opt.addSet("Usage2", 1, Integer.MAX_VALUE).addOption("update", Multiplicity.ZERO_OR_ONE).addOption("force",
+                Multiplicity.ZERO_OR_ONE);
         // Set 3: Set up Indiseas simulations
-        opt.addSet("Usage3", 0)
-                .addOption("indiseas", Separator.BLANK);
+        opt.addSet("Usage3", 0).addOption("indiseas", Separator.BLANK);
         // For all sets, user can specify parameter values that will overwrite
         // the values defined in the configuration files
         opt.addOptionAllSets("P", true, Separator.EQUALS, Multiplicity.ZERO_OR_MORE);
@@ -143,7 +136,7 @@ public class Osmose extends OLogger {
             error("Invalid command line usage.", new IllegalArgumentException(opt.getCheckErrors()));
         }
 
-        configurationFiles = new ArrayList();
+        configurationFiles = new ArrayList<>();
 
         // Usage1 & Usage2, OSMOSE
         if (set.getSetName().equals("Usage1")) {
@@ -161,13 +154,19 @@ public class Osmose extends OLogger {
                     updateConfiguration = true;
                 } else {
                     info(getCmdUsage());
-                    error("Invalid command line options.", new IllegalArgumentException("-update and -P options are mutually exclusive."));
+                    error("Invalid command line options.",
+                            new IllegalArgumentException("-update and -P options are mutually exclusive."));
                 }
             }
+
+            if (set.isSet("force")) {
+                this.forceConfiguration = true;
+            }
+
         }
 
         // Initialises the set of command line options
-        cmd = new HashMap();
+        cmd = new HashMap<>();
 
         // Parameters option -Pkey=value
         if (set.isSet("P")) {
@@ -183,7 +182,8 @@ public class Osmose extends OLogger {
         // Verbose and quiet options are exclusive
         if (set.isSet("verbose") && set.isSet("quiet")) {
             info(getCmdUsage());
-            error("Invalid command usage, -verbose and -quiet options are exclusive", new IllegalArgumentException("Osmose logging cannot be both verbose and quiet."));
+            error("Invalid command usage, -verbose and -quiet options are exclusive",
+                    new IllegalArgumentException("Osmose logging cannot be both verbose and quiet."));
         }
         if (set.isSet("verbose")) {
             getLogger().setLevel(Level.FINE);
@@ -212,8 +212,8 @@ public class Osmose extends OLogger {
         // Read usage from ressources/cmd-usage.txt
         StringBuilder usage = new StringBuilder();
         try {
-            BufferedReader bfIn = new BufferedReader(new InputStreamReader(
-                    Osmose.class.getResourceAsStream("/cmd-usage.txt")));
+            BufferedReader bfIn = new BufferedReader(
+                    new InputStreamReader(Osmose.class.getResourceAsStream("/cmd-usage.txt")));
             String line;
             while ((line = bfIn.readLine()) != null) {
                 usage.append(line);
@@ -226,15 +226,13 @@ public class Osmose extends OLogger {
     }
 
     /**
-     * Either update the configuration files, generate lists of Indiseas
-     * simulations or run the simulations, depending on the command line
-     * arguments.
+     * Either update the configuration files, generate lists of Indiseas simulations
+     * or run the simulations, depending on the command line arguments.
+     *
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
     public void run() throws IOException, InvalidRangeException {
-        
-        
 
         if (updateConfiguration) {
             for (String configurationFile : configurationFiles) {
@@ -266,16 +264,15 @@ public class Osmose extends OLogger {
 
     /**
      * Run a specified configuration in multi-threads mode. It initialises a new
-     * {@link Configuration} and launches concurrently batches of simulations.
-     * The number of simulations is controlled by parameter
-     * <i>simulation.nsimu</i>. The user can control how many CPUs are allocated
-     * to running the simulations with parameter <i>simulation.ncpu</i>. If this
-     * parameter is not provided in the configuration file or the value exceed
-     * the number of available processors in the system, Osmose will set it
-     * automatically to the number of available processors
-     * ({@code Runtime.getRuntime().availableProcessors()}). If the number of
-     * simulations exceed the number of processors allocated to running the
-     * configuration, Osmose will launch sequentially batches of simulations,
+     * {@link Configuration} and launches concurrently batches of simulations. The
+     * number of simulations is controlled by parameter <i>simulation.nsimu</i>. The
+     * user can control how many CPUs are allocated to running the simulations with
+     * parameter <i>simulation.ncpu</i>. If this parameter is not provided in the
+     * configuration file or the value exceed the number of available processors in
+     * the system, Osmose will set it automatically to the number of available
+     * processors ({@code Runtime.getRuntime().availableProcessors()}). If the
+     * number of simulations exceed the number of processors allocated to running
+     * the configuration, Osmose will launch sequentially batches of simulations,
      * each batch running concurrently as many simulations as the number of
      * allocated CPUs.
      *
@@ -291,9 +288,15 @@ public class Osmose extends OLogger {
         configuration = new Configuration(configurationFile, cmd);
         if (!configuration.load()) {
             StringBuilder msg = new StringBuilder();
-            msg.append("Your configuration file must be updated. Please run osmose with the -update option.\n");
-            msg.append("Example: java -jar osmose.jar -update config.csv");
-            error(msg.toString(), null);
+            if (this.forceConfiguration) {
+                msg.append("Your configuration file must be updated. However you decided to force the configuration.");
+                msg.append("**Do it at your own risks!!!**");
+                warning(msg.toString());
+            } else {
+                msg.append("Your configuration file must be updated. Please run osmose with the -update option.\n");
+                msg.append("Example: java -jar osmose.jar -update config.csv");
+                error(msg.toString(), null);
+            }
         }
         configuration.init();
 
@@ -342,9 +345,9 @@ public class Osmose extends OLogger {
     }
 
     /**
-     * Inner class that initializes and runs one simulation in a dedicated
-     * thread. It informs the {@link java.util.concurrent.CountDownLatch} when
-     * the simulation has completed (with or without error).
+     * Inner class that initializes and runs one simulation in a dedicated thread.
+     * It informs the {@link java.util.concurrent.CountDownLatch} when the
+     * simulation has completed (with or without error).
      */
     private class Worker implements Runnable {
 
@@ -353,22 +356,20 @@ public class Osmose extends OLogger {
          */
         private final int rank;
         /**
-         * The {@link java.util.concurrent.CountDownLatch} that will wait for
-         * this {@link Simulation} to complete before decrementing the count of
-         * the latch.
+         * The {@link java.util.concurrent.CountDownLatch} that will wait for this
+         * {@link Simulation} to complete before decrementing the count of the latch.
          */
         private final CountDownLatch doneSignal;
 
         /**
-         * Initializes a new {@code Worker} object for running the
-         * {@code Simulation} given as an argument and decrements the
-         * {@code CountDownLatch} given as an argument when the simulation has
-         * completed.
+         * Initializes a new {@code Worker} object for running the {@code Simulation}
+         * given as an argument and decrements the {@code CountDownLatch} given as an
+         * argument when the simulation has completed.
          *
-         * @param rank, the rank of the simulation to run in this thread
-         * @param doneSignal, the {@link java.util.concurrent.CountDownLatch}
-         * that will wait for {@code simulation} to complete before decrementing
-         * the count of the latch.
+         * @param rank,       the rank of the simulation to run in this thread
+         * @param doneSignal, the {@link java.util.concurrent.CountDownLatch} that will
+         *                    wait for {@code simulation} to complete before
+         *                    decrementing the count of the latch.
          */
         public Worker(int rank, CountDownLatch doneSignal) {
             this.rank = rank;
@@ -376,8 +377,8 @@ public class Osmose extends OLogger {
         }
 
         /**
-         * Initializes and runs the current {@code Simulation} object in this
-         * thread and decrements the count of the latch when it is completed.
+         * Initializes and runs the current {@code Simulation} object in this thread and
+         * decrements the count of the latch when it is completed.
          */
         @Override
         public void run() {
@@ -387,7 +388,7 @@ public class Osmose extends OLogger {
                 simulation[rank].init();
                 simulation[rank].run();
                 int time = (int) ((System.currentTimeMillis() - begin) / 1000);
-                info("Simulation {0} completed (time ellapsed: {1} seconds)", new Object[]{rank, time});
+                info("Simulation {0} completed (time ellapsed: {1} seconds)", new Object[] { rank, time });
                 simulation[rank].destroy();
             } finally {
                 doneSignal.countDown();
@@ -396,13 +397,13 @@ public class Osmose extends OLogger {
     }
 
     /**
-     * Returns a list of configuration files listed from a text file. Lines
-     * starting with # or // or empty lines are ignored. The function does not
-     * check whether the paths to the configuration files are correct. It is
-     * handled in the constructor of the {@link Configuration} object.
+     * Returns a list of configuration files listed from a text file. Lines starting
+     * with # or // or empty lines are ignored. The function does not check whether
+     * the paths to the configuration files are correct. It is handled in the
+     * constructor of the {@link Configuration} object.
      *
      * @param filename, the file that contains the list of Osmose configuration
-     * files
+     *                  files
      * @return a list of configuration files.
      */
     public List<String> readFilepath(String filename) {
@@ -419,7 +420,7 @@ public class Osmose extends OLogger {
         info("Listing configuration files from " + filename);
         BufferedReader bfIn = new BufferedReader(new InputStreamReader(filepath));
         String line;
-        List<String> cfgFiles = new ArrayList();
+        List<String> cfgFiles = new ArrayList<>();
         try {
             while ((line = bfIn.readLine()) != null) {
                 line = line.trim();
@@ -445,8 +446,8 @@ public class Osmose extends OLogger {
      * configurations.
      *
      * @param args, the input arguments. Refer to
-     * {@link #readArgs(java.lang.String...)} for details about accepted
-     * arguments.
+     *              {@link #readArgs(java.lang.String...)} for details about
+     *              accepted arguments.
      * @throws java.io.IOException
      * @throws ucar.ma2.InvalidRangeException
      */
@@ -484,7 +485,7 @@ public class Osmose extends OLogger {
      * Gets the {@link Simulation} object at specified rank.
      *
      * @param rank, the rank of the simulation, ranging from 0 to
-     * <i>simulation.nsimu</i>
+     *              <i>simulation.nsimu</i>
      * @return the {@link Simulation} object of rank {@code rank}
      */
     public Simulation getSimulation(int rank) {

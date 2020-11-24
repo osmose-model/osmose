@@ -1,18 +1,11 @@
 /* 
- * OSMOSE (Object-oriented Simulator of Marine ecOSystems Exploitation)
+ * 
+ * OSMOSE (Object-oriented Simulator of Marine Ecosystems)
  * http://www.osmose-model.org
  * 
- * Copyright (c) IRD (Institut de Recherche pour le Développement) 2009-2013
+ * Copyright (C) IRD (Institut de Recherche pour le Développement) 2009-2020
  * 
- * Contributor(s):
- * Yunne SHIN (yunne.shin@ird.fr),
- * Morgane TRAVERS (morgane.travers@ifremer.fr)
- * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
- * Philippe VERLEY (philippe.verley@ird.fr)
- * Laure VELEZ (laure.velez@ird.fr)
- * Nicolas Barrier (nicolas.barrier@ird.fr)
- * 
- * This software is a computer program whose purpose is to simulate fish
+ * Osmose is a computer program whose purpose is to simulate fish
  * populations and their interactions with their biotic and abiotic environment.
  * OSMOSE is a spatial, multispecies and individual-based model which assumes
  * size-based opportunistic predation based on spatio-temporal co-occurrence
@@ -23,32 +16,29 @@
  * starvation mortalities, reproduction and migration) and fishing mortalities
  * (Shin and Cury 2001, 2004).
  * 
- * This software is governed by the CeCILL-B license under French law and
- * abiding by the rules of distribution of free software.  You can  use, 
- * modify and/ or redistribute the software under the terms of the CeCILL-B
- * license as circulated by CEA, CNRS and INRIA at the following URL
- * "http://www.cecill.info". 
+ * Contributor(s):
+ * Yunne SHIN (yunne.shin@ird.fr),
+ * Morgane TRAVERS (morgane.travers@ifremer.fr)
+ * Ricardo OLIVEROS RAMOS (ricardo.oliveros@gmail.com)
+ * Philippe VERLEY (philippe.verley@ird.fr)
+ * Laure VELEZ (laure.velez@ird.fr)
+ * Nicolas Barrier (nicolas.barrier@ird.fr)
  * 
- * As a counterpart to the access to the source code and  rights to copy,
- * modify and redistribute granted by the license, users are provided only
- * with a limited warranty  and the software's author,  the holder of the
- * economic rights,  and the successive licensors  have only  limited
- * liability. 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation (version 3 of the License). Full description
+ * is provided on the LICENSE file.
  * 
- * In this respect, the user's attention is drawn to the risks associated
- * with loading,  using,  modifying and/or developing or reproducing the
- * software by the user in light of its specific status of free software,
- * that may mean  that it is complicated to manipulate,  and  that  also
- * therefore means  that it is reserved for developers  and  experienced
- * professionals having in-depth computer knowledge. Users are therefore
- * encouraged to load and test the software's suitability as regards their
- * requirements in conditions enabling the security of their systems and/or 
- * data to be ensured and,  more generally, to use and operate it in the 
- * same conditions as regards security. 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  * 
- * The fact that you are presently reading this means that you have had
- * knowledge of the CeCILL-B license and that you accept its terms.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  */
+
 package fr.ird.osmose.resource;
 
 import fr.ird.osmose.Cell;
@@ -75,11 +65,11 @@ public class ResourceForcing extends OsmoseLinker {
     /**
      * Index of the resource group.
      */
-    private final int index;
+    private final int fileindex;
 
     /**
-     * Array of double that stores the biomass, in tonne, on the Osmose grid for
-     * the current time step of the simulation.
+     * Array of double that stores the biomass, in tonne, on the Osmose grid for the
+     * current time step of the simulation.
      * {@code biomass[nline_osmose][ncolumn_osmose]}. The array is updated every
      * time step in the {@link #update(int)} function.
      */
@@ -97,20 +87,20 @@ public class ResourceForcing extends OsmoseLinker {
 
     /**
      * The constant biomass, in tonne, in a cell of the model. Parameter
-     * 'species.biomass.total.sp#' provides the total biomass of a given
-     * resource group in the system for every time step. This feature allows to
-     * consider a resource group with a constant biomass uniformly distributed
-     * over the grid of the model and over time. This feature has been added as
-     * a quick patch for a configuration that seems to lack a food compartment
-     * and as a result cannot reach any biomass equilibrium. It provides to the
-     * system a constant pool of biomass throughout time. It should only be used
-     * for "debugging" a configuration.
+     * 'species.biomass.total.sp#' provides the total biomass of a given resource
+     * group in the system for every time step. This feature allows to consider a
+     * resource group with a constant biomass uniformly distributed over the grid of
+     * the model and over time. This feature has been added as a quick patch for a
+     * configuration that seems to lack a food compartment and as a result cannot
+     * reach any biomass equilibrium. It provides to the system a constant pool of
+     * biomass throughout time. It should only be used for "debugging" a
+     * configuration.
      */
     private double uBiomass;
 
     /**
-     * Multiplier of the resource biomass. Parameter 'species.multiplier.sp#'
-     * for virtually increasing or decreasing resource biomass.
+     * Multiplier of the resource biomass. Parameter 'species.multiplier.sp#' for
+     * virtually increasing or decreasing resource biomass.
      */
     private double multiplier;
 
@@ -118,35 +108,44 @@ public class ResourceForcing extends OsmoseLinker {
      * Length of the NetCDF time series.
      */
     private int timeLength;
-    
+
     /** List of resource file names. */
     private String[] fileNames;
-    
+
     /** Number of time-steps stored in each file. */
     private int[] nSteps;
-    
+
     /** Number of files. */
     private int nFiles;
-    
+
     /** Index of the file to read for each time step. */
     private int[] fileMapping;
-    
-    /** Index of the time step to each for each simulated time step. **
+
+    /**
+     * Index of the time step to each for each simulated time step. **
      *
-     * @param index 
+     * @param index
      */
     private int[] stepMapping;
-    
-//////////////
-// Constructor
-//////////////
-    public ResourceForcing(int index) {
+
+    /** Number of time steps within a year.*/
+    private int ncPerYear;
+
+    /** Resource index. [0, nbkg -1] for background species, [nbkg, nbkg + nrsc - 1] 
+     * for resource species. */
+    private int index;
+
+    //////////////
+    // Constructor
+    //////////////
+    public ResourceForcing(int fileindex, int index) {
+        this.fileindex = fileindex;
         this.index = index;
     }
 
-////////////////////////////
-// Definition of the methods
-////////////////////////////
+    ////////////////////////////
+    // Definition of the methods
+    ////////////////////////////
     /**
      * Reads and checks parameters from configuration file.
      */
@@ -154,19 +153,18 @@ public class ResourceForcing extends OsmoseLinker {
 
         List<String> listFiles = new ArrayList<>();
 
-        if (!getConfiguration().isNull("species.biomass.total.sp" + index)) {
+        if (!getConfiguration().isNull("species.biomass.total.sp" + fileindex)) {
             // uniform biomass
-            uBiomass = getConfiguration().getDouble("species.biomass.total.sp" + index) / getGrid().getNOceanCell();
+            uBiomass = getConfiguration().getDouble("species.biomass.total.sp" + fileindex) / getGrid().getNOceanCell();
 
-        } else if (!getConfiguration().isNull("species.file.sp" + index)) {
+        } else if (!getConfiguration().isNull("species.file.sp" + fileindex)) {
             // biomass provided from NetCDF file
             // set negative value to uniform biomass
             uBiomass = -1.d;
 
             // check resource is properly defined in the NetCDF file
-            String name = getConfiguration().getString("species.name.sp" + index);
-            String ncFile = getConfiguration().getFile("species.file.sp" + index);
-
+            String name = getConfiguration().getString("species.name.sp" + fileindex);
+            String ncFile = getConfiguration().getFile("species.file.sp" + fileindex);
             // Recover the file pattern to match
             String pattern = new File(ncFile).getName();
 
@@ -174,26 +172,35 @@ public class ResourceForcing extends OsmoseLinker {
             String[] fileList = directory.list();
             for (String f : fileList) {
                 if (f.matches(pattern)) {
-                    listFiles.add(f);
+                    File tempfile = new File(directory, f);
+                    listFiles.add(tempfile.getAbsolutePath());
                 }
             }
-            
+
             Object[] tempObj = listFiles.stream().sorted().toArray();
             fileNames = new String[tempObj.length];
-            for(int k=0; k<tempObj.length; k++) { 
-                fileNames[k] = (String) tempObj[k];   
+            for (int k = 0; k < tempObj.length; k++) {
+                fileNames[k] = (String) tempObj[k];
             }
-            
+
             this.nFiles = fileNames.length;
             this.nSteps = new int[this.nFiles];
             int cpt = 0;
 
+            if (this.nFiles == 0) {
+                StringBuilder msg = new StringBuilder();
+                msg.append("No forcing file has been found for species index " + fileindex + "\n");
+                msg.append("The program will stop");
+                error("Error reading resource file", new IOException(msg.toString()));
+            }
+
             for (String temp : fileNames) {
 
-                ncFile = new File(directory, temp).getAbsolutePath();
-                
+                ncFile = new File(temp).getAbsolutePath();
+
                 if (!new File(ncFile).exists()) {
-                    error("Error reading forcing parameters for resource group " + index, new FileNotFoundException("NetCDF file " + ncFile + " does not exist."));
+                    error("Error reading forcing parameters for resource group " + fileindex,
+                            new FileNotFoundException("NetCDF file " + ncFile + " does not exist."));
                 }
 
                 try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
@@ -204,25 +211,50 @@ public class ResourceForcing extends OsmoseLinker {
                     cpt++;
                     // check grid dimension
                     if (getGrid().get_ny() != shape[1] | getGrid().get_nx() != shape[2]) {
-                        throw new IOException("NetCDF grid dimensions of resource group " + index + " does not match Osmose grid dimensions");
+                        throw new IOException("NetCDF grid dimensions of resource group " + fileindex
+                                + " does not match Osmose grid dimensions");
                     }
                 } catch (IOException ex) {
                     error("NetCDF file " + ncFile + ", variable " + name + "cannot be read", ex);
                 }
-            }
+            } // end of loop over files
 
             // user-defined caching mode
-            if (!getConfiguration().isNull("species.file.caching.sp" + index)) {
-                caching = ResourceCaching.valueOf(getConfiguration().getString("species.file.caching.sp" + index).toUpperCase());
+            if (!getConfiguration().isNull("species.file.caching.sp" + fileindex)) {
+                caching = ResourceCaching
+                        .valueOf(getConfiguration().getString("species.file.caching.sp" + fileindex).toUpperCase());
+            }
+
+            this.initTimeMapping();
+
+            if (!getConfiguration().isNull("species.biomass.nsteps.year.sp" + fileindex)) {
+                ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year.sp" + fileindex);
+            } else {
+                if (!getConfiguration().isNull("species.biomass.nsteps.year")) {
+                    ncPerYear = getConfiguration().getInt("species.biomass.nsteps.year");
+                } else {
+                    // If parameter is not set,
+                    if (this.getConfiguration().getNStepYear() == this.timeLength) {
+                        warning("Number of steps in the NetCDF file equals ndt/year for species " + fileindex);
+                        warning("Assumes ncPerYear = ndt/year");
+                        this.ncPerYear = this.timeLength;
+                    } else {
+                        StringBuilder errmsg = new StringBuilder();
+                        errmsg.append("No species.biomass.nsteps.year or species.biomass.nsteps.year.sp ")
+                                .append(fileindex).append(" parameter found.\n");
+                        errmsg.append("Program will stop");
+                        error(errmsg.toString(), null);
+                    }
+                }
             }
 
         } else {
-            error("No input file is provided for resource " + getConfiguration().getString("species.name.sp" + index), new IOException("Cannot initialize resource group " + index));
-        }
-                        
-        this.initTimeMapping();
+            error("No input file is provided for resource "
+                    + getConfiguration().getString("species.name.sp" + fileindex),
+                    new IOException("Cannot initialize resource group " + fileindex));
+        } // end of statement to check if file or constant value should be used.
 
-        // prevent irrelevant caching mode : incremental caching requested but 
+        // prevent irrelevant caching mode : incremental caching requested but
         // NetCDF time series as long as simulation time
         if (caching.equals(ResourceCaching.INCREMENTAL) && (timeLength == getConfiguration().getNStep())) {
             caching = ResourceCaching.NONE;
@@ -230,46 +262,48 @@ public class ResourceForcing extends OsmoseLinker {
 
         // initializes the biomass cache
         if (!caching.equals(ResourceCaching.NONE) && (uBiomass < 0)) {
-            cachedBiomass = new HashMap();
+            cachedBiomass = new HashMap<>();
         }
 
         // biomass multiplier
-        if (!getConfiguration().isNull("species.multiplier.sp" + index)) {
-            multiplier = getConfiguration().getFloat("species.multiplier.sp" + index);
-            warning("Resource biomass for resource group " + index + " will be multiplied by " + multiplier + " accordingly to parameter " + getConfiguration().printParameter("species.multiplier.sp" + index));
+        if (!getConfiguration().isNull("species.multiplier.sp" + fileindex)) {
+            multiplier = getConfiguration().getFloat("species.multiplier.sp" + fileindex);
+            warning("Resource biomass for resource group " + fileindex + " will be multiplied by " + multiplier
+                    + " accordingly to parameter "
+                    + getConfiguration().printParameter("species.multiplier.sp" + fileindex));
         } else {
             multiplier = 1.d;
-        }       
+        }
     }
-    
-    public void initTimeMapping() throws IOException { 
-        
+
+    public void initTimeMapping() throws IOException {
+
         timeLength = 0;
         for (int c : this.nSteps) {
             timeLength += c;
         }
 
         if ((timeLength < getConfiguration().getNStep()) && (timeLength % getConfiguration().getNStepYear() != 0)) {
-            throw new IOException("Time dimension of the NetCDF resource group " + index + " must be a multiple of the number of time steps per year");
+            throw new IOException("Time dimension of the NetCDF resource group " + fileindex
+                    + " must be a multiple of the number of time steps per year");
         }
-                     
+
         this.fileMapping = new int[timeLength];
         this.stepMapping = new int[timeLength];
-        
+
         int cpt = 0;
-        for (int ifile=0; ifile < this.nFiles; ifile++) {
-            for(int istep=0; istep < this.nSteps[ifile]; istep++) {
+        for (int ifile = 0; ifile < this.nFiles; ifile++) {
+            for (int istep = 0; istep < this.nSteps[ifile]; istep++) {
                 fileMapping[cpt] = ifile;
                 stepMapping[cpt] = istep;
                 cpt++;
             }
-        }    
+        }
     }
-    
 
     /**
-     * Updates the biomass of the resource groups at the current time step of
-     * the simulation.
+     * Updates the biomass of the resource groups at the current time step of the
+     * simulation.
      *
      * @param iStepSimu, the current step of the simulation
      */
@@ -280,14 +314,15 @@ public class ResourceForcing extends OsmoseLinker {
             return;
         }
 
-        int iStepNc = iStepSimu % timeLength;
+        int ndt = this.getConfiguration().getNStepYear();
+        int iStepNc = (iStepSimu / (ndt / this.ncPerYear)) % timeLength;
 
         switch (caching) {
             case ALL:
                 if (iStepSimu == 0) {
                     // cache whole time series at first time step
                     for (int iTime = 0; iTime < timeLength; iTime++) {
-                        debug("Caching biomass from resource group " + index + " time step " + iTime);
+                        debug("Caching biomass from resource group " + fileindex + " time step " + iTime);
                         cachedBiomass.put(iTime, readBiomass(iTime));
                     }
                 }
@@ -297,7 +332,7 @@ public class ResourceForcing extends OsmoseLinker {
             case INCREMENTAL:
                 if (iStepSimu == iStepNc) {
                     // cache current time step
-                    debug("Caching biomass from resource group " + index + " time step " + iStepNc);
+                    debug("Caching biomass from resource group " + fileindex + " time step " + iStepNc);
                     cachedBiomass.put(iStepNc, readBiomass(iStepNc));
                 }
                 // retrieve biomass from cache
@@ -305,7 +340,7 @@ public class ResourceForcing extends OsmoseLinker {
                 break;
             case NONE:
                 // update biomass at current time step, no caching
-                debug("Reading biomass from resource group " + index + " time step " + iStepNc);
+                debug("Reading biomass from resource group " + fileindex + " time step " + iStepNc);
                 biomass = readBiomass(iStepNc);
                 break;
         }
@@ -319,32 +354,43 @@ public class ResourceForcing extends OsmoseLinker {
 
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
-        
+
         int iFile = this.fileMapping[iStepNc];
         int iStep = this.stepMapping[iStepNc];
-       
-        String ncFile = getConfiguration().resolve(this.fileNames[iFile], getConfiguration().getMainFile());
+
+        // String ncFile = getConfiguration().resolve(this.fileNames[iFile],
+        // getConfiguration().getMainFile());
+        String ncFile = this.fileNames[iFile];
 
         double[][] rscbiomass = new double[ny][nx];
 
-        String name = getConfiguration().getString("species.name.sp" + index);
-        //String ncFile = getConfiguration().getFile("species.file.sp" + index);
+        String name = getConfiguration().getString("species.name.sp" + fileindex);
+        // String ncFile = getConfiguration().getFile("species.file.sp" + index);
         try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
-            //String message = String.format("Step=%d ==> Reading %s from %s, step=%d", iStepNc, name, ncFile, iStep);
-            //this.getLogger().info(message);
+            // String message = String.format("Step=%d ==> Reading %s from %s, step=%d",
+            // iStepNc, name, ncFile, iStep);
+            // this.getLogger().info(message);
             Variable variable = nc.findVariable(name);
-            Array ncbiomass = variable.read(new int[]{iStep, 0, 0}, new int[]{1, ny, nx}).reduce();
-            Index index = ncbiomass.getIndex();
+            Array ncbiomass = variable.read(new int[] { iStep, 0, 0 }, new int[] { 1, ny, nx }).reduce();
+            Index ncindex = ncbiomass.getIndex();
             getGrid().getCells().stream().filter((cell) -> (!cell.isLand())).forEach((cell) -> {
                 int i = cell.get_igrid();
                 int j = cell.get_jgrid();
-                index.set(j, i);
-                rscbiomass[j][i] = ncbiomass.getDouble(index);
+                ncindex.set(j, i);
+                rscbiomass[j][i] = ncbiomass.getDouble(ncindex);
             });
         } catch (IOException | InvalidRangeException ex) {
             error("File " + ncFile + ", variable " + name + "cannot be read", ex);
         }
         return rscbiomass;
+    }
+
+    public int getIndex() {
+        return this.index;
+    }
+
+    public int getFileIndex() {
+        return this.fileindex;
     }
 
 }
