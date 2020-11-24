@@ -41,13 +41,25 @@
 package fr.ird.osmose;
 
 /**
+ * Interface for species (focal, background and resource).
+ * 
+ * Allow to recover the species name, species file index and species index.
  *
  * @author barrier
  */
 public interface ISpecies {
-    
+
+    /** Recover the species name. */
     public String getName();
+
+    /** Recover the species index as defined in the file. */
     public int getFileSpeciesIndex();
+
+    /**
+     * Recover the species index. [0, nspecies - 1] for focal, [nspecies, nspecies +
+     * nbkg - 1] for background species and [nspecies + nbkg, nspecies + nbkg + nrsc
+     * - 1] for resource species.
+     */
     public int getSpeciesIndex();
-    
+
 }

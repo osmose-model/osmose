@@ -57,15 +57,15 @@ package fr.ird.osmose;
  */
 public class Species implements ISpecies {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
-    
-    /** 
+    ///////////////////////////////
+    // Declaration of the variables
+    ///////////////////////////////
+
+    /**
      * Index of the species. From 0 to Nspecies - 1 for focal species
      */
     private final int index;
-    
+
     /**
      * Trophic level of an egg.
      */
@@ -79,8 +79,8 @@ public class Species implements ISpecies {
      */
     private final String name;
     /**
-     * Lifespan expressed in number of time step. A lifespan of 5 years means
-     * that a fish will die as soon as it turns 5 years old. Parameter
+     * Lifespan expressed in number of time step. A lifespan of 5 years means that a
+     * fish will die as soon as it turns 5 years old. Parameter
      * <i>species.lifespan.sp#</i>
      */
     private final int lifespan;
@@ -108,40 +108,40 @@ public class Species implements ISpecies {
     private final float eggWeight;
 
     private int zlayer = 0;
-        
-    /** Threshold (number of time-steps) at which
-     * a species move from larva to adults. Expressed in
-     * time steps.
+
+    /**
+     * Threshold (number of time-steps) at which a species move from larva to
+     * adults. Expressed in time steps.
      */
     private final int lar2ad_thres;
-       
+
     private double beta_bioen;
 
-//////////////
-// Constructor
-//////////////
+    //////////////
+    // Constructor
+    //////////////
     /**
      * Create a new species
      *
      * @param fileIndex, an integer, the index of the species
-     * {@code [0, nbTotSpecies - 1]}
+     *                   {@code [0, nbTotSpecies - 1]}
      * @param index
      */
-    public Species(int fileIndex ,int index) {
-        
+    public Species(int fileIndex, int index) {
+
         this.index = index;
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
         this.fileIndex = fileIndex;
-        
+
         // Initialization of parameters
         name = cfg.getString("species.name.sp" + fileIndex);
         c = cfg.getFloat("species.length2weight.condition.factor.sp" + fileIndex);
         bPower = cfg.getFloat("species.length2weight.allometric.power.sp" + fileIndex);
-          
+
         if (!cfg.isBioenEnabled()) {
-            
-            // If not bioen, initialize age at maturity 
+
+            // If not bioen, initialize age at maturity
             // used for reproduction process and egg size
             // used for growth
             if (!cfg.isNull("species.maturity.size.sp" + fileIndex)) {
@@ -155,6 +155,7 @@ public class Species implements ISpecies {
             eggSize = cfg.getFloat("species.egg.size.sp" + fileIndex);
 
         } else {
+            // if Bioen module enabled, use maximum values
             sizeMaturity = Float.MAX_VALUE;
             ageMaturity = Float.MAX_VALUE;
             eggSize = Float.MAX_VALUE;
@@ -170,11 +171,11 @@ public class Species implements ISpecies {
             String key = String.format("species.beta.sp%d", fileIndex);
             beta_bioen = cfg.getDouble(key);
         }
-        
+
         // If the key is found, then the age switch in years is converted into
         // time-step.
         String key = "species.larva2adults.agethres.sp" + fileIndex;
-        if(cfg.canFind(key)) {
+        if (cfg.canFind(key)) {
             float age_adult = cfg.getFloat(key);
             this.lar2ad_thres = (int) Math.round(age_adult * cfg.getNStepYear());
         } else {
@@ -182,7 +183,7 @@ public class Species implements ISpecies {
             this.lar2ad_thres = 1;
         }
     }
-    
+
     public int getThresAge() {
         return this.lar2ad_thres;
     }
@@ -194,10 +195,10 @@ public class Species implements ISpecies {
     public int getDepthLayer() {
         return this.zlayer;
     }
-    
-//////////////////////////////
-// Definition of the functions
-//////////////////////////////
+
+    //////////////////////////////
+    // Definition of the functions
+    //////////////////////////////
     /**
      * Computes the weight, in gram, corresponding to the given length, in
      * centimetre.
@@ -210,7 +211,7 @@ public class Species implements ISpecies {
     }
 
     /**
-     * Computes the length, in centimetre, corresponding to the given weight, in
+     * Computes the length, in centimeter, corresponding to the given weight, in
      * gram.
      *
      * @param weight, the weight in gram
@@ -221,8 +222,7 @@ public class Species implements ISpecies {
     }
 
     /**
-     * Returns the lifespan of the species. Parameter
-     * <i>species.lifespan.sp#</i>
+     * Returns the lifespan of the species. Parameter <i>species.lifespan.sp#</i>
      *
      * @return the lifespan, in number of time step
      */
@@ -239,19 +239,20 @@ public class Species implements ISpecies {
     public int getFileSpeciesIndex() {
         return fileIndex;
     }
-    
-    /** Return the global index of the species. 
+
+    /**
+     * Return the global index of the species.
      * 
      * Index between [0, Nspec - 1].
      * 
      * 
-     * @return 
+     * @return
      */
     @Override
-    public int getSpeciesIndex() { 
+    public int getSpeciesIndex() {
         return index;
     }
-    
+
     /**
      * Returns the name of the species. Parameter <i>species.name.sp#</i>
      *
@@ -272,10 +273,9 @@ public class Species implements ISpecies {
         float output = cfg.isBioenEnabled() ? this.computeLength(eggWeight) : this.eggSize;
         return output;
     }
-    
+
     /**
-     * Returns the weight of an egg in gram. Parameter
-     * <i>species.egg.weight.sp#</i>
+     * Returns the weight of an egg in gram. Parameter <i>species.egg.weight.sp#</i>
      *
      * @return the weight of an egg in gram
      */
@@ -298,14 +298,9 @@ public class Species implements ISpecies {
      * @return
      */
     /*
-    private boolean isVulnerable(double biomass) {
-        double Bv = 0.d;
-        double Sv = 1.d;
-        return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
-    }
-    */
+     * private boolean isVulnerable(double biomass) { double Bv = 0.d; double Sv =
+     * 1.d; return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
+     * }
+     */
 
-    public double getBPower() {
-        return this.bPower;
-    }
 }
