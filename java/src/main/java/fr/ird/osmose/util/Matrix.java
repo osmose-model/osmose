@@ -188,7 +188,7 @@ public class Matrix extends OsmoseLinker {
         
         this.sortMatrix();
         debug(this.toString());
-
+        
     }
     
     /**
@@ -334,7 +334,12 @@ public class Matrix extends OsmoseLinker {
     private void sortMatrix() {
         
         // Copy the accessibility matrix
-        double[][] accessMatrixTemp = Arrays.copyOf(this.accessibilityMatrix, accessibilityMatrix.length);
+        double[][] accessMatrixTemp = new double[nPreys][nPred];
+        for(int i = 0; i < nPreys; i++) {
+            for(int j = 0; j < nPred; j++) { 
+                accessMatrixTemp[i][j] = this.accessibilityMatrix[i][j];
+            }
+        }
         
         // copy the input arrays of pred names and class;
         float[] classPredTemp = Arrays.copyOf(classPred, nPred);
@@ -430,7 +435,11 @@ public class Matrix extends OsmoseLinker {
             bld.append("\n");
         }
         
-        return bld.toString();
+        // Remove infinite class from string output
+        output =  bld.toString();
+        String toRemove = String.format("< %f", Float.MAX_VALUE);
+        output = output.replaceAll(toRemove, "");
+        return output;
                 
     } 
     
