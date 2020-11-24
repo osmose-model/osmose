@@ -51,7 +51,7 @@ import fr.ird.osmose.util.timeseries.ByRegimeTimeSeries;
  */
 public class FisheryBase extends OsmoseLinker {
 
-    int fisheryIndex;
+    int fileFisheryIndex;
     public double[] fisheryBase;
 
     /**
@@ -60,7 +60,7 @@ public class FisheryBase extends OsmoseLinker {
      * @param fisheryIndex
      */
     public FisheryBase(int fisheryIndex) {
-        this.fisheryIndex = fisheryIndex;
+        this.fileFisheryIndex = fisheryIndex;
         fisheryBase = new double[getConfiguration().getNStep()];
     }
 
@@ -70,10 +70,10 @@ public class FisheryBase extends OsmoseLinker {
     public void init() {
 
         // If a fishing shift exists, take it to extract the fishing values
-        String keyShift = String.format("fisheries.rate.base.shift.fsh%d", this.fisheryIndex);
-        String keyVal = String.format("fisheries.rate.base.fsh%d", this.fisheryIndex);
+        String keyShift = String.format("fisheries.rate.base.shift.fsh%d", this.fileFisheryIndex);
+        String keyVal = String.format("fisheries.rate.base.fsh%d", this.fileFisheryIndex);
         
-        boolean useLog10 = getConfiguration().getBoolean("fisheries.rate.base.log.enabled.fsh" + this.fisheryIndex);
+        boolean useLog10 = getConfiguration().getBoolean("fisheries.rate.base.log.enabled.fsh" + this.fileFisheryIndex);
 
         ByRegimeTimeSeries ts = new ByRegimeTimeSeries(keyShift, keyVal);
         ts.init();
@@ -82,7 +82,7 @@ public class FisheryBase extends OsmoseLinker {
         if(useLog10) {
             for (int i = 0; i < fisheryBase.length; i++) {
                 if(fisheryBase[i] > 0) {
-                    String message = String.format("Fishing mortality rate exponent for fishery %d is positive", this.fisheryIndex);
+                    String message = String.format("Fishing mortality rate exponent for fishery %d is positive", this.fileFisheryIndex);
                     error(message, new IllegalArgumentException());
                 }
                 fisheryBase[i] = Math.exp(fisheryBase[i]);

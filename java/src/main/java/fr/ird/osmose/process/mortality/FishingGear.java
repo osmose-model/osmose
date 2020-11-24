@@ -68,7 +68,7 @@ public class FishingGear extends AbstractMortality {
     /**
      * Fishery index.
      */
-    private final int fisheryIndex;
+    private final int fileFisheryIndex;
 
     // Initialize the time varying array
     private FisheryBase fishingBase;
@@ -88,7 +88,7 @@ public class FishingGear extends AbstractMortality {
 
     public FishingGear(int rank, int fisheryIndex) {
         super(rank);
-        this.fisheryIndex = fisheryIndex;
+        this.fileFisheryIndex = fisheryIndex;
     }
 
     @Override
@@ -102,25 +102,25 @@ public class FishingGear extends AbstractMortality {
         discards = new double[nspecies + nbackground];
 
         // set-up the name of the fishery
-        name = cfg.getString("fisheries.name.fsh" + fisheryIndex);
+        name = cfg.getString("fisheries.name.fsh" + fileFisheryIndex);
 
         checkFisheryEnabled = cfg.getBoolean("fisheries.check.enabled");
 
         // Initialize the time varying array
-        fishingBase = new FisheryBase(fisheryIndex);
+        fishingBase = new FisheryBase(fileFisheryIndex);
         fishingBase.init();
 
-        fishingPeriod = new FisheryPeriod(fisheryIndex);
+        fishingPeriod = new FisheryPeriod(fileFisheryIndex);
         fishingPeriod.init();
 
-        fishingSeasonality = new FisherySeasonality(fisheryIndex);
+        fishingSeasonality = new FisherySeasonality(fileFisheryIndex);
         fishingSeasonality.init();
 
         // fishery spatial maps
         fisheryMapSet = new FisheryMapSet(name, "fisheries.movement", "fishery");
         fisheryMapSet.init();
 
-        selectivity = new FisherySelectivity(fisheryIndex, "fisheries.selectivity", "fsh");
+        selectivity = new FisherySelectivity(fileFisheryIndex, "fisheries.selectivity", "fsh");
         selectivity.init();
 
         if (checkFisheryEnabled) {
@@ -190,7 +190,7 @@ public class FishingGear extends AbstractMortality {
      * @return the fishery index
      */
     public int getFisheryIndex() {
-        return this.fisheryIndex;
+        return this.fileFisheryIndex;
     }
 
     /**
