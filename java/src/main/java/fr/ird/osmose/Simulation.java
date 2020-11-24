@@ -61,19 +61,19 @@ import ucar.nc2.NetcdfFile;
  * parameters are to be run. Every replicated simulation is an instance of this
  * object {@code Simulation}.<br>
  * The {@code Simulation} initialises all the required components for running
- * the simulation such as
- * {@link fr.ird.osmose.step.AbstractStep}, {@link fr.ird.osmose.ltl.LTLForcing}
- * or {@link fr.ird.osmose.populator.PopulatingProcess} and then controls the
- * loop over time.
+ * the simulation such as {@link fr.ird.osmose.step.AbstractStep},
+ * {@link fr.ird.osmose.ltl.LTLForcing} or
+ * {@link fr.ird.osmose.populator.PopulatingProcess} and then controls the loop
+ * over time.
  *
  * @author P.Verley (philippe.verley@ird.fr)
  * @version 3.0b 2013/09/01
  */
 public class Simulation extends OsmoseLinker {
 
-///////////////////////////////
-// Declaration of the variables
-///////////////////////////////
+    ///////////////////////////////
+    // Declaration of the variables
+    ///////////////////////////////
     /**
      * The rank of the simulation. (among replicated simulations)
      */
@@ -82,11 +82,12 @@ public class Simulation extends OsmoseLinker {
      * The set of schools.
      */
     private SchoolSet schoolSet;
-    
+
     private BackgroundSchoolSet backSchoolSet;
-    
+
     /**
-     * The low trophic level forcing class.
+     * The low trophic level forcing class. Indexes from [0, nbkg -1] are the
+     * forcings for bkg species. Indexes from [nbkg, nbkg + nrsc - 1] are for LTL.
      */
     private ResourceForcing[] resourceForcing;
     /**
@@ -110,8 +111,8 @@ public class Simulation extends OsmoseLinker {
      */
     private SimulationStep step;
     /**
-     * Object that is able to take a snapshot of the set of schools and write it
-     * in a NetCDF file. Osmose will be able to restart on such a file.
+     * Object that is able to take a snapshot of the set of schools and write it in
+     * a NetCDF file. Osmose will be able to restart on such a file.
      */
     private SchoolSetSnapshot snapshot;
     /**
@@ -145,9 +146,9 @@ public class Simulation extends OsmoseLinker {
     private List<Trait> evolvingTrait;
     private int n_evolving_trait;
 
-//////////////
-// Constructor
-//////////////
+    //////////////
+    // Constructor
+    //////////////
     /**
      * Creates a new simulation with given rank.
      *
@@ -168,9 +169,9 @@ public class Simulation extends OsmoseLinker {
         snapshot = null;
     }
 
-///////////////////////////////
-// Definition of the functions
-///////////////////////////////
+    ///////////////////////////////
+    // Definition of the functions
+    ///////////////////////////////
     /**
      * Initialize the simulation.
      */
@@ -178,8 +179,9 @@ public class Simulation extends OsmoseLinker {
 
         // Create a new school set, empty at the moment
         schoolSet = new SchoolSet();
-        
-        // barrier.n: init a set of background schools (used to save fisheries and discards)
+
+        // barrier.n: init a set of background schools (used to save fisheries and
+        // discards)
         this.backSchoolSet = new BackgroundSchoolSet();
         this.backSchoolSet.init();
 
@@ -190,9 +192,7 @@ public class Simulation extends OsmoseLinker {
         }
 
         // Initialize time variables
-        n_steps_simu = oneStep
-                ? 1
-                : getConfiguration().getNStep();
+        n_steps_simu = oneStep ? 1 : getConfiguration().getNStep();
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
@@ -211,7 +211,7 @@ public class Simulation extends OsmoseLinker {
                 int nStepYear = getConfiguration().getNStepYear();
                 year = i_step_simu / nStepYear;
                 i_step_year = i_step_simu % nStepYear;
-                info("Restarting simulation from year {0} step {1}", new Object[]{year, i_step_year});
+                info("Restarting simulation from year {0} step {1}", new Object[] { year, i_step_year });
                 restart = true;
             } catch (IOException ex) {
                 error("Failed to open restart file " + ncfile, ex);
@@ -237,9 +237,9 @@ public class Simulation extends OsmoseLinker {
 
         // By default do not make prey records as it is memory expensive
         /**
-         * @warning - phv 2014/01/25 this must be done before calling
-         * step.init() that will in turn call outputManager.init() which may
-         * request prey record.
+         * @warning - phv 2014/01/25 this must be done before calling step.init() that
+         *          will in turn call outputManager.init() which may request prey
+         *          record.
          */
         preyRecord = false;
 
@@ -277,38 +277,38 @@ public class Simulation extends OsmoseLinker {
     }
 
     /**
-     * Initializes resources forcing. The ResourceForcing array contains first
-     * the background species, then the resource species.
+     * Initializes resources forcing. The ResourceForcing array contains first the
+     * background species, then the resource species.
      */
     private void initResourceForcing() {
 
-        int nTot = this.getNBkgSpecies() + this.getConfiguration().getNRscSpecies();
+        int nTot = this.getNBkgSpecies() + this.getNRscSpecies();
         resourceForcing = new ResourceForcing[nTot];
-        
-        int cpt = 0;
-        
+
+        int resourceIndex = 0;
+
         // Init resources for background species
-        for(int i : this.getConfiguration().getBackgroundIndex()) { 
-            ResourceForcing resForcing = new ResourceForcing(i, cpt);
+        for (int fileIndex : this.getConfiguration().getBackgroundIndex()) {
+            ResourceForcing resForcing = new ResourceForcing(fileIndex, resourceIndex);
             try {
                 resForcing.init();
             } catch (IOException ex) {
                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
             }
-            resourceForcing[cpt] = resForcing;
-            cpt++;
+            resourceForcing[resourceIndex] = resForcing;
+            resourceIndex++;
             // Name must contain only alphanumerical characters
         }
 
-        for (int i : this.getConfiguration().getResourceIndex()) {
-            ResourceForcing resForcing = new ResourceForcing(i, cpt);
+        for (int fileIndex : this.getConfiguration().getResourceIndex()) {
+            ResourceForcing resForcing = new ResourceForcing(fileIndex, resourceIndex);
             try {
                 resForcing.init();
             } catch (IOException ex) {
                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, null, ex);
             }
-            resourceForcing[cpt] = resForcing;
-            cpt++;
+            resourceForcing[resourceIndex] = resForcing;
+            resourceIndex++;
             // Name must contain only alphanumerical characters
         }
 
@@ -339,7 +339,7 @@ public class Simulation extends OsmoseLinker {
 
             // Run a new step
             step.step(i_step_simu);
-            //fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
+            // fr.ird.osmose.util.SimulationUI.step(year, i_step_year);
 
             // Create a restart file
             if (writeRestart && (year >= spinupRestart) && ((i_step_simu + 1) % restartFrequency == 0)) {
@@ -394,10 +394,10 @@ public class Simulation extends OsmoseLinker {
     }
 
     /**
-     * Whether to keep track of prey records during the simulation. The prey
-     * records starts one year before the start year of saving. It is arbitrary
-     * and just to make sure that the trophic levels are fully stabilised before
-     * saving the outputs.
+     * Whether to keep track of prey records during the simulation. The prey records
+     * starts one year before the start year of saving. It is arbitrary and just to
+     * make sure that the trophic levels are fully stabilised before saving the
+     * outputs.
      *
      * @return true if prey records should be activated
      */
@@ -447,7 +447,7 @@ public class Simulation extends OsmoseLinker {
     public int getNEvolvingTraits() {
         return this.n_evolving_trait;
     }
-    
+
     public BackgroundSchoolSet getBkgSchoolSet() {
         return this.backSchoolSet;
     }
