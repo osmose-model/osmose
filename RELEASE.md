@@ -1,5 +1,11 @@
 # OSMOSE Release Notes
 
+## Osmose 4.3.3
+
+### Bug fixes
+
+- Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)
+
 ## Osmose 4.3.2
 
 ### New features
