@@ -2,6 +2,10 @@
 
 ## Osmose 4.3.3
 
+### New features
+
+- Adding a test on the number of iterations for MapDistributions (programs stops if school cannot be moved after 1000 tries)
+
 ### Bug fixes
 
 - Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)

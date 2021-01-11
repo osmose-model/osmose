@@ -165,10 +165,22 @@ public class MapDistribution extends AbstractDistribution {
              * changed from previous cohort and time-step, or because the
              * school was unlocated due to migration.
              */
+            int maxIter = 10000;
+            int nIter = -1;
             int indexCell;
             int nCells = getGrid().get_nx() * getGrid().get_ny();
             double proba;
             do {
+                nIter++;
+                if(nIter >= maxIter) {
+                    StringBuilder bld = new StringBuilder();
+                    bld.append("The maximum number of iterations for map distribution has been reached\n");
+                    String outFmt = String.format("Check movements for species %s", school.getSpecies().getName());
+                    bld.append(outFmt);
+                    outFmt = String.format(" and for age %f\n", (float) age / getConfiguration().getNStepYear());
+                    bld.append(outFmt);
+                    error(bld.toString(), new Exception());
+                }
                 indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
                 proba = map.getValue(getGrid().getCell(indexCell));
             } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap]);
