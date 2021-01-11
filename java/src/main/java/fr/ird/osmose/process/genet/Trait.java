@@ -110,7 +110,7 @@ public class Trait extends SimulationLinker {
             xMean[cpt] = this.getConfiguration().getDouble(key + ".sp" + iSpeciesFile);
             cpt++;
         }
-        
+    
         envVar = new double[nspecies];
         key = String.format("%s.trait.envvar", prefix);
         cpt = 0;
@@ -166,6 +166,7 @@ public class Trait extends SimulationLinker {
                 }
             }
         }  // end of species loop
+        */
     }
 
     /**
