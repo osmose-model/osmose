@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import ucar.nc2.NetcdfFile;
 
 /**
@@ -144,7 +146,7 @@ public class Simulation extends OsmoseLinker {
      * List of evolving trait.
      */
     private List<Trait> evolvingTrait;
-    private int n_evolving_trait;
+    private int nEvolvingTrait;
 
     //////////////
     // Constructor
@@ -217,13 +219,28 @@ public class Simulation extends OsmoseLinker {
                 error("Failed to open restart file " + ncfile, ex);
             }
         }
-
+ 
         if (this.getConfiguration().isGeneticEnabled()) {
-            List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean");
-            this.n_evolving_trait = genet_keys.size();
+
+            // List all the trait mean parameters 
+            List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean.sp*");
+            
+            // Remove the "sp#"
+            List<String> output_keys = new ArrayList<>();
+            for(String strOut : genet_keys) { 
+                String prefix = strOut.substring(0, strOut.indexOf(".sp"));
+                output_keys.add(prefix);    
+            }
+            
+            // Removes duplicates.    
+            List<String> prefix_keys = output_keys.stream().distinct().collect(Collectors.toList());
+        
+            // Init the arrays
+            this.nEvolvingTrait = prefix_keys.size();
             this.evolvingTrait = new ArrayList<>();
-            for (int p = 0; p < this.n_evolving_trait; p++) {
-                String key = genet_keys.get(p);
+            
+            for (int p = 0; p < this.nEvolvingTrait; p++) {
+                String key = prefix_keys.get(p);
                 // recovers the trait prefix
                 String prefix = key.replace(".trait.mean", "");
                 Trait trait = new Trait(this.rank, prefix);
@@ -445,7 +462,7 @@ public class Simulation extends OsmoseLinker {
      * @return The number of evolving trait
      */
     public int getNEvolvingTraits() {
-        return this.n_evolving_trait;
+        return this.nEvolvingTrait;
     }
 
     public BackgroundSchoolSet getBkgSchoolSet() {
