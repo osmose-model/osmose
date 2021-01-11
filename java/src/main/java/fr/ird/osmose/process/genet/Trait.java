@@ -53,21 +53,21 @@ public class Trait extends SimulationLinker {
     /**
      * Number of locus that code the traits. One value for each species
      */
-    private int[] n_locus;
+    private int[] nLocus;
     
     /** Variance of the trait expressed due to env. One value per species. */
-    private double[] env_var;
+    private double[] envVar;
 
     /**
      * Number of possible values that the locus can take. One value for each
      * species
      */
-    private int[] n_val;
+    private int[] nVal;
 
     /**
      * Mean and variance of trait. One value for each species
      */
-    private double[] xmean, xvar;
+    private double[] xMean, xVar;
 
     /**
      * Name of the trait.
@@ -97,64 +97,71 @@ public class Trait extends SimulationLinker {
     public void init() {
 
         String key;
-
+        int cpt;
+        int[] focalIndex = this.getConfiguration().getFocalIndex();
+        
         int nspecies = this.getNSpecies();
-
+        
         // look for the mean value of the trait
+        xMean = new double[nspecies];
         key = String.format("%s.trait.mean", prefix);
-        xmean = this.getConfiguration().getArrayDouble(key);
-        if (xmean.length != nspecies) {
-            String errorMsg = String.format("The xmean value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, xmean.length);
-            error(errorMsg, new Exception());
+        cpt = 0;
+        for (int iSpeciesFile : focalIndex) { 
+            xMean[cpt] = this.getConfiguration().getDouble(key + ".sp" + iSpeciesFile);
+            cpt++;
         }
         
+        envVar = new double[nspecies];
         key = String.format("%s.trait.envvar", prefix);
-        env_var = this.getConfiguration().getArrayDouble(key);
-        if (env_var.length != nspecies) {
-            String errorMsg = String.format("The env_var value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, xvar.length);
-            error(errorMsg, new Exception());
+        cpt = 0;
+        for (int iSpeciesFile : focalIndex) { 
+            envVar[cpt] = this.getConfiguration().getDouble(key + ".sp" + iSpeciesFile);
+            cpt++;
         }
-
+        
         // look for the variance (sigma^2) of the trait
+        xVar = new double[nspecies];
         key = String.format("%s.trait.var", prefix);
-        xvar = this.getConfiguration().getArrayDouble(key);
-        if (xvar.length != nspecies) {
-            String errorMsg = String.format("The xvar value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, xvar.length);
-            error(errorMsg, new Exception());
+        cpt = 0;
+        for (int iSpeciesFile : focalIndex) { 
+            xVar[cpt] = this.getConfiguration().getDouble(key + ".sp" + iSpeciesFile);
+            cpt++;
         }
 
         // number of locus that code the trait
+        nLocus = new int[nspecies];
         key = String.format("%s.trait.nlocus", prefix);
-        n_locus = this.getConfiguration().getArrayInt(key);
-        if (n_locus.length != nspecies) {
-            String errorMsg = String.format("The n_locus value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, n_locus.length);
-            error(errorMsg, new Exception());
+        cpt = 0;
+        for (int iSpeciesFile : focalIndex) { 
+            nLocus[cpt] = this.getConfiguration().getInt(key + ".sp" + iSpeciesFile);
+            cpt++;
         }
 
         // number of values that the locus can take
+        nVal = new int[nspecies];
         key = String.format("%s.trait.nval", prefix);
-        n_val = this.getConfiguration().getArrayInt(key);
-        if (n_val.length != nspecies) {
-            String errorMsg = String.format("The n_val value for trait %s should have a size of %d. Size %d provided", prefix, nspecies, n_val.length);
-            error(errorMsg, new Exception());
+        cpt = 0;
+        for (int iSpeciesFile : focalIndex) { 
+            nVal[cpt] = this.getConfiguration().getInt(key + ".sp" + iSpeciesFile);
+            cpt++;
         }
 
         diversity = new double[nspecies][][];
 
         for (int ispec = 0; ispec < nspecies; ispec++) {
 
-            diversity[ispec] = new double[n_locus[ispec]][n_val[ispec]];
+            diversity[ispec] = new double[nLocus[ispec]][nVal[ispec]];
             // Convert the trait variance to "Loci" standard deviation.
             // variance is xvar / (2 * Lc)
             // hence standard deviation is sqrt(xvar / (2 * Lc))
-            double stddev = Math.sqrt(xvar[ispec] / (2 * n_locus[ispec]));
+            double stddev = Math.sqrt(xVar[ispec] / (2 * nLocus[ispec]));
 
             // initialisation of the "diversity" matrix, which is
             // the array of possible values for each of the locis
             // that code the trait
             Random gaussian_gen = new Random();
-            for (int i = 0; i < n_locus[ispec]; i++) {
-                for (int k = 0; k < n_val[ispec]; k++) {  // k = 0, 1
+            for (int i = 0; i < nLocus[ispec]; i++) {
+                for (int k = 0; k < nVal[ispec]; k++) {  // k = 0, 1
                     diversity[ispec][i][k] = gaussian_gen.nextGaussian() * stddev;
                 }
             }
@@ -168,7 +175,7 @@ public class Trait extends SimulationLinker {
      * @return
      */
     public int getNLocus(int index) {
-        return this.n_locus[index];
+        return this.nLocus[index];
     }
 
     /**
@@ -178,7 +185,7 @@ public class Trait extends SimulationLinker {
      * @return
      */
     public int getNValues(int index) {
-        return this.n_val[index];
+        return this.nVal[index];
     }
 
     /**
@@ -188,7 +195,7 @@ public class Trait extends SimulationLinker {
      * @return
      */
     public double getVar(int index) {
-        return this.xvar[index];
+        return this.xVar[index];
     }
 
     /**
@@ -210,7 +217,7 @@ public class Trait extends SimulationLinker {
      * @return
      */
     public double getMean(int spec_index) {
-        return this.xmean[spec_index];
+        return this.xMean[spec_index];
     }
 
     /** Get the name of the variable trait. 
@@ -229,7 +236,7 @@ public class Trait extends SimulationLinker {
      */
     public double addTraitNoise(int index) {
         Random random = new Random();
-        double std = Math.sqrt(this.env_var[index]);
+        double std = Math.sqrt(this.envVar[index]);
         double val = random.nextGaussian() * std;
         return val;
     }
