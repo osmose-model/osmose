@@ -4,6 +4,7 @@
 
 ### New features
 
+- Adding the output of aging mortality
 - Adding a test on the number of iterations for MapDistributions (programs stops if school cannot be moved after 1000 tries)
 - **New parameterization of genetics parameters. No more based on arrays but species by species, consistently with the new Osmose versions**
 
