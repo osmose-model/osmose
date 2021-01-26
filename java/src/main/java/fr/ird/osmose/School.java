@@ -458,7 +458,7 @@ public class School extends AbstractSchool {
      *
      * @return whether the school is alive or not
      */
-    public boolean diesOld() {
+    public boolean diesAging() {
         return (ageDt > species.getLifespanDt() - 1);
     }
     
