@@ -452,6 +452,17 @@ public class School extends AbstractSchool {
     }
 
     /**
+     * Checks whether the school is alive. A school is alive if it fulfills both
+     * conditions: {@code instantaneous abundance > 0} and null
+     * {@code age <= lifespan - 1}
+     *
+     * @return whether the school is alive or not
+     */
+    public boolean diesOld() {
+        return (ageDt > species.getLifespanDt() - 1);
+    }
+    
+    /**
      * Returns a string representation of the school (species, cohort and
      * location).
      *
