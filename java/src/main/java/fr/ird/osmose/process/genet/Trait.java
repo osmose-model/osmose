@@ -166,7 +166,6 @@ public class Trait extends SimulationLinker {
                 }
             }
         }  // end of species loop
-        */
     }
 
     /**
