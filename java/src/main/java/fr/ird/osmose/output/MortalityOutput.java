@@ -148,8 +148,10 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     for (int iDeath = 0; iDeath < nCause; iDeath++) {
                         nDeadTot += nDead[iSpecies][iDeath][iStage];
                     }
+                    // total mortality rate for the species/class based on  D = A (1 - e^{-F})
                     double Ftot = Math.log(abundanceStage[iSpecies][iStage] / (abundanceStage[iSpecies][iStage] - nDeadTot));
 
+                    // Mortality rates is just the proportion Fi = Ftot * Di / D, with D the number of dead.
                     if (Ftot != 0) {
                         for (int iDeath = 0; iDeath < nCause; iDeath++) {
                             mortalityRates[iSpecies][iDeath][iStage] += Ftot * nDead[iSpecies][iDeath][iStage] / ((1 - Math.exp(-Ftot)) * abundanceStage[iSpecies][iStage]);
