@@ -51,7 +51,7 @@ import java.io.IOException;
  */
 public class TempFunction extends AbstractProcess {
 
-    private double[] km, gamma;
+    private double[] E, A, Tpk;
 
     /**
      * Parameters for the energy maintenance.
@@ -76,25 +76,34 @@ public class TempFunction extends AbstractProcess {
         int cpt;
         int nSpecies = this.getNSpecies();
 
-        km = new double[nSpecies];
-        gamma = new double[nSpecies];
+        E = new double[nSpecies];
+        A = new double[nSpecies];
+        Tpk = new double[nSpecies];
         c_t = new double[nSpecies];
         Tr = new double[nSpecies];
 
         String key;
-        key = "bioen.gross.energy.km";
+        key = "bioen.AMR.E";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            km[cpt] = getConfiguration().getDouble(keytmp);
+            E[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
 
-        key = "bioen.gross.energy.gamma";
+        key = "bioen.AMR.A";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            gamma[cpt] = getConfiguration().getDouble(keytmp);
+            A[cpt] = getConfiguration().getDouble(keytmp);
+            cpt++;
+        }
+
+        key = "bioen.AMR.TpK";
+        cpt = 0;
+        for (int i : getConfiguration().getFocalIndex()) {
+            String keytmp = String.format("%s.sp%d", key, i);
+            Tpk[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
 
@@ -118,7 +127,8 @@ public class TempFunction extends AbstractProcess {
 
     @Override
     public void run() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+                                                                       // Tools | Templates.
     }
 
     /**
@@ -144,8 +154,16 @@ public class TempFunction extends AbstractProcess {
         // Recovers the temperature of the school cell
         double temp = temperature_input.getValue(school);
         int i = school.getSpeciesIndex();
+        double k = 8.62e-5;
 
-        double output = (temp - this.gamma[i]) / (temp - this.gamma[i] + this.km[i]);
+        double output = Math.exp((-this.E[i] / (k * (temp + 273.15))))
+                / (1 + Math.exp((-1 / (k * (temp + 273.15))) * (this.A[i] + this.E[i]
+                        - ((this.A[i] + this.E[i]) / this.Tpk[i] + k * Math.log(this.E[i] / (this.A[i])))
+                                * (temp + 273.15))))
+                / (Math.exp(-this.E[i] / (k * this.Tpk[i])) / (1 + Math.exp((-1 / (k * this.Tpk[i])) * (this.A[i]
+                        + this.E[i] - ((this.A[i] + this.E[i]) / this.Tpk[i] + k * Math.log(this.E[i] / (this.A[i])))
+                                * this.Tpk[i]))));
+
         return output;
 
     }
@@ -159,7 +177,7 @@ public class TempFunction extends AbstractProcess {
     public double get_Arrhenius(School school) {
 
         // Recovers the temperature of the school cell
-        // Autre formulation de Arrhénius : la plus récente des deux 
+        // Autre formulation de Arrhénius : la plus récente des deux
         double temp = this.getTemp(school);
         int i = school.getSpeciesIndex();
 
