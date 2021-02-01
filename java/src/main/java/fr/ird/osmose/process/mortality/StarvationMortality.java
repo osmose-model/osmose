@@ -72,7 +72,8 @@ public class StarvationMortality extends AbstractMortality {
     @Override
     public double getRate(School school) {
 
-        // starvation only active when age exceeds first feeding age.
+        // starvation rate only updated if the school did feed during
+        // the current time step, i.e if not egg
         if (school.isEgg()) {
             return 0.d;
         }
