@@ -61,6 +61,11 @@ public class BioenStarvationMortality extends AbstractMortality {
     }
 
     public double computeStarvation(School school, int subdt) {
+        
+        // barrier.n: adding condition to the application of starvation
+        if(!school.isStarvationEnabled()) { 
+            return 0.d;
+        }
 
         if (school.getENet() >= 0) {
             // If Enet > 0, maintenance needs have been paid, no starvation mortality
