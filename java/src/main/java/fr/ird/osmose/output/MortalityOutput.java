@@ -275,7 +275,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
         
         if(this.getConfiguration().isBioenEnabled()) {
     
-            if (school.isLarva()) {
+            if (school.isEgg()) {
                 // Eggss
                 iStage = EGG;
 
@@ -290,7 +290,7 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
             
         } else {
         
-            if (school.isLarva()) {
+            if (school.isEgg()) {
                 // Eggss
                 iStage = EGG;
 

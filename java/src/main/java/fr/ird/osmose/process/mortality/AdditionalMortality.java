@@ -149,7 +149,7 @@ public class AdditionalMortality extends AbstractMortality {
     public double getRate(School school) {
         double D;
         int ispec = school.getSpeciesIndex();
-        if (school.isLarva()) {
+        if (school.isEgg()) {
             // Egg stage
             D = larvaAdditionalMortality[ispec].getRate(school);
         } else {
