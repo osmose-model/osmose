@@ -828,12 +828,12 @@ public class School extends AbstractSchool {
      * @return True if larva, False if adult
      */
     public boolean isEgg() {
-        return (this.getAgeDt() < this.getSpecies().getFirstFeedingAge());
+        return (this.getAgeDt() < this.getSpecies().getFirstFeedingAgeDt());
     }
     
     /** Starvation enabled if species is older than first feeding age. */
     public boolean isStarvationEnabled() {
-        return (this.getAgeDt() > this.getSpecies().getFirstFeedingAge());
+        return (this.getAgeDt() > this.getSpecies().getFirstFeedingAgeDt());
     }
 
     /**
@@ -879,6 +879,11 @@ public class School extends AbstractSchool {
     @Override
     public int getFileSpeciesIndex() {
         return this.species.getFileSpeciesIndex();
+    }
+
+    @Override
+    public int getFirstFeedingAgeDt() {
+        return this.species.getFirstFeedingAgeDt();
     }
 
 }
