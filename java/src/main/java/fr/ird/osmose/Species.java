@@ -184,7 +184,7 @@ public class Species implements ISpecies {
         }
     }
 
-    public int getFirstFeedingAge() {
+    public int getFirstFeedingAgeDt() {
         return this.firstFeedingAgeDt;
     }
 
