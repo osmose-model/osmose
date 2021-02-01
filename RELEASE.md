@@ -10,6 +10,7 @@
 ### Bug fixes
 
 - Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)
+- Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age.
 
 ## Osmose 4.3.2
 
