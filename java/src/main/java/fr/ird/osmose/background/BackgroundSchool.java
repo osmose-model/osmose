@@ -203,4 +203,9 @@ public class BackgroundSchool extends AbstractSchool {
         return this.bkgSpecies.getSpeciesIndex();
     }
 
+    @Override
+    public int getFirstFeedingAgeDt() {
+        return -1;
+    }
+
 }
