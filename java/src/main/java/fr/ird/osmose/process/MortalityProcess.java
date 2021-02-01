@@ -521,7 +521,7 @@ public class MortalityProcess extends AbstractProcess {
                             // Starvation mortality when no use of bioen module.
                             double M = school.getStarvationRate() / subdt;
                             nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
-                        } else if (school.getAgeDt() > 0) {
+                        } else {
                             // computation of the starvation mortality
                             // which is updated directly from the BioenMortality class.
                             // computes starv.mortality only for species greater than 0 years old
