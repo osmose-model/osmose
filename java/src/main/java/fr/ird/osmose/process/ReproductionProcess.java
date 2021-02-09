@@ -68,7 +68,7 @@ public class ReproductionProcess extends AbstractProcess {
      */
     private double[] sexRatio;
     /*
-     * Annnual number of eggs per gram of mature female
+     * Annual number of eggs per gram of mature female
      */
     private double[] beta;
     /*
