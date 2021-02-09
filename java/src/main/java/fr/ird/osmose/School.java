@@ -452,14 +452,14 @@ public class School extends AbstractSchool {
     }
 
     /**
-     * Checks whether the school is alive. A school is alive if it fulfills both
-     * conditions: {@code instantaneous abundance > 0} and null
-     * {@code age <= lifespan - 1}
+     * Checks whether the school will die of ageing. Since the ageing mortality
+     * is updated before reproduction (where age is incremented), the school will
+     * die of ageing if it's age after increment exceeds lifespan - 1.
      *
      * @return whether the school is alive or not
      */
     public boolean diesAging() {
-        return (ageDt > species.getLifespanDt() - 1);
+        return (ageDt > species.getLifespanDt() - 2);
     }
     
     /**
