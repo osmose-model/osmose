@@ -48,7 +48,7 @@ import fr.ird.osmose.util.timeseries.SingleTimeSeries;
  * This class controls the reproduction process in the simulated domain. The
  * user defines the spawning season (a CSV file per Species) either annual or
  * interannual, the percentage of female in the population (sex ratio) and the
- * number of eggs per gramme of mature female (beta) for every species. Osmose
+ * annual number of eggs per gramme of mature female (beta) for every species. Osmose
  * estimates the spawning stock biomass (SSB) and calculates the number of eggs
  * to be released in the system at every time steps.<br />
  * During the spin-up of the simulation (duration of spin-up either set by the
@@ -68,7 +68,7 @@ public class ReproductionProcess extends AbstractProcess {
      */
     private double[] sexRatio;
     /*
-     * Number of eggs per gram of mature female
+     * Annnual number of eggs per gram of mature female
      */
     private double[] beta;
     /*
