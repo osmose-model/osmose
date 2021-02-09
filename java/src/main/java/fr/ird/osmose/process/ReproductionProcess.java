@@ -116,7 +116,7 @@ public class ReproductionProcess extends AbstractProcess {
             }
             cpt++;
         }
-
+        
         // Seeding biomass
         seedingBiomass = new double[nSpecies];
         cpt = 0;
@@ -201,6 +201,66 @@ public class ReproductionProcess extends AbstractProcess {
         }  // end of focal species loop
     }
 
+    protected void normSeason() {
+
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+
+            int length = seasonSpawning[iSpec].length;
+
+            // If time series if of length nStep/year (i.e. 24 for instance)
+            // one single normalisation is made for the series
+            if (length == getConfiguration().getNStepYear()) {
+
+                double sum = 0;
+
+                // computes the sum
+                for (double val : seasonSpawning[iSpec]) {
+                    sum += val;
+                }
+
+                // if the sum is not 0 and if the sum different than 1, normalisation
+                if ((sum > 0) && (sum != 1)) {
+                    for (int cpt = 0; cpt < length; cpt++) {
+                        seasonSpawning[iSpec][cpt] /= sum;
+                    }
+                }
+            }
+
+            // If the lenght of the time series is > nstepYear (i.e. values by years)
+            else if (length > getConfiguration().getNStepYear()) {
+
+                int start = 0;
+                int end = getConfiguration().getNStepYear();
+
+                // number of years = length / nstepyear. For instance, if length=48, nstep year=
+                // 24, nyears = 2
+                int nyears = length / getConfiguration().getNStepYear();
+                
+                // Loop over the years
+                for (int iyear = 0; iyear < nyears; iyear++) {
+
+                    double sum = 0;
+
+                    // computes the sum
+                    for (int cpt = start; cpt < end; cpt++) {
+                        sum += seasonSpawning[iSpec][cpt];
+                    }
+
+                    // if the sum is not 0 and if the sum different than 1, normalisation
+                    if ((sum > 0) && (sum != 1)) {
+                        for (int cpt = start; cpt < end; cpt++) {
+                            seasonSpawning[iSpec][cpt] /= sum;
+                        }
+                    }
+                    
+                    end += getConfiguration().getNStepYear();
+                    start += getConfiguration().getNStepYear();
+
+                } // end of year for loop
+            } // end of if condition on length
+        } // end of species loop
+    }  // end of method
+    
     protected double getSeason(int iStepSimu, Species species) {
 
         int iSpec = species.getSpeciesIndex();
