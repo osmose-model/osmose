@@ -102,7 +102,7 @@ public class FisheryPeriod extends OsmoseLinker {
             fishIndex[i] = k + do_offset;
         }
 
-        key = String.format("fisheries.rate.bySeason.fsh%d", this.fileFisheryIndex);
+        key = String.format("fisheries.rate.byPeriod.fsh%d", this.fileFisheryIndex);
         
         double[] fishingSeason = this.getConfiguration().getArrayDouble(key);
         if (fishingSeason.length == 1) {
