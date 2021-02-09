@@ -452,6 +452,17 @@ public class School extends AbstractSchool {
     }
 
     /**
+     * Checks whether the school will die of ageing. Since the ageing mortality
+     * is updated before reproduction (where age is incremented), the school will
+     * die of ageing if it's age after increment exceeds lifespan - 1.
+     *
+     * @return whether the school is alive or not
+     */
+    public boolean diesAging() {
+        return (ageDt > species.getLifespanDt() - 2);
+    }
+    
+    /**
      * Returns a string representation of the school (species, cohort and
      * location).
      *

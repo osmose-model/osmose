@@ -197,6 +197,9 @@ public class SimulationStep extends SimulationLinker {
         } else {
             bioenProcess.run();
         }
+        
+        // Updates the aging mortality variable
+        getSchoolSet().updateAgingMortality();
 
         // Save steps
         indicators.update(iStepSimu);

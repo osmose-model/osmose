@@ -41,6 +41,7 @@
 
 package fr.ird.osmose;
 
+import fr.ird.osmose.process.mortality.MortalityCause;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.filter.AliveSchoolFilter;
 import fr.ird.osmose.util.filter.FilteredSet;
@@ -135,6 +136,17 @@ public class SchoolSet extends OsmoseLinker {
         }
         for (int i = 0; i < getConfiguration().getNSpecies(); i++) {
             hasSpeciesChanged[i] = true;
+        }
+    }
+    
+    /** Increments the biomass of dead individuals that are going to die of aging */
+    public void updateAgingMortality() {
+        Iterator<School> it = schoolset.iterator();
+        while (it.hasNext()) {
+            School tmpSchool = it.next();
+            if (tmpSchool.diesAging()) {
+                tmpSchool.incrementNdead(MortalityCause.AGING, tmpSchool.getInstantaneousAbundance());
+            }
         }
     }
 
