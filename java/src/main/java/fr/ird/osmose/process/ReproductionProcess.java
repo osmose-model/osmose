@@ -40,6 +40,8 @@
  */
 package fr.ird.osmose.process;
 
+import java.util.ArrayList;
+
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import fr.ird.osmose.util.timeseries.SingleTimeSeries;
@@ -204,6 +206,7 @@ public class ReproductionProcess extends AbstractProcess {
         }  // end of focal species loop
     }
 
+    /** Normalize season in the case of classical Osmose run */
     protected void normSeason() {
 
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
@@ -295,5 +298,37 @@ public class ReproductionProcess extends AbstractProcess {
     public double getBeta(int i) {
         return this.beta[i];
     }
+    
+    
+    /** Normalize season in the case of Osmose Bioen run */
+    protected void normSeasonBioen() {
+        
+        for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            
+            // Init the list of reproduction start and end events
+            ArrayList<Integer> startIndex = new ArrayList<>();
+            ArrayList<Integer> endIndex = new ArrayList<>();
+            
+            // length of the seasonspawning vector
+            int length = seasonSpawning[iSpec].length;
+            
+            // loop over all the time-steps
+            for(int i = 0; i < length; i++) { 
+                if(seasonSpawning[iSpec][i] > 0) {
+                    // when the spawning is 1, reproduction event.
+                    startIndex.add(i); 
+                    // loop over the season spawning index until end of vector or end of season
+                    while((seasonSpawning[iSpec][i] > 0) & (i < length)) { 
+                        i++;
+                    }    
+                } // end of spawning test
+                
+                endIndex.add(i);
+                i++;
+                
+            }
+            
+        } // end of species loop
+    }  // end of method
 
 }
