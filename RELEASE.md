@@ -8,6 +8,7 @@
 - Adding a test on the number of iterations for MapDistributions (programs stops if school cannot be moved after 1000 tries)
 - **New parameterization of genetics parameters. No more based on arrays but species by species, consistently with the new Osmose versions**
 - `species.larva2adults.agethres.sp` parameter renamed into `species.first.feeding.age.sp`
+- Normalisation of season spawning to 1.
 
 ### Bug fixes
 
