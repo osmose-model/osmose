@@ -119,7 +119,7 @@ public class BioenPredationMortality extends PredationMortality {
         double[] preyUpon = new double[preys.size()];
         double cumPreyUpon = 0.d;
         // egg do not predate
-        if (predator.getAgeDt() > 0) {
+        if (predator.getAgeDt() >= predator.getFirstFeedingAgeDt()) {
             // Compute accessible biomass
             // 1. from preys
             double[] accessibleBiomass = new double[preys.size()];
@@ -198,7 +198,7 @@ public class BioenPredationMortality extends PredationMortality {
         }
 
         // recovers the thresshold age (stored on Dt)
-        int thresAge = this.getSpecies(speciesIndex).getThresAge();
+        int thresAge = this.getSpecies(speciesIndex).getFirstFeedingAgeDt();
 
         double factor = 1;
 

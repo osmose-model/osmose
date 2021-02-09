@@ -276,7 +276,7 @@ public class MortalityProcess extends AbstractProcess {
             for (School school : schools) {
                 school.setAccessibility(predationMortality.getAccessibility(school, preys));
                 school.setPredSuccessRate(0);
-                if (school.isLarva()) {
+                if (school.isEgg()) {
                     // Egg loss, not accessible to predation process
                     double D = additionalMortality.getRate(school);
                     double nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-D));
@@ -388,7 +388,7 @@ public class MortalityProcess extends AbstractProcess {
         // add focal schools to prey
         preys.addAll(schools);
 
-        schools.stream().filter((prey) -> (prey.isLarva())).forEachOrdered((prey) -> {
+        schools.stream().filter((prey) -> (prey.isEgg())).forEachOrdered((prey) -> {
             prey.releaseEgg(subdt);
         }); // Release some eggs for current subdt (initial abundance / subdt)
 
@@ -521,7 +521,7 @@ public class MortalityProcess extends AbstractProcess {
                             // Starvation mortality when no use of bioen module.
                             double M = school.getStarvationRate() / subdt;
                             nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-M));
-                        } else if (school.getAgeDt() > 0) {
+                        } else {
                             // computation of the starvation mortality
                             // which is updated directly from the BioenMortality class.
                             // computes starv.mortality only for species greater than 0 years old

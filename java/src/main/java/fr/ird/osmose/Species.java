@@ -113,7 +113,7 @@ public class Species implements ISpecies {
      * Threshold (number of time-steps) at which a species move from larva to
      * adults. Expressed in time steps.
      */
-    private final int lar2ad_thres;
+    private final int firstFeedingAgeDt;
 
     private double beta_bioen;
 
@@ -174,18 +174,18 @@ public class Species implements ISpecies {
 
         // If the key is found, then the age switch in years is converted into
         // time-step.
-        String key = "species.larva2adults.agethres.sp" + fileIndex;
+        String key = "species.first.feeding.age.sp" + fileIndex;
         if (cfg.canFind(key)) {
             float age_adult = cfg.getFloat(key);
-            this.lar2ad_thres = (int) Math.round(age_adult * cfg.getNStepYear());
+            this.firstFeedingAgeDt = (int) Math.round(age_adult * cfg.getNStepYear());
         } else {
             // if no parameter exists, species become larva when ageDt = 1
-            this.lar2ad_thres = 1;
+            this.firstFeedingAgeDt = 1;
         }
     }
 
-    public int getThresAge() {
-        return this.lar2ad_thres;
+    public int getFirstFeedingAgeDt() {
+        return this.firstFeedingAgeDt;
     }
 
     public double getBetaBioen() {
