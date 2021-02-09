@@ -117,6 +117,9 @@ public class ReproductionProcess extends AbstractProcess {
             cpt++;
         }
         
+        // normalisation of seasonSpawning.
+        this.normSeason();
+        
         // Seeding biomass
         seedingBiomass = new double[nSpecies];
         cpt = 0;
@@ -253,6 +256,7 @@ public class ReproductionProcess extends AbstractProcess {
                         }
                     }
                     
+                    // increment of the start/end indexes
                     end += getConfiguration().getNStepYear();
                     start += getConfiguration().getNStepYear();
 
