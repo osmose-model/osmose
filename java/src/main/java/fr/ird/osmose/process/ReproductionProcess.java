@@ -120,7 +120,11 @@ public class ReproductionProcess extends AbstractProcess {
         }
         
         // normalisation of seasonSpawning.
-        this.normSeason();
+        if (getConfiguration().isBioenEnabled()) {
+            this.normSeasonBioen();
+        } else {
+            this.normSeason();
+        }
         
         // Seeding biomass
         seedingBiomass = new double[nSpecies];
