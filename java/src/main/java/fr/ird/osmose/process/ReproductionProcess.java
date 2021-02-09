@@ -212,6 +212,10 @@ public class ReproductionProcess extends AbstractProcess {
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
 
             int length = seasonSpawning[iSpec].length;
+            
+            // no normalisation done if length == 1 (assumes
+            // evenly distributed reproduction
+            if(length == 1) continue;
 
             // If time series if of length nStep/year (i.e. 24 for instance)
             // one single normalisation is made for the series
@@ -219,7 +223,7 @@ public class ReproductionProcess extends AbstractProcess {
 
                 double sum = 0;
 
-                // computes the sum
+                // computes the sum over the vector
                 for (double val : seasonSpawning[iSpec]) {
                     sum += val;
                 }
@@ -303,30 +307,83 @@ public class ReproductionProcess extends AbstractProcess {
     /** Normalize season in the case of Osmose Bioen run */
     protected void normSeasonBioen() {
         
+        // Computes the indexes that will be used for the normalisation
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
+            
+            // length of the seasonspawning vector
+            int length = seasonSpawning[iSpec].length;
+            
+            // if no spawning time-series provided, assumes that
+            // evenly distributed
+            if(length > 1) continue;
             
             // Init the list of reproduction start and end events
             ArrayList<Integer> startIndex = new ArrayList<>();
             ArrayList<Integer> endIndex = new ArrayList<>();
             
-            // length of the seasonspawning vector
-            int length = seasonSpawning[iSpec].length;
+            // Array containing the normalized season spawning.
+            double[] seasonSpawningTemp;
             
-            // loop over all the time-steps
-            for(int i = 0; i < length; i++) { 
-                if(seasonSpawning[iSpec][i] > 0) {
+            if (length == getConfiguration().getNStepYear()) {
+                // If nstep == nstepyear, seasonal variable.
+                // It is duplicated 3 times, in order to facilitate
+                // the normalisation along winter months
+                seasonSpawningTemp = new double[3 * length];
+                for (int k = 0; k < 3; k++) {
+                    for (int p = 0; p < length; p++) {
+                        seasonSpawningTemp[k * length + p] = seasonSpawning[iSpec][p];
+                    }
+                }
+            } else {
+                // if nsteps > nstep year, full copy is made.
+                seasonSpawningTemp = new double[length];
+                for (int p = 0; p < length; p++) {
+                    seasonSpawningTemp[p] = seasonSpawning[iSpec][p];
+                }
+            }
+            
+            // loop over all the time-steps of the temporary vector
+            for(int i = 0; i < seasonSpawningTemp.length; i++) { 
+                if(seasonSpawningTemp[i] > 0) {
                     // when the spawning is 1, reproduction event.
                     startIndex.add(i); 
                     // loop over the season spawning index until end of vector or end of season
-                    while((seasonSpawning[iSpec][i] > 0) & (i < length)) { 
+                    while((seasonSpawningTemp[i] > 0) & (i < length)) { 
                         i++;
                     }    
                 } // end of spawning test
-                
                 endIndex.add(i);
-                i++;
-                
+                i++; 
             }
+            
+            int nEvents = startIndex.size();
+            for(int i =0; i<nEvents; i++) { 
+                
+                double sum = 0;
+                int start = startIndex.get(i);
+                int end = endIndex.get(i);
+                for (int p = start; p < end; p++) { 
+                    sum += seasonSpawningTemp[p];
+                }
+                
+                if(sum != 1) { 
+                    for (int p = start; p < end; p++) { 
+                        seasonSpawningTemp[p] /= sum;
+                    }                  
+                }  // end of norm test
+                
+            } // end of loop on normalisation events
+            
+            if (length == getConfiguration().getNStepYear()) { 
+                for(int p = 0; p < getConfiguration().getNStepYear(); p++) { 
+                    // take the middle of the series, which insures continuity over winter months
+                    seasonSpawning[iSpec][p] = seasonSpawningTemp[p + getConfiguration().getNStepYear()];
+                }
+            } else {
+                for(int p = 0; p < length; p++) { 
+                    seasonSpawning[iSpec][p] = seasonSpawningTemp[p];
+                }
+            }    
             
         } // end of species loop
     }  // end of method
