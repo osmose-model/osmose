@@ -416,9 +416,15 @@ public class Releases {
         new Release("4.3.3") {
             @Override
             void updateParameters() {
+                
+                Configuration cfg = this.getConfiguration();
+                
                 for (int index : this.getFocalIndex()) {
                     updateKey("species.larva2adults.agethres.sp" + index, "species.first.feeding.age.sp" + index);
                 }
+                
+                cfg.findKeys("fisheries.rate.bySeason.fsh*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).forEach(i -> updateKey("fisheries.rate.bySeason" + i, "fisheries.rate.byPeriod.fsh" + i));
+
             }
         }
         
