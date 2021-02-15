@@ -6,6 +6,7 @@
 
 - Adding the output of aging mortality
 - Adding a test on the number of iterations for MapDistributions (programs stops if school cannot be moved after 1000 tries)
+- New computation of the PhiT values
 - **New parameterization of genetics parameters. No more based on arrays but species by species, consistently with the new Osmose versions**
 - `species.larva2adults.agethres.sp` parameter renamed into `species.first.feeding.age.sp`
 - `fisheries.rate.bySeason.fsh%d` parameter renamed into `fisheries.rate.byperiod.fsh%d`
