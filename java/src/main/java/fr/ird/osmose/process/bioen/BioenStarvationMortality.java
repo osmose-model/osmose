@@ -49,6 +49,8 @@ import fr.ird.osmose.process.mortality.AbstractMortality;
  * @author nbarrier
  */
 public class BioenStarvationMortality extends AbstractMortality {
+    
+    private double[] eta;
 
     public BioenStarvationMortality(int rank) {
         super(rank);
@@ -58,6 +60,15 @@ public class BioenStarvationMortality extends AbstractMortality {
     public void init() {
         // nothing to do
         // Bioen starvation mortality does not directly rely on user-defined parameters
+        
+        int nSpecies = this.getNSpecies();
+        eta = new double[nSpecies];
+        
+        int cpt = 0;
+        for(int i : this.getFocalIndex()) { 
+            eta[cpt] = this.getConfiguration().getDouble("bioen.maturity.eta.sp" + i);
+            cpt++;
+        }
     }
 
     public double computeStarvation(School school, int subdt) {
@@ -77,21 +88,24 @@ public class BioenStarvationMortality extends AbstractMortality {
 
         // fraction of ENet deficit at current sub time step (turned into positive value)
         double eNetSubDt = Math.abs(school.getENet()) / subdt;
-
+        
+        int iSpecies = school.getSpeciesIndex();
+        double etaSpecies = this.eta[iSpecies];
+        
         // check whether ENet deficit can be compensated with gonadic energy
-        if (school.getGonadWeight() >= eNetSubDt) {
+        if (school.getGonadWeight() >= etaSpecies * eNetSubDt) {
             // 1. enough gonadic energy
             // pay maintenance with gonadic energy and decrease gonadic energy accordingly
-            school.incrementGonadWeight((float) -eNetSubDt);
+            school.incrementGonadWeight((float) (-eNetSubDt * etaSpecies));
             school.incrementEnet(eNetSubDt);
         } else {
             // 2. not enough gonadic energy
             // flush gonadic energy
             school.incrementGonadWeight(-school.getGonadWeight());
             // partially repay ENet with available gonadic energy
-            school.incrementEnet(school.getGonadWeight());
+            school.incrementEnet(school.getGonadWeight() * etaSpecies);
             // starvation occurs, as a fraction of energy deficit
-            double deathToll = eNetSubDt - school.getGonadWeight();
+            double deathToll = eNetSubDt - etaSpecies * school.getGonadWeight();
             ndead = deathToll / school.getWeight();
         }
 
