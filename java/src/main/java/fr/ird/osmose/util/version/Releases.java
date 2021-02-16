@@ -434,6 +434,11 @@ public class Releases {
                     for (int index : this.getFocalIndex()) {
                         updateKey("bioen.maint.energy.csmr.sp" + index, "bioen.maint.energy.c_m.sp" + index);
                     }
+                    
+                    for (int index : this.getFocalIndex()) {
+                        updateKey("species.c1.sp" + index, "species.oxygen.c1.sp" + index);
+                        updateKey("species.c2.sp" + index, "species.oxygen.c2.sp" + index);
+                    }
             }
         }
         
