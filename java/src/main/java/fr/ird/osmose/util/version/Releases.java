@@ -440,19 +440,16 @@ public class Releases {
                         updateKey("species.c1.sp" + index, "species.oxygen.c1.sp" + index);
                         updateKey("species.c2.sp" + index, "species.oxygen.c2.sp" + index);
                     }
-                    
-                    /*
+                
+                    // Deprecates old parameters for temperature function.
                     for (int index : this.getFocalIndex()) {
-                        updateKey("bioen.AMR.E.sp" + index, "species.bioen.mobilized.emobi" + index);
-                        updateKey("bioen.AMR.A.sp" + index, "species.bioen.mobilized.eD" + index);
-                        updateKey("bioen.AMR.Tpk.sp" + index, "species.bioen.mobilized.Tp" + index);
-                    }
-                    */
-                    
-                    
-                    
-            }
-        }
+                        deprecateParameter("bioen.gross.energy.km.sp" + index);
+                        deprecateParameter("bioen.gross.energy.gamma.sp" + index);
+                        deprecateParameter("bioen.arrh.ct.sp" + index);
+                        deprecateParameter("bioen.maint.energy.Tr.sp" + index);
+                    }       
+            }  // end of updatePara
+        }  // end of Release(4.3.3)
         
     };  // end of ALL array
 }  // end of class
