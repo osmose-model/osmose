@@ -671,6 +671,22 @@ public class OutputManager extends SimulationLinker {
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
                         school -> school.getInstantaneousAbundance(), sizeDistrib));
             }
+            
+            if (getConfiguration().getBoolean("output.meanSomaticWeight.byAge.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanSomaticWeightDistribBy",
+                        "Mean somatic weight of fish (centimeter)",
+                        school -> (school.getInstantaneousAbundance() * school.getGonadWeight()),
+                        school -> school.getInstantaneousAbundance(), ageDistrib)
+                );  
+            }
+            
+            if (getConfiguration().getBoolean("output.meanGonadWeight.byAge.enabled")) {
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanGonadWeightDistribBy",
+                        "Mean gonad weight of fish per gram of individual (centimeter) by ",
+                        school -> (school.getInstantaneousAbundance() * school.getGonadWeight() / (school.getWeight())),
+                        school -> school.getInstantaneousAbundance(), ageDistrib)
+                );  
+            }    
 
         }
 
