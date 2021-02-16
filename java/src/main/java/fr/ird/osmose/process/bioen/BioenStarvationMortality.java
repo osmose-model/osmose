@@ -50,6 +50,7 @@ import fr.ird.osmose.process.mortality.AbstractMortality;
  */
 public class BioenStarvationMortality extends AbstractMortality {
     
+    /** Converts somatic weight into gonadic weight. */
     private double[] eta;
 
     public BioenStarvationMortality(int rank) {
@@ -62,6 +63,7 @@ public class BioenStarvationMortality extends AbstractMortality {
         // Bioen starvation mortality does not directly rely on user-defined parameters
         
         int nSpecies = this.getNSpecies();
+        
         eta = new double[nSpecies];
         
         int cpt = 0;
@@ -105,7 +107,7 @@ public class BioenStarvationMortality extends AbstractMortality {
             // partially repay ENet with available gonadic energy
             school.incrementEnet(school.getGonadWeight() * etaSpecies);
             // starvation occurs, as a fraction of energy deficit
-            double deathToll = eNetSubDt - etaSpecies * school.getGonadWeight();
+            double deathToll = eNetSubDt - school.getGonadWeight() / etaSpecies;
             ndead = deathToll / school.getWeight();
         }
 
