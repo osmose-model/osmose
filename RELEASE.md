@@ -11,6 +11,7 @@
 - `species.larva2adults.agethres.sp` parameter renamed into `species.first.feeding.age.sp`
 - `fisheries.rate.bySeason.fsh%d` parameter renamed into `fisheries.rate.byperiod.fsh%d`
 - Normalisation of season spawning to 1.
+- Trimming of parameter name in the `Release.findLine` method.
 
 
 ### Bug fixes

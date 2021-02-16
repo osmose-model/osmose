@@ -152,7 +152,7 @@ public abstract class Release extends OsmoseLinker {
         for (int i = 0; i < parameters.size(); i++) {
             String paramLine = parameters.get(i).toLowerCase();
             Separator sep = Separator.guess(paramLine, Separator.EQUALS);
-            String paramKey = paramLine.split(sep.toString())[0];
+            String paramKey = paramLine.split(sep.toString())[0].trim();
             if (paramKey.equals(keyLC)) {
                 iline = i;
                 break;
