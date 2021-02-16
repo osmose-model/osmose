@@ -52,9 +52,11 @@ import java.util.logging.Logger;
  */
 public class EnergyBudget extends AbstractProcess {
 
-    private double[] csmr;
+    private double[] c_m;
 
     private double[] m0, m1;
+    
+    private double[] eta;
 
     private final TempFunction temp_function;
 
@@ -65,7 +67,7 @@ public class EnergyBudget extends AbstractProcess {
     private double[] r;
     private double[] larvaePredationRateBioen;
     
-       private double[] assimilation;
+    private double[] assimilation;
 
     public EnergyBudget(int rank) throws IOException {
 
@@ -86,6 +88,14 @@ public class EnergyBudget extends AbstractProcess {
         // Redundant with the beta of the BioenPredationMortality class.
         int nSpecies = this.getNSpecies();
 
+        cpt = 0;
+        eta = new double[nSpecies];
+        for (int i : getConfiguration().getFocalIndex()) {
+            key = String.format("bioen.maturity.eta.sp%d", i);
+            eta[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
+        }
+        
         // Recovers the beta coefficient for focal + background species
         cpt = 0;
         r = new double[nSpecies];
@@ -114,11 +124,11 @@ public class EnergyBudget extends AbstractProcess {
         }
 
         // Recovers the beta coefficient for focal + background species
-        csmr = new double[nSpecies];
+        c_m = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maint.energy.csmr.sp%d", i);
-            csmr[cpt] = this.getConfiguration().getDouble(key);
+            key = String.format("bioen.maint.energy.c_m.sp%d", i);
+            c_m[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
 
@@ -126,7 +136,7 @@ public class EnergyBudget extends AbstractProcess {
         cpt = 0;
         larvaePredationRateBioen = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("predation.ingestion.rate.max.larvae.bioen.sp%d", i);
+            key = String.format("predation.coef.ingestion.rate.max.larvae.bioen.sp%d", i);
             larvaePredationRateBioen[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
@@ -185,7 +195,7 @@ public class EnergyBudget extends AbstractProcess {
 
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
-        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
+        double output = this.c_m[ispec] * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
 
         // multiply the maintenance flow by the number of fish in the school
@@ -294,10 +304,11 @@ public class EnergyBudget extends AbstractProcess {
 
         String key = "r";
         double r_temp = school.existsTrait(key) ? school.getTrait(key) : r[ispec];
+        double etaSpecies = eta[ispec];
 
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - r_temp / school.get_enet_faced() * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
+        double kappa = (!school.isMature()) ? 1 : 1 - r_temp / (etaSpecies * school.get_enet_faced()) * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
         kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
         kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
 
