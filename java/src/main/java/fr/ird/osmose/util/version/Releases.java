@@ -426,10 +426,14 @@ public class Releases {
                 cfg.findKeys("fisheries.rate.bySeason.fsh*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).forEach(i -> updateKey("fisheries.rate.bySeason" + i, "fisheries.rate.byPeriod.fsh" + i));
 
                 // Update in parameters from Alaia 
-                for (int index : this.getFocalIndex()) {
-                    updateKey("predation.ingestion.rate.max.larvae.bioen.sp" + index, "predation.coef.ingestion.rate.max.larvae.bioen.sp" + index);
-                }
-                
+                    for (int index : this.getFocalIndex()) {
+                        updateKey("predation.ingestion.rate.max.larvae.bioen.sp" + index,
+                                "predation.coef.ingestion.rate.max.larvae.bioen.sp" + index);
+                    }
+
+                    for (int index : this.getFocalIndex()) {
+                        updateKey("bioen.maint.energy.csmr.sp" + index, "bioen.maint.energy.c_m.sp" + index);
+                    }
             }
         }
         
