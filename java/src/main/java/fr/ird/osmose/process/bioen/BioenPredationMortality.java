@@ -96,7 +96,7 @@ public class BioenPredationMortality extends PredationMortality {
         int cpt = 0;
         for (int i : this.getConfiguration().getPredatorIndex()) {
             predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
-            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i);
+            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.coef.ingestion.rate.max.larvae.bioen" + i);
             c_rateBioen[cpt] = getConfiguration().getDouble("predation.c.bioen.sp" + i);
             cpt++;
         }
