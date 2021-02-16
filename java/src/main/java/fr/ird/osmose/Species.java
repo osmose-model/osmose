@@ -114,7 +114,10 @@ public class Species implements ISpecies {
      * adults. Expressed in time steps.
      */
     private final int firstFeedingAgeDt;
-
+    
+    /** Threshold for moving from larvaeToAdults. */
+    private final int larvaeToAdultsAgeDt;
+    
     private double beta_bioen;
 
     //////////////
@@ -182,7 +185,22 @@ public class Species implements ISpecies {
             // if no parameter exists, species become larva when ageDt = 1
             this.firstFeedingAgeDt = 1;
         }
-    }
+                
+        // If bioen is on, use the parameter to get the age at which 
+        // a species moves from larvae to adult.
+        if (cfg.isBioenEnabled()) {
+            key = "species.larvae.growth.threshold.age.sp" + fileIndex;
+            if (cfg.canFind(key)) {
+                float age_adult = cfg.getFloat(key);
+                this.larvaeToAdultsAgeDt = (int) Math.round(age_adult * cfg.getNStepYear());
+            } else {
+                // if no parameter exists, species become larva when ageDt = 1
+                this.larvaeToAdultsAgeDt = 1;
+            }
+        } else {
+            this.larvaeToAdultsAgeDt = 0;
+        } // end of test on bioen.
+    }        
 
     public int getFirstFeedingAgeDt() {
         return this.firstFeedingAgeDt;
@@ -194,6 +212,10 @@ public class Species implements ISpecies {
 
     public int getDepthLayer() {
         return this.zlayer;
+    }
+    
+    public int getLarvaeThres() { 
+        return this.larvaeToAdultsAgeDt;   
     }
 
     //////////////////////////////
