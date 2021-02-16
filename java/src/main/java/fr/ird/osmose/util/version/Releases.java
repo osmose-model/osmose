@@ -435,10 +435,22 @@ public class Releases {
                         updateKey("bioen.maint.energy.csmr.sp" + index, "bioen.maint.energy.c_m.sp" + index);
                     }
                     
+                    // Update for oxygen functions
                     for (int index : this.getFocalIndex()) {
                         updateKey("species.c1.sp" + index, "species.oxygen.c1.sp" + index);
                         updateKey("species.c2.sp" + index, "species.oxygen.c2.sp" + index);
                     }
+                    
+                    /*
+                    for (int index : this.getFocalIndex()) {
+                        updateKey("bioen.AMR.E.sp" + index, "species.bioen.mobilized.emobi" + index);
+                        updateKey("bioen.AMR.A.sp" + index, "species.bioen.mobilized.eD" + index);
+                        updateKey("bioen.AMR.Tpk.sp" + index, "species.bioen.mobilized.Tp" + index);
+                    }
+                    */
+                    
+                    
+                    
             }
         }
         
