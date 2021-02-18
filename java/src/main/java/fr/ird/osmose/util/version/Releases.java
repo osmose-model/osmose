@@ -430,17 +430,21 @@ public class Releases {
                         updateKey("predation.ingestion.rate.max.larvae.bioen.sp" + index,
                                 "predation.coef.ingestion.rate.max.larvae.bioen.sp" + index);
                     }
-
-                    for (int index : this.getFocalIndex()) {
-                        updateKey("bioen.maint.energy.csmr.sp" + index, "bioen.maint.energy.c_m.sp" + index);
-                    }
                     
                     // Update for oxygen functions
                     for (int index : this.getFocalIndex()) {
                         updateKey("species.c1.sp" + index, "species.oxygen.c1.sp" + index);
                         updateKey("species.c2.sp" + index, "species.oxygen.c2.sp" + index);
                     }
-                
+                    
+                    // Update parameters for EnergyBudget.java
+                    for (int index : this.getFocalIndex()) {
+                        updateKey("bioen.maint.energy.csmr.sp" + index, "species.bioen.maint.energy.c_m.sp" + index);
+                        updateKey("bioen.maturity.r.sp" + index, "species.bioen.maturity.r.sp" + index);
+                        updateKey("bioen.maturity.m0.sp" + index, "species.bioen.maturity.m0.sp" + index);
+                        updateKey("bioen.maturity.m1.sp" + index, "species.bioen.maturity.m1.sp" + index);
+                    }
+                    
                     // Deprecates old parameters for temperature function.
                     for (int index : this.getFocalIndex()) {
                         deprecateParameter("bioen.gross.energy.km.sp" + index);

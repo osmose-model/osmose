@@ -91,7 +91,7 @@ public class EnergyBudget extends AbstractProcess {
         cpt = 0;
         eta = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maturity.eta.sp%d", i);
+            key = String.format("species.bioen.maturity.eta.sp%d", i);
             eta[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
@@ -100,7 +100,7 @@ public class EnergyBudget extends AbstractProcess {
         cpt = 0;
         r = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maturity.r.sp%d", i);
+            key = String.format("species.bioen.maturity.r.sp%d", i);
             r[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
@@ -109,7 +109,7 @@ public class EnergyBudget extends AbstractProcess {
         cpt = 0;
         m0 = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maturity.m0.sp%d", i);
+            key = String.format("species.bioen.maturity.m0.sp%d", i);
             m0[cpt] = this.getConfiguration().getDouble(key);   // barrier.n: conversion from mm to cm
             cpt++;
         }
@@ -118,7 +118,7 @@ public class EnergyBudget extends AbstractProcess {
         m1 = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maturity.m1.sp%d", i);
+            key = String.format("species.bioen.maturity.m1.sp%d", i);
             m1[cpt] = this.getConfiguration().getDouble(key);  // barrier.n: conversion from mm to cm
             cpt++;
         }
@@ -127,7 +127,7 @@ public class EnergyBudget extends AbstractProcess {
         c_m = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maint.energy.c_m.sp%d", i);
+            key = String.format("species.bioen.maint.energy.c_m.sp%d", i);
             c_m[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
@@ -144,7 +144,7 @@ public class EnergyBudget extends AbstractProcess {
         assimilation = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.assimilation.sp%d", i);
+            key = String.format("species.bioen.assimilation.sp%d", i);
             assimilation[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }

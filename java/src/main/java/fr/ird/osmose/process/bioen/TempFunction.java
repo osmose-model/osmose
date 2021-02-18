@@ -82,7 +82,7 @@ public class TempFunction extends AbstractProcess {
         e_m = new double[nSpecies];
 
         String key;
-        key = "species.bioen.mobilized.emobi";
+        key = "species.bioen.mobilized.e.mobi";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
@@ -90,7 +90,7 @@ public class TempFunction extends AbstractProcess {
             cpt++;
         }
 
-        key = "species.bioen.mobilized.eD";
+        key = "species.bioen.mobilized.e.D";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
@@ -106,7 +106,7 @@ public class TempFunction extends AbstractProcess {
             cpt++;
         }
         
-        key = "species.bioen.maint.emaint";
+        key = "species.bioen.maint.e.maint";
         for (int i = 0; i < this.getNSpecies(); i++) {
             String keytmp = String.format("%s.sp%d", key, i);
             e_m[i] = getConfiguration().getDouble(keytmp);
