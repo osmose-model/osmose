@@ -64,7 +64,7 @@ public class ForagingMortality extends AbstractMortality {
         I_max = new double[nspec];
         int cpt = 0;
         for (int i : getFocalIndex()) {
-            k_for[cpt] = getConfiguration().getDouble("bioen.forage.k_for.sp" + i);
+            k_for[cpt] = getConfiguration().getDouble("species.bioen.forage.k_for.sp" + i);
             I_max[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
             cpt++;
         }
