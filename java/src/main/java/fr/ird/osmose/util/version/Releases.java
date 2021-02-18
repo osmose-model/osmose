@@ -443,6 +443,7 @@ public class Releases {
                         updateKey("bioen.maturity.r.sp" + index, "species.bioen.maturity.r.sp" + index);
                         updateKey("bioen.maturity.m0.sp" + index, "species.bioen.maturity.m0.sp" + index);
                         updateKey("bioen.maturity.m1.sp" + index, "species.bioen.maturity.m1.sp" + index);
+                        updateKey("bioen.forage.k_for.sp" + index, "species.bioen.forage.k_for.sp" + index);
                     }
                     
                     // Deprecates old parameters for temperature function.
