@@ -68,7 +68,7 @@ public class BioenStarvationMortality extends AbstractMortality {
         
         int cpt = 0;
         for(int i : this.getFocalIndex()) { 
-            eta[cpt] = this.getConfiguration().getDouble("bioen.maturity.eta.sp" + i);
+            eta[cpt] = this.getConfiguration().getDouble("species.bioen.maturity.eta.sp" + i);
             cpt++;
         }
     }
