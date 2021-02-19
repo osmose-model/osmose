@@ -319,7 +319,7 @@ public class ReproductionProcess extends AbstractProcess {
             
             // if no spawning time-series provided, assumes that
             // evenly distributed
-            if(length > 1) continue;
+            if(length == 1) continue;
             
             // Init the list of reproduction start and end events
             ArrayList<Integer> startIndex = new ArrayList<>();
@@ -352,20 +352,22 @@ public class ReproductionProcess extends AbstractProcess {
                     // when the spawning is 1, reproduction event.
                     startIndex.add(i); 
                     // loop over the season spawning index until end of vector or end of season
-                    while((seasonSpawningTemp[i] > 0) & (i < length)) { 
+                    while((i < length) && (seasonSpawningTemp[i] > 0)) { 
                         i++;
                     }    
+                    endIndex.add(i);
                 } // end of spawning test
-                endIndex.add(i);
                 i++; 
             }
             
+                        
             int nEvents = startIndex.size();
             for(int i =0; i<nEvents; i++) { 
-                
+            
                 double sum = 0;
                 int start = startIndex.get(i);
                 int end = endIndex.get(i);
+
                 for (int p = start; p < end; p++) { 
                     sum += seasonSpawningTemp[p];
                 }
@@ -388,7 +390,6 @@ public class ReproductionProcess extends AbstractProcess {
                     seasonSpawning[iSpec][p] = seasonSpawningTemp[p];
                 }
             }    
-            
         } // end of species loop
     }  // end of method
 
