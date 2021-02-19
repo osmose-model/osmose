@@ -74,16 +74,18 @@ public class ForagingMortality extends AbstractMortality {
     public double getRate(School school) {
 
         double output = 0;
+        int nstepYear = this.getConfiguration().getNStepYear();
+        
         if (this.getConfiguration().isGeneticEnabled()) {
             String key = "imax";
 
             try {
-                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()] / 24;
+                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()] / nstepYear;
             } catch (Exception ex) {
                 Logger.getLogger(ForagingMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            output = I_max[school.getSpeciesIndex()] * this.k_for[school.getSpeciesIndex()] / 24;;
+            output = I_max[school.getSpeciesIndex()] * this.k_for[school.getSpeciesIndex()] / nstepYear;
         }
         if (output < 0) {
             output = 0;
