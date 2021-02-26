@@ -44,7 +44,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                          units, ci = TRUE, ...){
   
   # CHECK ARGUMENTS
-  if(!is.null(species)){
+  if(!is.null(species)) {
     # Check species I
     message1 = "'species' must be whether a numeric or character vector without NA or duplicated values."
     if(!is.vector(species) || # isn't it a vector?
@@ -56,12 +56,12 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
     }
     
     # Check species II
-    if(is.numeric(species)){
-      if(any(species > ncol(x))){
+    if(is.numeric(species)) {
+      if(any(species > ncol(x))) {
         stop("'species' must be between 1 and ", ncol(x))  
       }
-    }else if(is.character(species)){
-      if(is.null(dimnames(x))){
+    } else if(is.character(species)) {
+      if(is.null(dimnames(x))) {
         stop("Is not possible to define species as character due to 'x' has not species names defined.")
       }
       
@@ -101,7 +101,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   
   # Define error message
   msg = sprintf("Not defined method for ts = %s and type = %s", isTRUE(ts), type)
-  if(isTRUE(ts)){
+  if(isTRUE(ts)) {
     # Plot types for ts = TRUE
     switch(as.character(type),
            "1" = plot2DTsType1(x = x, replicates = replicates, 
@@ -128,7 +128,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                speciesNames = speciesNames, axes = axes, 
                                units = units, ...),
            stop(msg))
-  }else{
+  } else {
     # Plot types for ts = FALSE    
     switch(as.character(type),
            "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
@@ -157,34 +157,18 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
                          units, border, legend, ...){
   
   # Define name of species
-  if(is.null(speciesNames)){
-    speciesNames = toupper(colnames(x))
-  } 
+  if(is.null(speciesNames)) speciesNames = toupper(colnames(x))
   
   # To keep the plot params as the beginning
   op = par(no.readonly = TRUE)
   on.exit(par(op))
   
   # Define multiplot array if there're more than 1 species
-  if(ncol(x) > 1){
-    # Internal margins
-    mar = rep(0, 4)
-    
-    # External margins
-    oma = c(3, 4, 3, 4)
-    
-    # Define new margins
-    par(mar = mar, oma = oma)
-    
-    # Get array of plots
-    mfrow = getmfrow(ncol(x))
-  }else{
-    # Get array of plots
-    mfrow = c(1, 1)
+  mfrow = getmfrow(ncol(x))
+  if(ncol(x)!=1) {
+    par(oma = c(1,1,1,1), mar = c(3,3,1,1))
+    par(mfrow = mfrow)
   }
-  
-  # Define array of plots
-  par(mfrow = mfrow)
   
   # Extract args related with line customization
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
@@ -203,13 +187,14 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   
   # Define xlim & ylim if NULL
   if(is.null(xlim)) xlim = range(times)
-  if(is.null(ylim)) ylim = range(as.numeric(x))*factor #pending: ylim flexible for the users
+  
+  ylim_fix = ylim
   
   # Generate plots by spp
-  for(i in seq_len(ncol(x))){
+  for(i in seq_len(ncol(x))) {
     # Extract values for spp i
     xsp = factor*x[, i, ,drop = FALSE]
-    
+    if(is.null(ylim_fix)) ylim = c(0.75, 1.25)*range(as.numeric(xsp)) else ylim_fix*factor
     # Set an empty canvas
     plot.new()
     plot.window(xlim = xlim, ylim = ylim)
@@ -232,7 +217,7 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
     }
     
     # Add axis
-    if(isTRUE(axes)){
+    if(isTRUE(axes)) {
       # Define default value for las (direction of axis labels)
       las = list(...)$las
       las = ifelse(is.null(las), 1, las)
@@ -245,28 +230,12 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
       cex.axis = list(...)[["cex.axis"]]
       cex.axis = ifelse(is.null(cex.axis), 1, cex.axis)
       
-      # Draw left axis (if correspond)
-      if(is.element(i %% (mfrow[2]*2), c(0, 1))){
-        axis(side = ifelse(i %% 2 == 1, 2, 4), las = las, line = line, 
-             cex.axis = cex.axis)  
-      }
-      
-      # Draw upper axis (if correspond)
-      if(mfrow[2] > 1 && is.element(i, seq(2, mfrow[2], 2))){
-        axis(side = 3, las = las, line = line, cex.axis = cex.axis)
-      }
-      
-      # Draw bottom axis (if correspond)
-      index = c(seq(from = ncol(x) - mfrow[2] + 1, by = 2, 
-                    to = prod(mfrow) - mfrow[2] + 1),
-                seq(from = prod(mfrow), by = -2, length.out = mfrow[2] - 1))
-      if(is.element(i, index)){
-        axis(side = 1, las = las, line = line, cex.axis = cex.axis)
-      }
-      
+      axis(side = 1, las = las, line = line, cex.axis = cex.axis)
+      axis(side = 2, las = las, line = line, cex.axis = cex.axis)
       box()
     }
-  }
+    
+  } # end spp loop
   
   return(invisible())
 }
@@ -322,7 +291,7 @@ plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf,
   }
   
   # Add axes
-  if(isTRUE(axes)){
+  if(isTRUE(axes)) {
     # Define default value for las (direction of axis labels)
     las = list(...)$las
     las = ifelse(is.null(las), 1, las)
@@ -356,7 +325,7 @@ plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf,
 }
 
 plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border, 
-                  ...){
+                  ...) {
   
   # If there is just one replicate, plot it directly 
   if(dim(y)[3] == 1){
