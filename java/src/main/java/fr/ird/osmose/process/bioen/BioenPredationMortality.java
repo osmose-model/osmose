@@ -194,7 +194,7 @@ public class BioenPredationMortality extends PredationMortality {
         if(speciesIndex >= this.getNSpecies()) {
             // If species is a background one, return parameter
             // to check with Alaia
-            return  predationRateBioen[speciesIndex];
+            return predationRateBioen[speciesIndex];
         }
 
         // recovers the thresshold age (stored on Dt)
