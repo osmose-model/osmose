@@ -250,7 +250,29 @@ public class EnergyBudget extends AbstractProcess {
         }
 
         return output;
+        
+    }
 
+    public void computeEnetFaced(School school) {
+        int ispec = school.getSpeciesIndex();
+        int nStepYear = this.getConfiguration().getNStepYear();
+        
+        double output;
+        if (school.getAgeDt() < school.getSpecies().getFirstFeedingAgeDt()) {
+            // No feeding.
+            output = 0;
+        } else if (school.getAgeDt() == school.getSpecies().getFirstFeedingAgeDt()) {
+            // First speeding (age = 1 dt)
+            output = school.getENet()/larvaePredationRateBioen[ispec]*nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+        } else if ((school.getAgeDt() > school.getSpecies().getFirstFeedingAgeDt()) && (school.getAge() < school.getSpecies().getLarvaeThres())) {
+            // Next feedings as larvae
+            double enet = school.getENet() / larvaePredationRateBioen[ispec] * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
+        } else {
+            double enet = school.getENet() * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
+        }
+        school.set_enet_faced(output);
     }
 
     /**
@@ -315,26 +337,5 @@ public class EnergyBudget extends AbstractProcess {
         school.setKappa(kappa);
     }
 
-    public void computeEnetFaced(School school) {
-        int ispec = school.getSpeciesIndex();
-        int nStepYear = this.getConfiguration().getNStepYear();
-        
-        double output;
-        if (school.getAgeDt() < school.getSpecies().getFirstFeedingAgeDt()) {
-            // No feeding.
-            output = 0;
-        } else if (school.getAgeDt() == school.getSpecies().getFirstFeedingAgeDt()) {
-            // First speeding (age = 1 dt)
-            output = school.getENet()/larvaePredationRateBioen[ispec]*nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
-        } else if ((school.getAgeDt() > school.getSpecies().getFirstFeedingAgeDt()) && (school.getAge() < school.getSpecies().getLarvaeThres())) {
-            // Next feedings as larvae
-            double enet = school.getENet() / larvaePredationRateBioen[ispec] * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
-            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
-        } else {
-            double enet = school.getENet() * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
-            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
-        }
-        school.set_enet_faced(output);
-    }
 
 }
