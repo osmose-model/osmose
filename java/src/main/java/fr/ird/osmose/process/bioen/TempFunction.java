@@ -106,10 +106,12 @@ public class TempFunction extends AbstractProcess {
             cpt++;
         }
         
+        cpt = 0;
         key = "species.bioen.maint.e.maint";
-        for (int i = 0; i < this.getNSpecies(); i++) {
+        for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            e_m[i] = getConfiguration().getDouble(keytmp);
+            e_m[cpt] = getConfiguration().getDouble(keytmp);
+            cpt++;
         }
         
     }
