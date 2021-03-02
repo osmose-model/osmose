@@ -75,7 +75,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
         
         int nSpecies = this.getNSpecies();
         
-        // spawning stock biomass per species
+        // spawning stock biomass per species for seeding period
         double[] SSB = new double[nSpecies];
     
         // loop over all the schools to compute 

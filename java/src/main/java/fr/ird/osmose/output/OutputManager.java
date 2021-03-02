@@ -685,7 +685,7 @@ public class OutputManager extends SimulationLinker {
             if (getConfiguration().getBoolean("output.meanSomaticWeight.byAge.enabled")) {
                 outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanSomaticWeightDistribBy",
                         "Mean somatic weight of fish (centimeter)",
-                        school -> (school.getGonadWeight()),
+                        school -> (school.getWeight()),
                         school -> school.getInstantaneousAbundance(), ageDistrib)
                 );  
             }
