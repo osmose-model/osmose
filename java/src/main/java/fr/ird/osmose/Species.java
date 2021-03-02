@@ -214,7 +214,7 @@ public class Species implements ISpecies {
         return this.zlayer;
     }
     
-    public int getLarvaeThres() { 
+    public int getLarvaeThresDt() { 
         return this.larvaeToAdultsAgeDt;   
     }
 

@@ -198,7 +198,7 @@ public class BioenPredationMortality extends PredationMortality {
         }
 
         // recovers the thresshold age (stored on Dt)
-        int thresAge = this.getSpecies(speciesIndex).getLarvaeThres();
+        int thresAge = this.getSpecies(speciesIndex).getLarvaeThresDt();
         
         double factor = 1;
 

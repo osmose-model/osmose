@@ -264,7 +264,7 @@ public class EnergyBudget extends AbstractProcess {
         } else if (school.getAgeDt() == school.getSpecies().getFirstFeedingAgeDt()) {
             // First speeding (age = 1 dt)
             output = school.getENet()/larvaePredationRateBioen[ispec]*nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
-        } else if ((school.getAgeDt() > school.getSpecies().getFirstFeedingAgeDt()) && (school.getAge() < school.getSpecies().getLarvaeThres())) {
+        } else if ((school.getAgeDt() > school.getSpecies().getFirstFeedingAgeDt()) && (school.getAgeDt() < school.getSpecies().getLarvaeThresDt())) {
             // Next feedings as larvae
             double enet = school.getENet() / larvaePredationRateBioen[ispec] * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
             output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
