@@ -613,7 +613,7 @@ public class OutputManager extends SimulationLinker {
                         "Mean ingestion per g.g^-beta.y-1 of fish (centimeter)",
                         school -> (school.getIngestion() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear),
-                        school -> school.getInstantaneousAbundance(), ageDistrib));
+                        school -> school.getInstantaneousAbundance(), ageDistrib, false));
             }
 
             // Alaia's outputs in the new format
@@ -622,7 +622,7 @@ public class OutputManager extends SimulationLinker {
                         "Mean ingestion per g.g^-beta.y-1 of fish (centimeter)",
                         school -> (school.getIngestion() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear),
-                        school -> school.getInstantaneousAbundance(), sizeDistrib));
+                        school -> school.getInstantaneousAbundance(), sizeDistrib, false));
             }
 
             // Alaia's outputs in the new format
@@ -644,7 +644,7 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnetDistribBy",
                         "Mean Enet per g.g^-beta.y-1 of fish", school -> ((school.getENet() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
-                        school -> school.getInstantaneousAbundance(), ageDistrib));
+                        school -> school.getInstantaneousAbundance(), ageDistrib, false));
             }
 
             // Alaia's outputs in the new format
@@ -652,7 +652,7 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnetDistribBy",
                         "Mean Enet per g.g^-beta.y-1 of fish", school -> ((school.getENet() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
-                        school -> school.getInstantaneousAbundance(), sizeDistrib));
+                        school -> school.getInstantaneousAbundance(), sizeDistrib, false));
             }
 
             // Alaia's outputs in the new format
@@ -661,7 +661,7 @@ public class OutputManager extends SimulationLinker {
                         "Mean maintenance per g.g^-beta.y-1 of fish",
                         school -> ((school.getEMaint() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
-                        school -> school.getInstantaneousAbundance(), ageDistrib));
+                        school -> school.getInstantaneousAbundance(), ageDistrib, false));
             }
 
             if (getConfiguration().getBoolean("output.maintenance.bySize.enabled")) {
@@ -669,7 +669,7 @@ public class OutputManager extends SimulationLinker {
                         "Mean maintenance per g.g^-beta.y-1 of fish",
                         school -> ((school.getEMaint() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
-                        school -> school.getInstantaneousAbundance(), sizeDistrib));
+                        school -> school.getInstantaneousAbundance(), sizeDistrib, false));
             }
             
             if (getConfiguration().getBoolean("output.meanSomaticWeight.byAge.enabled")) {
