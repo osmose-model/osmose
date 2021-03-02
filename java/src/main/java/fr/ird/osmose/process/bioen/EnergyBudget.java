@@ -84,10 +84,11 @@ public class EnergyBudget extends AbstractProcess {
     public void init() {
 
         String key;
-        int cpt;
+                int cpt;
         // Redundant with the beta of the BioenPredationMortality class.
         int nSpecies = this.getNSpecies();
-
+        
+        // Recovers the eta parameters for focal + background species
         cpt = 0;
         eta = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
@@ -96,7 +97,7 @@ public class EnergyBudget extends AbstractProcess {
             cpt++;
         }
         
-        // Recovers the beta coefficient for focal + background species
+        // Recovers the r parameters for focal + background species
         cpt = 0;
         r = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
@@ -105,7 +106,7 @@ public class EnergyBudget extends AbstractProcess {
             cpt++;
         }
 
-        // Recovers the beta coefficient for focal + background species
+        // Recovers the m0 parameters for focal + background species
         cpt = 0;
         m0 = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
@@ -114,7 +115,7 @@ public class EnergyBudget extends AbstractProcess {
             cpt++;
         }
 
-        // Recovers the beta coefficient for focal + background species
+        // Recovers the m1 parameters for focal + background species
         m1 = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
@@ -123,7 +124,7 @@ public class EnergyBudget extends AbstractProcess {
             cpt++;
         }
 
-        // Recovers the beta coefficient for focal + background species
+        // Recovers the c_m parameters for focal + background species
         c_m = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
@@ -132,7 +133,7 @@ public class EnergyBudget extends AbstractProcess {
             cpt++;
         }
 
-        // Recovers the beta coefficient for focal + background species
+        // Recovers the larvae factor of ingestion for focal + background species
         cpt = 0;
         larvaePredationRateBioen = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
@@ -141,6 +142,7 @@ public class EnergyBudget extends AbstractProcess {
             cpt++;
         }
         
+        // Recovers the assimilation parameter  for focal + background species
         assimilation = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
@@ -157,7 +159,6 @@ public class EnergyBudget extends AbstractProcess {
     @Override
     public void run() {
 
-        //System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         // Loop over all the alive schools
         for (School school : getSchoolSet().getAliveSchools()) {
             this.getEgross(school);   // computes E_gross, stored in the attribute.
@@ -265,10 +266,10 @@ public class EnergyBudget extends AbstractProcess {
             // First speeding (age = 1 dt)
             output = school.getENet()/larvaePredationRateBioen[ispec]*nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
         } else if ((school.getAgeDt() > school.getSpecies().getFirstFeedingAgeDt()) && (school.getAgeDt() < school.getSpecies().getLarvaeThresDt())) {
-            // Next feedings as larvae
+            // Next feedings as larvae and post-larvae
             double enet = school.getENet() / larvaePredationRateBioen[ispec] * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
             output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
-        } else {
+        } else { // Next feeding as juvenile and adult
             double enet = school.getENet() * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
             output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
         }
@@ -321,6 +322,8 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @throws java.lang.Exception
      */
+    
+    // kappa = 1 - rho
     public void getKappa(School school) throws Exception {
         int ispec = school.getSpeciesIndex();
 

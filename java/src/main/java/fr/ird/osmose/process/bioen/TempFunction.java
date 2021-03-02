@@ -51,6 +51,10 @@ import java.io.IOException;
  */
 public class TempFunction extends AbstractProcess {
 
+     /**
+     * Parameters for the energy mobilization.
+     */
+    
     private double[] e_M, e_D, Tp;
 
     /**
@@ -123,7 +127,7 @@ public class TempFunction extends AbstractProcess {
     }
 
     /**
-     * Computes the phiT coefficients function for gross energy. Equation 4
+     * Computes the phiT coefficients function for mobilized energy. Equation 4
      */
     /**
      * Returns the temperature for a given school.
@@ -135,7 +139,7 @@ public class TempFunction extends AbstractProcess {
     }
 
     /**
-     * Returns the phiT function for gross energy. Equation 4
+     * Returns the phiT function for mobilized energy. Equation 4
      *
      * @param school
      * @return
@@ -158,7 +162,7 @@ public class TempFunction extends AbstractProcess {
     }
 
     /**
-     * Returns the Arrhenius function for a given school. Cf. equation 6
+     * Returns the Arrhenius function for a given school for maintenance. Cf. equation 6
      *
      * @param school
      * @return

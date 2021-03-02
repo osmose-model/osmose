@@ -63,12 +63,12 @@ public class BioenPredationMortality extends PredationMortality {
     private double[] predationRateBioen;
 
     /**
-     * Maximum ingestion rate use to calcul max ingestion for larvae.
+     * Maximum ingestion factor for larvae use to calcul max ingestion for larvae.
      */
     private double[] larvaePredationRateBioen;
 
     /**
-     * Mean enet rate for larvae.
+     * Mean adult enet rate used to calcul max ingestion for larvae
      */
     private double[] c_rateBioen;
 
@@ -192,8 +192,6 @@ public class BioenPredationMortality extends PredationMortality {
         int speciesIndex = predator.getSpeciesIndex();
         
         if(speciesIndex >= this.getNSpecies()) {
-            // If species is a background one, return parameter
-            // to check with Alaia
             return predationRateBioen[speciesIndex];
         }
 
