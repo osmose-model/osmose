@@ -89,6 +89,11 @@ public class ReproductionProcess extends AbstractProcess {
     @Override
     public void init() {
 
+        boolean normalisationEnabled = false;
+        if(!getConfiguration().isNull("reproduction.normalisation.enabled")) { 
+            normalisationEnabled = getConfiguration().getBoolean("reproduction.normalisation.enabled");   
+        }
+        
         int nSpecies = getNSpecies();
         sexRatio = new double[nSpecies];
         beta = new double[nSpecies];
@@ -119,11 +124,14 @@ public class ReproductionProcess extends AbstractProcess {
             cpt++;
         }
         
-        // normalisation of seasonSpawning.
-        if (getConfiguration().isBioenEnabled()) {
-            this.normSeasonBioen();
-        } else {
-            this.normSeason();
+        if (normalisationEnabled) {
+            info("Normalisation of season spawning is on for all species");
+            // normalisation of seasonSpawning.
+            if (getConfiguration().isBioenEnabled()) {
+                this.normSeasonBioen();
+            } else {
+                this.normSeason();
+            }
         }
         
         // Seeding biomass
@@ -389,7 +397,9 @@ public class ReproductionProcess extends AbstractProcess {
                 for(int p = 0; p < length; p++) { 
                     seasonSpawning[iSpec][p] = seasonSpawningTemp[p];
                 }
-            }    
+            }
+            
+            
         } // end of species loop
     }  // end of method
 
