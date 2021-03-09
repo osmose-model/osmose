@@ -251,7 +251,7 @@ public class EnergyBudget extends AbstractProcess {
             school.setSizeMat(length);
             school.setIsMature(true);
         }
-        
+
         return output;
         
     }
