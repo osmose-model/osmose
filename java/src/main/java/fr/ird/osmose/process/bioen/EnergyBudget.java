@@ -84,7 +84,7 @@ public class EnergyBudget extends AbstractProcess {
     public void init() {
 
         String key;
-                int cpt;
+        int cpt;
         // Redundant with the beta of the BioenPredationMortality class.
         int nSpecies = this.getNSpecies();
         
@@ -163,6 +163,7 @@ public class EnergyBudget extends AbstractProcess {
         for (School school : getSchoolSet().getAliveSchools()) {
             this.getEgross(school);   // computes E_gross, stored in the attribute.
             this.getMaintenance(school);   // computes E_maintanance
+
             school.updateIngestionTot(school.getIngestion(), school.getInstantaneousAbundance());
 
             try {
@@ -173,6 +174,7 @@ public class EnergyBudget extends AbstractProcess {
 
             school.setENet(school.getEGross() - school.getEMaint());
             this.computeEnetFaced(school);
+            
             try {
                 this.getKappa(school);   // computes the kappa function
             } catch (Exception ex) {
@@ -249,7 +251,7 @@ public class EnergyBudget extends AbstractProcess {
             school.setSizeMat(length);
             school.setIsMature(true);
         }
-
+        
         return output;
         
     }
@@ -290,7 +292,6 @@ public class EnergyBudget extends AbstractProcess {
 
         if (school.isAlive()) {
             dgrowth /= school.getInstantaneousAbundance();
-
             // increments the weight
             school.incrementWeight((float) dgrowth);
         }
