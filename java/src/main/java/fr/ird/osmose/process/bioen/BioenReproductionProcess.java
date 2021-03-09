@@ -60,14 +60,18 @@ import java.util.List;
  * guarantee egg release.
  */
 public class BioenReproductionProcess extends ReproductionProcess {
+    
+    private WeightedRandomDraft<School> weight_rand;
 
     public BioenReproductionProcess(int rank) {
         super(rank);
+        weight_rand = new WeightedRandomDraft<>();
     }
 
     @Override
     public void init() {
         super.init();
+        weight_rand.init();
     }
 
     @Override
@@ -96,7 +100,9 @@ public class BioenReproductionProcess extends ReproductionProcess {
             Species species = getSpecies(cpt);
             
             List<School> schoolset = getSchoolSet().getSchools(species);
-            WeightedRandomDraft<School> weight_rand = new WeightedRandomDraft<>();
+            
+            // reinit the map objects of random generator
+            weight_rand.reset();
             
             // compute nomber of eggs to be released
             double season = getSeason(getSimulation().getIndexTimeSimu(), species);
