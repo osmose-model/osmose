@@ -606,17 +606,7 @@ public class OutputManager extends SimulationLinker {
                 outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "kappa", "Kappa (rate [0-1])",
                         school -> school.getKappa(), school -> school.getInstantaneousAbundance()));
             }
-
-            if (getConfiguration().getBoolean("output.bioen.maturesize.enabled", NO_WARNING)) {
-                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "SizeMature", "Size at maturity (centimeters)",
-                        school -> school.getSizeMat(), school -> school.getInstantaneousAbundance()));
-            }
-
-            if (getConfiguration().getBoolean("output.bioen.matureage.enabled", NO_WARNING)) {
-                outputs.add(new WeightedSpeciesOutput(rank, "Bioen", "AgeMature", "Age at maturity (years)",
-                        school -> school.getAgeMat(), school -> school.getInstantaneousAbundance()));
-            }
-            
+ 
             // Alaia's outputs in the new format
             if (getConfiguration().getBoolean("output.ingest.byAge.enabled")) {
                 outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanIngestDistribBy",
