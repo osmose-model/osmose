@@ -633,14 +633,14 @@ public class OutputManager extends SimulationLinker {
 
             // Alaia's outputs in the new format
             if (getConfiguration().getBoolean("output.kappa.bySize.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanKappaDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanKappa",
                         "Mean kappa of fish", school -> (school.getKappa()),
                         school -> school.getInstantaneousAbundance(), sizeDistrib));
             }
 
             // Alaia's outputs in the new format
             if (getConfiguration().getBoolean("output.enet.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnetDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnet",
                         "Mean Enet per g.g^-beta.y-1 of fish", school -> ((school.getENet() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
                         school -> school.getInstantaneousAbundance(), ageDistrib, false));
@@ -648,7 +648,7 @@ public class OutputManager extends SimulationLinker {
 
             // Alaia's outputs in the new format
             if (getConfiguration().getBoolean("output.enet.bySize.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnetDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanEnet",
                         "Mean Enet per g.g^-beta.y-1 of fish", school -> ((school.getENet() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
                         school -> school.getInstantaneousAbundance(), sizeDistrib, false));
@@ -656,7 +656,7 @@ public class OutputManager extends SimulationLinker {
 
             // Alaia's outputs in the new format
             if (getConfiguration().getBoolean("output.maintenance.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanMaintDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanMaint",
                         "Mean maintenance per g.g^-beta.y-1 of fish",
                         school -> ((school.getEMaint() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
@@ -664,7 +664,7 @@ public class OutputManager extends SimulationLinker {
             }
 
             if (getConfiguration().getBoolean("output.maintenance.bySize.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanMaintDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanMaint",
                         "Mean maintenance per g.g^-beta.y-1 of fish",
                         school -> ((school.getEMaint() * 1e6f
                                 / Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * ndtPerYear)),
@@ -672,7 +672,7 @@ public class OutputManager extends SimulationLinker {
             }
             
             if (getConfiguration().getBoolean("output.meanSomaticWeight.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanSomaticWeightDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanSomaticWeight",
                         "Mean somatic weight of fish (centimeter)",
                         school -> (school.getWeight()),
                         school -> school.getInstantaneousAbundance(), ageDistrib)
@@ -680,7 +680,7 @@ public class OutputManager extends SimulationLinker {
             }
             
             if (getConfiguration().getBoolean("output.meanGonadWeight.byAge.enabled")) {
-                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanGonadWeightDistribBy",
+                outputs.add(new WeightedDistribOutput(rank, "BioenIndicators", "meanGonadWeight",
                         "Mean gonad weight of fish per gram of individual (centimeter) by ",
                         school -> (school.getGonadWeight() / (school.getWeight())),
                         school -> school.getInstantaneousAbundance(), ageDistrib)
