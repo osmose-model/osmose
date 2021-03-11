@@ -392,7 +392,7 @@ public class OutputManager extends SimulationLinker {
                     "Mean weight of fish species in kilogram, weighted by fish numbers, and "
                             + (cutoff ? "excluding" : "including") + " first ages specified in input",
                     school -> school.getAge() >= cutoffAge[school.getSpeciesIndex()],
-                    school -> 1E-3 * school.getWeight(), school -> school.getInstantaneousAbundance()));
+                    school -> school.getWeight(), school -> school.getInstantaneousAbundance()));
         }
 
         if (getConfiguration().getBoolean("output.size.catch.enabled")) {
@@ -402,31 +402,31 @@ public class OutputManager extends SimulationLinker {
         }
 
         if (getConfiguration().getBoolean("output.yield.abundance.bySize.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
+            outputs.add(new DistribOutput(rank, "SizeIndicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
                     school -> school.getNdead(MortalityCause.FISHING), sizeDistrib, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.biomass.bySize.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "yield",
+            outputs.add(new DistribOutput(rank, "SizeIndicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), sizeDistrib, false));
         }
 
         if (getConfiguration().getBoolean("output.meanSize.byAge.enabled")) {
-            outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanSize", "Mean size of fish (centimeter)",
+            outputs.add(new WeightedDistribOutput(rank, "AgeIndicators", "meanSize", "Mean size of fish (centimeter)",
                     school -> school.getLength(), school -> school.getInstantaneousAbundance(), ageDistrib));
         }
 
         // Age
         if (getConfiguration().getBoolean("output.yield.abundance.byAge.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "yieldN",
+            outputs.add(new DistribOutput(rank, "AgeIndicators", "yieldN",
                     "Distribution of cumulative catch (number of fish per time step of saving)",
                     school -> school.getNdead(MortalityCause.FISHING), ageDistrib, false));
         }
 
         if (getConfiguration().getBoolean("output.yield.biomass.byAge.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "yield",
+            outputs.add(new DistribOutput(rank, "AgeIndicators", "yield",
                     "Distribution of cumulative catch (tonne per time step of saving)",
                     school -> school.abd2biom(school.getNdead(MortalityCause.FISHING)), ageDistrib, false));
         }
