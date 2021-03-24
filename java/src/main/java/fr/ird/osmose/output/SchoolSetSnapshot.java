@@ -65,7 +65,7 @@ import ucar.nc2.Variable;
  */
 public class SchoolSetSnapshot extends SimulationLinker {
     
-    private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
+    private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar, gonadVar;
     private Variable genetVar, traitVarVar;
     private int nTrait=0;
     private int nMaxLoci;
@@ -78,6 +78,8 @@ public class SchoolSetSnapshot extends SimulationLinker {
         boolean useGenet = this.getConfiguration().isGeneticEnabled();
         ArrayFloat.D4 genotype = null;
         ArrayFloat.D2 traitnoise = null;
+        ArrayFloat.D1 gonadicWeight = null;
+
         NetcdfFileWriter nc = createNCFile(iStepSimu);
         int nSchool = getSchoolSet().getSchools().size();
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
@@ -88,11 +90,16 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 length = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 weight = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 trophiclevel = new ArrayFloat.D1(nSchool);
+        boolean useBioen = this.getConfiguration().isGeneticEnabled();
         
         // if use genetic, initialize the output of the genotype (nschool x ntrait x nloci x 2)
         if (useGenet) {
             genotype = new ArrayFloat.D4(nSchool, this.nTrait, this.nMaxLoci, 2);
             traitnoise = new ArrayFloat.D2(nSchool, this.nTrait);
+        }
+
+        if(useBioen) { 
+            gonadicWeight = new ArrayFloat.D1(nSchool);
         }
         
         int s = 0;
@@ -106,6 +113,8 @@ public class SchoolSetSnapshot extends SimulationLinker {
             length.set(s, school.getLength());
             weight.set(s, school.getWeight() * 1e6f);
             trophiclevel.set(s, school.getTrophicLevel());
+            if(useBioen) {
+            }
             
             if(useGenet) {
                 // If use genetic module, save the list of loci pairs for each trait.
@@ -135,6 +144,9 @@ public class SchoolSetSnapshot extends SimulationLinker {
             if(useGenet) { 
                 nc.write(this.genetVar, genotype);
                 nc.write(this.traitVarVar, traitnoise);
+            }
+            if(useBioen) { 
+                nc.write(this.gonadVar, gonadicWeight);
             }
             nc.close();
             //close(nc);
@@ -194,6 +206,12 @@ public class SchoolSetSnapshot extends SimulationLinker {
         weightVar = nc.addVariable(null, "weight", DataType.FLOAT, "nschool");
         weightVar.addAttribute(new Attribute("units", "g"));
         weightVar.addAttribute(new Attribute("description", "weight of the fish in the school in gram"));
+
+        if (this.getConfiguration().isBioenEnabled()) {
+            gonadVar = nc.addVariable(null, "gonadWeight", DataType.FLOAT, "nschool");
+            gonadVar.addAttribute(new Attribute("units", "g"));
+            gonadVar.addAttribute(new Attribute("description", "gonadic weight of the fish in the school in gram"));
+        }
 
         tlVar = nc.addVariable(null, "trophiclevel", DataType.FLOAT, "nschool");
         tlVar.addAttribute(new Attribute("units", "scalar"));
