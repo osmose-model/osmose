@@ -114,6 +114,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             weight.set(s, school.getWeight() * 1e6f);
             trophiclevel.set(s, school.getTrophicLevel());
             if(useBioen) {
+                gonadicWeight.set(s, school.getGonadWeight());
             }
             
             if(useGenet) {
