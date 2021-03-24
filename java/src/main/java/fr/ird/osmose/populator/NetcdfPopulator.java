@@ -95,10 +95,13 @@ public class NetcdfPopulator extends AbstractPopulator {
     public void populate() {
 
         boolean useGenetic = this.getConfiguration().isGeneticEnabled();
+        boolean useBioen = this.getConfiguration().isBioenEnabled();
         Variable genetVar = null; // variable containing the genotype
         Variable traitVarVar = null;  // variable containing the env. noise
+        Variable gonadVar = null;
         ArrayFloat.D4 genotype = null;   // data array containing the Netcdf genotype array
         ArrayFloat.D2 traitNoise = null;   // data array containing the Netcdf genotype array
+        ArrayFloat.D1 gonadWeight = null;
 
         int nSchool = nc.findDimension("nschool").getLength();
         try {
@@ -117,6 +120,11 @@ public class NetcdfPopulator extends AbstractPopulator {
                 traitNoise = (ArrayFloat.D2) traitVarVar.read();
             }
 
+            if(useBioen) { 
+                gonadVar = nc.findVariable("genotype");
+                gonadWeight = (ArrayFloat.D1) gonadVar.read();
+            }
+
             for (int s = 0; s < nSchool; s++) {
 
                 School school = new School(
@@ -130,6 +138,9 @@ public class NetcdfPopulator extends AbstractPopulator {
                         trophiclevel[s]);
                 if (useGenetic) {
                     school.restartGenotype(this.getRank(), s, genotype, traitNoise);
+                }
+                if(useBioen) { 
+                    school.setGonadWeight(gonadWeight.get(s));
                 }
                 getSchoolSet().add(school);
             }
