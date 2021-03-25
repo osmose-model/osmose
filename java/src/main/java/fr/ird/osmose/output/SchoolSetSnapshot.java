@@ -90,7 +90,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
         ArrayFloat.D1 length = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 weight = new ArrayFloat.D1(nSchool);
         ArrayFloat.D1 trophiclevel = new ArrayFloat.D1(nSchool);
-        boolean useBioen = this.getConfiguration().isGeneticEnabled();
+        boolean useBioen = this.getConfiguration().isBioenEnabled();
         
         // if use genetic, initialize the output of the genotype (nschool x ntrait x nloci x 2)
         if (useGenet) {
