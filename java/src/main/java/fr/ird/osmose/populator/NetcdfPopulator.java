@@ -140,7 +140,8 @@ public class NetcdfPopulator extends AbstractPopulator {
                     school.restartGenotype(this.getRank(), s, genotype, traitNoise);
                 }
                 if(useBioen) { 
-                    school.setGonadWeight(gonadWeight.get(s));
+                    // Weight is saved in g in netcdf, so must be provided converted in tons.
+                    school.setGonadWeight(gonadWeight.get(s) * 1e-6f);
                 }
                 getSchoolSet().add(school);
             }
