@@ -71,6 +71,7 @@ import fr.ird.osmose.output.spatial.SpatialYieldOutput;
 import fr.ird.osmose.output.spatial.SpatialYieldNOutput;
 import fr.ird.osmose.output.spatial.SpatialTLOutput;
 import fr.ird.osmose.output.spatial.SpatialSizeOutput;
+import fr.ird.osmose.output.spatial.SpatialEnetOutput;
 import fr.ird.osmose.process.mortality.MortalityCause;
 
 /**
@@ -250,6 +251,10 @@ public class OutputManager extends SimulationLinker {
 
         if (getConfiguration().getBoolean("output.spatialsize.enabled")) {
             outputs.add(new SpatialSizeOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialenet.enabled")) {
+            outputs.add(new SpatialEnetOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.spatial.yield.biomass.enabled")) {
