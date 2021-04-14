@@ -88,13 +88,15 @@ public class SpatialEnetOutput extends AbstractSpatialOutput {
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         int iSpec = school.getSpeciesIndex();
-                        if (cutoffEnabled && school.getAge() < cutoffAge[iSpec]) {
+                        int thresDt = getSpecies(iSpec).getLarvaeThresDt();
+                        if (school.getAgeDt() < thresDt) {
                             continue;
                         }
+                        if(!school.isAlive()) continue;
                         if (!school.isUnlocated()) {
                             // here, data is TK weighted by the biomass
-                            temp[iSpec][j][i] += school.getENet() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
-                            abundance[iSpec][j][i] += school.getInstantaneousAbundance();
+                            temp[iSpec][j][i] += school.getENet() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())) / school.getInstantaneousAbundance();
+                            abundance[iSpec][j][i] += 1;
                         }
                     }
                 }
