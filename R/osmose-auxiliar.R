@@ -94,7 +94,7 @@ getmfrow = function(n){
   return(out)
 }
 
-writeOsmoseParameters = function(conf, file, sep=";") {
+writeOsmoseParameters = function(conf, file, sep=";", append=FALSE) {
   .writeParameter = function(x) {
     out = paste(names(x),paste(x, collapse=sep), sep=sep)
     return(out)
@@ -105,7 +105,7 @@ writeOsmoseParameters = function(conf, file, sep=";") {
   dim(out) = c(length(out), 1)
   out = out[ind,, drop=FALSE]
   rownames(out) = vars[ind]
-  write.table(out, file=file, sep="", quote=FALSE, col.names=FALSE)
+  write.table(out, file=file, sep="", quote=FALSE, col.names=FALSE, append=append)
   return(invisible(out))
 }
 
