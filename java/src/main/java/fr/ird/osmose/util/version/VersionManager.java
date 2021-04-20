@@ -82,7 +82,7 @@ public class VersionManager extends OsmoseLinker {
             Attributes attributes = manifest.getMainAttributes();
             return VersionNumber.valueOf(attributes.getValue("Implementation-Version"));
         } catch (IOException ex) {
-            return VersionNumber.valueOf("4.3.2");
+            return VersionNumber.valueOf("4.3.3");
         }
     }
 
