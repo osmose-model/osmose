@@ -46,4 +46,4 @@ nbproject
 **.Rcheck
 
 **/nbactions.xml
-
+**/.classpath
