@@ -45,6 +45,7 @@ import fr.ird.osmose.background.BackgroundSchoolSet;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
+import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.resource.ResourceForcing;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
@@ -92,6 +93,10 @@ public class Simulation extends OsmoseLinker {
      * forcings for bkg species. Indexes from [nbkg, nbkg + nrsc - 1] are for LTL.
      */
     private ResourceForcing[] resourceForcing;
+    
+    /** Recover the list of fishing Gears **/   
+    private FishingGear[] fishingGear;
+    
     /**
      * Current year of the simulation.
      */
@@ -198,6 +203,9 @@ public class Simulation extends OsmoseLinker {
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
+    
+        // initialisation of fishing gears.
+        this.initFishingGear();
 
         // Look for restart file
         restart = false;
@@ -469,4 +477,31 @@ public class Simulation extends OsmoseLinker {
         return this.backSchoolSet;
     }
 
+    public FishingGear[] getFishingGear() {
+        return this.fishingGear;
+    }
+
+    private void initFishingGear() {
+        
+        int nfishery = getConfiguration().getNFishery();
+        
+        fishingGear = new FishingGear[nfishery];
+
+        // Recovers the index of fisheries
+        int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted().toArray();
+
+        if (fisheryIndex.length != nfishery) {
+            String message = "The number of fishery is not consistant with the number of fisheries name.";
+            error(message, new Exception());
+        }
+
+        int cpt = 0;
+        for (int index : fisheryIndex) {
+            fishingGear[cpt] = new FishingGear(rank, index);
+            fishingGear[cpt].init();
+            cpt++;
+        }
+    }
+    
 }

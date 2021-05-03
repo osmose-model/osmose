@@ -44,6 +44,7 @@ package fr.ird.osmose.util;
 import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Simulation;
 import fr.ird.osmose.process.genet.Trait;
+import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.resource.ResourceForcing;
 import fr.ird.osmose.background.BackgroundSchoolSet;
 
@@ -81,6 +82,10 @@ public class SimulationLinker extends OsmoseLinker {
     
     public ResourceForcing[] getResourceForcing() {
         return getOsmose().getSimulation(rank).getResourceForcing();
+    }
+    
+    public FishingGear[] getFishingGear() { 
+        return getOsmose().getSimulation(rank).getFishingGear();
     }
     
     
