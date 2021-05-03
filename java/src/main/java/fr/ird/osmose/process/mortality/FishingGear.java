@@ -303,5 +303,12 @@ public class FishingGear extends AbstractMortality {
             discards[cpt] = matrix.getValue(speciesIndex, fishIndex);
         }
     }
+    
+    /** Returns the gear selectivity. 
+     * Used to compute available biomass.
+     */
+    public double getSelectivity(int index, AbstractSchool school) {
+        return selectivity.getSelectivity(index, school);
+    }
 
 }

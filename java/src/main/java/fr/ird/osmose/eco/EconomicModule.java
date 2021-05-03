@@ -43,20 +43,21 @@ package fr.ird.osmose.eco;
 import java.util.List;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.stage.SizeStage;
 import fr.ird.osmose.util.SimulationLinker;
 
 public class EconomicModule extends SimulationLinker {
     
-    private double[][] availableBiomass;
+    /** Available biomass. Dimensions are (gear, species, size class).
+     */
+    private double[][][] availableBiomass;
     
     /** Size classes used to integrate fish biomass. 
      * [nSpecies, nClasses].
      * User gives nclasses, then the code add one more classes from 
      * L[-1] to Inf. At the end classes=[L0, L1, L2, INF].
-    */
-    private double[][] classes;
-    
+    */    
     private SizeStage stage;
 
     public EconomicModule(int rank) {
@@ -67,33 +68,30 @@ public class EconomicModule extends SimulationLinker {
     public void init() {
         
         // total number of species, including the  background species
-        int nSpecies = this.getNSpecies();
-        classes = new double[nSpecies][];
-        availableBiomass = new double[nSpecies][];
-        
-        int cpt = 0;
-        for(int i : this.getFocalIndex()) { 
-            String key = String.format("economic.classes.sp%d", i); 
-            double temp[] = this.getConfiguration().getArrayDouble(key);
-            int nvalues = temp.length;
-            classes[cpt] = new double[nvalues + 1];
-            availableBiomass[cpt] = new double[nvalues + 1];
-            for (int k=0; k<nvalues; k++) { 
-                classes[cpt][k] = temp[k];
+        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
+        int nGears = this.getConfiguration().getNFishery();
+        availableBiomass = new double[nGears][nSpecies][];
+        for (int g = 0; g < nGears; g++) {
+            for (int i = 0; i < nSpecies; i++) {
+                int nClasses = stage.getNStage(i);
+                availableBiomass[g][i] = new double[nClasses];
             }
-            classes[cpt][nvalues] = Double.MAX_VALUE;
         }
-        
     }
 
-        
-    public void assessAvailableBiomass() { 
-     
-       List<School> listSchool = this.getSchoolSet().getAliveSchools();
-       for(School sch : listSchool) { 
-            int iSpecies = sch.getSpeciesIndex();   
-       }
-        
+    /** Assess available biomass, which is only dependent on fish selectivity. **/
+    public void assessAvailableBiomass() {
+
+        int index = this.getSimulation().getIndexTimeSimu();
+        List<School> listSchool = this.getSchoolSet().getAliveSchools();
+        for (School school : listSchool) {
+            int iSpecies = school.getSpeciesIndex();
+            int sizeClass = stage.getStage(school);
+            int g = 0;
+            for (FishingGear gear : this.getFishingGear()) {
+                availableBiomass[g][iSpecies][sizeClass] += gear.getSelectivity(index, school) * school.getBiomass();
+                g++;
+            }
+        }
     }
-    
-    }
+}
