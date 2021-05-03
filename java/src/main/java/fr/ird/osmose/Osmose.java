@@ -455,7 +455,7 @@ public class Osmose extends OLogger {
         OSMOSE.setupLogger();
         OSMOSE.readArgs(args);
         OSMOSE.info("*********************************************");
-        OSMOSE.info("OSMOSE - Modelling Marin Exploited Ecosystems");
+        OSMOSE.info("OSMOSE - Modelling Marine Exploited Ecosystems");
         OSMOSE.info("http://www.osmose-model.org");
         OSMOSE.info("*********************************************");
         OSMOSE.info("Software version: " + VersionManager.getInstance().getJarVersion());
