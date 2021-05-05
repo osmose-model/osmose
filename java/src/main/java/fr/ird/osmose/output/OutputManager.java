@@ -774,16 +774,4 @@ public class OutputManager extends SimulationLinker {
             });
         }
     }
-
-    public void writeRestart(int iStepSimu) {
-        // Create a restart file
-        boolean isTimeToWrite = writeRestart;
-        isTimeToWrite &= (getSimulation().getYear() >= spinupRestart);
-        isTimeToWrite &= ((iStepSimu + 1) % restartFrequency == 0);
-        isTimeToWrite |= (iStepSimu >= (getConfiguration().getNStep() - 1));
-
-        if (isTimeToWrite) {
-            snapshot.makeSnapshot(iStepSimu);
-        }
-    }
 }
