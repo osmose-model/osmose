@@ -74,6 +74,7 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
         super(rank);
     }
 
+    @Override
     public void init() {
         if (getConfiguration().isNull("output.individual.freq")) {
             savingFrequency = 1;
@@ -93,6 +94,10 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
         int iStepSimu = getSimulation().getIndexTimeSimu();
         
         int nSchool = getSchoolSet().getSchools().size();
+        if(nSchool == 0) { 
+            return;
+        }
+        
         boolean useBioen = this.getConfiguration().isBioenEnabled();
         
         ArrayFloat.D1 lon = null;
@@ -269,10 +274,10 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
     }
 
     String getFilename(int iStepSimu) {
-        StringBuilder filename = new StringBuilder("restart");
+        StringBuilder filename = new StringBuilder("individual");
         filename.append(File.separatorChar);
         filename.append(getConfiguration().getString("output.file.prefix"));
-        filename.append("_snapshot_step");
+        filename.append("_modular_snapshot_step");
         filename.append(iStepSimu);
         filename.append(".nc.");
         filename.append(getRank());
