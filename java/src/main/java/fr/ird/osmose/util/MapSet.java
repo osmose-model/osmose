@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  * This class handles a set of spatial maps for a given species. No matter the
@@ -181,10 +182,14 @@ public class MapSet extends OsmoseLinker {
 
         // If the movement.map.spX exists, maps are initialised by using NetCDF
         // else, classic definitions of maps.
-        String key = prefix + ".map." + suffix + iSpeciesFile;
+        String key = prefix + ".map.file." + suffix + iSpeciesFile;
         if (!getConfiguration().isNull(key)) {
             info("Reding NetCDF file " + getConfiguration().getFile(key));
-            loadMapsNc();
+            if (!getConfiguration().isNull(prefix + ".map.variable." + suffix + iSpeciesFile)) {
+                this.loadMapsNcMaps();
+            } else {
+                this.loadMapsNc();
+            }
             // Check the map indexation
             if (!checkMapIndexation()) {
                 error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
@@ -212,7 +217,7 @@ public class MapSet extends OsmoseLinker {
      */
     public void loadMapsNc() throws IOException, InvalidRangeException {
 
-        String key = prefix + ".map." + suffix + iSpeciesFile;
+        String key = prefix + ".map.file." + suffix + iSpeciesFile;
         String ncFile = getConfiguration().getFile(key);
 
         // Open the NetCDF file
@@ -416,4 +421,67 @@ public class MapSet extends OsmoseLinker {
         }
 
     }
+    
+    
+    
+    /**
+     * Method to initialize MapSets from NetCDF file.
+     *
+     * @author Nicolas Barrier
+     * @throws java.io.IOException
+     * @throws ucar.ma2.InvalidRangeException
+     */
+    public void loadMapsNcMaps() throws IOException, InvalidRangeException {
+
+        // Get filename as movements.map.file.spX
+        String key = prefix + ".map.file." + suffix + iSpeciesFile;
+        String ncFile = getConfiguration().getFile(key);
+
+        // Open the NetCDF file
+        NetcdfFile nc = NetcdfFile.open(ncFile);
+        
+        // Recovery of the variable name from movements.map.file.variable.spX
+        String varName = getConfiguration().getString(prefix +  ".map.file.variable." + suffix + iSpeciesFile);
+        
+        // Recovery of the number of time steps per year in the file
+        int ncPerYear = getConfiguration().getInt(prefix +  ".map.file.nsteps.year." + suffix + iSpeciesFile);
+        
+        Variable var = nc.findVariable(null, varName);
+        if(var.getRank() != 3) { 
+            error(varName + " must have 3 dimensions, " + var.getRank() + " provided", null);
+        }
+        
+        int ntime = var.getShape()[0];
+
+        // Load all the maps (one per time step)
+        maps = new GridMap[ntime];
+        
+        for (int i = 0; i < ntime; i++) { 
+            
+            // Reads the GridMap by using NetCDF
+            maps[i] = new GridMap();
+            maps[i].read(nc, i, varName);
+
+            // If the map is set to 0 everywhere
+            if (maps[i].count() == 0) {
+                // add a warning here.
+                maps[i] = null;
+            }
+        } 
+
+        // Init the indexMaps (same for each age)
+        int ndt = this.getConfiguration().getNStepYear();
+        int ageMin = 0;
+        int ageMax = getSpecies(iSpecies).getLifespanDt();
+        for (int iAge = ageMin; iAge < ageMax; iAge++) {
+            for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+                int iStepNc = (iStep / (ndt / ncPerYear)) % ntime;
+                indexMaps[iAge][iStep] = iStepNc;
+            }
+        }
+            
+        nc.close();
+    }
+    
+    
 }

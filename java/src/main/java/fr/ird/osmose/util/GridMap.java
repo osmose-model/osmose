@@ -179,6 +179,10 @@ public class GridMap extends OsmoseLinker {
      * @throws InvalidRangeException
      */
     public void read(NetcdfFile nc, int mapIndex) throws IOException, InvalidRangeException {
+        this.read(nc, mapIndex, "map");
+    }
+    
+    public void read(NetcdfFile nc, int mapIndex, String varname) throws IOException, InvalidRangeException {
 
         // Defines the indexes of the NetCDF variable to read
         int nx = getConfiguration().getGrid().get_nx();
@@ -188,13 +192,13 @@ public class GridMap extends OsmoseLinker {
 
         // Extracts the FillValue attribute
         int fillValue = -99;
-        if (!nc.findVariable("map").getAttributes().isEmpty()) {
+        if (!nc.findVariable(varname).getAttributes().isEmpty()) {
             // The first attribute must be _FillValue
-            fillValue = nc.findVariable("map").getAttributes().get(0).getNumericValue().intValue();
+            fillValue = nc.findVariable(varname).getAttributes().get(0).getNumericValue().intValue();
         }
 
         // Reads the NetCDF variable
-        Array temp = nc.findVariable("map").read(start, count).reduce();
+        Array temp = nc.findVariable(varname).read(start, count).reduce();
         Index index = temp.getIndex();
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
