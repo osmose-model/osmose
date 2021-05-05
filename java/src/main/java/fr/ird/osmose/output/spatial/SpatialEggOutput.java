@@ -41,26 +41,30 @@
 package fr.ird.osmose.output.spatial;
 
 import fr.ird.osmose.Cell;
+import fr.ird.osmose.process.*;
 import fr.ird.osmose.School;
+import fr.ird.osmose.Species;
+import java.util.List;
+
 
 /**
  *
  * @author pverley
  */
-public class SpatialEnetOutput extends AbstractSpatialOutput {
+public class SpatialEggOutput extends AbstractSpatialOutput {
 
-    public SpatialEnetOutput(int rank) {
+    public SpatialEggOutput(int rank) {
         super(rank);
     }
 
     @Override
     public String getVarName() {
-        return "Enet";
+        return "Egg";
     }
 
     @Override
     public String getDesc() {
-        return "mean enet, in g.g-alpha, per species and per cell";
+        return "Mean number of Eggs";
     }
 
     @Override
@@ -88,34 +92,28 @@ public class SpatialEnetOutput extends AbstractSpatialOutput {
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         int iSpec = school.getSpeciesIndex();
-                        int thresDt = getSpecies(iSpec).getLarvaeThresDt();
-                        if (school.getAgeDt() <= thresDt) {
-                            continue;
-                        }
-                        if(!school.isAlive()) continue;
-                        if (!school.isUnlocated()) {
+                        int thresDt = getSpecies(iSpec).getFirstFeedingAgeDt();
+                        if (school.isEgg()) {
+
                             // here, data is TK weighted by the biomass
-                            temp[iSpec][j][i] += school.getENet() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())) / school.getInstantaneousAbundance();
+                              temp[iSpec][j][i] += school.getInstantaneousAbundance();
                             abundance[iSpec][j][i] += 1;
                         }
                     }
                 }
             }
         }
-
-        // Computation of the Weighted Mean for the TL
+                // Computation of the Weighted Mean for the TL
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {
             for (int j = 0; j < ny; j++) {
                 for (int i = 0; i < nx; i++) {
-                    if (abundance[iSpec][j][i] > 0) {
-                        temp[iSpec][j][i] /= abundance[iSpec][j][i];
-                    }
                     if (abundance[iSpec][j][i] == 0) {
                         temp[iSpec][j][i] = -999;
                     }
                 }
             }
         }
+
 
         // Update of the TL array
         for (int iSpec = 0; iSpec < getNSpecies(); iSpec++) {

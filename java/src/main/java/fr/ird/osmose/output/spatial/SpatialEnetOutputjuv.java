@@ -47,20 +47,20 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class SpatialEnetOutput extends AbstractSpatialOutput {
+public class SpatialEnetOutputjuv extends AbstractSpatialOutput {
 
-    public SpatialEnetOutput(int rank) {
+    public SpatialEnetOutputjuv(int rank) {
         super(rank);
     }
 
     @Override
     public String getVarName() {
-        return "Enet";
+        return "Enet_juv";
     }
 
     @Override
     public String getDesc() {
-        return "mean enet, in g.g-alpha, per species and per cell";
+        return "mean enet, in g.g-alpha, per species and per cell for not mature indiv whose agedt < thresdt";
     }
 
     @Override
@@ -89,7 +89,10 @@ public class SpatialEnetOutput extends AbstractSpatialOutput {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         int iSpec = school.getSpeciesIndex();
                         int thresDt = getSpecies(iSpec).getLarvaeThresDt();
-                        if (school.getAgeDt() <= thresDt) {
+                        if (school.getAgeDt() < thresDt) {
+                            continue;
+                        }
+                        if (school.isMature()) {
                             continue;
                         }
                         if(!school.isAlive()) continue;
