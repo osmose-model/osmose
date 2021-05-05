@@ -106,9 +106,9 @@ public class ModularSchoolSetSnapshot extends SimulationLinker implements IOutpu
         ArrayFloat.D1 weight = null;
         ArrayFloat.D1 abundance = null;
         
-        int nChars = getSchoolSet().getSchools().get(0).getID().toString().length();
+        //int nChars = getSchoolSet().getSchools().get(0).getID().toString().length();
         
-        ArrayString uuid = new ArrayString(new int[] {nSchool, nChars});
+        ArrayString uuid = new ArrayString(new int[] {nSchool});
         ArrayInt.D1 species = new ArrayInt.D1(nSchool);
         
         if (useBioen && includeGonadWeight) {
