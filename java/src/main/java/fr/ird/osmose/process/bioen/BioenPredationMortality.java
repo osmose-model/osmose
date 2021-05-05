@@ -63,12 +63,12 @@ public class BioenPredationMortality extends PredationMortality {
     private double[] predationRateBioen;
 
     /**
-     * Maximum ingestion rate use to calcul max ingestion for larvae.
+     * Maximum ingestion factor for larvae use to calcul max ingestion for larvae.
      */
     private double[] larvaePredationRateBioen;
 
     /**
-     * Mean enet rate for larvae.
+     * Mean adult enet rate used to calcul max ingestion for larvae
      */
     private double[] c_rateBioen;
 
@@ -96,7 +96,7 @@ public class BioenPredationMortality extends PredationMortality {
         int cpt = 0;
         for (int i : this.getConfiguration().getPredatorIndex()) {
             predationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
-            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.larvae.bioen.sp" + i);
+            larvaePredationRateBioen[cpt] = getConfiguration().getDouble("predation.coef.ingestion.rate.max.larvae.bioen.sp" + i);
             c_rateBioen[cpt] = getConfiguration().getDouble("predation.c.bioen.sp" + i);
             cpt++;
         }
@@ -192,14 +192,12 @@ public class BioenPredationMortality extends PredationMortality {
         int speciesIndex = predator.getSpeciesIndex();
         
         if(speciesIndex >= this.getNSpecies()) {
-            // If species is a background one, return parameter
-            // to check with Alaia
-            return  predationRateBioen[speciesIndex];
+            return predationRateBioen[speciesIndex];
         }
 
         // recovers the thresshold age (stored on Dt)
-        int thresAge = this.getSpecies(speciesIndex).getFirstFeedingAgeDt();
-
+        int thresAge = this.getSpecies(speciesIndex).getLarvaeThresDt();
+        
         double factor = 1;
 
         try {

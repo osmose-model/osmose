@@ -52,9 +52,11 @@ import java.util.logging.Logger;
  */
 public class EnergyBudget extends AbstractProcess {
 
-    private double[] csmr;
+    private double[] c_m;
 
     private double[] m0, m1;
+    
+    private double[] eta;
 
     private final TempFunction temp_function;
 
@@ -65,7 +67,7 @@ public class EnergyBudget extends AbstractProcess {
     private double[] r;
     private double[] larvaePredationRateBioen;
     
-       private double[] assimilation;
+    private double[] assimilation;
 
     public EnergyBudget(int rank) throws IOException {
 
@@ -85,56 +87,66 @@ public class EnergyBudget extends AbstractProcess {
         int cpt;
         // Redundant with the beta of the BioenPredationMortality class.
         int nSpecies = this.getNSpecies();
-
-        // Recovers the beta coefficient for focal + background species
+        
+        // Recovers the eta parameters for focal + background species
+        cpt = 0;
+        eta = new double[nSpecies];
+        for (int i : getConfiguration().getFocalIndex()) {
+            key = String.format("species.bioen.maturity.eta.sp%d", i);
+            eta[cpt] = this.getConfiguration().getDouble(key);
+            cpt++;
+        }
+        
+        // Recovers the r parameters for focal + background species
         cpt = 0;
         r = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maturity.r.sp%d", i);
+            key = String.format("species.bioen.maturity.r.sp%d", i);
             r[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
 
-        // Recovers the beta coefficient for focal + background species
+        // Recovers the m0 parameters for focal + background species
         cpt = 0;
         m0 = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maturity.m0.sp%d", i);
+            key = String.format("species.bioen.maturity.m0.sp%d", i);
             m0[cpt] = this.getConfiguration().getDouble(key);   // barrier.n: conversion from mm to cm
             cpt++;
         }
 
-        // Recovers the beta coefficient for focal + background species
+        // Recovers the m1 parameters for focal + background species
         m1 = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maturity.m1.sp%d", i);
+            key = String.format("species.bioen.maturity.m1.sp%d", i);
             m1[cpt] = this.getConfiguration().getDouble(key);  // barrier.n: conversion from mm to cm
             cpt++;
         }
 
-        // Recovers the beta coefficient for focal + background species
-        csmr = new double[nSpecies];
+        // Recovers the c_m parameters for focal + background species
+        c_m = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.maint.energy.csmr.sp%d", i);
-            csmr[cpt] = this.getConfiguration().getDouble(key);
+            key = String.format("species.bioen.maint.energy.c_m.sp%d", i);
+            c_m[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
 
-        // Recovers the beta coefficient for focal + background species
+        // Recovers the larvae factor of ingestion for focal + background species
         cpt = 0;
         larvaePredationRateBioen = new double[nSpecies];
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("predation.ingestion.rate.max.larvae.bioen.sp%d", i);
+            key = String.format("predation.coef.ingestion.rate.max.larvae.bioen.sp%d", i);
             larvaePredationRateBioen[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
         
+        // Recovers the assimilation parameter  for focal + background species
         assimilation = new double[nSpecies];
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
-            key = String.format("bioen.assimilation.sp%d", i);
+            key = String.format("species.bioen.assimilation.sp%d", i);
             assimilation[cpt] = this.getConfiguration().getDouble(key);
             cpt++;
         }
@@ -147,11 +159,11 @@ public class EnergyBudget extends AbstractProcess {
     @Override
     public void run() {
 
-        //System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         // Loop over all the alive schools
         for (School school : getSchoolSet().getAliveSchools()) {
             this.getEgross(school);   // computes E_gross, stored in the attribute.
             this.getMaintenance(school);   // computes E_maintanance
+
             school.updateIngestionTot(school.getIngestion(), school.getInstantaneousAbundance());
 
             try {
@@ -162,6 +174,7 @@ public class EnergyBudget extends AbstractProcess {
 
             school.setENet(school.getEGross() - school.getEMaint());
             this.computeEnetFaced(school);
+            
             try {
                 this.getKappa(school);   // computes the kappa function
             } catch (Exception ex) {
@@ -185,7 +198,7 @@ public class EnergyBudget extends AbstractProcess {
 
         // computes the mantenance flow for one fish of the school for the current time step
         // barrier.n: weight is converted into g.
-        double output = this.csmr[ispec] * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
+        double output = this.c_m[ispec] * Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()) * temp_function.get_Arrhenius(school);
         output /= this.getConfiguration().getNStepYear();   // if csmr is in year^-1, convert back into time step value
 
         // multiply the maintenance flow by the number of fish in the school
@@ -240,7 +253,29 @@ public class EnergyBudget extends AbstractProcess {
         }
 
         return output;
+        
+    }
 
+    public void computeEnetFaced(School school) {
+        int ispec = school.getSpeciesIndex();
+        int nStepYear = this.getConfiguration().getNStepYear();
+        
+        double output;
+        if (school.getAgeDt() < school.getSpecies().getFirstFeedingAgeDt()) {
+            // No feeding.
+            output = 0;
+        } else if (school.getAgeDt() == school.getSpecies().getFirstFeedingAgeDt()) {
+            // First speeding (age = 1 dt)
+            output = school.getENet()/larvaePredationRateBioen[ispec]*nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+        } else if ((school.getAgeDt() > school.getSpecies().getFirstFeedingAgeDt()) && (school.getAgeDt() < school.getSpecies().getLarvaeThresDt())) {
+            // Next feedings as larvae and post-larvae
+            double enet = school.getENet() / larvaePredationRateBioen[ispec] * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
+        } else { // Next feeding as juvenile and adult
+            double enet = school.getENet() * nStepYear / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
+            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
+        }
+        school.set_enet_faced(output);
     }
 
     /**
@@ -257,7 +292,6 @@ public class EnergyBudget extends AbstractProcess {
 
         if (school.isAlive()) {
             dgrowth /= school.getInstantaneousAbundance();
-
             // increments the weight
             school.incrementWeight((float) dgrowth);
         }
@@ -289,46 +323,23 @@ public class EnergyBudget extends AbstractProcess {
      * @param school
      * @throws java.lang.Exception
      */
+    
+    // kappa = 1 - rho
     public void getKappa(School school) throws Exception {
         int ispec = school.getSpeciesIndex();
 
         String key = "r";
         double r_temp = school.existsTrait(key) ? school.getTrait(key) : r[ispec];
+        double etaSpecies = eta[ispec];
 
         // If the organism is imature, all the net energy goes to the somatic growth.
         // else, only a kappa fraction goes to somatic growth
-        double kappa = (!school.isMature()) ? 1 : 1 - r_temp / school.get_enet_faced() * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
+        double kappa = (!school.isMature()) ? 1 : 1 - r_temp / (etaSpecies * school.get_enet_faced()) * Math.pow(school.getWeight() * 1e6f, 1 - school.getBetaBioen());
         kappa = ((kappa < 0) ? 0 : kappa); //0 if kappa<0
         kappa = ((kappa > 1) ? 1 : kappa); //1 if kappa>1
 
         school.setKappa(kappa);
     }
 
-//    public void getKappa(School school) {
-//        // int ispec = school.getFileSpeciesIndex();
-//        // If the organism is imature, all the net energy goes to the somatic growth.
-//        // else, only a kappa fraction goes to somatic growth
-//        double kappa = (!school.isMature()) ? 1 : 0; //Function in two parts according to maturity state
-//        
-//        
-//        school.setKappa(kappa);
-//    }
-    public void computeEnetFaced(School school) {
-        int ispec = school.getSpeciesIndex();
-        double output;
-        if (school.getAgeDt() == 0) {
-
-            output = school.getENet() * 24 / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
-        } else if (school.getAge() < 1 & school.getAgeDt() > 0) {
-            double enet = school.getENet() / larvaePredationRateBioen[ispec] * 24 / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
-            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
-        } else {
-
-            double enet = school.getENet() * 24 / school.getInstantaneousAbundance() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()));
-            output = (enet + school.get_enet_faced() * school.getAgeDt()) / (school.getAgeDt() + 1);
-
-        }
-        school.set_enet_faced(output);
-    }
 
 }

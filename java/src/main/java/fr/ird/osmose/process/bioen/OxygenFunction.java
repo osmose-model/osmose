@@ -78,10 +78,10 @@ public class OxygenFunction extends AbstractProcess {
         c2 = new double[nSpecies];
         int cpt = 0;
         for(int i : getConfiguration().getFocalIndex()) {
-            key = String.format("species.c1.sp%d", i);
+            key = String.format("species.oxygen.c1.sp%d", i);
             c1[cpt] = getConfiguration().getDouble(key); 
             
-            key = String.format("species.c2.sp%d", i);
+            key = String.format("species.oxygen.c2.sp%d", i);
             c2[cpt] = getConfiguration().getDouble(key); 
             cpt++;
         }       

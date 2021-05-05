@@ -104,9 +104,14 @@ public class FisherySeasonality extends OsmoseLinker {
                         + "of season duration (%d). %d provided", seasonDuration, seasonTmp.length);
                 error(error, new IOException());
             }
+            
+            // Fills the final seasonality array
+            for (int i = 0; i < ioff; i++) {
+                this.fisherySeasonality[i] = 0;
+            }
 
             // Fills the final seasonality array
-            for (int i = 0; i < nStep; i++) {
+            for (int i = ioff; i < nStep; i++) {
                 int k = (i - ioff) % seasonDuration;
                 k = (k < 0) ? -k : k;
                 this.fisherySeasonality[i] = seasonTmp[k];

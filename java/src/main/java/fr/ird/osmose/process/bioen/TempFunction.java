@@ -51,12 +51,16 @@ import java.io.IOException;
  */
 public class TempFunction extends AbstractProcess {
 
-    private double[] E, A, Tpk;
+     /**
+     * Parameters for the energy mobilization.
+     */
+    
+    private double[] e_M, e_D, Tp;
 
     /**
      * Parameters for the energy maintenance.
      */
-    private double[] c_t, Tr;
+    private double[] e_m;
 
     PhysicalData temperature_input;
 
@@ -76,53 +80,44 @@ public class TempFunction extends AbstractProcess {
         int cpt;
         int nSpecies = this.getNSpecies();
 
-        E = new double[nSpecies];
-        A = new double[nSpecies];
-        Tpk = new double[nSpecies];
-        c_t = new double[nSpecies];
-        Tr = new double[nSpecies];
+        e_M = new double[nSpecies];
+        e_D = new double[nSpecies];
+        Tp = new double[nSpecies];
+        e_m = new double[nSpecies];
 
         String key;
-        key = "bioen.AMR.E";
+        key = "species.bioen.mobilized.e.mobi";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            E[cpt] = getConfiguration().getDouble(keytmp);
+            e_M[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
 
-        key = "bioen.AMR.A";
+        key = "species.bioen.mobilized.e.D";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            A[cpt] = getConfiguration().getDouble(keytmp);
+            e_D[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
 
-        key = "bioen.AMR.TpK";
+        key = "species.bioen.mobilized.Tp";
         cpt = 0;
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            Tpk[cpt] = getConfiguration().getDouble(keytmp);
+            Tp[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
-
-        key = "bioen.arrh.ct";
+        
         cpt = 0;
+        key = "species.bioen.maint.e.maint";
         for (int i : getConfiguration().getFocalIndex()) {
             String keytmp = String.format("%s.sp%d", key, i);
-            c_t[cpt] = getConfiguration().getDouble(keytmp);
+            e_m[cpt] = getConfiguration().getDouble(keytmp);
             cpt++;
         }
-
-        key = "bioen.maint.energy.Tr";
-        cpt = 0;
-        for (int i : getConfiguration().getFocalIndex()) {
-            String keytmp = String.format("%s.sp%d", key, i);
-            Tr[cpt] = getConfiguration().getDouble(keytmp);
-            cpt++;
-        }
-
+        
     }
 
     @Override
@@ -132,7 +127,7 @@ public class TempFunction extends AbstractProcess {
     }
 
     /**
-     * Computes the phiT coefficients function for gross energy. Equation 4
+     * Computes the phiT coefficients function for mobilized energy. Equation 4
      */
     /**
      * Returns the temperature for a given school.
@@ -144,7 +139,7 @@ public class TempFunction extends AbstractProcess {
     }
 
     /**
-     * Returns the phiT function for gross energy. Equation 4
+     * Returns the phiT function for mobilized energy. Equation 4
      *
      * @param school
      * @return
@@ -155,21 +150,19 @@ public class TempFunction extends AbstractProcess {
         double temp = temperature_input.getValue(school);
         int i = school.getSpeciesIndex();
         double k = 8.62e-5;
-
-        double output = Math.exp((-this.E[i] / (k * (temp + 273.15))))
-                / (1 + Math.exp((-1 / (k * (temp + 273.15))) * (this.A[i] + this.E[i]
-                        - ((this.A[i] + this.E[i]) / this.Tpk[i] + k * Math.log(this.E[i] / (this.A[i])))
-                                * (temp + 273.15))))
-                / (Math.exp(-this.E[i] / (k * this.Tpk[i])) / (1 + Math.exp((-1 / (k * this.Tpk[i])) * (this.A[i]
-                        + this.E[i] - ((this.A[i] + this.E[i]) / this.Tpk[i] + k * Math.log(this.E[i] / (this.A[i])))
-                                * this.Tpk[i]))));
+        
+        double output = Math.exp(-this.e_M[i] / (k * (temp + 273.15)))
+                / (1 + (this.e_M[i] / (this.e_D[i] - this.e_M[i]))
+                        * Math.exp((this.e_D[i]) / k * (1 / (this.Tp[i] + 273.15) - 1 / (temp + 273.15))))
+                / (Math.exp(-this.e_M[i] / (k * (this.Tp[i] + 273.15)))
+                        / (1 + this.e_M[i] / (this.e_D[i] - this.e_M[i])));
 
         return output;
 
     }
 
     /**
-     * Returns the Arrhenius function for a given school. Cf. equation 6
+     * Returns the Arrhenius function for a given school for maintenance. Cf. equation 6
      *
      * @param school
      * @return
@@ -180,8 +173,9 @@ public class TempFunction extends AbstractProcess {
         // Autre formulation de Arrhénius : la plus récente des deux
         double temp = this.getTemp(school);
         int i = school.getSpeciesIndex();
+        double k = 8.62e-5;
 
-        return Math.exp(this.c_t[i] * (1 / this.Tr[i] - 1 / (temp + 273.15)));
+        return Math.exp(-this.e_m[i] / (k*(temp + 273.15)));
 
     }
 

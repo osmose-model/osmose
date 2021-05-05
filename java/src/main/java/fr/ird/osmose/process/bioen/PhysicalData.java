@@ -84,6 +84,12 @@ public class PhysicalData extends SimulationLinker {
     private boolean useConstantVal;
     private double constantVal;
 
+    /** Number of time steps within a year. */
+    private int ncPerYear;
+    
+    /** Total number of time steps in the NetCDF file */
+    private int timeLength;
+    
     /**
      * Array containing the fields to read. Dimensions should be (time, layer,
      * lat, lon) with layer the index of the vertical layer.
@@ -107,9 +113,28 @@ public class PhysicalData extends SimulationLinker {
             this.useConstantVal = true;
             this.constantVal = getConfiguration().getDouble(key);
         } else {
+            
             // if no constant value is provided, ask for a netcdf file.
             this.useConstantVal = false;
-            
+
+            key = String.format("%s.nsteps.year", this.variable_name);
+            if (!getConfiguration().isNull(key)) {
+                ncPerYear = getConfiguration().getInt(key);
+            } else {
+                // If parameter is not set,
+                if (this.getConfiguration().getNStepYear() == this.timeLength) {
+                    warning("Number of steps in the NetCDF file equals ndt/year for variable " + this.variable_name);
+                    warning("Assumes ncPerYear = ndt/year");
+                    this.ncPerYear = this.timeLength;
+                } else {
+                    StringBuilder errmsg = new StringBuilder();
+                    errmsg.append("No nsteps.year for the variable ")
+                            .append(this.variable_name).append(" wsa provided.\n");
+                    errmsg.append("Program will stop");
+                    error(errmsg.toString(), null);
+                }
+            }
+
             // Recovering the conversion factors and offsets (temperature.factor, temperature.offset)
             key = String.format("%s.factor", this.variable_name);
             if (getConfiguration().canFind(key)) {
@@ -135,9 +160,11 @@ public class PhysicalData extends SimulationLinker {
 
             // count the number of time steps
             try (NetcdfFile nc = NetcdfFile.open(filename)) {
+
                 // count the number of time steps
                 int ntime = nc.findVariable(netcdf_variable_name).getDimension(0).getLength();
-
+                this.timeLength = ntime;
+                
                 // count the number of layers (i.e. depth levels) within the physical variable
                 int nlayers = nc.findVariable(netcdf_variable_name).getDimension(1).getLength();
                 values = new double[ntime][nlayers][getGrid().get_ny()][getGrid().get_nx()];;
@@ -174,7 +201,9 @@ public class PhysicalData extends SimulationLinker {
         if (this.useConstantVal) {
             return this.constantVal;
         } else {
-            int ltlTimeStep = getSimulation().getIndexTimeSimu() % this.values.length;
+            int iStepSimu = getSimulation().getIndexTimeSimu();
+            int ndt = this.getConfiguration().getNStepYear();
+            int ltlTimeStep = (iStepSimu / (ndt / this.ncPerYear)) % timeLength;
             return values[ltlTimeStep][index][cell.get_jgrid()][cell.get_igrid()];
         }
     }
