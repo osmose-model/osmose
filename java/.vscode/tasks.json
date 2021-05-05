@@ -4,14 +4,10 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "maven",
+            "label": "package",
             "type": "shell",
-            "command": "mvn package",
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "command": "mvn -B package",
+            "group":  "build"
         }
     ]
 }
