@@ -564,7 +564,6 @@ public class OutputManager extends SimulationLinker {
 
         if (getConfiguration().getBoolean("output.individual.enabled", NO_WARNING)) {
             ModularSchoolSetSnapshot modOutput = new ModularSchoolSetSnapshot(rank);
-            modOutput.init();
             outputs.add(modOutput);
         }
         
