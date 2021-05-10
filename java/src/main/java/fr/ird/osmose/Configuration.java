@@ -399,7 +399,7 @@ public class Configuration extends OLogger {
         if (nResource_test != nResource) {
             String errorMsg = String.format(
                     "Resource species may be badly defined. simulation.nresource=%d, number of resource types=%d",
-                    nResource_test, nResource);
+                    nResource_test, this.nResource);
             error(errorMsg, null);
         }
 
