@@ -43,13 +43,36 @@ package fr.ird.osmose.process.bioen;
 
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.concurrent.ThreadLocalRandom;
+import fr.ird.osmose.util.OsmoseLinker;
+import java.util.Random;
 
 
-public class WeightedRandomDraft<E> {
-    
-  private final NavigableMap<Double, E> map = new TreeMap<>();
+public class WeightedRandomDraft<E> extends OsmoseLinker {
+  
+  private NavigableMap<Double, E> map = new TreeMap<>();
   private double total = 0;
+  
+  /** Random generator */
+  private Random rdDraft;
+  
+  public void init() {
+    
+    boolean fixedSeed = false;
+    String key = "reproduction.randomseed.fixed";
+    
+    if(!getConfiguration().isNull(key)) {
+      fixedSeed =  getConfiguration().getBoolean(key);
+    }
+    
+    // Init random number generator
+    if(fixedSeed) { 
+      int nSpecies = getConfiguration().getNSpecies();
+      rdDraft = new Random(13L * nSpecies); 
+    } else {
+      rdDraft = new Random();  
+    }
+     
+  }
 
   public void add(double weight, E result) {
     if (weight <= 0 || map.containsValue(result))
@@ -57,10 +80,15 @@ public class WeightedRandomDraft<E> {
     total += weight;
     map.put(total, result);
   }
+  
+  // Reinitialize the weights
+  public void reset() {
+    map = new TreeMap<>();
+    total = 0;
+  }
 
   public E next() {
-    double value = ThreadLocalRandom.current().nextDouble() * total;
+    double value = rdDraft.nextDouble() * total;
     return map.ceilingEntry(value).getValue();
   }
 }
-

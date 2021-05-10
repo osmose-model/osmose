@@ -64,7 +64,7 @@ public class ForagingMortality extends AbstractMortality {
         I_max = new double[nspec];
         int cpt = 0;
         for (int i : getFocalIndex()) {
-            k_for[cpt] = getConfiguration().getDouble("bioen.forage.k_for.sp" + i);
+            k_for[cpt] = getConfiguration().getDouble("species.bioen.forage.k_for.sp" + i);
             I_max[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
             cpt++;
         }
@@ -74,16 +74,18 @@ public class ForagingMortality extends AbstractMortality {
     public double getRate(School school) {
 
         double output = 0;
+        int nstepYear = this.getConfiguration().getNStepYear();
+        
         if (this.getConfiguration().isGeneticEnabled()) {
             String key = "imax";
 
             try {
-                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()] / 24;
+                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()] / nstepYear;
             } catch (Exception ex) {
                 Logger.getLogger(ForagingMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            output = I_max[school.getSpeciesIndex()] * this.k_for[school.getSpeciesIndex()] / 24;;
+            output = I_max[school.getSpeciesIndex()] * this.k_for[school.getSpeciesIndex()] / nstepYear;
         }
         if (output < 0) {
             output = 0;

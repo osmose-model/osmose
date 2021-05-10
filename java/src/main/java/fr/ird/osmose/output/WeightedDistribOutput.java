@@ -52,35 +52,67 @@ public class WeightedDistribOutput extends DistribOutput {
     // Denumerator distributed by species and by class
     private double[][][] denominator;
     
+    // True if numerator multiplied by weight. Default = true
+    private   final  boolean weightedMeanEnabled;
+    
     // school variable getter
     private final SchoolVariableGetter weight;
 
     public WeightedDistribOutput(int rank, String subfolder, String name, String description,
-            SchoolVariableGetter variable, SchoolVariableGetter weight,
-            AbstractDistribution distrib) {
+            SchoolVariableGetter variable, SchoolVariableGetter weight, AbstractDistribution distrib) {
+        this(rank, subfolder, name, description, variable, weight, distrib, true);
+    }
+
+    public WeightedDistribOutput(int rank, String subfolder, String name, String description,
+            SchoolVariableGetter variable, SchoolVariableGetter weight, AbstractDistribution distrib,
+            boolean weightedMeanEnabled) {
         super(rank, subfolder, name, description, null, variable, distrib);
         this.weight = weight;
+        this.weightedMeanEnabled = weightedMeanEnabled;
     }
 
     @Override
     public void update() {
         int timeStep = this.getSimulation().getIndexTimeSimu();
-        getSchoolSet().getAliveSchools().forEach(school -> {
-            int classSchool = getClass(school);
-            int iSpec = school.getSpeciesIndex();
-            if (classSchool >= 0) {
-                double w = weight.getVariable(school);
-                double wvar = w * variable.getVariable(school);
-                int irg = 0;
-                for (AbstractOutputRegion region : getOutputRegions()) {
-                    if (region.contains(timeStep, school)) {
-                        values[iSpec][irg][getClass(school)] += wvar;
-                        denominator[iSpec][irg][classSchool] += w;
+        
+        if (this.weightedMeanEnabled) {
+            // if numerator is multiplied by the weight
+            getSchoolSet().getAliveSchools().forEach(school -> {
+                int classSchool = getClass(school);
+                int iSpec = school.getSpeciesIndex();
+                if (classSchool >= 0) {
+                    double w = weight.getVariable(school);
+                    double wvar = w * variable.getVariable(school);
+                    int irg = 0;
+                    for (AbstractOutputRegion region : getOutputRegions()) {
+                        if (region.contains(timeStep, school)) {
+                            values[iSpec][irg][getClass(school)] += wvar;
+                            denominator[iSpec][irg][classSchool] += w;
+                        }
+                        irg++;
                     }
-                    irg++;
                 }
-            }
-        });
+            });
+        } else {
+            // if numerator not multiplied by the weight
+            getSchoolSet().getAliveSchools().forEach(school -> {
+                int classSchool = getClass(school);
+                int iSpec = school.getSpeciesIndex();
+                if (classSchool >= 0) {
+                    double w = weight.getVariable(school);
+                    double wvar = variable.getVariable(school);
+                    int irg = 0;
+                    for (AbstractOutputRegion region : getOutputRegions()) {
+                        if (region.contains(timeStep, school)) {
+                            values[iSpec][irg][getClass(school)] += wvar;
+                            denominator[iSpec][irg][classSchool] += w;
+                        }
+                        irg++;
+                    }
+                }
+            });
+
+        }
     }
 
     @Override

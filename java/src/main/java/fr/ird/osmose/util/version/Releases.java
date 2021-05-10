@@ -425,8 +425,36 @@ public class Releases {
                 
                 cfg.findKeys("fisheries.rate.bySeason.fsh*").stream().mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).forEach(i -> updateKey("fisheries.rate.bySeason" + i, "fisheries.rate.byPeriod.fsh" + i));
 
-            }
-        }
+                // Update in parameters from Alaia 
+                    for (int index : this.getFocalIndex()) {
+                        updateKey("predation.ingestion.rate.max.larvae.bioen.sp" + index,
+                                "predation.coef.ingestion.rate.max.larvae.bioen.sp" + index);
+                    }
+                    
+                    // Update for oxygen functions
+                    for (int index : this.getFocalIndex()) {
+                        updateKey("species.c1.sp" + index, "species.oxygen.c1.sp" + index);
+                        updateKey("species.c2.sp" + index, "species.oxygen.c2.sp" + index);
+                    }
+                    
+                    // Update parameters for EnergyBudget.java
+                    for (int index : this.getFocalIndex()) {
+                        updateKey("bioen.maint.energy.csmr.sp" + index, "species.bioen.maint.energy.c_m.sp" + index);
+                        updateKey("bioen.maturity.r.sp" + index, "species.bioen.maturity.r.sp" + index);
+                        updateKey("bioen.maturity.m0.sp" + index, "species.bioen.maturity.m0.sp" + index);
+                        updateKey("bioen.maturity.m1.sp" + index, "species.bioen.maturity.m1.sp" + index);
+                        updateKey("bioen.forage.k_for.sp" + index, "species.bioen.forage.k_for.sp" + index);
+                    }
+                    
+                    // Deprecates old parameters for temperature function.
+                    for (int index : this.getFocalIndex()) {
+                        deprecateParameter("bioen.gross.energy.km.sp" + index);
+                        deprecateParameter("bioen.gross.energy.gamma.sp" + index);
+                        deprecateParameter("bioen.arrh.ct.sp" + index);
+                        deprecateParameter("bioen.maint.energy.Tr.sp" + index);
+                    }       
+            }  // end of updatePara
+        }  // end of Release(4.3.3)
         
     };  // end of ALL array
 }  // end of class
