@@ -240,7 +240,7 @@ public class ResourceForcing extends OsmoseLinker {
                         this.ncPerYear = this.timeLength;
                     } else {
                         StringBuilder errmsg = new StringBuilder();
-                        errmsg.append("No species.biomass.nsteps.year or species.biomass.nsteps.year.sp ")
+                        errmsg.append("No species.biomass.nsteps.year or species.biomass.nsteps.year.sp")
                                 .append(fileindex).append(" parameter found.\n");
                         errmsg.append("Program will stop");
                         error(errmsg.toString(), null);
