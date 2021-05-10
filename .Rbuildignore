@@ -20,7 +20,6 @@ cran-comments.md
 ^R/osmose-plot4d\.R$
 ^R/ex_osmose-plot\.R$
 ^R/osmose\.netcdf\.R$
-^R/update_config\.R$
 ^R/osmose\.maps\.R$
 ^R/osmose2R\.R$
 ^data-raw$

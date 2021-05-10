@@ -99,7 +99,7 @@ update_ltl = function(input, filename=NULL, absolute=TRUE) {
   if(is.null(filename)) {
     filename = param$ltl$netcdf$file
     if(is.null(filename)) {
-      warning("LTL filename not found in configuration file, nothing to do.")
+      message("old LTL filename parameter not found in configuration file, nothing to do.")
       return(invisible())
     }
   }
