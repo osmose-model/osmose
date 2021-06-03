@@ -74,7 +74,13 @@ public class FishingGear extends AbstractMortality {
     private FisheryBase fishingBase;
     private FisheryPeriod fishingPeriod;
     private FisherySeasonality fishingSeasonality;
-
+    
+    // If economy is on, define a size stage array for fisheries.
+    private boolean isEconomyEnabled;
+    
+    // sizeClasses used to determine variables for fishing economy (costs, etc.)
+    private double[] sizeClasses;
+    
     /**
      * Fishery map set.
      */
@@ -95,17 +101,24 @@ public class FishingGear extends AbstractMortality {
     public void init() {
 
         Configuration cfg = Osmose.getInstance().getConfiguration();
+        
         int nspecies = cfg.getNSpecies();
         int nbackground = cfg.getNBkgSpecies();
-
+        this.isEconomyEnabled = cfg.isEconomyEnabled();
+        
         catchability = new double[nspecies + nbackground];
         discards = new double[nspecies + nbackground];
 
         // set-up the name of the fishery
         name = cfg.getString("fisheries.name.fsh" + fileFisheryIndex);
 
+        // True if fishing mortality components are to be saved for inspection
         checkFisheryEnabled = cfg.getBoolean("fisheries.check.enabled");
 
+        if (this.isEconomyEnabled) {
+            this.sizeClasses = cfg.getArrayDouble("fisheries.name.fsh" + fileFisheryIndex);
+        }
+        
         // Initialize the time varying array
         fishingBase = new FisheryBase(fileFisheryIndex);
         fishingBase.init();
@@ -309,6 +322,20 @@ public class FishingGear extends AbstractMortality {
      */
     public double getSelectivity(int index, AbstractSchool school) {
         return selectivity.getSelectivity(index, school);
+    }
+    
+    public int getSizeClass(AbstractSchool school) { 
+        int stage;
+        double length = school.getLength();
+        int nSizes = this.sizeClasses.length;  // number of upper values
+        for (stage = 0; stage < nSizes; stage++) { 
+            if(length <= sizeClasses[stage]) {
+                return stage;
+            }   
+        }
+        
+        return nSizes;
+            
     }
 
 }
