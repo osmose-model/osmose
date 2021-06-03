@@ -191,10 +191,15 @@ public class GridMap extends OsmoseLinker {
         int count[] = {1, ny, nx};
 
         // Extracts the FillValue attribute
-        int fillValue = -99;
+        double fillValue = -99;
         if (!nc.findVariable(varname).getAttributes().isEmpty()) {
-            // The first attribute must be _FillValue
-            fillValue = nc.findVariable(varname).getAttributes().get(0).getNumericValue().intValue();
+            // Loop over all the attributes to define a size.
+            for (int k = 0; k < nc.findVariable(varname).getAttributes().size(); k++) {
+                if(nc.findVariable(varname).getAttributes().get(k).getFullName().toLowerCase().equals("_fillvalue")) { 
+                    fillValue = nc.findVariable(varname).getAttributes().get(k).getNumericValue().doubleValue();
+                    break;
+                }
+            }
         }
 
         // Reads the NetCDF variable
@@ -203,7 +208,7 @@ public class GridMap extends OsmoseLinker {
         for (int j = 0; j < ny; j++) {
             for (int i = 0; i < nx; i++) {
                 index.set(j, i);
-                matrix[j][i] = (temp.getFloat(index) == fillValue) ? 0 : temp.getFloat(index);
+                matrix[j][i] = (temp.getDouble(index) == fillValue) ? 0.f : (float) temp.getDouble(index);
             }
         }
 
