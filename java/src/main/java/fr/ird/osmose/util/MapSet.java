@@ -185,7 +185,7 @@ public class MapSet extends OsmoseLinker {
         String key = prefix + ".map.file." + suffix + iSpeciesFile;
         if (!getConfiguration().isNull(key)) {
             info("Reding NetCDF file " + getConfiguration().getFile(key));
-            if (!getConfiguration().isNull(prefix + ".map.variable." + suffix + iSpeciesFile)) {
+            if (!getConfiguration().isNull(prefix + ".map.file.variable." + suffix + iSpeciesFile)) {
                 this.loadMapsNcMaps();
             } else {
                 this.loadMapsNc();
