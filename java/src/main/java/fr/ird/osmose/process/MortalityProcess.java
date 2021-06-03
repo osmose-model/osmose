@@ -632,10 +632,14 @@ public class MortalityProcess extends AbstractProcess {
                         fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
                         fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscared);
 
-                        // make sure a different fishery is called every time
-                        // it is just a trick since we do not have case FISHERY1,
-                        // case FISHERY2, etc. like the other mortality sources.
-       
+                        if (economyEnabled) {
+                            // If economy module is on, we store the maximum biomass that can be captured,
+                            // depending on selectivity.
+                            int index = getSimulation().getIndexTimeSimu();
+                            double Fmax = fisheriesMortality[iFishery].getSelectivity(index, fishedSchool) / subdt;
+                            double nDeadMax = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-Fmax)); 
+                        }
+
                     } else {
 
                         // Possibility to fish background species?????
