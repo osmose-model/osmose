@@ -127,6 +127,10 @@ public class MortalityProcess extends AbstractProcess {
      * Whether the Osmose v4 fishery implementation is enabled
      */
     private boolean fisheryEnabled = false;
+    
+    /** Whether the Fishing Economy is activated or not **/
+    private boolean economyEnabled = false;
+    
     /**
      * Number of fisheries
      */
@@ -165,6 +169,9 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         fisheryEnabled = getConfiguration().isFisheryEnabled();
+        economyEnabled = getConfiguration().isEconomyEnabled();
+        
+        
         nfishery = getConfiguration().getNFishery();
 
         additionalMortality = new AdditionalMortality(getRank());
