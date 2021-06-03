@@ -600,26 +600,22 @@ public class MortalityProcess extends AbstractProcess {
                     if(!fishingMortalityEnabled) { 
                         break;
                     }
+                    
                     // Osmose 4 fishery mortality
                     if (fisheryEnabled) {
-                        
-                        // get the school that corresponds to this new index
+
                         AbstractSchool fishedSchool = listPred.get(seqFish[i]);
 
                         // determine the index of the fishery to read.
-                        // at first call, indexFishery[i] is always 0.
-                        // it means that the first column of the seqFishery must be read
-                        // here, we work on i instead of seqFish[i], since it does not matter much
+                        // here, we use [i] and not seq[i] because it does not matter much
                         int iFishery = seqFishery[i][indexFishery[i]];
-                        indexFishery[i]++;
-                        
                         double F = fisheriesMortality[iFishery].getRate(fishedSchool) / subdt;
-                        
-                        if(F == 0) {
-                            continue;
-                        }
-                        
                         nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+
+                        if (economyEnabled) {
+                            // store the harvested biomass by size class by species for fishing gear.
+
+                        }
 
                         // Percentage values of discarded fish. The remaining go to fishery.
                         double discardRate = fisheriesMortality[iFishery].getDiscardRate(fishedSchool);
@@ -632,13 +628,10 @@ public class MortalityProcess extends AbstractProcess {
                         fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
                         fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscared);
 
-                        if (economyEnabled) {
-                            // If economy module is on, we store the maximum biomass that can be captured,
-                            // depending on selectivity.
-                            int index = getSimulation().getIndexTimeSimu();
-                            double Fmax = fisheriesMortality[iFishery].getSelectivity(index, fishedSchool) / subdt;
-                            double nDeadMax = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-Fmax)); 
-                        }
+                        // make sure a different fishery is called every time
+                        // it is just a trick since we do not have case FISHERY1,
+                        // case FISHERY2, etc. like the other mortality sources.
+                        indexFishery[i]++;
 
                     } else {
 
@@ -652,13 +645,13 @@ public class MortalityProcess extends AbstractProcess {
 
                         // Osmose 3 fishing Mortality
                         switch (fishingMortality.getType(school.getSpeciesIndex())) {
-                        case RATE:
-                            double F = fishingMortality.getRate(school) / subdt;
-                            nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
-                            break;
-                        case CATCHES:
-                            nDead = school.biom2abd(fishingMortality.getCatches(school) / subdt);
-                            break;
+                            case RATE:
+                                double F = fishingMortality.getRate(school) / subdt;
+                                nDead = school.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+                                break;
+                            case CATCHES:
+                                nDead = school.biom2abd(fishingMortality.getCatches(school) / subdt);
+                                break;
                         }
 
                         school.incrementNdead(MortalityCause.FISHING, nDead);
