@@ -219,6 +219,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             </plugin>
             
             <!-- Create a ".exe" file -->
+            <!-- 
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
@@ -255,13 +256,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                 <txtProductVersion>${maven.compiler.source}</txtProductVersion>
                                 <productName>${project.build.finalName}</productName>
                                 <originalFilename>${project.build.finalName}.exe</originalFilename>
-                                <!-- internalName is mandatory -->
                                 <internalName>${project.build.finalName}</internalName>
                             </versionInfo>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            -->
         </plugins>
     </build>
 </project>
