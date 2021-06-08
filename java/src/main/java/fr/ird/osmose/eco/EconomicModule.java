@@ -37,61 +37,119 @@
  *along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 package fr.ird.osmose.eco;
 
-import java.util.List;
-
-import fr.ird.osmose.School;
-import fr.ird.osmose.process.mortality.FishingGear;
-import fr.ird.osmose.stage.SizeStage;
+import fr.ird.osmose.process.AbstractProcess;
 import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.timeseries.SingleTimeSeries;
 
-public class EconomicModule extends SimulationLinker {
-    
-    /** Available biomass. Dimensions are (gear, species, size class).
-     */
-    private double[][][] availableBiomass;
-    
-    /** Size classes used to integrate fish biomass. 
-     * [nSpecies, nClasses].
-     * User gives nclasses, then the code add one more classes from 
-     * L[-1] to Inf. At the end classes=[L0, L1, L2, INF].
-    */    
-    private SizeStage stage;
+public class EconomicModule extends AbstractProcess {
 
+    /** Stock elasticity. [nSpecies] */
+    private double[] stockElasticity;
+    
+    /** Baseline costs. [gear, time] */
+    private double[][] baselineCosts;
+    
+    /** Number of fishing gears */
+    private int nFisheries;
+    
+    /** Number of species */
+    private int nSpecies;
+    
+    /* Computed harvested costs. [gear, species] */
+    private double[][] harvestingCosts;
+    
+    /** Substitution elasticity between species (alpha). */
+    private double speciesConsumptionElasticity;
+    
+    /** Substitution elasticity between sizes within a species (mu_i). */
+    private double[] sizeConsumptionElasticity;
+    
     public EconomicModule(int rank) {
         super(rank);
-        stage = new SizeStage("economic.size.class");
+        this.nSpecies = this.getNSpecies();
+        this.nFisheries = this.getFishingGear().length; 
+        this.stockElasticity = new double[nSpecies];
+        this.baselineCosts = new double[nFisheries][];
+        this.harvestingCosts = new double[nFisheries][nSpecies];     
+        this.sizeConsumptionElasticity = new double[nSpecies];     
+    }
+
+    @Override
+    public void init() {
+
+        int cpt;
+        // Recovers the index of fisheries
+        int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
+                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted().toArray();
+        
+        // Initialisation of stock elasticity.
+        cpt = 0;
+        for (int i : getFocalIndex()) {
+            this.stockElasticity[cpt] = getConfiguration().getDouble("species.stock.elasticity.sp" + i);
+            cpt++;
+        }
+        
+        // Reads the time series of baseline costs. Reads one cost per simulation time step.
+        cpt = 0;
+        for (int i : fisheryIndex) {
+            String filename = getConfiguration().getFile("baseline.costs.file.fsh" + i);
+            SingleTimeSeries ts = new SingleTimeSeries();
+            ts.read(filename);
+            this.baselineCosts[i] = ts.getValues();
+            cpt++;
+        }
+        
+        this.speciesConsumptionElasticity = getConfiguration().getDouble("consumption.elasticity");
+        
+        cpt = 0;
+        for (int i : getFocalIndex()) {
+            this.sizeConsumptionElasticity[cpt] = getConfiguration().getDouble("species.sizeconsumption.elasticity.sp" + i);
+            cpt++;
+        }
+        
     }
     
-    public void init() {
+    
+    /** Computation of harvesting costs. */
+    public void computeHarvestingCosts() {
+        int time = this.getSimulation().getIndexTimeSimu();
+        // Loop over fisheries
+        for (int iFishery=0; iFishery<nFisheries; iFishery++) { 
+            
+            double baseCost = this.baselineCosts[iFishery][time];  // get base costs
+            
+            // accessible biomass over size
+            double[][] accesBiomass = getFishingGear()[iFishery].getAccessibleBiomass();  // species, size
+            double sumAccess = 0;
+            
+            // integrate accessible biomass over size
+            double[][] harvestBiomass = getFishingGear()[iFishery].getHarvestedBiomass(); // species, size
+            double sumHarvest = 0;
+            
+            for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
+                // integrates harvested biomass over time
+                for (double temp : harvestBiomass[iSpecies]) {
+                    sumHarvest += temp;
+                }
+                
+                // integrates
+                for(double temp : accesBiomass[iSpecies]) {
+                    sumAccess += temp;
+                }
+                
+                this.harvestingCosts[iFishery][iSpecies] = baseCost * sumHarvest / (Math.pow(sumAccess, this.stockElasticity[iSpecies]));
+                
+            }
+        }
         
-        // total number of species, including the  background species
-        int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
-        int nGears = this.getConfiguration().getNFishery();
-        availableBiomass = new double[nGears][nSpecies][];
-        for (int g = 0; g < nGears; g++) {
-            for (int i = 0; i < nSpecies; i++) {
-                int nClasses = stage.getNStage(i);
-                availableBiomass[g][i] = new double[nClasses];
-            }
-        }
     }
 
-    /** Assess available biomass, which is only dependent on fish selectivity. **/
-    public void assessAvailableBiomass() {
-
-        int index = this.getSimulation().getIndexTimeSimu();
-        List<School> listSchool = this.getSchoolSet().getAliveSchools();
-        for (School school : listSchool) {
-            int iSpecies = school.getSpeciesIndex();
-            int sizeClass = stage.getStage(school);
-            int g = 0;
-            for (FishingGear gear : this.getFishingGear()) {
-                availableBiomass[g][iSpecies][sizeClass] += gear.getSelectivity(index, school) * school.getBiomass();
-                g++;
-            }
-        }
+    @Override
+    public void run() {
+        // TODO Auto-generated method stub
+        
     }
+
 }
