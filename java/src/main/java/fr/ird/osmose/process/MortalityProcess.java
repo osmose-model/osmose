@@ -614,7 +614,7 @@ public class MortalityProcess extends AbstractProcess {
 
                         if (economyEnabled) {
                             // store the harvested biomass by size class by species for fishing gear.
-
+                            fisheriesMortality[iFishery].incrementHarvestedBiomass(nDead, fishedSchool);
                         }
 
                         // Percentage values of discarded fish. The remaining go to fishery.
@@ -660,7 +660,7 @@ public class MortalityProcess extends AbstractProcess {
                     break;
                 default:
                     break;
-                } // end of switch (cause
+            } // end of switch (cause
             } // end of mort cause loop
         } // end of school loop species loop
     } // end of function
