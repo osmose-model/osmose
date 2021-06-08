@@ -104,10 +104,6 @@ public class MortalityProcess extends AbstractProcess {
      * Private instance of the predation mortality
      */
     private PredationMortality predationMortality;
-    /*
-     * Private instance of fishery mortality
-     */
-    private FishingGear[] fisheriesMortality;
     /**
      * Private instance of bioenergetic starvation mortality
      */
@@ -206,7 +202,10 @@ public class MortalityProcess extends AbstractProcess {
         if (fishingMortalityEnabled) {
             // fishery (Osmose 4) vs fishing mortality (Osmose 3)
             if (fisheryEnabled) {
-
+            
+            fisheryCatchability = new AccessibilityManager(getRank(), "fisheries.catchability", "cat", null);
+            fisheryCatchability.init();
+            
                 fisheriesMortality = new FishingGear[nfishery];
 
                 // Recovers the index of fisheries
@@ -485,7 +484,6 @@ public class MortalityProcess extends AbstractProcess {
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
                 
         if (fishingMortalityEnabled && fisheryEnabled) {
-            
             // distinct random fishery sequences for every school
             Integer[] singleSeqFishery = new Integer[nfishery];
             for (int i = 0; i < nfishery; i++) {
@@ -498,6 +496,18 @@ public class MortalityProcess extends AbstractProcess {
             for (int i = 0; i < ns + nBkg; i++) {
                 seqFishery[i] = Arrays.copyOf(singleSeqFishery, nfishery);
                 shuffleArray(seqFishery[i]);
+            }
+        }
+
+        if (fisheryEnabled) {
+            Matrix catchability = this.fisheryCatchability.getMatrix();
+            for (FishingGear gear : this.getFishingGear()) {
+                gear.setCatchability(catchability);
+            }
+
+            Matrix discards = this.fisheryDiscards.getMatrix();
+            for (FishingGear gear : this.getFishingGear()) {
+                gear.setDiscards(discards);
             }
         }
 
@@ -602,37 +612,38 @@ public class MortalityProcess extends AbstractProcess {
                     }
                     
                     // Osmose 4 fishery mortality
-                    if (fisheryEnabled) {
+                        if (fisheryEnabled) {
 
-                        AbstractSchool fishedSchool = listPred.get(seqFish[i]);
+                            AbstractSchool fishedSchool = listPred.get(seqFish[i]);
 
-                        // determine the index of the fishery to read.
-                        // here, we use [i] and not seq[i] because it does not matter much
-                        int iFishery = seqFishery[i][indexFishery[i]];
-                        double F = fisheriesMortality[iFishery].getRate(fishedSchool) / subdt;
-                        nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+                            // determine the index of the fishery to read.
+                            // here, we use [i] and not seq[i] because it does not matter much
+                            int iFishery = seqFishery[i][indexFishery[i]];
+                            FishingGear gear = this.getFishingGear()[iFishery];
+                            double F = gear.getRate(fishedSchool) / subdt;
+                            nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
+                            
+                            if (economyEnabled) {
+                                // store the harvested biomass by size class by species for fishing gear.
+                                gear.incrementHarvestedBiomass(nDead, fishedSchool);
+                            }
+                            
+                            // Percentage values of discarded fish. The remaining go to fishery.
+                            double discardRate = gear.getDiscardRate(fishedSchool);
+                            double nFished = (1 - discardRate) * nDead;
+                            double nDiscared = discardRate * nDead;
 
-                        if (economyEnabled) {
-                            // store the harvested biomass by size class by species for fishing gear.
-                            fisheriesMortality[iFishery].incrementHarvestedBiomass(nDead, fishedSchool);
-                        }
+                            fishedSchool.fishedBy(iFishery, fishedSchool.abd2biom(nFished));
+                            fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscared));
 
-                        // Percentage values of discarded fish. The remaining go to fishery.
-                        double discardRate = fisheriesMortality[iFishery].getDiscardRate(fishedSchool);
-                        double nFished = (1 - discardRate) * nDead;
-                        double nDiscared = discardRate * nDead;
+                            fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
+                            fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscared);
 
-                        fishedSchool.fishedBy(iFishery, fishedSchool.abd2biom(nFished));
-                        fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscared));
-
-                        fishedSchool.incrementNdead(MortalityCause.FISHING, nFished);
-                        fishedSchool.incrementNdead(MortalityCause.DISCARDS, nDiscared);
-
-                        // make sure a different fishery is called every time
-                        // it is just a trick since we do not have case FISHERY1,
-                        // case FISHERY2, etc. like the other mortality sources.
-                        indexFishery[i]++;
-
+                            // make sure a different fishery is called every time
+                            // it is just a trick since we do not have case FISHERY1,
+                            // case FISHERY2, etc. like the other mortality sources.
+                            indexFishery[i]++;
+                    
                     } else {
 
                         // Possibility to fish background species?????
