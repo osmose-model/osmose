@@ -331,7 +331,7 @@ public class MortalityProcess extends AbstractProcess {
                     school.retainEgg();
                 }
             }
-
+            
             // Loop over background species, which are this time predators.
             for (BackgroundSchool bkg : this.getBackgroundSchool(cell)) {
                 bkg.setAccessibility(predationMortality.getAccessibility(bkg, preys));
@@ -339,6 +339,16 @@ public class MortalityProcess extends AbstractProcess {
             }
 
         } // end of cell loop
+
+        // Init the total accessible biomass used for eco. module. Accessible biomass at 
+        // the beginning of the time-step.
+        // Also reset the total harvested biomass.
+        if (this.economyEnabled) {
+            for (FishingGear gear : this.getFishingGear()) {
+                gear.initAccessBiomass();
+                gear.resetHarvestedBiomass();
+            }
+        }
 
         int iStepSimu = getSimulation().getIndexTimeSimu();
         int nSpecies = this.getNSpecies();
