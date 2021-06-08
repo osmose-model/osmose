@@ -375,6 +375,11 @@ public class FishingGear extends AbstractMortality {
     public double[][] getAccessibleBiomass() {
         return this.accessibleBiomass;
     }
+    
+    /** Recovers the value of total accessible biomass. **/
+    public double[][] getHarvestedBiomass() {
+        return this.harvestedBiomass;
+    }
 
     /** Increment the harvested biomass.
      * @param nDead Number of fished individuals.
