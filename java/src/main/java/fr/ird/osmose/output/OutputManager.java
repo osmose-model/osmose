@@ -86,23 +86,7 @@ public class OutputManager extends SimulationLinker {
 
     // List of the indicators
     final private List<IOutput> outputs;
-    /**
-     * Object that is able to take a snapshot of the set of schools and write it in
-     * a NetCDF file. Osmose will be able to restart on such a file.
-     */
-    final private SchoolSetSnapshot snapshot;
-    /**
-     * Record frequency fclor writing restart files, in number of time step.
-     */
-    private int restartFrequency;
-    /**
-     * Whether the restart files should be written or not
-     */
-    private boolean writeRestart;
-    /**
-     * Number of years before writing restart files.
-     */
-    private int spinupRestart;
+
     /**
      * Whether first age class is discarded or not from output.
      */
@@ -120,7 +104,6 @@ public class OutputManager extends SimulationLinker {
     public OutputManager(int rank) {
         super(rank);
         outputs = new ArrayList<>();
-        snapshot = new SchoolSetSnapshot(rank);
     }
 
     public void init() {
@@ -579,6 +562,11 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new NDeadSchoolDistribOutput(rank, sizeDistrib));
         }
 
+        if (getConfiguration().getBoolean("output.individual.enabled", NO_WARNING)) {
+            ModularSchoolSetSnapshot modOutput = new ModularSchoolSetSnapshot(rank);
+            outputs.add(modOutput);
+        }
+        
         if (getConfiguration().isBioenEnabled()) {
 
             if (getConfiguration().getBoolean("output.bioen.mature.size.enabled", NO_WARNING)) {
@@ -730,23 +718,6 @@ public class OutputManager extends SimulationLinker {
             indicator.reset();
         });
 
-        // Initialize the restart maker
-        restartFrequency = Integer.MAX_VALUE;
-        if (!getConfiguration().isNull("output.restart.recordfrequency.ndt")) {
-            restartFrequency = getConfiguration().getInt("output.restart.recordfrequency.ndt");
-        }
-
-        writeRestart = true;
-        if (!getConfiguration().isNull("output.restart.enabled")) {
-            writeRestart = getConfiguration().getBoolean("output.restart.enabled");
-        } else {
-            warning("Could not find parameter 'output.restart.enabled'. Osmose assumes it is true and a NetCDF restart file will be created at the end of the simulation (or more, depending on parameters 'simulation.restart.recordfrequency.ndt' and 'simulation.restart.spinup').");
-        }
-
-        spinupRestart = 0;
-        if (!getConfiguration().isNull("output.restart.spinup")) {
-            spinupRestart = getConfiguration().getInt("output.restart.spinup") - 1;
-        }
     }
 
     public void close() {
@@ -772,18 +743,6 @@ public class OutputManager extends SimulationLinker {
                     indicator.reset();
                 }
             });
-        }
-    }
-
-    public void writeRestart(int iStepSimu) {
-        // Create a restart file
-        boolean isTimeToWrite = writeRestart;
-        isTimeToWrite &= (getSimulation().getYear() >= spinupRestart);
-        isTimeToWrite &= ((iStepSimu + 1) % restartFrequency == 0);
-        isTimeToWrite |= (iStepSimu >= (getConfiguration().getNStep() - 1));
-
-        if (isTimeToWrite) {
-            snapshot.makeSnapshot(iStepSimu);
         }
     }
 }
