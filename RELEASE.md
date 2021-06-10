@@ -4,6 +4,8 @@
 
 ### New features
 
+- 
+- Possibility to use `log` definition of fishing period mortality rates.
 - Adding a `simulation.nfisheries` parameter.
 - Adding the output of aging mortality
 - Adding a test on the number of iterations for MapDistributions (programs stops if school cannot be moved after 1000 tries)
@@ -36,7 +38,8 @@
 - Adding of all species (preys + background + focal) in the `DietDistribOutput` file.
 - Adding of background species in the `DietOutput` and `PredatorPressure` file.
 - Adding of lognormal distribution for fishery selectivity (Ricardo)
-- Adding some tools to help converting parameter names to version 4.3.0 (i.e adding `species.type`, replace `plankton.plk` by `species.sp`, etc)
+- Adding some tools to help converting parameter names to version 4.# does this parameter exist?ckage -f "/home/barrier/Codes/osmose/git-osmose/java/pom.xml"
+3.0 (i.e adding `species.type`, replace `plankton.plk` by `species.sp`, etc)
 - Replace use of hashmaps (costly) by use of arrays, as done before.
 
 

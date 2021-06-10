@@ -68,7 +68,7 @@ public class FisheryBase extends OsmoseLinker {
      * Initialize the time varying index.
      */
     public void init() {
-
+            
         // If a fishing shift exists, take it to extract the fishing values
         String keyShift = String.format("fisheries.rate.base.shift.fsh%d", this.fisheryIndex);
         String keyVal = String.format("fisheries.rate.base.fsh%d", this.fisheryIndex);
@@ -79,10 +79,10 @@ public class FisheryBase extends OsmoseLinker {
         ts.init();
 
         fisheryBase = ts.getValues();
-        if(useLog10) {
+        if (useLog10) {
             for (int i = 0; i < fisheryBase.length; i++) {
-                if(fisheryBase[i] > 0) {
-                    String message = String.format("Fishing mortality rate exponent for fishery %d is positive", this.fisheryIndex);
+                if (fisheryBase[i] > 0) {
+                    String message = String.format("Fishing base mortality rate exponent for fishery %d is positive", this.fisheryIndex);
                     error(message, new IllegalArgumentException());
                 }
                 fisheryBase[i] = Math.exp(fisheryBase[i]);
