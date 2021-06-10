@@ -17,8 +17,7 @@
             "mainClass": "fr.ird.osmose.Osmose",
             "projectName": "osmose",
             "cwd": "/home/barrier/Dropbox/alaia_migration_test/alaia-4.3.3-nobioen",
-            "args": "-verbose calib_config.csv",
-            "preLaunchTask": "package"
+            "args": "-verbose calib_config.csv"
         }
     ]
 }
