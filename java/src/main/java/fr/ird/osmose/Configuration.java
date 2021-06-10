@@ -497,14 +497,29 @@ public class Configuration extends OLogger {
 
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
-        nFishery = findKeys("fisheries.name.fsh*").size();
-
-        // Display warning message if new fishery enabled but no fishers
-        if (fisheryEnabled && (nFishery == 0)) {
-            warning("***************************************************");
-            warning("The new fishery implementation is enabled, but no fisheries ('fisheries.name.fsh*' parameters) has been found");
-            warning("***************************************************");
+        
+        // Init of fisheries at 0.
+        nFishery = 0;
+        
+        if (fisheryEnabled) {
+            
+            // if fishery is on: read nfisheries
+            nFishery = getInt("simulation.nfisheries");
+            
+            // compare with the number of fisheries names
+            int nFisheryTest = findKeys("fisheries.name.fsh*").size();
+    
+            // Display warning message if new fishery enabled but no fishers
+            if (nFishery != nFisheryTest) {
+                warning("***************************************************");
+                warning("The 'simulation.nfisheries' parameter is inconsistent "
+                        + "with the number of 'fisheries.name.fsh*' parameters");
+                warning("The program will stop");
+                warning("***************************************************");
+                System.exit(1);
+            }
         }
+        
 
         // Output regions
         outputRegions = new ArrayList<>();

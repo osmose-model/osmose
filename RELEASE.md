@@ -4,6 +4,7 @@
 
 ### New features
 
+- Adding a `simulation.nfisheries` parameter.
 - Adding the output of aging mortality
 - Adding a test on the number of iterations for MapDistributions (programs stops if school cannot be moved after 1000 tries)
 - New computation of the PhiT values
