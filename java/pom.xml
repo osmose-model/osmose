@@ -46,7 +46,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.ird</groupId>
     <artifactId>osmose</artifactId>
-    <version>4.3.2</version>
+    <version>4.3.3</version>
     <packaging>jar</packaging>
     <name>Osmose</name>
     <description></description>
