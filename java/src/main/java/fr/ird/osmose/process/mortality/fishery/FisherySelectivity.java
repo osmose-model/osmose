@@ -92,6 +92,15 @@ public class FisherySelectivity extends OsmoseLinker {
      * Array of selectivity methods. 0 = knife edge. 1 = Sigmoid 2 = Gaussian 3 = logNormal
      */
     private SizeSelect sizeSelectMethods[];
+    
+    /** Object for the normal distribution of selectivities. */
+    private NormalDistribution normDistrib;
+    
+    /** Object for the lognormal distribution of selectivites. */
+    private LogNormalDistribution logNormDistrib;
+    
+    /** True if selectivity should be initialized. True only if selectivity type changes. */
+    private boolean initSelectivity;
 
     /**
      * Determines which function should be used to compute the selectivity.
@@ -105,6 +114,7 @@ public class FisherySelectivity extends OsmoseLinker {
         this.fIndex = findex;
         this.selPrefix = prefix;
         this.selSuffix = suffix;
+        this.initSelectivity = true;
     }
 
     /**
@@ -118,7 +128,6 @@ public class FisherySelectivity extends OsmoseLinker {
      * selectivity.
      */
     private interface VarGetter {
-
         public double getVariable(AbstractSchool school);
     }
 
@@ -195,10 +204,34 @@ public class FisherySelectivity extends OsmoseLinker {
      * @return
      */
     public double getSelectivity(int index, AbstractSchool school) {
-
         int selType = (int) this.selectTypeArray[index];
-        return (sizeSelectMethods[selType].getSelectivity(index, school));
-
+        return sizeSelectMethods[selType].getSelectivity(index, school);
+    }
+    
+    public void checkIfUpdatedSel(int index) {
+        
+        if(this.initSelectivity) {
+            // when init is true (first simulated time step), nothing is done 
+            return;
+        }
+        
+        if(this.selectTypeArray[index] != this.selectTypeArray[index - 1]) {
+            // if the selectivity type has changed, reinit the objects
+            this.initSelectivity = true;
+            return;
+        }
+        
+        if(this.l50Array[index] != this.l50Array[index - 1]) {
+            // if the l50 value has changed, reinit the objects
+            this.initSelectivity = true;
+            return;
+        }
+        
+        if ((this.l75Array != null) && ((this.l75Array[index] != this.l75Array[index - 1]))) {
+            // if the l75 value has changed, reinit the objects
+            this.initSelectivity = true;
+            return;
+        }
     }
 
     /**
@@ -208,9 +241,7 @@ public class FisherySelectivity extends OsmoseLinker {
      * @return
      */
     public double getKnifeEdgeSelectivity(int index, AbstractSchool school) {
-
         double l50 = this.l50Array[index];
-
         double output = (varGetter.getVariable(school) < l50) ? 0 : 1;
         return output;
     }
@@ -227,18 +258,17 @@ public class FisherySelectivity extends OsmoseLinker {
         double l75 = this.l75Array[index];
         double q75 = 0.674489750196082; // declare constant to save time
         // this is the qnorm(0.75)
-        
-        //NormalDistribution norm = new NormalDistribution();
+        double sd = (l75 - l50) / q75; // this is the qnorm function
+        if (this.initSelectivity) {
+            // initialisation of the distribution used in selectity calculation
+            normDistrib = new NormalDistribution(l50, sd);
+            this.initSelectivity = false;
+        }
 
-        double sd = (l75 - l50) / q75;  // this is the qnorm function
-        // initialisation of the distribution used in selectity calculation
-        NormalDistribution distrib = new NormalDistribution(l50, sd);
-
-        double output;
         // calculation of selectivity. Normalisation by the maximum value 
         // (i.e. the value computed with x = mean).
         // If L75 > 0, assumes Ricardo Formulation should be used
-        output = distrib.density(varGetter.getVariable(school)) / distrib.density(l50);
+        double output = normDistrib.density(varGetter.getVariable(school)) / normDistrib.density(l50);
 
         if (output < tiny) {
             output = 0.0;
@@ -255,23 +285,24 @@ public class FisherySelectivity extends OsmoseLinker {
      * @return
      */
   public double getLogNormalSelectivity(int index, AbstractSchool school) {
-    
-    double l50 = this.l50Array[index];
-    double l75 = this.l75Array[index];
-    double q75 = 0.674489750196082; // declare constant to save time
-    // this is the qnorm(0.75), qnorm has to be used here
-    
-    double mean = Math.log(l50);
-    double sd   = Math.log(l75/l50) / q75;  
-    
-    // initialisation of the distribution used in selectity calculation
-    LogNormalDistribution distrib = new LogNormalDistribution(mean, sd);
+      double l50 = this.l50Array[index];
+      double l75 = this.l75Array[index];
+      double q75 = 0.674489750196082; // declare constant to save time
+      // this is the qnorm(0.75), qnorm has to be used here
+      double mean = Math.log(l50);
+      double sd   = Math.log(l75/l50) / q75;  
+      
+      if (this.initSelectivity) {
+          // initialisation of the distribution used in selectity calculation
+          logNormDistrib = new LogNormalDistribution(mean, sd);
+          this.initSelectivity = false;
+      }
     
     double output;
     // calculation of selectivity. Normalisation by the maximum value 
     // (i.e. the value computed with x = mode = exp(mean - sd^2).
     double mode = Math.exp(mean - Math.pow(sd, 2));
-    output = distrib.density(varGetter.getVariable(school)) / distrib.density(mode);
+    output = logNormDistrib.density(varGetter.getVariable(school)) / logNormDistrib.density(mode);
     
     if (output < tiny) {
       output = 0.0;
