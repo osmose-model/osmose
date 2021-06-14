@@ -144,7 +144,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         </goals>
                         <configuration>
                             <executable>${java.home}/bin/java</executable>
-                            <commandlineArgs>-classpath "${project.build.directory}/lib" -jar "${project.build.directory}/${project.build.finalName}.jar"</commandlineArgs>
+                            <commandlineArgs>-classpath "${project.build.directory}/lib" -jar "${project.build.directory}/${project.build.finalName}.jar" ${exec.appArgs}</commandlineArgs>
+                            <workingDirectory>${exec.workingdir}</workingDirectory>
                         </configuration>
                     </execution>
                 </executions>  
