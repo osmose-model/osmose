@@ -211,6 +211,37 @@ public class GridMap extends OsmoseLinker {
                 matrix[j][i] = (temp.getDouble(index) == fillValue) ? 0.f : (float) temp.getDouble(index);
             }
         }
-
     }
+    
+    public void read(NetcdfFile nc, int mapIndex, int classIndex, String varname) throws IOException, InvalidRangeException {
+
+        // Defines the indexes of the NetCDF variable to read
+        int nx = getConfiguration().getGrid().get_nx();
+        int ny = getConfiguration().getGrid().get_ny();
+        int start[] = {mapIndex, classIndex, 0, 0};
+        int count[] = {1, 1, ny, nx};
+
+        // Extracts the FillValue attribute
+        double fillValue = -99;
+        if (!nc.findVariable(varname).getAttributes().isEmpty()) {
+            // Loop over all the attributes to define a fill value.
+            for (int k = 0; k < nc.findVariable(varname).getAttributes().size(); k++) {
+                if(nc.findVariable(varname).getAttributes().get(k).getFullName().toLowerCase().equals("_fillvalue")) { 
+                    fillValue = nc.findVariable(varname).getAttributes().get(k).getNumericValue().doubleValue();
+                    break;
+                }
+            }
+        }
+
+        // Reads the NetCDF variable
+        Array temp = nc.findVariable(varname).read(start, count).reduce();
+        Index index = temp.getIndex();
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                index.set(j, i);
+                matrix[j][i] = (temp.getDouble(index) == fillValue) ? 0.f : (float) temp.getDouble(index);
+            }
+        }
+    }
+    
 }
