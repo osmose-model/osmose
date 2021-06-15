@@ -41,6 +41,7 @@
 
 package fr.ird.osmose.util;
 
+import fr.ird.osmose.Configuration;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
 import java.io.IOException;
@@ -331,7 +332,6 @@ public class MapSet extends OsmoseLinker {
                 indexMaps[iAge][iStep] = mapIndexNoTwin[indexMap];
             }
         }
-
     }
     
     
@@ -345,6 +345,89 @@ public class MapSet extends OsmoseLinker {
      */
     public void loadMapsNcMaps() throws IOException, InvalidRangeException {
 
+        // Load config + nstepyear + nsteps
+        Configuration cfg = getConfiguration();
+        int dt = cfg.getNStepYear();
+        int ntime = cfg.getNStep(); 
+        
+        // Load the file prefix with names that are of type. movemement.map.species.mapX
+        int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
+        List<Integer> mapNumber = new ArrayList<>();
+        int imap = 0;
+        
+        // Retrieve the index of the maps for this species
+        for (int n = 0; n < nmapmax; n++) {
+            while (!getConfiguration().canFind(prefix + ".species" + ".map" + imap)) {
+                imap++;
+            }
+            String key = prefix + ".species" + ".map" + imap;
+            Species species = getSpecies(getConfiguration().getString(key));
+            if (null != species) {
+                if (species.getSpeciesIndex() == iSpecies) {
+                    mapNumber.add(imap);
+                }
+            }
+            imap++;
+        }
+        
+        // Number of maps for the given species, i.e number of netcdf files to read.
+        int nMaps = mapNumber.size();
+        
+        // One map per timestep and per age number.
+        maps = new GridMap[ntime * nMaps];
+        
+        for(Integer im : mapNumber) { 
+            
+            // Loop over the map indexes
+            String ncFile = cfg.getFile(prefix + "map.file." + suffix + im);
+            String varName = cfg.getString(prefix + "map.variable." + suffix + im);
+            
+            // Recovery of the number of time steps per year in the file
+            int ncPerYear = getConfiguration().getInt(prefix + ".map.nsteps.year." + suffix + im);
+            int ageMin = (int) Math.round(getConfiguration().getDouble(prefix + ".map.ageMin." + suffix + im) * dt);
+            int ageMax = (int) Math.round(getConfiguration().getDouble(prefix + ".map.ageMax." + suffix + im) * dt);
+            
+            // Open the NetCDF file
+            NetcdfFile nc = NetcdfFile.open(ncFile);
+            
+            Variable var = nc.findVariable(null, varName);
+            if ((var.getRank() != 3)) {
+                error(varName + " must have 3 dimensions (time, lat, lon), " + var.getRank() + " provided", null);
+            }
+    
+            int ncTime = var.getShape()[0];
+            
+            // for each nctime, read the map.
+            // map is indexed as [time, nmaps]
+            for (int i = 0; i < ncTime; i++) {
+
+                int iii = i * nMaps + im;
+                // Reads the GridMap by using NetCDF
+                maps[iii] = new GridMap();
+                maps[iii].read(nc, i, varName);
+
+                // If the map is set to 0 everywhere
+                if (maps[iii].count() == 0) {
+                    // add a warning here.
+                    maps[iii] = null;
+                }
+            }
+            
+            // Prepare time-indexation.
+            int ndt = this.getConfiguration().getNStepYear();
+            for (int iAge = ageMin; iAge < ageMax; iAge++) {
+                for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+                    int iStepNc = (iStep / (ndt / ncPerYear)) % ncTime;
+                    indexMaps[iAge][iStep] = iStepNc * nMaps + im;
+                }
+            }
+            
+            nc.close();
+                    
+        }  // end of loop on map number
+        
+        
+        /*
         // Get filename as movements.map.file.spX
         String key = prefix + ".map.file." + suffix + iSpeciesFile;
         String ncFile = getConfiguration().getFile(key);
@@ -463,8 +546,9 @@ public class MapSet extends OsmoseLinker {
                 }
             }
         } // end of test on variable rank
-
+    
         nc.close();
+        */
         
     }  // end of method
 }
