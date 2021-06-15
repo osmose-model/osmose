@@ -345,7 +345,6 @@ public class MapSet extends OsmoseLinker {
         int dt = cfg.getNStepYear();
 
         // Load the file prefix with names that are of type. movemement.map.species.mapX
-        System.out.println(prefix + ".species.map*");
         int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
         List<Integer> mapNumber = new ArrayList<>();
         int imap = 0;
