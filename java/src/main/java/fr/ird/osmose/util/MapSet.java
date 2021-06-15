@@ -232,7 +232,7 @@ public class MapSet extends OsmoseLinker {
         // Load the maps
         for (int n = 0; n < mapNumber.size(); n++) {
             imap = mapNumber.get(n);
-            System.out.println("+++++++++++++++++++ " + imap);
+
             /*
              * read age min and age max concerned by this map
              */
