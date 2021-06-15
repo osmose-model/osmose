@@ -49,6 +49,8 @@ import java.util.List;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
+import ucar.ma2.Array;
+import ucar.ma2.Index;
 
 /**
  * This class handles a set of spatial maps for a given species. No matter the
@@ -185,11 +187,7 @@ public class MapSet extends OsmoseLinker {
         String key = prefix + ".map.file." + suffix + iSpeciesFile;
         if (!getConfiguration().isNull(key)) {
             info("Reding NetCDF file " + getConfiguration().getFile(key));
-            if (!getConfiguration().isNull(prefix + ".map.file.variable." + suffix + iSpeciesFile)) {
-                this.loadMapsNcMaps();
-            } else {
-                this.loadMapsNc();
-            }
+            this.loadMapsNcMaps();
             // Check the map indexation
             if (!checkMapIndexation()) {
                 error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
@@ -206,92 +204,6 @@ public class MapSet extends OsmoseLinker {
             eliminateTwinMap();
         }
 
-    }
-
-    /**
-     * Method to initialize MapSets from NetCDF file.
-     *
-     * @author Nicolas Barrier
-     * @throws java.io.IOException
-     * @throws ucar.ma2.InvalidRangeException
-     */
-    public void loadMapsNc() throws IOException, InvalidRangeException {
-
-        String key = prefix + ".map.file." + suffix + iSpeciesFile;
-        String ncFile = getConfiguration().getFile(key);
-
-        // Open the NetCDF file
-        NetcdfFile nc = NetcdfFile.open(ncFile);
-
-        // Counts the number of maps associated with the current species
-        int nmapmax = nc.findDimension("m").getLength();
-
-        // Initialize the total number of grid maps 
-        maps = new GridMap[nmapmax];
-
-        // Loop over all the Maps defined in the NetCDF.
-        for (int i = 0; i < nmapmax; i++) {
-
-            // Reads the GridMap by using NetCDF
-            maps[i] = new GridMap();
-            maps[i].read(nc, i);
-
-            // If the map is set to 0 everywhere
-            if (maps[i].count() == 0) {
-                // add a warning here.
-                maps[i] = null;
-            }
-
-            // Reads the NetCDF variables agemin and agemax
-            // if unset, ageMin/age<ax should be set equal to -1
-            int ageMin = nc.findVariable("agemin").read(new int[]{i}, new int[]{1}).getInt(0);
-            int ageMax = nc.findVariable("agemax").read(new int[]{i}, new int[]{1}).getInt(0);
-
-            // If ageMin is unset in the NetCDF files (values of -1),
-            // default values are set.
-            if (ageMin == -1) {
-                ageMin = 0;
-            }
-            if (ageMax == -1) {
-                ageMax = getSpecies(iSpecies).getLifespanDt() / getConfiguration().getNStepYear();
-            }
-
-            ageMin *= getConfiguration().getNStepYear();
-            ageMax *= getConfiguration().getNStepYear();
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
-
-            // extracts the tempSeason array, with 0 if map should be use for current season and 1 if should be useed
-            byte[] tempSeason = (byte[]) nc.findVariable("season").read(new int[]{i, 0}, new int[]{1, getConfiguration().getNStepYear()}).copyTo1DJavaArray();
-
-            //  number of years
-            int nyear = (int) Math.ceil(getConfiguration().getNStep() / (float) getConfiguration().getNStepYear());
-
-            // Extracts the yearmin and yearmax
-            int yearMin = nc.findVariable("yearmin").read(new int[]{i}, new int[]{1}).getInt(0);
-            int yearMax = nc.findVariable("yearmax").read(new int[]{i}, new int[]{1}).getInt(0);
-            if (yearMax == -1) {
-                yearMax = nyear;
-            }
-            yearMax = Math.min(yearMax, nyear);
-            yearMin = Math.max(yearMin, 0);
-
-            int nStepYear = getConfiguration().getNStepYear();
-            for (int iAge = ageMin; iAge < ageMax; iAge++) {
-                for (int iYear = yearMin; iYear < yearMax; iYear++) {
-                    int index = 0;    // index of the current season season in which we are
-                    for (int iSeason : tempSeason) {  // loop over all the seasons
-                        if (iSeason == 1) {
-                            int iStep = iYear * nStepYear + index;
-                            indexMaps[iAge][iStep] = i;
-                        }
-                        index++;
-                    }
-                }
-
-            }
-        }
-
-        nc.close();
     }
 
     public void loadMapsCsv() {
@@ -439,49 +351,120 @@ public class MapSet extends OsmoseLinker {
 
         // Open the NetCDF file
         NetcdfFile nc = NetcdfFile.open(ncFile);
-        
+
         // Recovery of the variable name from movements.map.file.variable.spX
-        String varName = getConfiguration().getString(prefix +  ".map.file.variable." + suffix + iSpeciesFile);
-        
+        String varName = getConfiguration().getString(prefix + ".map.file.variable." + suffix + iSpeciesFile);
+
         // Recovery of the number of time steps per year in the file
-        int ncPerYear = getConfiguration().getInt(prefix +  ".map.file.nsteps.year." + suffix + iSpeciesFile);
-        
+        int ncPerYear = getConfiguration().getInt(prefix + ".map.file.nsteps.year." + suffix + iSpeciesFile);
+
         Variable var = nc.findVariable(null, varName);
-        if(var.getRank() != 3) { 
-            error(varName + " must have 3 dimensions, " + var.getRank() + " provided", null);
+        if ((var.getRank() != 3) || (var.getRank() != 4)) {
+            error(varName + " must have 3 or 4 dimensions, " + var.getRank() + " provided", null);
         }
-        
+
         int ntime = var.getShape()[0];
 
-        // Load all the maps (one per time step)
-        maps = new GridMap[ntime];
-        
-        for (int i = 0; i < ntime; i++) { 
-            
-            // Reads the GridMap by using NetCDF
-            maps[i] = new GridMap();
-            maps[i].read(nc, i, varName);
+        if (var.getRank() == 3) {
 
-            // If the map is set to 0 everywhere
-            if (maps[i].count() == 0) {
-                // add a warning here.
-                maps[i] = null;
-            }
-        } 
+            // if map variable is of dimensions (time, lat, lon)
+            // all the maps (each time steps) are loaded into memory
+            // Load all the maps (one per time step)
+            maps = new GridMap[ntime];
+            for (int i = 0; i < ntime; i++) {
 
-        // Init the indexMaps (same for each age)
-        int ndt = this.getConfiguration().getNStepYear();
-        int ageMin = 0;
-        int ageMax = getSpecies(iSpecies).getLifespanDt();
-        for (int iAge = ageMin; iAge < ageMax; iAge++) {
-            for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
-                int iStepNc = (iStep / (ndt / ncPerYear)) % ntime;
-                indexMaps[iAge][iStep] = iStepNc;
+                // Reads the GridMap by using NetCDF
+                maps[i] = new GridMap();
+                maps[i].read(nc, i, varName);
+
+                // If the map is set to 0 everywhere
+                if (maps[i].count() == 0) {
+                    // add a warning here.
+                    maps[i] = null;
+                }
             }
-        }
+
+            // Init the indexMaps (same for each age)
+            int ndt = this.getConfiguration().getNStepYear();
+            int ageMin = 0;
+            int ageMax = getSpecies(iSpecies).getLifespanDt();
+            for (int iAge = ageMin; iAge < ageMax; iAge++) {
+                for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+                    int iStepNc = (iStep / (ndt / ncPerYear)) % ntime;
+                    indexMaps[iAge][iStep] = iStepNc;
+                }
+            }
+
+        } else {
+
+            // if variable is of dimension (time, classes + 1, lat, lon)
+            // read the age variable (upper limit of the class)
+            // if N values, N + 1 classes
+            Array classVar = nc.findVariable(null, "age").read();
+
+            // Read the age values for each class, and convert them into dt.
+            // Age classe are: [0, A1, A2, A3, Ainf], only 0, A1, A2, A3 are read
+            Index index = classVar.getIndex();
+            int nClasses = classVar.getShape()[0]; // =3, 4 classes in total.
             
+            if(nClasses != var.getShape()[1]) { 
+                error("The number of size classes must match the 2nd dimension of the map variable", new Exception());   
+            }
+            
+            int[] ageClass = new int[nClasses];
+            for (int k = 0; k < nClasses; k++) { // loop between 0
+                index.set(k);
+                ageClass[k] = (int) Math.round(classVar.getDouble(index) * getConfiguration().getNStepYear());
+            }
+            //ageClass[nClasses] = getSpecies(iSpecies).getLifespanDt();
+
+            // Load all the maps (one per time step)
+
+            // 1D indexation: (t, c) = (t * nc + c)
+
+            maps = new GridMap[ntime * nClasses];
+            for (int i = 0; i < ntime; i++) {
+                for (int c = 0; c < nClasses; c++) {
+                    int iii = i * nClasses + c;
+                    // Reads the GridMap by using NetCDF
+                    maps[iii] = new GridMap();
+                    maps[iii].read(nc, i, c, varName);
+
+                    // If the map is set to 0 everywhere
+                    if (maps[iii].count() == 0) {
+                        // add a warning here.
+                        maps[iii] = null;
+                    }
+                }
+            }
+            
+            // Init the indexMaps (same for each age class). 
+            // stops at nClass - 2
+            int ndt = this.getConfiguration().getNStepYear();
+            for (int c = 0; c < nClasses - 1; c++) {
+                int ageMin = ageClass[c];
+                int ageMax = ageClass[c + 1];
+                for (int iAge = ageMin; iAge < ageMax; iAge++) {
+                    for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+                        int iStepNc = (iStep / (ndt / ncPerYear)) % ntime;
+                        indexMaps[iAge][iStep] = iStepNc * nClasses + c;
+                    }
+                }
+            } 
+            
+            // init the map index for the last ageClass (LN, Lf)
+            int c = nClasses - 1;
+            int ageMin = ageClass[nClasses - 1];
+            int ageMax = getSpecies(iSpecies).getLifespanDt();
+            for (int iAge = ageMin; iAge < ageMax; iAge++) {
+                for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+                    int iStepNc = (iStep / (ndt / ncPerYear)) % ntime;
+                    indexMaps[iAge][iStep] = iStepNc * nClasses + c;
+                }
+            }
+        } // end of test on variable rank
+
         nc.close();
-    }
-    
-    
+        
+    }  // end of method
 }
