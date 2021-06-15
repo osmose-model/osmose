@@ -184,7 +184,6 @@ public class MapSet extends OsmoseLinker {
         // else, classic definitions of maps.
         String key = prefix + ".netcdf.enabled";
         if (getConfiguration().getBoolean(key)) {
-            info("Reding NetCDF file " + getConfiguration().getFile(key));
             this.loadMapsNcMaps();
             // Check the map indexation
             if (!checkMapIndexation()) {
@@ -341,7 +340,6 @@ public class MapSet extends OsmoseLinker {
      * @throws ucar.ma2.InvalidRangeException
      */
     public void loadMapsNcMaps() throws IOException, InvalidRangeException {
-
         // Load config + nstepyear + nsteps
         Configuration cfg = getConfiguration();
         int dt = cfg.getNStepYear();
@@ -382,7 +380,7 @@ public class MapSet extends OsmoseLinker {
             int ncPerYear = getConfiguration().getInt(prefix + ".nsteps.year." + suffix + im);
             int ageMin = (int) Math.round(getConfiguration().getDouble(prefix + ".initialAge." + suffix + im) * dt);
             int ageMax = (int) Math.round(getConfiguration().getDouble(prefix + ".lastAge." + suffix + im) * dt);
-            Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
+            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
                         
             // Open the NetCDF file
             NetcdfFile nc = NetcdfFile.open(ncFile);
