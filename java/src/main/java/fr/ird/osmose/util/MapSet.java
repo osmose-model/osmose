@@ -183,7 +183,6 @@ public class MapSet extends OsmoseLinker {
         // If the movement.map.spX exists, maps are initialised by using NetCDF
         // else, classic definitions of maps.
         String key = prefix + ".netcdf.enabled";
-        System.out.println("++++++++++++++++ " + key);
         if (getConfiguration().getBoolean(key)) {
             info("Reding NetCDF file " + getConfiguration().getFile(key));
             this.loadMapsNcMaps();
@@ -202,7 +201,6 @@ public class MapSet extends OsmoseLinker {
             // Get rid of redundant map definitions
             eliminateTwinMap();
         }
-        System.exit(0);
     }
 
     public void loadMapsCsv() {
