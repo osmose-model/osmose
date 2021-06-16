@@ -15,6 +15,7 @@
 - `fisheries.rate.bySeason.fsh%d` parameter renamed into `fisheries.rate.byperiod.fsh%d`
 - Normalisation of season spawning to 1.
 - Trimming of parameter name in the `Release.findLine` method.
+- Reduction of computation time for new fisheries implementation
 
 
 ### Bug fixes
