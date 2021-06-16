@@ -4,7 +4,7 @@
 
 ### New features
 
-- 
+- New parameterization of fish movements using NetCDF (one netcdf per species and age class). Old param has been removed.
 - Possibility to use `log` definition of fishing period mortality rates.
 - Adding a `simulation.nfisheries` parameter.
 - Adding the output of aging mortality
@@ -19,6 +19,7 @@
 
 ### Bug fixes
 
+- Correction of a bug in the map movements. At the first time-step within a year, the map was compared with the one of index `nstepyear - 1`. At step=48, map was compared with map 23 instead of map 47. 
 - Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)
 - Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age. 
 
