@@ -57,7 +57,7 @@ public class GenericTimeSeries extends OsmoseLinker {
 
     private double[] values;
 
-    public void read(String filename, int nValues) {
+    public void read(String filename) {
 
         try {
             // 1. Open the CSV file
@@ -66,13 +66,10 @@ public class GenericTimeSeries extends OsmoseLinker {
 
             // 2. Check the length of the time serie and inform the user about potential problems or inconsistencies
             int nTimeSerie = lines.size() - 1;
-            if ((nTimeSerie != nValues)) {
-                throw new IOException("Found " + nTimeSerie + " time steps in the time serie. It must contain " + nValues + " time steps.");
-            }
 
             // 3. Read the time series
-            values = new double[nValues];
-            for (int t = 0; t < nValues; t++) {
+            values = new double[nTimeSerie];
+            for (int t = 0; t < nTimeSerie; t++) {
                 String[] line = lines.get(t + 1);
                 values[t] = Double.valueOf(line[1]);
             }
