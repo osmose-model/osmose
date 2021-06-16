@@ -183,7 +183,7 @@ public class MapDistribution extends AbstractDistribution {
                 }
                 indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
                 proba = map.getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap]);
+            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba));
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.
@@ -215,8 +215,8 @@ public class MapDistribution extends AbstractDistribution {
         while (neighbours.hasNext()) {
             Cell neighbour = neighbours.next();
             // 2. Eliminate cell that is on land
-            // 3. Add the cell if it is within the current map of distribution 
-            if (!neighbour.isLand() && map.getValue(neighbour) > 0) {
+            // 3. Add the cell if it is within the current map of distribution
+            if (!neighbour.isLand() && (map.getValue(neighbour) > 0) && (!Double.isNaN(map.getValue(neighbour)))) {
                 accessibleCells.add(neighbour);
             }
         }
