@@ -340,6 +340,7 @@ public class MapSet extends OsmoseLinker {
      * @throws ucar.ma2.InvalidRangeException
      */
     public void loadMapsNcMaps() throws IOException, InvalidRangeException {
+        
         // Load config + nstepyear + nsteps
         Configuration cfg = getConfiguration();
         int dt = cfg.getNStepYear();
@@ -363,11 +364,14 @@ public class MapSet extends OsmoseLinker {
             }
             imap++;
         }
-
+        
         // One map per timestep and per age number.
-        maps = new HashMap<>(); // dimension = [nMaps][ntime]?
+        maps = new HashMap<>(); // dimension = [nMaps][ntime]
         int iii = 0;
-
+        
+        // Prepare time-indexation.
+        int ndt = this.getConfiguration().getNStepYear();
+        
         for (Integer im : mapNumber) {
 
             // Loop over the map indexes for the species.
@@ -380,7 +384,7 @@ public class MapSet extends OsmoseLinker {
             int ageMin = (int) Math.round(getConfiguration().getDouble(prefix + ".initialAge." + suffix + im) * dt);
             int ageMax = (int) Math.round(getConfiguration().getDouble(prefix + ".lastAge." + suffix + im) * dt);
             ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
-                        
+   
             // Open the NetCDF file
             NetcdfFile nc = NetcdfFile.open(ncFile);
 
@@ -406,18 +410,15 @@ public class MapSet extends OsmoseLinker {
                     maps.put(iii, null);
                 }
 
-                // Prepare time-indexation.
-                int ndt = this.getConfiguration().getNStepYear();
                 for (int iAge = ageMin; iAge < ageMax; iAge++) {
                     for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
-                        int iStepNc = (iStep / (ndt / ncPerYear)) % ncTime; // netcdf index to read
+                        int iStepNc = (iStep / (ndt / ncPerYear)) % ncTime; // netcdf index to read, based on simulation time step
                         if (iStepNc == i) {
-                            // if the nctime step associated with simu. time step matches nc index, add indexMaps
+                            // if the nctime step associated with simulation time step matches nc index, add indexMaps
                             indexMaps[iAge][iStep] = iii;
                         }
                     }
                 }
-
                 iii++;
 
             } // end of nctime loop
