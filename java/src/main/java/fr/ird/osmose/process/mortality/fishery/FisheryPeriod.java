@@ -92,6 +92,7 @@ public class FisheryPeriod extends OsmoseLinker {
         // 0 if no offset, else 1
         int do_offset = (ioff != 0) ? 1 : 0;
         
+        // time index of the fishery time step for fperiod
         int[] fishIndex = new int[this.getConfiguration().getNStep()];
 
         // If ioff = 0, nothing is done.
@@ -125,7 +126,7 @@ public class FisheryPeriod extends OsmoseLinker {
                 fishingSeason[i] = Math.exp(fishingSeason[i]);
             }
         }
-              
+        
         if (fishingSeason.length == 1) {
             // If fishing season given as a single value, then
             // use it for all the season.
@@ -136,6 +137,7 @@ public class FisheryPeriod extends OsmoseLinker {
         } else if (fishingSeason.length == this.nPeriods) {
             // In this case, values are provided for one year and N periods
             for (int i = 0; i < nStep; i++) {
+                // k is the index of the previous time step. it has been shifted by nperiods to prevent negatve index at the beginning
                 int k = (fishIndex[i] + do_offset * this.nPeriods - do_offset) % this.nPeriods;
                 fisheryPeriod[i] = fishingSeason[k];
             }
@@ -146,7 +148,7 @@ public class FisheryPeriod extends OsmoseLinker {
                 fisheryPeriod[i] = fishingSeason[k];
             }
         } else {
-            String msg = String.format("The %s parameter must have at least 1, %d or %d values. %d provided", key,
+            String msg = String.format("The fishing period rates for fsh%d must have at least 1, %d or %d values. %d provided", this.fileFisheryIndex,
                     this.nPeriods, fishIndex[nStep - 1] + 1, fishingSeason.length);
             error(msg, new IOException());
         }
