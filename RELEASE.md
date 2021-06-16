@@ -4,6 +4,9 @@
 
 ### New features
 
+- New parameterization of fish movements using NetCDF (one netcdf per species and age class). Old param has been removed.
+- Possibility to use `log` definition of fishing period mortality rates.
+- Adding a `simulation.nfisheries` parameter.
 - Adding the output of aging mortality
 - Adding a test on the number of iterations for MapDistributions (programs stops if school cannot be moved after 1000 tries)
 - New computation of the PhiT values
@@ -16,6 +19,7 @@
 
 ### Bug fixes
 
+- Correction of a bug in the map movements. At the first time-step within a year, the map was compared with the one of index `nstepyear - 1`. At step=48, map was compared with map 23 instead of map 47. 
 - Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)
 - Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age. 
 
@@ -35,7 +39,8 @@
 - Adding of all species (preys + background + focal) in the `DietDistribOutput` file.
 - Adding of background species in the `DietOutput` and `PredatorPressure` file.
 - Adding of lognormal distribution for fishery selectivity (Ricardo)
-- Adding some tools to help converting parameter names to version 4.3.0 (i.e adding `species.type`, replace `plankton.plk` by `species.sp`, etc)
+- Adding some tools to help converting parameter names to version 4.# does this parameter exist?ckage -f "/home/barrier/Codes/osmose/git-osmose/java/pom.xml"
+3.0 (i.e adding `species.type`, replace `plankton.plk` by `species.sp`, etc)
 - Replace use of hashmaps (costly) by use of arrays, as done before.
 
 

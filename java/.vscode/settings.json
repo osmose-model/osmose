@@ -1,5 +1,5 @@
 {
-    "java.autobuild.enabled": false,
+    "java.autobuild.enabled": true,
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.format.settings.url": ".vscode/eclipse-formatter.xml",
 }

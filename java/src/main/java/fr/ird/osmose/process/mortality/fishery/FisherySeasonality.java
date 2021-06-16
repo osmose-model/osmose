@@ -72,18 +72,18 @@ public class FisherySeasonality extends OsmoseLinker {
         String key;
 
         // Init the number of seasons;
-        key = String.format("fisheries.season.number.fsh%d", this.fileFisheryIndex);
-        int nSeasons = this.getConfiguration().getInt(key);
+        key = String.format("fisheries.period.number.fsh%d", this.fileFisheryIndex);
+        int nPeriods = this.getConfiguration().getInt(key);
 
         // Init the season offset (in fraction of years)
-        key = String.format("fisheries.season.start.fsh%d", this.fileFisheryIndex);
-        double seasonOffset = this.getConfiguration().getDouble(key);
+        key = String.format("fisheries.period.start.fsh%d", this.fileFisheryIndex);
+        double periodOffset = this.getConfiguration().getDouble(key);
 
         // Season offset in time steps
-        int ioff = (int) (seasonOffset * nStepYear);
+        int ioff = (int) (periodOffset * nStepYear);
 
         // Season duration in time steps
-        int seasonDuration = nStepYear / nSeasons;
+        int seasonDuration = nStepYear / nPeriods;
 
         String keyval = String.format("fisheries.seasonality.fsh%d", this.fileFisheryIndex);      
         String keyfile = String.format("fisheries.seasonality.file.fsh%d", this.fileFisheryIndex);

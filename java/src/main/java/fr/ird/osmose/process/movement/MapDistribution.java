@@ -131,7 +131,6 @@ public class MapDistribution extends AbstractDistribution {
 
     private void mapsDistribution(School school, int iStepSimu) {
 
-        int i_step_year = iStepSimu % getConfiguration().getNStepYear();
         int age = school.getAgeDt();
 
         // Get current map and max probability of presence
@@ -146,13 +145,7 @@ public class MapDistribution extends AbstractDistribution {
          */
         boolean sameMap = false;
         if (age > 0 && iStepSimu > 0) {
-            int oldTime;
-            if (i_step_year == 0) {
-                oldTime = getConfiguration().getNStepYear() - 1;
-            } else {
-                oldTime = i_step_year - 1;
-            }
-            int previousIndexMap = maps.getIndexMap(age - 1, oldTime);
+            int previousIndexMap = maps.getIndexMap(age - 1, iStepSimu - 1);
             if (indexMap == previousIndexMap) {
                 sameMap = true;
             }
@@ -183,7 +176,7 @@ public class MapDistribution extends AbstractDistribution {
                 }
                 indexCell = (int) Math.round((nCells - 1) * rd1.nextDouble());
                 proba = map.getValue(getGrid().getCell(indexCell));
-            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap]);
+            } while (proba <= 0.d || proba < rd2.nextDouble() * maxProbaPresence[indexMap] || Double.isNaN(proba));
             school.moveToCell(getGrid().getCell(indexCell));
         } else {
             // Random move in adjacent cells contained in the map.
@@ -215,8 +208,8 @@ public class MapDistribution extends AbstractDistribution {
         while (neighbours.hasNext()) {
             Cell neighbour = neighbours.next();
             // 2. Eliminate cell that is on land
-            // 3. Add the cell if it is within the current map of distribution 
-            if (!neighbour.isLand() && map.getValue(neighbour) > 0) {
+            // 3. Add the cell if it is within the current map of distribution
+            if (!neighbour.isLand() && (map.getValue(neighbour) > 0) && (!Double.isNaN(map.getValue(neighbour)))) {
                 accessibleCells.add(neighbour);
             }
         }
