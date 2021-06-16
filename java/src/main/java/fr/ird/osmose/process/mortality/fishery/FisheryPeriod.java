@@ -42,6 +42,8 @@
 package fr.ird.osmose.process.mortality.fishery;
 
 import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.timeseries.GenericTimeSeries;
+
 import java.io.IOException;
 
 /**
@@ -90,6 +92,7 @@ public class FisheryPeriod extends OsmoseLinker {
         // 0 if no offset, else 1
         int do_offset = (ioff != 0) ? 1 : 0;
         
+        // time index of the fishery time step for fperiod
         int[] fishIndex = new int[this.getConfiguration().getNStep()];
 
         // If ioff = 0, nothing is done.
@@ -101,10 +104,18 @@ public class FisheryPeriod extends OsmoseLinker {
             int k = (i - ioff) / (seasonDuration);
             fishIndex[i] = k + do_offset;
         }
-
-        key = String.format("fisheries.rate.byPeriod.fsh%d", this.fileFisheryIndex);
         
-        double[] fishingSeason = this.getConfiguration().getArrayDouble(key);
+        String keyfile = String.format("fisheries.rate.byPeriod.file.fsh%d", this.fileFisheryIndex);
+        double[] fishingSeason;
+        if (!getConfiguration().isNull(keyfile)) {
+            GenericTimeSeries ts = new GenericTimeSeries();
+            String fileName = getConfiguration().getFile(keyfile);
+            ts.read(fileName);
+            fishingSeason = ts.getValues();
+        } else {
+            key = String.format("fisheries.rate.byPeriod.fsh%d", this.fileFisheryIndex);
+            fishingSeason = this.getConfiguration().getArrayDouble(key);
+        }
         boolean useLog10 = getConfiguration().getBoolean("fisheries.rate.byperiod.log.enabled.fsh" + this.fileFisheryIndex);
         if(useLog10) { 
             for (int i = 0; i < fishingSeason.length; i++) {
@@ -115,7 +126,7 @@ public class FisheryPeriod extends OsmoseLinker {
                 fishingSeason[i] = Math.exp(fishingSeason[i]);
             }
         }
-              
+        
         if (fishingSeason.length == 1) {
             // If fishing season given as a single value, then
             // use it for all the season.
@@ -124,17 +135,20 @@ public class FisheryPeriod extends OsmoseLinker {
             }
 
         } else if (fishingSeason.length == this.nPeriods) {
+            // In this case, values are provided for one year and N periods
             for (int i = 0; i < nStep; i++) {
+                // k is the index of the previous time step. it has been shifted by nperiods to prevent negatve index at the beginning
                 int k = (fishIndex[i] + do_offset * this.nPeriods - do_offset) % this.nPeriods;
                 fisheryPeriod[i] = fishingSeason[k];
             }
         } else if (fishingSeason.length - 1 == fishIndex[nStep - 1]) {
+            // In this case, values are provided for all years and all periods
             for (int i = 0; i < nStep; i++) {
                 int k = fishIndex[i];
                 fisheryPeriod[i] = fishingSeason[k];
             }
         } else {
-            String msg = String.format("The %s parameter must have at least 1, %d or %d values. %d provided", key,
+            String msg = String.format("The fishing period rates for fsh%d must have at least 1, %d or %d values. %d provided", this.fileFisheryIndex,
                     this.nPeriods, fishIndex[nStep - 1] + 1, fishingSeason.length);
             error(msg, new IOException());
         }
