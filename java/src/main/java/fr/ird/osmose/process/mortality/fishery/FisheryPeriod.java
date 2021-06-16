@@ -42,6 +42,8 @@
 package fr.ird.osmose.process.mortality.fishery;
 
 import fr.ird.osmose.util.OsmoseLinker;
+import fr.ird.osmose.util.timeseries.GenericTimeSeries;
+
 import java.io.IOException;
 
 /**
@@ -101,10 +103,18 @@ public class FisheryPeriod extends OsmoseLinker {
             int k = (i - ioff) / (seasonDuration);
             fishIndex[i] = k + do_offset;
         }
-
-        key = String.format("fisheries.rate.byPeriod.fsh%d", this.fileFisheryIndex);
         
-        double[] fishingSeason = this.getConfiguration().getArrayDouble(key);
+        String keyfile = String.format("fisheries.rate.byPeriod.file.fsh%d", this.fileFisheryIndex);
+        double[] fishingSeason;
+        if (!getConfiguration().isNull(keyfile)) {
+            GenericTimeSeries ts = new GenericTimeSeries();
+            String fileName = getConfiguration().getFile(keyfile);
+            ts.read(fileName);
+            fishingSeason = ts.getValues();
+        } else {
+            key = String.format("fisheries.rate.byPeriod.fsh%d", this.fileFisheryIndex);
+            fishingSeason = this.getConfiguration().getArrayDouble(key);
+        }
         boolean useLog10 = getConfiguration().getBoolean("fisheries.rate.byperiod.log.enabled.fsh" + this.fileFisheryIndex);
         if(useLog10) { 
             for (int i = 0; i < fishingSeason.length; i++) {
@@ -124,11 +134,13 @@ public class FisheryPeriod extends OsmoseLinker {
             }
 
         } else if (fishingSeason.length == this.nPeriods) {
+            // In this case, values are provided for one year and N periods
             for (int i = 0; i < nStep; i++) {
                 int k = (fishIndex[i] + do_offset * this.nPeriods - do_offset) % this.nPeriods;
                 fisheryPeriod[i] = fishingSeason[k];
             }
         } else if (fishingSeason.length - 1 == fishIndex[nStep - 1]) {
+            // In this case, values are provided for all years and all periods
             for (int i = 0; i < nStep; i++) {
                 int k = fishIndex[i];
                 fisheryPeriod[i] = fishingSeason[k];
