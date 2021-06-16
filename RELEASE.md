@@ -4,6 +4,7 @@
 
 ### New features
 
+- Possibility to read fishing period rates from a file (new class for the management of time series, without any constraints on the number of values).
 - New parameterization of fish movements using NetCDF (one netcdf per species and age class). Old param has been removed.
 - Possibility to use `log` definition of fishing period mortality rates.
 - Adding a `simulation.nfisheries` parameter.
