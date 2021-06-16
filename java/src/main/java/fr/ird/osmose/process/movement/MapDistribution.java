@@ -131,7 +131,6 @@ public class MapDistribution extends AbstractDistribution {
 
     private void mapsDistribution(School school, int iStepSimu) {
 
-        int i_step_year = iStepSimu % getConfiguration().getNStepYear();
         int age = school.getAgeDt();
 
         // Get current map and max probability of presence
@@ -146,13 +145,7 @@ public class MapDistribution extends AbstractDistribution {
          */
         boolean sameMap = false;
         if (age > 0 && iStepSimu > 0) {
-            int oldTime;
-            if (i_step_year == 0) {
-                oldTime = getConfiguration().getNStepYear() - 1;
-            } else {
-                oldTime = i_step_year - 1;
-            }
-            int previousIndexMap = maps.getIndexMap(age - 1, oldTime);
+            int previousIndexMap = maps.getIndexMap(age - 1, iStepSimu - 1);
             if (indexMap == previousIndexMap) {
                 sameMap = true;
             }
