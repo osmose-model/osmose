@@ -72,6 +72,10 @@ import fr.ird.osmose.output.spatial.SpatialYieldNOutput;
 import fr.ird.osmose.output.spatial.SpatialTLOutput;
 import fr.ird.osmose.output.spatial.SpatialSizeOutput;
 import fr.ird.osmose.output.spatial.SpatialEnetOutput;
+import fr.ird.osmose.output.spatial.SpatialEnetOutputlarvae;
+import fr.ird.osmose.output.spatial.SpatialEnetOutputjuv;
+import fr.ird.osmose.output.spatial.SpatialdGOutput;
+import fr.ird.osmose.output.spatial.SpatialEggOutput;
 import fr.ird.osmose.process.mortality.MortalityCause;
 
 /**
@@ -255,6 +259,22 @@ public class OutputManager extends SimulationLinker {
         
         if (getConfiguration().getBoolean("output.spatialenet.enabled")) {
             outputs.add(new SpatialEnetOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialenetlarvae.enabled")) {
+            outputs.add(new SpatialEnetOutputlarvae(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialenetjuv.enabled")) {
+            outputs.add(new SpatialEnetOutputjuv(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialdg.enabled")) {
+            outputs.add(new SpatialdGOutput(rank));
+        }
+
+        if (getConfiguration().getBoolean("output.spatialegg.enabled")) {
+            outputs.add(new SpatialEggOutput(rank));
         }
 
         if (getConfiguration().getBoolean("output.spatial.yield.biomass.enabled")) {

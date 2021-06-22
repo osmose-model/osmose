@@ -47,20 +47,20 @@ import fr.ird.osmose.School;
  *
  * @author pverley
  */
-public class SpatialEnetOutput extends AbstractSpatialOutput {
+public class SpatialdGOutput extends AbstractSpatialOutput {
 
-    public SpatialEnetOutput(int rank) {
+    public SpatialdGOutput(int rank) {
         super(rank);
     }
 
     @Override
     public String getVarName() {
-        return "Enet";
+        return "dg";
     }
 
     @Override
     public String getDesc() {
-        return "mean enet, in g.g-alpha, per species and per cell";
+        return "mean dg";
     }
 
     @Override
@@ -88,14 +88,17 @@ public class SpatialEnetOutput extends AbstractSpatialOutput {
                 if (null != getSchoolSet().getSchools(cell)) {
                     for (School school : getSchoolSet().getSchools(cell)) {
                         int iSpec = school.getSpeciesIndex();
-                        int thresDt = getSpecies(iSpec).getLarvaeThresDt();
-                        if (school.getAgeDt() <= thresDt) {
+                        int thresDt = getSpecies(iSpec).getFirstFeedingAgeDt();
+                        if (!school.isMature()) {
                             continue;
                         }
-                        if(!school.isAlive()) continue;
+                        if(!school.isAlive()){
+                            continue;  
+                        }
                         if (!school.isUnlocated()) {
                             // here, data is TK weighted by the biomass
-                            temp[iSpec][j][i] += school.getENet() * 1e6f / (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen())) / school.getInstantaneousAbundance();
+                              temp[iSpec][j][i] += school.getENet()*1e6*school.getKappa()/school.getInstantaneousAbundance();
+                            
                             abundance[iSpec][j][i] += 1;
                         }
                     }
