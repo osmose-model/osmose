@@ -242,6 +242,14 @@ public class MortalityOutput extends SimulationLinker implements IOutput {
                     prw[iSpecies].print(separator);
                     prw[iSpecies].print(quote("Mfor"));
                 }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Mdis"));
+                }
+                for (int i = 0; i < STAGES; i++) {
+                    prw[iSpecies].print(separator);
+                    prw[iSpecies].print(quote("Mage"));
+                }
                 prw[iSpecies].println();
                 for (int cpt = 0; cpt < MortalityCause.values().length; cpt++) {
                     prw[iSpecies].print(separator);
