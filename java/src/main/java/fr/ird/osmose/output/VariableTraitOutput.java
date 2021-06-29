@@ -99,7 +99,7 @@ public class VariableTraitOutput extends SimulationLinker implements IOutput {
         try {
             String filename = getFilename();
             IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion()_classic, filename);
+            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
             //nc.setLocation(filename);
         } catch (IOException ex) {
             Logger.getLogger(VariableTraitOutput.class.getName()).log(Level.SEVERE, null, ex);
