@@ -130,7 +130,7 @@ abstract public class AbstractOutput_Netcdf extends SimulationLinker implements 
         try {
             String filename = getFilename();
             IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
+            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
         } catch (IOException ex) {
             Logger.getLogger(AbstractOutput_Netcdf.class.getName()).log(Level.SEVERE, null, ex);
         }

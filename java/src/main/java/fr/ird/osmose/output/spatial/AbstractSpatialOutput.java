@@ -136,7 +136,7 @@ public abstract class AbstractSpatialOutput extends SimulationLinker implements 
         try {
             String filename = getFilename();
             IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
+            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
         } catch (IOException ex) {
             Logger.getLogger(AbstractSpatialOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
