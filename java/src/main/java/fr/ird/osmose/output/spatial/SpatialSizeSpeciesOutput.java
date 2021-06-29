@@ -125,7 +125,7 @@ public class SpatialSizeSpeciesOutput extends SimulationLinker implements IOutpu
         try {
             String filename = getFilename();
             IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
+            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
         } catch (IOException ex) {
             Logger.getLogger(SpatialSizeSpeciesOutput.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -157,7 +157,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             File path = new File(getConfiguration().getOutputPathname());
             file = new File(path, getFilename(iStepSimu));
             file.getParentFile().mkdirs();
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, file.getAbsolutePath());
+            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), file.getAbsolutePath());
         } catch (IOException ex) {
             error("Could not create snapshot file " + file.getAbsolutePath(), ex);
         }

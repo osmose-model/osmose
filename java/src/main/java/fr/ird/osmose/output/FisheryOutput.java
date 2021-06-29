@@ -100,17 +100,18 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
         int nSpecies = this.getNSpecies() + this.getNBkgSpecies();
         biomass = new double[nSpecies][nFishery];
         discards = new double[nSpecies][nFishery];
-
+   
         /*
          * Create NetCDF file
          */
         try {
             String filename = getFilename();
             IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
+            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
         } catch (IOException ex) {
             Logger.getLogger(FisheryOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
         /*
          * Create dimensions
          */
@@ -148,8 +149,7 @@ public class FisheryOutput extends SimulationLinker implements IOutput {
 
         } catch (IOException ex) {
             Logger.getLogger(FisheryOutput.class.getName()).log(Level.SEVERE, null, ex);
-
-        }
+        }        
     }
 
     @Override

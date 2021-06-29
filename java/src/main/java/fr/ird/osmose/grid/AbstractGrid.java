@@ -435,7 +435,7 @@ public abstract class AbstractGrid extends OsmoseLinker {
          */
         try {
             IOTools.makeDirectories(filename);
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
+            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), filename);
         } catch (IOException ex) {
             error("Failed to created NetCDF grid file " + filename, ex);
         }

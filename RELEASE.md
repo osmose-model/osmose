@@ -24,6 +24,7 @@
 - Correction of a bug in the map movements. At the first time-step within a year, the map was compared with the one of index `nstepyear - 1`. At step=48, map was compared with map 23 instead of map 47. 
 - Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)
 - Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age. 
+- NetCDF output format forced to NetCDF3 instead of NetCDF4 when running in multithread mode (NetCDF4 causes an error and it does not seem possible to do that)
 
 ## Osmose 4.3.2
 
@@ -91,6 +92,7 @@
 - New parameterization of accessibility matrixes (thres. read from files, no more as parameters).
 - All species (focal, background and resource) must have different indexes
 - Extensive use of HashMaps in order to allow easy switch of a species from one type to another
+- Use of the updated NetCDF Java library (associated with Netcdf-C)
 
 # Older versions
 

@@ -216,7 +216,7 @@ public class ResourceOutput extends SimulationLinker implements IOutput {
             /*
              * Create NetCDF file
              */
-            nc = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, ncfile);
+            nc = NetcdfFileWriter.createNew(getConfiguration().getNcOutVersion(), ncfile);
         } catch (IOException ex) {
             Logger.getLogger(ResourceOutput.class.getName()).log(Level.SEVERE, null, ex);
         }
