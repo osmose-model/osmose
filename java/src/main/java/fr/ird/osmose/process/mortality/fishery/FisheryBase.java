@@ -76,6 +76,12 @@ public class FisheryBase extends OsmoseLinker {
         String keyVal = String.format("fisheries.rate.base.fsh%d", this.fisheryIndex);
         String keyValLog = String.format("fisheries.rate.base.log.fsh%d", this.fisheryIndex);
         
+        // test if only one of the two values exists
+        if (getConfiguration().isNull(keyValLog) == getConfiguration().isNull(keyVal)) { 
+            String message = String.format("Both %s and %s parameters are defined. Choose only one.\n", keyValLog, keyVal);
+            error(message, new Exception());
+        }
+        
         boolean useLog10;
         ByRegimeTimeSeries ts;
         if(getConfiguration().isNull(keyValLog)) { 
