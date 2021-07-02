@@ -45,6 +45,7 @@ import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.timeseries.GenericTimeSeries;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  *
@@ -105,19 +106,28 @@ public class FisheryPeriod extends OsmoseLinker {
             fishIndex[i] = k + do_offset;
         }
         
-        String keyfile = String.format("fisheries.rate.byPeriod.file.fsh%d", this.fileFisheryIndex);
+        // List the parameters for byPeriod for the current fishery.
+        List<String> keysList = getConfiguration().findKeys("fisheries.rate.byperiod.*.fsh" + this.fileFisheryIndex);
+        if(keysList.size() != 1) { 
+            String message = String.format("Fishery %d must contains only 1 parameter related to fishery rates by period. Currently %d provided.\n", this.fileFisheryIndex, keysList.size());   
+            error(message, new Exception());
+        }
+        
+        key = keysList.get(0);
+        boolean useLog = key.contains(".log");
+        boolean useFile = key.contains(".file");
+                
         double[] fishingSeason;
-        if (!getConfiguration().isNull(keyfile)) {
+        if (useFile) {
             GenericTimeSeries ts = new GenericTimeSeries();
-            String fileName = getConfiguration().getFile(keyfile);
+            String fileName = getConfiguration().getFile(key);
             ts.read(fileName);
             fishingSeason = ts.getValues();
         } else {
-            key = String.format("fisheries.rate.byPeriod.fsh%d", this.fileFisheryIndex);
             fishingSeason = this.getConfiguration().getArrayDouble(key);
         }
-        boolean useLog10 = getConfiguration().getBoolean("fisheries.rate.byperiod.log.enabled.fsh" + this.fileFisheryIndex);
-        if(useLog10) { 
+        
+        if(useLog) { 
             for (int i = 0; i < fishingSeason.length; i++) {
                 if(fishingSeason[i] > 0) {
                     String message = String.format("Fishing period mortality rate exponent for fishery %d is positive", this.fileFisheryIndex);

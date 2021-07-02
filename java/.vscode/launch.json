@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "fr.ird.osmose.Osmose",
             "projectName": "osmose",
-            "cwd": "-Poutput.dir.path=output osmose4.3.2_hum.R",
+            "cwd": "/Users/Nicolas/Desktop/demo_hum",
             "args": "-Poutput.dir.path=output osmose4.3.2_hum.R "
         }
     ]
