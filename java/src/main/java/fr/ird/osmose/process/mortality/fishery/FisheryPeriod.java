@@ -114,7 +114,7 @@ public class FisheryPeriod extends OsmoseLinker {
         }
         
         key = keysList.get(0);
-        boolean useLog10 = key.contains(".log");
+        boolean useLog = key.contains(".log");
         boolean useFile = key.contains(".file");
                 
         double[] fishingSeason;
@@ -127,7 +127,7 @@ public class FisheryPeriod extends OsmoseLinker {
             fishingSeason = this.getConfiguration().getArrayDouble(key);
         }
         
-        if(useLog10) { 
+        if(useLog) { 
             for (int i = 0; i < fishingSeason.length; i++) {
                 if(fishingSeason[i] > 0) {
                     String message = String.format("Fishing period mortality rate exponent for fishery %d is positive", this.fileFisheryIndex);

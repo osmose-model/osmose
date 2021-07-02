@@ -82,22 +82,22 @@ public class FisheryBase extends OsmoseLinker {
             error(message, new Exception());
         }
         
-        boolean useLog10;
+        boolean useLog;
         ByRegimeTimeSeries ts;
         if(getConfiguration().isNull(keyValLog)) { 
             // If the key for log values is Null, assume fishing mort in standard mode
             ts = new ByRegimeTimeSeries(keyShift, keyVal);
-            useLog10 = false;
+            useLog = false;
         } else { 
             // If the key for log values is not null, assume fishing mort in log
             ts = new ByRegimeTimeSeries(keyShift, keyValLog);
-            useLog10 = true;
+            useLog = true;
         }
 
         ts.init();
 
         fisheryBase = ts.getValues();
-        if (useLog10) {
+        if (useLog) {
             for (int i = 0; i < fisheryBase.length; i++) {
                 if (fisheryBase[i] > 0) {
                     String message = String.format("Fishing base mortality rate exponent for fishery %d is positive", this.fisheryIndex);
