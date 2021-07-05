@@ -107,7 +107,7 @@ public class FisheryPeriod extends OsmoseLinker {
         }
         
         // List the parameters for byPeriod for the current fishery.
-        List<String> keysList = getConfiguration().findKeys("fisheries.rate.byperiod.*.fsh" + this.fileFisheryIndex);
+        List<String> keysList = getConfiguration().findKeys("fisheries.rate.byperiod*fsh" + this.fileFisheryIndex);
         if(keysList.size() != 1) { 
             String message = String.format("Fishery %d must contains only 1 parameter related to fishery rates by period. Currently %d provided.\n", this.fileFisheryIndex, keysList.size());   
             error(message, new Exception());
