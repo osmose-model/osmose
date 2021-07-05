@@ -140,6 +140,9 @@ public class MortalityProcess extends AbstractProcess {
      * Should only be 1 so far, still problems to fix.
      */
     private int subdt;
+    
+    private boolean fishingMortalityEnabled;
+    
     /*
      * The set of resource aggregations
      */
@@ -188,38 +191,43 @@ public class MortalityProcess extends AbstractProcess {
             warning("Did not find parameter 'mortality.subdt' for stochastic mortality algorithm. Osmose set it to {0}.",
                     subdt);
         }
+        
+        fishingMortalityEnabled = getConfiguration().isFishingMortalityEnabled();
 
-        // fishery (Osmose 4) vs fishing mortality (Osmose 3)
-        if (fisheryEnabled) {
+        // If fishing mortality is enabled (default), activate the fishing mortality
+        if (fishingMortalityEnabled) {
+            // fishery (Osmose 4) vs fishing mortality (Osmose 3)
+            if (fisheryEnabled) {
 
-            fisheriesMortality = new FishingGear[nfishery];
+                fisheriesMortality = new FishingGear[nfishery];
 
-            // Recovers the index of fisheries
-            int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
-                    .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted()
-                    .toArray();
+                // Recovers the index of fisheries
+                int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
+                        .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted()
+                        .toArray();
 
-            if (fisheryIndex.length != nfishery) {
-                String message = "The number of fishery is not consistant with the number of fisheries name.";
-                error(message, new Exception());
+                if (fisheryIndex.length != nfishery) {
+                    String message = "The number of fishery is not consistant with the number of fisheries name.";
+                    error(message, new Exception());
+                }
+
+                int cpt = 0;
+                for (int index : fisheryIndex) {
+                    fisheriesMortality[cpt] = new FishingGear(getRank(), index);
+                    fisheriesMortality[cpt].init();
+                    cpt++;
+                }
+
+                fisheryCatchability = new AccessibilityManager(getRank(), "fisheries.catchability", "cat", null);
+                fisheryCatchability.init();
+
+                fisheryDiscards = new AccessibilityManager(getRank(), "fisheries.discards", "dis", null);
+                fisheryDiscards.init();
+
+            } else {
+                fishingMortality = new FishingMortality(getRank());
+                fishingMortality.init();
             }
-
-            int cpt = 0;
-            for (int index : fisheryIndex) {
-                fisheriesMortality[cpt] = new FishingGear(getRank(), index);
-                fisheriesMortality[cpt].init();
-                cpt++;
-            }
-
-            fisheryCatchability = new AccessibilityManager(getRank(), "fisheries.catchability", "cat", null);
-            fisheryCatchability.init();
-
-            fisheryDiscards = new AccessibilityManager(getRank(), "fisheries.discards", "dis", null);
-            fisheryDiscards.init();
-
-        } else {
-            fishingMortality = new FishingMortality(getRank());
-            fishingMortality.init();
         }
 
         // Create a new resources set, empty at the moment
@@ -251,7 +259,7 @@ public class MortalityProcess extends AbstractProcess {
     public void run() {
 
         // Update fishing process (for MPAs)
-        if (!fisheryEnabled) {
+        if (fishingMortalityEnabled && (!fisheryEnabled)) {
             fishingMortality.setMPA();
         }
 
@@ -325,7 +333,7 @@ public class MortalityProcess extends AbstractProcess {
         int[] ncellBatch = dispatchCells();
         int nbatch = ncellBatch.length;
         for (int idt = 0; idt < subdt; idt++) {
-            if (!fisheryEnabled) {
+            if (fishingMortalityEnabled && (!fisheryEnabled)) {
                 fishingMortality.assessFishableBiomass();
             }
             CountDownLatch doneSignal = new CountDownLatch(nbatch);
@@ -427,7 +435,7 @@ public class MortalityProcess extends AbstractProcess {
         causes.remove(MortalityCause.AGING);
 
         // add all the fisheries in the cause list
-        if (fisheryEnabled) {
+        if (fishingMortalityEnabled && fisheryEnabled) {
             // every fishery accounts as an independant fishing mortality source
             // note that we start at 1 since the addAll already include one fishing
             // mortality source
@@ -438,7 +446,7 @@ public class MortalityProcess extends AbstractProcess {
 
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
 
-        if (fisheryEnabled) {
+        if (fishingMortalityEnabled && fisheryEnabled) {
             Matrix catchability = this.fisheryCatchability.getMatrix();
             for (FishingGear gear : this.fisheriesMortality) {
                 gear.setCatchability(catchability);
@@ -462,7 +470,6 @@ public class MortalityProcess extends AbstractProcess {
                 seqFishery[i] = Arrays.copyOf(singleSeqFishery, nfishery);
                 shuffleArray(seqFishery[i]);
             }
-
         }
 
         int[] indexFishery = new int[ns + nBkg];
@@ -561,7 +568,9 @@ public class MortalityProcess extends AbstractProcess {
                     }
                     break;
                 case FISHING:
-
+                    if(!fishingMortalityEnabled) { 
+                        break;
+                    }
                     // Osmose 4 fishery mortality
                     if (fisheryEnabled) {
 
@@ -570,6 +579,7 @@ public class MortalityProcess extends AbstractProcess {
                         // determine the index of the fishery to read.
                         // here, we use [i] and not seq[i] because it does not matter much
                         int iFishery = seqFishery[i][indexFishery[i]];
+                        
                         double F = fisheriesMortality[iFishery].getRate(fishedSchool) / subdt;
                         nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
 

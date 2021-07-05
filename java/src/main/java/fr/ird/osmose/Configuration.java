@@ -263,6 +263,9 @@ public class Configuration extends OLogger {
     private int[] focalIndex, bkgIndex, rscIndex;
 
     private NetcdfFileWriter.Version ncOutVersion;
+    
+    /** True if fishing Mortality (v3 or v4) is on. */
+    private boolean fishingMortalityEnabled = true;
 
     ///////////////
     // Constructors
@@ -508,10 +511,15 @@ public class Configuration extends OLogger {
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
         
+        // true if fishingMortality is enabled or not (v3 or v4)
+        if (!isNull("fishing.mortality.enabled")) {
+            fishingMortalityEnabled = getBoolean("fishing.mortality.enabled");
+        }
+        
         // Init of fisheries at 0.
         nFishery = 0;
         
-        if (fisheryEnabled) {
+        if (fishingMortalityEnabled && fisheryEnabled) {
             
             // if fishery is on: read nfisheries
             nFishery = getInt("simulation.nfisheries");
@@ -604,6 +612,10 @@ public class Configuration extends OLogger {
 
     public boolean isFisheryEnabled() {
         return nFishery > 0;
+    }
+    
+    public boolean isFishingMortalityEnabled() { 
+        return this.fishingMortalityEnabled;   
     }
 
     /**
