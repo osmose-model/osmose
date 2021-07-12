@@ -512,8 +512,8 @@ public class Configuration extends OLogger {
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
         
         // true if fishingMortality is enabled or not (v3 or v4)
-        if (!isNull("fishing.mortality.enabled")) {
-            fishingMortalityEnabled = getBoolean("fishing.mortality.enabled");
+        if (!isNull("simulation.fishing.mortality.enabled")) {
+            fishingMortalityEnabled = getBoolean("simulation.fishing.mortality.enabled");
         }
         
         // Init of fisheries at 0.
