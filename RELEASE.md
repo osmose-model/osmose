@@ -4,6 +4,9 @@
 
 ### New features
 
+- Possibility to deactivate computation of $\F_{O2}$ in the bioen module (`simulation.bioen.fo2.enabled` parameter)
+- Possibility to deactivate computation of $\Phi_T$ in the bioen module (`simulation.bioen.phit.enabled` parameter)
+- Possibility to deactivate fishing/fishery mortalities (`simulation.fishing.mortality.enabled` parameter)
 - Possibility to read fishing period rates from a file (new class for the management of time series, without any constraints on the number of values).
 - New parameterization of fish movements using NetCDF (one netcdf per species and age class). Old param has been removed.
 - Possibility to use `log` definition of fishing period mortality rates.
