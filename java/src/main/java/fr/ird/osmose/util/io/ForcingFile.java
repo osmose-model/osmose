@@ -90,7 +90,7 @@ public class ForcingFile extends OsmoseLinker {
     private int timeLength;
 
     /** List of resource file names. */
-    private String[] fileNames;
+    private Object[] fileNames;
 
     /** Number of time-steps stored in each file. */
     private int[] nSteps;
@@ -161,7 +161,7 @@ public class ForcingFile extends OsmoseLinker {
         }
 
         // Extract the files as a list of sorted String
-        String[] fileNames = (String[]) listFiles.stream().sorted().toArray();
+        this.fileNames = listFiles.stream().sorted().toArray();
         this.nFiles = fileNames.length;
         
         if (this.nFiles == 0) {
@@ -175,8 +175,9 @@ public class ForcingFile extends OsmoseLinker {
         int cpt = 0;
 
         // Loop over all the files 
-        for (String temp : fileNames) {
+        for (int iFile=0; iFile<this.nFiles; iFile++) {
 
+            String temp = (String) fileNames[iFile];
             ncFile = new File(temp).getAbsolutePath();
 
             if (!new File(ncFile).exists()) {
@@ -312,7 +313,7 @@ public class ForcingFile extends OsmoseLinker {
 
         // String ncFile = getConfiguration().resolve(this.fileNames[iFile],
         // getConfiguration().getMainFile());
-        String ncFile = this.fileNames[iFile];
+        String ncFile = (String) this.fileNames[iFile];
 
         double[][] rscbiomass = new double[ny][nx];
 
