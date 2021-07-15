@@ -44,6 +44,9 @@ package fr.ird.osmose.process.bioen;
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.io.ForcingFile;
+import fr.ird.osmose.util.io.ForcingFileCaching;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -95,6 +98,10 @@ public class PhysicalData extends SimulationLinker {
      * lat, lon) with layer the index of the vertical layer.
      */
     private double[][][][] values;
+    
+    private ForcingFile forcingFile = null;
+    
+    private ForcingFileCaching caching = ForcingFileCaching.ALL;
 
     public PhysicalData(int rank, String var_name) {
         super(rank);
@@ -105,47 +112,34 @@ public class PhysicalData extends SimulationLinker {
 
         String key;
 
+        // Recovering the conversion factors and offsets (temperature.factor, temperature.offset)
+        key = String.format("%s.factor", this.variable_name);
+        if (getConfiguration().canFind(key)) {
+            factor = getConfiguration().getDouble(key);
+        }
+
+        key = String.format("%s.offset", this.variable_name);
+        if (getConfiguration().canFind(key)) {
+            offset = getConfiguration().getDouble(key);
+        }
+
         // Recovering the key temperature.filename
         key = String.format("%s.value", this.variable_name);
+        
         if (getConfiguration().canFind(key)) {
             // if a constant value is provided, then set the value
             // and force boolean to true
             this.useConstantVal = true;
-            this.constantVal = getConfiguration().getDouble(key);
+            this.constantVal = this.factor * (getConfiguration().getDouble(key) + this.offset);
+            
         } else {
             
             // if no constant value is provided, ask for a netcdf file.
             this.useConstantVal = false;
 
             key = String.format("%s.nsteps.year", this.variable_name);
-            if (!getConfiguration().isNull(key)) {
-                ncPerYear = getConfiguration().getInt(key);
-            } else {
-                // If parameter is not set,
-                if (this.getConfiguration().getNStepYear() == this.timeLength) {
-                    warning("Number of steps in the NetCDF file equals ndt/year for variable " + this.variable_name);
-                    warning("Assumes ncPerYear = ndt/year");
-                    this.ncPerYear = this.timeLength;
-                } else {
-                    StringBuilder errmsg = new StringBuilder();
-                    errmsg.append("No nsteps.year for the variable ")
-                            .append(this.variable_name).append(" wsa provided.\n");
-                    errmsg.append("Program will stop");
-                    error(errmsg.toString(), null);
-                }
-            }
-
-            // Recovering the conversion factors and offsets (temperature.factor, temperature.offset)
-            key = String.format("%s.factor", this.variable_name);
-            if (getConfiguration().canFind(key)) {
-                factor = getConfiguration().getDouble(key);
-            }
-
-            key = String.format("%s.offset", this.variable_name);
-            if (getConfiguration().canFind(key)) {
-                offset = getConfiguration().getDouble(key);
-            }
-
+            ncPerYear = getConfiguration().getInt(key);
+            
             // Recovering the name of the NetCDF variable (temperature.varname)
             key = String.format("%s.varname", this.variable_name);
             this.netcdf_variable_name = getConfiguration().getString(key);
@@ -153,40 +147,18 @@ public class PhysicalData extends SimulationLinker {
             // Recovering the key temperature.filename
             key = String.format("%s.filename", this.variable_name);
             String filename = getConfiguration().getFile(key);
-
-            if (!new File(filename).exists()) {
-                error("Error reading PhysicalDataset parameters.", new FileNotFoundException("LTL NetCDF file " + filename + " does not exist."));
+            
+            key = String.format("%s.caching", this.variable_name);
+            if (!getConfiguration().isNull(key)) {
+                caching = ForcingFileCaching
+                        .valueOf(getConfiguration().getString(key).toUpperCase());
             }
-
-            // count the number of time steps
-            try (NetcdfFile nc = NetcdfFile.open(filename)) {
-
-                // count the number of time steps
-                int ntime = nc.findVariable(netcdf_variable_name).getDimension(0).getLength();
-                this.timeLength = ntime;
-                
-                // count the number of layers (i.e. depth levels) within the physical variable
-                int nlayers = nc.findVariable(netcdf_variable_name).getDimension(1).getLength();
-                values = new double[ntime][nlayers][getGrid().get_ny()][getGrid().get_nx()];;
-
-                Array netcdf_value = nc.findVariable(netcdf_variable_name).read();
-
-                Index index = netcdf_value.getIndex();
-
-                for (int iTime = 0; iTime < ntime; iTime++) {
-                    for (int k = 0; k < nlayers; k++) {
-                        for (Cell cell : getGrid().getCells()) {
-                            if (!cell.isLand()) {
-                                int i = cell.get_igrid();
-                                int j = cell.get_jgrid();
-                                index.set(iTime, k, j, i);
-                                values[iTime][k][j][i] = factor * (offset + netcdf_value.getDouble(index));
-                            }  // end of if
-                        }  // end of cell
-                    }  // end of k
-                }   // end of time
-            } // end of try
-        }  // end of canfind constant value.
+        
+            this.forcingFile = new ForcingFile(netcdf_variable_name, filename, ncPerYear, this.offset, this.factor, caching);
+            this.forcingFile.init();
+            
+        }
+        
     }  // end of init method
 
     /**
