@@ -117,8 +117,8 @@ public class ForcingFile extends OsmoseLinker {
     
     private final double offset;
     private final double factor;
-    private final int layer;
     
+    private int layer = -1;
     private int previousNcStep = -1;
     
     //////////////
@@ -298,7 +298,7 @@ public class ForcingFile extends OsmoseLinker {
         
     }
 
-    public double getBiomass(Cell cell) {
+    public double getVariable(Cell cell) {
         return factor * (variable[cell.get_jgrid()][cell.get_igrid()] + offset);
     }
 
