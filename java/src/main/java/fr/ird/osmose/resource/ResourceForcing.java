@@ -153,7 +153,7 @@ public class ResourceForcing extends OsmoseLinker {
                         .valueOf(getConfiguration().getString("species.file.caching.sp" + fileindex).toUpperCase());
             }
 
-            this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, 0.0, this.multiplier, caching, -1);
+            this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, 0.0, this.multiplier, caching);
             this.forcingFile.init();
         }
 
