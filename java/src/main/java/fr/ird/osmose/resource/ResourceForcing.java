@@ -42,7 +42,6 @@
 package fr.ird.osmose.resource;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.util.OsmoseLinker;
@@ -155,7 +154,7 @@ public class ResourceForcing extends OsmoseLinker {
             }
 
             this.forcingFile = new ForcingFile(name, ncFile, ncPerYear, 0.0, this.multiplier, caching, -1);
-
+            this.forcingFile.init();
         }
 
     }
