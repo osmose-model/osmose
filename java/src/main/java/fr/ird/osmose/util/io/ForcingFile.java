@@ -72,12 +72,12 @@ public class ForcingFile extends OsmoseLinker {
      * {@code variable[nline_osmose][ncolumn_osmose]}. The array is updated every
      * time step in the {@link #update(int)} function.
      */
-    private double[][] variable;
+    private double[][][] variable;
 
     /**
      * Cached variable arrays.
      */
-    private HashMap<Integer, double[][]> cachedVariable;
+    private HashMap<Integer, double[][][]> cachedVariable;
 
     /**
      * Caching mode.
@@ -118,20 +118,18 @@ public class ForcingFile extends OsmoseLinker {
     private final double offset;
     private final double factor;
     
-    private int layer = -1;
     private int previousNcStep = -1;
     
     //////////////
     // Constructor
     //////////////
-    public ForcingFile(String varName, String filePattern, int ncPerYear, double offset, double factor, ForcingFileCaching caching, int layer) {
+    public ForcingFile(String varName, String filePattern, int ncPerYear, double offset, double factor, ForcingFileCaching caching) {
         this.varName = varName;
         this.filePattern = filePattern;
         this.ncPerYear = ncPerYear;
         this.caching = caching;
         this.factor = factor;
         this.offset = offset;
-        this.layer = layer;
     }
 
     ////////////////////////////
@@ -272,7 +270,7 @@ public class ForcingFile extends OsmoseLinker {
                     // cache whole time series at first time step
                     for (int iTime = 0; iTime < timeLength; iTime++) {
                         debug("Caching from variable " + this.varName + " time step " + iTime);
-                        cachedVariable.put(iTime, readVariable(iStepNc));
+                        cachedVariable.put(iTime, readVariable(iTime));
                     }
                 }
                 // retrieve biomass from cache
@@ -280,7 +278,7 @@ public class ForcingFile extends OsmoseLinker {
                 break;
             case INCREMENTAL:
                 if (!cachedVariable.containsKey(iStepNc)) {
-                    // cache current time step
+                    // cache current netcdf time step
                     debug("Caching from variable " + this.varName + " time step " + iStepNc);
                     this.cachedVariable.put(iStepNc, readVariable(iStepNc));
                 }
@@ -300,10 +298,14 @@ public class ForcingFile extends OsmoseLinker {
     }
 
     public double getVariable(Cell cell) {
-        return factor * (variable[cell.get_jgrid()][cell.get_igrid()] + offset);
+        return variable[0][cell.get_jgrid()][cell.get_igrid()];
+    }
+    
+    public double getVariable(Cell cell, int layer) {
+        return variable[layer][cell.get_jgrid()][cell.get_igrid()];
     }
 
-    private double[][] readVariable(int iStepNc) {
+    private double[][][] readVariable(int iStepNc) {
 
         int nx = getGrid().get_nx();
         int ny = getGrid().get_ny();
@@ -315,31 +317,59 @@ public class ForcingFile extends OsmoseLinker {
         // getConfiguration().getMainFile());
         String ncFile = (String) this.fileNames[iFile];
 
-        double[][] rscbiomass = new double[ny][nx];
+        int nlayer;
+        double[][][] output = null;
 
         // String ncFile = getConfiguration().getFile("species.file.sp" + index);
         try (NetcdfFile nc = NetcdfFile.open(ncFile)) {
             // String message = String.format("Step=%d ==> Reading %s from %s, step=%d",
             // iStepNc, name, ncFile, iStep);
             // this.getLogger().info(message);
-            Variable variable = nc.findVariable(this.varName);
-            Array ncbiomass;
-            if(variable.getShape().length == 3) { 
-                ncbiomass = variable.read(new int[] { iStep, 0, 0 }, new int[] {1, ny, nx }).reduce();
-            } else { 
-                ncbiomass = variable.read(new int[] { iStep, layer, 0 }, new int[] {1, 1, ny, nx }).reduce();
+            Variable ncVariable = nc.findVariable(this.varName);
+            Array ncArray;
+            if (ncVariable.getShape().length == 3) {
+                nlayer = 1;
+                ncArray = ncVariable.read(new int[] { iStep, 0, 0 }, new int[] { 1, ny, nx }).reduce();
+                Index ncindex = ncArray.getIndex();
+                output = new double[1][ny][nx];
+                for (Cell cell : getGrid().getCells()) {
+                    if (cell.isLand()) {
+                        continue;
+                    }
+                    int i = cell.get_igrid();
+                    int j = cell.get_jgrid();
+                    ncindex.set(j, i);
+                    output[0][j][i] = this.factor * (ncArray.getDouble(ncindex) + this.offset);
+                }
+            } else if (ncVariable.getShape().length == 4) {
+                nlayer = ncVariable.getShape()[1];
+                ncArray = ncVariable.read(new int[] { iStep, 0, 0, 0 }, new int[] { 1, nlayer, ny, nx }).reduce();
+                Index ncindex = ncArray.getIndex();
+                output = new double[nlayer][ny][nx];
+                for (Cell cell : getGrid().getCells()) { 
+                    if (cell.isLand()) {
+                        continue;
+                    }   
+                    int i = cell.get_igrid();
+                    int j = cell.get_jgrid();
+                    for (int k = 0; k < nlayer; k++) {
+                        ncindex.set(k, j, i);
+                        output[k][j][i] =  this.factor * (ncArray.getDouble(ncindex) + this.offset);
+                    }
+                };
+            } else {
+                String message = String.format(
+                        "Variable %s must be 3D (time, lat, lon) or 4D (time, z, lat, lon). It currently has %d dimensions",
+                        this.varName, ncVariable.getShape().length);
+                error(message, new Exception());
             }
             
-            Index ncindex = ncbiomass.getIndex();
-            getGrid().getCells().stream().filter((cell) -> (!cell.isLand())).forEach((cell) -> {
-                int i = cell.get_igrid();
-                int j = cell.get_jgrid();
-                ncindex.set(j, i);
-                rscbiomass[j][i] = ncbiomass.getDouble(ncindex);
-            });
+            
         } catch (IOException | InvalidRangeException ex) {
             error("File " + ncFile + ", variable " + this.varName + "cannot be read", ex);
         }
-        return rscbiomass;
+        
+        return output;
+    
     }
 }
