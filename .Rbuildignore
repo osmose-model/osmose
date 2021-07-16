@@ -23,7 +23,7 @@ cran-comments.md
 ^R/osmose\.maps\.R$
 ^R/osmose2R\.R$
 ^data-raw$
-^inst/java$
-java/target
-java/.classpath
-java/.vscode
+^inst/java/.*\.zip$
+^java/target$
+^java/.classpath$
+^java/.vscode$
