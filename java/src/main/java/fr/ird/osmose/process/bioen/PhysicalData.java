@@ -41,18 +41,13 @@
 
 package fr.ird.osmose.process.bioen;
 
+import java.io.IOException;
+
 import fr.ird.osmose.Cell;
 import fr.ird.osmose.School;
 import fr.ird.osmose.util.SimulationLinker;
 import fr.ird.osmose.util.io.ForcingFile;
 import fr.ird.osmose.util.io.ForcingFileCaching;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import ucar.ma2.Array;
-import ucar.ma2.Index;
-import ucar.nc2.NetcdfFile;
 
 /**
  * Class that is dedicated to the reading of Physical datasets used in the
@@ -63,8 +58,7 @@ import ucar.nc2.NetcdfFile;
 public class PhysicalData extends SimulationLinker {
 
     /**
-     * Name of the variable to read, and from which parameters will be
-     * extracted.
+     * Name of the variable to read, and from which parameters will be extracted.
      *
      * @param rank
      */
@@ -89,18 +83,9 @@ public class PhysicalData extends SimulationLinker {
 
     /** Number of time steps within a year. */
     private int ncPerYear;
-    
-    /** Total number of time steps in the NetCDF file */
-    private int timeLength;
-    
-    /**
-     * Array containing the fields to read. Dimensions should be (time, layer,
-     * lat, lon) with layer the index of the vertical layer.
-     */
-    private double[][][][] values;
-    
+
     private ForcingFile forcingFile = null;
-    
+
     private ForcingFileCaching caching = ForcingFileCaching.ALL;
 
     public PhysicalData(int rank, String var_name) {
@@ -112,7 +97,8 @@ public class PhysicalData extends SimulationLinker {
 
         String key;
 
-        // Recovering the conversion factors and offsets (temperature.factor, temperature.offset)
+        // Recovering the conversion factors and offsets (temperature.factor,
+        // temperature.offset)
         key = String.format("%s.factor", this.variable_name);
         if (getConfiguration().canFind(key)) {
             factor = getConfiguration().getDouble(key);
@@ -125,21 +111,21 @@ public class PhysicalData extends SimulationLinker {
 
         // Recovering the key temperature.filename
         key = String.format("%s.value", this.variable_name);
-        
+
         if (getConfiguration().canFind(key)) {
             // if a constant value is provided, then set the value
             // and force boolean to true
             this.useConstantVal = true;
             this.constantVal = this.factor * (getConfiguration().getDouble(key) + this.offset);
-            
+
         } else {
-            
+
             // if no constant value is provided, ask for a netcdf file.
             this.useConstantVal = false;
 
             key = String.format("%s.nsteps.year", this.variable_name);
             ncPerYear = getConfiguration().getInt(key);
-            
+
             // Recovering the name of the NetCDF variable (temperature.varname)
             key = String.format("%s.varname", this.variable_name);
             this.netcdf_variable_name = getConfiguration().getString(key);
@@ -147,42 +133,41 @@ public class PhysicalData extends SimulationLinker {
             // Recovering the key temperature.filename
             key = String.format("%s.filename", this.variable_name);
             String filename = getConfiguration().getFile(key);
-            
+
             key = String.format("%s.caching", this.variable_name);
             if (!getConfiguration().isNull(key)) {
-                caching = ForcingFileCaching
-                        .valueOf(getConfiguration().getString(key).toUpperCase());
+                caching = ForcingFileCaching.valueOf(getConfiguration().getString(key).toUpperCase());
             }
-        
-            this.forcingFile = new ForcingFile(netcdf_variable_name, filename, ncPerYear, this.offset, this.factor, caching);
+
+            this.forcingFile = new ForcingFile(netcdf_variable_name, filename, ncPerYear, this.offset, this.factor,
+                    caching);
             this.forcingFile.init();
-            
+
         }
-        
-    }  // end of init method
+
+    } // end of init method
 
     /**
-     * Recovers the value of a physicald dataset providing the depth index.
-     * Value is converted as follows: output = factor * (offset + value)
+     * Recovers the value of a physicald dataset providing the depth index. Value is
+     * converted as follows: output = factor * (offset + value)
      *
-     * @param index Depth index (0 = surface, 1=mean, 2=bottom)
-     * @param cell Cell index
+     * @param index
+     *            Depth index (0 = surface, 1=mean, 2=bottom)
+     * @param cell
+     *            Cell index
      * @return
      */
     public double getValue(int index, Cell cell) {
         if (this.useConstantVal) {
             return this.constantVal;
         } else {
-            int iStepSimu = getSimulation().getIndexTimeSimu();
-            int ndt = this.getConfiguration().getNStepYear();
-            int ltlTimeStep = (iStepSimu / (ndt / this.ncPerYear)) % timeLength;
-            return values[ltlTimeStep][index][cell.get_jgrid()][cell.get_igrid()];
+            return this.forcingFile.getVariable(cell, index);
         }
     }
 
     /**
-     * Recovers the value of a physicald dataset providing the depth index.
-     * Value is converted as follows: output = factor * (offset + value)
+     * Recovers the value of a physicald dataset providing the depth index. Value is
+     * converted as follows: output = factor * (offset + value)
      *
      * @param school
      * @return
@@ -193,4 +178,4 @@ public class PhysicalData extends SimulationLinker {
         return this.getValue(index, cell);
     }
 
-}  // end of class
+} // end of class
