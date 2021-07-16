@@ -149,8 +149,7 @@ public class TempFunction extends AbstractProcess {
 
     @Override
     public void run() {
-        throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
-                                                                       // Tools | Templates.
+        this.temperature_input.update(this.getSimulation().getIndexTimeSimu());
     }
 
     /**
@@ -173,7 +172,7 @@ public class TempFunction extends AbstractProcess {
     public double computePhiT(School school) {
 
         // Recovers the temperature of the school cell
-        double temp = temperature_input.getValue(school);
+        double temp = this.getTemp(school);
         int i = school.getSpeciesIndex();
         double k = 8.62e-5;
 

@@ -177,5 +177,22 @@ public class PhysicalData extends SimulationLinker {
         int index = school.getSpecies().getDepthLayer();
         return this.getValue(index, cell);
     }
+    
+    /**
+     * Updates the biomass of the resource groups at the current time step of the
+     * simulation.
+     *
+     * @param iStepSimu, the current step of the simulation
+     */
+    public void update(int iStepSimu) {
+
+        // uniform variable, nothing to update
+        if (this.useConstantVal) {
+            return;
+        }
+
+        this.forcingFile.update(iStepSimu);
+
+    }
 
 } // end of class
