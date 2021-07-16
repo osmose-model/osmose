@@ -117,7 +117,7 @@ public class OxygenFunction extends AbstractProcess {
 
     @Override
     public void run() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.o2_input.update(this.getSimulation().getIndexTimeSimu());
     }
     
     /** Computes the Oxygen function used in the ingestion formulae (equation 2).
