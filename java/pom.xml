@@ -203,6 +203,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <goal>single</goal>
                         </goals>
                         <configuration>
+			    <outputDirectory>${project.basedir}/../inst/java/</outputDirectory>
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>

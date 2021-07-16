@@ -49,3 +49,4 @@ nbproject
 
 **/nbactions.xml
 **/.classpath
+**/*jar-with-dependencies.jar
