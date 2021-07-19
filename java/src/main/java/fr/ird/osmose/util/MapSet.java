@@ -344,7 +344,7 @@ public class MapSet extends OsmoseLinker {
             if (null != mapK) {
                 for (int l = k - 1; l >= 0; l--) {
                     GridMap mapL = maps.get(l);
-                    if (mapK.equals(mapL)) {
+                    if ((mapL != null) && mapK.equals(mapL)) {
                         mapIndexNoTwin[k] = mapIndexNoTwin[l];
                         // Delete twin maps
                         maps.put(k, null);
