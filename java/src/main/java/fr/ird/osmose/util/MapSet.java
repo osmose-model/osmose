@@ -189,6 +189,8 @@ public class MapSet extends OsmoseLinker {
             if (!checkMapIndexation()) {
                 error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
             }
+            
+            eliminateTwinMapNC();
 
         } else {
             loadMapsCsv();
@@ -313,6 +315,36 @@ public class MapSet extends OsmoseLinker {
             if (null != file) {
                 for (int l = k - 1; l >= 0; l--) {
                     if (file.equals(mapFile[l])) {
+                        mapIndexNoTwin[k] = mapIndexNoTwin[l];
+                        // Delete twin maps
+                        maps.put(k, null);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (int iAge = 0; iAge < indexMaps.length; iAge++) {
+            for (int iStep = 0; iStep < indexMaps[iAge].length; iStep++) {
+                int indexMap = indexMaps[iAge][iStep];
+                indexMaps[iAge][iStep] = mapIndexNoTwin[indexMap];
+            }
+        }
+    }
+    
+        /**
+     * This function eliminates twins in the list of maps
+     */
+    private void eliminateTwinMapNC() {
+
+        int[] mapIndexNoTwin = new int[maps.size()];
+        for (int k = 0; k < maps.size(); k++) {
+            GridMap mapK = maps.get(k);
+            mapIndexNoTwin[k] = k;
+            if (null != mapK) {
+                for (int l = k - 1; l >= 0; l--) {
+                    GridMap mapL = maps.get(l);
+                    if ((mapL != null) && mapK.equals(mapL)) {
                         mapIndexNoTwin[k] = mapIndexNoTwin[l];
                         // Delete twin maps
                         maps.put(k, null);

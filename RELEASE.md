@@ -4,6 +4,8 @@
 
 ### New features
 
+- Possibility to use NetCDF parameterization for the definition of fish movements.
+- Improvement in the management of physical and LTL forcing file (new generic class, `ForcingFile.java`)
 - Possibility to deactivate computation of $\F_{O2}$ in the bioen module (`simulation.bioen.fo2.enabled` parameter)
 - Possibility to deactivate computation of $\Phi_T$ in the bioen module (`simulation.bioen.phit.enabled` parameter)
 - Possibility to deactivate fishing/fishery mortalities (`simulation.fishing.mortality.enabled` parameter)
