@@ -57,6 +57,16 @@ public class OxygenFunction extends AbstractProcess {
 
     PhysicalData o2_input;
     
+    private boolean isFO2Activated;
+    
+    /** Interface for the computation of FO2 */
+    @FunctionalInterface  
+    private interface LambdaFO2 {
+        double getFO2(School school);   
+    }
+    
+    LambdaFO2 lambdaFO2; 
+    
     public OxygenFunction(int rank) throws IOException { 
         
         super(rank);
@@ -84,12 +94,30 @@ public class OxygenFunction extends AbstractProcess {
             key = String.format("species.oxygen.c2.sp%d", i);
             c2[cpt] = getConfiguration().getDouble(key); 
             cpt++;
-        }       
+        }      
+        
+        // Check whether the fO2 calculation is activated or not.
+        // Default is trur
+        key = "simulation.bioen.fo2.enabled";
+        if (getConfiguration().isNull(key)) {
+            this.isFO2Activated = true;
+        } else {
+            this.isFO2Activated = getConfiguration().getBoolean(key);
+        }
+        
+        // If PhiT is on, we use the computePhiT function
+        // if PhiT is off, returns 1.0
+        if (this.isFO2Activated) {
+            lambdaFO2 = this::computeFO2;
+        } else {
+            lambdaFO2 = (school) -> 1.0;
+        }
+        
     }
 
     @Override
     public void run() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.o2_input.update(this.getSimulation().getIndexTimeSimu());
     }
     
     /** Computes the Oxygen function used in the ingestion formulae (equation 2).
@@ -97,7 +125,7 @@ public class OxygenFunction extends AbstractProcess {
      * @param school School whose ingestion is computed.
      * @return 
      */
-    public double compute_fO2(School school) {
+    public double computeFO2(School school) {
         
         int k = school.getSpecies().getDepthLayer();
         int iSpecies = school.getSpeciesIndex();
@@ -106,5 +134,10 @@ public class OxygenFunction extends AbstractProcess {
         double output = c1[iSpecies] * o2/ (o2 + c2[iSpecies]);
         
         return output;
-    }   
+    }
+    
+    public double getFO2(School school) {
+        return this.lambdaFO2.getFO2(school);   
+    }
+    
 }

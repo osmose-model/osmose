@@ -4,6 +4,11 @@
 
 ### New features
 
+- Possibility to use NetCDF parameterization for the definition of fish movements.
+- Improvement in the management of physical and LTL forcing file (new generic class, `ForcingFile.java`)
+- Possibility to deactivate computation of $\F_{O2}$ in the bioen module (`simulation.bioen.fo2.enabled` parameter)
+- Possibility to deactivate computation of $\Phi_T$ in the bioen module (`simulation.bioen.phit.enabled` parameter)
+- Possibility to deactivate fishing/fishery mortalities (`simulation.fishing.mortality.enabled` parameter)
 - Possibility to read fishing period rates from a file (new class for the management of time series, without any constraints on the number of values).
 - New parameterization of fish movements using NetCDF (one netcdf per species and age class). Old param has been removed.
 - Possibility to use `log` definition of fishing period mortality rates.
@@ -24,6 +29,7 @@
 - Correction of a bug in the map movements. At the first time-step within a year, the map was compared with the one of index `nstepyear - 1`. At step=48, map was compared with map 23 instead of map 47. 
 - Correction of `CatchesByDtByClassFishingMortality` (`fishableBiomass` was not initialized, hence causing malloc errors)
 - Correction of the starvation mortality in bioen mode. Starvation applied only if species is older than first feeding age. 
+- NetCDF output format forced to NetCDF3 instead of NetCDF4 when running in multithread mode (NetCDF4 causes an error and it does not seem possible to do that)
 
 ## Osmose 4.3.2
 
@@ -91,6 +97,7 @@
 - New parameterization of accessibility matrixes (thres. read from files, no more as parameters).
 - All species (focal, background and resource) must have different indexes
 - Extensive use of HashMaps in order to allow easy switch of a species from one type to another
+- Use of the updated NetCDF Java library (associated with Netcdf-C)
 
 # Older versions
 

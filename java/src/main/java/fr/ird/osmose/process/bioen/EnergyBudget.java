@@ -158,6 +158,10 @@ public class EnergyBudget extends AbstractProcess {
      */
     @Override
     public void run() {
+        
+        // Updates the temperature and oxygen variables. 
+        this.temp_function.run();
+        this.oxygen_function.run();
 
         // Loop over all the alive schools
         for (School school : getSchoolSet().getAliveSchools()) {
@@ -216,7 +220,7 @@ public class EnergyBudget extends AbstractProcess {
      */
     public void getEgross(School school) {
         int ispec = school.getSpeciesIndex();
-        school.setEGross(school.getIngestion() * this.assimilation[ispec] * temp_function.get_phiT(school) * oxygen_function.compute_fO2(school));
+        school.setEGross(school.getIngestion() * this.assimilation[ispec] * temp_function.getPhiT(school) * oxygen_function.getFO2(school));
     }
 
     /**

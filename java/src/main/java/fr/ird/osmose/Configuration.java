@@ -67,6 +67,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import ucar.ma2.InvalidRangeException;
 import org.apache.commons.lang3.ArrayUtils;
+import ucar.nc2.NetcdfFileWriter;
 
 /**
  * This class handles the Osmose configuration. It knows how to read Osmose
@@ -261,6 +262,11 @@ public class Configuration extends OLogger {
      */
     private int[] focalIndex, bkgIndex, rscIndex;
 
+    private NetcdfFileWriter.Version ncOutVersion;
+    
+    /** True if fishing Mortality (v3 or v4) is on. */
+    private boolean fishingMortalityEnabled = true;
+
     ///////////////
     // Constructors
     ///////////////
@@ -364,6 +370,13 @@ public class Configuration extends OLogger {
             nCpu = Math.min(Math.max(nCpu, 1), Runtime.getRuntime().availableProcessors());
         } else {
             nCpu = 1;
+        }
+        
+        // Adding a way to control output format (netcdf3 for parallel access using threads, not working with netcdf4)
+        if(nCpu == 1) { 
+            ncOutVersion = NetcdfFileWriter.Version.netcdf4;
+        } else { 
+            ncOutVersion = NetcdfFileWriter.Version.netcdf3;
         }
 
         // barrier.n: new way to count the number of species, resource and background
@@ -498,10 +511,15 @@ public class Configuration extends OLogger {
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
         
+        // true if fishingMortality is enabled or not (v3 or v4)
+        if (!isNull("simulation.fishing.mortality.enabled")) {
+            fishingMortalityEnabled = getBoolean("simulation.fishing.mortality.enabled");
+        }
+        
         // Init of fisheries at 0.
         nFishery = 0;
         
-        if (fisheryEnabled) {
+        if (fishingMortalityEnabled && fisheryEnabled) {
             
             // if fishery is on: read nfisheries
             nFishery = getInt("simulation.nfisheries");
@@ -594,6 +612,10 @@ public class Configuration extends OLogger {
 
     public boolean isFisheryEnabled() {
         return nFishery > 0;
+    }
+    
+    public boolean isFishingMortalityEnabled() { 
+        return this.fishingMortalityEnabled;   
     }
 
     /**
@@ -1460,6 +1482,11 @@ public class Configuration extends OLogger {
 
     public int[] getAllIndex() {
         return (ArrayUtils.addAll(ArrayUtils.addAll(this.focalIndex, this.bkgIndex), this.rscIndex));
+    }
+    
+    /** Recover the output NetCDF version */
+    public NetcdfFileWriter.Version getNcOutVersion() { 
+        return ncOutVersion;   
     }
 
 }
