@@ -49,3 +49,5 @@ nbproject
 
 **/nbactions.xml
 **/.classpath
+**/.settings
+**/.project
