@@ -93,6 +93,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>  
     </dependencies>
 
     <!-- Address to the libraries repositories -->
@@ -203,7 +209,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <goal>single</goal>
                         </goals>
                         <configuration>
-			    <outputDirectory>${project.basedir}/../inst/java/</outputDirectory>
+			                <outputDirectory>${project.basedir}/../inst/java/</outputDirectory>
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
@@ -220,51 +226,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 </executions>
             </plugin>
             
-            <!-- Create a ".exe" file -->
-            <!-- 
-            <plugin>
-                <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                <artifactId>launch4j-maven-plugin</artifactId>
-                <version>1.7.25</version>
-                <executions>
-                    <execution>
-                        <id>l4j-clui</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>console</headerType>
-                            <outfile>${project.build.directory}/${project.build.finalName}.exe</outfile>
-                            <jar>${project.build.directory}/${project.build.finalName}.jar</jar>
-                            <errTitle>encc</errTitle>
-                            <classPath>
-                                <mainClass>${mainClass}</mainClass>
-                                <addDependencies>true</addDependencies>
-                                <preCp>anything</preCp>
-                            </classPath>
-                            <jre>
-                                <minVersion>${maven.compiler.source}.0</minVersion>
-                                <opts>
-                                    <opt>-Djava.endorsed.dirs=./endorsed</opt>
-                                </opts>
-                            </jre>
-                            <versionInfo>
-                                <fileVersion>${maven.compiler.source}.0.0</fileVersion>
-                                <txtFileVersion>${maven.compiler.source}</txtFileVersion>
-                                <fileDescription>${project.name}</fileDescription>
-                                <copyright>CeCILL-B</copyright>
-                                <productVersion>${maven.compiler.source}.0.0</productVersion>
-                                <txtProductVersion>${maven.compiler.source}</txtProductVersion>
-                                <productName>${project.build.finalName}</productName>
-                                <originalFilename>${project.build.finalName}.exe</originalFilename>
-                                <internalName>${project.build.finalName}</internalName>
-                            </versionInfo>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
         </plugins>
     </build>
 </project>
