@@ -76,6 +76,11 @@ public class Test1 {
     }
     
     @Test
+    public void testNYears() {
+        assertEquals(120, cfg.getNYears());
+    }
+    
+    @Test
     public void testNSpecies() {
         assertEquals(14, cfg.getNSpecies());
     }
