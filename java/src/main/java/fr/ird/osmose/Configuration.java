@@ -1488,5 +1488,10 @@ public class Configuration extends OLogger {
     public NetcdfFileWriter.Version getNcOutVersion() { 
         return ncOutVersion;   
     }
+    
+    public int getNYears() { 
+        return this.getNStep() / this.getNStepYear();   
+    }    
+    
 
 }
