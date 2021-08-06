@@ -40,4 +40,4 @@ jobs:
         run:  | 
             cd java 
             mvn build-helper:remove-project-artifact
-            mvn -B package
+            mvn -B package -Dmaven.test.skip=true
