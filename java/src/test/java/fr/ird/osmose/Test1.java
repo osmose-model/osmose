@@ -42,13 +42,42 @@ package fr.ird.osmose;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+
+import org.junit.Before;
 import org.junit.Test;
 
-public class Test1 {
+import fr.ird.osmose.stage.ClassGetter;
+import fr.ird.osmose.util.AccessibilityManager;
 
+public class Test1 {
+    
+    private Configuration configuration;
+    private AccessibilityManager access;
+    
     @Test
     public void testNx() {
         assertEquals(26, 26);
     }
-
+    
+    public Configuration getConfiguration() { 
+        return Osmose.getInstance().getConfiguration();   
+    }
+    
+    @Before 
+    public void prepareData() throws Exception{
+        
+        Osmose osmose = Osmose.getInstance();
+        String dirIn = System.getenv("OSMOSE_TEST_DIR");
+        String fileIn = System.getenv("OSMOSE_TEST_FILE");
+        String configurationFile = new File(dirIn, fileIn).getAbsolutePath();
+        osmose.readConfiguration(configurationFile);
+        osmose.getConfiguration().init();
+        
+        ClassGetter classGetter = (school -> school.getLength());
+        access = new AccessibilityManager(0, "predation.accessibility", "acc", classGetter);
+        access.init();
+        
+    }
+    
 }
