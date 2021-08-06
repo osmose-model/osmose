@@ -182,6 +182,10 @@ public class AccessibilityManager extends SimulationLinker {
     public int[][] getMatrixIndex() { 
         return this.indexAccess;
     }
+    
+    public int getNMatrix() {
+        return this.matrixAccess.size();   
+    }
 
     /**
      * Returns the accesibility matrix for the given time-step.
