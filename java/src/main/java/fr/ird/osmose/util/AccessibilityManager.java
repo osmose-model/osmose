@@ -174,6 +174,10 @@ public class AccessibilityManager extends SimulationLinker {
             }
         }
     }
+    
+    public int getMatrixIndex(int year, int season) { 
+        return this.indexAccess[year][season];
+    }
 
     /**
      * Returns the accesibility matrix for the given time-step.
