@@ -47,30 +47,51 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.ird.osmose.grid.AbstractGrid;
-
-/** Class for testing the grid layout */
+/**
+ * Class for testing some basic parameters (number of species, number of
+ * longitudes, latitudes, time-steps, etc.)
+ */
 public class Test1 {
-    
+
     private Configuration cfg;
 
     @Test
     public void testNx() {
         assertEquals(45, cfg.getGrid().get_nx());
     }
-    
+
     @Test
     public void testNy() {
         assertEquals(22, cfg.getGrid().get_ny());
     }
-    
-    public Configuration getConfiguration() { 
-        return Osmose.getInstance().getConfiguration();   
+
+    @Test
+    public void testNStepYears() {
+        assertEquals(24, cfg.getNStepYear());
+    }
+
+    @Test
+    public void testNSteps() {
+        assertEquals(24 * 120, cfg.getNStep());
     }
     
-    @Before 
-    public void prepareData() throws Exception{
-        
+    @Test
+    public void testNSpecies() {
+        assertEquals(14, cfg.getNSpecies());
+    }
+    
+    @Test
+    public void testNResources() {
+        assertEquals(10, cfg.getNRscSpecies());
+    }
+
+    public Configuration getConfiguration() {
+        return Osmose.getInstance().getConfiguration();
+    }
+
+    @Before
+    public void prepareData() throws Exception {
+
         Osmose osmose = Osmose.getInstance();
         String dirIn = System.getenv("OSMOSE_TEST_DIR");
         String fileIn = System.getenv("OSMOSE_TEST_FILE");
@@ -78,7 +99,7 @@ public class Test1 {
         osmose.readConfiguration(configurationFile);
         cfg = osmose.getConfiguration();
         cfg.init();
-                
+
     }
-    
+
 }
