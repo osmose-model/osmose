@@ -47,17 +47,21 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.ird.osmose.stage.ClassGetter;
-import fr.ird.osmose.util.AccessibilityManager;
+import fr.ird.osmose.grid.AbstractGrid;
 
+/** Class for testing the grid layout */
 public class Test1 {
     
-    private Configuration configuration;
-    private AccessibilityManager access;
-    
+    private Configuration cfg;
+
     @Test
     public void testNx() {
-        assertEquals(26, 26);
+        assertEquals(45, cfg.getGrid().get_nx());
+    }
+    
+    @Test
+    public void testNy() {
+        assertEquals(22, cfg.getGrid().get_ny());
     }
     
     public Configuration getConfiguration() { 
@@ -72,12 +76,9 @@ public class Test1 {
         String fileIn = System.getenv("OSMOSE_TEST_FILE");
         String configurationFile = new File(dirIn, fileIn).getAbsolutePath();
         osmose.readConfiguration(configurationFile);
-        osmose.getConfiguration().init();
-        
-        ClassGetter classGetter = (school -> school.getLength());
-        access = new AccessibilityManager(0, "predation.accessibility", "acc", classGetter);
-        access.init();
-        
+        cfg = osmose.getConfiguration();
+        cfg.init();
+                
     }
     
 }
