@@ -40,20 +40,26 @@
 
 package fr.ird.osmose;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
+import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
+import ucar.ma2.InvalidRangeException;
 /**
  * Class for testing some basic parameters (number of species, number of
  * longitudes, latitudes, time-steps, etc.)
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class Test1 {
-
-    private Configuration cfg;
+    
+    private static Configuration cfg;
 
     @Test
     public void testNx() {
@@ -93,18 +99,24 @@ public class Test1 {
     public Configuration getConfiguration() {
         return Osmose.getInstance().getConfiguration();
     }
-
-    @Before
-    public void prepareData() throws Exception {
-
+    
+    @BeforeAll
+    public void prepareData() {
+    
+        System.out.println("++++++++++++++++++++++ Testing ");
         Osmose osmose = Osmose.getInstance();
         String dirIn = System.getenv("OSMOSE_TEST_DIR");
         String fileIn = System.getenv("OSMOSE_TEST_FILE");
         String configurationFile = new File(dirIn, fileIn).getAbsolutePath();
         osmose.readConfiguration(configurationFile);
         cfg = osmose.getConfiguration();
-        cfg.init();
-
+        try {
+            cfg.init();
+        } catch (IOException | InvalidRangeException e) {
+            e.printStackTrace();
+        }
     }
+    
+
 
 }
