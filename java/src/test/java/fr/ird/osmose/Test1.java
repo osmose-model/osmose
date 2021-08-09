@@ -46,8 +46,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -103,7 +101,6 @@ public class Test1 {
     @BeforeAll
     public void prepareData() {
     
-        System.out.println("++++++++++++++++++++++ Testing ");
         Osmose osmose = Osmose.getInstance();
         String dirIn = System.getenv("OSMOSE_TEST_DIR");
         String fileIn = System.getenv("OSMOSE_TEST_FILE");
