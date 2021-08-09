@@ -97,6 +97,8 @@ public class Matrix extends OsmoseLinker {
     private String[] namesPred;
 
     private final ClassGetter classGetter;
+    
+    private boolean sortMatrix;
 
     /*public abstract int getIndexPred(String namePred);
 
@@ -115,6 +117,14 @@ public class Matrix extends OsmoseLinker {
     public Matrix(String filename, ClassGetter classGetter) {
         this.filename = filename;
         this.classGetter = classGetter;
+        this.sortMatrix = true;
+        this.read();
+    }
+    
+    public Matrix(String filename, ClassGetter classGetter, boolean sortMatrix) {
+        this.filename = filename;
+        this.classGetter = classGetter;
+        this.sortMatrix = sortMatrix;
         this.read();
     }
 
@@ -186,7 +196,9 @@ public class Matrix extends OsmoseLinker {
             error("Error loading accessibility matrix from file " + filename, ex);
         } 
         
-        this.sortMatrix();
+        if (this.sortMatrix) {
+            this.sortMatrix();
+        }
         debug(this.toString());
         
     }
