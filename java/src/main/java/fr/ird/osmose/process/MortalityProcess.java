@@ -445,14 +445,17 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
+        
+        int year = this.getSimulation().getYear();
+        int season = this.getSimulation().getIndexTimeYear();
 
         if (fishingMortalityEnabled && fisheryEnabled) {
-            Matrix catchability = this.fisheryCatchability.getMatrix();
+            Matrix catchability = this.fisheryCatchability.getMatrix(year, season);
             for (FishingGear gear : this.fisheriesMortality) {
                 gear.setCatchability(catchability);
             }
 
-            Matrix discards = this.fisheryDiscards.getMatrix();
+            Matrix discards = this.fisheryDiscards.getMatrix(year, season);
             for (FishingGear gear : this.fisheriesMortality) {
                 gear.setDiscards(discards);
             }

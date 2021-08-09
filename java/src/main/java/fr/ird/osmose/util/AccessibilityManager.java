@@ -192,9 +192,17 @@ public class AccessibilityManager extends SimulationLinker {
      *
      * @return
      */
-    public Matrix getMatrix() {
-        int year = this.getSimulation().getYear();
-        int season = this.getSimulation().getIndexTimeYear();
+    public Matrix getMatrix(int year, int season) {
         return this.matrixAccess.get(this.getMatrixIndex(year, season));
     }
+
+    /**
+     * Returns the accesibility matrix for the given time-step.
+     *
+     * @return
+     */
+    public HashMap<Integer, Matrix> getMatrix() {
+        return this.matrixAccess;
+    }
+    
 }

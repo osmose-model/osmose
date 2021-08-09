@@ -255,7 +255,10 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
-        Matrix accessibilityMatrix = predationAccess.getMatrix();
+        int year = this.getSimulation().getYear();
+        int season = this.getSimulation().getIndexTimeYear();
+        
+        Matrix accessibilityMatrix = predationAccess.getMatrix(year, season);
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         // Number of predators species. Used to offeset resource percentage index
