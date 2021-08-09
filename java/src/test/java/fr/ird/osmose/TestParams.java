@@ -56,7 +56,7 @@ import ucar.ma2.InvalidRangeException;
  * longitudes, latitudes, time-steps, etc.)
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class Test1 {
+public class TestParams {
     
     private static Configuration cfg;
 
