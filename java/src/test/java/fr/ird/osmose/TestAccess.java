@@ -6,6 +6,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -55,8 +56,8 @@ public class TestAccess {
     @BeforeAll
     public void prepareData() throws Exception {
         
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ ");
         Osmose osmose = Osmose.getInstance();
+        osmose.getLogger().setLevel(Level.SEVERE);
         String dirIn = System.getenv("OSMOSE_TEST_DIR");
         String fileIn = System.getenv("OSMOSE_TEST_FILE");
         String configurationFile = new File(dirIn, fileIn).getAbsolutePath();

@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -102,6 +103,7 @@ public class Test1 {
     public void prepareData() {
     
         Osmose osmose = Osmose.getInstance();
+        osmose.getLogger().setLevel(Level.SEVERE);
         String dirIn = System.getenv("OSMOSE_TEST_DIR");
         String fileIn = System.getenv("OSMOSE_TEST_FILE");
         String configurationFile = new File(dirIn, fileIn).getAbsolutePath();
