@@ -62,6 +62,9 @@ import java.util.List;
 public class BioenReproductionProcess extends ReproductionProcess {
     
     private WeightedRandomDraft<School> weight_rand;
+    
+    /** Time step when genotype transmission should be activated */
+    private int dateGenoTransmission;
 
     public BioenReproductionProcess(int rank) {
         super(rank);
@@ -71,6 +74,10 @@ public class BioenReproductionProcess extends ReproductionProcess {
     @Override
     public void init() {
         super.init();
+        dateGenoTransmission = (int) getConfiguration().getDouble("population.genotype.transmission.year.start") * getConfiguration().getNStepYear();
+        if(dateGenoTransmission < this.getYearSeading()) {
+            error("The 'population.genotype.transmission.year.start' parameter must be greater/equal than the 'population.seeding.year.max' one", new Exception());   
+        }
         weight_rand.init();
     }
 
@@ -144,8 +151,9 @@ public class BioenReproductionProcess extends ReproductionProcess {
                     negg_tot += nEgg;
                     weight_rand.add(nEgg, school);
                 }  // end of loop over the school that belong to species i    
-
-                this.create_reproduction_schools(cpt, negg_tot, false, weight_rand);
+                
+                boolean transmitGenotype = (this.getSimulation().getIndexTimeSimu() >= this.dateGenoTransmission) ? true : false;
+                this.create_reproduction_schools(cpt, negg_tot, transmitGenotype, weight_rand);
                 
             }  // end of SSB statement
             
