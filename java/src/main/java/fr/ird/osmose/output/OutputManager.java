@@ -76,6 +76,8 @@ import fr.ird.osmose.output.spatial.SpatialEnetOutputlarvae;
 import fr.ird.osmose.output.spatial.SpatialEnetOutputjuv;
 import fr.ird.osmose.output.spatial.SpatialdGOutput;
 import fr.ird.osmose.output.spatial.SpatialEggOutput;
+import fr.ird.osmose.output.spatial.SpatialMortaPredOutput;
+import fr.ird.osmose.output.spatial.SpatialMortaStarvOutput;
 import fr.ird.osmose.process.mortality.MortalityCause;
 
 /**
@@ -250,6 +252,14 @@ public class OutputManager extends SimulationLinker {
         
         if (getConfiguration().getBoolean("output.spatialenetjuv.enabled")) {
             outputs.add(new SpatialEnetOutputjuv(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialMstarv.enabled")) {
+            outputs.add(new SpatialMortaStarvOutput(rank));
+        }
+        
+        if (getConfiguration().getBoolean("output.spatialMpred.enabled")) {
+            outputs.add(new SpatialMortaPredOutput(rank));
         }
         
         if (getConfiguration().getBoolean("output.spatialdg.enabled")) {
