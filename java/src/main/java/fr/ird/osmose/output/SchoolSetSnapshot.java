@@ -66,7 +66,7 @@ import ucar.nc2.Variable;
 public class SchoolSetSnapshot extends SimulationLinker {
     
     private Variable xVar, yVar, abVar, ageVar, lengthVar, weightVar, tlVar, specVar;
-    private Variable genetVar, traitVarVar;
+    private Variable genetVar, traitVar;
     private int nTrait=0;
     private int nMaxLoci;
     
@@ -134,7 +134,7 @@ public class SchoolSetSnapshot extends SimulationLinker {
             nc.write(this.tlVar, trophiclevel);
             if(useGenet) { 
                 nc.write(this.genetVar, genotype);
-                nc.write(this.traitVarVar, traitnoise);
+                nc.write(this.traitVar, traitnoise);
             }
             nc.close();
             //close(nc);
@@ -214,7 +214,8 @@ public class SchoolSetSnapshot extends SimulationLinker {
            Dimension lociDim = nc.addDimension(null, "loci", nMaxLoci);        
            Dimension locValDim = nc.addDimension(null, "loci_val",  2);
            
-           genetVar = nc.addVariable(null, "genotype", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim, lociDim, locValDim)));
+           this.genetVar = nc.addVariable(null, "genotype", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim, lociDim, locValDim)));
+           this.traitVar = nc.addVariable(null, "genotype", DataType.FLOAT, new ArrayList<>(Arrays.asList(schoolDim, traitDim)));
            
         }
         
