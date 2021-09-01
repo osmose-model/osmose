@@ -126,7 +126,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
                 double nEgg = this.getSexRatio(cpt) * this.getBeta(cpt) * season * SSB[cpt] * 1000000;
 
                 // in this case, weight_rand is never used.
-                this.create_reproduction_schools(cpt, nEgg, true, weight_rand);
+                this.create_reproduction_schools(cpt, nEgg, false, weight_rand);
 
             } else {
 
