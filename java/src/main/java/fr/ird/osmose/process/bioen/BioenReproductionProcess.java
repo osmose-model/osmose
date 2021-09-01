@@ -164,7 +164,7 @@ public class BioenReproductionProcess extends ReproductionProcess {
         }  // end of species loop
     }
 
-    private void create_reproduction_schools(int speciesIndex, double nEgg, boolean init_genotype, WeightedRandomDraft<School> rand_draft) {
+    private void create_reproduction_schools(int speciesIndex, double nEgg, boolean transmit_genotype, WeightedRandomDraft<School> rand_draft) {
         // nschool increases with time to avoid flooding the simulation with too many schools since the beginning
         //nSchool = Math.min(getConfiguration().getNSchool(i), nSchool * (getSimulation().getIndexTimeSimu() + 1) / (getConfiguration().getNStepYear() * 10));
 
@@ -182,12 +182,12 @@ public class BioenReproductionProcess extends ReproductionProcess {
 
             School school0 = new School(species, nEgg);
             school0.instance_genotype(this.getRank());
-            if (init_genotype) {
-                school0.getGenotype().init_genotype();
-            } else {
+            if (transmit_genotype) {
                 School parent_a = rand_draft.next();
                 School parent_b = rand_draft.next();
                 school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
+            } else {
+                school0.getGenotype().init_genotype();
             }
             getSchoolSet().add(school0);
         } else if (nEgg >= nSchool) {
@@ -195,12 +195,13 @@ public class BioenReproductionProcess extends ReproductionProcess {
             for (int s = 0; s < nSchool; s++) {
                 School school0 = new School(species, nEgg / nSchool);
                 school0.instance_genotype(this.getRank());
-                if (init_genotype) {
-                    school0.getGenotype().init_genotype();
-                } else {
+                if (transmit_genotype) {
                     School parent_a = rand_draft.next();
                     School parent_b = rand_draft.next();
                     school0.getGenotype().transmit_genotype(parent_a.getGenotype(), parent_b.getGenotype());
+                } else {
+
+                    school0.getGenotype().init_genotype();
                 }
                 getSchoolSet().add(school0);
             }
