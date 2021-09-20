@@ -372,12 +372,8 @@ public class Configuration extends OLogger {
             nCpu = 1;
         }
         
-        // Adding a way to control output format (netcdf3 for parallel access using threads, not working with netcdf4)
-        if(nCpu == 1) { 
-            ncOutVersion = NetcdfFileWriter.Version.netcdf4;
-        } else { 
-            ncOutVersion = NetcdfFileWriter.Version.netcdf3;
-        }
+        // Set the output NetCdf format for
+        this.setOutputNcFormat();    
 
         // barrier.n: new way to count the number of species, resource and background
         // based on types.
@@ -1489,4 +1485,43 @@ public class Configuration extends OLogger {
         return ncOutVersion;   
     }
 
+    private void setOutputNcFormat() {
+        
+        // Control of the NetCdf output version from a configuration file.
+        // If not provided, NetCdf4 is used.
+        ncOutVersion = NetcdfFileWriter.Version.netcdf4;
+        if (!isNull("output.netcdf.format")) {
+            String outputFormat = getString("output.netcdf.format");
+            switch (outputFormat) {
+                case "netcdf3":
+                    ncOutVersion = NetcdfFileWriter.Version.netcdf3;
+                    break;
+
+                case "netcdf4":
+                    ncOutVersion = NetcdfFileWriter.Version.netcdf4;
+                    break;
+
+                case "netcdf4_classic":
+                    ncOutVersion = NetcdfFileWriter.Version.netcdf4_classic;
+                    break;
+
+                case "netcdf3c":
+                    ncOutVersion = NetcdfFileWriter.Version.netcdf3c;
+                    break;
+
+                case "ncstream":
+                    ncOutVersion = NetcdfFileWriter.Version.ncstream;
+                    break;
+
+                case "netcdf3c64":
+                    ncOutVersion = NetcdfFileWriter.Version.netcdf3c64;
+                    break;
+
+                default:
+                    ncOutVersion = NetcdfFileWriter.Version.netcdf4;
+                    break;
+            }
+        }
+    }
+    
 }
