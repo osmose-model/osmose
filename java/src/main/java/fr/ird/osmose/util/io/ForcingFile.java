@@ -372,4 +372,14 @@ public class ForcingFile extends OsmoseLinker {
         return output;
     
     }
+    
+    public int getTimeLength() {
+        return this.timeLength;
+    }
+    
+    private int getNcStep(int iStepSimu) {  
+        int ndt = this.getConfiguration().getNStepYear();
+        int iStepNc = (iStepSimu / (ndt / this.ncPerYear)) % timeLength;
+        return iStepNc;
+    }
 }
