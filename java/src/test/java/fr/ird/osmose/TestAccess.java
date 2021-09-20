@@ -58,9 +58,7 @@ public class TestAccess {
         
         Osmose osmose = Osmose.getInstance();
         osmose.getLogger().setLevel(Level.SEVERE);
-        String dirIn = System.getenv("OSMOSE_TEST_DIR");
-        String fileIn = System.getenv("OSMOSE_TEST_FILE");
-        String configurationFile = new File(dirIn, fileIn).getAbsolutePath();
+        String configurationFile = this.getClass().getClassLoader().getResource("osmose-eec/eec_all-parameters.csv").getFile();
         
         // Adding HashMap to overwrite default setting
         HashMap<String, String> cmd = new HashMap<>();
