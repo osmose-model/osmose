@@ -42,7 +42,6 @@ package fr.ird.osmose;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 

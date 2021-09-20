@@ -40,7 +40,6 @@ package fr.ird.osmose;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.logging.Level;
 
