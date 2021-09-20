@@ -1,0 +1,39 @@
+# EEC main configuration file;
+osmose.configuration.simulation;eec_param-simulation-papierTROPHIC.csv
+osmose.configuration.movement;eec_param-movement.csv
+osmose.configuration.mortality.fishing;eec_param-fishing_2Phase.csv
+osmose.configuration.mortality.predation;eec_param-predation.csv
+osmose.configuration.mortality.starvation;eec_param-starvation.csv
+osmose.configuration.reproduction;eec_param-reproduction.csv
+osmose.configuration.species;eec_param-species.csv
+osmose.configuration.plankton;eec_param-ltl-papierTROPHIC.csv
+osmose.configuration.grid;eec_param-grid.csv
+osmose.configuration.initialization;eec_param-init-pop.csv
+osmose.configuration.migration;eec_param-out-mortality.csv
+osmose.configuration.output;eec_param-output_papierTROPHIC.csv
+osmose.configuration.mortality.additional;eec_param-additional-mortality_2Phase.csv
+
+mortality.subdt;10
+
+simulation.nschool.sp0;21
+simulation.nschool.sp1;35
+simulation.nschool.sp2;23
+simulation.nschool.sp3;19
+simulation.nschool.sp4;58
+simulation.nschool.sp5;14
+simulation.nschool.sp6;19
+simulation.nschool.sp7;34
+simulation.nschool.sp8;26
+simulation.nschool.sp9;37
+simulation.nschool.sp10;29
+simulation.nschool.sp11;16
+simulation.nschool.sp12;25
+simulation.nschool.sp13;28
+
+# Osmose 4.3.2 - Updated parameter osmose.version to 4.3.2
+# Osmose 4.3.3 - Updated parameter osmose.version to 4.3.3
+osmose.version;4.3.3
+
+#osmose.configuration.regional;regional_outputs/regional.csv
+#osmose.configuration.surveys;regional_outputs/surveys.csv
+#osmose.configuration.background;eec_param-background.csv

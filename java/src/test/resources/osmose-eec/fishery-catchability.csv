@@ -1,0 +1,16 @@
+,fishery0,fishery1,fishery2,fishery3,fishery4,fishery5,fishery6,fishery7,fishery8,fishery9,fishery10,fishery11,fishery12,fishery13
+lesserSpottedDogfish,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+redMullet,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+pouting ,0,0,1,0,0,0,0,0,0,0,0,0,0,0
+whiting,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+poorCod,0,0,0,0,1,0,0,0,0,0,0,0,0,0
+cod,0,0,0,0,0,1,0,0,0,0,0,0,0,0
+dragonet,0,0,0,0,0,0,1,0,0,0,0,0,0,0
+sole,0,0,0,0,0,0,0,1,0,0,0,0,0,0
+plaice,0,0,0,0,0,0,0,0,1,0,0,0,0,0
+horseMackerel,0,0,0,0,0,0,0,0,0,1,0,0,0,0
+mackerel,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+herring,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+sardine,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+squids,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+backgroundSpecies,0,0,0,0,0,0,0,0,0,0,0,0,0,0
