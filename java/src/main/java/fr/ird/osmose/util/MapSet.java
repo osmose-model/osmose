@@ -257,7 +257,7 @@ public class MapSet extends OsmoseLinker {
              * Assign number of maps to numMap array
              */
             int nStepYear = getConfiguration().getNStepYear();
-            for (int iAge = ageMin; iAge < ageMax; iAge++) {
+            for (int iAge = ageMin; iAge <= ageMax; iAge++) {
                 for (int iYear : mapYears) {
                     for (int iSeason : mapSeason) {
                         int iStep = iYear * nStepYear + iSeason;
