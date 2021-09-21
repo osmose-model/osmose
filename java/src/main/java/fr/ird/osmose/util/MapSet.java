@@ -257,7 +257,7 @@ public class MapSet extends OsmoseLinker {
              * Assign number of maps to numMap array
              */
             int nStepYear = getConfiguration().getNStepYear();
-            for (int iAge = ageMin; iAge < ageMax; iAge++) {
+            for (int iAge = ageMin; iAge <= ageMax; iAge++) {
                 for (int iYear : mapYears) {
                     for (int iSeason : mapSeason) {
                         int iStep = iYear * nStepYear + iSeason;
@@ -442,7 +442,7 @@ public class MapSet extends OsmoseLinker {
                     maps.put(iii, null);
                 }
 
-                for (int iAge = ageMin; iAge < ageMax; iAge++) {
+                for (int iAge = ageMin; iAge <= ageMax; iAge++) {
                     for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
                         int iStepNc = (iStep / (ndt / ncPerYear)) % ncTime; // netcdf index to read, based on simulation time step
                         if (iStepNc == i) {

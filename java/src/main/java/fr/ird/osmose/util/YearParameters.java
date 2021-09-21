@@ -98,7 +98,7 @@ public class YearParameters extends OsmoseLinker {
             int nyears = ymax - ymin;
             tempYears = new int[nyears];
             int cpt = 0;
-            for (int y = ymin; y < ymax; y++) {
+            for (int y = ymin; y <= ymax; y++) {
                 tempYears[cpt] = y;
                 cpt++;
             }
