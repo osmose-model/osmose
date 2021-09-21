@@ -295,7 +295,7 @@ public class MapSet extends OsmoseLinker {
                 mapFileList.add("null");
             }
             
-            mapIndexList.add(0);
+            mapIndexList.add(null);
             
         }
         
@@ -465,6 +465,13 @@ public class MapSet extends OsmoseLinker {
                 if (maps.get(iii).count() == 0) {
                     // add a warning here.
                     maps.put(iii, null);
+                    // Set the file name and netcdf index to null
+                    mapNcFiles.add("null");
+                    mapNcSteps.add(null);
+                } else {
+                    // Add the file name and netcdf index
+                    mapNcFiles.add(ncFile);
+                    mapNcSteps.add(i);
                 }
 
                 for (int iAge = ageMin; iAge <= ageMax; iAge++) {
@@ -477,9 +484,6 @@ public class MapSet extends OsmoseLinker {
                     }
                 }
                 
-                // Add the number of the NcFile into the list
-                mapNcFiles.add(ncFile);
-                mapNcSteps.add(i);
                 
                 iii++;
 
