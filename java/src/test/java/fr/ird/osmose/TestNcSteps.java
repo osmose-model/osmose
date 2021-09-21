@@ -153,8 +153,19 @@ public class TestNcSteps {
          String directory = new File(filename1).getParent();
          String pattern = new File(directory, "test4_[abc]_ltl_.*").getAbsolutePath();
           
-         //ForcingFile forcingFile = new ForcingFile("ltl", filename, 12, 0.0, 1.0, ForcingFileCaching.NONE);
-         //forcingFile.init();
+         ForcingFile forcingFile = new ForcingFile("ltl", pattern, 12, 0.0, 1.0, ForcingFileCaching.NONE);
+         forcingFile.init();
+         
+         assertEquals(72, forcingFile.getTimeLength());
+         
+        // testing first time steps
+        assertEquals(filename1, forcingFile.getNcFileName(0));
+        assertEquals(filename1, forcingFile.getNcFileName(5));
+        assertEquals(filename1, forcingFile.getNcFileName(11));
+        
+        assertEquals(filename2, forcingFile.getNcFileName(12));
+        
+        
          
         //  // Check the proper conversion from Osmose time-step to NetCDf time step
         //  assertEquals(0, forcingFile.getNcStep(0));
@@ -175,8 +186,17 @@ public class TestNcSteps {
         //  assertEquals(filename, forcingFile.getNcFileName(3));
         //  assertEquals(filename, forcingFile.getNcFileName(8));
          
-        //  File tempFile = new File(filename);
-        //  boolean deleted = tempFile.delete();
+        boolean deleted;
+        File tempFile;
+        
+        tempFile = new File(filename1);
+        deleted = tempFile.delete();
+        
+        tempFile = new File(filename2);
+        deleted = tempFile.delete();
+        
+        tempFile = new File(filename3);
+        deleted = tempFile.delete();
          
      }   
         
