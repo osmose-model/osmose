@@ -212,7 +212,7 @@ public class MapSet extends OsmoseLinker {
         }
     }
 
-    public void loadMapsCsv() {
+    public void loadMapsCsv() throws FileNotFoundException {
 
         int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
 
@@ -237,7 +237,10 @@ public class MapSet extends OsmoseLinker {
 
         maps = new HashMap<>();
         mapFile = new String[mapNumber.size()];
-
+        
+        List<String> mapFileList = new ArrayList<>();
+        List<Integer> mapIndexList = new ArrayList<>();
+        
         // Load the maps
         for (int n = 0; n < mapNumber.size(); n++) {
             imap = mapNumber.get(n);
@@ -277,6 +280,7 @@ public class MapSet extends OsmoseLinker {
                     }
                 }
             }
+
             /*
              * read the name of the CSV file and load the map. If name = "null"
              * it means there is no map defined at these age-class and time-step
@@ -285,10 +289,20 @@ public class MapSet extends OsmoseLinker {
                 String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
                 maps.put(n, new GridMap(csvFile));
+                mapFileList.add(csvFile);
             } else {
                 maps.put(n, null);
+                mapFileList.add("null");
             }
+            
+            mapIndexList.add(0);
+            
         }
+        
+        if(this.checkMaps) { 
+            this.writeMovementsChecks(mapFileList, mapIndexList);    
+        }
+        
     }
 
     private boolean checkMapIndexation() {
@@ -340,7 +354,7 @@ public class MapSet extends OsmoseLinker {
         }
     }
     
-        /**
+    /**
      * This function eliminates twins in the list of maps
      */
     private void eliminateTwinMapNC() {
