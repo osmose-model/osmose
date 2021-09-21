@@ -44,7 +44,11 @@ package fr.ird.osmose.util;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,6 +93,8 @@ public class MapSet extends OsmoseLinker {
      */
     protected final String prefix;
 
+    protected boolean checkMaps;
+    
     /**
      * Sufix of the maps. Can be "sp" or "bkg".
      */
@@ -169,6 +175,8 @@ public class MapSet extends OsmoseLinker {
 
     public void loadMaps() throws IOException, InvalidRangeException {
 
+        this.checkMaps = getConfiguration().getBoolean("movement.checks.enabled");
+        
         // Initialisation of the indexMaps array (valid for both NetCDF and CSV maps
         int nSteps = Math.max(getConfiguration().getNStep(), getConfiguration().getNStepYear());
         int lifespan = getSpecies(iSpecies).getLifespanDt();
@@ -204,7 +212,7 @@ public class MapSet extends OsmoseLinker {
         }
     }
 
-    public void loadMapsCsv() {
+    public void loadMapsCsv() throws FileNotFoundException {
 
         int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
 
@@ -229,7 +237,10 @@ public class MapSet extends OsmoseLinker {
 
         maps = new HashMap<>();
         mapFile = new String[mapNumber.size()];
-
+        
+        List<String> mapFileList = new ArrayList<>();
+        List<Integer> mapIndexList = new ArrayList<>();
+        
         // Load the maps
         for (int n = 0; n < mapNumber.size(); n++) {
             imap = mapNumber.get(n);
@@ -239,7 +250,7 @@ public class MapSet extends OsmoseLinker {
              */
             int ageMin = (int) Math.round(getConfiguration().getFloat(prefix + ".initialAge" + ".map" + imap) * getConfiguration().getNStepYear());
             int ageMax = (int) Math.round(getConfiguration().getFloat(prefix + ".lastAge" + ".map" + imap) * getConfiguration().getNStepYear());
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
+            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
                         
             /*
              * read the time steps over the year concerned by this map
@@ -269,6 +280,7 @@ public class MapSet extends OsmoseLinker {
                     }
                 }
             }
+
             /*
              * read the name of the CSV file and load the map. If name = "null"
              * it means there is no map defined at these age-class and time-step
@@ -277,10 +289,20 @@ public class MapSet extends OsmoseLinker {
                 String csvFile = getConfiguration().getFile(prefix + ".file" + ".map" + imap);
                 mapFile[n] = csvFile;
                 maps.put(n, new GridMap(csvFile));
+                mapFileList.add(csvFile);
             } else {
                 maps.put(n, null);
+                mapFileList.add("null");
             }
+            
+            mapIndexList.add(null);
+            
         }
+        
+        if(this.checkMaps) { 
+            this.writeMovementsChecks(mapFileList, mapIndexList);    
+        }
+        
     }
 
     private boolean checkMapIndexation() {
@@ -332,7 +354,7 @@ public class MapSet extends OsmoseLinker {
         }
     }
     
-        /**
+    /**
      * This function eliminates twins in the list of maps
      */
     private void eliminateTwinMapNC() {
@@ -380,8 +402,11 @@ public class MapSet extends OsmoseLinker {
         // Load the file prefix with names that are of type. movemement.map.species.mapX
         int nmapmax = getConfiguration().findKeys(prefix + ".species.map*").size();
         List<Integer> mapNumber = new ArrayList<>();
+        List<String> mapNcFiles = new ArrayList<>();
+        List<Integer> mapNcSteps = new ArrayList<>();
+        
         int imap = 0;
-
+        
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
             while (!getConfiguration().canFind(prefix + ".species" + ".map" + imap)) {
@@ -415,7 +440,7 @@ public class MapSet extends OsmoseLinker {
             int ncPerYear = getConfiguration().getInt(prefix + ".nsteps.year." + suffix + im);
             int ageMin = (int) Math.round(getConfiguration().getDouble(prefix + ".initialAge." + suffix + im) * dt);
             int ageMax = (int) Math.round(getConfiguration().getDouble(prefix + ".lastAge." + suffix + im) * dt);
-            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt());
+            ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
    
             // Open the NetCDF file
             NetcdfFile nc = NetcdfFile.open(ncFile);
@@ -440,6 +465,13 @@ public class MapSet extends OsmoseLinker {
                 if (maps.get(iii).count() == 0) {
                     // add a warning here.
                     maps.put(iii, null);
+                    // Set the file name and netcdf index to null
+                    mapNcFiles.add("null");
+                    mapNcSteps.add(null);
+                } else {
+                    // Add the file name and netcdf index
+                    mapNcFiles.add(ncFile);
+                    mapNcSteps.add(i);
                 }
 
                 for (int iAge = ageMin; iAge <= ageMax; iAge++) {
@@ -451,13 +483,92 @@ public class MapSet extends OsmoseLinker {
                         }
                     }
                 }
+                
+                
                 iii++;
 
             } // end of nctime loop
 
             nc.close();
+            
+            if(this.checkMaps) {
+                this.writeMovementsChecks(mapNcFiles, mapNcSteps);   
+            }
 
         } // end of loop on map number
     }  // end of method
+    
+    
+    /**
+     * Method that allows to write in an ASCII file the association between the
+     * time-step, the species age, the file that is being used and the time-step of
+     * the NetCDF file. It allows to check whether the movements maps are properly configured.
+     */
+    public void writeMovementsChecks(List<String>mapNcFiles, List<Integer>mapNcSteps) throws FileNotFoundException {
+
+        PrintWriter prw;
+    
+        // Create parent directory
+        File file = new File(getFilename());
+        file.getParentFile().mkdirs();
+        try {
+            // Init stream
+            prw = new PrintWriter(file);
+        } catch (FileNotFoundException ex) {
+            error("Failed to create output file " + file.getAbsolutePath(), ex);
+            throw (ex);
+        }
+    
+        String separator = getConfiguration().getOutputSeparator();
+        String[] headers = {"Age (dt)", "Time Step", "File", "Netcdf Index"};
+    
+        // Write headers
+        for (int i = 0; i < headers.length - 1; i++) {
+            prw.print(headers[i]);
+            prw.print(separator);
+        }
+    
+        prw.print(headers[headers.length - 1]);
+        prw.println();
+    
+        for (int a = 0; a < this.getSpecies(this.iSpecies).getLifespanDt(); a++) {
+
+            for (int i = 0; i < this.getConfiguration().getNStep(); i++) {
+                
+                int index = indexMaps[a][i];
+                String fileName = mapNcFiles.get(index);
+                Integer ncStep = mapNcSteps.get(index);
+                
+                prw.print(a);
+                prw.print(separator);
+
+                prw.print(i);
+                prw.print(separator);
+
+                prw.print(fileName);
+                prw.print(separator);
+
+                prw.print(ncStep);
+                prw.print(separator);
+
+                prw.println();
+            }
+        }
+    
+        prw.close();
+    
+    }
+    
+    final String getFilename() {
+        StringBuilder filename = new StringBuilder();
+        String subfolder = "movement_checks";
+        String speciesName = getSpecies(this.iSpecies).getName();
+        filename.append(subfolder).append(File.separatorChar);
+        filename.append(getConfiguration().getString("output.file.prefix"));
+        filename.append("_").append("movement_checks_").append(speciesName);
+        filename.append(".csv");
+        return filename.toString();
+    }
+    
     
 }
