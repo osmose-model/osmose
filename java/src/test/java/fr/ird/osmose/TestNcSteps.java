@@ -151,9 +151,7 @@ public class TestNcSteps {
          String filename3 = this.createSingleLtlFile("test4", "test4_c_ltl_", 3 * 12);
          
          String directory = new File(filename1).getParent();
-         String pattern = 
-         
-         System.out.println(directory);
+         String pattern = new File(directory, "test4_[abc]_ltl_.*").getAbsolutePath();
           
          //ForcingFile forcingFile = new ForcingFile("ltl", filename, 12, 0.0, 1.0, ForcingFileCaching.NONE);
          //forcingFile.init();
