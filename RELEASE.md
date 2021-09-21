@@ -5,6 +5,7 @@
 ### New features
 
 - Adding the possibility to save CSV files that allow to verify the proper definition of fish movements.
+- Now the parameters `lastYear` and `lastAge` are inclusive. For instance, if `Yinit=2` and `Ylast=5`, the years are `[2, 3, 4, 5]` instead of `[2, 3, 4]` in the previous version. 
 - Possibility to use NetCDF parameterization for the definition of fish movements.
 - Improvement in the management of physical and LTL forcing file (new generic class, `ForcingFile.java`)
 - Possibility to deactivate computation of $\F_{O2}$ in the bioen module (`simulation.bioen.fo2.enabled` parameter)
