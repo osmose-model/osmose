@@ -442,7 +442,7 @@ public class MapSet extends OsmoseLinker {
                     maps.put(iii, null);
                 }
 
-                for (int iAge = ageMin; iAge < ageMax; iAge++) {
+                for (int iAge = ageMin; iAge <= ageMax; iAge++) {
                     for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
                         int iStepNc = (iStep / (ndt / ncPerYear)) % ncTime; // netcdf index to read, based on simulation time step
                         if (iStepNc == i) {
