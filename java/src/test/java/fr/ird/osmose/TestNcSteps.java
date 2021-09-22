@@ -71,7 +71,7 @@ public class TestNcSteps {
         assertEquals(filename, forcingFile.getNcFileName(8));
         
         File tempFile = new File(filename);
-        boolean deleted = tempFile.delete();
+        tempFile.delete();
         
     }
 
@@ -104,7 +104,7 @@ public class TestNcSteps {
             assertEquals(filename, forcingFile.getNcFileName(8));
             
             File tempFile = new File(filename);
-            boolean deleted = tempFile.delete();
+            tempFile.delete();
             
         }
         
@@ -137,7 +137,7 @@ public class TestNcSteps {
             assertEquals(filename, forcingFile.getNcFileName(8));
             
             File tempFile = new File(filename);
-            boolean deleted = tempFile.delete();
+            tempFile.delete();
             
         }
         
@@ -156,49 +156,57 @@ public class TestNcSteps {
          ForcingFile forcingFile = new ForcingFile("ltl", pattern, 12, 0.0, 1.0, ForcingFileCaching.NONE);
          forcingFile.init();
          
+         File tempFile;
+         
+         tempFile = new File(filename1);
+         tempFile.delete();
+         
+         tempFile = new File(filename2);
+         tempFile.delete();
+         
+         tempFile = new File(filename3);
+         tempFile.delete();
+         
+         // test on the total number of time steps
          assertEquals(72, forcingFile.getTimeLength());
          
-        // testing first time steps
-        assertEquals(filename1, forcingFile.getNcFileName(0));
-        assertEquals(filename1, forcingFile.getNcFileName(5));
-        assertEquals(filename1, forcingFile.getNcFileName(11));
-        
-        assertEquals(filename2, forcingFile.getNcFileName(12));
-        
-        
-         
-        //  // Check the proper conversion from Osmose time-step to NetCDf time step
-        //  assertEquals(0, forcingFile.getNcStep(0));
-        //  assertEquals(0, forcingFile.getNcStep(1));
+         // testing on the name of the file that is accessed depending on the Nc time step
+         assertEquals(filename1, forcingFile.getNcFileName(0));
+         assertEquals(filename1, forcingFile.getNcFileName(5));
+         assertEquals(filename1, forcingFile.getNcFileName(11));
 
-        //  assertEquals(16, forcingFile.getNcStep(32));
-        //  assertEquals(6, forcingFile.getNcStep(613));
-        //  assertEquals(3, forcingFile.getNcStep(1807));
-         
-        //  // Check the proper conversion from **global** netcdf index to individual ones
-        //  assertEquals(0, forcingFile.getNcIndex(0));
-        //  assertEquals(3, forcingFile.getNcIndex(3));
-        //  assertEquals(8, forcingFile.getNcIndex(8));
-        //  assertEquals(49, forcingFile.getNcIndex(49));
-         
-        //  // Check the proper conversion from **global** netcdf index to individual ones
-        //  assertEquals(filename, forcingFile.getNcFileName(0));
-        //  assertEquals(filename, forcingFile.getNcFileName(3));
-        //  assertEquals(filename, forcingFile.getNcFileName(8));
-         
-        boolean deleted;
-        File tempFile;
+         assertEquals(filename2, forcingFile.getNcFileName(12));
+         assertEquals(filename2, forcingFile.getNcFileName(27));
+         assertEquals(filename2, forcingFile.getNcFileName(33));
         
-        tempFile = new File(filename1);
-        deleted = tempFile.delete();
-        
-        tempFile = new File(filename2);
-        deleted = tempFile.delete();
-        
-        tempFile = new File(filename3);
-        deleted = tempFile.delete();
+         assertEquals(filename3, forcingFile.getNcFileName(36));
+         assertEquals(filename3, forcingFile.getNcFileName(50));
+         assertEquals(filename3, forcingFile.getNcFileName(71));
          
-     }   
+         // testing on the time-step that will be used on the local file
+         assertEquals(0, forcingFile.getNcIndex(0));
+         assertEquals(5, forcingFile.getNcIndex(5));
+         assertEquals(11, forcingFile.getNcIndex(11));
+
+         assertEquals(0, forcingFile.getNcIndex(12));
+         assertEquals(15, forcingFile.getNcIndex(27));
+         assertEquals(21, forcingFile.getNcIndex(33));
+        
+         assertEquals(0, forcingFile.getNcIndex(36));
+         assertEquals(14, forcingFile.getNcIndex(50));
+         assertEquals(35, forcingFile.getNcIndex(71));
+         
+         // Check the proper conversion from Osmose time-step to NetCDf time step
+         assertEquals(5, forcingFile.getNcStep(10));
+         assertEquals(34, forcingFile.getNcStep(69));
+
+         assertEquals(5, forcingFile.getNcStep(10 + 6 * 24));
+         assertEquals(34, forcingFile.getNcStep(69 + 6 * 24));
+
+         assertEquals(5, forcingFile.getNcStep(10 + 48 * 24));
+         assertEquals(34, forcingFile.getNcStep(69 + 48 * 24));
+
+     }
         
         
         
