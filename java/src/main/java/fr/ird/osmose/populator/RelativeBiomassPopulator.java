@@ -51,7 +51,7 @@ import fr.ird.osmose.Species;
  *
  * @author pverley
  */
-public class CalibrationPopulator extends AbstractPopulator {
+public class RelativeBiomassPopulator extends AbstractPopulator {
 
     /**
      * Initial biomass to release to the system. Dimension = [nSpecies]. Units =
@@ -86,7 +86,7 @@ public class CalibrationPopulator extends AbstractPopulator {
 
     private int[] nSize;
 
-    public CalibrationPopulator(int rank) {
+    public RelativeBiomassPopulator(int rank) {
         super(rank);
     }
 

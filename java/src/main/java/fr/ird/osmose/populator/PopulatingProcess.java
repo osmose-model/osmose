@@ -66,7 +66,13 @@ public class PopulatingProcess extends AbstractProcess {
             populator = new NetcdfPopulator(getRank(), "simulation.restart.file");
         } else if (!getConfiguration().isNull("population.initialization.file")) {
             populator = new NetcdfPopulator(getRank(), "population.initialization.file");
+        } else {
+            if(getConfiguration().getBoolean("population.initialization.relativebiomass.enabled")) { 
+                populator = new RelativeBiomassPopulator(getRank()); 
+            }
         }
+        
+        
 
         if (null != populator) {
             populator.init();
