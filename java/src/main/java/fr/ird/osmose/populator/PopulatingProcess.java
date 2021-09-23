@@ -72,8 +72,6 @@ public class PopulatingProcess extends AbstractProcess {
             }
         }
         
-        
-
         if (null != populator) {
             populator.init();
         }
