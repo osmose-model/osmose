@@ -45,7 +45,6 @@ import fr.ird.osmose.Configuration;
 
 
 import fr.ird.osmose.School;
-import fr.ird.osmose.SchoolSet;
 import fr.ird.osmose.Species;
 
 /**
