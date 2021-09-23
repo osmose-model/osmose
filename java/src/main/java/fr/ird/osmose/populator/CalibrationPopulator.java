@@ -43,29 +43,50 @@ package fr.ird.osmose.populator;
 
 import fr.ird.osmose.Configuration;
 
+
+import fr.ird.osmose.School;
+import fr.ird.osmose.SchoolSet;
+import fr.ird.osmose.Species;
+
 /**
  *
  * @author pverley
  */
 public class CalibrationPopulator extends AbstractPopulator {
 
-    /** Initial biomass to release to the system. Dimension = [nSpecies]*/
+    /**
+     * Initial biomass to release to the system. Dimension = [nSpecies]. Units =
+     * tons
+     */
     private double[] seedingBiomass;
-    
-    /** Biomass proportion among the size classes. Dimension = [nSpecies][nLenghts] */
+
+    /**
+     * Biomass proportion among the size classes. Dimension = [nSpecies][nLenghts]
+     * Units = [0, 1]
+     */
     private double[][] biomassProportion;
-    
-    /** Size of the released schools. Dimensions = [nSpecies][nLenghts] */
+
+    /**
+     * Size of the released schools. Dimensions = [nSpecies][nLenghts]. Units = [cm]
+     */
     private double[][] size;
-    
-    /** Age of the released schools. Dimensions = [nSpecies][nLenghts] */
-    private double[][] age;
-    
+
+    /**
+     * Age of the released schools. Dimensions = [nSpecies][nLenghts]. Units = dt,
+     * but provided as years
+     */
+    private double[][] ageDt;
+
+    /**
+     * Age of the released schools. Dimensions = [nSpecies][nLenghts]. Units = [g]
+     */
+    private double[][] weight;
+
     /** Size lengths of the released schools. Dimensions = [nSpecies][nLenghts] */
     private double[][] trophicLevels;
-    
+
     private int[] nSize;
-    
+
     public CalibrationPopulator(int rank) {
         super(rank);
     }
@@ -75,53 +96,75 @@ public class CalibrationPopulator extends AbstractPopulator {
 
         Configuration cfg = this.getConfiguration();
         int nSpecies = cfg.getNSpecies();
-        
+
         int cpt;
-        
+
         seedingBiomass = new double[nSpecies];
         cpt = 0;
-        for(int i : this.getFocalIndex()) {
+        for (int i : this.getFocalIndex()) {
             seedingBiomass[cpt] = cfg.getDouble("population.initialization.biomass.sp" + i);
             cpt++;
         }
-        
+
         nSize = new int[nSpecies];
         size = new double[nSpecies][];
         cpt = 0;
-        for(int i : this.getFocalIndex()) {
+        for (int i : this.getFocalIndex()) {
             size[cpt] = cfg.getArrayDouble("population.initialization.size.sp" + i);
             nSize[cpt] = size[cpt].length;
             cpt++;
         }
-        
+
         trophicLevels = new double[nSpecies][];
         cpt = 0;
-        for(int i : this.getFocalIndex()) {
+        for (int i : this.getFocalIndex()) {
             trophicLevels[cpt] = cfg.getArrayDouble("population.initialization.tl.sp" + i);
-            if(trophicLevels[cpt].length != nSize[cpt]) {
-                String message = String.format("Parameter %s must contain %d values", "population.initialization.tl.sp" + i, nSize[cpt]);   
+            if (trophicLevels[cpt].length != nSize[cpt]) {
+                String message = String.format("Parameter %s must contain %d values",
+                        "population.initialization.tl.sp" + i, nSize[cpt]);
                 error(message, new Exception());
             }
             cpt++;
         }
-        
+
         biomassProportion = new double[nSpecies][];
         cpt = 0;
-        for(int i : this.getFocalIndex()) {
+        for (int i : this.getFocalIndex()) {
             biomassProportion[cpt] = cfg.getArrayDouble("population.initialization.relativebiomass.sp" + i);
-            if(biomassProportion[cpt].length != nSize[cpt]) {
-                String message = String.format("Parameter %s must contain %d values", "population.initialization.relativebiomass.sp" + i, nSize[cpt]);   
+            if (biomassProportion[cpt].length != nSize[cpt]) {
+                String message = String.format("Parameter %s must contain %d values",
+                        "population.initialization.relativebiomass.sp" + i, nSize[cpt]);
                 error(message, new Exception());
             }
             cpt++;
         }
-        
-        age = new double[nSpecies][];
+
+        ageDt = new double[nSpecies][];
         cpt = 0;
-        for(int i : this.getFocalIndex()) {
-            age[cpt] = cfg.getArrayDouble("population.initialization.age.sp" + i);
-            if(age[cpt].length != nSize[cpt]) {
-                String message = String.format("Parameter %s must contain %d values", "population.initialization.relativebiomass.sp" + i, nSize[cpt]);   
+        for (int i : this.getFocalIndex()) {
+            ageDt[cpt] = cfg.getArrayDouble("population.initialization.age.sp" + i);
+            if (ageDt[cpt].length != nSize[cpt]) {
+                String message = String.format("Parameter %s must contain %d values",
+                        "population.initialization.relativebiomass.sp" + i, nSize[cpt]);
+                error(message, new Exception());
+            }
+            cpt++;
+        }
+
+        // Conversion of the age in ageDt
+        for (int i = 0; i < nSpecies; i++) {
+            for (int l = 0; l < nSize[i]; l++) {
+                ageDt[i][l] *= cfg.getNStepYear();
+            }
+        }
+
+        weight = new double[nSpecies][];
+        cpt = 0;
+        for (int i : this.getFocalIndex()) {
+            weight[cpt] = cfg.getArrayDouble("population.initialization.weight.sp" + i);
+            if (weight[cpt].length != nSize[cpt]) {
+                String message = String.format("Parameter %s must contain %d values",
+                        "population.initialization.relativebiomass.sp" + i, nSize[cpt]);
                 error(message, new Exception());
             }
             cpt++;
@@ -132,62 +175,36 @@ public class CalibrationPopulator extends AbstractPopulator {
     @Override
     public void populate() {
 
-        /*
-        boolean useGenetic = this.getConfiguration().isGeneticEnabled();
-        boolean useBioen = this.getConfiguration().isBioenEnabled();
-        Variable genetVar = null; // variable containing the genotype
-        Variable traitVarVar = null;  // variable containing the env. noise
-        Variable gonadVar = null;
-        ArrayFloat.D4 genotype = null;   // data array containing the Netcdf genotype array
-        ArrayFloat.D2 traitNoise = null;   // data array containing the Netcdf genotype array
-        ArrayFloat.D1 gonadWeight = null;
+        int nSpecies = this.getNSpecies();
+        for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
 
-        int nSchool = nc.findDimension("nschool").getLength();
-        try {
-            int[] ispecies = (int[]) nc.findVariable("species").read().copyTo1DJavaArray();
-            float[] x = (float[]) nc.findVariable("x").read().copyTo1DJavaArray();
-            float[] y = (float[]) nc.findVariable("y").read().copyTo1DJavaArray();
-            double[] abundance = (double[]) nc.findVariable("abundance").read().copyTo1DJavaArray();
-            float[] length = (float[]) nc.findVariable("length").read().copyTo1DJavaArray();
-            float[] weight = (float[]) nc.findVariable("weight").read().copyTo1DJavaArray();
-            float[] age = (float[]) nc.findVariable("age").read().copyTo1DJavaArray();
-            float[] trophiclevel = (float[]) nc.findVariable("trophiclevel").read().copyTo1DJavaArray();
-            if (useGenetic) {
-                genetVar = nc.findVariable("genotype");
-                genotype = (ArrayFloat.D4) genetVar.read();
-                traitVarVar = nc.findVariable("trait_variance");
-                traitNoise = (ArrayFloat.D2) traitVarVar.read();
-            }
+            Species species = getConfiguration().getSpecies(iSpecies);
+            int nSchool = getConfiguration().getNSchool(iSpecies);
 
-            if(useBioen) { 
-                gonadVar = nc.findVariable("genotype");
-                gonadWeight = (ArrayFloat.D1) gonadVar.read();
-            }
+            for (int iLength = 0; iLength < nSize[iSpecies]; iLength++) {
 
-            for (int s = 0; s < nSchool; s++) {
+                // Biomass in tons, converted into grams
+                double biomass = this.seedingBiomass[iSpecies] * this.biomassProportion[iSpecies][iLength] * 1.0e6;
 
-                School school = new School(
-                        getSpecies(ispecies[s]),
-                        x[s],
-                        y[s],
-                        abundance[s],
-                        length[s],
-                        weight[s],
-                        Math.round(age[s] * getConfiguration().getNStepYear()),
-                        trophiclevel[s]);
-                if (useGenetic) {
-                    school.restartGenotype(this.getRank(), s, genotype, traitNoise);
+                // Computes the abundance based on weight ratio.
+                double nEgg = biomass / this.weight[iSpecies][iLength];
+
+                // Adding the schools to the system. However, in this case, they are not localized yet.
+                // localized.
+                if (nEgg == 0.d) {
+                    // do nothing, zero school
+                } else if (nEgg < nSchool) {
+                    School school0 = new School(species, nEgg, (float) this.size[iSpecies][iLength],
+                            (float) this.weight[iSpecies][iLength], (int) this.ageDt[iSpecies][iLength]);
+                    getSchoolSet().add(school0);
+                } else if (nEgg >= nSchool) {
+                    for (int s = 0; s < nSchool; s++) {
+                        School school0 = new School(species, nEgg / nSchool, (float) this.size[iSpecies][iLength],
+                            (float) this.weight[iSpecies][iLength], (int) this.ageDt[iSpecies][iLength]);
+                        getSchoolSet().add(school0);
+                    }
                 }
-                if(useBioen) { 
-                    // Weight is saved in g in netcdf, so must be provided converted in tons.
-                    school.setGonadWeight(gonadWeight.get(s) * 1e-6f);
-                }
-                getSchoolSet().add(school);
             }
-            nc.close();
-        } catch (IOException ex) {
-            error("Error reading restart file " + nc.getLocation(), ex);
         }
-        */
     }
 }
