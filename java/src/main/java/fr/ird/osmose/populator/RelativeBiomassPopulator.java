@@ -124,7 +124,16 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             nSize[cpt] = size[cpt].length;
             cpt++;
         }
-
+        
+        // Correct size=0 to EggSize
+        for(int i = 0; i < getNSpecies(); i++) {
+            for (int k = 0; k < nSize[i]; k++) { 
+                if(size[i][k] == 0) { 
+                    size[i][k] = getSpecies(i).getEggSize();   
+                }
+            }
+        }
+            
         // Init the trophic levels for each species and each size class.
         trophicLevels = new double[nSpecies][];
         cpt = 0;
@@ -158,8 +167,12 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             ageDt[i] = new double[nSize[i]];
             for(int s = 0; s < nSize[i]; s++) {
                 // age provided by growth process is returned in years.
-                // needs to convert it into dt 
-                ageDt[i][s] = growth.lengthToAge(size[i][s]) * cfg.getNStepYear();
+                // needs to convert it into dt
+                if(size[i][s] == getSpecies(i).getEggSize()) { 
+                    ageDt[i][s] = 0;
+                } else { 
+                    ageDt[i][s] = growth.lengthToAge(size[i][s]) * cfg.getNStepYear();
+                }
             }
         }
 
@@ -170,7 +183,11 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             for(int s = 0; s < nSize[i]; s++) {
                 // weight is computed using allometric functions.
                 // weight is provided in grams, converted into tons to have the same unit as seeding biomass.
-                weight[i][s] = (double) species.computeWeight((float) size[i][s]) * 1.0e-6;
+                if(size[i][s] == species.getEggSize()) { 
+                    weight[i][s] = species.getEggWeight() * 1.0e-6;
+                } else { 
+                    weight[i][s] = (double) species.computeWeight((float) size[i][s]) * 1.0e-6;
+                }
             }
         }
     }
@@ -188,6 +205,9 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
                 // Biomass in tons
                 double biomass = this.seedingBiomass[iSpecies] * this.biomassProportion[iSpecies][iLength];
+                if(biomass == 0) { 
+                    continue;   
+                }
 
                 // Computes the abundance based on weight ratio. Weight is in tons as well, so units match
                 double nEgg = biomass / this.weight[iSpecies][iLength];
