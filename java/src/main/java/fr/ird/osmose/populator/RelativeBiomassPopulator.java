@@ -41,8 +41,9 @@
 
 package fr.ird.osmose.populator;
 
-import fr.ird.osmose.Configuration;
+import java.util.Random;
 
+import fr.ird.osmose.Configuration;
 
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
@@ -54,6 +55,8 @@ import fr.ird.osmose.process.growth.AbstractGrowth;
  * @author pverley
  */
 public class RelativeBiomassPopulator extends AbstractPopulator {
+
+    private Random rand;
 
     /**
      * Initial biomass to release to the system. Dimension = [nSpecies]. Units =
@@ -70,27 +73,16 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
     /**
      * Size of the released schools. Dimensions = [nSpecies][nLenghts]. Units = [cm]
      */
-    private double[][] size;
+    private double[][] sizeMin;
 
-    /**
-     * Age of the released schools. Dimensions = [nSpecies][nLenghts]. Units = dt,
-     * but provided as years
-     */
-    private double[][] ageDt;
-
-    /**
-     * Age of the released schools. Dimensions = [nSpecies][nLenghts]. Units = [g]
-     */
-    private double[][] weight;
+    private double[][] sizeMax;
 
     /** Size lengths of the released schools. Dimensions = [nSpecies][nLenghts] */
     private double[][] trophicLevels;
 
     private int[] nSize;
-    
-    
-    private GrowthProcess growthProcess;    
 
+    private GrowthProcess growthProcess;
 
     public RelativeBiomassPopulator(int rank) {
         super(rank);
@@ -101,11 +93,25 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
     public void init() {
 
         growthProcess.init();
-        
+
         Configuration cfg = this.getConfiguration();
         int nSpecies = cfg.getNSpecies();
 
         int cpt;
+
+        // Init the random generator
+        if (!cfg.isNull("population.initialization.seed")) {
+            rand = new Random(cfg.getLong("population.initialization.seed"));
+        } else {
+            rand = new Random();
+        }
+
+        double[] lInf = new double[nSpecies];
+        cpt = 0;
+        for (int i : this.getFocalIndex()) {
+            lInf[cpt] = getConfiguration().getDouble("species.linf.sp" + i);
+            cpt++;
+        }
 
         // Init the seeding biomass for each species (tons)
         seedingBiomass = new double[nSpecies];
@@ -117,23 +123,20 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
 
         // Init the sizes (in cm) for each species and each size class
         nSize = new int[nSpecies];
-        size = new double[nSpecies][];
+        sizeMin = new double[nSpecies][];
+        sizeMax = new double[nSpecies][];
         cpt = 0;
         for (int iSpeciesFiles : this.getFocalIndex()) {
-            size[cpt] = cfg.getArrayDouble("population.initialization.size.sp" + iSpeciesFiles);
-            nSize[cpt] = size[cpt].length;
+            sizeMin[cpt] = cfg.getArrayDouble("population.initialization.size.sp" + iSpeciesFiles);
+            nSize[cpt] = sizeMin[cpt].length;
+            sizeMax[cpt] = new double[nSize[cpt]];
+            for (int p = 0; p < nSize[cpt] - 1; p++) {
+                sizeMax[cpt][p] = sizeMin[cpt][p + 1];
+            }
+            sizeMax[cpt][nSize[cpt] - 1] = lInf[cpt];
             cpt++;
         }
-        
-        // Correct size=0 to EggSize
-        for(int i = 0; i < getNSpecies(); i++) {
-            for (int k = 0; k < nSize[i]; k++) { 
-                if(size[i][k] == 0) { 
-                    size[i][k] = getSpecies(i).getEggSize();   
-                }
-            }
-        }
-            
+
         // Init the trophic levels for each species and each size class.
         trophicLevels = new double[nSpecies][];
         cpt = 0;
@@ -158,38 +161,6 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
             }
             cpt++;
         }
-
-        // Compute the age of focal species by using the Growth process.
-        // Growth process returns age in years. They are converted into 
-        ageDt = new double[nSpecies][];
-        for (int i = 0; i < nSpecies; i++) {
-            AbstractGrowth growth = growthProcess.getGrowth(i);
-            ageDt[i] = new double[nSize[i]];
-            for(int s = 0; s < nSize[i]; s++) {
-                // age provided by growth process is returned in years.
-                // needs to convert it into dt
-                if(size[i][s] == getSpecies(i).getEggSize()) { 
-                    ageDt[i][s] = 0;
-                } else { 
-                    ageDt[i][s] = growth.lengthToAge(size[i][s]) * cfg.getNStepYear();
-                }
-            }
-        }
-
-        weight = new double[nSpecies][];
-        for (int i = 0; i < nSpecies; i++) {
-            weight[i] = new double[nSize[i]];
-            Species species = getSpecies(i);
-            for(int s = 0; s < nSize[i]; s++) {
-                // weight is computed using allometric functions.
-                // weight is provided in grams, converted into tons to have the same unit as seeding biomass.
-                if(size[i][s] == species.getEggSize()) { 
-                    weight[i][s] = species.getEggWeight() * 1.0e-6;
-                } else { 
-                    weight[i][s] = (double) species.computeWeight((float) size[i][s]) * 1.0e-6;
-                }
-            }
-        }
     }
 
     @Override
@@ -198,36 +169,65 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         int nSpecies = this.getNSpecies();
         for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
 
-            Species species = getConfiguration().getSpecies(iSpecies);
             int nSchool = getConfiguration().getNSchool(iSpecies);
 
             for (int iLength = 0; iLength < nSize[iSpecies]; iLength++) {
 
+                double lengthMin = this.sizeMin[iSpecies][iLength];
+                double lengthMax = this.sizeMax[iSpecies][iLength];
+
                 // Biomass in tons
                 double biomass = this.seedingBiomass[iSpecies] * this.biomassProportion[iSpecies][iLength];
-                if(biomass == 0) { 
-                    continue;   
+                if (biomass == 0) {
+                    continue;
                 }
 
-                // Computes the abundance based on weight ratio. Weight is in tons as well, so units match
-                double nEgg = biomass / this.weight[iSpecies][iLength];
-
-                // Adding the schools to the system. However, in this case, they are not localized yet.
-                // localized.
-                if (nEgg == 0.d) {
-                    // do nothing, zero school
-                } else if (nEgg < nSchool) {
-                    School school0 = new School(species, nEgg, (float) this.size[iSpecies][iLength],
-                            (float) this.weight[iSpecies][iLength], (int) this.ageDt[iSpecies][iLength]);
+                for (int s = 0; s < nSchool; s++) {
+                    School school0 = this.generateSchool(biomass / nSchool, lengthMin, lengthMax, iSpecies);
                     getSchoolSet().add(school0);
-                } else if (nEgg >= nSchool) {
-                    for (int s = 0; s < nSchool; s++) {
-                        School school0 = new School(species, nEgg / nSchool, (float) this.size[iSpecies][iLength],
-                            (float) this.weight[iSpecies][iLength], (int) this.ageDt[iSpecies][iLength]);
-                        getSchoolSet().add(school0);
-                    }
+                    biomass -= school0.getBiomass();
                 }
+                
             }
-        }
+
+        }        
     }
+
+    private School generateSchool(double biomass, double lengthMin, double lengthMax, int iSpecies) {
+
+        Configuration cfg = getConfiguration();
+        Species species = getSpecies(iSpecies);
+
+        // Ramdom draft of length
+        double length = lengthMin + rand.nextDouble() * (lengthMax - lengthMin);
+        if (length == 0) {
+            length = species.getEggSize();
+        }
+
+        AbstractGrowth growth = growthProcess.getGrowth(iSpecies);
+        int ageDt;
+        if (length == species.getEggSize()) {
+            ageDt = 0;
+        } else {
+            ageDt = (int) growth.lengthToAge(length) * cfg.getNStepYear();
+        }
+        ageDt = Math.min(ageDt, species.getLifespanDt() - 1);
+
+        double weight;
+        if (length == species.getEggSize()) {
+            weight = species.getEggWeight() * 1.0e-6;
+        } else {
+            weight = (double) species.computeWeight((float) length) * 1.0e-6;
+        }
+
+        // Computes the abundance based on weight ratio. Weight is in tons as well, so
+        // units match
+        double nEgg = biomass / weight;
+        
+        School school0 = new School(species, nEgg, (float) length, (float) weight, (int) ageDt);
+
+        return school0;
+
+    }
+
 }
