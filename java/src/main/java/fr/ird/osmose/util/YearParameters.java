@@ -92,13 +92,13 @@ public class YearParameters extends OsmoseLinker {
             if (!conf.isNull(key)) {
                 ymax = conf.getInt(key);
             } else {
-                ymax = nyear;
+                ymax = nyear - 1;
             }
 
-            int nyears = ymax - ymin;
+            int nyears = ymax - ymin + 1;
             tempYears = new int[nyears];
             int cpt = 0;
-            for (int y = ymin; y < ymax; y++) {
+            for (int y = ymin; y <= ymax; y++) {
                 tempYears[cpt] = y;
                 cpt++;
             }
