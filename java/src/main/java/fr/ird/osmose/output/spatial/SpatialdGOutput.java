@@ -97,7 +97,7 @@ public class SpatialdGOutput extends AbstractSpatialOutput {
                         }
                         if (!school.isUnlocated()) {
                             // here, data is TK weighted by the biomass
-                              temp[iSpec][j][i] += school.getENet()*1e6*school.getKappa()/school.getInstantaneousAbundance();
+                              temp[iSpec][j][i] += school.getENet()*1e6/ (Math.pow(school.getWeight() * 1e6f, school.getBetaBioen()))/school.getInstantaneousAbundance();
                             
                             abundance[iSpec][j][i] += 1;
                         }
