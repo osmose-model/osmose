@@ -108,7 +108,7 @@ public class MapSet extends OsmoseLinker {
     
     /**
      * Array of map indexes for every age class and simulation time step.
-     * int[N_AGE_CLASSES][N_STEP_SIMU]
+     * int[lifeSpan][N_STEP_SIMU]
      */
     protected int[][] indexMaps;
     
@@ -273,10 +273,8 @@ public class MapSet extends OsmoseLinker {
                     for (int iSeason : mapSeason) {
                         int iStep = iYear * nStepYear + iSeason;
                         if (iStep < indexMaps[iAge].length) {
-                            indexMaps[iAge][iYear * nStepYear + iSeason] = n;
-                        } else {
-                            break;
-                        }
+                            indexMaps[iAge][iStep] = n;
+                        } 
                     }
                 }
             }
