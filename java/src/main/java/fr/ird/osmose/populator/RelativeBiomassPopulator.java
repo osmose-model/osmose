@@ -187,9 +187,7 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
                     getSchoolSet().add(school0);
                     biomass -= school0.getBiomass();
                 }
-                
             }
-
         }        
     }
 
@@ -209,21 +207,22 @@ public class RelativeBiomassPopulator extends AbstractPopulator {
         if (length == species.getEggSize()) {
             ageDt = 0;
         } else {
-            ageDt = (int) growth.lengthToAge(length) * cfg.getNStepYear();
+            ageDt = (int) Math.round(growth.lengthToAge(length) * cfg.getNStepYear());
         }
         ageDt = Math.min(ageDt, species.getLifespanDt() - 1);
 
         double weight;
         if (length == species.getEggSize()) {
-            weight = species.getEggWeight() * 1.0e-6;
+            weight = species.getEggWeight();
         } else {
-            weight = (double) species.computeWeight((float) length) * 1.0e-6;
+            weight = (double) species.computeWeight((float) length);
         }
 
-        // Computes the abundance based on weight ratio. Weight is in tons as well, so
-        // units match
-        double nEgg = biomass / weight;
+        // Computes the abundance based on weight ratio. Weight is in g, so
+        // it biomass is converted in grams to get abundance
+        double nEgg = biomass * 1e6 / (weight); 
         
+        // In school constructor, weight is provided in g.
         School school0 = new School(species, nEgg, (float) length, (float) weight, (int) ageDt);
 
         return school0;
