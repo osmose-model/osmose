@@ -66,7 +66,7 @@ public class AccessibilityManager extends SimulationLinker {
     /**
      * Provides the accessibility matrix to use as a function of the time-step.
      */
-    private int[][] indexAccess;
+    private int[] indexAccess;
 
     public AccessibilityManager(int rank, String prefix, String suffix, ClassGetter classGetter) {
         super(rank);
@@ -81,10 +81,10 @@ public class AccessibilityManager extends SimulationLinker {
         int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
 
         // Mapping of the year and season value
-        indexAccess = new int[nyear][nseason];
+        indexAccess = new int[nyear * nseason];
         for (int i = 0; i < nyear; i++) {
             for (int j = 0; j < nseason; j++) {
-                indexAccess[i][j] = -1;
+                indexAccess[i * nseason + j] = -1;
             }
         }
 
@@ -116,17 +116,20 @@ public class AccessibilityManager extends SimulationLinker {
                 // Reconstruct the steps to be used with this map
                 StepParameters seasonParam = new StepParameters(this.prefix, this.suffix + i);
                 int[] season = seasonParam.getSeasons();
+                
+                // conversion from 1D to ND
+                // array[y][m] = arra1d[y * nmonths + m]
 
                 for (int y : years) {
                     for (int s : season) {
-                        indexAccess[y][s] = i;
+                        indexAccess[y * nseason + s] = i;
                     }
                 }                
             }  // end of loop on access files
 
             for (int y = 0; y < nyear; y++) {
                 for (int s = 0; s < nseason; s++) {
-                    if (indexAccess[y][s] == - 1) {
+                    if (indexAccess[y * nseason + s] == - 1) {
                         error("Missing accessibility indexation for year " + y + " and season " + s, new IOException());
                     }
                 }
@@ -167,25 +170,26 @@ public class AccessibilityManager extends SimulationLinker {
             int oldIndex = index[iMap];
             for (int y = 0; y < nyear; y++) {
                 for (int s = 0; s < nseason; s++) {
-                    if (indexAccess[y][s] == oldIndex) {
-                        indexAccess[y][s] = mapIndexNoTwin[iMap];
+                    if (indexAccess[y * nseason + s] == oldIndex) {
+                        indexAccess[y * nseason + s] = mapIndexNoTwin[iMap];
                     }
                 }
             }
         }
     }
 
+    public int getMatrixIndex(int index) {
+        int mapIndex = this.indexAccess[index];
+        return mapIndex;
+    }
+    
     /**
      * Returns the accesibility matrix for the given time-step.
      *
      * @return
      */
     public Matrix getMatrix() {
-
-        int year = this.getSimulation().getYear();
-        int season = this.getSimulation().getIndexTimeYear();
-        int mapIndex = this.indexAccess[year][season];
+        int mapIndex = this.getMatrixIndex(getSimulation().getIndexTimeSimu());
         return this.matrixAccess.get(mapIndex);
-
     }
 }
