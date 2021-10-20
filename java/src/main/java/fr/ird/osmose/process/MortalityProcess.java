@@ -587,14 +587,23 @@ public class MortalityProcess extends AbstractProcess {
                     }
                     // Osmose 4 fishery mortality
                     if (fisheryEnabled) {
-
+                        
+                        // get the school that corresponds to this new index
                         AbstractSchool fishedSchool = listPred.get(seqFish[i]);
 
                         // determine the index of the fishery to read.
-                        // here, we use [i] and not seq[i] because it does not matter much
+                        // at first call, indexFishery[i] is always 0.
+                        // it means that the first column of the seqFishery must be read
+                        // here, we work on i instead of seqFish[i], since it does not matter much
                         int iFishery = seqFishery[i][indexFishery[i]];
+                        indexFishery[i]++;
                         
                         double F = fisheriesMortality[iFishery].getRate(fishedSchool) / subdt;
+                        
+                        if(F == 0) {
+                            continue;
+                        }
+                        
                         nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
 
                         // Percentage values of discarded fish. The remaining go to fishery.
@@ -611,7 +620,7 @@ public class MortalityProcess extends AbstractProcess {
                         // make sure a different fishery is called every time
                         // it is just a trick since we do not have case FISHERY1,
                         // case FISHERY2, etc. like the other mortality sources.
-                        indexFishery[i]++;
+       
                     } else {
 
                         // Possibility to fish background species?????
