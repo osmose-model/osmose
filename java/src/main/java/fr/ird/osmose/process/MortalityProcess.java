@@ -142,6 +142,7 @@ public class MortalityProcess extends AbstractProcess {
     private int subdt;
     
     private boolean fishingMortalityEnabled;
+    private boolean initCatchDiscards = true;
     
     /*
      * The set of resource aggregations
@@ -445,17 +446,30 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
-
+        
+        int iStep = this.getSimulation().getIndexTimeSimu();
+        int iStepPrevious = iStep - 1;
+        
         if (fishingMortalityEnabled && fisheryEnabled) {
-            Matrix catchability = this.fisheryCatchability.getMatrix();
-            for (FishingGear gear : this.fisheriesMortality) {
-                gear.setCatchability(catchability);
+            
+            if (initCatchDiscards || (this.fisheryCatchability.getMatrixIndex(iStep) != this.fisheryCatchability
+                    .getMatrixIndex(iStepPrevious))) {
+                Matrix catchability = this.fisheryCatchability.getMatrix();
+                for (FishingGear gear : this.fisheriesMortality) {
+                    gear.setCatchability(catchability);
+                }
             }
 
-            Matrix discards = this.fisheryDiscards.getMatrix();
-            for (FishingGear gear : this.fisheriesMortality) {
-                gear.setDiscards(discards);
+            if (initCatchDiscards || (this.fisheryDiscards.getMatrixIndex(iStep) != this.fisheryDiscards
+                    .getMatrixIndex(iStepPrevious))) {
+                Matrix discards = this.fisheryDiscards.getMatrix();
+                for (FishingGear gear : this.fisheriesMortality) {
+                    gear.setDiscards(discards);
+                }
             }
+            
+            initCatchDiscards = false;
+            
 
             // distinct random fishery sequences for every school
             Integer[] singleSeqFishery = new Integer[nfishery];
