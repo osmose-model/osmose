@@ -266,7 +266,10 @@ public class MortalityProcess extends AbstractProcess {
         
         // Init the accessibility matrix
         // done at the beginning of time-step
-        predationMortality.setMatrix();
+        int year = getSimulation().getYear();
+        int season = getSimulation().getIndexTimeYear();
+        predationMortality.setMatrix(year, season);
+        
         
         // Assess accessibility for this time step
         for (Cell cell : getGrid().getOceanCells()) {
@@ -453,12 +456,14 @@ public class MortalityProcess extends AbstractProcess {
         
         int iStep = this.getSimulation().getIndexTimeSimu();
         int iStepPrevious = iStep - 1;
+        int year = this.getSimulation().getYear();
+        int season = this.getSimulation().getIndexTimeYear();
         
         if (fishingMortalityEnabled && fisheryEnabled) {
             
             if (initCatchDiscards || (this.fisheryCatchability.getMatrixIndex(iStep) != this.fisheryCatchability
                     .getMatrixIndex(iStepPrevious))) {
-                Matrix catchability = this.fisheryCatchability.getMatrix();
+                Matrix catchability = this.fisheryCatchability.getMatrix(year, season);
                 for (FishingGear gear : this.fisheriesMortality) {
                     gear.setCatchability(catchability);
                 }
@@ -466,7 +471,7 @@ public class MortalityProcess extends AbstractProcess {
 
             if (initCatchDiscards || (this.fisheryDiscards.getMatrixIndex(iStep) != this.fisheryDiscards
                     .getMatrixIndex(iStepPrevious))) {
-                Matrix discards = this.fisheryDiscards.getMatrix();
+                Matrix discards = this.fisheryDiscards.getMatrix(year, season);
                 for (FishingGear gear : this.fisheriesMortality) {
                     gear.setDiscards(discards);
                 }

@@ -1,0 +1,17 @@
+simulation.nbackground = 1
+
+species.type.sp55;background
+species.name.sp55;backgroundSpecies
+species.length2weight.allometric.power.sp55;3.029
+species.length2weight.condition.factor.sp55;0.00308
+predation.predPrey.sizeRatio.max.sp55;3
+predation.predPrey.sizeRatio.min.sp55;50
+predation.ingestion.rate.max.sp55;3.5
+
+species.file.sp55 = eec_backgroundspecies_biomass.nc
+
+species.nclass.sp55;2
+species.trophic.level.sp55;2, 3
+species.length.sp55;10;30
+species.size.proportion.sp55;0.3;0.7
+species.age.sp55;1;3

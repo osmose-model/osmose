@@ -209,7 +209,6 @@ public class PredationMortality extends AbstractMortality {
      * @return
      */
     public float computePredSuccessRate(double biomassToPredate, double preyedBiomass) {
-
         // Compute the predation success rate
         return Math.min((float) (preyedBiomass / biomassToPredate), 1.f);
     }
@@ -246,8 +245,8 @@ public class PredationMortality extends AbstractMortality {
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
     }
     
-    public void setMatrix() {   
-        accessibilityMatrix = predationAccess.getMatrix();     
+    public void setMatrix(int year, int season) {  
+        accessibilityMatrix = predationAccess.getMatrix(year, season);     
     }
 
     /**
@@ -261,7 +260,6 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
-        //Matrix accessibilityMatrix = predationAccess.getMatrix();
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         // Number of predators species. Used to offeset resource percentage index

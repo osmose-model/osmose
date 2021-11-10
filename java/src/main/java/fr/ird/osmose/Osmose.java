@@ -261,6 +261,27 @@ public class Osmose extends OLogger {
             VersionManager.getInstance().updateConfiguration();
         }
     }
+    
+    public void readConfiguration(String configurationFile, HashMap<String, String> cmdInput) {
+        // Initialize the configuration
+        configuration = new Configuration(configurationFile, cmdInput);
+        if (!configuration.load()) {
+            StringBuilder msg = new StringBuilder();
+            if (this.forceConfiguration) {
+                msg.append("Your configuration file must be updated. However you decided to force the configuration.");
+                msg.append("**Do it at your own risks!!!**");
+                warning(msg.toString());
+            } else {
+                msg.append("Your configuration file must be updated. Please run osmose with the -update option.\n");
+                msg.append("Example: java -jar osmose.jar -update config.csv");
+                error(msg.toString(), null);
+            }
+        }
+    }
+    
+    public void readConfiguration(String configurationFile) {
+        this.readConfiguration(configurationFile, new HashMap<>());
+    }
 
     /**
      * Run a specified configuration in multi-threads mode. It initialises a new
@@ -284,20 +305,7 @@ public class Osmose extends OLogger {
      */
     public void runConfiguration(String configurationFile) throws IOException, InvalidRangeException {
 
-        // Initialize the configuration
-        configuration = new Configuration(configurationFile, cmd);
-        if (!configuration.load()) {
-            StringBuilder msg = new StringBuilder();
-            if (this.forceConfiguration) {
-                msg.append("Your configuration file must be updated. However you decided to force the configuration.");
-                msg.append("**Do it at your own risks!!!**");
-                warning(msg.toString());
-            } else {
-                msg.append("Your configuration file must be updated. Please run osmose with the -update option.\n");
-                msg.append("Example: java -jar osmose.jar -update config.csv");
-                error(msg.toString(), null);
-            }
-        }
+        this.readConfiguration(configurationFile, this.cmd);
         configuration.init();
 
         // Disable logging in multithread environment
