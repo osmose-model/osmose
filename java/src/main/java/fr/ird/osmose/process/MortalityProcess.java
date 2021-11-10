@@ -268,8 +268,31 @@ public class MortalityProcess extends AbstractProcess {
         // done at the beginning of time-step
         int year = getSimulation().getYear();
         int season = getSimulation().getIndexTimeYear();
+        int iStep = this.getSimulation().getIndexTimeSimu();
+        int iStepPrevious = iStep - 1;
         predationMortality.setMatrix(year, season);
         
+        if (fishingMortalityEnabled && fisheryEnabled) {
+
+            if (initCatchDiscards || (this.fisheryCatchability.getMatrixIndex(iStep) != this.fisheryCatchability
+                    .getMatrixIndex(iStepPrevious))) {
+                Matrix catchability = this.fisheryCatchability.getMatrix(year, season);
+                for (FishingGear gear : this.fisheriesMortality) {
+                    gear.setCatchability(catchability);
+                }
+            }
+
+            if (initCatchDiscards || (this.fisheryDiscards.getMatrixIndex(iStep) != this.fisheryDiscards
+                    .getMatrixIndex(iStepPrevious))) {
+                Matrix discards = this.fisheryDiscards.getMatrix(year, season);
+                for (FishingGear gear : this.fisheriesMortality) {
+                    gear.setDiscards(discards);
+                }
+            }
+
+            initCatchDiscards = false;
+
+        }
         
         // Assess accessibility for this time step
         for (Cell cell : getGrid().getOceanCells()) {
@@ -453,33 +476,9 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
-        
-        int iStep = this.getSimulation().getIndexTimeSimu();
-        int iStepPrevious = iStep - 1;
-        int year = this.getSimulation().getYear();
-        int season = this.getSimulation().getIndexTimeYear();
-        
+                
         if (fishingMortalityEnabled && fisheryEnabled) {
             
-            if (initCatchDiscards || (this.fisheryCatchability.getMatrixIndex(iStep) != this.fisheryCatchability
-                    .getMatrixIndex(iStepPrevious))) {
-                Matrix catchability = this.fisheryCatchability.getMatrix(year, season);
-                for (FishingGear gear : this.fisheriesMortality) {
-                    gear.setCatchability(catchability);
-                }
-            }
-
-            if (initCatchDiscards || (this.fisheryDiscards.getMatrixIndex(iStep) != this.fisheryDiscards
-                    .getMatrixIndex(iStepPrevious))) {
-                Matrix discards = this.fisheryDiscards.getMatrix(year, season);
-                for (FishingGear gear : this.fisheriesMortality) {
-                    gear.setDiscards(discards);
-                }
-            }
-            
-            initCatchDiscards = false;
-            
-
             // distinct random fishery sequences for every school
             Integer[] singleSeqFishery = new Integer[nfishery];
             for (int i = 0; i < nfishery; i++) {
