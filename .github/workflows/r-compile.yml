@@ -38,7 +38,13 @@ jobs:
                 ${{ runner.os }}-
 
       - name: Install Osmose dependencies
-        run: install.packages(c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "fields", "Rcpp"), repos="http://cran.us.r-project.org")
+        run: |
+            packages = c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "fields", "Rcpp")
+            installed_packages <- packages %in% rownames(installed.packages())
+            if (any(installed_packages == FALSE)) {
+                install.packages(packages[!installed_packages], repos="http://cran.us.r-project.org")
+            }
+
         shell: Rscript {0}
 
       - name: Build Osmose without vignettes
