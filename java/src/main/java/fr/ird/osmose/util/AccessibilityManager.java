@@ -66,7 +66,7 @@ public class AccessibilityManager extends SimulationLinker {
     /**
      * Provides the accessibility matrix to use as a function of the time-step.
      */
-    private int[] indexAccess;
+    private int[][] indexAccess;
 
     private boolean sortMatrix;
     
@@ -93,10 +93,10 @@ public class AccessibilityManager extends SimulationLinker {
         int nyear = (int) Math.ceil(this.getConfiguration().getNStep() / (float) nseason);
 
         // Mapping of the year and season value
-        indexAccess = new int[nyear * nseason];
+        indexAccess = new int[nyear][nseason];
         for (int i = 0; i < nyear; i++) {
             for (int j = 0; j < nseason; j++) {
-                indexAccess[i * nseason + j] = -1;
+                indexAccess[i][j] = -1;
             }
         }
 
@@ -134,14 +134,14 @@ public class AccessibilityManager extends SimulationLinker {
 
                 for (int y : years) {
                     for (int s : season) {
-                        indexAccess[y * nseason + s] = i;
+                        indexAccess[y][s] = i;
                     }
                 }                
             }  // end of loop on access files
 
             for (int y = 0; y < nyear; y++) {
                 for (int s = 0; s < nseason; s++) {
-                    if (indexAccess[y * nseason + s] == - 1) {
+                    if (indexAccess[y][s] == - 1) {
                         error("Missing accessibility indexation for year " + y + " and season " + s, new IOException());
                     }
                 }
@@ -182,8 +182,8 @@ public class AccessibilityManager extends SimulationLinker {
             int oldIndex = index[iMap];
             for (int y = 0; y < nyear; y++) {
                 for (int s = 0; s < nseason; s++) {
-                    if (indexAccess[y * nseason + s] == oldIndex) {
-                        indexAccess[y * nseason + s] = mapIndexNoTwin[iMap];
+                    if (indexAccess[y][s] == oldIndex) {
+                        indexAccess[y][s] = mapIndexNoTwin[iMap];
                     }
                 }
             }
@@ -198,13 +198,15 @@ public class AccessibilityManager extends SimulationLinker {
         return this.indexAccess;
     }
     
+    
     public int getNMatrix() {
         return this.matrixAccess.size();   
     }
-
     public int getMatrixIndex(int index) {
-        int mapIndex = this.indexAccess[index];
-        return mapIndex;
+        int nStepYear = getConfiguration().getNStepYear();
+        int year = index / nStepYear;        
+        int season = index % nStepYear;
+        return this.indexAccess[year][season];
     }
     
     /**
