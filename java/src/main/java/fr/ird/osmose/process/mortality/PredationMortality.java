@@ -72,6 +72,8 @@ public class PredationMortality extends AbstractMortality {
     private IStage predPreyStage;
 
     private AccessibilityManager predationAccess;
+    
+    Matrix accessibilityMatrix;
 
     public PredationMortality(int rank) {
         super(rank);
@@ -243,6 +245,10 @@ public class PredationMortality extends AbstractMortality {
         }
         return predationRate[predator.getSpeciesIndex()] / getConfiguration().getNStepYear();
     }
+    
+    public void setMatrix() {   
+        accessibilityMatrix = predationAccess.getMatrix();     
+    }
 
     /**
      * Get the accessibility of a list of preys for a given predator. Zero means
@@ -255,7 +261,7 @@ public class PredationMortality extends AbstractMortality {
      */
     public double[] getAccessibility(IAggregation predator, List<IAggregation> preys) {
 
-        Matrix accessibilityMatrix = predationAccess.getMatrix();
+        //Matrix accessibilityMatrix = predationAccess.getMatrix();
         int iAccessPred = accessibilityMatrix.getIndexPred(predator);
 
         // Number of predators species. Used to offeset resource percentage index

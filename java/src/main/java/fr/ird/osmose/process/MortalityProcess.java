@@ -263,7 +263,11 @@ public class MortalityProcess extends AbstractProcess {
         if (fishingMortalityEnabled && (!fisheryEnabled)) {
             fishingMortality.setMPA();
         }
-
+        
+        // Init the accessibility matrix
+        // done at the beginning of time-step
+        predationMortality.setMatrix();
+        
         // Assess accessibility for this time step
         for (Cell cell : getGrid().getOceanCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
