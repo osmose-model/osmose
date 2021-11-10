@@ -56,20 +56,23 @@ Encoding: UTF-8
 Depends: 
   R (>= 3.5.0)
 Imports: 
-  graphics,
-  grDevices,
-  rlist,
-  stats,
-  knitr,
-  rmarkdown,
-  stringr, 
-  utils,
-  ncdf4,
-  mgcv,
-  fields
+    graphics,
+    grDevices,
+    rlist,
+    stats,
+    knitr,
+    rmarkdown,
+    stringr,
+    utils,
+    ncdf4,
+    mgcv,
+    fields,
+    Rcpp
 URL: http://www.osmose-model.org/ 
 LazyData: FALSE
 BugReports: https://github.com/osmose-model/osmose/issues
 SystemRequirements: Java (>= 8)
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
+LinkingTo: 
+    Rcpp
