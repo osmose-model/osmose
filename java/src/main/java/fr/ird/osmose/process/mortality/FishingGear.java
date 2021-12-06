@@ -345,15 +345,7 @@ public class FishingGear extends AbstractMortality {
     public int getSizeClass(AbstractSchool school)  {
         return sizeClasses.getStage(school);
     }
-    
-    // public double[] getSizeClasses() {
-    //     return this.sizeClasses;   
-    // }
-    
-    // public int getNSizeClass() {
-    //     return this.nSizeClass;   
-    // }
-    
+       
     /** Init computation of total accessible biomass. */
     public void initAccessBiomass() {
         int nspecies = this.getNSpecies();
