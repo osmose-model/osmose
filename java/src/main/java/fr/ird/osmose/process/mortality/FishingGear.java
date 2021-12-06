@@ -50,6 +50,7 @@ import fr.ird.osmose.process.mortality.fishery.FisheryPeriod;
 import fr.ird.osmose.process.mortality.fishery.FisherySeasonality;
 import fr.ird.osmose.process.mortality.fishery.FisheryMapSet;
 import fr.ird.osmose.process.mortality.fishery.FisherySelectivity;
+import fr.ird.osmose.stage.SizeStage;
 import fr.ird.osmose.util.Matrix;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -79,8 +80,7 @@ public class FishingGear extends AbstractMortality {
     private boolean isEconomyEnabled;
     
     // sizeClasses used to determine variables for fishing economy (costs, etc.)
-    private double[] sizeClasses;
-    private int nSizeClass;
+    private SizeStage sizeClasses; 
     
     /** Total accessible biomass. Depends on species and size-class. */
     private double[][] accessibleBiomass;
@@ -124,11 +124,17 @@ public class FishingGear extends AbstractMortality {
 
         if (this.isEconomyEnabled) {
             // upper bounds of size classes. if 5 values provides, 6 classes:
-            // ]0, l1], ]l1, l2], ]l2, l3],  ]l3, l4], ]l4, l5], ]l5, inf] 
-            this.sizeClasses = cfg.getArrayDouble("fisheries.name.fsh" + fileFisheryIndex);
-            this.nSizeClass = this.sizeClasses.length + 1;
-            this.accessibleBiomass = new double[this.getNSpecies()][nSizeClass];
-            this.harvestedBiomass = new double[this.getNSpecies()][nSizeClass];
+            // [0, l1[, [l1, l2[, [l2, l3[, [l3, l4[, [l4, l5[, [l5, inf]
+            this.sizeClasses = new SizeStage("fisheries.size.class.fsh" + fileFisheryIndex);
+            this.sizeClasses.init();
+
+            this.accessibleBiomass = new double[this.getNSpecies()][];
+            this.harvestedBiomass = new double[this.getNSpecies()][];
+            for (int iSpecies = 0; iSpecies < nspecies; iSpecies++) {
+                int nSizeClass = this.sizeClasses.getNStage(iSpecies);
+                this.accessibleBiomass[iSpecies] = new double[nSizeClass];
+                this.harvestedBiomass[iSpecies] = new double[nSizeClass];
+            }
         }
         
         // Initialize the time varying array
@@ -336,38 +342,34 @@ public class FishingGear extends AbstractMortality {
         return selectivity.getSelectivity(index, school);
     }
     
-    public int getSizeClass(AbstractSchool school) { 
-        int stage;
-        double length = school.getLength();
-        int nSizes = this.nSizeClass;  // number of upper values
-        for (stage = 0; stage < nSizes; stage++) { 
-            if(length <= sizeClasses[stage]) {
-                return stage;
-            }   
-        }
-        
-        return nSizes;
-            
+    public int getSizeClass(AbstractSchool school)  {
+        return sizeClasses.getStage(school);
     }
     
-    public double[] getSizeClasses() {
-        return this.sizeClasses;   
-    }
+    // public double[] getSizeClasses() {
+    //     return this.sizeClasses;   
+    // }
     
-    public int getNSizeClass() {
-        return this.nSizeClass;   
-    }
+    // public int getNSizeClass() {
+    //     return this.nSizeClass;   
+    // }
     
     /** Init computation of total accessible biomass. */
     public void initAccessBiomass() {
-        
+        int nspecies = this.getNSpecies();
         int index = this.getSimulation().getIndexTimeSimu();
-        this.accessibleBiomass = new double[this.getNSpecies()][nSizeClass];
+        this.accessibleBiomass = new double[getNSpecies()][];
+        for (int iSpecies = 0; iSpecies < nspecies; iSpecies++) {
+            int nSizeClass = this.sizeClasses.getNStage(iSpecies);
+            this.accessibleBiomass = new double[this.getNSpecies()][nSizeClass];
+        }
+        
         for (School school : this.getSchoolSet().getAliveSchools()) { 
             int iSpecies = school.getSpeciesIndex();   
             int iClass = this.getSizeClass(school);
             double sel = this.getSelectivity(index, school);
-            this.accessibleBiomass[iSpecies][iClass] += school.getInstantaneousBiomass() * sel;    
+            double cat = this.catchability[iSpecies];
+            this.accessibleBiomass[iSpecies][iClass] += school.getInstantaneousBiomass() * sel * cat;    
         }
     }
     
@@ -392,6 +394,12 @@ public class FishingGear extends AbstractMortality {
     
     /** Reinitialize the harbvested biomass. */
     public void resetHarvestedBiomass() {
-        this.harvestedBiomass = new double[this.getNSpecies()][nSizeClass];
+        int nspecies = getNSpecies();
+        this.harvestedBiomass = new double[nspecies][];
+        for (int iSpecies = 0; iSpecies < nspecies; iSpecies++) {
+            int nSizeClass = this.sizeClasses.getNStage(iSpecies);
+            this.harvestedBiomass = new double[this.getNSpecies()][nSizeClass];
+        }
     }
+        
 }
