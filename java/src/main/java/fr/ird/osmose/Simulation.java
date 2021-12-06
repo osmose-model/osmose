@@ -481,6 +481,10 @@ public class Simulation extends OsmoseLinker {
         return this.fishingGear;
     }
 
+    public FishingGear getFishingGear(int index) {
+        return this.fishingGear[index];
+    }
+
     private void initFishingGear() {
         
         int nfishery = getConfiguration().getNFishery();
