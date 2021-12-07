@@ -49,8 +49,12 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
+
 import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.util.SimulationLinker;
+import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
+import ucar.jpeg.jj2000.j2k.entropy.decoder.ByteInputBuffer;
 
 /**
  * 
@@ -61,7 +65,7 @@ import fr.ird.osmose.util.SimulationLinker;
  *
  * @author Nicolas Barrier
  */
-public class FishingAccessBiomassOutput extends SimulationLinker implements IOutput {
+public class FishingPriceAccessBiomassOutput extends SimulationLinker implements IOutput {
 
     private FileOutputStream fos[];
     private PrintWriter prw[];
@@ -74,7 +78,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
      */
     private final String separator;
 
-    FishingAccessBiomassOutput(int rank) {
+    FishingPriceAccessBiomassOutput(int rank) {
         super(rank);
         separator = getConfiguration().getOutputSeparator();
     }
@@ -97,11 +101,12 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
         for (int iFishery = 0; iFishery < getConfiguration().getNFishery(); iFishery++) {
             FishingGear gear = getSimulation().getFishingGear(iFishery);
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                double accessBiomass = gear.getAccessibleBiomass(iSpecies);
-                output[iSpecies][iFishery] += accessBiomass;
+                double priceAccessBiomass = gear.getPriceAccessibleBiomass(iSpecies);
+                output[iSpecies][iFishery] += priceAccessBiomass;
             }
         }
     }
+
 
     @Override
     public void write(float time) {
