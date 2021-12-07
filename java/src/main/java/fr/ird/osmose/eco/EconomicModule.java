@@ -121,23 +121,17 @@ public class EconomicModule extends AbstractProcess {
             double baseCost = this.baselineCosts[iFishery][time];  // get base costs
             
             // accessible biomass over size
-            double[][] accesBiomass = getFishingGear()[iFishery].getAccessibleBiomass();  // species, size
+            double[] accesBiomass = getFishingGear()[iFishery].getAccessibleBiomass();  // species
             double sumAccess = 0;
             
             // integrate accessible biomass over size
-            double[][] harvestBiomass = getFishingGear()[iFishery].getHarvestedBiomass(); // species, size
+            double[] harvestBiomass = getFishingGear()[iFishery].getHarvestedBiomass(); // species
             double sumHarvest = 0;
             
             for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
                 // integrates harvested biomass over time
-                for (double temp : harvestBiomass[iSpecies]) {
-                    sumHarvest += temp;
-                }
-                
-                // integrates
-                for(double temp : accesBiomass[iSpecies]) {
-                    sumAccess += temp;
-                }
+                sumHarvest = harvestBiomass[iSpecies];
+                sumAccess = accesBiomass[iSpecies];
                 
                 this.harvestingCosts[iFishery][iSpecies] = baseCost * sumHarvest / (Math.pow(sumAccess, this.stockElasticity[iSpecies]));
                 

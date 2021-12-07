@@ -90,7 +90,7 @@ public class FishingGear extends AbstractMortality {
     private double[] priceAccessibleBiomass;
     
     /** Total harvested biomass. Depends on species and size-class. */
-    private double[][] harvestedBiomass;
+    private double[] harvestedBiomass;
     
     /**
      * Fishery map set.
@@ -135,12 +135,7 @@ public class FishingGear extends AbstractMortality {
             // Accessible biomass
             this.accessibleBiomass = new double[this.getNSpecies()];
             this.priceAccessibleBiomass = new double[this.getNSpecies()];
-            
-            this.harvestedBiomass = new double[this.getNSpecies()][];
-            for (int iSpecies = 0; iSpecies < nspecies; iSpecies++) {
-                int nSizeClass = this.sizeClasses.getNStage(iSpecies);
-                this.harvestedBiomass[iSpecies] = new double[nSizeClass];
-            }
+            this.harvestedBiomass = new double[this.getNSpecies()];
         }
         
         // Initialize the time varying array
@@ -393,7 +388,7 @@ public class FishingGear extends AbstractMortality {
     }
 
     /** Recovers the value of total accessible biomass. **/
-    public double[][] getHarvestedBiomass() {
+    public double[] getHarvestedBiomass() {
         return this.harvestedBiomass;
     }
 
@@ -403,16 +398,12 @@ public class FishingGear extends AbstractMortality {
     public void incrementHarvestedBiomass(double nDead, AbstractSchool school) {
         int iSpecies = school.getSpeciesIndex();   
         int iClass = this.getSizeClass(school);
-        this.harvestedBiomass[iSpecies][iClass] += school.abd2biom(nDead);
+        this.harvestedBiomass[iSpecies] += school.abd2biom(nDead);
     }
     
     /** Reinitialize the harbvested biomass. */
     public void resetHarvestedBiomass() {
         int nspecies = getNSpecies();
-        this.harvestedBiomass = new double[nspecies][];
-        for (int iSpecies = 0; iSpecies < nspecies; iSpecies++) {
-            int nSizeClass = this.sizeClasses.getNStage(iSpecies);
-            this.harvestedBiomass = new double[this.getNSpecies()][nSizeClass];
-        }
+        this.harvestedBiomass = new double[nspecies];
     }
 }
