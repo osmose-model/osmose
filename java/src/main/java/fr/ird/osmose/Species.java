@@ -330,10 +330,16 @@ public class Species implements ISpecies {
      * @param biomass
      * @return
      */
+
     /*
      * private boolean isVulnerable(double biomass) { double Bv = 0.d; double Sv =
      * 1.d; return (Math.random() > (1.d / (1.d + Math.exp(Sv * (Bv - biomass)))));
      * }
      */
+
+    /* Returns the prices for the given species. */
+    public ByClassTimeSeries getPrices() {
+        return prices;
+    }
 
 }
