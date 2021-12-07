@@ -44,64 +44,97 @@ package fr.ird.osmose.output;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import fr.ird.osmose.School;
+import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.util.SimulationLinker;
 
 /**
+ * 
+ * Class for writting the accessible biomass for fisheries. Outputs is by
+ * species (one file
+ * per species) and columns provide the accessible biomass for each fishing
+ * gear.
  *
  * @author Nicolas Barrier
  */
 public class FishingAccessBiomassOutput extends SimulationLinker implements IOutput {
-    
+
     private FileOutputStream fos[];
     private PrintWriter prw[];
     private int recordFrequency;
+
+    private double output[][];
+
     /**
      * CSV separator
      */
     private final String separator;
-    
+
     FishingAccessBiomassOutput(int rank) {
         super(rank);
         separator = getConfiguration().getOutputSeparator();
     }
 
-    
     @Override
     public void initStep() {
         // TODO Auto-generated method stub
-        
+
     }
+
     @Override
     public void reset() {
-        // TODO Auto-generated method stub
-        
+        // initialisation of the accessible biomass
+        output = new double[getNSpecies()][getConfiguration().getNFishery()];
+
     }
+
     @Override
     public void update() {
-        // TODO Auto-generated method stub
-        
+        for (int iFishery = 0; iFishery < getConfiguration().getNFishery(); iFishery++) {
+            FishingGear gear = getSimulation().getFishingGear(iFishery);
+            for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+                double[] accessBiomass = gear.getAccessibleBiomass(iSpecies);
+                int nClass = accessBiomass.length;
+                for (int s = 0; s < nClass; s++) {
+                    output[iSpecies][iFishery] += accessBiomass[s];
+                }
+            }
+        }
     }
+
+
     @Override
     public void write(float time) {
-        // TODO Auto-generated method stub
-        
+
+        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+            prw[iSpecies].print(time);
+            prw[iSpecies].print(separator);
+            for (int iFishery = 0; iFishery < getConfiguration().getNFishery(); iFishery++) {
+                // instantenous mortality rate for eggs additional mortality
+                prw[iSpecies].print(output[iSpecies][iFishery] / recordFrequency);
+                prw[iSpecies].print(separator);
+            }
+            prw[iSpecies].println();
+        }
     }
+
+
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
-        // TODO Auto-generated method stub
-        return false;
+        return (((iStepSimu + 1) % recordFrequency) == 0);
     }
+
     @Override
     public void init() {
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
         int nFisheries = getConfiguration().getNFishery();
-        
+
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
             File path = new File(getConfiguration().getOutputPathname());
@@ -127,7 +160,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
                 // Write headers
                 prw[iSpecies].print(quote("Time"));
                 prw[iSpecies].print(separator);
-                for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) { 
+                for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     String fishingName = getSimulation().getFishingGear(iFishery).getName();
                     prw[iSpecies].print(quote(fishingName));
                     prw[iSpecies].print(separator);
@@ -137,16 +170,27 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
                 prw[iSpecies].print(quote(fishingName));
                 prw[iSpecies].println();
             }
-            
-        } 
+
+        }
     }
-    
+
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-        
+        for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+            if (null != prw) {
+                prw[iSpecies].close();
+            }
+            if (null != fos) {
+                try {
+                    fos[iSpecies].close();
+                } catch (IOException ex) {
+                    // do nothing
+                }
+            }
+        }
+
     }
-    
+
     private String quote(String str) {
         return "\"" + str + "\"";
     }
