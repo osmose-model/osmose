@@ -370,6 +370,11 @@ public class FishingGear extends AbstractMortality {
         return this.accessibleBiomass;
     }
     
+    /** Recovers the value of total accessible biomass for a given species. **/
+    public double[] getAccessibleBiomass(int iSpecies) {
+        return this.accessibleBiomass[iSpecies];
+    }
+    
     /** Recovers the value of total accessible biomass. **/
     public double[][] getHarvestedBiomass() {
         return this.harvestedBiomass;
