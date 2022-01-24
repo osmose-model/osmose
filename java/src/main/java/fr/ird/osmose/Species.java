@@ -122,7 +122,7 @@ public class Species implements ISpecies {
     
     private double beta_bioen;
 
-    private ByClassTimeSeries prices;
+    // private ByClassTimeSeries prices;
     
     //////////////
     // Constructor
@@ -148,10 +148,10 @@ public class Species implements ISpecies {
         
         // If the economic module is on, then we read the file containing the prices for different
         // size classes.
-        if(cfg.isEconomyEnabled()) { 
-            prices = new ByClassTimeSeries();
-            prices.read(cfg.getFile("species.prices.file.sp" + fileIndex));
-        }
+        // if(cfg.isEconomyEnabled()) { 
+        //     prices = new ByClassTimeSeries();
+        //     prices.read(cfg.getFile("species.prices.file.sp" + fileIndex));
+        // }
 
         if (!cfg.isBioenEnabled()) {
 
@@ -337,9 +337,9 @@ public class Species implements ISpecies {
      * }
      */
 
-    /* Returns the prices for the given species. */
-    public ByClassTimeSeries getPrices() {
-        return prices;
-    }
+    // /* Returns the prices for the given species. */
+    // public ByClassTimeSeries getPrices() {
+    //     return prices;
+    // }
 
 }
