@@ -70,7 +70,7 @@ public class EconomicModule extends AbstractProcess {
         super(rank);
         this.nSpecies = this.getNSpecies();
         if(this.getConfiguration().isFisheryEnabled()) { 
-            this.nFisheries = this.getFishingGear().length; 
+            this.nFisheries = this.getConfiguration().getNFishery();
         } else {
             // if new fisheries are disabled, assume on fishing gear / species
             this.nFisheries = this.nSpecies;
@@ -121,30 +121,31 @@ public class EconomicModule extends AbstractProcess {
     public void computeHarvestingCosts() {
         int time = this.getSimulation().getIndexTimeSimu();
         // Loop over fisheries
-        for (int iFishery=0; iFishery<nFisheries; iFishery++) { 
-            
-            double baseCost = this.baselineCosts[iFishery][time];  // get base costs
-            
+        for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+
+            double baseCost = this.baselineCosts[iFishery][time]; // get base costs
+
             // accessible biomass over size
-            double[] accesBiomass = getFishingGear()[iFishery].getAccessibleBiomass();  // species
+            double[] accesBiomass = getSimulation().getAccessibleBiomass()[iFishery]; // species
             double sumAccess = 0;
-            
+
             // integrate accessible biomass over size
-            double[] harvestBiomass = getFishingGear()[iFishery].getHarvestedBiomass(); // species
+            double[] harvestBiomass = getSimulation().getHarvestedBiomass()[iFishery]; // species
             double sumHarvest = 0;
-            
-            for (int iSpecies = 0; iSpecies < nSpecies; iSpecies++) {
+
+            for (int iSpecies = 0; iSpecies < this.getNSpecies(); iSpecies++) {
+
                 // integrates harvested biomass over time
                 sumHarvest = harvestBiomass[iSpecies];
                 sumAccess = accesBiomass[iSpecies];
-                
-                this.harvestingCosts[iFishery][iSpecies] = baseCost * sumHarvest / (Math.pow(sumAccess, this.stockElasticity[iSpecies]));
-                
+
+                this.harvestingCosts[iFishery][iSpecies] = baseCost * sumHarvest
+                        / (Math.pow(sumAccess, this.stockElasticity[iSpecies]));
+
             }
         }
-        
     }
-
+            
     @Override
     public void run() {
         // TODO Auto-generated method stub
