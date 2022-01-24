@@ -509,7 +509,7 @@ public class Configuration extends OLogger {
         // Fisheries
         boolean fisheryEnabled = getBoolean("fisheries.enabled");
         this.isEconomyEnabled = getBoolean("economy.enabled");
-                
+
         // true if fishingMortality is enabled or not (v3 or v4)
         if (!isNull("simulation.fishing.mortality.enabled")) {
             fishingMortalityEnabled = getBoolean("simulation.fishing.mortality.enabled");
@@ -536,8 +536,6 @@ public class Configuration extends OLogger {
                 System.exit(1);
             }
         }
-        
-
         
         // Output regions
         outputRegions = new ArrayList<>();
