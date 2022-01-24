@@ -59,11 +59,10 @@ public class SizeStage extends AbstractStage {
         int stage = 0;
         int iSpec = school.getSpeciesIndex();
         for (float threshold : this.getThresholds(iSpec)) {
-            if (school.getLength() >= threshold) {
-                stage++;
-            } else {
+            if (school.getLength() < threshold) {
                 break;
-            }
+            } 
+            stage++;
         }
         return stage;
     }
