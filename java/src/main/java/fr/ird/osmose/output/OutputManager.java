@@ -289,6 +289,11 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.spatialagespecies.enabled")) {
             outputs.add(new SpatialSizeSpeciesOutput(rank, ageDistrib));
         }
+        
+        if(getConfiguration().getBoolean("output.fishing.accessible.biomass")){
+            outputs.add(new FishingAccessBiomassOutput(rank));  
+        }
+        
         // Fisheries output
         if (getConfiguration().isFisheryEnabled() && getConfiguration().getBoolean("output.fishery.enabled")) {
             outputs.add(new FisheryOutput(rank));
