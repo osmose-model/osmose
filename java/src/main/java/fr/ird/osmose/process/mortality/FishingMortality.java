@@ -348,4 +348,9 @@ public class FishingMortality extends AbstractMortality {
          */
         CATCHES;
     }
+    
+    public AbstractFishingMortality getFishingMortality(int index) { 
+        return this.fishingMortality[index];   
+    }
+    
 }

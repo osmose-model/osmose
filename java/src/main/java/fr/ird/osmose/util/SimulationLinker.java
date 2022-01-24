@@ -83,12 +83,7 @@ public class SimulationLinker extends OsmoseLinker {
     public ResourceForcing[] getResourceForcing() {
         return getOsmose().getSimulation(rank).getResourceForcing();
     }
-    
-    public FishingGear[] getFishingGear() { 
-        return getOsmose().getSimulation(rank).getFishingGear();
-    }
-    
-    
+        
     /** Returns the ith trait for the given simulation.
      * @param i
      * @return 
