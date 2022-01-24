@@ -82,16 +82,7 @@ public class FishingGear extends AbstractMortality {
     
     // sizeClasses used to determine variables for fishing economy (costs, etc.)
     private SizeStage sizeClasses; 
-    
-    /** Total accessible biomass. Depends on species and size-class. */
-    private double[] accessibleBiomass;
-    
-    /** Accessible biomass ponderated by the price of the species. */
-    private double[] priceAccessibleBiomass;
-    
-    /** Total harvested biomass. Depends on species and size-class. */
-    private double[] harvestedBiomass;
-    
+
     /**
      * Fishery map set.
      */
@@ -132,10 +123,6 @@ public class FishingGear extends AbstractMortality {
             this.sizeClasses = new SizeStage("fisheries.size.class.fsh" + fileFisheryIndex);
             this.sizeClasses.init();
 
-            // Accessible biomass
-            this.accessibleBiomass = new double[this.getNSpecies()];
-            this.priceAccessibleBiomass = new double[this.getNSpecies()];
-            this.harvestedBiomass = new double[this.getNSpecies()];
         }
         
         // Initialize the time varying array
@@ -346,64 +333,5 @@ public class FishingGear extends AbstractMortality {
     public int getSizeClass(AbstractSchool school)  {
         return sizeClasses.getStage(school);
     }
-       
-    /** Init computation of total accessible biomass. */
-    public void initAccessBiomass() {
-        int index = this.getSimulation().getIndexTimeSimu();
-        this.accessibleBiomass = new double[getNSpecies()];
-        this.priceAccessibleBiomass = new double[getNSpecies()];
 
-        for (School school : this.getSchoolSet().getAliveSchools()) {
-            int iSpecies = school.getSpeciesIndex();
-            double sel = this.getSelectivity(index, school);
-            // double cat = this.catchability[iSpecies];
-
-            // get the price that corresponds to the given length of the school
-            double prices = getSpecies(iSpecies).getPrices().getValue(index, school.getLength());
-
-            double temp = school.getInstantaneousBiomass() * sel;
-            this.accessibleBiomass[iSpecies] += temp;
-            this.priceAccessibleBiomass[iSpecies] += temp * prices;
-        }
-    }
-    
-    /** Recovers the value of total accessible biomass. **/ 
-    public double[] getAccessibleBiomass() {
-        return this.accessibleBiomass;
-    }
-    
-    /** Recovers the value of total accessible biomass for a given species. **/
-    public double getAccessibleBiomass(int iSpecies) {
-        return this.accessibleBiomass[iSpecies];
-    }
-    
-    /** Recovers the value of total priced accessible biomass. **/
-    public double[] getPriceAccessibleBiomass() {
-        return this.priceAccessibleBiomass;
-    }
-
-    /** Recovers the value of total priced accessible biomass for a given species. **/
-    public double getPriceAccessibleBiomass(int iSpecies) {
-        return this.priceAccessibleBiomass[iSpecies];
-    }
-
-    /** Recovers the value of total accessible biomass. **/
-    public double[] getHarvestedBiomass() {
-        return this.harvestedBiomass;
-    }
-
-    /** Increment the harvested biomass.
-     * @param nDead Number of fished individuals.
-     * @param school School object of the school that has been fished. */
-    public void incrementHarvestedBiomass(double nDead, AbstractSchool school) {
-        int iSpecies = school.getSpeciesIndex();   
-        int iClass = this.getSizeClass(school);
-        this.harvestedBiomass[iSpecies] += school.abd2biom(nDead);
-    }
-    
-    /** Reinitialize the harbvested biomass. */
-    public void resetHarvestedBiomass() {
-        int nspecies = getNSpecies();
-        this.harvestedBiomass = new double[nspecies];
-    }
 }
