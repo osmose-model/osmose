@@ -49,7 +49,6 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.util.SimulationLinker;
 
 /**
@@ -67,7 +66,8 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     private PrintWriter prw[];
     private int recordFrequency;
     private double output[][];
-
+    private int nFisheries;
+    
     /**
      * CSV separator
      */
@@ -87,12 +87,13 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     @Override
     public void reset() {
         // initialisation of the accessible biomass
-        output = new double[getNSpecies()][getConfiguration().getNFishery()];
+        output = new double[getNSpecies()][nFisheries];
 
     }
 
     @Override
     public void update() {
+        // get accessible biomass (nfisheries, nspecies)
         double[][] accessBiomass = getSimulation().getEconomicModule().getAccessibleBiomass();
         for (int iFishery = 0; iFishery < accessBiomass.length; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
@@ -125,7 +126,6 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     public void init() {
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
-        int nFisheries;
         String[] namesFisheries;
         if (getConfiguration().isFisheryEnabled()) {
             nFisheries = getConfiguration().getNFishery();
@@ -176,8 +176,10 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
                 prw[iSpecies].print(quote(fishingName));
                 prw[iSpecies].println();
             }
-
         }
+        
+        recordFrequency = getConfiguration().getInt("output.recordfrequency.ndt");
+        
     }
 
     @Override
