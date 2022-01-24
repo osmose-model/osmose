@@ -98,10 +98,10 @@ public class FishingPriceAccessBiomassOutput extends SimulationLinker implements
 
     @Override
     public void update() {
-        for (int iFishery = 0; iFishery < getConfiguration().getNFishery(); iFishery++) {
-            FishingGear gear = getSimulation().getFishingGear(iFishery);
+        double[][] priceAccessBiom = getSimulation().getPriceAccessibleBiomass();
+        for (int iFishery = 0; iFishery < priceAccessBiom.length; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                double priceAccessBiomass = gear.getPriceAccessibleBiomass(iSpecies);
+                double priceAccessBiomass = priceAccessBiom[iFishery][iSpecies];
                 output[iSpecies][iFishery] += priceAccessBiomass;
             }
         }
@@ -133,7 +133,21 @@ public class FishingPriceAccessBiomassOutput extends SimulationLinker implements
     public void init() {
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
-        int nFisheries = getConfiguration().getNFishery();
+        int nFisheries;
+        String[] namesFisheries;
+        if (getConfiguration().isFisheryEnabled()) {
+            nFisheries = getConfiguration().getNFishery();
+            namesFisheries = new String[nFisheries];
+            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+                namesFisheries[iFishery] = String.format("fishery%.3d", iFishery);
+            }
+        } else {
+            nFisheries = getConfiguration().getNSpecies();
+            namesFisheries = new String[nFisheries];
+            for (int iSpecies = 0; iSpecies < nFisheries; iSpecies++) {
+                namesFisheries[iSpecies] = getSpecies(iSpecies).getName();
+            }
+        }
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
@@ -161,12 +175,12 @@ public class FishingPriceAccessBiomassOutput extends SimulationLinker implements
                 prw[iSpecies].print(quote("Time"));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
-                    String fishingName = getSimulation().getFishingGear(iFishery).getName();
+                    String fishingName = namesFisheries[iFishery];
                     prw[iSpecies].print(quote(fishingName));
                     prw[iSpecies].print(separator);
                 }
                 int iFishery = nFisheries - 1;
-                String fishingName = getSimulation().getFishingGear(iFishery).getName();
+                String fishingName = namesFisheries[iFishery];
                 prw[iSpecies].print(quote(fishingName));
                 prw[iSpecies].println();
             }

@@ -66,7 +66,6 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     private FileOutputStream fos[];
     private PrintWriter prw[];
     private int recordFrequency;
-
     private double output[][];
 
     /**
@@ -94,11 +93,10 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
 
     @Override
     public void update() {
-        for (int iFishery = 0; iFishery < getConfiguration().getNFishery(); iFishery++) {
-            FishingGear gear = getSimulation().getFishingGear(iFishery);
+        double[][] accessBiomass = getSimulation().getAccessibleBiomass();
+        for (int iFishery = 0; iFishery < accessBiomass.length; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                double accessBiomass = gear.getAccessibleBiomass(iSpecies);
-                output[iSpecies][iFishery] += accessBiomass;
+                output[iSpecies][iFishery] += accessBiomass[iFishery][iSpecies];
             }
         }
     }
@@ -118,7 +116,6 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
         }
     }
 
-
     @Override
     public boolean isTimeToWrite(int iStepSimu) {
         return (((iStepSimu + 1) % recordFrequency) == 0);
@@ -128,7 +125,21 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     public void init() {
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
-        int nFisheries = getConfiguration().getNFishery();
+        int nFisheries;
+        String[] namesFisheries;
+        if (getConfiguration().isFisheryEnabled()) {
+            nFisheries = getConfiguration().getNFishery();
+            namesFisheries = new String[nFisheries];
+            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+                namesFisheries[iFishery] = String.format("fishery%.3d", iFishery);
+            }
+        } else {
+            nFisheries = getConfiguration().getNSpecies();
+            namesFisheries = new String[nFisheries];
+            for (int iSpecies = 0; iSpecies < nFisheries; iSpecies++) {
+                namesFisheries[iSpecies] = getSpecies(iSpecies).getName();
+            }
+        }
 
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
@@ -156,12 +167,12 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
                 prw[iSpecies].print(quote("Time"));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
-                    String fishingName = getSimulation().getFishingGear(iFishery).getName();
+                    String fishingName = namesFisheries[iFishery];
                     prw[iSpecies].print(quote(fishingName));
                     prw[iSpecies].print(separator);
                 }
                 int iFishery = nFisheries - 1;
-                String fishingName = getSimulation().getFishingGear(iFishery).getName();
+                String fishingName = namesFisheries[iFishery];
                 prw[iSpecies].print(quote(fishingName));
                 prw[iSpecies].println();
             }
