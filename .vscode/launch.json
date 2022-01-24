@@ -16,8 +16,9 @@
             "request": "launch",
             "mainClass": "fr.ird.osmose.Osmose",
             "projectName": "osmose",
-            "cwd": "/home/barrier/Work/codes/osmose/osmose-eec",
-            "args": "eec_all-parameters.csv"
+            "cwd": "/home/barrier/Dropbox/alaia_migration_test/alaia-4.3.3-nobioen",
+            "args": "-force calib_config.csv",
+
         }
     ]
 }

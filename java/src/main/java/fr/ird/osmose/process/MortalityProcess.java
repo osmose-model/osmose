@@ -270,6 +270,13 @@ public class MortalityProcess extends AbstractProcess {
             starvationMortality = new StarvationMortality(getRank());
             starvationMortality.init();
         }
+        
+        if (fisheryEnabled) {
+            accessBiomass = () -> this.initAccessibleBiomassFishery();
+        } else {
+            accessBiomass = () -> this.initAccessibleBiomassNoFishery();
+        }
+        
     }
 
     @Override
@@ -496,9 +503,6 @@ public class MortalityProcess extends AbstractProcess {
             for (int i = 1; i < nfishery; i++) {
                 causes.add(MortalityCause.FISHING);
             }
-            accessBiomass = () -> this.initAccessibleBiomassFishery();
-        } else {
-            accessBiomass = () -> this.initAccessibleBiomassNoFishery();
         }
 
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
@@ -672,7 +676,7 @@ public class MortalityProcess extends AbstractProcess {
                                 break;
                         }
 
-                        if (economyEnabled) {
+                        if (economyEnabled && nDead != 0) {
                             int iSpecies = school.getSpeciesIndex();
                             // store the harvested biomass by size class by species for fishing gear.
                             getSimulation().getEconomicModule().incrementHarvestedBiomass(iSpecies, iSpecies, school, nDead);
