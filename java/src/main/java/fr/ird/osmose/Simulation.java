@@ -45,7 +45,6 @@ import fr.ird.osmose.background.BackgroundSchoolSet;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
-import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.resource.ResourceForcing;
 import fr.ird.osmose.util.OsmoseLinker;
 import java.io.IOException;
@@ -88,15 +87,29 @@ public class Simulation extends OsmoseLinker {
 
     private BackgroundSchoolSet backSchoolSet;
 
+    private int nFishery;
+
+    /** Total accessible biomass. Dims=[fisheries, species] */
+    private double[][] accessibleBiomass;
+
+    /**
+     * Accessible biomass ponderated by the price of the species. Dims=[fisheries,
+     * species]
+     */
+    private double[][] priceAccessibleBiomass;
+
+    /**
+     * Total harvested biomass. Depends on species and size-class. Dims=[fisheries,
+     * species]
+     */
+    private double[][] harvestedBiomass;
+
     /**
      * The low trophic level forcing class. Indexes from [0, nbkg -1] are the
      * forcings for bkg species. Indexes from [nbkg, nbkg + nrsc - 1] are for LTL.
      */
     private ResourceForcing[] resourceForcing;
-    
-    /** Recover the list of fishing Gears **/   
-    private FishingGear[] fishingGear;
-    
+
     /**
      * Current year of the simulation.
      */
@@ -203,9 +216,13 @@ public class Simulation extends OsmoseLinker {
         year = 0;
         i_step_year = 0;
         i_step_simu = 0;
-    
-        // initialisation of fishing gears.
-        this.initFishingGear();
+
+        // initialisation of fishing gears
+        if (this.getConfiguration().isFisheryEnabled()) {
+            nFishery = getConfiguration().getNFishery();
+        } else {
+            nFishery = this.getNSpecies();
+        }
 
         // Look for restart file
         restart = false;
@@ -227,26 +244,26 @@ public class Simulation extends OsmoseLinker {
                 error("Failed to open restart file " + ncfile, ex);
             }
         }
- 
+
         if (this.getConfiguration().isGeneticEnabled()) {
 
-            // List all the trait mean parameters 
+            // List all the trait mean parameters
             List<String> genet_keys = this.getConfiguration().findKeys("*.trait.mean.sp*");
-            
+
             // Remove the "sp#"
             List<String> output_keys = new ArrayList<>();
-            for(String strOut : genet_keys) { 
+            for (String strOut : genet_keys) {
                 String prefix = strOut.substring(0, strOut.indexOf(".sp"));
-                output_keys.add(prefix);    
+                output_keys.add(prefix);
             }
-            
-            // Removes duplicates.    
+
+            // Removes duplicates.
             List<String> prefix_keys = output_keys.stream().distinct().collect(Collectors.toList());
-        
+
             // Init the arrays
             this.nEvolvingTrait = prefix_keys.size();
             this.evolvingTrait = new ArrayList<>();
-            
+
             for (int p = 0; p < this.nEvolvingTrait; p++) {
                 String key = prefix_keys.get(p);
                 // recovers the trait prefix
@@ -477,35 +494,34 @@ public class Simulation extends OsmoseLinker {
         return this.backSchoolSet;
     }
 
-    public FishingGear[] getFishingGear() {
-        return this.fishingGear;
+    public void clearAccessibleBiomass() {
+        this.accessibleBiomass = new double[nFishery][this.getNSpecies()];
+        this.priceAccessibleBiomass = new double[nFishery][this.getNSpecies()];
+        this.harvestedBiomass = new double[nFishery][this.getNSpecies()];
     }
 
-    public FishingGear getFishingGear(int index) {
-        return this.fishingGear[index];
+    public void incrementAccessibleBiomass(int iFishery, int iSpecies, double increment) {
+        this.accessibleBiomass[iFishery][iSpecies] += increment;
     }
 
-    private void initFishingGear() {
-        
-        int nfishery = getConfiguration().getNFishery();
-        
-        fishingGear = new FishingGear[nfishery];
-
-        // Recovers the index of fisheries
-        int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
-                .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted().toArray();
-
-        if (fisheryIndex.length != nfishery) {
-            String message = "The number of fishery is not consistant with the number of fisheries name.";
-            error(message, new Exception());
-        }
-
-        int cpt = 0;
-        for (int index : fisheryIndex) {
-            fishingGear[cpt] = new FishingGear(rank, index);
-            fishingGear[cpt].init();
-            cpt++;
-        }
+    public void incrementHarvestedBiomass(int iFishery, int iSpecies, double increment) {
+        this.priceAccessibleBiomass[iFishery][iSpecies] += increment;
     }
-    
+
+    public void incrementPriceAccessibleBiomass(int iFishery, int iSpecies, double increment) {
+        this.priceAccessibleBiomass[iFishery][iSpecies] += increment;
+    }
+
+    public double[][] getAccessibleBiomass() {
+        return accessibleBiomass;
+    }
+
+    public double[][] getPriceAccessibleBiomass() {
+        return priceAccessibleBiomass;
+    }
+
+    public double[][] getHarvestedBiomass() {
+        return this.harvestedBiomass;
+    }
+
 }
