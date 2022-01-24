@@ -519,18 +519,6 @@ public class MortalityProcess extends AbstractProcess {
             }
         }
 
-        if (fisheryEnabled) {
-            Matrix catchability = this.fisheryCatchability.getMatrix();
-            for (FishingGear gear : fisheriesMortality) {
-                gear.setCatchability(catchability);
-            }
-
-            Matrix discards = this.fisheryDiscards.getMatrix();
-            for (FishingGear gear : fisheriesMortality) {
-                gear.setDiscards(discards);
-            }
-        }
-
         int[] indexFishery = new int[ns + nBkg];
 
         // Initialisation of list of predators, which contains both
@@ -645,7 +633,7 @@ public class MortalityProcess extends AbstractProcess {
                             
                             if (economyEnabled) {
                                 // store the harvested biomass by size class by species for fishing gear.
-                                getSimulation().incrementHarvestedBiomass(iFishery, fishedSchool.getSpeciesIndex(), nDead);
+                                getSimulation().incrementHarvestedBiomass(iFishery, fishedSchool.getSpeciesIndex(), fishedSchool.abd2biom(nDead));
                             }
                             
                             // Percentage values of discarded fish. The remaining go to fishery.
@@ -670,7 +658,6 @@ public class MortalityProcess extends AbstractProcess {
                         if (seqFish[i] >= ns) {
                             break;
                         }
-
                         // recovers the current school
                         school = schools.get(seqFish[i]);
 
@@ -683,6 +670,12 @@ public class MortalityProcess extends AbstractProcess {
                             case CATCHES:
                                 nDead = school.biom2abd(fishingMortality.getCatches(school) / subdt);
                                 break;
+                        }
+
+                        if (economyEnabled) {
+                            int iSpecies = school.getSpeciesIndex();
+                            // store the harvested biomass by size class by species for fishing gear.
+                            getSimulation().incrementHarvestedBiomass(iSpecies, iSpecies, school.abd2biom(nDead));
                         }
 
                         school.incrementNdead(MortalityCause.FISHING, nDead);
