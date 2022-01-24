@@ -480,7 +480,7 @@ public class Configuration extends OLogger {
         }
 
         // barrier.n: add number of background species
-        key = "simulation.nbackground";
+        String key = "simulation.nbackground";
         int nBackground_test = 0;
         if (canFind(key)) {
             nBackground_test = getInt(key);
