@@ -633,7 +633,7 @@ public class MortalityProcess extends AbstractProcess {
                             
                             if (economyEnabled) {
                                 // store the harvested biomass by size class by species for fishing gear.
-                                getSimulation().incrementHarvestedBiomass(iFishery, fishedSchool.getSpeciesIndex(), fishedSchool.abd2biom(nDead));
+                                getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, fishedSchool.getSpeciesIndex(), fishedSchool, nDead);
                             }
                             
                             // Percentage values of discarded fish. The remaining go to fishery.
@@ -675,7 +675,7 @@ public class MortalityProcess extends AbstractProcess {
                         if (economyEnabled) {
                             int iSpecies = school.getSpeciesIndex();
                             // store the harvested biomass by size class by species for fishing gear.
-                            getSimulation().incrementHarvestedBiomass(iSpecies, iSpecies, school.abd2biom(nDead));
+                            getSimulation().getEconomicModule().incrementHarvestedBiomass(iSpecies, iSpecies, school, nDead);
                         }
 
                         school.incrementNdead(MortalityCause.FISHING, nDead);
@@ -868,7 +868,7 @@ public class MortalityProcess extends AbstractProcess {
     // }
     
     public void initAccessibleBiomass() { 
-        this.getSimulation().clearAccessibleBiomass();
+        this.getSimulation().getEconomicModule().clearAccessibleBiomass();
         accessBiomass.initAccessibleBiomass(); 
     }
     
@@ -884,29 +884,29 @@ public class MortalityProcess extends AbstractProcess {
                 double sel = gear.getSelectivity(index, school);
                 // double cat = this.catchability[iSpecies];
                 // get the price that corresponds to the given length of the school
-                double prices = getSpecies(iSpecies).getPrices().getValue(index, school.getLength());
+                // double prices = getSpecies(iSpecies).getPrices().getValue(index, school.getLength());
 
                 double incrementBiom = school.getInstantaneousBiomass() * sel;
-                double incrementPriceBiom = incrementBiom * prices;
-                this.getSimulation().incrementAccessibleBiomass(iFishery, iSpecies, incrementBiom);
-                this.getSimulation().incrementPriceAccessibleBiomass(iFishery, iSpecies, incrementPriceBiom);
+                // double incrementPriceBiom = incrementBiom * prices;
+                this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iFishery, iSpecies, incrementBiom);
+                // this.getSimulation().getEconomicModule().incrementPriceAccessibleBiomass(iFishery, iSpecies, incrementPriceBiom);
             }
         }
     }
     
     private void initAccessibleBiomassNoFishery() {
-        int index = this.getSimulation().getIndexTimeSimu();
+        // int index = this.getSimulation().getIndexTimeSimu();
         // Loop over all the schools
         for (School school : this.getSchoolSet().getAliveSchools()) {
             // Loop over all the fisheries.
             int iSpecies = school.getSpeciesIndex();
             AbstractFishingMortality fishingMortality = this.fishingMortality.getFishingMortality(iSpecies);
-            double prices = getSpecies(iSpecies).getPrices().getValue(index, school.getLength());
+            // double prices = getSpecies(iSpecies).getPrices().getValue(index, school.getLength());
             if (!school.isUnlocated() && fishingMortality.isFishable(school)) {
                 double incrementBiom = school.getInstantaneousBiomass();
-                double incrementPriceBiom = school.getInstantaneousBiomass() * prices;
-                this.getSimulation().incrementAccessibleBiomass(iSpecies, iSpecies, incrementBiom);
-                this.getSimulation().incrementPriceAccessibleBiomass(iSpecies, iSpecies, incrementPriceBiom);
+                // double incrementPriceBiom = school.getInstantaneousBiomass() * prices;
+                this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iSpecies, iSpecies, incrementBiom);
+                // this.getSimulation().getEconomicModule().incrementPriceAccessibleBiomass(iSpecies, iSpecies, incrementPriceBiom);
             }
         }
     }

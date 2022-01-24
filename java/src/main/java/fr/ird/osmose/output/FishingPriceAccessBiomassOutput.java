@@ -49,12 +49,7 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
-
-import fr.ird.osmose.process.mortality.FishingGear;
 import fr.ird.osmose.util.SimulationLinker;
-import fr.ird.osmose.util.timeseries.ByClassTimeSeries;
-import ucar.jpeg.jj2000.j2k.entropy.decoder.ByteInputBuffer;
 
 /**
  * 
@@ -98,7 +93,7 @@ public class FishingPriceAccessBiomassOutput extends SimulationLinker implements
 
     @Override
     public void update() {
-        double[][] priceAccessBiom = getSimulation().getPriceAccessibleBiomass();
+        double[][] priceAccessBiom = getSimulation().getEconomicModule().getPriceAccessibleBiomass();
         for (int iFishery = 0; iFishery < priceAccessBiom.length; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
                 double priceAccessBiomass = priceAccessBiom[iFishery][iSpecies];

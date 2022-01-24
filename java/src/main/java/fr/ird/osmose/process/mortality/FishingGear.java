@@ -80,9 +80,6 @@ public class FishingGear extends AbstractMortality {
     // If economy is on, define a size stage array for fisheries.
     private boolean isEconomyEnabled;
     
-    // sizeClasses used to determine variables for fishing economy (costs, etc.)
-    private SizeStage sizeClasses; 
-
     /**
      * Fishery map set.
      */
@@ -116,14 +113,6 @@ public class FishingGear extends AbstractMortality {
 
         // True if fishing mortality components are to be saved for inspection
         checkFisheryEnabled = cfg.getBoolean("fisheries.check.enabled");
-
-        if (this.isEconomyEnabled) {
-            // upper bounds of size classes. if 5 values provides, 6 classes:
-            // [0, l1[, [l1, l2[, [l2, l3[, [l3, l4[, [l4, l5[, [l5, inf]
-            this.sizeClasses = new SizeStage("fisheries.size.class.fsh" + fileFisheryIndex);
-            this.sizeClasses.init();
-
-        }
         
         // Initialize the time varying array
         fishingBase = new FisheryBase(fileFisheryIndex);
@@ -330,8 +319,4 @@ public class FishingGear extends AbstractMortality {
         return selectivity.getSelectivity(index, school);
     }
     
-    public int getSizeClass(AbstractSchool school)  {
-        return sizeClasses.getStage(school);
-    }
-
 }

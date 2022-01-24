@@ -286,6 +286,7 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.spatialsizespecies.enabled")) {
             outputs.add(new SpatialSizeSpeciesOutput(rank, sizeDistrib));
         }
+
         if (getConfiguration().getBoolean("output.spatialagespecies.enabled")) {
             outputs.add(new SpatialSizeSpeciesOutput(rank, ageDistrib));
         }

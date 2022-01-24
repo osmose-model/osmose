@@ -93,7 +93,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
 
     @Override
     public void update() {
-        double[][] accessBiomass = getSimulation().getAccessibleBiomass();
+        double[][] accessBiomass = getSimulation().getEconomicModule().getAccessibleBiomass();
         for (int iFishery = 0; iFishery < accessBiomass.length; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
                 output[iSpecies][iFishery] += accessBiomass[iFishery][iSpecies];
