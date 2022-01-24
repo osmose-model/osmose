@@ -42,6 +42,7 @@
 package fr.ird.osmose;
 
 import fr.ird.osmose.background.BackgroundSchoolSet;
+import fr.ird.osmose.eco.EconomicModule;
 import fr.ird.osmose.output.SchoolSetSnapshot;
 import fr.ird.osmose.populator.PopulatingProcess;
 import fr.ird.osmose.process.genet.Trait;
@@ -80,29 +81,15 @@ public class Simulation extends OsmoseLinker {
      * The rank of the simulation. (among replicated simulations)
      */
     private final int rank;
+    
+    private EconomicModule economicModule;
+    
     /**
      * The set of schools.
      */
     private SchoolSet schoolSet;
 
     private BackgroundSchoolSet backSchoolSet;
-
-    private int nFishery;
-
-    /** Total accessible biomass. Dims=[fisheries, species] */
-    private double[][] accessibleBiomass;
-
-    /**
-     * Accessible biomass ponderated by the price of the species. Dims=[fisheries,
-     * species]
-     */
-    private double[][] priceAccessibleBiomass;
-
-    /**
-     * Total harvested biomass. Depends on species and size-class. Dims=[fisheries,
-     * species]
-     */
-    private double[][] harvestedBiomass;
 
     /**
      * The low trophic level forcing class. Indexes from [0, nbkg -1] are the
@@ -217,13 +204,6 @@ public class Simulation extends OsmoseLinker {
         i_step_year = 0;
         i_step_simu = 0;
 
-        // initialisation of fishing gears
-        if (this.getConfiguration().isFisheryEnabled()) {
-            nFishery = getConfiguration().getNFishery();
-        } else {
-            nFishery = this.getNSpecies();
-        }
-
         // Look for restart file
         restart = false;
         if (!getConfiguration().isNull("simulation.restart.file")) {
@@ -272,6 +252,11 @@ public class Simulation extends OsmoseLinker {
                 trait.init();
                 this.evolvingTrait.add(trait);
             }
+        }
+        
+        if(getConfiguration().isEconomyEnabled()) { 
+            economicModule = new EconomicModule(rank);
+            economicModule.init();
         }
 
         // Init resource forcing
@@ -493,35 +478,9 @@ public class Simulation extends OsmoseLinker {
     public BackgroundSchoolSet getBkgSchoolSet() {
         return this.backSchoolSet;
     }
-
-    public void clearAccessibleBiomass() {
-        this.accessibleBiomass = new double[nFishery][this.getNSpecies()];
-        this.priceAccessibleBiomass = new double[nFishery][this.getNSpecies()];
-        this.harvestedBiomass = new double[nFishery][this.getNSpecies()];
-    }
-
-    public void incrementAccessibleBiomass(int iFishery, int iSpecies, double increment) {
-        this.accessibleBiomass[iFishery][iSpecies] += increment;
-    }
-
-    public void incrementHarvestedBiomass(int iFishery, int iSpecies, double increment) {
-        this.priceAccessibleBiomass[iFishery][iSpecies] += increment;
-    }
-
-    public void incrementPriceAccessibleBiomass(int iFishery, int iSpecies, double increment) {
-        this.priceAccessibleBiomass[iFishery][iSpecies] += increment;
-    }
-
-    public double[][] getAccessibleBiomass() {
-        return accessibleBiomass;
-    }
-
-    public double[][] getPriceAccessibleBiomass() {
-        return priceAccessibleBiomass;
-    }
-
-    public double[][] getHarvestedBiomass() {
-        return this.harvestedBiomass;
+    
+    public EconomicModule getEconomicModule() {
+        return this.economicModule;   
     }
 
 }
