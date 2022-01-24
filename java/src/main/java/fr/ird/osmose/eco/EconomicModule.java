@@ -69,7 +69,12 @@ public class EconomicModule extends AbstractProcess {
     public EconomicModule(int rank) {
         super(rank);
         this.nSpecies = this.getNSpecies();
-        this.nFisheries = this.getFishingGear().length; 
+        if(this.getConfiguration().isFisheryEnabled()) { 
+            this.nFisheries = this.getFishingGear().length; 
+        } else {
+            // if new fisheries are disabled, assume on fishing gear / species
+            this.nFisheries = this.nSpecies;
+        }
         this.stockElasticity = new double[nSpecies];
         this.baselineCosts = new double[nFisheries][];
         this.harvestingCosts = new double[nFisheries][nSpecies];     
