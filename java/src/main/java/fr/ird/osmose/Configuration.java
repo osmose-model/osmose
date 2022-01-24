@@ -339,8 +339,11 @@ public class Configuration extends OLogger {
         String keybioen = "simulation.bioen.enabled";
         this.bioenEnabled = this.getBoolean(keybioen);
 
-        String key = "simulation.genetic.enabled";
-        this.geneticEnabled = this.getBoolean(key);
+        this.geneticEnabled = false;
+        if (this.bioenEnabled) {
+            String key = "simulation.genetic.enabled";
+            this.geneticEnabled = this.getBoolean(key);
+        }
 
         String keyincom = "simulation.incoming.flux.enabled";
         this.incomingFluxEnabled = this.getBoolean(keyincom);
