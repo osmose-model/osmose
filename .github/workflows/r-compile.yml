@@ -45,8 +45,8 @@ jobs:
       - name: Build Osmose without vignettes
         run: R CMD build --no-build-vignettes .
 
-      - name: Check Osmose without vignettes
-        run: |
-            file=`ls *tar.gz`
-            echo $file
-            R CMD check --as-cran --ignore-vignettes ${file} 
+#      - name: Check Osmose without vignettes
+#        run: |
+#            file=`ls *tar.gz`
+#            echo $file
+#            R CMD check --as-cran --ignore-vignettes ${file} 
