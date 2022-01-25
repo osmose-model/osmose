@@ -295,6 +295,10 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new FishingAccessBiomassOutput(rank));  
         }
         
+        if(getConfiguration().getBoolean("output.fishing.harvested.biomass.bysize")){
+            outputs.add(new FishingHarvestedBiomassDistribOutput(rank));  
+        }
+        
         // Fisheries output
         if (getConfiguration().isFisheryEnabled() && getConfiguration().getBoolean("output.fishery.enabled")) {
             outputs.add(new FisheryOutput(rank));
@@ -325,6 +329,18 @@ public class OutputManager extends SimulationLinker {
 
         if (getConfiguration().getBoolean("output.abundance.age1.enabled")) {
             outputs.add(new AbundanceOutput_age1(rank, "Bioen", "AbundAge1"));
+        }
+        
+        if (getConfiguration().getBoolean("output.weight.bysize.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "weight",
+                    "Distribution of fish weight (number of fish)", school -> school.getWeight(),
+                    sizeDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.weight.byage.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "weight",
+                    "Distribution of fish weight (number of fish)", school -> school.getWeight(),
+                    ageDistrib));
         }
 
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
