@@ -40,14 +40,17 @@
 package fr.ird.osmose.eco;
 
 import fr.ird.osmose.AbstractSchool;
+import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.SizeDistribution;
 import fr.ird.osmose.process.AbstractProcess;
+import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.stage.SizeStage;
 import fr.ird.osmose.util.SimulationLinker;
 
 public class EconomicModule extends AbstractProcess {
     
     // sizeClasses used to determine variables for fishing economy (costs, etc.)
-    private SizeStage sizeClasses;
+    private AbstractDistribution sizeClasses;
     private boolean isCalibrationEnabled = true;
 
     /** Stock elasticity. [nSpecies] */
@@ -77,6 +80,8 @@ public class EconomicModule extends AbstractProcess {
     /** Number of species */
     private int nSpecies;
     
+    private String[] namesFisheries;
+    
     // /* Computed harvested costs. [gear, species] */
     // private double[][] harvestingCosts;
     
@@ -92,33 +97,34 @@ public class EconomicModule extends AbstractProcess {
     
     @Override
     public void init() {
-        
-        this.nSpecies = this.getNSpecies();
-        if(this.getConfiguration().isFisheryEnabled()) { 
-            this.nFisheries = this.getConfiguration().getNFishery();
+                
+        if (getConfiguration().isFisheryEnabled()) {
+            nFisheries = getConfiguration().getNFishery();
+            namesFisheries = new String[nFisheries];
+            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+                namesFisheries[iFishery] = String.format("fishery%.3d", iFishery);
+            }
         } else {
-            // if new fisheries are disabled, assume on fishing gear / species
-            this.nFisheries = this.nSpecies;
+            nFisheries = getConfiguration().getNSpecies();
+            namesFisheries = new String[nFisheries];
+            for (int iSpecies = 0; iSpecies < nFisheries; iSpecies++) {
+                namesFisheries[iSpecies] = getSpecies(iSpecies).getName();
+            }
         }
         
         // upper bounds of size classes. if 5 values provides, 6 classes:
         // [0, l1[, [l1, l2[, [l2, l3[, [l3, l4[, [l4, l5[, [l5, inf]
-        this.sizeClasses = new SizeStage("economic.module.size.class.sp");
+        this.sizeClasses = new SizeDistribution();
         this.sizeClasses.init();
-
+        
     }
     
     public void clearAccessibleBiomass() {
         int nSpecies = this.getNSpecies();
+        int nClass = sizeClasses.getNClass();
         this.accessibleBiomass = new double[nFisheries][nSpecies];
         this.priceAccessibleBiomass = new double[nFisheries][nSpecies];
-        this.harvestedBiomass = new double[nFisheries][nSpecies][];
-        for(int iFishery = 0; iFishery < nFisheries; iFishery++) { 
-            for(int iSpecies=0; iSpecies<nSpecies; iSpecies++) {
-                int nClass = sizeClasses.getNStage(iSpecies);
-                harvestedBiomass[iFishery][iSpecies] = new double[nClass];
-            }
-        }
+        this.harvestedBiomass = new double[nFisheries][nSpecies][nClass];
     }
 
     public void incrementAccessibleBiomass(int iFishery, int iSpecies, double increment) {
@@ -126,7 +132,7 @@ public class EconomicModule extends AbstractProcess {
     }
 
     public void incrementHarvestedBiomass(int iFishery, int iSpecies, AbstractSchool school, double nDead) {
-        int iClass = this.sizeClasses.getStage(school);
+        int iClass = this.sizeClasses.getClass(school);
         this.harvestedBiomass[iFishery][iSpecies][iClass] += nDead;
     }
 
@@ -134,20 +140,20 @@ public class EconomicModule extends AbstractProcess {
         this.priceAccessibleBiomass[iFishery][iSpecies] += increment;
     }
 
-    public double[][] getAccessibleBiomass() {
-        return accessibleBiomass;
+    public double getAccessibleBiomass(int iFishery, int iSpecies) {
+        return accessibleBiomass[iFishery][iSpecies];
     }
 
-    public double[][] getPriceAccessibleBiomass() {
-        return priceAccessibleBiomass;
+    public double getPriceAccessibleBiomass(int iFishery, int iSpecies) {
+        return priceAccessibleBiomass[iFishery][iSpecies];
     }
 
-    public double[][][] getHarvestedBiomass() {
-        return this.harvestedBiomass;
+    public double getHarvestedBiomass(int iFishery, int iSpecies, int iClass) {
+        return this.harvestedBiomass[iFishery][iSpecies][iClass];
     }
     
     public int getSizeClass(AbstractSchool school)  {
-        return sizeClasses.getStage(school);
+        return sizeClasses.getClass(school);
     }
     
 
@@ -217,6 +223,18 @@ public class EconomicModule extends AbstractProcess {
     public void run() {
         // TODO Auto-generated method stub
         
+    }
+    
+    public AbstractDistribution getSizeClass() {
+        return this.sizeClasses;
+    }
+    
+    public int getNFisheries() { 
+        return this.nFisheries;   
+    }
+    
+    public String[] getFisheriesNames() {
+        return this.namesFisheries;   
     }
 
 }
