@@ -94,10 +94,9 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     @Override
     public void update() {
         // get accessible biomass (nfisheries, nspecies)
-        double[][] accessBiomass = getSimulation().getEconomicModule().getAccessibleBiomass();
-        for (int iFishery = 0; iFishery < accessBiomass.length; iFishery++) {
+        for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
             for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                output[iSpecies][iFishery] += accessBiomass[iFishery][iSpecies];
+                output[iSpecies][iFishery] += getSimulation().getEconomicModule().getAccessibleBiomass(iFishery, iSpecies);
             }
         }
     }
@@ -108,7 +107,7 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             prw[iSpecies].print(time);
             prw[iSpecies].print(separator);
-            for (int iFishery = 0; iFishery < getConfiguration().getNFishery(); iFishery++) {
+            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
                 // instantenous mortality rate for eggs additional mortality
                 prw[iSpecies].print(output[iSpecies][iFishery] / recordFrequency);
                 prw[iSpecies].print(separator);
@@ -126,21 +125,9 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
     public void init() {
         fos = new FileOutputStream[getNSpecies()];
         prw = new PrintWriter[getNSpecies()];
-        String[] namesFisheries;
-        if (getConfiguration().isFisheryEnabled()) {
-            nFisheries = getConfiguration().getNFishery();
-            namesFisheries = new String[nFisheries];
-            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
-                namesFisheries[iFishery] = String.format("fishery%.3d", iFishery);
-            }
-        } else {
-            nFisheries = getConfiguration().getNSpecies();
-            namesFisheries = new String[nFisheries];
-            for (int iSpecies = 0; iSpecies < nFisheries; iSpecies++) {
-                namesFisheries[iSpecies] = getSpecies(iSpecies).getName();
-            }
-        }
-
+        nFisheries = getSimulation().getEconomicModule().getNFisheries();
+        String[] namesFisheries = getSimulation().getEconomicModule().getFisheriesNames();
+        
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             // Create parent directory
             File path = new File(getConfiguration().getOutputPathname());
