@@ -170,6 +170,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
                     prw[i].print(quote(header));
                 }
                 prw[i].println();
+                prw[i].flush();
             }
             i++;
         }
@@ -202,6 +203,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
             prw[region].print(sval);
         }
         prw[region].println();
+        prw[region].flush();
     }
 
     void writeVariable(int region, float time, double[][] variable) {
@@ -215,6 +217,7 @@ abstract public class AbstractOutput extends SimulationLinker implements IOutput
                 prw[region].print(sval);
             }
             prw[region].println();
+            prw[region].flush();
         }
     }
     

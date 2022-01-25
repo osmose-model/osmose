@@ -68,12 +68,24 @@ public class AccessibilityManager extends SimulationLinker {
      */
     private int[][] indexAccess;
 
+    private boolean sortMatrix;
+    
     public AccessibilityManager(int rank, String prefix, String suffix, ClassGetter classGetter) {
         super(rank);
         this.prefix = prefix;
         this.suffix = suffix;
         this.classGetter = classGetter;
+        this.sortMatrix = true;
     }
+    
+    public AccessibilityManager(int rank, String prefix, String suffix, ClassGetter classGetter, boolean sortMatrix) {
+        super(rank);
+        this.prefix = prefix;
+        this.suffix = suffix;
+        this.classGetter = classGetter;
+        this.sortMatrix = sortMatrix;
+    }
+
 
     public void init() {
 
@@ -95,7 +107,7 @@ public class AccessibilityManager extends SimulationLinker {
         if (!getConfiguration().isNull(this.prefix + ".file")) {
             // accessibility matrix
             String filename = getConfiguration().getFile(this.prefix + ".file");
-            Matrix temp = new Matrix(filename, classGetter);
+            Matrix temp = new Matrix(filename, classGetter, this.sortMatrix);
             matrixAccess.put(-1, temp);
         } else {
             
@@ -106,7 +118,7 @@ public class AccessibilityManager extends SimulationLinker {
             for (int i : index) {
                 
                 String filename = getConfiguration().getFile(this.prefix + ".file." + this.suffix + i);
-                Matrix temp = new Matrix(filename, classGetter);
+                Matrix temp = new Matrix(filename, classGetter, this.sortMatrix);
                 matrixAccess.put(i, temp);
 
                 // Reconstruct the years to be used with this map
@@ -116,6 +128,9 @@ public class AccessibilityManager extends SimulationLinker {
                 // Reconstruct the steps to be used with this map
                 StepParameters seasonParam = new StepParameters(this.prefix, this.suffix + i);
                 int[] season = seasonParam.getSeasons();
+                
+                // conversion from 1D to ND
+                // array[y][m] = arra1d[y * nmonths + m]
 
                 for (int y : years) {
                     for (int s : season) {
@@ -174,18 +189,51 @@ public class AccessibilityManager extends SimulationLinker {
             }
         }
     }
+    
+    public int getMatrixIndex(int year, int season) { 
+        return this.indexAccess[year][season];
+    }
+       
+    public int[][] getMatrixIndex() { 
+        return this.indexAccess;
+    }
+    
+    
+    public int getNMatrix() {
+        return this.matrixAccess.size();   
+    }
+    public int getMatrixIndex(int index) {
+        int nStepYear = getConfiguration().getNStepYear();
+        int year = index / nStepYear;        
+        int season = index % nStepYear;
+        return this.indexAccess[year][season];
+    }
+    
+    /**
+     * Returns the accesibility matrix for the given time-step.
+     *
+     * @return
+     */
+    public Matrix getMatrix(int year, int season) {
+        return this.matrixAccess.get(this.getMatrixIndex(year, season));
+    }
+    
+    /**
+     * Returns the accesibility matrix for the given time-step.
+     *
+     * @return
+     */
+    public Matrix getMatrix(int index) {
+        return this.matrixAccess.get(this.getMatrixIndex(index));
+    }
 
     /**
      * Returns the accesibility matrix for the given time-step.
      *
      * @return
      */
-    public Matrix getMatrix() {
-
-        int year = this.getSimulation().getYear();
-        int season = this.getSimulation().getIndexTimeYear();
-        int mapIndex = this.indexAccess[year][season];
-        return this.matrixAccess.get(mapIndex);
-
+    public HashMap<Integer, Matrix> getMatrix() {
+        return this.matrixAccess;
     }
+    
 }

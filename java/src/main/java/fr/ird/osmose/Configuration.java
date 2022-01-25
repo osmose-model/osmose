@@ -287,7 +287,7 @@ public class Configuration extends OLogger {
             debug("Loading parameters from command line");
             for (Entry<String, String> argument : cmd.entrySet()) {
                 Parameter parameter = new Parameter(argument.getKey(), argument.getValue());
-                parameters.put(argument.getKey(), parameter);
+                parameters.put(argument.getKey().toLowerCase(), parameter);
                 debug(". " + parameter.toString());
             }
         }
@@ -1484,6 +1484,11 @@ public class Configuration extends OLogger {
     public NetcdfFileWriter.Version getNcOutVersion() { 
         return ncOutVersion;   
     }
+    
+    public int getNYears() { 
+        return this.getNStep() / this.getNStepYear();   
+    }    
+    
 
     private void setOutputNcFormat() {
         

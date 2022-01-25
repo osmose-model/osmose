@@ -142,6 +142,7 @@ public class MortalityProcess extends AbstractProcess {
     private int subdt;
     
     private boolean fishingMortalityEnabled;
+    private boolean initCatchDiscards = true;
     
     /*
      * The set of resource aggregations
@@ -262,7 +263,37 @@ public class MortalityProcess extends AbstractProcess {
         if (fishingMortalityEnabled && (!fisheryEnabled)) {
             fishingMortality.setMPA();
         }
+        
+        // Init the accessibility matrix
+        // done at the beginning of time-step
+        int year = getSimulation().getYear();
+        int season = getSimulation().getIndexTimeYear();
+        int iStep = this.getSimulation().getIndexTimeSimu();
+        int iStepPrevious = iStep - 1;
+        predationMortality.setMatrix(year, season);
+        
+        if (fishingMortalityEnabled && fisheryEnabled) {
 
+            if (initCatchDiscards || (this.fisheryCatchability.getMatrixIndex(iStep) != this.fisheryCatchability
+                    .getMatrixIndex(iStepPrevious))) {
+                Matrix catchability = this.fisheryCatchability.getMatrix(year, season);
+                for (FishingGear gear : this.fisheriesMortality) {
+                    gear.setCatchability(catchability);
+                }
+            }
+
+            if (initCatchDiscards || (this.fisheryDiscards.getMatrixIndex(iStep) != this.fisheryDiscards
+                    .getMatrixIndex(iStepPrevious))) {
+                Matrix discards = this.fisheryDiscards.getMatrix(year, season);
+                for (FishingGear gear : this.fisheriesMortality) {
+                    gear.setDiscards(discards);
+                }
+            }
+
+            initCatchDiscards = false;
+
+        }
+        
         // Assess accessibility for this time step
         for (Cell cell : getGrid().getOceanCells()) {
             List<School> schools = getSchoolSet().getSchools(cell);
@@ -445,18 +476,9 @@ public class MortalityProcess extends AbstractProcess {
         }
 
         MortalityCause[] mortalityCauses = causes.toArray(new MortalityCause[causes.size()]);
-
+                
         if (fishingMortalityEnabled && fisheryEnabled) {
-            Matrix catchability = this.fisheryCatchability.getMatrix();
-            for (FishingGear gear : this.fisheriesMortality) {
-                gear.setCatchability(catchability);
-            }
-
-            Matrix discards = this.fisheryDiscards.getMatrix();
-            for (FishingGear gear : this.fisheriesMortality) {
-                gear.setDiscards(discards);
-            }
-
+            
             // distinct random fishery sequences for every school
             Integer[] singleSeqFishery = new Integer[nfishery];
             for (int i = 0; i < nfishery; i++) {
@@ -573,14 +595,23 @@ public class MortalityProcess extends AbstractProcess {
                     }
                     // Osmose 4 fishery mortality
                     if (fisheryEnabled) {
-
+                        
+                        // get the school that corresponds to this new index
                         AbstractSchool fishedSchool = listPred.get(seqFish[i]);
 
                         // determine the index of the fishery to read.
-                        // here, we use [i] and not seq[i] because it does not matter much
+                        // at first call, indexFishery[i] is always 0.
+                        // it means that the first column of the seqFishery must be read
+                        // here, we work on i instead of seqFish[i], since it does not matter much
                         int iFishery = seqFishery[i][indexFishery[i]];
+                        indexFishery[i]++;
                         
                         double F = fisheriesMortality[iFishery].getRate(fishedSchool) / subdt;
+                        
+                        if(F == 0) {
+                            continue;
+                        }
+                        
                         nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
 
                         // Percentage values of discarded fish. The remaining go to fishery.
@@ -597,7 +628,7 @@ public class MortalityProcess extends AbstractProcess {
                         // make sure a different fishery is called every time
                         // it is just a trick since we do not have case FISHERY1,
                         // case FISHERY2, etc. like the other mortality sources.
-                        indexFishery[i]++;
+       
                     } else {
 
                         // Possibility to fish background species?????

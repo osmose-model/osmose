@@ -1,0 +1,5 @@
+grid.java.classname;fr.ird.osmose.grid.NcGrid
+grid.netcdf.file;eec_grid-mask.nc
+grid.var.lat;lat
+grid.var.lon;lon
+grid.var.mask;mask
