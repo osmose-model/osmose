@@ -44,7 +44,10 @@ package fr.ird.osmose.output.distribution;
 import fr.ird.osmose.IMarineOrganism;
 import fr.ird.osmose.util.OsmoseLinker;
 
-/**
+/** Species belong to distribution (T) class s if 
+ * 
+ *   T(s) <=  L(s) < T(s + 1) 
+ *  
  *
  * @author pverley
  */
