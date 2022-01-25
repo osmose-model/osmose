@@ -90,6 +90,9 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
         prw = new PrintWriter[getNSpecies()];
         nFisheries = getSimulation().getEconomicModule().getNFisheries();
         nSpecies = getConfiguration().getNSpecies();
+        
+        this.sizeClasses = getSimulation().getEconomicModule().getSizeClass();
+        
         String[] namesFisheries = getSimulation().getEconomicModule().getFisheriesNames();
         nClass = this.sizeClasses.getNClass();
         
