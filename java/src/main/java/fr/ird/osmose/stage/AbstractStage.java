@@ -53,7 +53,7 @@ import fr.ird.osmose.util.OsmoseLinker;
  *
  * @author pverley
  */
-abstract class AbstractStage extends OsmoseLinker implements IStage {
+public abstract class AbstractStage extends OsmoseLinker implements IStage {
 
     private float[][] thresholds;
 
