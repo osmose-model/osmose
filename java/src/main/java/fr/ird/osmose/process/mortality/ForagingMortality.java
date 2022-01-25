@@ -50,7 +50,9 @@ import java.util.logging.Logger;
  */
 public class ForagingMortality extends AbstractMortality {
 
-    private double[] k_for;
+    private double[] k1_for; // parameter for foraging mortality with evo on 
+    private double[] k2_for; // parameter for foraging mortality with evo on 
+    private double[] k_for; // parameter for foraging mortality with evo off 
     private double[] I_max;
 
     public ForagingMortality(int rank) {
@@ -60,12 +62,20 @@ public class ForagingMortality extends AbstractMortality {
     @Override
     public void init() {
         int nspec = this.getNSpecies();
+        k1_for = new double[nspec];
+        k2_for = new double[nspec];
         k_for = new double[nspec];
         I_max = new double[nspec];
         int cpt = 0;
         for (int i : getFocalIndex()) {
-            k_for[cpt] = getConfiguration().getDouble("species.bioen.forage.k_for.sp" + i);
-            I_max[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
+            
+            if (this.getConfiguration().isGeneticEnabled()) {
+            k1_for[cpt] = getConfiguration().getDouble("species.bioen.forage.k1_for.sp" + i);
+            k2_for[cpt] = getConfiguration().getDouble("species.bioen.forage.k2_for.sp" + i);
+        } else {
+             k_for[cpt] = getConfiguration().getDouble("species.bioen.forage.k_for.sp" + i);
+        }
+        I_max[cpt] = getConfiguration().getDouble("predation.ingestion.rate.max.bioen.sp" + i);
             cpt++;
         }
     }
@@ -80,12 +90,13 @@ public class ForagingMortality extends AbstractMortality {
             String key = "imax";
 
             try {
-                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()] / nstepYear;
+//                output = school.getTrait(key) * this.k_for[school.getSpeciesIndex()] / nstepYear;
+                output = this.k1_for[school.getSpeciesIndex()] * Math.exp(this.k2_for[school.getSpeciesIndex()]*(school.getTrait(key) - I_max[school.getSpeciesIndex()])) / nstepYear;
             } catch (Exception ex) {
                 Logger.getLogger(ForagingMortality.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            output = I_max[school.getSpeciesIndex()] * this.k_for[school.getSpeciesIndex()] / nstepYear;
+            output = this.k_for[school.getSpeciesIndex()] / nstepYear;
         }
         if (output < 0) {
             output = 0;
