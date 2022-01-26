@@ -331,16 +331,15 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new AbundanceOutput_age1(rank, "Bioen", "AbundAge1"));
         }
         
-        if (getConfiguration().getBoolean("output.weight.bysize.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "weight",
-                    "Distribution of fish weight (number of fish)", school -> school.getWeight(),
-                    sizeDistrib));
-        }
 
-        if (getConfiguration().getBoolean("output.weight.byage.enabled")) {
-            outputs.add(new DistribOutput(rank, "Indicators", "weight",
-                    "Distribution of fish weight (number of fish)", school -> school.getWeight(),
-                    ageDistrib));
+        if (getConfiguration().getBoolean("output.meanWeight.byAge.enabled")) {
+            outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanWeight", "Mean Weight of fish (kg)",
+                    school -> (school.getWeight() * 1e-3), school -> school.getInstantaneousAbundance(), ageDistrib));
+        }
+        
+        if (getConfiguration().getBoolean("output.meanWeight.bySize.enabled")) {
+            outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanWeight", "Mean Weight of fish (kg)",
+                    school -> (school.getWeight() * 1e-3), school -> school.getInstantaneousAbundance(), sizeDistrib));
         }
 
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
