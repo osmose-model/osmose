@@ -129,7 +129,7 @@ public class MortalitySpeciesOutput extends AbstractDistribOutput {
 
     @Override
     String[] getHeaders() {
-        return new String[]{getType().toString(), "Mpred", "Mstar", "Mnat", "F", "Z", "Mfor"};
+        return new String[]{getType().toString(), "Mpred", "Mstar", "Mnat", "F", "Z", "Mfor", "Dis", "Age"};
     }
 
     @Override
