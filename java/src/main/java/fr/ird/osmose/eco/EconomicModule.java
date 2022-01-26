@@ -41,11 +41,10 @@ package fr.ird.osmose.eco;
 
 import fr.ird.osmose.AbstractSchool;
 import fr.ird.osmose.output.distribution.AbstractDistribution;
+import fr.ird.osmose.output.distribution.AgeDistribution;
 import fr.ird.osmose.output.distribution.SizeDistribution;
+import fr.ird.osmose.output.distribution.WeightDistribution;
 import fr.ird.osmose.process.AbstractProcess;
-import fr.ird.osmose.stage.AbstractStage;
-import fr.ird.osmose.stage.SizeStage;
-import fr.ird.osmose.util.SimulationLinker;
 
 public class EconomicModule extends AbstractProcess {
     
@@ -112,9 +111,27 @@ public class EconomicModule extends AbstractProcess {
             }
         }
         
-        // upper bounds of size classes. if 5 values provides, 6 classes:
-        // [0, l1[, [l1, l2[, [l2, l3[, [l3, l4[, [l4, l5[, [l5, inf]
-        this.sizeClasses = new SizeDistribution();
+        String key = "economic.distribution.type";
+        if (getConfiguration().canFind(key)) {
+            String type = getConfiguration().getString(key);
+            switch (type) {
+                case ("weight"):
+                    this.sizeClasses = new WeightDistribution();
+                    break;
+                case ("age"):
+                    this.sizeClasses = new AgeDistribution();
+                    break;
+                case ("size"):
+                    this.sizeClasses = new SizeDistribution();
+                    break;
+                default:
+                    this.sizeClasses = new SizeDistribution();
+                    break;
+            }
+        } else {
+            this.sizeClasses = new SizeDistribution();
+        }
+
         this.sizeClasses.init();
         
     }
@@ -131,9 +148,11 @@ public class EconomicModule extends AbstractProcess {
         this.accessibleBiomass[iFishery][iSpecies] += increment;
     }
 
-    public void incrementHarvestedBiomass(int iFishery, int iSpecies, AbstractSchool school, double nDead) {
+    public void incrementHarvestedBiomass(int iFishery, AbstractSchool school, double nDead) {
+        int iSpecies = school.getSpeciesIndex();
         int iClass = this.sizeClasses.getClass(school);
-        this.harvestedBiomass[iFishery][iSpecies][iClass] += nDead;
+        double biomass = school.abd2biom(nDead);
+        this.harvestedBiomass[iFishery][iSpecies][iClass] += biomass;
     }
 
     public void incrementPriceAccessibleBiomass(int iFishery, int iSpecies, double increment) {
