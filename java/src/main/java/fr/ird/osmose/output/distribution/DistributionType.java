@@ -58,7 +58,11 @@ public enum DistributionType {
     /**
      * Trophic level discretization
      */
-    TL("TL", "Trophic level");
+    TL("TL", "Trophic level"),
+    /**
+     * Trophic level discretization
+     */
+    WEIGHT("Weight", "Weight (kg)");
     /**
      * Name of the discretization type that will be used in the configuration
      * file. If the name is set to 'size', Osmose will refer to it in the
