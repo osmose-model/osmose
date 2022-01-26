@@ -637,7 +637,7 @@ public class MortalityProcess extends AbstractProcess {
                             
                             if (economyEnabled) {
                                 // store the harvested biomass by size class by species for fishing gear.
-                                getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, fishedSchool.getSpeciesIndex(), fishedSchool, nDead);
+                                getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, fishedSchool, nDead);
                             }
                             
                             // Percentage values of discarded fish. The remaining go to fishery.
@@ -662,6 +662,7 @@ public class MortalityProcess extends AbstractProcess {
                         if (seqFish[i] >= ns) {
                             break;
                         }
+
                         // recovers the current school
                         school = schools.get(seqFish[i]);
 
@@ -679,7 +680,7 @@ public class MortalityProcess extends AbstractProcess {
                         if (economyEnabled && nDead != 0) {
                             int iSpecies = school.getSpeciesIndex();
                             // store the harvested biomass by size class by species for fishing gear.
-                            getSimulation().getEconomicModule().incrementHarvestedBiomass(iSpecies, iSpecies, school, nDead);
+                            getSimulation().getEconomicModule().incrementHarvestedBiomass(iSpecies, school, nDead);
                         }
 
                         school.incrementNdead(MortalityCause.FISHING, nDead);
