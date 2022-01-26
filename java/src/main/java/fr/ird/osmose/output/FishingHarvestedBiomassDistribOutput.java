@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import fr.ird.osmose.output.distribution.AbstractDistribution;
-import fr.ird.osmose.stage.AbstractStage;
 import fr.ird.osmose.util.SimulationLinker;
 
 public class FishingHarvestedBiomassDistribOutput extends SimulationLinker implements IOutput {
@@ -65,16 +64,15 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
                 prw[iSpecies].print(separator);
                 prw[iSpecies].print(this.sizeClasses.getThreshold(iClass));
                 prw[iSpecies].print(separator);
-                for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+                for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     // instantenous mortality rate for eggs additional mortality
                     prw[iSpecies].print(output[iSpecies][iFishery][iClass] / recordFrequency);
                     prw[iSpecies].print(separator);
                 }
+                int iFishery = nFisheries - 1;
+                prw[iSpecies].print(output[iSpecies][iFishery][iClass] / recordFrequency);
+                prw[iSpecies].println();
             }
-            
-            
-
-            prw[iSpecies].println();
         }
     }
 
@@ -102,7 +100,9 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
             StringBuilder filename = new StringBuilder("Econ");
             filename.append(File.separatorChar);
             filename.append(getConfiguration().getString("output.file.prefix"));
-            filename.append("_HarvestedBiomassBy-");
+            filename.append("_HarvestedBiomassBy");
+            filename.append(sizeClasses.getType());
+            filename.append("-");
             filename.append(getSpecies(iSpecies).getName());
             filename.append("_Simu");
             filename.append(getRank());
@@ -120,6 +120,8 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
             if (!fileExists) {
                 // Write headers
                 prw[iSpecies].print(quote("Time"));
+                prw[iSpecies].print(separator);
+                prw[iSpecies].print(quote("Class"));
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     String fishingName = namesFisheries[iFishery];

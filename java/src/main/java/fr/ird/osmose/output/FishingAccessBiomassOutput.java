@@ -107,11 +107,14 @@ public class FishingAccessBiomassOutput extends SimulationLinker implements IOut
         for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
             prw[iSpecies].print(time);
             prw[iSpecies].print(separator);
-            for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+            for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                 // instantenous mortality rate for eggs additional mortality
                 prw[iSpecies].print(output[iSpecies][iFishery] / recordFrequency);
                 prw[iSpecies].print(separator);
             }
+            
+            int iFishery = nFisheries - 1;
+            prw[iSpecies].print(output[iSpecies][iFishery] / recordFrequency); 
             prw[iSpecies].println();
         }
     }
