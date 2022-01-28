@@ -4,6 +4,8 @@
 
 ### New features
 
+- Adding a weight distribution for the outputs (abundance by weight class)
+- Adding outputs for the economic module (accessible and harvested biomass distribution).
 - Adding the possibility to save CSV files that allow to verify the proper definition of fish movements.
 - Now the parameters `lastYear` and `lastAge` are inclusive. For instance, if `Yinit=2` and `Ylast=5`, the years are `[2, 3, 4, 5]` instead of `[2, 3, 4]` in the previous version. 
 - Possibility to use NetCDF parameterization for the definition of fish movements.
