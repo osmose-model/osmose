@@ -885,16 +885,9 @@ public class MortalityProcess extends AbstractProcess {
             for (int iFishery = 0; iFishery < getConfiguration().getNFishery(); iFishery++) {
 
                 FishingGear gear = fisheriesMortality[iFishery];
-                int iSpecies = school.getSpeciesIndex();
                 double sel = gear.getSelectivity(index, school);
-                // double cat = this.catchability[iSpecies];
-                // get the price that corresponds to the given length of the school
-                // double prices = getSpecies(iSpecies).getPrices().getValue(index, school.getLength());
-
                 double incrementBiom = school.getInstantaneousBiomass() * sel;
-                // double incrementPriceBiom = incrementBiom * prices;
-                this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iFishery, iSpecies, incrementBiom);
-                // this.getSimulation().getEconomicModule().incrementPriceAccessibleBiomass(iFishery, iSpecies, incrementPriceBiom);
+                this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iFishery, school, incrementBiom);
             }
         }
     }
@@ -906,12 +899,9 @@ public class MortalityProcess extends AbstractProcess {
             // Loop over all the fisheries.
             int iSpecies = school.getSpeciesIndex();
             AbstractFishingMortality fishingMortality = this.fishingMortality.getFishingMortality(iSpecies);
-            // double prices = getSpecies(iSpecies).getPrices().getValue(index, school.getLength());
             if (!school.isUnlocated() && fishingMortality.isFishable(school)) {
                 double incrementBiom = school.getInstantaneousBiomass();
-                // double incrementPriceBiom = school.getInstantaneousBiomass() * prices;
-                this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iSpecies, iSpecies, incrementBiom);
-                // this.getSimulation().getEconomicModule().incrementPriceAccessibleBiomass(iSpecies, iSpecies, incrementPriceBiom);
+                this.getSimulation().getEconomicModule().incrementAccessibleBiomass(iSpecies, school, incrementBiom);
             }
         }
     }

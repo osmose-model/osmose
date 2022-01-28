@@ -62,13 +62,13 @@ public class EconomicModule extends AbstractProcess {
     private int nFisheries;
     
     /** Total accessible biomass. Dims=[fisheries, species] */
-    private double[][] accessibleBiomass;
+    private double[][][] accessibleBiomass;
 
     /**
      * Accessible biomass ponderated by the price of the species. Dims=[fisheries,
      * species]
      */
-    private double[][] priceAccessibleBiomass;
+    private double[][][] priceAccessibleBiomass;
 
     /**
      * Total harvested biomass. Depends on fisheries, species and size-class. Dims=[fisheries,
@@ -101,13 +101,13 @@ public class EconomicModule extends AbstractProcess {
             nFisheries = getConfiguration().getNFishery();
             namesFisheries = new String[nFisheries];
             for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
-                namesFisheries[iFishery] = String.format("fishery%.3d", iFishery);
+                namesFisheries[iFishery] = String.format("fishery%03d", iFishery);
             }
         } else {
             nFisheries = getConfiguration().getNSpecies();
             namesFisheries = new String[nFisheries];
             for (int iSpecies = 0; iSpecies < nFisheries; iSpecies++) {
-                namesFisheries[iSpecies] = getSpecies(iSpecies).getName();
+                namesFisheries[iSpecies] = String.format("fishery%03d", iSpecies);
             }
         }
         
@@ -139,13 +139,15 @@ public class EconomicModule extends AbstractProcess {
     public void clearAccessibleBiomass() {
         int nSpecies = this.getNSpecies();
         int nClass = sizeClasses.getNClass();
-        this.accessibleBiomass = new double[nFisheries][nSpecies];
-        this.priceAccessibleBiomass = new double[nFisheries][nSpecies];
+        this.accessibleBiomass = new double[nFisheries][nSpecies][nClass];
+        this.priceAccessibleBiomass = new double[nFisheries][nSpecies][nClass];
         this.harvestedBiomass = new double[nFisheries][nSpecies][nClass];
     }
 
-    public void incrementAccessibleBiomass(int iFishery, int iSpecies, double increment) {
-        this.accessibleBiomass[iFishery][iSpecies] += increment;
+    public void incrementAccessibleBiomass(int iFishery, AbstractSchool school, double increment) {
+        int iSpecies = school.getSpeciesIndex();
+        int iClass = this.sizeClasses.getClass(school);
+        this.accessibleBiomass[iFishery][iSpecies][iClass] += increment;
     }
 
     public void incrementHarvestedBiomass(int iFishery, AbstractSchool school, double nDead) {
@@ -155,16 +157,16 @@ public class EconomicModule extends AbstractProcess {
         this.harvestedBiomass[iFishery][iSpecies][iClass] += biomass;
     }
 
-    public void incrementPriceAccessibleBiomass(int iFishery, int iSpecies, double increment) {
-        this.priceAccessibleBiomass[iFishery][iSpecies] += increment;
+    // public void incrementPriceAccessibleBiomass(int iFishery, int iSpecies, double increment) {
+    //     this.priceAccessibleBiomass[iFishery][iSpecies] += increment;
+    // }
+
+    public double getAccessibleBiomass(int iFishery, int iSpecies, int iClass) {
+        return accessibleBiomass[iFishery][iSpecies][iClass];
     }
 
-    public double getAccessibleBiomass(int iFishery, int iSpecies) {
-        return accessibleBiomass[iFishery][iSpecies];
-    }
-
-    public double getPriceAccessibleBiomass(int iFishery, int iSpecies) {
-        return priceAccessibleBiomass[iFishery][iSpecies];
+    public double getPriceAccessibleBiomass(int iFishery, int iSpecies, int iClass) {
+        return priceAccessibleBiomass[iFishery][iSpecies][iClass];
     }
 
     public double getHarvestedBiomass(int iFishery, int iSpecies, int iClass) {

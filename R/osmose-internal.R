@@ -294,6 +294,12 @@
            # outputs for calibration of the Osmose model.
            meanWeightDistribByAge = .read_2D(files=files, path=path),
            meanWeightDistribBySize = .read_2D(files=files, path=path),
+           meanWeightDistribByWeight = .read_2D(files=files, path=path),
+      
+           biomassDistribByWeight         = .read_2D(files=files, path=path, ...),     
+           abundanceDistribByWeight         = .read_2D(files=files, path=path, ...),
+           yieldDistribByWeight         = .read_2D(files=files, path=path, ...),
+           yieldNDistribByWeight         = .read_2D(files=files, path=path, ...),
            
            .warningReadingOutputs(type)), 
     error = .errorReadingOutputs)
@@ -586,7 +592,14 @@ osmose2R.v4r0 = function (path=NULL, species.names=NULL) {
                     
                     # outputs used for the calibration of the economic model
                     meanWeightByAge = readOsmoseFiles(path=path, type="meanWeightDistribByAge"),
-                    meanWeightBySize = readOsmoseFiles(path=path, type="meanWeightDistribBySize")
+                    meanWeightBySize = readOsmoseFiles(path=path, type="meanWeightDistribBySize"),
+                    meanWeightByWeight = readOsmoseFiles(path=path, type="meanWeightDistribByWeight"),
+                    
+                    yieldByWeight = readOsmoseFiles(path = path, type = "yieldDistribByWeight"),  
+                    yieldNByWeight = readOsmoseFiles(path = path, type = "yieldNDistribByWeight"),  
+                    abundanceByWeight = readOsmoseFiles(path = path, type = "abundanceDistribByWeight"),
+                    biomassByWeight = readOsmoseFiles(path = path, type = "biomassDistribByWeight")
+                    
 )
   
   if(!is.null(outputData$yieldByFishery)) {

@@ -298,7 +298,7 @@ public class OutputManager extends SimulationLinker {
             outputs.add(new FishingAccessBiomassOutput(rank));  
         }
         
-        if(getConfiguration().getBoolean("output.fishing.harvested.biomass.bysize")){
+        if(getConfiguration().getBoolean("output.fishing.harvested.biomass")){
             outputs.add(new FishingHarvestedBiomassDistribOutput(rank));  
         }
         
@@ -333,7 +333,6 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.abundance.age1.enabled")) {
             outputs.add(new AbundanceOutput_age1(rank, "Bioen", "AbundAge1"));
         }
-        
 
         if (getConfiguration().getBoolean("output.meanWeight.byAge.enabled")) {
             outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanWeight", "Mean Weight of fish (kg)",
@@ -343,6 +342,11 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.meanWeight.bySize.enabled")) {
             outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanWeight", "Mean Weight of fish (kg)",
                     school -> (school.getWeight() * 1e3), school -> school.getInstantaneousAbundance(), sizeDistrib));
+        }
+        
+        if (getConfiguration().getBoolean("output.meanWeight.byWeight.enabled")) {
+            outputs.add(new WeightedDistribOutput(rank, "Indicators", "meanWeight", "Mean Weight of fish (kg)",
+                    school -> (school.getWeight() * 1e3), school -> school.getInstantaneousAbundance(), weightDistrib));
         }
 
         if (getConfiguration().getBoolean("output.abundance.bysize.enabled")) {
@@ -354,6 +358,12 @@ public class OutputManager extends SimulationLinker {
         if (getConfiguration().getBoolean("output.abundance.byweight.enabled")) {
             outputs.add(new DistribOutput(rank, "Indicators", "abundance",
                     "Distribution of fish abundance (number of fish)", school -> school.getInstantaneousAbundance(),
+                    weightDistrib));
+        }
+
+        if (getConfiguration().getBoolean("output.biomass.byweight.enabled")) {
+            outputs.add(new DistribOutput(rank, "Indicators", "biomass",
+                    "Distribution of fish biomass (tons)", school -> school.getInstantaneousBiomass(),
                     weightDistrib));
         }
 

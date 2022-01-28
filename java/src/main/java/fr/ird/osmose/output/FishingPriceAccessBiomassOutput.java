@@ -94,11 +94,11 @@ public class FishingPriceAccessBiomassOutput extends SimulationLinker implements
 
     @Override
     public void update() {
-        for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
-            for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
-                output[iSpecies][iFishery] += getSimulation().getEconomicModule().getPriceAccessibleBiomass(iFishery, iSpecies);
-            }
-        }
+        // for (int iFishery = 0; iFishery < nFisheries; iFishery++) {
+        //     for (int iSpecies = 0; iSpecies < getNSpecies(); iSpecies++) {
+        //         output[iSpecies][iFishery] += getSimulation().getEconomicModule().getPriceAccessibleBiomass(iFishery, iSpecies);
+        //     }
+        // }
     }
 
 
