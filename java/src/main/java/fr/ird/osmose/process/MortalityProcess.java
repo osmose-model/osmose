@@ -175,10 +175,6 @@ public class MortalityProcess extends AbstractProcess {
 
         fisheryEnabled = getConfiguration().isFisheryEnabled();
         economyEnabled = getConfiguration().isEconomyEnabled();
-        if (fisheryEnabled) { 
-            this.initFishingGear();
-        }
-        nfishery = getConfiguration().getNFishery();
 
         additionalMortality = new AdditionalMortality(getRank());
         additionalMortality.init();
@@ -210,36 +206,17 @@ public class MortalityProcess extends AbstractProcess {
 
         // If fishing mortality is enabled (default), activate the fishing mortality
         if (fishingMortalityEnabled) {
+            
             // fishery (Osmose 4) vs fishing mortality (Osmose 3)
             if (fisheryEnabled) {
-            
-            fisheryCatchability = new AccessibilityManager(getRank(), "fisheries.catchability", "cat", null);
-            fisheryCatchability.init();
-            
-                fisheriesMortality = new FishingGear[nfishery];
-
-                // Recovers the index of fisheries
-                int[] fisheryIndex = this.getConfiguration().findKeys("fisheries.name.fsh*").stream()
-                        .mapToInt(rgKey -> Integer.valueOf(rgKey.substring(rgKey.lastIndexOf(".fsh") + 4))).sorted()
-                        .toArray();
-
-                if (fisheryIndex.length != nfishery) {
-                    String message = "The number of fishery is not consistant with the number of fisheries name.";
-                    error(message, new Exception());
-                }
-
-                int cpt = 0;
-                for (int index : fisheryIndex) {
-                    fisheriesMortality[cpt] = new FishingGear(getRank(), index);
-                    fisheriesMortality[cpt].init();
-                    cpt++;
-                }
 
                 fisheryCatchability = new AccessibilityManager(getRank(), "fisheries.catchability", "cat", null);
                 fisheryCatchability.init();
 
                 fisheryDiscards = new AccessibilityManager(getRank(), "fisheries.discards", "dis", null);
                 fisheryDiscards.init();
+                
+                this.initFishingGear();
 
             } else {
                 fishingMortality = new FishingMortality(getRank());
