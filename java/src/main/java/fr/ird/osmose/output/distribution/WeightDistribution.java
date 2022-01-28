@@ -72,6 +72,8 @@ public class WeightDistribution extends AbstractDistribution {
         return 0.25f;
     }
 
+    /** Returns the weight in kg. Weight is computed in tons,
+     * it is converted back in kg here. */
     @Override
     float getValue(IMarineOrganism school) {
         return school.getWeight() * 1e3f;
