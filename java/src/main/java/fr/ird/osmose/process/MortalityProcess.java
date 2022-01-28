@@ -635,15 +635,16 @@ public class MortalityProcess extends AbstractProcess {
                             double F = gear.getRate(fishedSchool) / subdt;
                             nDead = fishedSchool.getInstantaneousAbundance() * (1.d - Math.exp(-F));
                             
-                            if (economyEnabled) {
-                                // store the harvested biomass by size class by species for fishing gear.
-                                getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, fishedSchool, nDead);
-                            }
                             
                             // Percentage values of discarded fish. The remaining go to fishery.
                             double discardRate = gear.getDiscardRate(fishedSchool);
                             double nFished = (1 - discardRate) * nDead;
                             double nDiscared = discardRate * nDead;
+
+                            if (economyEnabled) {
+                                // store the harvested biomass by size class by species for fishing gear.
+                                getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, fishedSchool, nDead);
+                            }
 
                             fishedSchool.fishedBy(iFishery, fishedSchool.abd2biom(nFished));
                             fishedSchool.discardedBy(iFishery, fishedSchool.abd2biom(nDiscared));
@@ -678,9 +679,9 @@ public class MortalityProcess extends AbstractProcess {
                         }
 
                         if (economyEnabled && nDead != 0) {
-                            int iSpecies = school.getSpeciesIndex();
+                            int iFishery = school.getSpeciesIndex();
                             // store the harvested biomass by size class by species for fishing gear.
-                            getSimulation().getEconomicModule().incrementHarvestedBiomass(iSpecies, school, nDead);
+                            getSimulation().getEconomicModule().incrementHarvestedBiomass(iFishery, school, nDead);
                         }
 
                         school.incrementNdead(MortalityCause.FISHING, nDead);
