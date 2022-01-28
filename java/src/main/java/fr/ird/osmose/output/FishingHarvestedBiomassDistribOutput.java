@@ -66,11 +66,11 @@ public class FishingHarvestedBiomassDistribOutput extends SimulationLinker imple
                 prw[iSpecies].print(separator);
                 for (int iFishery = 0; iFishery < nFisheries - 1; iFishery++) {
                     // instantenous mortality rate for eggs additional mortality
-                    prw[iSpecies].print(output[iSpecies][iFishery][iClass] / recordFrequency);
+                    prw[iSpecies].print(output[iSpecies][iFishery][iClass]);
                     prw[iSpecies].print(separator);
                 }
                 int iFishery = nFisheries - 1;
-                prw[iSpecies].print(output[iSpecies][iFishery][iClass] / recordFrequency);
+                prw[iSpecies].print(output[iSpecies][iFishery][iClass]);
                 prw[iSpecies].println();
             }
         }
