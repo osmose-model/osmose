@@ -41,7 +41,7 @@
 osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts, 
                          type, replicates, freq, horizontal, conf, factor, 
                          xlim, ylim, col, alpha, border, lty, lwd, axes, legend, 
-                         units, ci = TRUE, ...){
+                         units, ci = TRUE, zero=FALSE, ...){
   
   # CHECK ARGUMENTS
   if(!is.null(species)) {
@@ -109,7 +109,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                conf = conf, factor = factor, col = col, 
                                alpha = alpha, speciesNames = speciesNames, 
                                lty = lty, lwd = lwd, axes = axes, units = units,
-                               border = border, legend = legend, ...),
+                               border = border, legend = legend, zero=zero, ...),
            "2" = plot2DTsType2(x = x, replicates = replicates, 
                                ci = ci, times = times, xlim = xlim, ylim = ylim,
                                conf = conf, factor = factor, col = col, 
@@ -154,21 +154,23 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
 
 plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf, 
                          factor, col, alpha, speciesNames, lty, lwd, axes, 
-                         units, border, legend, ...){
+                         units, border, legend, zero=FALSE, ...){
   
   # Define name of species
   if(is.null(speciesNames)) speciesNames = toupper(colnames(x))
   
-  # To keep the plot params as the beginning
-  op = par(no.readonly = TRUE)
-  on.exit(par(op))
-  
   # Define multiplot array if there're more than 1 species
   mfrow = getmfrow(ncol(x))
   if(ncol(x)!=1) {
+    # To keep the plot params as the beginning
+    op = par(no.readonly = TRUE)
+    on.exit(par(op))
+    # change canvas
     par(oma = c(1,1,1,1), mar = c(3,3,1,1))
     par(mfrow = mfrow)
   }
+
+  lmin = if(isTRUE(zero)) 0 else 0.75
   
   # Extract args related with line customization
   col = rep(x = if(is.null(col)) "black" else col, length.out = ncol(x))
@@ -194,7 +196,7 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
   for(i in seq_len(ncol(x))) {
     # Extract values for spp i
     xsp = factor*x[, i, ,drop = FALSE]
-    if(is.null(ylim_fix)) ylim = c(0.75, 1.25)*range(as.numeric(xsp)) else ylim_fix*factor
+    if(is.null(ylim_fix)) ylim = c(lmin, 1.25)*range(as.numeric(xsp)) else ylim_fix*factor
     # Set an empty canvas
     plot.new()
     plot.window(xlim = xlim, ylim = ylim)
