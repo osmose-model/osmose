@@ -44,7 +44,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                          units, ci = TRUE, zero=FALSE, ...){
   
   # CHECK ARGUMENTS
-  if(!is.null(species)) {
+  if(!is.null(species)){
     # Check species I
     message1 = "'species' must be whether a numeric or character vector without NA or duplicated values."
     if(!is.vector(species) || # isn't it a vector?
@@ -56,12 +56,12 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
     }
     
     # Check species II
-    if(is.numeric(species)) {
-      if(any(species > ncol(x))) {
+    if(is.numeric(species)){
+      if(any(species > ncol(x))){
         stop("'species' must be between 1 and ", ncol(x))  
       }
-    } else if(is.character(species)) {
-      if(is.null(dimnames(x))) {
+    }else if(is.character(species)){
+      if(is.null(dimnames(x))){
         stop("Is not possible to define species as character due to 'x' has not species names defined.")
       }
       
@@ -101,7 +101,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
   
   # Define error message
   msg = sprintf("Not defined method for ts = %s and type = %s", isTRUE(ts), type)
-  if(isTRUE(ts)) {
+  if(isTRUE(ts)){
     # Plot types for ts = TRUE
     switch(as.character(type),
            "1" = plot2DTsType1(x = x, replicates = replicates, 
@@ -128,7 +128,7 @@ osmosePlots2D = function(x, species, speciesNames, start, end, initialYear, ts,
                                speciesNames = speciesNames, axes = axes, 
                                units = units, ...),
            stop(msg))
-  } else {
+  }else{
     # Plot types for ts = FALSE    
     switch(as.character(type),
            "1" = plot2DType1(x, ci = ci, horizontal = horizontal, col = col,
@@ -170,6 +170,8 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
     par(mfrow = mfrow)
   }
 
+  lmin = if(isTRUE(zero)) 0 else 0.75
+  
   lmin = if(isTRUE(zero)) 0 else 0.75
   
   # Extract args related with line customization
@@ -293,7 +295,7 @@ plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf,
   }
   
   # Add axes
-  if(isTRUE(axes)) {
+  if(isTRUE(axes)){
     # Define default value for las (direction of axis labels)
     las = list(...)$las
     las = ifelse(is.null(las), 1, las)
@@ -327,7 +329,7 @@ plot2DTsType2 = function(x, replicates, ci, times, xlim, ylim, conf,
 }
 
 plotCI = function(x, y, replicates, ci, prob, col, alpha, lty, lwd, border, 
-                  ...) {
+                  ...){
   
   # If there is just one replicate, plot it directly 
   if(dim(y)[3] == 1){
