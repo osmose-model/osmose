@@ -112,7 +112,6 @@ public class TestPredMatrix {
     @Order(3)
     public void TestPreyIndex() {
 
-        System.out.println(":::::::");
         double age;
         Species species;
         School school;
