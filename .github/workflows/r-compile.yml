@@ -43,10 +43,12 @@ jobs:
         shell: Rscript {0}
 
       - name: Build Osmose without vignettes
-        run: R CMD build --no-build-vignettes .
+        run: |
+              R CMD build --no-build-vignettes .
+              cat /home/runner/work/osmose-private/osmose-private/osmose.Rcheck/00check.log
 
       - name: Check Osmose without vignettes
         run: |
             file=`ls *tar.gz`
             echo $file
-            R CMD check --as-cran --ignore-vignettes ${file} 
+            R CMD check --as-cran --ignore-vignettes ${file}
