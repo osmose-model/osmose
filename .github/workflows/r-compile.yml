@@ -22,7 +22,7 @@ jobs:
         uses: r-lib/actions/setup-r@master
             
       - name: Install NetCDF and Latex
-        run: sudo apt-get update && sudo apt-get install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
+        run:  sudo apt-get install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
 
       - name: Cache R dependencies
         id: r-dep
