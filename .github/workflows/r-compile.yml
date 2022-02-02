@@ -11,7 +11,7 @@ jobs:
   # This workflow contains a single job called "build"
   r-build:
     # The type of runner that the job will run on
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -24,18 +24,18 @@ jobs:
       - name: Install NetCDF and Latex
         run:  sudo apt-get install -yq libnetcdf-dev texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
 
-      - name: Cache R dependencies
-        id: r-dep
-        uses: actions/cache@v2
-        env:
-            cache-name: r-dep-modules
-        with:
-            path: /home/runner/work/_temp/Library
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/DESCRIPTION') }}
-            restore-keys: | 
-                ${{ runner.os }}-build-${{ env.cache-name }}-
-                ${{ runner.os }}-build-
-                ${{ runner.os }}-
+      # - name: Cache R dependencies
+      #   id: r-dep
+      #   uses: actions/cache@v2
+      #   env:
+      #       cache-name: r-dep-modules
+      #   with:
+      #       path: /home/runner/work/_temp/Library
+      #       key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/DESCRIPTION') }}
+      #       restore-keys: | 
+      #           ${{ runner.os }}-build-${{ env.cache-name }}-
+      #           ${{ runner.os }}-build-
+      #           ${{ runner.os }}-
 
       - name: Install Osmose dependencies
         # if: steps.r-dep.outputs.cache-hit != 'true'
