@@ -215,7 +215,7 @@ public class Matrix extends OsmoseLinker {
         } else {
             if(this.sortMatrix) {
                 // If class getter is not null, then the Class methods are used.
-                this.indexingPred = (school -> this.getIndexPredClass(school));
+                this.indexingPred = (school -> this.getIndexPredClassSorted(school));
                 this.indexingPrey = (school -> this.getIndexPreyClassSorted(school));
             } else {
                 // If class getter is not null, then the Class methods are used.
@@ -429,6 +429,29 @@ public class Matrix extends OsmoseLinker {
         return -1;
     }
 
+    /**
+     * Extracts the matrix column for the given prey.
+     *
+     * Based on full correspondance of the name (class < thres).
+     *
+     * @param prey
+     * @return
+     */
+    public int getIndexPredClassSorted(IAggregation pred) {
+        
+        int iSpecies = pred.getSpeciesIndex();
+        float[] classes = this.predClasses[iSpecies];
+        for(int i = 0; i < classes.length; i++) {
+            if(classGetter.getVariable(pred) < classes[i]) { 
+                return this.predIndex[iSpecies][i];   
+            }
+        }
+
+        String message = String.format("No accessibility found for pred %s class %f", pred.getSpeciesName(), classGetter.getVariable(pred));
+        error(message, new IllegalArgumentException());
+        return -1;
+    }
+    
     public int getIndexPreyNoClass(IAggregation prey) {
         
         String preyname = prey.getSpeciesName();
