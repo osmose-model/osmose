@@ -38,7 +38,7 @@ jobs:
                 ${{ runner.os }}-
 
       - name: Install Osmose dependencies
-        if: steps.r-dep.outputs.cache-hit != 'true'
+        # if: steps.r-dep.outputs.cache-hit != 'true'
         run: install.packages(c("rlist", "knitr", "rmarkdown", "stringr", "ncdf4", "mgcv", "fields"), repos="http://cran.us.r-project.org")
         shell: Rscript {0}
 
@@ -50,4 +50,3 @@ jobs:
             file=`ls *tar.gz`
             echo $file
             R CMD check --as-cran --ignore-vignettes ${file}
-            cat /home/runner/work/osmose-private/osmose-private/osmose.Rcheck/00check.log
