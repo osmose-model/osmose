@@ -157,6 +157,19 @@ public class TestNcSteps {
           
          ForcingFile forcingFile = new ForcingFile("ltl", pattern, 12, 0.0, 1.0, ForcingFileCaching.NONE);
          forcingFile.init();
+         
+         // We remove the files, in order to make sure that for the next running of tests,
+         // only the newly created files are used.
+         File tempFile;
+         
+         tempFile = new File(filename1);
+         tempFile.delete();
+         
+         tempFile = new File(filename2);
+         tempFile.delete();
+         
+         tempFile = new File(filename3);
+         tempFile.delete();
                   
          // test on the total number of time steps
          assertEquals(72, forcingFile.getTimeLength());
