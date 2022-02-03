@@ -308,6 +308,22 @@ public class Matrix extends OsmoseLinker {
     public int getNPrey() {
         return this.nPreys;
     }
+    
+    public String[] getPreyNames() {
+        return namesPrey;
+    }
+
+    public String[] getPredNames() {
+        return namesPred;
+    }
+
+    public float[] getPreyClasses() {
+        return classPrey;
+    }
+
+    public float[] getPredClasses() {
+        return classPred;
+    }
 
     public String getPreyName(int i) {
         return namesPrey[i];

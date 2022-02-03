@@ -1,5 +1,6 @@
 package fr.ird.osmose;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import fr.ird.osmose.resource.ResourceSpecies;
 import fr.ird.osmose.util.AccessibilityManager;
 import fr.ird.osmose.util.Matrix;
 
+/** Class that tests the reading of accessibility matrix. */
 @TestMethodOrder(OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestPredMatrix {
@@ -54,6 +56,48 @@ public class TestPredMatrix {
         assertEquals(35, nPreys);
 
     }
+    
+    @Test
+    public void TestPreyNames() {
+        String[] expected = new String[] { "lesserSpottedDogfish", "lesserSpottedDogfish", "redMullet", "redMullet",
+                "pouting", "pouting", "whiting", "whiting", "poorCod", "poorCod", "cod", "cod", "dragonet", "dragonet",
+                "sole", "sole", "plaice", "plaice", "horseMackerel", "mackerel", "herring", "sardine", "squids",
+                "squids", "Dinoflagellates", "Diatoms", "Microzoo", "Mesozoo", "Macrozoo", "VSBVerySmallBenthos",
+                "SmallBenthos", "MediumBenthos", "LargeBenthos", "VLBVeryLargeBenthos", "backgroundSpecies" };
+
+        assertArrayEquals(expected, this.accessMatrix.getPreyNames());
+    }
+
+    @Test
+    public void TestPredNames() {
+        String[] expected = new String[] { "lesserSpottedDogfish", "lesserSpottedDogfish", "redMullet", "redMullet",
+                "pouting", "pouting", "whiting", "whiting", "poorCod", "poorCod", "cod", "cod", "dragonet", "dragonet",
+                "sole", "sole", "plaice", "plaice", "horseMackerel", "mackerel", "herring", "sardine", "squids",
+                "squids", "backgroundSpecies" };
+        assertArrayEquals(expected, this.accessMatrix.getPredNames());
+    }
+    
+    @Test
+    public void TestPredClass() {
+        float[] expected = new float[] { 0.45f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f,
+                Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.4f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.15f,
+                Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE,
+                Float.MAX_VALUE, 0.125f, Float.MAX_VALUE, Float.MAX_VALUE };
+        assertArrayEquals(expected, this.accessMatrix.getPredClasses());
+    }
+
+    @Test
+    public void TestPreyClasses() {
+        float[] expected = new float[] { 0.45f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f,
+                Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.4f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.15f,
+                Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE,
+                Float.MAX_VALUE, 0.125f, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE,
+                Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE,
+                Float.MAX_VALUE, Float.MAX_VALUE };
+        assertArrayEquals(expected, this.accessMatrix.getPreyClasses());
+    }
+    
+  
 
     /** Test of the predator (column) index on unsorted array */
     @Test
@@ -204,12 +248,16 @@ public class TestPredMatrix {
         osmose.readConfiguration(configurationFile, cmd);
         cfg = osmose.getConfiguration();
         cfg.init();
-        AccessibilityManager access = new AccessibilityManager(0, "predation.accessibility", ".acc",
+        
+        // First, we read the accessibility matrix when the matrixes is not sorted.
+        // i.e. we read the file as it is.
+        AccessibilityManager access = new AccessibilityManager(0,"predation.accessibility",".acc",
                 (school -> (school.getAge())), false);
         access.init();
         accessMatrix = access.getMatrix().get(-1);
 
-        AccessibilityManager access2 = new AccessibilityManager(0, "predation.accessibility", ".acc",
+        // Here, we read the file and we sort the columns and rows by first comparing names and then class.
+        AccessibilityManager access2 = new AccessibilityManager(0,"predation.accessibility",".acc",
                 (school -> (school.getAge())), true);
         access2.init();
         accessMatrix2 = access2.getMatrix().get(-1);
