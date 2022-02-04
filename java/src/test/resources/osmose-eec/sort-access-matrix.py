@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.10.3
+#       jupytext_version: 1.13.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -16,6 +16,7 @@
 # +
 import pandas as pd
 import numpy as np
+import sys
 
 data = pd.read_csv('predation-accessibility.csv', index_col = 0, sep=';')
 data.head()
@@ -23,14 +24,35 @@ data.head()
 
 data.tail()
 
-rownames = data.index.values.copy()
-sortedrows = sorted(rownames, key=str.lower)
 
-colnames = data.columns.values.copy()
-sortedcols = sorted(colnames, key=str.lower)
-sortedcols
+def sort(names):
+    prednames = []
+    predclasses = []
+    for temp in names:
+        test = temp.split('<')
+        if len(test) == 1:
+            predclasses.append(sys.float_info.max)
+        else:
+            predclasses.append(float(test[1]))
+        prednames.append(test[0].strip().lower())
+    
+    preddf = pd.DataFrame(index=names, data={'names': prednames, 'classes':predclasses})
+    return preddf
 
-output = data.loc[sortedrows, sortedcols]
+
+prey = sort(data.index)
+prey.tail()
+
+pred = sort(data.columns)
+pred.tail()
+
+sortpred = pred.sort_values(by=['names', 'classes'])
+sortpred.head()
+
+sortprey = prey.sort_values(by=['names', 'classes'])
+sortprey.head()
+
+output = data.loc[sortprey.index, sortpred.index]
 output
 
 output.to_csv('sorted-predation-accessibility.csv')
