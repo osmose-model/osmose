@@ -64,7 +64,6 @@ public class TestPredMatrix {
                 "sole", "sole", "plaice", "plaice", "horseMackerel", "mackerel", "herring", "sardine", "squids",
                 "squids", "Dinoflagellates", "Diatoms", "Microzoo", "Mesozoo", "Macrozoo", "VSBVerySmallBenthos",
                 "SmallBenthos", "MediumBenthos", "LargeBenthos", "VLBVeryLargeBenthos", "backgroundSpecies" };
-
         assertArrayEquals(expected, this.accessMatrix.getPreyNames());
     }
 
@@ -97,8 +96,46 @@ public class TestPredMatrix {
         assertArrayEquals(expected, this.accessMatrix.getPreyClasses());
     }
     
-  
+    
+    @Test
+    public void TestSortedPreyNames() {
+        String[] expected = new String[] { "backgroundSpecies", "cod", "cod", "Diatoms", "Dinoflagellates", "dragonet",
+                "dragonet", "herring", "horseMackerel", "LargeBenthos", "lesserSpottedDogfish", "lesserSpottedDogfish",
+                "mackerel", "Macrozoo", "MediumBenthos", "Mesozoo", "Microzoo", "plaice", "plaice", "poorCod",
+                "poorCod", "pouting", "pouting", "redMullet", "redMullet", "sardine", "SmallBenthos", "sole", "sole",
+                "squids", "squids", "VLBVeryLargeBenthos", "VSBVerySmallBenthos", "whiting", "whiting" };
+        assertArrayEquals(expected, this.accessMatrix2.getPreyNames());
+    }
 
+    @Test
+    public void TestSortedPredNames() {
+        String[] expected = new String[] { "backgroundSpecies", "cod", "cod", "dragonet", "dragonet", "herring",
+                "horseMackerel", "lesserSpottedDogfish", "lesserSpottedDogfish", "mackerel", "plaice", "plaice",
+                "poorCod", "poorCod", "pouting", "pouting", "redMullet", "redMullet", "sardine", "sole", "sole",
+                "squids", "squids", "whiting", "whiting" };
+        assertArrayEquals(expected, this.accessMatrix2.getPredNames());
+    }
+    
+    @Test
+    public void TestSortedPredClass() {
+        float[] expected = new float[] { Float.MAX_VALUE, 0.4f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE,
+                Float.MAX_VALUE, Float.MAX_VALUE, 0.45f, Float.MAX_VALUE, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE,
+                0.25f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, Float.MAX_VALUE, 0.15f,
+                Float.MAX_VALUE, 0.125f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE };
+        assertArrayEquals(expected, this.accessMatrix2.getPredClasses());
+    }
+
+    @Test
+    public void TestSortedPreyClasses() {
+        float[] expected = new float[] { Float.MAX_VALUE, 0.4f, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE,
+                0.25f, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, 0.45f, Float.MAX_VALUE,
+                Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, 0.25f,
+                Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE, 0.25f, Float.MAX_VALUE,
+                Float.MAX_VALUE, Float.MAX_VALUE, 0.15f, Float.MAX_VALUE, 0.125f, Float.MAX_VALUE, Float.MAX_VALUE,
+                Float.MAX_VALUE, 0.25f, Float.MAX_VALUE };
+        assertArrayEquals(expected, this.accessMatrix2.getPreyClasses());
+    }
+    
     /** Test of the predator (column) index on unsorted array */
     @Test
     @Order(2)
