@@ -82,16 +82,10 @@ public class OsmoseLinker extends OLogger {
         } else {
             return this.getRscSpecies(index - nSpecies - nBkg);
         }
-
     }
 
     final public Species getSpecies(String name) {
-        for (int i = 0; i < getNSpecies(); i++) {
-            if (getSpecies(i).getName().equalsIgnoreCase(name)) {
-                return getSpecies(i);
-            }
-        }
-        return null;
+        return getConfiguration().getSpecies(name);
     }
 
     /**
