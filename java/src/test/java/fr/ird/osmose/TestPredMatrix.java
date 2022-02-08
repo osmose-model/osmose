@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.junit.jupiter.api.AfterAll;
@@ -40,6 +41,31 @@ public class TestPredMatrix {
     private ArrayList<Integer> preyIndex = new ArrayList<>();
 
     private int nStepYears;
+    
+    interface Index {
+        int getIndex(School school);
+    }
+        
+    String[] testNames = new String[] { "lesserSpottedDogfish", "lesserSpottedDogfish", "redMullet", "redMullet",
+    "pouting", "pouting", "whiting", "whiting", "poorCod", "poorCod", "cod", "cod", "dragonet", "dragonet",
+    "sole", "sole", "plaice", "plaice", "horseMackerel", "horseMackerel", "mackerel", "mackerel", "herring",
+    "herring", "sardine", "sardine", "squids", "squids"};
+    
+    float[] testAges = new float[] { 0.3f, 0.46f, // lesser
+            0.2f, 0.3f, // rm
+            0.2f, 0.3f, // pouting
+            0.2f, 0.3f, // whitting,
+            0.2f, 0.3f, // poorcod,
+            0.35f, 0.45f, // cod,
+            0.2f, 0.3f, // drago,
+            0.1f, 0.2f, // sole,
+            0.2f, 0.3f, // plaice,
+            0.3f, 0.5f, // hmack,
+            0.3f, 0.5f, // mack,
+            0.3f, 0.5f, // herring
+            0.3f, 0.5f, // sard
+            0.1f, 0.2f // squid
+    };
 
     /** Test of the predation dimension array **/
     @Test
@@ -136,119 +162,85 @@ public class TestPredMatrix {
         assertArrayEquals(expected, this.accessMatrix2.getPreyClasses());
     }
     
+    /** Method that generates the expected index of the accessible matrix for the species and
+     * age classes defined in the above. 
+     */
+    private int[] getIndexes(Index indexer) {
+        
+        List<Integer> values = new ArrayList<>();
+        for(int i = 0; i < testNames.length; i++) {
+            String speciesName = testNames[i];
+            float age = testAges[i];
+            Species species = this.getSpecies(speciesName);
+            School school = this.getSchool(species, age);
+            int index = indexer.getIndex(school);
+            values.add(index);
+        }
+        
+        int[] actual = values.stream().mapToInt(i -> i).toArray();
+        return actual;
+        
+    }
+    
     /** Test of the predator (column) index on unsorted array */
     @Test
     @Order(2)
     public void TestPredIndex() {
-
-        double age;
-        Species species;
-        School school;
-
-        // testing species 0=lesserSpottedDogfish;
-        species = this.getSpecies(0);
-        age = 0.2;
-        school = this.getSchool(species, age);
-        assertEquals(0, this.accessMatrix.getIndexPred(school));
-        predIndex.add(0);
-
-        age = 0.45;
-        school = this.getSchool(species, age);
-        assertEquals(1, this.accessMatrix.getIndexPred(school));
-        predIndex.add(1);
-
-        age = 0.46;
-        school = this.getSchool(species, age);
-        assertEquals(1, this.accessMatrix.getIndexPred(school));
-        predIndex.add(1);
-
-        // testing for horseMackerel 18
-        species = this.getSpecies(9);
-        age = 0.1;
-        school = this.getSchool(species, age);
-        assertEquals(18, this.accessMatrix.getIndexPred(school));
-        predIndex.add(18);
-
-        age = 1e6f;
-        school = this.getSchool(species, age);
-        assertEquals(18, this.accessMatrix.getIndexPred(school));
-        predIndex.add(18);
-
-        // testing for species= (squids) 22
-        species = this.getSpecies(13);
-        age = 0.1;
-        school = this.getSchool(species, age);
-        assertEquals(22, this.accessMatrix.getIndexPred(school));
-        predIndex.add(22);
-
-        age = 0.2;
-        school = this.getSchool(species, age);
-        assertEquals(23, this.accessMatrix.getIndexPred(school));
-        predIndex.add(23);
-
+                
+        int[] expected = new int[] { 0, 1, // less
+                2, 3, // rm
+                4, 5, // pout
+                6, 7, // whit
+                8, 9, // poorcod
+                10, 11, // cod
+                12, 13, // drago
+                14, 15, // sole
+                16, 17, // plaice
+                18, 18, // hmack
+                19, 19, // mack
+                20, 20, // hering
+                21, 21, // sard
+                22, 23 };
+            
+        int[] actual = this.getIndexes(sch-> this.accessMatrix.getIndexPred(sch));
+        
+        assertArrayEquals(expected, actual);
+            
     }
 
     /** Test on prey (row) for unsorted matrix **/
     @Test
     @Order(3)
     public void TestPreyIndex() {
-
-        double age;
-        Species species;
-        School school;
-
-        // testing species 0=lesserSpottedDogfish;
-        species = this.getSpecies(0);
-        age = 0.2;
-        school = this.getSchool(species, age);
-        assertEquals(0, this.accessMatrix.getIndexPrey(school));
-        preyIndex.add(0);
-
-        age = 0.45;
-        school = this.getSchool(species, age);
-        assertEquals(1, this.accessMatrix.getIndexPrey(school));
-        preyIndex.add(1);
-
-        age = 0.46;
-        school = this.getSchool(species, age);
-        assertEquals(1, this.accessMatrix.getIndexPrey(school));
-        preyIndex.add(1);
-
-        // testing for horseMackerel 18
-        species = this.getSpecies(9);
-        age = 0.1;
-        school = this.getSchool(species, age);
-        assertEquals(18, this.accessMatrix.getIndexPrey(school));
-        preyIndex.add(18);
-
-        age = 1e6f;
-        school = this.getSchool(species, age);
-        assertEquals(18, this.accessMatrix.getIndexPrey(school));
-        preyIndex.add(18);
-
-        // testing for species= (squids) 22
-        species = this.getSpecies(13);
-        age = 0.1;
-        school = this.getSchool(species, age);
-        assertEquals(22, this.accessMatrix.getIndexPrey(school));
-        preyIndex.add(22);
-
-        age = 0.2;
-        school = this.getSchool(species, age);
-        assertEquals(23, this.accessMatrix.getIndexPrey(school));
-        preyIndex.add(23);
+        
+        int[] expected = new int[] { 0, 1, // less
+                2, 3, // rm
+                4, 5, // pout
+                6, 7, // whit
+                8, 9, // poorcod
+                10, 11, // cod
+                12, 13, // drago
+                14, 15, // sole
+                16, 17, // plaice
+                18, 18, // hmack
+                19, 19, // mack
+                20, 20, // hering
+                21, 21, // sard
+                22, 23 };
+        
+        int[] actual = this.getIndexes(sch -> this.accessMatrix.getIndexPrey(sch));
+        
+        assertArrayEquals(expected, actual);
 
     }
 
     @Test
     @Order(4)
     public void TestRscPreyIndex() {
-        System.out.println("RSC");
         ResourceSpecies rscSpecies;
         Resource resource;
         Cell cell = Osmose.getInstance().getConfiguration().getGrid().getCell(0);
-
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < Osmose.getInstance().getConfiguration().getNRscSpecies(); i++) {
             rscSpecies = this.getRscSpecies(i);
             resource = new Resource(rscSpecies, cell);
             assertEquals(24 + i, this.accessMatrix.getIndexPrey(resource));
@@ -265,6 +257,10 @@ public class TestPredMatrix {
 
     public Species getSpecies(int index) {
         return Osmose.getInstance().getConfiguration().getSpecies(index);
+    }
+    
+    public Species getSpecies(String name) {
+        return Osmose.getInstance().getConfiguration().getSpecies(name);
     }
 
     public ResourceSpecies getRscSpecies(int index) {
