@@ -254,9 +254,12 @@ get_var = function(object, what, how, ...){
 #' 
 #' @export
 write_osmose = function(x, file, sep = ",", col.names = NA, quote = FALSE, 
-                        row.names = TRUE, ...){
+                        row.names = TRUE, append=FALSE, ...) {
+  
+  if(isTRUE(append)) cat("\n", file=file, append=TRUE)
   write.table(x = x, file = file, sep = sep, col.names = col.names, quote = quote,
-              row.names = row.names, ...)
+              row.names = row.names, append=append, ...)
+  if(isTRUE(append)) cat("\n", file=file, append=TRUE)
 }
 
 
