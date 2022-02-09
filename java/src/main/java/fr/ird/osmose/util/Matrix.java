@@ -300,6 +300,10 @@ public class Matrix extends OsmoseLinker {
     public double getValue(int iprey, int ipred) {
         return this.accessibilityMatrix[iprey][ipred];
     }
+    
+    public double[][] getValues() {
+        return this.accessibilityMatrix;   
+    }
 
     public int getNPred() {
         return this.nPred;
