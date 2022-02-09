@@ -207,6 +207,57 @@ public class TestPredMatrix {
         assertArrayEquals(expected, actual);
             
     }
+    
+    /** Test of the predator (column) index on unsorted array */
+    @Test
+    public void SortedTestPredIndex() {
+
+        int[] expected = new int[] { 7, 8, // less
+                16, 17, // rm
+                14, 15, // pout
+                23, 24, // whit
+                12, 13, // poorcod
+                1, 2, // cod
+                3, 4, // drago
+                19, 20, // sole
+                10, 11, // plaice
+                6, 6, // hmack
+                9, 9, // mack
+                5, 5, // hering
+                18, 18, // sard
+                21, 22 };  // squids
+
+        int[] actual = this.getIndexes(sch -> this.accessMatrix2.getIndexPred(sch));
+
+        assertArrayEquals(expected, actual);
+
+    }
+    
+    /** Test of the predator (column) index on unsorted array */
+    @Test
+    public void SortedTestPreYIndex() {
+
+        int[] expected = new int[] { 10, 11, // less
+                23, 24, // rm
+                21, 22, // pout
+                33, 34, // whit
+                19, 20, // poorcod
+                1, 2, // cod
+                5, 6, // drago
+                27, 28, // sole
+                17, 18, // plaice
+                8, 8, // hmack
+                12, 12, // mack
+                7, 7, // hering
+                25, 25, // sard
+                29, 30 };
+
+        int[] actual = this.getIndexes(sch -> this.accessMatrix2.getIndexPrey(sch));
+
+        assertArrayEquals(expected, actual);
+
+    }
+    
 
     /** Test on prey (row) for unsorted matrix **/
     @Test
