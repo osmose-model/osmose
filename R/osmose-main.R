@@ -70,17 +70,31 @@
 #' }
 #' @export
 run_osmose = function(input, parameters = NULL, output = NULL, log = "osmose.log",
-                      version = "4.3.2", osmose = NULL, java = "java",
+                      version = NULL, osmose = NULL, java = "java",
                       options = NULL, verbose = TRUE, clean = TRUE, force = FALSE){
+                        
+  package_version = packageVersion("osmose")
   
   # Print message with version
-  if(isTRUE(verbose)) message(sprintf("This is OSMOSE version %s", version))
+  # if version argument is null, Java version is the same as the package version
+  if (isTRUE(verbose)) {
+    if (!is.null(version)) {
+      message(sprintf("This is OSMOSE version %s", version))
+    } else {
+      message(sprintf("This is OSMOSE version %s", package_version))
+    }
+  }
   
   # Update to provide by release executables
-  if(is.null(osmose)){
-    osmose_name = sprintf("osmose_%s.jar", version)
-    lib = cacheManager("lib")
-    osmose = shQuote(cacheManager(osmose_name))
+  if (is.null(osmose)) {
+    if (!is.null(version)) {
+      osmose_name = sprintf("osmose_%s.jar", version)
+      lib = cacheManager("lib")
+      osmose = shQuote(cacheManager(osmose_name))
+    } else {
+       osmose_name = sprintf("osmose_%s-jar-with-dependencies.jar", package_version)
+       osmose = shQuote(system.file("java", osmose_name, package = "osmose"))
+    }
   }
   
   # If output path were specified, remove it
@@ -393,4 +407,3 @@ osmose_calib_demo = function(path = NULL) {
   
   return(demo)
 }
-
