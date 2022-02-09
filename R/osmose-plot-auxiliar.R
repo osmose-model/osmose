@@ -169,6 +169,8 @@ plot2DTsType1 = function(x, replicates, ci, times, xlim, ylim, conf,
     par(oma = c(1,1,1,1), mar = c(3,3,1,1))
     par(mfrow = mfrow)
   }
+
+  lmin = if(isTRUE(zero)) 0 else 0.75
   
   lmin = if(isTRUE(zero)) 0 else 0.75
   
