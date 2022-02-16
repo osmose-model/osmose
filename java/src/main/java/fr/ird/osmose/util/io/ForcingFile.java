@@ -391,4 +391,8 @@ public class ForcingFile extends OsmoseLinker {
         return this.stepMapping[iNcStep];
     }
     
+    public HashMap<Integer, double[][][]> getCachedVariable() {
+        return this.cachedVariable;
+    }
+
 }
