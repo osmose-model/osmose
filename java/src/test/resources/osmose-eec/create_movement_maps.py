@@ -20,6 +20,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 species = 'horseMackerel'
+nlat = 22
+nlon = 45
 
 with open('eec_param-movement.csv', 'r') as fin:
     lines = fin.readlines()
@@ -35,24 +37,41 @@ for l in lines[:]:
 
 keys = params.keys()
 key_species = [k for k in keys if k.startswith('movement.species')]
+key_species = [k for k in key_species if params[k] == species]
 map_index = [k.replace('movement.species.', '') for k in key_species]
 map_index
 
-for m in map_index:
-    file = params['movement.file.%s' %m][0]
-    if(file == 'null'):
-        continue
-     
-    data = pd.read_csv(file, sep=';', header=None)
-    data = data.values[::-1]
-    data = np.ma.masked_where(data < 0, data)
-    data = np.tile(data, (24, 1, 1))
+initialAge = [params['movement.initialAge.%s' %m][0] for m in map_index]
+lastAge = [params['movement.lastAge.%s' %m][0] for m in map_index]
+initialAge, lastAge
 
-    dsout = xr.Dataset()
-    dsout['movements'] = (['time', 'y', 'x'], data)
+cpt = 0
+for i in np.unique(initialAge):
+    print('+++++++++++++++++++++ Processing initialAge', i)
+    output = np.zeros((24, nlat, nlon))
+    for m in map_index:
+        if params['movement.initialAge.%s' %m][0] == i:
+            file = params['movement.file.%s' %m][0]
+            if(file == 'null'):
+                continue
+            print(m)
+            print('Reading ', file)
+            data = pd.read_csv(file, sep=';', header=None)
+            data = data.values[::-1]
+            data = np.ma.masked_where(data < 0, data)
+            steps = params['movement.steps.%s' %m]#.astype(int)
+            steps = steps[steps != '']
+            print(steps)
+            steps = steps.astype(int)
+            
+            output[steps, :, :] = data
+    fileOut = 'maps/movements_%s_initialAge_%s_lastAge_%s.nc' %(species, np.unique(initialAge)[cpt], np.unique(lastAge)[cpt])
     
-    output_file = file.replace('.csv', '.nc')
-    print('Writting ', output_file)
-    dsout.to_netcdf(output_file)
+    dsout = xr.Dataset()
+    dsout['movements'] = (['time', 'y', 'x'], output)
+    print('Writting ', fileOut)
+    dsout.to_netcdf(fileOut)
+    
+    cpt += 1
 
 
