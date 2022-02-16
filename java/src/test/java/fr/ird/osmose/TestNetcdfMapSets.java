@@ -37,32 +37,21 @@ public class TestNetcdfMapSets {
         String configurationFile = this.getClass().getClassLoader().getResource("osmose-eec/eec_all-parameters.csv").getFile();
         
         // Overwrite some parameters
-        cmd.put("netcdfmovements.lastAge.map29", "1");
         cmd.put("netcdfmovements.initialAge.map29", "0");
-        cmd.put("netcdfmovements.file.map29", "maps/10chinchard_0.nc");
-        cmd.put("netcdfmovements.steps.map29", "0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23");
+        cmd.put("netcdfmovements.lastAge.map29", "1");
+        cmd.put("netcdfmovements.file.map29", "maps/movements_horseMackerel_initialAge_0_lastAge_1.nc");
         cmd.put("netcdfmovements.species.map29", "horseMackerel");
-        cmd.put("netcdfmovements.lastAge.map30", "4");
+        
         cmd.put("netcdfmovements.initialAge.map30", "1");
-        cmd.put("netcdfmovements.file.map30", "maps/10chinchard_1plus.nc");
-        cmd.put("netcdfmovements.steps.map30", "0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23");
+        cmd.put("netcdfmovements.lastAge.map30", "4");
+        cmd.put("netcdfmovements.file.map30", "maps/movements_horseMackerel_initialAge_1_lastAge_4.nc");
         cmd.put("netcdfmovements.species.map30", "horseMackerel");
-        cmd.put("netcdfmovements.lastAge.map31", "16");
+    
         cmd.put("netcdfmovements.initialAge.map31", "4");
-        cmd.put("netcdfmovements.file.map31", "null");
-        cmd.put("netcdfmovements.steps.map31", "12;13;14;15;16;17");
+        cmd.put("netcdfmovements.lastAge.map31", "16");
+        cmd.put("netcdfmovements.file.map31", "maps/movements_horseMackerel_initialAge_4_lastAge_16.nc");
         cmd.put("netcdfmovements.species.map31", "horseMackerel");
-        cmd.put("netcdfmovements.lastAge.map32", "16");
-        cmd.put("netcdfmovements.initialAge.map32", "4");
-        cmd.put("netcdfmovements.file.map32", "maps/10chinchard_spawning.nc");
-        cmd.put("netcdfmovements.steps.map32", "4;5;6;7;8;9;10;11;");
-        cmd.put("netcdfmovements.species.map32", "horseMackerel");
-        cmd.put("netcdfmovements.lastAge.map33", "16");
-        cmd.put("netcdfmovements.initialAge.map33", "4");
-        cmd.put("netcdfmovements.file.map33", "maps/10chinchard_1plus.nc");
-        cmd.put("netcdfmovements.steps.map33", "0;1;2;3;18;19;20;21;22;23;");
-        cmd.put("netcdfmovements.species.map33", "horseMackerel");
-        cmd.put("netcdfmovements.species.map33", "horseMackerel");
+        
         cmd.put("netcdfmovements.netcdf.enabled", "true");
         
         osmose.readConfiguration(configurationFile, cmd);
@@ -86,7 +75,7 @@ public class TestNetcdfMapSets {
 
     @Test
     public void testIndexMaps() { 
-        assertEquals(5, mapSet.getNMap());   
+        assertEquals(3, mapSet.getNMap());   
     }
     
 }
