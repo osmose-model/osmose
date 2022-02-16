@@ -44,6 +44,8 @@ package fr.ird.osmose.util;
 import fr.ird.osmose.Configuration;
 import fr.ird.osmose.School;
 import fr.ird.osmose.Species;
+import fr.ird.osmose.util.io.ForcingFile;
+import fr.ird.osmose.util.io.ForcingFileCaching;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,8 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
+
 
 /**
  * This class handles a set of spatial maps for a given species. No matter the
@@ -408,6 +409,7 @@ public class MapSet extends OsmoseLinker {
         int imap = 0;
         
         // Retrieve the index of the maps for this species
+        // There might be several maps for one species, based on size.
         for (int n = 0; n < nmapmax; n++) {
             while (!getConfiguration().canFind(prefix + ".species" + ".map" + imap)) {
                 imap++;
@@ -422,74 +424,51 @@ public class MapSet extends OsmoseLinker {
             imap++;
         }
         
-        // One map per timestep and per age number.
+        // One map per timestep and per age number
         maps = new HashMap<>(); // dimension = [nMaps][ntime]
         int iii = 0;
-        
-        // Prepare time-indexation.
-        int ndt = this.getConfiguration().getNStepYear();
-        
+                
         for (Integer im : mapNumber) {
 
             // Loop over the map indexes for the species.
             // note that it can contains two maps (for two size classes for instance)
-            String ncFile = cfg.getFile(prefix + ".file." + suffix + im);
+            String ncFilePattern = cfg.getFile(prefix + ".file." + suffix + im);
             String varName = cfg.getString(prefix + ".variable." + suffix + im);
-
             // Recovery of the number of time steps per year in the file
             int ncPerYear = getConfiguration().getInt(prefix + ".nsteps.year." + suffix + im);
+    
             int ageMin = (int) Math.round(getConfiguration().getDouble(prefix + ".initialAge." + suffix + im) * dt);
             int ageMax = (int) Math.round(getConfiguration().getDouble(prefix + ".lastAge." + suffix + im) * dt);
             ageMax = Math.min(ageMax, getSpecies(iSpecies).getLifespanDt() - 1);
-   
-            // Open the NetCDF file
-            NetcdfFile nc = NetcdfFile.open(ncFile);
-
-            Variable var = nc.findVariable(null, varName);
-            if ((var.getRank() != 3)) {
-                error(varName + " must have 3 dimensions (time, lat, lon), " + var.getRank() + " provided", null);
-            }
-
-            // number of time steps in the NetCDF
-            int ncTime = var.getShape()[0];
-
-            // for each nctime, read the map.
-            // map is indexed as [time, nmaps]
-            for (int i = 0; i < ncTime; i++) {
-
-                // Reads the GridMap by using NetCDF
-                maps.put(iii, new GridMap());
-                maps.get(iii).read(nc, i, varName);
-
-                // If the map is set to 0 everywhere
-                if (maps.get(iii).count() == 0) {
-                    // add a warning here.
-                    maps.put(iii, null);
-                    // Set the file name and netcdf index to null
-                    mapNcFiles.add("null");
-                    mapNcSteps.add(null);
-                } else {
-                    // Add the file name and netcdf index
-                    mapNcFiles.add(ncFile);
-                    mapNcSteps.add(i);
-                }
-
+            
+            ForcingFile forcingFile = new ForcingFile(varName, ncFilePattern, ncPerYear, 0, 1, ForcingFileCaching.ALL);
+            forcingFile.init();
+            
+            // Reading fish movements for the given file.
+            // the dimensions are nTimeNc.
+            HashMap<Integer, double[][][]> values = forcingFile.getCachedVariable();
+            
+            // Loop over all the values of fish movements (keys = ncStep in file)
+            for(int iStepNc : values.keySet()) { 
+                
+                // We add the map that corresponds to iStepNc file
+                maps.put(iii, new GridMap(values.get(iStepNc)[0]));
+                
+                // now we create the indexMaps by looping over all age classes and 
+                // all time-steps.
+                // If nStepNc match the one for the current map, 
                 for (int iAge = ageMin; iAge <= ageMax; iAge++) {
                     for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
-                        int iStepNc = (iStep / (ndt / ncPerYear)) % ncTime; // netcdf index to read, based on simulation time step
-                        if (iStepNc == i) {
-                            // if the nctime step associated with simulation time step matches nc index, add indexMaps
-                            indexMaps[iAge][iStep] = iii;
+                        int fileNcStep = forcingFile.getNcStep(iStep); 
+                        if(fileNcStep == iStepNc) { 
+                            indexMaps[iAge][iStep] = iii;   
                         }
                     }
                 }
                 
-                
                 iii++;
-
-            } // end of nctime loop
-
-            nc.close();
+                
+            }
             
             if(this.checkMaps) {
                 this.writeMovementsChecks(mapNcFiles, mapNcSteps);   
