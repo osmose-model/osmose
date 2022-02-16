@@ -45,9 +45,9 @@ import fr.ird.osmose.Configuration;
 import fr.ird.osmose.util.GridMap;
 import fr.ird.osmose.util.OsmoseLinker;
 import fr.ird.osmose.util.YearParameters;
+import fr.ird.osmose.util.io.ForcingFile;
+import fr.ird.osmose.util.io.ForcingFileCaching;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 import fr.ird.osmose.util.StepParameters;
 
 import java.io.IOException;
@@ -110,7 +110,6 @@ public class FisheryMapSet extends OsmoseLinker {
      * List of the maps.
      */
     protected HashMap<Integer, GridMap> maps;
-    
 
     /**
      * List of the pathnames of the CSV files.
@@ -126,15 +125,27 @@ public class FisheryMapSet extends OsmoseLinker {
     public void init() {
 
         // Load the maps
-        this.loadMaps();
+        String key = prefix + ".netcdf.enabled";
+        if (getConfiguration().getBoolean(key)) {
+            this.loadMaps();
 
-        // Check the map indexation
-        if (!this.checkMapIndexation()) {
-            error("Missing map indexation for Fishery index " + fisheryName + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
+            // Check the map indexation
+            if (!this.checkMapIndexation()) {
+                error("Missing map indexation for Fishery index " + fisheryName + " in map series '" + prefix
+                        + ".map*'. Please refer to prior warning messages for details.", null);
+            }
+
+            // Get rid of redundant map definitions
+            this.eliminateTwinMap();
+
+        } else {
+            try {
+                this.loadMapsNcMaps();
+            } catch (IOException | InvalidRangeException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }   
         }
-
-        // Get rid of redundant map definitions
-        this.eliminateTwinMap();
 
         // Normalize all maps
         this.normalizeAllMaps();
@@ -402,17 +413,13 @@ public class FisheryMapSet extends OsmoseLinker {
         
         // Load config + nstepyear + nsteps
         Configuration cfg = getConfiguration();
-        int dt = cfg.getNStepYear();
 
         // Load the file prefix with names that are of type. movemement.map.species.mapX
         String key = String.format("%s.%s.map*", prefix, suffix);
         int nmapmax = getConfiguration().findKeys(key).size();
+    
         List<Integer> mapNumber = new ArrayList<>();
-        List<String> mapNcFiles = new ArrayList<>();
-        List<Integer> mapNcSteps = new ArrayList<>();
-        
         int imap = 0;
-        
         // Retrieve the index of the maps for this species
         for (int n = 0; n < nmapmax; n++) {
             while (!getConfiguration().canFind(String.format("%s.%s.map%d", prefix, suffix, imap))) {
@@ -426,79 +433,35 @@ public class FisheryMapSet extends OsmoseLinker {
             imap++;
         }
         
+        if(mapNumber.size() != 1) {
+            getLogger().warning("One map should be provided for fishery");   
+        }
+    
+        // Recover the first map number.
+        imap = mapNumber.get(0);
+        
+        String ncFilePattern = cfg.getFile(prefix + ".file.map" + imap);
+        String varName = cfg.getString(prefix + ".variable.map" + imap);
+        int ncPerYear = cfg.getInt(prefix + ".steps.year.map" + imap);
+      
+        // Init a NetCDF file containing movements NetCDF forcings.
+        ForcingFile forcingFile = new ForcingFile(varName, ncFilePattern, ncPerYear, 0, 1, ForcingFileCaching.ALL);
+        forcingFile.init();
+        
+        // Define the indexMaps based on NetCDF index
+        for(int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
+            int iStepNc = forcingFile.getNcStep(iStep);
+            indexMaps[iStep] = iStepNc;            
+        }
+    
         // One map per timestep and per age number.
         maps = new HashMap<>(); // dimension = [nMaps][ntime]
-        int iii = 0;
-        
-        // Prepare time-indexation.
-        int ndt = this.getConfiguration().getNStepYear();
-        
-        for (Integer im : mapNumber) {
+        HashMap<Integer, double[][][]> forcingValues = forcingFile.getCachedVariable();
+        for(int i : forcingValues.keySet()) { 
+           double[][] values = forcingValues.get(i)[0];
+           maps.put(i, new GridMap(values));    
+        }
 
-            // Loop over the map indexes for the species.
-            // note that it can contains two maps (for two size classes for instance)
-            String ncFile = cfg.getFile(prefix + ".file.map" + im);
-            String varName = cfg.getString(prefix + ".variable.map" + im);
-
-            // Recovery of the number of time steps per year in the file
-            int ncPerYear = getConfiguration().getInt(prefix + ".nsteps.year.map" + im);
-   
-            // Open the NetCDF file
-            NetcdfFile nc = NetcdfFile.open(ncFile);
-
-            Variable var = nc.findVariable(null, varName);
-            if ((var.getRank() != 3)) {
-                error(varName + " must have 3 dimensions (time, lat, lon), " + var.getRank() + " provided", null);
-            }
-
-            // number of time steps in the NetCDF
-            int ncTime = var.getShape()[0];
-
-            // for each nctime, read the map.
-            // map is indexed as [time, nmaps]
-            for (int i = 0; i < ncTime; i++) {
-
-                // Reads the GridMap by using NetCDF
-                maps.put(iii, new GridMap());
-                maps.get(iii).read(nc, i, varName);
-
-                // If the map is set to 0 everywhere
-                if (maps.get(iii).count() == 0) {
-                    // add a warning here.
-                    maps.put(iii, null);
-                    // Set the file name and netcdf index to null
-                    mapNcFiles.add("null");
-                    mapNcSteps.add(null);
-                } else {
-                    // Add the file name and netcdf index
-                    mapNcFiles.add(ncFile);
-                    mapNcSteps.add(i);
-                }
-
-                for (int iStep = 0; iStep < getConfiguration().getNStep(); iStep++) {
-                    int iStepNc = (iStep / (ndt / ncPerYear)) % ncTime; // netcdf index to read, based on simulation
-                                                                        // time step
-                    if (iStepNc == i) {
-                        // if the nctime step associated with simulation time step matches nc index, add
-                        // indexMaps
-                        indexMaps[iStep] = iii;
-                    }
-                }
-                
-                iii++;
-
-            } // end of nctime loop
-
-            nc.close();
-            
-            // if(this.checkMaps) {
-            //     this.writeMovementsChecks(mapNcFiles, mapNcSteps);   
-            // }
-
-        } // end of loop on map number
     }  // end of method
-    
-    
-    
     
 }
