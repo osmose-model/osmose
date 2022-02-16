@@ -118,6 +118,8 @@ public class MapSet extends OsmoseLinker {
      */
     protected HashMap<Integer, GridMap> maps;
     
+    private final boolean removeDuplicate;
+    
     /**
      * List of the pathnames of the CSV files.
      */
@@ -128,10 +130,15 @@ public class MapSet extends OsmoseLinker {
     }
 
     public MapSet(int iSpeciesFile, int iSpecies, String prefix, String suffix) {
+        this(iSpeciesFile, iSpecies, prefix, suffix, true);
+    }
+    
+    public MapSet(int iSpeciesFile, int iSpecies, String prefix, String suffix, boolean removeDuplicate) {
         this.iSpeciesFile = iSpeciesFile;
         this.iSpecies = iSpecies;
         this.prefix = prefix;
         this.suffix = suffix;
+        this.removeDuplicate = removeDuplicate;
     }
 
     public void init() throws IOException, InvalidRangeException {
@@ -199,7 +206,9 @@ public class MapSet extends OsmoseLinker {
                 error("Missing map indexation for species " + getSpecies(iSpecies).getName() + " in map series '" + prefix + ".map*'. Please refer to prior warning messages for details.", null);
             }
             
-            eliminateTwinMapNC();
+            if(this.removeDuplicate) { 
+                eliminateTwinMapNC();
+            }
 
         } else {
             loadMapsCsv();
@@ -209,7 +218,9 @@ public class MapSet extends OsmoseLinker {
             }
 
             // Get rid of redundant map definitions
-            eliminateTwinMap();
+            if(this.removeDuplicate) { 
+                eliminateTwinMap();
+            }
         }
     }
 
