@@ -40,7 +40,7 @@ public class TestMapSets {
         
         species = osmose.getConfiguration().getSpecies(9);
         
-        mapSet = new MapSet(species.getFileSpeciesIndex(), species.getSpeciesIndex(), "movement");
+        mapSet = new MapSet(species.getFileSpeciesIndex(), species.getSpeciesIndex(), "movement", "map", false);
         try {
             mapSet.init();
         } catch (IOException | InvalidRangeException e) {
@@ -79,9 +79,6 @@ public class TestMapSets {
                 { 12, 13, 14, 15, 16, 17 }, // 31
                 { 4, 5, 6, 7, 8, 9, 10, 11 }, // 32
                 { 0, 1, 2, 3, 18, 19, 20, 21, 22, 23 } }; // 33
-
-        // expected maps, taken into account the duplicates
-        int[] indexMaps = new int[] { 0, 1, 2, 3, 1 };
         
         int nYears = cfg.getNYears();
         int lifeSpanDt = species.getLifespanDt();
@@ -94,7 +91,7 @@ public class TestMapSets {
             for (int a = ageMin; a <= ageMax; a++) {
                 for (int y = 0; y < nYears; y++) {
                     for (int s : steps[i]) {
-                        expected[a][y * dt + s] = indexMaps[i];
+                        expected[a][y * dt + s] = i;
                     }
                 }
             }

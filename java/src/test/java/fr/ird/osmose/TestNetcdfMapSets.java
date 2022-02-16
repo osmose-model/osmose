@@ -64,7 +64,7 @@ public class TestNetcdfMapSets {
         
         species = osmose.getConfiguration().getSpecies(9);
         
-        mapSet = new MapSet(species.getFileSpeciesIndex(), species.getSpeciesIndex(), "netcdfmovements");
+        mapSet = new MapSet(species.getFileSpeciesIndex(), species.getSpeciesIndex(), "netcdfmovements", "map", false);
         try {
             mapSet.init();
         } catch (IOException | InvalidRangeException e1) {
@@ -77,5 +77,56 @@ public class TestNetcdfMapSets {
     public void testIndexMaps() { 
         assertEquals(3, mapSet.getNMap());   
     }
+    
+    /** Testing the shape of the index Matrix */
+    @Test
+    public void testIndexDimensions() {
+        int[][] indexMaps = mapSet.getIndexMap();
+        int lifeSpan = species.getLifespanDt();
+        int nStep = cfg.getNStep();
+        assertEquals(lifeSpan, indexMaps.length);
+        for (int i = 0; i < lifeSpan; i++) {
+            assertEquals(nStep, indexMaps[i].length);
+        }
+    }
+    
+    @Test
+    public void testMatrixIndex() { 
+        
+        float initialAge[] = new float[] { 0, 1, 4, 4, 4 };
+        float lastAge[] = new float[] { 1, 4, 16, 16, 16 };
+        int dt = cfg.getNStepYear();
+        int[][] steps = new int[][] {
+                { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 }, // 29
+                { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 }, // 30
+                { 12, 13, 14, 15, 16, 17 }, // 31
+                { 4, 5, 6, 7, 8, 9, 10, 11 }, // 32
+                { 0, 1, 2, 3, 18, 19, 20, 21, 22, 23 } }; // 33
+
+        // expected maps, taken into account the duplicates
+        int[] indexMaps = new int[] { 0, 1, 2, 3, 1 };
+        
+        int nYears = cfg.getNYears();
+        int lifeSpanDt = species.getLifespanDt();
+        int[][] expected = new int[lifeSpanDt][cfg.getNStep()];
+                
+        for (int i = 0; i < 5; i++) {
+            int ageMin = (int) Math.round(initialAge[i] * dt);
+            int ageMax = (int) Math.round(lastAge[i] * dt);
+            ageMax = Math.min(ageMax, lifeSpanDt - 1);
+            for (int a = ageMin; a <= ageMax; a++) {
+                for (int y = 0; y < nYears; y++) {
+                    for (int s : steps[i]) {
+                        expected[a][y * dt + s] = indexMaps[i];
+                    }
+                }
+            }
+        }
+        
+        assertArrayEquals(expected, mapSet.getIndexMap());
+            
+    }
+    
+    
     
 }
