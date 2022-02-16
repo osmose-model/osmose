@@ -454,8 +454,8 @@ public class FisheryMapSet extends OsmoseLinker {
             indexMaps[iStep] = iStepNc;            
         }
     
-        // One map per timestep and per age number.
-        maps = new HashMap<>(); // dimension = [nMaps][ntime]
+        // One map per timestep
+        maps = new HashMap<>(); // dimension = [ntimeNc]
         HashMap<Integer, double[][][]> forcingValues = forcingFile.getCachedVariable();
         for(int i : forcingValues.keySet()) { 
            double[][] values = forcingValues.get(i)[0];
