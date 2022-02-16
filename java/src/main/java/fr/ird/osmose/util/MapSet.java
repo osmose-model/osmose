@@ -292,6 +292,7 @@ public class MapSet extends OsmoseLinker {
                 maps.put(n, new GridMap(csvFile));
                 mapFileList.add(csvFile);
             } else {
+                mapFile[n] = null;
                 maps.put(n, null);
                 mapFileList.add("null");
             }
@@ -384,9 +385,7 @@ public class MapSet extends OsmoseLinker {
             }
         }
     }
-    
-    
-    
+
     /**
      * Method to initialize MapSets from NetCDF file.
      *
@@ -549,5 +548,12 @@ public class MapSet extends OsmoseLinker {
         return filename.toString();
     }
     
+    public String[] getFileNames() {
+        return this.mapFile;   
+    }
+    
+    public int[][] getIndexMap() {
+        return this.indexMaps;   
+    }
     
 }
