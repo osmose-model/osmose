@@ -133,7 +133,7 @@ public class FisheryMapSet extends OsmoseLinker {
 
         // Load the maps
         String key = prefix + ".netcdf.enabled";
-        if (getConfiguration().getBoolean(key)) {
+        if (!getConfiguration().getBoolean(key)) {
             this.loadMaps();
 
             // Check the map indexation
