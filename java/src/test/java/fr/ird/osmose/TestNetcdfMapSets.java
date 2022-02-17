@@ -82,7 +82,7 @@ public class TestNetcdfMapSets {
 
     @Test
     public void testIndexMaps() { 
-        assertEquals(3, mapSet.getNMap());   
+        assertEquals(3 * 24, mapSet.getNMap());   
     }
     
     /** Testing the shape of the index Matrix */
