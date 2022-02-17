@@ -212,7 +212,18 @@ public class ForcingFile extends OsmoseLinker {
         if (!caching.equals(ForcingFileCaching.NONE)) {
             cachedVariable = new HashMap<>();
         }
-
+    
+        if(caching.equals(ForcingFileCaching.ALL)) { 
+            this.loadCachedVariable();   
+        }
+    }
+    
+    private void loadCachedVariable() {
+        // cache whole time series at first time step
+        for (int iTime = 0; iTime < timeLength; iTime++) {
+            debug("Caching from variable " + this.varName + " time step " + iTime);
+            cachedVariable.put(iTime, readVariable(iTime));
+        }
     }
 
     public void initTimeMapping() throws IOException {
@@ -266,13 +277,6 @@ public class ForcingFile extends OsmoseLinker {
 
         switch (this.caching) {
             case ALL:
-                if (iStepSimu == 0) {
-                    // cache whole time series at first time step
-                    for (int iTime = 0; iTime < timeLength; iTime++) {
-                        debug("Caching from variable " + this.varName + " time step " + iTime);
-                        cachedVariable.put(iTime, readVariable(iTime));
-                    }
-                }
                 // retrieve biomass from cache
                 this.variable = this.cachedVariable.get(iStepNc);
                 break;
