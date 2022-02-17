@@ -462,7 +462,12 @@ public class MapSet extends OsmoseLinker {
             for(int iStepNc : values.keySet()) { 
                 
                 // We add the map that corresponds to iStepNc file
-                maps.put(iii, new GridMap(values.get(iStepNc)[0]));
+                // if GridMap is only 0s, then assume null
+                GridMap gridMap = new GridMap(values.get(iStepNc)[0]);
+                if(gridMap.count() == 0) { 
+                    gridMap = null;   
+                }
+                maps.put(iii, gridMap);
                 
                 // now we create the indexMaps by looping over all age classes and 
                 // all time-steps.
