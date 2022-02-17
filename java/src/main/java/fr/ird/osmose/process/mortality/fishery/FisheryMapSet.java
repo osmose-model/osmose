@@ -116,10 +116,17 @@ public class FisheryMapSet extends OsmoseLinker {
      */
     private String[] mapFile;
 
-    public FisheryMapSet(String fisheryName, String prefix, String suffix) {
+    private final boolean removeDuplicate;
+    
+    public FisheryMapSet(String fisheryName, String prefix, String suffix, boolean removeDuplicate) {
         this.fisheryName = fisheryName;
         this.prefix = prefix;  // should be fishery.movement
         this.suffix = suffix;
+        this.removeDuplicate = removeDuplicate;
+    }
+    
+    public FisheryMapSet(String fisheryName, String prefix, String suffix) {
+        this(fisheryName, prefix, suffix, true);
     }
 
     public void init() {
@@ -136,7 +143,9 @@ public class FisheryMapSet extends OsmoseLinker {
             }
 
             // Get rid of redundant map definitions
-            this.eliminateTwinMap();
+            if(this.removeDuplicate) { 
+                this.eliminateTwinMap();
+            }
 
         } else {
             try {
