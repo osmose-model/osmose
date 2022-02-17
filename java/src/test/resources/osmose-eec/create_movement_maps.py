@@ -41,8 +41,8 @@ key_species = [k for k in key_species if params[k] == species]
 map_index = [k.replace('movement.species.', '') for k in key_species]
 map_index
 
-initialAge = [params['movement.initialAge.%s' %m][0] for m in map_index]
-lastAge = [params['movement.lastAge.%s' %m][0] for m in map_index]
+initialAge = np.array([params['movement.initialAge.%s' %m][0] for m in map_index], dtype=int)
+lastAge = np.array([params['movement.lastAge.%s' %m][0] for m in map_index], dtype=int)
 initialAge, lastAge
 
 cpt = 0
@@ -65,7 +65,7 @@ for i in np.unique(initialAge):
             steps = steps.astype(int)
             
             output[steps, :, :] = data
-    fileOut = 'maps/movements_%s_initialAge_%s_lastAge_%s.nc' %(species, np.unique(initialAge)[cpt], np.unique(lastAge)[cpt])
+    fileOut = 'maps/movements_%s_initialAge_%d_lastAge_%d.nc' %(species, np.unique(initialAge)[cpt], np.unique(lastAge)[cpt])
     
     dsout = xr.Dataset()
     dsout['movements'] = (['time', 'y', 'x'], output)
