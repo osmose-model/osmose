@@ -98,7 +98,34 @@ public class TestNetcdfMapSets {
     }
     
     @Test
-    public void testMatrixIndex() { 
+    public void testMatrixIndex() {
+
+        float initialAge[] = new float[] { 0, 1, 4 };
+        float lastAge[] = new float[] { 1, 4, 16 };
+
+        int nYears = cfg.getNYears();
+        int lifeSpanDt = species.getLifespanDt();
+        
+        
+        int[][] expected = new int[lifeSpanDt][cfg.getNStep()];
+        // for young ages, expected map index should be 0, 23
+        // for intermediate aged, expected map index should be 24, 47
+        // for old ages, expected map index should be 48, 71
+        
+        int dt = cfg.getNStepYear();
+        for (int i = 0; i < 3; i++) {
+            int ageMin = (int) Math.round(initialAge[i] * dt);
+            int ageMax = (int) Math.round(lastAge[i] * dt);
+            ageMax = Math.min(ageMax, lifeSpanDt - 1);
+            for (int a = ageMin; a <= ageMax; a++) {
+                for (int y = 0; y < nYears; y++) {
+                    for (int s = 0; s < 24; s++) {
+                        expected[a][y * dt + s] = i * 24 + s;
+                    }
+                }
+            }
+        }
+        assertArrayEquals(expected, mapSet.getIndexMap());
            
     }
     
