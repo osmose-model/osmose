@@ -472,5 +472,9 @@ public class FisheryMapSet extends OsmoseLinker {
         }
 
     }  // end of method
+
+    public int[] getIndexMap() { 
+        return this.indexMaps;
+    }
     
 }

@@ -1,5 +1,6 @@
 package fr.ird.osmose;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -68,5 +69,41 @@ public class TestFishingMapSet {
     public void testMapNumbers() {
         assertEquals(3, mapSet.getNMap());       
     }
+    
+    @Test
+    public void testIndexShape() {
+        int nStep = cfg.getNStep();
+        assertEquals(nStep, mapSet.getIndexMap().length);       
+    }
+    
+    @Test
+    public void testIndexValues() {
+
+        int[] expected = new int[cfg.getNStep()];
+        int y;
+        int nYears = cfg.getNYears();
+        
+        for(y = 0; y<=5; y++) {
+            for(int s = 0; s < 24; s++) {
+                expected[y * 24 + s] = 0;   
+            }
+        }
+        
+        for(y = 6; y<=10; y++) {
+            for(int s = 0; s < 24; s++) {
+                expected[y * 24 + s] = 1;   
+            }
+        }
+        
+        for(y = 11; y<nYears; y++) {
+            for(int s = 0; s < 24; s++) {
+                expected[y * 24 + s] = 2;   
+            }
+        }
+        
+        assertArrayEquals(expected, mapSet.getIndexMap());
+        
+    }
+    
     
 }
